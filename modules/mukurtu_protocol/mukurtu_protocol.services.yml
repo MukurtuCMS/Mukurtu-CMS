@@ -1,0 +1,5 @@
+services:
+  mukurtu_protocol.protocol_manager:
+    class: Drupal\mukurtu_protocol\MukurtuProtocolManager
+    tags:
+      - { name: mukurtu }

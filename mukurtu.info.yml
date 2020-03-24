@@ -1,0 +1,60 @@
+name: Mukurtu CMS
+type: profile
+description: 'Mukurtu CMS Installation Profile'
+core: 8.x
+core_version_requirement: ^8 || ^9
+
+distribution:
+  name: Mukurtu
+
+install:
+  - node
+  - history
+  - block
+  - breakpoint
+  - ckeditor
+  - color
+  - config
+  - comment
+  - contextual
+  - contact
+  - devel
+  - devel_generate
+  - devel_php
+  - menu_link_content
+  - datetime
+  - block_content
+  - quickedit
+  - editor
+  - help
+  - image
+  - menu_ui
+  - options
+  - path
+  - page_cache
+  - dynamic_page_cache
+  - big_pipe
+  - taxonomy
+  - dblog
+  - search
+  - shortcut
+  - toolbar
+  - field_ui
+  - file
+  - rdf
+  - views
+  - views_ui
+  - tour
+  - automated_cron
+
+dependencies:
+  - og
+  - og_ui
+  - mukurtu_protocol
+
+themes:
+  - bartik
+  - seven
+
+
+version: '8.x-1.x-dev'

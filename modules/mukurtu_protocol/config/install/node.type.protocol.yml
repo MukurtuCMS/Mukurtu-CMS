@@ -1,0 +1,13 @@
+# node.type.protocol.yml
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_protocol
+name: 'Protocol'
+type: protocol
+description: 'Content type that can be used to control access to content.'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: true

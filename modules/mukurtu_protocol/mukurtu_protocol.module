@@ -1,0 +1,94 @@
+<?php
+
+/**
+ * @file
+ * Provide Mukurtu Protocols (access control).
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
+
+define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
+define("MUKURTU_PROTOCOL_ANY", "any");
+define("MUKURTU_PROTOCOL_ALL", "all");
+
+/**
+ * Implements hook_entity().
+ */
+function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+/*   if ($entity->getEntityType()->getGroup() == 'content') {
+    //dpm($entity->get('title')->value);
+    if ($entity->id() == 1) {
+      return AccessResult::forbidden();
+    }
+  }
+  return AccessResult::neutral(); */
+  //dpm($entity);
+  //return AccessResult::forbidden();
+  if ($entity->id() == 1) {
+    \Drupal::logger('mukurtu_protocol')->notice("my dude");
+    return AccessResult::forbidden();
+  }
+
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_node_grants().
+ */
+function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
+  $grants = [];
+
+  if ($op == 'view') {
+    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+    $protocols = $protocol_manager->getMemberProtocols($account);
+    $grants[MUKURTU_PROTOCOL_GRANTS_REALM] = $protocols;
+  }
+
+  return $grants;
+}
+
+/**
+ * Implements hook_node_access_records().
+ */
+function mukurtu_protocol_node_access_records(NodeInterface $node) {
+  // TODO: Replace this with real node -> protocol list.
+  $protocols = [5, 1002];
+  $mode = 'any';
+
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+
+  $grants = [];
+
+  // For "any" protocol, create a grant for each single ID.
+  if ($mode == MUKURTU_PROTOCOL_ANY) {
+    foreach ($protocols as $p) {
+      $p_id = $protocol_manager->getProtocolId([$p]);
+      $grants[] = [
+        'realm' => MUKURTU_PROTOCOL_GRANTS_REALM,
+        'gid' => $p_id,
+        'grant_view' => 1,
+        'grant_update' => 0,
+        'grant_delete' => 0,
+        'priority' => 0,
+      ];
+    }
+  }
+
+  // For "all" protocols, create a single grant for the effective protocol ID.
+  if ($mode == MUKURTU_PROTOCOL_ALL) {
+    $p_id = $protocol_manager->getProtocolId($protocols);
+    $grants[] = [
+      'realm' => MUKURTU_PROTOCOL_GRANTS_REALM,
+      'gid' => $p_id,
+      'grant_view' => 1,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+    ];
+  }
+
+  return $grants;
+}
