@@ -1,0 +1,17 @@
+uuid: 0159d5c1-0bac-4f74-b7b0-c1254c2d4671
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+name: Community
+type: community
+description: 'Community Groups can be used for content and user assignments, and community content can be made available to members of the group only.'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: false

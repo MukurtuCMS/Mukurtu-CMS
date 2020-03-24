@@ -1,0 +1,14 @@
+group_manager_full_access: true
+groups:
+  node:
+    - community
+    - protocol
+node_access_strict: true
+delete_orphans: false
+delete_orphans_plugin_id: simple
+deny_subscribe_without_approval: true
+group_resolvers:
+  - route_group
+  - route_group_content
+  - request_query_argument
+  - user_access
