@@ -27,10 +27,12 @@ function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, Acc
   return AccessResult::neutral(); */
   //dpm($entity);
   //return AccessResult::forbidden();
-  if ($entity->id() == 1) {
+
+
+/*   if ($entity->id() == 1) {
     \Drupal::logger('mukurtu_protocol')->notice("my dude");
     return AccessResult::forbidden();
-  }
+  } */
 
   return AccessResult::neutral();
 }
@@ -54,11 +56,9 @@ function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
  * Implements hook_node_access_records().
  */
 function mukurtu_protocol_node_access_records(NodeInterface $node) {
-  // TODO: Replace this with real node -> protocol list.
-  $protocols = [5, 1002];
   $mode = 'any';
-
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  $protocols = $protocol_manager->getNodeProtocols($node);
 
   $grants = [];
 
@@ -66,6 +66,23 @@ function mukurtu_protocol_node_access_records(NodeInterface $node) {
   if ($mode == MUKURTU_PROTOCOL_ANY) {
     foreach ($protocols as $p) {
       $p_id = $protocol_manager->getProtocolId([$p]);
+      if ($p_id) {
+        $grants[] = [
+          'realm' => MUKURTU_PROTOCOL_GRANTS_REALM,
+          'gid' => $p_id,
+          'grant_view' => 1,
+          'grant_update' => 0,
+          'grant_delete' => 0,
+          'priority' => 0,
+        ];
+      }
+    }
+  }
+
+  // For "all" protocols, create a single grant for the effective protocol ID.
+  if ($mode == MUKURTU_PROTOCOL_ALL) {
+    $p_id = $protocol_manager->getProtocolId($protocols);
+    if ($p_id) {
       $grants[] = [
         'realm' => MUKURTU_PROTOCOL_GRANTS_REALM,
         'gid' => $p_id,
@@ -75,19 +92,6 @@ function mukurtu_protocol_node_access_records(NodeInterface $node) {
         'priority' => 0,
       ];
     }
-  }
-
-  // For "all" protocols, create a single grant for the effective protocol ID.
-  if ($mode == MUKURTU_PROTOCOL_ALL) {
-    $p_id = $protocol_manager->getProtocolId($protocols);
-    $grants[] = [
-      'realm' => MUKURTU_PROTOCOL_GRANTS_REALM,
-      'gid' => $p_id,
-      'grant_view' => 1,
-      'grant_update' => 0,
-      'grant_delete' => 0,
-      'priority' => 0,
-    ];
   }
 
   return $grants;
