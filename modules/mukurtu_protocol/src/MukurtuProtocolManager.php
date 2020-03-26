@@ -40,6 +40,16 @@ class MukurtuProtocolManager {
     $grants = [];
     $memberships = Og::getMemberships($account);
 
+    // Helper function to filter memberships to protocols only.
+    $protocols_only = function ($e) {
+      if ($e->get('entity_bundle')->value == 'protocol') {
+        return TRUE;
+      }
+      return FALSE;
+    };
+
+    $memberships = array_filter($memberships, $protocols_only);
+
     // Helper function to take OG membership and return the protocol NID.
     $get_protocol_id = function ($e) {
       return $e->get('entity_id')->value;
