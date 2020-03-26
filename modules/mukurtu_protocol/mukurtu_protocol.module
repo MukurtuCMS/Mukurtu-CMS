@@ -45,8 +45,8 @@ function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
 
   if ($op == 'view') {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-    $protocols = $protocol_manager->getMemberProtocols($account);
-    $grants[MUKURTU_PROTOCOL_GRANTS_REALM] = $protocols;
+    $grantIds = $protocol_manager->getUserGrantIds($account);
+    $grants[MUKURTU_PROTOCOL_GRANTS_REALM] = $grantIds;
   }
 
   return $grants;
@@ -65,7 +65,7 @@ function mukurtu_protocol_node_access_records(NodeInterface $node) {
   // For "any" protocol, create a grant for each single ID.
   if ($mode == MUKURTU_PROTOCOL_ANY) {
     foreach ($protocols as $p) {
-      $p_id = $protocol_manager->getProtocolId([$p]);
+      $p_id = $protocol_manager->getProtocolGrantId([$p]);
       if ($p_id) {
         $grants[] = [
           'realm' => MUKURTU_PROTOCOL_GRANTS_REALM,
@@ -81,7 +81,7 @@ function mukurtu_protocol_node_access_records(NodeInterface $node) {
 
   // For "all" protocols, create a single grant for the effective protocol ID.
   if ($mode == MUKURTU_PROTOCOL_ALL) {
-    $p_id = $protocol_manager->getProtocolId($protocols);
+    $p_id = $protocol_manager->getProtocolGrantId($protocols);
     if ($p_id) {
       $grants[] = [
         'realm' => MUKURTU_PROTOCOL_GRANTS_REALM,

@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_protocol;
 
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
+use Drupal\og\Og;
 
 class MukurtuProtocolManager {
 
@@ -18,24 +19,11 @@ class MukurtuProtocolManager {
     if (!isset($this->protocolTable['new_id'])) {
       $this->protocolTable['new_id'] = 1;
     }
-/*     $this->protocolTable = [
-      1 => [
-        5 => ['id' => 7],
-        45 => ['id' => 1],
-        1002 => ['id' => 8],
-      ],
-      2 => [
-        ['id' => 2, 'protocols' => [72, 98]],
-        ['id' => 3, 'protocols' => [5, 1002]],
-      ],
-      3 => [
-        ['id' => 4, 'protocols' => [19, 1002, 3000]],
-        ['id' => 5, 'protocols' => [22, 1003, 3001]],
-        ['id' => 6, 'protocols' => [72, 98, 3000]],
-      ],
-    ]; */
   }
 
+  /**
+   * Re-intialize the protocol table with default values.
+   */
   protected function clearProtocolTable() {
     $this->protocolTable = [];
     $this->protocolTable['new_id'] = 1;
@@ -48,9 +36,40 @@ class MukurtuProtocolManager {
    * @param Drupal\Core\Session\AccountInterface $account
    *   The user account.
    */
-  public function getMemberProtocols(AccountInterface $account) {
-    // TODO: Actually implemement this.
-    return [2, 5];
+  public function getUserGrantIds(AccountInterface $account) {
+    $grants = [];
+    $memberships = Og::getMemberships($account);
+
+    // Helper function to take OG membership and return the protocol NID.
+    $get_protocol_id = function ($e) {
+      return $e->get('entity_id')->value;
+    };
+
+    // Get the protocol NID list and sort them.
+    $protocols = array_map($get_protocol_id, $memberships);
+    sort($protocols);
+
+    // Search the entire protocol table for combinations of protocols
+    // that the user is a member of. This is potentially slow, but it's faster
+    // than computing the super set of user protocols.
+    foreach ($this->protocolTable as $key => $superProtocol) {
+      $superProtocolProtocols = explode(',', $key);
+      $length = count($superProtocolProtocols);
+      $i = 1;
+
+      foreach ($superProtocolProtocols as $spp) {
+        if (!in_array($spp, $protocols)) {
+          break;
+        }
+
+        // The user is a member of all of the protocols in superProtocolProtocols.
+        if ($i++ == $length) {
+          $grants[] = $superProtocol;
+        }
+      }
+    }
+
+    return $grants;
   }
 
   /**
@@ -61,77 +80,40 @@ class MukurtuProtocolManager {
   }
 
   /**
-   * Create the Mukurtu ID for an effective protocol.
-   *
-   * You must NOT call this for protocols that already exist in the table.
+   * Create an array key for an effective protocol.
    *
    * @param array $protocols
    *   An array containing all the nids of the protocols.
    */
-  protected function createProtocolId(array $protocols) {
-    $size = count($protocols);
-
-    if ($size == 1 && !isset($this->protocolTable[$size][$protocols[0]])) {
-      $this->protocolTable[$size][$protocols[0]] = ['id' => $this->protocolTable['new_id']++];
-      $this->saveProtocolTable();
-      return $this->protocolTable[$size][$protocols[0]]['id'];
-    }
-
-    if ($size > 1) {
-      sort($protocols);
-
-      $new_id = $this->protocolTable['new_id']++;
-      $this->protocolTable[$size][] = ['id' => $new_id, 'protocols' => $protocols];
-      $this->saveProtocolTable();
-      return $new_id;
-    }
-
-    return NULL;
+  protected function createProtocolKey(array $protocols) {
+    sort($protocols);
+    return implode(',', $protocols);
   }
 
   /**
-   * Return the Mukurtu ID for an effective protocol.
+   * Return the Grant ID for an effective protocol.
    *
    * @param array $protocols
    *   An array containing all the nids of the protocols.
    */
-  public function getProtocolId(array $protocols) {
+  public function getProtocolGrantId(array $protocols) {
+    $key = $this->createProtocolKey($protocols);
+
     // No protocols given resolves to null.
-    if (empty($protocols)) {
+    if (!$key) {
       return NULL;
     }
 
-    $size = count($protocols);
-
-    // For a single protocol, do a direct lookup.
-    if ($size == 1) {
-      // Create the ID if it doesn't yet exist.
-      if (!isset($this->protocolTable[$size][$protocols[0]]['id'])) {
-        return $this->createProtocolId($protocols);
-      }
-
-      return $this->protocolTable[$size][$protocols[0]]['id'];
+    // Return the ID if it already exists.
+    if (isset($this->protocolTable[$key])) {
+      return $this->protocolTable[$key];
     }
 
-    // For the intersection of protocols, we need to search.
-    sort($protocols);
-    foreach ($this->protocolTable[$size] as $superProtocol) {
-      $i = 0;
-      foreach ($superProtocol['protocols'] as $p) {
-        // Does member of the super protocol exist in the given protocol list?
-        if ($p != $protocols[$i++]) {
-          break;
-        }
-
-        // All members match.
-        if ($i == $size) {
-          return $superProtocol['id'];
-        }
-      }
-    }
-
-    // Searched the whole list, didn't find it. Try creating one.
-    return $this->createProtocolId($protocols);
+    // Create it if it does not.
+    $new_id = $this->protocolTable['new_id']++;
+    $this->protocolTable[$key] = $new_id;
+    $this->saveProtocolTable();
+    return $new_id;
   }
 
   /**
@@ -162,7 +144,6 @@ class MukurtuProtocolManager {
    */
   public function getNodeProtocolId(Node $node) {
     $protocols = $this->getNodeProtocols($node);
-    return $this->getProtocolId($protocols);
+    return $this->getProtocolGrantId($protocols);
   }
-
 }
