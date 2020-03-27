@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
@@ -13,7 +14,7 @@ class MukurtuProtocolManager {
 
   public function __construct() {
     // TODO: Allow this to be configured.
-    $this->protocolFieldName = 'og_audience';
+    $this->protocolFieldName = MUKURTU_PROTOCOL_FIELD_NAME;
     $this->protocolTable = \Drupal::state()->get('mukurtu_protocol_lookup_table');
 
     if (!isset($this->protocolTable['new_id'])) {
@@ -28,6 +29,69 @@ class MukurtuProtocolManager {
     $this->protocolTable = [];
     $this->protocolTable['new_id'] = 1;
     $this->saveProtocolTable();
+  }
+
+  public function checkAccess($node, $operation, AccountInterface $account) {
+    // If the node has no protocol field, we don't have an opinion.
+    if (!$node->hasField(MUKURTU_PROTOCOL_FIELD_NAME)) {
+      return AccessResult::neutral();
+    }
+
+    $protocols = $this->getNodeProtocols($node);
+
+    // TODO: Get from node.
+    $protocol_mode = 'all';
+
+    // If the protocol field exists but is empty, only the owner has access.
+    if (empty($protocols)) {
+      return ($node->getOwnerId() == $account->id()) ? AccessResult::allowed() : AccessResult::forbidden();
+    }
+
+    $has_required_memberships = FALSE;
+
+    // Is the user a member of all protocols?
+    if ($protocol_mode == 'all') {
+      $grant = $this->getProtocolGrantId($protocols);
+      $user_grants = $this->getUserGrantIds($account);
+      if (in_array($grant, $user_grants)) {
+        $has_required_memberships = TRUE;
+      }
+    }
+
+    // Is the user a member of any protocols?
+    if ($protocol_mode == 'any') {
+      foreach ($protocols as $protocol) {
+        $grant = $this->getProtocolGrantId([$protocol]);
+        $user_grants = $this->getUserGrantIds($account);
+        if (in_array($grant, $user_grants)) {
+          $has_required_memberships = TRUE;
+          break;
+        }
+      }
+    }
+
+    switch ($operation) {
+      case 'view':
+        $view_permission = TRUE;
+        return ($view_permission && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
+
+      case 'create':
+        $create_permission = TRUE;
+        return ($create_permission && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
+
+      case 'update':
+        $update_permission = TRUE;
+        return ($update_permission && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
+
+      case 'delete':
+        $delete_permission = TRUE;
+        return ($delete_permission && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
+
+      default:
+        return AccessResult::forbidden();
+    }
+
+    return AccessResult::forbidden();
   }
 
   /**

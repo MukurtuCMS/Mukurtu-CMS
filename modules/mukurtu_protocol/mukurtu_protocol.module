@@ -16,7 +16,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_ANY", "any");
 define("MUKURTU_PROTOCOL_ALL", "all");
-define("MUKURTU_PROTOCOL_FIELD_NAME", "protocol");
+define("MUKURTU_PROTOCOL_FIELD_NAME", "field_protocol");
 
 /**
  * Create the Mukurtu protocol field for a given node bundle type.
@@ -33,21 +33,11 @@ function mukurtu_protocol_create_protocol_field($bundle_type) {
  * Implements hook_entity().
  */
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-/*   if ($entity->getEntityType()->getGroup() == 'content') {
-    //dpm($entity->get('title')->value);
-    if ($entity->id() == 1) {
-      return AccessResult::forbidden();
-    }
+  // Protocols only work with nodes.
+  if ($entity->getEntityType()->id() == 'node') {
+    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+    return $protocol_manager->checkAccess($entity, $operation, $account);
   }
-  return AccessResult::neutral(); */
-  //dpm($entity);
-  //return AccessResult::forbidden();
-
-
-/*   if ($entity->id() == 1) {
-    \Drupal::logger('mukurtu_protocol')->notice("my dude");
-    return AccessResult::forbidden();
-  } */
 
   return AccessResult::neutral();
 }
@@ -71,7 +61,7 @@ function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
  * Implements hook_node_access_records().
  */
 function mukurtu_protocol_node_access_records(NodeInterface $node) {
-  $mode = 'any';
+  $mode = 'all';
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   $protocols = $protocol_manager->getNodeProtocols($node);
 
