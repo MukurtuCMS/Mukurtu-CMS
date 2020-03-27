@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_protocol module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_protocol_install() {
+  // Create the protocol field on all node types.
+  foreach (node_type_get_names() as $bundle => $label) {
+    mukurtu_protocol_create_protocol_field($bundle);
+  }
+}

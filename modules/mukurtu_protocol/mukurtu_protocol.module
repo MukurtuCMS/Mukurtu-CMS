@@ -8,11 +8,26 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\node\NodeInterface;
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_ANY", "any");
 define("MUKURTU_PROTOCOL_ALL", "all");
+define("MUKURTU_PROTOCOL_FIELD_NAME", "protocol");
+
+/**
+ * Create the Mukurtu protocol field for a given node bundle type.
+ */
+function mukurtu_protocol_create_protocol_field($bundle_type) {
+  $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME;
+  $settings['field_config']['label'] = "Mukurtu Protocol";
+  $settings['field_config']['description'] = "Mukurtu Protocol Helper Text Goes Here";
+
+  Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $bundle_type, $settings);
+}
 
 /**
  * Implements hook_entity().
@@ -95,4 +110,14 @@ function mukurtu_protocol_node_access_records(NodeInterface $node) {
   }
 
   return $grants;
+}
+
+/**
+ * Implements hook_entity_bundle_create().
+ */
+function mukurtu_protocol_entity_bundle_create($entity_type_id, $bundle) {
+  // For any new node type that is defined, add the protocol field.
+  if ($entity_type_id == 'node') {
+    mukurtu_protocol_create_protocol_field($bundle);
+  }
 }
