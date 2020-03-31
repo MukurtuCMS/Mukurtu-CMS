@@ -7,11 +7,17 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
 
+/**
+ * Provides a service for managing and resolving Protocols.
+ */
 class MukurtuProtocolManager {
 
   protected $protocolTable;
   protected $protocolFieldName;
 
+  /**
+   * Load the protocol lookup table.
+   */
   public function __construct() {
     // TODO: Allow this to be configured.
     $this->protocolFieldName = MUKURTU_PROTOCOL_FIELD_NAME;
@@ -31,6 +37,20 @@ class MukurtuProtocolManager {
     $this->saveProtocolTable();
   }
 
+  /**
+   * Return account access for a given operation.
+   *
+   * @param \Drupal\node\NodeInterface|string $node
+   *   Either a node entity or the machine name of the content type on which to
+   *   perform the access check.
+   * @param string $operation
+   *   The operation to be performed.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user object to perform the access check operation on.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
   public function checkAccess($node, $operation, AccountInterface $account) {
     // If the node has no protocol field, we don't have an opinion.
     if (!$node->hasField(MUKURTU_PROTOCOL_FIELD_NAME)) {
