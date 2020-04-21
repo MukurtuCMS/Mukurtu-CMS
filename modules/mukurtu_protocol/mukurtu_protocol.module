@@ -10,23 +10,53 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\node\NodeInterface;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_ANY", "any");
 define("MUKURTU_PROTOCOL_ALL", "all");
-define("MUKURTU_PROTOCOL_FIELD_NAME", "field_protocol");
+define("MUKURTU_PROTOCOL_FIELD_NAME_READ", "field_mukurtu_protocol_read");
+define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE", "field_mukurtu_protocol_write");
 
 /**
  * Create the Mukurtu protocol field for a given node bundle type.
  */
 function mukurtu_protocol_create_protocol_field($bundle_type) {
-  $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME;
-  $settings['field_config']['label'] = "Mukurtu Protocol";
-  $settings['field_config']['description'] = "Mukurtu Protocol Helper Text Goes Here";
+  $bundle_skip_list = ['community', 'protocol'];
+  if (in_array($bundle_type, $bundle_skip_list)) {
+    return;
+  }
 
+  // Read Access Protocol Field.
+  $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_READ;
+  $settings['field_config']['label'] = "Mukurtu Protocol - View Access";
+  $settings['field_config']['description'] = "Mukurtu Protocol Helper Text Goes Here";
   Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $bundle_type, $settings);
+
+  $field = FieldConfig::create([
+    'field_name' => 'field_mukurtu_protocol_r_scope',
+    'entity_type' => 'node',
+    'bundle' => $bundle_type,
+    'label' => 'Mukurtu Protocol - View Scope',
+  ]);
+  $field->save();
+
+  // Write Access Protocol Field.
+  $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_WRITE;
+  $settings['field_config']['label'] = "Mukurtu Protocol - Update Access";
+  $settings['field_config']['description'] = "Mukurtu Protocol Helper Text Goes Here";
+  Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $bundle_type, $settings);
+
+  $field = FieldConfig::create([
+    'field_name' => 'field_mukurtu_protocol_w_scope',
+    'entity_type' => 'node',
+    'bundle' => $bundle_type,
+    'label' => 'Mukurtu Protocol - Update Scope',
+  ]);
+  $field->save();
+
 }
 
 /**

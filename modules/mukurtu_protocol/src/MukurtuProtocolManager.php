@@ -20,7 +20,7 @@ class MukurtuProtocolManager {
    */
   public function __construct() {
     // TODO: Allow this to be configured.
-    $this->protocolFieldName = MUKURTU_PROTOCOL_FIELD_NAME;
+    $this->protocolFieldName = MUKURTU_PROTOCOL_FIELD_NAME_READ;
     $this->protocolTable = \Drupal::state()->get('mukurtu_protocol_lookup_table');
 
     if (!isset($this->protocolTable['new_id'])) {
@@ -53,7 +53,7 @@ class MukurtuProtocolManager {
    */
   public function checkAccess($node, $operation, AccountInterface $account) {
     // If the node has no protocol field, we don't have an opinion.
-    if (!$node->hasField(MUKURTU_PROTOCOL_FIELD_NAME)) {
+    if (!$node->hasField(MUKURTU_PROTOCOL_FIELD_NAME_READ)) {
       return AccessResult::neutral();
     }
 

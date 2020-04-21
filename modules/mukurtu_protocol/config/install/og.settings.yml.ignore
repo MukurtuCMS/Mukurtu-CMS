@@ -12,3 +12,6 @@ group_resolvers:
   - route_group_content
   - request_query_argument
   - user_access
+
+tags:
+  - {name: config.factory.override, priority: 5}

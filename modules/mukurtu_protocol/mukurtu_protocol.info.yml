@@ -4,6 +4,8 @@ description: 'Provides access control that is fundamental to the Mukurtu platfor
 core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
-#dependencies:
+dependencies:
+  - og
+  - mukurtu_community
 
 version: '8.x-1.x-dev'
