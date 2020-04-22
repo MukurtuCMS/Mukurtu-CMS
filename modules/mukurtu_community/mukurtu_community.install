@@ -4,3 +4,13 @@
  * @file
  * Install, update and uninstall functions for the mukurtu_community module.
  */
+
+use Drupal\og\Og;
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_community_install() {
+  // Communities are groups.
+  Og::addGroup('node', 'community');
+}

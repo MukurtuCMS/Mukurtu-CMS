@@ -17,6 +17,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_ANY", "any");
 define("MUKURTU_PROTOCOL_ALL", "all");
+define("MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY", "field_mukurtu_community");
 define("MUKURTU_PROTOCOL_FIELD_NAME_READ", "field_mukurtu_protocol_read");
 define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE", "field_mukurtu_protocol_write");
 
