@@ -1,0 +1,9 @@
+mukurtu_protocol.protocol_membership.add:
+  path: '/node/{nid}/membership/add/{user}'
+  defaults:
+    _title: 'Add User as Protocol member'
+    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuProtocolController::addUserAsProtocolMember'
+  requirements:
+    nid: \d+
+    user: \d+
+    _permission: 'access content'
