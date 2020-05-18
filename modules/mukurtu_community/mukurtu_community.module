@@ -4,3 +4,17 @@
  * @file
  * Provide Mukurtu Communities.
  */
+
+ use Drupal\Core\Access\AccessResult;
+ use Drupal\Core\Entity\EntityInterface;
+ use Drupal\Core\Session\AccountInterface;
+
+ /**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function mukurtu_community_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+
+  //dpm("community: $operation");
+
+  return AccessResult::neutral();
+}

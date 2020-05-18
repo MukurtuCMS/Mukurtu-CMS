@@ -1,0 +1,10 @@
+name: 'Mukurtu Community Records'
+type: module
+description: 'Provides community records.'
+core_version_requirement: ^8 || ^9
+core: 8.x
+package: 'Mukurtu'
+dependencies:
+  - mukurtu_protocol
+
+version: '8.x-1.x-dev'

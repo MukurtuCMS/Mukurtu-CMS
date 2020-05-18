@@ -8,7 +8,6 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\node\NodeInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
@@ -64,6 +63,7 @@ function mukurtu_protocol_create_protocol_field($bundle_type) {
  * Implements hook_entity().
  */
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  //dpm("protocol:{$operation}");
   // Protocols only work with nodes.
   if ($entity->getEntityType()->id() == 'node') {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');

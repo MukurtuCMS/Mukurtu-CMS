@@ -1,0 +1,12 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_community_records module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_community_records_install() {
+}
