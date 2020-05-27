@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_digital_heritage module.
+ */
+
+//use Drupal\og\Og;
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_digital_heritage_install() {
+}

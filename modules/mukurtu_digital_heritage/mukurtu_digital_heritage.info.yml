@@ -1,0 +1,10 @@
+name: 'Mukurtu Digital Heritage'
+type: module
+description: 'Provides the digital heritage content type.'
+core_version_requirement: ^8 || ^9
+core: 8.x
+package: 'Mukurtu'
+dependencies:
+  - mukurtu_community
+
+version: '8.x-1.x-dev'
