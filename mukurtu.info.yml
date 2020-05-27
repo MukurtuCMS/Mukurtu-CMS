@@ -50,7 +50,11 @@ install:
 dependencies:
   - og
   - og_ui
+  - restui
+  - search_api
   - mukurtu_protocol
+  - mukurtu_taxonomy
+  - mukurtu_digital_heritage
 
 themes:
   - bartik
