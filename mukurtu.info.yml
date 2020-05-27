@@ -46,6 +46,7 @@ install:
   - views_ui
   - tour
   - automated_cron
+  - mukurtu_digital_heritage
 
 dependencies:
   - og
@@ -54,7 +55,6 @@ dependencies:
   - search_api
   - mukurtu_protocol
   - mukurtu_taxonomy
-  - mukurtu_digital_heritage
 
 themes:
   - bartik
