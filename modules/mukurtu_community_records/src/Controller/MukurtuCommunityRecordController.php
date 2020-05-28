@@ -14,8 +14,7 @@ class MukurtuCommunityRecordController extends ControllerBase {
   /**
    * {@inheritdoc}
    */
-  protected function getModuleName()
-  {
+  protected function getModuleName() {
     return 'mukurtu_community_records';
   }
 

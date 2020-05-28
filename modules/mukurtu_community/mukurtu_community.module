@@ -9,7 +9,7 @@
  use Drupal\Core\Entity\EntityInterface;
  use Drupal\Core\Session\AccountInterface;
 
- /**
+/**
  * Implements hook_ENTITY_TYPE_access().
  */
 function mukurtu_community_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
@@ -17,4 +17,25 @@ function mukurtu_community_entity_access(EntityInterface $entity, $operation, Ac
   //dpm("community: $operation");
 
   return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function mukurtu_community_entity_insert(EntityInterface $entity) {
+  /*
+   * A new community has been created, we need to create a community
+   * only protocol to match.
+   */
+
+  $type = $entity->getType();
+
+  // Placeholder, replace after import implemented.
+  $suppress_protocol_creation = FALSE;
+
+  // There are some cases where we don't want to auto generate the protocol (e.g., import).
+  if ($type == "community" && !$suppress_protocol_creation) {
+    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+    $protocol_manager->createProtocol($entity, 'community');
+  }
 }

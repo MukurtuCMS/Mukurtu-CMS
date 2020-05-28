@@ -12,6 +12,7 @@ use Drupal\node\NodeInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\og\Entity\OgMembership;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_ANY", "any");
@@ -71,6 +72,41 @@ function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, Acc
   }
 
   return AccessResult::neutral();
+}
+
+
+/**
+ * Implements hook_entity_insert().
+ */
+function mukurtu_protocol_entity_insert(EntityInterface $entity) {
+  if (!$entity instanceof OgMembership) {
+    return;
+  }
+
+  if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'community') {
+    $nid = $entity->get('entity_id')->value;
+    dpm("Membership inserted from community $nid, we need to check protocols");
+  }
+
+/*   $result = unserialize(serialize($entity));
+  dpm($result); */
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function mukurtu_protocol_entity_delete(EntityInterface $entity) {
+  if (!$entity instanceof OgMembership) {
+    return;
+  }
+
+  if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'community') {
+    $nid = $entity->get('entity_id')->value;
+    dpm("Membership deleted from community $nid, we need to check protocols");
+  }
+
+/*   $result = unserialize(serialize($entity));
+  dpm($result); */
 }
 
 /**

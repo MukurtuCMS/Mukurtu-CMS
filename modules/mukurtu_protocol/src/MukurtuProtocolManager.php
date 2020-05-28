@@ -29,6 +29,23 @@ class MukurtuProtocolManager {
   }
 
   /**
+   * Create a protocol for a given community.
+   */
+  public function createProtocol($community, $membership_handler = 'manual', $options = []) {
+    $title = $community->get("title")->value . " " . t("Only");
+    $nid = $community->id();
+
+    $node = Node::create([
+      'type' => 'protocol',
+      'title' => $title,
+      'field_mukurtu_community' => [$nid],
+      'field_membership_handler' => $membership_handler,
+    ]);
+
+    $node->save();
+  }
+
+  /**
    * Re-intialize the protocol table with default values.
    */
   protected function clearProtocolTable() {
