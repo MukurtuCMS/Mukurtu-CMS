@@ -3,3 +3,7 @@ services:
     class: Drupal\mukurtu_protocol\MukurtuProtocolManager
     tags:
       - { name: mukurtu }
+  mukurtu_protocol.membership_manager:
+    class: Drupal\mukurtu_protocol\MukurtuMembershipManager
+    tags:
+      - { name: mukurtu }

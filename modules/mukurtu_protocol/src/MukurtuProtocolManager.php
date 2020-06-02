@@ -5,7 +5,9 @@ namespace Drupal\mukurtu_protocol;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\Og;
+use Drupal\user\Entity\User;
 
 /**
  * Provides a service for managing and resolving Protocols.
@@ -14,6 +16,7 @@ class MukurtuProtocolManager {
 
   protected $protocolTable;
   protected $protocolFieldName;
+  protected $logger;
 
   /**
    * Load the protocol lookup table.
@@ -26,6 +29,9 @@ class MukurtuProtocolManager {
     if (!isset($this->protocolTable['new_id'])) {
       $this->protocolTable['new_id'] = 1;
     }
+
+    // Setup named logger.
+    $this->logger = \Drupal::logger('Mukurtu');
   }
 
   /**
@@ -256,5 +262,72 @@ class MukurtuProtocolManager {
   public function getNodeProtocolId(Node $node) {
     $protocols = $this->getNodeProtocols($node);
     return $this->getProtocolGrantId($protocols);
+  }
+
+  /**
+   * Get all protocols associated with a community.
+   */
+  public function getCommunityProtocols(EntityInterface $community) {
+    // TODO: This currently only takes into consideration the single level community.
+    // TODO: Later once sub-communities are figured out, we need to change to handle them.
+
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $query = \Drupal::entityQuery('node')
+      ->condition('type', 'protocol')
+      ->condition('field_mukurtu_community', $community->id());
+    $nids = $query->execute();
+    $nodes = $node_storage->loadMultiple($nids);
+
+    return $nodes;
+  }
+
+  /**
+   * Handle protocol membership changes needed when community user is added.
+   */
+  public function processCommunityMembershipInsert($gid, $uid) {
+    $membership_manager = \Drupal::service('mukurtu_protocol.membership_manager');
+
+    // Load the community entity.
+    $entity = \Drupal::entityTypeManager()->getStorage('node')->load($gid);
+
+    // Load the user.
+    $account = User::load($uid);
+
+    // Get all the community protocols.
+    $protocols = $this->getCommunityProtocols($entity);
+
+    // Check if any protocols are using the "community" mode.
+    foreach ($protocols as $protocol) {
+      if ($protocol->field_membership_handler->value == 'community') {
+        // Add the user to the protocol.
+        $membership_manager->addMember($protocol, $account);
+
+        // Log user add.
+        // TODO: This should be handling success/failure.
+        $this->logger->notice("User {$account->name->value} ($uid) added to protocol {$protocol->title->value} ({$protocol->id()}) as a result of being added to community {$entity->title->value} ($gid).");
+      }
+    }
+  }
+
+  /**
+   * Handle protocol membership changes needed when community user is removed.
+   */
+  public function processCommunityMembershipDelete($gid, $uid) {
+    $membership_manager = \Drupal::service('mukurtu_protocol.membership_manager');
+
+    // Load the community entity.
+    $entity = \Drupal::entityTypeManager()->getStorage('node')->load($gid);
+
+    // Load the user.
+    $account = User::load($uid);
+
+    // Get all the community protocols.
+    $protocols = $this->getCommunityProtocols($entity);
+
+    // Remove user from all community protocols.
+    foreach ($protocols as $protocol) {
+      $membership_manager->removeMember($protocol, $account);
+      $this->logger->notice("User {$account->name->value} ($uid) removed from protocol {$protocol->title->value} ({$protocol->id()}) as a result of being removed from community {$entity->title->value} ($gid).");
+    }
   }
 }

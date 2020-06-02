@@ -83,12 +83,15 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
     return;
   }
 
+  // Handle user being added to a community.
   if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'community') {
+    $uid = $entity->getOwnerId();
     $nid = $entity->get('entity_id')->value;
-    dpm("Membership inserted from community $nid, we need to check protocols");
+    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+    $protocol_manager->processCommunityMembershipInsert($nid, $uid);
   }
-
-/*   $result = unserialize(serialize($entity));
+/*
+  $result = unserialize(serialize($entity));
   dpm($result); */
 }
 
@@ -100,9 +103,12 @@ function mukurtu_protocol_entity_delete(EntityInterface $entity) {
     return;
   }
 
+  // Handle user being removed from a community.
   if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'community') {
+    $uid = $entity->getOwnerId();
     $nid = $entity->get('entity_id')->value;
-    dpm("Membership deleted from community $nid, we need to check protocols");
+    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+    $protocol_manager->processCommunityMembershipDelete($nid, $uid);
   }
 
 /*   $result = unserialize(serialize($entity));
