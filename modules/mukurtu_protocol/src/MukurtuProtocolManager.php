@@ -63,7 +63,7 @@ class MukurtuProtocolManager {
   /**
    * Return account access for a given operation.
    *
-   * @param \Drupal\node\NodeInterface|string $node
+   * @param \Drupal\Core\Entity\EntityInterface|string $entity
    *   Either a node entity or the machine name of the content type on which to
    *   perform the access check.
    * @param string $operation
@@ -74,20 +74,20 @@ class MukurtuProtocolManager {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function checkAccess($node, $operation, AccountInterface $account) {
+  public function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     // If the node has no protocol field, we don't have an opinion.
-    if (!$node->hasField(MUKURTU_PROTOCOL_FIELD_NAME_READ)) {
+    if (!$entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_READ)) {
       return AccessResult::neutral();
     }
 
-    $protocols = $this->getNodeProtocols($node);
+    $protocols = $this->getProtocols($entity);
 
     // TODO: Get from node.
     $protocol_mode = 'all';
 
     // If the protocol field exists but is empty, only the owner has access.
     if (empty($protocols)) {
-      return ($node->getOwnerId() == $account->id()) ? AccessResult::allowed() : AccessResult::forbidden();
+      return ($entity->getOwnerId() == $account->id()) ? AccessResult::allowed() : AccessResult::forbidden();
     }
 
     $has_required_memberships = FALSE;
@@ -234,16 +234,16 @@ class MukurtuProtocolManager {
   }
 
   /**
-   * Return the array of protocol NIDs a node is using.
+   * Return the array of protocol NIDs an entity is using.
    *
-   * @param Drupal\node\Entity\Node $node
-   *   The node.
+   * @param \rupal\Core\Entity\EntityInterface $entity
+   *   The entity.
    */
-  public function getNodeProtocols(Node $node) {
+  public function getProtocols(EntityInterface $entity) {
     $protocols = [];
 
-    if ($node->hasField($this->protocolFieldName)) {
-      $protocols_og = $node->get($this->protocolFieldName)->getValue();
+    if ($entity->hasField($this->protocolFieldName)) {
+      $protocols_og = $entity->get($this->protocolFieldName)->getValue();
       $flatten = function ($e) {
         return isset($e['target_id']) ? $e['target_id'] : NULL;
       };
@@ -260,7 +260,7 @@ class MukurtuProtocolManager {
    *   The node.
    */
   public function getNodeProtocolId(Node $node) {
-    $protocols = $this->getNodeProtocols($node);
+    $protocols = $this->getProtocols($node);
     return $this->getProtocolGrantId($protocols);
   }
 
