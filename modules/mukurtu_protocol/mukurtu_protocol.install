@@ -7,6 +7,7 @@
 
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\Core\Entity\EntityTypeBundleManagerInterface;
 
 /**
  * Implements hook_install().
@@ -14,7 +15,14 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 function mukurtu_protocol_install() {
   // Create the protocol field on all pre-existing node types.
   foreach (node_type_get_names() as $bundle => $label) {
-    mukurtu_protocol_create_protocol_field($bundle);
+    mukurtu_protocol_create_protocol_field('node', $bundle);
+  }
+
+  // Create the protocol field for all pre-existing media types.
+  $entity_type_bundle = \Drupal::service('entity_type.bundle.info');
+  $media_types = $entity_type_bundle->getBundleInfo('media');
+  foreach ($media_types as $media_type => $media_label) {
+    mukurtu_protocol_create_protocol_field('media', $media_type);
   }
 
   // Protocols are special, add the owning community field.

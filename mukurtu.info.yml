@@ -46,6 +46,8 @@ install:
   - views_ui
   - tour
   - automated_cron
+  - media
+  - media_library
   - mukurtu_digital_heritage
 
 dependencies:
