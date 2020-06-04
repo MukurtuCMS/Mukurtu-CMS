@@ -28,7 +28,7 @@ function mukurtu_community_entity_insert(EntityInterface $entity) {
    * only protocol to match.
    */
 
-  $type = $entity->getType();
+  $type = $entity->bundle();
 
   // Placeholder, replace after import implemented.
   $suppress_protocol_creation = FALSE;
