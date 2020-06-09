@@ -136,7 +136,7 @@ function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
 function mukurtu_protocol_node_access_records(NodeInterface $node) {
   $mode = 'all';
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-  $protocols = $protocol_manager->getNodeProtocols($node);
+  $protocols = $protocol_manager->getProtocols($node);
 
   $grants = [];
 
