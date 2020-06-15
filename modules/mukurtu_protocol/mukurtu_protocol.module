@@ -10,9 +10,12 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeInterface;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\Entity\OgMembership;
+use Drupal\Core\Database\Query\AlterableInterface;
+use Drupal\user\Entity\User;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_ANY", "any");
@@ -34,7 +37,20 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
   $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_READ;
   $settings['field_config']['label'] = "Mukurtu Protocol - View Access";
   $settings['field_config']['description'] = "Mukurtu Protocol Helper Text Goes Here";
+  $settings['field_config']['handler'] = 'default';
+  $settings['field_config']['handler_settings']['target_bundles'] = ['protocol'];
+  $settings['field_storage_config']['target_type'] = "node";
+
   Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type, $bundle_type, $settings);
+
+  // OG doesn't actually use the field settings we give it.
+  // We will set the protocol fields to target protocols only here.
+  $field_storage_config = FieldStorageConfig::loadByName($entity_type, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+  $field_storage_config->setSetting('target_type', 'node');
+  $field_storage_config->save();
+  $field_config = FieldConfig::loadByName($entity_type, $bundle_type, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+  $field_config->setSettings($settings['field_config']);
+  $field_config->save();
 
   $field = FieldConfig::create([
     'field_name' => 'field_mukurtu_protocol_r_scope',
@@ -48,7 +64,20 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
   $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_WRITE;
   $settings['field_config']['label'] = "Mukurtu Protocol - Update Access";
   $settings['field_config']['description'] = "Mukurtu Protocol Helper Text Goes Here";
+  $settings['field_config']['handler'] = 'default';
+  $settings['field_config']['handler_settings']['target_bundles'] = ['protocol'];
+  $settings['field_storage_config']['target_type'] = "node";
+
   Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type, $bundle_type, $settings);
+
+  // OG doesn't actually use the field settings we give it.
+  // We will set the protocol fields to target protocols only here.
+  $field_storage_config = FieldStorageConfig::loadByName($entity_type, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+  $field_storage_config->setSetting('target_type', 'node');
+  $field_storage_config->save();
+  $field_config = FieldConfig::loadByName($entity_type, $bundle_type, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+  $field_config->setSettings($settings['field_config']);
+  $field_config->save();
 
   $field = FieldConfig::create([
     'field_name' => 'field_mukurtu_protocol_w_scope',
@@ -66,7 +95,8 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   //dpm("protocol:{$operation}");
   // Protocols only work with nodes.
-  if ($entity->getEntityType()->id() == 'node') {
+  $type = $entity->getEntityType()->id();
+  if ($type == 'node' || $type == 'media') {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     return $protocol_manager->checkAccess($entity, $operation, $account);
   }
@@ -182,5 +212,43 @@ function mukurtu_protocol_entity_bundle_create($entity_type_id, $bundle) {
   // For any new node or media type that is defined, add the protocol field.
   if ($entity_type_id == 'node'|| $entity_type_id == 'media') {
     mukurtu_protocol_create_protocol_field($entity_type_id, $bundle);
+  }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function mukurtu_protocol_entity_type_alter(array &$entity_types) {
+  //$entity_types['media']->setHandlerClass('access', '\Drupal\Core\Entity\EntityAccessControlHandler');
+  //$entity_types['media']->setHandlerClass('query_access', '\Drupal\Core\Entity\QueryAccess\QueryAccessHandler');
+  //$entity_types['media']->setHandlerClass('query_access', '\Drupal\entity\QueryAccess\QueryAccessHandler');
+  //$entity_types['media']->setHandlerClass('permission_provider', '\Drupal\Core\Entity\EntityPermissionProvider');
+}
+
+function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
+  $account = User::load(\Drupal::currentUser()->id());
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+
+  // Protocol Set IDs the *user* has access to.
+  $protocol_set_ids = $protocol_manager->getUserGrantIds($account);
+  //dpm($protocol_set_ids);
+
+  // Compare that to the protocol set IDs the *content* has configured.
+
+
+  $query->leftJoin('media__' . MUKURTU_PROTOCOL_FIELD_NAME_READ, 'p', 'media_field_data.mid = p.entity_id');
+
+  // $protocol_manager->getProtocolGrantId();
+  //dpm("query");
+  //dpm($query);
+}
+
+/**
+ * Implements hook_entity_type_build().
+ */
+function mukurtu_protocol_entity_type_build(array &$entity_types) {
+  if (!$entity_types['media']->hasHandlerClass('query_access')) {
+    //\Drupal::logger('mukurtu_protocol')->notice("added media");
+    $entity_types['media']->setHandlerClass('query_access', \Drupal\entity\QueryAccess\QueryAccessHandler::class);
   }
 }
