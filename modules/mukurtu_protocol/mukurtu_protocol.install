@@ -34,3 +34,87 @@ function mukurtu_protocol_install() {
   // Protocols are also groups.
   Og::addGroup('node', 'protocol');
 }
+
+/**
+ * Implements hook_schema().
+ */
+function mukurtu_protocol_schema() {
+  $schema['mukurtu_protocol_map'] = [
+    'description' => 'Mukurtu Protocol Map',
+    'fields' => [
+      'protocol_set_id' => [
+        'description' => 'The ID of the protocol set.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'protocol_set' => [
+        'description' => 'The set of protocols',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+      ],
+    ],
+    'primary key' => [
+      'protocol_set_id',
+    ],
+  ];
+
+  $schema['mukurtu_protocol_access'] = [
+    'description' => 'Mukurtu Protocol Access System',
+    'fields' => [
+      'id' => [
+        'description' => 'The ID of the entity.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'entity_type' => [
+        'description' => 'The entity type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 'en',
+      ],
+      'langcode' => [
+        'description' => 'The language.langcode of this entity.',
+        'type' => 'varchar_ascii',
+        'not null' => TRUE,
+        'default' => 'en',
+      ],
+      'protocol_set_id' => [
+        'description' => 'The ID of the protocol set',
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ],
+      'grant_view' => [
+        'description' => 'Boolean indicating whether a user with the protocol set can view this entity.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'default' => 0,
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ],
+      'grant_update' => [
+        'description' => 'Boolean indicating whether a user with the protocol set can update this entity.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'default' => 0,
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ],
+      'grant_delete' => [
+        'description' => 'Boolean indicating whether a user with the protocol set can delete this entity.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'default' => 0,
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ],
+    ],
+  ];
+
+  return $schema;
+}

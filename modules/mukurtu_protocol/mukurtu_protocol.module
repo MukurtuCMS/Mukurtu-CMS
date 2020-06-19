@@ -15,6 +15,7 @@ use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\Core\Database\Query\AlterableInterface;
+use Drupal\Core\Database\Query\Condition;
 use Drupal\user\Entity\User;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
@@ -22,7 +23,9 @@ define("MUKURTU_PROTOCOL_ANY", "any");
 define("MUKURTU_PROTOCOL_ALL", "all");
 define("MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY", "field_mukurtu_community");
 define("MUKURTU_PROTOCOL_FIELD_NAME_READ", "field_mukurtu_protocol_read");
+define("MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE", "field_mukurtu_protocol_r_scope");
 define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE", "field_mukurtu_protocol_write");
+define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE", "field_mukurtu_protocol_w_scope");
 
 /**
  * Create the Mukurtu protocol field for a given node bundle type.
@@ -94,7 +97,7 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
  */
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   //dpm("protocol:{$operation}");
-  // Protocols only work with nodes.
+  // Protocols only work with nodes & media.
   $type = $entity->getEntityType()->id();
   if ($type == 'node' || $type == 'media') {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
@@ -126,9 +129,26 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
 }
 
 /**
+ * Implements hook_entity_update().
+ */
+function mukurtu_protocol_entity_update(EntityInterface $entity) {
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  if ($protocol_manager->hasProtocolFields($entity)) {
+    $protocol_manager->handleProtocolUpdate($entity);
+  }
+}
+
+/**
  * Implements hook_entity_delete().
  */
 function mukurtu_protocol_entity_delete(EntityInterface $entity) {
+  // Clean up protocol entries for deleted entity.
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  if ($protocol_manager->hasProtocolFields($entity)) {
+    $protocol_manager->clearProtocolAccess($entity);
+  }
+
+  // Handle OgMemberships from here on.
   if (!$entity instanceof OgMembership) {
     return;
   }
@@ -140,9 +160,6 @@ function mukurtu_protocol_entity_delete(EntityInterface $entity) {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     $protocol_manager->processCommunityMembershipDelete($nid, $uid);
   }
-
-/*   $result = unserialize(serialize($entity));
-  dpm($result); */
 }
 
 /**
@@ -231,16 +248,23 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
 
   // Protocol Set IDs the *user* has access to.
   $protocol_set_ids = $protocol_manager->getUserGrantIds($account);
-  //dpm($protocol_set_ids);
 
-  // Compare that to the protocol set IDs the *content* has configured.
+  // Get the protocol set IDs for the media.
+  $query->leftJoin('mukurtu_protocol_access', 'mpa', 'media_field_data.mid = mpa.id');
+  $query->condition('mpa.entity_type', 'media');
 
-
-  $query->leftJoin('media__' . MUKURTU_PROTOCOL_FIELD_NAME_READ, 'p', 'media_field_data.mid = p.entity_id');
-
-  // $protocol_manager->getProtocolGrantId();
-  //dpm("query");
-  //dpm($query);
+  if (empty($protocol_set_ids)) {
+    // User doesn't have access to any protocols.
+    $query->condition('protocol_set_id', 0);
+  } else {
+    // User can access media for any of these protocol sets.
+    $or = new Condition('OR');
+    foreach ($protocol_set_ids as $protocol_set_id) {
+      //$query->condition('protocol_set_id', $protocol_set_id);
+      $or->condition('protocol_set_id', $protocol_set_id);
+      // add condition , $protocol_set_id = mukurtu_media_access.protocol_set_id, also where mukurtu_media_access.mid = entity_id
+    }
+  }
 }
 
 /**

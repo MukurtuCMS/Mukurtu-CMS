@@ -16,6 +16,7 @@ class MukurtuProtocolManager {
 
   protected $protocolTable;
   protected $protocolFieldName;
+  protected $protocolFields;
   protected $logger;
 
   /**
@@ -24,6 +25,10 @@ class MukurtuProtocolManager {
   public function __construct() {
     // TODO: Allow this to be configured.
     $this->protocolFieldName = MUKURTU_PROTOCOL_FIELD_NAME_READ;
+    $this->protocolFields = [
+      ['protocol' => MUKURTU_PROTOCOL_FIELD_NAME_READ, 'scope' => MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE],
+      ['protocol' => MUKURTU_PROTOCOL_FIELD_NAME_WRITE, 'scope' => MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE],
+    ];
     $this->protocolTable = \Drupal::state()->get('mukurtu_protocol_lookup_table');
 
     if (!isset($this->protocolTable['new_id'])) {
@@ -54,7 +59,7 @@ class MukurtuProtocolManager {
   /**
    * Re-intialize the protocol table with default values.
    */
-  protected function clearProtocolTable() {
+  public function clearProtocolTable() {
     $this->protocolTable = [];
     $this->protocolTable['new_id'] = 1;
     $this->saveProtocolTable();
@@ -138,6 +143,18 @@ class MukurtuProtocolManager {
   }
 
   /**
+   * Check if the entity has protocol fields.
+   */
+  public function hasProtocolFields(EntityInterface $entity) {
+    foreach ($this->protocolFields as $protocolField) {
+      if ($entity->hasField($protocolField['protocol'])) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * Return an array of effective protocols the user belongs to.
    *
    * @param Drupal\Core\Session\AccountInterface $account
@@ -203,8 +220,13 @@ class MukurtuProtocolManager {
    *   An array containing all the nids of the protocols.
    */
   protected function createProtocolKey(array $protocols) {
-    sort($protocols);
-    return implode(',', $protocols);
+    // Filter out any non IDs (nulls, whitespace).
+    $filtered_protocols = array_filter($protocols, is_numeric);
+
+    // Sort so we don't have to worry about different combinations.
+    sort($filtered_protocols);
+
+    return implode(',', $filtered_protocols);
   }
 
   /**
@@ -236,14 +258,14 @@ class MukurtuProtocolManager {
   /**
    * Return the array of protocol NIDs an entity is using.
    *
-   * @param \rupal\Core\Entity\EntityInterface $entity
+   * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity.
    */
-  public function getProtocols(EntityInterface $entity) {
+  public function getProtocols(EntityInterface $entity, $protocolFieldName = MUKURTU_PROTOCOL_FIELD_NAME_READ) {
     $protocols = [];
 
-    if ($entity->hasField($this->protocolFieldName)) {
-      $protocols_og = $entity->get($this->protocolFieldName)->getValue();
+    if ($entity->hasField($protocolFieldName)) {
+      $protocols_og = $entity->get($protocolFieldName)->getValue();
       $flatten = function ($e) {
         return isset($e['target_id']) ? $e['target_id'] : NULL;
       };
@@ -262,6 +284,76 @@ class MukurtuProtocolManager {
   public function getNodeProtocolId(Node $node) {
     $protocols = $this->getProtocols($node);
     return $this->getProtocolGrantId($protocols);
+  }
+
+  /**
+   * Delete protocol table entries for a given entry.
+   */
+  public function clearProtocolAccess(EntityInterface $entity) {
+    $entity_type = $entity->getEntityTypeId();
+    $langcode = $entity->get('langcode')->value;
+    $entity_id = $entity->id();
+
+    $connection = \Drupal::database();
+    $query = $connection->delete('mukurtu_protocol_access')
+      ->condition('id', $entity_id)
+      ->condition('langcode', $langcode)
+      ->condition('entity_type', $entity_type)
+      ->execute();
+  }
+
+  /**
+   * Handle any protocol set management on entity update.
+   */
+  public function handleProtocolUpdate(EntityInterface $entity) {
+    $entity_type = $entity->getEntityTypeId();
+    $entity_id = $entity->id();
+    $langcode = $entity->get('langcode')->value;
+
+    // Clear out old protocol entries.
+    $this->clearProtocolAccess($entity);
+
+    $update = [];
+
+    foreach ($this->protocolFields as $protocolField) {
+      // Get the protocols.
+      $protocols = $this->getProtocols($entity, $protocolField['protocol']);
+
+      // Nothing to do, skip.
+      if (empty($protocols)) {
+        continue;
+      }
+
+      // "OR" operation, no protocol sets needed, each protocol is atomic.
+      if ($entity->get($protocolField['scope'])->value == MUKURTU_PROTOCOL_ANY) {
+        foreach ($protocols as $p) {
+          $update[$p] = ['protocol' => $p, 'view' => 1, 'update' => 0, 'delete' => 0];
+        }
+      }
+
+      // "AND" operation, protocol needs a protocol set.
+      if ($entity->get($protocolField['scope'])->value == MUKURTU_PROTOCOL_ALL) {
+        $new_p = $this->getProtocolGrantId($protocols);
+        $update[$new_p] = ['protocol' => $new_p, 'view' => 1, 'update' => 1, 'delete' => 1];
+      }
+    }
+
+    if (!empty($update)) {
+      $connection = \Drupal::database();
+      foreach ($update as $row) {
+        $result = $connection->insert('mukurtu_protocol_access')
+          ->fields([
+            'id' => $entity_id,
+            'langcode' => $langcode,
+            'entity_type' => $entity_type,
+            'protocol_set_id' => $row['protocol'],
+            'grant_view' => $row['view'],
+            'grant_update' => $row['update'],
+            'grant_delete' => $row['delete'],
+          ])
+          ->execute();
+      }
+    }
   }
 
   /**
