@@ -96,7 +96,6 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
  * Implements hook_entity().
  */
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  //dpm("protocol:{$operation}");
   // Protocols only work with nodes & media.
   $type = $entity->getEntityType()->id();
   if ($type == 'node' || $type == 'media') {
@@ -127,12 +126,15 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
   if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'community') {
     $uid = $entity->getOwnerId();
     $nid = $entity->get('entity_id')->value;
-    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     $protocol_manager->processCommunityMembershipInsert($nid, $uid);
   }
-/*
-  $result = unserialize(serialize($entity));
-  dpm($result); */
+
+  // Invalidate cache for content under the protocol with the membership change.
+  if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'protocol') {
+    $nid = $entity->get('entity_id')->value;
+    $protocol = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    $protocol_manager->invalidateProtocolCache($protocol);
+  }
 }
 
 /**
@@ -142,6 +144,18 @@ function mukurtu_protocol_entity_update(EntityInterface $entity) {
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   if ($protocol_manager->hasProtocolFields($entity)) {
     $protocol_manager->handleProtocolUpdate($entity);
+  }
+
+  // Handle OgMemberships from here on.
+  if (!$entity instanceof OgMembership) {
+    return;
+  }
+
+  // Invalidate cache for content under the protocol with the membership change.
+  if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'protocol') {
+    $nid = $entity->get('entity_id')->value;
+    $protocol = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    $protocol_manager->invalidateProtocolCache($protocol);
   }
 }
 
@@ -164,8 +178,14 @@ function mukurtu_protocol_entity_delete(EntityInterface $entity) {
   if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'community') {
     $uid = $entity->getOwnerId();
     $nid = $entity->get('entity_id')->value;
-    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     $protocol_manager->processCommunityMembershipDelete($nid, $uid);
+  }
+
+  // Invalidate cache for content under the protocol with the deleted membership.
+  if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'protocol') {
+    $nid = $entity->get('entity_id')->value;
+    $protocol = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    $protocol_manager->invalidateProtocolCache($protocol);
   }
 }
 
@@ -249,6 +269,9 @@ function mukurtu_protocol_entity_type_alter(array &$entity_types) {
   //$entity_types['media']->setHandlerClass('permission_provider', '\Drupal\Core\Entity\EntityPermissionProvider');
 }
 
+/**
+ * Implements hook_query_TAG_alter().
+ */
 function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
   $account = User::load(\Drupal::currentUser()->id());
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
@@ -267,9 +290,7 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
     // User can access media for any of these protocol sets.
     $or = new Condition('OR');
     foreach ($protocol_set_ids as $protocol_set_id) {
-      //$query->condition('protocol_set_id', $protocol_set_id);
       $or->condition('protocol_set_id', $protocol_set_id);
-      // add condition , $protocol_set_id = mukurtu_media_access.protocol_set_id, also where mukurtu_media_access.mid = entity_id
     }
 
     $query->condition($or);

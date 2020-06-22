@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_protocol;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityInterface;
@@ -430,6 +431,47 @@ class MukurtuProtocolManager {
     foreach ($protocols as $protocol) {
       $membership_manager->removeMember($protocol, $account);
       $this->logger->notice("User {$account->name->value} ($uid) removed from protocol {$protocol->title->value} ({$protocol->id()}) as a result of being removed from community {$entity->title->value} ($gid).");
+    }
+  }
+
+  /**
+   * Invalidate cache for content under a given protocol.
+   */
+  public function invalidateProtocolCache(EntityInterface $protocol) {
+    // Nodes.
+    foreach ($this->protocolFields as $protocolField) {
+      $storage = \Drupal::entityTypeManager()->getStorage('node');
+      $query = \Drupal::entityQuery('node')
+        ->condition($protocolField['protocol'], $protocol->id());
+      $ids = $query->execute();
+
+      if (!empty($ids)) {
+        Cache::invalidateTags(['library_info', 'node_list']);
+
+        $entities = $storage->loadMultiple($ids);
+        foreach ($entities as $entity) {
+          Cache::invalidateTags($entity->getCacheTagsToInvalidate());
+        }
+      }
+    }
+
+    // Media. This errors out if we don't include the bundle,
+    // otherwise we'd lump it together in a loop with nodes.
+    foreach ($this->protocolFields as $protocolField) {
+      $storage = \Drupal::entityTypeManager()->getStorage('media');
+      $query = \Drupal::entityQuery('media')
+        ->exists('bundle')
+        ->condition($protocolField['protocol'], $protocol->id());
+      $ids = $query->execute();
+
+      if (!empty($ids)) {
+        Cache::invalidateTags(['library_info', 'media_list']);
+
+        $entities = $storage->loadMultiple($ids);
+        foreach ($entities as $entity) {
+          Cache::invalidateTags($entity->getCacheTagsToInvalidate());
+        }
+      }
     }
   }
 }
