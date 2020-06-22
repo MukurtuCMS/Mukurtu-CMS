@@ -29,8 +29,11 @@ class MukurtuProtocolManager {
       ['protocol' => MUKURTU_PROTOCOL_FIELD_NAME_READ, 'scope' => MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE],
       ['protocol' => MUKURTU_PROTOCOL_FIELD_NAME_WRITE, 'scope' => MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE],
     ];
+
+    // Initialize the protocol set table.
     $this->protocolTable = \Drupal::state()->get('mukurtu_protocol_lookup_table');
 
+    // Starting protocol set IDs from 1.
     if (!isset($this->protocolTable['new_id'])) {
       $this->protocolTable['new_id'] = 1;
     }
@@ -183,6 +186,12 @@ class MukurtuProtocolManager {
     $protocols = array_map($get_protocol_id, $memberships);
     sort($protocols);
 
+    // User has access to each single protocol they are a member of.
+    foreach ($protocols as $protocol) {
+      $p_gid = $this->getProtocolGrantId([$protocol]);
+      $grants[$p_gid] = $p_gid;
+    }
+
     // Search the entire protocol table for combinations of protocols
     // that the user is a member of. This is potentially slow, but it's faster
     // than computing the super set of user protocols.
@@ -198,7 +207,7 @@ class MukurtuProtocolManager {
 
         // The user is a member of all of the protocols in superProtocolProtocols.
         if ($i++ == $length) {
-          $grants[] = $superProtocol;
+          $grants[$superProtocol] = $superProtocol;
         }
       }
     }
@@ -327,14 +336,15 @@ class MukurtuProtocolManager {
       // "OR" operation, no protocol sets needed, each protocol is atomic.
       if ($entity->get($protocolField['scope'])->value == MUKURTU_PROTOCOL_ANY) {
         foreach ($protocols as $p) {
-          $update[$p] = ['protocol' => $p, 'view' => 1, 'update' => 0, 'delete' => 0];
+          $new_p = $this->getProtocolGrantId([$p]);
+          $update[$new_p] = ['protocol' => $new_p, 'view' => 1, 'update' => 0, 'delete' => 0];
         }
       }
 
       // "AND" operation, protocol needs a protocol set.
       if ($entity->get($protocolField['scope'])->value == MUKURTU_PROTOCOL_ALL) {
         $new_p = $this->getProtocolGrantId($protocols);
-        $update[$new_p] = ['protocol' => $new_p, 'view' => 1, 'update' => 1, 'delete' => 1];
+        $update[$new_p] = ['protocol' => $new_p, 'view' => 1, 'update' => 0, 'delete' => 0];
       }
     }
 

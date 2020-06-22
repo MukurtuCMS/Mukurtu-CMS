@@ -112,6 +112,13 @@ function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, Acc
  * Implements hook_entity_insert().
  */
 function mukurtu_protocol_entity_insert(EntityInterface $entity) {
+  // Update protocol tables.
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  if ($protocol_manager->hasProtocolFields($entity)) {
+    $protocol_manager->handleProtocolUpdate($entity);
+  }
+
+  // Handle OgMemberships from here on.
   if (!$entity instanceof OgMembership) {
     return;
   }
@@ -264,7 +271,11 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
       $or->condition('protocol_set_id', $protocol_set_id);
       // add condition , $protocol_set_id = mukurtu_media_access.protocol_set_id, also where mukurtu_media_access.mid = entity_id
     }
+
+    $query->condition($or);
   }
+
+  $query->distinct();
 }
 
 /**
