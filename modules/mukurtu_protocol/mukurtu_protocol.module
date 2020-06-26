@@ -17,6 +17,7 @@ use Drupal\og\Entity\OgMembership;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Database\Query\Condition;
 use Drupal\user\Entity\User;
+use Drupal\Core\Form\FormStateInterface;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_ANY", "any");
@@ -306,5 +307,21 @@ function mukurtu_protocol_entity_type_build(array &$entity_types) {
   if (!$entity_types['media']->hasHandlerClass('query_access')) {
     //\Drupal::logger('mukurtu_protocol')->notice("added media");
     $entity_types['media']->setHandlerClass('query_access', \Drupal\entity\QueryAccess\QueryAccessHandler::class);
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // When we a protocol scope/protocol list pairing, only display the protocol
+  // list when the any/all options are selected on the scope.
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  foreach ($protocol_manager->protocolFields as $protocol_field) {
+    if (isset($form[$protocol_field['protocol']]) && isset($form[$protocol_field['scope']])) {
+      $form[$protocol_field['protocol']]['#states'] = [
+        'visible' => [':input[name="' . $protocol_field['scope'] . '_input' . '"]' => [['value' => 'any'], ['value' => 'all']]],
+      ];
+    }
   }
 }

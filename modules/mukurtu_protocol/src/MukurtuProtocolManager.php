@@ -15,9 +15,9 @@ use Drupal\user\Entity\User;
  */
 class MukurtuProtocolManager {
 
+  public $protocolFields;
   protected $protocolTable;
   protected $protocolFieldName;
-  protected $protocolFields;
   protected $logger;
 
   /**
@@ -151,11 +151,38 @@ class MukurtuProtocolManager {
    */
   public function hasProtocolFields(EntityInterface $entity) {
     foreach ($this->protocolFields as $protocolField) {
-      if ($entity->hasField($protocolField['protocol'])) {
+      if (method_exists($entity, 'hasField') && $entity->hasField($protocolField['protocol'])) {
         return TRUE;
       }
     }
     return FALSE;
+  }
+
+  public function getUserProtocolMemberships(AccountInterface $account) {
+    $memberships = Og::getMemberships($account);
+
+    // Helper function to filter memberships to protocols only.
+    $protocols_only = function ($e) {
+      if ($e->get('entity_bundle')->value == 'protocol') {
+        return TRUE;
+      }
+      return FALSE;
+    };
+
+    $memberships = array_filter($memberships, $protocols_only);
+
+    // Helper function to take OG membership and return the protocol NID.
+    $get_protocol_id = function ($e) {
+      return $e->get('entity_id')->value;
+    };
+
+    // Get the protocol NID list and sort them.
+    $protocols = array_map($get_protocol_id, $memberships);
+    //sort($protocols);
+
+    $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($protocols);
+
+    return $nodes;
   }
 
   /**
