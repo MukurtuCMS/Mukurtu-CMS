@@ -501,4 +501,20 @@ class MukurtuProtocolManager {
       }
     }
   }
+
+  /**
+   * Return the owning community for a protocol.
+   */
+  public function getCommunity($protocol) {
+    if ($protocol->hasField('field_mukurtu_community')) {
+      $field_value = $protocol->get('field_mukurtu_community')->getValue();
+
+      if(isset($field_value[0]['target_id'])) {
+        $community_id = $field_value[0]['target_id'];
+        return \Drupal::entityTypeManager()->getStorage('node')->load($community_id);
+      }
+    }
+
+    return NULL;
+  }
 }

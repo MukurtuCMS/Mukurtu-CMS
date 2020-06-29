@@ -24,30 +24,32 @@ class ProtocolScopeWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $element += [
+    $value = isset($items[$delta]->value) ? $items[$delta]->value : 'personal';
+
+    $element['value'] = $element + [
       '#type' => 'radios',
-      '#title' => $this->t('Who can view this content?'),
+      '#description' => $this->t('Who can view this content?'),
       '#options' => [
         'personal' => $this->t('Only me, this content is not ready to be shared.'),
         'public' => $this->t('Anyone, this is public content.'),
         'any' => $this->t('This content may be shared with members of ANY protocols listed.'),
         'all' => $this->t('This content may only be shared with members belonging to ALL protocols listed.'),
       ],
-      '#attributes' => [
-        'name' => $this->fieldDefinition->getName() . '_input',
-      ],
+      '#default_value' => $value,
       '#element_validate' => [
         [static::class, 'validate'],
       ],
     ];
 
-    return ['value' => $element];
+    return $element;
   }
 
   /**
-   * Validate the color text field.
+   * Validate the protocol scope field.
    */
   public static function validate($element, FormStateInterface $form_state) {
+    $value = $element['#value'];
+    //dpm("Validate $value");
   }
 
 }

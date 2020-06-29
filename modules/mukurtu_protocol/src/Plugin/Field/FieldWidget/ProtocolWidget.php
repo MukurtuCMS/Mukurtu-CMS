@@ -36,14 +36,21 @@ class ProtocolWidget extends WidgetBase {
     // Build the options list.
     foreach ($protocol_nodes as $protocol_node) {
       $nid = $protocol_node->id();
-      // TODO: Filter out protocols that are already selected.
-      $protocol_options[$nid] = $protocol_node->title->value;
+      $protocol_community = $protocol_manager->getCommunity($protocol_node);
+
+      // Don't show any orphaned protocols.
+      if ($protocol_community) {
+        $title = $protocol_community->getTitle();
+
+        // TODO: Filter out protocols that are already selected.
+        $protocol_options[$title][$nid] = $protocol_node->title->value;
+      }
     }
 
     $element += [
       '#type' => 'select',
       '#default_value' => $value,
-      '#title' => $this->t('Select Protocol'),
+      //'#title' => $this->t('Select Protocol'),
       '#options' => $protocol_options,
       '#element_validate' => [
         [static::class, 'validate'],
@@ -54,10 +61,11 @@ class ProtocolWidget extends WidgetBase {
   }
 
   /**
-   * Validate the color text field.
+   * Validate the protocol field.
    */
   public static function validate($element, FormStateInterface $form_state) {
-
+    $value = $element['#value'];
+    dpm("Validate $value");
   }
 
 }

@@ -320,8 +320,24 @@ function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $fo
   foreach ($protocol_manager->protocolFields as $protocol_field) {
     if (isset($form[$protocol_field['protocol']]) && isset($form[$protocol_field['scope']])) {
       $form[$protocol_field['protocol']]['#states'] = [
-        'visible' => [':input[name="' . $protocol_field['scope'] . '_input' . '"]' => [['value' => 'any'], ['value' => 'all']]],
+        'visible' => [':input[name="' . $protocol_field['scope'] . '[0][value]' . '"]' => [['value' => 'any'], ['value' => 'all']]],
       ];
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function mukurtu_protocol_entity_presave(EntityInterface $entity) {
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  if ($protocol_manager->hasProtocolFields($entity)) {
+    foreach ($protocol_manager->protocolFields as $protocol_field) {
+      if ($entity->hasField($protocol_field['protocol']) && $entity->hasField($protocol_field['scope'])) {
+        //kint($entity);
+        dpm($entity->get($protocol_field['scope'])->value);
+        dpm($entity->get($protocol_field['protocol'])->getValue());
+      }
     }
   }
 }
