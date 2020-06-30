@@ -332,11 +332,17 @@ function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $fo
 function mukurtu_protocol_entity_presave(EntityInterface $entity) {
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   if ($protocol_manager->hasProtocolFields($entity)) {
+    // Check each protocol field for changes for any changes we need to make.
     foreach ($protocol_manager->protocolFields as $protocol_field) {
       if ($entity->hasField($protocol_field['protocol']) && $entity->hasField($protocol_field['scope'])) {
-        //kint($entity);
-        //dpm($entity->get($protocol_field['scope'])->value);
-        //dpm($entity->get($protocol_field['protocol'])->getValue());
+        $original_scope = $entity->original->get($protocol_field['scope'])->value;
+        $new_scope = $entity->get($protocol_field['scope'])->value;
+        if ($original_scope != $new_scope) {
+          // The scope has changed from any/all -> public/private. Unset the protocols.
+          if (($original_scope == 'any' || $original_scope == 'all') && ($new_scope != 'any' && $new_scope != 'all')) {
+            $entity->set($protocol_field['protocol'], NULL);
+          }
+        }
       }
     }
   }

@@ -83,6 +83,21 @@ class MukurtuProtocolManager {
   }
 
   /**
+   * Given an operation, return the scope/protocol field names.
+   */
+  public function getProtocolFieldByOperation($operation) {
+    switch ($operation) {
+      case 'edit':
+      case 'delete':
+        return [MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE, MUKURTU_PROTOCOL_FIELD_NAME_WRITE];
+
+      case 'view':
+      default:
+        return [MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE, MUKURTU_PROTOCOL_FIELD_NAME_READ];
+    }
+  }
+
+  /**
    * Return account access for a given operation.
    *
    * @param \Drupal\Core\Entity\EntityInterface|string $entity
@@ -97,25 +112,36 @@ class MukurtuProtocolManager {
    *   The access result.
    */
   public function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
-    // If the node has no protocol field, we don't have an opinion.
-    if (!$entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_READ)) {
+    // Get the correct fieldnames.
+    list($scope_field_name, $protocol_field_name) = $this->getProtocolFieldByOperation($operation);
+
+    // If the node has no scope/protocol field, we don't have an opinion.
+    if (!($entity->hasField($protocol_field_name) && $entity->hasField($scope_field_name))) {
       return AccessResult::neutral();
     }
 
     $protocols = $this->getProtocols($entity);
+    $protocol_scope = $entity->get($scope_field_name)->value;
 
-    // TODO: Get from node.
-    $protocol_mode = 'all';
-
-    // If the protocol field exists but is empty, only the owner has access.
+ /*    // If the protocol field exists but is empty, only the owner has access.
     if (empty($protocols)) {
       return ($entity->getOwnerId() == $account->id()) ? AccessResult::allowed() : AccessResult::forbidden();
     }
-
+ */
     $has_required_memberships = FALSE;
 
-    // Is the user a member of all protocols?
-    if ($protocol_mode == 'all') {
+    // Only the author should have access.
+    if ($protocol_scope == 'private' && ($entity->getOwnerId() == $account->id())) {
+      $has_required_memberships = TRUE;
+    }
+
+    // Item is public, everybody is a member.
+    if ($protocol_scope == 'public') {
+      $has_required_memberships = TRUE;
+    }
+
+    // Is the user a member of *all* protocols?
+    if ($protocol_scope == 'all') {
       $grant = $this->getProtocolGrantId($protocols);
       $user_grants = $this->getUserGrantIds($account);
       if (in_array($grant, $user_grants)) {
@@ -123,8 +149,8 @@ class MukurtuProtocolManager {
       }
     }
 
-    // Is the user a member of any protocols?
-    if ($protocol_mode == 'any') {
+    // Is the user a member of *any* protocols?
+    if ($protocol_scope == 'any') {
       foreach ($protocols as $protocol) {
         $grant = $this->getProtocolGrantId([$protocol]);
         $user_grants = $this->getUserGrantIds($account);
@@ -171,6 +197,9 @@ class MukurtuProtocolManager {
     return FALSE;
   }
 
+  /**
+   * Return the loaded protocol nodes a user is a member of.
+   */
   public function getUserProtocolMemberships(AccountInterface $account) {
     $memberships = Og::getMemberships($account);
 
