@@ -335,8 +335,8 @@ function mukurtu_protocol_entity_presave(EntityInterface $entity) {
     foreach ($protocol_manager->protocolFields as $protocol_field) {
       if ($entity->hasField($protocol_field['protocol']) && $entity->hasField($protocol_field['scope'])) {
         //kint($entity);
-        dpm($entity->get($protocol_field['scope'])->value);
-        dpm($entity->get($protocol_field['protocol'])->getValue());
+        //dpm($entity->get($protocol_field['scope'])->value);
+        //dpm($entity->get($protocol_field['protocol'])->getValue());
       }
     }
   }

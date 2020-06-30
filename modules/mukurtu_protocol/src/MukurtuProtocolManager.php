@@ -70,6 +70,19 @@ class MukurtuProtocolManager {
   }
 
   /**
+   * Given the protocol field name, return the corresponding scope field name.
+   */
+  public function getProtocolScopeFieldname($protocol_field_name) {
+    foreach ($this->protocolFields as $protocol_field) {
+      if ($protocol_field['protocol'] == $protocol_field_name) {
+        return $protocol_field['scope'];
+      }
+    }
+
+    return NULL;
+  }
+
+  /**
    * Return account access for a given operation.
    *
    * @param \Drupal\Core\Entity\EntityInterface|string $entity

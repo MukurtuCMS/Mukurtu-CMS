@@ -48,8 +48,6 @@ class ProtocolScopeWidget extends WidgetBase {
    * Validate the protocol scope field.
    */
   public static function validate($element, FormStateInterface $form_state) {
-    $value = $element['#value'];
-    //dpm("Validate $value");
   }
 
 }

@@ -11,11 +11,17 @@ type: list_string
 settings:
   allowed_values:
     -
+      value: personal
+      label: 'Only me, this content is not ready to be shared.'
+    -
+      value: public
+      label: 'Anyone, this is public content.'
+    -
       value: any
-      label: 'This item may be shared with members of ANY protocol listed.'
+      label: 'This content may be shared with members of ANY protocols listed.'
     -
       value: all
-      label: 'This item may only be shared with members belonging to ALL the protocols listed.'
+      label: 'This content may only be shared with members belonging to ALL protocols listed.'
   allowed_values_function: ''
 module: options
 locked: false

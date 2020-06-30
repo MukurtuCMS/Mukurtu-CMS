@@ -26,12 +26,11 @@ class ProtocolWidget extends WidgetBase {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $account = User::load(\Drupal::currentUser()->id());
-    $value = isset($items[$delta]->value) ? $items[$delta]->value : '';
 
     // Get the list of protocols the user has access to.
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     $protocol_nodes = $protocol_manager->getUserProtocolMemberships($account);
-    $protocol_options = [];
+    $protocol_options = [-1 => t('Select a Protocol')];
 
     // Build the options list.
     foreach ($protocol_nodes as $protocol_node) {
@@ -47,25 +46,63 @@ class ProtocolWidget extends WidgetBase {
       }
     }
 
+    $referenced_entities = $items->referencedEntities();
+
     $element += [
       '#type' => 'select',
-      '#default_value' => $value,
-      //'#title' => $this->t('Select Protocol'),
+      '#default_value' => isset($referenced_entities[$delta]) ? $referenced_entities[$delta]->id() : -1,
       '#options' => $protocol_options,
       '#element_validate' => [
         [static::class, 'validate'],
       ],
     ];
 
-    return ['value' => $element];
+    return ['target_id' => $element];
+  }
+
+  /**
+   * Massage the submitted values of the protocol field.
+   */
+  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
+    // Remove any of our default "select a protocol" options.
+    foreach ($values as $delta => $value) {
+      if ($value['target_id'] == -1) {
+        unset($values[$delta]);
+      }
+    }
+
+    return $values;
   }
 
   /**
    * Validate the protocol field.
    */
   public static function validate($element, FormStateInterface $form_state) {
-    $value = $element['#value'];
-    dpm("Validate $value");
+    // Get the protocol scope.
+    $field_name = $element['#array_parents'][0];
+    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+    $scope_field_name = $protocol_manager->getProtocolScopeFieldname($field_name);
+    $scope_value = $form_state->getValue($scope_field_name);
+
+    if (isset($scope_value[0]['value'])) {
+      $scope = $scope_value[0]['value'];
+
+      // Any or All means we need to have at least one valid protocol selected.
+      if ($scope == 'any' || $scope == 'all') {
+        $protocol_value = $form_state->getValue('field_mukurtu_protocol_read');
+
+        $count = 0;
+        foreach ($protocol_value as $delta => $protocol) {
+          if (is_numeric($delta) && $protocol['target_id'] != -1) {
+            $count += 1;
+          }
+        }
+
+        if ($count < 1) {
+          $form_state->setError($element, t('You must select at least one protocol.'));
+        }
+      }
+    }
   }
 
 }
