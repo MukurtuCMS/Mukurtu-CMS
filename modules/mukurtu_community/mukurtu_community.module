@@ -6,8 +6,12 @@
  */
 
  use Drupal\Core\Access\AccessResult;
+ use Drupal\field\Entity\FieldConfig;
+ use Drupal\field\Entity\FieldStorageConfig;
  use Drupal\Core\Entity\EntityInterface;
  use Drupal\Core\Session\AccountInterface;
+
+ define("MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY", "field_mukurtu_community");
 
 /**
  * Implements hook_ENTITY_TYPE_access().
@@ -37,5 +41,37 @@ function mukurtu_community_entity_insert(EntityInterface $entity) {
   if ($type == "community" && !$suppress_protocol_creation) {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     $protocol_manager->createProtocol($entity, 'community');
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_create().
+ */
+function mukurtu_community_entity_bundle_create($entity_type_id, $bundle) {
+  // For any new node or media type that is defined, add the community field.
+  if ($entity_type_id == 'node'|| $entity_type_id == 'media') {
+    mukurtu_community_create_community_field($entity_type_id, $bundle);
+  }
+}
+
+/**
+ * Create the community field for an entity type/bundle.
+ */
+function mukurtu_community_create_community_field($entity_type_id, $bundle) {
+  $field_storage = FieldStorageConfig::loadByName($entity_type_id, MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
+  $field = FieldConfig::loadByName($entity_type_id, $bundle, MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
+  if ($field_storage && empty($field)) {
+    $new_field = $field_storage->toArray();
+    $new_field['label'] = "Community";
+    $new_field['bundle'] = $bundle;
+    $new_field['settings'] = [
+      'handler' => 'default:node',
+      'handler_settings' => [
+        'target_bundles' => ['community' => 'community'],
+        'auto_create' => FALSE,
+      ],
+    ];
+    $new_field = FieldConfig::create($new_field);
+    $new_field->save();
   }
 }

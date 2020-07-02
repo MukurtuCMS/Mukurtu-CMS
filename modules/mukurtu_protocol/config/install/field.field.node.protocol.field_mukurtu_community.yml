@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_mukurtu_community
+    - node.type.community
     - node.type.protocol
   module:
     - og
@@ -17,7 +18,12 @@ translatable: true
 default_value: {  }
 default_value_callback: ''
 settings:
-  handler: 'og:default'
-  handler_settings: {  }
-  access_override: false
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      community: community
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
 field_type: og_standard_reference
