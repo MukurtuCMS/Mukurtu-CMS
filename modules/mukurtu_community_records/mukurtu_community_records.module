@@ -4,3 +4,141 @@
  * @file
  * Provide Mukurtu Community Records.
  */
+
+define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS", "field_mukurtu_community_records");
+define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD", "field_mukurtu_original_record");
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+
+/**
+ * Implements hook_entity_bundle_create().
+ */
+function mukurtu_community_records_entity_bundle_create($entity_type_id, $bundle) {
+  // For any new node type that is defined, add the community record field.
+  if ($entity_type_id == 'node') {
+    mukurtu_community_records_create_community_records_field($entity_type_id, $bundle);
+  }
+}
+
+/**
+ * Create the community field for an entity type/bundle.
+ */
+function mukurtu_community_records_create_community_records_field($entity_type_id, $bundle) {
+  if ($entity_type_id != 'node' || $bundle == 'protocol' || $bundle == 'community') {
+    return;
+  }
+
+  // Create the community records field.
+  $field_storage = FieldStorageConfig::loadByName($entity_type_id, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS);
+  $field = FieldConfig::loadByName($entity_type_id, $bundle, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS);
+  if ($field_storage && empty($field)) {
+    $new_field = $field_storage->toArray();
+    $new_field['label'] = "Community Records";
+    $new_field['bundle'] = $bundle;
+    $new_field['settings'] = [
+      'handler' => 'default:node',
+      'handler_settings' => [
+        'target_bundles' => [$bundle => $bundle],
+        'auto_create' => FALSE,
+      ],
+    ];
+    $new_field = FieldConfig::create($new_field);
+    $new_field->save();
+  }
+
+  // Create the original record field (parent record).
+  $field_storage = FieldStorageConfig::loadByName($entity_type_id, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD);
+  $field = FieldConfig::loadByName($entity_type_id, $bundle, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD);
+
+  if ($field_storage && empty($field)) {
+    $new_field = $field_storage->toArray();
+    $new_field['label'] = "Original Record";
+    $new_field['bundle'] = $bundle;
+    $new_field['settings'] = [
+      'handler' => 'default:node',
+      'handler_settings' => [
+        'target_bundles' => [$bundle => $bundle],
+        'auto_create' => FALSE,
+      ],
+    ];
+    $new_field = FieldConfig::create($new_field);
+    $new_field->save();
+  }
+}
+
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function mukurtu_community_records_entity_insert(EntityInterface $entity) {
+  if ($entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)) {
+    $records = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)->getValue();
+    if (!empty($records)) {
+      foreach ($records as $record) {
+        // Load the target record, set its original record field.
+        dpm($record);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
+function mukurtu_community_records_entity_update(EntityInterface $entity) {
+  if ($entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)) {
+    $new_record_refs = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)->getValue();
+    $old_record_refs = [];
+
+    if (isset($entity->original)) {
+      $old_record_refs = $entity->original->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)->getValue();
+    }
+
+    $flatten = function ($e) {
+      return isset($e['target_id']) ? $e['target_id'] : NULL;
+    };
+    $new_records = array_map($flatten, $new_record_refs);
+    $old_records = array_map($flatten, $old_record_refs);
+
+    // For each record in the updated entity, make sure the relationship is set
+    // on the community record.
+    $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($new_records);
+    if (!empty($nodes)) {
+      foreach ($nodes as $node) {
+        dpm("add " . $node->title->value);
+      }
+    }
+
+    // If any records have been removed, unset the relationship on the child.
+    $records_to_remove = array_diff($old_records, $new_records);
+    if (!empty($records_to_remove)) {
+      $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($records_to_remove);
+      if (!empty($nodes)) {
+      foreach ($nodes as $node) {
+        dpm("unset " . $node->title->value);
+      }
+    }
+    }
+/*     dpm($new_records);
+    dpm($old_records); */
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
+function mukurtu_community_records_entity_delete(EntityInterface $entity) {
+}
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle)
+{
+  if (isset($fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS])) {
+    $fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS]->addConstraint('ValidCommunityRecord', []);
+  }
+}

@@ -5,13 +5,13 @@
  * Provide Mukurtu Communities.
  */
 
- use Drupal\Core\Access\AccessResult;
- use Drupal\field\Entity\FieldConfig;
- use Drupal\field\Entity\FieldStorageConfig;
- use Drupal\Core\Entity\EntityInterface;
- use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
 
- define("MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY", "field_mukurtu_community");
+define("MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY", "field_mukurtu_community");
 
 /**
  * Implements hook_ENTITY_TYPE_access().
