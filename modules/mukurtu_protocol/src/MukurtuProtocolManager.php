@@ -300,7 +300,7 @@ class MukurtuProtocolManager {
    */
   protected function createProtocolKey(array $protocols) {
     // Filter out any non IDs (nulls, whitespace).
-    $filtered_protocols = array_filter($protocols, is_numeric);
+    $filtered_protocols = array_filter($protocols, 'is_numeric');
 
     // Sort so we don't have to worry about different combinations.
     sort($filtered_protocols);

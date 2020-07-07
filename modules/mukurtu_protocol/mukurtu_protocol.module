@@ -94,14 +94,16 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
 }
 
 /**
- * Implements hook_entity().
+ * Implements hook_entity_access().
  */
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   // Protocols only work with nodes & media.
-  $type = $entity->getEntityType()->id();
+  $type = $entity->getEntityTypeId();
   if ($type == 'node' || $type == 'media') {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-    return $protocol_manager->checkAccess($entity, $operation, $account);
+    if ($protocol_manager->hasProtocolFields($entity)) {
+      return $protocol_manager->checkAccess($entity, $operation, $account);
+    }
   }
 
   return AccessResult::neutral();
@@ -335,7 +337,13 @@ function mukurtu_protocol_entity_presave(EntityInterface $entity) {
     // Check each protocol field for changes for any changes we need to make.
     foreach ($protocol_manager->protocolFields as $protocol_field) {
       if ($entity->hasField($protocol_field['protocol']) && $entity->hasField($protocol_field['scope'])) {
-        $original_scope = $entity->original->get($protocol_field['scope'])->value;
+
+        // Get the old scope.
+        $original_scope = [];
+        if (isset($entity->original)) {
+          $original_scope = $entity->original->get($protocol_field['scope'])->value;
+        }
+
         $new_scope = $entity->get($protocol_field['scope'])->value;
         if ($original_scope != $new_scope) {
           // The scope has changed from any/all -> public/private. Unset the protocols.
