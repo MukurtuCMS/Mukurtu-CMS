@@ -14,5 +14,8 @@ use Symfony\Component\Validator\Constraint;
  * )
  */
 class ValidCommunityRecord extends Constraint {
-  public $circularReference = 'An item cannot be self referential';
+  public $circularReference = 'An item %title (%id) cannot be its own community record.';
+  public $nestedCommunityRecord = 'The community record %title (%id) cannot have a community record attached.';
+  public $invalidTargetNoAccess = 'The ID %id does not represent a valid community record target.';
+  public $invalidTargetAccess = '%title (%id) is already a community record for another item and cannot be attached to another.';
 }

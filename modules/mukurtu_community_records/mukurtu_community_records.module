@@ -69,20 +69,46 @@ function mukurtu_community_records_create_community_records_field($entity_type_i
   }
 }
 
-
 /**
  * Implements hook_ENTITY_TYPE_insert().
  */
 function mukurtu_community_records_entity_insert(EntityInterface $entity) {
-  if ($entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)) {
-    $records = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)->getValue();
-    if (!empty($records)) {
-      foreach ($records as $record) {
-        // Load the target record, set its original record field.
-        dpm($record);
-      }
+  mukurtu_community_records_entity_update($entity);
+}
+
+/**
+ * Attach a record to an item.
+ */
+function mukurtu_community_records_attach_record(EntityInterface $original, EntityInterface $record) {
+  // Set the record's original record field to reference the item.
+  if ($record->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
+    $record->set(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, [$original->id()]);
+    $record->save();
+  }
+}
+
+/**
+ * Detach a record from an item.
+ */
+function mukurtu_community_records_detach_record(EntityInterface $original, EntityInterface $record) {
+  if ($record->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
+    $record->set(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, []);
+    $record->save();
+  }
+}
+
+/**
+ * Check if an entity is a community record.
+ */
+function mukurtu_community_records_is_community_record(EntityInterface $entity) {
+  if ($entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
+    $original = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->getValue();
+    if (!empty($original)) {
+      return $original['target_id'];
     }
   }
+
+  return FALSE;
 }
 
 /**
@@ -108,7 +134,7 @@ function mukurtu_community_records_entity_update(EntityInterface $entity) {
     $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($new_records);
     if (!empty($nodes)) {
       foreach ($nodes as $node) {
-        dpm("add " . $node->title->value);
+        mukurtu_community_records_attach_record($entity, $node);
       }
     }
 
@@ -117,13 +143,11 @@ function mukurtu_community_records_entity_update(EntityInterface $entity) {
     if (!empty($records_to_remove)) {
       $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($records_to_remove);
       if (!empty($nodes)) {
-      foreach ($nodes as $node) {
-        dpm("unset " . $node->title->value);
+        foreach ($nodes as $node) {
+          mukurtu_community_records_detach_record($entity, $node);
+        }
       }
     }
-    }
-/*     dpm($new_records);
-    dpm($old_records); */
   }
 }
 
