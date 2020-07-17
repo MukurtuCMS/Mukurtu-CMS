@@ -24,6 +24,20 @@ function mukurtu_community_records_entity_bundle_create($entity_type_id, $bundle
 }
 
 /**
+ * Return true if the entity has the given record field.
+ */
+function mukurtu_community_records_has_record_field(EntityInterface $entity, $field_name) {
+  $entity_type_id = $entity->getEntityTypeId();
+  if ($entity_type_id == 'node' || $entity_type_id == 'media') {
+    if (method_exists($entity, 'hasField')) {
+      return $entity->hasField($field_name);
+    }
+  }
+
+  return FALSE;
+}
+
+/**
  * Create the community field for an entity type/bundle.
  */
 function mukurtu_community_records_create_community_records_field($entity_type_id, $bundle) {
@@ -81,7 +95,7 @@ function mukurtu_community_records_entity_insert(EntityInterface $entity) {
  */
 function mukurtu_community_records_attach_record(EntityInterface $original, EntityInterface $record) {
   // Set the record's original record field to reference the item.
-  if ($record->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
+  if (mukurtu_community_records_has_record_field($record, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
     $record->set(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, [$original->id()]);
     $record->save();
   }
@@ -91,7 +105,7 @@ function mukurtu_community_records_attach_record(EntityInterface $original, Enti
  * Detach a record from an item.
  */
 function mukurtu_community_records_detach_record(EntityInterface $original, EntityInterface $record) {
-  if ($record->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
+  if (mukurtu_community_records_has_record_field($record, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
     $record->set(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, []);
     $record->save();
   }
@@ -101,7 +115,7 @@ function mukurtu_community_records_detach_record(EntityInterface $original, Enti
  * Check if an entity is a community record.
  */
 function mukurtu_community_records_is_community_record(EntityInterface $entity) {
-  if ($entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
+  if (mukurtu_community_records_has_record_field($entity, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
     $original = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->getValue();
     if (!empty($original)) {
       return $original['target_id'];
@@ -115,7 +129,7 @@ function mukurtu_community_records_is_community_record(EntityInterface $entity) 
  * Implements hook_ENTITY_TYPE_update().
  */
 function mukurtu_community_records_entity_update(EntityInterface $entity) {
-  if ($entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)) {
+  if (mukurtu_community_records_has_record_field($entity, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)) {
     $new_record_refs = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)->getValue();
     $old_record_refs = [];
 
