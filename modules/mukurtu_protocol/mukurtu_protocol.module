@@ -57,7 +57,7 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
   $field_config->save();
 
   $field = FieldConfig::create([
-    'field_name' => 'field_mukurtu_protocol_r_scope',
+    'field_name' => MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE,
     'entity_type' => $entity_type,
     'bundle' => $bundle_type,
     'label' => 'Mukurtu Protocol - View Scope',
@@ -84,13 +84,45 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
   $field_config->save();
 
   $field = FieldConfig::create([
-    'field_name' => 'field_mukurtu_protocol_w_scope',
+    'field_name' => MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE,
     'entity_type' => $entity_type,
     'bundle' => $bundle_type,
     'label' => 'Mukurtu Protocol - Update Scope',
   ]);
   $field->save();
 
+  // Use our custom widgets in the form display.
+  // Read fields widgets.
+  \Drupal::entityTypeManager()
+    ->getStorage('entity_form_display')
+    ->load("{$entity_type}.{$bundle_type}.default")
+    ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE, [
+      'type' => 'mukurtu_protocol_scope_widget',
+      'region' => 'content',
+      'weight' => 0,
+    ])
+    ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_READ, [
+      'type' => 'mukurtu_protocol_widget',
+      'region' => 'content',
+      'weight' => 1,
+    ])
+    ->save();
+
+  // Write fields widgets.
+  \Drupal::entityTypeManager()
+    ->getStorage('entity_form_display')
+    ->load("{$entity_type}.{$bundle_type}.default")
+    ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE, [
+      'type' => 'mukurtu_protocol_scope_widget',
+      'region' => 'content',
+      'weight' => 0,
+    ])
+    ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_WRITE, [
+      'type' => 'mukurtu_protocol_widget',
+      'region' => 'content',
+      'weight' => 1,
+    ])
+    ->save();
 }
 
 /**
