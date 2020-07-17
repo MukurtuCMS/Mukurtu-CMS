@@ -16,7 +16,7 @@ bundle: digital_heritage
 label: 'Media Assets'
 description: 'Media assets are the core element of Digital Heritage Items and can be images, documents, video, or audio files. Digital Heritage Item can include more than one media asset. Media assets are not required for Digital Heritage Items.'
 required: false
-translatable: false
+translatable: true
 default_value: {  }
 default_value_callback: ''
 settings:

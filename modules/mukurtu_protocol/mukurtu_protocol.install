@@ -29,6 +29,11 @@ function mukurtu_protocol_install() {
   $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY;
   $settings['field_config']['label'] = "Parent Community";
   $settings['field_config']['description'] = "Community that owns the protocol.";
+/*   $settings['field_config']['handler'] = 'default:node';
+  $settings['field_config']['handler_settings'] = [
+    'target_bundles' => ['community' => 'community'],
+    'auto_create' => FALSE,
+  ]; */
   Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'protocol', $settings);
 
   // Protocols are also groups.
@@ -69,6 +74,7 @@ function mukurtu_protocol_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
+        'default' => 0,
       ],
       'entity_type' => [
         'description' => 'The entity type.',
@@ -80,6 +86,7 @@ function mukurtu_protocol_schema() {
       'langcode' => [
         'description' => 'The language.langcode of this entity.',
         'type' => 'varchar_ascii',
+        'length' => 12,
         'not null' => TRUE,
         'default' => 'en',
       ],

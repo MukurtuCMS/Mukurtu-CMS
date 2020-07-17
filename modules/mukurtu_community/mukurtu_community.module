@@ -58,10 +58,21 @@ function mukurtu_community_entity_bundle_create($entity_type_id, $bundle) {
  * Create the community field for an entity type/bundle.
  */
 function mukurtu_community_create_community_field($entity_type_id, $bundle) {
+  // Protocols implement their own community field.
+  if ($entity_type_id == 'node' && $bundle == 'protocol') {
+    return;
+  }
+
   $field_storage = FieldStorageConfig::loadByName($entity_type_id, MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
-  $field = FieldConfig::loadByName($entity_type_id, $bundle, MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
-  if ($field_storage && empty($field)) {
+  $field_config = FieldConfig::loadByName($entity_type_id, $bundle, MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
+  if ($field_storage && is_null($field_config)) {
     $new_field = $field_storage->toArray();
+
+    // Get rid of the UUID field, we want it to generate a fresh UUID for the new field.
+    if (isset($new_field['uuid'])) {
+      unset($new_field['uuid']);
+    }
+
     $new_field['label'] = "Community";
     $new_field['bundle'] = $bundle;
     $new_field['settings'] = [

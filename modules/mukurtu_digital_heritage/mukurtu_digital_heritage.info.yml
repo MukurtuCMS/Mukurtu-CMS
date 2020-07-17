@@ -5,6 +5,8 @@ core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
 dependencies:
+  - media
+  - media_library
   - mukurtu_community
   - mukurtu_taxonomy
 

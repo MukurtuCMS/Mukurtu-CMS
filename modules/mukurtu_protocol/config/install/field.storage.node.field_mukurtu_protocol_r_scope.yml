@@ -4,8 +4,6 @@ dependencies:
   module:
     - node
     - options
-_core:
-  default_config_hash: gQH3_DnF8uXTu6Bgu6BgJgsBd9_6P-yucbATIhxQ2vQ
 id: node.field_mukurtu_protocol_r_scope
 field_name: field_mukurtu_protocol_r_scope
 entity_type: node
