@@ -90,39 +90,65 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
     'label' => 'Mukurtu Protocol - Update Scope',
   ]);
   $field->save();
+}
 
+/**
+ * Configure the given entity/bundle form to use the custom protocol widgets.
+ */
+function mukurtu_protocol_use_custom_protocol_widgets($entity_type, $bundle_type) {
   // Use our custom widgets in the form display.
   // Read fields widgets.
-  \Drupal::entityTypeManager()
+  $read = \Drupal::entityTypeManager()
     ->getStorage('entity_form_display')
-    ->load("{$entity_type}.{$bundle_type}.default")
-    ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE, [
+    ->load("{$entity_type}.{$bundle_type}.default");
+  if ($read) {
+    $read->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE, [
       'type' => 'mukurtu_protocol_scope_widget',
       'region' => 'content',
-      'weight' => 0,
+      'weight' => -6,
     ])
     ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_READ, [
       'type' => 'mukurtu_protocol_widget',
       'region' => 'content',
-      'weight' => 1,
+      'weight' => -5,
     ])
     ->save();
+  }
 
   // Write fields widgets.
-  \Drupal::entityTypeManager()
+  $write = \Drupal::entityTypeManager()
     ->getStorage('entity_form_display')
-    ->load("{$entity_type}.{$bundle_type}.default")
-    ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE, [
+    ->load("{$entity_type}.{$bundle_type}.default");
+  if ($write) {
+    $write->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE, [
       'type' => 'mukurtu_protocol_scope_widget',
       'region' => 'content',
-      'weight' => 0,
+      'weight' => -4,
     ])
     ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_WRITE, [
       'type' => 'mukurtu_protocol_widget',
       'region' => 'content',
-      'weight' => 1,
+      'weight' => -3,
     ])
     ->save();
+  }
+}
+
+/**
+ * Configure all nodes/media to use our protocol widget.
+ */
+function mukurtu_protocol_use_custom_protocol_widgets_sitewide() {
+  // Create the protocol field on all pre-existing node types.
+  foreach (node_type_get_names() as $bundle => $label) {
+    mukurtu_protocol_use_custom_protocol_widgets('node', $bundle);
+  }
+
+  // Create the protocol field for all pre-existing media types.
+  $entity_type_bundle = \Drupal::service('entity_type.bundle.info');
+  $media_types = $entity_type_bundle->getBundleInfo('media');
+  foreach ($media_types as $media_type => $media_label) {
+    mukurtu_protocol_use_custom_protocol_widgets('media', $media_type);
+  }
 }
 
 /**
@@ -291,6 +317,7 @@ function mukurtu_protocol_entity_bundle_create($entity_type_id, $bundle) {
   // For any new node or media type that is defined, add the protocol field.
   if ($entity_type_id == 'node'|| $entity_type_id == 'media') {
     mukurtu_protocol_create_protocol_field($entity_type_id, $bundle);
+    mukurtu_protocol_use_custom_protocol_widgets($entity_type_id, $bundle);
   }
 }
 
@@ -385,5 +412,20 @@ function mukurtu_protocol_entity_presave(EntityInterface $entity) {
         }
       }
     }
+  }
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function mukurtu_protocol_user_login($account) {
+  // This is a dirty little hack to make sure our widgets are configured.
+  // Ideally this would be done when the fields are created, but for the
+  // fields that are created during install, config is being changed by
+  // too many other things and there's not a reliable post-install hook.
+  $mukurtu_widgets_set = \Drupal::state()->get('mukurtu_protocol_use_widgets_set', FALSE);
+  if (!$mukurtu_widgets_set) {
+    mukurtu_protocol_use_custom_protocol_widgets_sitewide();
+    \Drupal::state()->set('mukurtu_protocol_use_widgets_set', TRUE);
   }
 }
