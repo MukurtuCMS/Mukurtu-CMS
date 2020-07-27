@@ -131,7 +131,7 @@ class MukurtuProtocolManager {
     $has_required_memberships = FALSE;
 
     // Only the author should have access.
-    if ($protocol_scope == 'private' && ($entity->getOwnerId() == $account->id())) {
+    if ($protocol_scope == 'personal' && ($entity->getOwnerId() == $account->id())) {
       $has_required_memberships = TRUE;
     }
 
