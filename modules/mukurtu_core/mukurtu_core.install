@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_core module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_core_install() {
+
+}

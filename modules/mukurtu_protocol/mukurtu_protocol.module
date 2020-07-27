@@ -112,6 +112,9 @@ function mukurtu_protocol_use_custom_protocol_widgets($entity_type, $bundle_type
       'region' => 'content',
       'weight' => -5,
     ])
+    ->setComponent('title', [
+      'weight' => -7,
+    ])
     ->save();
   }
 

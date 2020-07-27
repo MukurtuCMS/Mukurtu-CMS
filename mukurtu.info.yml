@@ -46,17 +46,19 @@ install:
   - views_ui
   - tour
   - automated_cron
-  - media
-  - media_library
-  - mukurtu_digital_heritage
 
 dependencies:
+  - media
+  - media_library
   - og
   - og_ui
   - restui
   - search_api
+  - mukurtu_core
+  - mukurtu_community
   - mukurtu_protocol
   - mukurtu_taxonomy
+  - mukurtu_digital_heritage
 
 themes:
   - bartik

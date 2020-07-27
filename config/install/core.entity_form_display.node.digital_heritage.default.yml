@@ -4,9 +4,14 @@ dependencies:
   config:
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_media_assets
+    - field.field.node.digital_heritage.field_mukurtu_community
+    - field.field.node.digital_heritage.field_mukurtu_protocol_r_scope
+    - field.field.node.digital_heritage.field_mukurtu_protocol_read
+    - field.field.node.digital_heritage.field_mukurtu_protocol_w_scope
+    - field.field.node.digital_heritage.field_mukurtu_protocol_write
     - node.type.digital_heritage
   module:
-    - media_library
+    - og
     - path
 id: node.digital_heritage.default
 targetEntityType: node
@@ -15,13 +20,13 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 4
+    weight: 8
     region: content
     settings: {  }
     third_party_settings: {  }
   field_category:
     type: entity_reference_autocomplete
-    weight: 2
+    weight: 6
     region: content
     settings:
       match_operator: CONTAINS
@@ -30,12 +35,47 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_media_assets:
-    type: media_library_widget
-    weight: 1
-    settings:
-      media_types: {  }
-    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    weight: 5
     region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_mukurtu_protocol_r_scope:
+    type: options_select
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_read:
+    type: og_complex
+    weight: 2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_mukurtu_protocol_w_scope:
+    type: options_select
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_write:
+    type: og_complex
+    weight: 4
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   og_audience:
     type: og_complex
     settings:
@@ -48,7 +88,7 @@ content:
     region: content
   path:
     type: path
-    weight: 7
+    weight: 11
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -56,21 +96,21 @@ content:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 5
+    weight: 9
     region: content
     third_party_settings: {  }
   status:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 8
+    weight: 12
     region: content
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 6
+    weight: 10
     region: content
     third_party_settings: {  }
   title:
@@ -83,7 +123,7 @@ content:
     third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete
-    weight: 3
+    weight: 7
     settings:
       match_operator: CONTAINS
       size: 60
@@ -92,3 +132,4 @@ content:
     region: content
     third_party_settings: {  }
 hidden:
+  field_mukurtu_community: true
