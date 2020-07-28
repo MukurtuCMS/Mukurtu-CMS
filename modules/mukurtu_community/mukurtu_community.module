@@ -10,6 +10,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Entity\OgMembership;
 
 define("MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY", "field_mukurtu_community");
 
@@ -59,7 +60,7 @@ function mukurtu_community_entity_bundle_create($entity_type_id, $bundle) {
  */
 function mukurtu_community_create_community_field($entity_type_id, $bundle) {
   // Protocols implement their own community field.
-  if ($entity_type_id == 'node' && $bundle == 'protocol') {
+  if ($entity_type_id == 'node' && ($bundle == 'protocol' || $bundle == 'community')) {
     return;
   }
 

@@ -29,8 +29,12 @@ class MukurtuMembershipManager {
    *   The user account.
    */
   public function addMember(EntityInterface $group, AccountInterface $account) {
-    $membership = Og::createMembership($group, $account);
-    $membership->save();
+    // Is the account already a member of the group?
+    $membership = Og::getMembership($group, $account, OgMembershipInterface::ALL_STATES);
+    if (!$membership) {
+      $membership = Og::createMembership($group, $account);
+      $membership->save();
+    }
   }
 
   /**
