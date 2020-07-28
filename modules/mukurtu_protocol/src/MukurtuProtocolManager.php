@@ -220,7 +220,6 @@ class MukurtuProtocolManager {
 
     // Get the protocol NID list and sort them.
     $protocols = array_map($get_protocol_id, $memberships);
-    //sort($protocols);
 
     $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($protocols);
 
@@ -236,6 +235,15 @@ class MukurtuProtocolManager {
   public function getUserGrantIds(AccountInterface $account) {
     $grants = [];
     $memberships = Og::getMemberships($account);
+
+    // User is a member of their own personal protocol.
+    $uid = $account->id();
+    $personal = $this->getProtocolGrantId([$uid], 'user');
+    $grants[$personal] = $personal;
+
+    // All users have the public protocol.
+    $public = $this->getProtocolGrantId([], 'public');
+    $grants[$public] = $public;
 
     // Helper function to filter memberships to protocols only.
     $protocols_only = function ($e) {
@@ -302,6 +310,9 @@ class MukurtuProtocolManager {
     // Filter out any non IDs (nulls, whitespace).
     $filtered_protocols = array_filter($protocols, 'is_numeric');
 
+    // Remove duplicates.
+    $filtered_protocols = array_unique($filtered_protocols);
+
     // Sort so we don't have to worry about different combinations.
     sort($filtered_protocols);
 
@@ -314,12 +325,34 @@ class MukurtuProtocolManager {
    * @param array $protocols
    *   An array containing all the nids of the protocols.
    */
-  public function getProtocolGrantId(array $protocols) {
+  public function getProtocolGrantId(array $protocols, $type = NULL) {
+    // Special handling for public access.
+    if ($type == 'public') {
+      if (isset($this->protocolTable['public'])) {
+        return $this->protocolTable['public'];
+      }
+      $new_id = $this->protocolTable['new_id']++;
+      $this->protocolTable['public'] = $new_id;
+      $this->saveProtocolTable();
+      return $new_id;
+    }
+
     $key = $this->createProtocolKey($protocols);
 
     // No protocols given resolves to null.
     if (!$key) {
       return NULL;
+    }
+
+    // Special handling for user specific protocol.
+    if ($type == 'user') {
+      if (isset($this->protocolTable['user'][$key])) {
+        return $this->protocolTable['user'][$key];
+      }
+      $new_id = $this->protocolTable['new_id']++;
+      $this->protocolTable['user'][$key] = $new_id;
+      $this->saveProtocolTable();
+      return $new_id;
     }
 
     // Return the ID if it already exists.
@@ -395,7 +428,22 @@ class MukurtuProtocolManager {
     $update = [];
 
     foreach ($this->protocolFields as $protocolField) {
-      // Get the protocols.
+      $scope = $entity->get($protocolField['scope'])->value;
+
+      // Public.
+      if ($scope == MUKURTU_PROTOCOL_PUBLIC) {
+        $new_p = $this->getProtocolGrantId([], 'public');
+        $update[$new_p] = ['protocol' => $new_p, 'view' => 1, 'update' => 0, 'delete' => 0];
+      }
+
+      // Personal, author only.
+      if ($scope == MUKURTU_PROTOCOL_PERSONAL) {
+        $uid = $entity->getOwnerId();
+        $new_p = $this->getProtocolGrantId([$uid], 'user');
+        $update[$new_p] = ['protocol' => $new_p, 'view' => 1, 'update' => 0, 'delete' => 0];
+      }
+
+      // All other scopes involve protocols, get the protocols.
       $protocols = $this->getProtocols($entity, $protocolField['protocol']);
 
       // Nothing to do, skip.
