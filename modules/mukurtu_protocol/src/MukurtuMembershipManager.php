@@ -34,7 +34,10 @@ class MukurtuMembershipManager {
     if (!$membership) {
       $membership = Og::createMembership($group, $account);
       $membership->save();
+      return TRUE;
     }
+
+    return FALSE;
   }
 
   /**
@@ -47,7 +50,12 @@ class MukurtuMembershipManager {
    */
   public function removeMember(EntityInterface $group, AccountInterface $account) {
     $membership = Og::getMembership($group, $account, OgMembershipInterface::ALL_STATES);
-    $membership->delete();
+    if ($membership) {
+      $membership->delete();
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
 }

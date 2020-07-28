@@ -472,11 +472,10 @@ class MukurtuProtocolManager {
     foreach ($protocols as $protocol) {
       if ($protocol->field_membership_handler->value == 'community') {
         // Add the user to the protocol.
-        $membership_manager->addMember($protocol, $account);
-
-        // Log user add.
-        // TODO: This should be handling success/failure.
-        $this->logger->notice("User {$account->name->value} ($uid) added to protocol {$protocol->title->value} ({$protocol->id()}) as a result of being added to community {$entity->title->value} ($gid).");
+        if ($membership_manager->addMember($protocol, $account)) {
+          // Log user add.
+          $this->logger->notice("User {$account->name->value} ($uid) added to protocol {$protocol->title->value} ({$protocol->id()}) as a result of being added to community {$entity->title->value} ($gid).");
+        }
       }
     }
   }
@@ -498,8 +497,32 @@ class MukurtuProtocolManager {
 
     // Remove user from all community protocols.
     foreach ($protocols as $protocol) {
-      $membership_manager->removeMember($protocol, $account);
-      $this->logger->notice("User {$account->name->value} ($uid) removed from protocol {$protocol->title->value} ({$protocol->id()}) as a result of being removed from community {$entity->title->value} ($gid).");
+      if ($membership_manager->removeMember($protocol, $account)) {
+        $this->logger->notice("User {$account->name->value} ($uid) removed from protocol {$protocol->title->value} ({$protocol->id()}) as a result of being removed from community {$entity->title->value} ($gid).");
+      }
+    }
+  }
+
+  /**
+   * Handle community membership changes needed when protocol user is added.
+   */
+  public function processProtocolMembershipInsert($gid, $uid) {
+    $membership_manager = \Drupal::service('mukurtu_protocol.membership_manager');
+
+    // Load the protocol entity.
+    $protocol = \Drupal::entityTypeManager()->getStorage('node')->load($gid);
+
+    // Load the user.
+    $account = User::load($uid);
+
+    if ($protocol->hasField('field_mukurtu_community')) {
+      $community_nid = $protocol->get('field_mukurtu_community')->target_id;
+      if ($community_nid) {
+        $community = \Drupal::entityTypeManager()->getStorage('node')->load($community_nid);
+        if ($membership_manager->addMember($community, $account)) {
+          $this->logger->notice("User {$account->name->value} ($uid) added to community {$community->title->value} ({$community->id()}) as a result of being added to protocol {$protocol->title->value} ($gid).");
+        }
+      }
     }
   }
 

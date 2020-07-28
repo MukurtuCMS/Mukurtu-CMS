@@ -186,16 +186,22 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
     return;
   }
 
+  $entity_type = $entity->get('entity_type')->value;
+  $entity_bundle = $entity->get('entity_bundle')->value;
+
   // Handle user being added to a community.
-  if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'community') {
+  if ($entity_type == 'node' && $entity_bundle == 'community') {
     $uid = $entity->getOwnerId();
     $nid = $entity->get('entity_id')->value;
     $protocol_manager->processCommunityMembershipInsert($nid, $uid);
   }
 
   // Invalidate cache for content under the protocol with the membership change.
-  if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'protocol') {
+  if ($entity_type == 'node' && $entity_bundle == 'protocol') {
+    $uid = $entity->getOwnerId();
     $nid = $entity->get('entity_id')->value;
+
+    $protocol_manager->processProtocolMembershipInsert($nid, $uid);
     $protocol = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
     $protocol_manager->invalidateProtocolCache($protocol);
   }
