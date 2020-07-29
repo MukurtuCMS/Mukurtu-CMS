@@ -3,25 +3,63 @@ status: true
 dependencies:
   config:
     - field.field.media.remote_video.field_media_oembed_video
+    - field.field.media.remote_video.field_mukurtu_protocol_r_scope
+    - field.field.media.remote_video.field_mukurtu_protocol_read
+    - field.field.media.remote_video.field_mukurtu_protocol_w_scope
+    - field.field.media.remote_video.field_mukurtu_protocol_write
     - media.type.remote_video
   module:
-    - media
+    - user
 id: media.remote_video.default
 targetEntityType: media
 bundle: remote_video
 mode: default
 content:
-  field_media_oembed_video:
-    type: oembed
-    weight: 0
+  created:
     label: hidden
+    type: timestamp
+    weight: 3
+    region: content
     settings:
-      max_width: 0
-      max_height: 0
+      date_format: medium
+      custom_date_format: ''
+      timezone: ''
+    third_party_settings: {  }
+  field_media_oembed_video:
+    type: string
+    weight: 1
+    region: content
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  name:
+    type: string
+    weight: 0
+    region: content
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  og_audience:
+    label: above
+    type: entity_reference_label
+    settings:
+      link: true
+    weight: 7
     third_party_settings: {  }
     region: content
+  uid:
+    label: hidden
+    type: author
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
-  created: true
-  name: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  search_api_excerpt: true
   thumbnail: true
-  uid: true

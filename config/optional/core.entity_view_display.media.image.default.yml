@@ -3,26 +3,65 @@ status: true
 dependencies:
   config:
     - field.field.media.image.field_media_image
-    - image.style.large
+    - field.field.media.image.field_mukurtu_protocol_r_scope
+    - field.field.media.image.field_mukurtu_protocol_read
+    - field.field.media.image.field_mukurtu_protocol_w_scope
+    - field.field.media.image.field_mukurtu_protocol_write
     - media.type.image
   module:
     - image
+    - user
 id: media.image.default
 targetEntityType: media
 bundle: image
 mode: default
 content:
-  field_media_image:
-    label: visually_hidden
+  created:
+    label: hidden
+    type: timestamp
+    weight: 3
+    region: content
     settings:
-      image_style: 'large'
-      image_link: ''
+      date_format: medium
+      custom_date_format: ''
+      timezone: ''
     third_party_settings: {  }
+  field_media_image:
     type: image
     weight: 1
     region: content
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+  name:
+    type: string
+    weight: 0
+    region: content
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  og_audience:
+    label: above
+    type: entity_reference_label
+    settings:
+      link: true
+    weight: 7
+    third_party_settings: {  }
+    region: content
+  uid:
+    label: hidden
+    type: author
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
-  created: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  search_api_excerpt: true
   thumbnail: true
-  uid: true
-  name: true

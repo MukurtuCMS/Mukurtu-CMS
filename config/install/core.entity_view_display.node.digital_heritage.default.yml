@@ -26,12 +26,13 @@ content:
       link: true
     third_party_settings: {  }
   field_media_assets:
-    type: entity_reference_label
+    type: entity_reference_entity_view
     weight: 0
     region: content
     label: above
     settings:
       link: true
+      view_mode: default
     third_party_settings: {  }
   field_mukurtu_community:
     type: entity_reference_label
