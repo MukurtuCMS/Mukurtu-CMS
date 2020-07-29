@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.user.compact
+    - field.field.user.user.field_display_name
     - field.field.user.user.user_picture
     - image.style.thumbnail
   module:
@@ -13,6 +14,14 @@ targetEntityType: user
 bundle: user
 mode: compact
 content:
+  field_display_name:
+    type: string
+    weight: 1
+    region: content
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
   user_picture:
     type: image
     weight: 0
@@ -24,3 +33,4 @@ content:
     label: hidden
 hidden:
   member_for: true
+  search_api_excerpt: true
