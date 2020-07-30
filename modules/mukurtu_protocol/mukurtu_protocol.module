@@ -107,15 +107,18 @@ function mukurtu_protocol_use_custom_protocol_widgets($entity_type, $bundle_type
     $read->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE, [
       'type' => 'mukurtu_protocol_scope_widget',
       'region' => 'content',
-      //'weight' => -6,
+      'weight' => -6,
     ])
     ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_READ, [
       'type' => 'mukurtu_protocol_widget',
       'region' => 'content',
-//      'weight' => -5,
+      'weight' => -5,
     ])
     ->setComponent('title', [
-//      'weight' => -7,
+      'weight' => -7,
+    ])
+    ->setComponent('name', [
+      'weight' => -8,
     ])
     ->save();
   }
@@ -128,12 +131,12 @@ function mukurtu_protocol_use_custom_protocol_widgets($entity_type, $bundle_type
     $write->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE, [
       'type' => 'mukurtu_protocol_scope_widget',
       'region' => 'content',
-      //'weight' => -4,
+      'weight' => -4,
     ])
     ->setComponent(MUKURTU_PROTOCOL_FIELD_NAME_WRITE, [
       'type' => 'mukurtu_protocol_widget',
       'region' => 'content',
-      //'weight' => -3,
+      'weight' => -3,
     ])
     ->save();
   }
