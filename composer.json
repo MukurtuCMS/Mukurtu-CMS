@@ -1,0 +1,25 @@
+{
+  "name": "mukurtu/mukurtu-cms",
+  "description": "Mukurtu CMS v4 Description",
+  "type": "drupal-profile",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    },
+    {
+      "type": "composer",
+      "url": "https://asset-packagist.org"
+    }
+  ],
+  "require": {
+    "drupal/core": "~8.8.8",
+    "drupal/devel": "*",
+    "drupal/devel_php": "*",
+    "drupal/og": "*",
+    "drupal/restui": "*",
+    "drupal/search_api": "*"
+  }
+}
