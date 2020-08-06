@@ -1,6 +1,6 @@
 {
-  "name": "mukurtu/mukurtu-cms-profile",
-  "description": "Mukurtu CMS v4 Description",
+  "name": "mukurtu/mukurtu-cms",
+  "description": "Mukurtu CMS Profile v4 Description",
   "type": "drupal-profile",
   "minimum-stability": "dev",
   "prefer-stable": true,
