@@ -1,0 +1,8 @@
+name: 'Mukurtu Roundtrip'
+type: module
+description: 'Handles import and export of Mukurtu content'
+core: 8.x
+package: 'Mukurtu'
+dependencies:
+  - csv_serialization
+  - mukurtu_core

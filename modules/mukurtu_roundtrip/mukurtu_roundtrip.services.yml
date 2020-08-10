@@ -1,0 +1,10 @@
+services:
+  mukurtu_roundtrip.normalizer.entity_reference_field_item:
+    class: Drupal\mukurtu_roundtrip\Normalizer\MukurtuEntityReferenceFieldItemNormalizer
+    tags:
+      - { name: normalizer, priority: 10 }
+
+  serializer.mukurtu_roundtrip.csv.content_entity:
+    class: Drupal\mukurtu_roundtrip\Normalizer\MukurtuContentEntityNormalizer
+    tags:
+      - { name: normalizer, priority: 10 }

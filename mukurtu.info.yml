@@ -59,6 +59,7 @@ dependencies:
   - mukurtu_protocol
   - mukurtu_taxonomy
   - mukurtu_digital_heritage
+  - mukurtu_roundtrip
 
 themes:
   - bartik
