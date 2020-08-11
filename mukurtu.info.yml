@@ -46,6 +46,7 @@ install:
   - views_ui
   - tour
   - automated_cron
+  - diff
 
 dependencies:
   - media
