@@ -55,8 +55,10 @@ class ImportFromFileForm extends FormBase {
           ];
         }
       }
-
-      // var table = new Tabulator("#edit-import-table", {});
+    } else {
+      // This is the first run (or the file didn't upload correctly).
+      // Clear the session variable from any previous runs.
+      $_SESSION['mukurtu_roundtrip'][$this->getFormId()] = [];
     }
 
     // Submit button.
@@ -68,7 +70,8 @@ class ImportFromFileForm extends FormBase {
       '#submit' => ['::submitFormValidateImport'],
     );
 
-    $valid = $form_state->getValue('valid_import') ?? FALSE;
+    $valid = $_SESSION['mukurtu_roundtrip'][$this->getFormId()]['valid'] ?? FALSE;
+    //$valid = $form_state->getValue('valid_import') ?? FALSE;
     if ($valid) {
       $form['actions']['submitForImport'] = array(
         '#type' => 'submit',
@@ -108,29 +111,27 @@ class ImportFromFileForm extends FormBase {
       return;
     }
 
-    $data = file_get_contents($file->getFileUri());
+    $data = $this->getImportFileContents($form_state);
 
-    // Run the import file through the deserializer.
-    $serializer = \Drupal::service('serializer');
-    $entities = $serializer->deserialize($data, 'Drupal\node\Entity\Node', 'csv', []);
-    $valid = 0;
-
-    // Validate the resultant entities.
-    foreach ($entities as $entity) {
-      $violations = $entity->validate();
-      if ($violations->count() > 0) {
-        foreach ($violations as $violation) {
-          drupal_set_message($violation->getMessage());
-        }
-      } else {
-        $valid++;
-      }
-    }
-
-    // If all entities are valid, enable the import button.
-    if ($valid == count($entities)) {
-      $form_state->setValue('valid_import', TRUE);
-    }
+    // Run the validation as a batch operation.
+    $batch = [
+      'title' => t('Import'),
+      'operations' => [
+        [
+          'mukurtu_roundtrip_importbatch',
+          [
+            [
+              'input' => $data,
+              'save' => FALSE,
+              'form_id' => $this->getFormId(),
+            ],
+          ],
+        ],
+      ],
+      'finished' => 'mukurtu_roundtrip_import_complete_callback',
+      'file' => drupal_get_path('module', 'mukurtu_roundtrip') . '/mukurtu_roundtrip.importbatch.inc',
+    ];
+    batch_set($batch);
 
     $form_state->setRebuild();
   }
@@ -147,33 +148,40 @@ class ImportFromFileForm extends FormBase {
     $form_file = $form_state->getValue('import_file', 0);
     if (isset($form_file[0]) && !empty($form_file[0])) {
       $file = File::load($form_file[0]);
+      // When we add logging, we'll want the file used for import as permanent.
+      // $file->setPermanent();
+      // $file->save();
     }
 
     if (!$file) {
       drupal_set_message("Error reading file");
       return;
     }
-    $data = file_get_contents($file->getFileUri());
 
-    $serializer = \Drupal::service('serializer');
-    $entities = $serializer->deserialize($data, 'Drupal\node\Entity\Node', 'csv', []);
-    $valid = 0;
+    $data = $this->getImportFileContents($form_state);
 
-    foreach ($entities as $entity) {
-      $violations = $entity->validate();
-      if ($violations->count() > 0) {
-        foreach ($violations as $violation) {
-          drupal_set_message($violation->getMessage());
-        }
-      } else {
-        $valid++;
-        //$entity->save();
-      }
-    }
+    // Run the import as a batch operation.
+    $batch = [
+      'title' => t('Import'),
+      'operations' => [
+        [
+          'mukurtu_roundtrip_importbatch',
+          [
+            [
+              'input' => $data,
+              'save' => TRUE,
+              'form_id' => $this->getFormId(),
+            ],
+          ],
+        ],
+      ],
+      'finished' => 'mukurtu_roundtrip_import_complete_callback',
+      'file' => drupal_get_path('module', 'mukurtu_roundtrip') . '/mukurtu_roundtrip.importbatch.inc',
+    ];
+    batch_set($batch);
 
-    drupal_set_message("Imported $valid items.");
-    //$form_state->setRebuild();
-  }
+    $form_state->setRebuild();
+}
 
   protected function getImportFileContents(FormStateInterface $form_state) {
     $form_file = $form_state->getValue('import_file', 0);
@@ -182,6 +190,7 @@ class ImportFromFileForm extends FormBase {
       if ($file) {
         $data = file_get_contents($file->getFileUri());
         $csv_array = array_map("str_getcsv", explode("\n", $data));
+        //$csv_array = array_map("str_getcsv", file($file->getFileUri()));
         return $csv_array;
       }
     }

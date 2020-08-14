@@ -1,0 +1,7 @@
+mukurtu_roundtrip.batch:
+  path: '/import/csv'
+  defaults:
+    _controller: '\Drupal\mukurtu_roundtrip\Controller\ImportBatchController::content'
+    _title: 'Import - CSV'
+  requirements:
+    _permission: 'administer content'
