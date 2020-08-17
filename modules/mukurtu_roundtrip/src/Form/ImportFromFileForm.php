@@ -149,8 +149,9 @@ class ImportFromFileForm extends FormBase {
     if (isset($form_file[0]) && !empty($form_file[0])) {
       $file = File::load($form_file[0]);
       // When we add logging, we'll want the file used for import as permanent.
-      // $file->setPermanent();
-      // $file->save();
+      $file->setPermanent();
+      $file->save();
+      $this->logImport($file->getOwnerId(), $file->fid->value);
     }
 
     if (!$file) {
@@ -196,6 +197,28 @@ class ImportFromFileForm extends FormBase {
     }
 
     return [];
+  }
+
+  /**
+   * Log an import.
+   *
+   * This is quick and dirty just to keep track, long term
+   * we should have a more fleshed out logging system.
+   */
+  protected function logImport($uid, $fid) {
+    $time = time();
+
+    $description = "";
+
+    $connection = \Drupal::database();
+    $result = $connection->insert('mukurtu_roundtrip_import_log')
+      ->fields([
+        'uid' => $uid,
+        'fid' => $fid,
+        'import_timestamp' => $time,
+        'description' => $description,
+      ])
+      ->execute();
   }
 
 }
