@@ -34,6 +34,9 @@ class ImportFromFileForm extends FormBase {
       '#upload_validators' => [
         'file_validate_extensions' => ['csv'],
       ],
+      '#attributes' => [
+        'name' => 'import_file_upload',
+      ],
     ];
 
     // Build the table showing the import file values.
@@ -46,6 +49,11 @@ class ImportFromFileForm extends FormBase {
         '#type' => 'table',
         '#caption' => $this->t('Table'),
         '#header' =>  $headers,
+        '#states' => [
+          'visible' => [
+            ':input[name="import_file[fids]"]' => ['filled' => TRUE],
+          ],
+        ],
       ];
 
       foreach ($import_file_contents as $delta => $row) {
@@ -68,16 +76,25 @@ class ImportFromFileForm extends FormBase {
       '#value' => $this->t('Validate'),
       '#button_type' => 'primary',
       '#submit' => ['::submitFormValidateImport'],
+      '#states' => [
+        'visible' => [
+          ':input[name="import_file[fids]"]' => ['filled' => TRUE],
+        ],
+      ],
     );
 
     $valid = $_SESSION['mukurtu_roundtrip'][$this->getFormId()]['valid'] ?? FALSE;
-    //$valid = $form_state->getValue('valid_import') ?? FALSE;
     if ($valid) {
       $form['actions']['submitForImport'] = array(
         '#type' => 'submit',
         '#value' => $this->t('Import'),
         '#button_type' => 'primary',
         '#submit' => ['::submitFormImportAll'],
+        '#states' => [
+          'visible' => [
+            ':input[name="import_file[fids]"]' => ['filled' => TRUE],
+          ],
+        ],
       );
     }
 

@@ -38,7 +38,13 @@ function mukurtu_roundtrip_importbatch($options, &$context) {
 
   // Write data.
   foreach ($this_batch_input as $line) {
-    fputcsv($batch_temp, $line);
+    if (!empty($line)) {
+      // Skip completely empty lines;
+      if ((count($line) == 1) && trim($count[0]) == "") {
+        continue;
+      }
+      fputcsv($batch_temp, $line);
+    }
   }
 
   // Get the raw data to hand to the serializer.
