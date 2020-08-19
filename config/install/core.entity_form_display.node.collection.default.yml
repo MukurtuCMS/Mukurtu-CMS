@@ -1,0 +1,144 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.collection.field_description
+    - field.field.node.collection.field_items_in_collection
+    - field.field.node.collection.field_keywords
+    - field.field.node.collection.field_mukurtu_community
+    - field.field.node.collection.field_mukurtu_protocol_r_scope
+    - field.field.node.collection.field_mukurtu_protocol_read
+    - field.field.node.collection.field_mukurtu_protocol_w_scope
+    - field.field.node.collection.field_mukurtu_protocol_write
+    - node.type.collection
+  module:
+    - mukurtu_protocol
+    - path
+    - text
+id: node.collection.default
+targetEntityType: node
+bundle: collection
+mode: default
+content:
+  created:
+    type: datetime_timestamp
+    weight: 9
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_description:
+    weight: 5
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
+    third_party_settings: {  }
+    type: text_textarea_with_summary
+    region: content
+  field_items_in_collection:
+    weight: 6
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_keywords:
+    weight: 7
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_mukurtu_protocol_r_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_read:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_w_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_write:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+  name:
+    weight: -8
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  og_audience:
+    type: og_complex
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      match_limit: 10
+      placeholder: ''
+    weight: 122
+    third_party_settings: {  }
+    region: content
+  path:
+    type: path
+    weight: 12
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  promote:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 10
+    region: content
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 13
+    region: content
+    third_party_settings: {  }
+  sticky:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 11
+    region: content
+    third_party_settings: {  }
+  title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  uid:
+    type: entity_reference_autocomplete
+    weight: 8
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+      match_limit: 10
+    region: content
+    third_party_settings: {  }
+hidden:
+  field_mukurtu_community: true

@@ -1,0 +1,12 @@
+name: 'Mukurtu Collections'
+type: module
+description: 'Provides the collection content type.'
+core_version_requirement: ^8 || ^9
+core: 8.x
+package: 'Mukurtu'
+dependencies:
+  - media
+  - media_library
+  - mukurtu_core
+
+version: '8.x-1.x-dev'

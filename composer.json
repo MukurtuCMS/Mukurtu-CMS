@@ -20,6 +20,9 @@
     "drupal/devel_php": "*",
     "drupal/og": "*",
     "drupal/restui": "*",
-    "drupal/search_api": "*"
+    "drupal/search_api": "*",
+    "drupal/csv_serialization": "*",
+    "drupal/diff": "*",
+    "drupal/geolocation": "*"
   }
 }

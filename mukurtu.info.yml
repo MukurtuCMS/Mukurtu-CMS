@@ -54,6 +54,7 @@ dependencies:
   - og
   - og_ui
   - restui
+  - geolocation
   - search_api
   - mukurtu_core
   - mukurtu_community
