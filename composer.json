@@ -16,13 +16,16 @@
   ],
   "require": {
     "drupal/core": "~8.8.8",
-    "drupal/devel": "*",
-    "drupal/devel_php": "*",
     "drupal/og": "*",
     "drupal/restui": "*",
     "drupal/search_api": "*",
     "drupal/csv_serialization": "*",
     "drupal/diff": "*",
     "drupal/geolocation": "*"
+  },
+  "require-dev": {
+    "drupal/devel": "*",
+    "drupal/devel_php": "*",
+    "drupal/core-dev": "*"
   }
 }
