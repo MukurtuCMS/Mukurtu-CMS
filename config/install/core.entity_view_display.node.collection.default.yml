@@ -5,11 +5,6 @@ dependencies:
     - field.field.node.collection.field_description
     - field.field.node.collection.field_items_in_collection
     - field.field.node.collection.field_keywords
-    - field.field.node.collection.field_mukurtu_community
-    - field.field.node.collection.field_mukurtu_protocol_r_scope
-    - field.field.node.collection.field_mukurtu_protocol_read
-    - field.field.node.collection.field_mukurtu_protocol_w_scope
-    - field.field.node.collection.field_mukurtu_protocol_write
     - node.type.collection
   module:
     - text
