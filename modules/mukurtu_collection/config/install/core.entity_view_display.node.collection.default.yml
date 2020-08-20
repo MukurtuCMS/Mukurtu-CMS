@@ -20,21 +20,21 @@ bundle: collection
 mode: default
 content:
   field_description:
+    type: text_default
     weight: 0
+    region: content
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
-    region: content
   field_items_in_collection:
+    type: entity_reference_entity_view
     weight: 1
+    region: content
     label: above
     settings:
       link: true
       view_mode: default
     third_party_settings: {  }
-    type: entity_reference_entity_view
-    region: content
   field_keywords:
     weight: 2
     label: above
@@ -43,6 +43,11 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: content
+  links:
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   og_audience:
     label: above
     type: entity_reference_label
@@ -57,5 +62,4 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
-  links: true
   search_api_excerpt: true

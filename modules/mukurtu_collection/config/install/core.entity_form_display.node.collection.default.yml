@@ -27,25 +27,25 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_description:
+    type: text_textarea_with_summary
     weight: 5
+    region: content
     settings:
       rows: 9
       summary_rows: 3
       placeholder: ''
       show_summary: false
     third_party_settings: {  }
-    type: text_textarea_with_summary
-    region: content
   field_items_in_collection:
+    type: entity_reference_autocomplete
     weight: 6
+    region: content
     settings:
       match_operator: CONTAINS
       match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
   field_keywords:
     weight: 7
     settings:
