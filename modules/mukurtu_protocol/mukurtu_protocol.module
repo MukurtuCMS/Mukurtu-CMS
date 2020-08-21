@@ -410,7 +410,7 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
  * Implements hook_entity_type_build().
  */
 function mukurtu_protocol_entity_type_build(array &$entity_types) {
-  if (!$entity_types['media']->hasHandlerClass('query_access')) {
+  if (isset($entity_types['media']) && !$entity_types['media']->hasHandlerClass('query_access')) {
     //\Drupal::logger('mukurtu_protocol')->notice("added media");
     $entity_types['media']->setHandlerClass('query_access', \Drupal\entity\QueryAccess\QueryAccessHandler::class);
   }

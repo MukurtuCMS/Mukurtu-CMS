@@ -87,7 +87,7 @@ class MukurtuProtocolManager {
    */
   public function getProtocolFieldByOperation($operation) {
     switch ($operation) {
-      case 'edit':
+      case 'update':
       case 'delete':
         return [MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE, MUKURTU_PROTOCOL_FIELD_NAME_WRITE];
 
@@ -622,7 +622,7 @@ class MukurtuProtocolManager {
     if ($protocol->hasField('field_mukurtu_community')) {
       $field_value = $protocol->get('field_mukurtu_community')->getValue();
 
-      if(isset($field_value[0]['target_id'])) {
+      if (isset($field_value[0]['target_id'])) {
         $community_id = $field_value[0]['target_id'];
         return \Drupal::entityTypeManager()->getStorage('node')->load($community_id);
       }
@@ -630,4 +630,5 @@ class MukurtuProtocolManager {
 
     return NULL;
   }
+
 }
