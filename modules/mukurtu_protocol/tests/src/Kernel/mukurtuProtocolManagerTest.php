@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
 use Drupal\Core\Language\Language;
 use Drupal\field\Entity\FieldConfig;
@@ -39,6 +40,7 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
   }
 
   protected $site_admin;
+  protected $anonymous;
   protected $protocol_manager;
   protected $membership_manager;
   protected $entityTypeManager;
@@ -98,6 +100,9 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
     // Create user 1 who has special permissions.
     $this->site_admin = $this->drupalCreateUser();
 
+    // Get the anonymous user.
+    $this->anonymous = User::getAnonymousUser();
+
     // Create a node type to test with protocols.
     NodeType::create([
       'type' => 'page',
@@ -147,6 +152,13 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'delete' => FALSE,
     ], $user1PrivateNode, $user2);
 
+    // Anonymous should not be able to do anything.
+    $this->assertProtocolAccess([
+      'view' => FALSE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1PrivateNode, $this->anonymous);
+
     // Public item.
     $user1PublicNode = $this->drupalCreateNode([
       'type' => 'page',
@@ -169,6 +181,12 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'delete' => FALSE,
     ], $user1PublicNode, $user2);
 
+    // Anonymous should be able to read but not write.
+    $this->assertProtocolAccess([
+      'view' => TRUE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1PublicNode, $this->anonymous);
 
     // Communitiy for testing.
     $community1 = $this->drupalCreateNode([
@@ -245,6 +263,13 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'delete' => FALSE,
     ], $user1AnyNode, $user2);
 
+    // Anonymous should not be able to do anything.
+    $this->assertProtocolAccess([
+      'view' => FALSE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1AnyNode, $this->anonymous);
+
     // Testing "ALL". Node has two protocols, one that each user is a member of.
     $user1AllNode = $this->drupalCreateNode([
       'type' => 'page',
@@ -268,7 +293,14 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'delete' => FALSE,
     ], $user1AllNode, $user2);
 
-    // Testing "ALL" where user is in both protocols.
+    // Anonymous should not be able to do anything.
+    $this->assertProtocolAccess([
+      'view' => FALSE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1AllNode, $this->anonymous);
+
+    // Testing "ALL" where user 1 is in both protocols.
     $allNode2 = $this->drupalCreateNode([
       'type' => 'page',
       'uid' => $user1->id(),
@@ -289,6 +321,13 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'update' => FALSE,
       'delete' => FALSE,
     ], $allNode2, $user2);
+
+    // Anonymous should not be able to do anything.
+    $this->assertProtocolAccess([
+      'view' => FALSE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $allNode2, $this->anonymous);
   }
 
   /**
