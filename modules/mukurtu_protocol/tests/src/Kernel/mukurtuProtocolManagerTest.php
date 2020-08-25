@@ -6,12 +6,17 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\NodeInterface;
+use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\user\RoleInterface;
 use Drupal\Core\Language\Language;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Tests the MukurtuProtocolManager.
@@ -33,7 +38,10 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
     createContentType as drupalCreateContentType;
   }
 
+  protected $site_admin;
   protected $protocol_manager;
+  protected $membership_manager;
+  protected $entityTypeManager;
 
   /**
    * {@inheritdoc}
@@ -51,6 +59,8 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
     'og',
     'options',
     'entity_test',
+    'menu_ui',
+    'mukurtu_community',
     'mukurtu_protocol',
   ];
 
@@ -64,6 +74,7 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
     $this->installSchema('node', 'node_access');
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
+    $this->installEntitySchema('entity_test');
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     $this->installEntitySchema('media');
@@ -71,9 +82,13 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
     $this->installConfig('filter');
     $this->installConfig('node');
     $this->installConfig('og');
+    $this->installConfig('menu_ui');
+    $this->installConfig('mukurtu_community');
     $this->installConfig('mukurtu_protocol');
 
     $this->protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+    $this->membership_manager = \Drupal::service('mukurtu_protocol.membership_manager');
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     // Clear permissions for authenticated users.
     $this->config('user.role.' . RoleInterface::AUTHENTICATED_ID)
@@ -81,15 +96,17 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       ->save();
 
     // Create user 1 who has special permissions.
-    $this->drupalCreateUser();
+    $this->site_admin = $this->drupalCreateUser();
 
-    // Create a node type.
-    $this->drupalCreateContentType([
+    // Create a node type to test with protocols.
+    NodeType::create([
       'type' => 'page',
-      'name' => 'Basic page',
-      'display_submitted' => FALSE,
-    ]);
+      'name' => 'Basic Page',
+    ])->save();
+    Og::groupTypeManager()->addGroup('node', 'community');
+    Og::groupTypeManager()->addGroup('node', 'protocol');
 
+    mukurtu_protocol_create_protocol_field('node', 'page');
   }
 
   /**
@@ -152,41 +169,67 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'delete' => FALSE,
     ], $user1PublicNode, $user2);
 
-/*
+
+    // Communitiy for testing.
+    $community1 = $this->drupalCreateNode([
+      'type' => 'community',
+      'uid' => $this->site_admin->id(),
+    ]);
+
     // Protocols for testing.
-    $user1group1 = $this->drupalCreateNode([
+
+    // Protocol 1, User 1 is a member.
+    $values = [
+      'title' => $this->randomString(),
       'type' => 'protocol',
       'uid' => $user1->id(),
-    ]);
+      'field_mukurtu_community' => $community1->id(),
+    ];
+    $user1group1 = $this->entityTypeManager->getStorage('node')->create($values);
+    $user1group1->save();
+    $this->membership_manager->addMember($user1group1, $user1);
 
-    $user1group2 = $this->drupalCreateNode([
+    // Protocol 2, User 1 is a member.
+    $values = [
+      'title' => $this->randomString(),
       'type' => 'protocol',
       'uid' => $user1->id(),
-    ]);
+      'field_mukurtu_community' => $community1->id(),
+    ];
+    $user1group2 = $this->entityTypeManager->getStorage('node')->create($values);
+    $user1group2->save();
+    $this->membership_manager->addMember($user1group2, $user1);
 
-    $user2group1 = $this->drupalCreateNode([
+    // Protocol 3, User 2 is a member.
+    $values = [
+      'title' => $this->randomString(),
       'type' => 'protocol',
       'uid' => $user2->id(),
-    ]);
+      'field_mukurtu_community' => $community1->id(),
+    ];
+    $user2group1 = $this->entityTypeManager->getStorage('node')->create($values);
+    $user2group1->save();
+    $this->membership_manager->addMember($user2group1, $user2);
 
-    $user2group2 = $this->drupalCreateNode([
+    // Protocol 4, User 2 is a member.
+    $values = [
+      'title' => $this->randomString(),
       'type' => 'protocol',
       'uid' => $user2->id(),
-    ]);
+      'field_mukurtu_community' => $community1->id(),
+    ];
+    $user2group2 = $this->entityTypeManager->getStorage('node')->create($values);
+    $user2group2->save();
+    $this->membership_manager->addMember($user2group2, $user2);
 
     // Testing "ANY". Node has two protocols, one that each user is a member of.
     $user1AnyNode = $this->drupalCreateNode([
       'type' => 'page',
       'uid' => $user1->id(),
       MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_ANY,
-      //MUKURTU_PROTOCOL_FIELD_NAME_READ => [Language::LANGCODE_NOT_SPECIFIED => [['target_id' => $user1group1->id()]]],
-      //MUKURTU_PROTOCOL_FIELD_NAME_READ => [$user1group1->id(), $user2group1->id()],
+      MUKURTU_PROTOCOL_FIELD_NAME_READ => [$user1group1->id(), $user2group1->id()],
       MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_PERSONAL,
     ]);
-
-    $user1AnyNode->set(MUKURTU_PROTOCOL_FIELD_NAME_READ, [$user1group1->id(), $user2group1->id()]);
-    $user1AnyNode->save();
-
 
     // User 1 should have all access.
     $this->assertProtocolAccess([
@@ -202,16 +245,15 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'delete' => FALSE,
     ], $user1AnyNode, $user2);
 
-
     // Testing "ALL". Node has two protocols, one that each user is a member of.
     $user1AllNode = $this->drupalCreateNode([
       'type' => 'page',
       'uid' => $user1->id(),
       MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_ALL,
-     // MUKURTU_PROTOCOL_FIELD_NAME_READ => [$user1group1->id(), $user2group1->id()],
+      MUKURTU_PROTOCOL_FIELD_NAME_READ => [$user1group1->id(), $user2group1->id()],
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_ALL,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE => [$user1group1->id(), $user2group1->id()],
     ]);
-    $user1AllNode->set(MUKURTU_PROTOCOL_FIELD_NAME_READ, [$user1group1->id(), $user2group1->id()]);
-    $user1AllNode->save();
 
     // Neither user should have access, they are only members of one protocol.
     $this->assertProtocolAccess([
@@ -224,7 +266,29 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'view' => FALSE,
       'update' => FALSE,
       'delete' => FALSE,
-    ], $user1AllNode, $user2); */
+    ], $user1AllNode, $user2);
+
+    // Testing "ALL" where user is in both protocols.
+    $allNode2 = $this->drupalCreateNode([
+      'type' => 'page',
+      'uid' => $user1->id(),
+      MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_ALL,
+      MUKURTU_PROTOCOL_FIELD_NAME_READ => [$user1group1->id(), $user1group2->id()],
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_ALL,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE => [$user1group1->id(), $user1group2->id()],
+    ]);
+
+    $this->assertProtocolAccess([
+      'view' => TRUE,
+      'update' => TRUE,
+      'delete' => TRUE,
+    ], $allNode2, $user1);
+
+    $this->assertProtocolAccess([
+      'view' => FALSE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $allNode2, $user2);
   }
 
   /**
@@ -277,4 +341,5 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       ]
     );
   }
+
 }

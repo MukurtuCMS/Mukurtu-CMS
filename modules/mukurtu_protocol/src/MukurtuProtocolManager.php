@@ -597,19 +597,26 @@ class MukurtuProtocolManager {
 
     // Media. This errors out if we don't include the bundle,
     // otherwise we'd lump it together in a loop with nodes.
-    foreach ($this->protocolFields as $protocolField) {
-      $storage = \Drupal::entityTypeManager()->getStorage('media');
-      $query = \Drupal::entityQuery('media')
+    $moduleHandler = \Drupal::service('module_handler');
+    // We are checking for the existance of the mukurtu_digital_heritage module
+    // purely because this crashes the unit/kernel tests if media isn't fully
+    // bootstrapped. Longterm this should be set to something that actually makes
+    // sense.
+    if ($moduleHandler->moduleExists('mukurtu_digital_heritage')) {
+      foreach ($this->protocolFields as $protocolField) {
+        $storage = \Drupal::entityTypeManager()->getStorage('media');
+        $query = \Drupal::entityQuery('media')
         ->exists('bundle')
         ->condition($protocolField['protocol'], $protocol->id());
-      $ids = $query->execute();
+        $ids = $query->execute();
 
-      if (!empty($ids)) {
-        Cache::invalidateTags(['library_info', 'media_list']);
+        if (!empty($ids)) {
+          Cache::invalidateTags(['library_info', 'media_list']);
 
-        $entities = $storage->loadMultiple($ids);
-        foreach ($entities as $entity) {
-          Cache::invalidateTags($entity->getCacheTagsToInvalidate());
+          $entities = $storage->loadMultiple($ids);
+          foreach ($entities as $entity) {
+            Cache::invalidateTags($entity->getCacheTagsToInvalidate());
+          }
         }
       }
     }

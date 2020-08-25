@@ -39,6 +39,10 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
     return;
   }
 
+  // What fields does this entity/bundle already have?
+  $entityFieldManager = \Drupal::service('entity_field.manager');
+  $fields = $entityFieldManager->getFieldDefinitions($entity_type, $bundle_type);
+
   // Read Access Protocol Field.
   $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_READ;
   $settings['field_config']['label'] = "Mukurtu Protocol - View Access";
@@ -46,8 +50,9 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
   $settings['field_config']['handler'] = 'default';
   $settings['field_config']['handler_settings']['target_bundles'] = ['protocol'];
   $settings['field_storage_config']['target_type'] = "node";
-
-  Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type, $bundle_type, $settings);
+  if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_READ])) {
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type, $bundle_type, $settings);
+  }
 
   // OG doesn't actually use the field settings we give it.
   // We will set the protocol fields to target protocols only here.
@@ -58,13 +63,16 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
   $field_config->setSettings($settings['field_config']);
   $field_config->save();
 
-  $field = FieldConfig::create([
-    'field_name' => MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE,
-    'entity_type' => $entity_type,
-    'bundle' => $bundle_type,
-    'label' => 'Mukurtu Protocol - View Scope',
-  ]);
-  $field->save();
+  // Read Access Protocol Scope Field.
+  if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE])) {
+    $field = FieldConfig::create([
+      'field_name' => MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle_type,
+      'label' => 'Mukurtu Protocol - View Scope',
+    ]);
+    $field->save();
+  }
 
   // Write Access Protocol Field.
   $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_WRITE;
@@ -73,8 +81,9 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
   $settings['field_config']['handler'] = 'default';
   $settings['field_config']['handler_settings']['target_bundles'] = ['protocol'];
   $settings['field_storage_config']['target_type'] = "node";
-
-  Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type, $bundle_type, $settings);
+  if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_WRITE])) {
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type, $bundle_type, $settings);
+  }
 
   // OG doesn't actually use the field settings we give it.
   // We will set the protocol fields to target protocols only here.
@@ -85,13 +94,16 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
   $field_config->setSettings($settings['field_config']);
   $field_config->save();
 
-  $field = FieldConfig::create([
-    'field_name' => MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE,
-    'entity_type' => $entity_type,
-    'bundle' => $bundle_type,
-    'label' => 'Mukurtu Protocol - Update Scope',
-  ]);
-  $field->save();
+  // Write Access Protocol Scope Field.
+  if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE])) {
+    $field = FieldConfig::create([
+      'field_name' => MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle_type,
+      'label' => 'Mukurtu Protocol - Update Scope',
+    ]);
+    $field->save();
+  }
 }
 
 /**
