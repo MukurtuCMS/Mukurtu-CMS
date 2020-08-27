@@ -56,6 +56,7 @@ dependencies:
   - restui
   - geolocation
   - search_api
+  - search_api_db
   - mukurtu_core
   - mukurtu_community
   - mukurtu_protocol

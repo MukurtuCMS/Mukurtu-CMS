@@ -1,0 +1,169 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - taxonomy
+    - search_api
+  config:
+    - field.storage.node.body
+    - field.storage.node.field_category
+    - field.storage.node.field_description
+    - field.storage.node.field_keywords
+    - search_api.server.mukurtu_database_server
+id: mukurtu_default_content_index
+name: 'Mukurtu Default content index'
+description: 'Default Mukurtu content index'
+read_only: false
+field_settings:
+  body:
+    label: Body
+    datasource_id: 'entity:node'
+    property_path: body
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.body
+  field_description:
+    label: Description
+    datasource_id: 'entity:node'
+    property_path: field_description
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_description
+  name:
+    label: 'Category » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_category:entity:name'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_category
+      module:
+        - taxonomy
+  name_1:
+    label: 'Keywords » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_keywords:entity:name'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_keywords
+      module:
+        - taxonomy
+  node_grants:
+    label: 'Node access information'
+    property_path: search_api_node_grants
+    type: string
+    indexed_locked: true
+    type_locked: true
+    hidden: true
+  status:
+    label: Published
+    datasource_id: 'entity:node'
+    property_path: status
+    type: boolean
+    indexed_locked: true
+    type_locked: true
+    dependencies:
+      module:
+        - node
+  title:
+    label: Title
+    datasource_id: 'entity:node'
+    property_path: title
+    type: text
+    boost: !!float 8
+    dependencies:
+      module:
+        - node
+  uid:
+    label: uid
+    datasource_id: 'entity:node'
+    property_path: uid
+    type: integer
+    indexed_locked: true
+    type_locked: true
+    dependencies:
+      module:
+        - node
+datasource_settings:
+  'entity:node':
+    bundles:
+      default: true
+      selected: {  }
+    languages:
+      default: true
+      selected: {  }
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  content_access:
+    weights:
+      preprocess_query: -30
+  entity_status: {  }
+  html_filter:
+    all_fields: true
+    fields:
+      - body
+      - field_description
+      - name
+      - name_1
+      - title
+    title: true
+    alt: true
+    tags:
+      b: 2
+      em: 1
+      h1: 5
+      h2: 3
+      h3: 2
+      strong: 2
+      u: 1
+    weights:
+      preprocess_index: -15
+      preprocess_query: -15
+  ignorecase:
+    all_fields: true
+    fields:
+      - body
+      - field_description
+      - name
+      - name_1
+      - title
+    weights:
+      preprocess_index: -20
+      preprocess_query: -20
+  language_with_fallback: {  }
+  rendered_item: {  }
+  tokenizer:
+    all_fields: true
+    fields:
+      - body
+      - field_description
+      - title
+    spaces: ''
+    overlap_cjk: 1
+    minimum_word_size: '3'
+    weights:
+      preprocess_index: -6
+      preprocess_query: -6
+  transliteration:
+    all_fields: true
+    fields:
+      - body
+      - field_description
+      - name
+      - name_1
+      - title
+    weights:
+      preprocess_index: -20
+      preprocess_query: -20
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  index_directly: true
+  cron_limit: 50
+server: mukurtu_database_server
