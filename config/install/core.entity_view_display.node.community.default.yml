@@ -1,0 +1,49 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.community.field_child_communities
+    - field.field.node.community.field_description
+    - field.field.node.community.field_featured_content
+    - field.field.node.community.field_parent_community
+    - node.type.community
+  module:
+    - og
+    - text
+    - user
+id: node.community.default
+targetEntityType: node
+bundle: community
+mode: default
+content:
+  field_description:
+    weight: 0
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+  field_featured_content:
+    weight: 1
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  links:
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  og_group:
+    weight: 2
+    type: og_group_subscribe
+    region: content
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_child_communities: true
+  field_parent_community: true
+  search_api_excerpt: true
