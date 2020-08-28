@@ -21,11 +21,23 @@
     "drupal/search_api": "*",
     "drupal/csv_serialization": "*",
     "drupal/diff": "*",
-    "drupal/geolocation": "*"
+    "drupal/geolocation": "*",
+    "drupal/flag": "*",
+    "drupal/message": "*",
+    "drupal/message_ui": "*",
+    "drupal/message_digest": "*",
+    "drupal/message_digest_ui": "*",
+    "drupal/message_notify": "*",
+    "drupal/message_notify_ui": "*",
+    "drupal/message_subscribe": "*",
+    "drupal/message_subscribe_email": "*",
+    "drupal/message_subscribe_ui": "*"
   },
   "require-dev": {
     "drupal/devel": "*",
     "drupal/devel_php": "*",
-    "drupal/core-dev": "*"
+    "drupal/core-dev": "*",
+    "drupal/coder": "^8.3",
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0"
   }
 }
