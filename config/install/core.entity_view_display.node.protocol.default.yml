@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.protocol.body
+    - field.field.node.protocol.field_membership_handler
+    - field.field.node.protocol.field_mukurtu_community
+    - node.type.protocol
+  module:
+    - user
+id: node.protocol.default
+targetEntityType: node
+bundle: protocol
+mode: default
+content:
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  og_audience:
+    label: above
+    type: entity_reference_label
+    settings:
+      link: true
+    weight: 101
+    third_party_settings: {  }
+    region: content
+hidden:
+  body: true
+  field_membership_handler: true
+  field_mukurtu_community: true

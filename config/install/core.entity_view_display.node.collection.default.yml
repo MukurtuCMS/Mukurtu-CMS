@@ -38,8 +38,17 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: content
-  links:
+  field_related_content:
     weight: 3
+    label: above
+    settings:
+      link: true
+      view_mode: default
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  links:
+    weight: 4
     region: content
     settings: {  }
     third_party_settings: {  }
