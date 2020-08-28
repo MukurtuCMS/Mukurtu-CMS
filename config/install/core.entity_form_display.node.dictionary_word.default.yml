@@ -1,0 +1,127 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.dictionary_word.field_keywords
+    - field.field.node.dictionary_word.field_media_assets
+    - node.type.dictionary_word
+  module:
+    - mukurtu_protocol
+    - path
+id: node.dictionary_word.default
+targetEntityType: node
+bundle: dictionary_word
+mode: default
+content:
+  created:
+    type: datetime_timestamp
+    weight: 8
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_keywords:
+    weight: 2
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_media_assets:
+    weight: 1
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_mukurtu_protocol_r_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_read:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_w_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: 5
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_write:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: 6
+    settings: {  }
+    third_party_settings: {  }
+  name:
+    weight: -8
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  og_audience:
+    type: og_complex
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      match_limit: 10
+      placeholder: ''
+    weight: 122
+    third_party_settings: {  }
+    region: content
+  path:
+    type: path
+    weight: 11
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  promote:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 9
+    region: content
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 12
+    region: content
+    third_party_settings: {  }
+  sticky:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 10
+    region: content
+    third_party_settings: {  }
+  title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  uid:
+    type: entity_reference_autocomplete
+    weight: 7
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+      match_limit: 10
+    region: content
+    third_party_settings: {  }
+hidden:
+  field_mukurtu_community: true
