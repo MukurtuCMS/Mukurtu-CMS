@@ -53,6 +53,7 @@ dependencies:
   - media_library
   - og
   - og_ui
+  - paragraphs
   - restui
   - geolocation
   - search_api

@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_language
+    - node.type.dictionary_word
+    - taxonomy.vocabulary.language
+id: node.dictionary_word.field_language
+field_name: field_language
+entity_type: node
+bundle: dictionary_word
+label: Language
+description: 'A dictionary word must be associated with a single language on the site.'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      language: language
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

@@ -31,7 +31,9 @@
     "drupal/message_notify_ui": "*",
     "drupal/message_subscribe": "*",
     "drupal/message_subscribe_email": "*",
-    "drupal/message_subscribe_ui": "*"
+    "drupal/message_subscribe_ui": "*",
+    "drupal/entity_reference_revisions": "*",
+    "drupal/paragraphs": "*"
   },
   "require-dev": {
     "drupal/devel": "*",

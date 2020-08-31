@@ -1,0 +1,89 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.dictionary_word_entry.field_alternate_spelling
+    - field.field.paragraph.dictionary_word_entry.field_definition
+    - field.field.paragraph.dictionary_word_entry.field_part_of_speech
+    - field.field.paragraph.dictionary_word_entry.field_pronunciation
+    - field.field.paragraph.dictionary_word_entry.field_recording
+    - field.field.paragraph.dictionary_word_entry.field_sample_sentences
+    - field.field.paragraph.dictionary_word_entry.field_source
+    - field.field.paragraph.dictionary_word_entry.field_translation
+    - paragraphs.paragraphs_type.dictionary_word_entry
+  module:
+    - media_library
+    - text
+id: paragraph.dictionary_word_entry.default
+targetEntityType: paragraph
+bundle: dictionary_word_entry
+mode: default
+content:
+  field_alternate_spelling:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_definition:
+    weight: 6
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_part_of_speech:
+    weight: 5
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_pronunciation:
+    weight: 3
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textfield
+    region: content
+  field_recording:
+    type: media_library_widget
+    weight: 4
+    settings:
+      media_types: {  }
+    third_party_settings: {  }
+    region: content
+  field_sample_sentences:
+    weight: 7
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_source:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_translation:
+    weight: 2
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  created: true
+  status: true
