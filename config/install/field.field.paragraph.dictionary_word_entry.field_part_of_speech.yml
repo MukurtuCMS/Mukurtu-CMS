@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_part_of_speech
+    - paragraphs.paragraphs_type.dictionary_word_entry
+    - taxonomy.vocabulary.part_of_speech
+id: paragraph.dictionary_word_entry.field_part_of_speech
+field_name: field_part_of_speech
+entity_type: paragraph
+bundle: dictionary_word_entry
+label: 'Part of Speech'
+description: 'Choose one or more parts of speech that best matches your word entry. This field can be used for content browsing.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      part_of_speech: part_of_speech
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

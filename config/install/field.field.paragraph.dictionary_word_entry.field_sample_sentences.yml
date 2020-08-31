@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_sample_sentences
+    - paragraphs.paragraphs_type.dictionary_word_entry
+id: paragraph.dictionary_word_entry.field_sample_sentences
+field_name: field_sample_sentences
+entity_type: paragraph
+bundle: dictionary_word_entry
+label: 'Sample Sentences'
+description: 'One or more example sentences that demonstrate use of the word entry.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long
