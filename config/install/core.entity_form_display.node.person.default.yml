@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.person.field_related_content
     - node.type.person
   module:
+    - media_library
     - mukurtu_protocol
     - path
 id: node.person.default
@@ -33,12 +34,9 @@ content:
   field_media_assets:
     weight: 5
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      media_types: {  }
     third_party_settings: {  }
-    type: entity_reference_autocomplete
+    type: media_library_widget
     region: content
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget

@@ -28,6 +28,7 @@ dependencies:
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
+    - media_library
     - mukurtu_protocol
     - path
     - text
@@ -137,14 +138,16 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_media_assets:
-    type: entity_reference_autocomplete
+    type: media_library_widget
     weight: 5
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      media_types:
+        - audio
+        - document
+        - image
+        - remote_video
+        - video
     third_party_settings: {  }
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
