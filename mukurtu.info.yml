@@ -49,6 +49,7 @@ install:
   - diff
 
 dependencies:
+  - layout_builder
   - media
   - media_library
   - og
