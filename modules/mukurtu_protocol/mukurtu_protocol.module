@@ -436,6 +436,14 @@ function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $fo
   // list when the any/all options are selected on the scope.
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   foreach ($protocol_manager->protocolFields as $protocol_field) {
+    // Media Library.
+    if (isset($form['media'][0]['fields'][$protocol_field['protocol']]) && isset($form['media'][0]['fields'][$protocol_field['scope']])) {
+      $form['media'][0]['fields'][$protocol_field['protocol']]['#states'] = [
+        'visible' => [':input[name="media[0][fields][' . $protocol_field['scope'] . '][0][value]' . '"]' => [['value' => 'any'], ['value' => 'all']]],
+      ];
+    }
+
+    // Standard entity forms.
     if (isset($form[$protocol_field['protocol']]) && isset($form[$protocol_field['scope']])) {
       $form[$protocol_field['protocol']]['#states'] = [
         'visible' => [':input[name="' . $protocol_field['scope'] . '[0][value]' . '"]' => [['value' => 'any'], ['value' => 'all']]],
