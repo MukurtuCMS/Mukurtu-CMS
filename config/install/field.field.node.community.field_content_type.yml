@@ -1,0 +1,19 @@
+uuid: 22b1b234-50c5-4d76-a3ec-77b00799d086
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_content_type
+    - node.type.community
+id: node.community.field_content_type
+field_name: field_content_type
+entity_type: node
+bundle: community
+label: 'Content Type'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

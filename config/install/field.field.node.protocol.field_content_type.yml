@@ -1,0 +1,19 @@
+uuid: e6273b41-3cd2-4672-aca3-a88ca6b332d0
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_content_type
+    - node.type.protocol
+id: node.protocol.field_content_type
+field_name: field_content_type
+entity_type: node
+bundle: protocol
+label: 'Content Type'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

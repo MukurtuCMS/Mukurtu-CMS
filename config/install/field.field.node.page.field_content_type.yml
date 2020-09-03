@@ -1,0 +1,19 @@
+uuid: e1d85d1f-9322-45a3-a899-14605f7eb558
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_content_type
+    - node.type.page
+id: node.page.field_content_type
+field_name: field_content_type
+entity_type: node
+bundle: page
+label: 'Content Type'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

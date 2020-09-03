@@ -1,0 +1,19 @@
+uuid: b8a0e9a5-e29e-4b4d-8b52-a43afa8d6ce5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_content_type
+    - node.type.person
+id: node.person.field_content_type
+field_name: field_content_type
+entity_type: node
+bundle: person
+label: 'Content Type'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
