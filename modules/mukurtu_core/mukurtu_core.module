@@ -23,9 +23,10 @@ function mukurtu_core_entity_bundle_create($entity_type_id, $bundle) {
  */
 function mukurtu_core_entity_presave(EntityInterface $entity) {
   // Update content type field.
-  if ($entity->type == 'node' && $entity->hasField('field_content_type')) {
-    dpm($entity->type->entity->label());
-    $entity->set('field_content_type', $entity->type->entity->label());
+  if ($entity instanceof NodeInterface) {
+    if ($entity->hasField('field_content_type')) {
+      $entity->set('field_content_type', $entity->type->entity->label());
+    }
   }
 }
 

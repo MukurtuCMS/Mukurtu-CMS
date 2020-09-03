@@ -12,6 +12,18 @@
     {
       "type": "composer",
       "url": "https://asset-packagist.org"
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "mukurtu/masonry",
+        "version": "4.2.2",
+        "dist": {
+          "url": "https://github.com/desandro/masonry/archive/v4.2.2.zip",
+          "type": "zip"
+        },
+        "type": "drupal-library"
+      }
     }
   ],
   "require": {
@@ -20,7 +32,7 @@
     "drupal/restui": "*",
     "drupal/search_api": "*",
     "drupal/csv_serialization": "*",
-    "drupal/masonry": "*",
+    "mukurtu/masonry": "*",
     "drupal/embed": "*",
     "drupal/entity_embed": "*",
     "drupal/entity_browser": "*",
