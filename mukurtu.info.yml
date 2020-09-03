@@ -54,6 +54,8 @@ dependencies:
   - entity_embed
   - entity_browser
   - layout_builder
+  - flag
+  - message
   - media
   - media_library
   - og
