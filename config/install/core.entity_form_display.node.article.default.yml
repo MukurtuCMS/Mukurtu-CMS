@@ -11,6 +11,7 @@ dependencies:
   module:
     - comment
     - image
+    - mukurtu_protocol
     - path
     - text
 id: node.article.default
@@ -47,6 +48,30 @@ content:
     settings:
       progress_indicator: throbber
       preview_image_style: thumbnail
+    third_party_settings: {  }
+  field_mukurtu_protocol_r_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: -6
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_read:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: -5
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_w_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: -4
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_write:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: -3
+    settings: {  }
     third_party_settings: {  }
   field_tags:
     type: entity_reference_autocomplete_tags

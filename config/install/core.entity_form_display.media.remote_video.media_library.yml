@@ -13,6 +13,10 @@ content: {  }
 hidden:
   created: true
   field_media_oembed_video: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
   name: true
   path: true
   status: true

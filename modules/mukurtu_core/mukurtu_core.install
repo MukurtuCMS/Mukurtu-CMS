@@ -5,9 +5,21 @@
  * Install, update and uninstall functions for the mukurtu_core module.
  */
 
+ use Drupal\field\Entity\FieldStorageConfig;
+
 /**
  * Implements hook_install().
  */
 function mukurtu_core_install() {
+  // Create the content type field on all pre-existing node types.
+  FieldStorageConfig::create([
+    'field_name' => 'field_content_type',
+    'entity_type' => $entity_type,
+    'type' => 'string',
+    'cardinality' => 1,
+  ])->save();
 
+  foreach (node_type_get_names() as $bundle => $label) {
+    mukurtu_core_create_content_type_field('node', $bundle);
+  }
 }

@@ -4,3 +4,44 @@
  * @file
  * Provide Mukurtu Core.
  */
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_entity_bundle_create().
+ */
+function mukurtu_core_entity_bundle_create($entity_type_id, $bundle) {
+  // For any new node that is defined, add the content type field.
+  if ($entity_type_id == 'node') {
+    mukurtu_core_create_content_type_field($entity_type_id, $bundle);
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function mukurtu_core_entity_presave(EntityInterface $entity) {
+  // Update content type field.
+  if ($entity->type == 'node' && $entity->hasField('field_content_type')) {
+    dpm($entity->type->entity->label());
+    $entity->set('field_content_type', $entity->type->entity->label());
+  }
+}
+
+/**
+ * Create the content type field.
+ */
+function mukurtu_core_create_content_type_field($entity_type, $bundle) {
+  $entityFieldManager = \Drupal::service('entity_field.manager');
+  $fields = $entityFieldManager->getFieldDefinitions($entity_type, $bundle);
+
+  if (!isset($fields['field_content_type'])) {
+    FieldConfig::create([
+      'field_name' => 'field_content_type',
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => 'Content Type',
+    ])->save();
+  }
+}

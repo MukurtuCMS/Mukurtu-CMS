@@ -3,10 +3,6 @@ status: true
 dependencies:
   config:
     - field.field.media.video.field_media_video_file
-    - field.field.media.video.field_mukurtu_protocol_r_scope
-    - field.field.media.video.field_mukurtu_protocol_read
-    - field.field.media.video.field_mukurtu_protocol_w_scope
-    - field.field.media.video.field_mukurtu_protocol_write
     - media.type.video
   module:
     - file

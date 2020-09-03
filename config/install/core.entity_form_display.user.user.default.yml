@@ -1,0 +1,51 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.user.user.field_display_name
+    - field.field.user.user.message_digest
+    - field.field.user.user.message_subscribe_email
+    - field.field.user.user.user_picture
+  module:
+    - user
+id: user.user.default
+targetEntityType: user
+bundle: user
+mode: default
+content:
+  account:
+    weight: -10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  contact:
+    weight: 5
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  language:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  message_digest:
+    type: options_select
+    settings: {  }
+    weight: 26
+    third_party_settings: {  }
+    region: content
+  message_subscribe_email:
+    type: boolean_checkbox
+    weight: 25
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    region: content
+  timezone:
+    weight: 6
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden:
+  field_display_name: true
+  user_picture: true

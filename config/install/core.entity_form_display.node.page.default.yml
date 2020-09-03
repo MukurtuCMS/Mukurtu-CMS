@@ -29,6 +29,35 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_mukurtu_protocol_r_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: -6
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_read:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: -5
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_w_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: -4
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_write:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: -3
+    settings: {  }
+    third_party_settings: {  }
+  name:
+    weight: -8
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   path:
     type: path
     weight: 30

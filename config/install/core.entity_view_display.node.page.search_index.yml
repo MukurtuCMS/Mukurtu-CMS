@@ -2,27 +2,23 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.teaser
+    - core.entity_view_mode.node.search_index
     - field.field.node.page.body
     - node.type.page
   module:
     - text
     - user
-id: node.page.teaser
+id: node.page.search_index
 targetEntityType: node
 bundle: page
-mode: teaser
+mode: search_index
 content:
   body:
-    label: hidden
-    type: text_summary_or_trimmed
-    weight: 100
-    region: content
-    settings:
-      trim_length: 600
+    type: text_default
+    weight: 0
+    settings: {  }
     third_party_settings: {  }
-  links:
-    weight: 101
+    label: hidden
     region: content
 hidden:
   field_mukurtu_community: true
@@ -30,4 +26,5 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  links: true
   search_api_excerpt: true

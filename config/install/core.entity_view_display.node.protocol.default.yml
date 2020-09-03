@@ -4,7 +4,6 @@ dependencies:
   config:
     - field.field.node.protocol.body
     - field.field.node.protocol.field_membership_handler
-    - field.field.node.protocol.field_mukurtu_community
     - node.type.protocol
   module:
     - user

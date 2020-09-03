@@ -5,6 +5,7 @@ dependencies:
     - field.field.node.collection.field_description
     - field.field.node.collection.field_items_in_collection
     - field.field.node.collection.field_keywords
+    - field.field.node.collection.field_related_content
     - node.type.collection
   module:
     - mukurtu_protocol

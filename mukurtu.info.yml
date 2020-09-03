@@ -49,6 +49,10 @@ install:
   - diff
 
 dependencies:
+  - content_browser
+  - embed
+  - entity_embed
+  - entity_browser
   - layout_builder
   - media
   - media_library

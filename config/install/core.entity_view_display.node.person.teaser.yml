@@ -3,31 +3,29 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
-    - field.field.node.page.body
-    - node.type.page
+    - field.field.node.person.field_keywords
+    - field.field.node.person.field_media_assets
+    - field.field.node.person.field_related_content
+    - node.type.person
   module:
-    - text
     - user
-id: node.page.teaser
+id: node.person.teaser
 targetEntityType: node
-bundle: page
+bundle: person
 mode: teaser
 content:
-  body:
-    label: hidden
-    type: text_summary_or_trimmed
-    weight: 100
-    region: content
-    settings:
-      trim_length: 600
-    third_party_settings: {  }
   links:
-    weight: 101
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
     region: content
 hidden:
+  field_keywords: true
+  field_media_assets: true
   field_mukurtu_community: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_related_content: true
   search_api_excerpt: true

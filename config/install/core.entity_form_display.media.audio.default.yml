@@ -3,10 +3,6 @@ status: true
 dependencies:
   config:
     - field.field.media.audio.field_media_audio_file
-    - field.field.media.audio.field_mukurtu_protocol_r_scope
-    - field.field.media.audio.field_mukurtu_protocol_read
-    - field.field.media.audio.field_mukurtu_protocol_w_scope
-    - field.field.media.audio.field_mukurtu_protocol_write
     - media.type.audio
   module:
     - file
@@ -33,35 +29,35 @@ content:
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 2
+    weight: -6
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: 3
+    weight: -5
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 4
+    weight: -4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: 5
+    weight: -3
     settings: {  }
     third_party_settings: {  }
   name:
-    type: string_textfield
-    weight: 0
-    region: content
+    weight: -8
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+    type: string_textfield
+    region: content
   og_audience:
     type: og_complex
     settings:

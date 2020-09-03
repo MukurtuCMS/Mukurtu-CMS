@@ -25,5 +25,10 @@ content:
 hidden:
   created: true
   field_media_image: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
   name: true
+  search_api_excerpt: true
   uid: true
