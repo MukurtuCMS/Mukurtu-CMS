@@ -2,81 +2,76 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.dictionary_word.field_content_type
-    - field.field.node.dictionary_word.field_keywords
-    - field.field.node.dictionary_word.field_language
-    - field.field.node.dictionary_word.field_media_assets
-    - field.field.node.dictionary_word.field_related_content
-    - field.field.node.dictionary_word.field_word_entry
-    - node.type.dictionary_word
+    - core.entity_view_mode.node.search_index
+    - field.field.node.collection.field_content_type
+    - field.field.node.collection.field_description
+    - field.field.node.collection.field_items_in_collection
+    - field.field.node.collection.field_keywords
+    - field.field.node.collection.field_related_content
+    - node.type.collection
   module:
-    - entity_reference_revisions
+    - layout_builder
+    - text
     - user
-id: node.dictionary_word.default
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.collection.search_index
 targetEntityType: node
-bundle: dictionary_word
-mode: default
+bundle: collection
+mode: search_index
 content:
+  field_description:
+    type: text_default
+    weight: 0
+    region: content
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+  field_items_in_collection:
+    type: entity_reference_entity_view
+    weight: 1
+    region: content
+    label: above
+    settings:
+      link: true
+      view_mode: default
+    third_party_settings: {  }
   field_keywords:
+    weight: 2
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_related_content:
     weight: 3
     label: above
     settings:
       link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: content
-  field_language:
-    weight: 1
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: content
-  field_media_assets:
-    weight: 0
-    label: above
-    settings:
-      link: true
       view_mode: default
     third_party_settings: {  }
     type: entity_reference_entity_view
-    region: content
-  field_related_content:
-    weight: 4
-    label: above
-    settings:
-      link: true
-      view_mode: default
-    third_party_settings: {  }
-    type: entity_reference_entity_view
-    region: content
-  field_word_entry:
-    type: entity_reference_revisions_entity_view
-    weight: 2
-    label: above
-    settings:
-      view_mode: default
-      link: ''
-    third_party_settings: {  }
     region: content
   flag_email_node:
-    weight: 6
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
   flag_email_og:
-    weight: 7
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
   flag_favorite:
-    weight: 8
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
   flag_subscribe_node:
-    weight: 9
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -86,7 +81,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   links:
-    weight: 5
+    weight: 4
     region: content
     settings: {  }
     third_party_settings: {  }

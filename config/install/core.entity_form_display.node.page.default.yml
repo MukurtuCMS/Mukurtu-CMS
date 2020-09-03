@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.field.node.page.body
+    - field.field.node.page.field_content_type
     - node.type.page
   module:
     - mukurtu_protocol
@@ -104,4 +105,5 @@ content:
       placeholder: ''
     third_party_settings: {  }
 hidden:
+  field_content_type: true
   field_mukurtu_community: true

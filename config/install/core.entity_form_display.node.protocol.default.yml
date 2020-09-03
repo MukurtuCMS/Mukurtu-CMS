@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.field.node.protocol.body
+    - field.field.node.protocol.field_content_type
     - field.field.node.protocol.field_membership_handler
     - node.type.protocol
   module:
@@ -104,5 +105,6 @@ content:
     third_party_settings: {  }
 hidden:
   body: true
+  field_content_type: true
   field_membership_handler: true
   field_mukurtu_community: true

@@ -3,15 +3,37 @@ status: true
 dependencies:
   config:
     - field.field.node.protocol.body
+    - field.field.node.protocol.field_content_type
     - field.field.node.protocol.field_membership_handler
     - node.type.protocol
   module:
+    - og
     - user
 id: node.protocol.default
 targetEntityType: node
 bundle: protocol
 mode: default
 content:
+  flag_email_node:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_email_og:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_node:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_og:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   links:
     weight: 100
     settings: {  }
@@ -25,7 +47,16 @@ content:
     weight: 101
     third_party_settings: {  }
     region: content
+  og_group:
+    weight: 0
+    type: og_group_subscribe
+    region: content
+    label: above
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   body: true
+  field_content_type: true
   field_membership_handler: true
   field_mukurtu_community: true
+  search_api_excerpt: true

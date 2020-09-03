@@ -2,11 +2,15 @@ langcode: en
 status: true
 dependencies:
   config:
+    - entity_browser.browser.browse_content
+    - field.field.node.person.field_content_type
     - field.field.node.person.field_keywords
     - field.field.node.person.field_media_assets
     - field.field.node.person.field_related_content
     - node.type.person
   module:
+    - entity_browser
+    - media_library
     - mukurtu_protocol
     - path
 id: node.person.default
@@ -33,12 +37,9 @@ content:
   field_media_assets:
     weight: 5
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      media_types: {  }
     third_party_settings: {  }
-    type: entity_reference_autocomplete
+    type: media_library_widget
     region: content
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
@@ -67,12 +68,17 @@ content:
   field_related_content:
     weight: 7
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_display_settings:
+        view_mode: content_browser
+      field_widget_edit: true
+      field_widget_remove: true
+      selection_mode: selection_append
+      field_widget_replace: false
+      open: false
     third_party_settings: {  }
-    type: entity_reference_autocomplete
+    type: entity_browser_entity_reference
     region: content
   name:
     weight: -8
@@ -135,4 +141,5 @@ content:
     region: content
     third_party_settings: {  }
 hidden:
+  field_content_type: true
   field_mukurtu_community: true

@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.field.node.digital_heritage.field_category
+    - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
@@ -29,7 +30,333 @@ dependencies:
 third_party_settings:
   layout_builder:
     allow_custom: false
-    enabled: false
+    enabled: true
+    sections:
+      -
+        layout_id: layout_twocol_section
+        layout_settings:
+          label: 'Side by Side'
+          column_widths: 75-25
+        components:
+          361e55b7-02b6-4db8-94b3-3bbf74c4e3c6:
+            uuid: 361e55b7-02b6-4db8-94b3-3bbf74c4e3c6
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_description'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: text_default
+            additional: {  }
+            weight: 4
+          de6fabcc-9f8e-4df9-bfe8-8b71a9f5a7ca:
+            uuid: de6fabcc-9f8e-4df9-bfe8-8b71a9f5a7ca
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_creator'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 11
+          2a296063-2190-4092-860b-7539783c100d:
+            uuid: 2a296063-2190-4092-860b-7539783c100d
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_related_content'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                  view_mode: default
+                third_party_settings: {  }
+                type: entity_reference_entity_view
+            additional: {  }
+            weight: 9
+          44b46551-8d88-4cd5-b930-53eae3a49ead:
+            uuid: 44b46551-8d88-4cd5-b930-53eae3a49ead
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_rights'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: basic_string
+            additional: {  }
+            weight: 17
+          fa502182-3b6f-4fb9-a729-95d6d1040587:
+            uuid: fa502182-3b6f-4fb9-a729-95d6d1040587
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_keywords'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 12
+          61334943-4b96-48b2-b782-ebfa81cdb497:
+            uuid: 61334943-4b96-48b2-b782-ebfa81cdb497
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_category'
+              formatter:
+                type: entity_reference_label
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+            additional: {  }
+            weight: 10
+          15a5b6a4-0ee4-4d58-b072-d9f9b57d53b3:
+            uuid: 15a5b6a4-0ee4-4d58-b072-d9f9b57d53b3
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_contributor'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 13
+          4e9880f4-12c7-4637-8815-7e4086910c24:
+            uuid: 4e9880f4-12c7-4637-8815-7e4086910c24
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_format'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 14
+          b4b1c622-7a85-4722-8b5d-0c913182ea61:
+            uuid: b4b1c622-7a85-4722-8b5d-0c913182ea61
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_type'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 15
+          823f49c3-6f02-4864-a5aa-266214dfb472:
+            uuid: 823f49c3-6f02-4864-a5aa-266214dfb472
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_publisher'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 16
+          89dfcc8b-36a3-4041-8637-f2290606dec5:
+            uuid: 89dfcc8b-36a3-4041-8637-f2290606dec5
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_mukurtu_community'
+              formatter:
+                type: entity_reference_label
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+            additional: {  }
+            weight: 3
+          e0c6cf35-51d3-4c9b-be96-716a6da2b1cb:
+            uuid: e0c6cf35-51d3-4c9b-be96-716a6da2b1cb
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_date_description'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 8
+          1dc77bd0-4397-476a-bd8e-b3eea2fcb2db:
+            uuid: 1dc77bd0-4397-476a-bd8e-b3eea2fcb2db
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_cultural_narrative'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: text_default
+            additional: {  }
+            weight: 2
+          6091dc96-8024-4878-97bf-6c57aacd7f14:
+            uuid: 6091dc96-8024-4878-97bf-6c57aacd7f14
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_traditional_knowledge'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: text_default
+            additional: {  }
+            weight: 1
+          d9d42f2c-f58c-4ba5-abc9-d93b92fee226:
+            uuid: d9d42f2c-f58c-4ba5-abc9-d93b92fee226
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_identifier'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 7
+          07fe8cb6-ae2c-44c1-b9e1-d003381b5e39:
+            uuid: 07fe8cb6-ae2c-44c1-b9e1-d003381b5e39
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_language'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 6
+          da586949-811e-4bb8-80ad-ecae7922ae9b:
+            uuid: da586949-811e-4bb8-80ad-ecae7922ae9b
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_source'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 5
+          22570f94-5fee-4222-a7c9-6f4588c01103:
+            uuid: 22570f94-5fee-4222-a7c9-6f4588c01103
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_subject'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 4
+          fce166f5-e6f6-4086-8bcb-d165af1eea09:
+            uuid: fce166f5-e6f6-4086-8bcb-d165af1eea09
+            region: second
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_people'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 3
+          444e9b36-843f-48ff-a485-4187ee68233b:
+            uuid: 444e9b36-843f-48ff-a485-4187ee68233b
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_media_assets'
+              formatter:
+                type: entity_reference_entity_view
+                label: above
+                settings:
+                  link: true
+                  view_mode: default
+                third_party_settings: {  }
+            additional: {  }
+            weight: 0
+        third_party_settings: {  }
 id: node.digital_heritage.default
 targetEntityType: node
 bundle: digital_heritage
@@ -227,6 +554,7 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  field_content_type: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true

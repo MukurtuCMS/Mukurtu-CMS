@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.node.teaser
     - field.field.node.community.field_child_communities
     - field.field.node.community.field_content_type
     - field.field.node.community.field_description
@@ -9,13 +10,18 @@ dependencies:
     - field.field.node.community.field_parent_community
     - node.type.community
   module:
+    - layout_builder
     - og
     - text
     - user
-id: node.community.default
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.community.teaser
 targetEntityType: node
 bundle: community
-mode: default
+mode: teaser
 content:
   field_description:
     weight: 0
@@ -34,24 +40,24 @@ content:
     region: content
   flag_email_node:
     weight: 10
-    region: content
     settings: {  }
     third_party_settings: {  }
+    region: content
   flag_email_og:
     weight: 10
-    region: content
     settings: {  }
     third_party_settings: {  }
+    region: content
   flag_subscribe_node:
     weight: 10
-    region: content
     settings: {  }
     third_party_settings: {  }
+    region: content
   flag_subscribe_og:
     weight: 10
-    region: content
     settings: {  }
     third_party_settings: {  }
+    region: content
   links:
     weight: 3
     region: content

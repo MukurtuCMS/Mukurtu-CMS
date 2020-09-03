@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.field.node.page.body
+    - field.field.node.page.field_content_type
     - node.type.page
   module:
     - text
@@ -19,10 +20,36 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  flag_email_node:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_email_og:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_favorite:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_node:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_og:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   links:
     weight: 101
     region: content
 hidden:
+  field_content_type: true
   field_mukurtu_community: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true

@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.node.search_result
     - field.field.node.dictionary_word.field_content_type
     - field.field.node.dictionary_word.field_keywords
     - field.field.node.dictionary_word.field_language
@@ -11,11 +12,16 @@ dependencies:
     - node.type.dictionary_word
   module:
     - entity_reference_revisions
+    - layout_builder
     - user
-id: node.dictionary_word.default
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.dictionary_word.search_result
 targetEntityType: node
 bundle: dictionary_word
-mode: default
+mode: search_result
 content:
   field_keywords:
     weight: 3

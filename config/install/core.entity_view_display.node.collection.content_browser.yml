@@ -1,0 +1,64 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.content_browser
+    - field.field.node.collection.field_content_type
+    - field.field.node.collection.field_description
+    - field.field.node.collection.field_items_in_collection
+    - field.field.node.collection.field_keywords
+    - field.field.node.collection.field_related_content
+    - node.type.collection
+  module:
+    - layout_builder
+    - text
+    - user
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.collection.content_browser
+targetEntityType: node
+bundle: collection
+mode: content_browser
+content:
+  field_content_type:
+    type: string
+    weight: 0
+    region: content
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  field_description:
+    type: text_summary_or_trimmed
+    weight: 1
+    region: content
+    label: hidden
+    settings:
+      trim_length: 300
+    third_party_settings: {  }
+  og_audience:
+    label: above
+    type: entity_reference_label
+    settings:
+      link: true
+    weight: 102
+    third_party_settings: {  }
+    region: content
+hidden:
+  field_items_in_collection: true
+  field_keywords: true
+  field_mukurtu_community: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  field_related_content: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_favorite: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  links: true
+  search_api_excerpt: true

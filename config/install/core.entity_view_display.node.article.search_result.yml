@@ -5,6 +5,7 @@ dependencies:
     - core.entity_view_mode.node.search_result
     - field.field.node.article.body
     - field.field.node.article.comment
+    - field.field.node.article.field_content_type
     - field.field.node.article.field_image
     - field.field.node.article.field_tags
     - image.style.thumbnail
@@ -35,6 +36,26 @@ content:
     third_party_settings: {  }
     label: hidden
     region: content
+  flag_email_node:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_email_og:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_node:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_og:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   links:
     weight: 2
     settings: {  }
@@ -42,6 +63,7 @@ content:
     region: content
 hidden:
   comment: true
+  field_content_type: true
   field_mukurtu_community: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true

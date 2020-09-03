@@ -1,0 +1,43 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.content_browser
+    - field.field.node.community.field_child_communities
+    - field.field.node.community.field_content_type
+    - field.field.node.community.field_description
+    - field.field.node.community.field_featured_content
+    - field.field.node.community.field_parent_community
+    - node.type.community
+  module:
+    - layout_builder
+    - user
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.community.content_browser
+targetEntityType: node
+bundle: community
+mode: content_browser
+content:
+  field_content_type:
+    type: string
+    weight: 0
+    region: content
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  field_child_communities: true
+  field_description: true
+  field_featured_content: true
+  field_parent_community: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  links: true
+  og_group: true
+  search_api_excerpt: true

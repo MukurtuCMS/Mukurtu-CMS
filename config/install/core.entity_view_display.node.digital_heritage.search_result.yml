@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.teaser
+    - core.entity_view_mode.node.search_result
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
@@ -31,87 +31,11 @@ dependencies:
 third_party_settings:
   layout_builder:
     allow_custom: false
-    enabled: true
-    sections:
-      -
-        layout_id: layout_twocol_section
-        layout_settings:
-          label: 'Side by Side'
-          column_widths: 33-67
-        components:
-          f4c02053-ad7d-47e7-aac8-9bcf39e705ad:
-            uuid: f4c02053-ad7d-47e7-aac8-9bcf39e705ad
-            region: first
-            configuration:
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-              id: 'field_block:node:digital_heritage:field_media_assets'
-              formatter:
-                type: entity_reference_entity_view
-                label: above
-                settings:
-                  link: true
-                  view_mode: default
-                third_party_settings: {  }
-            additional: {  }
-            weight: 0
-          3a6de97f-9de9-4cdc-9130-56b9d44efae0:
-            uuid: 3a6de97f-9de9-4cdc-9130-56b9d44efae0
-            region: second
-            configuration:
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-              id: 'field_block:node:digital_heritage:field_mukurtu_community'
-              formatter:
-                type: entity_reference_label
-                label: above
-                settings:
-                  link: true
-                third_party_settings: {  }
-            additional: {  }
-            weight: 1
-          44b5844d-e5de-498e-bb69-8266df9ef11d:
-            uuid: 44b5844d-e5de-498e-bb69-8266df9ef11d
-            region: second
-            configuration:
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-              id: 'field_block:node:digital_heritage:field_category'
-              formatter:
-                type: entity_reference_label
-                label: above
-                settings:
-                  link: true
-                third_party_settings: {  }
-            additional: {  }
-            weight: 0
-          597ae8c9-1e00-4ade-8269-d00f8af7f506:
-            uuid: 597ae8c9-1e00-4ade-8269-d00f8af7f506
-            region: second
-            configuration:
-              id: 'field_block:node:digital_heritage:field_description'
-              label: Description
-              provider: layout_builder
-              label_display: '0'
-              formatter:
-                label: above
-                type: text_summary_or_trimmed
-                settings:
-                  trim_length: 300
-                third_party_settings: {  }
-              context_mapping:
-                entity: layout_builder.entity
-                view_mode: view_mode
-            additional: {  }
-            weight: 2
-        third_party_settings: {  }
-id: node.digital_heritage.teaser
+    enabled: false
+id: node.digital_heritage.search_result
 targetEntityType: node
 bundle: digital_heritage
-mode: teaser
+mode: search_result
 content:
   field_category:
     type: entity_reference_label

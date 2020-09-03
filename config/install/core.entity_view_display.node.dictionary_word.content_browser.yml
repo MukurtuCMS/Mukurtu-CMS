@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.teaser
+    - core.entity_view_mode.node.content_browser
     - field.field.node.dictionary_word.field_content_type
     - field.field.node.dictionary_word.field_keywords
     - field.field.node.dictionary_word.field_language
@@ -11,44 +11,26 @@ dependencies:
     - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
+    - layout_builder
     - user
-id: node.dictionary_word.teaser
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.dictionary_word.content_browser
 targetEntityType: node
 bundle: dictionary_word
-mode: teaser
+mode: content_browser
 content:
-  flag_email_node:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
+  field_content_type:
+    type: string
+    weight: 0
     region: content
-  flag_email_og:
-    weight: 10
-    settings: {  }
+    label: above
+    settings:
+      link_to_entity: false
     third_party_settings: {  }
-    region: content
-  flag_favorite:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  flag_subscribe_node:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  flag_subscribe_og:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  links:
-    weight: 100
-    settings: {  }
-    third_party_settings: {  }
-    region: content
 hidden:
-  field_content_type: true
   field_keywords: true
   field_language: true
   field_media_assets: true
@@ -59,4 +41,10 @@ hidden:
   field_mukurtu_protocol_write: true
   field_related_content: true
   field_word_entry: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_favorite: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  links: true
   search_api_excerpt: true

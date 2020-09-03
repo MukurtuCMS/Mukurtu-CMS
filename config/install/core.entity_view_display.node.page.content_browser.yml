@@ -1,0 +1,50 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.content_browser
+    - field.field.node.page.body
+    - field.field.node.page.field_content_type
+    - node.type.page
+  module:
+    - layout_builder
+    - text
+    - user
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.page.content_browser
+targetEntityType: node
+bundle: page
+mode: content_browser
+content:
+  body:
+    type: text_summary_or_trimmed
+    weight: 1
+    region: content
+    label: hidden
+    settings:
+      trim_length: 100
+    third_party_settings: {  }
+  field_content_type:
+    type: string
+    weight: 0
+    region: content
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  field_mukurtu_community: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_favorite: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  links: true
+  search_api_excerpt: true

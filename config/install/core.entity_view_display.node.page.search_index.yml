@@ -4,6 +4,7 @@ dependencies:
   config:
     - core.entity_view_mode.node.search_index
     - field.field.node.page.body
+    - field.field.node.page.field_content_type
     - node.type.page
   module:
     - text
@@ -20,7 +21,33 @@ content:
     third_party_settings: {  }
     label: hidden
     region: content
+  flag_email_node:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_email_og:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_favorite:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_node:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_og:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
 hidden:
+  field_content_type: true
   field_mukurtu_community: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true

@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.collection.field_content_type
     - field.field.node.collection.field_description
     - field.field.node.collection.field_items_in_collection
     - field.field.node.collection.field_keywords
@@ -48,6 +49,31 @@ content:
     third_party_settings: {  }
     type: entity_reference_entity_view
     region: content
+  flag_email_node:
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  flag_email_og:
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  flag_favorite:
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  flag_subscribe_node:
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  flag_subscribe_og:
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   links:
     weight: 4
     region: content
@@ -62,6 +88,7 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  field_content_type: true
   field_mukurtu_community: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true

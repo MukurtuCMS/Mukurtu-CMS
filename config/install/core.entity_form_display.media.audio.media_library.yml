@@ -5,19 +5,55 @@ dependencies:
     - core.entity_form_mode.media.media_library
     - field.field.media.audio.field_media_audio_file
     - media.type.audio
+  module:
+    - file
+    - mukurtu_protocol
 id: media.audio.media_library
 targetEntityType: media
 bundle: audio
 mode: media_library
-content: {  }
+content:
+  field_media_audio_file:
+    type: file_generic
+    weight: 5
+    region: content
+    settings:
+      progress_indicator: throbber
+    third_party_settings: {  }
+  field_mukurtu_protocol_r_scope:
+    type: mukurtu_protocol_scope_widget
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_read:
+    type: mukurtu_protocol_widget
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_w_scope:
+    type: mukurtu_protocol_scope_widget
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_write:
+    type: mukurtu_protocol_widget
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  name:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
 hidden:
   created: true
-  field_media_audio_file: true
-  field_mukurtu_protocol_r_scope: true
-  field_mukurtu_protocol_read: true
-  field_mukurtu_protocol_w_scope: true
-  field_mukurtu_protocol_write: true
-  name: true
   path: true
   status: true
   uid: true
