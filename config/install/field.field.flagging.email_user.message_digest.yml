@@ -1,0 +1,23 @@
+uuid: 83aa6ce6-6aec-47ab-8d16-d49bf66339bf
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.flagging.message_digest
+    - flag.flag.email_user
+  module:
+    - options
+_core:
+  default_config_hash: r9Gb2oKBBbhfPXDZ0gGBSRsFC7moUws1-VnFgaTFdjc
+id: flagging.email_user.message_digest
+field_name: message_digest
+entity_type: flagging
+bundle: email_user
+label: 'Notification interval'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: message_digest_default_value_callback
+settings: {  }
+field_type: list_string
