@@ -53,6 +53,7 @@ dependencies:
   - embed
   - entity_embed
   - entity_browser
+  - field_group
   - layout_builder
   - flag
   - message
