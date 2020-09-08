@@ -40,6 +40,7 @@
     "drupal/diff": "*",
     "drupal/geolocation": "*",
     "drupal/flag": "*",
+    "drupal/field_group": "*",
     "drupal/message": "*",
     "drupal/message_ui": "*",
     "drupal/message_digest": "*",

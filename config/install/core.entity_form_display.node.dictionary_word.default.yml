@@ -12,10 +12,76 @@ dependencies:
     - node.type.dictionary_word
   module:
     - entity_browser
+    - field_group
     - media_library
     - mukurtu_protocol
     - paragraphs
     - path
+third_party_settings:
+  field_group:
+    group_main_tab:
+      children:
+        - group_mukurtu_essentials
+        - group_entries
+        - group_relations
+      parent_name: ''
+      weight: 0
+      format_type: tabs
+      region: content
+      format_settings:
+        direction: horizontal
+        id: ''
+        classes: ''
+      label: 'Main Tab'
+    group_mukurtu_essentials:
+      children:
+        - title
+        - field_language
+        - field_mukurtu_protocol_r_scope
+        - field_mukurtu_protocol_read
+        - field_mukurtu_protocol_w_scope
+        - field_mukurtu_protocol_write
+        - field_keywords
+        - field_media_assets
+      parent_name: group_main_tab
+      weight: 20
+      format_type: tab
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: open
+        required_fields: true
+      label: 'Mukurtu Essentials'
+    group_entries:
+      children:
+        - field_word_entry
+      parent_name: group_main_tab
+      weight: 21
+      format_type: tab
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: closed
+        required_fields: true
+      label: Entries
+    group_relations:
+      children:
+        - field_related_content
+      parent_name: group_main_tab
+      weight: 22
+      format_type: tab
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: closed
+        required_fields: true
+      label: Relations
 id: node.dictionary_word.default
 targetEntityType: node
 bundle: dictionary_word
@@ -23,12 +89,12 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 11
+    weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
   field_keywords:
-    weight: 8
+    weight: 7
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -38,7 +104,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_language:
-    weight: 5
+    weight: 2
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -48,7 +114,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_media_assets:
-    weight: 7
+    weight: 8
     settings:
       media_types: {  }
     third_party_settings: {  }
@@ -57,29 +123,29 @@ content:
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 1
+    weight: 3
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: 2
+    weight: 4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 3
+    weight: 5
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: 4
+    weight: 6
     settings: {  }
     third_party_settings: {  }
   field_related_content:
-    weight: 9
+    weight: 3
     settings:
       entity_browser: browse_content
       field_widget_display: rendered_entity
@@ -95,7 +161,7 @@ content:
     region: content
   field_word_entry:
     type: entity_reference_paragraphs
-    weight: 6
+    weight: 8
     settings:
       title: Paragraph
       title_plural: Paragraphs
@@ -122,7 +188,7 @@ content:
     region: content
   path:
     type: path
-    weight: 14
+    weight: 8
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -130,25 +196,25 @@ content:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 12
+    weight: 6
     region: content
     third_party_settings: {  }
   status:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 15
+    weight: 9
     region: content
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 13
+    weight: 7
     region: content
     third_party_settings: {  }
   title:
-    weight: 0
+    weight: 1
     settings:
       size: 60
       placeholder: ''
@@ -157,7 +223,7 @@ content:
     region: content
   uid:
     type: entity_reference_autocomplete
-    weight: 10
+    weight: 4
     settings:
       match_operator: CONTAINS
       size: 60

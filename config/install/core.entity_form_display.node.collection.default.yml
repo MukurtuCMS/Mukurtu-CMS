@@ -11,9 +11,60 @@ dependencies:
     - node.type.collection
   module:
     - entity_browser
+    - field_group
     - mukurtu_protocol
     - path
     - text
+third_party_settings:
+  field_group:
+    group_main_tab:
+      children:
+        - group_mukurtu_essentials
+        - group_relations
+      parent_name: ''
+      weight: 0
+      format_type: tabs
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        direction: horizontal
+      label: 'Main Tab'
+    group_mukurtu_essentials:
+      children:
+        - title
+        - field_mukurtu_protocol_r_scope
+        - field_mukurtu_protocol_read
+        - field_mukurtu_protocol_w_scope
+        - field_mukurtu_protocol_write
+        - field_description
+        - field_keywords
+      parent_name: group_main_tab
+      weight: 20
+      format_type: tab
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: open
+        required_fields: true
+      label: 'Mukurtu Essentials'
+    group_relations:
+      children:
+        - field_items_in_collection
+        - field_related_content
+      parent_name: group_main_tab
+      weight: 21
+      format_type: tab
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: closed
+        required_fields: true
+      label: Relations
 id: node.collection.default
 targetEntityType: node
 bundle: collection
@@ -21,13 +72,13 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 10
+    weight: 11
     region: content
     settings: {  }
     third_party_settings: {  }
   field_description:
     type: text_textarea_with_summary
-    weight: 5
+    weight: 6
     region: content
     settings:
       rows: 9
@@ -37,7 +88,7 @@ content:
     third_party_settings: {  }
   field_items_in_collection:
     type: entity_browser_entity_reference
-    weight: 6
+    weight: 7
     region: content
     settings:
       entity_browser: browse_content
@@ -63,25 +114,25 @@ content:
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 1
+    weight: 2
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: 2
+    weight: 3
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 3
+    weight: 4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: 4
+    weight: 5
     settings: {  }
     third_party_settings: {  }
   field_related_content:
@@ -116,7 +167,7 @@ content:
     region: content
   path:
     type: path
-    weight: 13
+    weight: 14
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -124,25 +175,25 @@ content:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 11
+    weight: 12
     region: content
     third_party_settings: {  }
   status:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 14
+    weight: 15
     region: content
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 12
+    weight: 13
     region: content
     third_party_settings: {  }
   title:
-    weight: 0
+    weight: 1
     settings:
       size: 60
       placeholder: ''
@@ -151,7 +202,7 @@ content:
     region: content
   uid:
     type: entity_reference_autocomplete
-    weight: 9
+    weight: 10
     settings:
       match_operator: CONTAINS
       size: 60

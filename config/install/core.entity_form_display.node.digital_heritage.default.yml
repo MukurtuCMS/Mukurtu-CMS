@@ -26,10 +26,118 @@ dependencies:
     - node.type.digital_heritage
   module:
     - entity_browser
+    - field_group
     - media_library
     - mukurtu_protocol
     - path
     - text
+third_party_settings:
+  field_group:
+    group_main_tab:
+      children:
+        - group_mukurtu_essentials
+        - group_mukurtu_core
+        - group_rights_and_permissions
+        - group_additional_metadata
+        - group_relations
+      parent_name: ''
+      weight: 0
+      format_type: tabs
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        direction: horizontal
+      label: 'Main Tab'
+    group_mukurtu_essentials:
+      children:
+        - title
+        - field_mukurtu_protocol_r_scope
+        - field_mukurtu_protocol_read
+        - field_mukurtu_protocol_w_scope
+        - field_mukurtu_protocol_write
+        - field_media_assets
+        - field_category
+        - field_creator
+        - field_contributor
+        - field_date_description
+      parent_name: group_main_tab
+      weight: 20
+      format_type: tab
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: open
+        required_fields: true
+      label: 'Mukurtu Essentials'
+    group_mukurtu_core:
+      children:
+        - field_cultural_narrative
+        - field_traditional_knowledge
+        - field_description
+        - field_keywords
+      parent_name: group_main_tab
+      weight: 21
+      format_type: tab
+      region: content
+      format_settings:
+        description: ''
+        formatter: closed
+        required_fields: true
+        id: ''
+        classes: ''
+      label: 'Mukurtu Core'
+    group_rights_and_permissions:
+      children:
+        - field_publisher
+        - field_rights
+      parent_name: group_main_tab
+      weight: 22
+      format_type: tab
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: closed
+        required_fields: true
+      label: 'Rights and Permissions'
+    group_additional_metadata:
+      children:
+        - field_format
+        - field_type
+        - field_identifier
+        - field_language
+        - field_source
+        - field_subject
+        - field_people
+      parent_name: group_main_tab
+      weight: 23
+      format_type: tab
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: closed
+        required_fields: true
+      label: 'Additional Metadata'
+    group_relations:
+      children:
+        - field_related_content
+      parent_name: group_main_tab
+      weight: 24
+      format_type: tab
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: closed
+        required_fields: true
+      label: Relations
 id: node.digital_heritage.default
 targetEntityType: node
 bundle: digital_heritage
@@ -37,7 +145,7 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 11
+    weight: 12
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -48,7 +156,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_contributor:
-    weight: 124
+    weight: 9
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -58,60 +166,6 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_creator:
-    weight: 123
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
-  field_cultural_narrative:
-    weight: 126
-    settings:
-      rows: 5
-      placeholder: ''
-    third_party_settings: {  }
-    type: text_textarea
-    region: content
-  field_date_description:
-    weight: 125
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_description:
-    weight: 6
-    settings:
-      rows: 9
-      summary_rows: 3
-      placeholder: ''
-      show_summary: false
-    third_party_settings: {  }
-    type: text_textarea_with_summary
-    region: content
-  field_format:
-    weight: 130
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
-  field_identifier:
-    weight: 132
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_keywords:
     weight: 8
     settings:
       match_operator: CONTAINS
@@ -121,8 +175,62 @@ content:
     third_party_settings: {  }
     type: entity_reference_autocomplete
     region: content
+  field_cultural_narrative:
+    weight: 20
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textarea
+    region: content
+  field_date_description:
+    weight: 10
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_description:
+    weight: 22
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
+    third_party_settings: {  }
+    type: text_textarea_with_summary
+    region: content
+  field_format:
+    weight: 24
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_identifier:
+    weight: 27
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_keywords:
+    weight: 23
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
   field_language:
-    weight: 133
+    weight: 28
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -133,7 +241,7 @@ content:
     region: content
   field_media_assets:
     type: media_library_widget
-    weight: 5
+    weight: 6
     region: content
     settings:
       media_types:
@@ -146,29 +254,29 @@ content:
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 1
+    weight: 2
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: 2
+    weight: 3
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 3
+    weight: 4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: 4
+    weight: 5
     settings: {  }
     third_party_settings: {  }
   field_people:
-    weight: 136
+    weight: 31
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -178,7 +286,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_publisher:
-    weight: 128
+    weight: 22
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -188,7 +296,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_related_content:
-    weight: 9
+    weight: 10
     settings:
       entity_browser: browse_content
       field_widget_display: rendered_entity
@@ -203,7 +311,7 @@ content:
     type: entity_browser_entity_reference
     region: content
   field_rights:
-    weight: 129
+    weight: 23
     settings:
       rows: 5
       placeholder: ''
@@ -211,7 +319,7 @@ content:
     type: string_textarea
     region: content
   field_source:
-    weight: 134
+    weight: 29
     settings:
       size: 60
       placeholder: ''
@@ -219,7 +327,7 @@ content:
     type: string_textfield
     region: content
   field_subject:
-    weight: 135
+    weight: 30
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -229,7 +337,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_traditional_knowledge:
-    weight: 127
+    weight: 21
     settings:
       rows: 5
       placeholder: ''
@@ -237,7 +345,7 @@ content:
     type: text_textarea
     region: content
   field_type:
-    weight: 131
+    weight: 26
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -263,7 +371,7 @@ content:
     region: content
   path:
     type: path
-    weight: 14
+    weight: 15
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -271,25 +379,25 @@ content:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 12
+    weight: 13
     region: content
     third_party_settings: {  }
   status:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 15
+    weight: 16
     region: content
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 13
+    weight: 14
     region: content
     third_party_settings: {  }
   title:
-    weight: 0
+    weight: 1
     settings:
       size: 60
       placeholder: ''
@@ -298,7 +406,7 @@ content:
     region: content
   uid:
     type: entity_reference_autocomplete
-    weight: 10
+    weight: 11
     settings:
       match_operator: CONTAINS
       size: 60
