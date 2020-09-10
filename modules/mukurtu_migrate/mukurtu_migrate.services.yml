@@ -1,0 +1,5 @@
+services:
+  mukurtu_migrate.migrate_rest_manager:
+    class: Drupal\mukurtu_migrate\MukurtuMigrateRestManager
+    tags:
+      - { name: mukurtu }
