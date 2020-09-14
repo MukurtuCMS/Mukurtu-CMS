@@ -67,10 +67,26 @@ function mukurtu_migrate_import_summary($options, &$context) {
 
   // Endpoints to slurp up data from.
   $steps = [
-    ['endpoint' => '/tax-vocab', 'type' => 'Taxonomy Vocabularies', 'filename' => 'vocab.json'],
-    ['endpoint' => '/tax-term', 'type' => 'Taxonomy Terms', 'filename' => 'terms.json'],
-    ['endpoint' => '/scald', 'type' => 'Media', 'filename' => 'scald.json'],
-    ['endpoint' => '/node', 'type' => 'Nodes', 'filename' => 'nodes.json'],
+    [
+      'endpoint' => '/tax-vocab',
+      'type' => 'Taxonomy Vocabularies',
+      'filename' => 'vocab.json'
+    ],
+    [
+      'endpoint' => '/tax-term',
+      'type' => 'Taxonomy Terms',
+      'filename' => 'terms.json'
+    ],
+    [
+      'endpoint' => '/scald',
+      'type' => 'Media',
+      'filename' => 'scald.json'
+    ],
+    [
+      'endpoint' => '/node',
+      'type' => 'Nodes',
+      'filename' => 'nodes.json'
+    ],
   ];
 
   // Start of batch run.
@@ -82,7 +98,7 @@ function mukurtu_migrate_import_summary($options, &$context) {
     $context['sandbox']['manifest'] = [];
 
     // Create directory to write json files to.
-    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
+    \Drupal::service('file_system')->prepareDirectory($directory, \Drupal\Core\File\FileSystemInterface::CREATE_DIRECTORY);
   }
 
   // Batch run is complete.
@@ -116,7 +132,9 @@ function mukurtu_migrate_import_summary($options, &$context) {
       file_save_data(json_encode($context['sandbox']['manifest']), $directory . 'manifest.json', FILE_EXISTS_REPLACE);
     } else {
       // File exists, append the batch data.
-      file_put_contents(drupal_realpath($directory . $current_step['filename']), json_encode($batch), FILE_APPEND);
+      $old = json_decode(file_get_contents(\Drupal::service('file_system')->realpath($directory . $current_step['filename'])));
+      $updated = array_merge($old, $batch);
+      file_put_contents(\Drupal::service('file_system')->realpath($directory . $current_step['filename']), json_encode($updated));
     }
   }
 

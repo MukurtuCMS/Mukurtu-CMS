@@ -14,6 +14,82 @@ class MukurtuMigrateRestManager {
     $this->login();
   }
 
+  protected function loadJsonFile($path) {
+    $raw = file_get_contents($path);
+    $data = json_decode($raw);
+
+    if (!$data) {
+      return [];
+    }
+    return $data;
+  }
+
+  protected function buildVocabularyTable($vocabFile, $termsFile) {
+    $vocabs = $this->loadJsonFile($vocabFile);
+    $terms = $this->loadJsonFile($termsFile);
+
+    $table = [];
+    // Index all the vocabularies.
+    foreach ($vocabs as $vocab) {
+      $table[$vocab->vid] = $vocab;
+    }
+
+    // Index all terms and attach to the vocabulary table.
+    foreach ($terms as $term) {
+      // We are harvesting the vocab that this term exists in.
+      if (isset($term->vid) && isset($table[$term->vid])) {
+        if (!isset($table[$term->vid]->terms)) {
+          $table[$term->vid]->terms = [];
+        }
+        $table[$term->vid]->terms[$term->tid] = $term;
+      }
+    }
+
+    return $table;
+  }
+
+  protected function buildNodeTable($nodeFile) {
+    $nodes = $this->loadJsonFile($nodeFile);
+
+    $table = [];
+
+    // Index all nodes by type, then nid.
+    foreach ($nodes as $node) {
+      if (!isset($table[$node->type])) {
+        $table[$node->type] = [];
+      }
+      $table[$node->type][$node->nid] = $node;
+    }
+
+    return $table;
+  }
+
+  public function summarizeImportData($manifest) {
+    $taxTable = (isset($manifest['vocab']) && isset($manifest['terms'])) ? $this->buildVocabularyTable($manifest['vocab'], $manifest['terms']) : [];
+    $nodeTable = isset($manifest['nodes']) ? $this->buildNodeTable($manifest['nodes']) : [];
+    $summary = "";
+
+    if (!empty($taxTable)) {
+      $summary .= "<h3>Taxonomy Vocabularies and Terms</h3><ul>";
+      foreach ($taxTable as $vocab) {
+        $terms_in_vocab = isset($vocab->terms) ? count($vocab->terms) : 0;
+        $summary .= "<li>{$vocab->name} ({$vocab->machine_name}): $terms_in_vocab terms</li>";
+      }
+      $summary .= "</ul>";
+    }
+
+    if (!empty($nodeTable)) {
+      $summary .= "<h3>Nodes</h3><ul>";
+      foreach ($nodeTable as $type => $nodes) {
+        $typeCount = count($nodes);
+        $summary .= "<li>$typeCount nodes of type $type</li>";
+      }
+      $summary .= "</ul>";
+    }
+
+    return $summary;
+  }
+
   public function fetchBatch($endpoint, $offset = 0, $number = 10, $itemsPerPage = 20) {
     $batch = [];
     $page = 0;

@@ -10,6 +10,7 @@ namespace Drupal\mukurtu_migrate\Form;
 use Drupal\file\Entity\File;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\File\FileSystem;
 
 class ImportFromRemoteSite extends FormBase {
   const STATE_START = 'migrateStart';
@@ -76,10 +77,8 @@ class ImportFromRemoteSite extends FormBase {
   protected function migrateConnectionSuccessful(array $form, FormStateInterface $form_state) {
     $manifest = $this->loadManifest($form_state);
     if ($manifest) {
-      $summary = "";
-      foreach ($manifest as $file) {
-        $summary .= "<li>$file</li>";
-      }
+      $summary = $this->migrationManager->summarizeImportData($manifest);
+
       $form['summary'] = [
         '#markup' => "<h2>Content to be Migrated</h2><ul>$summary</ul>",
       ];
@@ -129,7 +128,7 @@ class ImportFromRemoteSite extends FormBase {
     $username = $form_state->getValue('remote_username');
     $password = $form_state->getValue('remote_password');
 
-    $this->migrationManager = \Drupal::service('mukurtu_migrate.migrate_rest_manager');
+
     $logged_in = $this->migrationManager->login($url, $username, $password);
     if ($logged_in) {
       $batch = [
@@ -222,6 +221,9 @@ class ImportFromRemoteSite extends FormBase {
   protected function getMigrationState(FormStateInterface $form_state) {
     $state = $form_state->getValue('migrate_state') ?? ImportFromRemoteSite::STATE_START;
 
+    $this->migrationManager = $_SESSION['mukurtu_migrate']['migration_manager'] ?? \Drupal::service('mukurtu_migrate.migrate_rest_manager');
+    $_SESSION['mukurtu_migrate']['migration_manager'] = $this->migrationManager;
+
     // If we are at the start but still have files from a previous run, give the
     // user the option to resume.
     if ($state == ImportFromRemoteSite::STATE_START) {
@@ -237,11 +239,15 @@ class ImportFromRemoteSite extends FormBase {
    * Return the mainfest file contents. Return FALSE if it does not exist.
    */
   protected function loadManifest(FormStateInterface $form_state) {
-    $manifest = file_get_contents(drupal_realpath('private://mukurtu_migrate/manifest.json'));
+    $manifest = file_get_contents(\Drupal::service('file_system')->realpath('private://mukurtu_migrate/manifest.json'));
     if ($manifest) {
       $manifest_array = json_decode($manifest);
-      $form_state->setValue('migrate_manifest', $manifest_array);
-      return $manifest_array;
+      $result = [];
+      foreach ($manifest_array as $file) {
+        $result[basename($file, '.json')] = $file;
+      }
+      $form_state->setValue('migrate_manifest', $result);
+      return $result;
     }
 
     return FALSE;
