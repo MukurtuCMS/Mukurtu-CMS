@@ -2,16 +2,167 @@
 
 namespace Drupal\mukurtu_migrate;
 
+use stdClass;
+
 class MukurtuMigrateRestManager {
   protected $sourceUrl;
   protected $sourceUser;
   protected $sourcePassword;
 
+  protected $taxonomyTable;
+  protected $nodeTable;
+  protected $mediaTable;
+
+  protected $fieldMappings;
+  protected $migrationSteps;
+
+  protected $currentImportPosition;
+  protected $itemsPerBatch;
+
   public function __construct() {
+    // Default field mappings.
+    $this->fieldMappings = [
+      'default' => [
+        'language' => 'langcode',
+      ],
+      'taxonomy_term' => [],
+      'node' => [
+        'default' => [
+          'title' => 'title',
+          'status' => 'status',
+          'type' => 'type',
+          'field_identifier' => 'field_identifier',
+          'field_tk_body' => 'field_traditional_knowledge',
+          'field_description' => 'field_description',
+        ],
+        'digital_heritage' => [
+          'body' => 'field_cultural_narrative',
+        ],
+      ],
+      'scald_atom' => [],
+    ];
+
+    $this->itemsPerBatch = 5;
+    $this->currentImportPosition = ['node', 0];
+    // Default Migration Steps.
+
   }
 
-  public function test() {
-    $this->login();
+  /**
+   * Given entity type/bundle/field name, return the new field name.
+   */
+  protected function mapField($entity_type, $bundle, $field_name) {
+    if (!isset($this->fieldMappings[$entity_type])) {
+      return NULL;
+    }
+
+    // Check most specific case first, type/bundle/fieldname given.
+    if (isset($this->fieldMappings[$entity_type][$bundle][$field_name])) {
+     return ['field_name' => $this->fieldMappings[$entity_type][$bundle][$field_name]];
+    }
+
+    // Try the default for the given entity type.
+    if (isset($this->fieldMappings[$entity_type]['default'][$field_name])) {
+      return ['field_name' => $this->fieldMappings[$entity_type]['default'][$field_name]];
+    }
+
+    // Try the global default.
+    if (isset($this->fieldMappings['default'][$field_name])) {
+      return ['field_name' => $this->fieldMappings['default'][$field_name]];
+    }
+
+    return NULL;
+  }
+
+  /**
+   * Take Mukurtu v2 JSON and convert to Mukurtu v4 JSON.
+   */
+  protected function migrateItem($json) {
+    $item = json_decode($json);
+    $entity_type = 'node';
+    $bundle = $item->type;
+    $new_item = new stdClass();
+
+    foreach ($item as $key => $value) {
+      $fieldMapping = $this->mapField($entity_type, $bundle, $key);
+
+      if ($fieldMapping) {
+        // TODO: Do any required processing to the new field value.
+        $new_item->{$fieldMapping['field_name']} = is_array($value) ? $value : [$value];
+      }
+    }
+
+
+    // Testing only.
+    $new_item->field_category = [1];
+    $new_item->field_description = $this->convertTextField($new_item->field_description);
+    $new_item->field_traditional_knowledge = $this->convertTextField($new_item->field_traditional_knowledge);
+
+    $new_item->type = $bundle;
+    return json_encode($new_item);
+  }
+
+  protected function convertTextField($value) {
+    $new_value = new stdClass();
+    $new_value->value = $value[0]->und[0]->value;
+    $new_value->format = $value[0]->und[0]->format;
+    switch($value[0]->und[0]->format) {
+      case 'full_html':
+      case 'ds_code':
+        $new_value->format = 'full_html';
+        break;
+
+      case 'filtered_html':
+        $new_value->format = 'restricted_html';
+        break;
+
+      default:
+        $new_value->format = 'basic_html';
+    }
+
+    return [$new_value];
+  }
+
+  /**
+   * Import a single item by fetching its JSON record.
+   */
+  protected function importByURI($uri) {
+    $response = $this->remoteCall('GET', $uri);
+    if ($response['HTTP_CODE'] == 200) {
+      // Map and process fields.
+      $migratedItem = $this->migrateItem($response['body']);
+      dpm("I would run JSON deserializer on this:");
+      dpm($migratedItem);
+
+      // Run the resulting JSON through the deserializer.
+      $serializer = \Drupal::service('serializer');
+      $entity = $serializer->deserialize($migratedItem, \Drupal\node\Entity\Node::class, 'json');
+
+      // Check if the entity validates.
+      $violations = $entity->validate();
+      if ($violations->count() > 0) {
+        // Validation failed. Log and move on.
+        dpm("Failed to import $uri");
+        foreach ($violations as $violation) {
+          $msg = $violations[0]->getMessage();
+          dpm("Field Violation: " . $violation->getPropertyPath());
+        }
+      } else {
+        // Validation succeeded, save the entity.
+        //$entity->save();
+      }
+    } else {
+      dpm("Need to log error");
+      dpm($response);
+    }
+  }
+
+  public function processBatch() {
+    $bundle = 'digital_heritage';
+
+    $item = $this->nodeTable[$bundle][37684];
+    $this->importByURI($item->uri);
+    return ['current' => 1];
   }
 
   protected function loadJsonFile($path) {
@@ -24,7 +175,7 @@ class MukurtuMigrateRestManager {
     return $data;
   }
 
-  protected function buildVocabularyTable($vocabFile, $termsFile) {
+  public function buildVocabularyTable($vocabFile, $termsFile) {
     $vocabs = $this->loadJsonFile($vocabFile);
     $terms = $this->loadJsonFile($termsFile);
 
@@ -45,10 +196,11 @@ class MukurtuMigrateRestManager {
       }
     }
 
+    $this->taxonomyTable = $table;
     return $table;
   }
 
-  protected function buildNodeTable($nodeFile) {
+  public function buildNodeTable($nodeFile) {
     $nodes = $this->loadJsonFile($nodeFile);
 
     $table = [];
@@ -61,6 +213,13 @@ class MukurtuMigrateRestManager {
       $table[$node->type][$node->nid] = $node;
     }
 
+    $this->nodeTable = $table;
+    return $table;
+  }
+
+  public function buildMediaTable($mediaFile) {
+    $table = [];
+    $this->mediaTable = $table;
     return $table;
   }
 
@@ -90,6 +249,9 @@ class MukurtuMigrateRestManager {
     return $summary;
   }
 
+  /**
+   * Fetch a number results from the given endpoint, starting at the given offset.
+   */
   public function fetchBatch($endpoint, $offset = 0, $number = 10, $itemsPerPage = 20) {
     $batch = [];
     $page = 0;
@@ -117,6 +279,9 @@ class MukurtuMigrateRestManager {
     return $batch;
   }
 
+  /**
+   * Authenticate to the remote site using the given credentials.
+   */
   public function login($url, $user, $password) {
     $this->sourceUrl = $url;
     $this->sourceUser = $user;
@@ -125,6 +290,9 @@ class MukurtuMigrateRestManager {
     return $this->authenticate();
   }
 
+  /**
+   * Authenticate to the remote site using the stored credentials.
+   */
   public function authenticate() {
     $data = [
       'username' => $this->sourceUser,
@@ -137,8 +305,15 @@ class MukurtuMigrateRestManager {
     return FALSE;
   }
 
+  /**
+   * Make a REST API call to the Mukurtu Mobile interface of the remote site.
+   */
   private function remoteCall($method, $endpoint, $data = FALSE, $retry = TRUE) {
-    $url = $this->sourceUrl . $endpoint;
+    if (stripos($url, $this->sourceUrl) == 0) {
+      $url = $endpoint;
+    } else {
+      $url = $this->sourceUrl . $endpoint;
+    }
     $http_header = [];
 
     $curl = curl_init();

@@ -169,6 +169,11 @@ class ImportFromRemoteSite extends FormBase {
     // Refresh auth.
     $this->migrationManager->authenticate();
 
+    $manifest = $this->loadManifest($form_state);
+    $taxonomyTable = (isset($manifest['vocab']) && isset($manifest['terms'])) ? $this->migrationManager->buildVocabularyTable($manifest['vocab'], $manifest['terms']) : [];
+    $nodeTable = isset($manifest['nodes']) ? $this->migrationManager->buildNodeTable($manifest['nodes']) : [];
+    $mediaTable = [];
+
     $batch = [
       'title' => t('Migrating from Remote Site'),
       'operations' => [
@@ -178,6 +183,9 @@ class ImportFromRemoteSite extends FormBase {
             [
               'manifest' => $this->loadManifest($form_state),
               'migration_manager' => $this->migrationManager,
+              'taxonomy_table' => $taxonomyTable,
+              'node_table' => $nodeTable,
+              'media_table' => $mediaTable,
               'form_id' => $this->getFormId(),
             ],
           ],

@@ -6,6 +6,9 @@
  */
 function mukurtu_migrate_import_from_remote($options, &$context) {
   $migrationManager = $options['migration_manager'];
+/*   $taxonomy_table = $options['taxonomy_table'];
+  $node_table = $options['node_table'];
+  $media_table = $options['media_table']; */
   $manifest = $options['manifest'] ?? [];
   $form_id = $options['form_id'] ?? 'import';
 
@@ -13,18 +16,15 @@ function mukurtu_migrate_import_from_remote($options, &$context) {
   if (empty($context['sandbox'])) {
     $context['sandbox']['file'] = 0;
     $context['sandbox']['offset'] = 0;
-    $context['sandbox']['max'] = count($manifest);
+    $context['sandbox']['max'] = 1;//count($manifest);
   }
 
-  $current_file = $manifest[$context['sandbox']['file']];
-
-  // Done with the current file, move to the next.
-  $context['sandbox']['file'] += 1;
-  dpm($current_file);
+  $result = $migrationManager->processBatch();
+  $context['sandbox']['current'] = $result['current'];
 
   // Progress bar.
-  if ($context['sandbox']['file'] < $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['file'] / $context['sandbox']['max'];
+  if ($context['sandbox']['current'] < $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['current'] / $context['sandbox']['max'];
   }
 }
 
