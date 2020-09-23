@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_migrate;
 
+use Exception;
 use stdClass;
 
 class MukurtuMigrateRestManager {
@@ -12,11 +13,15 @@ class MukurtuMigrateRestManager {
   protected $taxonomyTable;
   protected $nodeTable;
   protected $mediaTable;
+  protected $importTable;
 
   protected $fieldMappings;
   protected $migrationSteps;
 
-  protected $currentImportPosition;
+  protected $currentStep;
+  protected $currentEntityType;
+  protected $currentBundle;
+  protected $currentOffset;
   protected $itemsPerBatch;
 
   public function __construct() {
@@ -25,7 +30,20 @@ class MukurtuMigrateRestManager {
       'default' => [
         'language' => 'langcode',
       ],
-      'taxonomy_term' => [],
+      'taxonomy_vocabulary' => [
+        'default' => [
+          'name' => 'name',
+          'machine_name' => 'vid',
+          'description' => 'description',
+        ],
+      ],
+      'taxonomy_term' => [
+        'default' => [
+          'name' => 'name',
+          'description' => 'description',
+          'vocabulary_machine_name' => 'vid',
+        ],
+      ],
       'node' => [
         'default' => [
           'title' => 'title',
@@ -42,10 +60,23 @@ class MukurtuMigrateRestManager {
       'scald_atom' => [],
     ];
 
-    $this->itemsPerBatch = 5;
-    $this->currentImportPosition = ['node', 0];
-    // Default Migration Steps.
+    $this->itemsPerBatch = 20;
 
+    // Default Migration Steps.
+    $this->migrationSteps = [
+      ['entity_type' => 'taxonomy_vocabulary', 'bundle' => ''],
+      ['entity_type' => 'taxonomy_term', 'bundle' => ''],
+      ['entity_type' => 'node', 'bundle' => 'community'],
+      ['entity_type' => 'node', 'bundle' => 'protocol'],
+      ['entity_type' => 'node', 'bundle' => 'digital_heritage'],
+    ];
+  }
+
+  public function setState($step = NULL, $entity_type = NULL, $bundle = NULL, $offset = 0) {
+    $this->currentStep = $step ?? $this->migrationSteps[0];
+    $this->currentEntityType = $entity_type ?? 'taxonomy_vocabulary';
+    $this->currentBundle = $bundle ?? current(array_keys($this->importTable[$this->currentEntityType]));
+    $this->currentOffset = $offset;
   }
 
   /**
@@ -77,10 +108,10 @@ class MukurtuMigrateRestManager {
   /**
    * Take Mukurtu v2 JSON and convert to Mukurtu v4 JSON.
    */
-  protected function migrateItem($json) {
+  protected function migrateItem($entity_type, $json) {
     $item = json_decode($json);
-    $entity_type = 'node';
-    $bundle = $item->type;
+
+    $bundle = ($entity_type == 'taxonomy_vocabulary' || $entity_type == 'taxonomy_term') ? '' : $item->type;
     $new_item = new stdClass();
 
     foreach ($item as $key => $value) {
@@ -88,17 +119,18 @@ class MukurtuMigrateRestManager {
 
       if ($fieldMapping) {
         // TODO: Do any required processing to the new field value.
-        $new_item->{$fieldMapping['field_name']} = is_array($value) ? $value : [$value];
+        $new_item->{$fieldMapping['field_name']} = $value;//is_array($value) ? $value : [$value];
       }
     }
 
 
     // Testing only.
-    $new_item->field_category = [1];
-    $new_item->field_description = $this->convertTextField($new_item->field_description);
-    $new_item->field_traditional_knowledge = $this->convertTextField($new_item->field_traditional_knowledge);
+    //$new_item->field_category = [1];
+    //$new_item->field_description = $this->convertTextField($new_item->field_description);
+    //$new_item->field_traditional_knowledge = $this->convertTextField($new_item->field_traditional_knowledge);
 
-    $new_item->type = $bundle;
+    //$new_item->type = $bundle;
+
     return json_encode($new_item);
   }
 
@@ -126,30 +158,46 @@ class MukurtuMigrateRestManager {
   /**
    * Import a single item by fetching its JSON record.
    */
-  protected function importByURI($uri) {
+  protected function importByURI($entity_type, $uri) {
     $response = $this->remoteCall('GET', $uri);
     if ($response['HTTP_CODE'] == 200) {
       // Map and process fields.
-      $migratedItem = $this->migrateItem($response['body']);
-      dpm("I would run JSON deserializer on this:");
+      $migratedItem = $this->migrateItem($entity_type, $response['body']);
+      //dpm("I would run JSON deserializer on this:");
       dpm($migratedItem);
+
+      // Determine entity class for the serializer.
+      $entityClass = \Drupal\node\Entity\Node::class;
+      if ($entity_type == 'taxonomy_vocabulary') {
+        $entityClass = \Drupal\taxonomy\Entity\Vocabulary::class;
+      }
 
       // Run the resulting JSON through the deserializer.
       $serializer = \Drupal::service('serializer');
-      $entity = $serializer->deserialize($migratedItem, \Drupal\node\Entity\Node::class, 'json');
+      try {
+        $entity = $serializer->deserialize($migratedItem, $entityClass, 'json');
+        if (method_exists($entity, 'validate')) {
+          // Check if the entity validates.
+          $violations = $entity->validate();
+          if ($violations->count() > 0) {
+            // Validation failed. Log and move on.
+            dpm("Failed to import $uri");
+            foreach ($violations as $violation) {
+              $msg = $violations[0]->getMessage();
+              dpm("Field Violation: " . $violation->getPropertyPath());
+            }
+          } else {
+            // Validation succeeded, save the entity.
+            //$entity->save();
+          }
+        } else {
 
-      // Check if the entity validates.
-      $violations = $entity->validate();
-      if ($violations->count() > 0) {
-        // Validation failed. Log and move on.
-        dpm("Failed to import $uri");
-        foreach ($violations as $violation) {
-          $msg = $violations[0]->getMessage();
-          dpm("Field Violation: " . $violation->getPropertyPath());
+          //dpm($entity);
+          //$entity->save();
         }
-      } else {
-        // Validation succeeded, save the entity.
-        //$entity->save();
+      } catch (Exception $e) {
+        dpm("Failed to import $uri");
+        //dpm($e);
       }
     } else {
       dpm("Need to log error");
@@ -157,12 +205,75 @@ class MukurtuMigrateRestManager {
     }
   }
 
-  public function processBatch() {
-    $bundle = 'digital_heritage';
 
-    $item = $this->nodeTable[$bundle][37684];
-    $this->importByURI($item->uri);
-    return ['current' => 1];
+  /**
+   * Return the total number of items to process.
+   */
+  public function getMigrationStepCount() {
+    $items = 0;
+    foreach ($this->migrationSteps as $step) {
+      if (isset($this->importTable[$step['entity_type']][$step['bundle']])) {
+        $items += count($this->importTable[$step['entity_type']][$step['bundle']]);
+      } elseif(isset($this->importTable[$step['entity_type']])) {
+        $items += count($this->importTable[$step['entity_type']]);
+      }
+    }
+
+    return $items;
+    //return 10;
+  }
+
+  /**
+   * Run a batch of imports.
+   */
+  public function processBatch($context) {
+    // Fresh run.
+    if (!isset($context['step'])) {
+      $context['step'] = 0;
+      $context['entity_type'] = $this->migrationSteps[$context['step']]['entity_type'];
+      $context['bundle'] = $this->migrationSteps[$context['step']]['bundle'];
+      $context['total_items_processed'] = 0;
+    }
+
+    $entity_type = $context['entity_type'];
+    $bundle = $context['bundle'];
+    $offset = $context['offset'] ?? 0;
+    $items_per_batch = $context['items_per_batch'] ?? $this->itemsPerBatch;
+
+    // Break off the amount of items we are processing this batch.
+    if ($entity_type == 'taxonomy_vocabulary' || $entity_type == 'taxonomy_term') {
+      $batch = array_slice($this->importTable[$entity_type], $offset, $items_per_batch);
+    } else {
+      $batch = array_slice($this->importTable[$entity_type][$bundle], $offset, $items_per_batch);
+    }
+
+    // Import them by fetching their individual JSON records.
+    foreach ($batch as $item) {
+      $this->importByURI($entity_type, $item->uri);
+    }
+
+    // Update based on how many items we processed.
+    $processed = count($batch);
+    $context['total_items_processed'] += $processed;
+    $context['offset'] += $processed;
+
+    // Move on to the next step when we exhaust the current step.
+    if ($processed < $items_per_batch) {
+      // Is this the last step?
+      if (!isset($this->migrationSteps[$context['step'] + 1])) {
+        // It was the last step, we're done.
+        $context['done'] = TRUE;
+      } else {
+        // There are more steps, set the context up for the next step.
+        $context['done'] = FALSE;
+        $context['step'] += 1;
+        $context['entity_type'] = $this->migrationSteps[$context['step']]['entity_type'];
+        $context['bundle'] = $this->migrationSteps[$context['step']]['bundle'];
+        $context['offset'] = 0;
+      }
+    }
+
+    return $context;
   }
 
   protected function loadJsonFile($path) {
@@ -193,13 +304,18 @@ class MukurtuMigrateRestManager {
           $table[$term->vid]->terms = [];
         }
         $table[$term->vid]->terms[$term->tid] = $term;
+        $this->importTable['taxonomy_term'][$term->tid] = $term;
       }
     }
 
-    $this->taxonomyTable = $table;
+    $this->importTable['taxonomy_vocabulary'] = $table;
+
     return $table;
   }
 
+  /**
+   * Build the table of nodes to import.
+   */
   public function buildNodeTable($nodeFile) {
     $nodes = $this->loadJsonFile($nodeFile);
 
@@ -213,13 +329,13 @@ class MukurtuMigrateRestManager {
       $table[$node->type][$node->nid] = $node;
     }
 
-    $this->nodeTable = $table;
+    $this->importTable['node'] = $table;
     return $table;
   }
 
   public function buildMediaTable($mediaFile) {
     $table = [];
-    $this->mediaTable = $table;
+    $this->importTable['media'] = $table;
     return $table;
   }
 
@@ -250,7 +366,7 @@ class MukurtuMigrateRestManager {
   }
 
   /**
-   * Fetch a number results from the given endpoint, starting at the given offset.
+   * Fetch results from the given endpoint, starting at the given offset.
    */
   public function fetchBatch($endpoint, $offset = 0, $number = 10, $itemsPerPage = 20) {
     $batch = [];
@@ -299,6 +415,7 @@ class MukurtuMigrateRestManager {
       'password' => $this->sourcePassword,
     ];
     $response = $this->remoteCall("POST", "/user/login", $data);
+
     if ($response['HTTP_CODE'] == 200) {
       return TRUE;
     }
@@ -309,7 +426,7 @@ class MukurtuMigrateRestManager {
    * Make a REST API call to the Mukurtu Mobile interface of the remote site.
    */
   private function remoteCall($method, $endpoint, $data = FALSE, $retry = TRUE) {
-    if (stripos($url, $this->sourceUrl) == 0) {
+    if (stripos($endpoint, $this->sourceUrl) === 0) {
       $url = $endpoint;
     } else {
       $url = $this->sourceUrl . $endpoint;
@@ -365,8 +482,9 @@ class MukurtuMigrateRestManager {
     $result['HTTP_CODE'] = $http_code;
     curl_close($curl);
 
-    // If request was forbidden and auth was selected, try re-authenticated and repeat the request.
+    // If request was forbidden and auth was selected, try re-authenticating and repeat the request.
     if (($http_code == 403 || $http_code == 401) && $retry) {
+      $this->authenticate();
       return $this->remoteCall($method, $data, FALSE);
     }
 

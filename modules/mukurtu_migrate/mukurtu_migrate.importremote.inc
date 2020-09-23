@@ -9,22 +9,29 @@ function mukurtu_migrate_import_from_remote($options, &$context) {
 /*   $taxonomy_table = $options['taxonomy_table'];
   $node_table = $options['node_table'];
   $media_table = $options['media_table']; */
-  $manifest = $options['manifest'] ?? [];
-  $form_id = $options['form_id'] ?? 'import';
+  //$manifest = $options['manifest'] ?? [];
+  //$form_id = $options['form_id'] ?? 'import';
 
   // Start of batch run.
   if (empty($context['sandbox'])) {
-    $context['sandbox']['file'] = 0;
-    $context['sandbox']['offset'] = 0;
-    $context['sandbox']['max'] = 1;//count($manifest);
+    $context['sandbox']['max'] = $migrationManager->getMigrationStepCount();
+    $context['sandbox']['migration_context'] = [];
   }
 
-  $result = $migrationManager->processBatch();
-  $context['sandbox']['current'] = $result['current'];
+  $context['sandbox']['migration_context'] = $migrationManager->processBatch($context['sandbox']['migration_context']);
 
-  // Progress bar.
-  if ($context['sandbox']['current'] < $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['current'] / $context['sandbox']['max'];
+  // If we are "done" set items processed to the max amount so the progress bar touches the very end.
+  if ($context['sandbox']['migration_context']['done']) {
+    $context['sandbox']['migration_context']['total_items_processed'] = $context['sandbox']['max'];
+  }
+
+  // Status message.
+  $message = t("Processing item @count of @total...", ['@count' => $context['sandbox']['migration_context']['total_items_processed'], '@total' => $context['sandbox']['max']]);
+  $context['message'] = $message;
+
+  // Display the progress bar.
+  if ($context['sandbox']['migration_context']['total_items_processed'] < $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['migration_context']['total_items_processed'] / $context['sandbox']['max'];
   }
 }
 
