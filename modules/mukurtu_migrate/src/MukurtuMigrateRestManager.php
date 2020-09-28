@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_migrate;
 
 use Exception;
 use stdClass;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 
 class MukurtuMigrateRestManager {
   protected $sourceUrl;
@@ -14,8 +15,11 @@ class MukurtuMigrateRestManager {
   protected $nodeTable;
   protected $mediaTable;
   protected $importTable;
+  protected $oldToNewLookupTable;
 
   protected $fieldMappings;
+  protected $vocabMappings;
+  protected $fieldTransforms;
   protected $migrationSteps;
 
   protected $currentStep;
@@ -39,6 +43,7 @@ class MukurtuMigrateRestManager {
       ],
       'taxonomy_term' => [
         'default' => [
+          'tid' => 'old_id',
           'name' => 'name',
           'description' => 'description',
           'vocabulary_machine_name' => 'vid',
@@ -46,11 +51,13 @@ class MukurtuMigrateRestManager {
       ],
       'node' => [
         'default' => [
+          'nid' => 'old_id',
           'title' => 'title',
           'status' => 'status',
           'type' => 'type',
           'field_identifier' => 'field_identifier',
           'field_tk_body' => 'field_traditional_knowledge',
+          'field_category' => 'field_category',
           'field_description' => 'field_description',
         ],
         'digital_heritage' => [
@@ -58,6 +65,12 @@ class MukurtuMigrateRestManager {
         ],
       ],
       'scald_atom' => [],
+    ];
+
+    // Mukurtu 2 vs Mukurtu 4 vocabulary machine names.
+    $this->vocabMappings = [
+      'scald_authors' => 'authors',
+      'tags' => 'keywords',
     ];
 
     $this->itemsPerBatch = 20;
@@ -70,6 +83,20 @@ class MukurtuMigrateRestManager {
       ['entity_type' => 'node', 'bundle' => 'protocol'],
       ['entity_type' => 'node', 'bundle' => 'digital_heritage'],
     ];
+
+    /** @var PrivateTempStoreFactory $private_tempstore */
+    $private_tempstore = \Drupal::service('tempstore.private');
+    $migrate_tempstore = $private_tempstore->get('mukurtu_migrate');
+    try {
+      $this->sourceUrl = $migrate_tempstore->get('migration_source_url');
+      $this->sourceUser = $migrate_tempstore->get('migration_source_username');
+      $this->sourcePassword = $migrate_tempstore->get('migration_source_password');
+    } catch (Exception $e) {
+      dpm($e->getMessage());
+    }
+
+    // Load previous old -> new table.
+    $this->oldToNewLookupTable = \Drupal::state()->get('mukurtu_migrate_old_new_table', []);
   }
 
   public function setState($step = NULL, $entity_type = NULL, $bundle = NULL, $offset = 0) {
@@ -77,6 +104,55 @@ class MukurtuMigrateRestManager {
     $this->currentEntityType = $entity_type ?? 'taxonomy_vocabulary';
     $this->currentBundle = $bundle ?? current(array_keys($this->importTable[$this->currentEntityType]));
     $this->currentOffset = $offset;
+  }
+
+
+  protected function setOldToNewMapping($entity_type, $oldId, $newId) {
+    if (!is_null($oldId) && !is_null($newId)) {
+      dpm("Mapping $entity_type $oldId => $newId");
+      $this->oldToNewLookupTable[$entity_type][$oldId] = $newId;
+      \Drupal::state()->set('mukurtu_migrate_old_new_table', $this->oldToNewLookupTable);
+    }
+  }
+
+  /**
+   * Map pre-defined Mukurtu 4 content to pre-defined Mukurtu 2 content.
+   */
+  protected function mapDefaultContent() {
+    // New -> Old.
+    $defaultTaxonomies = [
+      'authors' => 'scald_authors',
+      'category' => 'category',
+      'contributor' => 'contributor',
+      'creator' => 'creator',
+      'format' => 'format',
+      'interpersonal_relationship' => 'interpersonal_relationship',
+      'keywords' => 'tags',
+      'language' => 'language',
+      'part_of_speech' => 'part_of_speech',
+      'people' => 'people',
+      'publisher' => 'publisher',
+      'subject' => 'subject',
+      //'tags' => '',
+      'type' => 'dh_type',
+    ];
+
+    // Taxonomy vocabularies.
+    foreach ($defaultTaxonomies as $newVocab => $oldVocab) {
+      // Fetch the old remote vocab.
+      $data = ['parameters[machine_name]' => $oldVocab];
+      $response = $this->remoteCall('GET', '/tax-vocab', $data);
+      if ($response['HTTP_CODE'] == 200) {
+        $responseData = json_decode($response['body']);
+
+        if (isset($responseData[0]->vid)) {
+          // Add to the mapping table.
+          $this->setOldToNewMapping('taxonomy_vocabulary', $responseData[0]->vid, $newVocab);
+        }
+      }
+    }
+
+    // "Default" category.
   }
 
   /**
@@ -105,6 +181,91 @@ class MukurtuMigrateRestManager {
     return NULL;
   }
 
+  protected function translateTargetId($id_type, $target_id) {
+    if ($id_type == 'tid') {
+      return $this->oldToNewLookupTable['taxonomy_term'][$target_id];
+    }
+
+    return NULL;
+  }
+
+  protected function getIdFieldname($entity_type) {
+    switch ($entity_type) {
+      case 'taxonomy_term':
+        return 'tid';
+
+      case 'taxonomy_vocabulary':
+        return 'vid';
+
+      case 'node':
+      default:
+        return 'nid';
+
+    }
+  }
+
+  protected function migrate_entity_reference($value) {
+    if (is_object($value)) {
+      $new_value = [];
+      foreach ($value as $lang => $targets) {
+        if (is_array($targets)) {
+          foreach ($targets as $delta => $target) {
+            foreach ($target as $id => $target_id) {
+              $new_value[$lang][] = ['target_id' => $this->translateTargetId($id, $target_id)];
+              //$new_value[] = ['target_id' => $this->translateTargetId($id, $target_id)];
+            }
+          }
+        }
+      }
+      dpm($new_value);
+      return $new_value;
+    }
+
+    //dpm($value);
+    return $value;
+  }
+
+
+  /**
+   * Migrate a field value.
+   *
+   * This should be very specific Mukurtu 2 -> 4 behavior, general stuff
+   * should be handled in the serializer/normalizer.
+   */
+  protected function migrateValue($entity_type, $bundle, $field_name, $value) {
+    $field_type_ftn = '';
+    if (isset($this->importTable['field_definitions'][$entity_type][$bundle][$field_name])) {
+      $field_type_ftn = 'migrate_' . $this->importTable['field_definitions'][$entity_type][$bundle][$field_name]->getType();
+    } elseif (isset($this->importTable['field_definitions'][$entity_type][$field_name])) {
+      $field_type_ftn = 'migrate_' . $this->importTable['field_definitions'][$entity_type][$field_name]->getType();
+    }
+
+
+    if (method_exists($this, $field_type_ftn)) {
+      $value = $this->{$field_type_ftn}($value);
+    }
+
+    if ($entity_type == 'taxonomy_vocabulary') {
+      // Convert vocab names.
+      if ($field_name == 'vid') {
+        return $this->vocabMappings[$value] ?? $value;
+      }
+
+      // These can't be an array.
+      if ($field_name == 'name' || $field_name == 'description') {
+        return $value;
+      }
+    }
+
+    if ($entity_type == 'taxonomy_term') {
+      if ($field_name == 'vid') {
+        return $this->vocabMappings[$value] ?? $value;
+      }
+    }
+
+    return is_array($value) ? $value : [$value];
+  }
+
   /**
    * Take Mukurtu v2 JSON and convert to Mukurtu v4 JSON.
    */
@@ -119,26 +280,37 @@ class MukurtuMigrateRestManager {
 
       if ($fieldMapping) {
         // TODO: Do any required processing to the new field value.
-        $new_item->{$fieldMapping['field_name']} = $value;//is_array($value) ? $value : [$value];
+        $new_item->{$fieldMapping['field_name']} = $this->migrateValue($entity_type, $bundle, $fieldMapping['field_name'], $value);
       }
     }
 
+    if ($bundle != '') {
+      $new_item->type = $bundle;
+    }
 
-    // Testing only.
-    //$new_item->field_category = [1];
-    //$new_item->field_description = $this->convertTextField($new_item->field_description);
-    //$new_item->field_traditional_knowledge = $this->convertTextField($new_item->field_traditional_knowledge);
+    $old_id = $new_item->old_id[0] ?? NULL;
+    if ($old_id) {
+      unset($new_item->old_id);
+      // Is this an existing (previously migrated) item?
+      $existing_id = $this->oldToNewLookupTable[$entity_type][$old_id];
+      if ($existing_id) {
+        // It is an existing item, add the existing ID to the migrated item
+        // so that we don't create a duplicate.
+        $id_fieldname = $this->getIdFieldname($entity_type);
+        if ($id_fieldname) {
+          $new_item->{$id_fieldname} = $existing_id;
+        }
+      }
+    }
 
-    //$new_item->type = $bundle;
-
-    return json_encode($new_item);
+    return ['old_id' => $old_id[0], 'json' => json_encode($new_item)];
   }
 
   protected function convertTextField($value) {
     $new_value = new stdClass();
     $new_value->value = $value[0]->und[0]->value;
     $new_value->format = $value[0]->und[0]->format;
-    switch($value[0]->und[0]->format) {
+    switch ($value[0]->und[0]->format) {
       case 'full_html':
       case 'ds_code':
         $new_value->format = 'full_html';
@@ -164,18 +336,22 @@ class MukurtuMigrateRestManager {
       // Map and process fields.
       $migratedItem = $this->migrateItem($entity_type, $response['body']);
       //dpm("I would run JSON deserializer on this:");
-      dpm($migratedItem);
+      //dpm($migratedItem);
 
       // Determine entity class for the serializer.
       $entityClass = \Drupal\node\Entity\Node::class;
       if ($entity_type == 'taxonomy_vocabulary') {
         $entityClass = \Drupal\taxonomy\Entity\Vocabulary::class;
       }
+      if ($entity_type == 'taxonomy_term') {
+        $entityClass = \Drupal\taxonomy\Entity\Term::class;
+      }
 
       // Run the resulting JSON through the deserializer.
       $serializer = \Drupal::service('serializer');
+
       try {
-        $entity = $serializer->deserialize($migratedItem, $entityClass, 'json');
+        $entity = $serializer->deserialize($migratedItem['json'], $entityClass, 'json');
         if (method_exists($entity, 'validate')) {
           // Check if the entity validates.
           $violations = $entity->validate();
@@ -188,16 +364,20 @@ class MukurtuMigrateRestManager {
             }
           } else {
             // Validation succeeded, save the entity.
-            //$entity->save();
+            $entity->save();
           }
         } else {
-
           //dpm($entity);
-          //$entity->save();
+          $entity->save();
+        }
+
+        // Add old ID -> new ID lookup.
+        if (isset($migratedItem['old_id']) && $migratedItem['old_id']) {
+          $this->setOldToNewMapping($entity_type, $migratedItem['old_id'], $entity->id());
         }
       } catch (Exception $e) {
         dpm("Failed to import $uri");
-        //dpm($e);
+        dpm($e->getMessage());
       }
     } else {
       dpm("Need to log error");
@@ -233,6 +413,9 @@ class MukurtuMigrateRestManager {
       $context['entity_type'] = $this->migrationSteps[$context['step']]['entity_type'];
       $context['bundle'] = $this->migrationSteps[$context['step']]['bundle'];
       $context['total_items_processed'] = 0;
+      $context['offset'] = 0;
+
+      $this->mapDefaultContent();
     }
 
     $entity_type = $context['entity_type'];
@@ -244,7 +427,12 @@ class MukurtuMigrateRestManager {
     if ($entity_type == 'taxonomy_vocabulary' || $entity_type == 'taxonomy_term') {
       $batch = array_slice($this->importTable[$entity_type], $offset, $items_per_batch);
     } else {
-      $batch = array_slice($this->importTable[$entity_type][$bundle], $offset, $items_per_batch);
+      $import_table = $this->importTable[$entity_type][$bundle] ?? [];
+      $batch = array_slice($import_table, $offset, $items_per_batch);
+    }
+
+    if (is_null($batch)) {
+      $batch = [];
     }
 
     // Import them by fetching their individual JSON records.
@@ -291,9 +479,12 @@ class MukurtuMigrateRestManager {
     $terms = $this->loadJsonFile($termsFile);
 
     $table = [];
+    $entityFieldManager = \Drupal::service('entity_field.manager');
+
     // Index all the vocabularies.
     foreach ($vocabs as $vocab) {
       $table[$vocab->vid] = $vocab;
+      $this->importTable['field_definitions']['taxonomy_term'][$vocab->machine_name] = $entityFieldManager->getFieldDefinitions('taxonomy_term', $vocab->machine_name);
     }
 
     // Index all terms and attach to the vocabulary table.
@@ -320,11 +511,13 @@ class MukurtuMigrateRestManager {
     $nodes = $this->loadJsonFile($nodeFile);
 
     $table = [];
+    $entityFieldManager = \Drupal::service('entity_field.manager');
 
     // Index all nodes by type, then nid.
     foreach ($nodes as $node) {
       if (!isset($table[$node->type])) {
         $table[$node->type] = [];
+        $this->importTable['field_definitions']['node'][$node->type] = $entityFieldManager->getFieldDefinitions('node', $node->type);
       }
       $table[$node->type][$node->nid] = $node;
     }
@@ -402,6 +595,11 @@ class MukurtuMigrateRestManager {
     $this->sourceUrl = $url;
     $this->sourceUser = $user;
     $this->sourcePassword = $password;
+
+/*     $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_migrate');
+    $tempstore->set('source_url', $url);
+    $tempstore->set('source_username', $user);
+    $tempstore->set('source_password', $password); */
 
     return $this->authenticate();
   }

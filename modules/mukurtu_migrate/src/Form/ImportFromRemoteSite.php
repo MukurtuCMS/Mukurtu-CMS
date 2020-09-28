@@ -11,6 +11,7 @@ use Drupal\file\Entity\File;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\File\FileSystem;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 
 class ImportFromRemoteSite extends FormBase {
   const STATE_START = 'migrateStart';
@@ -128,6 +129,12 @@ class ImportFromRemoteSite extends FormBase {
     $username = $form_state->getValue('remote_username');
     $password = $form_state->getValue('remote_password');
 
+    /** @var PrivateTempStoreFactory $private_tempstore */
+    $private_tempstore = \Drupal::service('tempstore.private');
+    $migrate_tempstore = $private_tempstore->get('mukurtu_migrate');
+    $migrate_tempstore->set('migration_source_url', $url);
+    $migrate_tempstore->set('migration_source_username', $username);
+    $migrate_tempstore->set('migration_source_password', $password);
 
     $logged_in = $this->migrationManager->login($url, $username, $password);
     if ($logged_in) {
@@ -218,6 +225,16 @@ class ImportFromRemoteSite extends FormBase {
 
     // Set state to the start.
     $form_state->setValue('migrate_state', ImportFromRemoteSite::STATE_START);
+
+    // Wipe the old -> new table.
+    \Drupal::state()->set('mukurtu_migrate_old_new_table', []);
+
+    /** @var PrivateTempStoreFactory $private_tempstore */
+    $private_tempstore = \Drupal::service('tempstore.private');
+    $migrate_tempstore = $private_tempstore->get('mukurtu_migrate');
+    $migrate_tempstore->set('migration_source_url', '');
+    $migrate_tempstore->set('migration_source_username', '');
+    $migrate_tempstore->set('migration_source_password', '');
 
     // Rebuild the form.
     $form_state->setRebuild();

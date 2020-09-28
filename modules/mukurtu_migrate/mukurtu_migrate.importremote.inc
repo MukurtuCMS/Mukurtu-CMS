@@ -15,7 +15,7 @@ function mukurtu_migrate_import_from_remote($options, &$context) {
   // Start of batch run.
   if (empty($context['sandbox'])) {
     $context['sandbox']['max'] = $migrationManager->getMigrationStepCount();
-    $context['sandbox']['migration_context'] = [];
+    $context['sandbox']['migration_context'] = ['done' => FALSE];
   }
 
   $context['sandbox']['migration_context'] = $migrationManager->processBatch($context['sandbox']['migration_context']);
