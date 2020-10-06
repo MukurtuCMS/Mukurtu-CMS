@@ -264,15 +264,18 @@ class ImportFromRemoteSite extends FormBase {
    * Return the mainfest file contents. Return FALSE if it does not exist.
    */
   protected function loadManifest(FormStateInterface $form_state) {
-    $manifest = file_get_contents(\Drupal::service('file_system')->realpath('private://mukurtu_migrate/manifest.json'));
-    if ($manifest) {
-      $manifest_array = json_decode($manifest);
-      $result = [];
-      foreach ($manifest_array as $file) {
-        $result[basename($file, '.json')] = $file;
+    $manifest_path = \Drupal::service('file_system')->realpath('private://mukurtu_migrate/manifest.json');
+    if (file_exists($manifest_path)) {
+      $manifest = file_get_contents($manifest_path);
+      if ($manifest) {
+        $manifest_array = json_decode($manifest);
+        $result = [];
+        foreach ($manifest_array as $file) {
+          $result[basename($file, '.json')] = $file;
+        }
+        $form_state->setValue('migrate_manifest', $result);
+        return $result;
       }
-      $form_state->setValue('migrate_manifest', $result);
-      return $result;
     }
 
     return FALSE;

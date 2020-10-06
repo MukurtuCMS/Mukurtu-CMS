@@ -10,6 +10,7 @@ class MukurtuMigrateRestManager {
   protected $sourceUrl;
   protected $sourceUser;
   protected $sourcePassword;
+  protected $sourceCookie;
 
   protected $taxonomyTable;
   protected $nodeTable;
@@ -38,6 +39,7 @@ class MukurtuMigrateRestManager {
         'default' => [
           'name' => 'name',
           'machine_name' => 'vid',
+          'vid' => 'old_id',
           'description' => 'description',
         ],
       ],
@@ -80,7 +82,7 @@ class MukurtuMigrateRestManager {
       ['entity_type' => 'taxonomy_vocabulary', 'bundle' => ''],
       ['entity_type' => 'taxonomy_term', 'bundle' => ''],
       ['entity_type' => 'node', 'bundle' => 'community'],
-      ['entity_type' => 'node', 'bundle' => 'protocol'],
+      ['entity_type' => 'node', 'bundle' => 'protocol', 'bundle_v2' => 'cultural_protocol_group'],
       ['entity_type' => 'node', 'bundle' => 'digital_heritage'],
     ];
 
@@ -91,6 +93,7 @@ class MukurtuMigrateRestManager {
       $this->sourceUrl = $migrate_tempstore->get('migration_source_url');
       $this->sourceUser = $migrate_tempstore->get('migration_source_username');
       $this->sourcePassword = $migrate_tempstore->get('migration_source_password');
+      $this->sourceCookie = $migrate_tempstore->get('migration_source_cookie');
     } catch (Exception $e) {
       dpm($e->getMessage());
     }
@@ -109,10 +112,18 @@ class MukurtuMigrateRestManager {
 
   protected function setOldToNewMapping($entity_type, $oldId, $newId) {
     if (!is_null($oldId) && !is_null($newId)) {
-      dpm("Mapping $entity_type $oldId => $newId");
+      dpm("setOldToNewMapping: Mapping $entity_type $oldId => $newId");
       $this->oldToNewLookupTable[$entity_type][$oldId] = $newId;
       \Drupal::state()->set('mukurtu_migrate_old_new_table', $this->oldToNewLookupTable);
     }
+  }
+
+  protected function getOldToNewMapping($entity_type, $oldId) {
+    if (isset($this->oldToNewLookupTable[$entity_type][$oldId])) {
+      return $this->oldToNewLookupTable[$entity_type][$oldId];
+    }
+
+    return NULL;
   }
 
   /**
@@ -138,7 +149,9 @@ class MukurtuMigrateRestManager {
     ];
 
     // Taxonomy vocabularies.
-    foreach ($defaultTaxonomies as $newVocab => $oldVocab) {
+    $localVocabs = taxonomy_vocabulary_get_names();
+    foreach ($localVocabs as $localVocab) {
+      $oldVocab = $defaultTaxonomies[$localVocab] ?? $localVocab;
       // Fetch the old remote vocab.
       $data = ['parameters[machine_name]' => $oldVocab];
       $response = $this->remoteCall('GET', '/tax-vocab', $data);
@@ -147,7 +160,7 @@ class MukurtuMigrateRestManager {
 
         if (isset($responseData[0]->vid)) {
           // Add to the mapping table.
-          $this->setOldToNewMapping('taxonomy_vocabulary', $responseData[0]->vid, $newVocab);
+          $this->setOldToNewMapping('taxonomy_vocabulary', $responseData[0]->vid, $localVocab);
         }
       }
     }
@@ -182,13 +195,22 @@ class MukurtuMigrateRestManager {
   }
 
   protected function translateTargetId($id_type, $target_id) {
-    if ($id_type == 'tid') {
-      return $this->oldToNewLookupTable['taxonomy_term'][$target_id];
-    }
+    $lookup = [
+      'tid' => 'taxonomy_term',
+      'vid' => 'taxonomy_vocabulary',
+      'nid' => 'node',
+    ];
 
-    return NULL;
+    $new_id = $this->getOldToNewMapping($lookup[$id_type], $target_id);
+    if (is_null($new_id)) {
+      dpm("I didn't find an existing $id_type with ID $target_id");
+    }
+    return $new_id;
   }
 
+  /**
+   * Return the ID fieldname for a given entity type.
+   */
   protected function getIdFieldname($entity_type) {
     switch ($entity_type) {
       case 'taxonomy_term':
@@ -205,19 +227,24 @@ class MukurtuMigrateRestManager {
   }
 
   protected function migrate_entity_reference($value) {
+    dpm("I SHOULDN'T BE CALLED ANY MORE");
     if (is_object($value)) {
       $new_value = [];
       foreach ($value as $lang => $targets) {
         if (is_array($targets)) {
           foreach ($targets as $delta => $target) {
             foreach ($target as $id => $target_id) {
-              $new_value[$lang][] = ['target_id' => $this->translateTargetId($id, $target_id)];
+              //$new_value[$lang][] = ['target_id' => $this->translateTargetId($id, $target_id)];
               //$new_value[] = ['target_id' => $this->translateTargetId($id, $target_id)];
+              $new_target = $this->translateTargetId($id, $target_id);
+              if ($new_target) {
+                $new_value[] = ['value' => $new_target];
+              }
             }
           }
         }
       }
-      dpm($new_value);
+      //dpm($new_value);
       return $new_value;
     }
 
@@ -240,11 +267,12 @@ class MukurtuMigrateRestManager {
       $field_type_ftn = 'migrate_' . $this->importTable['field_definitions'][$entity_type][$field_name]->getType();
     }
 
-
+    // Check if we have a migration method for this field type.
     if (method_exists($this, $field_type_ftn)) {
       $value = $this->{$field_type_ftn}($value);
     }
 
+    // These are all special one off migration cases.
     if ($entity_type == 'taxonomy_vocabulary') {
       // Convert vocab names.
       if ($field_name == 'vid') {
@@ -273,8 +301,17 @@ class MukurtuMigrateRestManager {
     $item = json_decode($json);
 
     $bundle = ($entity_type == 'taxonomy_vocabulary' || $entity_type == 'taxonomy_term') ? '' : $item->type;
-    $new_item = new stdClass();
 
+    // Swtich back from v2 -> v4 bundle names.
+    if ($entity_type == 'node') {
+      if ($bundle == 'cultural_protocol_group') {
+        $bundle = 'protocol';
+        $item->type = $bundle;
+      }
+    }
+
+    // Migrate the values from the incoming JSON to v4 format/schema.
+    $new_item = new stdClass();
     foreach ($item as $key => $value) {
       $fieldMapping = $this->mapField($entity_type, $bundle, $key);
 
@@ -284,26 +321,33 @@ class MukurtuMigrateRestManager {
       }
     }
 
+    // Set the type so the entity validation works.
     if ($bundle != '') {
       $new_item->type = $bundle;
     }
 
+    // Now we need to determine if we are creating a new entity or updating an
+    // existing one.
     $old_id = $new_item->old_id[0] ?? NULL;
+
     if ($old_id) {
+      // "old_id" is book-keeping that we don't want to save in the entity.
       unset($new_item->old_id);
-      // Is this an existing (previously migrated) item?
-      $existing_id = $this->oldToNewLookupTable[$entity_type][$old_id];
+
+      // Check for an existing local ID for this entity.
+      $existing_id = $this->getOldToNewMapping($entity_type, $old_id);
       if ($existing_id) {
         // It is an existing item, add the existing ID to the migrated item
         // so that we don't create a duplicate.
         $id_fieldname = $this->getIdFieldname($entity_type);
+        dpm("this already exists, $entity_type: $id_fieldname=> $existing_id");
         if ($id_fieldname) {
-          $new_item->{$id_fieldname} = $existing_id;
+          $new_item->{$id_fieldname} = $this->migrateValue($entity_type, $bundle, $id_fieldname, $existing_id);
         }
       }
     }
 
-    return ['old_id' => $old_id[0], 'json' => json_encode($new_item)];
+    return ['old_id' => $old_id, 'local_id' => $existing_id, 'json' => json_encode($new_item)];
   }
 
   protected function convertTextField($value) {
@@ -333,6 +377,9 @@ class MukurtuMigrateRestManager {
   protected function importByURI($entity_type, $uri) {
     $response = $this->remoteCall('GET', $uri);
     if ($response['HTTP_CODE'] == 200) {
+      if ($entity_type == 'node') {
+        dpm($response['body']);
+      }
       // Map and process fields.
       $migratedItem = $this->migrateItem($entity_type, $response['body']);
       //dpm("I would run JSON deserializer on this:");
@@ -352,6 +399,28 @@ class MukurtuMigrateRestManager {
 
       try {
         $entity = $serializer->deserialize($migratedItem['json'], $entityClass, 'json');
+
+        // Mark it as fromImport, this stops automatic protocol creation, etc.
+        $entity->fromImport = TRUE;
+
+        if ($entity_type == 'node' && $entity->bundle() == 'digital_heritage') {
+          dpm($migratedItem);
+        }
+
+        // The item already exists and we should do an update.
+        if (isset($migratedItem['local_id']) && !is_null($migratedItem['local_id'])) {
+          // Load the local entity.
+          $existing_entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($migratedItem['local_id']);
+
+          // Copy the remote field values onto the existing entity.
+          foreach ($entity as $fieldname => $value) {
+            //dpm("I'm copying $fieldname onto existing");
+            $existing_entity->{$fieldname} = $value;
+          }
+          $entity = $existing_entity;
+        }
+
+        // Validate the entity, if possible.
         if (method_exists($entity, 'validate')) {
           // Check if the entity validates.
           $violations = $entity->validate();
@@ -359,14 +428,17 @@ class MukurtuMigrateRestManager {
             // Validation failed. Log and move on.
             dpm("Failed to import $uri");
             foreach ($violations as $violation) {
-              $msg = $violations[0]->getMessage();
-              dpm("Field Violation: " . $violation->getPropertyPath());
+              //$msg = $violations[0]->getMessage();
+              $badField = $violation->getPropertyPath();
+              dpm("Field Violation: $badField");
+              dpm($entity->get($badField)->value);
             }
           } else {
             // Validation succeeded, save the entity.
             $entity->save();
           }
         } else {
+          // Not all types support validiation, role the dice and hope it saves.
           //dpm($entity);
           $entity->save();
         }
@@ -394,13 +466,12 @@ class MukurtuMigrateRestManager {
     foreach ($this->migrationSteps as $step) {
       if (isset($this->importTable[$step['entity_type']][$step['bundle']])) {
         $items += count($this->importTable[$step['entity_type']][$step['bundle']]);
-      } elseif(isset($this->importTable[$step['entity_type']])) {
+      } elseif (isset($this->importTable[$step['entity_type']])) {
         $items += count($this->importTable[$step['entity_type']]);
       }
     }
 
     return $items;
-    //return 10;
   }
 
   /**
@@ -420,6 +491,12 @@ class MukurtuMigrateRestManager {
 
     $entity_type = $context['entity_type'];
     $bundle = $context['bundle'];
+
+    // Convert v4 -> v2 bundles.
+    if (isset($this->migrationSteps[$context['step']]['bundle_v2'])) {
+      $bundle = $this->migrationSteps[$context['step']]['bundle_v2'];
+    }
+
     $offset = $context['offset'] ?? 0;
     $items_per_batch = $context['items_per_batch'] ?? $this->itemsPerBatch;
 
@@ -465,8 +542,10 @@ class MukurtuMigrateRestManager {
   }
 
   protected function loadJsonFile($path) {
-    $raw = file_get_contents($path);
-    $data = json_decode($raw);
+    if (file_exists($path)) {
+      $raw = file_get_contents($path);
+      $data = json_decode($raw);
+    }
 
     if (!$data) {
       return [];
@@ -574,6 +653,7 @@ class MukurtuMigrateRestManager {
     $response = $this->remoteCall('GET', $endpoint, $data);
     if ($response['HTTP_CODE'] == 200) {
       $responseData = json_decode($response['body']);
+
       if (empty($responseData) || count($responseData) == 0) {
         return $batch;
       }
@@ -612,9 +692,16 @@ class MukurtuMigrateRestManager {
       'username' => $this->sourceUser,
       'password' => $this->sourcePassword,
     ];
-    $response = $this->remoteCall("POST", "/user/login", $data);
+    $response = $this->remoteCall("POST", "/user/login", $data, FALSE);
 
     if ($response['HTTP_CODE'] == 200) {
+      $body = json_decode($response['body']);
+      if (isset($body->session_name)) {
+        $this->sourceCookie = $body->session_name . '=' . $body->sessid;
+        $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_migrate');
+        $tempstore->set('migration_source_cookie', $this->sourceCookie);
+      }
+
       return TRUE;
     }
     return FALSE;
@@ -665,11 +752,15 @@ class MukurtuMigrateRestManager {
         break;
 
       default:
-        if ($data)
+        if ($data) {
+          $http_header[] = 'Content-Type: application/json';
           $url = sprintf("%s?%s", $url, http_build_query($data));
+        }
     }
 
-
+    if ($endpoint != '/user/login') {
+      $http_header[] = 'Cookie: ' . $this->sourceCookie;
+    }
     curl_setopt($curl, CURLOPT_HTTPHEADER, $http_header);
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);

@@ -36,7 +36,7 @@ function mukurtu_community_entity_insert(EntityInterface $entity) {
   $type = $entity->bundle();
 
   // Placeholder, replace after import implemented.
-  $suppress_protocol_creation = FALSE;
+  $suppress_protocol_creation = $entity->fromImport ?? FALSE;
 
   // There are some cases where we don't want to auto generate the protocol (e.g., import).
   if ($type == "community" && !$suppress_protocol_creation) {
