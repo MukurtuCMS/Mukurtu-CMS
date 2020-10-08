@@ -226,9 +226,6 @@ class ImportFromRemoteSite extends FormBase {
     // Set state to the start.
     $form_state->setValue('migrate_state', ImportFromRemoteSite::STATE_START);
 
-    // Wipe the old -> new table.
-    \Drupal::state()->set('mukurtu_migrate_old_new_table', []);
-
     /** @var PrivateTempStoreFactory $private_tempstore */
     $private_tempstore = \Drupal::service('tempstore.private');
     $migrate_tempstore = $private_tempstore->get('mukurtu_migrate');
@@ -246,8 +243,9 @@ class ImportFromRemoteSite extends FormBase {
   protected function getMigrationState(FormStateInterface $form_state) {
     $state = $form_state->getValue('migrate_state') ?? ImportFromRemoteSite::STATE_START;
 
-    $this->migrationManager = $_SESSION['mukurtu_migrate']['migration_manager'] ?? \Drupal::service('mukurtu_migrate.migrate_rest_manager');
-    $_SESSION['mukurtu_migrate']['migration_manager'] = $this->migrationManager;
+    //$this->migrationManager = $_SESSION['mukurtu_migrate']['migration_manager'] ?? \Drupal::service('mukurtu_migrate.migrate_rest_manager');
+    //$_SESSION['mukurtu_migrate']['migration_manager'] = $this->migrationManager;
+    $this->migrationManager = \Drupal::service('mukurtu_migrate.migrate_rest_manager');
 
     // If we are at the start but still have files from a previous run, give the
     // user the option to resume.

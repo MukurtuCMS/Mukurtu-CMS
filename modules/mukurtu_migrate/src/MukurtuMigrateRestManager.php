@@ -82,7 +82,11 @@ class MukurtuMigrateRestManager {
       ['entity_type' => 'taxonomy_vocabulary', 'bundle' => ''],
       ['entity_type' => 'taxonomy_term', 'bundle' => ''],
       ['entity_type' => 'node', 'bundle' => 'community'],
-      ['entity_type' => 'node', 'bundle' => 'protocol', 'bundle_v2' => 'cultural_protocol_group'],
+      [
+        'entity_type' => 'node',
+        'bundle' => 'protocol',
+        'bundle_v2' => 'cultural_protocol_group',
+      ],
       ['entity_type' => 'node', 'bundle' => 'digital_heritage'],
     ];
 
@@ -97,75 +101,62 @@ class MukurtuMigrateRestManager {
     } catch (Exception $e) {
       dpm($e->getMessage());
     }
-
-    // Load previous old -> new table.
-    $this->oldToNewLookupTable = \Drupal::state()->get('mukurtu_migrate_old_new_table', []);
-  }
-
-  public function setState($step = NULL, $entity_type = NULL, $bundle = NULL, $offset = 0) {
-    $this->currentStep = $step ?? $this->migrationSteps[0];
-    $this->currentEntityType = $entity_type ?? 'taxonomy_vocabulary';
-    $this->currentBundle = $bundle ?? current(array_keys($this->importTable[$this->currentEntityType]));
-    $this->currentOffset = $offset;
-  }
-
-
-  protected function setOldToNewMapping($entity_type, $oldId, $newId) {
-    if (!is_null($oldId) && !is_null($newId)) {
-      dpm("setOldToNewMapping: Mapping $entity_type $oldId => $newId");
-      $this->oldToNewLookupTable[$entity_type][$oldId] = $newId;
-      \Drupal::state()->set('mukurtu_migrate_old_new_table', $this->oldToNewLookupTable);
-    }
-  }
-
-  protected function getOldToNewMapping($entity_type, $oldId) {
-    if (isset($this->oldToNewLookupTable[$entity_type][$oldId])) {
-      return $this->oldToNewLookupTable[$entity_type][$oldId];
-    }
-
-    return NULL;
   }
 
   /**
-   * Map pre-defined Mukurtu 4 content to pre-defined Mukurtu 2 content.
+   * Return the local ID for existing content given entity type and remote ID.
    */
-  protected function mapDefaultContent() {
-    // New -> Old.
-    $defaultTaxonomies = [
-      'authors' => 'scald_authors',
-      'category' => 'category',
-      'contributor' => 'contributor',
-      'creator' => 'creator',
-      'format' => 'format',
-      'interpersonal_relationship' => 'interpersonal_relationship',
-      'keywords' => 'tags',
-      'language' => 'language',
-      'part_of_speech' => 'part_of_speech',
-      'people' => 'people',
-      'publisher' => 'publisher',
-      'subject' => 'subject',
-      //'tags' => '',
-      'type' => 'dh_type',
-    ];
-
-    // Taxonomy vocabularies.
-    $localVocabs = taxonomy_vocabulary_get_names();
-    foreach ($localVocabs as $localVocab) {
-      $oldVocab = $defaultTaxonomies[$localVocab] ?? $localVocab;
-      // Fetch the old remote vocab.
-      $data = ['parameters[machine_name]' => $oldVocab];
-      $response = $this->remoteCall('GET', '/tax-vocab', $data);
-      if ($response['HTTP_CODE'] == 200) {
-        $responseData = json_decode($response['body']);
-
-        if (isset($responseData[0]->vid)) {
-          // Add to the mapping table.
-          $this->setOldToNewMapping('taxonomy_vocabulary', $responseData[0]->vid, $localVocab);
+  protected function getPreviouslyImported($entity_type, $remote_id) {
+    if ($entity_type == 'taxonomy_vocabulary') {
+      if (isset($this->importTable['taxonomy_vocabulary'][$remote_id])) {
+        $remote_machine_name = $this->importTable['taxonomy_vocabulary'][$remote_id]->machine_name;
+        $local_vocab = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->load($remote_machine_name);
+        if ($local_vocab) {
+          dpm("getPreviouslyImported($entity_type, $remote_id): found existing vocab");
+          return $local_vocab->id();
         }
       }
+      return NULL;
     }
 
-    // "Default" category.
+    if ($entity_type == 'taxonomy_term') {
+      if (isset($this->importTable['taxonomy_term'][$remote_id])) {
+        $term_name = $this->importTable['taxonomy_term'][$remote_id]->name;
+        $vid = $this->importTable['taxonomy_term'][$remote_id]->vid;
+        if (isset($this->importTable['taxonomy_vocabulary'][$vid])) {
+          $vocab_name = $this->importTable['taxonomy_vocabulary'][$vid]->machine_name;
+          $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
+            ->loadByProperties(['name' => $term_name, 'vid' => $vocab_name]);
+          $term = reset($term);
+          if ($term) {
+            dpm("getPreviouslyImported($entity_type, $remote_id): found existing term");
+            return $term->id();
+          }
+        }
+      }
+      return NULL;
+    }
+
+    $msg = $this->makeRevisionMessage($entity_type, $remote_id);
+    $query = \Drupal::entityQuery($entity_type)
+      ->latestRevision()
+      ->condition('revision_log', $msg , '=');
+
+    $ids = $query->execute();
+
+    if (empty($ids)) {
+      return NULL;
+    }
+
+    if (count($ids) == 1) {
+      dpm("getPreviouslyImported found one!");
+      return reset($ids);
+    } else {
+      dpm("getPreviouslyImported($entity_type, $remote_id) returned too many results");
+      dpm($ids);
+    }
+
+    return NULL;
   }
 
   /**
@@ -201,7 +192,8 @@ class MukurtuMigrateRestManager {
       'nid' => 'node',
     ];
 
-    $new_id = $this->getOldToNewMapping($lookup[$id_type], $target_id);
+    //$new_id = $this->getOldToNewMapping($lookup[$id_type], $target_id);
+    $new_id = $this->getPreviouslyImported($lookup[$id_type], $target_id);
     if (is_null($new_id)) {
       dpm("I didn't find an existing $id_type with ID $target_id");
     }
@@ -227,7 +219,7 @@ class MukurtuMigrateRestManager {
   }
 
   protected function migrate_entity_reference($value) {
-    dpm("I SHOULDN'T BE CALLED ANY MORE");
+    //dpm("I SHOULDN'T BE CALLED ANY MORE");
     if (is_object($value)) {
       $new_value = [];
       foreach ($value as $lang => $targets) {
@@ -335,7 +327,8 @@ class MukurtuMigrateRestManager {
       unset($new_item->old_id);
 
       // Check for an existing local ID for this entity.
-      $existing_id = $this->getOldToNewMapping($entity_type, $old_id);
+      //$existing_id = $this->getOldToNewMapping($entity_type, $old_id);
+      $existing_id = $this->getPreviouslyImported($entity_type, $old_id);
       if ($existing_id) {
         // It is an existing item, add the existing ID to the migrated item
         // so that we don't create a duplicate.
@@ -372,14 +365,21 @@ class MukurtuMigrateRestManager {
   }
 
   /**
+   * Make a unique revision log message.
+   */
+  protected function makeRevisionMessage($entity_type, $id) {
+    $url = strtolower($this->sourceUrl);
+    $url = str_replace('http://', '', $url);
+    $url = str_replace('https://', '', $url);
+    return "mukurtu_migrate:{$url}:{$entity_type}:{$id}";
+  }
+
+  /**
    * Import a single item by fetching its JSON record.
    */
   protected function importByURI($entity_type, $uri) {
     $response = $this->remoteCall('GET', $uri);
     if ($response['HTTP_CODE'] == 200) {
-      if ($entity_type == 'node') {
-        dpm($response['body']);
-      }
       // Map and process fields.
       $migratedItem = $this->migrateItem($entity_type, $response['body']);
       //dpm("I would run JSON deserializer on this:");
@@ -403,10 +403,6 @@ class MukurtuMigrateRestManager {
         // Mark it as fromImport, this stops automatic protocol creation, etc.
         $entity->fromImport = TRUE;
 
-        if ($entity_type == 'node' && $entity->bundle() == 'digital_heritage') {
-          dpm($migratedItem);
-        }
-
         // The item already exists and we should do an update.
         if (isset($migratedItem['local_id']) && !is_null($migratedItem['local_id'])) {
           // Load the local entity.
@@ -418,6 +414,11 @@ class MukurtuMigrateRestManager {
             $existing_entity->{$fieldname} = $value;
           }
           $entity = $existing_entity;
+        }
+
+        // Mark the entity revision with the old ID so we can find it on later runs.
+        if (method_exists($entity, 'setRevisionLogMessage') && isset($migratedItem['old_id']) && $migratedItem['old_id']) {
+          $entity->setRevisionLogMessage($this->makeRevisionMessage($entity_type, $migratedItem['old_id']));
         }
 
         // Validate the entity, if possible.
@@ -444,9 +445,9 @@ class MukurtuMigrateRestManager {
         }
 
         // Add old ID -> new ID lookup.
-        if (isset($migratedItem['old_id']) && $migratedItem['old_id']) {
+  /*       if (isset($migratedItem['old_id']) && $migratedItem['old_id']) {
           $this->setOldToNewMapping($entity_type, $migratedItem['old_id'], $entity->id());
-        }
+        } */
       } catch (Exception $e) {
         dpm("Failed to import $uri");
         dpm($e->getMessage());
@@ -485,8 +486,6 @@ class MukurtuMigrateRestManager {
       $context['bundle'] = $this->migrationSteps[$context['step']]['bundle'];
       $context['total_items_processed'] = 0;
       $context['offset'] = 0;
-
-      $this->mapDefaultContent();
     }
 
     $entity_type = $context['entity_type'];
