@@ -84,11 +84,11 @@ function mukurtu_migrate_import_summary($options, &$context) {
       'type' => 'Taxonomy Terms',
       'filename' => 'terms.json'
     ],
-    [
+/*     [
       'endpoint' => '/scald',
       'type' => 'Media',
       'filename' => 'scald.json'
-    ],
+    ], */
     [
       'endpoint' => '/node',
       'type' => 'Nodes',

@@ -64,6 +64,8 @@ class MukurtuMigrateRestManager {
         ],
         'digital_heritage' => [
           'body' => 'field_cultural_narrative',
+          'field_tags' => 'field_keywords',
+          //'field_media_asset' => 'field_media_assets',
         ],
       ],
       'scald_atom' => [],
@@ -107,9 +109,16 @@ class MukurtuMigrateRestManager {
    * Return the local ID for existing content given entity type and remote ID.
    */
   protected function getPreviouslyImported($entity_type, $remote_id) {
+    // Taxonomy Vocabulary.
     if ($entity_type == 'taxonomy_vocabulary') {
       if (isset($this->importTable['taxonomy_vocabulary'][$remote_id])) {
+        // Get the remote vocab name from the manifest.
         $remote_machine_name = $this->importTable['taxonomy_vocabulary'][$remote_id]->machine_name;
+
+        // If we've renamed that vocab for Mukurtu 4, use that name.
+        $remote_machine_name = $this->vocabMappings[$remote_machine_name] ?? $remote_machine_name;
+
+        // Try and load a local vocab with that name.
         $local_vocab = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->load($remote_machine_name);
         if ($local_vocab) {
           dpm("getPreviouslyImported($entity_type, $remote_id): found existing vocab");
@@ -119,12 +128,23 @@ class MukurtuMigrateRestManager {
       return NULL;
     }
 
+    // Taxonomy Term.
     if ($entity_type == 'taxonomy_term') {
       if (isset($this->importTable['taxonomy_term'][$remote_id])) {
+        // Get the taxonomy term name from the manifest. For migrate, we are treating names as unique.
         $term_name = $this->importTable['taxonomy_term'][$remote_id]->name;
+
+        // Get the remote vocab ID from the manifest.
         $vid = $this->importTable['taxonomy_term'][$remote_id]->vid;
+
         if (isset($this->importTable['taxonomy_vocabulary'][$vid])) {
+          // Lookup the remote vocab name from the manifest using that ID.
           $vocab_name = $this->importTable['taxonomy_vocabulary'][$vid]->machine_name;
+
+          // If we've renamed that vocab for Mukurtu 4, use that name.
+          $vocab_name = $this->vocabMappings[$vocab_name] ?? $vocab_name;
+
+          // Try and load a local taxonomy term with that name/vocab.
           $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
             ->loadByProperties(['name' => $term_name, 'vid' => $vocab_name]);
           $term = reset($term);
@@ -137,6 +157,7 @@ class MukurtuMigrateRestManager {
       return NULL;
     }
 
+    // Nodes.
     $msg = $this->makeRevisionMessage($entity_type, $remote_id);
     $query = \Drupal::entityQuery($entity_type)
       ->latestRevision()
@@ -219,15 +240,12 @@ class MukurtuMigrateRestManager {
   }
 
   protected function migrate_entity_reference($value) {
-    //dpm("I SHOULDN'T BE CALLED ANY MORE");
     if (is_object($value)) {
       $new_value = [];
       foreach ($value as $lang => $targets) {
         if (is_array($targets)) {
           foreach ($targets as $delta => $target) {
             foreach ($target as $id => $target_id) {
-              //$new_value[$lang][] = ['target_id' => $this->translateTargetId($id, $target_id)];
-              //$new_value[] = ['target_id' => $this->translateTargetId($id, $target_id)];
               $new_target = $this->translateTargetId($id, $target_id);
               if ($new_target) {
                 $new_value[] = ['value' => $new_target];
@@ -236,11 +254,42 @@ class MukurtuMigrateRestManager {
           }
         }
       }
-      //dpm($new_value);
+
       return $new_value;
     }
 
-    //dpm($value);
+    return $value;
+  }
+
+  protected function migrate_text_with_summary($value) {
+    if (is_object($value)) {
+      $new_value = [];
+      foreach ($value as $lang => $text_values) {
+        if (is_array($text_values)) {
+          foreach ($text_values as $delta => $text_value) {
+            if (isset($text_value->format)) {
+              switch ($text_value->format) {
+                case 'full_html':
+                case 'ds_code':
+                  $text_value->format = 'full_html';
+                  break;
+
+                case 'filtered_html':
+                  $text_value->format = 'restricted_html';
+                  break;
+
+                default:
+                  $text_value->format = 'basic_html';
+              }
+            }
+            $new_value[] = $text_value;
+          }
+        }
+      }
+
+      return $new_value;
+    }
+
     return $value;
   }
 
@@ -341,27 +390,6 @@ class MukurtuMigrateRestManager {
     }
 
     return ['old_id' => $old_id, 'local_id' => $existing_id, 'json' => json_encode($new_item)];
-  }
-
-  protected function convertTextField($value) {
-    $new_value = new stdClass();
-    $new_value->value = $value[0]->und[0]->value;
-    $new_value->format = $value[0]->und[0]->format;
-    switch ($value[0]->und[0]->format) {
-      case 'full_html':
-      case 'ds_code':
-        $new_value->format = 'full_html';
-        break;
-
-      case 'filtered_html':
-        $new_value->format = 'restricted_html';
-        break;
-
-      default:
-        $new_value->format = 'basic_html';
-    }
-
-    return [$new_value];
   }
 
   /**
