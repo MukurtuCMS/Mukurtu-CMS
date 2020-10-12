@@ -52,22 +52,19 @@ class MukurtuEntityReferenceFieldItemNormalizer extends ComplexDataNormalizer im
       throw new InvalidArgumentException('The field item passed in via $context[\'target_instance\'] must have a parent set.');
     }
     $field_item = $context['target_instance'];
-    //dpm($field_item);
-    //$entities = parent::denormalize($data, $class, $format, $context);
 
-    dpm("denormalize");
-    dpm($data);
     $refList = [];
     //return $entities;
     foreach ($data as $ref) {
       if (isset($ref['target_id'])) {
         $refList[] = ['target_id' => $ref['target_id']];
       }
+      if (isset($ref['value'])) {
+        $refList[] = ['target_id' => $ref['value']];
+      }
     }
 
     $field_item->setValue($refList);
-    //$field_item->setValue($this->constructValue($data, $context));
-    //dpm($field_item);
 
     return $field_item;
   }

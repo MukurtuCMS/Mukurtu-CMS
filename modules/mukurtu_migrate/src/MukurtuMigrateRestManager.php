@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_migrate;
 use Exception;
 use stdClass;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\Core\Language\Language;
 
 class MukurtuMigrateRestManager {
   protected $sourceUrl;
@@ -28,9 +29,10 @@ class MukurtuMigrateRestManager {
   protected $currentBundle;
   protected $currentOffset;
   protected $itemsPerBatch;
+  protected $openProtocolDeleteTag;
 
   public function __construct() {
-    // Default field mappings.
+    // Default field mappings. Mukurtu v2 -> Mukurtu v4.
     $this->fieldMappings = [
       'default' => [
         'language' => 'langcode',
@@ -66,6 +68,12 @@ class MukurtuMigrateRestManager {
           'body' => 'field_cultural_narrative',
           'field_tags' => 'field_keywords',
           //'field_media_asset' => 'field_media_assets',
+        ],
+/*         'protocol' => [
+          'og_group_ref' => 'field_mukurtu_community',
+        ], */
+        'cultural_protocol_group' => [
+          'og_group_ref' => 'field_mukurtu_community',
         ],
       ],
       'scald_atom' => [],
@@ -103,6 +111,8 @@ class MukurtuMigrateRestManager {
     } catch (Exception $e) {
       dpm($e->getMessage());
     }
+
+    $this->openProtocolDeleteTag = "!!!mukurtu_migrate:open!!!";
   }
 
   /**
@@ -121,7 +131,6 @@ class MukurtuMigrateRestManager {
         // Try and load a local vocab with that name.
         $local_vocab = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->load($remote_machine_name);
         if ($local_vocab) {
-          dpm("getPreviouslyImported($entity_type, $remote_id): found existing vocab");
           return $local_vocab->id();
         }
       }
@@ -149,7 +158,6 @@ class MukurtuMigrateRestManager {
             ->loadByProperties(['name' => $term_name, 'vid' => $vocab_name]);
           $term = reset($term);
           if ($term) {
-            dpm("getPreviouslyImported($entity_type, $remote_id): found existing term");
             return $term->id();
           }
         }
@@ -170,7 +178,6 @@ class MukurtuMigrateRestManager {
     }
 
     if (count($ids) == 1) {
-      dpm("getPreviouslyImported found one!");
       return reset($ids);
     } else {
       dpm("getPreviouslyImported($entity_type, $remote_id) returned too many results");
@@ -211,9 +218,9 @@ class MukurtuMigrateRestManager {
       'tid' => 'taxonomy_term',
       'vid' => 'taxonomy_vocabulary',
       'nid' => 'node',
+      'target_id' => 'node',
     ];
 
-    //$new_id = $this->getOldToNewMapping($lookup[$id_type], $target_id);
     $new_id = $this->getPreviouslyImported($lookup[$id_type], $target_id);
     if (is_null($new_id)) {
       dpm("I didn't find an existing $id_type with ID $target_id");
@@ -308,6 +315,11 @@ class MukurtuMigrateRestManager {
       $field_type_ftn = 'migrate_' . $this->importTable['field_definitions'][$entity_type][$field_name]->getType();
     }
 
+    // One off for protocol community handler.
+    if ($entity_type == 'node' && $bundle == 'cultural_protocol_group' && $field_name == 'field_mukurtu_community') {
+      $field_type_ftn = 'migrate_entity_reference';
+    }
+
     // Check if we have a migration method for this field type.
     if (method_exists($this, $field_type_ftn)) {
       $value = $this->{$field_type_ftn}($value);
@@ -343,14 +355,6 @@ class MukurtuMigrateRestManager {
 
     $bundle = ($entity_type == 'taxonomy_vocabulary' || $entity_type == 'taxonomy_term') ? '' : $item->type;
 
-    // Swtich back from v2 -> v4 bundle names.
-    if ($entity_type == 'node') {
-      if ($bundle == 'cultural_protocol_group') {
-        $bundle = 'protocol';
-        $item->type = $bundle;
-      }
-    }
-
     // Migrate the values from the incoming JSON to v4 format/schema.
     $new_item = new stdClass();
     foreach ($item as $key => $value) {
@@ -359,6 +363,55 @@ class MukurtuMigrateRestManager {
       if ($fieldMapping) {
         // TODO: Do any required processing to the new field value.
         $new_item->{$fieldMapping['field_name']} = $this->migrateValue($entity_type, $bundle, $fieldMapping['field_name'], $value);
+      }
+    }
+
+    // Handle item under Protocols.
+    if ($entity_type == 'node' && isset($this->importTable['field_definitions'][$entity_type][$bundle]['field_mukurtu_protocol_r_scope'])) {
+      // Set to most retrictive first.
+      $new_item->field_mukurtu_protocol_r_scope = ['value' => 'personal'];
+      $new_item->field_mukurtu_protocol_w_scope = ['value' => 'personal'];
+      if (isset($item->og_group_ref) && !empty($item->og_group_ref->{Language::LANGCODE_NOT_SPECIFIED})) {
+        $all_open = TRUE;
+        $strict_protocols = [];
+        foreach ($item->og_group_ref->{Language::LANGCODE_NOT_SPECIFIED} as $delta => $item_protocol) {
+          $protocol_id = $this->getPreviouslyImported('node', $item_protocol->target_id);
+          $protocol_entity = \Drupal::entityTypeManager()->getStorage('node')->load($protocol_id);
+          if ($protocol_entity) {
+            // Item has at least one strict protocol.
+            if (stripos($protocol_entity->title->value, $this->openProtocolDeleteTag) === FALSE) {
+              $all_open = FALSE;
+              $strict_protocols[] = ['value' => $protocol_entity->id()];
+            }
+          }
+        }
+
+        // If all the item's protocols are open, set the migrated item's scope to public.
+        if ($all_open) {
+          $new_item->field_mukurtu_protocol_r_scope = ['value' => 'public'];
+          $new_item->field_mukurtu_protocol_w_scope = ['value' => 'public'];
+        } else {
+          // Some or all of the protocols were strict, get any/all setting.
+          if (count($strict_protocols) > 0 && isset($item->field_item_privacy_setting->{Language::LANGCODE_NOT_SPECIFIED}[0])) {
+            $new_item->field_mukurtu_protocol_r_scope = $item->field_item_privacy_setting->{Language::LANGCODE_NOT_SPECIFIED}[0];
+            $new_item->field_mukurtu_protocol_w_scope = $item->field_item_privacy_setting->{Language::LANGCODE_NOT_SPECIFIED}[0];
+            $new_item->field_mukurtu_protocol_read = $strict_protocols;
+            $new_item->field_mukurtu_protocol_write = $strict_protocols;
+          }
+        }
+      }
+    }
+
+    // Swtich back from v2 -> v4 bundle names.
+    if ($entity_type == 'node') {
+      if ($bundle == 'cultural_protocol_group') {
+        $bundle = 'protocol';
+        $item->type = $bundle;
+
+        // Mark open protocols so we can delete them later.
+        if (isset($item->group_access->und[0]->value) && $item->group_access->und[0]->value == "0") {
+          $item->title = $this->openProtocolDeleteTag . ' ' . $item->title;
+        }
       }
     }
 
@@ -382,7 +435,7 @@ class MukurtuMigrateRestManager {
         // It is an existing item, add the existing ID to the migrated item
         // so that we don't create a duplicate.
         $id_fieldname = $this->getIdFieldname($entity_type);
-        dpm("this already exists, $entity_type: $id_fieldname=> $existing_id");
+
         if ($id_fieldname) {
           $new_item->{$id_fieldname} = $this->migrateValue($entity_type, $bundle, $id_fieldname, $existing_id);
         }
@@ -407,11 +460,10 @@ class MukurtuMigrateRestManager {
    */
   protected function importByURI($entity_type, $uri) {
     $response = $this->remoteCall('GET', $uri);
+
     if ($response['HTTP_CODE'] == 200) {
       // Map and process fields.
       $migratedItem = $this->migrateItem($entity_type, $response['body']);
-      //dpm("I would run JSON deserializer on this:");
-      //dpm($migratedItem);
 
       // Determine entity class for the serializer.
       $entityClass = \Drupal\node\Entity\Node::class;
@@ -438,7 +490,6 @@ class MukurtuMigrateRestManager {
 
           // Copy the remote field values onto the existing entity.
           foreach ($entity as $fieldname => $value) {
-            //dpm("I'm copying $fieldname onto existing");
             $existing_entity->{$fieldname} = $value;
           }
           $entity = $existing_entity;
@@ -468,7 +519,6 @@ class MukurtuMigrateRestManager {
           }
         } else {
           // Not all types support validiation, role the dice and hope it saves.
-          //dpm($entity);
           $entity->save();
         }
 
