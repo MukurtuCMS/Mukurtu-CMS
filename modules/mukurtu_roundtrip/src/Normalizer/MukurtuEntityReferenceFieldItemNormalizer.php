@@ -54,7 +54,7 @@ class MukurtuEntityReferenceFieldItemNormalizer extends ComplexDataNormalizer im
     $field_item = $context['target_instance'];
 
     $refList = [];
-    //return $entities;
+
     foreach ($data as $ref) {
       if (isset($ref['target_id'])) {
         $refList[] = ['target_id' => $ref['target_id']];

@@ -67,7 +67,7 @@ class MukurtuMigrateRestManager {
         'digital_heritage' => [
           'body' => 'field_cultural_narrative',
           'field_tags' => 'field_keywords',
-          //'field_media_asset' => 'field_media_assets',
+          'field_media_asset' => 'field_media_assets',
         ],
 /*         'protocol' => [
           'og_group_ref' => 'field_mukurtu_community',
@@ -76,7 +76,16 @@ class MukurtuMigrateRestManager {
           'og_group_ref' => 'field_mukurtu_community',
         ],
       ],
-      'scald_atom' => [],
+      'media' => [
+        'default' => [
+          'sid' => 'old_id',
+          'type' => 'bundle',
+          'title' => 'name',
+        ],
+        'image' => [
+          'base_id' => 'field_media_image',
+        ],
+      ],
     ];
 
     // Mukurtu 2 vs Mukurtu 4 vocabulary machine names.
@@ -165,11 +174,46 @@ class MukurtuMigrateRestManager {
       return NULL;
     }
 
+    // Media/Scald Atoms.
+    if ($entity_type == 'scald_atom' || $entity_type == 'media') {
+      // Try and load a local media item with that ID.
+      $msg = $this->makeRevisionMessage('media', $remote_id);
+
+      $query = \Drupal::entityQuery('media')
+        ->latestRevision()
+        ->condition('revision_log_message', $msg, '=');
+
+      $ids = $query->execute();
+
+      if (count($ids) == 1) {
+        dpm("I found media with msg = $msg");
+        dpm($ids);
+        return reset($ids);
+      }
+
+      return NULL;
+    }
+
+    if ($entity_type == 'file') {
+      $msg = $this->makeRevisionMessage($entity_type, $remote_id);
+
+      $query = \Drupal::entityQuery($entity_type)
+        ->condition('filename', $msg, 'CONTAINS');
+
+      $ids = $query->execute();
+
+      if (count($ids) == 1) {
+        return reset($ids);
+      }
+
+      return NULL;
+    }
+
     // Nodes.
     $msg = $this->makeRevisionMessage($entity_type, $remote_id);
     $query = \Drupal::entityQuery($entity_type)
       ->latestRevision()
-      ->condition('revision_log', $msg , '=');
+      ->condition('revision_log', $msg, '=');
 
     $ids = $query->execute();
 
@@ -218,14 +262,29 @@ class MukurtuMigrateRestManager {
       'tid' => 'taxonomy_term',
       'vid' => 'taxonomy_vocabulary',
       'nid' => 'node',
+      'sid' => 'scald_atom',
       'target_id' => 'node',
     ];
 
-    $new_id = $this->getPreviouslyImported($lookup[$id_type], $target_id);
-    if (is_null($new_id)) {
-      dpm("I didn't find an existing $id_type with ID $target_id");
+    if (isset($lookup[$id_type])) {
+      $new_id = $this->getPreviouslyImported($lookup[$id_type], $target_id);
+      if (is_null($new_id)) {
+        // If this is a media reference that hasn't been imported, try and import it.
+        // This is temporary until we make a REST index for Mukurtu 2 scald atoms.
+        if ($id_type == 'sid') {
+          $uri = "{$this->sourceUrl}/scald/sid/$target_id";
+          $media_id = $this->importByURI('media', $uri);
+          if ($media_id) {
+            return $media_id;
+          }
+        }
+        dpm("I didn't find an existing $id_type with ID $target_id");
+      }
+      return $new_id;
     }
-    return $new_id;
+
+    dpm("translateTargetId($id_type, $target_id) = NULL");
+    return NULL;
   }
 
   /**
@@ -300,6 +359,16 @@ class MukurtuMigrateRestManager {
     return $value;
   }
 
+  protected function migrate_image($value) {
+    $id = $this->getPreviouslyImported('file', $value);
+    if ($id) {
+      return [['target_id' => $id]];
+    }
+
+    // TESTING.
+    return [['target_id' => 11]];//[['target_id' => 11]];
+  }
+
 
   /**
    * Migrate a field value.
@@ -325,6 +394,13 @@ class MukurtuMigrateRestManager {
       $value = $this->{$field_type_ftn}($value);
     }
 
+    if ($field_name == 'field_media_assets') {
+      dpm("$entity_type:$bundle:$field_name");
+      dpm($value);
+      // TODO: Placeholder, replace.
+      $value = [['value'=> 4]];
+    }
+
     // These are all special one off migration cases.
     if ($entity_type == 'taxonomy_vocabulary') {
       // Convert vocab names.
@@ -341,6 +417,12 @@ class MukurtuMigrateRestManager {
     if ($entity_type == 'taxonomy_term') {
       if ($field_name == 'vid') {
         return $this->vocabMappings[$value] ?? $value;
+      }
+    }
+
+    if ($entity_type == 'media') {
+      if ($field_name == 'bundle') {
+        return $value;
       }
     }
 
@@ -416,7 +498,7 @@ class MukurtuMigrateRestManager {
     }
 
     // Set the type so the entity validation works.
-    if ($bundle != '') {
+    if ($bundle != '' && $entity_type != 'media') {
       $new_item->type = $bundle;
     }
 
@@ -429,7 +511,6 @@ class MukurtuMigrateRestManager {
       unset($new_item->old_id);
 
       // Check for an existing local ID for this entity.
-      //$existing_id = $this->getOldToNewMapping($entity_type, $old_id);
       $existing_id = $this->getPreviouslyImported($entity_type, $old_id);
       if ($existing_id) {
         // It is an existing item, add the existing ID to the migrated item
@@ -472,6 +553,9 @@ class MukurtuMigrateRestManager {
       }
       if ($entity_type == 'taxonomy_term') {
         $entityClass = \Drupal\taxonomy\Entity\Term::class;
+      }
+      if ($entity_type == 'media' || $entity_type == 'scald_atom') {
+        $entityClass = \Drupal\media\Entity\Media::class;
       }
 
       // Run the resulting JSON through the deserializer.
@@ -516,16 +600,13 @@ class MukurtuMigrateRestManager {
           } else {
             // Validation succeeded, save the entity.
             $entity->save();
+            return $entity->id();
           }
         } else {
           // Not all types support validiation, role the dice and hope it saves.
           $entity->save();
+          return $entity->id();
         }
-
-        // Add old ID -> new ID lookup.
-  /*       if (isset($migratedItem['old_id']) && $migratedItem['old_id']) {
-          $this->setOldToNewMapping($entity_type, $migratedItem['old_id'], $entity->id());
-        } */
       } catch (Exception $e) {
         dpm("Failed to import $uri");
         dpm($e->getMessage());
@@ -534,6 +615,8 @@ class MukurtuMigrateRestManager {
       dpm("Need to log error");
       dpm($response);
     }
+
+    return NULL;
   }
 
 
@@ -676,6 +759,11 @@ class MukurtuMigrateRestManager {
         $this->importTable['field_definitions']['node'][$node->type] = $entityFieldManager->getFieldDefinitions('node', $node->type);
       }
       $table[$node->type][$node->nid] = $node;
+    }
+
+    // Load the media entity field definitions as well.
+    foreach (['image', 'audio', 'document', 'remote_video', 'video'] as $media_type) {
+      $this->importTable['field_definitions']['media'][$media_type] = $entityFieldManager->getFieldDefinitions('media', $media_type);
     }
 
     $this->importTable['node'] = $table;
