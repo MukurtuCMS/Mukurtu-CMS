@@ -186,8 +186,6 @@ class MukurtuMigrateRestManager {
       $ids = $query->execute();
 
       if (count($ids) == 1) {
-        dpm("I found media with msg = $msg");
-        dpm($ids);
         return reset($ids);
       }
 
@@ -394,13 +392,6 @@ class MukurtuMigrateRestManager {
       $value = $this->{$field_type_ftn}($value);
     }
 
-    if ($field_name == 'field_media_assets') {
-      dpm("$entity_type:$bundle:$field_name");
-      dpm($value);
-      // TODO: Placeholder, replace.
-      $value = [['value'=> 4]];
-    }
-
     // These are all special one off migration cases.
     if ($entity_type == 'taxonomy_vocabulary') {
       // Convert vocab names.
@@ -449,7 +440,7 @@ class MukurtuMigrateRestManager {
     }
 
     // Handle item under Protocols.
-    if ($entity_type == 'node' && isset($this->importTable['field_definitions'][$entity_type][$bundle]['field_mukurtu_protocol_r_scope'])) {
+    if (isset($this->importTable['field_definitions'][$entity_type][$bundle]['field_mukurtu_protocol_r_scope'])) {
       // Set to most retrictive first.
       $new_item->field_mukurtu_protocol_r_scope = ['value' => 'personal'];
       $new_item->field_mukurtu_protocol_w_scope = ['value' => 'personal'];
@@ -840,11 +831,6 @@ class MukurtuMigrateRestManager {
     $this->sourceUrl = $url;
     $this->sourceUser = $user;
     $this->sourcePassword = $password;
-
-/*     $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_migrate');
-    $tempstore->set('source_url', $url);
-    $tempstore->set('source_username', $user);
-    $tempstore->set('source_password', $password); */
 
     return $this->authenticate();
   }
