@@ -178,6 +178,7 @@ class ImportFromRemoteSite extends FormBase {
 
     $manifest = $this->loadManifest($form_state);
     $taxonomyTable = (isset($manifest['vocab']) && isset($manifest['terms'])) ? $this->migrationManager->buildVocabularyTable($manifest['vocab'], $manifest['terms']) : [];
+    $fileTable = isset($manifest['files']) ? $this->migrationManager->buildFileTable($manifest['files']) : [];
     $nodeTable = isset($manifest['nodes']) ? $this->migrationManager->buildNodeTable($manifest['nodes']) : [];
     $mediaTable = [];
 

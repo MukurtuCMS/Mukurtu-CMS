@@ -8,3 +8,8 @@ services:
     class: Drupal\mukurtu_roundtrip\Normalizer\MukurtuContentEntityNormalizer
     tags:
       - { name: normalizer, priority: 10 }
+
+  mukurtu_roundtrip.normalizer.file_field_item_list:
+    class: Drupal\mukurtu_roundtrip\Normalizer\MukurtuFileFieldItemListNormalizer
+    tags:
+      - { name: normalizer, priority: 10 }

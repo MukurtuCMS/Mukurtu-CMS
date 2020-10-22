@@ -77,22 +77,27 @@ function mukurtu_migrate_import_summary($options, &$context) {
     [
       'endpoint' => '/tax-vocab',
       'type' => 'Taxonomy Vocabularies',
-      'filename' => 'vocab.json'
+      'filename' => 'vocab.json',
     ],
     [
       'endpoint' => '/tax-term',
       'type' => 'Taxonomy Terms',
-      'filename' => 'terms.json'
+      'filename' => 'terms.json',
+    ],
+    [
+      'endpoint' => '/file',
+      'type' => 'Files',
+      'filename' => 'files.json',
     ],
 /*     [
       'endpoint' => '/scald',
       'type' => 'Media',
-      'filename' => 'scald.json'
+      'filename' => 'scald.json',
     ], */
     [
       'endpoint' => '/node',
       'type' => 'Nodes',
-      'filename' => 'nodes.json'
+      'filename' => 'nodes.json',
     ],
   ];
 

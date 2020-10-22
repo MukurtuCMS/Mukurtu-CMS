@@ -38,6 +38,9 @@ class MukurtuEntityReferenceFieldItemNormalizer extends ComplexDataNormalizer im
    * {@inheritdoc}
    */
   public function supportsDenormalization($data, $type, $format = NULL) {
+    if ($type != 'Drupal\Core\Field\EntityReferenceFieldItemList') {
+      return FALSE;
+    }
     return parent::supportsDenormalization($data, $type, $format);
   }
 
@@ -51,6 +54,7 @@ class MukurtuEntityReferenceFieldItemNormalizer extends ComplexDataNormalizer im
     if ($context['target_instance']->getParent() == NULL) {
       throw new InvalidArgumentException('The field item passed in via $context[\'target_instance\'] must have a parent set.');
     }
+
     $field_item = $context['target_instance'];
 
     $refList = [];

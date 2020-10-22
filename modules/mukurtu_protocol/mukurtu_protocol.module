@@ -401,7 +401,8 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
   // Get the protocol set IDs for the media.
   //$query->leftJoin('mukurtu_protocol_access', 'mpa', 'media_field_data.mid = mpa.id');
   $media_tables = $query->getTables();
-  $media_table = reset(array_keys($media_tables));
+  $media_tables_keys = array_keys($media_tables);
+  $media_table = reset($media_tables_keys);
   $query->leftJoin('mukurtu_protocol_access', 'mpa', "$media_table.mid = mpa.id");
   $query->condition('mpa.entity_type', 'media');
 

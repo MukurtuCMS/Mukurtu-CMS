@@ -6,8 +6,13 @@ use Exception;
 use stdClass;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Language\Language;
+use Drupal\file\Entity\File;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
 
 class MukurtuMigrateRestManager {
+  use StringTranslationTrait;
+
   protected $sourceUrl;
   protected $sourceUser;
   protected $sourcePassword;
@@ -76,11 +81,19 @@ class MukurtuMigrateRestManager {
           'og_group_ref' => 'field_mukurtu_community',
         ],
       ],
+      'file' => [
+        'default' => [
+          'fid' => 'old_id',
+          'filename' => 'filename',
+          //'type' => 'type',
+        ],
+      ],
       'media' => [
         'default' => [
           'sid' => 'old_id',
           'type' => 'bundle',
           'title' => 'name',
+          'uri_full' => 'uri_full',
         ],
         'image' => [
           'base_id' => 'field_media_image',
@@ -100,6 +113,7 @@ class MukurtuMigrateRestManager {
     $this->migrationSteps = [
       ['entity_type' => 'taxonomy_vocabulary', 'bundle' => ''],
       ['entity_type' => 'taxonomy_term', 'bundle' => ''],
+      ['entity_type' => 'file', 'bundle' => 'image'],
       ['entity_type' => 'node', 'bundle' => 'community'],
       [
         'entity_type' => 'node',
@@ -268,7 +282,7 @@ class MukurtuMigrateRestManager {
       $new_id = $this->getPreviouslyImported($lookup[$id_type], $target_id);
       if (is_null($new_id)) {
         // If this is a media reference that hasn't been imported, try and import it.
-        // This is temporary until we make a REST index for Mukurtu 2 scald atoms.
+        // TODO: This is temporary until we make a REST index for Mukurtu 2 scald atoms.
         if ($id_type == 'sid') {
           $uri = "{$this->sourceUrl}/scald/sid/$target_id";
           $media_id = $this->importByURI('media', $uri);
@@ -295,6 +309,9 @@ class MukurtuMigrateRestManager {
 
       case 'taxonomy_vocabulary':
         return 'vid';
+
+      case 'file':
+        return 'fid';
 
       case 'node':
       default:
@@ -357,14 +374,17 @@ class MukurtuMigrateRestManager {
     return $value;
   }
 
+  // TODO: Figure out really how to handle title/alt text.
   protected function migrate_image($value) {
     $id = $this->getPreviouslyImported('file', $value);
+    $file = File::load($id);
+    $alt = '';
+
     if ($id) {
-      return [['target_id' => $id]];
+      return ['target_id' => $id, 'alt' => $alt, 'title' => ''];
     }
 
-    // TESTING.
-    return [['target_id' => 11]];//[['target_id' => 11]];
+    return NULL;
   }
 
 
@@ -426,7 +446,7 @@ class MukurtuMigrateRestManager {
   protected function migrateItem($entity_type, $json) {
     $item = json_decode($json);
 
-    $bundle = ($entity_type == 'taxonomy_vocabulary' || $entity_type == 'taxonomy_term') ? '' : $item->type;
+    $bundle = ($entity_type == 'taxonomy_vocabulary' || $entity_type == 'taxonomy_term' || $entity_type == 'file') ? '' : $item->type;
 
     // Migrate the values from the incoming JSON to v4 format/schema.
     $new_item = new stdClass();
@@ -511,6 +531,33 @@ class MukurtuMigrateRestManager {
         if ($id_fieldname) {
           $new_item->{$id_fieldname} = $this->migrateValue($entity_type, $bundle, $id_fieldname, $existing_id);
         }
+      } else {
+        // For files we need to download the actual binary file and store it locally.
+        if ($entity_type == 'file') {
+          if (isset($item->uri_full)) {
+            $opts = [
+              'http' => [
+                'method' => "GET",
+                'header' => "Accept-language: en\r\nCookie: {$this->sourceCookie}\r\n"
+              ],
+            ];
+
+            $context = stream_context_create($opts);
+
+            // Open the file using the HTTP headers set above
+            $binary = file_get_contents($item->uri_full, FALSE, $context);
+            // TODO: Should this be private?
+            $destination = "public://{$item->filename}";
+
+            // TODO: For large files this may not work.
+            $file = file_save_data($binary, $destination, FILE_EXISTS_REPLACE);
+            if ($file) {
+              $file->set('filename', $this->makeRevisionMessage($entity_type, $old_id) . $item->filename);
+              $new_item->uri = [$file->getFileUri()];
+              $file->save();
+            }
+          }
+        }
       }
     }
 
@@ -524,7 +571,11 @@ class MukurtuMigrateRestManager {
     $url = strtolower($this->sourceUrl);
     $url = str_replace('http://', '', $url);
     $url = str_replace('https://', '', $url);
-    return "mukurtu_migrate:{$url}:{$entity_type}:{$id}";
+    $message = "mukurtu_migrate:{$url}:{$entity_type}:{$id}";
+    if ($entity_type == 'file') {
+      $message = str_replace('/', '-', $message);
+    }
+    return $message;
   }
 
   /**
@@ -548,6 +599,9 @@ class MukurtuMigrateRestManager {
       if ($entity_type == 'media' || $entity_type == 'scald_atom') {
         $entityClass = \Drupal\media\Entity\Media::class;
       }
+      if ($entity_type == 'file') {
+        $entityClass = \Drupal\file\Entity\File::class;
+      }
 
       // Run the resulting JSON through the deserializer.
       $serializer = \Drupal::service('serializer');
@@ -563,9 +617,12 @@ class MukurtuMigrateRestManager {
           // Load the local entity.
           $existing_entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($migratedItem['local_id']);
 
-          // Copy the remote field values onto the existing entity.
-          foreach ($entity as $fieldname => $value) {
-            $existing_entity->{$fieldname} = $value;
+          // Files don't have any values we want to merge.
+          if ($entity_type != 'file') {
+            // Copy the remote field values onto the existing entity.
+            foreach ($entity as $fieldname => $value) {
+              $existing_entity->{$fieldname} = $value;
+            }
           }
           $entity = $existing_entity;
         }
@@ -580,13 +637,15 @@ class MukurtuMigrateRestManager {
           // Check if the entity validates.
           $violations = $entity->validate();
           if ($violations->count() > 0) {
+
             // Validation failed. Log and move on.
             dpm("Failed to import $uri");
             foreach ($violations as $violation) {
-              //$msg = $violations[0]->getMessage();
+              $msg = $violations[0]->getMessage();
               $badField = $violation->getPropertyPath();
               dpm("Field Violation: $badField");
               dpm($entity->get($badField)->value);
+              dpm($msg);
             }
           } else {
             // Validation succeeded, save the entity.
@@ -599,7 +658,7 @@ class MukurtuMigrateRestManager {
           return $entity->id();
         }
       } catch (Exception $e) {
-        dpm("Failed to import $uri");
+        dpm("Failed to import $uri, no validation");
         dpm($e->getMessage());
       }
     } else {
@@ -761,6 +820,25 @@ class MukurtuMigrateRestManager {
     return $table;
   }
 
+  public function buildFileTable($fileFile) {
+    $files = $this->loadJsonFile($fileFile);
+
+    $table = [];
+    $entityFieldManager = \Drupal::service('entity_field.manager');
+
+    foreach ($files as $file) {
+      if (!isset($table[$file->type])) {
+        $table[$file->type] = [];
+        $this->importTable['field_definitions']['file'][$file->type] = $entityFieldManager->getFieldDefinitions('file', $file->type);
+      }
+      $table[$file->type][$file->fid] = $file;
+    }
+
+    $this->importTable['file'] = $table;
+
+    return $table;
+  }
+
   public function buildMediaTable($mediaFile) {
     $table = [];
     $this->importTable['media'] = $table;
@@ -770,6 +848,7 @@ class MukurtuMigrateRestManager {
   public function summarizeImportData($manifest) {
     $taxTable = (isset($manifest['vocab']) && isset($manifest['terms'])) ? $this->buildVocabularyTable($manifest['vocab'], $manifest['terms']) : [];
     $nodeTable = isset($manifest['nodes']) ? $this->buildNodeTable($manifest['nodes']) : [];
+    $fileTable = isset($manifest['files']) ? $this->buildFileTable($manifest['files']) : [];
     $summary = "";
 
     if (!empty($taxTable)) {
@@ -777,6 +856,15 @@ class MukurtuMigrateRestManager {
       foreach ($taxTable as $vocab) {
         $terms_in_vocab = isset($vocab->terms) ? count($vocab->terms) : 0;
         $summary .= "<li>{$vocab->name} ({$vocab->machine_name}): $terms_in_vocab terms</li>";
+      }
+      $summary .= "</ul>";
+    }
+
+    if (!empty($fileTable)) {
+      $summary .= "<h3>Files</h3><ul>";
+      foreach ($fileTable as $type => $files) {
+        $typeCount = count($files);
+        $summary .= "<li>$typeCount files of type $type</li>";
       }
       $summary .= "</ul>";
     }
