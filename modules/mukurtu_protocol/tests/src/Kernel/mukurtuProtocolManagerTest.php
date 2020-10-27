@@ -122,12 +122,14 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'access content',
       'edit own page content',
       'delete own page content',
+      'view own unpublished content',
     ]);
 
     $user2 = $this->drupalCreateUser([
       'access content',
       'edit own page content',
       'delete own page content',
+      'view own unpublished content',
     ]);
 
     // Test user making a private item.
@@ -328,6 +330,37 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'update' => FALSE,
       'delete' => FALSE,
     ], $allNode2, $this->anonymous);
+
+    // Public unpublished item.
+    $user1PublicNode = $this->drupalCreateNode([
+      'type' => 'page',
+      'uid' => $user1->id(),
+      'status' => FALSE,
+      MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_PUBLIC,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_PERSONAL,
+    ]);
+
+    // The author should be able to do all operations.
+    $this->assertProtocolAccess([
+      'view' => TRUE,
+      'update' => TRUE,
+      'delete' => TRUE,
+    ], $user1PublicNode, $user1);
+
+    // Non-author should not be able to do anything to the unpublished item.
+    $this->assertProtocolAccess([
+      'view' => FALSE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1PublicNode, $user2);
+
+    // Anonymous should not be able to do anything to the unpublished item.
+    $this->assertProtocolAccess([
+      'view' => FALSE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1PublicNode, $this->anonymous);
+
   }
 
   /**

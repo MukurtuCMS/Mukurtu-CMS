@@ -164,6 +164,21 @@ class MukurtuProtocolManager {
     switch ($operation) {
       case 'view':
         $view_permission = TRUE;
+
+        // Handle unpublished content. Ideally we'd be returning AccessResult::neutral and
+        // letting Drupal resolve this, but OG messes this up. Worth taking another look
+        // at this later.
+        if ($entity->get('status')->value == FALSE) {
+          // Default to deny for unpublished content.
+          $view_permission = FALSE;
+
+          // If the user is the author and has the correct permisssion, allow.
+          $author = $entity->getOwner();
+          if ($author && $author->id() == $account->id() && $account->hasPermission('view own unpublished content')) {
+            $view_permission = TRUE;
+          }
+        }
+
         return ($view_permission && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
 
       case 'create':
