@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+    - og
+id: media.field_mukurtu_community
+field_name: field_mukurtu_community
+entity_type: media
+type: og_standard_reference
+settings:
+  target_type: media
+module: og
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

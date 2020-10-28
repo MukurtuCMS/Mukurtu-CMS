@@ -18,4 +18,10 @@ function mukurtu_community_install() {
   foreach (node_type_get_names() as $bundle => $label) {
     mukurtu_community_create_community_field('node', $bundle);
   }
+
+  // Create the community field on all pre-existing media bundles.
+  $media_bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
+  foreach ($media_bundles as $bundle => $bundle_info) {
+    mukurtu_community_create_community_field('media', $bundle);
+  }
 }
