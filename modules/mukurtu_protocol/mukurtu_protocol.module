@@ -18,6 +18,9 @@ use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Database\Query\Condition;
 use Drupal\user\Entity\User;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_PERSONAL", "personal");
@@ -452,7 +455,116 @@ function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $fo
       $form[$protocol_field['protocol']]['#states'] = [
         'visible' => [':input[name="' . $protocol_field['scope'] . '[0][value]' . '"]' => [['value' => 'any'], ['value' => 'all']]],
       ];
+
+      // Testing ajax.
+      if ($protocol_field['scope'] == MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE) {
+        $form[$protocol_field['scope']]['widget'][0]['value']['#ajax'] = [
+          'callback' => 'mukurtu_protocol_ajax_update_write_protocol_scope',
+          'disable-refocus' => FALSE,
+          'event' => 'change',
+          'wrapper' => 'edit-field-mukurtu-protocol-w-scope-0-value',
+        ];
+      }
+
+      if ($protocol_field['scope'] == MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE) {
+        $read_scope = $form[MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE]['widget'][0]['value']['#default_value'];
+        switch ($read_scope) {
+          case MUKURTU_PROTOCOL_PERSONAL:
+            $form[$protocol_field['scope']]['widget'][0]['value']['default']['#disabled'] = TRUE;
+            $form[$protocol_field['scope']]['widget'][0]['value']['any']['#disabled'] = TRUE;
+            $form[$protocol_field['scope']]['widget'][0]['value']['all']['#disabled'] = TRUE;
+            break;
+
+          case MUKURTU_PROTOCOL_PUBLIC:
+            $form[$protocol_field['scope']]['widget'][0]['value']['personal']['#disabled'] = TRUE;
+            $form[$protocol_field['scope']]['widget'][0]['value']['default']['#disabled'] = TRUE;
+            break;
+
+          case MUKURTU_PROTOCOL_ANY:
+            $form[$protocol_field['scope']]['widget'][0]['value']['personal']['#disabled'] = TRUE;
+            break;
+
+          case MUKURTU_PROTOCOL_ALL:
+            $form[$protocol_field['scope']]['widget'][0]['value']['personal']['#disabled'] = TRUE;
+            break;
+        }
+      }
     }
+  }
+}
+
+/**
+ * Update the write protocol scope based on the read scope value.
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @return \Drupal\Core\Ajax\AjaxResponse
+ *
+ */
+function mukurtu_protocol_ajax_update_write_protocol_scope(&$form, FormStateInterface $form_state) {
+  if (!empty($form_state->getValue(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)[0]['value'])) {
+    $read_scope = $form_state->getValue(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)[0]['value'];
+    $write_scope = $form_state->getValue(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE)[0]['value'];
+    $response = new AjaxResponse();
+
+    // Start from known state, remove all the disabled classes from the radio buttons.
+    $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value > div', 'removeClass', ['form-disabled']));
+
+    switch ($read_scope) {
+      case MUKURTU_PROTOCOL_PERSONAL:
+        // Read scope is personal, the only valid write scope is personal.
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-personal', 'attr', ['disabled', FALSE]));
+
+        // Disable default, any, all.
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-default', 'attr', ['disabled', TRUE]));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-any', 'attr', ['disabled', TRUE]));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-all', 'attr', ['disabled', TRUE]));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value > div:nth-child(2)', 'addClass', ['form-disabled']));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value > div:nth-child(3)', 'addClass', ['form-disabled']));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value > div:nth-child(4)', 'addClass', ['form-disabled']));
+
+        // Select personal.
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-personal', 'trigger', ['click']));
+        return $response;
+
+      case MUKURTU_PROTOCOL_PUBLIC:
+        // Read scope is public, the only valid write options are any/all.
+        // Disable personal/default.
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-personal', 'attr', ['disabled', TRUE]));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-default', 'attr', ['disabled', TRUE]));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value > div:nth-child(1)', 'addClass', ['form-disabled']));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value > div:nth-child(2)', 'addClass', ['form-disabled']));
+
+        // Enable any/all.
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-any', 'attr', ['disabled', FALSE]));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-all', 'attr', ['disabled', FALSE]));
+
+        // If write scope was on an invalid selection, select 'any' as the new default.
+        if ($write_scope == 'public' || $write_scope == 'personal') {
+          $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-any', 'trigger', ['click']));
+        }
+        return $response;
+
+      case MUKURTU_PROTOCOL_ALL:
+      case MUKURTU_PROTOCOL_ANY:
+        // Read scope gives a protocol, valid write scopes are default/any/all.
+        // Disable personal.
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-personal', 'attr', ['disabled', TRUE]));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value > div:nth-child(1)', 'addClass', ['form-disabled']));
+
+        // Enable default/any/all.
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-default', 'attr', ['disabled', FALSE]));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-any', 'attr', ['disabled', FALSE]));
+        $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-all', 'attr', ['disabled', FALSE]));
+
+        // If write scope was on an invalid selection, select 'default'.
+        if ($write_scope == 'personal') {
+          $response->addCommand(new InvokeCommand('#edit-field-mukurtu-protocol-w-scope-0-value-default', 'trigger', ['click']));
+        }
+        return $response;
+    }
+
+    return $response;
   }
 }
 
@@ -481,6 +593,19 @@ function mukurtu_protocol_entity_presave(EntityInterface $entity) {
         }
       }
     }
+
+    // Compute Community affiliation field.
+/*     if ($entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)) {
+      $all_protocols = [];
+      foreach ($protocol_manager->protocolFields as $protocol_field) {
+        if ($entity->hasField($protocol_field['protocol'])) {
+          foreach ($entity->get($protocol_field['protocol']) as $protocol) {
+            $all_protocols[] =
+          }
+        }
+      }
+    } */
+
   }
 }
 

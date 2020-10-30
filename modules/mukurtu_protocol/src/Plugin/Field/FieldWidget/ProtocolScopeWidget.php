@@ -24,8 +24,10 @@ class ProtocolScopeWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $value = isset($items[$delta]->value) ? $items[$delta]->value : 'personal';
     $options = $items[$delta]->getPossibleOptions();
+    $default_keys = array_keys($options);
+    $default = reset($default_keys);
+    $value = isset($items[$delta]->value) ? $items[$delta]->value : $default;
 
     $element['value'] = $element + [
       '#type' => 'radios',
