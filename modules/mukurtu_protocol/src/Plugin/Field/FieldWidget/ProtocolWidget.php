@@ -89,7 +89,7 @@ class ProtocolWidget extends WidgetBase {
 
       // Any or All means we need to have at least one valid protocol selected.
       if ($scope == 'any' || $scope == 'all') {
-        $protocol_value = $form_state->getValue('field_mukurtu_protocol_read');
+        $protocol_value = $form_state->getValue($field_name);
 
         $count = 0;
         foreach ($protocol_value as $delta => $protocol) {

@@ -14,14 +14,14 @@ settings:
       value: personal
       label: 'Only me, this content is not ready to be shared.'
     -
-      value: public
-      label: 'Anyone, this is public content.'
+      value: default
+      label: 'Use standard Mukurtu roles.'
     -
       value: any
-      label: 'This content may be shared with members of ANY protocols listed.'
+      label: 'This content may be updated only by members of ANY protocols listed.'
     -
       value: all
-      label: 'This content may only be shared with members belonging to ALL protocols listed.'
+      label: 'This content may be updated only by members belonging to ALL protocols listed.'
   allowed_values_function: ''
 module: options
 locked: false

@@ -25,16 +25,11 @@ class ProtocolScopeWidget extends WidgetBase {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $value = isset($items[$delta]->value) ? $items[$delta]->value : 'personal';
+    $options = $items[$delta]->getPossibleOptions();
 
     $element['value'] = $element + [
       '#type' => 'radios',
-      '#description' => $this->t('Who can view this content?'),
-      '#options' => [
-        'personal' => $this->t('Only me, this content is not ready to be shared.'),
-        'public' => $this->t('Anyone, this is public content.'),
-        'any' => $this->t('This content may be shared with members of ANY protocols listed.'),
-        'all' => $this->t('This content may only be shared with members belonging to ALL protocols listed.'),
-      ],
+      '#options' => $options,
       '#default_value' => $value,
       '#element_validate' => [
         [static::class, 'validate'],
