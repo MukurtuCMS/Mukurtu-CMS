@@ -6,9 +6,28 @@ dependencies:
     - image.style.thumbnail
     - media.type.image
   module:
+    - field_group
     - image
     - mukurtu_protocol
     - path
+third_party_settings:
+  field_group:
+    group_protocols:
+      children:
+        - field_mukurtu_protocol_r_scope
+        - field_mukurtu_protocol_read
+        - field_mukurtu_protocol_w_scope
+        - field_mukurtu_protocol_write
+      parent_name: ''
+      weight: 1
+      format_type: fieldset
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        required_fields: true
+      label: Protocols
 id: media.image.default
 targetEntityType: media
 bundle: image
@@ -16,13 +35,13 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 7
+    weight: 8
     region: content
     settings: {  }
     third_party_settings: {  }
   field_media_image:
     type: image_image
-    weight: 1
+    weight: 6
     region: content
     settings:
       progress_indicator: throbber
@@ -31,29 +50,29 @@ content:
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -6
+    weight: 2
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: -5
+    weight: 3
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -4
+    weight: 4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: -3
+    weight: 5
     settings: {  }
     third_party_settings: {  }
   name:
-    weight: -8
+    weight: 0
     settings:
       size: 60
       placeholder: ''
@@ -72,7 +91,7 @@ content:
     region: content
   path:
     type: path
-    weight: 8
+    weight: 9
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -80,7 +99,7 @@ content:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 9
+    weight: 10
     region: content
     third_party_settings: {  }
   title:
@@ -90,7 +109,7 @@ content:
     region: content
   uid:
     type: entity_reference_autocomplete
-    weight: 6
+    weight: 7
     settings:
       match_operator: CONTAINS
       size: 60
@@ -98,4 +117,5 @@ content:
       match_limit: 10
     region: content
     third_party_settings: {  }
-hidden: {  }
+hidden:
+  field_mukurtu_community: true

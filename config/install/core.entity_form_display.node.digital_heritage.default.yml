@@ -52,10 +52,7 @@ third_party_settings:
     group_mukurtu_essentials:
       children:
         - title
-        - field_mukurtu_protocol_r_scope
-        - field_mukurtu_protocol_read
-        - field_mukurtu_protocol_w_scope
-        - field_mukurtu_protocol_write
+        - group_protocols
         - field_media_assets
         - field_category
         - field_creator
@@ -138,6 +135,22 @@ third_party_settings:
         formatter: closed
         required_fields: true
       label: Relations
+    group_protocols:
+      children:
+        - field_mukurtu_protocol_r_scope
+        - field_mukurtu_protocol_read
+        - field_mukurtu_protocol_w_scope
+        - field_mukurtu_protocol_write
+      parent_name: group_mukurtu_essentials
+      weight: -4
+      format_type: fieldset
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        required_fields: true
+      label: Protocols
 id: node.digital_heritage.default
 targetEntityType: node
 bundle: digital_heritage
@@ -151,12 +164,12 @@ content:
     third_party_settings: {  }
   field_category:
     type: options_buttons
-    weight: 7
+    weight: 0
     region: content
     settings: {  }
     third_party_settings: {  }
   field_contributor:
-    weight: 9
+    weight: 2
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -166,7 +179,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_creator:
-    weight: 8
+    weight: 1
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -184,7 +197,7 @@ content:
     type: text_textarea
     region: content
   field_date_description:
-    weight: 10
+    weight: 3
     settings:
       size: 60
       placeholder: ''
@@ -202,7 +215,7 @@ content:
     type: text_textarea_with_summary
     region: content
   field_format:
-    weight: 24
+    weight: 21
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -212,7 +225,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_identifier:
-    weight: 27
+    weight: 23
     settings:
       size: 60
       placeholder: ''
@@ -230,7 +243,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_language:
-    weight: 28
+    weight: 24
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -241,7 +254,7 @@ content:
     region: content
   field_media_assets:
     type: media_library_widget
-    weight: 6
+    weight: -1
     region: content
     settings:
       media_types:
@@ -254,29 +267,29 @@ content:
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 2
+    weight: -5
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: 3
+    weight: -3
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
-    type: mukurtu_protocol_scope_widget
-    region: content
-    weight: 4
+    weight: -2
     settings: {  }
     third_party_settings: {  }
+    type: mukurtu_protocol_scope_widget
+    region: content
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: 5
+    weight: -1
     settings: {  }
     third_party_settings: {  }
   field_people:
-    weight: 31
+    weight: 27
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -319,7 +332,7 @@ content:
     type: string_textarea
     region: content
   field_source:
-    weight: 29
+    weight: 25
     settings:
       size: 60
       placeholder: ''
@@ -327,7 +340,7 @@ content:
     type: string_textfield
     region: content
   field_subject:
-    weight: 30
+    weight: 26
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -345,7 +358,7 @@ content:
     type: text_textarea
     region: content
   field_type:
-    weight: 26
+    weight: 22
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -397,7 +410,7 @@ content:
     region: content
     third_party_settings: {  }
   title:
-    weight: 1
+    weight: -7
     settings:
       size: 60
       placeholder: ''

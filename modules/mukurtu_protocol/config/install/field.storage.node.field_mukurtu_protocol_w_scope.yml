@@ -11,9 +11,6 @@ type: list_string
 settings:
   allowed_values:
     -
-      value: personal
-      label: 'Only me, this content is not ready to be shared.'
-    -
       value: default
       label: 'Use standard Mukurtu roles.'
     -

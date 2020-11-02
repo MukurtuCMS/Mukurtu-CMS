@@ -45,6 +45,24 @@ class ProtocolScopeWidget extends WidgetBase {
    * Validate the protocol scope field.
    */
   public static function validate($element, FormStateInterface $form_state) {
+    $field_name = $element['#array_parents'][0];
+
+    // Write scope depends on read scope.
+    if ($field_name == MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE) {
+      $write_scope = $element['#value'];
+      $read_scope = $form_state->getValue(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE);
+      if (isset($read_scope[0]['value'])) {
+        // Read scope is personal, only valid write scope is default.
+        if ($read_scope[0]['value'] == MUKURTU_PROTOCOL_PERSONAL && $write_scope != 'default') {
+          $form_state->setError($element, t('Protocol write scope must be default if read scope is set to personal only'));
+        }
+
+        // Read scope is public, only valid write scopes are any/all.
+        if ($read_scope[0]['value'] == MUKURTU_PROTOCOL_PUBLIC && $write_scope == 'default') {
+          $form_state->setError($element, t('Protocol write scope must be "any" or "all" if read scope is set to public'));
+        }
+      }
+    }
   }
 
 }
