@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.community
+id: node-community-manager
+label: 'Community Manager'
+weight: 2
+is_admin: false
+group_type: node
+group_bundle: community
+group_id: null
+permissions:
+  - 'add user'
+  - 'administer permissions'
+  - 'approve and deny subscription'
+  - 'manage members'
+  - 'update group'
+role_type: null
