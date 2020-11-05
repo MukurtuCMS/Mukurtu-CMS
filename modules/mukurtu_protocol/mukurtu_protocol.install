@@ -7,6 +7,7 @@
 
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\Core\Entity\EntityTypeBundleManagerInterface;
 
 /**
@@ -38,6 +39,12 @@ function mukurtu_protocol_install() {
 
   // Protocols are also groups.
   Og::addGroup('node', 'protocol');
+
+  // Delete the default 'administrator' role from protocols.
+  $role = OgRole::getRole('node', 'protocol', 'administrator');
+  if ($role) {
+    $role->delete();
+  }
 }
 
 /**

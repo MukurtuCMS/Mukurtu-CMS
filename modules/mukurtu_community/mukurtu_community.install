@@ -6,6 +6,7 @@
  */
 
 use Drupal\og\Og;
+use Drupal\og\Entity\OgRole;
 
 /**
  * Implements hook_install().
@@ -23,5 +24,11 @@ function mukurtu_community_install() {
   $media_bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
   foreach ($media_bundles as $bundle => $bundle_info) {
     mukurtu_community_create_community_field('media', $bundle);
+  }
+
+  // Delete the default 'administrator' role from community.
+  $role = OgRole::getRole('node', 'community', 'administrator');
+  if ($role) {
+    $role->delete();
   }
 }
