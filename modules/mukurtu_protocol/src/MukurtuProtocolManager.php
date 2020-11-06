@@ -100,6 +100,12 @@ class MukurtuProtocolManager {
   /**
    * Return account access for a given operation.
    *
+   * Checking in order of importance.
+   * - Mukurtu membership rules.
+   * - OG User Role Permissions - Protocol.
+   * - OG User Role Permissions - Community.
+   * - Drupal User Role Permissions.
+   *
    * @param \Drupal\Core\Entity\EntityInterface|string $entity
    *   Either a node entity or the machine name of the content type on which to
    *   perform the access check.
@@ -120,43 +126,123 @@ class MukurtuProtocolManager {
       return AccessResult::neutral();
     }
 
-    $protocols = $this->getProtocols($entity);
+    // Get the content's protocol scope and protocols.
+    $protocols = $this->getProtocols($entity, $protocol_field_name);
     $protocol_scope = $entity->get($scope_field_name)->value;
 
- /*    // If the protocol field exists but is empty, only the owner has access.
-    if (empty($protocols)) {
-      return ($entity->getOwnerId() == $account->id()) ? AccessResult::allowed() : AccessResult::forbidden();
-    }
- */
+    // Default permissions to deny.
     $has_required_memberships = FALSE;
+    $og_user_access_protocol = FALSE;
 
-    // Only the author should have access.
-    if ($protocol_scope == 'personal' && ($entity->getOwnerId() == $account->id())) {
-      $has_required_memberships = TRUE;
+    // Handle unpublished content. Ideally we'd be returning AccessResult::neutral and
+    // letting Drupal resolve this, but OG messes this up. Worth taking another look
+    // at this later.
+    if ($entity->get('status')->value == FALSE) {
+      // If the user is not the author or does not have the correct permisssion, deny.
+      $author = $entity->getOwner();
+      $permission = $entity->getEntityType() == 'media' ? 'view own unpublished media' : 'view own unpublished content';
+      if ($author && !($author->id() == $account->id() && $account->hasPermission($permission))) {
+        $unpublished_view_permission = FALSE;
+      }
+    } else {
+      $unpublished_view_permission = TRUE;
+    }
+
+    // Update protocol scope is default, which is classic Mukurtu v2 behavior.
+    if ($protocol_scope == MUKURTU_PROTOCOL_DEFAULT) {
+      // Replace the update protocol scope/protocols with the read values.
+      $read_scope = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)->value;
+
+      $protocol_scope = $read_scope == MUKURTU_PROTOCOL_PERSONAL ? MUKURTU_PROTOCOL_PERSONAL : MUKURTU_PROTOCOL_ALL;
+      //$protocol_scope = MUKURTU_PROTOCOL_ALL;//$entity->get(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)->value;
+      $protocols = $this->getProtocols($entity, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+    }
+
+    // Item is set to personal, only the author should have access.
+    if ($protocol_scope == MUKURTU_PROTOCOL_PERSONAL && ($entity->getOwnerId() == $account->id())) {
+      // No OG checks or specific operation checks for personal items, we can return right away.
+      return AccessResult::allowed();
     }
 
     // Item is public, everybody is a member.
-    if ($protocol_scope == 'public') {
-      $has_required_memberships = TRUE;
-    }
-
-    // Is the user a member of *all* protocols?
-    if ($protocol_scope == 'all') {
-      $grant = $this->getProtocolGrantId($protocols);
-      $user_grants = $this->getUserGrantIds($account);
-      if (in_array($grant, $user_grants)) {
-        $has_required_memberships = TRUE;
+    if ($protocol_scope == MUKURTU_PROTOCOL_PUBLIC) {
+      // Item is public and operation is 'view', we don't need to check OG.
+      if ($operation == 'view') {
+        // If the item is unpublished, user either needs 'view own unpublished' or update access.
+        return $unpublished_view_permission ? AccessResult::allowed() : $this->checkAccess($entity, 'update', $account);
       }
     }
 
-    // Is the user a member of *any* protocols?
-    if ($protocol_scope == 'any') {
+    // Is the user a member of *all* protocols?
+    if ($protocol_scope == MUKURTU_PROTOCOL_ALL) {
+      $grant = $this->getProtocolGrantId($protocols);
+      $user_grants = $this->getUserGrantIds($account);
+      if (in_array($grant, $user_grants)) {
+        // User is a member of all required protocols.
+        // For viewing we don't need to check OG and can return right away.
+        if ($operation == 'view') {
+          return $unpublished_view_permission ? AccessResult::allowed() : AccessResult::forbidden();
+        }
+        $has_required_memberships = TRUE;
+
+        // User meets the Mukurtu protocol requirements, now check if they have the OG permissions.
+        // In this case, they need OG permissions for ALL protocol groups.
+        foreach ($protocols as $protocol) {
+          if (is_null($protocol)) {
+            continue;
+          }
+
+          // Load the protocol node.
+          $group = \Drupal::entityTypeManager()->getStorage('node')->load($protocol);
+          if ($group) {
+            // Ask OG if they have the named permission.
+            $og_access = \Drupal::service('og.access')->userAccessGroupContentEntityOperation($operation, $group, $entity, $account);
+/*             $class = get_class($og_access);
+            dpm("{$account->getUsername()} requests '$operation' on '{$entity->title->value}', OG says: {$class}"); */
+
+            // OG says they do not have access.
+            if (!$og_access->isAllowed()) {
+              //$class = get_class($og_access);
+              //dpm("{$account->getUsername()} requests '$operation' on '{$entity->title->value}', OG says: {$class}");
+              return AccessResult::forbidden();
+            }
+          }
+        }
+
+        // At this point the OG didn't invalidate the user.
+        $og_user_access_protocol = TRUE;
+      }
+    }
+
+    // Is the user a member of ANY protocols?
+    if ($protocol_scope == MUKURTU_PROTOCOL_ANY) {
       foreach ($protocols as $protocol) {
         $grant = $this->getProtocolGrantId([$protocol]);
         $user_grants = $this->getUserGrantIds($account);
         if (in_array($grant, $user_grants)) {
+          // The user is a member of at least one protocol.
           $has_required_memberships = TRUE;
-          break;
+
+          // We don't need to check OG for view, we can return right away.
+          if ($operation == 'view') {
+            return $unpublished_view_permission ? AccessResult::allowed() : AccessResult::forbidden();
+          }
+
+          // If we've already found one valid OG permission, stop checking.
+          if ($og_user_access_protocol) {
+            break;
+          }
+
+          // User is in one of the groups, ask OG if it has the required permission to do the operation.
+          // In this case the user needs OG permissions for only a single group.
+          $group = \Drupal::entityTypeManager()->getStorage('node')->load($protocol);
+          $og_access = \Drupal::service('og.access')->userAccessGroupContentEntityOperation($operation, $group, $entity, $account);
+          if ($og_access->isAllowed()) {
+            $class = get_class($og_access);
+         //   dpm("{$account->getUsername()} requests '$operation' on '{$entity->title->value}', OG says: {$class}");
+            $og_user_access_protocol = TRUE;
+          }
+          //dpm("og_user_access = $og_user_access");
         }
       }
     }
@@ -164,36 +250,34 @@ class MukurtuProtocolManager {
     switch ($operation) {
       case 'view':
         $view_permission = TRUE;
-
+        //dpm("view");
         // Handle unpublished content. Ideally we'd be returning AccessResult::neutral and
         // letting Drupal resolve this, but OG messes this up. Worth taking another look
         // at this later.
         if ($entity->get('status')->value == FALSE) {
-          // Default to deny for unpublished content.
-          $view_permission = FALSE;
-
-          // If the user is the author and has the correct permisssion, allow.
+          // If the user is not the author or does not have the correct permisssion, deny.
           $author = $entity->getOwner();
-          if ($author && $author->id() == $account->id() && $account->hasPermission('view own unpublished content')) {
-            $view_permission = TRUE;
+          if ($author && !($author->id() == $account->id() && $account->hasPermission('view own unpublished content'))) {
+            $view_permission = FALSE;
           }
         }
 
-        return ($view_permission && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
+        return ($view_permission && $og_user_access_protocol && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
 
       case 'create':
         $create_permission = TRUE;
-        return ($create_permission && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
+        return ($create_permission && $og_user_access_protocol && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
 
       case 'update':
         $update_permission = TRUE;
-        return ($update_permission && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
+        return ($update_permission && $og_user_access_protocol && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
 
       case 'delete':
         $delete_permission = TRUE;
-        return ($delete_permission && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
+        return ($delete_permission && $og_user_access_protocol && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
 
       default:
+        //dpm("unhandled op $operation");
         return AccessResult::forbidden();
     }
 
