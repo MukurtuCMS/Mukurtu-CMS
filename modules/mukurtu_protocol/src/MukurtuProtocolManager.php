@@ -143,6 +143,8 @@ class MukurtuProtocolManager {
       $permission = $entity->getEntityType() == 'media' ? 'view own unpublished media' : 'view own unpublished content';
       if ($author && !($author->id() == $account->id() && $account->hasPermission($permission))) {
         $unpublished_view_permission = FALSE;
+      } else {
+        $unpublished_view_permission = TRUE;
       }
     } else {
       $unpublished_view_permission = TRUE;

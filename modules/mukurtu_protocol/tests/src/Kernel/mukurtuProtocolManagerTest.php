@@ -132,64 +132,6 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'view own unpublished content',
     ]);
 
-    // Test user making a private item.
-    $user1PrivateNode = $this->drupalCreateNode([
-      'type' => 'page',
-      'uid' => $user1->id(),
-      MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_PERSONAL,
-      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_PERSONAL,
-    ]);
-
-    // The author should be able to do all operations.
-    $this->assertProtocolAccess([
-      'view' => TRUE,
-      'update' => TRUE,
-      'delete' => TRUE,
-    ], $user1PrivateNode, $user1);
-
-    // Non-author should not be able to do anything.
-    $this->assertProtocolAccess([
-      'view' => FALSE,
-      'update' => FALSE,
-      'delete' => FALSE,
-    ], $user1PrivateNode, $user2);
-
-    // Anonymous should not be able to do anything.
-    $this->assertProtocolAccess([
-      'view' => FALSE,
-      'update' => FALSE,
-      'delete' => FALSE,
-    ], $user1PrivateNode, $this->anonymous);
-
-    // Public item.
-    $user1PublicNode = $this->drupalCreateNode([
-      'type' => 'page',
-      'uid' => $user1->id(),
-      MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_PUBLIC,
-      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_PERSONAL,
-    ]);
-
-    // The author should be able to do all operations.
-    $this->assertProtocolAccess([
-      'view' => TRUE,
-      'update' => TRUE,
-      'delete' => TRUE,
-    ], $user1PublicNode, $user1);
-
-    // Non-author should be able to read but not write.
-    $this->assertProtocolAccess([
-      'view' => TRUE,
-      'update' => FALSE,
-      'delete' => FALSE,
-    ], $user1PublicNode, $user2);
-
-    // Anonymous should be able to read but not write.
-    $this->assertProtocolAccess([
-      'view' => TRUE,
-      'update' => FALSE,
-      'delete' => FALSE,
-    ], $user1PublicNode, $this->anonymous);
-
     // Communitiy for testing.
     $community1 = $this->drupalCreateNode([
       'type' => 'community',
@@ -197,7 +139,6 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
     ]);
 
     // Protocols for testing.
-
     // Protocol 1, User 1 is a member.
     $values = [
       'title' => $this->randomString(),
@@ -242,20 +183,81 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
     $user2group2->save();
     $this->membership_manager->addMember($user2group2, $user2);
 
+    // Test user making a private item.
+    $user1PrivateNode = $this->drupalCreateNode([
+      'type' => 'page',
+      'uid' => $user1->id(),
+      MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_PERSONAL,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_ANY,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE => [$user1group1->id()],
+    ]);
+
+    // The author should be able to do all operations.
+    $this->assertProtocolAccess([
+      'view' => TRUE,
+      'update' => TRUE,
+      'delete' => TRUE,
+    ], $user1PrivateNode, $user1);
+
+    // Non-author should not be able to do anything.
+    $this->assertProtocolAccess([
+      'view' => FALSE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1PrivateNode, $user2);
+
+    // Anonymous should not be able to do anything.
+    $this->assertProtocolAccess([
+      'view' => FALSE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1PrivateNode, $this->anonymous);
+
+    // Public item.
+    $user1PublicNode = $this->drupalCreateNode([
+      'type' => 'page',
+      'uid' => $user1->id(),
+      MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_PUBLIC,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_ANY,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE => [$user1group1->id()],
+    ]);
+
+    // The author should be able to do all operations.
+    $this->assertProtocolAccess([
+      'view' => TRUE,
+      'update' => TRUE,
+      'delete' => TRUE,
+    ], $user1PublicNode, $user1);
+
+    // Non-author should be able to read but not write.
+    $this->assertProtocolAccess([
+      'view' => TRUE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1PublicNode, $user2);
+
+    // Anonymous should be able to read but not write.
+    $this->assertProtocolAccess([
+      'view' => TRUE,
+      'update' => FALSE,
+      'delete' => FALSE,
+    ], $user1PublicNode, $this->anonymous);
+
     // Testing "ANY". Node has two protocols, one that each user is a member of.
+    // User 1 is author.
     $user1AnyNode = $this->drupalCreateNode([
       'type' => 'page',
       'uid' => $user1->id(),
       MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_ANY,
       MUKURTU_PROTOCOL_FIELD_NAME_READ => [$user1group1->id(), $user2group1->id()],
-      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_PERSONAL,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_DEFAULT,
     ]);
 
     // User 1 should have all access.
     $this->assertProtocolAccess([
       'view' => TRUE,
-      'update' => TRUE,
-      'delete' => TRUE,
+      'update' => FALSE,
+      'delete' => FALSE,
     ], $user1AnyNode, $user1);
 
     // User 2 should have be able to read.
@@ -337,7 +339,8 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'uid' => $user1->id(),
       'status' => FALSE,
       MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_PUBLIC,
-      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_PERSONAL,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_ALL,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE => [$user1group1->id()],
     ]);
 
     // The author should be able to do all operations.
