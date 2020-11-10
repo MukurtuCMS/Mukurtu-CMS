@@ -25,11 +25,13 @@ class ProtocolWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+    $entity = $items->getEntity();
+    $bundle = $entity->getType();
     $account = User::load(\Drupal::currentUser()->id());
 
     // Get the list of protocols the user has access to.
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-    $protocol_nodes = $protocol_manager->getUserProtocolMemberships($account);
+    $protocol_nodes = $protocol_manager->getValidProtocols('node', $bundle, $account);
     $protocol_options = [-1 => t('Select a Protocol')];
 
     // Build the options list.
@@ -64,9 +66,17 @@ class ProtocolWidget extends WidgetBase {
    * Massage the submitted values of the protocol field.
    */
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
+    $unique = [];
     // Remove any of our default "select a protocol" options.
     foreach ($values as $delta => $value) {
       if ($value['target_id'] == -1) {
+        unset($values[$delta]);
+      }
+
+      // Remove any duplicates.
+      if (!in_array($value['target_id'], $unique)) {
+        $unique[] = $value['target_id'];
+      } else {
         unset($values[$delta]);
       }
     }

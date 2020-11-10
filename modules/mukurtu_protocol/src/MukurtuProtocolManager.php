@@ -299,10 +299,12 @@ class MukurtuProtocolManager {
   }
 
   /**
-   * Return the loaded protocol nodes a user is a member of.
+   * Return the loaded protocol nodes the account has edit abilities in.
    */
-  public function getUserProtocolMemberships(AccountInterface $account) {
+  public function getValidProtocols($entity_type, $bundle, AccountInterface $account) {
     $memberships = Og::getMemberships($account);
+
+    $entity_permission = $entity_type == 'media' ? 'media' : 'content';
 
     // Helper function to filter memberships to protocols only.
     $protocols_only = function ($e) {
@@ -323,6 +325,20 @@ class MukurtuProtocolManager {
     $protocols = array_map($get_protocol_id, $memberships);
 
     $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($protocols);
+
+    /** @var \Drupal\og\OgAccessInterface $og_access */
+    $og_access = \Drupal::service('og.access');
+    foreach ($nodes as $index => $protocol) {
+      $access_result = AccessResult::Forbidden();
+      if ($protocol && method_exists($protocol, 'id')) {
+        $access_result = $og_access->userAccess($protocol, "edit any $bundle $entity_permission");
+      }
+
+      if (!$access_result->isAllowed()) {
+        // Remove the protocol if the user doesn't have update abilities.
+        unset($nodes[$index]);
+      }
+    }
 
     return $nodes;
   }
