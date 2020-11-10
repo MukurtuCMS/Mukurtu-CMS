@@ -26,7 +26,7 @@ class ProtocolWidget extends WidgetBase {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $entity = $items->getEntity();
-    $bundle = $entity->getType();
+    $bundle = $entity->bundle();
     $account = User::load(\Drupal::currentUser()->id());
 
     // Get the list of protocols the user has access to.
