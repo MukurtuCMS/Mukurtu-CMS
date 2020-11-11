@@ -9,11 +9,13 @@ use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Provides a service for managing and resolving Protocols.
  */
 class MukurtuProtocolManager {
+  use StringTranslationTrait;
 
   public $protocolFields;
   protected $protocolTable;
@@ -47,7 +49,7 @@ class MukurtuProtocolManager {
    * Create a protocol for a given community.
    */
   public function createProtocol($community, $membership_handler = 'manual', $options = []) {
-    $title = $community->get("title")->value . " " . t("Only");
+    $title = $community->get("title")->value . " " . $this->t("Only");
     $nid = $community->id();
 
     $node = Node::create([
@@ -598,6 +600,104 @@ class MukurtuProtocolManager {
           ])
           ->execute();
       }
+    }
+  }
+
+  /**
+   * Push any protocol changes from entity to children.
+   */
+  public function updateProtocolInheritance(EntityInterface $entity) {
+    $entity_types = ['node', 'media'];
+    $item_count = 0;
+
+    // Query for any items targeting this entity for inheritance.
+    $ids = [];
+    foreach ($entity_types as $entity_type) {
+      $query = \Drupal::entityQuery($entity_type)
+        ->condition(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $entity->id());
+      $ids[$entity_type] = $query->execute();
+      $item_count += count($ids);
+    }
+
+    if ($item_count > 0) {
+      // For fewer than 10 items that need updating, do them without batch processing.
+      if ($item_count < 10) {
+        foreach ($entity_types as $entity_type) {
+          $entity_storage = \Drupal::entityTypeManager()->getStorage($entity_type);
+          $entities = $entity_storage->loadMultiple($ids[$entity_type]);
+          foreach ($entities as $entity_to_be_updated) {
+            $this->copyProtocolFields($entity, $entity_to_be_updated);
+          }
+        }
+      } else {
+        // More than 10 items and we run it in batch.
+        $batch = [
+          'title' => $this->t('Resolving Protocol Inheritance'),
+          'operations' => [
+            [
+              'mukurtu_protocol_batch_copy_protocol_inheritance',
+              [
+                [
+                  'entity' => $entity,
+                  'ids' => $ids,
+                ],
+              ],
+            ],
+          ],
+          'file' => drupal_get_path('module', 'mukurtu_protocol') . '/mukurtu_protocol.protocolinheritance.inc',
+        ];
+        batch_set($batch);
+      }
+    }
+  }
+
+  /**
+   * Copy protocol fields from templateEntity to entity and save entity.
+   */
+  public function copyProtocolFields(EntityInterface $templateEntity, EntityInterface $entity) {
+    $scope_fields = [MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE, MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE];
+    $protocol_fields = [MUKURTU_PROTOCOL_FIELD_NAME_READ, MUKURTU_PROTOCOL_FIELD_NAME_WRITE];
+    $dirty = FALSE;
+
+    try {
+      // Copy scope fields.
+      foreach ($scope_fields as $field) {
+        if ($templateEntity->hasField($field) && $entity->hasField($field)) {
+          // Only copy if different.
+          if ($templateEntity->get($field)->value != $entity->get($field)->value) {
+            $entity->set($field, $templateEntity->get($field)->value);
+            $dirty = TRUE;
+          }
+        }
+      }
+
+      // Copy protocol reference fields.
+      foreach ($protocol_fields as $field) {
+        $templateProtocols = $this->getProtocols($templateEntity, $field);
+        $entityProtocols = $this->getProtocols($entity, $field);
+
+        // If they have a different number of protocols they are for sure different.
+        if (count($templateProtocols) != count($entityProtocols)) {
+          $entity->set($field, $templateProtocols);
+          $dirty = TRUE;
+        } else {
+          // We want to know if they are EXACTLY the same, including position.
+          foreach ($templateProtocols as $delta => $tp) {
+            if (!isset($entityProtocols[$delta]) || $entityProtocols[$delta] != $tp) {
+              $entity->set($field, $templateProtocols);
+              $dirty = TRUE;
+              break;
+            }
+          }
+        }
+      }
+
+      // Only save the entity if we made changes.
+      if ($dirty) {
+        $entity->save();
+      }
+    } catch (Exception $e) {
+
     }
   }
 

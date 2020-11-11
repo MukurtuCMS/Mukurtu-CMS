@@ -33,6 +33,7 @@ define("MUKURTU_PROTOCOL_FIELD_NAME_READ", "field_mukurtu_protocol_read");
 define("MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE", "field_mukurtu_protocol_r_scope");
 define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE", "field_mukurtu_protocol_write");
 define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE", "field_mukurtu_protocol_w_scope");
+define("MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET", "field_mukurtu_protocol_inherit");
 
 /**
  * Create the Mukurtu protocol field for a given node bundle type.
@@ -180,6 +181,14 @@ function mukurtu_protocol_use_custom_protocol_widgets_sitewide() {
  */
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   // Protocols only work with nodes & media.
+
+    $class = get_class($entity);
+
+    if (is_string($entity)) {
+      dpm("is string $entity");
+    }
+
+
   $type = $entity->getEntityTypeId();
   if ($type == 'node' || $type == 'media') {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
@@ -199,7 +208,20 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
   // Update protocol tables.
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   if ($protocol_manager->hasProtocolFields($entity)) {
-    $protocol_manager->handleProtocolUpdate($entity);
+    // If the new item is using inheritance and the target is set, do the protocol copy now.
+    if ($entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)) {
+      if (isset($entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0])) {
+        $inheritance_target_id = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0]->target_id;
+        $inheritance_target = \Drupal::entityTypeManager()->getStorage('node')->load($inheritance_target_id);
+        if ($inheritance_target) {
+          $protocol_manager->copyProtocolFields($inheritance_target, $entity);
+        }
+      }
+    } else {
+      // Only run this if not doing inheritance. copyProtocolFields will
+      // trigger hook_entity_update, which will run handleProtocolUpdate.
+      $protocol_manager->handleProtocolUpdate($entity);
+    }
   }
 
   // Handle OgMemberships from here on.
@@ -235,6 +257,9 @@ function mukurtu_protocol_entity_update(EntityInterface $entity) {
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   if ($protocol_manager->hasProtocolFields($entity)) {
     $protocol_manager->handleProtocolUpdate($entity);
+
+    // Protocol Inheritance.
+    $protocol_manager->updateProtocolInheritance($entity);
   }
 
   // Handle OgMemberships from here on.
