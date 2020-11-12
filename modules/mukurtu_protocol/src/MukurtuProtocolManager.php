@@ -611,7 +611,7 @@ class MukurtuProtocolManager {
     $item_count = 0;
 
     // Protocol inheritance targets can only be nodes.
-    if ($entity->getEntityType() != 'node') {
+    if ($entity->getEntityTypeId() != 'node') {
       return;
     }
 
