@@ -109,6 +109,17 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
     ]);
     $field->save();
   }
+
+  // Protocol Inheritance Field.
+  if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET])) {
+    $field = FieldConfig::create([
+      'field_name' => MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle_type,
+      'label' => 'Mukurtu Protocol - Inheritance Target',
+    ]);
+    $field->save();
+  }
 }
 
 /**
