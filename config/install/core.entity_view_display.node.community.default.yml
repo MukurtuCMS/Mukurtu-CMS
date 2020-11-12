@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.community.body
     - field.field.node.community.field_child_communities
     - field.field.node.community.field_content_type
     - field.field.node.community.field_description
@@ -65,6 +66,7 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
+  body: true
   field_child_communities: true
   field_content_type: true
   field_parent_community: true

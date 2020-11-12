@@ -16,14 +16,6 @@ content:
     settings: {  }
     third_party_settings: {  }
     region: content
-  roles:
-    type: entity_reference_label
-    weight: 1
-    label: above
-    settings:
-      link: false
-    third_party_settings: {  }
-    region: content
   uid:
     type: entity_reference_label
     weight: 0
@@ -33,4 +25,5 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  search_api_excerpt: true
   state: true

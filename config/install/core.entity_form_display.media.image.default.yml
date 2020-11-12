@@ -14,6 +14,7 @@ third_party_settings:
   field_group:
     group_protocols:
       children:
+        - field_mukurtu_protocol_inherit
         - field_mukurtu_protocol_r_scope
         - field_mukurtu_protocol_read
         - field_mukurtu_protocol_w_scope
@@ -47,32 +48,42 @@ content:
       progress_indicator: throbber
       preview_image_style: thumbnail
     third_party_settings: {  }
+  field_mukurtu_protocol_inherit:
+    weight: 103
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 2
+    weight: 104
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: 3
+    weight: 105
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 4
+    weight: 106
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: 5
+    weight: 107
     settings: {  }
     third_party_settings: {  }
   name:
-    weight: 0
+    weight: -8
     settings:
       size: 60
       placeholder: ''

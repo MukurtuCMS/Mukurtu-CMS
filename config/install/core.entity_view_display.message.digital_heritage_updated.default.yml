@@ -4,8 +4,6 @@ dependencies:
   config:
     - field.field.message.digital_heritage_updated.field_item
     - message.template.digital_heritage_updated
-  module:
-    - user
 id: message.digital_heritage_updated.default
 targetEntityType: message
 bundle: digital_heritage_updated

@@ -20,6 +20,14 @@ content:
       image_style: ''
       image_link: ''
     third_party_settings: {  }
+  field_mukurtu_protocol_inherit:
+    weight: 8
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
   name:
     type: string
     weight: 1
@@ -38,6 +46,7 @@ content:
     region: content
 hidden:
   created: true
+  field_mukurtu_community: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true

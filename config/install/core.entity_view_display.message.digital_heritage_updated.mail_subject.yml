@@ -5,8 +5,6 @@ dependencies:
     - core.entity_view_mode.message.mail_subject
     - field.field.message.digital_heritage_updated.field_item
     - message.template.digital_heritage_updated
-  module:
-    - user
 id: message.digital_heritage_updated.mail_subject
 targetEntityType: message
 bundle: digital_heritage_updated

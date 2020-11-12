@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.content_browser
+    - field.field.node.community.body
     - field.field.node.community.field_child_communities
     - field.field.node.community.field_content_type
     - field.field.node.community.field_description
@@ -30,6 +31,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
 hidden:
+  body: true
   field_child_communities: true
   field_description: true
   field_featured_content: true

@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.browse_content
+    - field.field.node.community.body
     - field.field.node.community.field_child_communities
     - field.field.node.community.field_content_type
     - field.field.node.community.field_description
@@ -49,6 +50,35 @@ content:
     third_party_settings: {  }
     type: entity_browser_entity_reference
     region: content
+  field_mukurtu_protocol_r_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: -6
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_read:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: -5
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_w_scope:
+    type: mukurtu_protocol_scope_widget
+    region: content
+    weight: -4
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_write:
+    type: mukurtu_protocol_widget
+    region: content
+    weight: -3
+    settings: {  }
+    third_party_settings: {  }
+  name:
+    weight: -8
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   path:
     type: path
     weight: 7
@@ -77,13 +107,13 @@ content:
     region: content
     third_party_settings: {  }
   title:
-    type: string_textfield
-    weight: 0
-    region: content
+    weight: -7
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+    type: string_textfield
+    region: content
   uid:
     type: entity_reference_autocomplete
     weight: 3
@@ -95,6 +125,7 @@ content:
     region: content
     third_party_settings: {  }
 hidden:
+  body: true
   field_child_communities: true
   field_content_type: true
   field_parent_community: true

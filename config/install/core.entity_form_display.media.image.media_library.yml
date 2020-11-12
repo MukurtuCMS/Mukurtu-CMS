@@ -56,6 +56,8 @@ content:
     third_party_settings: {  }
 hidden:
   created: true
+  field_mukurtu_community: true
+  field_mukurtu_protocol_inherit: true
   path: true
   status: true
   uid: true

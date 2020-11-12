@@ -356,6 +356,350 @@ third_party_settings:
                 third_party_settings: {  }
             additional: {  }
             weight: 0
+          4038aef0-5fdc-4c68-8e97-58f876a20f4f:
+            uuid: 4038aef0-5fdc-4c68-8e97-58f876a20f4f
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_media_assets'
+              formatter:
+                type: entity_reference_entity_view
+                label: above
+                settings:
+                  link: true
+                  view_mode: default
+                third_party_settings: {  }
+            additional: {  }
+            weight: 0
+          12eab768-966c-4912-8815-24a1342f4245:
+            uuid: 12eab768-966c-4912-8815-24a1342f4245
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_mukurtu_community'
+              formatter:
+                type: entity_reference_label
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+            additional: {  }
+            weight: 1
+          8f8c41e9-e260-4e6c-9e43-c390d8d6e304:
+            uuid: 8f8c41e9-e260-4e6c-9e43-c390d8d6e304
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_category'
+              formatter:
+                type: entity_reference_label
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+            additional: {  }
+            weight: 2
+          9935abf9-6a06-47e6-b596-b132fad83a6e:
+            uuid: 9935abf9-6a06-47e6-b596-b132fad83a6e
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'extra_field_block:node:digital_heritage:flag_email_node'
+            additional: {  }
+            weight: 3
+          8cbc86f7-c8f7-44fb-9b3b-d8559a7258f0:
+            uuid: 8cbc86f7-c8f7-44fb-9b3b-d8559a7258f0
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_keywords'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 4
+          c7d88002-7501-4acb-a332-6b9d0e567f03:
+            uuid: c7d88002-7501-4acb-a332-6b9d0e567f03
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_description'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: text_default
+            additional: {  }
+            weight: 5
+          9899c11e-90fe-44bf-aa22-519ac9ab996d:
+            uuid: 9899c11e-90fe-44bf-aa22-519ac9ab996d
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_related_content'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                  view_mode: default
+                third_party_settings: {  }
+                type: entity_reference_entity_view
+            additional: {  }
+            weight: 6
+          db5acaa3-a8bb-4370-a999-587c903a91fa:
+            uuid: db5acaa3-a8bb-4370-a999-587c903a91fa
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_creator'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 7
+          9e4c7d92-2c0e-49ac-af8b-21475aeb623a:
+            uuid: 9e4c7d92-2c0e-49ac-af8b-21475aeb623a
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_contributor'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 8
+          9f85e8f0-c4c8-4a7e-9278-69adea9036c7:
+            uuid: 9f85e8f0-c4c8-4a7e-9278-69adea9036c7
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_date_description'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 9
+          37bd2346-af54-490b-a300-ec0938651216:
+            uuid: 37bd2346-af54-490b-a300-ec0938651216
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_cultural_narrative'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: text_default
+            additional: {  }
+            weight: 10
+          4ad06eae-713e-48ea-909c-39b30bd1be36:
+            uuid: 4ad06eae-713e-48ea-909c-39b30bd1be36
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_traditional_knowledge'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: text_default
+            additional: {  }
+            weight: 11
+          245fdb78-e96e-4eff-b509-f85a4affecdf:
+            uuid: 245fdb78-e96e-4eff-b509-f85a4affecdf
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_publisher'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 12
+          435cf93d-b32d-40c8-85b4-0a3b2de5fdd9:
+            uuid: 435cf93d-b32d-40c8-85b4-0a3b2de5fdd9
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_rights'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: basic_string
+            additional: {  }
+            weight: 13
+          de42b8a8-ed7b-46f5-ae0c-53f95c48e693:
+            uuid: de42b8a8-ed7b-46f5-ae0c-53f95c48e693
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_format'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 14
+          bfffba9f-9747-47e2-98a6-cddb3b67695f:
+            uuid: bfffba9f-9747-47e2-98a6-cddb3b67695f
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_type'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 15
+          1bae3087-d8f4-4a85-913d-3ea6f8584c3e:
+            uuid: 1bae3087-d8f4-4a85-913d-3ea6f8584c3e
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_identifier'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 16
+          823e76c9-cff0-4663-9d97-8f7f1fe58c67:
+            uuid: 823e76c9-cff0-4663-9d97-8f7f1fe58c67
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_language'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 17
+          e6bae4e2-b417-44da-907b-3d8b1d58839c:
+            uuid: e6bae4e2-b417-44da-907b-3d8b1d58839c
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_source'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 18
+          5e51ef44-6c4a-4418-a130-3b0d7d839238:
+            uuid: 5e51ef44-6c4a-4418-a130-3b0d7d839238
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_subject'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 19
+          a7192e13-47ac-4098-bcf7-75fad77d1b6f:
+            uuid: a7192e13-47ac-4098-bcf7-75fad77d1b6f
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_people'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 20
+          451e1240-35f2-46b2-a895-8ecfb66505bc:
+            uuid: 451e1240-35f2-46b2-a895-8ecfb66505bc
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_mukurtu_protocol_inherit'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 5
         third_party_settings: {  }
 id: node.digital_heritage.default
 targetEntityType: node
@@ -457,6 +801,14 @@ content:
     settings:
       link: true
     third_party_settings: {  }
+  field_mukurtu_protocol_inherit:
+    weight: 117
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: first
   field_people:
     weight: 116
     label: above
