@@ -610,6 +610,11 @@ class MukurtuProtocolManager {
     $entity_types = ['node', 'media'];
     $item_count = 0;
 
+    // Protocol inheritance targets can only be nodes.
+    if ($entity->getEntityType != 'node') {
+      return;
+    }
+
     // Query for any items targeting this entity for inheritance.
     $ids = [];
     foreach ($entity_types as $entity_type) {
