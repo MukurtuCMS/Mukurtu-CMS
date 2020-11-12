@@ -282,6 +282,8 @@ function mukurtu_protocol_entity_delete(EntityInterface $entity) {
   // Clean up protocol entries for deleted entity.
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   if ($protocol_manager->hasProtocolFields($entity)) {
+    // Protocol Inheritance.
+    $protocol_manager->updateProtocolInheritance($entity, 'delete');
     $protocol_manager->clearProtocolAccess($entity);
   }
 

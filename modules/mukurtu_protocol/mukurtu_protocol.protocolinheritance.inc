@@ -1,9 +1,10 @@
 <?php
 
-function mukurtu_protocol_batch_copy_protocol_inheritance($options, &$context) {
+function mukurtu_protocol_batch_update_protocol_inheritance($options, &$context) {
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   $ids = $options['ids'];
   $entity = $options['entity'];
+  $operation = $options['operation'];
 
   // Start of batch run.
   if (empty($context['sandbox'])) {
@@ -29,9 +30,13 @@ function mukurtu_protocol_batch_copy_protocol_inheritance($options, &$context) {
     $entity_storage = \Drupal::entityTypeManager()->getStorage($entity_type);
     $entities = $entity_storage->loadMultiple($ids_batch);
 
-    // Copy the protocol field for each.
+    // Update the protocol field for each.
     foreach ($entities as $entity_to_update) {
-      $protocol_manager->copyProtocolFields($entity, $entity_to_update);
+      if ($operation == 'delete') {
+        $protocol_manager->clearProtocolInheritance($entity_to_update);
+      } else {
+        $protocol_manager->copyProtocolFields($entity, $entity_to_update);
+      }
     }
 
     $context['sandbox']['offset'] += count($ids_batch);

@@ -606,7 +606,7 @@ class MukurtuProtocolManager {
   /**
    * Push any protocol changes from entity to children.
    */
-  public function updateProtocolInheritance(EntityInterface $entity) {
+  public function updateProtocolInheritance(EntityInterface $entity, $operation = 'update') {
     $entity_types = ['node', 'media'];
     $item_count = 0;
 
@@ -626,7 +626,11 @@ class MukurtuProtocolManager {
           $entity_storage = \Drupal::entityTypeManager()->getStorage($entity_type);
           $entities = $entity_storage->loadMultiple($ids[$entity_type]);
           foreach ($entities as $entity_to_be_updated) {
-            $this->copyProtocolFields($entity, $entity_to_be_updated);
+            if ($operation == 'delete') {
+              $this->clearProtocolInheritance($entity_to_be_updated);
+            } else {
+              $this->copyProtocolFields($entity, $entity_to_be_updated);
+            }
           }
         }
       } else {
@@ -635,11 +639,12 @@ class MukurtuProtocolManager {
           'title' => $this->t('Resolving Protocol Inheritance'),
           'operations' => [
             [
-              'mukurtu_protocol_batch_copy_protocol_inheritance',
+              'mukurtu_protocol_batch_update_protocol_inheritance',
               [
                 [
                   'entity' => $entity,
                   'ids' => $ids,
+                  'operation' => $operation,
                 ],
               ],
             ],
@@ -647,6 +652,22 @@ class MukurtuProtocolManager {
           'file' => drupal_get_path('module', 'mukurtu_protocol') . '/mukurtu_protocol.protocolinheritance.inc',
         ];
         batch_set($batch);
+      }
+    }
+  }
+
+  /**
+   * Clear the protocol inheritance target field.
+   */
+  public function clearProtocolInheritance(EntityInterface $entity) {
+    if ($entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)) {
+      $target = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET);
+      if (isset($target[0]) && isset($target[0]->target_id) && !is_null($target[0]->target_id)) {
+        $entity->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, []);
+        if (method_exists($entity, 'setRevisionLogMessage')) {
+          $entity->setRevisionLogMessage('Item is no longer using protocol inheritance (target item deleted).');
+        }
+        $entity->save();
       }
     }
   }
@@ -694,6 +715,9 @@ class MukurtuProtocolManager {
 
       // Only save the entity if we made changes.
       if ($dirty) {
+        if (method_exists($entity, 'setRevisionLogMessage')) {
+          $entity->setRevisionLogMessage('Updated protocol fields via protocol inheritance.');
+        }
         $entity->save();
       }
     } catch (Exception $e) {
