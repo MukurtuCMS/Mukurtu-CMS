@@ -20,6 +20,14 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_mukurtu_protocol_inherit:
+    weight: 102
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
   flag_email_node:
     weight: 10
     settings: {  }

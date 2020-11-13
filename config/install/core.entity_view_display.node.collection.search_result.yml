@@ -96,6 +96,7 @@ content:
 hidden:
   field_content_type: true
   field_mukurtu_community: true
+  field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true

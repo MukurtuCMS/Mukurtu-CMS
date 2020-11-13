@@ -36,15 +36,13 @@ third_party_settings:
     group_mukurtu_essentials:
       children:
         - title
+        - field_mukurtu_protocol_inherit
+        - group_protocols
         - field_language
-        - field_mukurtu_protocol_r_scope
-        - field_mukurtu_protocol_read
-        - field_mukurtu_protocol_w_scope
-        - field_mukurtu_protocol_write
         - field_keywords
         - field_media_assets
       parent_name: group_main_tab
-      weight: 20
+      weight: 10
       format_type: tab
       region: content
       format_settings:
@@ -58,7 +56,7 @@ third_party_settings:
       children:
         - field_word_entry
       parent_name: group_main_tab
-      weight: 21
+      weight: 11
       format_type: tab
       region: content
       format_settings:
@@ -72,7 +70,7 @@ third_party_settings:
       children:
         - field_related_content
       parent_name: group_main_tab
-      weight: 22
+      weight: 12
       format_type: tab
       region: content
       format_settings:
@@ -82,6 +80,22 @@ third_party_settings:
         formatter: closed
         required_fields: true
       label: Relations
+    group_protocols:
+      children:
+        - field_mukurtu_protocol_r_scope
+        - field_mukurtu_protocol_read
+        - field_mukurtu_protocol_w_scope
+        - field_mukurtu_protocol_write
+      parent_name: group_mukurtu_essentials
+      weight: -5
+      format_type: fieldset
+      region: content
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        required_fields: true
+      label: Protocols
 id: node.dictionary_word.default
 targetEntityType: node
 bundle: dictionary_word
@@ -89,12 +103,12 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 5
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
   field_keywords:
-    weight: 7
+    weight: -3
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -104,7 +118,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_language:
-    weight: 2
+    weight: -4
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -114,34 +128,49 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_media_assets:
-    weight: 8
+    weight: -2
     settings:
       media_types: {  }
     third_party_settings: {  }
     type: media_library_widget
     region: content
+  field_mukurtu_protocol_inherit:
+    weight: -6
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_display_settings:
+        view_mode: content_browser
+      field_widget_remove: true
+      field_widget_replace: true
+      selection_mode: selection_append
+      field_widget_edit: false
+      open: false
+    third_party_settings: {  }
+    type: entity_browser_entity_reference
+    region: content
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -6
+    weight: -5
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: -5
+    weight: -4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -4
+    weight: -2
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: -3
+    weight: -1
     settings: {  }
     third_party_settings: {  }
   field_related_content:
@@ -188,7 +217,7 @@ content:
     region: content
   path:
     type: path
-    weight: 8
+    weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -196,21 +225,21 @@ content:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 6
+    weight: 3
     region: content
     third_party_settings: {  }
   status:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 9
+    weight: 6
     region: content
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 7
+    weight: 4
     region: content
     third_party_settings: {  }
   title:
@@ -223,7 +252,7 @@ content:
     region: content
   uid:
     type: entity_reference_autocomplete
-    weight: 4
+    weight: 1
     settings:
       match_operator: CONTAINS
       size: 60

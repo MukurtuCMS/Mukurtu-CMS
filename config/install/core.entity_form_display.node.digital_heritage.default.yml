@@ -52,6 +52,7 @@ third_party_settings:
     group_mukurtu_essentials:
       children:
         - title
+        - field_mukurtu_protocol_inherit
         - group_protocols
         - field_media_assets
         - field_category
@@ -137,13 +138,12 @@ third_party_settings:
       label: Relations
     group_protocols:
       children:
-        - field_mukurtu_protocol_inherit
         - field_mukurtu_protocol_r_scope
         - field_mukurtu_protocol_read
         - field_mukurtu_protocol_w_scope
         - field_mukurtu_protocol_write
       parent_name: group_mukurtu_essentials
-      weight: -4
+      weight: -5
       format_type: fieldset
       region: content
       format_settings:
@@ -165,12 +165,12 @@ content:
     third_party_settings: {  }
   field_category:
     type: options_buttons
-    weight: 0
+    weight: -3
     region: content
     settings: {  }
     third_party_settings: {  }
   field_contributor:
-    weight: 2
+    weight: -1
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -180,7 +180,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_creator:
-    weight: 1
+    weight: -2
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -198,7 +198,7 @@ content:
     type: text_textarea
     region: content
   field_date_description:
-    weight: 3
+    weight: 0
     settings:
       size: 60
       placeholder: ''
@@ -255,7 +255,7 @@ content:
     region: content
   field_media_assets:
     type: media_library_widget
-    weight: -1
+    weight: -4
     region: content
     settings:
       media_types:
@@ -266,37 +266,42 @@ content:
         - video
     third_party_settings: {  }
   field_mukurtu_protocol_inherit:
-    type: entity_reference_autocomplete
-    weight: 23
+    type: entity_browser_entity_reference
+    weight: -6
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_display_settings:
+        view_mode: content_browser
+      field_widget_remove: true
+      field_widget_replace: true
+      selection_mode: selection_append
+      field_widget_edit: false
+      open: false
     third_party_settings: {  }
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 24
+    weight: -5
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: 25
+    weight: -4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: 26
+    weight: -3
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: 27
+    weight: -2
     settings: {  }
     third_party_settings: {  }
   field_people:

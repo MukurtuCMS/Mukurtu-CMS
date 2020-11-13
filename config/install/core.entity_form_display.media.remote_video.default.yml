@@ -2,9 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
+    - entity_browser.browser.browse_content
     - field.field.media.remote_video.field_media_oembed_video
     - media.type.remote_video
   module:
+    - entity_browser
     - field_group
     - mukurtu_protocol
     - path
@@ -17,7 +19,7 @@ third_party_settings:
         - field_mukurtu_protocol_w_scope
         - field_mukurtu_protocol_write
       parent_name: ''
-      weight: 1
+      weight: 2
       format_type: fieldset
       region: content
       format_settings:
@@ -33,18 +35,33 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 8
+    weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
   field_media_oembed_video:
     type: string_textfield
-    weight: 6
+    weight: 3
     region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_mukurtu_protocol_inherit:
+    weight: 1
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_display_settings:
+        view_mode: content_browser
+      field_widget_remove: true
+      field_widget_replace: true
+      selection_mode: selection_append
+      field_widget_edit: false
+      open: false
+    third_party_settings: {  }
+    type: entity_browser_entity_reference
+    region: content
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
@@ -70,7 +87,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   name:
-    weight: -8
+    weight: 0
     settings:
       size: 60
       placeholder: ''
@@ -89,7 +106,7 @@ content:
     region: content
   path:
     type: path
-    weight: 9
+    weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -97,7 +114,7 @@ content:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 10
+    weight: 7
     region: content
     third_party_settings: {  }
   title:
@@ -107,7 +124,7 @@ content:
     region: content
   uid:
     type: entity_reference_autocomplete
-    weight: 7
+    weight: 4
     settings:
       match_operator: CONTAINS
       size: 60
