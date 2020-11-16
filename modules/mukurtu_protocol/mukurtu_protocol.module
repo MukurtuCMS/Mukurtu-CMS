@@ -487,6 +487,13 @@ function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $fo
       $form['media'][0]['fields'][$protocol_field['protocol']]['#states'] = [
         'visible' => [':input[name="media[0][fields][' . $protocol_field['scope'] . '][0][value]' . '"]' => [['value' => 'any'], ['value' => 'all']]],
       ];
+
+      // Hide entire protocol fieldset if using protocol inheritance.
+      $form['media'][0]['fields']['group_protocols']['#states'] = [
+        'visible' => [
+          ':input[name="media[0][fields][field_mukurtu_protocol_inherit][target_id]"]' => ['value' => ''],
+        ],
+      ];
     }
 
     // Standard entity forms.
