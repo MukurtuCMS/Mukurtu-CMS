@@ -31,6 +31,7 @@
     "drupal/og": "*",
     "drupal/restui": "*",
     "drupal/search_api": "*",
+    "drupal/config_sync": "^2.0@beta",
     "drupal/csv_serialization": "*",
     "mukurtu/masonry": "*",
     "drupal/embed": "*",
