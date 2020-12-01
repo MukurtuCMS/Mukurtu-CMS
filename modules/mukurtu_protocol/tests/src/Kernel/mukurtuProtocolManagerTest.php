@@ -364,6 +364,62 @@ class MukurtuProtocolManagerTest extends KernelTestBase {
       'delete' => FALSE,
     ], $user1PublicNode, $this->anonymous);
 
+    // Test Protocol Inheritance.
+    // Create a node to inherit protocols from.
+    $nodeToInheritFrom = $this->drupalCreateNode([
+      'type' => 'page',
+      'uid' => $user1->id(),
+      MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_ANY,
+      MUKURTU_PROTOCOL_FIELD_NAME_READ => [$user1group1->id(), $user1group2->id()],
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_DEFAULT,
+      //MUKURTU_PROTOCOL_FIELD_NAME_WRITE => [$user1group1->id()],
+    ]);
+
+    $nodeBeforeInheritance = $this->drupalCreateNode([
+      'type' => 'page',
+      'uid' => $user1->id(),
+      MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_PUBLIC,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE => MUKURTU_PROTOCOL_ALL,
+      MUKURTU_PROTOCOL_FIELD_NAME_WRITE => [$user1group1->id()],
+      //MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET => [$nodeToInheritFrom->id()],
+    ]);
+
+    // Silly test but make sure scopes are what we expect prior to inheritance.
+    $this->assertEquals($nodeBeforeInheritance->get(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)->value, MUKURTU_PROTOCOL_PUBLIC);
+    $this->assertEquals($nodeBeforeInheritance->get(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE)->value, MUKURTU_PROTOCOL_ALL);
+
+    // Setup the inheritance.
+    $nodeBeforeInheritance->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, [$nodeToInheritFrom->id()]);
+    $nodeBeforeInheritance->save();
+
+    // Reload child node.
+    $nodeAfterInheritance = \Drupal::entityTypeManager()->getStorage('node')->load($nodeBeforeInheritance->id());
+
+    // Protocol fields should now be the same as the inheritance target's protocol fields.
+    $this->assertEquals($nodeAfterInheritance->get(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)->value, MUKURTU_PROTOCOL_ANY);
+    $this->assertEquals($nodeAfterInheritance->get(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE)->value, MUKURTU_PROTOCOL_DEFAULT);
+    $flatten = function ($e) {
+      return isset($e['target_id']) ? $e['target_id'] : NULL;
+    };
+    $read_protocols = implode(',', array_map($flatten, $nodeAfterInheritance->get(MUKURTU_PROTOCOL_FIELD_NAME_READ)->getValue()));
+    $write_protocols = implode(',', array_map($flatten, $nodeAfterInheritance->get(MUKURTU_PROTOCOL_FIELD_NAME_WRITE)->getValue()));
+    $parent_read_protocols = implode(',', [$user1group1->id(), $user1group2->id()]);
+    $this->assertEquals($read_protocols, $parent_read_protocols);
+    $this->assertEquals($write_protocols, '');
+
+    // Change the parent and see if the child correctly updates.
+    /* $nodeToInheritFrom->set(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE, MUKURTU_PROTOCOL_ALL);
+    $nodeToInheritFrom->set(MUKURTU_PROTOCOL_FIELD_NAME_READ, [$user1group2->id(), $user1group1->id()]);
+    $nodeToInheritFrom->set(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE, MUKURTU_PROTOCOL_ALL);
+    $nodeToInheritFrom->set(MUKURTU_PROTOCOL_FIELD_NAME_WRITE, [$user1group1->id(), $user1group2->id()]);
+    $nodeToInheritFrom->save();
+    $nodeAfterInheritanceUpdate = \Drupal::entityTypeManager()->getStorage('node')->load($nodeAfterInheritance->id());
+    $this->assertEquals($nodeAfterInheritanceUpdate->get(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)->value, MUKURTU_PROTOCOL_ALL);
+    $this->assertEquals($nodeAfterInheritanceUpdate->get(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE)->value, MUKURTU_PROTOCOL_ALL);
+    $read_protocols = implode(',', array_map($flatten, $nodeAfterInheritanceUpdate->get(MUKURTU_PROTOCOL_FIELD_NAME_READ)->getValue()));
+    $write_protocols = implode(',', array_map($flatten, $nodeAfterInheritanceUpdate->get(MUKURTU_PROTOCOL_FIELD_NAME_WRITE)->getValue()));
+    $this->assertEquals($read_protocols, implode(',', [$user1group2->id(), $user1group1->id()]));
+    $this->assertEquals($write_protocols, implode(',', [$user1group1->id(), $user1group2->id()])); */
   }
 
   /**

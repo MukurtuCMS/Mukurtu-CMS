@@ -271,6 +271,20 @@ function mukurtu_protocol_entity_update(EntityInterface $entity) {
 
     // Protocol Inheritance.
     $protocol_manager->updateProtocolInheritance($entity);
+
+    // Check for inheritance changes for this particular node.
+    if ($entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)) {
+      $original_target_field = $entity->original->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)->first();
+      $new_target_field = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)->first();
+      $original_target_id = is_null($original_target_field) ? NULL : $original_target_field->target_id;
+      $new_target_id = is_null($new_target_field) ? NULL : $new_target_field->target_id;
+
+      // Only update if there's been a change.
+      if (!is_null($new_target_id) && $original_target_id != $new_target_id) {
+        $inheritance_node = \Drupal::entityTypeManager()->getStorage('node')->load($new_target_id);
+        $protocol_manager->updateProtocolInheritance($inheritance_node);
+      }
+    }
   }
 
   // Handle OgMemberships from here on.
@@ -435,6 +449,9 @@ function mukurtu_protocol_entity_type_alter(array &$entity_types) {
  */
 function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
   $account = User::load(\Drupal::currentUser()->id());
+  if (is_null($account)) {
+    $account = User::getAnonymousUser();
+  }
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
 
   // Protocol Set IDs the *user* has access to.
