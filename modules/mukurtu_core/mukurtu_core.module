@@ -46,3 +46,108 @@ function mukurtu_core_create_content_type_field($entity_type, $bundle) {
     ])->save();
   }
 }
+
+/**
+ * Run $fn on the target entities, using the batch system if necessary.
+ *
+ * $target_entity_ids = ['node' => [1, 2, 3], 'media' => [4, 5]];
+ */
+function mukurtu_core_entity_batch_operation($fn, $target_entity_ids, $args = []) {
+  // Count the number of entities we are processing.
+  $count_entities = function ($carry, $item) {
+    $carry += count($item);
+    return $carry;
+  };
+  $item_count = array_reduce($target_entity_ids, $count_entities);
+
+  if ($item_count == 0) {
+    return;
+  }
+
+  // For fewer than 10 items, proceed without batch processing.
+  if ($item_count < 10) {
+    foreach ($target_entity_ids as $entity_type_id => $ids) {
+      // Load the entities.
+      $entity_storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
+      $entities = $entity_storage->loadMultiple($ids);
+
+      // Apply the function to each.
+      foreach ($entities as $batch_entity) {
+        $fn($batch_entity, $args);
+      }
+    }
+  } else {
+    // More than 10 items and we run it in batch.
+    $batch_title = $args['title'] ?? t('Updating content');
+    $batch = [
+      'title' => $batch_title,
+      'operations' => [
+        [
+          'mukurtu_core_entity_run_batch_operation',
+          [
+            [
+              'entities' => $target_entity_ids,
+              'fn' => $fn,
+              'args' => $args,
+            ],
+          ],
+        ],
+      ],
+      'file' => drupal_get_path('module', 'mukurtu_core') . '/mukurtu_core.entity_batch_operation.inc',
+    ];
+
+    batch_set($batch);
+  }
+}
+
+/**
+ * Flatten an entity reference field to an array of ids.
+ */
+function mukurtu_core_flatten_entity_ref_field($entity, $fieldname) {
+  if (!$entity->hasField($fieldname)) {
+    return [];
+  }
+
+  $refs = $entity->get($fieldname)->getValue();
+
+  $flatten = function ($e) {
+    return isset($e['target_id']) ? $e['target_id'] : NULL;
+  };
+
+  return array_map($flatten, $refs);
+}
+
+function mukurtu_core_batch_remove_entity_reference($entity, $args) {
+  $fieldname = $args['fieldname'];
+  $id_to_remove = $args['target_id'];
+  if ($entity->hasField($fieldname)) {
+    $current_ids = mukurtu_core_flatten_entity_ref_field($entity, $fieldname);
+    if (in_array($id_to_remove, $current_ids)) {
+      $entity->set($fieldname, array_diff($current_ids, [$id_to_remove]));
+      $entity->save();
+      return TRUE;
+    }
+  }
+  return FALSE;
+};
+
+function mukurtu_core_batch_add_entity_reference($entity, $args) {
+  $fieldname = $args['fieldname'];
+  $id_to_add = $args['target_id'];
+  if ($entity->hasField($fieldname)) {
+    $cardinality = $entity->{$fieldname}->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
+    $current_ids = mukurtu_core_flatten_entity_ref_field($entity, $fieldname);
+    if (!in_array($id_to_add, $current_ids)) {
+      // No room to add the ref, fail.
+      if ($cardinality > 0 && count($current_ids) + 1 > $cardinality) {
+        return FALSE;
+      }
+      // Add the ref and save the entity.
+      $current_ids[] = $id_to_add;
+      $entity->set($fieldname, $current_ids);
+      $entity->save();
+      return TRUE;
+    }
+  }
+  return FALSE;
+};

@@ -4,3 +4,100 @@
  * @file
  * Provide Mukurtu Collection Type.
  */
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\Core\Entity\EntityInterface;
+
+define("MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION", "field_sequence_collection");
+define("MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION", "Sequence Collection");
+define("MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE", "field_collection_type");
+define("MUKURTU_COLLECTION_TYPE_MULTIPAGE", "multipage");
+define("MUKURTU_COLLECTION_FIELD_NAME_ITEMS", "field_items_in_collection");
+
+
+/**
+ * Create the sequence collection field.
+ */
+function mukurtu_collection_create_sequence_field($entity_type_id, $bundle) {
+  $skip_list = ['collection', 'community', 'protocol'];
+  if (in_array($bundle, $skip_list)) {
+    return;
+  }
+
+  $entityFieldManager = \Drupal::service('entity_field.manager');
+  $fields = $entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
+  if (!isset($fields[MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION])) {
+    FieldConfig::create([
+      'field_name' => MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION,
+      'entity_type' => $entity_type_id,
+      'bundle' => $bundle,
+      'label' => MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION,
+      'description' => '',
+      'required' => FALSE,
+      'settings' => [
+        'handler' => 'default:node',
+        'handler_settings' => [
+          'target_bundles' => ['collection'],
+        ],
+      ],
+    ])->save();
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_create().
+ */
+function mukurtu_collection_entity_bundle_create($entity_type_id, $bundle) {
+  // For any new node that is defined, add the sequence collection field.
+  if ($entity_type_id == 'node') {
+    mukurtu_collection_create_sequence_field($entity_type_id, $bundle);
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function mukurtu_collection_entity_insert(EntityInterface $entity) {
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function mukurtu_collection_entity_update(EntityInterface $entity) {
+  if ($entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE) && $entity->bundle() == 'collection') {
+    $collection_type = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value;
+
+    // Collection is a multi-page item, check if any contained items
+    // need to be updated.
+    if ($collection_type == MUKURTU_COLLECTION_TYPE_MULTIPAGE) {
+      $old_items = [];
+
+      // Items can only be in a single multi-page collection at a time.
+      // Do a site-wide query to catch broken relationships.
+      $query = \Drupal::entityQuery('node');
+      $query->condition(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION, $entity->id());
+      $old_items = $query->execute();
+
+      $new_items = mukurtu_core_flatten_entity_ref_field($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
+      $items_to_remove = array_diff($old_items, $new_items);
+      $items_to_add = array_diff($new_items, $old_items);
+
+      $fn_args = [
+        'fieldname' => MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION,
+        'target_id' => $entity->id(),
+      ];
+      if (!empty($items_to_remove)) {
+        mukurtu_core_entity_batch_operation('mukurtu_core_batch_remove_entity_reference', ['node' => $items_to_remove], $fn_args);
+      }
+      if (!empty($items_to_add)) {
+        mukurtu_core_entity_batch_operation('mukurtu_core_batch_add_entity_reference', ['node' => $items_to_add], $fn_args);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function mukurtu_collection_entity_delete(EntityInterface $entity) {
+}
