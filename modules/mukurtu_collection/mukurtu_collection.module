@@ -58,12 +58,32 @@ function mukurtu_collection_entity_bundle_create($entity_type_id, $bundle) {
  * Implements hook_entity_insert().
  */
 function mukurtu_collection_entity_insert(EntityInterface $entity) {
+  mukurtu_collection_multipage_sync_relationship($entity);
 }
 
 /**
  * Implements hook_entity_update().
  */
 function mukurtu_collection_entity_update(EntityInterface $entity) {
+  mukurtu_collection_multipage_sync_relationship($entity);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function mukurtu_collection_entity_delete(EntityInterface $entity) {
+  if ($entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)) {
+    // Set the collection to empty and request a relationship sync.
+    // This will delete all the item level references to the collection.
+    $entity->set(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, []);
+    mukurtu_collection_multipage_sync_relationship($entity);
+  }
+}
+
+/**
+ * Update the item references for a multi-page collection.
+ */
+function mukurtu_collection_multipage_sync_relationship(EntityInterface $entity) {
   if ($entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE) && $entity->bundle() == 'collection') {
     $collection_type = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value;
 
@@ -86,18 +106,14 @@ function mukurtu_collection_entity_update(EntityInterface $entity) {
         'fieldname' => MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION,
         'target_id' => $entity->id(),
       ];
+      // Remove old items from the multi-page collection.
       if (!empty($items_to_remove)) {
         mukurtu_core_entity_batch_operation('mukurtu_core_batch_remove_entity_reference', ['node' => $items_to_remove], $fn_args);
       }
+      // Add new items from the multi-page collection.
       if (!empty($items_to_add)) {
         mukurtu_core_entity_batch_operation('mukurtu_core_batch_add_entity_reference', ['node' => $items_to_add], $fn_args);
       }
     }
   }
-}
-
-/**
- * Implements hook_entity_delete().
- */
-function mukurtu_collection_entity_delete(EntityInterface $entity) {
 }

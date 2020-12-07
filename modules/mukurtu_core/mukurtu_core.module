@@ -117,6 +117,9 @@ function mukurtu_core_flatten_entity_ref_field($entity, $fieldname) {
   return array_map($flatten, $refs);
 }
 
+/**
+ * Batch callback to remove an ID from an entity reference field.
+ */
 function mukurtu_core_batch_remove_entity_reference($entity, $args) {
   $fieldname = $args['fieldname'];
   $id_to_remove = $args['target_id'];
@@ -131,6 +134,9 @@ function mukurtu_core_batch_remove_entity_reference($entity, $args) {
   return FALSE;
 };
 
+/**
+ * Batch callback to add an ID to an entity reference field.
+ */
 function mukurtu_core_batch_add_entity_reference($entity, $args) {
   $fieldname = $args['fieldname'];
   $id_to_add = $args['target_id'];
