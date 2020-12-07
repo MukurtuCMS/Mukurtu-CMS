@@ -7,12 +7,14 @@
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 
 define("MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION", "field_sequence_collection");
 define("MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION", "Sequence Collection");
 define("MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE", "field_collection_type");
 define("MUKURTU_COLLECTION_TYPE_MULTIPAGE", "multipage");
 define("MUKURTU_COLLECTION_FIELD_NAME_ITEMS", "field_items_in_collection");
+define("MUKURTU_COLLECTION_MULTIPAGE_NAVIGATION_VIEW_MODE", "full");
 
 
 /**
@@ -84,6 +86,11 @@ function mukurtu_collection_entity_delete(EntityInterface $entity) {
  * Update the item references for a multi-page collection.
  */
 function mukurtu_collection_multipage_sync_relationship(EntityInterface $entity) {
+  // Multipage collections only work with nodes.
+  if ($entity->getEntityTypeId() != 'node') {
+    return;
+  }
+
   if ($entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE) && $entity->bundle() == 'collection') {
     $collection_type = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value;
 
@@ -115,5 +122,15 @@ function mukurtu_collection_multipage_sync_relationship(EntityInterface $entity)
         mukurtu_core_entity_batch_operation('mukurtu_core_batch_add_entity_reference', ['node' => $items_to_add], $fn_args);
       }
     }
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+function mukurtu_collection_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  // Attach our contraint to the sequence collection field.
+  if (isset($fields[MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION])) {
+    $fields[MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION]->addConstraint('ValidSequenceCollection', []);
   }
 }
