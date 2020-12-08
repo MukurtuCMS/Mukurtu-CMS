@@ -4,6 +4,7 @@ dependencies:
   config:
     - field.field.node.page.body
     - field.field.node.page.field_content_type
+    - field.field.node.page.field_sequence_collection
     - node.type.page
   module:
     - text
@@ -30,9 +31,9 @@ content:
     region: content
   flag_email_node:
     weight: 10
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
   flag_email_og:
     weight: 10
     settings: {  }
@@ -56,6 +57,8 @@ content:
   links:
     weight: 101
     region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   field_content_type: true
   field_mukurtu_community: true
@@ -63,4 +66,5 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_sequence_collection: true
   search_api_excerpt: true

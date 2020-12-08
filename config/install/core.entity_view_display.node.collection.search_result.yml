@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.search_result
+    - field.field.node.collection.field_collection_type
     - field.field.node.collection.field_content_type
     - field.field.node.collection.field_description
     - field.field.node.collection.field_items_in_collection
@@ -94,6 +95,7 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  field_collection_type: true
   field_content_type: true
   field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true

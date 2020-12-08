@@ -18,6 +18,8 @@ dependencies:
     - field.field.node.digital_heritage.field_publisher
     - field.field.node.digital_heritage.field_related_content
     - field.field.node.digital_heritage.field_rights
+    - field.field.node.digital_heritage.field_sequence_collection
+    - field.field.node.digital_heritage.field_sequence_position
     - field.field.node.digital_heritage.field_source
     - field.field.node.digital_heritage.field_subject
     - field.field.node.digital_heritage.field_traditional_knowledge
@@ -700,6 +702,39 @@ third_party_settings:
                 type: entity_reference_label
             additional: {  }
             weight: 5
+          b8ea5d13-d50f-4bb3-b224-f721f72283db:
+            uuid: b8ea5d13-d50f-4bb3-b224-f721f72283db
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_sequence_collection'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 6
+          3f09ab96-882a-417e-ae53-b5754d115f7c:
+            uuid: 3f09ab96-882a-417e-ae53-b5754d115f7c
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_sequence_position'
+              formatter:
+                label: above
+                settings:
+                  thousand_separator: ''
+                  prefix_suffix: true
+                third_party_settings: {  }
+                type: number_integer
+            additional: {  }
+            weight: 7
         third_party_settings: {  }
 id: node.digital_heritage.default
 targetEntityType: node
@@ -841,6 +876,23 @@ content:
     third_party_settings: {  }
     type: basic_string
     region: content
+  field_sequence_collection:
+    weight: 118
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: first
+  field_sequence_position:
+    weight: 119
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: first
   field_source:
     weight: 114
     label: above

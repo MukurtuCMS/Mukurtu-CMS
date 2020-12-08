@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.node.multipage_navigation
     - field.field.node.collection.field_collection_type
     - field.field.node.collection.field_content_type
     - field.field.node.collection.field_description
@@ -11,12 +12,44 @@ dependencies:
     - field.field.node.collection.field_sequence_collection
     - node.type.collection
   module:
+    - layout_builder
+    - slick_entityreference
     - user
-id: node.collection.default
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.collection.multipage_navigation
 targetEntityType: node
 bundle: collection
-mode: default
+mode: multipage_navigation
 content:
+  field_items_in_collection:
+    type: slick_entityreference_vanilla
+    weight: 0
+    region: content
+    label: hidden
+    settings:
+      optionset: mukurtu_multipage_navigation
+      skin: ''
+      view_mode: multipage_navigation_teaser
+      cache: 0
+      current_view_mode: multipage_navigation
+      override: false
+      overridables:
+        arrows: '0'
+        autoplay: '0'
+        dots: '0'
+        draggable: '0'
+        infinite: '0'
+        mouseWheel: '0'
+        randomize: '0'
+        variableWidth: '0'
+      skin_arrows: ''
+      skin_dots: ''
+      fx: ''
+      style: ''
+    third_party_settings: {  }
   flag_email_og:
     weight: 10
     region: content
@@ -49,7 +82,6 @@ hidden:
   field_collection_type: true
   field_content_type: true
   field_description: true
-  field_items_in_collection: true
   field_keywords: true
   field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true

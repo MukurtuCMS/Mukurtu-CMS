@@ -27,6 +27,7 @@
     }
   ],
   "require": {
+    "drupal/blazy": "^2.1",
     "drupal/core": "~8.8.8",
     "drupal/og": "*",
     "drupal/restui": "*",
@@ -52,7 +53,9 @@
     "drupal/message_subscribe_email": "*",
     "drupal/message_subscribe_ui": "*",
     "drupal/entity_reference_revisions": "*",
-    "drupal/paragraphs": "*"
+    "drupal/paragraphs": "*",
+    "drupal/slick": "^2.2",
+    "drupal/slick_entityreference": "^2.0"
   },
   "require-dev": {
     "drupal/devel": "*",

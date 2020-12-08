@@ -19,6 +19,8 @@ dependencies:
     - field.field.node.digital_heritage.field_publisher
     - field.field.node.digital_heritage.field_related_content
     - field.field.node.digital_heritage.field_rights
+    - field.field.node.digital_heritage.field_sequence_collection
+    - field.field.node.digital_heritage.field_sequence_position
     - field.field.node.digital_heritage.field_source
     - field.field.node.digital_heritage.field_subject
     - field.field.node.digital_heritage.field_traditional_knowledge
@@ -346,6 +348,23 @@ content:
       placeholder: ''
     third_party_settings: {  }
     type: string_textarea
+    region: content
+  field_sequence_collection:
+    weight: 123
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_sequence_position:
+    weight: 124
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: number
     region: content
   field_source:
     weight: 26

@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.rss
+    - core.entity_view_mode.node.multipage_navigation_teaser
     - field.field.node.article.body
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
@@ -11,17 +11,53 @@ dependencies:
     - field.field.node.article.field_tags
     - node.type.article
   module:
+    - blazy
+    - layout_builder
     - user
-id: node.article.rss
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.article.multipage_navigation_teaser
 targetEntityType: node
 bundle: article
-mode: rss
+mode: multipage_navigation_teaser
 content:
-  flag_email_node:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
+  field_image:
+    type: blazy
+    weight: 0
     region: content
+    settings:
+      image_style: ''
+      media_switch: ''
+      thumbnail_style: ''
+      ratio: ''
+      current_view_mode: multipage_navigation_teaser
+      background: false
+      caption:
+        title: '0'
+        alt: '0'
+      icon: ''
+      layout: ''
+      view_mode: ''
+      cache: 0
+      skin: ''
+      fx: ''
+      style: ''
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      responsive_image_style: ''
+      box_style: ''
+      _uri: ''
+      breakpoints: {  }
+      sizes: ''
+      grid_header: ''
+      grid: 0
+      grid_medium: 0
+      grid_small: 0
+    third_party_settings: {  }
+    label: hidden
   flag_email_og:
     weight: 10
     settings: {  }
@@ -37,14 +73,10 @@ content:
     settings: {  }
     third_party_settings: {  }
     region: content
-  links:
-    weight: 100
-    region: content
 hidden:
   body: true
   comment: true
   field_content_type: true
-  field_image: true
   field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
@@ -53,4 +85,6 @@ hidden:
   field_mukurtu_protocol_write: true
   field_sequence_collection: true
   field_tags: true
+  flag_email_node: true
+  links: true
   search_api_excerpt: true

@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
     - field.field.node.article.field_image
+    - field.field.node.article.field_sequence_collection
     - field.field.node.article.field_tags
     - image.style.thumbnail
     - node.type.article
@@ -173,3 +174,4 @@ content:
 hidden:
   field_content_type: true
   field_mukurtu_community: true
+  field_sequence_collection: true

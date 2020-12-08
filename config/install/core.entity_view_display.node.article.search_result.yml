@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
     - field.field.node.article.field_image
+    - field.field.node.article.field_sequence_collection
     - field.field.node.article.field_tags
     - image.style.thumbnail
     - node.type.article
@@ -70,5 +71,6 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_sequence_collection: true
   field_tags: true
   search_api_excerpt: true

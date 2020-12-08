@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.node.multipage_navigation_teaser
     - field.field.node.collection.field_collection_type
     - field.field.node.collection.field_content_type
     - field.field.node.collection.field_description
@@ -11,11 +12,16 @@ dependencies:
     - field.field.node.collection.field_sequence_collection
     - node.type.collection
   module:
+    - layout_builder
     - user
-id: node.collection.default
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.collection.multipage_navigation_teaser
 targetEntityType: node
 bundle: collection
-mode: default
+mode: multipage_navigation_teaser
 content:
   flag_email_og:
     weight: 10

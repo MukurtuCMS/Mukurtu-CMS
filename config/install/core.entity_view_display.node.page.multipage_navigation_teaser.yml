@@ -2,27 +2,29 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.rss
-    - field.field.node.article.body
-    - field.field.node.article.comment
-    - field.field.node.article.field_content_type
-    - field.field.node.article.field_image
-    - field.field.node.article.field_sequence_collection
-    - field.field.node.article.field_tags
-    - node.type.article
+    - core.entity_view_mode.node.multipage_navigation_teaser
+    - field.field.node.page.body
+    - field.field.node.page.field_content_type
+    - field.field.node.page.field_sequence_collection
+    - node.type.page
   module:
+    - layout_builder
     - user
-id: node.article.rss
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: node.page.multipage_navigation_teaser
 targetEntityType: node
-bundle: article
-mode: rss
+bundle: page
+mode: multipage_navigation_teaser
 content:
-  flag_email_node:
+  flag_email_og:
     weight: 10
     settings: {  }
     third_party_settings: {  }
     region: content
-  flag_email_og:
+  flag_favorite:
     weight: 10
     settings: {  }
     third_party_settings: {  }
@@ -37,14 +39,9 @@ content:
     settings: {  }
     third_party_settings: {  }
     region: content
-  links:
-    weight: 100
-    region: content
 hidden:
   body: true
-  comment: true
   field_content_type: true
-  field_image: true
   field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
@@ -52,5 +49,6 @@ hidden:
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
   field_sequence_collection: true
-  field_tags: true
+  flag_email_node: true
+  links: true
   search_api_excerpt: true

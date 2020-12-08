@@ -6,6 +6,7 @@ dependencies:
     - field.field.node.person.field_keywords
     - field.field.node.person.field_media_assets
     - field.field.node.person.field_related_content
+    - field.field.node.person.field_sequence_collection
     - node.type.person
   module:
     - user
@@ -50,9 +51,9 @@ content:
     region: content
   flag_email_node:
     weight: 10
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
   flag_email_og:
     weight: 10
     settings: {  }
@@ -93,4 +94,5 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_sequence_collection: true
   search_api_excerpt: true

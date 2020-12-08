@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
     - field.field.node.article.field_image
+    - field.field.node.article.field_sequence_collection
     - field.field.node.article.field_tags
     - image.style.large
     - node.type.article
@@ -63,9 +64,9 @@ content:
     third_party_settings: {  }
   flag_email_node:
     weight: 10
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
   flag_email_og:
     weight: 10
     settings: {  }
@@ -93,4 +94,5 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_sequence_collection: true
   search_api_excerpt: true

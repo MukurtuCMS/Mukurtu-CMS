@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.dictionary_word.field_language
     - field.field.node.dictionary_word.field_media_assets
     - field.field.node.dictionary_word.field_related_content
+    - field.field.node.dictionary_word.field_sequence_collection
     - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
@@ -113,4 +114,5 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_sequence_collection: true
   search_api_excerpt: true

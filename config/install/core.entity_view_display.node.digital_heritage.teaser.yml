@@ -19,6 +19,8 @@ dependencies:
     - field.field.node.digital_heritage.field_publisher
     - field.field.node.digital_heritage.field_related_content
     - field.field.node.digital_heritage.field_rights
+    - field.field.node.digital_heritage.field_sequence_collection
+    - field.field.node.digital_heritage.field_sequence_position
     - field.field.node.digital_heritage.field_source
     - field.field.node.digital_heritage.field_subject
     - field.field.node.digital_heritage.field_traditional_knowledge
@@ -311,6 +313,8 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_sequence_collection: true
+  field_sequence_position: true
   layout_builder__layout: true
   links: true
   search_api_excerpt: true

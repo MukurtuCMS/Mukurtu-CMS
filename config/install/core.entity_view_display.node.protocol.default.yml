@@ -5,6 +5,7 @@ dependencies:
     - field.field.node.protocol.body
     - field.field.node.protocol.field_content_type
     - field.field.node.protocol.field_membership_handler
+    - field.field.node.protocol.field_sequence_collection
     - node.type.protocol
   module:
     - og
@@ -59,4 +60,5 @@ hidden:
   field_content_type: true
   field_membership_handler: true
   field_mukurtu_community: true
+  field_sequence_collection: true
   search_api_excerpt: true

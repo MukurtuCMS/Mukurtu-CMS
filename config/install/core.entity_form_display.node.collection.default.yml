@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.browse_content
+    - field.field.node.collection.field_collection_type
     - field.field.node.collection.field_content_type
     - field.field.node.collection.field_description
     - field.field.node.collection.field_items_in_collection
@@ -90,6 +91,12 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_collection_type:
+    weight: 123
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
   field_description:
     type: text_textarea_with_summary
     weight: -4

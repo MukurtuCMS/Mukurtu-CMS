@@ -3,14 +3,17 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.full
+    - field.field.node.collection.field_collection_type
     - field.field.node.collection.field_content_type
     - field.field.node.collection.field_description
     - field.field.node.collection.field_items_in_collection
     - field.field.node.collection.field_keywords
     - field.field.node.collection.field_related_content
+    - field.field.node.collection.field_sequence_collection
     - node.type.collection
   module:
     - layout_builder
+    - slick_entityreference
     - text
     - user
 third_party_settings:
@@ -30,13 +33,30 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_items_in_collection:
-    type: entity_reference_entity_view
+    type: slick_entityreference_vanilla
     weight: 1
     region: content
     label: above
     settings:
-      link: true
-      view_mode: default
+      optionset: mukurtu_multipage_item
+      skin: ''
+      view_mode: content_browser
+      cache: 0
+      current_view_mode: full
+      override: false
+      overridables:
+        arrows: '0'
+        autoplay: '0'
+        dots: '0'
+        draggable: '0'
+        infinite: '0'
+        mouseWheel: '0'
+        randomize: '0'
+        variableWidth: '0'
+      skin_arrows: ''
+      skin_dots: ''
+      fx: ''
+      style: ''
     third_party_settings: {  }
   field_keywords:
     weight: 2
@@ -57,9 +77,9 @@ content:
     region: content
   flag_email_node:
     weight: 10
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
   flag_email_og:
     weight: 10
     settings: {  }
@@ -94,6 +114,7 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  field_collection_type: true
   field_content_type: true
   field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true
@@ -101,4 +122,5 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_sequence_collection: true
   search_api_excerpt: true

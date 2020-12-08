@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.content_browser
+    - core.entity_view_mode.node.multipage_navigation_teaser
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
@@ -25,45 +25,88 @@ dependencies:
     - field.field.node.digital_heritage.field_subject
     - field.field.node.digital_heritage.field_traditional_knowledge
     - field.field.node.digital_heritage.field_type
-    - image.style.media_library
     - node.type.digital_heritage
   module:
+    - blazy
     - layout_builder
-    - media
     - user
 third_party_settings:
   layout_builder:
     allow_custom: false
     enabled: false
-id: node.digital_heritage.content_browser
+id: node.digital_heritage.multipage_navigation_teaser
 targetEntityType: node
 bundle: digital_heritage
-mode: content_browser
+mode: multipage_navigation_teaser
 content:
-  field_content_type:
-    type: string
+  field_media_assets:
+    type: blazy_media
     weight: 0
     region: content
     label: hidden
     settings:
-      link_to_entity: false
+      style: ''
+      image_style: ''
+      media_switch: ''
+      thumbnail_style: ''
+      ratio: ''
+      view_mode: default
+      image: ''
+      grid: null
+      grid_medium: null
+      grid_small: null
+      current_view_mode: multipage_navigation_teaser
+      background: false
+      caption:
+        field_mukurtu_community: '0'
+        field_mukurtu_protocol_inherit: '0'
+        field_mukurtu_protocol_read: '0'
+        field_mukurtu_protocol_r_scope: '0'
+        field_mukurtu_protocol_write: '0'
+        field_mukurtu_protocol_w_scope: '0'
+        field_media_document: '0'
+        title: '0'
+        alt: '0'
+      class: ''
+      id: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      icon: ''
+      layout: ''
+      cache: 0
+      skin: ''
+      fx: ''
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      responsive_image_style: ''
+      box_style: ''
+      _uri: ''
+      breakpoints: {  }
+      sizes: ''
+      grid_header: ''
     third_party_settings: {  }
-  field_media_assets:
-    type: media_thumbnail
-    weight: 1
+  flag_email_og:
+    weight: 4
     region: content
-    label: hidden
-    settings:
-      image_style: media_library
-      image_link: ''
+    settings: {  }
     third_party_settings: {  }
-  field_mukurtu_community:
-    type: entity_reference_label
-    weight: 2
+  flag_favorite:
+    weight: 5
     region: content
-    label: above
-    settings:
-      link: true
+    settings: {  }
+    third_party_settings: {  }
+  flag_subscribe_node:
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  flag_subscribe_og:
+    weight: 7
+    region: content
+    settings: {  }
     third_party_settings: {  }
   og_audience:
     label: above
@@ -75,6 +118,7 @@ content:
     region: content
 hidden:
   field_category: true
+  field_content_type: true
   field_contributor: true
   field_creator: true
   field_cultural_narrative: true
@@ -84,6 +128,7 @@ hidden:
   field_identifier: true
   field_keywords: true
   field_language: true
+  field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
@@ -100,10 +145,6 @@ hidden:
   field_traditional_knowledge: true
   field_type: true
   flag_email_node: true
-  flag_email_og: true
-  flag_favorite: true
-  flag_subscribe_node: true
-  flag_subscribe_og: true
   layout_builder__layout: true
   links: true
   search_api_excerpt: true
