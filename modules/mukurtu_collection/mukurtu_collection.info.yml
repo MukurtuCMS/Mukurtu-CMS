@@ -10,5 +10,6 @@ dependencies:
   - media_library
   - mukurtu_core
   - slick
+  - slick_entityreference
 
 version: '8.x-1.x-dev'
