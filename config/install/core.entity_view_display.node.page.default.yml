@@ -4,7 +4,6 @@ dependencies:
   config:
     - field.field.node.page.body
     - field.field.node.page.field_content_type
-    - field.field.node.page.field_sequence_collection
     - node.type.page
   module:
     - text

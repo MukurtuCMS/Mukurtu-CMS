@@ -5,7 +5,6 @@ dependencies:
     - field.field.node.protocol.body
     - field.field.node.protocol.field_content_type
     - field.field.node.protocol.field_membership_handler
-    - field.field.node.protocol.field_sequence_collection
     - node.type.protocol
   module:
     - og

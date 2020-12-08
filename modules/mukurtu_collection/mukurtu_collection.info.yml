@@ -5,8 +5,10 @@ core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
 dependencies:
+  - blazy
   - media
   - media_library
   - mukurtu_core
+  - slick
 
 version: '8.x-1.x-dev'

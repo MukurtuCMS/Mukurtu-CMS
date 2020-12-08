@@ -8,7 +8,6 @@ dependencies:
     - field.field.node.collection.field_items_in_collection
     - field.field.node.collection.field_keywords
     - field.field.node.collection.field_related_content
-    - field.field.node.collection.field_sequence_collection
     - node.type.collection
   module:
     - user

@@ -7,7 +7,6 @@ dependencies:
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
     - field.field.node.article.field_image
-    - field.field.node.article.field_sequence_collection
     - field.field.node.article.field_tags
     - image.style.thumbnail
     - node.type.article

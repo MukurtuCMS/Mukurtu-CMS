@@ -5,7 +5,6 @@ dependencies:
     - core.entity_view_mode.node.multipage_navigation_teaser
     - field.field.node.page.body
     - field.field.node.page.field_content_type
-    - field.field.node.page.field_sequence_collection
     - node.type.page
   module:
     - layout_builder
