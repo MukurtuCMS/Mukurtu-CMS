@@ -49,6 +49,7 @@ install:
   - diff
 
 dependencies:
+  - blazy
   - content_browser
   - embed
   - entity_embed
@@ -66,6 +67,8 @@ dependencies:
   - geolocation
   - search_api
   - search_api_db
+  - slick
+  - slick_entityreference
   - mukurtu_core
   - mukurtu_community
   - mukurtu_protocol
