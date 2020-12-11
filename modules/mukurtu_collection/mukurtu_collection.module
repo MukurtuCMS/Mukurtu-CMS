@@ -94,6 +94,7 @@ function mukurtu_collection_node_view(array &$build, EntityInterface $entity, En
   }
 
   if ($entity->getEntityTypeId() == 'node') {
+    // Collections.
     if ($entity->bundle() == 'collection' && $entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)) {
       $collection_type = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value;
       if ($collection_type == MUKURTU_COLLECTION_TYPE_MULTIPAGE) {
@@ -115,6 +116,7 @@ function mukurtu_collection_entity_view_mode_alter(&$view_mode, EntityInterface 
     return;
   }
 
+  // Alter view modes for collections.
   if ($entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE) && $entity->bundle() == 'collection') {
     $collection_type = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value;
     if ($collection_type == MUKURTU_COLLECTION_TYPE_MULTIPAGE) {
@@ -122,6 +124,15 @@ function mukurtu_collection_entity_view_mode_alter(&$view_mode, EntityInterface 
         // Display "full" mode multipage collections in "multipage_item" mode.
         $view_mode = 'multipage_item';
       }
+    }
+  }
+
+  // Any full view content that is a member of a multipage collection.
+  if ($view_mode ==  'full' && $entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)) {
+    $collections = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)->referencedEntities();
+    $collection = $collections[0] ?? NULL;
+    if ($collection) {
+      $view_mode = 'multipage_full';
     }
   }
 }
@@ -176,5 +187,28 @@ function mukurtu_collection_entity_bundle_field_info_alter(&$fields, EntityTypeI
   // Attach our contraint to the sequence collection field.
   if (isset($fields[MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION])) {
     $fields[MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION]->addConstraint('ValidSequenceCollection', []);
+  }
+}
+
+/**
+ * Implements hook_slick_settings_alter().
+ */
+function mukurtu_collection_slick_settings_alter(array &$build, $items) {
+  $id = \Drupal::routeMatch()->getRawParameter('node');
+
+  $options = &$build['optionset'];
+
+  $page = 0;
+
+  // Select the current node in the slick slider.
+  if ($id) {
+    $refs = $items->referencedEntities();
+    foreach ($refs as $ref) {
+      if ($id == $ref->id()) {
+        $options->setSetting('initialSlide', $page);
+        continue;
+      }
+      $page++;
+    }
   }
 }
