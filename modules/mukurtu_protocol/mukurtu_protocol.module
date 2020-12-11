@@ -192,14 +192,6 @@ function mukurtu_protocol_use_custom_protocol_widgets_sitewide() {
  */
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   // Protocols only work with nodes & media.
-
-    $class = get_class($entity);
-
-    if (is_string($entity)) {
-      dpm("is string $entity");
-    }
-
-
   $type = $entity->getEntityTypeId();
   if ($type == 'node' || $type == 'media') {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
@@ -219,7 +211,9 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
   // Update protocol tables.
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   if ($protocol_manager->hasProtocolFields($entity)) {
-    // If the new item is using inheritance and the target is set, do the protocol copy now.
+    // If the new item is using inheritance and the target is set,
+    // do the protocol copy now.
+    $inheritance_target = NULL;
     if ($entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)) {
       if (isset($entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0])) {
         $inheritance_target_id = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0]->target_id;
@@ -228,7 +222,9 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
           $protocol_manager->copyProtocolFields($inheritance_target, $entity);
         }
       }
-    } else {
+    }
+
+    if ($inheritance_target_id == NULL) {
       // Only run this if not doing inheritance. copyProtocolFields will
       // trigger hook_entity_update, which will run handleProtocolUpdate.
       $protocol_manager->handleProtocolUpdate($entity);
