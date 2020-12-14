@@ -87,7 +87,8 @@ function mukurtu_collection_entity_delete(EntityInterface $entity) {
  * Implements hook_ENTITY_TYPE_view().
  */
 function mukurtu_collection_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-  if ($view_mode === 'multipage_navigation' || $view_mode === 'multipage_item') {
+  // Don't display the real title field for multipage view modes.
+  if (substr($view_mode, 0, 10) === 'multipage_') {
     if (isset($build['title'])) {
       unset($build['title']);
     }
