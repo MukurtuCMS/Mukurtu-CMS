@@ -7,6 +7,8 @@
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\node\Entity\NodeType;
 
 /**
  * Implements hook_entity_bundle_create().
@@ -15,6 +17,32 @@ function mukurtu_core_entity_bundle_create($entity_type_id, $bundle) {
   // For any new node that is defined, add the content type field.
   if ($entity_type_id == 'node') {
     mukurtu_core_create_content_type_field($entity_type_id, $bundle);
+  }
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function mukurtu_core_entity_extra_field_info() {
+  $extra = [];
+
+  foreach (NodeType::loadMultiple() as $bundle) {
+    $extra['node'][$bundle->id()]['display']['field_title'] = [
+      'label' => t('Title'),
+      'description' => t('Title'),
+      'weight' => 0,
+      'visible' => TRUE,
+    ];
+  }
+  return $extra;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if ($display->getComponent('field_title')) {
+    $build['field_title'] = $entity->title->view();
   }
 }
 
