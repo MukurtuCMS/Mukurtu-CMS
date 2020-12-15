@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.multipage_full
+label: 'Multipage Full'
+targetEntityType: node
+cache: true
