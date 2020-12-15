@@ -75,6 +75,10 @@ function mukurtu_collection_entity_update(EntityInterface $entity) {
  * Implements hook_entity_delete().
  */
 function mukurtu_collection_entity_delete(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() !== 'node') {
+    return;
+  }
+
   if ($entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)) {
     // Set the collection to empty and request a relationship sync.
     // This will delete all the item level references to the collection.
