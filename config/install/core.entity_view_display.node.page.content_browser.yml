@@ -42,6 +42,8 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_sequence_collection: true
+  field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_favorite: true

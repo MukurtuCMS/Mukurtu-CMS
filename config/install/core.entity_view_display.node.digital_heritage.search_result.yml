@@ -46,60 +46,6 @@ content:
       link: true
     third_party_settings: {  }
   field_contributor:
-    weight: 104
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: content
-  field_creator:
-    weight: 103
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: content
-  field_cultural_narrative:
-    weight: 106
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    type: text_default
-    region: content
-  field_date_description:
-    weight: 105
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
-  field_description:
-    weight: 9
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    type: text_default
-    region: content
-  field_format:
-    weight: 110
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: content
-  field_identifier:
-    weight: 112
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
-  field_keywords:
     weight: 8
     label: above
     settings:
@@ -107,8 +53,62 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: content
+  field_creator:
+    weight: 7
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_cultural_narrative:
+    weight: 10
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+  field_date_description:
+    weight: 9
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_description:
+    weight: 5
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+  field_format:
+    weight: 14
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_identifier:
+    weight: 16
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_keywords:
+    weight: 4
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
   field_language:
-    weight: 113
+    weight: 17
     label: above
     settings:
       link: true
@@ -133,7 +133,7 @@ content:
       link: true
     third_party_settings: {  }
   field_people:
-    weight: 116
+    weight: 20
     label: above
     settings:
       link: true
@@ -141,7 +141,7 @@ content:
     type: entity_reference_label
     region: content
   field_publisher:
-    weight: 108
+    weight: 12
     label: above
     settings:
       link: true
@@ -149,7 +149,7 @@ content:
     type: entity_reference_label
     region: content
   field_related_content:
-    weight: 10
+    weight: 6
     label: above
     settings:
       link: true
@@ -158,14 +158,14 @@ content:
     type: entity_reference_entity_view
     region: content
   field_rights:
-    weight: 109
+    weight: 13
     label: above
     settings: {  }
     third_party_settings: {  }
     type: basic_string
     region: content
   field_source:
-    weight: 114
+    weight: 18
     label: above
     settings:
       link_to_entity: false
@@ -173,7 +173,7 @@ content:
     type: string
     region: content
   field_subject:
-    weight: 115
+    weight: 19
     label: above
     settings:
       link: true
@@ -181,14 +181,14 @@ content:
     type: entity_reference_label
     region: content
   field_traditional_knowledge:
-    weight: 107
+    weight: 11
     label: above
     settings: {  }
     third_party_settings: {  }
     type: text_default
     region: content
   field_type:
-    weight: 111
+    weight: 15
     label: above
     settings:
       link: true
@@ -237,6 +237,7 @@ hidden:
   field_mukurtu_protocol_write: true
   field_sequence_collection: true
   field_sequence_position: true
+  field_title: true
   layout_builder__layout: true
   links: true
   search_api_excerpt: true

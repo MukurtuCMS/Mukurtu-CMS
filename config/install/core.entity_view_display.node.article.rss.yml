@@ -17,10 +17,10 @@ bundle: article
 mode: rss
 content:
   flag_email_node:
-    weight: 10
+    weight: 0
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
   flag_email_og:
     weight: 10
     settings: {  }
@@ -37,8 +37,10 @@ content:
     third_party_settings: {  }
     region: content
   links:
-    weight: 100
+    weight: 1
     region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   body: true
   comment: true
@@ -52,4 +54,5 @@ hidden:
   field_mukurtu_protocol_write: true
   field_sequence_collection: true
   field_tags: true
+  field_title: true
   search_api_excerpt: true

@@ -16,12 +16,12 @@ content:
   body:
     label: hidden
     type: text_default
-    weight: 100
+    weight: 1
     region: content
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_inherit:
-    weight: 102
+    weight: 3
     label: above
     settings:
       link: true
@@ -29,7 +29,7 @@ content:
     type: entity_reference_label
     region: content
   flag_email_node:
-    weight: 10
+    weight: 0
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -54,7 +54,7 @@ content:
     third_party_settings: {  }
     region: content
   links:
-    weight: 101
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -66,4 +66,5 @@ hidden:
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
   field_sequence_collection: true
+  field_title: true
   search_api_excerpt: true

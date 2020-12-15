@@ -22,10 +22,10 @@ content:
     label: hidden
     region: content
   flag_email_node:
-    weight: 10
+    weight: 1
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
   flag_email_og:
     weight: 10
     settings: {  }
@@ -54,5 +54,7 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_sequence_collection: true
+  field_title: true
   links: true
   search_api_excerpt: true

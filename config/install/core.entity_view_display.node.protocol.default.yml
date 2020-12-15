@@ -15,10 +15,10 @@ bundle: protocol
 mode: default
 content:
   flag_email_node:
-    weight: 10
+    weight: 1
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
   flag_email_og:
     weight: 10
     settings: {  }
@@ -35,10 +35,10 @@ content:
     third_party_settings: {  }
     region: content
   links:
-    weight: 100
+    weight: 2
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
   og_audience:
     label: above
     type: entity_reference_label
@@ -60,4 +60,5 @@ hidden:
   field_membership_handler: true
   field_mukurtu_community: true
   field_sequence_collection: true
+  field_title: true
   search_api_excerpt: true

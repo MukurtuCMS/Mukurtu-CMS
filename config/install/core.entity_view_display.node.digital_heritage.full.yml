@@ -303,17 +303,19 @@ third_party_settings:
             uuid: 85453a34-bafd-4f31-8435-663f36300239
             region: first
             configuration:
+              id: 'field_block:node:digital_heritage:field_media_assets'
+              label: 'Media Assets'
+              provider: layout_builder
               label_display: '0'
+              formatter:
+                label: above
+                type: entity_reference_entity_view
+                settings:
+                  view_mode: full
+                third_party_settings: {  }
               context_mapping:
                 entity: layout_builder.entity
-              id: 'field_block:node:digital_heritage:field_media_assets'
-              formatter:
-                type: entity_reference_entity_view
-                label: above
-                settings:
-                  link: true
-                  view_mode: default
-                third_party_settings: {  }
+                view_mode: view_mode
             additional: {  }
             weight: 0
           2476aca0-7393-4193-93f6-6bc16a44de73:

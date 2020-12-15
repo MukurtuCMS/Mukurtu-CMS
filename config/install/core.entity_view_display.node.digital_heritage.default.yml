@@ -907,6 +907,11 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: content
+  field_title:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    region: first
   field_traditional_knowledge:
     weight: 107
     label: above

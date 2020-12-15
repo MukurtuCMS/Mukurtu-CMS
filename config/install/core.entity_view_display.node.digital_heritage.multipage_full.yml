@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.multipage_navigation_teaser
+    - core.entity_view_mode.node.multipage_full
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
@@ -25,71 +25,25 @@ dependencies:
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
-    - blazy
     - layout_builder
     - user
 third_party_settings:
   layout_builder:
     allow_custom: false
     enabled: false
-id: node.digital_heritage.multipage_navigation_teaser
+id: node.digital_heritage.multipage_full
 targetEntityType: node
 bundle: digital_heritage
-mode: multipage_navigation_teaser
+mode: multipage_full
 content:
-  field_media_assets:
-    type: blazy_media
+  field_sequence_collection:
+    type: entity_reference_entity_view
     weight: 0
     region: content
     label: hidden
     settings:
-      style: ''
-      image_style: ''
-      media_switch: ''
-      thumbnail_style: ''
-      ratio: ''
-      view_mode: default
-      image: ''
-      grid: null
-      grid_medium: null
-      grid_small: null
-      current_view_mode: multipage_navigation_teaser
-      background: false
-      caption:
-        field_mukurtu_community: '0'
-        field_mukurtu_protocol_inherit: '0'
-        field_mukurtu_protocol_read: '0'
-        field_mukurtu_protocol_r_scope: '0'
-        field_mukurtu_protocol_write: '0'
-        field_mukurtu_protocol_w_scope: '0'
-        field_media_document: '0'
-        title: '0'
-        alt: '0'
-      class: ''
-      id: ''
-      link: ''
-      overlay: ''
-      title: ''
-      vanilla: false
-      icon: ''
-      layout: ''
-      cache: 0
-      skin: ''
-      fx: ''
-      box_caption: ''
-      box_caption_custom: ''
-      box_media_style: ''
-      responsive_image_style: ''
-      box_style: ''
-      _uri: ''
-      breakpoints: {  }
-      sizes: ''
-      grid_header: ''
-    third_party_settings: {  }
-  field_title:
-    weight: 1
-    region: content
-    settings: {  }
+      view_mode: full
+      link: false
     third_party_settings: {  }
   flag_email_og:
     weight: 4
@@ -131,6 +85,7 @@ hidden:
   field_identifier: true
   field_keywords: true
   field_language: true
+  field_media_assets: true
   field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
@@ -141,10 +96,10 @@ hidden:
   field_publisher: true
   field_related_content: true
   field_rights: true
-  field_sequence_collection: true
   field_sequence_position: true
   field_source: true
   field_subject: true
+  field_title: true
   field_traditional_knowledge: true
   field_type: true
   flag_email_node: true

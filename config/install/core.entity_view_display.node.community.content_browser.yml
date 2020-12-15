@@ -36,6 +36,8 @@ hidden:
   field_description: true
   field_featured_content: true
   field_parent_community: true
+  field_sequence_collection: true
+  field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_subscribe_node: true
