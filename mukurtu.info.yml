@@ -70,6 +70,7 @@ dependencies:
   - slick
   - slick_entityreference
   - mukurtu_core
+  - mukurtu_collection
   - mukurtu_community
   - mukurtu_protocol
   - mukurtu_taxonomy
