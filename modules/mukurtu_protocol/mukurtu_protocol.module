@@ -213,7 +213,7 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
   if ($protocol_manager->hasProtocolFields($entity)) {
     // If the new item is using inheritance and the target is set,
     // do the protocol copy now.
-    $inheritance_target = NULL;
+    $inheritance_target_id = NULL;
     if ($entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)) {
       if (isset($entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0])) {
         $inheritance_target_id = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0]->target_id;

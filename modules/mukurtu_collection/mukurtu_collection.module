@@ -100,8 +100,10 @@ function mukurtu_collection_node_view(array &$build, EntityInterface $entity, En
       $collection_type = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value;
       if ($collection_type == MUKURTU_COLLECTION_TYPE_MULTIPAGE) {
         // Add in the multipage navigation field.
-        $temp = $build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS];
-        unset($build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS]);
+        $temp = $build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS] ?? [];
+        if (!empty($temp)) {
+          unset($build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS]);
+        }
         $build['field_multipage_navigation'] = $entity->{MUKURTU_COLLECTION_FIELD_NAME_ITEMS}->view('multipage_navigation');
         $build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS] = $temp;
       }
