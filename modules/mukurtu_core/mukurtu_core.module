@@ -9,6 +9,8 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\node\Entity\NodeType;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * Implements hook_entity_bundle_create().
@@ -35,6 +37,28 @@ function mukurtu_core_entity_extra_field_info() {
     ];
   }
   return $extra;
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+  if ($entity_type->id() == 'node') {
+    // Define a computed field for representative media, a single media entity that
+    // represents the specific content.
+    $fields['field_representative_media'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_representative_media')
+      ->setLabel(t('Representative Media'))
+      ->setDescription(t('A single media item that represents the specific content.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_core\Plugin\Field\RepresentativeMediaItemList')
+      ->setSetting('target_type', 'media')
+      ->setCardinality(1)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayOptions('view', ['label' => 'hidden', 'type' => 'blazy_media']);
+  }
+  return $fields;
 }
 
 /**
