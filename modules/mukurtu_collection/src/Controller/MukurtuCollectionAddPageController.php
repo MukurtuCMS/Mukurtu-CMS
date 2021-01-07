@@ -4,10 +4,28 @@ namespace Drupal\mukurtu_collection\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\node\NodeInterface;
+use Drupal\node\Entity\Node;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 
 class MukurtuCollectionAddPageController extends ControllerBase {
+
+  protected function getCollection(NodeInterface $node) {
+    if ($node->bundle() == 'collection') {
+      return $node;
+    } else {
+      if ($node->hasField(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)) {
+        // Get the multipage collection that node belongs to.
+        $collections = $node->get(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)->referencedEntities();
+        $collection = $collections[0] ?? NULL;
+
+        return $collection;
+      }
+    }
+
+    return NULL;
+  }
+
   /**
    * Check access for adding new pages to multipage collections.
    *
@@ -20,7 +38,7 @@ class MukurtuCollectionAddPageController extends ControllerBase {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(AccountInterface $account, NodeInterface $node) {
+  public function access(AccountInterface $account, NodeInterface $node, $bundle = '') {
     if ($node) {
       // Node is the collection.
       if ($node->bundle() == 'collection') {
@@ -28,18 +46,12 @@ class MukurtuCollectionAddPageController extends ControllerBase {
         return AccessResult::allowedIf($node->access('update', $account));
       }
 
-      // Node might be a member of the collection.
-      if ($node->hasField(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)) {
-        // Get the multipage collection.
-        $collections = $node->get(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)->referencedEntities();
-        $collection = $collections[0] ?? NULL;
+      // The collection must exist and it must be in multipage mode.
+      $collection = $this->getCollection($node);
+      if ($collection && $collection->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value == 'multipage') {
 
-        // The collection must exist and it must be in multipage mode.
-        if ($collection && $collection->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value == 'multipage') {
-
-          // Check if user has edit rights to the collection.
-          return AccessResult::allowedIf($node->access('update', $account));
-        }
+        // Check if user has edit rights to the collection.
+        return AccessResult::allowedIf($node->access('update', $account));
       }
     }
 
@@ -47,18 +59,10 @@ class MukurtuCollectionAddPageController extends ControllerBase {
   }
 
   /**
-   * Display the edit form for the multipage collection.
+   * Display the list of available new content for a multipage collection.
    */
   public function content(NodeInterface $node) {
-    if ($node->bundle() == 'collection') {
-      $collection = $node;
-    } else {
-      if ($node->hasField(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)) {
-        // Get the multipage collection that node belongs to.
-        $collections = $node->get(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)->referencedEntities();
-        $collection = $collections[0] ?? NULL;
-      }
-    }
+    $collection = $this->getCollection($node);
 
     if ($collection) {
       // Get the allowed target bundles from the collection items field.
@@ -86,6 +90,40 @@ class MukurtuCollectionAddPageController extends ControllerBase {
       ];
       return $build;
     }
+  }
+
+  /**
+   * Display the creation form for the specified node bundle.
+   */
+  public function contentByBundle(NodeInterface $node, $bundle) {
+    $collection = $this->getCollection($node);
+
+    if (!$collection) {
+      return;
+    }
+
+    // Create a new node form for the given bundle.
+    $node = Node::create([
+      'type' => $bundle,
+      MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET => [$collection->id()],
+    ]);
+
+    // Get the node form.
+    $form = \Drupal::service('entity.manager')
+        ->getFormObject('node', 'default')
+        ->setEntity($node);
+
+    // Pass a custom submit handler and the collection ID to
+    // mukurtu_collection_form_alter. There might be a cleaner way to do this...
+    $args = [
+      'mukurtu_collection' => [
+        'submit' => ['mukurtu_collection_multipage_add_page_form_submit'],
+        'target' => $collection->id(),
+      ],
+    ];
+    $build[] = \Drupal::formBuilder()->getForm($form, $args);
+
+    return $build;
   }
 
 }

@@ -9,6 +9,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 define("MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION", "field_sequence_collection");
 define("MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION", "Sequence Collection");
@@ -216,6 +217,48 @@ function mukurtu_collection_slick_settings_alter(array &$build, $items) {
         continue;
       }
       $page++;
+    }
+  }
+}
+
+
+/**
+ * Implements hook_form_alter().
+ */
+function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Only run on node forms.
+  if (strpos($form_id, 'node_') === 0) {
+    $args = $form_state->getBuildInfo()['args'];
+
+    // Are there any mukurtu_collection specific arguments to handle?
+    if (!empty($args) && isset($args[0]['mukurtu_collection']['submit'])) {
+      // We want to add this node to the target collection after the node form is submitted.
+      // Add the collection ID to the form.
+      $form['mukurtu_collection_target'] = [
+        '#type' => 'hidden',
+        '#value' => $args[0]['mukurtu_collection']['target'],
+      ];
+
+      // Attach our custom submit handler that will run after the default handler.
+      $form['actions']['submit']['#submit'][] = $args[0]['mukurtu_collection']['submit'][0];
+    }
+  }
+}
+
+/**
+ * Submit handler for node create form to add node to collection after save.
+ */
+function mukurtu_collection_multipage_add_page_form_submit(array &$form, FormStateInterface $form_state) {
+  // Get the collection ID, this is set in mukurtu_collection_form_alter.
+  $collection_id = $form_state->getValue('mukurtu_collection_target');
+  if ($collection_id) {
+    $collection = \Drupal::entityTypeManager()->getStorage('node')->load($collection_id);
+    if ($collection && $collection->access('update')) {
+      // Add the node to the collection's items field.
+      $items = mukurtu_core_flatten_entity_ref_field($collection, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
+      $items[] = $form_state->getformObject()->getEntity()->id();
+      $collection->set(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, $items);
+      $collection->save();
     }
   }
 }
