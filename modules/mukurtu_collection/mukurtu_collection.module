@@ -262,3 +262,24 @@ function mukurtu_collection_multipage_add_page_form_submit(array &$form, FormSta
     }
   }
 }
+
+/**
+ * Submit handler for node create form for multipage item creation.
+ */
+function mukurtu_collection_multipage_create_multipage_form_submit(array &$form, FormStateInterface $form_state) {
+  // The nid of the node the user is converting into a brand new MPI.
+  $nid = $form_state->getValue('mukurtu_collection_target');
+
+  if ($nid) {
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    if ($node && $node->access('update')) {
+      // The ID of the new MPI collection.
+      $new_multipage_collection_id = $form_state->getformObject()->getEntity()->id();
+
+      // Have the original item (first page) inherit protocols from the collection.
+      // The protocols of the collection were initially copied from the node during creation.
+      $node->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $new_multipage_collection_id);
+      $node->save();
+    }
+  }
+}

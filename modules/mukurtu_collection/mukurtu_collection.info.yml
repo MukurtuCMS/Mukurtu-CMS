@@ -9,6 +9,7 @@ dependencies:
   - media
   - media_library
   - mukurtu_core
+  - mukurtu_protocol
   - slick
   - slick_entityreference
 
