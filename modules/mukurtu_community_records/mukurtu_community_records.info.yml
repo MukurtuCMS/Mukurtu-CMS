@@ -6,6 +6,7 @@ core: 8.x
 package: 'Mukurtu'
 dependencies:
   - mukurtu_core
+  - mukurtu_community
   - mukurtu_protocol
 
 version: '8.x-1.x-dev'

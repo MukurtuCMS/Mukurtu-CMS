@@ -12,6 +12,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_entity_bundle_create().
@@ -178,5 +179,46 @@ function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, Enti
 {
   if (isset($fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS])) {
     $fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS]->addConstraint('ValidCommunityRecord', []);
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function mukurtu_community_records_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Only run on node forms.
+  if (strpos($form_id, 'node_') === 0) {
+    $args = $form_state->getBuildInfo()['args'];
+
+    if (!empty($args) && isset($args[0]['mukurtu_community_records']['submit'])) {
+      $form['mukurtu_community_records_target'] = [
+        '#type' => 'hidden',
+        '#value' => $args[0]['mukurtu_community_records']['target'],
+      ];
+
+      // Attach our custom submit handler that will run after the default handler.
+      $form['actions']['submit']['#submit'][] = $args[0]['mukurtu_community_records']['submit'][0];
+    }
+  }
+}
+
+/**
+ * Form submit callback for add community record.
+ */
+function mukurtu_community_records_add_community_record_form_submit(array &$form, FormStateInterface $form_state) {
+  $nid = $form_state->getValue('mukurtu_community_records_target');
+
+  if ($nid) {
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    if ($node && $node->access('update')) {
+      $new_community_record_id = $form_state->getformObject()->getEntity()->id();
+      $existing_community_records = mukurtu_core_flatten_entity_ref_field($node, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS);
+      if (!in_array($new_community_record_id, $existing_community_records)) {
+        $existing_community_records[] = $new_community_record_id;
+
+        $node->set(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS, $existing_community_records);
+        $node->save();
+      }
+    }
   }
 }
