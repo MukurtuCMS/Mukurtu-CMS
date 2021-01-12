@@ -41,6 +41,7 @@
     "drupal/content_browser": "*",
     "drupal/diff": "*",
     "drupal/geolocation": "*",
+    "drupal/geolocation_gpx": "*",
     "drupal/flag": "*",
     "drupal/field_group": "3.x-dev",
     "drupal/message": "*",
