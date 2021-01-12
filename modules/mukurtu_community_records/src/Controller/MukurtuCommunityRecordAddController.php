@@ -33,6 +33,11 @@ class MukurtuCommunityRecordAddController extends ControllerBase {
       return AccessResult::forbidden();
     }
 
+    // Omit basic Mukurtu types.
+    if (in_array($node->bundle(), ['community', 'protocol', 'collection'])) {
+      return AccessResult::forbidden();
+    }
+
     // If the original record field is set, this is already a community record.
     // Do the rest of the checks using the parent record.
     $original = $node->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->referencedEntities();

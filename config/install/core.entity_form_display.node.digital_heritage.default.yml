@@ -6,6 +6,8 @@ dependencies:
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
+    - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_coverage_gpx
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
     - field.field.node.digital_heritage.field_date_description
@@ -15,6 +17,8 @@ dependencies:
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
+    - field.field.node.digital_heritage.field_mukurtu_community_records
+    - field.field.node.digital_heritage.field_mukurtu_original_record
     - field.field.node.digital_heritage.field_people
     - field.field.node.digital_heritage.field_publisher
     - field.field.node.digital_heritage.field_related_content
@@ -27,6 +31,8 @@ dependencies:
   module:
     - entity_browser
     - field_group
+    - geolocation
+    - geolocation_gpx
     - media_library
     - mukurtu_protocol
     - path
@@ -111,6 +117,8 @@ third_party_settings:
         - field_source
         - field_subject
         - field_people
+        - field_coverage
+        - field_coverage_gpx
       parent_name: group_main_tab
       weight: 23
       format_type: tab
@@ -179,6 +187,19 @@ content:
     third_party_settings: {  }
     type: entity_reference_autocomplete
     region: content
+  field_coverage:
+    weight: 28
+    settings: {  }
+    third_party_settings: {  }
+    type: geolocation_latlng
+    region: content
+  field_coverage_gpx:
+    weight: 29
+    settings:
+      progress_indicator: throbber
+    third_party_settings: {  }
+    type: geolocation_gpx_file
+    region: content
   field_creator:
     weight: -2
     settings:
@@ -226,7 +247,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_identifier:
-    weight: 24
+    weight: 23
     settings:
       size: 60
       placeholder: ''
@@ -244,7 +265,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_language:
-    weight: 25
+    weight: 24
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -265,6 +286,26 @@ content:
         - remote_video
         - video
     third_party_settings: {  }
+  field_mukurtu_community_records:
+    weight: 124
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_mukurtu_original_record:
+    weight: 125
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
   field_mukurtu_protocol_inherit:
     type: entity_browser_entity_reference
     weight: -6
@@ -305,7 +346,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_people:
-    weight: 28
+    weight: 27
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -357,15 +398,8 @@ content:
     third_party_settings: {  }
     type: entity_reference_autocomplete
     region: content
-  field_sequence_position:
-    weight: 124
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
   field_source:
-    weight: 26
+    weight: 25
     settings:
       size: 60
       placeholder: ''
@@ -373,7 +407,7 @@ content:
     type: string_textfield
     region: content
   field_subject:
-    weight: 27
+    weight: 26
     settings:
       match_operator: CONTAINS
       match_limit: 10

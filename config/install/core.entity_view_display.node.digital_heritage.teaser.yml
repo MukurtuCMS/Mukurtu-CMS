@@ -6,6 +6,8 @@ dependencies:
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
+    - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_coverage_gpx
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
     - field.field.node.digital_heritage.field_date_description
@@ -15,6 +17,8 @@ dependencies:
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
+    - field.field.node.digital_heritage.field_mukurtu_community_records
+    - field.field.node.digital_heritage.field_mukurtu_original_record
     - field.field.node.digital_heritage.field_people
     - field.field.node.digital_heritage.field_publisher
     - field.field.node.digital_heritage.field_related_content
@@ -25,6 +29,7 @@ dependencies:
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
+    - blazy
     - layout_builder
     - text
     - user
@@ -105,6 +110,64 @@ third_party_settings:
               context_mapping:
                 entity: layout_builder.entity
                 view_mode: view_mode
+            additional: {  }
+            weight: 2
+          a754d864-6fe2-48e6-818b-c8113dd63489:
+            uuid: a754d864-6fe2-48e6-818b-c8113dd63489
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'extra_field_block:node:digital_heritage:field_title'
+            additional: {  }
+            weight: 1
+          8b943920-d0fd-4a59-8730-97017f86f812:
+            uuid: 8b943920-d0fd-4a59-8730-97017f86f812
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_representative_media'
+              formatter:
+                label: hidden
+                type: blazy_media
+                settings:
+                  class: ''
+                  id: ''
+                  image: ''
+                  link: ''
+                  overlay: ''
+                  title: ''
+                  vanilla: false
+                  icon: ''
+                  layout: ''
+                  view_mode: ''
+                  cache: 0
+                  current_view_mode: ''
+                  skin: ''
+                  fx: ''
+                  style: ''
+                  background: false
+                  box_caption: ''
+                  box_caption_custom: ''
+                  box_media_style: ''
+                  caption: {  }
+                  responsive_image_style: ''
+                  box_style: ''
+                  image_style: ''
+                  media_switch: ''
+                  ratio: ''
+                  thumbnail_style: ''
+                  _uri: ''
+                  breakpoints: {  }
+                  sizes: ''
+                  grid_header: ''
+                  grid: 0
+                  grid_medium: 0
+                  grid_small: 0
+                third_party_settings: {  }
             additional: {  }
             weight: 2
         third_party_settings: {  }
@@ -233,6 +296,46 @@ content:
     third_party_settings: {  }
     type: entity_reference_entity_view
     region: content
+  field_representative_media:
+    label: hidden
+    type: blazy_media
+    region: first
+    weight: 117
+    settings:
+      class: ''
+      id: ''
+      image: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      icon: ''
+      layout: ''
+      view_mode: ''
+      cache: 0
+      current_view_mode: ''
+      skin: ''
+      fx: ''
+      style: ''
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      caption: {  }
+      responsive_image_style: ''
+      box_style: ''
+      image_style: ''
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      _uri: ''
+      breakpoints: {  }
+      sizes: ''
+      grid_header: ''
+      grid: 0
+      grid_medium: 0
+      grid_small: 0
+    third_party_settings: {  }
   field_rights:
     weight: 109
     label: above
@@ -256,6 +359,11 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: content
+  field_title:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    region: first
   field_traditional_knowledge:
     weight: 107
     label: above
@@ -306,13 +414,16 @@ content:
     region: content
 hidden:
   field_content_type: true
+  field_coverage: true
+  field_coverage_gpx: true
+  field_mukurtu_community_records: true
+  field_mukurtu_original_record: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
   field_sequence_collection: true
-  field_sequence_position: true
   layout_builder__layout: true
   links: true
   search_api_excerpt: true

@@ -6,6 +6,8 @@ dependencies:
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
+    - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_coverage_gpx
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
     - field.field.node.digital_heritage.field_date_description
@@ -15,6 +17,8 @@ dependencies:
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
+    - field.field.node.digital_heritage.field_mukurtu_community_records
+    - field.field.node.digital_heritage.field_mukurtu_original_record
     - field.field.node.digital_heritage.field_people
     - field.field.node.digital_heritage.field_publisher
     - field.field.node.digital_heritage.field_related_content
@@ -84,6 +88,8 @@ content:
 hidden:
   field_content_type: true
   field_contributor: true
+  field_coverage: true
+  field_coverage_gpx: true
   field_creator: true
   field_cultural_narrative: true
   field_date_description: true
@@ -93,6 +99,8 @@ hidden:
   field_keywords: true
   field_language: true
   field_mukurtu_community: true
+  field_mukurtu_community_records: true
+  field_mukurtu_original_record: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
@@ -101,9 +109,9 @@ hidden:
   field_people: true
   field_publisher: true
   field_related_content: true
+  field_representative_media: true
   field_rights: true
   field_sequence_collection: true
-  field_sequence_position: true
   field_source: true
   field_subject: true
   field_title: true

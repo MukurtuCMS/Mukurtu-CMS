@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.multipage_navigation_teaser
+    - core.entity_view_mode.node.community_records_full
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
@@ -29,69 +29,25 @@ dependencies:
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
-    - blazy
     - layout_builder
     - user
 third_party_settings:
   layout_builder:
     allow_custom: false
     enabled: false
-id: node.digital_heritage.multipage_navigation_teaser
+id: node.digital_heritage.community_records_full
 targetEntityType: node
 bundle: digital_heritage
-mode: multipage_navigation_teaser
+mode: community_records_full
 content:
-  field_representative_media:
-    type: blazy_media
+  field_all_community_records:
+    type: entity_reference_entity_view
     weight: 0
     region: content
     label: hidden
     settings:
-      image_style: ''
-      media_switch: ''
-      thumbnail_style: ''
-      ratio: ''
-      view_mode: default
-      current_view_mode: multipage_navigation_teaser
-      background: false
-      caption:
-        field_mukurtu_community: '0'
-        field_mukurtu_protocol_inherit: '0'
-        field_mukurtu_protocol_read: '0'
-        field_mukurtu_protocol_r_scope: '0'
-        field_mukurtu_protocol_write: '0'
-        field_mukurtu_protocol_w_scope: '0'
-        field_media_document: '0'
-      class: ''
-      id: ''
-      image: ''
-      link: ''
-      overlay: ''
-      title: ''
-      vanilla: false
-      icon: ''
-      layout: ''
-      cache: 0
-      skin: ''
-      fx: ''
-      style: ''
-      box_caption: ''
-      box_caption_custom: ''
-      box_media_style: ''
-      responsive_image_style: ''
-      box_style: ''
-      _uri: ''
-      breakpoints: {  }
-      sizes: ''
-      grid_header: ''
-      grid: 0
-      grid_medium: 0
-      grid_small: 0
-    third_party_settings: {  }
-  field_title:
-    weight: 1
-    region: content
-    settings: {  }
+      view_mode: community_records_single_record
+      link: false
     third_party_settings: {  }
   flag_email_og:
     weight: 4
@@ -147,10 +103,12 @@ hidden:
   field_people: true
   field_publisher: true
   field_related_content: true
+  field_representative_media: true
   field_rights: true
   field_sequence_collection: true
   field_source: true
   field_subject: true
+  field_title: true
   field_traditional_knowledge: true
   field_type: true
   flag_email_node: true

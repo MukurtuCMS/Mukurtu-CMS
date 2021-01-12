@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.content_browser
+    - core.entity_view_mode.node.community_records_full
     - field.field.node.article.body
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
@@ -10,78 +10,27 @@ dependencies:
     - field.field.node.article.field_mukurtu_community_records
     - field.field.node.article.field_mukurtu_original_record
     - field.field.node.article.field_tags
-    - image.style.medium
     - node.type.article
   module:
-    - blazy
-    - image
     - layout_builder
     - user
 third_party_settings:
   layout_builder:
     allow_custom: false
     enabled: false
-id: node.article.content_browser
+id: node.article.community_records_full
 targetEntityType: node
 bundle: article
-mode: content_browser
+mode: community_records_full
 content:
-  field_content_type:
-    type: string
+  field_all_community_records:
+    type: entity_reference_entity_view
     weight: 0
     region: content
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-  field_image:
-    type: image
-    weight: 1
-    region: content
-    settings:
-      image_style: medium
-      image_link: content
-    third_party_settings: {  }
     label: hidden
-  field_representative_media:
-    label: hidden
-    type: blazy_media
-    region: content
-    weight: 11
     settings:
-      class: ''
-      id: ''
-      image: ''
-      link: ''
-      overlay: ''
-      title: ''
-      vanilla: false
-      icon: ''
-      layout: ''
-      view_mode: ''
-      cache: 0
-      current_view_mode: ''
-      skin: ''
-      fx: ''
-      style: ''
-      background: false
-      box_caption: ''
-      box_caption_custom: ''
-      box_media_style: ''
-      caption: {  }
-      responsive_image_style: ''
-      box_style: ''
-      image_style: ''
-      media_switch: ''
-      ratio: ''
-      thumbnail_style: ''
-      _uri: ''
-      breakpoints: {  }
-      sizes: ''
-      grid_header: ''
-      grid: 0
-      grid_medium: 0
-      grid_small: 0
+      view_mode: community_records_single_record
+      link: false
     third_party_settings: {  }
   flag_email_og:
     weight: 10
@@ -101,6 +50,8 @@ content:
 hidden:
   body: true
   comment: true
+  field_content_type: true
+  field_image: true
   field_mukurtu_community: true
   field_mukurtu_community_records: true
   field_mukurtu_original_record: true
@@ -109,6 +60,7 @@ hidden:
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_representative_media: true
   field_sequence_collection: true
   field_tags: true
   field_title: true

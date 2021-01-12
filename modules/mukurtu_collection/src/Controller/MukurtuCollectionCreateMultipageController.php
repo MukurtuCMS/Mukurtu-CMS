@@ -22,6 +22,11 @@ class MukurtuCollectionCreateMultipageController extends ControllerBase {
    */
   public function access(AccountInterface $account, NodeInterface $node) {
     if ($node && $node->bundle() != 'collection' && $node->hasField(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)) {
+      // Omit basic Mukurtu types.
+      if (in_array($node->bundle(), ['community', 'protocol'])) {
+        return AccessResult::forbidden();
+      }
+
       // Check if this node already is already part of a multipage collection.
       $collections = $node->get(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)->referencedEntities();
       $collection = $collections[0] ?? NULL;

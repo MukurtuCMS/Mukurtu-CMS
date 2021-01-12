@@ -1,0 +1,72 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.representative_media
+    - field.field.media.remote_video.field_media_oembed_video
+    - media.type.remote_video
+  module:
+    - blazy
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: media.remote_video.representative_media
+targetEntityType: media
+bundle: remote_video
+mode: representative_media
+content:
+  og_audience:
+    label: above
+    type: entity_reference_label
+    settings:
+      link: true
+    weight: 7
+    third_party_settings: {  }
+    region: content
+  thumbnail:
+    type: blazy
+    weight: 0
+    region: content
+    label: hidden
+    settings:
+      image_style: ''
+      icon: ''
+      layout: ''
+      view_mode: ''
+      cache: 0
+      current_view_mode: ''
+      skin: ''
+      fx: ''
+      style: ''
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      caption: {  }
+      responsive_image_style: ''
+      box_style: ''
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      _uri: ''
+      breakpoints: {  }
+      sizes: ''
+      grid_header: ''
+      grid: 0
+      grid_medium: 0
+      grid_small: 0
+    third_party_settings: {  }
+hidden:
+  created: true
+  field_media_oembed_video: true
+  field_mukurtu_community: true
+  field_mukurtu_protocol_inherit: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  name: true
+  search_api_excerpt: true
+  uid: true

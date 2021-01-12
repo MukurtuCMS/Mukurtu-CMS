@@ -5,6 +5,8 @@ dependencies:
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
+    - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_coverage_gpx
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
     - field.field.node.digital_heritage.field_date_description
@@ -14,6 +16,8 @@ dependencies:
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
+    - field.field.node.digital_heritage.field_mukurtu_community_records
+    - field.field.node.digital_heritage.field_mukurtu_original_record
     - field.field.node.digital_heritage.field_people
     - field.field.node.digital_heritage.field_publisher
     - field.field.node.digital_heritage.field_related_content
@@ -22,8 +26,12 @@ dependencies:
     - field.field.node.digital_heritage.field_subject
     - field.field.node.digital_heritage.field_traditional_knowledge
     - field.field.node.digital_heritage.field_type
+    - filter.format.plain_text
     - node.type.digital_heritage
   module:
+    - blazy
+    - geolocation
+    - geolocation_gpx
     - layout_builder
     - text
     - user
@@ -716,23 +724,134 @@ third_party_settings:
                 type: entity_reference_label
             additional: {  }
             weight: 6
-          3f09ab96-882a-417e-ae53-b5754d115f7c:
-            uuid: 3f09ab96-882a-417e-ae53-b5754d115f7c
+          0d2fc957-c1a4-44ad-8687-f29e451484ea:
+            uuid: 0d2fc957-c1a4-44ad-8687-f29e451484ea
             region: first
             configuration:
               label_display: '0'
               context_mapping:
                 entity: layout_builder.entity
-              id: 'field_block:node:digital_heritage:field_sequence_position'
+              id: 'field_block:node:digital_heritage:field_representative_media'
+              formatter:
+                label: hidden
+                type: blazy_media
+                settings:
+                  class: ''
+                  id: ''
+                  image: ''
+                  link: ''
+                  overlay: ''
+                  title: ''
+                  vanilla: false
+                  icon: ''
+                  layout: ''
+                  view_mode: ''
+                  cache: 0
+                  current_view_mode: ''
+                  skin: ''
+                  fx: ''
+                  style: ''
+                  background: false
+                  box_caption: ''
+                  box_caption_custom: ''
+                  box_media_style: ''
+                  caption: {  }
+                  responsive_image_style: ''
+                  box_style: ''
+                  image_style: ''
+                  media_switch: ''
+                  ratio: ''
+                  thumbnail_style: ''
+                  _uri: ''
+                  breakpoints: {  }
+                  sizes: ''
+                  grid_header: ''
+                  grid: 0
+                  grid_medium: 0
+                  grid_small: 0
+                third_party_settings: {  }
+            additional: {  }
+            weight: 7
+          bbd0c58c-a494-4c25-85c5-8cdd309b0674:
+            uuid: bbd0c58c-a494-4c25-85c5-8cdd309b0674
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_coverage'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: geolocation_latlng
+            additional: {  }
+            weight: 8
+          6a30c4fc-2a0a-4f57-a8bd-7ff704e8d4bf:
+            uuid: 6a30c4fc-2a0a-4f57-a8bd-7ff704e8d4bf
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_coverage_gpx'
               formatter:
                 label: above
                 settings:
-                  thousand_separator: ''
-                  prefix_suffix: true
+                  title: ''
+                  set_marker: true
+                  common_map: true
+                  show_delta_label: false
+                  data_provider_settings: {  }
+                  map_provider_id: ''
+                  centre:
+                    fit_bounds:
+                      enable: true
+                      weight: -101
+                      map_center_id: fit_bounds
+                      settings:
+                        reset_zoom: true
+                  map_provider_settings: {  }
+                  info_text:
+                    value: ''
+                    format: plain_text
+                  use_overridden_map_settings: false
                 third_party_settings: {  }
-                type: number_integer
+                type: geolocation_gpx_file
             additional: {  }
-            weight: 7
+            weight: 9
+          001b39b9-ac9d-476e-bc59-5b9534c47d4c:
+            uuid: 001b39b9-ac9d-476e-bc59-5b9534c47d4c
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_mukurtu_community_records'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 10
+          c6b1759b-d8af-4bbe-9e3f-c89ede46b9e7:
+            uuid: c6b1759b-d8af-4bbe-9e3f-c89ede46b9e7
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_mukurtu_original_record'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 11
         third_party_settings: {  }
 id: node.digital_heritage.default
 targetEntityType: node
@@ -755,6 +874,38 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: content
+  field_coverage:
+    weight: 120
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: geolocation_latlng
+    region: first
+  field_coverage_gpx:
+    weight: 121
+    label: above
+    settings:
+      title: ''
+      set_marker: true
+      common_map: true
+      show_delta_label: false
+      data_provider_settings: {  }
+      map_provider_id: ''
+      centre:
+        fit_bounds:
+          enable: true
+          weight: -101
+          map_center_id: fit_bounds
+          settings:
+            reset_zoom: true
+      map_provider_settings: {  }
+      info_text:
+        value: ''
+        format: plain_text
+      use_overridden_map_settings: false
+    third_party_settings: {  }
+    type: geolocation_gpx_file
+    region: first
   field_creator:
     weight: 103
     label: above
@@ -834,6 +985,22 @@ content:
     settings:
       link: true
     third_party_settings: {  }
+  field_mukurtu_community_records:
+    weight: 122
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: first
+  field_mukurtu_original_record:
+    weight: 123
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: first
   field_mukurtu_protocol_inherit:
     weight: 117
     label: above
@@ -867,6 +1034,46 @@ content:
     third_party_settings: {  }
     type: entity_reference_entity_view
     region: content
+  field_representative_media:
+    label: hidden
+    type: blazy_media
+    region: first
+    weight: 119
+    settings:
+      class: ''
+      id: ''
+      image: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      icon: ''
+      layout: ''
+      view_mode: ''
+      cache: 0
+      current_view_mode: ''
+      skin: ''
+      fx: ''
+      style: ''
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      caption: {  }
+      responsive_image_style: ''
+      box_style: ''
+      image_style: ''
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      _uri: ''
+      breakpoints: {  }
+      sizes: ''
+      grid_header: ''
+      grid: 0
+      grid_medium: 0
+      grid_small: 0
+    third_party_settings: {  }
   field_rights:
     weight: 109
     label: above
@@ -881,15 +1088,6 @@ content:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
-    region: first
-  field_sequence_position:
-    weight: 119
-    label: above
-    settings:
-      thousand_separator: ''
-      prefix_suffix: true
-    third_party_settings: {  }
-    type: number_integer
     region: first
   field_source:
     weight: 114
@@ -961,6 +1159,7 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  field_all_community_records: true
   field_content_type: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true

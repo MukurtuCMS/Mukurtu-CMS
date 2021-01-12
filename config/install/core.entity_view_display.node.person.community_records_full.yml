@@ -2,54 +2,53 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.teaser
-    - field.field.node.collection.field_collection_type
-    - field.field.node.collection.field_content_type
-    - field.field.node.collection.field_description
-    - field.field.node.collection.field_items_in_collection
-    - field.field.node.collection.field_keywords
-    - field.field.node.collection.field_related_content
-    - node.type.collection
+    - core.entity_view_mode.node.community_records_full
+    - field.field.node.person.field_content_type
+    - field.field.node.person.field_keywords
+    - field.field.node.person.field_media_assets
+    - field.field.node.person.field_related_content
+    - node.type.person
   module:
     - layout_builder
-    - text
     - user
 third_party_settings:
   layout_builder:
     allow_custom: false
     enabled: false
-id: node.collection.teaser
+id: node.person.community_records_full
 targetEntityType: node
-bundle: collection
-mode: teaser
+bundle: person
+mode: community_records_full
 content:
-  field_description:
-    type: text_default
+  field_all_community_records:
+    type: entity_reference_entity_view
     weight: 0
     region: content
-    label: above
-    settings: {  }
+    label: hidden
+    settings:
+      view_mode: community_records_single_record
+      link: false
     third_party_settings: {  }
   flag_email_og:
     weight: 10
-    region: content
     settings: {  }
     third_party_settings: {  }
+    region: content
   flag_favorite:
     weight: 10
-    region: content
     settings: {  }
     third_party_settings: {  }
+    region: content
   flag_subscribe_node:
     weight: 10
-    region: content
     settings: {  }
     third_party_settings: {  }
+    region: content
   flag_subscribe_og:
     weight: 10
-    region: content
     settings: {  }
     third_party_settings: {  }
+    region: content
   og_audience:
     label: above
     type: entity_reference_label
@@ -59,10 +58,9 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
-  field_collection_type: true
   field_content_type: true
-  field_items_in_collection: true
   field_keywords: true
+  field_media_assets: true
   field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
@@ -70,6 +68,7 @@ hidden:
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
   field_related_content: true
+  field_representative_media: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true

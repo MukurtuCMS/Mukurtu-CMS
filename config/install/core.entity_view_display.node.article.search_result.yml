@@ -7,10 +7,13 @@ dependencies:
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
     - field.field.node.article.field_image
+    - field.field.node.article.field_mukurtu_community_records
+    - field.field.node.article.field_mukurtu_original_record
     - field.field.node.article.field_tags
     - image.style.thumbnail
     - node.type.article
   module:
+    - blazy
     - image
     - text
     - user
@@ -36,6 +39,46 @@ content:
     third_party_settings: {  }
     label: hidden
     region: content
+  field_representative_media:
+    label: hidden
+    type: blazy_media
+    region: content
+    weight: 11
+    settings:
+      class: ''
+      id: ''
+      image: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      icon: ''
+      layout: ''
+      view_mode: ''
+      cache: 0
+      current_view_mode: ''
+      skin: ''
+      fx: ''
+      style: ''
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      caption: {  }
+      responsive_image_style: ''
+      box_style: ''
+      image_style: ''
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      _uri: ''
+      breakpoints: {  }
+      sizes: ''
+      grid_header: ''
+      grid: 0
+      grid_medium: 0
+      grid_small: 0
+    third_party_settings: {  }
   flag_email_node:
     weight: 3
     region: content
@@ -65,6 +108,8 @@ hidden:
   comment: true
   field_content_type: true
   field_mukurtu_community: true
+  field_mukurtu_community_records: true
+  field_mukurtu_original_record: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true

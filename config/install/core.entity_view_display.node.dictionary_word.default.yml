@@ -10,6 +10,7 @@ dependencies:
     - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
+    - blazy
     - entity_reference_revisions
     - user
 id: node.dictionary_word.default
@@ -59,6 +60,46 @@ content:
     third_party_settings: {  }
     type: entity_reference_entity_view
     region: content
+  field_representative_media:
+    label: hidden
+    type: blazy_media
+    region: content
+    weight: 103
+    settings:
+      class: ''
+      id: ''
+      image: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      icon: ''
+      layout: ''
+      view_mode: ''
+      cache: 0
+      current_view_mode: ''
+      skin: ''
+      fx: ''
+      style: ''
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      caption: {  }
+      responsive_image_style: ''
+      box_style: ''
+      image_style: ''
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      _uri: ''
+      breakpoints: {  }
+      sizes: ''
+      grid_header: ''
+      grid: 0
+      grid_medium: 0
+      grid_small: 0
+    third_party_settings: {  }
   field_word_entry:
     type: entity_reference_revisions_entity_view
     weight: 2
@@ -107,6 +148,7 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  field_all_community_records: true
   field_content_type: true
   field_mukurtu_community: true
   field_mukurtu_protocol_r_scope: true

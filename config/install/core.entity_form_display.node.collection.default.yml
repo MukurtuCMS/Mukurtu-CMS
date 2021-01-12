@@ -38,6 +38,7 @@ third_party_settings:
         - group_protocols
         - field_description
         - field_keywords
+        - field_collection_type
       parent_name: group_main_tab
       weight: 20
       format_type: tab
@@ -92,7 +93,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_collection_type:
-    weight: 123
+    weight: -2
     settings: {  }
     third_party_settings: {  }
     type: options_select
@@ -249,3 +250,4 @@ content:
 hidden:
   field_content_type: true
   field_mukurtu_community: true
+  field_sequence_collection: true

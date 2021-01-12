@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.search_result
+    - core.entity_view_mode.node.community_records_single_record
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
@@ -27,9 +27,12 @@ dependencies:
     - field.field.node.digital_heritage.field_subject
     - field.field.node.digital_heritage.field_traditional_knowledge
     - field.field.node.digital_heritage.field_type
+    - filter.format.plain_text
     - node.type.digital_heritage
   module:
     - blazy
+    - geolocation
+    - geolocation_gpx
     - layout_builder
     - text
     - user
@@ -37,10 +40,10 @@ third_party_settings:
   layout_builder:
     allow_custom: false
     enabled: false
-id: node.digital_heritage.search_result
+id: node.digital_heritage.community_records_single_record
 targetEntityType: node
 bundle: digital_heritage
-mode: search_result
+mode: community_records_single_record
 content:
   field_category:
     type: entity_reference_label
@@ -51,15 +54,47 @@ content:
       link: true
     third_party_settings: {  }
   field_contributor:
-    weight: 8
+    weight: 104
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
     region: content
+  field_coverage:
+    weight: 120
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: geolocation_latlng
+    region: first
+  field_coverage_gpx:
+    weight: 121
+    label: above
+    settings:
+      title: ''
+      set_marker: true
+      common_map: true
+      show_delta_label: false
+      data_provider_settings: {  }
+      map_provider_id: ''
+      centre:
+        fit_bounds:
+          enable: true
+          weight: -101
+          map_center_id: fit_bounds
+          settings:
+            reset_zoom: true
+      map_provider_settings: {  }
+      info_text:
+        value: ''
+        format: plain_text
+      use_overridden_map_settings: false
+    third_party_settings: {  }
+    type: geolocation_gpx_file
+    region: first
   field_creator:
-    weight: 7
+    weight: 103
     label: above
     settings:
       link: true
@@ -67,14 +102,14 @@ content:
     type: entity_reference_label
     region: content
   field_cultural_narrative:
-    weight: 10
+    weight: 106
     label: above
     settings: {  }
     third_party_settings: {  }
     type: text_default
     region: content
   field_date_description:
-    weight: 9
+    weight: 105
     label: above
     settings:
       link_to_entity: false
@@ -82,14 +117,14 @@ content:
     type: string
     region: content
   field_description:
-    weight: 5
+    weight: 9
     label: above
     settings: {  }
     third_party_settings: {  }
     type: text_default
     region: content
   field_format:
-    weight: 14
+    weight: 110
     label: above
     settings:
       link: true
@@ -97,7 +132,7 @@ content:
     type: entity_reference_label
     region: content
   field_identifier:
-    weight: 16
+    weight: 112
     label: above
     settings:
       link_to_entity: false
@@ -105,7 +140,7 @@ content:
     type: string
     region: content
   field_keywords:
-    weight: 4
+    weight: 8
     label: above
     settings:
       link: true
@@ -113,7 +148,7 @@ content:
     type: entity_reference_label
     region: content
   field_language:
-    weight: 17
+    weight: 113
     label: above
     settings:
       link: true
@@ -137,8 +172,32 @@ content:
     settings:
       link: true
     third_party_settings: {  }
+  field_mukurtu_community_records:
+    weight: 122
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: first
+  field_mukurtu_original_record:
+    weight: 123
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: first
+  field_mukurtu_protocol_inherit:
+    weight: 117
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: first
   field_people:
-    weight: 20
+    weight: 116
     label: above
     settings:
       link: true
@@ -146,7 +205,7 @@ content:
     type: entity_reference_label
     region: content
   field_publisher:
-    weight: 12
+    weight: 108
     label: above
     settings:
       link: true
@@ -154,7 +213,7 @@ content:
     type: entity_reference_label
     region: content
   field_related_content:
-    weight: 6
+    weight: 10
     label: above
     settings:
       link: true
@@ -165,8 +224,8 @@ content:
   field_representative_media:
     label: hidden
     type: blazy_media
-    region: content
-    weight: 103
+    region: first
+    weight: 119
     settings:
       class: ''
       id: ''
@@ -203,14 +262,22 @@ content:
       grid_small: 0
     third_party_settings: {  }
   field_rights:
-    weight: 13
+    weight: 109
     label: above
     settings: {  }
     third_party_settings: {  }
     type: basic_string
     region: content
+  field_sequence_collection:
+    weight: 118
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: first
   field_source:
-    weight: 18
+    weight: 114
     label: above
     settings:
       link_to_entity: false
@@ -218,22 +285,27 @@ content:
     type: string
     region: content
   field_subject:
-    weight: 19
+    weight: 115
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
     region: content
+  field_title:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    region: first
   field_traditional_knowledge:
-    weight: 11
+    weight: 107
     label: above
     settings: {  }
     third_party_settings: {  }
     type: text_default
     region: content
   field_type:
-    weight: 15
+    weight: 111
     label: above
     settings:
       link: true
@@ -274,18 +346,12 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  field_all_community_records: true
   field_content_type: true
-  field_coverage: true
-  field_coverage_gpx: true
-  field_mukurtu_community_records: true
-  field_mukurtu_original_record: true
-  field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
-  field_sequence_collection: true
-  field_title: true
   layout_builder__layout: true
   links: true
   search_api_excerpt: true
