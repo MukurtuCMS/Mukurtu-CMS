@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_mukurtu_original_record
+    - node.type.digital_heritage
+id: node.digital_heritage.field_mukurtu_original_record
+field_name: field_mukurtu_original_record
+entity_type: node
+bundle: digital_heritage
+label: 'Original Record'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      digital_heritage: digital_heritage
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

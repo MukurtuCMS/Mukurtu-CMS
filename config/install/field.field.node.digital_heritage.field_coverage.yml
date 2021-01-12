@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_coverage
+    - node.type.digital_heritage
+  module:
+    - geolocation
+id: node.digital_heritage.field_coverage
+field_name: field_coverage
+entity_type: node
+bundle: digital_heritage
+label: Location
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geolocation
