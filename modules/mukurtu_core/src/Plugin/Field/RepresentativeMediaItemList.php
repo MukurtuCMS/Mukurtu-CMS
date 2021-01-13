@@ -37,8 +37,11 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
       }
     }
 
-    // TODO: If the item has no media, give a representative placeholder.
-    $this->list[0] = $this->createItem(0, 2);
+    // If the item has no media, use the default image.
+    $default_image = \Drupal::config('mukurtu.settings')->get('mukurtu_default_image');
+    if ($default_image) {
+      $this->list[0] = $this->createItem(0, $default_image);
+    }
   }
 
 }

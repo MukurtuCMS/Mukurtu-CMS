@@ -1,0 +1,7 @@
+mukurtu_core.settings:
+  path: '/admin/config/mukurtu/settings'
+  defaults:
+    _form: '\Drupal\mukurtu_core\Form\MukurtuSettingsForm'
+    _title: 'Mukurtu Settings'
+  requirements:
+    _permission: 'administer site configuration'
