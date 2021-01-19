@@ -113,7 +113,18 @@ class MukurtuCommunityRecordAddController extends ControllerBase {
         'target' => $node->id(),
       ],
     ];
+
+    $form_title = $this->t('Original Record');
+    $build[] = ['#type' => 'markup', '#markup' => "<h2>$form_title</h2>"];
+    $build[] = \Drupal::entityTypeManager()->getViewBuilder('node')->view($node, 'content_browser');
     $build[] = \Drupal::formBuilder()->getForm($form, $args);
+
+    // It doesn't make sense for community records to use protocol
+    // inheritance, so don't show the field.
+    $build[2][MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET]['#access'] = FALSE;
+
+    // Hide the media assets field.
+    $build[2]['field_media_assets']['#access'] = FALSE;
 
     return $build;
   }
