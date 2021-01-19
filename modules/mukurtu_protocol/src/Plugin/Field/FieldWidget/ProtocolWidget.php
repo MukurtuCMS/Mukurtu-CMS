@@ -6,6 +6,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\user\Entity\User;
+use Drupal\Component\Utility\NestedArray;
 
 /**
  * Plugin implementation of the 'mukurtu_protocol_widget' widget.
@@ -21,14 +22,7 @@ use Drupal\user\Entity\User;
  */
 class ProtocolWidget extends WidgetBase {
 
-  /**
-   * {@inheritdoc}
-   */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $entity = $items->getEntity();
-    $bundle = $entity->bundle();
-    $account = User::load(\Drupal::currentUser()->id());
-
+  protected function getOptions($entity_type, $bundle, $account) {
     // Get the list of protocols the user has access to.
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     $protocol_nodes = $protocol_manager->getValidProtocols('node', $bundle, $account);
@@ -42,24 +36,164 @@ class ProtocolWidget extends WidgetBase {
       // Don't show any orphaned protocols.
       if ($protocol_community) {
         $title = $protocol_community->getTitle();
-
-        // TODO: Filter out protocols that are already selected.
         $protocol_options[$title][$nid] = $protocol_node->title->value;
       }
     }
+
+    return $protocol_options;
+  }
+
+  protected function getElementOptions(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+    $field_name = $this->fieldDefinition->getFieldStorageDefinition()->getName();
+    $entity = $form_state->getFormObject()->getEntity();
+
+    if (isset($form[$field_name . '_all_options']['#value'])) {
+      $all_options = $form[$field_name . '_all_options']['#value'];
+    } else {
+      $account = User::load(\Drupal::currentUser()->id());
+      $all_options = $this->getOptions($entity->getEntityTypeId(), $entity->bundle(), $account);
+
+      // Add a hidden field with the original protocol options
+      // for the AJAX callback.
+      $form[$field_name . '_all_options'] = [
+        '#type' => 'hidden',
+        '#value' => $all_options,
+      ];
+    }
+
+    // Currently selected protocols.
+    $selected_protocols = [];
+    $protocols = $form_state->getValue($field_name);
+    if (empty($protocols)) {
+      // No protocols in the form state, use the current values from the entity.
+      $protocol_values = $entity->get($field_name)->referencedEntities();
+      foreach ($protocol_values as $protocol) {
+        $selected_protocols[] = $protocol->id();
+      }
+    } else {
+      foreach ($protocols as $protocol) {
+        if (is_array($protocol) && isset($protocol['target_id']) && $protocol['target_id'] > 0) {
+          $selected_protocols[] = $protocol['target_id'];
+        }
+      }
+    }
+
+    // Start with all options.
+    $options = $all_options;
+
+    // Currently selected value for delta.
+    $current_value = $selected_protocols[$delta];
+    foreach ($options as $community => $community_protocols) {
+      foreach ($community_protocols as $protocol_id => $protocol_name) {
+        // Skip the placeholder options.
+        if ($protocol_id < 0) {
+          continue;
+        }
+
+        // Remove values that have already been selected.
+        if ($current_value != $protocol_id && in_array($protocol_id, $selected_protocols)) {
+          unset($options[$community][$protocol_id]);
+        }
+      }
+
+      // If we've removed all options for a given community, remove the community.
+      if (empty($options[$community])) {
+        unset($options[$community]);
+      }
+    }
+
+    // Set the new options.
+    return $options;
+
+  }
+
+  public function form(FieldItemListInterface $items, array &$form, FormStateInterface $form_state, $get_delta = NULL) {
+    $widget_form = parent::form($items, $form, $form_state, $get_delta);
+    $field_name = $this->fieldDefinition->getFieldStorageDefinition()->getName();
+    $wrapper = 'edit-' . str_replace('_', '-', $field_name) . '-ajax-wrapper';
+
+    // Wrap the entire protocol selector so we can target
+    // it in our AJAX callback.
+    $widget_form['#prefix'] = "<div id=\"$wrapper\">";
+    $widget_form['#suffix'] = "</div>";
+
+    return $widget_form;
+  }
+
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+    $field_name = $this->fieldDefinition->getFieldStorageDefinition()->getName();
+    $wrapper = 'edit-' . str_replace('_', '-', $field_name) . '-ajax-wrapper';
 
     $referenced_entities = $items->referencedEntities();
 
     $element += [
       '#type' => 'select',
       '#default_value' => isset($referenced_entities[$delta]) ? $referenced_entities[$delta]->id() : -1,
-      '#options' => $protocol_options,
+      '#options' => $this->getElementOptions($items, $delta, $element, $form, $form_state),
       '#element_validate' => [
         [static::class, 'validate'],
+      ],
+      '#ajax' => [
+        'event' => 'change',
+        'callback' => [$this, 'protocolChangeCallback'],
+        'wrapper' => $wrapper,
       ],
     ];
 
     return ['target_id' => $element];
+  }
+
+  public function protocolChangeCallback(array &$form, FormStateInterface $form_state) {
+    $triggering_element = $form_state->getTriggeringElement();
+    $element = $form[$triggering_element['#array_parents'][0]];
+    $field_name = $this->fieldDefinition->getFieldStorageDefinition()->getName();
+    $max_delta = $element['widget']['#max_delta'];
+
+    // All protocol options.
+    $all_options = $form_state->getValue($field_name . '_all_options');
+
+    // Currently selected protocols.
+    $protocol_values = $form_state->getValue($field_name);
+    $selected_protocols = [];
+    for ($delta = 0; $delta <= $max_delta; $delta++) {
+      $selected_protocols[] = $protocol_values[$delta]['target_id'];
+    }
+
+    for ($delta = 0; $delta <= $max_delta; $delta++) {
+      // Start with all options.
+      $options = $all_options;
+
+      // Currently selected value for delta.
+      $current_value = $element['widget'][$delta]['target_id']['#value'];
+
+      foreach ($options as $community => $community_protocols) {
+        foreach ($community_protocols as $protocol_id => $protocol_name) {
+          // Skip the placeholder options.
+          if ($protocol_id < 0) {
+            continue;
+          }
+
+          // Remove values that have already been selected.
+          if ($current_value != $protocol_id && in_array($protocol_id, $selected_protocols)) {
+            unset($options[$community][$protocol_id]);
+          }
+        }
+
+        // If we've removed all options for a given community, remove the community.
+        if (empty($options[$community])) {
+          unset($options[$community]);
+        }
+      }
+
+      // Set the new options.
+      $element['widget'][$delta]['target_id']['#options'] = $options;
+    }
+
+    return $element;
   }
 
   /**
