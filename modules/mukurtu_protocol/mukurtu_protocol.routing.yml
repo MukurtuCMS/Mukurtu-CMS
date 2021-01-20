@@ -7,3 +7,15 @@ mukurtu_protocol.protocol_membership.add:
     nid: \d+
     user: \d+
     _permission: 'access content'
+mukurtu_protocol.add_new_protocol:
+  path: '/node/{node}/add/protocol'
+  defaults:
+    _title: 'Create Protocol'
+    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuAddNewProtocolController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuAddNewProtocolController::access'
+    _permission: 'create content'

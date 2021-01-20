@@ -1,0 +1,4 @@
+mukurtu_protocol.add_new_protocol:
+  title: Create Protocol
+  route_name: mukurtu_protocol.add_new_protocol
+  base_route: entity.node.canonical

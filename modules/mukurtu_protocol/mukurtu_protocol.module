@@ -29,6 +29,7 @@ define("MUKURTU_PROTOCOL_DEFAULT", "default");
 define("MUKURTU_PROTOCOL_ANY", "any");
 define("MUKURTU_PROTOCOL_ALL", "all");
 define("MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY", "field_mukurtu_community");
+define("MUKURTU_PROTOCOL_FIELD_NAME_MEMBERSHIP_HANDLER", "field_membership_handler");
 define("MUKURTU_PROTOCOL_FIELD_NAME_READ", "field_mukurtu_protocol_read");
 define("MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE", "field_mukurtu_protocol_r_scope");
 define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE", "field_mukurtu_protocol_write");
