@@ -19,3 +19,14 @@ mukurtu_protocol.add_new_protocol:
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuAddNewProtocolController::access'
     _permission: 'create content'
+mukurtu_protocol.manage_memberships:
+  path: '/node/{node}/memberships'
+  defaults:
+    _title: 'Manage Memberships'
+    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuManageMembershipsController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuManageMembershipsController::access'
