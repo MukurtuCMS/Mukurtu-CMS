@@ -33,11 +33,13 @@ class MukurtuManageMembershipsController extends ControllerBase {
 
     // Show the community memberships and all community's protocol memberships.
     if ($node->bundle() == 'community') {
+      $build[] = ['#markup' => '<h2>' . $this->t('Community') . '</h2>'];
       $build[] = \Drupal::formBuilder()->getForm('\Drupal\mukurtu_community\Form\ManageCommunityMembershipForm', $node);
 
       $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
       $protocols = $protocol_manager->getCommunityProtocols($node);
 
+      $build[] = ['#markup' => '<h2>' . $this->t('Protocols') . '</h2>'];
       foreach ($protocols as $protocol) {
         $build[] = \Drupal::formBuilder()->getForm('\Drupal\mukurtu_protocol\Form\ManageProtocolMembershipForm', $protocol);
       }
