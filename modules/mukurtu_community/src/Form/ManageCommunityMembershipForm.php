@@ -41,7 +41,7 @@ class ManageCommunityMembershipForm extends FormBase {
     }
 
     // Initialize the table.
-    $form['protocol-memberships'] = [
+    $form['community-memberships'] = [
       '#type' => 'table',
       '#caption' => $this->t('Community Memberships') . ' - ' . $community->getTitle(),
       '#header' => $headers,
@@ -56,17 +56,17 @@ class ManageCommunityMembershipForm extends FormBase {
       $user = $membership->getOwner();
       $delta = $user->id();
       // Start the row with all the checkboxes unchecked.
-      $form['protocol-memberships'][$delta] = $row_default;
+      $form['community-memberships'][$delta] = $row_default;
 
       // Get the user name.
-      $form['protocol-memberships'][$delta]['uid'] = [
+      $form['community-memberships'][$delta]['uid'] = [
         '#type' => 'item',
         '#value' => $user->id(),
         '#title' => $user->get('name')->value,
       ];
 
       // Status.
-      $form['protocol-memberships'][$delta]['state'] = [
+      $form['community-memberships'][$delta]['state'] = [
         '#type' => 'item',
         '#value' => $membership->get('state')->value,
         '#title' => $membership->get('state')->value,
@@ -75,7 +75,7 @@ class ManageCommunityMembershipForm extends FormBase {
       // Check the roles the user has.
       $userRoles = $membership->getRoles();
       foreach ($userRoles as $roleId => $userRole) {
-        $form['protocol-memberships'][$delta][$userRole->id()]['#default_value'] = TRUE;
+        $form['community-memberships'][$delta][$userRole->id()]['#default_value'] = TRUE;
       }
     }
 
