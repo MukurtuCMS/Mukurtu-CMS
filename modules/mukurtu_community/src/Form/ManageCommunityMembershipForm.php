@@ -47,6 +47,9 @@ class ManageCommunityMembershipForm extends FormBase {
       '#header' => $headers,
     ];
 
+    // Add JS.
+    $form['community-memberships']['#attached']['library'][] = 'mukurtu_community/mukurtu-community-role-management';
+
     // Get current memberships.
     $membership_manager = \Drupal::service('og.membership_manager');
     $membershipIds = $membership_manager->getGroupMembershipIdsByRoleNames($community, [OgRoleInterface::AUTHENTICATED]);
