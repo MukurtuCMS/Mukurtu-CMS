@@ -47,6 +47,9 @@ class ManageProtocolMembershipForm extends FormBase {
       '#header' => $headers,
     ];
 
+    // Add JS.
+    $form['protocol-memberships']['#attached']['library'][] = 'mukurtu_protocol/mukurtu-protocol-role-management';
+
     // Get current memberships.
     $membership_manager = \Drupal::service('og.membership_manager');
     $membershipIds = $membership_manager->getGroupMembershipIdsByRoleNames($protocol, [OgRoleInterface::AUTHENTICATED]);

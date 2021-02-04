@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeInterface;
+use Drupal\Core\Link;
 
 class MukurtuManageMembershipsController extends ControllerBase {
 
@@ -41,6 +42,7 @@ class MukurtuManageMembershipsController extends ControllerBase {
 
       $build[] = ['#markup' => '<h2>' . $this->t('Protocols') . '</h2>'];
       foreach ($protocols as $protocol) {
+        $build[] = ['#markup' => '<h3><a href="'. $protocol->toUrl()->toString() . '">'  . $protocol->getTitle() . '</a></h3>'];
         $build[] = \Drupal::formBuilder()->getForm('\Drupal\mukurtu_protocol\Form\ManageProtocolMembershipForm', $protocol);
       }
     }
