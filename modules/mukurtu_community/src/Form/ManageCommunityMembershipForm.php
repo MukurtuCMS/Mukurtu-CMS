@@ -25,6 +25,7 @@ class ManageCommunityMembershipForm extends FormBase {
     if (!$community || $community->bundle() != 'community') {
       return $form;
     }
+    $element = 'community-memberships-' . $community->id();
 
     // Get available roles.
     $role_manager = \Drupal::service('og.role_manager');
@@ -41,14 +42,14 @@ class ManageCommunityMembershipForm extends FormBase {
     }
 
     // Initialize the table.
-    $form['community-memberships'] = [
+    $form[$element] = [
       '#type' => 'table',
       '#caption' => $this->t('Community Memberships') . ' - ' . $community->getTitle(),
       '#header' => $headers,
     ];
 
     // Add JS.
-    $form['community-memberships']['#attached']['library'][] = 'mukurtu_community/mukurtu-community-role-management';
+    $form[$element]['#attached']['library'][] = 'mukurtu_community/mukurtu-community-role-management';
 
     // Get current memberships.
     $membership_manager = \Drupal::service('og.membership_manager');
@@ -59,17 +60,17 @@ class ManageCommunityMembershipForm extends FormBase {
       $user = $membership->getOwner();
       $delta = $user->id();
       // Start the row with all the checkboxes unchecked.
-      $form['community-memberships'][$delta] = $row_default;
+      $form[$element][$delta] = $row_default;
 
       // Get the user name.
-      $form['community-memberships'][$delta]['uid'] = [
+      $form[$element][$delta]['uid'] = [
         '#type' => 'item',
         '#value' => $user->id(),
         '#title' => $user->get('name')->value,
       ];
 
       // Status.
-      $form['community-memberships'][$delta]['state'] = [
+      $form[$element][$delta]['state'] = [
         '#type' => 'item',
         '#value' => $membership->get('state')->value,
         '#title' => $membership->get('state')->value,
@@ -78,7 +79,7 @@ class ManageCommunityMembershipForm extends FormBase {
       // Check the roles the user has.
       $userRoles = $membership->getRoles();
       foreach ($userRoles as $roleId => $userRole) {
-        $form['community-memberships'][$delta][$userRole->id()]['#default_value'] = TRUE;
+        $form[$element][$delta][$userRole->id()]['#default_value'] = TRUE;
       }
     }
 

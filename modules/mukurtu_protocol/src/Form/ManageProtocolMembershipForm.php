@@ -25,6 +25,7 @@ class ManageProtocolMembershipForm extends FormBase {
     if (!$protocol || $protocol->bundle() != 'protocol') {
       return $form;
     }
+    $element = 'protocol-memberships-' . $protocol->id();
 
     // Get available roles.
     $role_manager = \Drupal::service('og.role_manager');
@@ -41,14 +42,14 @@ class ManageProtocolMembershipForm extends FormBase {
     }
 
     // Initialize the table.
-    $form['protocol-memberships'] = [
+    $form[$element] = [
       '#type' => 'table',
       '#caption' => $this->t('Protocol Memberships') . ' - ' . $protocol->getTitle(),
       '#header' => $headers,
     ];
 
     // Add JS.
-    $form['protocol-memberships']['#attached']['library'][] = 'mukurtu_protocol/mukurtu-protocol-role-management';
+    $form[$element]['#attached']['library'][] = 'mukurtu_protocol/mukurtu-protocol-role-management';
 
     // Get current memberships.
     $membership_manager = \Drupal::service('og.membership_manager');
@@ -59,17 +60,17 @@ class ManageProtocolMembershipForm extends FormBase {
       $user = $membership->getOwner();
       $delta = $user->id();
       // Start the row with all the checkboxes unchecked.
-      $form['protocol-memberships'][$delta] = $row_default;
+      $form[$element][$delta] = $row_default;
 
       // Get the user name.
-      $form['protocol-memberships'][$delta]['uid'] = [
+      $form[$element][$delta]['uid'] = [
         '#type' => 'item',
         '#value' => $user->id(),
         '#title' => $user->get('name')->value,
       ];
 
       // Status.
-      $form['protocol-memberships'][$delta]['state'] = [
+      $form[$element][$delta]['state'] = [
         '#type' => 'item',
         '#value' => $membership->get('state')->value,
         '#title' => $membership->get('state')->value,
@@ -78,7 +79,7 @@ class ManageProtocolMembershipForm extends FormBase {
       // Check the roles the user has.
       $userRoles = $membership->getRoles();
       foreach ($userRoles as $roleId => $userRole) {
-        $form['protocol-memberships'][$delta][$userRole->id()]['#default_value'] = TRUE;
+        $form[$element][$delta][$userRole->id()]['#default_value'] = TRUE;
       }
     }
 
