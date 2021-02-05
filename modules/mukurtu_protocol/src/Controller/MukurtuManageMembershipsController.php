@@ -29,6 +29,7 @@ class MukurtuManageMembershipsController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
+
   public function content(NodeInterface $node) {
     $build = [];
 
@@ -41,9 +42,33 @@ class MukurtuManageMembershipsController extends ControllerBase {
       $protocols = $protocol_manager->getCommunityProtocols($node);
 
       $build[] = ['#markup' => '<h2>' . $this->t('Protocols') . '</h2>'];
-      foreach ($protocols as $protocol) {
-        $build[] = ['#markup' => '<h3><a href="'. $protocol->toUrl()->toString() . '">'  . $protocol->getTitle() . '</a></h3>'];
-        $build[] = \Drupal::formBuilder()->getForm('\Drupal\mukurtu_protocol\Form\ManageProtocolMembershipForm', $protocol);
+      if (count($protocols)) {
+        $protocolTabs = [];
+        $protocolTabs['protocols'] = [
+          '#type' => 'horizontal_tabs',
+          '#tree' => TRUE,
+          '#prefix' => '<div id="protocols-membership-management-wrapper">',
+          '#suffix' => '</div>',
+        ];
+        $protocolTabs['protocols']['#attached']['library'][] = 'field_group/formatter.horizontal_tabs';
+        foreach ($protocols as $protocol) {
+          $protocolTabs['protocols'][$protocol->id()]['protocol'] = [
+            '#type' => 'details',
+            '#title' => $protocol->getTitle(),
+            '#collapsible' => TRUE,
+            '#collapsed' => TRUE,
+          ];
+          $protocolTabs['protocols'][$protocol->id()]['protocol']['form'] = \Drupal::formBuilder()->getForm('\Drupal\mukurtu_protocol\Form\ManageProtocolMembershipForm', $protocol);
+          $protocolTabs['protocols'][$protocol->id()]['protocol']['form']['#tree'] = TRUE;
+          $protocolTabs['protocols'][$protocol->id()]['protocol']['form']['#parents'] = [$protocol->id(), 'form'];
+        }
+
+        $build[] = $protocolTabs;
+      } else {
+        foreach ($protocols as $protocol) {
+          $build[] = ['#markup' => '<h3><a href="'. $protocol->toUrl()->toString() . '">'  . $protocol->getTitle() . '</a></h3>'];
+          $build[] = \Drupal::formBuilder()->getForm('\Drupal\mukurtu_protocol\Form\ManageProtocolMembershipForm', $protocol);
+        }
       }
     }
 
