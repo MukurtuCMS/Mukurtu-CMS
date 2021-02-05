@@ -4,7 +4,9 @@ namespace Drupal\mukurtu_protocol\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
+use Drupal\og\OgMembershipInterface;
 use Drupal\Core\Url;
 
 class ManageProtocolMembershipForm extends FormBase {
@@ -27,6 +29,10 @@ class ManageProtocolMembershipForm extends FormBase {
     }
     $element = 'protocol-memberships-' . $protocol->id();
 
+    // Fix multiple forms issue, see https://www.drupal.org/project/drupal/issues/2821852.
+    $form_state->setRequestMethod('POST');
+    $form_state->setCached(TRUE);
+
     // Get available roles.
     $role_manager = \Drupal::service('og.role_manager');
     $roles = $role_manager->getRolesByBundle($protocol->getEntityTypeId(), $protocol->bundle());
@@ -38,6 +44,7 @@ class ManageProtocolMembershipForm extends FormBase {
         '#type' => 'checkbox',
         '#title' => '',
         '#default_value' => FALSE,
+        '#return_value' => TRUE,
       ];
     }
 
@@ -83,18 +90,18 @@ class ManageProtocolMembershipForm extends FormBase {
       }
     }
 
+    $form[$element . '-submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Save'),
+    ];
+
     // Add user button.
     $destination = Url::fromRoute('<current>')->toString();
-    $form['actions']['add_user'] = [
+    $form[$element]['actions']['add_user'] = [
       '#type' => 'link',
       '#title' => $this->t('Add User'),
       '#url' => Url::fromRoute('entity.og_membership.add_form', ['entity_type_id' => $protocol->getEntityTypeId(), 'group' => $protocol->id(), 'og_membership_type' => 'default'], ['query' => ['destination' => $destination]]),
     ];
-
-/*     $form['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Save'),
-    ]; */
 
     return $form;
   }
@@ -103,6 +110,57 @@ class ManageProtocolMembershipForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $buildInfo = $form_state->getBuildInfo();
+    $protocol = $buildInfo['args'][0] ?? NULL;
+    if (!$protocol) {
+      return;
+    }
+
+    $mukurtuMembershipManager = \Drupal::service('mukurtu_protocol.membership_manager');
+
+    // Get all available roles for protocols.
+    $roleManager = \Drupal::service('og.role_manager');
+    $allProtocolRoles = $roleManager->getRolesByBundle($protocol->getEntityTypeId(), $protocol->bundle());
+
+    // Get the submitted values from the form.
+    $element = 'protocol-memberships-' . $protocol->id();
+    $values = $form_state->getValues();
+
+    // TODO: This should all be batched.
+    foreach ($values[$element] as $uid => $roles) {
+      // Load the user account.
+      $account = \Drupal\user\Entity\User::load($uid);
+      if (!$account) {
+        continue;
+      }
+
+      // First handle member/non-member.
+      if ($roles['node-protocol-member'] === 0 || $roles['node-protocol-non-member'] !== 0) {
+        $mukurtuMembershipManager->removeMember($protocol, $account);
+      } else {
+        $mukurtuMembershipManager->addMember($protocol, $account);
+
+        // Handle roles.
+        $membership = Og::getMembership($protocol, $account, OgMembershipInterface::ALL_STATES);
+
+        // Build a list of enabled roles.
+        $enabledRoles = [];
+        foreach ($roles as $role => $status) {
+          if (!in_array($role, ['uid', 'state', 'node-protocol-non-member'])) {
+            if ($status !== 0 && isset($allProtocolRoles[$role])) {
+              $enabledRoles[] = $allProtocolRoles[$role];
+            }
+          }
+        }
+
+        // Set the roles and save the user's membership.
+        $membership->setRoles($enabledRoles);
+        $membership->save();
+      }
+    }
+
+    // Display a status message telling the user the protocol membership was updated.
+    \Drupal::messenger()->addStatus($this->t('Updated memberships for protocol %protocol', ['%protocol' => $protocol->getTitle()]));
   }
 
 }
