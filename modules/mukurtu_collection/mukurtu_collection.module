@@ -109,8 +109,11 @@ function mukurtu_collection_node_view(array &$build, EntityInterface $entity, En
         if (!empty($temp)) {
           unset($build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS]);
         }
-        $build['field_multipage_navigation'] = $entity->{MUKURTU_COLLECTION_FIELD_NAME_ITEMS}->view('multipage_navigation');
-        $build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS] = $temp;
+
+        if ($display->getComponent(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)) {
+          $build['field_multipage_navigation'] = $entity->{MUKURTU_COLLECTION_FIELD_NAME_ITEMS}->view('multipage_navigation');
+          $build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS] = $temp;
+        }
       }
     }
   }
@@ -136,7 +139,7 @@ function mukurtu_collection_entity_view_mode_alter(&$view_mode, EntityInterface 
   }
 
   // Any full view content that is a member of a multipage collection.
-  if ($view_mode ==  'full' && $entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)) {
+  if ($view_mode == 'full' && $entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)) {
     $collections = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)->referencedEntities();
     $collection = $collections[0] ?? NULL;
     if ($collection) {
