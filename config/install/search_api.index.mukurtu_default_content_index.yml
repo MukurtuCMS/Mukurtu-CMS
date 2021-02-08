@@ -1,16 +1,16 @@
 langcode: en
 status: true
 dependencies:
-  module:
-    - node
-    - taxonomy
-    - search_api
   config:
     - field.storage.node.body
     - field.storage.node.field_category
     - field.storage.node.field_description
     - field.storage.node.field_keywords
     - search_api.server.mukurtu_database_server
+  module:
+    - taxonomy
+    - node
+    - search_api
 id: mukurtu_default_content_index
 name: 'Mukurtu Default content index'
 description: 'Default Mukurtu content index'
@@ -78,6 +78,14 @@ field_settings:
     dependencies:
       module:
         - node
+  type:
+    label: 'Content type'
+    datasource_id: 'entity:node'
+    property_path: type
+    type: string
+    dependencies:
+      module:
+        - node
   uid:
     label: uid
     datasource_id: 'entity:node'
@@ -92,7 +100,8 @@ datasource_settings:
   'entity:node':
     bundles:
       default: true
-      selected: {  }
+      selected:
+        - protocol
     languages:
       default: true
       selected: {  }
@@ -111,6 +120,7 @@ processor_settings:
       - name
       - name_1
       - title
+      - type
     title: true
     alt: true
     tags:
@@ -132,6 +142,7 @@ processor_settings:
       - name
       - name_1
       - title
+      - type
     weights:
       preprocess_index: -20
       preprocess_query: -20
@@ -149,6 +160,7 @@ processor_settings:
     weights:
       preprocess_index: -6
       preprocess_query: -6
+    ignored: ._-
   transliteration:
     all_fields: true
     fields:
@@ -157,6 +169,7 @@ processor_settings:
       - name
       - name_1
       - title
+      - type
     weights:
       preprocess_index: -20
       preprocess_query: -20

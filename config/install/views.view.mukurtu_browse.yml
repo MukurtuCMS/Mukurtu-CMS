@@ -68,14 +68,13 @@ display:
         options:
           view_modes:
             'entity:node':
-              article: search_result
-              collection: search_result
-              community: search_result
-              dictionary_word: search_result
-              digital_heritage: search_result
-              page: search_result
-              person: search_result
-              protocol: search_result
+              article: teaser
+              collection: teaser
+              community: teaser
+              dictionary_word: teaser
+              digital_heritage: teaser
+              page: teaser
+              person: teaser
       fields:
         body:
           table: search_api_index_mukurtu_default_content_index
