@@ -40,6 +40,7 @@
     "drupal/entity_browser": "*",
     "drupal/content_browser": "*",
     "drupal/diff": "*",
+    "drupal/facets": "^1.6",
     "drupal/geolocation": "*",
     "drupal/geolocation_gpx": "*",
     "drupal/flag": "*",
