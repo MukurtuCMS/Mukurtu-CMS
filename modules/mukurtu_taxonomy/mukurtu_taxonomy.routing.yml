@@ -1,0 +1,9 @@
+mukurtu_taxonomy.manage_categories:
+  path: '/mukurtu/manage/categories'
+  defaults:
+    _title: 'Manage Categories'
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuCategoryManageController::content'
+  requirements:
+    _permission: 'create terms in category'
+    _permission: 'edit terms in category'
+    _permission: 'delete terms in category'
