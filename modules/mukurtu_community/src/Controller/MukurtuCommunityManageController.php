@@ -3,6 +3,8 @@
 namespace Drupal\mukurtu_community\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 
 class MukurtuCommunityManageController extends ControllerBase {
   /**
@@ -10,6 +12,8 @@ class MukurtuCommunityManageController extends ControllerBase {
    */
   public function content() {
     $build = [];
+    $destination = Url::fromRoute('<current>')->toString();
+    $build[] = Link::fromTextAndUrl(t('Add a new community'), Url::fromUri('internal:/node/add/community', ['query' => ['destination' => $destination]]))->toRenderable();
     $build[] = $this->displayCommunities();
     return $build;
   }
@@ -21,7 +25,8 @@ class MukurtuCommunityManageController extends ControllerBase {
     $op = is_null($parent) ? 'IS NULL' : '=';
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'community')
-      ->condition('field_parent_community', $parent, $op);
+      ->condition('field_parent_community', $parent, $op)
+      ->sort('title');
     $entity_ids = $query->execute();
 
     if (empty($entity_ids)) {
@@ -52,7 +57,8 @@ class MukurtuCommunityManageController extends ControllerBase {
     $build = [];
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'protocol')
-      ->condition(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY, $community->id(), '=');
+      ->condition(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY, $community->id(), '=')
+      ->sort('title');
     $entity_ids = $query->execute();
     if (empty($entity_ids)) {
       return $build;
@@ -64,7 +70,7 @@ class MukurtuCommunityManageController extends ControllerBase {
     foreach ($nodes as $node) {
       $nodeBuild = [];
       $nodeBuild[] = ['#markup' => '<li>'];
-      $link_object = \Drupal\Core\Link::createFromRoute($node->getTitle(), 'entity.node.canonical', ['node' => $node->id()]);
+      $link_object = Link::createFromRoute($node->getTitle(), 'entity.node.canonical', ['node' => $node->id()]);
       $nodeBuild[] = $link_object->toRenderable();
       $nodeBuild[] = ['#markup' => '</li>'];
 
