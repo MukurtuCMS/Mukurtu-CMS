@@ -54,6 +54,7 @@ dependencies:
   - embed
   - entity_embed
   - entity_browser
+  - facets
   - field_group
   - layout_builder
   - flag
