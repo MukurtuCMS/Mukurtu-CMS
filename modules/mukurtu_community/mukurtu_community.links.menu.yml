@@ -1,0 +1,6 @@
+mukurtu_community.manage_categories:
+  title: 'Communities'
+  description: 'Manage Communities'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_community.manage_communities

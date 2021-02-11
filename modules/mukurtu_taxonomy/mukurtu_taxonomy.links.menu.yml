@@ -1,0 +1,6 @@
+mukurtu_taxonomy.manage_categories:
+  title: 'Categories'
+  description: 'Manage Categories'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_taxonomy.manage_categories
