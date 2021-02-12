@@ -142,8 +142,6 @@ permissions:
   - 'update any media'
   - 'update media'
   - 'use advanced search'
-  - 'use text format full_html'
-  - 'use text format restricted_html'
   - 'view all media revisions'
   - 'view all revisions'
   - 'view article revisions'

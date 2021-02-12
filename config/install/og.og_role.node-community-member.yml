@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.community
+id: node-community-member
+label: Member
+weight: 1
+is_admin: null
+group_type: node
+group_bundle: community
+group_id: null
+permissions: {  }
+role_type: required

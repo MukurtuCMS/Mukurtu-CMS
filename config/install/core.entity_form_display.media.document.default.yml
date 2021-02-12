@@ -87,7 +87,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   name:
-    weight: 0
+    weight: -8
     settings:
       size: 60
       placeholder: ''

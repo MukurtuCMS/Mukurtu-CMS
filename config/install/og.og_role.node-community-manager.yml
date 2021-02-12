@@ -14,6 +14,11 @@ permissions:
   - 'add user'
   - 'administer permissions'
   - 'approve and deny subscription'
+  - 'create protocol content'
+  - 'delete any protocol content'
+  - 'delete own protocol content'
+  - 'edit any protocol content'
+  - 'edit own protocol content'
   - 'manage members'
   - 'update group'
 role_type: null

@@ -852,6 +852,504 @@ third_party_settings:
                 type: entity_reference_label
             additional: {  }
             weight: 11
+          542d7e50-8318-44a0-b97f-f1d2a03722ee:
+            uuid: 542d7e50-8318-44a0-b97f-f1d2a03722ee
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_media_assets'
+              formatter:
+                type: entity_reference_entity_view
+                label: above
+                settings:
+                  link: true
+                  view_mode: default
+                third_party_settings: {  }
+            additional: {  }
+            weight: 21
+          64591166-f627-455f-980b-8efeac5e4695:
+            uuid: 64591166-f627-455f-980b-8efeac5e4695
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'extra_field_block:node:digital_heritage:field_title'
+            additional: {  }
+            weight: 12
+          a0eda143-d61d-43ee-9791-ec127c4bfa53:
+            uuid: a0eda143-d61d-43ee-9791-ec127c4bfa53
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_mukurtu_community'
+              formatter:
+                type: entity_reference_label
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+            additional: {  }
+            weight: 22
+          71c83a6f-439d-4cd7-8118-954389011ffb:
+            uuid: 71c83a6f-439d-4cd7-8118-954389011ffb
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_category'
+              formatter:
+                type: entity_reference_label
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+            additional: {  }
+            weight: 23
+          0c642650-0ed2-420d-840a-6378175f0e99:
+            uuid: 0c642650-0ed2-420d-840a-6378175f0e99
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'extra_field_block:node:digital_heritage:flag_email_node'
+            additional: {  }
+            weight: 24
+          fa9a8c5d-533a-4879-bc10-76d30d348a4e:
+            uuid: fa9a8c5d-533a-4879-bc10-76d30d348a4e
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_keywords'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 25
+          3eb362b0-330f-4920-b252-aec8fe9342af:
+            uuid: 3eb362b0-330f-4920-b252-aec8fe9342af
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_description'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: text_default
+            additional: {  }
+            weight: 26
+          eeae9f86-41c6-439c-99ae-68e41c706b0f:
+            uuid: eeae9f86-41c6-439c-99ae-68e41c706b0f
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_related_content'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                  view_mode: default
+                third_party_settings: {  }
+                type: entity_reference_entity_view
+            additional: {  }
+            weight: 27
+          0247ff19-bbaa-44e8-a65b-a4de38a2aec2:
+            uuid: 0247ff19-bbaa-44e8-a65b-a4de38a2aec2
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_creator'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 28
+          4c6b841b-1f31-4e06-9dd0-152a2f7cead0:
+            uuid: 4c6b841b-1f31-4e06-9dd0-152a2f7cead0
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_contributor'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 29
+          7fd132d4-2d91-4321-b044-aebd3791ac95:
+            uuid: 7fd132d4-2d91-4321-b044-aebd3791ac95
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_date_description'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 30
+          93e12a3c-3cb1-4b0e-ac70-d97095b0ec87:
+            uuid: 93e12a3c-3cb1-4b0e-ac70-d97095b0ec87
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_cultural_narrative'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: text_default
+            additional: {  }
+            weight: 31
+          c0fad8d5-e96c-4708-9a82-5e2009d15f85:
+            uuid: c0fad8d5-e96c-4708-9a82-5e2009d15f85
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_traditional_knowledge'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: text_default
+            additional: {  }
+            weight: 32
+          eef75eee-6f7d-450b-b977-851b7a11311a:
+            uuid: eef75eee-6f7d-450b-b977-851b7a11311a
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_publisher'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 33
+          8b78849b-4f2d-4751-bd82-6e028e263477:
+            uuid: 8b78849b-4f2d-4751-bd82-6e028e263477
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_rights'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: basic_string
+            additional: {  }
+            weight: 34
+          671926eb-946a-4857-9939-1f0ea5721973:
+            uuid: 671926eb-946a-4857-9939-1f0ea5721973
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_format'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 35
+          6a8ea3f9-7620-4920-b0ef-7b92a7c03296:
+            uuid: 6a8ea3f9-7620-4920-b0ef-7b92a7c03296
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_type'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 36
+          9474514a-773c-4ce7-a615-51687636472b:
+            uuid: 9474514a-773c-4ce7-a615-51687636472b
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_identifier'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 37
+          2a281108-ba4e-41ed-b367-31a4edd93cf7:
+            uuid: 2a281108-ba4e-41ed-b367-31a4edd93cf7
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_language'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 38
+          acbf0998-6eda-4b88-876b-b18e56061683:
+            uuid: acbf0998-6eda-4b88-876b-b18e56061683
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_source'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 39
+          f8b7927e-878c-43e7-af26-236703c32c26:
+            uuid: f8b7927e-878c-43e7-af26-236703c32c26
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_subject'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 40
+          2bce60e8-5181-41ff-bdb2-ebad53769705:
+            uuid: 2bce60e8-5181-41ff-bdb2-ebad53769705
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_people'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 41
+          408db4f8-7d87-4893-80ff-e0f2ba39257f:
+            uuid: 408db4f8-7d87-4893-80ff-e0f2ba39257f
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_mukurtu_protocol_inherit'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 13
+          a7c095be-37a3-4d5a-8d4d-2bc9c653fba8:
+            uuid: a7c095be-37a3-4d5a-8d4d-2bc9c653fba8
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_sequence_collection'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 14
+          7e2c9254-773f-4982-b74e-ebcf433e73a3:
+            uuid: 7e2c9254-773f-4982-b74e-ebcf433e73a3
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_representative_media'
+              formatter:
+                label: hidden
+                type: blazy_media
+                settings:
+                  class: ''
+                  id: ''
+                  image: ''
+                  link: ''
+                  overlay: ''
+                  title: ''
+                  vanilla: false
+                  icon: ''
+                  layout: ''
+                  view_mode: ''
+                  cache: 0
+                  current_view_mode: ''
+                  skin: ''
+                  fx: ''
+                  style: ''
+                  background: false
+                  box_caption: ''
+                  box_caption_custom: ''
+                  box_media_style: ''
+                  caption: {  }
+                  responsive_image_style: ''
+                  box_style: ''
+                  image_style: ''
+                  media_switch: ''
+                  ratio: ''
+                  thumbnail_style: ''
+                  _uri: ''
+                  breakpoints: {  }
+                  sizes: ''
+                  grid_header: ''
+                  grid: 0
+                  grid_medium: 0
+                  grid_small: 0
+                third_party_settings: {  }
+            additional: {  }
+            weight: 15
+          fb3e0cfd-4c3a-42d9-9a46-c75604d4d8ff:
+            uuid: fb3e0cfd-4c3a-42d9-9a46-c75604d4d8ff
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_coverage'
+              formatter:
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                type: geolocation_latlng
+            additional: {  }
+            weight: 16
+          116d884a-a60c-4170-9fa3-d638bf94c7d3:
+            uuid: 116d884a-a60c-4170-9fa3-d638bf94c7d3
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_coverage_gpx'
+              formatter:
+                label: above
+                settings:
+                  title: ''
+                  set_marker: true
+                  common_map: true
+                  show_delta_label: false
+                  data_provider_settings: {  }
+                  map_provider_id: ''
+                  centre:
+                    fit_bounds:
+                      enable: true
+                      weight: -101
+                      map_center_id: fit_bounds
+                      settings:
+                        reset_zoom: true
+                  map_provider_settings: {  }
+                  info_text:
+                    value: ''
+                    format: plain_text
+                  use_overridden_map_settings: false
+                third_party_settings: {  }
+                type: geolocation_gpx_file
+            additional: {  }
+            weight: 17
+          0089f910-23f2-49eb-800e-b1a918641e12:
+            uuid: 0089f910-23f2-49eb-800e-b1a918641e12
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_mukurtu_community_records'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 18
+          7c7c6495-d36e-402f-af44-f94719f7781e:
+            uuid: 7c7c6495-d36e-402f-af44-f94719f7781e
+            region: first
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:digital_heritage:field_mukurtu_original_record'
+              formatter:
+                label: above
+                settings:
+                  link: true
+                third_party_settings: {  }
+                type: entity_reference_label
+            additional: {  }
+            weight: 19
         third_party_settings: {  }
 id: node.digital_heritage.default
 targetEntityType: node

@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.protocol
+id: node-protocol-non-member
+label: Non-member
+weight: 2
+is_admin: null
+group_type: node
+group_bundle: protocol
+group_id: null
+permissions:
+  - subscribe
+role_type: required
