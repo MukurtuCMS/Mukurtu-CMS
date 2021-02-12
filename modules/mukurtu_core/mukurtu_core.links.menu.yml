@@ -1,0 +1,7 @@
+mukurtu_core.create_content:
+  title: 'Add Content'
+  description: 'Add Content'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: node.add_page
+  expanded: TRUE
