@@ -12,3 +12,25 @@ mukurtu_core.dashboard:
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::content'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
+mukurtu_core.add_page:
+  path: '/dashboard/node/add'
+  defaults:
+    _title: 'Add content'
+    _controller: '\Drupal\node\Controller\NodeController::addPage'
+  options:
+    _node_operation_route: TRUE
+  requirements:
+    _node_add_access: 'node'
+mukurtu_core.add:
+  path: '/dashboard/node/add/{node_type}'
+  defaults:
+    _entity_form: 'node.default'
+    _title_callback: '\Drupal\node\Controller\NodeController::addPageTitle'
+  requirements:
+    _node_add_access: 'node:{node_type}'
+  options:
+    _node_operation_route: TRUE
+    parameters:
+      node_type:
+        type: entity:node_type
+        with_config_overrides: TRUE

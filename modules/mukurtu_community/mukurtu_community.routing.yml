@@ -1,5 +1,5 @@
 mukurtu_community.manage_communities:
-  path: '/mukurtu/manage/communities'
+  path: '/dashboard/communities'
   defaults:
     _title: 'Manage Communities'
     _controller: '\Drupal\mukurtu_community\Controller\MukurtuCommunityManageController::content'
