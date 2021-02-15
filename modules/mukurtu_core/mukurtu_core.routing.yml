@@ -5,3 +5,10 @@ mukurtu_core.settings:
     _title: 'Mukurtu Settings'
   requirements:
     _permission: 'administer site configuration'
+mukurtu_core.dashboard:
+  path: '/dashboard'
+  defaults:
+    _title: 'Dashboard'
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::content'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
