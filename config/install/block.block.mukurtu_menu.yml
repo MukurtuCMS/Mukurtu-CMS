@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.mukurtu
+  module:
+    - system
+  theme:
+    - bartik
+id: mukurtu_menu
+theme: bartik
+region: sidebar_first
+weight: 0
+provider: null
+plugin: 'system_menu_block:mukurtu'
+settings:
+  id: 'system_menu_block:mukurtu'
+  label: Mukurtu
+  provider: system
+  label_display: '0'
+  level: 1
+  depth: 0
+  expand_all_items: true
+visibility:
+  request_path:
+    id: request_path
+    pages: /dashboard
+    negate: false
+    context_mapping: {  }
