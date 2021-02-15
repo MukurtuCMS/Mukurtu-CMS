@@ -13,7 +13,12 @@ class MukurtuDashboardController extends ControllerBase {
    *   The access result.
    */
   public function access() {
-    return AccessResult::allowed();
+    $account = \Drupal::currentUser();
+    if (!$account->isAnonymous()) {
+      return AccessResult::allowed();
+    }
+
+    return AccessResult::forbidden();
   }
 
   public function content() {
