@@ -11,6 +11,8 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Implements hook_entity_bundle_create().
@@ -79,6 +81,17 @@ function mukurtu_core_entity_presave(EntityInterface $entity) {
     if ($entity->hasField('field_content_type')) {
       $entity->set('field_content_type', $entity->type->entity->label());
     }
+  }
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function mukurtu_core_user_login($account) {
+  $current_route = \Drupal::routeMatch()->getRouteName();
+  if (!in_array($current_route, ['user.reset', 'user.reset.login'])) {
+    $response = new RedirectResponse(Url::fromRoute('mukurtu_core.dashboard')->toString());
+    $response->send();
   }
 }
 
