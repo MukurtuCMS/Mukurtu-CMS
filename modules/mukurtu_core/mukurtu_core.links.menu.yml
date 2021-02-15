@@ -1,3 +1,11 @@
+mukurtu_core.dashboard:
+  title: 'Dashboard'
+  description: 'Dashboard'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_core.dashboard
+  expanded: TRUE
+  weight: -1000
 mukurtu_core.create_content:
   title: 'Add Content'
   description: 'Add Content'
