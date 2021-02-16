@@ -15,7 +15,7 @@ mukurtu_core.dashboard:
 mukurtu_core.manage_content:
   path: '/dashboard/content'
   defaults:
-    _title: 'Dashboard'
+    _title: 'Manage Content'
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuManageContentController::content'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuManageContentController::access'
