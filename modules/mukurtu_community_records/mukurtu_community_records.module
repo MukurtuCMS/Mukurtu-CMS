@@ -83,7 +83,11 @@ function mukurtu_community_records_create_community_records_field($entity_type_i
       ],
     ];
     $new_field = FieldConfig::create($new_field);
-    $new_field->save();
+    try {
+      $new_field->save();
+    } catch (Exception $e) {
+
+    }
   }
 
   // Create the original record field (parent record).
@@ -102,7 +106,11 @@ function mukurtu_community_records_create_community_records_field($entity_type_i
       ],
     ];
     $new_field = FieldConfig::create($new_field);
-    $new_field->save();
+    try {
+      $new_field->save();
+    } catch (Exception $e) {
+
+    }
   }
 }
 
