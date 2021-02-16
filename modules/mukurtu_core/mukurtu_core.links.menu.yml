@@ -4,7 +4,13 @@ mukurtu_core.dashboard:
   parent: mukurtu
   menu_name: mukurtu
   route_name: mukurtu_core.dashboard
-  expanded: TRUE
+  weight: -1000
+mukurtu_core.account_dashboard:
+  title: 'Dashboard'
+  description: 'Dashboard'
+  parent: account
+  menu_name: account
+  route_name: mukurtu_core.dashboard
   weight: -1000
 mukurtu_core.create_content:
   title: 'Add Content'
