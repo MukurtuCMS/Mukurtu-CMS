@@ -1,5 +1,5 @@
-mukurtu_migrate.batch:
-  path: '/migrate'
+mukurtu_migrate.migrate:
+  path: '/dashboard/migrate'
   defaults:
     _controller: '\Drupal\mukurtu_migrate\Controller\ImportBatchController::content'
     _title: 'Migrate from Remote Mukurtu Site'
