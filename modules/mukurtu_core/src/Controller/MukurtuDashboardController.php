@@ -24,8 +24,6 @@ class MukurtuDashboardController extends ControllerBase {
 
   public function content() {
     $build = [];
-    $block_manager = \Drupal::service('plugin.manager.block');
-    $config = [];
 
     // Helper for community creation.
     $build[] = $this->gettingStartedCommunityContent();
@@ -34,22 +32,22 @@ class MukurtuDashboardController extends ControllerBase {
     $build[] = $this->gettingStartedCategoryContent();
 
     // Display all recent content.
-    $allRecentContentBlock = $block_manager->createInstance('views_block:mukurtu_recent_content-all_recent_content_block', $config);
-    if ($allRecentContentBlock) {
-      $access_result = $allRecentContentBlock->access(\Drupal::currentUser());
-      if ($access_result == AccessResult::allowed()) {
-        $build[] = $allRecentContentBlock->build();
-      }
-    }
+    $allRecentContentBlock = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_recent_content',
+      '#display_id' => 'all_recent_content_block',
+      '#embed' => TRUE,
+    ];
+    $build[] = $allRecentContentBlock;
 
     // Display all the user's recent content.
-    $userRecentContentBlock = $block_manager->createInstance('views_block:mukurtu_recent_content-user_recent_content_block', $config);
-    if ($userRecentContentBlock) {
-      $access_result = $userRecentContentBlock->access(\Drupal::currentUser());
-      if ($access_result == AccessResult::allowed()) {
-        $build[] = $userRecentContentBlock->build();
-      }
-    }
+    $userRecentContentBlock = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_recent_content',
+      '#display_id' => 'user_recent_content_block',
+      '#embed' => TRUE,
+    ];
+    $build[] = $userRecentContentBlock;
 
     return $build;
   }
@@ -66,7 +64,7 @@ class MukurtuDashboardController extends ControllerBase {
       $entityManager = \Drupal::entityTypeManager();
       $accessControlHandler = $entityManager->getAccessControlHandler('node');
       if ($accessControlHandler->createAccess('community')) {
-        $build[] = ['#markup' => '<div class="mukurtu-getting-started-communities">' . $this->t('Communities are a foundational component of Mukurtu CMS. Get started by creating your first community <a href="@create-community-page">here</a>.', ['@create-community-page' => Url::fromRoute('mukurtu_core.add', ['node_type' => 'community'])->toString()]) . '</div>'];
+        $build[] = ['#markup' => '<div class="mukurtu-getting-started mukurtu-getting-started-communities">' . $this->t('Communities are a foundational component of Mukurtu CMS. Get started by creating your first community <a href="@create-community-page">here</a>.', ['@create-community-page' => Url::fromRoute('mukurtu_core.add', ['node_type' => 'community'])->toString()]) . '</div>'];
       }
     }
 
@@ -79,7 +77,7 @@ class MukurtuDashboardController extends ControllerBase {
     $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree('category');
 
     if (count($terms) == 1 && $terms[0]->name == 'Default') {
-      $build[] = ['#markup' => '<div class="mukurtu-getting-started-categories">' . $this->t('Categories are important for grouping related content. Consider adding new terms and removing the default term <a href="@manage-category-page">here</a>.', ['@manage-category-page' => Url::fromRoute('mukurtu_taxonomy.manage_categories')->toString()]) . '</div>'];
+      $build[] = ['#markup' => '<div class="mukurtu-getting-started mukurtu-getting-started-categories">' . $this->t('Categories are important for grouping related content. Consider adding new terms and removing the default term <a href="@manage-category-page">here</a>.', ['@manage-category-page' => Url::fromRoute('mukurtu_taxonomy.manage_categories')->toString()]) . '</div>'];
     }
 
     return $build;
