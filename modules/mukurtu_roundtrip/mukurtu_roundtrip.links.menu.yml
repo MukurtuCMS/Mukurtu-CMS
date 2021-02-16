@@ -1,0 +1,7 @@
+mukurtu_roundtrip.import_csv:
+  title: 'Import - CSV'
+  description: 'Batch import content using a CSV file'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_roundtrip.import_csv
+  weight: 900
