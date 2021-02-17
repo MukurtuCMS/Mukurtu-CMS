@@ -34,7 +34,7 @@ dependencies:
 third_party_settings:
   layout_builder:
     allow_custom: false
-    enabled: true
+    enabled: false
     sections:
       -
         layout_id: layout_twocol_section
