@@ -17,8 +17,6 @@ dependencies:
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
-    - field.field.node.digital_heritage.field_mukurtu_community_records
-    - field.field.node.digital_heritage.field_mukurtu_original_record
     - field.field.node.digital_heritage.field_people
     - field.field.node.digital_heritage.field_publisher
     - field.field.node.digital_heritage.field_related_content
@@ -82,8 +80,6 @@ hidden:
   field_language: true
   field_media_assets: true
   field_mukurtu_community: true
-  field_mukurtu_community_records: true
-  field_mukurtu_original_record: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true

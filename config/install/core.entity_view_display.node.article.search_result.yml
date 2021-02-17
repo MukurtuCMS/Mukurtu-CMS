@@ -7,8 +7,6 @@ dependencies:
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
     - field.field.node.article.field_image
-    - field.field.node.article.field_mukurtu_community_records
-    - field.field.node.article.field_mukurtu_original_record
     - field.field.node.article.field_tags
     - image.style.thumbnail
     - node.type.article
@@ -108,8 +106,6 @@ hidden:
   comment: true
   field_content_type: true
   field_mukurtu_community: true
-  field_mukurtu_community_records: true
-  field_mukurtu_original_record: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true

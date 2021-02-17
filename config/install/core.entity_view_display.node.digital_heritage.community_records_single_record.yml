@@ -17,8 +17,6 @@ dependencies:
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
-    - field.field.node.digital_heritage.field_mukurtu_community_records
-    - field.field.node.digital_heritage.field_mukurtu_original_record
     - field.field.node.digital_heritage.field_people
     - field.field.node.digital_heritage.field_publisher
     - field.field.node.digital_heritage.field_related_content
@@ -172,22 +170,6 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-  field_mukurtu_community_records:
-    weight: 122
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: first
-  field_mukurtu_original_record:
-    weight: 123
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: first
   field_mukurtu_protocol_inherit:
     weight: 117
     label: above
