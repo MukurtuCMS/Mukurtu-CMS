@@ -170,22 +170,6 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-  field_mukurtu_community_records:
-    weight: 122
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: first
-  field_mukurtu_original_record:
-    weight: 123
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: first
   field_mukurtu_protocol_inherit:
     weight: 117
     label: above

@@ -100,8 +100,6 @@ hidden:
   body: true
   comment: true
   field_mukurtu_community: true
-  field_mukurtu_community_records: true
-  field_mukurtu_original_record: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
