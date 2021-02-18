@@ -25,6 +25,5 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
-  roles: true
   search_api_excerpt: true
   state: true

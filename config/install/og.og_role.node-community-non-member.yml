@@ -5,7 +5,7 @@ dependencies:
     - node.type.community
 id: node-community-non-member
 label: Non-member
-weight: 9
+weight: 6
 is_admin: null
 group_type: node
 group_bundle: community

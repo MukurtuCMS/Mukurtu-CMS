@@ -11,53 +11,12 @@ dependencies:
     - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
-    - blazy
     - user
 id: node.dictionary_word.teaser
 targetEntityType: node
 bundle: dictionary_word
 mode: teaser
 content:
-  field_representative_media:
-    label: hidden
-    type: blazy_media
-    region: content
-    weight: 11
-    settings:
-      class: ''
-      id: ''
-      image: ''
-      link: ''
-      overlay: ''
-      title: ''
-      vanilla: false
-      icon: ''
-      layout: ''
-      view_mode: ''
-      cache: 0
-      current_view_mode: ''
-      skin: ''
-      fx: ''
-      style: ''
-      background: false
-      box_caption: ''
-      box_caption_custom: ''
-      box_media_style: ''
-      caption: {  }
-      responsive_image_style: ''
-      box_style: ''
-      image_style: ''
-      media_switch: ''
-      ratio: ''
-      thumbnail_style: ''
-      _uri: ''
-      breakpoints: {  }
-      sizes: ''
-      grid_header: ''
-      grid: 0
-      grid_medium: 0
-      grid_small: 0
-    third_party_settings: {  }
   flag_email_node:
     weight: 0
     region: content

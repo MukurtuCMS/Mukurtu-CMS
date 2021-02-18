@@ -69,25 +69,25 @@ content:
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -6
+    weight: 2
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: -5
+    weight: 3
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -4
+    weight: 4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: -3
+    weight: 5
     settings: {  }
     third_party_settings: {  }
   name:
@@ -123,7 +123,7 @@ content:
     region: content
     third_party_settings: {  }
   title:
-    weight: -7
+    weight: 0
     settings:
       size: 60
       placeholder: ''
@@ -143,4 +143,3 @@ content:
 hidden:
   field_content_type: true
   field_mukurtu_community: true
-  field_sequence_collection: true

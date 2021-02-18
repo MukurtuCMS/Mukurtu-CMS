@@ -7,6 +7,8 @@ dependencies:
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
     - field.field.node.article.field_image
+    - field.field.node.article.field_mukurtu_community_records
+    - field.field.node.article.field_mukurtu_original_record
     - field.field.node.article.field_tags
     - image.style.thumbnail
     - node.type.article
@@ -89,25 +91,25 @@ content:
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -6
+    weight: 2
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: -5
+    weight: 3
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -4
+    weight: 4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: -3
+    weight: 5
     settings: {  }
     third_party_settings: {  }
   field_tags:
@@ -153,7 +155,7 @@ content:
     region: content
     third_party_settings: {  }
   title:
-    weight: -7
+    weight: 0
     settings:
       size: 60
       placeholder: ''
@@ -173,4 +175,6 @@ content:
 hidden:
   field_content_type: true
   field_mukurtu_community: true
+  field_mukurtu_community_records: true
+  field_mukurtu_original_record: true
   field_sequence_collection: true

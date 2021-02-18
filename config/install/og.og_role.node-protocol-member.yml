@@ -5,7 +5,7 @@ dependencies:
     - node.type.protocol
 id: node-protocol-member
 label: Member
-weight: 3
+weight: 4
 is_admin: null
 group_type: node
 group_bundle: protocol

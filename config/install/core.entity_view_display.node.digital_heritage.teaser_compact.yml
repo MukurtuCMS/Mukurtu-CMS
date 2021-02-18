@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.community_records_full
+    - core.entity_view_mode.node.teaser_compact
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
@@ -27,27 +27,42 @@ dependencies:
     - field.field.node.digital_heritage.field_subject
     - field.field.node.digital_heritage.field_traditional_knowledge
     - field.field.node.digital_heritage.field_type
+    - image.style.thumbnail
     - node.type.digital_heritage
   module:
     - layout_builder
+    - media
     - user
 third_party_settings:
   layout_builder:
     allow_custom: false
     enabled: false
-id: node.digital_heritage.community_records_full
+id: node.digital_heritage.teaser_compact
 targetEntityType: node
 bundle: digital_heritage
-mode: community_records_full
+mode: teaser_compact
 content:
-  field_all_community_records:
-    type: entity_reference_entity_view
+  field_content_type:
+    type: string
+    weight: 2
+    region: content
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  field_representative_media:
+    type: media_thumbnail
     weight: 0
     region: content
     label: hidden
     settings:
-      view_mode: community_records_single_record
-      link: false
+      image_style: thumbnail
+      image_link: ''
+    third_party_settings: {  }
+  field_title:
+    weight: 1
+    region: content
+    settings: {  }
     third_party_settings: {  }
   flag_email_og:
     weight: 4
@@ -78,8 +93,8 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  field_all_community_records: true
   field_category: true
-  field_content_type: true
   field_contributor: true
   field_coverage: true
   field_coverage_gpx: true
@@ -103,12 +118,10 @@ hidden:
   field_people: true
   field_publisher: true
   field_related_content: true
-  field_representative_media: true
   field_rights: true
   field_sequence_collection: true
   field_source: true
   field_subject: true
-  field_title: true
   field_traditional_knowledge: true
   field_type: true
   flag_email_node: true

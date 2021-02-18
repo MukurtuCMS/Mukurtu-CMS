@@ -8,6 +8,8 @@ is_admin: false
 permissions:
   - 'access comments'
   - 'access content'
+  - 'access devel information'
   - 'access site-wide contact form'
   - 'search content'
   - 'use text format restricted_html'
+  - 'view digital_heritage revisions'

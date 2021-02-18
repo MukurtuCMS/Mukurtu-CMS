@@ -7,7 +7,6 @@ dependencies:
     - field.field.node.page.field_content_type
     - node.type.page
   module:
-    - blazy
     - text
     - user
 id: node.page.teaser
@@ -22,46 +21,6 @@ content:
     region: content
     settings:
       trim_length: 600
-    third_party_settings: {  }
-  field_representative_media:
-    label: hidden
-    type: blazy_media
-    region: content
-    weight: 11
-    settings:
-      class: ''
-      id: ''
-      image: ''
-      link: ''
-      overlay: ''
-      title: ''
-      vanilla: false
-      icon: ''
-      layout: ''
-      view_mode: ''
-      cache: 0
-      current_view_mode: ''
-      skin: ''
-      fx: ''
-      style: ''
-      background: false
-      box_caption: ''
-      box_caption_custom: ''
-      box_media_style: ''
-      caption: {  }
-      responsive_image_style: ''
-      box_style: ''
-      image_style: ''
-      media_switch: ''
-      ratio: ''
-      thumbnail_style: ''
-      _uri: ''
-      breakpoints: {  }
-      sizes: ''
-      grid_header: ''
-      grid: 0
-      grid_medium: 0
-      grid_small: 0
     third_party_settings: {  }
   flag_email_node:
     weight: 0
