@@ -8,8 +8,6 @@ dependencies:
     - field.field.node.article.comment
     - field.field.node.article.field_content_type
     - field.field.node.article.field_image
-    - field.field.node.article.field_mukurtu_community_records
-    - field.field.node.article.field_mukurtu_original_record
     - field.field.node.article.field_tags
     - node.type.article
   module:
