@@ -59,6 +59,7 @@ dependencies:
   - layout_builder
   - flag
   - message
+  - message_digest
   - media
   - media_library
   - og
