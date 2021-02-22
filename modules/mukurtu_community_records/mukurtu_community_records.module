@@ -73,6 +73,7 @@ function mukurtu_community_records_create_community_records_field($entity_type_i
   $field = FieldConfig::loadByName($entity_type_id, $bundle, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS);
   if ($field_storage && empty($field)) {
     $new_field = $field_storage->toArray();
+    unset($new_field['uuid']);
     $new_field['label'] = "Community Records";
     $new_field['bundle'] = $bundle;
     $new_field['settings'] = [
@@ -96,6 +97,7 @@ function mukurtu_community_records_create_community_records_field($entity_type_i
 
   if ($field_storage && empty($field)) {
     $new_field = $field_storage->toArray();
+    unset($new_field['uuid']);
     $new_field['label'] = "Original Record";
     $new_field['bundle'] = $bundle;
     $new_field['settings'] = [
