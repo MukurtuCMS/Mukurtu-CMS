@@ -33,7 +33,9 @@ class MukurtuAddNewProtocolController extends ControllerBase {
     // in that community.
     if ($node->access('update', $account)) {
       $membership = Og::getMembership($node, $account);
-      return AccessResult::allowedIf($membership->hasPermission('create protocol content'));
+      if ($membership) {
+        return AccessResult::allowedIf($membership->hasPermission('create protocol content'));
+      }
     }
 
     return AccessResult::forbidden();
