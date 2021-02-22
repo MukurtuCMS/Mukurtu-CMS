@@ -192,8 +192,19 @@ function mukurtu_protocol_use_custom_protocol_widgets_sitewide() {
  * Implements hook_entity_access().
  */
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  // Protocols only work with nodes & media.
   $type = $entity->getEntityTypeId();
+
+  // Do not allow the deletion of communities that have attached protocols.
+  if ($type == 'node' && $entity->bundle() == 'community' && $operation == 'delete') {
+    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+    $protocols = $protocol_manager->getCommunityProtocols($entity);
+
+    if (count($protocols) > 0) {
+      return AccessResult::forbidden();
+    }
+  }
+
+  // Protocols only work with nodes & media.
   if ($type == 'node' || $type == 'media') {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     if ($protocol_manager->hasProtocolFields($entity)) {
