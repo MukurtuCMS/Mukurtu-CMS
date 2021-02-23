@@ -4,3 +4,13 @@ mukurtu_core.user_admin_create:
   appears_on:
     - mukurtu_core.people
     - mukurtu_core.manage_users
+mukurtu_core.add_media:
+  route_name: entity.media.add_page
+  title: 'Add media'
+  appears_on:
+    - mukurtu_core.manage_media
+mukurtu_core.add_content:
+  route_name: mukurtu_core.add_page
+  title: 'Add content'
+  appears_on:
+    - mukurtu_core.manage_content

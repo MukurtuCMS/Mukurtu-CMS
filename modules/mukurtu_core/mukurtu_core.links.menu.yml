@@ -18,6 +18,12 @@ mukurtu_core.manage_content:
   parent: mukurtu
   menu_name: mukurtu
   route_name: mukurtu_core.manage_content
+mukurtu_core.manage_media:
+  title: 'Manage Media'
+  description: 'Manage Media'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_core.manage_media
 mukurtu_core.create_content:
   title: 'Add Content'
   description: 'Add Content'
