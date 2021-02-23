@@ -15,7 +15,7 @@ class MukurtuManageContentController extends ControllerBase {
   public function access() {
     $account = \Drupal::currentUser();
     if (!$account->isAnonymous()) {
-      return AccessResult::allowed();
+      return AccessResult::allowedIfHasPermission($account, 'administer nodes');
     }
 
     return AccessResult::forbidden();

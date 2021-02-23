@@ -15,7 +15,7 @@ class MukurtuManageMediaController extends ControllerBase {
   public function access() {
     $account = \Drupal::currentUser();
     if (!$account->isAnonymous()) {
-      return AccessResult::allowed();
+      return AccessResult::allowedIfHasPermission($account, 'administer media');
     }
 
     return AccessResult::forbidden();
