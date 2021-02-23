@@ -18,6 +18,11 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
         'field' => 'name',
         'specifier' => 'name',
       ],
+      'field_display_name' => [
+        'data' => $this->t('Display Name'),
+        'field' => 'field_display_name',
+        'specifier' => 'field_display_name',
+      ],
       'status' => [
         'data' => $this->t('Status'),
         'field' => 'status',
@@ -57,6 +62,7 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
       '#theme' => 'username',
       '#account' => $entity,
     ];
+    $row['field_display_name']['data']['#markup'] = $entity->get('field_display_name')->value;
     $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('blocked');
 
     $roles = user_role_names(TRUE);
@@ -75,7 +81,10 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     $options = [
       'return_as_object' => TRUE,
     ];
-    $row['communities']['data'] = $this->getUserCommunities($entity);
+    $row['communities']['data'] = [
+      '#theme' => 'item_list',
+      '#items' => $this->getUserCommunities($entity),
+    ];
     $row['member_for']['data'] = $this->dateFormatter->formatTimeDiffSince($entity->getCreatedTime(), $options)->toRenderable();
     $last_access = $this->dateFormatter->formatTimeDiffSince($entity->getLastAccessedTime(), $options);
 
@@ -102,9 +111,9 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     $memberships = array_filter($memberships, $communities_only);
     $communities = [];
     foreach ($memberships as $membership) {
-      $communities[] = $membership->getGroup()->getTitle();
+      $community = $membership->getGroup();
+      $communities[$community->id()] = $community->getTitle();
     }
-
-    return implode(', ', $communities);
+    return $communities;
   }
 }
