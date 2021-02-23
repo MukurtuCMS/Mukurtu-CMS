@@ -35,4 +35,38 @@ class MukurtuManageContentController extends ControllerBase {
 
     return $build;
   }
+
+  public function addPage() {
+    $build = [
+      '#theme' => 'mukurtu_node_add_list',
+      '#cache' => [
+        'tags' => $this->entityTypeManager()->getDefinition('node_type')->getListCacheTags(),
+      ],
+    ];
+
+    $content = [];
+
+    // Only use node types the user has access to.
+    foreach ($this->entityTypeManager()->getStorage('node_type')->loadMultiple() as $type) {
+      // Skip community/protocol, they aren't "content".
+      if (in_array($type->get('type'), ['community', 'protocol'])) {
+        continue;
+      }
+
+      $access = $this->entityTypeManager()->getAccessControlHandler('node')->createAccess($type->id(), NULL, [], TRUE);
+      if ($access->isAllowed()) {
+        $content[$type->id()] = $type;
+      }
+    }
+
+    // Bypass the node/add listing if only one content type is available.
+    if (count($content) == 1) {
+      $type = array_shift($content);
+      return $this->redirect('mukurtu_core.add', ['node_type' => $type->id()]);
+    }
+
+    $build['#content'] = $content;
+
+    return $build;
+  }
 }

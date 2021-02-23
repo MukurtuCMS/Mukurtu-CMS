@@ -30,7 +30,7 @@ mukurtu_core.add_page:
   path: '/dashboard/node/add'
   defaults:
     _title: 'Add content'
-    _controller: '\Drupal\node\Controller\NodeController::addPage'
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuManageContentController::addPage'
   options:
     _node_operation_route: TRUE
   requirements:

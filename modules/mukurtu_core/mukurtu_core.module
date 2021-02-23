@@ -12,7 +12,45 @@ use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Url;
+use Drupal\Core\Link;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_core_theme($existing, $type, $theme, $path) {
+  return [
+    'mukurtu_node_add_list' => [
+      'template' => 'mukurtu-node-add-list',
+      'variables' => ['content' => NULL],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for list of available node type templates.
+ *
+ * Default template: mukurtu-node-add-list.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - content: An array of content types.
+ */
+function template_preprocess_mukurtu_node_add_list(array &$variables) {
+  $variables['types'] = [];
+
+  if (!empty($variables['content'])) {
+    foreach ($variables['content'] as $type) {
+      $variables['types'][$type->id()] = [
+        'type' => $type->id(),
+        'add_link' => Link::fromTextAndUrl($type->label(), Url::fromRoute('mukurtu_core.add', ['node_type' => $type->id()]))->toString(),
+        'description' => [
+          '#markup' => $type->getDescription(),
+        ],
+      ];
+    }
+  }
+}
 
 /**
  * Implements hook_entity_bundle_create().
