@@ -1,0 +1,6 @@
+user_admin_create:
+  route_name: mukurtu_core.people
+  title: 'Add user'
+  appears_on:
+    - mukurtu_core.people
+    - mukurtu_core.manage_users

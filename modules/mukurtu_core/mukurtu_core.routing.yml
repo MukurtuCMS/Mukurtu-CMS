@@ -41,3 +41,10 @@ mukurtu_core.add:
       node_type:
         type: entity:node_type
         with_config_overrides: TRUE
+mukurtu_core.people:
+  path: '/dashboard/admin/people'
+  defaults:
+    _entity_list: 'user'
+    _title: 'People - All User Accounts'
+  requirements:
+    _permission: 'administer users'

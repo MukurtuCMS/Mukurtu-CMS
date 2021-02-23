@@ -64,6 +64,13 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
 }
 
 /**
+ * Implements hook_entity_type_alter().
+ */
+function mukurtu_core_entity_type_alter(array &$entity_types) {
+  $entity_types['user']->setListBuilderClass('Drupal\mukurtu_core\MukurtuUserListBuilder');
+}
+
+/**
  * Implements hook_ENTITY_TYPE_view().
  */
 function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {

@@ -25,3 +25,9 @@ mukurtu_core.create_content:
   menu_name: mukurtu
   route_name: mukurtu_core.add_page
   expanded: TRUE
+mukurtu_core.manage_users:
+  title: 'Manage Users'
+  description: 'Manage site user accounts.'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_core.people
