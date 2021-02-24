@@ -12,8 +12,6 @@ class MukurtuCommunityManageController extends ControllerBase {
    */
   public function content() {
     $build = [];
-    $destination = Url::fromRoute('<current>')->toString();
-    $build[] = Link::fromTextAndUrl(t('Add a new community'), Url::fromUri('internal:/node/add/community', ['query' => ['destination' => $destination]]))->toRenderable();
     $build[] = $this->displayCommunities();
     return $build;
   }
