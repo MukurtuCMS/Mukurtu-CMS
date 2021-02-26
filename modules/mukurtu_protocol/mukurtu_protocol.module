@@ -493,6 +493,7 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
  * Implements hook_entity_type_build().
  */
 function mukurtu_protocol_entity_type_build(array &$entity_types) {
+  //$entity_types['file']->setHandlerClass('access', '\Drupal\mukurtu_protocol\MukurtuFileAccessControlHandler');
   if (isset($entity_types['media']) && !$entity_types['media']->hasHandlerClass('query_access')) {
     //\Drupal::logger('mukurtu_protocol')->notice("added media");
     $entity_types['media']->setHandlerClass('query_access', \Drupal\entity\QueryAccess\QueryAccessHandler::class);
@@ -719,5 +720,44 @@ function mukurtu_protocol_user_login($account) {
   if (!$mukurtu_widgets_set) {
     mukurtu_protocol_use_custom_protocol_widgets_sitewide();
     \Drupal::state()->set('mukurtu_protocol_use_widgets_set', TRUE);
+  }
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function mukurtu_protocol_file_download($uri) {
+  $account = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
+
+  /** @var \Drupal\file\FileInterface[] $files */
+  $files = \Drupal::entityTypeManager()->getStorage('file')->loadByProperties(['uri' => $uri]);
+
+  // Find the file by the URI.
+  if (count($files)) {
+    foreach ($files as $item) {
+      if ($item->getFileUri() === $uri) {
+        $file = $item;
+        break;
+      }
+    }
+  }
+  if (!isset($file)) {
+    return;
+  }
+
+  // Get entities using the file.
+  $usage = \Drupal::service('file.usage')->listUsage($file);
+
+  // Check for access to media entities.
+  if (!empty($usage['file']['media'])) {
+    $allMedia = \Drupal::entityTypeManager()->getStorage('media')->loadMultiple(array_keys($usage['file']['media']));
+    foreach ($allMedia as $media) {
+      // If the user has view access to ANY media that uses that file, allow the download.
+      if ($media->access('view', $account)) {
+        return;
+      }
+    }
+    // Deny download if they failed all the media checks.
+    return -1;
   }
 }
