@@ -4,3 +4,43 @@
  * @file
  * Provide Mukurtu Taxonomies.
  */
+
+use Drupal\Core\Url;
+use Drupal\Core\Link;
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
+  return [
+    'mukurtu_vocabulary_add_list' => [
+      'template' => 'mukurtu-vocabulary-add-list',
+      'variables' => ['content' => NULL],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for list of available vocabulary templates.
+ *
+ * Default template: mukurtu-vocabulary-add-list.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - content: An array of content types.
+ */
+function template_preprocess_mukurtu_vocabulary_add_list(array &$variables) {
+  $variables['types'] = [];
+
+  if (!empty($variables['content'])) {
+    foreach ($variables['content'] as $type) {
+      $variables['types'][$type->id()] = [
+        'type' => $type->id(),
+        'add_link' => Link::fromTextAndUrl($type->label(), Url::fromRoute('mukurtu_taxonomy.manage_taxonomy_vocabulary', ['taxonomy_vocabulary' => $type->id()]))->toString(),
+        'description' => [
+          '#markup' => $type->getDescription(),
+        ],
+      ];
+    }
+  }
+}

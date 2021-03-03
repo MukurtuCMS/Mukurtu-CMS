@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\taxonomy\Entity\Term;
 
 class MukurtuCategoryManageController extends ControllerBase {
+
   /**
    * Display the manage categories page.
    */
@@ -19,7 +20,7 @@ class MukurtuCategoryManageController extends ControllerBase {
 
       // Render the form to add a new category.
       $newCategoryTerm = Term::create([
-      'vid' => $vocabulary->id(),
+        'vid' => $vocabulary->id(),
       ]);
       $form = \Drupal::service('entity.manager')
         ->getFormObject('taxonomy_term', 'default')
@@ -27,11 +28,12 @@ class MukurtuCategoryManageController extends ControllerBase {
 
       $build['add_category'] = [
         '#type' => 'details',
-        '#title' => $this->t('Add a new category')
+        '#title' => $this->t('Add a new category'),
       ];
       $build['add_category']['form'] = \Drupal::formBuilder()->getForm($form);
     }
 
     return $build;
   }
+
 }

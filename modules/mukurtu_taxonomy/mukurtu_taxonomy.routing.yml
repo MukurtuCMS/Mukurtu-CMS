@@ -7,3 +7,17 @@ mukurtu_taxonomy.manage_categories:
     _permission: 'create terms in category'
     _permission: 'edit terms in category'
     _permission: 'delete terms in category'
+mukurtu_taxonomy.manage_taxonomy_vocabulary:
+  path: '/dashboard/taxonomy/{taxonomy_vocabulary}'
+  defaults:
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
+  requirements:
+    _entity_create_access: 'taxonomy_term:{taxonomy_vocabulary}'
+    _custom_access: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::access'
+mukurtu_taxonomy.add_page:
+  path: '/dashboard/taxonomy'
+  defaults:
+    _title: 'Manage Vocabularies'
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::addPage'
+  requirements:
+    _node_add_access: 'taxonomy_term'

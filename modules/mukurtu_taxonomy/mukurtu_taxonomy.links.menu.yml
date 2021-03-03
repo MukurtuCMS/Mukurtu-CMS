@@ -1,3 +1,9 @@
+mukurtu_taxonomy.manage_vocabularies:
+  title: 'Manage Taxonomy'
+  description: 'Manage Taxonomy'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_taxonomy.add_page
 mukurtu_taxonomy.manage_categories:
   title: 'Categories'
   description: 'Manage Categories'
