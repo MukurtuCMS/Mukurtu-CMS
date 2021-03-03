@@ -431,7 +431,7 @@ display:
           exclude: false
           alter:
             alter_text: true
-            text: "{% if field_mukurtu_protocol_r_scope__value  == 'public' %}\r\n  Public\r\n{% else %}\r\n  Restricted\r\n{% endif %}"
+            text: "{% if field_mukurtu_protocol_r_scope__value  == 'public' %}\r\n  Public\r\n{% elseif field_mukurtu_protocol_r_scope__value == 'personal' %}\r\n  Personal\r\n{% else %}\r\n  Restricted\r\n{% endif %}"
             make_link: false
             path: ''
             absolute: false
