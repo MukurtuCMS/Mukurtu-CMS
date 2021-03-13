@@ -1,0 +1,41 @@
+<?php
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function mukurtu_content_warnings_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+  if ($entity_type->id() == 'media') {
+    $fields['field_content_warnings'] = BaseFieldDefinition::create('string')
+      ->setName('field_content_warnings')
+      ->setLabel(t('Content Warnings'))
+      ->setDescription(t('Content warnings regarding contained media.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_content_warnings\Plugin\Field\ContentWarningsField')
+      ->setCardinality(-1)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayOptions('view', ['label' => 'hidden']);
+  }
+  return $fields;
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function mukurtu_content_warnings_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  $entity_type_id = $entity->getEntityTypeId();
+
+  if ($entity_type_id != 'media' || !$entity->hasField('field_content_warnings')) {
+    return;
+  }
+
+  $warnings = $entity->get('field_content_warnings');
+  if (count($warnings) > 0) {
+    $build['#attributes']['class'][] = 'content-warning';
+  }
+}

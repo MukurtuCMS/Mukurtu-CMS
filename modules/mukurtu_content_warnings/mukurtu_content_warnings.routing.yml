@@ -1,0 +1,11 @@
+mukurtu_content_warnings.manage_community_content_warnings:
+  path: '/node/{node}/content-warnings'
+  defaults:
+    _title: 'Content Warnings'
+    _controller: '\Drupal\mukurtu_content_warnings\Controller\MukurtuManageContentWarningsController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_content_warnings\Controller\MukurtuManageContentWarningsController::access'
