@@ -238,7 +238,7 @@ function mukurtu_community_records_entity_view_mode_alter(&$view_mode, EntityInt
  */
 function mukurtu_community_records_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Only run on node forms.
-  if (strpos($form_id, 'node_') === 0) {
+  if (strpos($form_id, 'node_') === 0 && strpos($form_id, '_edit_form') > 0) {
     $args = $form_state->getBuildInfo()['args'];
 
     if (!empty($args) && isset($args[0]['mukurtu_community_records']['submit'])) {

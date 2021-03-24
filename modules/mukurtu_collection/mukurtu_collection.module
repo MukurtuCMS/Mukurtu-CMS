@@ -230,7 +230,7 @@ function mukurtu_collection_slick_settings_alter(array &$build, $items) {
  */
 function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Only run on node forms.
-  if (strpos($form_id, 'node_') === 0) {
+  if (strpos($form_id, 'node_') === 0 && strpos($form_id, '_edit_form') > 0) {
     $args = $form_state->getBuildInfo()['args'];
 
     // Are there any mukurtu_collection specific arguments to handle?
