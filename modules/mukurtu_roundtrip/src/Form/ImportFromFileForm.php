@@ -48,7 +48,7 @@ class ImportFromFileForm extends FormBase {
       $form['import_table'] = [
         '#type' => 'table',
         '#caption' => $this->t('Table'),
-        '#header' =>  $headers,
+        '#header' => $headers,
         '#states' => [
           'visible' => [
             ':input[name="import_file[fids]"]' => ['filled' => TRUE],
@@ -208,6 +208,12 @@ class ImportFromFileForm extends FormBase {
       if ($file) {
         $data = file_get_contents($file->getFileUri());
         $csv_array = array_map("str_getcsv", explode("\n", $data));
+
+        $last = count($csv_array) - 1;
+
+        if (empty($csv_array[$last]) || empty($csv_array[$last][0])) {
+          unset($csv_array[$last]);
+        }
         //$csv_array = array_map("str_getcsv", file($file->getFileUri()));
         return $csv_array;
       }

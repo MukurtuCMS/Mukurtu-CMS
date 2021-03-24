@@ -5,3 +5,11 @@ mukurtu_roundtrip.import_csv:
     _title: 'Import - CSV'
   requirements:
     _permission: 'administer content'
+mukurtu_roundtrip.tabulator_ajax_file_update:
+  path: '/mukurtu-ajax/tabulator/file-update'
+  defaults:
+    _controller: '\Drupal\mukurtu_roundtrip\Controller\ImportTabulatorAjaxController::fileUpdate'
+  methods: [POST]
+  requirements:
+    _permission: 'administer content'
+    _format: json

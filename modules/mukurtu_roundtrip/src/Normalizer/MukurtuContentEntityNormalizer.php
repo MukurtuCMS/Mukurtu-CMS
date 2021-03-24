@@ -76,7 +76,7 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
       $entity = $this->getEntity($row);
 
       foreach ($row as $field_name => $field_data) {
-         if ($field_data) {
+        if ($field_data) {
           $items = $entity->get($field_name);
           $items->setValue([]);
           $field_data = is_array($field_data) ? $field_data : [$field_data];
@@ -116,7 +116,7 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
   protected function getEntity($row) {
     // Try loading by NID first.
     if (!empty($row['nid'])) {
-      $entity = \Drupal::entityManager()->getStorage('node')->load($row['nid']);
+      $entity = \Drupal::entityTypeManager()->getStorage('node')->load($row['nid']);
       if ($entity) {
         return $entity;
       }
@@ -124,7 +124,7 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
 
     // Try loading by UUID next.
     if (!empty($row['uuid'])) {
-      $entity = \Drupal::service('entity.repository')->loadEntityByUuid('node', $uuid);
+      $entity = \Drupal::service('entity.repository')->loadEntityByUuid('node', $row['uuid']);
       if ($entity) {
         return $entity;
       }
@@ -137,7 +137,7 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
       throw new UnexpectedValueException("Could not determine the bundle type during normalization/denormalization for row: $msg");
     }
     $values = ['type' => $type];
-    $entity = \Drupal::entityManager()->getStorage('node')->create($values);
+    $entity = \Drupal::entityTypeManager()->getStorage('node')->create($values);
 
     return $entity;
   }
