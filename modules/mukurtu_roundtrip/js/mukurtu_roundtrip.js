@@ -5,7 +5,9 @@
         var importTable = new Tabulator(this, {
           cellEdited: function(cell) {
             // Disable the submit button, the file needs to be validated again.
-            document.getElementById("edit-submitforimport").disabled = true;
+            if (document.getElementById("edit-submitforimport") != undefined) {
+              document.getElementById("edit-submitforimport").disabled = true;
+            }
 
             // Disable the validate button, it will be re-enabled once the server
             // gets the updated data.

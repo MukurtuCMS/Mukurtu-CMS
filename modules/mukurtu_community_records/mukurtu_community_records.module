@@ -218,7 +218,7 @@ function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, Enti
  * Implements hook_entity_view_mode_alter().
  */
 function mukurtu_community_records_entity_view_mode_alter(&$view_mode, EntityInterface $entity, $context) {
-  if ( $entity->getEntityTypeId() != 'node'
+  if ($entity->getEntityTypeId() != 'node'
     || $view_mode != 'full'
     || !$entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)
     || !$entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {

@@ -39,8 +39,8 @@ function mukurtu_roundtrip_importbatch($options, &$context) {
   // Write data.
   foreach ($this_batch_input as $line) {
     if (!empty($line)) {
-      // Skip completely empty lines;
-      if ((count($line) == 1) && trim($count[0]) == "") {
+      // Skip completely empty lines.
+      if ((count($line) == 1) && trim($line) == "") {
         continue;
       }
       fputcsv($batch_temp, $line);
@@ -53,20 +53,41 @@ function mukurtu_roundtrip_importbatch($options, &$context) {
 
   // Run this chunk of the import file through the deserializer.
   $serializer = \Drupal::service('serializer');
-  $entities = $serializer->deserialize($raw_batch_input, 'Drupal\node\Entity\Node', 'csv', []);
+  try {
+    $entities = $serializer->deserialize($raw_batch_input, 'Drupal\node\Entity\Node', 'csv', []);
 
-  // Validate the resultant entities.
-  foreach ($entities as $entity) {
-    $violations = $entity->validate();
-    if ($violations->count() > 0) {
-      foreach ($violations as $violation) {
-        $context['results']['violations'][] = $violation->getMessage();
+    // Validate the resultant entities.
+    foreach ($entities as $entity) {
+      $violations = $entity->validate();
+      if ($violations->count() > 0) {
+        foreach ($violations as $violation) {
+          $context['results']['violations'][] = $violation->getMessage();
+        }
+      } else {
+        $context['results']['valid_entities']++;
+        if ($save) {
+          $entity->save();
+        }
       }
+    }
+  } catch (Exception $e) {
+    $trace = $e->getTrace();
+    $lineNumber = NULL;
+    if (isset($trace[0]['args'][0])) {
+      $badLine = implode('||', $trace[0]['args'][0]);
+
+      foreach ($this_batch_input as $delta => $inputLine) {
+        $thisLine = implode('||', $inputLine);
+        if ($badLine == $thisLine) {
+          $lineNumber = $delta + $context['sandbox']['progress'] + 1;
+        }
+      }
+    }
+
+    if ($lineNumber) {
+      $context['results']['violations'][$lineNumber] = $e->getMessage();
     } else {
-      $context['results']['valid_entities']++;
-      if ($save) {
-        $entity->save();
-      }
+      $context['results']['violations'][] = $e->getMessage();
     }
   }
 
@@ -98,17 +119,21 @@ function mukurtu_roundtrip_import_complete_callback($success, $results, $operati
   $form_id = $results['form_id'] ?? 'import';
   $violations = $results['violations'];
 
-  if ($success) {
+  if ($success && count($violations) == 0) {
     if ($save) {
       $message = t('Successfully imported @valid entities.', ['@valid' => $valid]);
     } else {
       $message = t('Import file is valid, you can now import.');
       $_SESSION['mukurtu_roundtrip'][$form_id]['valid'] = TRUE;
     }
+    \Drupal::messenger()->addMessage($message, 'status');
   } else {
     $message = t('There were some errors.');
     $_SESSION['mukurtu_roundtrip'][$form_id]['valid'] = FALSE;
-    dpm($violations);
+    $_SESSION['mukurtu_roundtrip'][$form_id]['violations'] = $violations;
+    foreach ($violations as $delta => $violation) {
+      \Drupal::messenger()->addMessage("Row $delta: " . $violation, 'error');
+    }
   }
-  drupal_set_message($message);
+
 }

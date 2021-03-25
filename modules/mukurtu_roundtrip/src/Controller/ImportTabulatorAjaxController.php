@@ -55,6 +55,8 @@ class ImportTabulatorAjaxController {
       $file = \Drupal\file\Entity\File::load($fid);
       if ($file) {
         file_save_data($csv, $file->getFileUri(), \Drupal\Core\File\FileSystemInterface::EXISTS_REPLACE);
+        $file->setTemporary();
+        $file->save();
       }
     }
 
