@@ -10,7 +10,6 @@ dependencies:
     - field.field.node.community.field_description
     - field.field.node.community.field_featured_content
     - field.field.node.community.field_parent_community
-    - field.field.node.community.field_sequence_collection
     - node.type.community
   module:
     - entity_browser
@@ -205,4 +204,3 @@ hidden:
   body: true
   field_child_communities: true
   field_content_type: true
-  field_sequence_collection: true
