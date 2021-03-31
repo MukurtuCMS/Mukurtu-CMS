@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ */
+ function mukurtu_browse_theme($existing, $type, $theme, $path) {
+  return [
+    'mukurtu_browse' => [
+      'variables' => [
+        'results' => NULL,
+        'facets' => [],
+      ],
+    ],
+  ];
+}

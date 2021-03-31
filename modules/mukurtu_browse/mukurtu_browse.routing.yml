@@ -1,0 +1,7 @@
+mukurtu_browse.browse_page:
+  path: '/browse'
+  defaults:
+    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseController::content'
+    _title: 'Browse Content'
+  requirements:
+    _permission: 'access content'
