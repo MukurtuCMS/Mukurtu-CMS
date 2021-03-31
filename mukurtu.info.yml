@@ -80,6 +80,7 @@ dependencies:
   - mukurtu_community_records
   - mukurtu_roundtrip
   - mukurtu_migrate
+  - mukurtu_browse
 
 themes:
   - bartik
