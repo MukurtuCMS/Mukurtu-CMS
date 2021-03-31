@@ -6,6 +6,7 @@ core: 8.x
 package: 'Mukurtu'
 version: '8.x-1.x-dev'
 dependencies:
+  - blazy
   - entity_browser
   - media
   - media_library
