@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_dictionary_theme($existing, $type, $theme, $path) {
+  return [
+    'mukurtu_dictionary_page' => [
+      'variables' => [
+        'results' => NULL,
+        'facets' => [],
+        'glossary' => NULL,
+      ],
+    ],
+  ];
+}

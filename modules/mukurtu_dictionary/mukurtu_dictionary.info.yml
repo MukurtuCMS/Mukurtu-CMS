@@ -1,0 +1,14 @@
+name: 'Mukurtu Dictionary'
+type: module
+description: 'Provides the default Mukurtu dictionary pages.'
+core_version_requirement: ^8 || ^9
+core: 8.x
+package: 'Mukurtu'
+dependencies:
+  - mukurtu_core
+  - mukurtu_community
+  - mukurtu_taxonomy
+  - search_api
+  - text
+
+version: '8.x-1.x-dev'

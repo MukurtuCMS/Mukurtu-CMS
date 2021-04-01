@@ -1,0 +1,7 @@
+mukurtu_dictionary.dictionary_page:
+  path: '/dictionary'
+  defaults:
+    _controller: '\Drupal\mukurtu_dictionary\Controller\MukurtuDictionaryController::content'
+    _title: 'Dictionary'
+  requirements:
+    _permission: 'access content'

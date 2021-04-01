@@ -1,0 +1,5 @@
+mukurtu_dictionary.dictionary:
+  title: 'Dictionary'
+  description: 'Browse the Dictionary'
+  menu_name: main
+  route_name: mukurtu_dictionary.dictionary_page
