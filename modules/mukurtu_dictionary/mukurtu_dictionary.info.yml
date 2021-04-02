@@ -5,10 +5,12 @@ core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
 dependencies:
+  - facets
   - mukurtu_core
   - mukurtu_community
   - mukurtu_taxonomy
   - search_api
+  - search_api_glossary
   - text
 
 version: '8.x-1.x-dev'

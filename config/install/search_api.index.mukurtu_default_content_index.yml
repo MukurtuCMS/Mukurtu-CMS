@@ -3,14 +3,15 @@ status: true
 dependencies:
   config:
     - field.storage.node.body
-    - field.storage.node.field_category
     - field.storage.node.field_description
+    - field.storage.node.field_category
     - field.storage.node.field_keywords
     - search_api.server.mukurtu_database_server
   module:
     - taxonomy
     - node
     - search_api
+    - search_api_glossary
 id: mukurtu_default_content_index
 name: 'Mukurtu Default content index'
 description: 'Default Mukurtu content index'
@@ -32,6 +33,13 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.field_description
+  glossaryaz_title:
+    label: 'Glossary AZ - Content » Title'
+    property_path: glossaryaz_title
+    type: string
+    indexed_locked: true
+    type_locked: true
+    hidden: true
   name:
     label: 'Category » Taxonomy term » Name'
     datasource_id: 'entity:node'
@@ -112,11 +120,21 @@ processor_settings:
     weights:
       preprocess_query: -30
   entity_status: {  }
+  glossary:
+    glossarytable: 'a:1:{s:13:"glossarytable";a:7:{s:4:"body";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:17:"field_description";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:4:"name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:6:"name_1";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:5:"title";a:2:{s:8:"glossary";s:1:"1";s:8:"grouping";a:3:{s:11:"grouping_09";s:11:"grouping_09";s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;}}s:4:"type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:3:"uid";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}}}'
+    field_enabled: 0
+    grouping_defaults:
+      grouping_other: grouping_other
+      grouping_az: 0
+      grouping_09: 0
+    weights:
+      preprocess_index: -20
   html_filter:
     all_fields: true
     fields:
       - body
       - field_description
+      - glossaryaz_title
       - name
       - name_1
       - title
@@ -125,12 +143,10 @@ processor_settings:
     alt: true
     tags:
       b: 2
-      em: 1
       h1: 5
       h2: 3
       h3: 2
       strong: 2
-      u: 1
     weights:
       preprocess_index: -15
       preprocess_query: -15
@@ -139,6 +155,7 @@ processor_settings:
     fields:
       - body
       - field_description
+      - glossaryaz_title
       - name
       - name_1
       - title
@@ -154,18 +171,19 @@ processor_settings:
       - body
       - field_description
       - title
+    ignored: ._-
     spaces: ''
     overlap_cjk: 1
     minimum_word_size: '3'
     weights:
       preprocess_index: -6
       preprocess_query: -6
-    ignored: ._-
   transliteration:
     all_fields: true
     fields:
       - body
       - field_description
+      - glossaryaz_title
       - name
       - name_1
       - title

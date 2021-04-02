@@ -69,6 +69,7 @@ dependencies:
   - geolocation
   - search_api
   - search_api_db
+  - search_api_glossary
   - slick
   - slick_entityreference
   - mukurtu_core

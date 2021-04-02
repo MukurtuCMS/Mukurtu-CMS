@@ -22,16 +22,21 @@ class MukurtuDictionaryController extends ControllerBase {
       ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_dictionary__mukurtu_dictionary_block']);
 
     // Render the facet block for each of them.
+    $block_manager = \Drupal::service('plugin.manager.block');
     $facets = [];
+    $glossary = NULL;
     if ($facetEntities) {
-      $block_manager = \Drupal::service('plugin.manager.block');
       foreach ($facetEntities as $facet_id => $facetEntity) {
         $config = [];
         $block_plugin = $block_manager->createInstance('facet_block' . PluginBase::DERIVATIVE_SEPARATOR . $facet_id, $config);
         if ($block_plugin) {
           $access_result = $block_plugin->access(\Drupal::currentUser());
           if ($access_result) {
-            $facets[$facet_id] = $block_plugin->build();
+            if ($facet_id == 'glossary_title') {
+              $glossary = $block_plugin->build();
+            } else {
+              $facets[$facet_id] = $block_plugin->build();
+            }
           }
         }
       }
@@ -41,7 +46,7 @@ class MukurtuDictionaryController extends ControllerBase {
       '#theme' => 'mukurtu_dictionary_page',
       '#results' => $browse_view_block,
       '#facets' => $facets,
-      '#glossary' => NULL,
+      '#glossary' => $glossary,
     ];
   }
 
