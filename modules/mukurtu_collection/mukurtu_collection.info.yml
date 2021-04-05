@@ -10,7 +10,9 @@ dependencies:
   - media_library
   - mukurtu_core
   - mukurtu_protocol
+  - search_api
   - slick
   - slick_entityreference
+  - text
 
 version: '8.x-1.x-dev'

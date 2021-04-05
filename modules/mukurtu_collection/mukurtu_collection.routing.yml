@@ -51,4 +51,10 @@ mukurtu_collection.edit_index:
     _custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionEditIndexController::access'
     _entity_access: node.update
     _permission: 'access content'
-
+mukurtu_collection.collection_browse_page:
+  path: '/collections'
+  defaults:
+    _controller: '\Drupal\mukurtu_collection\Controller\MukurtuBrowseCollectionsController::content'
+    _title: 'Collections'
+  requirements:
+    _permission: 'access content'

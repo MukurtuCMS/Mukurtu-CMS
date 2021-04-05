@@ -6,3 +6,8 @@ mukurtu_collection.create_collection:
   route_name: mukurtu_core.add
   route_parameters:
     node_type: collection
+mukurtu_collection.browse_collections:
+  title: 'Collections'
+  description: 'Browse Site Collections'
+  menu_name: main
+  route_name: mukurtu_collection.collection_browse_page

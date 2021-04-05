@@ -20,6 +20,21 @@ define("MUKURTU_COLLECTION_MULTIPAGE_NAVIGATION_VIEW_MODE", "full");
 
 
 /**
+ * Implements hook_theme().
+ */
+function mukurtu_collection_theme($existing, $type, $theme, $path)
+{
+  return [
+    'mukurtu_collection_browse' => [
+      'variables' => [
+        'results' => NULL,
+        'facets' => [],
+      ],
+    ],
+  ];
+}
+
+/**
  * Create the sequence collection field.
  */
 function mukurtu_collection_create_sequence_field($entity_type_id, $bundle) {
