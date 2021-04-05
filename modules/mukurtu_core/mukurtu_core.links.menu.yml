@@ -37,3 +37,9 @@ mukurtu_core.manage_users:
   parent: mukurtu
   menu_name: mukurtu
   route_name: mukurtu_core.people
+mukurtu_core.categories:
+  title: "Categories"
+  menu_name: main
+  description: "Browse the site categories"
+  route_name: view.mukurtu_categories.categories_page
+  weight: -10
