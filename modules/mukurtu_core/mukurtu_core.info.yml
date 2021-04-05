@@ -10,3 +10,7 @@ dependencies:
   - entity_browser
   - media
   - media_library
+  - node
+  - search_api
+  - search_api_glossary
+  - taxonomy
