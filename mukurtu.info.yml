@@ -81,6 +81,7 @@ dependencies:
   - mukurtu_community_records
   - mukurtu_roundtrip
   - mukurtu_migrate
+  - mukurtu_dictionary
   - mukurtu_browse
 
 themes:
