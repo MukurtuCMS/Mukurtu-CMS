@@ -39,6 +39,7 @@
     "drupal/entity_embed": "*",
     "drupal/entity_browser": "*",
     "drupal/content_browser": "*",
+    "drupal/ctools": "*",
     "drupal/diff": "*",
     "drupal/facets": "^1.6",
     "drupal/geolocation": "*",
@@ -56,8 +57,11 @@
     "drupal/message_subscribe_ui": "*",
     "drupal/entity_reference_revisions": "*",
     "drupal/paragraphs": "*",
+    "drupal/pathauto": "*",
+    "drupal/redirect": "*",
     "drupal/slick": "^2.2",
-    "drupal/slick_entityreference": "^2.0"
+    "drupal/slick_entityreference": "^2.0",
+    "drupal/token": "*"
   },
   "require-dev": {
     "drupal/devel": "*",

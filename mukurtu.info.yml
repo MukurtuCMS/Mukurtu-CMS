@@ -51,6 +51,7 @@ install:
 dependencies:
   - blazy
   - content_browser
+  - ctools
   - embed
   - entity_embed
   - entity_browser
@@ -65,6 +66,8 @@ dependencies:
   - og
   - og_ui
   - paragraphs
+  - pathauto
+  - redirect
   - restui
   - geolocation
   - search_api
@@ -72,6 +75,7 @@ dependencies:
   - search_api_glossary
   - slick
   - slick_entityreference
+  - token
   - mukurtu_core
   - mukurtu_collection
   - mukurtu_community
