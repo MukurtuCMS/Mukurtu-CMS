@@ -31,6 +31,15 @@ class MukurtuDashboardController extends ControllerBase {
     // Helper for category creation.
     $build[] = $this->gettingStartedCategoryContent();
 
+    // Display message log.
+    $messageLogBlock = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_message_log',
+      '#display_id' => 'mukurtu_message_log_block',
+      '#embed' => TRUE,
+    ];
+    $build[] = $messageLogBlock;
+
     // Display all recent content.
     $allRecentContentBlock = [
       '#type' => 'view',

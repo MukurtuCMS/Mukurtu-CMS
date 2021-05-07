@@ -1,0 +1,18 @@
+name: 'Mukurtu Notifications'
+type: module
+description: 'Provides messaging and notifications to the Mukurtu platform.'
+core_version_requirement: ^8 || ^9
+core: 8.x
+package: 'Mukurtu'
+dependencies:
+  - flag
+  - message
+  - message_digest
+  - message_notify
+  - message_subscribe
+  - mukurtu_core
+  - mukurtu_community
+  - mukurtu_protocol
+  - mukurtu_collection
+
+version: '8.x-1.x-dev'

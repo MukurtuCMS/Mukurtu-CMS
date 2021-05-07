@@ -1,0 +1,40 @@
+<?php
+
+use Drupal\node\Entity\Node;
+use Drupal\message\Entity\Message;
+
+/**
+ * Implements hook_node_update().
+ */
+function mukurtu_notifications_node_update(Node $node) {
+  $notifier = \Drupal::service('message_notify.sender');
+  $subscribers = \Drupal::service('message_subscribe.subscribers');
+
+  $template = 'mukurtu_single_node_update';
+
+  $message = Message::create([
+    'template' => $template,
+    'uid' => $node->getOwnerId(),
+  ]);
+
+  // Record the node that was updated in the message.
+  $message->set('field_item', $node);
+
+  //$message->set('field_published', $node->isPublished());
+  $message->save();
+
+  // Immediately notify message creator (node author) about update.
+  // This is probably most interesting if someone else made updated or
+  // published it.
+  $notifier->send($message, [], 'email');
+
+  // Do nothing more for unpublished node.
+  if (!$node->isPublished()) {
+    return;
+  }
+
+  // Queue messages to the regular node subscribers about changes in published
+  // nodes.
+  $subscribers->sendMessage($node, $message);
+
+}
