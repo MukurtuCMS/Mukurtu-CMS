@@ -39,20 +39,12 @@ class MukurtuCollectionAddPageController extends ControllerBase {
    *   The access result.
    */
   public function access(AccountInterface $account, NodeInterface $node, $bundle = '') {
-    if ($node) {
-      // Node is the collection.
-      if ($node->bundle() == 'collection') {
-        // User can add pages if they can edit the collection.
-        return AccessResult::allowedIf($node->access('update', $account));
-      }
+    // The collection must exist and it must be in multipage mode.
+    $collection = $this->getCollection($node);
+    if ($collection && $collection->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value == 'multipage') {
 
-      // The collection must exist and it must be in multipage mode.
-      $collection = $this->getCollection($node);
-      if ($collection && $collection->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value == 'multipage') {
-
-        // Check if user has edit rights to the collection.
-        return AccessResult::allowedIf($node->access('update', $account));
-      }
+      // Check if user has edit rights to the collection.
+      return AccessResult::allowedIf($node->access('update', $account));
     }
 
     return AccessResult::forbidden();

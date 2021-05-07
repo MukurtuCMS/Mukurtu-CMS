@@ -22,8 +22,7 @@ define("MUKURTU_COLLECTION_MULTIPAGE_NAVIGATION_VIEW_MODE", "full");
 /**
  * Implements hook_theme().
  */
-function mukurtu_collection_theme($existing, $type, $theme, $path)
-{
+function mukurtu_collection_theme($existing, $type, $theme, $path) {
   return [
     'mukurtu_collection_browse' => [
       'variables' => [
