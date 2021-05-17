@@ -1,7 +1,112 @@
 <?php
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\node\Entity\Node;
 use Drupal\message\Entity\Message;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Database\Query\AlterableInterface;
+use Drupal\Core\Database\Query\Condition;
+use Drupal\user\Entity\User;
+
+/**
+ * Implements hook_entity_access().
+ */
+/*function mukurtu_notifications_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+   $type = $entity->getEntityTypeId();
+
+  // Only dealing with messages here.
+  if ($type != 'message') {
+    return AccessResult::neutral();
+  }
+
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  $fieldItem = $entity->get('field_item') ?? NULL;
+  $itemEntity = $fieldItem->referencedEntities()[0] ?? NULL;
+  dpm($itemEntity->getTitle());
+  if ($itemEntity && $protocol_manager->hasProtocolFields($itemEntity)) {
+    dpm("checking {$itemEntity->getTitle()}");
+    return $protocol_manager->checkAccess($itemEntity, $operation, $account);
+  }
+
+  return AccessResult::neutral();
+} */
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function mukurtu_notifications_entity_type_alter(array &$entity_types) {
+  $entity_types['message']->setHandlerClass('access', '\Drupal\Core\Entity\EntityAccessControlHandler');
+  $entity_types['message']->setHandlerClass('query_access', '\Drupal\entity\QueryAccess\QueryAccessHandler');
+  $entity_types['message']->setHandlerClass('permission_provider', '\Drupal\Core\Entity\EntityPermissionProvider');
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ */
+function mukurtu_notifications_query_message_access_alter(AlterableInterface $query) {
+  $account = User::load(\Drupal::currentUser()->id());
+  if (is_null($account)) {
+    $account = User::getAnonymousUser();
+  }
+
+  if ($account->id() == 1) {
+    return;
+  }
+
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+
+  // Protocol Set IDs the *user* has access to.
+  $protocol_set_ids = $protocol_manager->getUserGrantIds($account);
+
+  $tables = $query->getTables();
+  $tables_keys = array_keys($tables);
+  $table = reset($tables_keys);
+
+  $query->leftJoin('mukurtu_protocol_access', 'mpa', "$table.mid = mpa.id");
+  $query->condition('mpa.entity_type', 'message');
+
+  if (empty($protocol_set_ids)) {
+    // User doesn't have access to any protocols.
+    $query->condition('protocol_set_id', 0);
+  } else {
+    // User can access media for any of these protocol sets.
+    $or = new Condition('OR');
+    foreach ($protocol_set_ids as $protocol_set_id) {
+      $or->condition('protocol_set_id', $protocol_set_id);
+    }
+
+    $query->condition($or);
+  }
+
+  $query->distinct();
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function mukurtu_notifications_node_insert(Node $node) {
+  $currentUser = \Drupal::currentUser();
+  // No messages created for unpublished items.
+  if (!$node->isPublished()) {
+    return;
+  }
+
+  /* if ($node->getOwnerId() == $currentUser->id()) {
+    return;
+  } */
+
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  if ($protocol_manager->hasProtocolFields($node)) {
+    $message = Message::create([
+      'template' => 'mukurtu_new_item_in_protocol',
+      'uid' => $node->getOwnerId(),
+    ]);
+    $message->set('field_item', $node);
+    $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+    $message->save();
+  }
+}
 
 /**
  * Implements hook_node_update().
@@ -19,6 +124,7 @@ function mukurtu_notifications_node_update(Node $node) {
 
   // Record the node that was updated in the message.
   $message->set('field_item', $node);
+  $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
 
   //$message->set('field_published', $node->isPublished());
   $message->save();
@@ -26,7 +132,7 @@ function mukurtu_notifications_node_update(Node $node) {
   // Immediately notify message creator (node author) about update.
   // This is probably most interesting if someone else made updated or
   // published it.
-  $notifier->send($message, [], 'email');
+//  $notifier->send($message, [], 'email');
 
   // Do nothing more for unpublished node.
   if (!$node->isPublished()) {
@@ -38,3 +144,34 @@ function mukurtu_notifications_node_update(Node $node) {
   $subscribers->sendMessage($node, $message);
 
 }
+
+function mukurtu_notifications_build_message($template, $fields = []) {
+  $message = Message::create([
+    'template' => $template,
+  ]);
+
+  foreach ($fields as $fieldName => $fieldValue) {
+    $message->set($fieldName, $fieldValue);
+  }
+
+  return $message;
+}
+
+/* function mukurtu_notifications_check_event_protocol(Node $node) {
+  if (!$node->isPublished()) {
+    return;
+  }
+
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  if ($protocol_manager->hasProtocolFields($node)) {
+    if ($node->isNew()) {
+
+    } else {
+      $protocols_og = $entity->get($protocolFieldName)->getValue();
+      $flatten = function ($e) {
+        return isset($e['target_id']) ? $e['target_id'] : NULL;
+      };
+      $protocols = array_map($flatten, $protocols_og);
+    }
+  }
+} */

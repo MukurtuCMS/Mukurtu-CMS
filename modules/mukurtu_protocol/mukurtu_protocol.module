@@ -21,6 +21,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_PERSONAL", "personal");
@@ -35,6 +37,7 @@ define("MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE", "field_mukurtu_protocol_r_scope
 define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE", "field_mukurtu_protocol_write");
 define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE", "field_mukurtu_protocol_w_scope");
 define("MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET", "field_mukurtu_protocol_inherit");
+define("MUKURTU_PROTOCOL_FIELD_NAME_READ_COMPUTED", "field_mukurtu_protocol_r_compute");
 
 /**
  * Create the Mukurtu protocol field for a given node bundle type.
@@ -62,12 +65,14 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
 
   // OG doesn't actually use the field settings we give it.
   // We will set the protocol fields to target protocols only here.
-  $field_storage_config = FieldStorageConfig::loadByName($entity_type, MUKURTU_PROTOCOL_FIELD_NAME_READ);
-  $field_storage_config->setSetting('target_type', 'node');
-  $field_storage_config->save();
   $field_config = FieldConfig::loadByName($entity_type, $bundle_type, MUKURTU_PROTOCOL_FIELD_NAME_READ);
   $field_config->setSettings($settings['field_config']);
   $field_config->save();
+  $field_storage_config = FieldStorageConfig::loadByName($entity_type, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+  if ($field_storage_config) {
+    $field_storage_config->setSetting('target_type', 'node');
+    $field_storage_config->save();
+  }
 
   // Read Access Protocol Scope Field.
   if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE])) {
@@ -93,12 +98,14 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
 
   // OG doesn't actually use the field settings we give it.
   // We will set the protocol fields to target protocols only here.
-  $field_storage_config = FieldStorageConfig::loadByName($entity_type, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
-  $field_storage_config->setSetting('target_type', 'node');
-  $field_storage_config->save();
   $field_config = FieldConfig::loadByName($entity_type, $bundle_type, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
   $field_config->setSettings($settings['field_config']);
   $field_config->save();
+  $field_storage_config = FieldStorageConfig::loadByName($entity_type, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+  if ($field_storage_config) {
+    $field_storage_config->setSetting('target_type', 'node');
+    $field_storage_config->save();
+  }
 
   // Write Access Protocol Scope Field.
   if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE])) {
@@ -189,6 +196,39 @@ function mukurtu_protocol_use_custom_protocol_widgets_sitewide() {
 }
 
 /**
+ * Check if entity type is protocol enabled.
+ */
+function mukurtu_protocol_supported_entity_type($entity_type_id) {
+  // Note: Eventually types might be configurable.
+  switch ($entity_type_id) {
+    case 'node':
+    case 'media':
+    case 'message':
+      return TRUE;
+    default:
+      return FALSE;
+  }
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+  if (mukurtu_protocol_supported_entity_type($entity_type->id())) {
+    $fields[MUKURTU_PROTOCOL_FIELD_NAME_READ_COMPUTED] = BaseFieldDefinition::create('integer')
+      ->setName(MUKURTU_PROTOCOL_FIELD_NAME_READ_COMPUTED)
+      ->setLabel(t('Mukurtu Computed Protocol - Read'))
+      ->setDescription(t('A computed field that stores the pre-calculated list of effective protocol groups.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\MukurtuCalculatedProtocolField')
+      ->setCardinality(-1)
+      ->setDisplayConfigurable('view', FALSE);
+  }
+  return $fields;
+}
+
+/**
  * Implements hook_entity_access().
  */
 function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
@@ -205,7 +245,7 @@ function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, Acc
   }
 
   // Protocols only work with nodes & media.
-  if ($type == 'node' || $type == 'media') {
+  if (mukurtu_protocol_supported_entity_type($type)) {
     $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     if ($protocol_manager->hasProtocolFields($entity)) {
       return $protocol_manager->checkAccess($entity, $operation, $account);
@@ -435,8 +475,8 @@ function mukurtu_protocol_node_access_records(NodeInterface $node) {
  * Implements hook_entity_bundle_create().
  */
 function mukurtu_protocol_entity_bundle_create($entity_type_id, $bundle) {
-  // For any new node or media type that is defined, add the protocol field.
-  if ($entity_type_id == 'node'|| $entity_type_id == 'media') {
+  // For any new supported entity type that is defined, add the protocol field.
+  if (mukurtu_protocol_supported_entity_type($entity_type_id)) {
     mukurtu_protocol_create_protocol_field($entity_type_id, $bundle);
     mukurtu_protocol_use_custom_protocol_widgets($entity_type_id, $bundle);
   }
