@@ -1,8 +1,11 @@
 langcode: en
 status: true
 dependencies:
+  config:
+    - core.entity_view_mode.message.full
   module:
     - message
+    - user
 id: mukurtu_message_log
 label: 'Mukurtu Message Log'
 module: views
@@ -18,8 +21,9 @@ display:
     position: 0
     display_options:
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access content'
       cache:
         type: tag
         options: {  }
@@ -49,7 +53,10 @@ display:
       style:
         type: default
       row:
-        type: fields
+        type: 'entity:message'
+        options:
+          relationship: none
+          view_mode: full
       fields:
         created:
           id: created
@@ -198,6 +205,7 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - user.permissions
       tags: {  }
   mukurtu_message_log_block:
     display_plugin: block
@@ -211,4 +219,5 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - user.permissions
       tags: {  }

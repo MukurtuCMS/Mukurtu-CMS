@@ -1,0 +1,31 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_subject
+    - field.field.message.mukurtu_single_node_insert.field_item
+    - message.template.mukurtu_single_node_insert
+  module:
+    - layout_builder
+    - user
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: message.mukurtu_single_node_insert.mail_subject
+targetEntityType: message
+bundle: mukurtu_single_node_insert
+mode: mail_subject
+content:
+  partial_0:
+    weight: 0
+    region: content
+hidden:
+  field_item: true
+  field_mukurtu_protocol_inherit: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  partial_1: true
+  search_api_excerpt: true

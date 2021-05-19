@@ -86,7 +86,22 @@ function mukurtu_notifications_query_message_access_alter(AlterableInterface $qu
  * Implements hook_node_insert().
  */
 function mukurtu_notifications_node_insert(Node $node) {
-  $currentUser = \Drupal::currentUser();
+  // Record the node insert event.
+  $template = 'mukurtu_single_node_insert';
+  $message = Message::create([
+    'template' => $template,
+    'uid' => $node->getOwnerId(),
+  ]);
+
+  // Add the subject node to the message.
+  $message->set('field_item', $node);
+
+  // Set the message to inherit the protocol of the subject node.
+  $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+
+  //$message->set('field_published', $node->isPublished());
+  $message->save();
+
   // No messages created for unpublished items.
   if (!$node->isPublished()) {
     return;
@@ -96,7 +111,7 @@ function mukurtu_notifications_node_insert(Node $node) {
     return;
   } */
 
-  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+/*   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   if ($protocol_manager->hasProtocolFields($node)) {
     $message = Message::create([
       'template' => 'mukurtu_new_item_in_protocol',
@@ -105,44 +120,73 @@ function mukurtu_notifications_node_insert(Node $node) {
     $message->set('field_item', $node);
     $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
     $message->save();
-  }
+  } */
 }
 
 /**
  * Implements hook_node_update().
  */
 function mukurtu_notifications_node_update(Node $node) {
-  $notifier = \Drupal::service('message_notify.sender');
-  $subscribers = \Drupal::service('message_subscribe.subscribers');
+  // $notifier = \Drupal::service('message_notify.sender');
+  // $subscribers = \Drupal::service('message_subscribe.subscribers');
 
+  // Record the node update event.
   $template = 'mukurtu_single_node_update';
-
   $message = Message::create([
     'template' => $template,
     'uid' => $node->getOwnerId(),
   ]);
 
-  // Record the node that was updated in the message.
+  // Add the subject node to the message.
   $message->set('field_item', $node);
+
+  // Set the message to inherit the protocol of the subject node.
   $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
 
   //$message->set('field_published', $node->isPublished());
   $message->save();
+
+  // Do nothing for an unpublished node.
+  if (!$node->isPublished()) {
+    return;
+  }
 
   // Immediately notify message creator (node author) about update.
   // This is probably most interesting if someone else made updated or
   // published it.
 //  $notifier->send($message, [], 'email');
 
-  // Do nothing more for unpublished node.
-  if (!$node->isPublished()) {
-    return;
-  }
-
   // Queue messages to the regular node subscribers about changes in published
   // nodes.
-  $subscribers->sendMessage($node, $message);
+  //$subscribers->sendMessage($node, $message);
 
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function mukurtu_notifications_node_delete(Node $node) {
+  // Record the node delete event.
+  $template = 'mukurtu_single_node_delete';
+  $message = Message::create([
+    'template' => $template,
+    'uid' => $node->getOwnerId(),
+  ]);
+
+  // Add the node's title to the message.
+  $message->set('field_title', $node->getTitle());
+
+  // Record the content type.
+  $message->set('field_content_type', \Drupal::token()->replace('[node:type-name]', ['node' => $node]));
+
+  // Record the user who took the action.
+  $message->set('field_user', \Drupal\user\Entity\User::load(\Drupal::currentUser()->id()));
+
+  // Record the deleted node's protocols.
+  // We can't use inheritance because node won't exist later.
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  $protocol_manager->copyProtocolFields($node, $message);
+  $message->save();
 }
 
 function mukurtu_notifications_build_message($template, $fields = []) {

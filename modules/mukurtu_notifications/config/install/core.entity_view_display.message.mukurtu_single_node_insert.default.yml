@@ -1,0 +1,34 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.message.mukurtu_single_node_insert.field_item
+    - message.template.mukurtu_single_node_insert
+  module:
+    - user
+id: message.mukurtu_single_node_insert.default
+targetEntityType: message
+bundle: mukurtu_single_node_insert
+mode: default
+content:
+  og_audience:
+    label: above
+    type: entity_reference_label
+    settings:
+      link: true
+    weight: 2
+    third_party_settings: {  }
+    region: content
+  partial_0:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_item: true
+  field_mukurtu_protocol_inherit: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  search_api_excerpt: true
