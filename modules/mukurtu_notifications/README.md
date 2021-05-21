@@ -4,6 +4,7 @@ The Mukurtu Notifications module provides integration with the 'message' module 
 
 ## Events
 Mukurtu records certain Drupal events as messages. Messages have been extend to use protocols for access control. The following is the list of events Mukurtu tracks:
+
 | Event | Message Template Name | Message Template Machine Name |
 |---|---|---|
 | Node insert |Mukurtu Single Node Insert | mukurtu_single_node_insert |
@@ -23,6 +24,7 @@ Events are displayed in the activity log on the dashboard.
 Notifications are messages that are pushed to users via e-mail or other communication methods.
 
 The following are flags that can be toggled per user to control notifications.
+
 | Flag | Machine Name | Message Template(s) | Description |
 | --- | --- | --- | --- |
 | Mukurtu Follow Content | mukurtu_follow_content| Mukurtu Single Node Update (mukurtu_single_node_update) | Notify on node update, new comments |
