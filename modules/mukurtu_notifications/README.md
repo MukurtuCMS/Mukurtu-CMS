@@ -24,7 +24,7 @@ Notifications are messages that are pushed to users via e-mail or other communic
 
 The following are flags that can be toggled per user to control notifications.
 |Flag|Machine Name|Message Template(s)|Description|
-|--|--|--|--|
+|---|---|---|---|
 |Mukurtu Follow Content| mukurtu_follow_content| Mukurtu Single Node Update (mukurtu_single_node_update)|Notify on node update, new comments|
 |Mukurtu Follow Protocol|mukurtu_follow_protocol|Mukurtu New Item in Protocol (mukurtu_new_item_in_protocol) |Notify on new items added to protocol
 |Mukurtu Follow Community|mukurtu_follow_community|Mukurtu New Item in Community (mukurtu_new_item_in_community) |Notify on new, accessible items added to the community
