@@ -205,8 +205,10 @@ function mukurtu_protocol_supported_entity_type($entity_type_id) {
     case 'media':
     case 'message':
       return TRUE;
+
     default:
       return FALSE;
+
   }
 }
 
@@ -266,15 +268,15 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
     // If the new item is using inheritance and the target is set,
     // do the protocol copy now.
     $inheritance_target_id = NULL;
-    if ($entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)) {
-      if (isset($entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0])) {
-        $inheritance_target_id = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0]->target_id;
-        $inheritance_target = \Drupal::entityTypeManager()->getStorage('node')->load($inheritance_target_id);
-        if ($inheritance_target) {
-          $protocol_manager->copyProtocolFields($inheritance_target, $entity);
-        }
+    //if ($entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)) {
+    if (isset($entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0])) {
+      $inheritance_target_id = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)[0]->target_id;
+      $inheritance_target = \Drupal::entityTypeManager()->getStorage('node')->load($inheritance_target_id);
+      if ($inheritance_target) {
+        $protocol_manager->copyProtocolFields($inheritance_target, $entity);
       }
     }
+    //}
 
     if ($inheritance_target_id == NULL) {
       // Only run this if not doing inheritance. copyProtocolFields will
@@ -321,7 +323,7 @@ function mukurtu_protocol_entity_update(EntityInterface $entity) {
     $protocol_manager->updateProtocolInheritance($entity);
 
     // Check for inheritance changes for this particular node.
-    if ($entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)) {
+    if (method_exists($entity, 'hasField') && $entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)) {
       $original_target_field = $entity->original->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)->first();
       $new_target_field = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)->first();
       $original_target_id = is_null($original_target_field) ? NULL : $original_target_field->target_id;
@@ -687,64 +689,58 @@ function mukurtu_protocol_entity_presave(EntityInterface $entity) {
   if ($protocol_manager->hasProtocolFields($entity)) {
     // Check each protocol field for changes for any changes we need to make.
     foreach ($protocol_manager->protocolFields as $protocol_field) {
-      if ($entity->hasField($protocol_field['protocol']) && $entity->hasField($protocol_field['scope'])) {
+      //if ($entity->hasField($protocol_field['protocol']) && $entity->hasField($protocol_field['scope'])) {
 
-        // Get the old scope.
-        $original_scope = [];
-        if (isset($entity->original)) {
-          $original_scope = $entity->original->get($protocol_field['scope'])->value;
-        }
+      // Get the old scope.
+      $original_scope = [];
+      if (isset($entity->original)) {
+        $original_scope = $entity->original->get($protocol_field['scope'])->value;
+      }
 
-        $new_scope = $entity->get($protocol_field['scope'])->value;
-        if ($original_scope != $new_scope) {
-          // The scope has changed from any/all -> public/private. Unset the protocols.
-          if (($original_scope == 'any' || $original_scope == 'all') && ($new_scope != 'any' && $new_scope != 'all')) {
-            $entity->set($protocol_field['protocol'], NULL);
-          }
+      $new_scope = $entity->get($protocol_field['scope'])->value;
+      if ($original_scope != $new_scope) {
+        // The scope has changed from any/all -> public/private. Unset the protocols.
+        if (($original_scope == 'any' || $original_scope == 'all') && ($new_scope != 'any' && $new_scope != 'all')) {
+          $entity->set($protocol_field['protocol'], NULL);
         }
       }
     }
+    //}
 
     // Compute Community affiliation field.
-    if (
-      $entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY) &&
-      $entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_READ) &&
-      $entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE) &&
-      $entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_WRITE) &&
-      $entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE)
-    ) {
-      $community_protocols = [];
-      $community_affiliation = [];
+    $community_protocols = [];
+    $community_affiliation = [];
 
-      $read_scope = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)->value;
-      $write_scope = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE)->value;
+    $read_scope = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)->value;
+    $write_scope = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE)->value;
 
-      // If any write only protocols are set, use those for the community affiliation.
-      if ($write_scope == MUKURTU_PROTOCOL_ANY || $write_scope == MUKURTU_PROTOCOL_ANY) {
-        $community_protocols = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
-      } else {
-        // Write protocols not being used, use the read protocols if given.
-        if ($read_scope != MUKURTU_PROTOCOL_PERSONAL) {
-          $community_protocols = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_READ);
-        }
+    // If any write only protocols are set, use those for the
+    // community affiliation.
+    if ($write_scope == MUKURTU_PROTOCOL_ANY || $write_scope == MUKURTU_PROTOCOL_ALL) {
+      $community_protocols = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+    } else {
+      // Write protocols not being used, use the read protocols if given.
+      if ($read_scope != MUKURTU_PROTOCOL_PERSONAL) {
+        $community_protocols = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_READ);
       }
-
-      // Load each protocol and grab the owning community ID.
-      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
-      foreach ($community_protocols as $protocol_ref) {
-        $protocol = $node_storage->load($protocol_ref->target_id);
-        if ($protocol && $protocol->hasField(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)) {
-          $protocol_community = $protocol->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)->target_id;
-          if ($protocol_community && !in_array($protocol_community, $community_affiliation)) {
-            $community_affiliation[] = $protocol_community;
-          }
-        }
-      }
-
-      // Set the new community affiliation.
-      $entity->set(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY, $community_affiliation);
     }
 
+    // Load each protocol and grab the owning community ID.
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    foreach ($community_protocols as $protocol_ref) {
+      $protocol = $node_storage->load($protocol_ref->target_id);
+      if ($protocol && $protocol->hasField(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)) {
+        $protocol_community = $protocol->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)->target_id;
+        if ($protocol_community && !in_array($protocol_community, $community_affiliation)) {
+          $community_affiliation[] = $protocol_community;
+        }
+      }
+    }
+
+    // Set the new community affiliation.
+    if (method_exists($entity, 'hasField') && $entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)) {
+      $entity->set(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY, $community_affiliation);
+    }
   }
 }
 

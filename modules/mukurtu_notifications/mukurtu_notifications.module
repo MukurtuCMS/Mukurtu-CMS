@@ -37,7 +37,7 @@ use Drupal\user\Entity\User;
  */
 function mukurtu_notifications_entity_type_alter(array &$entity_types) {
   $entity_types['message']->setHandlerClass('access', '\Drupal\Core\Entity\EntityAccessControlHandler');
-  $entity_types['message']->setHandlerClass('query_access', '\Drupal\entity\QueryAccess\QueryAccessHandler');
+  //$entity_types['message']->setHandlerClass('query_access', '\Drupal\entity\QueryAccess\QueryAccessHandler');
   $entity_types['message']->setHandlerClass('permission_provider', '\Drupal\Core\Entity\EntityPermissionProvider');
 }
 
@@ -127,8 +127,8 @@ function mukurtu_notifications_node_insert(Node $node) {
  * Implements hook_node_update().
  */
 function mukurtu_notifications_node_update(Node $node) {
-  // $notifier = \Drupal::service('message_notify.sender');
-  // $subscribers = \Drupal::service('message_subscribe.subscribers');
+  //$notifier = \Drupal::service('message_notify.sender');
+  $subscribers = \Drupal::service('message_subscribe.subscribers');
 
   // Record the node update event.
   $template = 'mukurtu_single_node_update';
@@ -142,24 +142,25 @@ function mukurtu_notifications_node_update(Node $node) {
 
   // Set the message to inherit the protocol of the subject node.
   $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
-
-  //$message->set('field_published', $node->isPublished());
   $message->save();
 
-  // Do nothing for an unpublished node.
+  // Don't send out notifications for unpublished nodes.
   if (!$node->isPublished()) {
     return;
   }
 
-  // Immediately notify message creator (node author) about update.
-  // This is probably most interesting if someone else made updated or
-  // published it.
-//  $notifier->send($message, [], 'email');
+  // Send "Mukurtu Follow Content" notifications.
+  $subscribers->sendMessage($node, $message);
 
-  // Queue messages to the regular node subscribers about changes in published
-  // nodes.
-  //$subscribers->sendMessage($node, $message);
+  // Check for "Mukurtu Follow Protocol" notifcations.
+  mukurtu_notifications_notify_protocol($node, $subscribers);
 
+  // Check for "Mukurtu Follow Community" notifcations.
+  mukurtu_notifications_notify_community($node, $subscribers);
+
+  // Check for "Mukurtu Follow Collection" notifcations.
+
+  // Check for "Mukurtu Follow Language" notifcations.
 }
 
 /**
@@ -199,6 +200,106 @@ function mukurtu_notifications_build_message($template, $fields = []) {
   }
 
   return $message;
+}
+
+/**
+ * Check if node is new to a followed protocol.
+ *
+ * @param Node $node
+ * @return void
+ */
+function mukurtu_notifications_notify_protocol(Node $node, $subscribers) {
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+
+  // If this node isn't using protocols we are done.
+  if (!$protocol_manager->hasProtocolFields($node)) {
+    return;
+  }
+
+  // Determine the new/updated protocols.
+  $protocols = [];
+  if ($node->isNew() || !isset($node->original)) {
+    $read = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+    $write = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+    $protocols = array_unique(array_merge($read, $write));
+  } else {
+    $read = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+    $write = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+    $protocols = array_unique(array_merge($read, $write));
+    $readOriginal = $protocol_manager->getProtocols($node->original, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+    $writeOriginal = $protocol_manager->getProtocols($node->original, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+    $protocolsOriginal = array_unique(array_merge($readOriginal, $writeOriginal));
+    $protocols = array_diff($protocols, $protocolsOriginal);
+  }
+
+  // For all the new/updated protocols, build the message and have
+  // Message Subscribe determine if any are being followed.
+  if (!empty($protocols)) {
+    $protocolNodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($protocols);
+    foreach ($protocolNodes as $protocolNode) {
+      // Build the message.
+      $message = Message::create([
+        'template' => 'mukurtu_new_item_in_protocol',
+        'uid' => $node->getOwnerId(),
+      ]);
+
+      // Add the subject node to the message.
+      $message->set('field_item', $node);
+
+      // Add the followed protocol to the message.
+      $message->set('field_protocol', $protocolNode);
+
+      // Set the message to inherit the protocol of the subject node.
+      $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+
+      // Send the message.
+      $subscribers->sendMessage($protocolNode, $message);
+    }
+  }
+}
+
+function mukurtu_notifications_notify_community(Node $node, $subscribers) {
+  if (!$node->hasField(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY)) {
+    return;
+  }
+
+  $communities = $node->get(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
+
+  // Build a list of communities that didn't change between revisions.
+  $communitiesToSkip = [];
+  if (!$node->isNew() && isset($node->original)) {
+    $skip = $node->original->get(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
+    foreach ($skip as $skipCommunity) {
+      $communitiesToSkip[] = $skipCommunity->entity->id();
+    }
+  }
+
+  foreach ($communities as $community) {
+    // Don't notify for communities that aren't new.
+    if (in_array($community->entity->id(), $communitiesToSkip)) {
+      continue;
+    }
+
+    // Build the message.
+    $message = Message::create([
+      'template' => 'mukurtu_new_item_in_community',
+      'uid' => $node->getOwnerId(),
+    ]);
+
+    // Add the subject node to the message.
+    $message->set('field_item', $node);
+
+    // Add the followed protocol to the message.
+    $message->set('field_community', $community->entity);
+
+    // Set the message to inherit the protocol of the subject node.
+    $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+
+    // Skip context otherwise Message Subscribe tries to run OG
+    // getGroupIds on a node that doesn't support it.
+    $options = ['skip context' => TRUE];
+    $subscribers->sendMessage($community->entity, $message, [], $options);
+  }
 }
 
 /* function mukurtu_notifications_check_event_protocol(Node $node) {

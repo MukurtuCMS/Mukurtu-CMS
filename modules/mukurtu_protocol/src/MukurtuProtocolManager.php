@@ -302,11 +302,11 @@ class MukurtuProtocolManager {
    */
   public function hasProtocolFields(EntityInterface $entity) {
     foreach ($this->protocolFields as $protocolField) {
-      if (method_exists($entity, 'hasField') && $entity->hasField($protocolField['protocol'])) {
-        return TRUE;
+      if (method_exists($entity, 'hasField') && !$entity->hasField($protocolField['protocol'])) {
+        return FALSE;
       }
     }
-    return FALSE;
+    return TRUE;
   }
 
   /**
@@ -504,7 +504,7 @@ class MukurtuProtocolManager {
   public function getProtocols(EntityInterface $entity, $protocolFieldName = MUKURTU_PROTOCOL_FIELD_NAME_READ) {
     $protocols = [];
 
-    if ($entity->hasField($protocolFieldName)) {
+    if (method_exists($entity, 'hasField') && $entity->hasField($protocolFieldName)) {
       $protocols_og = $entity->get($protocolFieldName)->getValue();
       $flatten = function ($e) {
         return isset($e['target_id']) ? $e['target_id'] : NULL;

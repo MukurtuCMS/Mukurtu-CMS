@@ -17,8 +17,12 @@ class MukurtuCalculatedProtocolField extends FieldItemList implements FieldItemL
     $entity = $this->getEntity();
     $fieldValues = [];
 
-    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+    if (!$entity->hasField(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)) {
+      return;
+    }
+
     $protocolScope = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)->value;
+    $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
     $protocols = $protocol_manager->getProtocols($entity);
 
     if ($protocolScope == MUKURTU_PROTOCOL_PUBLIC) {
@@ -43,8 +47,6 @@ class MukurtuCalculatedProtocolField extends FieldItemList implements FieldItemL
     foreach ($fieldValues as $delta => $fieldValue) {
       $this->list[$delta] = $this->createItem($delta, $fieldValue);
     }
-
-    dpm($fieldValues);
   }
 
 }
