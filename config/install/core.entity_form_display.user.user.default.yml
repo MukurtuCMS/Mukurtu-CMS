@@ -9,6 +9,7 @@ dependencies:
     - image.style.thumbnail
   module:
     - image
+    - path
     - user
 id: user.user.default
 targetEntityType: user
@@ -38,6 +39,25 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  message_digest:
+    type: options_select
+    settings: {  }
+    weight: 31
+    third_party_settings: {  }
+    region: content
+  message_subscribe_email:
+    type: boolean_checkbox
+    weight: 25
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    region: content
+  path:
+    type: path
+    weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   timezone:
     weight: 5
     region: content
@@ -51,6 +71,4 @@ content:
       progress_indicator: throbber
       preview_image_style: thumbnail
     third_party_settings: {  }
-hidden:
-  message_digest: true
-  message_subscribe_email: true
+hidden: {  }

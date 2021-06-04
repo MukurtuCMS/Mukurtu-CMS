@@ -6,11 +6,13 @@ dependencies:
     - field.field.node.community.body
     - field.field.node.community.field_child_communities
     - field.field.node.community.field_content_type
+    - field.field.node.community.field_content_warning_triggers
     - field.field.node.community.field_description
     - field.field.node.community.field_featured_content
     - field.field.node.community.field_parent_community
     - node.type.community
   module:
+    - blazy
     - layout_builder
     - og
     - text
@@ -39,6 +41,46 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: content
+  field_representative_media:
+    label: hidden
+    type: blazy_media
+    region: content
+    weight: 11
+    settings:
+      class: ''
+      id: ''
+      image: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      icon: ''
+      layout: ''
+      view_mode: ''
+      cache: 0
+      current_view_mode: ''
+      skin: ''
+      fx: ''
+      style: ''
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      caption: {  }
+      responsive_image_style: ''
+      box_style: ''
+      image_style: ''
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      _uri: ''
+      breakpoints: {  }
+      sizes: ''
+      grid_header: ''
+      grid: 0
+      grid_medium: 0
+      grid_small: 0
+    third_party_settings: {  }
   flag_email_node:
     weight: 4
     region: content
@@ -73,8 +115,10 @@ content:
     third_party_settings: {  }
 hidden:
   body: true
+  field_all_community_records: true
   field_child_communities: true
   field_content_type: true
+  field_content_warning_triggers: true
   field_parent_community: true
   field_sequence_collection: true
   field_title: true

@@ -1,17 +1,14 @@
-uuid: 04641ff0-0a4c-4a9f-a680-831a716b528d
 langcode: en
 status: false
 dependencies:
   module:
     - taxonomy
-_core:
-  default_config_hash: Uw7Tr9__uuZlJ038N2i0BCRiat1YP5Q0jikju6wgjR0
 id: email_term
 label: 'Email terms'
 bundles: {  }
 entity_type: taxonomy_term
 global: false
-weight: 0
+weight: -1
 flag_short: 'Send email'
 flag_long: ''
 flag_message: ''

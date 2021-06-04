@@ -4,23 +4,18 @@ dependencies:
   config:
     - field.field.message.digital_heritage_updated.field_item
     - message.template.digital_heritage_updated
+  module:
+    - user
 id: message.digital_heritage_updated.default
 targetEntityType: message
 bundle: digital_heritage_updated
 mode: default
 content:
-  field_item:
-    weight: 1
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: content
   partial_0:
     weight: 0
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
 hidden:
+  field_item: true
   search_api_excerpt: true

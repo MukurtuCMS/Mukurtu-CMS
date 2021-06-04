@@ -3,7 +3,7 @@ status: true
 dependencies:
   module:
     - message
-id: messae.field_mukurtu_protocol_inherit
+id: message.field_mukurtu_protocol_inherit
 field_name: field_mukurtu_protocol_inherit
 entity_type: message
 type: entity_reference

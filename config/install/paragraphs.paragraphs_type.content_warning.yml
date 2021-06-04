@@ -3,7 +3,6 @@ status: true
 dependencies: {  }
 id: content_warning
 label: 'Content Warning'
-icon_uuid: null
-icon_default: null
+icon_icon_default: null
 description: ''
 behavior_plugins: {  }

@@ -1,4 +1,3 @@
-uuid: bfa25913-0933-4a02-b9a4-f2f94ad5764a
 langcode: en
 status: true
 dependencies:
@@ -7,8 +6,6 @@ dependencies:
     - flag.flag.email_term
   module:
     - options
-_core:
-  default_config_hash: bS7ed3qxf07W9EL_NYnFEN9lQlvyC1xgQP4wcqwrjbs
 id: flagging.email_term.message_digest
 field_name: message_digest
 entity_type: flagging

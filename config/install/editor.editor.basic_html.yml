@@ -31,6 +31,8 @@ settings:
           items:
             - Blockquote
             - DrupalImage
+            - DrupalMediaLibrary
+            - content_browser
         -
           name: 'Block Formatting'
           items:
@@ -39,6 +41,7 @@ settings:
           name: Tools
           items:
             - Source
+            - Maximize
   plugins:
     language:
       language_list: un

@@ -1,4 +1,3 @@
-uuid: 83aa6ce6-6aec-47ab-8d16-d49bf66339bf
 langcode: en
 status: true
 dependencies:
@@ -7,8 +6,6 @@ dependencies:
     - flag.flag.email_user
   module:
     - options
-_core:
-  default_config_hash: r9Gb2oKBBbhfPXDZ0gGBSRsFC7moUws1-VnFgaTFdjc
 id: flagging.email_user.message_digest
 field_name: message_digest
 entity_type: flagging

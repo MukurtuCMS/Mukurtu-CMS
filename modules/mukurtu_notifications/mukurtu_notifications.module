@@ -10,29 +10,6 @@ use Drupal\Core\Database\Query\Condition;
 use Drupal\user\Entity\User;
 
 /**
- * Implements hook_entity_access().
- */
-/*function mukurtu_notifications_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-   $type = $entity->getEntityTypeId();
-
-  // Only dealing with messages here.
-  if ($type != 'message') {
-    return AccessResult::neutral();
-  }
-
-  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-  $fieldItem = $entity->get('field_item') ?? NULL;
-  $itemEntity = $fieldItem->referencedEntities()[0] ?? NULL;
-  dpm($itemEntity->getTitle());
-  if ($itemEntity && $protocol_manager->hasProtocolFields($itemEntity)) {
-    dpm("checking {$itemEntity->getTitle()}");
-    return $protocol_manager->checkAccess($itemEntity, $operation, $account);
-  }
-
-  return AccessResult::neutral();
-} */
-
-/**
  * Implements hook_entity_type_alter().
  */
 function mukurtu_notifications_entity_type_alter(array &$entity_types) {
@@ -159,6 +136,7 @@ function mukurtu_notifications_node_update(Node $node) {
   mukurtu_notifications_notify_community($node, $subscribers);
 
   // Check for "Mukurtu Follow Collection" notifcations.
+  mukurtu_notifications_notify_collection($node, $subscribers);
 
   // Check for "Mukurtu Follow Language" notifcations.
 }
@@ -188,18 +166,6 @@ function mukurtu_notifications_node_delete(Node $node) {
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   $protocol_manager->copyProtocolFields($node, $message);
   $message->save();
-}
-
-function mukurtu_notifications_build_message($template, $fields = []) {
-  $message = Message::create([
-    'template' => $template,
-  ]);
-
-  foreach ($fields as $fieldName => $fieldValue) {
-    $message->set($fieldName, $fieldValue);
-  }
-
-  return $message;
 }
 
 /**
@@ -300,6 +266,40 @@ function mukurtu_notifications_notify_community(Node $node, $subscribers) {
     $options = ['skip context' => TRUE];
     $subscribers->sendMessage($community->entity, $message, [], $options);
   }
+}
+
+function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
+  // Only handling existing collections here.
+  if ($node->bundle() != 'collection' || !isset($node->original)) {
+    return;
+  }
+
+  // Only handling default type collections.
+  if ($node->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value != 'default') {
+    return;
+  }
+
+  // Check if there are any new items in the collection.
+  $currentItems = mukurtu_core_flatten_entity_ref_field($node, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
+  $oldItems = mukurtu_core_flatten_entity_ref_field($node->original, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
+  $newItems = array_diff($currentItems, $oldItems);
+
+  if (empty($newItems)) {
+    return;
+  }
+
+  // Build the message.
+  $message = Message::create([
+    'template' => 'mukurtu_new_item_in_collection',
+    'field_collection' => $node,
+    'field_item' => $newItems,
+    'uid' => $node->getOwnerId(),
+  ]);
+
+  // Set the message to inherit the protocol of the collection.
+  $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+
+  $subscribers->sendMessage($node, $message);
 }
 
 /* function mukurtu_notifications_check_event_protocol(Node $node) {

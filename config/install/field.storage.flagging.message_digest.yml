@@ -1,12 +1,9 @@
-uuid: f51dd440-6653-46d4-9383-9abbd6330c2e
 langcode: en
 status: true
 dependencies:
   module:
     - flag
     - options
-_core:
-  default_config_hash: 6VAaEE7Z1GyxktHmhZpRqW_pARS2MgpKFCMFYwEgvs4
 id: flagging.message_digest
 field_name: message_digest
 entity_type: flagging

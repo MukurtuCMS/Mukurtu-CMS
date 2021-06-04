@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.media.representative_media
+    - field.field.media.image.field_keywords
     - field.field.media.image.field_media_image
     - media.type.image
   module:
@@ -17,6 +18,14 @@ targetEntityType: media
 bundle: image
 mode: representative_media
 content:
+  field_content_warnings:
+    label: hidden
+    region: content
+    weight: 8
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
   field_media_image:
     type: blazy
     weight: 0
@@ -60,6 +69,7 @@ content:
     region: content
 hidden:
   created: true
+  field_keywords: true
   field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true

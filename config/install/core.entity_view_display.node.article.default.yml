@@ -30,7 +30,7 @@ content:
     label: hidden
   comment:
     type: comment_default
-    weight: 5
+    weight: 4
     region: content
     label: above
     settings:
@@ -47,7 +47,7 @@ content:
     third_party_settings: {  }
     label: hidden
   field_mukurtu_protocol_inherit:
-    weight: 6
+    weight: 5
     label: above
     settings:
       link: true
@@ -58,7 +58,7 @@ content:
     label: hidden
     type: blazy_media
     region: content
-    weight: 11
+    weight: 6
     settings:
       class: ''
       id: ''
@@ -102,28 +102,8 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-  flag_email_node:
-    weight: 3
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  flag_email_og:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  flag_subscribe_node:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  flag_subscribe_og:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
   links:
-    weight: 4
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -137,4 +117,11 @@ hidden:
   field_mukurtu_protocol_write: true
   field_sequence_collection: true
   field_title: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_follow_content: true
+  flag_mukurtu_notify_protocol: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
   search_api_excerpt: true

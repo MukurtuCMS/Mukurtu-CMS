@@ -261,6 +261,10 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
+      cache:
+        type: none
+      defaults:
+        cache: false
     cache_metadata:
       max-age: -1
       contexts:

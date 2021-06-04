@@ -1,4 +1,3 @@
-uuid: 2022077b-fe60-4dd4-8015-b84b2a081598
 langcode: en
 status: true
 dependencies:
@@ -6,8 +5,6 @@ dependencies:
     - field.storage.user.message_subscribe_email
   module:
     - user
-_core:
-  default_config_hash: 9mz1pXkx60_nnk21n4E98JDCyfxz9bhjQlMwdZPUzpo
 id: user.user.message_subscribe_email
 field_name: message_subscribe_email
 entity_type: user

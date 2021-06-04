@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   module:
-    - media
     - menu_ui
 third_party_settings:
   menu_ui:

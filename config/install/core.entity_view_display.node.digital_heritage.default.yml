@@ -13,6 +13,7 @@ dependencies:
     - field.field.node.digital_heritage.field_description
     - field.field.node.digital_heritage.field_format
     - field.field.node.digital_heritage.field_identifier
+    - field.field.node.digital_heritage.field_int_test
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
@@ -24,12 +25,8 @@ dependencies:
     - field.field.node.digital_heritage.field_subject
     - field.field.node.digital_heritage.field_traditional_knowledge
     - field.field.node.digital_heritage.field_type
-    - filter.format.plain_text
     - node.type.digital_heritage
   module:
-    - blazy
-    - geolocation
-    - geolocation_gpx
     - layout_builder
     - text
     - user
@@ -44,54 +41,22 @@ mode: default
 content:
   field_category:
     type: entity_reference_label
-    weight: 2
+    weight: 3
     region: content
     label: above
     settings:
       link: true
     third_party_settings: {  }
   field_contributor:
-    weight: 104
+    weight: 12
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
     region: content
-  field_coverage:
-    weight: 120
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    type: geolocation_latlng
-    region: first
-  field_coverage_gpx:
-    weight: 121
-    label: above
-    settings:
-      title: ''
-      set_marker: true
-      common_map: true
-      show_delta_label: false
-      data_provider_settings: {  }
-      map_provider_id: ''
-      centre:
-        fit_bounds:
-          enable: true
-          weight: -101
-          map_center_id: fit_bounds
-          settings:
-            reset_zoom: true
-      map_provider_settings: {  }
-      info_text:
-        value: ''
-        format: plain_text
-      use_overridden_map_settings: false
-    third_party_settings: {  }
-    type: geolocation_gpx_file
-    region: first
   field_creator:
-    weight: 103
+    weight: 11
     label: above
     settings:
       link: true
@@ -99,14 +64,14 @@ content:
     type: entity_reference_label
     region: content
   field_cultural_narrative:
-    weight: 106
+    weight: 14
     label: above
     settings: {  }
     third_party_settings: {  }
     type: text_default
     region: content
   field_date_description:
-    weight: 105
+    weight: 13
     label: above
     settings:
       link_to_entity: false
@@ -121,7 +86,7 @@ content:
     type: text_default
     region: content
   field_format:
-    weight: 110
+    weight: 18
     label: above
     settings:
       link: true
@@ -129,12 +94,21 @@ content:
     type: entity_reference_label
     region: content
   field_identifier:
-    weight: 112
+    weight: 20
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
+    region: content
+  field_int_test:
+    weight: 103
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
     region: content
   field_keywords:
     weight: 8
@@ -145,7 +119,7 @@ content:
     type: entity_reference_label
     region: content
   field_language:
-    weight: 113
+    weight: 21
     label: above
     settings:
       link: true
@@ -154,7 +128,7 @@ content:
     region: content
   field_media_assets:
     type: entity_reference_entity_view
-    weight: 0
+    weight: 1
     region: content
     label: above
     settings:
@@ -163,22 +137,14 @@ content:
     third_party_settings: {  }
   field_mukurtu_community:
     type: entity_reference_label
-    weight: 1
+    weight: 2
     region: content
     label: above
     settings:
       link: true
     third_party_settings: {  }
-  field_mukurtu_protocol_inherit:
-    weight: 117
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: first
   field_people:
-    weight: 116
+    weight: 24
     label: above
     settings:
       link: true
@@ -186,7 +152,7 @@ content:
     type: entity_reference_label
     region: content
   field_publisher:
-    weight: 108
+    weight: 16
     label: above
     settings:
       link: true
@@ -202,63 +168,15 @@ content:
     third_party_settings: {  }
     type: entity_reference_entity_view
     region: content
-  field_representative_media:
-    label: hidden
-    type: blazy_media
-    region: first
-    weight: 119
-    settings:
-      class: ''
-      id: ''
-      image: ''
-      link: ''
-      overlay: ''
-      title: ''
-      vanilla: false
-      icon: ''
-      layout: ''
-      view_mode: ''
-      cache: 0
-      current_view_mode: ''
-      skin: ''
-      fx: ''
-      style: ''
-      background: false
-      box_caption: ''
-      box_caption_custom: ''
-      box_media_style: ''
-      caption: {  }
-      responsive_image_style: ''
-      box_style: ''
-      image_style: ''
-      media_switch: ''
-      ratio: ''
-      thumbnail_style: ''
-      _uri: ''
-      breakpoints: {  }
-      sizes: ''
-      grid_header: ''
-      grid: 0
-      grid_medium: 0
-      grid_small: 0
-    third_party_settings: {  }
   field_rights:
-    weight: 109
+    weight: 17
     label: above
     settings: {  }
     third_party_settings: {  }
     type: basic_string
     region: content
-  field_sequence_collection:
-    weight: 118
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: first
   field_source:
-    weight: 114
+    weight: 22
     label: above
     settings:
       link_to_entity: false
@@ -266,27 +184,22 @@ content:
     type: string
     region: content
   field_subject:
-    weight: 115
+    weight: 23
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
     region: content
-  field_title:
-    weight: 0
-    settings: {  }
-    third_party_settings: {  }
-    region: first
   field_traditional_knowledge:
-    weight: 107
+    weight: 15
     label: above
     settings: {  }
     third_party_settings: {  }
     type: text_default
     region: content
   field_type:
-    weight: 111
+    weight: 19
     label: above
     settings:
       link: true
@@ -294,17 +207,22 @@ content:
     type: entity_reference_label
     region: content
   flag_email_node:
-    weight: 3
+    weight: 4
     region: content
     settings: {  }
     third_party_settings: {  }
   flag_email_og:
-    weight: 4
+    weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
   flag_favorite:
     weight: 5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  flag_mukurtu_follow_content:
+    weight: 0
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -329,10 +247,16 @@ content:
 hidden:
   field_all_community_records: true
   field_content_type: true
+  field_coverage: true
+  field_coverage_gpx: true
+  field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_representative_media: true
+  field_sequence_collection: true
+  field_title: true
   layout_builder__layout: true
   links: true
   search_api_excerpt: true

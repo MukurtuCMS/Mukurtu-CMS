@@ -204,3 +204,4 @@ hidden:
   body: true
   field_child_communities: true
   field_content_type: true
+  field_sequence_collection: true

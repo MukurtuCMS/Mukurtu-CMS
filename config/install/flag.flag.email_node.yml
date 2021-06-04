@@ -1,17 +1,14 @@
-uuid: 2cad8c4b-df6c-43e2-92df-07151353b873
 langcode: en
 status: false
 dependencies:
   module:
     - node
-_core:
-  default_config_hash: NWLBWtzQ9vKqNGt906_xDkP9iowCgocfoMLPAWzuWHk
 id: email_node
 label: 'Email content'
 bundles: {  }
 entity_type: node
 global: false
-weight: 0
+weight: -10
 flag_short: 'Send email'
 flag_long: ''
 flag_message: ''
