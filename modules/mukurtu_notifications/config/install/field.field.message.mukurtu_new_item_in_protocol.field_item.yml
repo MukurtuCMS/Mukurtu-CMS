@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.message.field_item
+    - message.template.mukurtu_new_item_in_protocol
+    - node.type.article
+    - node.type.dictionary_word
+    - node.type.digital_heritage
+    - node.type.person
+id: message.mukurtu_new_item_in_protocol.field_item
+field_name: field_item
+entity_type: message
+bundle: mukurtu_new_item_in_protocol
+label: Item
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      article: article
+      dictionary_word: dictionary_word
+      digital_heritage: digital_heritage
+      person: person
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: article
+field_type: entity_reference
