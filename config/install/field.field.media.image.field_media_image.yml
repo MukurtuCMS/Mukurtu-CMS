@@ -27,7 +27,8 @@ settings:
   max_resolution: ''
   min_resolution: ''
   default_image:
-        alt: ''
+    uuid: null
+    alt: ''
     title: ''
     width: null
     height: null

@@ -13,7 +13,6 @@ dependencies:
     - field.field.node.digital_heritage.field_description
     - field.field.node.digital_heritage.field_format
     - field.field.node.digital_heritage.field_identifier
-    - field.field.node.digital_heritage.field_int_test
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
@@ -100,15 +99,6 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
-  field_int_test:
-    weight: 103
-    label: above
-    settings:
-      thousand_separator: ''
-      prefix_suffix: true
-    third_party_settings: {  }
-    type: number_integer
     region: content
   field_keywords:
     weight: 8
@@ -221,6 +211,11 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  flag_mukurtu_email_content:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   flag_mukurtu_follow_content:
     weight: 0
     region: content

@@ -15,7 +15,8 @@ type: image
 settings:
   uri_scheme: private
   default_image:
-        alt: ''
+    uuid: ''
+    alt: ''
     title: ''
     width: null
     height: null

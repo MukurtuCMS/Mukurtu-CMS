@@ -3,6 +3,7 @@ status: true
 dependencies: {  }
 id: dictionary_word_entry
 label: 'Dictionary Word Entry'
-icon_icon_default: null
+icon_uuid: null
+icon_default: null
 description: ''
 behavior_plugins: {  }

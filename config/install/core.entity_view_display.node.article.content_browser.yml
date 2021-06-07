@@ -86,6 +86,21 @@ content:
     settings: {  }
     third_party_settings: {  }
     region: content
+  flag_mukurtu_email_content:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_mukurtu_follow_content:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_mukurtu_notify_protocol:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   flag_subscribe_node:
     weight: 10
     settings: {  }
@@ -99,6 +114,7 @@ content:
 hidden:
   body: true
   comment: true
+  field_all_community_records: true
   field_mukurtu_community: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true

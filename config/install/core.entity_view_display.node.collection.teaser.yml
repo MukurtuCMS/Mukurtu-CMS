@@ -72,22 +72,7 @@ content:
       grid_medium: 0
       grid_small: 0
     third_party_settings: {  }
-  flag_email_og:
-    weight: 10
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   flag_favorite:
-    weight: 10
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  flag_subscribe_node:
-    weight: 10
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  flag_subscribe_og:
     weight: 10
     region: content
     settings: {  }
@@ -116,5 +101,10 @@ hidden:
   field_sequence_collection: true
   field_title: true
   flag_email_node: true
+  flag_email_og: true
+  flag_mukurtu_email_collection: true
+  flag_mukurtu_follow_collection: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
   links: true
   search_api_excerpt: true

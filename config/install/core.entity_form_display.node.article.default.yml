@@ -120,6 +120,11 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  flag:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   name:
     weight: -8
     settings: {  }
@@ -170,6 +175,11 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  url_redirects:
+    weight: 50
+    settings: {  }
+    third_party_settings: {  }
+    region: content
 hidden:
   field_content_type: true
   field_mukurtu_community: true

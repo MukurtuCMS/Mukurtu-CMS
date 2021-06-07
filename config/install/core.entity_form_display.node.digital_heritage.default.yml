@@ -14,7 +14,6 @@ dependencies:
     - field.field.node.digital_heritage.field_description
     - field.field.node.digital_heritage.field_format
     - field.field.node.digital_heritage.field_identifier
-    - field.field.node.digital_heritage.field_int_test
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
@@ -75,7 +74,8 @@ third_party_settings:
         formatter: open
         required_fields: true
       label: 'Mukurtu Essentials'
-    group_mukurtu      children:
+    group_mukurtu_core:
+      children:
         - field_cultural_narrative
         - field_traditional_knowledge
         - field_description
@@ -252,13 +252,6 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
-  field_int_test:
-    weight: 126
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
   field_keywords:
     weight: 23
     settings:
@@ -292,7 +285,7 @@ content:
         - video
     third_party_settings: {  }
   field_mukurtu_community_records:
-    weight: 124
+    weight: 9
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -302,7 +295,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_mukurtu_original_record:
-    weight: 125
+    weight: 10
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -394,7 +387,7 @@ content:
     type: string_textarea
     region: content
   field_sequence_collection:
-    weight: 123
+    weight: 8
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -500,10 +493,10 @@ content:
     region: content
     third_party_settings: {  }
   url_redirects:
-    weight: 50
+    weight: 7
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
 hidden:
   field_content_type: true
   field_mukurtu_community: true
