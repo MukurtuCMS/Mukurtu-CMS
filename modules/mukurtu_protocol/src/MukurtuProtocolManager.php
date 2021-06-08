@@ -302,7 +302,7 @@ class MukurtuProtocolManager {
    */
   public function hasProtocolFields(EntityInterface $entity) {
     foreach ($this->protocolFields as $protocolField) {
-      if (method_exists($entity, 'hasField') && !$entity->hasField($protocolField['protocol'])) {
+      if (!method_exists($entity, 'hasField') || !$entity->hasField($protocolField['protocol'])) {
         return FALSE;
       }
     }
