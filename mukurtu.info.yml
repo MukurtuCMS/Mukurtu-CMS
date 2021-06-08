@@ -87,6 +87,7 @@ dependencies:
   - mukurtu_migrate
   - mukurtu_dictionary
   - mukurtu_browse
+  - mukurtu_notifications
 
 themes:
   - bartik
