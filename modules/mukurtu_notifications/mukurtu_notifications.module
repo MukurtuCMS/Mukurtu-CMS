@@ -19,6 +19,20 @@ function mukurtu_notifications_entity_type_alter(array &$entity_types) {
 }
 
 /**
+ * Implements hook_entity_field_access().
+ */
+function mukurtu_notifications_entity_field_access($operation, $field_definition, $account, $items = NULL) {
+  $result = AccessResult::neutral();
+  // Don't let anonymous users see flags.
+  // If flag fields are shown for users without session info,
+  // the server 500 errors out.
+  if ($account->isAnonymous() && strpos($field_definition->getName(), 'flag_') === 0) {
+    $result = AccessResult::forbidden();
+  }
+  return $result->addCacheContexts(['user.roles']);
+}
+
+/**
  * Implements hook_query_TAG_alter().
  */
 function mukurtu_notifications_query_message_access_alter(AlterableInterface $query) {
