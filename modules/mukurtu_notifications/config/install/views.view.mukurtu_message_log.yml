@@ -3,6 +3,12 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.message.full
+    - message.template.mukurtu_new_item_in_collection
+    - message.template.mukurtu_new_item_in_community
+    - message.template.mukurtu_new_item_in_protocol
+    - message.template.mukurtu_single_node_delete
+    - message.template.mukurtu_single_node_insert
+    - message.template.mukurtu_single_node_update
   module:
     - message
     - user
@@ -46,10 +52,23 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       pager:
-        type: some
+        type: mini
         options:
-          items_per_page: 20
+          items_per_page: 10
           offset: 0
+          id: 0
+          total_pages: null
+          tags:
+            previous: ‹‹
+            next: ››
+          expose:
+            items_per_page: false
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 25, 50'
+            items_per_page_options_all: false
+            items_per_page_options_all_label: '- All -'
+            offset: false
+            offset_label: Offset
       style:
         type: default
       row:
@@ -176,7 +195,54 @@ display:
           delta: null
           entity_type: message
           plugin_id: get_text
-      filters: {  }
+      filters:
+        template:
+          id: template
+          table: message_field_data
+          field: template
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: in
+          value:
+            mukurtu_new_item_in_collection: mukurtu_new_item_in_collection
+            mukurtu_new_item_in_community: mukurtu_new_item_in_community
+            mukurtu_new_item_in_protocol: mukurtu_new_item_in_protocol
+            mukurtu_single_node_delete: mukurtu_single_node_delete
+            mukurtu_single_node_insert: mukurtu_single_node_insert
+            mukurtu_single_node_update: mukurtu_single_node_update
+          group: 1
+          exposed: false
+          expose:
+            operator_id: ''
+            label: ''
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: ''
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          entity_type: message
+          entity_field: template
+          plugin_id: bundle
       sorts:
         created:
           id: created
@@ -200,11 +266,13 @@ display:
       relationships: {  }
       arguments: {  }
       display_extenders: {  }
+      use_ajax: true
     cache_metadata:
       max-age: -1
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url.query_args
         - user.permissions
       tags: {  }
   mukurtu_message_log_block:
@@ -219,5 +287,6 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url.query_args
         - user.permissions
       tags: {  }
