@@ -10,6 +10,7 @@ dependencies:
   - message_digest
   - message_notify
   - message_subscribe
+  - message_digest_ui
   - mukurtu_core
   - mukurtu_community
   - mukurtu_protocol

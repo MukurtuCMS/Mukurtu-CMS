@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: mukurtu_follow_protocol
+label: 'Mukurtu Follow Protocol'
+bundles:
+  - protocol
+entity_type: node
+global: false
+weight: 6
+flag_short: 'Follow this Protocol'
+flag_long: ''
+flag_message: ''
+unflag_short: 'Stop Following this Protocol'
+unflag_long: ''
+unflag_message: ''
+unflag_denied_text: ''
+flag_type: 'entity:node'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links:
+    full: full
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  extra_permissions:
+    owner: '0'
+linkTypeConfig: {  }
