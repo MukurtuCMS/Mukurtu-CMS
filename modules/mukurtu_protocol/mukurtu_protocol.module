@@ -727,12 +727,14 @@ function mukurtu_protocol_entity_presave(EntityInterface $entity) {
 
     // Load each protocol and grab the owning community ID.
     $node_storage = \Drupal::entityTypeManager()->getStorage('node');
-    foreach ($community_protocols as $protocol_ref) {
-      $protocol = $node_storage->load($protocol_ref->target_id);
-      if ($protocol && $protocol->hasField(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)) {
-        $protocol_community = $protocol->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)->target_id;
-        if ($protocol_community && !in_array($protocol_community, $community_affiliation)) {
-          $community_affiliation[] = $protocol_community;
+    if (!empty($community_protocols)) {
+      foreach ($community_protocols as $protocol_ref) {
+        $protocol = $node_storage->load($protocol_ref->target_id);
+        if ($protocol && $protocol->hasField(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)) {
+          $protocol_community = $protocol->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)->target_id;
+          if ($protocol_community && !in_array($protocol_community, $community_affiliation)) {
+            $community_affiliation[] = $protocol_community;
+          }
         }
       }
     }
