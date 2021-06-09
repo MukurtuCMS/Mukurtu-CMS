@@ -8,9 +8,13 @@ dependencies:
   - flag
   - message
   - message_digest
-  - message_notify
-  - message_subscribe
   - message_digest_ui
+  - message_notify
+  - message_notify_ui
+  - message_subscribe
+  - message_subscribe_email
+  - message_subscribe_ui
+  - message_ui
   - mukurtu_core
   - mukurtu_community
   - mukurtu_protocol
