@@ -7,7 +7,6 @@ package: 'Mukurtu'
 dependencies:
   - flag
   - message
-  - message_digest
   - message_notify
   - message_notify_ui
   - message_subscribe
