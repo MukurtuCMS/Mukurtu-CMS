@@ -49,7 +49,6 @@
     "drupal/message": "*",
     "drupal/message_ui": "*",
     "drupal/message_digest": "*",
-    "drupal/message_digest_ui": "*",
     "drupal/message_notify": "*",
     "drupal/message_notify_ui": "*",
     "drupal/message_subscribe": "*",
