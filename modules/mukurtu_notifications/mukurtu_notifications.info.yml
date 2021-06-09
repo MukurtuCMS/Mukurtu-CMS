@@ -13,7 +13,6 @@ dependencies:
   - message_notify_ui
   - message_subscribe
   - message_subscribe_email
-  - message_subscribe_ui
   - message_ui
   - mukurtu_core
   - mukurtu_community
