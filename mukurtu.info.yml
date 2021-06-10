@@ -60,6 +60,8 @@ dependencies:
   - layout_builder
   - flag
   - message
+  - message_digest_ui
+  - message_subscribe_ui
   - media
   - media_library
   - og
