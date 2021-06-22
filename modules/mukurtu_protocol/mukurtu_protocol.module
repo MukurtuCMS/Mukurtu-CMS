@@ -203,6 +203,7 @@ function mukurtu_protocol_supported_entity_type($entity_type_id) {
   switch ($entity_type_id) {
     case 'node':
     case 'media':
+    case 'comment':
     case 'message':
       return TRUE;
 

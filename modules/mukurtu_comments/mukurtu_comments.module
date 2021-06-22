@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function mukurtu_comments_comment_presave($entity) {
+  // For new comments, have them inherit the protocol of
+  // the owning entity, if the owning entity is using
+  // protocols.
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  if ($entity->isNew()) {
+    $commentedEntity = $entity->getCommentedEntity();
+    if ($commentedEntity && $protocol_manager->hasProtocolFields($commentedEntity)) {
+      $entity->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $commentedEntity);
+    }
+  }
+}

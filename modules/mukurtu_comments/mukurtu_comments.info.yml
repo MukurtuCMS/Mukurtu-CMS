@@ -1,0 +1,13 @@
+name: 'Mukurtu Comments'
+type: module
+description: 'Provides Mukurtu specific customizations to standard Drupal comments.'
+core_version_requirement: ^8 || ^9
+core: 8.x
+package: 'Mukurtu'
+dependencies:
+  - comment
+  - mukurtu_core
+  - mukurtu_community
+  - mukurtu_protocol
+
+version: '8.x-1.x-dev'
