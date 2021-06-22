@@ -1,11 +1,8 @@
-uuid: c3a53a71-884b-4d06-8f06-198fdfe24ddf
 langcode: en
 status: true
 dependencies:
   module:
     - user
-_core:
-  default_config_hash: 1Eb15pF9hoMytbNSzI8HQ_ZqCuB_tSp4IycZ-lFClnM
 id: user.message_subscribe_email
 field_name: message_subscribe_email
 entity_type: user

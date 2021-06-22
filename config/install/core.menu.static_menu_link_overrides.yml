@@ -5,3 +5,9 @@ definitions:
     parent: ''
     weight: 0
     expanded: false
+  mukurtu_core__create_content:
+    menu_name: mukurtu
+    parent: ''
+    weight: 0
+    expanded: true
+    enabled: true

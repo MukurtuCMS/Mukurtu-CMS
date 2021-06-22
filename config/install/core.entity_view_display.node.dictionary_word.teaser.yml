@@ -11,43 +11,60 @@ dependencies:
     - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
+    - blazy
     - user
 id: node.dictionary_word.teaser
 targetEntityType: node
 bundle: dictionary_word
 mode: teaser
 content:
-  flag_email_node:
+  field_representative_media:
+    label: hidden
+    type: blazy_media
+    region: content
     weight: 0
-    region: content
-    settings: {  }
+    settings:
+      class: ''
+      id: ''
+      image: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      icon: ''
+      layout: ''
+      view_mode: ''
+      cache: 0
+      current_view_mode: ''
+      skin: ''
+      fx: ''
+      style: ''
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      caption: {  }
+      responsive_image_style: ''
+      box_style: ''
+      image_style: ''
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      _uri: ''
+      breakpoints: {  }
+      sizes: ''
+      grid_header: ''
+      grid: 0
+      grid_medium: 0
+      grid_small: 0
     third_party_settings: {  }
-  flag_email_og:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
   flag_favorite:
     weight: 10
     settings: {  }
     third_party_settings: {  }
     region: content
-  flag_subscribe_node:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  flag_subscribe_og:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  links:
-    weight: 1
-    region: content
-    settings: {  }
-    third_party_settings: {  }
 hidden:
+  field_all_community_records: true
   field_content_type: true
   field_keywords: true
   field_language: true
@@ -62,4 +79,11 @@ hidden:
   field_sequence_collection: true
   field_title: true
   field_word_entry: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_follow_content: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  links: true
   search_api_excerpt: true

@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - message
+    - options
+id: message.field_mukurtu_protocol_w_scope
+field_name: field_mukurtu_protocol_w_scope
+entity_type: message
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: default
+      label: 'Use standard Mukurtu roles.'
+    -
+      value: any
+      label: 'This content may be updated only by members of ANY protocols listed.'
+    -
+      value: all
+      label: 'This content may be updated only by members belonging to ALL protocols listed.'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

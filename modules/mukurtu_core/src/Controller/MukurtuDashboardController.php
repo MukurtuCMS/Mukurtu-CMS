@@ -23,13 +23,13 @@ class MukurtuDashboardController extends ControllerBase {
   }
 
   public function content() {
-    $build = [];
-
-    // Helper for community creation.
-    $build[] = $this->gettingStartedCommunityContent();
-
-    // Helper for category creation.
-    $build[] = $this->gettingStartedCategoryContent();
+    // Display message log.
+    $messageLogBlock = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_message_log',
+      '#display_id' => 'mukurtu_message_log_block',
+      '#embed' => TRUE,
+    ];
 
     // Display all recent content.
     $allRecentContentBlock = [
@@ -38,7 +38,6 @@ class MukurtuDashboardController extends ControllerBase {
       '#display_id' => 'all_recent_content_block',
       '#embed' => TRUE,
     ];
-    $build[] = $allRecentContentBlock;
 
     // Display all the user's recent content.
     $userRecentContentBlock = [
@@ -47,11 +46,20 @@ class MukurtuDashboardController extends ControllerBase {
       '#display_id' => 'user_recent_content_block',
       '#embed' => TRUE,
     ];
-    $build[] = $userRecentContentBlock;
 
-    return $build;
+    return [
+      '#theme' => 'mukurtu_dashboard',
+      '#getting_started_community' => $this->gettingStartedCommunityContent(),
+      '#getting_started_category' => $this->gettingStartedCategoryContent(),
+      '#activity_log' => $messageLogBlock,
+      '#all_recent_content' => $allRecentContentBlock,
+      '#user_recent_content' => $userRecentContentBlock,
+    ];
   }
 
+  /**
+   * Helper wizard for community creation.
+   */
   public function gettingStartedCommunityContent() {
     $build = [];
 
@@ -71,6 +79,9 @@ class MukurtuDashboardController extends ControllerBase {
     return $build;
   }
 
+  /**
+   * Helper wizard for category creation.
+   */
   public function gettingStartedCategoryContent() {
     $build = [];
 

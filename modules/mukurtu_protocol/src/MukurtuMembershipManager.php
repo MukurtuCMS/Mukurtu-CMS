@@ -58,4 +58,17 @@ class MukurtuMembershipManager {
     return FALSE;
   }
 
+  public function removeRoles(EntityInterface $group, AccountInterface $account, $roles) {
+    $membership = Og::getMembership($group, $account, OgMembershipInterface::ALL_STATES);
+    if ($membership) {
+      foreach ($roles as $role) {
+        $membership->revokeRoleById($role);
+      }
+      $membership->save();
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
 }

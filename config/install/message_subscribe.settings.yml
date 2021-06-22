@@ -1,0 +1,6 @@
+use_queue: false
+notify_own_actions: false
+flag_prefix: mukurtu_follow
+debug_mode: false
+default_notifiers:
+  - email

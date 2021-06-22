@@ -4,6 +4,7 @@ dependencies:
   config:
     - core.entity_form_mode.media.media_library
     - entity_browser.browser.browse_content
+    - field.field.media.image.field_keywords
     - field.field.media.image.field_media_image
     - image.style.thumbnail
     - media.type.image
@@ -93,6 +94,7 @@ content:
     third_party_settings: {  }
 hidden:
   created: true
+  field_keywords: true
   field_mukurtu_community: true
   path: true
   status: true

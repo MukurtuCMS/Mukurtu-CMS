@@ -5,11 +5,13 @@ dependencies:
     - field.field.node.community.body
     - field.field.node.community.field_child_communities
     - field.field.node.community.field_content_type
+    - field.field.node.community.field_content_warning_triggers
     - field.field.node.community.field_description
     - field.field.node.community.field_featured_content
     - field.field.node.community.field_parent_community
     - node.type.community
   module:
+    - entity_reference_revisions
     - text
     - user
 id: node.community.default
@@ -25,6 +27,15 @@ content:
     settings:
       link: true
     third_party_settings: {  }
+  field_content_warning_triggers:
+    type: entity_reference_revisions_entity_view
+    weight: 11
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    region: content
   field_description:
     weight: 0
     label: above

@@ -21,3 +21,4 @@ mukurtu_taxonomy.add_page:
     _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::addPage'
   requirements:
     _node_add_access: 'taxonomy_term'
+    _permission: 'access taxonomy overview'

@@ -1,12 +1,9 @@
-uuid: 7a7c7e24-f451-42ee-b8f5-580504372b17
 langcode: en
 status: true
 dependencies:
   module:
     - options
     - user
-_core:
-  default_config_hash: 2czSRgYdugGDECdpS7iruL7Pn_C7EelUJ3U-L46UgoQ
 id: user.message_digest
 field_name: message_digest
 entity_type: user

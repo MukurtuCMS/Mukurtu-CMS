@@ -47,23 +47,8 @@ content:
       view_mode: community_records_single_record
       link: false
     third_party_settings: {  }
-  flag_email_og:
-    weight: 4
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   flag_favorite:
     weight: 5
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  flag_subscribe_node:
-    weight: 6
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  flag_subscribe_og:
-    weight: 7
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -108,6 +93,11 @@ hidden:
   field_traditional_knowledge: true
   field_type: true
   flag_email_node: true
+  flag_email_og: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_follow_content: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
   layout_builder__layout: true
   links: true
   search_api_excerpt: true

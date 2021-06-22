@@ -284,6 +284,26 @@ content:
         - remote_video
         - video
     third_party_settings: {  }
+  field_mukurtu_community_records:
+    weight: 9
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_mukurtu_original_record:
+    weight: 10
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
   field_mukurtu_protocol_inherit:
     type: entity_browser_entity_reference
     weight: -6
@@ -367,7 +387,7 @@ content:
     type: string_textarea
     region: content
   field_sequence_collection:
-    weight: 123
+    weight: 8
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -471,6 +491,11 @@ content:
       placeholder: ''
       match_limit: 10
     region: content
+    third_party_settings: {  }
+  url_redirects:
+    weight: 7
+    region: content
+    settings: {  }
     third_party_settings: {  }
 hidden:
   field_content_type: true

@@ -89,6 +89,7 @@ class MukurtuProtocolManager {
    */
   public function getProtocolFieldByOperation($operation) {
     switch ($operation) {
+      case 'edit':
       case 'update':
       case 'delete':
         return [MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE, MUKURTU_PROTOCOL_FIELD_NAME_WRITE];
@@ -136,11 +137,13 @@ class MukurtuProtocolManager {
     $has_required_memberships = FALSE;
     $og_user_access_protocol = FALSE;
 
-    // Handle unpublished content. Ideally we'd be returning AccessResult::neutral and
-    // letting Drupal resolve this, but OG messes this up. Worth taking another look
+    // Handle unpublished content. Ideally we'd be returning
+    // AccessResult::neutral and letting Drupal resolve this,
+    // but OG messes this up. Worth taking another look
     // at this later.
-    if ($entity->get('status')->value == FALSE) {
-      // If the user is not the author or does not have the correct permisssion, deny.
+    if ($entity->hasField('status') && $entity->get('status')->value == FALSE) {
+      // If the user is not the author or does not have the correct
+      // permisssion, deny.
       $author = $entity->getOwner();
       $permission = $entity->getEntityType() == 'media' ? 'view own unpublished media' : 'view own unpublished content';
       if ($author && !($author->id() == $account->id() && $account->hasPermission($permission))) {
@@ -172,7 +175,8 @@ class MukurtuProtocolManager {
     if ($protocol_scope == MUKURTU_PROTOCOL_PUBLIC) {
       // Item is public and operation is 'view', we don't need to check OG.
       if ($operation == 'view') {
-        // If the item is unpublished, user either needs 'view own unpublished' or update access.
+        // If the item is unpublished, user either needs 'view own unpublished'
+        // or update access.
         return $unpublished_view_permission ? AccessResult::allowed() : $this->checkAccess($entity, 'update', $account);
       }
     }
@@ -189,26 +193,26 @@ class MukurtuProtocolManager {
         }
         $has_required_memberships = TRUE;
 
-        // User meets the Mukurtu protocol requirements, now check if they have the OG permissions.
-        // In this case, they need OG permissions for ALL protocol groups.
-        foreach ($protocols as $protocol) {
-          if (is_null($protocol)) {
-            continue;
-          }
+        // Only nodes and media have permisssions as OG group content.
+        if ($entity->getEntityType() === 'node' || $entity->getEntityType() === 'media') {
+          // User meets the Mukurtu protocol requirements, now check
+          // if they have the OG permissions. In this case, they need
+          // OG permissions for ALL protocol groups.
+          foreach ($protocols as $protocol) {
+            if (is_null($protocol)) {
+              continue;
+            }
 
-          // Load the protocol node.
-          $group = \Drupal::entityTypeManager()->getStorage('node')->load($protocol);
-          if ($group) {
-            // Ask OG if they have the named permission.
-            $og_access = \Drupal::service('og.access')->userAccessGroupContentEntityOperation($operation, $group, $entity, $account);
-/*             $class = get_class($og_access);
-            dpm("{$account->getUsername()} requests '$operation' on '{$entity->title->value}', OG says: {$class}"); */
+            // Load the protocol node.
+            $group = \Drupal::entityTypeManager()->getStorage('node')->load($protocol);
+            if ($group) {
+              // Ask OG if they have the named permission.
+              $og_access = \Drupal::service('og.access')->userAccessGroupContentEntityOperation($operation, $group, $entity, $account);
 
-            // OG says they do not have access.
-            if (!$og_access->isAllowed()) {
-              //$class = get_class($og_access);
-              //dpm("{$account->getUsername()} requests '$operation' on '{$entity->title->value}', OG says: {$class}");
-              return AccessResult::forbidden();
+              // OG says they do not have access.
+              if (!$og_access->isAllowed()) {
+                return AccessResult::forbidden();
+              }
             }
           }
         }
@@ -223,9 +227,15 @@ class MukurtuProtocolManager {
       foreach ($protocols as $protocol) {
         $grant = $this->getProtocolGrantId([$protocol]);
         $user_grants = $this->getUserGrantIds($account);
+
         if (in_array($grant, $user_grants)) {
           // The user is a member of at least one protocol.
           $has_required_memberships = TRUE;
+
+          // Only nodes and media have permisssions as OG group content.
+          if ($entity->getEntityType() != 'node' && $entity->getEntityType() != 'media') {
+            $og_user_access_protocol = TRUE;
+          }
 
           // We don't need to check OG for view, we can return right away.
           if ($operation == 'view') {
@@ -237,16 +247,14 @@ class MukurtuProtocolManager {
             break;
           }
 
-          // User is in one of the groups, ask OG if it has the required permission to do the operation.
-          // In this case the user needs OG permissions for only a single group.
+          // User is in one of the groups, ask OG if it has the required
+          // permission to do the operation. In this case the user needs
+          // OG permissions for only a single group.
           $group = \Drupal::entityTypeManager()->getStorage('node')->load($protocol);
           $og_access = \Drupal::service('og.access')->userAccessGroupContentEntityOperation($operation, $group, $entity, $account);
           if ($og_access->isAllowed()) {
-            $class = get_class($og_access);
-         //   dpm("{$account->getUsername()} requests '$operation' on '{$entity->title->value}', OG says: {$class}");
             $og_user_access_protocol = TRUE;
           }
-          //dpm("og_user_access = $og_user_access");
         }
       }
     }
@@ -258,7 +266,7 @@ class MukurtuProtocolManager {
         // Handle unpublished content. Ideally we'd be returning AccessResult::neutral and
         // letting Drupal resolve this, but OG messes this up. Worth taking another look
         // at this later.
-        if ($entity->get('status')->value == FALSE) {
+        if ($entity->hasField('status') && $entity->get('status')->value == FALSE) {
           // If the user is not the author or does not have the correct permisssion, deny.
           $author = $entity->getOwner();
           if ($author && !($author->id() == $account->id() && $account->hasPermission('view own unpublished content'))) {
@@ -272,6 +280,7 @@ class MukurtuProtocolManager {
         $create_permission = TRUE;
         return ($create_permission && $og_user_access_protocol && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
 
+      case 'edit':
       case 'update':
         $update_permission = TRUE;
         return ($update_permission && $og_user_access_protocol && $has_required_memberships) ? AccessResult::allowed() : AccessResult::forbidden();
@@ -293,11 +302,11 @@ class MukurtuProtocolManager {
    */
   public function hasProtocolFields(EntityInterface $entity) {
     foreach ($this->protocolFields as $protocolField) {
-      if (method_exists($entity, 'hasField') && $entity->hasField($protocolField['protocol'])) {
-        return TRUE;
+      if (!method_exists($entity, 'hasField') || !$entity->hasField($protocolField['protocol'])) {
+        return FALSE;
       }
     }
-    return FALSE;
+    return TRUE;
   }
 
   /**
@@ -495,7 +504,7 @@ class MukurtuProtocolManager {
   public function getProtocols(EntityInterface $entity, $protocolFieldName = MUKURTU_PROTOCOL_FIELD_NAME_READ) {
     $protocols = [];
 
-    if ($entity->hasField($protocolFieldName)) {
+    if (method_exists($entity, 'hasField') && $entity->hasField($protocolFieldName)) {
       $protocols_og = $entity->get($protocolFieldName)->getValue();
       $flatten = function ($e) {
         return isset($e['target_id']) ? $e['target_id'] : NULL;
@@ -607,7 +616,8 @@ class MukurtuProtocolManager {
    * Push any protocol changes from entity to children.
    */
   public function updateProtocolInheritance(EntityInterface $entity, $operation = 'update') {
-    $entity_types = ['node', 'media'];
+    // TODO: This shouldn't be hardcoded.
+    $entity_types = ['node', 'media', 'message'];
     $item_count = 0;
 
     // Protocol inheritance targets can only be nodes.
@@ -625,7 +635,8 @@ class MukurtuProtocolManager {
     }
 
     if ($item_count > 0) {
-      // For fewer than 10 items that need updating, do them without batch processing.
+      // For fewer than 10 items that need updating,
+      // do them without batch processing.
       if ($item_count < 10) {
         foreach ($entity_types as $entity_type) {
           $entity_storage = \Drupal::entityTypeManager()->getStorage($entity_type);

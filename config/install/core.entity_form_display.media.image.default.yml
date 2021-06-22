@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.browse_content
+    - field.field.media.image.field_keywords
     - field.field.media.image.field_media_image
     - image.style.thumbnail
     - media.type.image
@@ -41,6 +42,16 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_keywords:
+    weight: 108
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
   field_media_image:
     type: image_image
     weight: 3

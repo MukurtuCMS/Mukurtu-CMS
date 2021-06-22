@@ -3,7 +3,6 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_category
-    - field.storage.node.field_mukurtu_community
     - field.storage.node.field_mukurtu_protocol_inherit
     - field.storage.node.field_mukurtu_protocol_r_scope
     - node.type.article

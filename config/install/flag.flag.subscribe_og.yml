@@ -1,0 +1,33 @@
+langcode: en
+status: false
+dependencies:
+  module:
+    - message_subscribe_ui
+    - node
+third_party_settings:
+  message_subscribe_ui:
+    view_name: 'subscribe_node_email:default'
+id: subscribe_og
+label: Groups
+bundles: {  }
+entity_type: node
+global: false
+weight: -7
+flag_short: Subscribe
+flag_long: ''
+flag_message: 'You are now subscribed to this item.'
+unflag_short: Unsubscribe
+unflag_long: ''
+unflag_message: 'You are no longer subscribed to this item.'
+unflag_denied_text: ''
+flag_type: 'entity:node'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links:
+    - full
+    - teaser
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  extra_permissions: {  }
+linkTypeConfig: {  }

@@ -1,0 +1,38 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.message.mukurtu_single_node_delete.field_content_type
+    - field.field.message.mukurtu_single_node_delete.field_title
+    - field.field.message.mukurtu_single_node_delete.field_user
+    - message.template.mukurtu_single_node_delete
+  module:
+    - user
+id: message.mukurtu_single_node_delete.default
+targetEntityType: message
+bundle: mukurtu_single_node_delete
+mode: default
+content:
+  og_audience:
+    label: above
+    type: entity_reference_label
+    settings:
+      link: true
+    weight: 5
+    third_party_settings: {  }
+    region: content
+  partial_0:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_content_type: true
+  field_mukurtu_protocol_inherit: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  field_title: true
+  field_user: true
+  search_api_excerpt: true

@@ -82,7 +82,7 @@ class ProtocolWidget extends WidgetBase {
     $options = $all_options;
 
     // Currently selected value for delta.
-    $current_value = $selected_protocols[$delta];
+    $current_value = $selected_protocols[$delta] ?? 0;
     foreach ($options as $community => $community_protocols) {
       foreach ($community_protocols as $protocol_id => $protocol_name) {
         // Skip the placeholder options.
@@ -96,7 +96,8 @@ class ProtocolWidget extends WidgetBase {
         }
       }
 
-      // If we've removed all options for a given community, remove the community.
+      // If we've removed all options for a given community,
+      // remove the community.
       if (empty($options[$community])) {
         unset($options[$community]);
       }

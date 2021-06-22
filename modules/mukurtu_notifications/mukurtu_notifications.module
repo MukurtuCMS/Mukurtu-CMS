@@ -1,0 +1,317 @@
+<?php
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\node\Entity\Node;
+use Drupal\message\Entity\Message;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Database\Query\AlterableInterface;
+use Drupal\Core\Database\Query\Condition;
+use Drupal\user\Entity\User;
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function mukurtu_notifications_entity_type_alter(array &$entity_types) {
+  $entity_types['message']->setHandlerClass('access', '\Drupal\Core\Entity\EntityAccessControlHandler');
+  //$entity_types['message']->setHandlerClass('query_access', '\Drupal\entity\QueryAccess\QueryAccessHandler');
+  $entity_types['message']->setHandlerClass('permission_provider', '\Drupal\Core\Entity\EntityPermissionProvider');
+}
+
+/**
+ * Implements hook_entity_field_access().
+ */
+function mukurtu_notifications_entity_field_access($operation, $field_definition, $account, $items = NULL) {
+  $result = AccessResult::neutral();
+  // Don't let anonymous users see flags.
+  // If flag fields are shown for users without session info,
+  // the server 500 errors out.
+  if ($account->isAnonymous() && strpos($field_definition->getName(), 'flag_') === 0) {
+    $result = AccessResult::forbidden();
+  }
+  return $result->addCacheContexts(['user.roles']);
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ */
+function mukurtu_notifications_query_message_access_alter(AlterableInterface $query) {
+  $account = User::load(\Drupal::currentUser()->id());
+  if (is_null($account)) {
+    $account = User::getAnonymousUser();
+  }
+
+  if ($account->id() == 1) {
+    return;
+  }
+
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+
+  // Protocol Set IDs the *user* has access to.
+  $protocol_set_ids = $protocol_manager->getUserGrantIds($account);
+
+  $tables = $query->getTables();
+  $tables_keys = array_keys($tables);
+  $table = reset($tables_keys);
+
+  $query->leftJoin('mukurtu_protocol_access', 'mpa', "$table.mid = mpa.id");
+  $query->condition('mpa.entity_type', 'message');
+
+  if (empty($protocol_set_ids)) {
+    // User doesn't have access to any protocols.
+    $query->condition('protocol_set_id', 0);
+  } else {
+    // User can access media for any of these protocol sets.
+    $or = new Condition('OR');
+    foreach ($protocol_set_ids as $protocol_set_id) {
+      $or->condition('protocol_set_id', $protocol_set_id);
+    }
+
+    $query->condition($or);
+  }
+
+  $query->distinct();
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function mukurtu_notifications_node_insert(Node $node) {
+  // Record the node insert event.
+  $template = 'mukurtu_single_node_insert';
+  $message = Message::create([
+    'template' => $template,
+    'uid' => $node->getOwnerId(),
+  ]);
+
+  // Add the subject node to the message.
+  $message->set('field_item', $node);
+
+  // Set the message to inherit the protocol of the subject node.
+  $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+
+  //$message->set('field_published', $node->isPublished());
+  $message->save();
+
+  // No messages created for unpublished items.
+  if (!$node->isPublished()) {
+    return;
+  }
+
+  /* if ($node->getOwnerId() == $currentUser->id()) {
+    return;
+  } */
+
+/*   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  if ($protocol_manager->hasProtocolFields($node)) {
+    $message = Message::create([
+      'template' => 'mukurtu_new_item_in_protocol',
+      'uid' => $node->getOwnerId(),
+    ]);
+    $message->set('field_item', $node);
+    $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+    $message->save();
+  } */
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function mukurtu_notifications_node_update(Node $node) {
+  //$notifier = \Drupal::service('message_notify.sender');
+  $subscribers = \Drupal::service('message_subscribe.subscribers');
+
+  // Record the node update event.
+  $template = 'mukurtu_single_node_update';
+  $message = Message::create([
+    'template' => $template,
+    'uid' => $node->getOwnerId(),
+  ]);
+
+  // Add the subject node to the message.
+  $message->set('field_item', $node);
+
+  // Set the message to inherit the protocol of the subject node.
+  $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+  $message->save();
+
+  // Don't send out notifications for unpublished nodes.
+  if (!$node->isPublished()) {
+    return;
+  }
+
+  // Send "Mukurtu Follow Content" notifications.
+  $subscribers->sendMessage($node, $message);
+
+  // Check for "Mukurtu Follow Protocol" notifcations.
+  mukurtu_notifications_notify_protocol($node, $subscribers);
+
+  // Check for "Mukurtu Follow Community" notifcations.
+  mukurtu_notifications_notify_community($node, $subscribers);
+
+  // Check for "Mukurtu Follow Collection" notifcations.
+  mukurtu_notifications_notify_collection($node, $subscribers);
+
+  // Check for "Mukurtu Follow Language" notifcations.
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function mukurtu_notifications_node_delete(Node $node) {
+  // Record the node delete event.
+  $template = 'mukurtu_single_node_delete';
+  $message = Message::create([
+    'template' => $template,
+    'uid' => $node->getOwnerId(),
+  ]);
+
+  // Add the node's title to the message.
+  $message->set('field_title', $node->getTitle());
+
+  // Record the content type.
+  $message->set('field_content_type', \Drupal::token()->replace('[node:type-name]', ['node' => $node]));
+
+  // Record the user who took the action.
+  $message->set('field_user', \Drupal\user\Entity\User::load(\Drupal::currentUser()->id()));
+
+  // Record the deleted node's protocols.
+  // We can't use inheritance because node won't exist later.
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  $protocol_manager->copyProtocolFields($node, $message);
+  $message->save();
+}
+
+/**
+ * Check if node is new to a followed protocol.
+ *
+ * @param Node $node
+ * @return void
+ */
+function mukurtu_notifications_notify_protocol(Node $node, $subscribers) {
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+
+  // If this node isn't using protocols we are done.
+  if (!$protocol_manager->hasProtocolFields($node)) {
+    return;
+  }
+
+  // Determine the new/updated protocols.
+  $protocols = [];
+  if ($node->isNew() || !isset($node->original)) {
+    $read = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+    $write = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+    $protocols = array_unique(array_merge($read, $write));
+  } else {
+    $read = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+    $write = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+    $protocols = array_unique(array_merge($read, $write));
+    $readOriginal = $protocol_manager->getProtocols($node->original, MUKURTU_PROTOCOL_FIELD_NAME_READ);
+    $writeOriginal = $protocol_manager->getProtocols($node->original, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+    $protocolsOriginal = array_unique(array_merge($readOriginal, $writeOriginal));
+    $protocols = array_diff($protocols, $protocolsOriginal);
+  }
+
+  // For all the new/updated protocols, build the message and have
+  // Message Subscribe determine if any are being followed.
+  if (!empty($protocols)) {
+    $protocolNodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($protocols);
+    foreach ($protocolNodes as $protocolNode) {
+      // Build the message.
+      $message = Message::create([
+        'template' => 'mukurtu_new_item_in_protocol',
+        'uid' => $node->getOwnerId(),
+      ]);
+
+      // Add the subject node to the message.
+      $message->set('field_item', $node);
+
+      // Add the followed protocol to the message.
+      $message->set('field_protocol', $protocolNode);
+
+      // Set the message to inherit the protocol of the subject node.
+      $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+
+      // Send the message.
+      $subscribers->sendMessage($protocolNode, $message);
+    }
+  }
+}
+
+function mukurtu_notifications_notify_community(Node $node, $subscribers) {
+  if (!$node->hasField(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY)) {
+    return;
+  }
+
+  $communities = $node->get(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
+
+  // Build a list of communities that didn't change between revisions.
+  $communitiesToSkip = [];
+  if (!$node->isNew() && isset($node->original)) {
+    $skip = $node->original->get(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
+    foreach ($skip as $skipCommunity) {
+      $communitiesToSkip[] = $skipCommunity->entity->id();
+    }
+  }
+
+  foreach ($communities as $community) {
+    // Don't notify for communities that aren't new.
+    if (in_array($community->entity->id(), $communitiesToSkip)) {
+      continue;
+    }
+
+    // Build the message.
+    $message = Message::create([
+      'template' => 'mukurtu_new_item_in_community',
+      'uid' => $node->getOwnerId(),
+    ]);
+
+    // Add the subject node to the message.
+    $message->set('field_item', $node);
+
+    // Add the followed protocol to the message.
+    $message->set('field_community', $community->entity);
+
+    // Set the message to inherit the protocol of the subject node.
+    $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+
+    // Skip context otherwise Message Subscribe tries to run OG
+    // getGroupIds on a node that doesn't support it.
+    $options = ['skip context' => TRUE];
+    $subscribers->sendMessage($community->entity, $message, [], $options);
+  }
+}
+
+function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
+  // Only handling existing collections here.
+  if ($node->bundle() != 'collection' || !isset($node->original)) {
+    return;
+  }
+
+  // Only handling default type collections.
+  if ($node->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value != 'default') {
+    return;
+  }
+
+  // Check if there are any new items in the collection.
+  $currentItems = mukurtu_core_flatten_entity_ref_field($node, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
+  $oldItems = mukurtu_core_flatten_entity_ref_field($node->original, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
+  $newItems = array_diff($currentItems, $oldItems);
+
+  if (empty($newItems)) {
+    return;
+  }
+
+  // Build the message.
+  $message = Message::create([
+    'template' => 'mukurtu_new_item_in_collection',
+    'field_collection' => $node,
+    'field_item' => $newItems,
+    'uid' => $node->getOwnerId(),
+  ]);
+
+  // Set the message to inherit the protocol of the collection.
+  $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
+
+  $subscribers->sendMessage($node, $message);
+}

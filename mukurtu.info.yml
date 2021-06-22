@@ -60,7 +60,7 @@ dependencies:
   - layout_builder
   - flag
   - message
-  - message_digest
+  - message_subscribe_ui
   - media
   - media_library
   - og
@@ -87,6 +87,7 @@ dependencies:
   - mukurtu_migrate
   - mukurtu_dictionary
   - mukurtu_browse
+  - mukurtu_notifications
 
 themes:
   - bartik

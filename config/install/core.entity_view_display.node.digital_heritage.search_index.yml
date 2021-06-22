@@ -212,6 +212,16 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  flag_mukurtu_email_content:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_mukurtu_follow_content:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   flag_subscribe_node:
     weight: 6
     region: content
@@ -231,6 +241,7 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  field_all_community_records: true
   field_content_type: true
   field_coverage: true
   field_coverage_gpx: true

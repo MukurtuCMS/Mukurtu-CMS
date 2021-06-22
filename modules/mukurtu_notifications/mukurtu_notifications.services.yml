@@ -1,0 +1,5 @@
+services:
+  mukurtu_notifications.query_access_subscriber:
+    class: Drupal\mukurtu_notifications\EventSubscriber\QueryAccessSubscriber
+    tags:
+      - { name: event_subscriber, priority: 1000 }

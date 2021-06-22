@@ -35,6 +35,21 @@ content:
     settings: {  }
     third_party_settings: {  }
     region: content
+  flag_mukurtu_email_content:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_mukurtu_follow_content:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_mukurtu_notify_protocol:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   flag_subscribe_node:
     weight: 10
     settings: {  }
