@@ -3,8 +3,9 @@ status: true
 dependencies:
   config:
     - field.storage.node.body
-    - field.storage.node.field_description
     - field.storage.node.field_category
+    - field.storage.node.field_collection_type
+    - field.storage.node.field_description
     - field.storage.node.field_keywords
     - search_api.server.mukurtu_database_server
   module:
@@ -25,6 +26,14 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.body
+  field_collection_type:
+    label: 'Collection Type'
+    datasource_id: 'entity:node'
+    property_path: field_collection_type
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_collection_type
   field_description:
     label: Description
     datasource_id: 'entity:node'
@@ -133,6 +142,7 @@ processor_settings:
     all_fields: true
     fields:
       - body
+      - field_collection_type
       - field_description
       - glossaryaz_title
       - name
@@ -154,6 +164,7 @@ processor_settings:
     all_fields: true
     fields:
       - body
+      - field_collection_type
       - field_description
       - glossaryaz_title
       - name
@@ -182,6 +193,7 @@ processor_settings:
     all_fields: true
     fields:
       - body
+      - field_collection_type
       - field_description
       - glossaryaz_title
       - name
