@@ -315,22 +315,3 @@ function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
 
   $subscribers->sendMessage($node, $message);
 }
-
-/* function mukurtu_notifications_check_event_protocol(Node $node) {
-  if (!$node->isPublished()) {
-    return;
-  }
-
-  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-  if ($protocol_manager->hasProtocolFields($node)) {
-    if ($node->isNew()) {
-
-    } else {
-      $protocols_og = $entity->get($protocolFieldName)->getValue();
-      $flatten = function ($e) {
-        return isset($e['target_id']) ? $e['target_id'] : NULL;
-      };
-      $protocols = array_map($flatten, $protocols_og);
-    }
-  }
-} */
