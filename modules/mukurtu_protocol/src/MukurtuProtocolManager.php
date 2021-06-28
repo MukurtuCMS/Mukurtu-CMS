@@ -140,7 +140,7 @@ class MukurtuProtocolManager {
     // Handle unpublished content. Ideally we'd be returning
     // AccessResult::neutral and letting Drupal resolve this,
     // but OG messes this up. Worth taking another look
-    // at this later.
+    // at this later as OG exits alpha.
     if ($entity->hasField('status') && $entity->get('status')->value == FALSE) {
       // If the user is not the author or does not have the correct
       // permisssion, deny.
@@ -617,7 +617,7 @@ class MukurtuProtocolManager {
    */
   public function updateProtocolInheritance(EntityInterface $entity, $operation = 'update') {
     // TODO: This shouldn't be hardcoded.
-    $entity_types = ['node', 'media', 'message'];
+    $entity_types = ['node', 'media', 'message', 'comment'];
     $item_count = 0;
 
     // Protocol inheritance targets can only be nodes.
@@ -710,10 +710,16 @@ class MukurtuProtocolManager {
 
       // Copy protocol reference fields.
       foreach ($protocol_fields as $field) {
+        // If there's a field mismatch, skip it.
+        if (!$templateEntity->hasField($field) || !$entity->hasField($field)) {
+          continue;
+        }
+
         $templateProtocols = $this->getProtocols($templateEntity, $field);
         $entityProtocols = $this->getProtocols($entity, $field);
 
-        // If they have a different number of protocols they are for sure different.
+        // If they have a different number of protocols they are for sure
+        // different.
         if (count($templateProtocols) != count($entityProtocols)) {
           $entity->set($field, $templateProtocols);
           $dirty = TRUE;

@@ -43,7 +43,12 @@ define("MUKURTU_PROTOCOL_FIELD_NAME_READ_COMPUTED", "field_mukurtu_protocol_r_co
  * Create the Mukurtu protocol field for a given node bundle type.
  */
 function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
+  // List of entity types/bundles that should never have protocol fields.
   $bundle_skip_list = ['node' => ['community', 'protocol']];
+  // List of entity types/bundles that should never have write protocol fields.
+  $write_bundle_skip_list = ['comment' => ['comment']];
+
+  // Skip field creation completely if the entity/bundle is on the ban list.
   if (!empty($bundle_skip_list[$entity_type]) && in_array($bundle_type, $bundle_skip_list[$entity_type])) {
     return;
   }
@@ -85,37 +90,39 @@ function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
     $field->save();
   }
 
-  // Write Access Protocol Field.
-  $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_WRITE;
-  $settings['field_config']['label'] = "Mukurtu Protocol - Update Access";
-  $settings['field_config']['description'] = "Mukurtu Protocol Helper Text Goes Here";
-  $settings['field_config']['handler'] = 'default';
-  $settings['field_config']['handler_settings']['target_bundles'] = ['protocol'];
-  $settings['field_storage_config']['target_type'] = "node";
-  if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_WRITE])) {
-    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type, $bundle_type, $settings);
-  }
+  if (empty($write_bundle_skip_list[$entity_type]) || !in_array($bundle_type, $write_bundle_skip_list[$entity_type])) {
+    // Write Access Protocol Field.
+    $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_WRITE;
+    $settings['field_config']['label'] = "Mukurtu Protocol - Update Access";
+    $settings['field_config']['description'] = "Mukurtu Protocol Helper Text Goes Here";
+    $settings['field_config']['handler'] = 'default';
+    $settings['field_config']['handler_settings']['target_bundles'] = ['protocol'];
+    $settings['field_storage_config']['target_type'] = "node";
+    if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_WRITE])) {
+      Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type, $bundle_type, $settings);
+    }
 
-  // OG doesn't actually use the field settings we give it.
-  // We will set the protocol fields to target protocols only here.
-  $field_config = FieldConfig::loadByName($entity_type, $bundle_type, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
-  $field_config->setSettings($settings['field_config']);
-  $field_config->save();
-  $field_storage_config = FieldStorageConfig::loadByName($entity_type, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
-  if ($field_storage_config) {
-    $field_storage_config->setSetting('target_type', 'node');
-    $field_storage_config->save();
-  }
+    // OG doesn't actually use the field settings we give it.
+    // We will set the protocol fields to target protocols only here.
+    $field_config = FieldConfig::loadByName($entity_type, $bundle_type, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+    $field_config->setSettings($settings['field_config']);
+    $field_config->save();
+    $field_storage_config = FieldStorageConfig::loadByName($entity_type, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
+    if ($field_storage_config) {
+      $field_storage_config->setSetting('target_type', 'node');
+      $field_storage_config->save();
+    }
 
-  // Write Access Protocol Scope Field.
-  if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE])) {
-    $field = FieldConfig::create([
-      'field_name' => MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE,
-      'entity_type' => $entity_type,
-      'bundle' => $bundle_type,
-      'label' => 'Mukurtu Protocol - Update Scope',
-    ]);
-    $field->save();
+    // Write Access Protocol Scope Field.
+    if (!isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE])) {
+      $field = FieldConfig::create([
+        'field_name' => MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE,
+        'entity_type' => $entity_type,
+        'bundle' => $bundle_type,
+        'label' => 'Mukurtu Protocol - Update Scope',
+      ]);
+      $field->save();
+    }
   }
 
   // Protocol Inheritance Field.
