@@ -27,7 +27,7 @@ function mukurtu_protocol_install() {
   }
 
   // Create the protocol fields on the default Drupal comments.
-  mukurtu_protocol_create_protocol_field('comment', 'comment');
+  // mukurtu_protocol_create_protocol_field('comment', 'comment');
 
   // Protocols are special, add the owning community field.
   $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY;

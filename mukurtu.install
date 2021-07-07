@@ -19,4 +19,7 @@ function mukurtu_install() {
 
   // Uninstall search.
   \Drupal::service('module_installer')->uninstall(['search']);
+
+  // Create the protocol fields on the default Drupal comments.
+  mukurtu_protocol_create_protocol_field('comment', 'comment');
 }
