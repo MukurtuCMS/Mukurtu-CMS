@@ -50,6 +50,7 @@ install:
 
 dependencies:
   - blazy
+  - comment
   - content_browser
   - ctools
   - embed
