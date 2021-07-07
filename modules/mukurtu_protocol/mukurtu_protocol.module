@@ -44,7 +44,7 @@ define("MUKURTU_PROTOCOL_FIELD_NAME_READ_COMPUTED", "field_mukurtu_protocol_r_co
  */
 function mukurtu_protocol_create_protocol_field($entity_type, $bundle_type) {
   // List of entity types/bundles that should never have protocol fields.
-  $bundle_skip_list = ['node' => ['community', 'protocol']];
+  $bundle_skip_list = ['node' => ['community', 'protocol'], 'comment' => ['comment_type']];
   // List of entity types/bundles that should never have write protocol fields.
   $write_bundle_skip_list = ['comment' => ['comment']];
 
