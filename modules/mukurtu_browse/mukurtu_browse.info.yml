@@ -7,7 +7,5 @@ package: 'Mukurtu'
 dependencies:
   - mukurtu_core
   - mukurtu_protocol
-  config:
-    - views.view.mukurtu_browse
 
 version: '8.x-1.x-dev'
