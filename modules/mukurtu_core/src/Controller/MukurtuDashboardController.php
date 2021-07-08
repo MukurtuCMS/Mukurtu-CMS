@@ -88,7 +88,10 @@ class MukurtuDashboardController extends ControllerBase {
     $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree('category');
 
     if (count($terms) == 1 && $terms[0]->name == 'Default') {
-      $build[] = ['#markup' => '<div class="mukurtu-getting-started mukurtu-getting-started-categories">' . $this->t('Categories are important for grouping related content. Consider adding new terms and removing the default term <a href="@manage-category-page">here</a>.', ['@manage-category-page' => Url::fromRoute('mukurtu_taxonomy.manage_categories')->toString()]) . '</div>'];
+      $account = \Drupal::currentUser();
+      if ($account->hasPermission('create terms in category')) {
+        $build[] = ['#markup' => '<div class="mukurtu-getting-started mukurtu-getting-started-categories">' . $this->t('Categories are important for grouping related content. Consider adding new terms and removing the default term <a href="@manage-category-page">here</a>.', ['@manage-category-page' => Url::fromRoute('mukurtu_taxonomy.manage_categories')->toString()]) . '</div>'];
+      }
     }
 
     return $build;
