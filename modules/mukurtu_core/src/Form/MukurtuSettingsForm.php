@@ -40,7 +40,7 @@ class MukurtuSettingsForm extends ConfigFormBase {
     $config = $this->config(static::SETTINGS);
 
     $default_media_id = $config->get('mukurtu_default_image');
-    if($default_media_id) {
+    if ($default_media_id) {
       $default_media = \Drupal::entityTypeManager()->getStorage('media')->load($default_media_id);
     } else {
       $default_media = NULL;
@@ -48,6 +48,7 @@ class MukurtuSettingsForm extends ConfigFormBase {
 
     $form['mukurtu_default_image'] = [
       '#title' => 'Default Image',
+      '#description' => $this->t('This image will be used when media is not available for a field or item.'),
       '#type'          => 'entity_autocomplete',
       '#target_type'   => 'media',
       '#default_value' => $default_media,

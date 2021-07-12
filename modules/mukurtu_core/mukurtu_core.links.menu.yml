@@ -43,3 +43,9 @@ mukurtu_core.categories:
   description: "Browse the site categories"
   route_name: view.mukurtu_categories.categories_page
   weight: -10
+mukurtu_core.settings:
+  title: "Mukurtu Settings"
+  menu_name: mukurtu
+  description: "Configuration form for Mukurtu specific options."
+  route_name: mukurtu_core.settings
+  weight: 1000
