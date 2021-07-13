@@ -4,6 +4,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\node\Entity\Node;
 use Drupal\message\Entity\Message;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Database\Query\Condition;
@@ -19,17 +20,35 @@ function mukurtu_notifications_entity_type_alter(array &$entity_types) {
 }
 
 /**
- * Implements hook_entity_field_access().
+ * Implements hook_entity_view_alter().
  */
-function mukurtu_notifications_entity_field_access($operation, $field_definition, $account, $items = NULL) {
-  $result = AccessResult::neutral();
+function mukurtu_notifications_entity_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
   // Don't let anonymous users see flags.
   // If flag fields are shown for users without session info,
   // the server 500 errors out.
-  if ($account->isAnonymous() && strpos($field_definition->getName(), 'flag_') === 0) {
-    $result = AccessResult::forbidden();
+  // See https://www.drupal.org/project/flag/issues/3219804.
+  $account = \Drupal::currentUser();
+
+  // Exit early if not anonymous.
+  if (!$account->isAnonymous()) {
+    return;
   }
-  return $result->addCacheContexts(['user.roles']);
+
+  // Get all the potential flags for the given entity/bundle type.
+  $flag_service = \Drupal::service('flag');
+  $flags = $flag_service->getAllFlags($entity->getEntityTypeID(), $entity->bundle());
+
+  if (empty($flags)) {
+    return;
+  }
+
+  // Remove any flags from the build array.
+  foreach ($flags as $flag) {
+    $flag_id = 'flag_' . $flag->id();
+    if (isset($build[$flag_id])) {
+      unset($build[$flag_id]);
+    }
+  }
 }
 
 /**
