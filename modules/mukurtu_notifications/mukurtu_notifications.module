@@ -202,6 +202,25 @@ function mukurtu_notifications_node_delete(Node $node) {
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function mukurtu_notifications_user_insert($entity) {
+  // Create the new user registration message.
+  $template = 'mukurtu_new_user_registration';
+  $message = Message::create([
+    'template' => $template,
+    'uid' => 1,
+  ]);
+
+  // Record the user requesting the account.
+  $message->set('field_user', $entity);
+  $message->save();
+
+  // Send an email to all users with admin users permission.
+
+}
+
+/**
  * Check if node is new to a followed protocol.
  *
  * @param Node $node
