@@ -9,6 +9,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Database\Query\Condition;
 use Drupal\user\Entity\User;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 
 /**
  * Implements hook_entity_type_alter().
@@ -216,8 +217,32 @@ function mukurtu_notifications_user_insert($entity) {
   $message->set('field_user', $entity);
   $message->save();
 
-  // Send an email to all users with admin users permission.
+  // Find all users with 'administer users' permission.
+  // TODO: Eventually we want an option for these admin users to
+  // be able to opt out of these emails. At that point we'll
+  // need to filter for that in this query.
+  $roles = user_role_names(TRUE, 'administer users');
+  $rids = array_keys($roles);
+  $uids = Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
+    ->condition('roles', $rids, 'IN')
+    ->execute();
 
+  // Build the options required to send the message to specific
+  // uids via message subscribe, rather than querying flags.
+  $flags = ['subscribe_user'];
+  $notifiers = ['email'];
+  $notify_options = [];
+  $subscribe_options = [
+    'notify message owner' => TRUE,
+    'uids' => [],
+  ];
+  foreach ($uids as $uid) {
+    $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
+  }
+
+  // Queue messages to our custom list of admins.
+  $subscribers = \Drupal::service('message_subscribe.subscribers');
+  $subscribers->sendMessage($message, $message, $notify_options, $subscribe_options);
 }
 
 /**
