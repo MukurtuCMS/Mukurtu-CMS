@@ -36,6 +36,7 @@ permissions:
   - 'edit own article content'
   - 'edit own audio media'
   - 'edit own collection content'
+  - 'edit own comments'
   - 'edit own dictionary_word content'
   - 'edit own digital_heritage content'
   - 'edit own document media'

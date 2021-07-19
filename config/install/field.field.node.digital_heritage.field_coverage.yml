@@ -5,7 +5,7 @@ dependencies:
     - field.storage.node.field_coverage
     - node.type.digital_heritage
   module:
-    - geolocation
+    - geofield
 id: node.digital_heritage.field_coverage
 field_name: field_coverage
 entity_type: node
@@ -17,4 +17,4 @@ translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }
-field_type: geolocation
+field_type: geofield

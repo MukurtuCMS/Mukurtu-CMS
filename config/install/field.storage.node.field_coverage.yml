@@ -2,14 +2,15 @@ langcode: en
 status: true
 dependencies:
   module:
-    - geolocation
+    - geofield
     - node
 id: node.field_coverage
 field_name: field_coverage
 entity_type: node
-type: geolocation
-settings: {  }
-module: geolocation
+type: geofield
+settings:
+  backend: geofield_backend_default
+module: geofield
 locked: false
 cardinality: 1
 translatable: true

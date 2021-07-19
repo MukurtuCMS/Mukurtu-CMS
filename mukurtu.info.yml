@@ -70,7 +70,9 @@ dependencies:
   - pathauto
   - redirect
   - restui
-  - geolocation
+  - geofield
+  - leaflet
+  - leaflet_views
   - search_api
   - search_api_db
   - search_api_glossary

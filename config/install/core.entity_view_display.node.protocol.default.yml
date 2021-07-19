@@ -14,28 +14,13 @@ targetEntityType: node
 bundle: protocol
 mode: default
 content:
-  flag_email_test:
-    weight: 4
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   flag_mukurtu_follow_collection:
     weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
-  flag_mukurtu_follow_protocol:
-    weight: 0
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  flag_mukurtu_notify_protocol:
-    weight: 1
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   links:
-    weight: 3
+    weight: 1
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -48,7 +33,7 @@ content:
     third_party_settings: {  }
     region: content
   og_group:
-    weight: 2
+    weight: 0
     type: og_group_subscribe
     region: content
     label: above
@@ -65,7 +50,11 @@ hidden:
   field_title: true
   flag_email_node: true
   flag_email_og: true
+  flag_email_test: true
+  flag_mukurtu_email_protocol: true
   flag_mukurtu_follow_content: true
+  flag_mukurtu_follow_protocol: true
+  flag_mukurtu_notify_protocol: true
   flag_subscribe_node: true
   flag_subscribe_og: true
   search_api_excerpt: true

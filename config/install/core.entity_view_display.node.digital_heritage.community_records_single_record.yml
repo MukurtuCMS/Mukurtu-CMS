@@ -3,11 +3,11 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.community_records_single_record
+    - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
     - field.field.node.digital_heritage.field_coverage
-    - field.field.node.digital_heritage.field_coverage_gpx
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
     - field.field.node.digital_heritage.field_date_description
@@ -216,10 +216,10 @@ content:
     third_party_settings: {  }
     region: content
 hidden:
+  comment: true
   field_all_community_records: true
   field_content_type: true
   field_coverage: true
-  field_coverage_gpx: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true

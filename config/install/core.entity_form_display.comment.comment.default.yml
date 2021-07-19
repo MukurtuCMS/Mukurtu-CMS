@@ -22,6 +22,16 @@ content:
       rows: 5
       placeholder: ''
     third_party_settings: {  }
+  og_audience:
+    type: og_complex
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      match_limit: 10
+      placeholder: ''
+    weight: 13
+    third_party_settings: {  }
+    region: content
   subject:
     type: string_textfield
     weight: 10
@@ -30,4 +40,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden: {  }
+hidden:
+  field_mukurtu_protocol_inherit: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
