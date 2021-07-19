@@ -128,6 +128,32 @@ function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityVi
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  // Build an "approve" link to block/unblock users.
+  if ($view_mode == 'full') {
+    $status = $entity->status->value;
+    $title = $status ? t('Block User') : t('Approve User');
+    $route = $status ? 'mukurtu_core.block_user' : 'mukurtu_core.approve_user';
+    $build['mukurtu_toggle_user_approval'] = [
+      '#theme' => 'links',
+      '#weight' => -2,
+      '#links' => [
+        'mukurtu-toggle-user-approval' => [
+          'title' => $title,
+          'url' => Url::fromRoute($route, ['uid' => $entity->id()]),
+          'attributes' => [
+            'class' => ['use-ajax'],
+          ],
+        ],
+      ],
+      '#attached' => ['library' => ['core/drupal.ajax']],
+    ];
+  }
+}
+
+/**
  * Implements hook_entity_presave().
  */
 function mukurtu_core_entity_presave(EntityInterface $entity) {

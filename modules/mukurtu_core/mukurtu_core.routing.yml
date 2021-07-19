@@ -55,3 +55,20 @@ mukurtu_core.people:
     _title: 'People - All User Accounts'
   requirements:
     _permission: 'administer users'
+mukurtu_core.approve_user:
+  path: '/user/{uid}/approve'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuUserController::approveAjax'
+    _title: 'Approve User'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
+    uid: \d+
+mukurtu_core.block_user:
+  path: '/user/{uid}/block'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuUserController::blockAjax'
+    _title: 'Block User'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
+    uid: \d+
+
