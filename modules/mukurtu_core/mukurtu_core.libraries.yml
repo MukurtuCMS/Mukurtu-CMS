@@ -1,0 +1,7 @@
+mukurtu-leaflet-widget:
+  version: 1.x
+  js:
+    js/mukurtu-leaflet-widget.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once

@@ -5,6 +5,8 @@ core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
 version: '8.x-1.x-dev'
+libraries:
+  - mukurtu_core/mukurtu-leaflet-widget
 dependencies:
   - blazy
   - entity_browser
