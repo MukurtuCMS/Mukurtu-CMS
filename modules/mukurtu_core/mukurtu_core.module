@@ -43,7 +43,7 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
  */
 function mukurtu_core_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Include our leaflet widget library fixes on node edit forms.
-  if (str_starts_with($form_id, 'node_') && str_ends_with($form_id, '_edit_form')) {
+  if (str_starts_with($form_id, 'node_') && str_ends_with($form_id, '_form')) {
     $form['#attached']['library'][] = 'mukurtu_core/mukurtu-leaflet-widget';
   }
 }
