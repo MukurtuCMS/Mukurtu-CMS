@@ -1,13 +1,22 @@
 <?php
 
+use Drupal\views\ViewExecutable;
+
 /**
  * Implements hook_theme().
  */
- function mukurtu_browse_theme($existing, $type, $theme, $path) {
+function mukurtu_browse_theme($existing, $type, $theme, $path) {
   return [
     'mukurtu_browse' => [
       'variables' => [
         'results' => NULL,
+        'facets' => [],
+      ],
+    ],
+    'mukurtu_map_browse' => [
+      'variables' => [
+        'teasers' => NULL,
+        'map' => NULL,
         'facets' => [],
       ],
     ],

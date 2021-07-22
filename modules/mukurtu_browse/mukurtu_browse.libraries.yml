@@ -1,0 +1,7 @@
+mukurtu-leaflet-preview:
+  version: 1.x
+  js:
+    js/mukurtu-leaflet-preview.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once

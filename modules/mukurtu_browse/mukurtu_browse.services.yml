@@ -1,0 +1,6 @@
+services:
+  map_browse_nodes:
+    class: Drupal\mukurtu_browse\ParamConverter\MukurtuMapNodesParamConverter
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: paramconverter }

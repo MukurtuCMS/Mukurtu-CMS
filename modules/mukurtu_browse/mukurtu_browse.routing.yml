@@ -5,3 +5,21 @@ mukurtu_browse.browse_page:
     _title: 'Browse Content'
   requirements:
     _permission: 'access content'
+mukurtu_browse.map_browse_page:
+  path: '/browse/map'
+  defaults:
+    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuMapBrowseController::content'
+    _title: 'Browse Content'
+  requirements:
+    _permission: 'access content'
+mukurtu_browse.map_browse_page_teasers:
+  path: '/browse/map/teasers/{nodes}'
+  defaults:
+    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuMapBrowseController::getTeasersAjax'
+    nodes: '[\d\,]+'
+  requirements:
+    _access: 'TRUE'
+  options:
+    parameters:
+      nodes:
+        type: 'nodes'
