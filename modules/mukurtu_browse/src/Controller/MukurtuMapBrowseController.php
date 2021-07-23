@@ -22,7 +22,6 @@ class MukurtuMapBrowseController extends ControllerBase {
       '#type' => 'container',
       '#attributes' => [
         'id' => 'mukurtu-map-browse-teasers',
-        'class' => ['use-ajax'],
       ],
     ];
 
@@ -67,7 +66,6 @@ class MukurtuMapBrowseController extends ControllerBase {
       '#type' => 'container',
       '#attributes' => [
         'id' => 'mukurtu-map-browse-teasers',
-        'class' => ['use-ajax'],
       ],
     ];
 

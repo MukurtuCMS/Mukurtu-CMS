@@ -49,7 +49,7 @@
             try {
               Drupal.ajax({ url: '/browse/map/teasers/' + nidsList }).execute().done(
                 function (comands, statusString, ajaxObject) {
-              });
+                });
             } catch (error) {
 
             }
@@ -58,6 +58,9 @@
 
         // Listen for the moveend event and update the preview field.
         lMap.on("moveend", refreshPreviewFromLeaflet);
+
+        // Initialize Previews.
+        refreshPreviewFromLeaflet();
       });
     }
   };
