@@ -2,10 +2,18 @@
   Drupal.behaviors.mukurtu_browse_leaflet_preview = {
     attach: function (context, settings) {
       $(document).ready(function () {
-        let features = drupalSettings.leaflet["leaflet-map-view-mukurtu-map-browse-mukurtu-map-browse-block"].features;
-        let lMap = drupalSettings.leaflet["leaflet-map-view-mukurtu-map-browse-mukurtu-map-browse-block"].lMap;
+        //let features = drupalSettings.leaflet["leaflet-map-view-mukurtu-map-browse-mukurtu-map-browse-block"].features;
+        //let lMap = drupalSettings.leaflet["leaflet-map-view-mukurtu-map-browse-mukurtu-map-browse-block"].lMap;
+
+        var getCurrentBrowseMap = function () {
+          let blockId = $("#mukurtu-map-browse-container .view-mukurtu-map-browse .leaflet-container").attr('id');
+          return drupalSettings.leaflet[blockId];
+        }
 
         var refreshPreviewFromLeaflet = function () {
+          let leafletMap = getCurrentBrowseMap();
+          let features = leafletMap.features;
+          let lMap = leafletMap.lMap;
           let inViewFeatures = [];
           let mapBounds = lMap.getBounds();
 
@@ -57,7 +65,8 @@
         };
 
         // Listen for the moveend event and update the preview field.
-        lMap.on("moveend", refreshPreviewFromLeaflet);
+        let leafletMap = getCurrentBrowseMap();
+        leafletMap.lMap.on("moveend", refreshPreviewFromLeaflet);
 
         // Initialize Previews.
         refreshPreviewFromLeaflet();
