@@ -21,7 +21,7 @@
           // visible map bounds.
           inViewFeatures = features.filter(
             function (e) {
-              if (e.points[0] !== undefined && mapBounds.contains(e.points[0])) {
+              if (e !== undefined && e.points[0] !== undefined && mapBounds.contains(e.points[0])) {
                 return true;
               }
               return false;
