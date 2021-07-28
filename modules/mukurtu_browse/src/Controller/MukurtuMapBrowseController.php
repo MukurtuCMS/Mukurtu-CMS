@@ -11,10 +11,16 @@ class MukurtuMapBrowseController extends ControllerBase {
 
   public function content() {
     // Render the map browse view block.
-    $map_browse_view_block = [
+/*     $map_browse_view_block = [
       '#type' => 'view',
       '#name' => 'mukurtu_map_browse',
       '#display_id' => 'mukurtu_map_browse_block',
+      '#embed' => TRUE,
+    ]; */
+    $map_browse_view_block = [
+      '#type' => 'view',
+      '#name' => 'manual_clustering_test',
+      '#display_id' => 'block_1',
       '#embed' => TRUE,
     ];
 
@@ -28,7 +34,8 @@ class MukurtuMapBrowseController extends ControllerBase {
     // Load all facets configured to use our browse block as a datasource.
     $facetEntities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_map_browse__mukurtu_map_browse_block']);
+     // ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_map_browse__mukurtu_map_browse_block']);
+      ->loadByProperties(['facet_source_id' => 'search_api:views_block__manual_clustering_test__block_1']);
 
     // Render the facet block for each of them.
     $facets = [];
@@ -53,7 +60,10 @@ class MukurtuMapBrowseController extends ControllerBase {
       '#facets' => $facets,
       '#attached' => [
         'library' => [
-          'mukurtu_browse/mukurtu-leaflet-preview',
+          'leaflet/leaflet',
+          'mukurtu_browse/mukurtu-leaflet-markercluster',
+          'mukurtu_browse/mukurtu-leaflet-custom-markercluster',
+//          'mukurtu_browse/mukurtu-leaflet-preview',
         ],
       ],
     ];

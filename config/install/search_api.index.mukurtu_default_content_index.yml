@@ -7,6 +7,7 @@ dependencies:
     - field.storage.node.field_collection_type
     - field.storage.node.field_description
     - field.storage.node.field_keywords
+    - field.storage.node.field_coverage
     - search_api.server.mukurtu_database_server
   module:
     - taxonomy
@@ -34,6 +35,15 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.field_collection_type
+  field_coverage:
+    label: Location
+    datasource_id: 'entity:node'
+    property_path: field_coverage
+    type: text
+    boost: !!float 0
+    dependencies:
+      config:
+        - field.storage.node.field_coverage
   field_description:
     label: Description
     datasource_id: 'entity:node'
@@ -42,6 +52,14 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.field_description
+  field_has_location:
+    label: 'Has Location'
+    datasource_id: 'entity:node'
+    property_path: field_coverage
+    type: boolean
+    dependencies:
+      config:
+        - field.storage.node.field_coverage
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
@@ -143,6 +161,7 @@ processor_settings:
     fields:
       - body
       - field_collection_type
+      - field_coverage
       - field_description
       - glossaryaz_title
       - name
@@ -165,6 +184,7 @@ processor_settings:
     fields:
       - body
       - field_collection_type
+      - field_coverage
       - field_description
       - glossaryaz_title
       - name
@@ -180,6 +200,7 @@ processor_settings:
     all_fields: true
     fields:
       - body
+      - field_coverage
       - field_description
       - title
     ignored: ._-
@@ -194,6 +215,7 @@ processor_settings:
     fields:
       - body
       - field_collection_type
+      - field_coverage
       - field_description
       - glossaryaz_title
       - name

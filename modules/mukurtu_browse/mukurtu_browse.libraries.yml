@@ -5,3 +5,22 @@ mukurtu-leaflet-preview:
   dependencies:
     - core/jquery
     - core/jquery.once
+mukurtu-leaflet-markercluster:
+  version: 1.4.1
+  js:
+    js/leaflet.markercluster.js: {}
+  css:
+    component:
+      js/leaflet-markercluster/dist/MarkerCluster.css: {}
+      js/leaflet-markercluster/dist/MarkerCluster.Default.css: {}
+      css/mukurtu-map-browse.default.css: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+mukurtu-leaflet-custom-markercluster:
+  version: 1.x
+  js:
+    js/mukurtu-leaflet-custom-markercluster.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
