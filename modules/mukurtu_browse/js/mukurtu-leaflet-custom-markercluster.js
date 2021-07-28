@@ -41,10 +41,16 @@
           jQuery("#mukurtu-map-browse-container .views-element-container .view-content .views-row").each(function (index) {
             let poly = jQuery(this).find('.views-field-field-coverage .field-content');
             if (poly[0] !== undefined) {
-              let data = JSON.parse(poly[0].innerHTML.replace(/<!--.*?-->/sg, "").trim());
+              let fieldValue = poly[0].innerHTML.replace(/<!--.*?-->/sg, "").trim();
+              if (fieldValue.length > 0) {
+                try {
+                  let data = JSON.parse(fieldValue);
+                  let points = [geoJSONtoLeafletCoordinates(data.coordinates[0])];
+                  new L.PolygonClusterable(points).addTo(markerClusterLayer);
+                } catch (e) {
 
-              let points = [geoJSONtoLeafletCoordinates(data.coordinates[0])];
-              new L.PolygonClusterable(points).addTo(markerClusterLayer);
+                }
+              }
             }
           });
 
