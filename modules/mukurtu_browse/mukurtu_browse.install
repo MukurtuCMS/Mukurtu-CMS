@@ -1,0 +1,19 @@
+<?php
+
+use Drupal\field\Entity\FieldStorageConfig;
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_browse_install() {
+  FieldStorageConfig::create([
+    'field_name' => 'field_mukurtu_geojson',
+    'entity_type' => 'node',
+    'type' => 'string_long',
+    'cardinality' => -1,
+  ])->save();
+
+  foreach (node_type_get_names() as $bundle => $label) {
+    mukurtu_browse_create_computed_fields('node', $bundle);
+  }
+}

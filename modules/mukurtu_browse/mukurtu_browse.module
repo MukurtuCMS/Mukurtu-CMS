@@ -1,6 +1,12 @@
 <?php
 
 use Drupal\views\ViewExecutable;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\Core\Entity\EntityInterface;
+use geoPHP;
+use Drupal\Component\Serialization\Json;
+
+define("MUKURTU_BROWSE_FIELD_NAME_GEOJSON", 'field_mukurtu_geojson');
 
 /**
  * Implements hook_theme().
@@ -21,4 +27,67 @@ function mukurtu_browse_theme($existing, $type, $theme, $path) {
       ],
     ],
   ];
+}
+
+/**
+ * Implements hook_entity_bundle_create().
+ */
+function mukurtu_browse_entity_bundle_create($entity_type_id, $bundle) {
+  // For any new node that is defined, add the computed fields.
+  if ($entity_type_id == 'node') {
+    mukurtu_browse_create_computed_fields($entity_type_id, $bundle);
+  }
+}
+
+/**
+ * Create the Mukurtu GeoJSON computed field.
+ */
+function mukurtu_browse_create_computed_fields($entity_type, $bundle) {
+  $entityFieldManager = \Drupal::service('entity_field.manager');
+  $fields = $entityFieldManager->getFieldDefinitions($entity_type, $bundle);
+
+  if (!isset($fields[MUKURTU_BROWSE_FIELD_NAME_GEOJSON])) {
+    FieldConfig::create([
+      'field_name' => MUKURTU_BROWSE_FIELD_NAME_GEOJSON,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => 'Mukurtu GeoJSON',
+    ])->save();
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function mukurtu_browse_node_presave(EntityInterface $entity) {
+  $geojson = mukurtu_browse_compute_geojson($entity);
+  $entity->set(MUKURTU_BROWSE_FIELD_NAME_GEOJSON, $geojson);
+}
+
+
+/**
+ * Compute the GeoJSON for the map browse.
+ */
+function mukurtu_browse_compute_geojson($entity) {
+  $coverage = $entity->get('field_coverage');
+
+  // No location data, we're done.
+  if (!$coverage) {
+    return NULL;
+  }
+
+  // Convert WKT to GeoJSON.
+  $geojson = [];
+  foreach ($coverage as $location) {
+    $wkt = $location->getValue()['value'];
+    if (!empty($wkt)) {
+      $geometry = geoPHP::load($wkt, 'wkt');
+
+      if (is_object($geometry)) {
+        $geojson[] = $geometry->out('json');
+      }
+    }
+  }
+
+  return $geojson;
 }

@@ -635,9 +635,9 @@ class MukurtuProtocolManager {
     }
 
     if ($item_count > 0) {
-      // For fewer than 10 items that need updating,
+      // For fewer than 25 items that need updating,
       // do them without batch processing.
-      if ($item_count < 10) {
+      if ($item_count < 25) {
         foreach ($entity_types as $entity_type) {
           $entity_storage = \Drupal::entityTypeManager()->getStorage($entity_type);
           $entities = $entity_storage->loadMultiple($ids[$entity_type]);
@@ -650,7 +650,7 @@ class MukurtuProtocolManager {
           }
         }
       } else {
-        // More than 10 items and we run it in batch.
+        // More than 25 items and we run it in batch.
         $batch = [
           'title' => $this->t('Resolving Protocol Inheritance'),
           'operations' => [
