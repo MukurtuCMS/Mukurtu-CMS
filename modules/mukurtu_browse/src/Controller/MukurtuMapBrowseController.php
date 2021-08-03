@@ -11,16 +11,10 @@ class MukurtuMapBrowseController extends ControllerBase {
 
   public function content() {
     // Render the map browse view block.
-/*     $map_browse_view_block = [
-      '#type' => 'view',
-      '#name' => 'mukurtu_map_browse',
-      '#display_id' => 'mukurtu_map_browse_block',
-      '#embed' => TRUE,
-    ]; */
     $map_browse_view_block = [
       '#type' => 'view',
-      '#name' => 'manual_clustering_test',
-      '#display_id' => 'block_1',
+      '#name' => 'mukurtu_browse_map',
+      '#display_id' => 'mukurtu_browse_map_block',
       '#embed' => TRUE,
     ];
 
