@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.map_popup
+label: 'Map Popup'
+targetEntityType: node
+cache: true

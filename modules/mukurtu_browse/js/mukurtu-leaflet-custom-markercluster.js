@@ -11,8 +11,6 @@
             }, */
 
             getLatLng: function () {
-/*               console.log("custom getlatlng: " + this.getBounds().getCenter());
-              console.log(this); */
               this._latlng = this.getBounds().getCenter();
               return this._latlng
             },
@@ -28,7 +26,7 @@
           }).addTo(map);
 
           // Init clustering.
-          markerClusterLayer = L.markerClusterGroup({
+          var markerClusterLayer = L.markerClusterGroup({
             disableClusteringAtZoom: 13,
             chunkedLoading: false,
           });
@@ -37,16 +35,27 @@
             return coordinates.map(e => [e[1], e[0]]);
           }
 
+          function mukurtuClusterableGeoJSON(feature) {
+            let points = [geoJSONtoLeafletCoordinates(feature.geometry.coordinates[0])];
+            let layer = new L.PolygonClusterable(points);
+            let popup = new DOMParser().parseFromString(feature.properties.popup, "text/html");
+            let popupContent = popup.documentElement.textContent;
+            layer.bindPopup(popupContent);
+            layer.addTo(markerClusterLayer);
+          }
+
           // Iterate through all the SAPI results.
           jQuery("#mukurtu-map-browse-container .views-element-container .view-content .views-row").each(function (index) {
-            let poly = jQuery(this).find('.views-field-field-coverage .field-content');
+            let poly = jQuery(this).find('.views-field-field-mukurtu-geojson .field-content');
             if (poly[0] !== undefined) {
               let fieldValue = poly[0].innerHTML.replace(/<!--.*?-->/sg, "").trim();
+
               if (fieldValue.length > 0) {
                 try {
-                  let data = JSON.parse(fieldValue);
-                  let points = [geoJSONtoLeafletCoordinates(data.coordinates[0])];
-                  new L.PolygonClusterable(points).addTo(markerClusterLayer);
+                  let features = JSON.parse(fieldValue);
+                  features.forEach(function (feature) {
+                    mukurtuClusterableGeoJSON(feature);
+                  });
                 } catch (e) {
 
                 }
@@ -55,12 +64,6 @@
           });
 
           markerClusterLayer.addTo(map);
-          /* // Testing marker clustering.
-          var markers = L.markerClusterGroup();
-          for (let i = 0; i < 1000; i++) {
-            markers.addLayer(L.marker(getRandomLatLng(map)));
-          }
-          map.addLayer(markers); */
         });
       });
     }

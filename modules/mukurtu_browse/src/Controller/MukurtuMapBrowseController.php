@@ -34,8 +34,7 @@ class MukurtuMapBrowseController extends ControllerBase {
     // Load all facets configured to use our browse block as a datasource.
     $facetEntities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
-     // ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_map_browse__mukurtu_map_browse_block']);
-      ->loadByProperties(['facet_source_id' => 'search_api:views_block__manual_clustering_test__block_1']);
+      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_browse_map__mukurtu_browse_map_block']);
 
     // Render the facet block for each of them.
     $facets = [];

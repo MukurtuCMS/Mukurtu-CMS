@@ -3,7 +3,6 @@
 use Drupal\views\ViewExecutable;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
-use geoPHP;
 use Drupal\Component\Serialization\Json;
 
 define("MUKURTU_BROWSE_FIELD_NAME_GEOJSON", 'field_mukurtu_geojson');
@@ -69,6 +68,8 @@ function mukurtu_browse_node_presave(EntityInterface $entity) {
  * Compute the GeoJSON for the map browse.
  */
 function mukurtu_browse_compute_geojson($entity) {
+  $view_builder = \Drupal::entityManager()->getViewBuilder($entity->getEntityTypeId());
+  $renderer = \Drupal::service('renderer');
   $coverage = $entity->get('field_coverage');
 
   // No location data, we're done.
@@ -77,17 +78,27 @@ function mukurtu_browse_compute_geojson($entity) {
   }
 
   // Convert WKT to GeoJSON.
-  $geojson = [];
+  $features = [];
   foreach ($coverage as $location) {
+    // Create a new GeoJSON feature.
+    $feature = ['type' => 'Feature'];
+
+    // Load the geometry.
     $wkt = $location->getValue()['value'];
     if (!empty($wkt)) {
       $geometry = geoPHP::load($wkt, 'wkt');
-
       if (is_object($geometry)) {
-        $geojson[] = $geometry->out('json');
+        $feature['geometry'] = json_decode($geometry->out('json'));
+
+        // Build the pop-up properties.
+
+        $feature['properties'] = [];
+        $feature['properties']['name'] = $entity->getTitle();
+        $feature['properties']['popup'] = $renderer->renderPlain($view_builder->view($entity, 'map_popup'));
+        $features[] = $feature;
       }
     }
   }
 
-  return $geojson;
+  return json_encode($features);
 }

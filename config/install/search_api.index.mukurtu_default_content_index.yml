@@ -8,6 +8,7 @@ dependencies:
     - field.storage.node.field_description
     - field.storage.node.field_keywords
     - field.storage.node.field_coverage
+    - field.storage.node.field_mukurtu_geojson
     - search_api.server.mukurtu_database_server
   module:
     - taxonomy
@@ -55,11 +56,20 @@ field_settings:
   field_has_location:
     label: 'Has Location'
     datasource_id: 'entity:node'
-    property_path: field_coverage
+    property_path: field_mukurtu_geojson
     type: boolean
     dependencies:
       config:
-        - field.storage.node.field_coverage
+        - field.storage.node.field_mukurtu_geojson
+  field_mukurtu_geojson:
+    label: 'Mukurtu GeoJSON'
+    datasource_id: 'entity:node'
+    property_path: field_mukurtu_geojson
+    type: text
+    boost: !!float 0
+    dependencies:
+      config:
+        - field.storage.node.field_mukurtu_geojson
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
@@ -163,6 +173,7 @@ processor_settings:
       - field_collection_type
       - field_coverage
       - field_description
+      - field_mukurtu_geojson
       - glossaryaz_title
       - name
       - name_1
@@ -186,6 +197,7 @@ processor_settings:
       - field_collection_type
       - field_coverage
       - field_description
+      - field_mukurtu_geojson
       - glossaryaz_title
       - name
       - name_1
@@ -202,6 +214,7 @@ processor_settings:
       - body
       - field_coverage
       - field_description
+      - field_mukurtu_geojson
       - title
     ignored: ._-
     spaces: ''
@@ -217,6 +230,7 @@ processor_settings:
       - field_collection_type
       - field_coverage
       - field_description
+      - field_mukurtu_geojson
       - glossaryaz_title
       - name
       - name_1
