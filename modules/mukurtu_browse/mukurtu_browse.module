@@ -94,7 +94,8 @@ function mukurtu_browse_compute_geojson($entity) {
 
         $feature['properties'] = [];
         $feature['properties']['name'] = $entity->getTitle();
-        $feature['properties']['popup'] = $renderer->renderPlain($view_builder->view($entity, 'map_popup'));
+        $renderArray = $view_builder->view($entity, 'map_popup');
+        $feature['properties']['popup'] = $renderer->renderPlain($renderArray);
         $features[] = $feature;
       }
     }
