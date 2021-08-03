@@ -70,7 +70,7 @@ function mukurtu_browse_node_presave(EntityInterface $entity) {
 function mukurtu_browse_compute_geojson($entity) {
   $view_builder = \Drupal::entityManager()->getViewBuilder($entity->getEntityTypeId());
   $renderer = \Drupal::service('renderer');
-  $coverage = $entity->get('field_coverage');
+  $coverage = $entity->hasField('field_coverage') ? $entity->get('field_coverage') : NULL;
 
   // No location data, we're done.
   if (!$coverage) {
