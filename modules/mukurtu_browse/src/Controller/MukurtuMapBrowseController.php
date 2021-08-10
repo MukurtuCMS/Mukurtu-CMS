@@ -56,7 +56,7 @@ class MukurtuMapBrowseController extends ControllerBase {
           'leaflet/leaflet',
           'mukurtu_browse/mukurtu-leaflet-markercluster',
           'mukurtu_browse/mukurtu-leaflet-custom-markercluster',
-//          'mukurtu_browse/mukurtu-leaflet-preview',
+          'mukurtu_browse/mukurtu-leaflet-preview',
         ],
       ],
     ];

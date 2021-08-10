@@ -21,6 +21,7 @@
           // Initialize the map.
           Drupal.behaviors.mukurtu_browse_leaflet_map.features = [];
           var map = L.map('mukurtu-map-browse-map').setView([46.636236615519636, -117.37106323242186], 8);
+          Drupal.behaviors.mukurtu_browse_leaflet_map.map = map;
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
