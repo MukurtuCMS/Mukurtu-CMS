@@ -20,9 +20,9 @@ class AddCommunityRecordAccessCheck implements AccessInterface {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(AccountInterface $account) {
+/*   public function access(AccountInterface $account) {
     //\Drupal::logger('mukurtu_community_records')->notice("I am here");
     dpm($account);
     return (TRUE) ? AccessResult::allowed() : AccessResult::forbidden();
-  }
+  } */
 }
