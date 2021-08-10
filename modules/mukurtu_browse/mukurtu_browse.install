@@ -7,9 +7,23 @@ use Drupal\field\Entity\FieldStorageConfig;
  */
 function mukurtu_browse_install() {
   FieldStorageConfig::create([
-    'field_name' => 'field_mukurtu_geojson',
+    'field_name' => MUKURTU_BROWSE_FIELD_NAME_GEOJSON,
     'entity_type' => 'node',
     'type' => 'string_long',
+    'cardinality' => -1,
+  ])->save();
+
+  FieldStorageConfig::create([
+    'field_name' => MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LAT,
+    'entity_type' => 'node',
+    'type' => 'float',
+    'cardinality' => -1,
+  ])->save();
+
+  FieldStorageConfig::create([
+    'field_name' => MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LONG,
+    'entity_type' => 'node',
+    'type' => 'float',
     'cardinality' => -1,
   ])->save();
 

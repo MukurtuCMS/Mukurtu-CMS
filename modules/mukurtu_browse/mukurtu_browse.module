@@ -4,8 +4,11 @@ use Drupal\views\ViewExecutable;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Component\Serialization\Json;
+use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
 
 define("MUKURTU_BROWSE_FIELD_NAME_GEOJSON", 'field_mukurtu_geojson');
+define("MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LAT", 'field_mukurtu_cluster_lat');
+define("MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LONG", 'field_mukurtu_cluster_long');
 
 /**
  * Implements hook_theme().
@@ -26,6 +29,31 @@ function mukurtu_browse_theme($existing, $type, $theme, $path) {
       ],
     ],
   ];
+}
+
+/**
+ * Implements hook_ajax_render_alter().
+ */
+function mukurtu_browse_ajax_render_alter(array &$data) {
+  // On the map browse, remove the viewsScrollTop command so
+  // we don't scroll on refresh.
+  $view_name = 'mukurtu_browse_map';
+  $view_display_id = 'mukurtu_browse_map_block';
+
+  if (isset($data[0]['settings']['views']['ajaxViews'])) {
+    $view = reset($data[0]['settings']['views']['ajaxViews']);
+
+    if ($view['view_name'] == $view_name && $view['view_display_id'] == $view_display_id) {
+      $selector = '.js-view-dom-id-' . $view['view_dom_id'];
+      foreach ($data as $key => $value) {
+        if ($value['command'] === 'viewsScrollTop' && $value['selector'] === $selector) {
+          unset ($data[$key]);
+          break;
+        }
+      }
+    }
+  }
+
 }
 
 /**
@@ -53,15 +81,35 @@ function mukurtu_browse_create_computed_fields($entity_type, $bundle) {
       'label' => 'Mukurtu GeoJSON',
     ])->save();
   }
+
+  if (!isset($fields[MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LAT])) {
+    FieldConfig::create([
+      'field_name' => MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LAT,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => 'Mukurtu Coverage - Cluster Latitude',
+    ])->save();
+  }
+
+  if (!isset($fields[MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LONG])) {
+    FieldConfig::create([
+      'field_name' => MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LONG,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => 'Mukurtu Coverage - Cluster Longitude',
+    ])->save();
+  }
 }
 
 /**
  * Implements hook_ENTITY_TYPE_presave().
  */
 function mukurtu_browse_node_presave(EntityInterface $entity) {
+  // Compute GeoJSON field.
   $geojson = mukurtu_browse_compute_geojson($entity);
   $entity->set(MUKURTU_BROWSE_FIELD_NAME_GEOJSON, $geojson);
 }
+
 
 
 /**
@@ -79,7 +127,9 @@ function mukurtu_browse_compute_geojson($entity) {
 
   // Convert WKT to GeoJSON.
   $features = [];
-  foreach ($coverage as $location) {
+  $center_lat = [];
+  $center_long = [];
+  foreach ($coverage as $delta => $location) {
     // Create a new GeoJSON feature.
     $feature = ['type' => 'Feature'];
 
@@ -87,11 +137,18 @@ function mukurtu_browse_compute_geojson($entity) {
     $wkt = $location->getValue()['value'];
     if (!empty($wkt)) {
       $geometry = geoPHP::load($wkt, 'wkt');
+
+      // Calculate center point for clustering.
+      $center = $geometry->centroid();
+      if ($center) {
+        $center_lat[$delta] = $center->y();
+        $center_long[$delta] = $center->x();
+      }
+
       if (is_object($geometry)) {
         $feature['geometry'] = json_decode($geometry->out('json'));
 
         // Build the pop-up properties.
-
         $feature['properties'] = [];
         $feature['properties']['name'] = $entity->getTitle();
         $renderArray = $view_builder->view($entity, 'map_popup');
@@ -101,5 +158,42 @@ function mukurtu_browse_compute_geojson($entity) {
     }
   }
 
+  // Set the clustering center points.
+  if ($entity->hasField(MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LAT) && $entity->hasField(MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LONG)) {
+    $entity->set(MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LAT, $center_lat);
+    $entity->set(MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LONG, $center_long);
+  }
+
   return json_encode($features);
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function mukurtu_browse_views_data_alter(array &$data) {
+  //dpm(array_keys($data));
+  if (isset($data['search_api_index_mukurtu_default_content_index'])) {
+    $data['search_api_index_mukurtu_default_content_index']['mukurtu_bounding_box'] = [
+      'title' => t('Mukurtu Bounding Box'),
+      'argument' => [
+        'title' => t('Mukurtu Bounding Box'),
+        'help' => t('Bounding box query for Leaflet maps.'),
+        'field' => 'field_mukurtu_geojson',
+        'id' => 'mukurtu_bounding_box',
+      ],
+    ];
+  }
+}
+
+
+/**
+ * Implements hook_views_plugins_argument_alter().
+ */
+function mukurtu_browse_views_plugins_argument_alter(array &$plugins) {
+  $plugins['mukurtu_bounding_box'] = [
+    'plugin_type' => 'argument',
+    'id' => 'mukurtu_bounding_box',
+    'class' => MukurtuBoundingBox::class,
+    'provider' => 'mukurtu_browse',
+  ];
 }

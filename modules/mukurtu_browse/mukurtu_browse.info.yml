@@ -9,5 +9,6 @@ libraries:
 dependencies:
   - mukurtu_core
   - mukurtu_protocol
+  - search_api
 
 version: '8.x-1.x-dev'
