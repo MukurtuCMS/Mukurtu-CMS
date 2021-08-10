@@ -3,12 +3,14 @@ status: true
 dependencies:
   config:
     - field.storage.node.body
-    - field.storage.node.field_category
     - field.storage.node.field_collection_type
-    - field.storage.node.field_description
-    - field.storage.node.field_keywords
     - field.storage.node.field_coverage
+    - field.storage.node.field_description
     - field.storage.node.field_mukurtu_geojson
+    - field.storage.node.field_mukurtu_cluster_lat
+    - field.storage.node.field_mukurtu_cluster_long
+    - field.storage.node.field_category
+    - field.storage.node.field_keywords
     - search_api.server.mukurtu_database_server
   module:
     - taxonomy
@@ -61,6 +63,22 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.field_mukurtu_geojson
+  field_mukurtu_cluster_lat:
+    label: 'Mukurtu Coverage - Cluster Latitude'
+    datasource_id: 'entity:node'
+    property_path: field_mukurtu_cluster_lat
+    type: decimal
+    dependencies:
+      config:
+        - field.storage.node.field_mukurtu_cluster_lat
+  field_mukurtu_cluster_long:
+    label: 'Mukurtu Coverage - Cluster Longitude'
+    datasource_id: 'entity:node'
+    property_path: field_mukurtu_cluster_long
+    type: decimal
+    dependencies:
+      config:
+        - field.storage.node.field_mukurtu_cluster_long
   field_mukurtu_geojson:
     label: 'Mukurtu GeoJSON'
     datasource_id: 'entity:node'
