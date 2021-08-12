@@ -16,3 +16,4 @@ dependencies:
   - search_api
   - search_api_glossary
   - taxonomy
+  - views_bulk_operations

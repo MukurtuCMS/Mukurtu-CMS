@@ -60,7 +60,8 @@
     "drupal/redirect": "*",
     "drupal/slick": "^2.2",
     "drupal/slick_entityreference": "^2.0",
-    "drupal/token": "*"
+    "drupal/token": "*",
+    "drupal/views_bulk_operations": "*"
   },
   "require-dev": {
     "drupal/devel": "*",

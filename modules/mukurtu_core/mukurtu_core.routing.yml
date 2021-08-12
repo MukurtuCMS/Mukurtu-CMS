@@ -12,20 +12,6 @@ mukurtu_core.dashboard:
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::content'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
-mukurtu_core.manage_content:
-  path: '/dashboard/content'
-  defaults:
-    _title: 'Manage Content'
-    _controller: '\Drupal\mukurtu_core\Controller\MukurtuManageContentController::content'
-  requirements:
-    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuManageContentController::access'
-mukurtu_core.manage_media:
-  path: '/dashboard/media'
-  defaults:
-    _title: 'Manage Media'
-    _controller: '\Drupal\mukurtu_core\Controller\MukurtuManageMediaController::content'
-  requirements:
-    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuManageMediaController::access'
 mukurtu_core.add_page:
   path: '/dashboard/node/add'
   defaults:

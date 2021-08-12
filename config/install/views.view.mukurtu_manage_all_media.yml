@@ -24,7 +24,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'view media'
+          perm: 'administer media'
       cache:
         type: tag
         options: {  }
@@ -774,6 +774,93 @@ display:
           entity_type: media
           entity_field: name
           plugin_id: string
+        status:
+          id: status
+          table: media_field_data
+          field: status
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: '='
+          value: All
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Published
+            description: ''
+            use_operator: false
+            operator: status_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: status
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+              mukurtu_administrator: '0'
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          entity_type: media
+          entity_field: status
+          plugin_id: boolean
+        bundle:
+          id: bundle
+          table: media_field_data
+          field: bundle
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: bundle_op
+            label: 'Media type'
+            description: ''
+            use_operator: false
+            operator: bundle_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: bundle
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+              mukurtu_administrator: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          entity_type: media
+          entity_field: bundle
+          plugin_id: bundle
       sorts: {  }
       title: 'Mukurtu Manage All Media'
       header: {  }
@@ -782,7 +869,7 @@ display:
       relationships: {  }
       arguments: {  }
       display_extenders: {  }
-      use_ajax: false
+      use_ajax: true
     cache_metadata:
       max-age: 0
       contexts:
@@ -794,14 +881,15 @@ display:
       tags:
         - 'config:field.storage.media.field_mukurtu_protocol_inherit'
         - 'config:field.storage.media.field_mukurtu_protocol_r_scope'
-  manage_all_media_block:
-    display_plugin: block
-    id: manage_all_media_block
-    display_title: Media
+  mukurtu_manage_media:
+    display_plugin: page
+    id: mukurtu_manage_media
+    display_title: Page
     position: 1
     display_options:
       display_extenders: {  }
       display_description: ''
+      path: dashboard/media
     cache_metadata:
       max-age: 0
       contexts:

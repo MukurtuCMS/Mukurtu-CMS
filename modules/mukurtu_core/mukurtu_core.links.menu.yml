@@ -5,6 +5,12 @@ mukurtu_core.dashboard:
   menu_name: mukurtu
   route_name: mukurtu_core.dashboard
   weight: -1000
+mukurtu_core.dashboard_admin:
+  title: 'Mukurtu Dashboard'
+  description: 'Mukurtu Dashboard'
+  parent: system.admin
+  route_name: mukurtu_core.dashboard
+  weight: -1000
 mukurtu_core.account_dashboard:
   title: 'Dashboard'
   description: 'Dashboard'
@@ -17,13 +23,13 @@ mukurtu_core.manage_content:
   description: 'Manage Content'
   parent: mukurtu
   menu_name: mukurtu
-  route_name: mukurtu_core.manage_content
+  route_name: view.mukurtu_manage_all_content.mukurtu_manage_content
 mukurtu_core.manage_media:
   title: 'Manage Media'
   description: 'Manage Media'
   parent: mukurtu
   menu_name: mukurtu
-  route_name: mukurtu_core.manage_media
+  route_name: view.mukurtu_manage_all_media.mukurtu_manage_media
 mukurtu_core.create_content:
   title: 'Add Content'
   description: 'Add Content'

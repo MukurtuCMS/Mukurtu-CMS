@@ -21,21 +21,6 @@ class MukurtuManageContentController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
-  public function content() {
-    $build = [];
-
-    $view = [
-      '#type' => 'view',
-      '#name' => 'mukurtu_manage_all_content',
-      '#display_id' => 'manage_all_content_block',
-      '#embed' => TRUE,
-    ];
-
-    $build[] = $view;
-
-    return $build;
-  }
-
   public function addPage() {
     $build = [
       '#theme' => 'mukurtu_node_add_list',

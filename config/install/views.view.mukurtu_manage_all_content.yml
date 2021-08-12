@@ -35,7 +35,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'access content'
+          perm: 'administer nodes'
       cache:
         type: tag
         options: {  }
@@ -1079,7 +1079,7 @@ display:
       relationships: {  }
       arguments: {  }
       display_extenders: {  }
-      use_ajax: false
+      use_ajax: true
     cache_metadata:
       max-age: 0
       contexts:
@@ -1095,14 +1095,15 @@ display:
         - 'config:field.storage.node.field_mukurtu_community'
         - 'config:field.storage.node.field_mukurtu_protocol_inherit'
         - 'config:field.storage.node.field_mukurtu_protocol_r_scope'
-  manage_all_content_block:
-    display_plugin: block
-    id: manage_all_content_block
-    display_title: Content
+  mukurtu_manage_content:
+    display_plugin: page
+    id: mukurtu_manage_content
+    display_title: Page
     position: 1
     display_options:
       display_extenders: {  }
       display_description: ''
+      path: dashboard/content
     cache_metadata:
       max-age: 0
       contexts:
