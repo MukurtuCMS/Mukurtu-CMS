@@ -24,3 +24,10 @@ mukurtu-leaflet-custom-markercluster:
   dependencies:
     - core/jquery
     - core/jquery.once
+mukurtu-browse-view-switch:
+  version: 1.x
+  js:
+    js/mukurtu-browse-view-switch.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once

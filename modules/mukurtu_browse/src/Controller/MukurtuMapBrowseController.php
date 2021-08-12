@@ -6,10 +6,15 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Link;
 
 class MukurtuMapBrowseController extends ControllerBase {
 
   public function content() {
+    // Browse link.
+    $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link']];
+    $map_browse_link = Link::createFromRoute(t('Switch to List View'), 'mukurtu_browse.browse_page', [], $options);
+
     // Render the map browse view block.
     $map_browse_view_block = [
       '#type' => 'view',
@@ -48,6 +53,7 @@ class MukurtuMapBrowseController extends ControllerBase {
 
     return [
       '#theme' => 'mukurtu_map_browse',
+      '#browselink' => $map_browse_link,
       '#teasers' => $teasers,
       '#map' => $map_browse_view_block,
       '#facets' => $facets,
@@ -57,6 +63,7 @@ class MukurtuMapBrowseController extends ControllerBase {
           'mukurtu_browse/mukurtu-leaflet-markercluster',
           'mukurtu_browse/mukurtu-leaflet-custom-markercluster',
           'mukurtu_browse/mukurtu-leaflet-preview',
+          'mukurtu_browse/mukurtu-browse-view-switch',
         ],
       ],
     ];

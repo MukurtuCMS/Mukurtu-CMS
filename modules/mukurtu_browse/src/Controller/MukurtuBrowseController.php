@@ -4,10 +4,15 @@ namespace Drupal\mukurtu_browse\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\Link;
 
 class MukurtuBrowseController extends ControllerBase {
 
   public function content() {
+    // Map browse link.
+    $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link']];
+    $map_browse_link = Link::createFromRoute(t('Switch to Map View'), 'mukurtu_browse.map_browse_page', [], $options);
+
     // Render the browse view block.
     $browse_view_block = [
       '#type' => 'view',
@@ -39,8 +44,14 @@ class MukurtuBrowseController extends ControllerBase {
 
     return [
       '#theme' => 'mukurtu_browse',
+      '#maplink' => $map_browse_link,
       '#results' => $browse_view_block,
       '#facets' => $facets,
+      '#attached' => [
+        'library' => [
+          'mukurtu_browse/mukurtu-browse-view-switch',
+        ],
+      ],
     ];
   }
 

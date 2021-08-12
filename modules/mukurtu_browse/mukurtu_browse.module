@@ -17,12 +17,14 @@ function mukurtu_browse_theme($existing, $type, $theme, $path) {
   return [
     'mukurtu_browse' => [
       'variables' => [
+        'maplink' => NULL,
         'results' => NULL,
         'facets' => [],
       ],
     ],
     'mukurtu_map_browse' => [
       'variables' => [
+        'browselink' => NULL,
         'teasers' => NULL,
         'map' => NULL,
         'facets' => [],
