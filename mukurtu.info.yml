@@ -79,6 +79,7 @@ dependencies:
   - slick
   - slick_entityreference
   - token
+  - views_bulk_operations
   - mukurtu_core
   - mukurtu_collection
   - mukurtu_community

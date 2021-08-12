@@ -3,8 +3,6 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_category
-    - field.storage.node.field_mukurtu_protocol_inherit
-    - field.storage.node.field_mukurtu_protocol_r_scope
     - node.type.article
     - node.type.collection
     - node.type.community
@@ -19,6 +17,7 @@ dependencies:
     - options
     - taxonomy
     - user
+    - views_bulk_operations
 id: mukurtu_manage_all_content
 label: 'Mukurtu Manage All Content'
 module: views
@@ -165,6 +164,91 @@ display:
       row:
         type: fields
       fields:
+        views_bulk_operations_bulk_form:
+          id: views_bulk_operations_bulk_form
+          table: views
+          field: views_bulk_operations_bulk_form
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Views bulk operations'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          batch: true
+          batch_size: 10
+          form_step: true
+          buttons: false
+          clear_on_exposed: true
+          action_title: Action
+          selected_actions:
+            31:
+              action_id: node_assign_owner_action
+              preconfiguration:
+                add_confirmation: 0
+            34:
+              action_id: node_publish_action
+              preconfiguration:
+                add_confirmation: 0
+            35:
+              action_id: node_save_action
+              preconfiguration:
+                add_confirmation: 0
+            38:
+              action_id: node_unpublish_action
+              preconfiguration:
+                add_confirmation: 0
+            40:
+              action_id: views_bulk_operations_delete_entity
+              preconfiguration:
+                label_override: 'Delete Content'
+            41:
+              action_id: 'entity:publish_action:node'
+              preconfiguration:
+                add_confirmation: 0
+            43:
+              action_id: 'entity:unpublish_action:node'
+              preconfiguration:
+                add_confirmation: 0
+          force_selection_info: false
+          plugin_id: views_bulk_operations_bulk_form
         title:
           id: title
           table: node_field_data
@@ -995,9 +1079,9 @@ display:
       relationships: {  }
       arguments: {  }
       display_extenders: {  }
-      use_ajax: true
+      use_ajax: false
     cache_metadata:
-      max-age: -1
+      max-age: 0
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
@@ -1020,7 +1104,7 @@ display:
       display_extenders: {  }
       display_description: ''
     cache_metadata:
-      max-age: -1
+      max-age: 0
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
