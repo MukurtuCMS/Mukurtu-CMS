@@ -5,3 +5,10 @@ mukurtu_roundtrip.import_csv:
   menu_name: mukurtu
   route_name: mukurtu_roundtrip.import_csv
   weight: 900
+mukurtu_roundtrip.import:
+  title: 'Import Content'
+  description: 'Batch import'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_roundtrip.import_start
+  weight: 800

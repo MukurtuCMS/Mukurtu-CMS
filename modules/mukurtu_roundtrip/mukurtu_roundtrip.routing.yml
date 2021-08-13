@@ -13,3 +13,17 @@ mukurtu_roundtrip.tabulator_ajax_file_update:
   requirements:
     _permission: 'administer content'
     _format: json
+mukurtu_roundtrip.import_start:
+  path: '/import'
+  defaults:
+    _form: '\Drupal\mukurtu_roundtrip\Form\MultiStepImport\MukurtuImportStartForm'
+    _title: 'Import Content'
+  requirements:
+    _permission: 'administer content'
+mukurtu_roundtrip.import_upload_summary:
+  path: '/import/upload-summary'
+  defaults:
+    _form: '\Drupal\mukurtu_roundtrip\Form\MultiStepImport\MukurtuImportUploadSummaryForm'
+    _title: 'Import - Files to Upload'
+  requirements:
+    _permission: 'administer content'
