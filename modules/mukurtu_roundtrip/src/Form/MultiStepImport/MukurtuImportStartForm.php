@@ -29,7 +29,7 @@ class MukurtuImportStartForm extends MukurtuImportFormBase {
     $form = parent::buildForm($form, $form_state);
 
     // Get the files if this is part of an existing import session.
-    $files = $this->store->get('files_to_import');
+    $files = $this->importer->getInputFiles();
 
     // File upload widget.
     $form['initial_import_files'] = [
@@ -76,7 +76,7 @@ class MukurtuImportStartForm extends MukurtuImportFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $files = $form_state->getValue('initial_import_files');
     $processed_files = $this->processUploadedFiles($files);
-    $this->store->set('files_to_import', $processed_files);
+    $this->importer->setInputFiles($processed_files);
 
     $form_state->setRedirect('mukurtu_roundtrip.import_upload_summary');
   }

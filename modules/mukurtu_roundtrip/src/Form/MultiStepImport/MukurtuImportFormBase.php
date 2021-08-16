@@ -9,7 +9,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-
+use Drupal\mukurtu_roundtrip\Services\Importer;
 abstract class MukurtuImportFormBase extends FormBase {
 
   /**
@@ -27,10 +27,14 @@ abstract class MukurtuImportFormBase extends FormBase {
    */
   protected $store;
 
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, AccountInterface $current_user) {
-    $this->tempStoreFactory = $temp_store_factory;
+  protected $importer;
+
+  //public function __construct(PrivateTempStoreFactory $temp_store_factory, AccountInterface $current_user) {
+  public function __construct($importer) {
+    /* $this->tempStoreFactory = $temp_store_factory;
     $this->currentUser = $current_user;
-    $this->store = $this->tempStoreFactory->get('mukurtu_import_form');
+    $this->store = $this->tempStoreFactory->get('mukurtu_import_form'); */
+    $this->importer = $importer;
   }
 
   /**
@@ -38,8 +42,9 @@ abstract class MukurtuImportFormBase extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('user.private_tempstore'),
-      $container->get('current_user')
+      $container->get('mukurtu_roundtrip.importer')
+      /* $container->get('user.private_tempstore'),
+      $container->get('current_user') */
     );
   }
 
