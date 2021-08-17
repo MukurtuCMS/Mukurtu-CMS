@@ -13,4 +13,12 @@ services:
       - { name: normalizer, priority: 10 }
   mukurtu_roundtrip.importer:
     class: Drupal\mukurtu_roundtrip\Services\Importer
-    arguments: ['@tempstore.private', '@current_user', '@entity_type.manager']
+    arguments: ['@tempstore.private', '@current_user', '@entity_type.manager', '@file_system', '@mukurtu_roundtrip.import_file_processor_manager']
+  mukurtu_roundtrip.import_file_processor_manager:
+    class: Drupal\mukurtu_roundtrip\Services\MukurtuImportFileProcessorManager
+    tags:
+      - { name: service_collector, tag: mukurtu_import_processor, call: addProcessor }
+  mukurtu_roundtrip.mukurtu_csv_import_processor:
+    class: Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuCsvImportFileProcessor
+    tags:
+      - { name: mukurtu_import_processor, priority: 0 }

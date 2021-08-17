@@ -24,6 +24,6 @@ mukurtu_roundtrip.import_upload_summary:
   path: '/import/upload-summary'
   defaults:
     _form: '\Drupal\mukurtu_roundtrip\Form\MultiStepImport\MukurtuImportUploadSummaryForm'
-    _title: 'Import - Files to Upload'
+    _title: 'Import - Files to Import'
   requirements:
     _permission: 'administer content'

@@ -12,7 +12,15 @@ interface MukurtuImportFileProcessorInterface {
    * @return string
    *   Plain text name of the processor.
    */
-  public function getName();
+  public static function getName();
+
+  /**
+   * Returns the machine name of the processor.
+   *
+   * @return string
+   *   Machine name of the processor.
+   */
+  public static function id();
 
   /**
    * Checks if the processor supports a given file.
@@ -23,7 +31,7 @@ interface MukurtuImportFileProcessorInterface {
    * @return bool
    *   Returns true if supported, false if not supported.
    */
-  public function supportsFileType(File $file);
+  public function supportsFile(File $file);
 
   /**
    * Process the given file.

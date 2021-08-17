@@ -32,6 +32,10 @@ class MukurtuImportStartForm extends MukurtuImportFormBase {
     $files = $this->importer->getInputFiles();
 
     // File upload widget.
+    $form['initial_import_files_helper_text'] = [
+      '#plain_text' => $this->t("Upload your files or compressed archives below. Import files contained in compressed archives (e.g., Zip) must be at the top level of the archive."),
+    ];
+
     $form['initial_import_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Select files to import'),
@@ -67,7 +71,7 @@ class MukurtuImportStartForm extends MukurtuImportFormBase {
    * Take the fids and process as needed (e.g., uncompress).
    */
   private function processUploadedFiles($files) {
-    return $files;
+    return $this->importer->setup($files);
   }
 
   /**
@@ -75,8 +79,8 @@ class MukurtuImportStartForm extends MukurtuImportFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $files = $form_state->getValue('initial_import_files');
-    $processed_files = $this->processUploadedFiles($files);
-    $this->importer->setInputFiles($processed_files);
+    $this->importer->setInputFiles($files);
+    $this->importer->setup();
 
     $form_state->setRedirect('mukurtu_roundtrip.import_upload_summary');
   }

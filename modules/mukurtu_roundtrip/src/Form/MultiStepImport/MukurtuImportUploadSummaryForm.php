@@ -20,15 +20,15 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
     $form = parent::buildForm($form, $form_state);
 
     // These are the files to import.
-    $files = $this->importer->getInputFiles();
+    $files = $this->importer->getImportFiles();
     $form[] = $this->buildTable($files);
 
 
     // Submit for validation button.
     $form['actions']['#type'] = 'actions';
-    $form['actions']['submit'] = array(
+    $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Validate'),
+      '#value' => $this->t('Next'),
       '#button_type' => 'primary',
 //      '#submit' => ['::submitFormValidateImport'],
 /*       '#states' => [
@@ -36,12 +36,40 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
           ':input[name="import_file[fids]"]' => ['filled' => TRUE],
         ],
       ], */
-    );
+    ];
     return $form;
+  }
+
+  /**
+   * Build the processor select control.
+   *
+   * @param array $options
+   * @return array
+   */
+  private function processorSelect(array $options) {
+    // For 2 or more options, allow user to select.
+    if (count($options) > 1) {
+      return [
+        '#type' => 'select',
+        '#options' => $options,
+      ];
+    }
+
+    // For 1 (or 0?) disable the select so the user knows
+    // they can't change it.
+    return [
+      '#type' => 'select',
+      '#options' => $options,
+      '#attributes' => ['disabled' => 'disabled'],
+    ];
   }
 
   private function buildTable($files) {
     $table = [];
+
+    if (empty($files)) {
+      return $table;
+    }
 
     $storage = \Drupal::entityTypeManager()->getStorage('file');
     $fileEntities = $storage->loadMultiple($files);
@@ -49,10 +77,10 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
     // Build table.
     $table['import_files'] = [
       '#type' => 'table',
-      '#caption' => $this->t('Import Files'),
+      '#caption' => $this->t('Files will be imported in order, top to bottom (lowest weight first).'),
       '#header' => [
         $this->t('Import File'),
-        $this->t('Import Processor'),
+        $this->t('Import Format'),
         $this->t('Weight'),
       ],
       '#empty' => $this->t('No import files provided.'),
@@ -72,17 +100,16 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
       $table['import_files'][$id]['#attributes']['class'][] = 'draggable';
       $table['import_files'][$id]['#weight'] = $weight;
 
-      // Label col.
+      // File names.
       $table['import_files'][$id]['label'] = [
         '#plain_text' => $entity->getFileName(),
       ];
 
-      // ID col.
-      $table['import_files'][$id]['id'] = [
-        '#plain_text' => $entity->id(),
-      ];
+      // Processor options.
+      $options = $this->importer->getAvailableProcessors($entity);
+      $table['import_files'][$id]['processor'] = $this->processorSelect($options);
 
-      // Weight col.
+      // Weights.
       $table['import_files'][$id]['weight'] = [
         '#type' => 'weight',
         '#title' => $this->t('Weight for @title', ['@title' => $entity->getFileName()]),
@@ -99,7 +126,7 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    dpm($form_state->getValue('import_files'));
+    //dpm($form_state->getValue('import_files'));
     //$form_state->setRedirect('mukurtu_import.import_upload_summary');
   }
 
