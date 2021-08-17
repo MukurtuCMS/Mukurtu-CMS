@@ -31,11 +31,13 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
       '#value' => $this->t('Next'),
       '#button_type' => 'primary',
 //      '#submit' => ['::submitFormValidateImport'],
-/*       '#states' => [
-        'visible' => [
-          ':input[name="import_file[fids]"]' => ['filled' => TRUE],
-        ],
-      ], */
+    ];
+
+    $form['actions']['back'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Back'),
+      '#button_type' => 'primary',
+      '#submit' => ['::submitFormBack'],
     ];
     return $form;
   }
@@ -47,21 +49,14 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
    * @return array
    */
   private function processorSelect(array $options) {
-    // For 2 or more options, allow user to select.
-    if (count($options) > 1) {
+    if (count($options) > 0) {
       return [
         '#type' => 'select',
         '#options' => $options,
       ];
     }
 
-    // For 1 (or 0?) disable the select so the user knows
-    // they can't change it.
-    return [
-      '#type' => 'select',
-      '#options' => $options,
-      '#attributes' => ['disabled' => 'disabled'],
-    ];
+    return [];
   }
 
   private function buildTable($files) {
@@ -126,8 +121,20 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    //dpm($form_state->getValue('import_files'));
+    $files = $form_state->getValue('import_files');
+    $import_list = [];
+    foreach ($files as $fid => $values) {
+      if (isset($values['processor'])) {
+        $import_list[] = ['id' => $fid, 'processor' => $values['processor']];
+      }
+    }
+
+    $this->importer->importMultiple($import_list);
     //$form_state->setRedirect('mukurtu_import.import_upload_summary');
+  }
+
+  public function submitFormBack(array &$form, FormStateInterface $form_state) {
+    $form_state->setRedirect('mukurtu_roundtrip.import_start');
   }
 
 }

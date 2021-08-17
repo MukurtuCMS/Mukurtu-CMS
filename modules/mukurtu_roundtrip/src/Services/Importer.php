@@ -139,8 +139,36 @@ class Importer {
     $this->store->set('user_input_files', []);
   }
 
-  public function import(array $fids) {
+  public function import($fid, $processor_id) {
+    $import_processor = $this->import_file_process_manager->getProcessorById($processor_id);
+    $import_files = $this->getImportFiles();
 
+    // Only import if we have a processor and the fid is in the
+    // list of files we processed earlier.
+    if ($import_processor && in_array($fid, $import_files)) {
+      // Load the import file entity.
+      $storage = $this->entity_manager->getStorage('file');
+      $importFile = $storage->load($fid);
+
+      // Build the context.
+      $context = [];
+
+      // Process the file.
+      $processed_file = $import_processor->process($importFile, $context);
+
+      // File is ready for deserializing.
+      dpm("import: {$processed_file->id()} via $processor_id");
+    } else {
+      dpm('add no import processor error handler');
+    }
+  }
+
+  public function importMultiple(array $input) {
+    foreach ($input as $importFile) {
+      if (isset($importFile['id']) && isset($importFile['processor'])) {
+        $this->import($importFile['id'], $importFile['processor']);
+      }
+    }
   }
 
 }

@@ -39,4 +39,13 @@ class MukurtuImportFileProcessorManager {
     return $valid_processors;
   }
 
+  public function getProcessorById($id) {
+    foreach ($this->sortedProcessors as $processor) {
+      if ($processor->id() === $id) {
+        return $processor;
+      }
+    }
+    return NULL;
+  }
+
 }
