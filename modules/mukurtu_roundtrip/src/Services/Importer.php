@@ -8,7 +8,10 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuCsvImportFileProcessor;
+use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuImportFileProcessorResult;
 use Drupal\mukurtu_roundtrip\Services\MukurtuImportFileProcessorManager;
+use Exception;
+use Symfony\Component\Serializer\SerializerInterface;
 use ZipArchive;
 
 class Importer {
@@ -37,19 +40,22 @@ class Importer {
    */
   protected $file_system;
 
+  protected $serializer;
+
   protected $import_file_process_manager;
 
   protected $basepath;
 
   protected $processors;
 
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, AccountInterface $current_user, EntityTypeManagerInterface $entity_manager, FileSystemInterface $file_system, MukurtuImportFileProcessorManager $import_file_process_manager) {
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, AccountInterface $current_user, EntityTypeManagerInterface $entity_manager, FileSystemInterface $file_system, MukurtuImportFileProcessorManager $import_file_process_manager, SerializerInterface $serializer) {
     $this->tempStoreFactory = $temp_store_factory;
     $this->currentUser = $current_user;
     $this->store = $this->tempStoreFactory->get('mukurtu_roundtrip_importer');
     $this->entity_manager = $entity_manager;
     $this->file_system = $file_system;
     $this->import_file_process_manager = $import_file_process_manager;
+    $this->serializer = $serializer;
     $this->basepath = 'private://mukurtu_importer/' . $this->currentUser->id();
     $this->file_system->prepareDirectory($this->basepath);
 
@@ -78,6 +84,18 @@ class Importer {
 
   protected function setBatchChunks($chunks) {
     $this->store->set('batch_chunks', $chunks);
+  }
+
+  public function getValidationViolations() {
+    return $this->store->get('import_violations');
+  }
+
+  protected function setValidationViolations($violations) {
+    $this->store->set('import_violations', $violations);
+  }
+
+  protected function getContext() {
+    return [];
   }
 
   protected function unzipImportFile(File $zipFile) {
@@ -121,16 +139,55 @@ class Importer {
   }
 
   /**
+   * Purge any files that aren't the current input files from the import space.
+   */
+  protected function reset() {
+    // Build a list of input URIs to keep.
+    $inputFiles = $this->getInputFiles();
+    $storage = $this->entity_manager->getStorage('file');
+    $fileEntities = $storage->loadMultiple($inputFiles);
+    $inputUri = [];
+    foreach ($fileEntities as $file) {
+      $inputUri[] = $file->getFileUri();
+    }
+
+    // Clear the violation list.
+    $this->setValidationViolations([]);
+
+    // Search our import space and delete anything not in that list.
+    $rawFiles = $this->file_system->scanDirectory($this->basepath, '/.*/', ['recurse' => FALSE]);
+    foreach ($rawFiles as $uri => $rawFile) {
+      if (!in_array($inputUri, $uri)) {
+        try {
+          if (is_file($this->file_system->realpath($uri))) {
+            $this->file_system->delete($uri);
+          }
+          elseif (is_dir($this->file_system->realpath($uri))) {
+            $this->file_system->deleteRecursive($uri);
+          }
+        } catch (Exception $e) {
+          dpm($e);
+        }
+      }
+    }
+  }
+
+  /**
    * Take initial input files and unpack/copy as needed.
    */
   public function setup() {
+    $this->reset();
     $inputFiles = $this->getInputFiles();
     if (!empty($inputFiles)) {
       $storage = $this->entity_manager->getStorage('file');
       $fileEntities = $storage->loadMultiple($inputFiles);
       foreach ($fileEntities as $entity) {
+        // Unpack Zip files.
         if ($entity->get('filemime')->value == 'application/zip') {
           $this->unzipImportFile($entity);
+        } else {
+          // Copy single files.
+          $this->file_system->copy($entity->getFileUri(), $this->basepath);
         }
       }
     }
@@ -140,12 +197,12 @@ class Importer {
     return $setupFiles;
   }
 
-  protected function reset() {
+/*   protected function reset() {
     // TODO: Delete temp files?
 
     // Reset our variables.
     $this->store->set('user_input_files', []);
-  }
+  } */
 
   public function import($fid, $processor_id) {
     $import_processor = $this->import_file_process_manager->getProcessorById($processor_id);
@@ -159,23 +216,81 @@ class Importer {
       $importFile = $storage->load($fid);
 
       // Build the context.
-      $context = [];
+      $context = $this->getContext();
 
       // Process the file.
       $processed_file = $import_processor->process($importFile, $context);
 
       // File is ready for deserializing.
-      dpm("import: {$processed_file->id()} via $processor_id");
+      //dpm("import: {$processed_file->id()} via $processor_id");
     } else {
       dpm('add no import processor error handler');
     }
   }
 
-  public function batchValidation($fid, $processor_id) {
-    dpm("batch validate($fid, $processor_id)");
+  /**
+   * Batch validation operation callback.
+   *
+   * @param int $fid
+   *   The file ID of the file to validate.
+   * @param string $processor_fn
+   *   The name of the MukurtuImportFileProcessor process function.
+   *
+   * @return void
+   */
+  public static function batchValidation($fid, $processor_fn) {
+    // The Importer object won't exist when working in the Batch API, so we
+    // can't use dependency injection here.
+    $storage = \Drupal::entityTypeManager()->getStorage('file');
+    $serializer = \Drupal::service('serializer');
+    $tempstore = \Drupal::service('tempstore.private');
+    $store = $tempstore->get('mukurtu_roundtrip_importer');
+    //$import_file_process_manager = \Drupal::service('mukurtu_roundtrip.import_file_processor_manager');
+
+    try {
+      $file = $storage->load($fid);
+      $fileViolations = $store->get('import_violations');
+      //$import_processor = $import_file_process_manager->getProcessorById($processor_id);
+      //dpm($import_processor);
+      $context = [];
+
+      // Should this be array of class/content?
+      //$result = $import_processor->process($file, $context);
+      $result = call_user_func($processor_fn, $file, $context);
+
+      $entities = $serializer->deserialize($result->getData(), $result->getClass(), $result->getFormat(), $result->getContext());
+      foreach ($entities as $entity) {
+        $violations = $entity->validate();
+        // If no violations, save entity to file for later actual import?
+        if ($violations->count() == 0) {
+          dpm("{$entity->getTitle()} is valid dude");
+        } else {
+          foreach ($violations as $violation) {
+            $fileViolations[$fid][] = ['filename' => $file->getFileName(), 'message' => $violation->getMessage(), 'propertyPath' => $violation->getPropertyPath()];
+             //dpm($violation->getMessage() . " " . $violation->getPropertyPath());
+          }
+        }
+      }
+
+      // Update saved violations.
+      $store->set('import_violations', $fileViolations);
+    } catch (Exception $e) {
+      dpm($e);
+    }
   }
 
-  public function batchImport($fid, $processor_id) {
+  /**
+   * Batch import operation callback.
+   *
+   * @param int $fid
+   *   The file ID of the file to import.
+   * @param string $processor_id
+   *   The machine name of the MukurtuImportFileProcessor to use to process
+   *   the file.
+   *
+   * @return void
+   */
+  public static function batchImport($fid, $processor_id) {
     dpm("batch import($fid, $processor_id)");
   }
 
@@ -201,7 +316,7 @@ class Importer {
         if ($import_processor && $file) {
           $chunks = $import_processor->chunkForBatch($file, $size);
           foreach ($chunks as $chunk) {
-            $operations[] = [['Drupal\mukurtu_roundtrip\Services\Importer', 'batchValidation'], [$chunk, $importFile['processor']]];
+            $operations[] = [['Drupal\mukurtu_roundtrip\Services\Importer', 'batchValidation'], [$chunk, get_class($import_processor). "::process"]];
             $chunk_inputs[] = ['id' => $chunk, 'processor' => $importFile['processor']];
           }
         }

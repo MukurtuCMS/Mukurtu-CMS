@@ -18,14 +18,33 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
+    $allValid = TRUE;
+
+    $violationsByFile = $this->importer->getValidationViolations();
+    foreach ($violationsByFile as $fid => $violations) {
+      if (!empty($violations)) {
+        foreach ($violations as $violation) {
+          // Temp.
+          $violationMessage = $violation['filename'] . ': ' . $violation['message'] . ' for ' . $violation['propertyPath'];
+          $form['violations'][$fid][] = ['#plain_text' => $violationMessage];
+        }
+        $allValid = FALSE;
+      }
+    }
 
     // Submit for import button.
     $form['actions']['#type'] = 'actions';
+
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Import'),
       '#button_type' => 'primary',
+      '#attributes' => [],
     ];
+
+    if (!$allValid) {
+      $form['actions']['submit']['#attributes']['disabled'] = 'disabled';
+    }
 
     // Back button.
     $form['actions']['back'] = [
@@ -50,7 +69,7 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
       'error_message' => $this->t('An error occurred during while batch importing the files.'),
     ];
     batch_set($batch);
-    //$form_state->setRedirect('mukurtu_roundtrip.import_validation_complete');
+    $form_state->setRedirect('mukurtu_roundtrip.import_complete');
   }
 
   public function submitFormBack(array &$form, FormStateInterface $form_state) {

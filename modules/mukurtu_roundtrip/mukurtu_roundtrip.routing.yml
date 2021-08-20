@@ -34,3 +34,10 @@ mukurtu_roundtrip.import_validation_complete:
     _title: 'Import - Validation'
   requirements:
     _permission: 'administer content'
+mukurtu_roundtrip.import_complete:
+  path: '/import/finished'
+  defaults:
+    _form: '\Drupal\mukurtu_roundtrip\Form\MultiStepImport\MukurtuImportBatchImportCompleteForm'
+    _title: 'Import - Summary'
+  requirements:
+    _permission: 'administer content'

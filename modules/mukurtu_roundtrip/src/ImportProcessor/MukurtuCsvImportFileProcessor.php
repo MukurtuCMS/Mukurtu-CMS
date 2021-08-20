@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_roundtrip\ImportProcessor;
 
 use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuImportFileProcessorInterface;
+use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuImportFileProcessorResult;
 use Drupal\file\Entity\File;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 
@@ -29,8 +30,11 @@ class MukurtuCsvImportFileProcessor implements MukurtuImportFileProcessorInterfa
     return [$file->id()];
   }
 
-  public function process(File $file, array $context = []) {
-    return $file;
+  public static function process(File $file, array $context = []) {
+    $data = file_get_contents($file->getFileUri());
+    $class = 'Drupal\node\Entity\Node';
+    $result = new MukurtuImportFileProcessorResult($data, $class, 'csv', $context);
+    return $result;
   }
 
 }

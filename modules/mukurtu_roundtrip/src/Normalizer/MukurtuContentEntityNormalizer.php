@@ -66,13 +66,30 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
     return $format === static::FORMAT && $data instanceof ContentEntityInterface;
   }
 
+  protected function mapRow($headers, $row) {
+    $mappedRow = [];
+    foreach ($headers as $delta => $fieldName) {
+      $mappedRow[$headers[$delta]] = $row[$delta];
+    }
+    return $mappedRow;
+  }
+
   /**
    * {@inheritdoc}
    */
   public function denormalize($data, $class, $format = NULL, array $context = []) {
+    $use_headers = TRUE;
+    $headers = [];
     $entities = [];
 
-    foreach ($data as $row) {
+    foreach ($data as $rawRow) {
+      // Grab the headers.
+      if ($use_headers && empty($headers)) {
+        $headers = $rawRow;
+        continue;
+      }
+
+      $row = $this->mapRow($headers, $rawRow);
       $entity = $this->getEntity($row);
 
       foreach ($row as $field_name => $field_data) {

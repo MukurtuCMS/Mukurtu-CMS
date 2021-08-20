@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_roundtrip\ImportProcessor;
 
 use Drupal\file\Entity\File;
+use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuImportFileProcessorResult;
 
 interface MukurtuImportFileProcessorInterface {
 
@@ -54,9 +55,9 @@ interface MukurtuImportFileProcessorInterface {
    * @param array $context
    *   The importer context.
    *
-   * @return \Drupal\file\Entity\File
+   * @return MukurtuImportFileProcessorResult[]
    *   Return the processed file.
    */
-  public function process(File $file, array $context = []);
+  public static function process(File $file, array $context = []);
 
 }

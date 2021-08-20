@@ -18,7 +18,8 @@ class MukurtuImportStartForm extends MukurtuImportFormBase {
    */
   private function getValidExtensions() {
     // TODO: This should eventually be computed.
-    return ['zip', 'json', 'csv'];
+    $extensions = ['zip', 'json', 'csv'];
+    return implode(" ", $extensions);
   }
 
   /**
@@ -33,7 +34,7 @@ class MukurtuImportStartForm extends MukurtuImportFormBase {
 
     // File upload widget.
     $form['initial_import_files_helper_text'] = [
-      '#plain_text' => $this->t("Upload your files or compressed archives below. Import files contained in compressed archives (e.g., Zip) must be at the top level of the archive."),
+      '#plain_text' => $this->t("Upload your files or compressed archives below. Content import files (e.g., digital heritage) contained in compressed archives (e.g., Zip) must be at the top level of the archive. Binary files, such as media, can be at any level."),
     ];
 
     $form['initial_import_files'] = [
@@ -70,9 +71,9 @@ class MukurtuImportStartForm extends MukurtuImportFormBase {
   /**
    * Take the fids and process as needed (e.g., uncompress).
    */
-  private function processUploadedFiles($files) {
+/*   private function processUploadedFiles($files) {
     return $this->importer->setup($files);
-  }
+  } */
 
   /**
    * {@inheritdoc}
