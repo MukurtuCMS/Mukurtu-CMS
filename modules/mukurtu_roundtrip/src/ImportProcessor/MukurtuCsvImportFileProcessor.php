@@ -25,6 +25,10 @@ class MukurtuCsvImportFileProcessor implements MukurtuImportFileProcessorInterfa
     return FALSE;
   }
 
+  public function chunkForBatch(File $file, int $size) {
+    return [$file->id()];
+  }
+
   public function process(File $file, array $context = []) {
     return $file;
   }

@@ -129,8 +129,17 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
       }
     }
 
-    $this->importer->importMultiple($import_list);
-    //$form_state->setRedirect('mukurtu_import.import_upload_summary');
+    //$this->importer->importMultiple($import_list);
+    $operations = $this->importer->getValidationBatchOperations($import_list, 10);
+    $batch = [
+      'title' => $this->t('Validating import files'),
+      'operations' => $operations,
+      'init_message' => $this->t('Reading the import files...'),
+      'progress_message' => $this->t('Processed @current out of @total files.'),
+      'error_message' => $this->t('An error occurred during while validating the files.'),
+    ];
+    batch_set($batch);
+    $form_state->setRedirect('mukurtu_roundtrip.import_validation_complete');
   }
 
   public function submitFormBack(array &$form, FormStateInterface $form_state) {

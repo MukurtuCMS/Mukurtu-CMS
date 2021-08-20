@@ -69,7 +69,15 @@ class Importer {
   }
 
   public function setImportFiles($files) {
-    return $this->store->set('import_files', $files);
+    $this->store->set('import_files', $files);
+  }
+
+  protected function getBatchChunks() {
+    return $this->store->get('batch_chunks');
+  }
+
+  protected function setBatchChunks($chunks) {
+    $this->store->set('batch_chunks', $chunks);
   }
 
   protected function unzipImportFile(File $zipFile) {
@@ -98,7 +106,7 @@ class Importer {
         $file = File::create([
           'uri' => $uri,
           'uid' => $this->currentUser->id(),
-          'status' => FILE_STATUS_TEMPORARY,
+          'status' => 0,
         ]);
         $file->save();
 
@@ -161,6 +169,60 @@ class Importer {
     } else {
       dpm('add no import processor error handler');
     }
+  }
+
+  public function batchValidation($fid, $processor_id) {
+    dpm("batch validate($fid, $processor_id)");
+  }
+
+  public function batchImport($fid, $processor_id) {
+    dpm("batch import($fid, $processor_id)");
+  }
+
+  /**
+   * Create a batch operations array for import file validation.
+   *
+   * @param array $inputs
+   *   An array of ['id' => file id, 'processor' => import processor]. Should probably make this its own class.
+   * @param int $size
+   *   Number of items to process per batch.
+   *
+   * @return array
+   *   Return the array of batch operations.
+   */
+  public function getValidationBatchOperations(array $inputs, $size) {
+    $operations = [];
+    $chunk_inputs = [];
+    foreach ($inputs as $importFile) {
+      if (isset($importFile['id']) && isset($importFile['processor'])) {
+        $import_processor = $this->import_file_process_manager->getProcessorById($importFile['processor']);
+        $storage = $this->entity_manager->getStorage('file');
+        $file = $storage->load($importFile['id']);
+        if ($import_processor && $file) {
+          $chunks = $import_processor->chunkForBatch($file, $size);
+          foreach ($chunks as $chunk) {
+            $operations[] = [['Drupal\mukurtu_roundtrip\Services\Importer', 'batchValidation'], [$chunk, $importFile['processor']]];
+            $chunk_inputs[] = ['id' => $chunk, 'processor' => $importFile['processor']];
+          }
+        }
+      }
+    }
+
+    // Save the chunks for later reference.
+    $this->setBatchChunks($chunk_inputs);
+
+    return $operations;
+  }
+
+  public function getImportBatchOperations() {
+    $operations = [];
+    $chunks = $this->getBatchChunks();
+    foreach ($chunks as $chunk) {
+      $operations[] = [
+        ['Drupal\mukurtu_roundtrip\Services\Importer', 'batchImport'], [$chunk['id'], $chunk['processor']],
+      ];
+    }
+    return $operations;
   }
 
   public function importMultiple(array $input) {

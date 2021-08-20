@@ -34,6 +34,19 @@ interface MukurtuImportFileProcessorInterface {
   public function supportsFile(File $file);
 
   /**
+   * Split a file into pieces for batch processing.
+   *
+   * @param \Drupal\file\Entity\File $file
+   *   The full input file to split.
+   * @param int $size
+   *   The number of items to include in each piece.
+   *
+   * @return array
+   *   Returns an array of File IDs.
+   */
+  public function chunkForBatch(File $file, int $size);
+
+  /**
    * Process the given file.
    *
    * @param \Drupal\file\Entity\File $file
