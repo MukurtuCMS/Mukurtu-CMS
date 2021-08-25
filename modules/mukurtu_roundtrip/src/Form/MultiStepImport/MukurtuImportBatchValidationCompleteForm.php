@@ -3,8 +3,11 @@
 namespace Drupal\mukurtu_roundtrip\Form\MultiStepImport;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 
 class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
+
+  protected $allValid = TRUE;
 
   /**
    * {@inheritdoc}.
@@ -20,16 +23,10 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
     $form = parent::buildForm($form, $form_state);
     $allValid = TRUE;
 
-    $violationsByFile = $this->importer->getValidationViolations();
-    foreach ($violationsByFile as $fid => $violations) {
-      if (!empty($violations)) {
-        foreach ($violations as $violation) {
-          // Temp.
-          $violationMessage = $violation['filename'] . ': ' . $violation['message'] . ' for ' . $violation['propertyPath'];
-          $form['violations'][$fid][] = ['#plain_text' => $violationMessage];
-        }
-        $allValid = FALSE;
-      }
+    // Build the report.
+    $validationReport = $this->importer->getValidationReport();
+    if (!empty($validationReport)) {
+      $form['validation_report'] = $this->reportToTables($validationReport);
     }
 
     // Submit for import button.
@@ -42,7 +39,7 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
       '#attributes' => [],
     ];
 
-    if (!$allValid) {
+    if (!$this->allValid) {
       $form['actions']['submit']['#attributes']['disabled'] = 'disabled';
     }
 
@@ -54,6 +51,72 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
       '#submit' => ['::submitFormBack'],
     ];
     return $form;
+  }
+
+  protected function reportToTables($report) {
+    $tables = [];
+    foreach ($report as $fid => $result) {
+      $file = $this->fileStorage->load($fid);
+      if (!empty($result)) {
+        $table = [
+          '#type' => 'table',
+          '#caption' => $this->t('Validation results from file: @filename', ['@filename' => $file->getFileName()]),
+          '#header' => [
+            $this->t('Title'),
+            $this->t('Validation Status'),
+            $this->t("Actions"),
+          ],
+        ];
+
+        // Do violations first.
+        if (!empty($result['invalid'])) {
+          // Flag that we have some validation violations.
+          $this->allValid = FALSE;
+
+          foreach ($result['invalid'] as $index => $invalid) {
+            $entity = $invalid['entity'];
+            $violations = $invalid['violations'];
+            $violation_count = count($violations);
+
+            $row = [];
+            $row['title'] = [
+              '#plain_text' => $entity->getTitle(),
+            ];
+            $row['validation_status'] = [
+              '#plain_text' => $this->t('@num violation', ['@num' => $violation_count]),
+            ];
+
+            $link = Link::createFromRoute($this->t("View Details"), 'mukurtu_roundtrip.entity_validation_details', ['fid' => $fid, 'index' => $index]);
+            $row['actions'] = $link->toRenderable();
+            $table[] = $row;
+          }
+        }
+
+        if (!empty($result['valid'])) {
+          foreach ($result['valid'] as $entity) {
+            $row = [];
+            $row['title'] = [
+              '#plain_text' => $entity->getTitle(),
+            ];
+            $row['validation_status'] = [
+              '#plain_text' => 'valid',
+            ];
+            $row['actions'] = [
+              '#plain_text' => 'actions',
+            ];
+            $table[] = $row;
+          }
+        }
+/*         foreach ($violations as $violation) {
+          // Temp.
+          $violationMessage = $violation['filename'] . ': ' . $violation['message'] . ' for ' . $violation['propertyPath'];
+          $form['violations'][$fid][] = ['#plain_text' => $violationMessage];
+        } */
+        $tables[] = $table;
+      }
+    }
+
+    return $tables;
   }
 
   /**

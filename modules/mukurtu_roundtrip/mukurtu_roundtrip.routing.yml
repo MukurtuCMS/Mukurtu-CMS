@@ -41,3 +41,10 @@ mukurtu_roundtrip.import_complete:
     _title: 'Import - Summary'
   requirements:
     _permission: 'administer content'
+mukurtu_roundtrip.entity_validation_details:
+  path: '/import/validation-details/{fid}/{index}'
+  defaults:
+    _form: '\Drupal\mukurtu_roundtrip\Form\MultiStepImport\MukurtuImportEntityValidationDetailsForm'
+    _title: 'Import - Validation Details'
+  requirements:
+    _permission: 'administer content'

@@ -29,12 +29,19 @@ abstract class MukurtuImportFormBase extends FormBase {
 
   protected $importer;
 
+  protected $entityTypeManager;
+  protected $fileStorage;
+  protected $url;
+
   //public function __construct(PrivateTempStoreFactory $temp_store_factory, AccountInterface $current_user) {
-  public function __construct($importer) {
+  public function __construct($importer, $entity_type_manager, $url) {
     /* $this->tempStoreFactory = $temp_store_factory;
     $this->currentUser = $current_user;
     $this->store = $this->tempStoreFactory->get('mukurtu_import_form'); */
     $this->importer = $importer;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->fileStorage = $this->entityTypeManager->getStorage('file');
+    $this->url = $url;
   }
 
   /**
@@ -42,7 +49,9 @@ abstract class MukurtuImportFormBase extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('mukurtu_roundtrip.importer')
+      $container->get('mukurtu_roundtrip.importer'),
+      $container->get('entity_type.manager'),
+      $container->get('url_generator')
       /* $container->get('user.private_tempstore'),
       $container->get('current_user') */
     );

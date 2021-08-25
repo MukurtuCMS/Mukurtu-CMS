@@ -21,8 +21,8 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
 
     // These are the files to import.
     $files = $this->importer->getImportFiles();
-    $form[] = $this->buildTable($files);
-
+    $table = $this->buildTable($files);
+    $form[] = $table;
 
     // Submit for validation button.
     $form['actions']['#type'] = 'actions';
@@ -30,8 +30,11 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
       '#type' => 'submit',
       '#value' => $this->t('Next'),
       '#button_type' => 'primary',
-//      '#submit' => ['::submitFormValidateImport'],
     ];
+
+    if ($table['import_files']['count'] <= 0) {
+      $form['actions']['submit']['#attributes']['disabled'] = 'disabled';
+    }
 
     $form['actions']['back'] = [
       '#type' => 'submit',
@@ -66,8 +69,7 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
       return $table;
     }
 
-    $storage = \Drupal::entityTypeManager()->getStorage('file');
-    $fileEntities = $storage->loadMultiple($files);
+    $fileEntities = $this->fileStorage->loadMultiple($files);
 
     // Build table.
     $table['import_files'] = [
@@ -87,11 +89,13 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
           'group' => 'group-order-weight',
         ],
       ],
+      'count' => 0,
     ];
 
     // Build rows.
     $weight = 0;
     foreach ($fileEntities as $id => $entity) {
+      $table['import_files']['count'] += 1;
       $table['import_files'][$id]['#attributes']['class'][] = 'draggable';
       $table['import_files'][$id]['#weight'] = $weight;
 
@@ -131,6 +135,7 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
 
     //$this->importer->importMultiple($import_list);
     $operations = $this->importer->getValidationBatchOperations($import_list, 10);
+    $this->importer->resetValidationReport();
     $batch = [
       'title' => $this->t('Validating import files'),
       'operations' => $operations,

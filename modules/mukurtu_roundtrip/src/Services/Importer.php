@@ -86,12 +86,16 @@ class Importer {
     $this->store->set('batch_chunks', $chunks);
   }
 
-  public function getValidationViolations() {
-    return $this->store->get('import_violations');
+  public function getValidationReport() {
+    return $this->store->get('import_validation_report');
   }
 
-  protected function setValidationViolations($violations) {
-    $this->store->set('import_violations', $violations);
+  protected function setValidationReport($report) {
+    $this->store->set('import_validation_report', $report);
+  }
+
+  public function resetValidationReport() {
+    $this->setValidationReport([]);
   }
 
   protected function getContext() {
@@ -152,7 +156,7 @@ class Importer {
     }
 
     // Clear the violation list.
-    $this->setValidationViolations([]);
+    $this->resetValidationReport();
 
     // Search our import space and delete anything not in that list.
     $rawFiles = $this->file_system->scanDirectory($this->basepath, '/.*/', ['recurse' => FALSE]);
@@ -245,17 +249,13 @@ class Importer {
     $serializer = \Drupal::service('serializer');
     $tempstore = \Drupal::service('tempstore.private');
     $store = $tempstore->get('mukurtu_roundtrip_importer');
-    //$import_file_process_manager = \Drupal::service('mukurtu_roundtrip.import_file_processor_manager');
 
     try {
       $file = $storage->load($fid);
-      $fileViolations = $store->get('import_violations');
-      //$import_processor = $import_file_process_manager->getProcessorById($processor_id);
-      //dpm($import_processor);
+      $report = $store->get('import_validation_report');
       $context = [];
 
       // Should this be array of class/content?
-      //$result = $import_processor->process($file, $context);
       $result = call_user_func($processor_fn, $file, $context);
 
       $entities = $serializer->deserialize($result->getData(), $result->getClass(), $result->getFormat(), $result->getContext());
@@ -263,17 +263,18 @@ class Importer {
         $violations = $entity->validate();
         // If no violations, save entity to file for later actual import?
         if ($violations->count() == 0) {
-          dpm("{$entity->getTitle()} is valid dude");
+          $report[$fid]['valid'][] = $entity;
         } else {
-          foreach ($violations as $violation) {
-            $fileViolations[$fid][] = ['filename' => $file->getFileName(), 'message' => $violation->getMessage(), 'propertyPath' => $violation->getPropertyPath()];
+          $report[$fid]['invalid'][] = ['entity' => $entity, 'violations' => $violations];
+          /* foreach ($violations as $violation) {
+            //$report[$fid][][] = ['filename' => $file->getFileName(), 'message' => $violation->getMessage(), 'propertyPath' => $violation->getPropertyPath()];
+            $report[$fid]['invalid'][] = $entity;
              //dpm($violation->getMessage() . " " . $violation->getPropertyPath());
-          }
+          } */
         }
       }
-
       // Update saved violations.
-      $store->set('import_violations', $fileViolations);
+      $store->set('import_validation_report', $report);
     } catch (Exception $e) {
       dpm($e);
     }
