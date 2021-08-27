@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_roundtrip\Form\MultiStepImport;
 
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
 
@@ -70,6 +71,7 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
     }
 
     $fileEntities = $this->fileStorage->loadMultiple($files);
+    $fileReport = $this->importer->getFileReport();
 
     // Build table.
     $table['import_files'] = [
@@ -99,10 +101,19 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
       $table['import_files'][$id]['#attributes']['class'][] = 'draggable';
       $table['import_files'][$id]['#weight'] = $weight;
 
+      $errors = isset($fileReport[$id]) ? implode("\n", $fileReport[$id]) : NULL;
+
       // File names.
-      $table['import_files'][$id]['label'] = [
-        '#plain_text' => $entity->getFileName(),
-      ];
+      if (!$errors) {
+        $table['import_files'][$id]['label'] = [
+          '#plain_text' => $entity->getFileName(),
+        ];
+      } else {
+        $table['import_files'][$id]['label'] = [
+          '#plain_text' => $entity->getFileName() . ": " . $errors,
+        ];
+        $table['import_files'][$id]['#attributes'] = ['class' => ['has-error']];
+      }
 
       // Processor options.
       $options = $this->importer->getAvailableProcessors($entity);
@@ -136,15 +147,33 @@ class MukurtuImportUploadSummaryForm extends MukurtuImportFormBase {
     //$this->importer->importMultiple($import_list);
     $operations = $this->importer->getValidationBatchOperations($import_list, 10);
     $this->importer->resetValidationReport();
+    $this->importer->resetFileReport();
     $batch = [
       'title' => $this->t('Validating import files'),
       'operations' => $operations,
       'init_message' => $this->t('Reading the import files...'),
       'progress_message' => $this->t('Processed @current out of @total files.'),
       'error_message' => $this->t('An error occurred during while validating the files.'),
+      'finished' => ['Drupal\mukurtu_roundtrip\Form\MultiStepImport\MukurtuImportUploadSummaryForm', 'afterBatchRedirect'],
     ];
     batch_set($batch);
-    $form_state->setRedirect('mukurtu_roundtrip.import_validation_complete');
+    //$form_state->setRedirect('mukurtu_roundtrip.import_validation_complete');
+  }
+
+  /**
+   * Batch 'finished' callback for file validation. No dependency injection available, very ugly.
+   */
+  public static function afterBatchRedirect($success, $results, $operations) {
+    $tempstore = \Drupal::service('tempstore.private');
+    $store = $tempstore->get('mukurtu_roundtrip_importer');
+    $file_report = $store->get('import_file_report');
+    if (empty($file_report)) {
+      // Redirect to entity validation form if no exceptions from the files.
+      //$form_state->setRedirect('mukurtu_roundtrip.import_validation_complete');
+      return new RedirectResponse(\Drupal\Core\Url::fromRoute('mukurtu_roundtrip.import_validation_complete')->toString());
+    } else {
+
+    }
   }
 
   public function submitFormBack(array &$form, FormStateInterface $form_state) {

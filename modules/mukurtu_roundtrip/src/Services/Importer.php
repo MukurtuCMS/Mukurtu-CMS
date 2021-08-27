@@ -11,6 +11,7 @@ use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuCsvImportFileProcessor;
 use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuImportFileProcessorResult;
 use Drupal\mukurtu_roundtrip\Services\MukurtuImportFileProcessorManager;
 use Exception;
+use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\SerializerInterface;
 use ZipArchive;
 
@@ -98,6 +99,24 @@ class Importer {
     $this->setValidationReport([]);
   }
 
+  public function getFileReport() {
+    return $this->store->get('import_file_report');
+  }
+
+  protected function setFileReport($report) {
+    $this->store->set('import_file_report', $report);
+  }
+
+  protected function addFileReportEntry($fid, $entry) {
+    $report = $this->getFileReport();
+    $report[$fid][] = $entry;
+    $this->setFileReport($report);
+  }
+
+  public function resetFileReport() {
+    $this->setFileReport([]);
+  }
+
   protected function getContext() {
     return [];
   }
@@ -157,6 +176,7 @@ class Importer {
 
     // Clear the violation list.
     $this->resetValidationReport();
+    $this->resetFileReport();
 
     // Search our import space and delete anything not in that list.
     $rawFiles = $this->file_system->scanDirectory($this->basepath, '/.*/', ['recurse' => FALSE]);
@@ -275,8 +295,15 @@ class Importer {
       }
       // Update saved violations.
       $store->set('import_validation_report', $report);
-    } catch (Exception $e) {
-      dpm($e);
+    }/*  catch (\Symfony\Component\Serializer\Exception\UnexpectedValueException $e) {
+      //dpm("Handled InvalidArgumentException");
+      $this->addFileReportEntry($fid, $e->getMessage());
+      //dpm($e->getMessage());
+    } */
+    catch (Exception $e) {
+      $report = $store->get('import_file_report');
+      $report[$fid][] = $e->getMessage();
+      $store->set('import_file_report', $report);
     }
   }
 
@@ -291,8 +318,27 @@ class Importer {
    *
    * @return void
    */
-  public static function batchImport($fid, $processor_id) {
-    dpm("batch import($fid, $processor_id)");
+  public static function batchImport($fid, $offset, $size) {
+    $tempstore = \Drupal::service('tempstore.private');
+    $store = $tempstore->get('mukurtu_roundtrip_importer');
+    $report = $store->get('import_validation_report');
+
+    if (!empty($report[$fid]['valid'])) {
+      $chunk = array_slice($report[$fid]['valid'], $offset, $size);
+      if (!empty($chunk)) {
+        foreach ($chunk as $delta => $entity) {
+          try {
+            $entity->save();
+            dpm("Unimplemented logging: imported {$entity->getTitle()}");
+            // log here.
+          } catch (Exception $e) {
+            dpm("Unimplemented logging: Failed to save entity given by file ID $fid");
+          }
+        }
+      }
+    }
+
+    //dpm("batch import($fid, $processor_id)");
   }
 
   /**
@@ -330,13 +376,21 @@ class Importer {
     return $operations;
   }
 
-  public function getImportBatchOperations() {
+  public function getImportBatchOperations($size = 10) {
     $operations = [];
-    $chunks = $this->getBatchChunks();
-    foreach ($chunks as $chunk) {
-      $operations[] = [
-        ['Drupal\mukurtu_roundtrip\Services\Importer', 'batchImport'], [$chunk['id'], $chunk['processor']],
-      ];
+    $report = $this->getValidationReport();
+
+    foreach ($report as $fid => $file_report) {
+      $total_size = count($file_report);
+      $offset = 0;
+      if (!empty($file_report['valid'])) {
+        for ($offset = 0; $offset <= $total_size; $offset += $size) {
+          $operations[] = [
+            ['Drupal\mukurtu_roundtrip\Services\Importer', 'batchImport'],
+            [$fid, $offset, $size],
+          ];
+        }
+      }
     }
     return $operations;
   }

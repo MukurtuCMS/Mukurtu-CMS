@@ -21,12 +21,13 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
-    $allValid = TRUE;
 
     // Build the report.
     $validationReport = $this->importer->getValidationReport();
     if (!empty($validationReport)) {
       $form['validation_report'] = $this->reportToTables($validationReport);
+    } else {
+      $this->allValid = FALSE;
     }
 
     // Submit for import button.
@@ -82,8 +83,10 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
             $row['title'] = [
               '#plain_text' => $entity->getTitle(),
             ];
+
+            $violation_text = $violation_count > 1 ? $this->t('@num errors', ['@num' => $violation_count]) : $this->t('@num error', ['@num' => $violation_count]);
             $row['validation_status'] = [
-              '#plain_text' => $this->t('@num violation', ['@num' => $violation_count]),
+              '#plain_text' => $violation_text,
             ];
 
             $link = Link::createFromRoute($this->t("View Details"), 'mukurtu_roundtrip.entity_validation_details', ['fid' => $fid, 'index' => $index]);
@@ -106,6 +109,9 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
             ];
             $table[] = $row;
           }
+        } else {
+          // No valid entities.
+          $this->allValid = FALSE;
         }
 /*         foreach ($violations as $violation) {
           // Temp.
