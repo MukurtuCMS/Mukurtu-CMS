@@ -64,6 +64,14 @@ class MukurtuImportEntityValidationDetailsForm extends MukurtuImportFormBase {
       //dpm($test);
     }
 
+    // Preview valid entity.
+    if (isset($report[$fid]['valid'][$index])) {
+      $entity = $report[$fid]['valid'][$index];
+      $view_builder = \Drupal::entityTypeManager()
+        ->getViewBuilder($entity->getEntityTypeId());
+      $form['entity'] = $view_builder->view($entity, 'preview');
+    }
+
     // Back button.
     $form['actions']['back'] = [
       '#type' => 'submit',

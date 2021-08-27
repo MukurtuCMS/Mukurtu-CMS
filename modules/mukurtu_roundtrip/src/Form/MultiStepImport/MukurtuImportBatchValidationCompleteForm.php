@@ -96,7 +96,7 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
         }
 
         if (!empty($result['valid'])) {
-          foreach ($result['valid'] as $entity) {
+          foreach ($result['valid'] as $index => $entity) {
             $row = [];
             $row['title'] = [
               '#plain_text' => $entity->getTitle(),
@@ -104,9 +104,9 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
             $row['validation_status'] = [
               '#plain_text' => 'valid',
             ];
-            $row['actions'] = [
-              '#plain_text' => 'actions',
-            ];
+
+            $link = Link::createFromRoute($this->t("Preview"), 'mukurtu_roundtrip.entity_validation_details', ['fid' => $fid, 'index' => $index]);
+            $row['actions'] = $link->toRenderable();
             $table[] = $row;
           }
         } else {
