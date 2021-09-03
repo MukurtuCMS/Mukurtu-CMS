@@ -60,13 +60,13 @@ class MukurtuImportEntityValidationDetailsForm extends MukurtuImportFormBase {
         $form['errors'] = $table;
       }
 
-     // $test = \Drupal::service('entity.form_builder')->getForm($entity, 'edit');
+      //$test = \Drupal::service('entity.form_builder')->getForm($entity, 'edit');
       //dpm($test);
     }
 
     // Preview valid entity.
-    if (isset($report[$fid]['valid'][$index])) {
-      $entity = $report[$fid]['valid'][$index];
+    if (isset($report[$fid]['valid'][$index]['entity'])) {
+      $entity = $report[$fid]['valid'][$index]['entity'];
       $view_builder = \Drupal::entityTypeManager()
         ->getViewBuilder($entity->getEntityTypeId());
       $form['entity'] = $view_builder->view($entity, 'preview');

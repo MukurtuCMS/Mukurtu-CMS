@@ -34,6 +34,10 @@ class MukurtuImportBatchImportCompleteForm extends MukurtuImportFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    // Clear the importer workspace.
+    $this->importer->reset();
+
+    // Go back to the start form.
     $form_state->setRedirect('mukurtu_roundtrip.import_start');
   }
 

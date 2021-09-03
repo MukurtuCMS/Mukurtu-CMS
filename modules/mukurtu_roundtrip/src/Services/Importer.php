@@ -12,6 +12,7 @@ use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuImportFileProcessorResult;
 use Drupal\mukurtu_roundtrip\Services\MukurtuImportFileProcessorManager;
 use Exception;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
+use Drupal\Core\File\Exception\NotRegularDirectoryException;
 use Symfony\Component\Serializer\SerializerInterface;
 use ZipArchive;
 
@@ -58,6 +59,8 @@ class Importer {
     $this->import_file_process_manager = $import_file_process_manager;
     $this->serializer = $serializer;
     $this->basepath = 'private://mukurtu_importer/' . $this->currentUser->id();
+
+    // Create the workspace for this user.
     $this->file_system->prepareDirectory($this->basepath);
 
     //$this->processors['text/csv'][] = new MukurtuCsvImportFileProcessor();
@@ -162,9 +165,18 @@ class Importer {
   }
 
   /**
+   * Completely reset the importer to greenfield.
+   */
+  public function reset() {
+    $this->setInputFiles([]);
+    $this->setBatchChunks([]);
+    $this->clearOldFiles();
+  }
+
+  /**
    * Purge any files that aren't the current input files from the import space.
    */
-  protected function reset() {
+  protected function clearOldFiles() {
     // Build a list of input URIs to keep.
     $inputFiles = $this->getInputFiles();
     $storage = $this->entity_manager->getStorage('file');
@@ -200,7 +212,7 @@ class Importer {
    * Take initial input files and unpack/copy as needed.
    */
   public function setup() {
-    $this->reset();
+    $this->clearOldFiles();
     $inputFiles = $this->getInputFiles();
     if (!empty($inputFiles)) {
       $storage = $this->entity_manager->getStorage('file');
@@ -211,7 +223,11 @@ class Importer {
           $this->unzipImportFile($entity);
         } else {
           // Copy single files.
-          $this->file_system->copy($entity->getFileUri(), $this->basepath);
+          try {
+            $this->file_system->copy($entity->getFileUri(), $this->basepath);
+          } catch (NotRegularDirectoryException $e) {
+            return [];
+          }
         }
       }
     }
@@ -283,7 +299,18 @@ class Importer {
         $violations = $entity->validate();
         // If no violations, save entity to file for later actual import?
         if ($violations->count() == 0) {
-          $report[$fid]['valid'][] = $entity;
+          $vid = NULL;
+          if (!$entity->isNew()) {
+            $vid = $entity->get('vid')->value;
+          }
+
+          // If the entity supports revisions, we'll make one.
+          if ($entity->getEntityType()->isRevisionable()) {
+            $entity->setNewRevision(TRUE);
+            $entity->setRevisionLogMessage("Updated via batch import. Input file: " . $file->getFileName());
+          }
+
+          $report[$fid]['valid'][] = ['entity' => $entity, 'vid' => $vid];
         } else {
           $report[$fid]['invalid'][] = ['entity' => $entity, 'violations' => $violations];
           /* foreach ($violations as $violation) {
@@ -326,8 +353,9 @@ class Importer {
     if (!empty($report[$fid]['valid'])) {
       $chunk = array_slice($report[$fid]['valid'], $offset, $size);
       if (!empty($chunk)) {
-        foreach ($chunk as $delta => $entity) {
+        foreach ($chunk as $delta => $importEntityRow) {
           try {
+            $entity = $importEntityRow['entity'];
             $entity->save();
             dpm("Unimplemented logging: imported {$entity->getTitle()}");
             // log here.

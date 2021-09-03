@@ -96,7 +96,8 @@ class MukurtuImportBatchValidationCompleteForm extends MukurtuImportFormBase {
         }
 
         if (!empty($result['valid'])) {
-          foreach ($result['valid'] as $index => $entity) {
+          foreach ($result['valid'] as $index => $validImportEntity) {
+            $entity = $validImportEntity['entity'];
             $row = [];
             $row['title'] = [
               '#plain_text' => $entity->getTitle(),
