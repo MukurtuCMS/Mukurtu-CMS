@@ -10,6 +10,7 @@ use Drupal\file\Entity\File;
 use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuCsvImportFileProcessor;
 use Drupal\mukurtu_roundtrip\ImportProcessor\MukurtuImportFileProcessorResult;
 use Drupal\mukurtu_roundtrip\Services\MukurtuImportFileProcessorManager;
+use Drupal\message\Entity\Message;
 use Exception;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Drupal\Core\File\Exception\NotRegularDirectoryException;
@@ -171,6 +172,8 @@ class Importer {
     $this->setInputFiles([]);
     $this->setBatchChunks([]);
     $this->clearOldFiles();
+    $this->store->set('entity_import_log', []);
+    $this->store->set('import_report_message', NULL);
   }
 
   /**
@@ -357,7 +360,21 @@ class Importer {
           try {
             $entity = $importEntityRow['entity'];
             $entity->save();
-            dpm("Unimplemented logging: imported {$entity->getTitle()}");
+
+            // Create log message for this entity.
+            // It would probably be better to split this off
+            // but for this simple version it's fine.
+            $log = $store->get('entity_import_log');
+            if ($entity->isNew()) {
+              $message = t('Created @entityurl', ['@entityurl' => $entity->link()]);
+            } else {
+              $message = t('Updated @entityurl', ['@entityurl' => $entity->link()]);
+            }
+
+            $log[] = ['value' => $message->render(), 'format' => 'restricted_html'];
+            $store->set('entity_import_log', $log);
+
+            //dpm("Unimplemented logging: imported {$entity->getTitle()}");
             // log here.
           } catch (Exception $e) {
             dpm("Unimplemented logging: Failed to save entity given by file ID $fid");
@@ -431,4 +448,44 @@ class Importer {
     }
   }
 
+  protected function logEntityImport($entity) {
+    $this->entity_import_log[] = $this->t('Imported <a href="@url">@title</a>', ['@url' => $entity->link(), '@title' => $entity->getTitle()]);
+  }
+
+  protected function setReportMessage($message) {
+    $this->store->set('import_report_message', $message);
+  }
+
+  public function getReportMessage() {
+    $reportMessage = $this->store->get('import_report_message');
+
+    // If we've already generated the report, return it.
+    if ($reportMessage != NULL) {
+      return $reportMessage;
+    }
+
+    // If the import hasn't occured yet, we can't make a report.
+    $entity_import_log = $this->store->get('entity_import_log');
+    if (empty($entity_import_log)) {
+      return NULL;
+    }
+
+    // Build the message.
+    $template = 'mukurtu_batch_import_report';
+    $message = Message::create([
+      'template' => $template,
+      'uid' => $this->currentUser->id(),
+      MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE => MUKURTU_PROTOCOL_PERSONAL,
+    ]);
+
+    $number = !empty($entity_import_log) ? count($entity_import_log) : 0;
+    $message->set('field_number_imported', $number);
+    $message->set('field_import_results', $entity_import_log);
+    $message->save();
+
+    // Store the report message.
+    $this->setReportMessage($message);
+
+    return $message;
+  }
 }

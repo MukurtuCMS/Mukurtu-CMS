@@ -48,3 +48,10 @@ mukurtu_roundtrip.entity_validation_details:
     _title: 'Import - Validation Details'
   requirements:
     _permission: 'administer content'
+mukurtu_roundtrip.import_report:
+  path: '/import/report/{mid}'
+  defaults:
+    _form: '\Drupal\mukurtu_roundtrip\Form\MukurtuImportReportForm'
+    _title: 'Import Report'
+  requirements:
+    _permission: 'administer content'

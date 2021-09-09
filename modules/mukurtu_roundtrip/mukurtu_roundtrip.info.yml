@@ -6,3 +6,5 @@ package: 'Mukurtu'
 dependencies:
   - csv_serialization
   - mukurtu_core
+  - mukurtu_protocol
+  - mukurtu_notifications

@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_body
+    - field.field.message.mukurtu_batch_import_report.field_import_results
+    - field.field.message.mukurtu_batch_import_report.field_number_imported
+    - message.template.mukurtu_batch_import_report
+  module:
+    - layout_builder
+    - user
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: message.mukurtu_batch_import_report.mail_body
+targetEntityType: message
+bundle: mukurtu_batch_import_report
+mode: mail_body
+content:
+  partial_1:
+    weight: 0
+    region: content
+hidden:
+  field_import_results: true
+  field_mukurtu_protocol_inherit: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  field_number_imported: true
+  partial_0: true
+  search_api_excerpt: true

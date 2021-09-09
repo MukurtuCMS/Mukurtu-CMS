@@ -1,0 +1,43 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.message.mukurtu_batch_import_report.field_import_results
+    - field.field.message.mukurtu_batch_import_report.field_number_imported
+    - message.template.mukurtu_batch_import_report
+  module:
+    - text
+    - user
+id: message.mukurtu_batch_import_report.default
+targetEntityType: message
+bundle: mukurtu_batch_import_report
+mode: default
+content:
+  field_import_results:
+    type: text_default
+    weight: 1
+    region: content
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+  og_audience:
+    label: above
+    type: entity_reference_label
+    settings:
+      link: true
+    weight: 2
+    third_party_settings: {  }
+    region: content
+  partial_0:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_mukurtu_protocol_inherit: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  field_number_imported: true
+  search_api_excerpt: true

@@ -2,7 +2,8 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.message.full
+    - core.entity_view_mode.message.mail_subject
+    - message.template.mukurtu_batch_import_report
     - message.template.mukurtu_new_item_in_collection
     - message.template.mukurtu_new_item_in_community
     - message.template.mukurtu_new_item_in_protocol
@@ -76,7 +77,7 @@ display:
         type: 'entity:message'
         options:
           relationship: none
-          view_mode: full
+          view_mode: mail_subject
       fields:
         created:
           id: created
@@ -206,6 +207,7 @@ display:
           admin_label: ''
           operator: in
           value:
+            mukurtu_batch_import_report: mukurtu_batch_import_report
             mukurtu_new_item_in_collection: mukurtu_new_item_in_collection
             mukurtu_new_item_in_community: mukurtu_new_item_in_community
             mukurtu_new_item_in_protocol: mukurtu_new_item_in_protocol

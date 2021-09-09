@@ -27,6 +27,10 @@ class MukurtuImportBatchImportCompleteForm extends MukurtuImportFormBase {
       '#button_type' => 'primary',
     ];
 
+    $reportMessage = $this->importer->getReportMessage();
+    $view_builder = $this->entityTypeManager->getViewBuilder($reportMessage->getEntityTypeId());
+    $form['report'] = $view_builder->view($reportMessage);
+
     return $form;
   }
 
