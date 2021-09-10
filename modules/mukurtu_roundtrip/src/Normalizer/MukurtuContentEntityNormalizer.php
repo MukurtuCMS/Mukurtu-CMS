@@ -139,7 +139,6 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
         if ($field_data) {
           // Resolve header value to field name.
           $field_name = $this->headerToFieldname($field_header_name, $entity);
-          dpm("$field_header_name resolved to $field_name");
 
           $items = $entity->get($field_name);
           $items->setValue([]);
