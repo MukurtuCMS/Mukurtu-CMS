@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_roundtrip\Normalizer;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\SerializerAwareNormalizer;
@@ -13,6 +14,8 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
   use StringTranslationTrait;
 
   const FORMAT = 'csv';
+
+  protected $fieldMappings;
 
   /**
    * {@inheritdoc}
@@ -74,6 +77,46 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
     return $mappedRow;
   }
 
+  protected function buildFieldMappings($entity_type_id, $bundle) {
+    $mappings = ['forward' => [], 'reverse' => []];
+    $definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+
+    foreach ($definitions as $fieldname => $definition) {
+      $label = $definition->getLabel();
+      if ($label instanceof TranslatableMarkup) {
+        $label_string = $label->render();
+      } else {
+        $label_string = $label;
+      }
+      $mappings['forward'][$fieldname] = $label_string;
+      $mappings['reverse'][$label_string] = $fieldname;
+      $mappings['reverse'][strtolower($label_string)] = $fieldname;
+    }
+
+    return $mappings;
+  }
+
+  protected function headerToFieldname($field_header_name, $entity) {
+    $entity_type_id = $entity->getEntityTypeId();
+    $bundle = $entity->bundle();
+
+    if (empty($this->fieldMappings[$entity_type_id][$bundle])) {
+      $this->fieldMappings[$entity_type_id][$bundle] = $this->buildFieldMappings($entity_type_id, $bundle);
+    }
+
+    // Check direct mapping first.
+    if (isset($this->fieldMappings[$entity_type_id][$bundle]['reverse'][$field_header_name])) {
+      return $this->fieldMappings[$entity_type_id][$bundle]['reverse'][$field_header_name];
+    }
+
+    // Didn't find it, try lowercase.
+    if (isset($this->fieldMappings[$entity_type_id][$bundle]['reverse'][strtolower($field_header_name)])) {
+      return $this->fieldMappings[$entity_type_id][$bundle]['reverse'][strtolower($field_header_name)];
+    }
+
+    return $field_header_name;
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -92,14 +135,24 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
       $row = $this->mapRow($headers, $rawRow);
       $entity = $this->getEntity($row);
 
-      foreach ($row as $field_name => $field_data) {
+      foreach ($row as $field_header_name => $field_data) {
         if ($field_data) {
+          // Resolve header value to field name.
+          $field_name = $this->headerToFieldname($field_header_name, $entity);
+          dpm("$field_header_name resolved to $field_name");
+
           $items = $entity->get($field_name);
           $items->setValue([]);
           $field_data = is_array($field_data) ? $field_data : [$field_data];
           // Denormalize the field data into the FieldItemList object.
           $context['target_instance'] = $items;
+/*           dpm($field_name);
+
+          dpm(get_class($items));
+          dpm($format);
+          dpm($context); */
           $field = $this->serializer->denormalize($field_data, get_class($items), $format, $context);
+          //dpm($field);
           if ($field) {
             $entity->{$field_name} = $field;
           }
@@ -122,8 +175,8 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
   /**
    * Given a deserialized CSV row for an Entity, return the most likely bundle.
    */
-  protected function inferEntityType($row) {
-    $type = $row['type'] ?? '';
+  protected function inferEntityBundle($row) {
+    $type = !empty($row['Type']) ? $row['Type'] : (!empty($row['type']) ? $row['type'] : '');
     return $type;
   }
 
@@ -131,24 +184,26 @@ class MukurtuContentEntityNormalizer extends SerializerAwareNormalizer implement
    * Load the existing entity or create a new entity if it doesn't exist.
    */
   protected function getEntity($row) {
-    // Try loading by NID first.
-    if (!empty($row['nid'])) {
-      $entity = \Drupal::entityTypeManager()->getStorage('node')->load($row['nid']);
+    // Try loading by ID first.
+    $id = !empty($row['ID']) ? $row['ID'] : (!empty($row['id']) ? $row['id'] : NULL);
+    if ($id !== NULL) {
+      $entity = \Drupal::entityTypeManager()->getStorage('node')->load($id);
       if ($entity) {
         return $entity;
       }
     }
 
     // Try loading by UUID next.
-    if (!empty($row['uuid'])) {
-      $entity = \Drupal::service('entity.repository')->loadEntityByUuid('node', $row['uuid']);
+    $uuid = !empty($row['UUID']) ? $row['UUID'] : (!empty($row['uuid']) ? $row['uuid'] : NULL);
+    if ($uuid !== NULL) {
+      $entity = \Drupal::service('entity.repository')->loadEntityByUuid('node', $uuid);
       if ($entity) {
         return $entity;
       }
     }
 
     // Create a new entity.
-    $type = $this->inferEntityType($row);
+    $type = $this->inferEntityBundle($row);
     if (!$type) {
       $msg = implode(', ', $row);
       throw new UnexpectedValueException("Could not determine the bundle type during normalization/denormalization for row: $msg");
