@@ -24,6 +24,20 @@ class MukurtuImportFieldnameResolver {
     $definitions = $this->entityFieldManager->getFieldDefinitions($entityTypeId, $bundle);
     $entityDefinition = $this->entityManager->getDefinition($entityTypeId);
 
+    $entityLabel = $entityDefinition->getLabel()->render();
+    $id_key = $entityDefinition->getKey('id');
+    $uuid_key = $entityDefinition->getKey('uuid');
+
+    // Build the mapping for entity label + ID, e.g., 'Content ID' for nid.
+    $entityIdLabel = $entityLabel . " ID";
+    $mappings['reverse'][$entityIdLabel] = $id_key;
+
+    // Build the mapping for entity label + UUID, e.g., 'Content UUID'
+    // for uuid.
+    $entityUuidLabel = $entityLabel . " UUID";
+    $mappings['reverse'][$entityUuidLabel] = $uuid_key;
+
+
     foreach ($definitions as $fieldname => $definition) {
       $label = $definition->getLabel();
       //dpm("$fieldname => $label");
@@ -34,19 +48,6 @@ class MukurtuImportFieldnameResolver {
       }
       $mappings['forward'][$fieldname] = $label_string;
       $mappings['reverse'][$label_string] = $fieldname;
-
-      $entityLabel = $entityDefinition->getLabel()->render();
-      $id_key = $entityDefinition->getKey('id');
-      $uuid_key = $entityDefinition->getKey('uuid');
-
-      // Build the mapping for entity label + ID, e.g., 'Content ID' for nid.
-      $entityIdLabel = $entityLabel . " ID";
-      $mappings['reverse'][$entityIdLabel] = $id_key;
-
-      // Build the mapping for entity label + UUID, e.g., 'Content UUID'
-      // for uuid.
-      $entityUuidLabel = $entityLabel . " UUID";
-      $mappings['reverse'][$entityUuidLabel] = $uuid_key;
     }
 
     return $mappings;
