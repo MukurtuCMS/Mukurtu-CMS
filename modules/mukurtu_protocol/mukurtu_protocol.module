@@ -38,6 +38,7 @@ define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE", "field_mukurtu_protocol_write");
 define("MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE", "field_mukurtu_protocol_w_scope");
 define("MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET", "field_mukurtu_protocol_inherit");
 define("MUKURTU_PROTOCOL_FIELD_NAME_READ_COMPUTED", "field_mukurtu_protocol_r_compute");
+define("MUKURTU_PROTOCOL_FIELD_NAME_INHERIT_FIRST_USE", "field_mukurtu_protocol_inherit_first_use");
 
 /**
  * Create the Mukurtu protocol field for a given node bundle type.
@@ -265,6 +266,29 @@ function mukurtu_protocol_entity_access(EntityInterface $entity, $operation, Acc
   return AccessResult::neutral();
 }
 
+/**
+ * For a new entity, check if any referenced entities need
+ * inheritance targets set.
+ */
+function mukurtu_protocol_resolve_new_content_inheritance($entity) {
+  $referenced_entities = $entity->referencedEntities();
+  foreach ($referenced_entities as $referenced_entity) {
+    // Currently only handling media entities.
+    if ($referenced_entity->getEntityTypeId() == 'media') {
+      $scope = $referenced_entity->get(MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE)->value;
+      $target = $referenced_entity->get(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET)->value;
+      // If the media is set to personal AND not currently using inheritance,
+      // assume that the user wants the media to inherit the content protocol.
+      if (   $scope == MUKURTU_PROTOCOL_PERSONAL
+          && $target == NULL
+      ) {
+        // Set the inheritance target to the owning content.
+        $referenced_entity->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $entity->id());
+        $referenced_entity->save();
+      }
+    }
+  }
+}
 
 /**
  * Implements hook_entity_insert().
@@ -273,6 +297,10 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
   // Update protocol tables.
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   if ($protocol_manager->hasProtocolFields($entity)) {
+    // Handle post-save protocol inheritance for new items,
+    // such as media being referenced by a DH item.
+    mukurtu_protocol_resolve_new_content_inheritance($entity);
+
     // If the new item is using inheritance and the target is set,
     // do the protocol copy now.
     $inheritance_target_id = NULL;
@@ -325,6 +353,10 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
 function mukurtu_protocol_entity_update(EntityInterface $entity) {
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
   if ($protocol_manager->hasProtocolFields($entity)) {
+    // Handle post-save protocol inheritance for new items,
+    // such as media being referenced by a DH item.
+    mukurtu_protocol_resolve_new_content_inheritance($entity);
+
     $protocol_manager->handleProtocolUpdate($entity);
 
     // Protocol Inheritance.
@@ -621,6 +653,40 @@ function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $fo
         }
       }
     }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_protocol_form_media_library_add_form_upload_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!empty($form['media'])) {
+    // Create a checkbox to toggle protocol inherit on first use for media.
+    // This doesn't actually DO anything other than obscure the protocol fields.
+    // We depend on the default protocol values of 'personal' and the behavior
+    // defined in mukurtu_protocol_resolve_new_content_inheritance.
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_INHERIT_FIRST_USE] = [
+      '#type' => 'checkbox',
+      '#title' => t('Inherit protocol(s) from content'),
+      '#default_value' => TRUE,
+      '#weight' => 1,
+    ];
+
+    // Move protocol widgets below our new checkbox.
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET]['#weight'] = 20;
+    $form['media'][0]['fields']['group_protocols']['#weight'] = 30;
+
+    // Hide inheritance element when our simple checkbox is checked.
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET]["widget"]['#states'] = [
+      'visible' => [
+        ':input[name="field_mukurtu_protocol_inherit_first_use"]' => ['checked' => FALSE],
+      ],
+    ];
+
+    // Hide protocol elements when our simple checkbox is checked.
+    $form['media'][0]['fields']['group_protocols']['#states']['visible'][] = [
+      ':input[name="field_mukurtu_protocol_inherit_first_use"]' => ['checked' => FALSE],
+    ];
   }
 }
 
