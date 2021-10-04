@@ -5,3 +5,4 @@ mukurtu_community.add_community:
     node_type: 'community'
   appears_on:
     - mukurtu_community.manage_communities
+    - view.mukurtu_communities_browse.browse_communities_page
