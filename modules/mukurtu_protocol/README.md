@@ -17,6 +17,7 @@ All|This content may only be shared with members belonging to ALL protocols list
 
 ## Update Protocols
 Update protocols control who can edit existing content.
+
 | Scope | Label | Description |
 |---|---|---|
 Default|Use standard Mukurtu roles.| The default setting uses the value of the read scope to determine who can update the content. For personal, only the owning user can update. For public, this is not a valid selection. For any/all, the user must have the required protocol membership to view and have the corresponding OG or site permission to update content of that type.
