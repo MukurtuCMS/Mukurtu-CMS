@@ -108,3 +108,4 @@ hidden:
   field_content_type: true
   field_membership_handler: true
   field_mukurtu_community: true
+  field_mukurtu_geojson: true

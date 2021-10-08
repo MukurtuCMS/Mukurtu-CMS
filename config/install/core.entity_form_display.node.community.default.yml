@@ -204,4 +204,5 @@ hidden:
   body: true
   field_child_communities: true
   field_content_type: true
+  field_mukurtu_geojson: true
   field_sequence_collection: true

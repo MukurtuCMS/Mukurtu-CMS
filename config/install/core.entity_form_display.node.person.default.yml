@@ -222,3 +222,5 @@ content:
 hidden:
   field_content_type: true
   field_mukurtu_community: true
+  field_mukurtu_geojson: true
+  field_sequence_collection: true
