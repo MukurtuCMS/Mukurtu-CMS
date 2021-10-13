@@ -7,3 +7,8 @@ services:
         name: access_check,
         # Optional: Specify which routes this applies to.
         applies_to: _create_community_record_access_check
+  mukurtu_community_records.event_subscriber:
+    class: Drupal\mukurtu_community_records\EventSubscriber\MukurtuCommunityRecordEventSubscriber
+    arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
+    tags:
+      - { name: 'event_subscriber' }
