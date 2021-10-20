@@ -1,12 +1,9 @@
 services:
   mukurtu_community_records.create_access_check:
     class: Drupal\mukurtu_community_records\Access\AddCommunityRecordAccessCheck
-    arguments: ['@current_user']
+    arguments: ['@current_user', '@entity_field.manager']
     tags:
-      - # Required: Mark that this service is for access checks.
-        name: access_check,
-        # Optional: Specify which routes this applies to.
-        applies_to: _create_community_record_access_check
+      - { name: access_check, applies_to: _create_community_record_access_check }
   mukurtu_community_records.event_subscriber:
     class: Drupal\mukurtu_community_records\EventSubscriber\MukurtuCommunityRecordEventSubscriber
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']

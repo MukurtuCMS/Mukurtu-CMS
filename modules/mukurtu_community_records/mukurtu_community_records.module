@@ -47,6 +47,18 @@ function mukurtu_community_records_entity_base_field_info(EntityTypeInterface $e
 }
 
 /**
+ * Implements hook_theme().
+ */
+function mukurtu_community_records_theme($existing, $type, $theme, $path) {
+  return [
+    'mukurtu_select_community_record_type' => [
+      'template' => 'mukurtu-select-community-record-type',
+      'variables' => ['node' => NULL, 'types' => NULL],
+    ],
+  ];
+}
+
+/**
  * Return true if the entity has the given record field.
  */
 function mukurtu_community_records_has_record_field(EntityInterface $entity, $field_name) {

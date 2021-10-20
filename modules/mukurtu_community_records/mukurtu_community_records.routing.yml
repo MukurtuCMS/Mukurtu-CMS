@@ -9,4 +9,20 @@ mukurtu_community_records.add_new_record:
         type: entity:node
   requirements:
     _custom_access: '\Drupal\mukurtu_community_records\Controller\MukurtuCommunityRecordAddController::access'
-    _permission: 'create content'
+    _create_community_record_access_check: 'TRUE'
+    #_permission: 'create content'
+mukurtu_community_records.add_new_record_by_type:
+  path: '/node/{node}/community-record/add/{node_type}'
+  defaults:
+    _title: 'New Community Record'
+    _controller: '\Drupal\mukurtu_community_records\Controller\MukurtuCommunityRecordAddNodeController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+      node_type:
+        type: entity:node_type
+        with_config_overrides: TRUE
+  requirements:
+    _custom_access: '\Drupal\mukurtu_community_records\Controller\MukurtuCommunityRecordAddNodeController::access'
+    _create_community_record_access_check: 'TRUE'
