@@ -23,13 +23,11 @@ bundle: dictionary_word
 mode: community_records_full
 content:
   field_all_community_records:
-    type: entity_reference_entity_view
+    type: entity_reference_community_record_formatter
     weight: 0
     region: content
     label: hidden
-    settings:
-      view_mode: community_records_single_record
-      link: false
+    settings: {  }
     third_party_settings: {  }
   flag_email_og:
     weight: 7

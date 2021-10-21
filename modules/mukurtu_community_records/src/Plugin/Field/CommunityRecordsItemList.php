@@ -6,7 +6,7 @@ use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\TypedData\ComputedItemListTrait;
 
 /**
- * TermStatusItemList class to generate a computed field.
+ * CommunityRecordsItemList class to generate a computed field.
  */
 class CommunityRecordsItemList extends EntityReferenceFieldItemList {
   use ComputedItemListTrait;
@@ -15,30 +15,58 @@ class CommunityRecordsItemList extends EntityReferenceFieldItemList {
    * {@inheritdoc}
    */
   protected function computeValue() {
+    $this->ensurePopulated();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function ensurePopulated() {
     $entity = $this->getEntity();
 
-    // Do we have the required fields?
-    if (!($entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)
-      && $entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS))) {
-      return;
+    $records = $this->getAllRecords($entity);
+
+    foreach ($records as $delta => $nid) {
+      $this->list[] = $this->createItem($delta, $nid);
     }
+  }
 
-    // Find the parent node.
-    $parent = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->referencedEntities()[0] ?? NULL;
-    if (empty($parent)) {
-      $parent = $entity;
-    }
+  /**
+   * Find all records associated with an entity.
+   */
+  protected function getAllRecords($entity) {
+    $original_record = NULL;
 
-    // Add the parent (first) record.
-    $this->list[] = $this->createItem(0, $parent->id());
+    // The owning entity is always record #1.
+    $records = [$entity->id()];
 
-    // Add all the children records.
-    $children = $parent->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS);
-    if (!empty($children)) {
-      foreach ($children as $child) {
-        $this->list[] = $this->createItem(0, $child->target_id);
+    if ($entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
+      // Is entity a community record or the original record?
+      $original_record = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->referencedEntities()[0] ?? NULL;
+
+      if (empty($original_record)) {
+        $original_record = $entity;
+      } else {
+        $records[] = $original_record->id();
+      }
+
+      // Find all the community records for the original record.
+      $query = \Drupal::entityQuery('node')
+        ->condition(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, $original_record->id())
+        ->sort('created', 'DESC');
+      $results = $query->execute();
+
+      // Add the other records.
+      // TODO: Default ordering would be established here.
+      foreach ($results as $vid => $nid) {
+        if ($nid === $entity->id()) {
+          continue;
+        }
+        $records[] = $nid;
       }
     }
+
+    return $records;
   }
 
 }

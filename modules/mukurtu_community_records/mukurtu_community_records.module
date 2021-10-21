@@ -6,6 +6,7 @@
  */
 
 define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS", "field_mukurtu_community_records");
+define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS", "field_all_community_records");
 define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD", "field_mukurtu_original_record");
 
 use Drupal\field\Entity\FieldConfig;
@@ -34,7 +35,7 @@ function mukurtu_community_records_entity_base_field_info(EntityTypeInterface $e
     // Define a computed field for community records. This flattens out the
     // parent and all child records into a single list.
     $fields['field_all_community_records'] = BaseFieldDefinition::create('entity_reference')
-      ->setName('field_all_community_records')
+      ->setName(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS)
       ->setLabel(t('All Community Records'))
       ->setDescription(t('All community records, including the current record.'))
       ->setComputed(TRUE)
@@ -55,6 +56,10 @@ function mukurtu_community_records_theme($existing, $type, $theme, $path) {
       'template' => 'mukurtu-select-community-record-type',
       'variables' => ['node' => NULL, 'types' => NULL],
     ],
+/*     'node__community_records_full' => [
+      'template' => 'node--community-records-full',
+      'variables' => ['node' => NULL],
+    ], */
   ];
 }
 
@@ -232,14 +237,13 @@ function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, Enti
 function mukurtu_community_records_entity_view_mode_alter(&$view_mode, EntityInterface $entity, $context) {
   if ($entity->getEntityTypeId() != 'node'
     || $view_mode != 'full'
-    || !$entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)
     || !$entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
     return;
   }
 
-  $community_records = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)->referencedEntities();
-  $parent_record = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->referencedEntities();
-  if (!empty($community_records) || !empty($parent_record)) {
+  $records = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS)->referencedEntities();
+  //$parent_record = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->referencedEntities();
+  if (!empty($records) && (count($records) > 1)) {
     $view_mode = 'community_records_full';
   }
 }

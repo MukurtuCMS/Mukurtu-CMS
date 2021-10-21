@@ -28,6 +28,7 @@ dependencies:
     - node.type.digital_heritage
   module:
     - layout_builder
+    - mukurtu_community_records
     - user
 third_party_settings:
   layout_builder:
@@ -39,13 +40,11 @@ bundle: digital_heritage
 mode: community_records_full
 content:
   field_all_community_records:
-    type: entity_reference_entity_view
+    type: entity_reference_community_record_formatter
     weight: 0
     region: content
     label: hidden
-    settings:
-      view_mode: community_records_single_record
-      link: false
+    settings: {  }
     third_party_settings: {  }
   flag_favorite:
     weight: 5
@@ -75,7 +74,12 @@ hidden:
   field_keywords: true
   field_language: true
   field_media_assets: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
   field_mukurtu_community: true
+  field_mukurtu_community_records: true
+  field_mukurtu_geojson: true
+  field_mukurtu_original_record: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
