@@ -53,6 +53,7 @@ class EntityReferenceCommunityRecordFormatter extends FormatterBase {
       $elements['records'][$element_id] = [
         '#type' => 'details',
         '#title' => $title,
+        '#summary' => "summary",
         '#group' => 'records',
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
@@ -60,7 +61,6 @@ class EntityReferenceCommunityRecordFormatter extends FormatterBase {
 
       // Body (rendered record).
       $elements['records'][$element_id]['node']['body'] = $view_builder->view($record, 'community_records_single_record');
-
       $elements['records'][$element_id]['node']['#tree'] = TRUE;
       $elements['records'][$element_id]['node']['#parents'] = [
         'records',
@@ -70,6 +70,8 @@ class EntityReferenceCommunityRecordFormatter extends FormatterBase {
     }
 
     $elements['#attached']['library'][] = 'field_group/element.horizontal_tabs';
+    $elements['#attached']['library'][] = 'mukurtu_community_records/community-records';
+
 
     return [$elements];
   }

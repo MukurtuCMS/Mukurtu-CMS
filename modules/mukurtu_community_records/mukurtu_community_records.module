@@ -13,6 +13,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
@@ -224,12 +225,29 @@ function mukurtu_community_records_entity_delete(EntityInterface $entity) {
 /**
  * Implements hook_entity_bundle_field_info_alter().
  */
-function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle)
-{
+function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
   if (isset($fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS])) {
     $fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS]->addConstraint('ValidCommunityRecord', []);
   }
 }
+
+/**
+ * Implements hook_entity_view().
+ */
+function mukurtu_community_records_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if ($entity->getEntityTypeId() != 'node'
+    || $view_mode != 'community_records_full'
+    || !$entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
+    return;
+  }
+
+  // Don't display the title (as a field) on the community record view.
+  $records = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS)->referencedEntities();
+  if (!empty($records) && (count($records) > 1)) {
+    unset($build['title']);
+  }
+}
+
 
 /**
  * Implements hook_entity_view_mode_alter().
