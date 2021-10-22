@@ -23,7 +23,6 @@ class CommunityRecordsItemList extends EntityReferenceFieldItemList {
    */
   protected function ensurePopulated() {
     $entity = $this->getEntity();
-
     $records = $this->getAllRecords($entity);
 
     foreach ($records as $delta => $nid) {
@@ -40,7 +39,7 @@ class CommunityRecordsItemList extends EntityReferenceFieldItemList {
     // The owning entity is always record #1.
     $records = [$entity->id()];
 
-    if ($entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
+    if (mukurtu_community_records_has_record_field($entity, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
       // Is entity a community record or the original record?
       $original_record = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->referencedEntities()[0] ?? NULL;
 

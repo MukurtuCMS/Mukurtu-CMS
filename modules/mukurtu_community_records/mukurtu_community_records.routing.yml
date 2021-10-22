@@ -1,3 +1,10 @@
+mukurtu_community_records.settings:
+  path: '/admin/config/mukurtu/community-record-settings'
+  defaults:
+    _form: '\Drupal\mukurtu_community_records\Form\MukurtuCommunityRecordSettingsForm'
+    _title: 'Mukurtu Community Records Settings'
+  requirements:
+    _permission: 'administer site configuration'
 mukurtu_community_records.add_new_record:
   path: '/node/{node}/community-record/add'
   defaults:

@@ -23,11 +23,8 @@ class MukurtuCommunityRecordAddNodeController extends ControllerBase {
    *   The access result.
    */
   public function access(AccountInterface $account, NodeInterface $node, NodeType $node_type = NULL) {
-    $entityFieldManager = \Drupal::service('entity_field.manager');
-
     // Desired community record content type must have the CR fields.
-    $fields = $entityFieldManager->getFieldDefinitions('node', $node_type->getOriginalId());
-    if (empty($fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD])) {
+    if (!mukurtu_community_records_entity_type_supports_records('node', $node_type->getOriginalId())) {
       return AccessResult::forbidden();
     }
 

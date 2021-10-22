@@ -1,0 +1,7 @@
+mukurtu_community_records.settings:
+  title: "Mukurtu Community Records Settings"
+  menu_name: mukurtu
+  description: "Manage settings for Mukurtu community records."
+  route_name: mukurtu_community_records.settings
+  parent: system.admin_config_content
+  weight: 1000

@@ -4,7 +4,9 @@
   <dl>
     {% for type in types %}
       <dt><a href="{{  path('mukurtu_community_records.add_new_record_by_type', {'node': node.id(), 'node_type': type.getOriginalId()}) }}">{{ type.label() }}</a></dt>
-      <dd>{{ type.description }}</dd>
+      {% autoescape false %}
+        <dd>{{ type.description }}</dd>
+      {% endautoescape %}
     {% endfor %}
   </dl>
 {% endif %}

@@ -78,6 +78,11 @@ function mukurtu_community_records_has_record_field(EntityInterface $entity, $fi
   return FALSE;
 }
 
+function mukurtu_community_records_entity_type_supports_records($entity_type_id, $bundle) {
+  $definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+  return isset($definitions[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD]);
+}
+
 /**
  * Create the community field for an entity type/bundle.
  */

@@ -51,7 +51,9 @@ class MukurtuCommunityRecordAddController extends ControllerBase {
 
     $types = [];
     foreach ($this->entityTypeManager()->getStorage('node_type')->loadMultiple($allowed_bundles) as $type) {
-      $types[$type->id()] = $type;
+      if (mukurtu_community_records_entity_type_supports_records('node', $type->id())) {
+        $types[$type->id()] = $type;
+      }
     }
 
     $build['#node'] = $node;
