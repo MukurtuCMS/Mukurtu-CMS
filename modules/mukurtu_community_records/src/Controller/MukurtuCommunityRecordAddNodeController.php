@@ -23,6 +23,11 @@ class MukurtuCommunityRecordAddNodeController extends ControllerBase {
    *   The access result.
    */
   public function access(AccountInterface $account, NodeInterface $node, NodeType $node_type = NULL) {
+    // Node must support CRs.
+    if (!mukurtu_community_records_entity_type_supports_records($node->getEntityTypeId(), $node->bundle())) {
+      return AccessResult::forbidden();
+    }
+
     // Desired community record content type must have the CR fields.
     if (!mukurtu_community_records_entity_type_supports_records('node', $node_type->getOriginalId())) {
       return AccessResult::forbidden();

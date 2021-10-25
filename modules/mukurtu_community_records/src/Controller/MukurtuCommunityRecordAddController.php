@@ -30,6 +30,11 @@ class MukurtuCommunityRecordAddController extends ControllerBase {
     $config = $this->config('mukurtu_community_records.settings');
     $allowed_bundles = $config->get('allowed_community_record_bundles');
 
+    // Node must support CRs.
+    if (!mukurtu_community_records_entity_type_supports_records($node->getEntityTypeId(), $node->bundle())) {
+      return AccessResult::forbidden();
+    }
+
     // If the site has no allowed CR types, nobody can create CRs.
     if (empty($allowed_bundles)) {
       return AccessResult::forbidden();
