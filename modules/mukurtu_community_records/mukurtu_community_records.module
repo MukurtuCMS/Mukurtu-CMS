@@ -9,6 +9,7 @@ define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS", "field_mukurtu_
 define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS", "field_all_community_records");
 define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD", "field_mukurtu_original_record");
 
+use Drupal\Core\Cache\Cache;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Core\Entity\EntityInterface;
@@ -143,7 +144,8 @@ function mukurtu_community_records_create_community_records_field($entity_type_i
  * Implements hook_ENTITY_TYPE_insert().
  */
 function mukurtu_community_records_entity_insert(EntityInterface $entity) {
-  mukurtu_community_records_entity_update($entity);
+  //mukurtu_community_records_entity_update($entity);
+  mukurtu_community_records_invalidate_record_tags($entity);
 }
 
 /**
@@ -182,10 +184,45 @@ function mukurtu_community_records_is_community_record(EntityInterface $entity) 
 }
 
 /**
+ * Invalidate cache tags for all community records associated with entity.
+ *
+ * @param EntityInterface $entity
+ * @return void
+ */
+function mukurtu_community_records_invalidate_record_tags(EntityInterface $entity) {
+  if ($entity->getOriginalId() != 'node') {
+    return;
+  }
+
+  $original_record_id = mukurtu_community_records_is_community_record($entity);
+  if ($original_record_id === FALSE) {
+    $original_record_id = $entity->id();
+  }
+
+  if ($original_record_id) {
+    $query = \Drupal::entityQuery('node')
+      ->condition(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, $original_record_id);
+    $results = $query->execute();
+    if (!empty($results)) {
+      // Add the original record to the tags list.
+      $tags = ["node:$original_record_id"];
+
+      // Add all the records.
+      foreach ($results as $vid => $nid) {
+        $tags[] = "node:$nid";
+      }
+      dpm($tags);
+      Cache::invalidateTags($tags);
+    }
+  }
+}
+
+/**
  * Implements hook_ENTITY_TYPE_update().
  */
 function mukurtu_community_records_entity_update(EntityInterface $entity) {
-  if (mukurtu_community_records_has_record_field($entity, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)) {
+  mukurtu_community_records_invalidate_record_tags($entity);
+/*   if (mukurtu_community_records_has_record_field($entity, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)) {
     $new_record_refs = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)->getValue();
     $old_record_refs = [];
 
@@ -218,13 +255,14 @@ function mukurtu_community_records_entity_update(EntityInterface $entity) {
         }
       }
     }
-  }
+  } */
 }
 
 /**
  * Implements hook_ENTITY_TYPE_delete().
  */
 function mukurtu_community_records_entity_delete(EntityInterface $entity) {
+  mukurtu_community_records_invalidate_record_tags($entity);
 }
 
 /**
