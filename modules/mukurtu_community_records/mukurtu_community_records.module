@@ -176,7 +176,7 @@ function mukurtu_community_records_is_community_record(EntityInterface $entity) 
   if (mukurtu_community_records_has_record_field($entity, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
     $original = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->getValue();
     if (!empty($original)) {
-      return $original['target_id'];
+      return $original[0]['target_id'];
     }
   }
 
@@ -190,11 +190,12 @@ function mukurtu_community_records_is_community_record(EntityInterface $entity) 
  * @return void
  */
 function mukurtu_community_records_invalidate_record_tags(EntityInterface $entity) {
-  if ($entity->getOriginalId() != 'node') {
+  if ($entity->getEntityTypeId() != 'node') {
     return;
   }
 
   $original_record_id = mukurtu_community_records_is_community_record($entity);
+
   if ($original_record_id === FALSE) {
     $original_record_id = $entity->id();
   }
@@ -211,7 +212,6 @@ function mukurtu_community_records_invalidate_record_tags(EntityInterface $entit
       foreach ($results as $vid => $nid) {
         $tags[] = "node:$nid";
       }
-      dpm($tags);
       Cache::invalidateTags($tags);
     }
   }
