@@ -9,5 +9,6 @@ dependencies:
   - mukurtu_core
   - mukurtu_community
   - mukurtu_protocol
+  - mukurtu_digital_heritage
 
 version: '8.x-1.x-dev'
