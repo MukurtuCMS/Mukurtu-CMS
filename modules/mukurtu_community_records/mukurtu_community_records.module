@@ -8,6 +8,7 @@
 define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS", "field_all_community_records");
 define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD", "field_mukurtu_original_record");
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -16,6 +17,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Implements hook_entity_bundle_create().
@@ -272,4 +274,18 @@ function mukurtu_community_records_entity_view_mode_alter(&$view_mode, EntityInt
   if (!empty($records) && (count($records) > 1)) {
     $view_mode = 'community_records_full';
   }
+}
+
+/**
+ * Implements hook_entity_access().
+ */
+function mukurtu_community_records_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // Do not allow the deletion of entities that have attached community records.
+  if ($operation === 'delete') {
+    if (mukurtu_community_records_is_original_record($entity) !== FALSE) {
+      return AccessResult::forbidden();
+    }
+  }
+
+  return AccessResult::neutral();
 }
