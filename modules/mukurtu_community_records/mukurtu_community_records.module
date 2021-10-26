@@ -5,7 +5,6 @@
  * Provide Mukurtu Community Records.
  */
 
-define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS", "field_mukurtu_community_records");
 define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS", "field_all_community_records");
 define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD", "field_mukurtu_original_record");
 
@@ -79,6 +78,9 @@ function mukurtu_community_records_has_record_field(EntityInterface $entity, $fi
   return FALSE;
 }
 
+/**
+ * Check if entity type/bundle supports CRs.
+ */
 function mukurtu_community_records_entity_type_supports_records($entity_type_id, $bundle) {
   $definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
   return isset($definitions[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD]);
@@ -90,29 +92,6 @@ function mukurtu_community_records_entity_type_supports_records($entity_type_id,
 function mukurtu_community_records_create_community_records_field($entity_type_id, $bundle) {
   if ($entity_type_id != 'node' || $bundle == 'protocol' || $bundle == 'community') {
     return;
-  }
-
-  // Create the community records field.
-  $field_storage = FieldStorageConfig::loadByName($entity_type_id, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS);
-  $field = FieldConfig::loadByName($entity_type_id, $bundle, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS);
-  if ($field_storage && empty($field)) {
-    $new_field = $field_storage->toArray();
-    unset($new_field['uuid']);
-    $new_field['label'] = "Community Records";
-    $new_field['bundle'] = $bundle;
-    $new_field['settings'] = [
-      'handler' => 'default:node',
-      'handler_settings' => [
-        'target_bundles' => [$bundle => $bundle],
-        'auto_create' => FALSE,
-      ],
-    ];
-    $new_field = FieldConfig::create($new_field);
-    try {
-      $new_field->save();
-    } catch (Exception $e) {
-
-    }
   }
 
   // Create the original record field (parent record).
@@ -144,7 +123,6 @@ function mukurtu_community_records_create_community_records_field($entity_type_i
  * Implements hook_ENTITY_TYPE_insert().
  */
 function mukurtu_community_records_entity_insert(EntityInterface $entity) {
-  //mukurtu_community_records_entity_update($entity);
   mukurtu_community_records_invalidate_record_tags($entity);
 }
 
@@ -244,40 +222,6 @@ function mukurtu_community_records_invalidate_record_tags(EntityInterface $entit
  */
 function mukurtu_community_records_entity_update(EntityInterface $entity) {
   mukurtu_community_records_invalidate_record_tags($entity);
-/*   if (mukurtu_community_records_has_record_field($entity, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)) {
-    $new_record_refs = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)->getValue();
-    $old_record_refs = [];
-
-    if (isset($entity->original)) {
-      $old_record_refs = $entity->original->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS)->getValue();
-    }
-
-    $flatten = function ($e) {
-      return isset($e['target_id']) ? $e['target_id'] : NULL;
-    };
-    $new_records = array_map($flatten, $new_record_refs);
-    $old_records = array_map($flatten, $old_record_refs);
-
-    // For each record in the updated entity, make sure the relationship is set
-    // on the community record.
-    $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($new_records);
-    if (!empty($nodes)) {
-      foreach ($nodes as $node) {
-        mukurtu_community_records_attach_record($entity, $node);
-      }
-    }
-
-    // If any records have been removed, unset the relationship on the child.
-    $records_to_remove = array_diff($old_records, $new_records);
-    if (!empty($records_to_remove)) {
-      $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($records_to_remove);
-      if (!empty($nodes)) {
-        foreach ($nodes as $node) {
-          mukurtu_community_records_detach_record($entity, $node);
-        }
-      }
-    }
-  } */
 }
 
 /**
@@ -313,7 +257,6 @@ function mukurtu_community_records_entity_view(array &$build, EntityInterface $e
   }
 }
 
-
 /**
  * Implements hook_entity_view_mode_alter().
  */
@@ -328,47 +271,5 @@ function mukurtu_community_records_entity_view_mode_alter(&$view_mode, EntityInt
   //$parent_record = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->referencedEntities();
   if (!empty($records) && (count($records) > 1)) {
     $view_mode = 'community_records_full';
-  }
-}
-
-
-/**
- * Implements hook_form_alter().
- */
-function mukurtu_community_records_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  // Only run on node forms.
-  if (strpos($form_id, 'node_') === 0 && strpos($form_id, '_edit_form') > 0) {
-    $args = $form_state->getBuildInfo()['args'];
-
-    if (!empty($args) && isset($args[0]['mukurtu_community_records']['submit'])) {
-      $form['mukurtu_community_records_target'] = [
-        '#type' => 'hidden',
-        '#value' => $args[0]['mukurtu_community_records']['target'],
-      ];
-
-      // Attach our custom submit handler that will run after the default handler.
-      $form['actions']['submit']['#submit'][] = $args[0]['mukurtu_community_records']['submit'][0];
-    }
-  }
-}
-
-/**
- * Form submit callback for add community record.
- */
-function mukurtu_community_records_add_community_record_form_submit(array &$form, FormStateInterface $form_state) {
-  $nid = $form_state->getValue('mukurtu_community_records_target');
-
-  if ($nid) {
-    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
-    if ($node && $node->access('update')) {
-      $new_community_record_id = $form_state->getformObject()->getEntity()->id();
-      $existing_community_records = mukurtu_core_flatten_entity_ref_field($node, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS);
-      if (!in_array($new_community_record_id, $existing_community_records)) {
-        $existing_community_records[] = $new_community_record_id;
-
-        $node->set(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS, $existing_community_records);
-        $node->save();
-      }
-    }
   }
 }
