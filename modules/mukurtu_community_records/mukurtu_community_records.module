@@ -184,6 +184,28 @@ function mukurtu_community_records_is_community_record(EntityInterface $entity) 
 }
 
 /**
+ * Check if entity has community records.
+ *
+ * @param EntityInterface $entity
+ * @return mixed
+ */
+function mukurtu_community_records_is_original_record(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() != 'node') {
+    return FALSE;
+  }
+
+  $query = \Drupal::entityQuery('node')
+    ->condition(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, $entity->id());
+  $results = $query->execute();
+
+  if (!empty($results)) {
+    return $results;
+  }
+
+  return FALSE;
+}
+
+/**
  * Invalidate cache tags for all community records associated with entity.
  *
  * @param EntityInterface $entity
@@ -269,8 +291,8 @@ function mukurtu_community_records_entity_delete(EntityInterface $entity) {
  * Implements hook_entity_bundle_field_info_alter().
  */
 function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
-  if (isset($fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS])) {
-    $fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_COMMUNITY_RECORDS]->addConstraint('ValidCommunityRecord', []);
+  if (isset($fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD])) {
+    $fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD]->addConstraint('ValidOriginalRecord', []);
   }
 }
 
