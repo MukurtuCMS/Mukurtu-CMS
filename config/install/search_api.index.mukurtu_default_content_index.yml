@@ -3,18 +3,21 @@ status: true
 dependencies:
   config:
     - field.storage.node.body
+    - field.storage.node.field_category
     - field.storage.node.field_collection_type
-    - field.storage.node.field_coverage
+    - field.storage.node.field_mukurtu_community
     - field.storage.node.field_description
     - field.storage.node.field_mukurtu_geojson
+    - field.storage.node.field_keywords
+    - field.storage.node.field_coverage
+    - field.storage.node.field_media_assets
     - field.storage.node.field_mukurtu_cluster_lat
     - field.storage.node.field_mukurtu_cluster_long
-    - field.storage.node.field_category
-    - field.storage.node.field_keywords
     - search_api.server.mukurtu_database_server
   module:
     - taxonomy
     - node
+    - media
     - search_api
     - search_api_glossary
 id: mukurtu_default_content_index
@@ -30,6 +33,16 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.body
+  community_title:
+    label: 'Community » Content » Title'
+    datasource_id: 'entity:node'
+    property_path: 'field_mukurtu_community:entity:title'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_mukurtu_community
+      module:
+        - node
   field_collection_type:
     label: 'Collection Type'
     datasource_id: 'entity:node'
@@ -95,6 +108,16 @@ field_settings:
     indexed_locked: true
     type_locked: true
     hidden: true
+  media_type:
+    label: 'Media Assets » Media » Media type'
+    datasource_id: 'entity:node'
+    property_path: 'field_media_assets:entity:bundle'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_media_assets
+      module:
+        - media
   name:
     label: 'Category » Taxonomy term » Name'
     datasource_id: 'entity:node'
@@ -176,7 +199,7 @@ processor_settings:
       preprocess_query: -30
   entity_status: {  }
   glossary:
-    glossarytable: 'a:1:{s:13:"glossarytable";a:7:{s:4:"body";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:17:"field_description";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:4:"name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:6:"name_1";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:5:"title";a:2:{s:8:"glossary";s:1:"1";s:8:"grouping";a:3:{s:11:"grouping_09";s:11:"grouping_09";s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;}}s:4:"type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:3:"uid";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}}}'
+    glossarytable: 'a:1:{s:13:"glossarytable";a:10:{s:4:"body";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:21:"field_collection_type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:14:"field_coverage";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:17:"field_description";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:21:"field_mukurtu_geojson";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:4:"name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:6:"name_1";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:5:"title";a:2:{s:8:"glossary";s:1:"1";s:8:"grouping";a:3:{s:11:"grouping_09";s:11:"grouping_09";s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;}}s:4:"type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:3:"uid";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}}}'
     field_enabled: 0
     grouping_defaults:
       grouping_other: grouping_other
@@ -188,11 +211,13 @@ processor_settings:
     all_fields: true
     fields:
       - body
+      - community_title
       - field_collection_type
       - field_coverage
       - field_description
       - field_mukurtu_geojson
       - glossaryaz_title
+      - media_type
       - name
       - name_1
       - title
@@ -209,16 +234,12 @@ processor_settings:
       preprocess_index: -15
       preprocess_query: -15
   ignorecase:
-    all_fields: true
+    all_fields: false
     fields:
       - body
       - field_collection_type
       - field_coverage
       - field_description
-      - field_mukurtu_geojson
-      - glossaryaz_title
-      - name
-      - name_1
       - title
       - type
     weights:
@@ -245,11 +266,13 @@ processor_settings:
     all_fields: true
     fields:
       - body
+      - community_title
       - field_collection_type
       - field_coverage
       - field_description
       - field_mukurtu_geojson
       - glossaryaz_title
+      - media_type
       - name
       - name_1
       - title
