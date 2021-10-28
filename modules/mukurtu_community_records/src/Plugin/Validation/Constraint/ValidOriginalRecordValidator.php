@@ -19,6 +19,11 @@ class ValidOriginalRecordValidator extends ConstraintValidator {
     $entity = $items->getEntity();
     $entity_id = $entity->id();
 
+    // If the field is empty, we have no opinion.
+    if ($items->count() === 0) {
+      return;
+    }
+
     if (mukurtu_community_records_is_original_record($entity) !== FALSE) {
       // This entity already has community records so it cannot
       // be a community record.
