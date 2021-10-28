@@ -243,18 +243,56 @@ function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, Enti
 }
 
 /**
+ * Sync the shared field(s) between original record/community record.
+ */
+function mukurtu_community_records_sync_shared_fields(EntityInterface &$community_record) {
+  $original_id = mukurtu_community_records_is_community_record($community_record);
+
+  // $community_record wasn't a community record.
+  if ($original_id === FALSE) {
+    return;
+  }
+
+  $original = \Drupal::entityTypeManager()->getStorage('node')->load($original_id);
+
+  // Static field list for development.
+  $shared_fields_settings = ['digital_heritage' => ['field_media_assets']];
+
+  // Get the shared field(s) for the given CR type.
+  $shared_fields = $shared_fields_settings[$original->bundle()] ?? NULL;
+
+  // Copy the shared fields from the original record to the community record.
+  if (!empty($shared_fields)) {
+    foreach ($shared_fields as $shared_field) {
+      if ($community_record->hasField($shared_field) && $original->hasField($shared_field)) {
+        $community_record->set($shared_field, $original->get($shared_field)->getValue());
+      }
+    }
+  }
+
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_load().
+ */
+function mukurtu_community_records_node_load(array $entities) {
+  foreach ($entities as $entity) {
+    mukurtu_community_records_sync_shared_fields($entity);
+  }
+}
+
+/**
  * Implements hook_entity_view().
  */
 function mukurtu_community_records_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   if ($entity->getEntityTypeId() != 'node'
-    || $view_mode != 'community_records_full'
     || !$entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
     return;
   }
 
   // Don't display the title (as a field) on the community record view.
   $records = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS)->referencedEntities();
-  if (!empty($records) && (count($records) > 1)) {
+  if ($view_mode == 'community_records_full' && !empty($records) && (count($records) > 1)) {
     unset($build['title']);
   }
 }
