@@ -140,7 +140,9 @@ class MukurtuSetProtocolMembershipAction extends ViewsBulkOperationsActionBase i
 
       if ($membership->hasPermission('administer group') || $membership->hasPermission('manage members')) {
         $group = $membership->getGroup();
-        $protocols[$group->id()] = $group->getTitle();
+        if ($group) {
+          $protocols[$group->id()] = $group->getTitle();
+        }
       }
     }
 

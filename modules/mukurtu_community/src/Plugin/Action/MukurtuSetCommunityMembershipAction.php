@@ -140,7 +140,9 @@ class MukurtuSetCommunityMembershipAction extends ViewsBulkOperationsActionBase 
 
       if ($membership->hasPermission('administer group') || $membership->hasPermission('manage members')) {
         $group = $membership->getGroup();
-        $communities[$group->id()] = $group->getTitle();
+        if ($group) {
+          $communities[$group->id()] = $group->getTitle();
+        }
       }
     }
 
