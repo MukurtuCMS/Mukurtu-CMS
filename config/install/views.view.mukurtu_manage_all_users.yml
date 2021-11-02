@@ -211,20 +211,22 @@ display:
           action_title: Action
           selected_actions:
             9:
-              action_id: mukurtu_set_protocol_membership_action
+              action_id: mukurtu_set_community_membership_action
             10:
+              action_id: mukurtu_set_protocol_membership_action
+            11:
               action_id: user_add_role_action
               preconfiguration:
                 add_confirmation: false
-            11:
+            12:
               action_id: user_unblock_user_action
               preconfiguration:
                 add_confirmation: false
-            12:
+            13:
               action_id: user_remove_role_action
               preconfiguration:
                 add_confirmation: false
-            13:
+            14:
               action_id: user_block_user_action
               preconfiguration:
                 add_confirmation: false
