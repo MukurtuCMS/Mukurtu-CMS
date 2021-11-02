@@ -6,6 +6,8 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeInterface;
+use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
 use Drupal\Core\Link;
 
 class MukurtuManageMembershipsController extends ControllerBase {
@@ -22,13 +24,14 @@ class MukurtuManageMembershipsController extends ControllerBase {
    *   The access result.
    */
   public function access(AccountInterface $account, NodeInterface $node) {
-    if ($node->bundle() == 'community' || $node->bundle() == 'protocol') {
-      return AccessResult::allowed();
+    if ($node->bundle() === 'community' || $node->bundle() === 'protocol') {
+      $membership = Og::getMembership($node, $account, OgMembershipInterface::ALL_STATES);
+      if ($membership && ($membership->hasPermission('administer group') || $membership->hasPermission('manage members'))) {
+        return AccessResult::allowed();
+      }
     }
-
     return AccessResult::forbidden();
   }
-
 
   public function content(NodeInterface $node) {
     $build = [];
@@ -52,6 +55,11 @@ class MukurtuManageMembershipsController extends ControllerBase {
         ];
         $protocolTabs['protocols']['#attached']['library'][] = 'field_group/formatter.horizontal_tabs';
         foreach ($protocols as $protocol) {
+          // Check access for protocol forms.
+          if ($this->access($this->currentUser(), $protocol) != AccessResult::allowed()) {
+            continue;
+          }
+
           $protocolTabs['protocols'][$protocol->id()]['protocol'] = [
             '#type' => 'details',
             '#title' => $protocol->getTitle(),
