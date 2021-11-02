@@ -42,7 +42,7 @@ mukurtu_core.manage_users:
   description: 'Manage site user accounts.'
   parent: mukurtu
   menu_name: mukurtu
-  route_name: mukurtu_core.people
+  route_name: view.mukurtu_manage_all_users.manage_users_page
 mukurtu_core.categories:
   title: "Categories"
   menu_name: main
