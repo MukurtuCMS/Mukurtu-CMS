@@ -4,6 +4,7 @@ mukurtu_core.user_admin_create:
   appears_on:
     - mukurtu_core.people
     - mukurtu_core.manage_users
+    - view.mukurtu_manage_all_users.manage_users_page
 mukurtu_core.add_media:
   route_name: entity.media.add_page
   title: 'Add media'
