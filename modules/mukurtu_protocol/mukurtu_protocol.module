@@ -326,6 +326,19 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
     return;
   }
 
+  // Automatically add owner as protocol steward.
+  if ($entity->isOwner() && $entity->getGroupEntityType() == 'node' && $entity->getGroupBundle() == 'protocol') {
+    // Find the protocol steward role.
+    $roleManager = \Drupal::service('og.role_manager');
+    $roles = $roleManager->getRolesByBundle($entity->getGroupEntityType(), $entity->getGroupBundle());
+
+    // If we have it, add it.
+    if (isset($roles['node-protocol-protocol_steward'])) {
+      $entity->addRole($roles['node-protocol-protocol_steward']);
+      $entity->save();
+    }
+  }
+
   $entity_type = $entity->get('entity_type')->value;
   $entity_bundle = $entity->get('entity_bundle')->value;
 
