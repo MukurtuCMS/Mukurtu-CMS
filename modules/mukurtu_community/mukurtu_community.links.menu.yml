@@ -1,17 +1,9 @@
 mukurtu_community.manage_communities:
-  title: 'Communities'
+  title: 'Manage Communities'
   description: 'Manage Communities'
   parent: mukurtu
   menu_name: mukurtu
   route_name: mukurtu_community.manage_communities
-mukurtu_community.create_community:
-  title: 'Add Community'
-  description: 'Add Community'
-  parent: mukurtu_core.create_content
-  menu_name: mukurtu
-  route_name: mukurtu_core.add
-  route_parameters:
-    node_type: community
 mukurtu_community.browse_communities:
   title: "Communities"
   menu_name: main

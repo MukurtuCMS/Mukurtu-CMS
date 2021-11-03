@@ -3,3 +3,11 @@ mukurtu_dictionary.dictionary:
   description: 'Browse the Dictionary'
   menu_name: main
   route_name: mukurtu_dictionary.dictionary_page
+mukurtu_dictionary.create_dictionary_word:
+  title: 'Dictionary Word'
+  description: 'Add a Dictionary Word'
+  parent: mukurtu_core.create_content
+  menu_name: mukurtu
+  route_name: mukurtu_core.add
+  route_parameters:
+    node_type: dictionary_word

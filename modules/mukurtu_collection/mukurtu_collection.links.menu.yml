@@ -1,5 +1,5 @@
 mukurtu_collection.create_collection:
-  title: 'Add Collection'
+  title: 'Collection'
   description: 'Add Collection'
   parent: mukurtu_core.create_content
   menu_name: mukurtu

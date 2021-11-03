@@ -1,5 +1,5 @@
 mukurtu_digital_heritage.create_digital_heritage:
-  title: 'Add Digital Heritage'
+  title: 'Digital Heritage'
   description: 'Add Digital Heritage'
   parent: mukurtu_core.create_content
   menu_name: mukurtu
