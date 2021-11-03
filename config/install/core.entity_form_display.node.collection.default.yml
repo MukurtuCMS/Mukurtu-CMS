@@ -38,7 +38,6 @@ third_party_settings:
         - group_protocols
         - field_description
         - field_keywords
-        - field_collection_type
       parent_name: group_main_tab
       weight: 20
       format_type: tab
@@ -88,16 +87,10 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 11
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_collection_type:
-    weight: -2
-    settings: {  }
-    third_party_settings: {  }
-    type: options_select
-    region: content
   field_description:
     type: text_textarea_with_summary
     weight: -4
@@ -151,25 +144,25 @@ content:
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -5
+    weight: -6
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_read:
     type: mukurtu_protocol_widget
     region: content
-    weight: -4
+    weight: -5
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_w_scope:
     type: mukurtu_protocol_scope_widget
     region: content
-    weight: -3
+    weight: -4
     settings: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     region: content
-    weight: -2
+    weight: -3
     settings: {  }
     third_party_settings: {  }
   field_related_content:
@@ -204,7 +197,7 @@ content:
     region: content
   path:
     type: path
-    weight: 14
+    weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -212,21 +205,21 @@ content:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 12
+    weight: 3
     region: content
     third_party_settings: {  }
   status:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 15
+    weight: 6
     region: content
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 13
+    weight: 4
     region: content
     third_party_settings: {  }
   title:
@@ -239,7 +232,7 @@ content:
     region: content
   uid:
     type: entity_reference_autocomplete
-    weight: 10
+    weight: 1
     settings:
       match_operator: CONTAINS
       size: 60
@@ -247,8 +240,17 @@ content:
       match_limit: 10
     region: content
     third_party_settings: {  }
+  url_redirects:
+    weight: 7
+    region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
+  field_collection_type: true
   field_content_type: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
   field_mukurtu_community: true
   field_mukurtu_geojson: true
+  field_mukurtu_original_record: true
   field_sequence_collection: true

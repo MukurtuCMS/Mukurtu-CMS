@@ -330,16 +330,6 @@ content:
     third_party_settings: {  }
     type: entity_reference_autocomplete
     region: content
-  field_mukurtu_original_record:
-    weight: 10
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
   field_mukurtu_protocol_inherit:
     type: entity_browser_entity_reference
     weight: -6
@@ -530,4 +520,5 @@ hidden:
   field_mukurtu_cluster_long: true
   field_mukurtu_community: true
   field_mukurtu_geojson: true
+  field_mukurtu_original_record: true
   field_sequence_collection: true
