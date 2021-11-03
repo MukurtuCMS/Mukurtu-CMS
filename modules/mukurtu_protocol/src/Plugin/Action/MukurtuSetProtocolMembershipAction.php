@@ -12,6 +12,7 @@ use Drupal\user\Entity\User;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Core\Access\AccessResult;
+use Exception;
 
 /**
  * VBO for managing user memberships/roles in protocols.
@@ -141,7 +142,16 @@ class MukurtuSetProtocolMembershipAction extends ViewsBulkOperationsActionBase i
       if ($membership->hasPermission('administer group') || $membership->hasPermission('manage members')) {
         $group = $membership->getGroup();
         if ($group) {
-          $protocols[$group->id()] = $group->getTitle();
+          $community_title = "";
+          try {
+            // Load the community name.
+            $community_id = $group->get('field_mukurtu_community')[0]->getValue()['target_id'];
+            $community = \Drupal::entityTypeManager()->getStorage('node')->load($community_id);
+            $community_title = $community->getTitle();
+          } catch (Exception $e) {
+
+          }
+          $protocols[$group->id()] = $community_title . ' - ' . $group->getTitle();
         }
       }
     }
