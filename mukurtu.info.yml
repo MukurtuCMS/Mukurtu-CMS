@@ -82,17 +82,18 @@ dependencies:
   - token
   - views_bulk_operations
   - mukurtu_core
-  - mukurtu_collection
   - mukurtu_community
   - mukurtu_protocol
-  - mukurtu_taxonomy
-  - mukurtu_digital_heritage
   - mukurtu_community_records
-  - mukurtu_roundtrip
-  - mukurtu_migrate
+  - mukurtu_taxonomy
+  - mukurtu_collection
+  - mukurtu_digital_heritage
   - mukurtu_dictionary
   - mukurtu_browse
+  - mukurtu_comments
   - mukurtu_notifications
+  - mukurtu_roundtrip
+  - mukurtu_migrate
 
 themes:
   - bartik
