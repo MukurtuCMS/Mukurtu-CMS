@@ -30,6 +30,12 @@ mukurtu_core.manage_media:
   parent: mukurtu
   menu_name: mukurtu
   route_name: view.mukurtu_manage_all_media.mukurtu_manage_media
+mukurtu_core.create_media:
+  title: 'Add Media'
+  description: 'Add Media'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: entity.media.add_page
 mukurtu_core.create_content:
   title: 'Add Content'
   description: 'Add Content'

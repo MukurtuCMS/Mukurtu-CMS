@@ -9,7 +9,7 @@ mukurtu_core.add_media:
   route_name: entity.media.add_page
   title: 'Add media'
   appears_on:
-    - mukurtu_core.manage_media
+    - view.mukurtu_manage_all_media.mukurtu_manage_media
 mukurtu_core.add_content:
   route_name: mukurtu_core.add_page
   title: 'Add content'
