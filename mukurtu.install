@@ -20,6 +20,14 @@ function mukurtu_install() {
   // Uninstall search.
   \Drupal::service('module_installer')->uninstall(['search']);
 
+  // Message digest UI doesn't seem to get correctly resolved as a
+  // dependency, so we'll install it here.
+  \Drupal::service('module_installer')->install(['message_digest_ui']);
+
+  // Protocol field isn't always being created for DH on install,
+  // so we'll double check it here.
+  mukurtu_protocol_create_protocol_field('node', 'digital_heritage');
+
   // Create the protocol fields on the default Drupal comments.
   mukurtu_protocol_create_protocol_field('comment', 'comment');
 }

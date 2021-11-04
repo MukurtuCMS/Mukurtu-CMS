@@ -8,7 +8,6 @@ dependencies:
   - flag
   - message
   - message_digest
-  - message_digest_ui
   - message_notify
   - message_notify_ui
   - message_subscribe
