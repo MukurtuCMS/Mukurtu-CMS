@@ -175,10 +175,29 @@ function mukurtu_notifications_node_update(Node $node) {
   // Check for "Mukurtu Follow Language" notifcations.
 }
 
+function mukurtu_notifications_remove_notifications($template, $entity, $field = 'field_item') {
+  // Find notifications for the given template that reference the entity.
+  $query = \Drupal::entityQuery('message')
+    ->condition('template', $template)
+    ->condition($field, $entity->id());
+  $results = $query->execute();
+
+  $messages = Message::loadMultiple($results);
+
+  if (!empty($messages)) {
+    foreach ($messages as $message) {
+      $message->delete();
+    }
+  }
+}
+
 /**
  * Implements hook_node_update().
  */
 function mukurtu_notifications_node_delete(Node $node) {
+  // Remove any old notifications for the deleted node.
+  mukurtu_notifications_remove_notifications('mukurtu_single_node_insert', $node);
+
   // Record the node delete event.
   $template = 'mukurtu_single_node_delete';
   $message = Message::create([
