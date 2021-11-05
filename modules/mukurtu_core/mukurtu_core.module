@@ -49,6 +49,43 @@ function mukurtu_core_form_alter(&$form, FormStateInterface $form_state, $form_i
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_core_form_views_exposed_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $view = $form_state->getStorage('view');
+
+  if ($view['view']->id() === 'mukurtu_manage_all_content') {
+    // Replace the default textfield with an entity autocomplete.
+    $form['field_mukurtu_community_target_id'] = [
+      '#type' => 'entity_autocomplete',
+      '#target_type' => 'node',
+      '#default_value' => 0,
+      '#process_default_value' => FALSE,
+      '#required' => FALSE,
+      '#selection_handler' => 'default',
+      '#selection_settings' => [
+        'target_bundles' => ['community'],
+      ],
+    ];
+
+    // Use our custom submit handler.
+    array_unshift($form['#submit'], 'mukurtu_core_mukurtu_manage_all_content_autocomplete_submit');
+  }
+}
+
+/**
+ * Custom submit handler for field_mukurtu_community_target_id.
+ */
+function mukurtu_core_mukurtu_manage_all_content_autocomplete_submit($form, &$form_state) {
+  // Hot replacing the textfield with auto complete messes up default
+  // value handling. Replace it here so when there's no input
+  // the view still displays results as expected.
+  if (!$form_state->getValue('field_mukurtu_community_target_id')) {
+    $form_state->setValue('field_mukurtu_community_target_id', 0);
+  }
+}
+
+/**
  * Prepares variables for list of available node type templates.
  *
  * Default template: mukurtu-node-add-list.html.twig.

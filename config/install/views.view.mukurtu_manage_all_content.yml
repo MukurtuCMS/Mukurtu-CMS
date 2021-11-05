@@ -222,19 +222,19 @@ display:
             31:
               action_id: node_assign_owner_action
               preconfiguration:
-                add_confirmation: 0
+                add_confirmation: false
             34:
               action_id: node_publish_action
               preconfiguration:
-                add_confirmation: 0
+                add_confirmation: false
             35:
               action_id: node_save_action
               preconfiguration:
-                add_confirmation: 0
+                add_confirmation: false
             38:
               action_id: node_unpublish_action
               preconfiguration:
-                add_confirmation: 0
+                add_confirmation: false
             40:
               action_id: views_bulk_operations_delete_entity
               preconfiguration:
@@ -242,11 +242,11 @@ display:
             41:
               action_id: 'entity:publish_action:node'
               preconfiguration:
-                add_confirmation: 0
+                add_confirmation: false
             43:
               action_id: 'entity:unpublish_action:node'
               preconfiguration:
-                add_confirmation: 0
+                add_confirmation: false
           force_selection_info: false
           plugin_id: views_bulk_operations_bulk_form
         title:
@@ -1056,6 +1056,56 @@ display:
           entity_type: node
           entity_field: status
           plugin_id: boolean
+        field_mukurtu_community_target_id:
+          id: field_mukurtu_community_target_id
+          table: node__field_mukurtu_community
+          field: field_mukurtu_community_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: '='
+          value:
+            min: ''
+            max: ''
+            value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_mukurtu_community_target_id_op
+            label: Community
+            description: ''
+            use_operator: false
+            operator: field_mukurtu_community_target_id_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: field_mukurtu_community_target_id
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+              mukurtu_administrator: '0'
+            placeholder: ''
+            min_placeholder: ''
+            max_placeholder: ''
+          is_grouped: false
+          group_info:
+            label: 'Community (field_mukurtu_community)'
+            description: null
+            identifier: field_mukurtu_community_target_id
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items:
+              1: {  }
+              2: {  }
+              3: {  }
+          plugin_id: numeric
       sorts:
         created:
           id: created
