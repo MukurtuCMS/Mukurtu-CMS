@@ -9,7 +9,7 @@ field_name: field_mukurtu_community
 entity_type: media
 type: og_standard_reference
 settings:
-  target_type: media
+  target_type: node
 module: og
 locked: false
 cardinality: -1

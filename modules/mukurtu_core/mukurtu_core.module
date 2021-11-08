@@ -54,7 +54,9 @@ function mukurtu_core_form_alter(&$form, FormStateInterface $form_state, $form_i
 function mukurtu_core_form_views_exposed_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $view = $form_state->getStorage('view');
 
-  if ($view['view']->id() === 'mukurtu_manage_all_content') {
+  $views = ['mukurtu_manage_all_media', 'mukurtu_manage_all_content'];
+
+  if (in_array($view['view']->id(), $views)) {
     // Replace the default textfield with an entity autocomplete.
     $form['field_mukurtu_community_target_id'] = [
       '#type' => 'entity_autocomplete',
