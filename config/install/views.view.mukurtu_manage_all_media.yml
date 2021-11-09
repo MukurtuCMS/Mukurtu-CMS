@@ -215,18 +215,20 @@ display:
           action_title: Action
           selected_actions:
             0:
+              action_id: mukurtu_set_protocol_action
+            1:
               action_id: views_bulk_operations_delete_entity
               preconfiguration:
                 label_override: 'Delete Media'
-            1:
-              action_id: 'entity:publish_action:media'
-              preconfiguration:
-                label_override: 'Publish Meda'
-                add_confirmation: false
             3:
               action_id: 'entity:unpublish_action:media'
               preconfiguration:
                 label_override: 'Unpublish Media'
+                add_confirmation: false
+            4:
+              action_id: 'entity:publish_action:media'
+              preconfiguration:
+                label_override: 'Publish Media'
                 add_confirmation: false
           force_selection_info: false
           plugin_id: views_bulk_operations_bulk_form
