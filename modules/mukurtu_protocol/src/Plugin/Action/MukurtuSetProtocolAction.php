@@ -93,11 +93,8 @@ class MukurtuSetProtocolAction extends ViewsBulkOperationsActionBase implements 
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $fakeNode = \Drupal::service('entity_type.manager')->getStorage('node')->create(
-      [
-        'type' => 'digital_heritage',
-      ],
-    );
+    $node = ['type' => 'digital_heritage'];
+    $fakeNode = \Drupal::service('entity_type.manager')->getStorage('node')->create($node);
     $entityFormDisplay = \Drupal::service('entity_type.manager')->getStorage('entity_form_display')
       ->load('node.digital_heritage.default');
 
