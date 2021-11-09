@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.content_warning.field_content_warning_terms
+    - field.field.paragraph.content_warning.field_content_warning_text
+    - paragraphs.paragraphs_type.content_warning
+  module:
+    - text
+id: paragraph.content_warning.default
+targetEntityType: paragraph
+bundle: content_warning
+mode: default
+content:
+  field_content_warning_text:
+    type: text_default
+    weight: 0
+    region: content
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_content_warning_terms: true
+  search_api_excerpt: true

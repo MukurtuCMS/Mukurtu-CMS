@@ -1,0 +1,35 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.content_warning.field_content_warning_terms
+    - field.field.paragraph.content_warning.field_content_warning_text
+    - paragraphs.paragraphs_type.content_warning
+  module:
+    - text
+id: paragraph.content_warning.default
+targetEntityType: paragraph
+bundle: content_warning
+mode: default
+content:
+  field_content_warning_terms:
+    type: entity_reference_autocomplete
+    weight: 0
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_content_warning_text:
+    type: text_textarea
+    weight: 1
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true
