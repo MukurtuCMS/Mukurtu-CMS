@@ -45,13 +45,8 @@ class ProtocolWidget extends WidgetBase {
 
   protected function getElementOptions(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $field_name = $this->fieldDefinition->getFieldStorageDefinition()->getName();
-    $form_object = $form_state->getFormObject();
 
-    if (method_exists($form_object, 'getEntity')) {
-      $entity = $form_object->getEntity();
-    } else {
-      return;
-    }
+    $entity = $items->getEntity();
 
     if (isset($form[$field_name . '_all_options']['#value'])) {
       $all_options = $form[$field_name . '_all_options']['#value'];
