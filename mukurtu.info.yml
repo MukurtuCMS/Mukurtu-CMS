@@ -52,6 +52,7 @@ dependencies:
   - blazy
   - comment
   - content_browser
+  - config_distro
   - ctools
   - embed
   - entity_embed
