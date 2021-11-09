@@ -39,6 +39,15 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_page_attachments.
+ */
+function mukurtu_core_page_attachments(array &$attachments) {
+  if (\Drupal::currentUser()->id() == 1) {
+    \Drupal::messenger()->addError(t('You are logged in as the super admin (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. Consider logging into a different account.'));
+  }
+}
+
+/**
  * Implements hook_form_alter().
  */
 function mukurtu_core_form_alter(&$form, FormStateInterface $form_state, $form_id) {
