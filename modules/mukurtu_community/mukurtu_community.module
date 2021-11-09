@@ -18,16 +18,6 @@ use Drupal\og\Entity\OgMembership;
 define("MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY", "field_mukurtu_community");
 
 /**
- * Implements hook_ENTITY_TYPE_access().
- */
-function mukurtu_community_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-
-  //dpm("community: $operation");
-
-  return AccessResult::neutral();
-}
-
-/**
  * Implements hook_ENTITY_TYPE_insert().
  */
 function mukurtu_community_entity_insert(EntityInterface $entity) {

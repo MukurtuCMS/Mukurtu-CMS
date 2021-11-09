@@ -161,12 +161,19 @@ function mukurtu_notifications_node_update(Node $node) {
   }
 
   // Send "Mukurtu Follow Content" notifications.
-  $subscribers->sendMessage($node, $message);
+  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
 
-  // Check for "Mukurtu Follow Protocol" notifcations.
+  // Only do it for protocol aware bundles. Otherwise
+  // message_subscribe will call og\MembershipManager->getGroupIds
+  // which will throw an exception for being non-group content.
+  if ($protocol_manager->hasProtocolFields($node)) {
+    $subscribers->sendMessage($node, $message);
+  }
+
+  // Check for "Mukurtu Follow Protocol" notifications.
   mukurtu_notifications_notify_protocol($node, $subscribers);
 
-  // Check for "Mukurtu Follow Community" notifcations.
+  // Check for "Mukurtu Follow Community" notifications.
   mukurtu_notifications_notify_community($node, $subscribers);
 
   // Check for "Mukurtu Follow Collection" notifcations.
