@@ -17,7 +17,8 @@ use Drupal\Core\Url;
 class MukurtuManageContentWarningsController extends ControllerBase {
 
   public function access(AccountInterface $account, NodeInterface $node) {
-    if ($node->bundle() != 'community') {
+    return AccessResult::forbidden();
+/*     if ($node->bundle() != 'community') {
       return AccessResult::forbidden();
     }
 
@@ -25,7 +26,7 @@ class MukurtuManageContentWarningsController extends ControllerBase {
       return AccessResult::allowed();
     }
 
-    return AccessResult::forbidden();
+    return AccessResult::forbidden(); */
   }
 
   public function content(NodeInterface $node) {
