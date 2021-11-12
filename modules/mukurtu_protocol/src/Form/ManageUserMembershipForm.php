@@ -121,7 +121,10 @@ class ManageUserMembershipForm extends FormBase {
 
           $groupCommunity = NULL;
           if ($group->hasField(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)) {
-            $groupCommunity = $group->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)[0]->getEntity();
+            $groupCommunityId = $group->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)[0]->getValue();
+            if (isset($groupCommunityId['target_id'])) {
+              $groupCommunity = \Drupal::entityTypeManager()->getStorage('node')->load($groupCommunityId['target_id']);
+            }
           }
 
           // Group Name.
