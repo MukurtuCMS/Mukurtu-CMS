@@ -606,7 +606,9 @@ function mukurtu_protocol_user_edit_form_submit($form, FormStateInterface &$form
   // Redirect freshly created user to the manage memberships page.
   if ($user) {
     $url = Url::fromRoute('mukurtu_protocol.manage_user_memberships', ['user' => $uid]);
-    $form_state->setRedirectUrl($url);
+    if ($url->access(NULL)) {
+      $form_state->setRedirectUrl($url);
+    }
   }
 }
 
