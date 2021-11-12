@@ -32,8 +32,8 @@ mukurtu_protocol.manage_memberships:
 mukurtu_protocol.manage_user_memberships:
   path: '/user/{user}/memberships'
   defaults:
-    _title: 'Manage User Memberships'
     _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::content'
+    _title_callback: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::getTitle'
   options:
     parameters:
       node:

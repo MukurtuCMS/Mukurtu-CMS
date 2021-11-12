@@ -44,6 +44,21 @@ class MukurtuManageUserMembershipsController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getTitle(UserInterface $user = NULL) {
+    if ($user) {
+      $displayName = $user->get('field_display_name')->value;
+
+      if (!empty($displayName)) {
+        return $this->t("@displayname (@username) Memberships", ["@displayname" => $displayName, "@username" => $user->getAccountName()]);
+      }
+      return $this->t("@username Memberships", ["@username" => $user->getAccountName()]);
+    }
+    return $this->t("Manage Memberships");
+  }
+
   public function content(UserInterface $user) {
     $build = [];
 
