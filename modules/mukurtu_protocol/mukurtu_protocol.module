@@ -23,6 +23,7 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Url;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_PERSONAL", "personal");
@@ -596,9 +597,28 @@ function mukurtu_protocol_entity_type_build(array &$entity_types) {
 }
 
 /**
+ * Submit handler for user_register_form.
+ */
+function mukurtu_protocol_user_edit_form_submit($form, FormStateInterface &$form_state) {
+  $uid = $form_state->getValue("uid");
+  $user = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
+
+  // Redirect freshly created user to the manage memberships page.
+  if ($user) {
+    $url = Url::fromRoute('mukurtu_protocol.manage_user_memberships', ['user' => $uid]);
+    $form_state->setRedirectUrl($url);
+  }
+}
+
+/**
  * Implements hook_form_alter().
  */
 function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Redirect freshly created user to the manage memberships page.
+  if ($form_id == 'user_register_form') {
+    $form['actions']['submit']['#submit'][] = 'mukurtu_protocol_user_edit_form_submit';
+  }
+
   // When we a protocol scope/protocol list pairing, only display the protocol
   // list when the any/all options are selected on the scope.
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
