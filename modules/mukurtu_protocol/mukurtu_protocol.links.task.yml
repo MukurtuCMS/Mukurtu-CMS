@@ -6,3 +6,7 @@ mukurtu_protocol.manage_memberships:
   title: Manage Memberships
   route_name: mukurtu_protocol.manage_memberships
   base_route: entity.node.canonical
+mukurtu_protocol.manage_user_memberships:
+  title: Manage Memberships
+  route_name: mukurtu_protocol.manage_user_memberships
+  base_route: entity.user.canonical

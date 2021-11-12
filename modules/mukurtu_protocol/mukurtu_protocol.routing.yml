@@ -18,7 +18,6 @@ mukurtu_protocol.add_new_protocol:
         type: entity:node
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuAddNewProtocolController::access'
-    _permission: 'create content'
 mukurtu_protocol.manage_memberships:
   path: '/node/{node}/memberships'
   defaults:
@@ -30,3 +29,14 @@ mukurtu_protocol.manage_memberships:
         type: entity:node
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuManageMembershipsController::access'
+mukurtu_protocol.manage_user_memberships:
+  path: '/user/{user}/memberships'
+  defaults:
+    _title: 'Manage User Memberships'
+    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::content'
+  options:
+    parameters:
+      node:
+        type: entity:user
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::access'

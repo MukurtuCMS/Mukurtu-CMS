@@ -58,6 +58,35 @@ class MukurtuMembershipManager {
     return FALSE;
   }
 
+  public function setRoles(EntityInterface $group, AccountInterface $account, array $roles) {
+    $nonMemberRoleId = "{$group->getEntityTypeId()}-{$group->bundle()}-non-member";
+    $memberRoleId = "{$group->getEntityTypeId()}-{$group->bundle()}-member";
+
+    $roleManager = \Drupal::service('og.role_manager');
+    $allProtocolRoles = $roleManager->getRolesByBundle($group->getEntityTypeId(), $group->bundle());
+
+    // Build a list of enabled roles.
+    $enabledRoles = [];
+    foreach ($roles as $role) {
+      if (!in_array($role, [$nonMemberRoleId, $memberRoleId])) {
+        if (isset($allProtocolRoles[$role])) {
+          $enabledRoles[] = $allProtocolRoles[$role];
+        }
+      }
+    }
+
+    if (in_array($nonMemberRoleId, $roles)) {
+      $this->removeMember($group, $account);
+      return;
+    }
+
+    if (in_array($memberRoleId, $roles)) {
+      $this->addMember($group, $account);
+      $membership = Og::getMembership($group, $account, OgMembershipInterface::ALL_STATES);
+      $membership->setRoles($enabledRoles);
+    }
+  }
+
   public function removeRoles(EntityInterface $group, AccountInterface $account, $roles) {
     $membership = Og::getMembership($group, $account, OgMembershipInterface::ALL_STATES);
     if ($membership) {
