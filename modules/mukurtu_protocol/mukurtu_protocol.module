@@ -749,6 +749,50 @@ function mukurtu_protocol_form_media_library_add_form_upload_alter(&$form, FormS
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_protocol_form_media_library_add_form_oembed_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!empty($form['media'])) {
+    // Create a checkbox to toggle protocol inherit on first use for media.
+    // This doesn't actually DO anything other than obscure the protocol fields.
+    // We depend on the default protocol values of 'personal' and the behavior
+    // defined in mukurtu_protocol_resolve_new_content_inheritance.
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_INHERIT_FIRST_USE] = [
+      '#type' => 'checkbox',
+      '#title' => t('Inherit protocol(s) from content'),
+      '#default_value' => TRUE,
+      '#weight' => 1,
+    ];
+
+    // Move protocol widgets below our new checkbox.
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET]['#weight'] = 20;
+    $form['media'][0]['fields']['group_protocols']['#weight'] = 30;
+
+    // Hide inheritance element when our simple checkbox is checked.
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET]["widget"]['#states'] = [
+      'visible' => [
+        ':input[name="field_mukurtu_protocol_inherit_first_use"]' => ['checked' => FALSE],
+      ],
+    ];
+
+    // Hide protocol elements when our simple checkbox is checked.
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_READ]['#states']['visible'][] = [
+      ':input[name="field_mukurtu_protocol_inherit_first_use"]' => ['checked' => FALSE],
+    ];
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_READ_SCOPE]['#states']['visible'][] = [
+      ':input[name="field_mukurtu_protocol_inherit_first_use"]' => ['checked' => FALSE],
+    ];
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_WRITE]['#states']['visible'][] = [
+      ':input[name="field_mukurtu_protocol_inherit_first_use"]' => ['checked' => FALSE],
+    ];
+    $form['media'][0]['fields'][MUKURTU_PROTOCOL_FIELD_NAME_WRITE_SCOPE]['#states']['visible'][] = [
+      ':input[name="field_mukurtu_protocol_inherit_first_use"]' => ['checked' => FALSE],
+    ];
+  }
+
+}
+
+/**
  * Update the write protocol scope based on the read scope value.
  *
  * @param $form
