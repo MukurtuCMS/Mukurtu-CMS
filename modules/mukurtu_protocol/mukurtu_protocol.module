@@ -359,10 +359,10 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
     $protocol_manager->processProtocolMembershipInsert($entity->id(), $entity->getOwnerId());
     $protocol_manager->invalidateProtocolCache($entity);
 
-    // Trigger save to recalculate protocol list.
+    // Recalculate protocol list.
     $community = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)->referencedEntities()[0] ?? NULL;
     if ($community) {
-      $community->save();
+      Cache::invalidateTags($community->getCacheTagsToInvalidate());
     }
   }
 
@@ -419,10 +419,10 @@ function mukurtu_protocol_entity_update(EntityInterface $entity) {
   if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'protocol') {
     $protocol_manager->invalidateProtocolCache($entity);
 
-    // Trigger save to recalculate protocol list.
+    // Invalidate owning community cache.
     $community = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)->referencedEntities()[0] ?? NULL;
     if ($community) {
-      $community->save();
+      Cache::invalidateTags($community->getCacheTagsToInvalidate());
     }
   }
 }
