@@ -26,21 +26,29 @@ mode: full
 content:
   field_child_communities:
     type: entity_reference_label
-    weight: 3
+    weight: 5
     region: content
     label: above
     settings:
       link: true
     third_party_settings: {  }
+  field_community_protocols:
+    label: above
+    type: entity_reference_label
+    weight: 3
+    region: content
+    settings:
+      link: true
+    third_party_settings: {  }
   field_description:
-    weight: 0
+    weight: 1
     label: above
     settings: {  }
     third_party_settings: {  }
     type: text_default
     region: content
   field_featured_content:
-    weight: 1
+    weight: 2
     label: above
     settings:
       link: true
@@ -49,36 +57,34 @@ content:
     region: content
   field_parent_community:
     type: entity_reference_label
-    weight: 2
+    weight: 4
     region: content
     label: above
     settings:
       link: true
     third_party_settings: {  }
-  flag_email_og:
-    weight: 10
+  flag_mukurtu_follow_community:
+    weight: 0
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
-  flag_subscribe_node:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  flag_subscribe_og:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
 hidden:
   body: true
   field_all_community_records: true
   field_content_type: true
   field_content_warning_triggers: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
   field_representative_media: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true
+  flag_email_og: true
+  flag_mukurtu_email_community: true
+  flag_mukurtu_email_og: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
   links: true
   og_group: true
   search_api_excerpt: true
