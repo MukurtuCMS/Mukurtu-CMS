@@ -23,7 +23,10 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Url;
+use Drupal\Core\Cache\Cache;
+use Drupal\entity_test\FieldStorageDefinition;
 
 define("MUKURTU_PROTOCOL_GRANTS_REALM", "mukurtu");
 define("MUKURTU_PROTOCOL_PERSONAL", "personal");
@@ -226,8 +229,8 @@ function mukurtu_protocol_supported_entity_type($entity_type_id) {
  * Implements hook_entity_base_field_info().
  */
 function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_type) {
-  $fields = [];
   if (mukurtu_protocol_supported_entity_type($entity_type->id())) {
+    $fields = [];
     $fields[MUKURTU_PROTOCOL_FIELD_NAME_READ_COMPUTED] = BaseFieldDefinition::create('integer')
       ->setName(MUKURTU_PROTOCOL_FIELD_NAME_READ_COMPUTED)
       ->setLabel(t('Mukurtu Computed Protocol - Read'))
@@ -236,8 +239,32 @@ function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setClass('Drupal\mukurtu_protocol\Plugin\Field\MukurtuCalculatedProtocolField')
       ->setCardinality(-1)
       ->setDisplayConfigurable('view', FALSE);
+    return $fields;
   }
-  return $fields;
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function mukurtu_protocol_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  if ($entity_type->id() == 'node' && $bundle == 'community') {
+    $fields = [];
+    $fields['field_community_protocols'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_community_protocols')
+      ->setLabel(t('Protocols'))
+      ->setDescription(t('Protocols in this community'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityProtocolsItemList')
+      ->setTargetEntityTypeId('node')
+      ->setTargetBundle('protocol')
+      ->setRevisionable(FALSE)
+      ->setTranslatable(FALSE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayOptions('view', ['label' => 'above', 'type' => 'entity_reference_label', 'weight' => 3]);
+
+    return $fields;
+  }
 }
 
 /**
@@ -322,6 +349,23 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
     }
   }
 
+  // Handle user being added to a community.
+  if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'community') {
+    $protocol_manager->processCommunityMembershipInsert($entity->id(), $entity->getOwnerId());
+  }
+
+  // Invalidate cache for content under the protocol with the membership change.
+  if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'protocol') {
+    $protocol_manager->processProtocolMembershipInsert($entity->id(), $entity->getOwnerId());
+    $protocol_manager->invalidateProtocolCache($entity);
+
+    // Trigger save to recalculate protocol list.
+    $community = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)->referencedEntities()[0] ?? NULL;
+    if ($community) {
+      $community->save();
+    }
+  }
+
   // Handle OgMemberships from here on.
   if (!$entity instanceof OgMembership) {
     return;
@@ -338,26 +382,6 @@ function mukurtu_protocol_entity_insert(EntityInterface $entity) {
       $entity->addRole($roles['node-protocol-protocol_steward']);
       $entity->save();
     }
-  }
-
-  $entity_type = $entity->get('entity_type')->value;
-  $entity_bundle = $entity->get('entity_bundle')->value;
-
-  // Handle user being added to a community.
-  if ($entity_type == 'node' && $entity_bundle == 'community') {
-    $uid = $entity->getOwnerId();
-    $nid = $entity->get('entity_id')->value;
-    $protocol_manager->processCommunityMembershipInsert($nid, $uid);
-  }
-
-  // Invalidate cache for content under the protocol with the membership change.
-  if ($entity_type == 'node' && $entity_bundle == 'protocol') {
-    $uid = $entity->getOwnerId();
-    $nid = $entity->get('entity_id')->value;
-
-    $protocol_manager->processProtocolMembershipInsert($nid, $uid);
-    $protocol = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
-    $protocol_manager->invalidateProtocolCache($protocol);
   }
 }
 
@@ -391,16 +415,15 @@ function mukurtu_protocol_entity_update(EntityInterface $entity) {
     }
   }
 
-  // Handle OgMemberships from here on.
-  if (!$entity instanceof OgMembership) {
-    return;
-  }
-
   // Invalidate cache for content under the protocol with the membership change.
-  if ($entity->get('entity_type')->value == 'node' && $entity->get('entity_bundle')->value == 'protocol') {
-    $nid = $entity->get('entity_id')->value;
-    $protocol = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
-    $protocol_manager->invalidateProtocolCache($protocol);
+  if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'protocol') {
+    $protocol_manager->invalidateProtocolCache($entity);
+
+    // Trigger save to recalculate protocol list.
+    $community = $entity->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)->referencedEntities()[0] ?? NULL;
+    if ($community) {
+      $community->save();
+    }
   }
 }
 
