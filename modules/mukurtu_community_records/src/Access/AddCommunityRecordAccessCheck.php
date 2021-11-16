@@ -42,18 +42,18 @@ class AddCommunityRecordAccessCheck implements AccessInterface {
    *   The access result.
    */
   public function access(AccountInterface $account) {
-    $memberships = Og::getMemberships($account);
-
     // Helper function to filter memberships to communities only.
     $communities_only = function ($e) {
-      if ($e->get('entity_bundle')->value == 'community') {
-        return TRUE;
-      }
-      return FALSE;
+      return $e->getGroupBundle() == 'community' ? TRUE : FALSE;
+    };
+
+    $protocols_only = function ($e) {
+      return $e->getGroupBundle() == 'protocol' ? TRUE : FALSE;
     };
 
     // Find community memberships.
-    $memberships = array_filter($memberships, $communities_only);
+    $memberships = array_filter(Og::getMemberships($account), $communities_only);
+    $protocol_memberships = array_filter(Og::getMemberships($account), $protocols_only);
 
     // User cannot create CRs if they have no community memberships.
     if (empty($memberships)) {
@@ -65,12 +65,19 @@ class AddCommunityRecordAccessCheck implements AccessInterface {
     $has_cr_permission = function ($e) {
       return $e->hasPermission('administer community records');
     };
-    $valid_cr_communties = array_filter($memberships, $has_cr_permission);
+    $valid_cr_community_memberships = array_filter($memberships, $has_cr_permission);
 
     // User cannot create CRs if they have no community memberships in which
     // they have the administer community records permission.
-    if (empty($valid_cr_communties)) {
+    if (empty($valid_cr_community_memberships)) {
       return AccessResult::forbidden();
+    }
+
+    // Load the communities from the community memberships.
+    $valid_cr_communities = [];
+    foreach ($valid_cr_community_memberships as $valid_cr_community_membership) {
+      $community = $valid_cr_community_membership->getGroup();
+      $valid_cr_communities[$community->id()] = $community;
     }
 
     // We know at this point the user is in at least one community
@@ -87,11 +94,18 @@ class AddCommunityRecordAccessCheck implements AccessInterface {
 
     // Can the user create any of those types?
     foreach ($validBundles as $key => $bundle) {
-      foreach ($valid_cr_communties as $community) {
-        // As soon as we have one valid case we can return.
-        if ($community->hasPermission("create $bundle content")) {
-          //return AccessResult::neutral();
-          return AccessResult::allowed();
+      foreach ($protocol_memberships as $protocol_membership) {
+        // Check if we have the permission in this protocol.
+        if ($protocol_membership->hasPermission("create $bundle content")) {
+          // Is this protocol contained in one of the allowed communities?
+          $protocol = $protocol_membership->getGroup();
+          $parent_communities = $protocol->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)->referencedEntities();
+          foreach ($parent_communities as $parent_community) {
+            if (isset($valid_cr_communities[$parent_community->id()])) {
+              // As soon as we have one valid case we can return.
+              return AccessResult::allowed();
+            }
+          }
         }
       }
     }
