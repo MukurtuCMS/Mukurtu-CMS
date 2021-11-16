@@ -15,6 +15,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\Core\Cache\Cache;
 
 /**
  * Implements hook_theme().
@@ -362,3 +363,16 @@ function mukurtu_core_batch_add_entity_reference($entity, $args) {
   }
   return FALSE;
 };
+
+
+/**
+ * Helper function to invalidate all contained references in an ERF.
+ */
+function mukurtu_core_invalidate_entity_reference_field_references(EntityInterface $entity, $field) {
+  $refs = $entity->get($field)->referencedEntities() ?? NULL;
+  if (!empty($refs)) {
+    foreach ($refs as $ref) {
+      Cache::invalidateTags($ref->getCacheTagsToInvalidate());
+    }
+  }
+}

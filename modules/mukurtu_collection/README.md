@@ -23,3 +23,8 @@ When content is added to the multipage collection:
 |Multipage Navigation Teaser|multipage_navigation_teaser|This mode controls the display of individual item teasers in the navigation control (e.g., a single page in the carousel). **This mode must be implemented for each content type that is available to be added to a collection.**
 |Multipage Item|multipage_item|When viewing a multipage item, this view mode controls the display of the currently selected page. **This mode must be implemented for each content type that is available to be added to a collection.**
 |Multipage Full|multipage_full|This view mode is for nodes that are in a multipage item collection. It will display the entire multipage document instead of only the single item page. **This mode must be implemented for each content type that is available to be added to a collection. All content types should have the exact same implementation of this mode.**
+
+## Computed Fields
+
+### Node - Collections (field_in_collection)
+This computed field contains the collections the content is a member of.

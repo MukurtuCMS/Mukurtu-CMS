@@ -71,7 +71,7 @@ function mukurtu_collection_entity_bundle_field_info(EntityTypeInterface $entity
   if ($entity_type->id() == 'node') {
     $fields = [];
     $fields['field_in_collection'] = BaseFieldDefinition::create('entity_reference')
-      ->setName('field_community_protocols')
+      ->setName('field_in_collection')
       ->setLabel(t('Collections'))
       ->setDescription(t('Collections this content is contained in.'))
       ->setComputed(TRUE)
@@ -103,6 +103,10 @@ function mukurtu_collection_entity_bundle_create($entity_type_id, $bundle) {
  */
 function mukurtu_collection_entity_insert(EntityInterface $entity) {
   mukurtu_collection_multipage_sync_relationship($entity);
+
+  if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'collection') {
+    mukurtu_core_invalidate_entity_reference_field_references($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
+  }
 }
 
 /**
@@ -110,6 +114,10 @@ function mukurtu_collection_entity_insert(EntityInterface $entity) {
  */
 function mukurtu_collection_entity_update(EntityInterface $entity) {
   mukurtu_collection_multipage_sync_relationship($entity);
+
+  if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'collection') {
+    mukurtu_core_invalidate_entity_reference_field_references($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
+  }
 }
 
 /**
@@ -125,6 +133,10 @@ function mukurtu_collection_entity_delete(EntityInterface $entity) {
     // This will delete all the item level references to the collection.
     $entity->set(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, []);
     mukurtu_collection_multipage_sync_relationship($entity);
+  }
+
+  if ($entity->bundle() == 'collection') {
+    mukurtu_core_invalidate_entity_reference_field_references($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
   }
 }
 
