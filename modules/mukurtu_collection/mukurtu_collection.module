@@ -10,6 +10,8 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 define("MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION", "field_sequence_collection");
 define("MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION", "Sequence Collection");
@@ -59,6 +61,30 @@ function mukurtu_collection_create_sequence_field($entity_type_id, $bundle) {
         ],
       ],
     ])->save();
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function mukurtu_collection_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  if ($entity_type->id() == 'node') {
+    $fields = [];
+    $fields['field_in_collection'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_community_protocols')
+      ->setLabel(t('Collections'))
+      ->setDescription(t('Collections this content is contained in.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_collection\Plugin\Field\MukurtuInCollectionFieldItemsList')
+      ->setTargetEntityTypeId('node')
+      ->setTargetBundle('collection')
+      ->setRevisionable(FALSE)
+      ->setTranslatable(FALSE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setDisplayConfigurable('view', TRUE);
+      //      ->setDisplayOptions('view', ['label' => 'above', 'type' => 'entity_reference_label', 'weight' => 3]);
+
+    return $fields;
   }
 }
 
