@@ -5,13 +5,7 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Og;
-//use Drupal\user\Entity\UserInterface;
 use Drupal\user\UserInterface;
-use Drupal\Core\Session\AccountProxy;
-use Drupal\og\OgRoleInterface;
-use Drupal\og\OgMembershipInterface;
-use Drupal\Core\Url;
-use Exception;
 
 class ManageUserMembershipForm extends FormBase {
 
@@ -78,24 +72,27 @@ class ManageUserMembershipForm extends FormBase {
 
     // Get current memberships for the user we are managing.
     $memberships = Og::getMemberships($user);
+    $memberships = $this->sortMemberships($memberships);
 
     // We want to display the groups that the viewing user has
     // management permissions for but the user being edited
     // doesn't have membership for.
     $currentUserMemberships = Og::getMemberships($this->currentUser());
+    $currentUserMemberships = $this->sortMemberships($currentUserMemberships);
     $nonMemberGroups = [];
     foreach ($currentUserMemberships as $membership) {
       if ($membership->getGroupBundle() == $bundle) {
         if ($membership->hasPermission('administer group') || $membership->hasPermission('manage members')) {
-          $userMembership = Og::getMembership($membership->getGroup(), $user);
-          if (!$userMembership) {
-            $nonMemberGroups[$membership->getGroup()->id()] = $membership->getGroup();
+          $nonMemberGroup = $membership->getGroup();
+          if ($nonMemberGroup) {
+            $userMembership = Og::getMembership($membership->getGroup(), $user);
+            if (!$userMembership) {
+              $nonMemberGroups[$membership->getGroup()->id()] = $membership->getGroup();
+            }
           }
         }
       }
     }
-
-    $memberships = $memberships;
 
     foreach ($memberships as $membership) {
       // Only dealing with the specific bundle.
@@ -178,8 +175,13 @@ class ManageUserMembershipForm extends FormBase {
       $row_default["node-{$group->bundle()}-non-member"]['#default_value'] = TRUE;
       $table[$delta] = $row_default;
       $groupCommunity = NULL;
+
+      // For protocols, grab the community name.
       if ($group->hasField(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)) {
-        $groupCommunity = $group->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)[0]->getEntity();
+        $groupCommunityId = $group->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)[0]->getValue();
+        if (isset($groupCommunityId['target_id'])) {
+          $groupCommunity = \Drupal::entityTypeManager()->getStorage('node')->load($groupCommunityId['target_id']);
+        }
       }
 
       // Group Name.
@@ -258,6 +260,41 @@ class ManageUserMembershipForm extends FormBase {
       $roles = $this->buildRolesFromCheckboxes($group, $protocol);
       $mukurtuMembershipManager->setRoles($group, $user, $roles);
     }
+  }
+
+  protected function sortMemberships(Array $memberships) {
+    $sorted = [];
+    $nulls = [];
+
+    foreach ($memberships as $membership) {
+      $group = $membership->getGroup();
+      if ($group) {
+
+        if ($group->bundle() == 'protocol') {
+          $groupCommunityId = $group->get(MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY)[0]->getValue();
+          if (isset($groupCommunityId['target_id'])) {
+            $groupCommunity = \Drupal::entityTypeManager()->getStorage('node')->load($groupCommunityId['target_id']);
+            if ($groupCommunity) {
+              $sort_me[$membership->id()] = $groupCommunity->getTitle();
+            } else {
+              $sort_me[$membership->id()] = "ZZZZZZ" . $group->getTitle();
+            }
+          }
+        } else {
+          $sort_me[$membership->id()] = $group->getTitle();
+        }
+      } else {
+        $nulls[] = $membership;
+      }
+    }
+
+    asort($sort_me, SORT_NATURAL | SORT_FLAG_CASE);
+
+    foreach ($sort_me as $index => $title) {
+      $sorted[] = $memberships[$index];
+    }
+
+    return $sorted;
   }
 
 }
