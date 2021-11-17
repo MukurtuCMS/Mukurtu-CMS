@@ -620,6 +620,18 @@ function mukurtu_protocol_entity_type_build(array &$entity_types) {
 }
 
 /**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+function mukurtu_protocol_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  if ($entity_type->getBundleEntityType() === 'node_type' && $bundle === 'protocol') {
+    if (isset($fields[MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY])) {
+      // Use the ID as defined in the annotation of the constraint definition
+      $fields[MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY]->addConstraint('ImmutableProtocolParentCommunity', []);
+    }
+  }
+}
+
+/**
  * Submit handler for user_register_form.
  */
 function mukurtu_protocol_user_edit_form_submit($form, FormStateInterface &$form_state) {
@@ -642,6 +654,14 @@ function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $fo
   // Redirect freshly created user to the manage memberships page.
   if ($form_id == 'user_register_form') {
     $form['actions']['submit']['#submit'][] = 'mukurtu_protocol_user_edit_form_submit';
+  }
+
+  // Disable the parent community field widget for existing protocols.
+  if ($form_id == 'node_protocol_edit_form') {
+    $entity = $form_state->getformObject()->getEntity();
+    if ($entity && !$entity->isNew()) {
+      $form[MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY]['#disabled'] = TRUE;
+    }
   }
 
   // When we a protocol scope/protocol list pairing, only display the protocol
