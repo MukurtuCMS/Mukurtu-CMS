@@ -13,4 +13,8 @@ mukurtu_collection.multipage_create:
   base_route: entity.node.canonical
   title: 'Create Multipage Collection'
   weight: 46
-
+mukurtu_collection.add_item_to_collection:
+  route_name: mukurtu_collection.add_item_to_collection
+  base_route: entity.node.canonical
+  title: 'Add to Collection'
+  weight: 50

@@ -58,3 +58,14 @@ mukurtu_collection.collection_browse_page:
     _title: 'Collections'
   requirements:
     _permission: 'access content'
+mukurtu_collection.add_item_to_collection:
+  path: '/node/{node}/collection/add'
+  defaults:
+    _title_callback: '\Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController::getTitle'
+    _controller: '\Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController::access'
