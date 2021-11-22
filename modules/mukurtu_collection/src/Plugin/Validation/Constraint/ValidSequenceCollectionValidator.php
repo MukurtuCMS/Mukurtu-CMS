@@ -42,4 +42,5 @@ class ValidSequenceCollectionValidator extends ConstraintValidator {
       }
     }
   }
+
 }
