@@ -234,32 +234,34 @@ display:
           action_title: Action
           selected_actions:
             37:
+              action_id: mukurtu_add_to_collection_action
+            38:
               action_id: mukurtu_set_protocol_action
-            40:
+            41:
               action_id: node_assign_owner_action
               preconfiguration:
                 add_confirmation: false
-            42:
+            43:
               action_id: node_unpublish_action
               preconfiguration:
                 add_confirmation: false
-            43:
+            44:
               action_id: node_publish_action
               preconfiguration:
                 add_confirmation: false
-            46:
+            47:
               action_id: node_save_action
               preconfiguration:
                 add_confirmation: false
-            47:
+            48:
               action_id: views_bulk_operations_delete_entity
               preconfiguration:
                 label_override: 'Delete Content'
-            49:
+            50:
               action_id: 'entity:unpublish_action:node'
               preconfiguration:
                 add_confirmation: false
-            50:
+            51:
               action_id: 'entity:publish_action:node'
               preconfiguration:
                 add_confirmation: false
