@@ -118,7 +118,7 @@ function mukurtu_browse_node_presave(EntityInterface $entity) {
  * Compute the GeoJSON for the map browse.
  */
 function mukurtu_browse_compute_geojson($entity) {
-  $view_builder = \Drupal::entityManager()->getViewBuilder($entity->getEntityTypeId());
+  $view_builder = \Drupal::entityTypeManager()->getViewBuilder($entity->getEntityTypeId());
   $renderer = \Drupal::service('renderer');
   $coverage = $entity->hasField('field_coverage') ? $entity->get('field_coverage') : NULL;
 
