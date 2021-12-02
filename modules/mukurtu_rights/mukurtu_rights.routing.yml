@@ -1,0 +1,7 @@
+mukurtu_rights.localcontextshub_settings:
+  path: '/admin/config/mukurtu/localcontextshub/settings'
+  defaults:
+    _form: '\Drupal\mukurtu_rights\Form\LocalContextsHubSettingsForm'
+    _title: 'Mukurtu Local Contexts Hub Settings'
+  requirements:
+    _permission: 'administer site configuration'

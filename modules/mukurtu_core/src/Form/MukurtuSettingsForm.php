@@ -6,7 +6,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Configure example settings for this site.
+ * Configure Mukurtu core settings for this site.
  */
 class MukurtuSettingsForm extends ConfigFormBase {
 
@@ -42,7 +42,8 @@ class MukurtuSettingsForm extends ConfigFormBase {
     $default_media_id = $config->get('mukurtu_default_image');
     if ($default_media_id) {
       $default_media = \Drupal::entityTypeManager()->getStorage('media')->load($default_media_id);
-    } else {
+    }
+    else {
       $default_media = NULL;
     }
 

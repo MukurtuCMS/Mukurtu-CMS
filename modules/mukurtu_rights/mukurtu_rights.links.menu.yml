@@ -1,0 +1,7 @@
+mukurtu_rights.localcontextshub_settings:
+  title: "Mukurtu Local Contexts Hub Settings"
+  menu_name: mukurtu
+  description: "Manage settings for the Local Contexts Hub integration."
+  route_name: mukurtu_rights.localcontextshub_settings
+  parent: system.admin_config_content
+  weight: 1000

@@ -5,12 +5,12 @@ namespace Drupal\mukurtu_rights\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\mukurtu_rights\LocalContextLabelInterface;
+use Drupal\mukurtu_rights\LocalContextsLabelInterface;
 
 /**
  * Defines the LocalContextLabel entity.
  *
- * @ingroup lclabel
+ * @ingroup local_contexts_hub
  *
  * @ContentEntityType(
  *   id = "lclabel",
@@ -22,7 +22,7 @@ use Drupal\mukurtu_rights\LocalContextLabelInterface;
  *   },
  * )
  */
-class LocalContextLabel extends ContentEntityBase implements LocalContextLabelInterface {
+class LocalContextsLabel extends ContentEntityBase implements LocalContextsLabelInterface {
 
   /**
    * {@inheritdoc}
