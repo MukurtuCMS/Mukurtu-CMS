@@ -116,8 +116,8 @@ class LocalContextsHubManager implements LocalContextsHubManagerInterface {
           $label->set('project_title', $data['title'] ?? '');
           $label->set('name', $hubLabel['name'] ?? '');
           $label->set('text', $hubLabel['default_text'] ?? '');
-          $label->set('image_url', $hubLabel['image_url'] ?? '');
           $label->set('community', $hubLabel['community'] ?? '');
+          $label->set('image_url', $hubLabel['img_url'] ?? '');
 
           if (isset($hubLabel['created'])) {
             $label->set('hub_created', substr($hubLabel['created'], 0, -8));

@@ -1,2 +1,34 @@
 <?php
+use Drupal\Core\Render\Element;
 
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_rights_theme($existing, $type, $theme, $path) {
+  $theme = [
+    'lclabel' => [
+      'path' => $path . '/templates',
+      'template'  => 'lclabel',
+      'render element' => 'elements',
+    ],
+  ];
+
+  return $theme;
+}
+
+/**
+ * Prepares variables for lclabel templates.
+ *
+ * Default template: lclabel.html.twig.
+ */
+function template_preprocess_lclabel(&$variables) {
+  $variables['lclabel'] = $variables['elements']['#lclabel'];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+  $entity = $variables['elements']['#lclabel'];
+  $variables['title'] = $entity->getTitle();
+  $variables['image_url'] = $entity->getImageUrl();
+  $variables['text'] = $entity->getText();
+}

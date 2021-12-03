@@ -1,0 +1,22 @@
+{#
+/**
+ * @file
+ * Default theme implementation to for Local Contexts labels.
+ *
+ * @see template_preprocess_lclabel()
+ *
+ * @ingroup themeable
+ */
+#}
+<article{{attributes}}>
+  <img src="{{ image_url }}" alt="{{ title }}">
+  <div class="title">
+    {{ title }}
+  </div>
+  <div class="text">
+    {{ text }}
+  </div>
+  {% if content %}
+    {{- content -}}
+  {% endif %}
+</article>

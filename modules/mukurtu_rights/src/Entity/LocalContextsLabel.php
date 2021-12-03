@@ -15,14 +15,45 @@ use Drupal\mukurtu_rights\LocalContextsLabelInterface;
  * @ContentEntityType(
  *   id = "lclabel",
  *   label = @Translation("Local Contexts Label"),
+ *   label_collection = @Translation("Local Contexts Labels"),
+ *   label_singular = @Translation("Local Contexts Label"),
+ *   label_plural = @Translation("Local Contexts Labels"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count label",
+ *     plural = "@count labels",
+ *   ),
  *   base_table = "lclabel",
  *   entity_keys = {
  *     "id" = "lid",
  *     "uuid" = "uuid",
  *   },
+ * handlers = {
+ *    "views_data" = "Drupal\views\EntityViewsData",
+ *  },
  * )
  */
 class LocalContextsLabel extends ContentEntityBase implements LocalContextsLabelInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getTitle() : string {
+    return $this->get('name')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getText() : string {
+    return $this->get('text')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getImageUrl() : string {
+    return $this->get('image_url')->value ?? '';
+  }
 
   /**
    * {@inheritdoc}
