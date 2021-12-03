@@ -1,0 +1,40 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.content_browser_local_contexts_labels
+  module:
+    - views
+name: browser_for_local_contexts_labels
+label: 'Browser for Local Contexts Labels'
+display: modal
+display_configuration:
+  width: '650'
+  height: '500'
+  link_text: 'Select entities'
+  auto_open: false
+selection_display: no_display
+selection_display_configuration: {  }
+widget_selector: tabs
+widget_selector_configuration: {  }
+widgets:
+  b382cebf-5b4b-4ea4-bc6f-57c95d0267a0:
+    settings:
+      view: content_browser_local_contexts_labels
+      view_display: entity_browser_1
+      submit_text: 'Select labels'
+      auto_select: false
+    uuid: b382cebf-5b4b-4ea4-bc6f-57c95d0267a0
+    weight: 1
+    label: 'TK Labels'
+    id: view
+  8d2fc5a1-5a51-429d-b39f-0fd0dd7a6f59:
+    settings:
+      view: content_browser_local_contexts_labels
+      view_display: entity_browser_2
+      submit_text: 'Select labels'
+      auto_select: false
+    uuid: 8d2fc5a1-5a51-429d-b39f-0fd0dd7a6f59
+    weight: 2
+    label: 'BC Labels'
+    id: view

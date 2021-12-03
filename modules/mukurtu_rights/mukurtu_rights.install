@@ -1,0 +1,11 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_rights_install() {
+  // Create the labels field on all pre-existing content types.
+  foreach (node_type_get_names() as $bundle => $label) {
+    mukurtu_rights_create_labels_field('node', $bundle);
+  }
+}

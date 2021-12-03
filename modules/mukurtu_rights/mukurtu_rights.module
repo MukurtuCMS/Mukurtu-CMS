@@ -1,5 +1,7 @@
 <?php
 use Drupal\Core\Render\Element;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Implements hook_theme().
@@ -22,13 +24,57 @@ function mukurtu_rights_theme($existing, $type, $theme, $path) {
  * Default template: lclabel.html.twig.
  */
 function template_preprocess_lclabel(&$variables) {
-  $variables['lclabel'] = $variables['elements']['#lclabel'];
+/*   $variables['lclabel'] = $variables['elements']['#lclabel'];
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
-  }
+  } */
 
   $entity = $variables['elements']['#lclabel'];
   $variables['title'] = $entity->getTitle();
   $variables['image_url'] = $entity->getImageUrl();
   $variables['text'] = $entity->getText();
+}
+
+/**
+ * Create the labels field for an entity type/bundle.
+ */
+function mukurtu_rights_create_labels_field($entity_type_id, $bundle) {
+  // Protocols and communities don't need label fields.
+  if ($entity_type_id != 'node' || in_array($bundle, ['community', 'protocol'])) {
+    return;
+  }
+
+  $field_storage = FieldStorageConfig::loadByName($entity_type_id, 'field_local_contexts_labels');
+  $field_config = FieldConfig::loadByName($entity_type_id, $bundle, 'field_local_contexts_labels');
+
+  if ($field_storage && is_null($field_config)) {
+    $new_field = $field_storage->toArray();
+
+    // Get rid of the UUID field, we want it to generate a fresh UUID for the new field.
+    if (isset($new_field['uuid'])) {
+      unset($new_field['uuid']);
+    }
+
+    $new_field['label'] = "Local Contexts Labels";
+    $new_field['bundle'] = $bundle;
+    $new_field['settings'] = [
+      'handler' => 'default:lclabel',
+      'handler_settings' => [
+        'target_bundles' => NULL,
+        'auto_create' => FALSE,
+      ],
+    ];
+    $new_field = FieldConfig::create($new_field);
+    $new_field->save();
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_create().
+ */
+function mukurtu_rights_entity_bundle_create($entity_type_id, $bundle) {
+  // For any new node type that is defined, add the labels field.
+  if ($entity_type_id == 'node') {
+    mukurtu_rights_create_labels_field($entity_type_id, $bundle);
+  }
 }

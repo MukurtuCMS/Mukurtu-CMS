@@ -52,7 +52,7 @@ class LocalContextsHubManager implements LocalContextsHubManagerInterface {
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager) {
     $this->configFactory = $config_factory;
     $this->entityTypeManager = $entity_type_manager;
-    $endpointUrl = $config_factory->get($this->SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? 'https://anth-ja77-lc-dev-42d5.uc.r.appspot.com/api/v1/';
+    $endpointUrl = $config_factory->get(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? 'https://anth-ja77-lc-dev-42d5.uc.r.appspot.com/api/v1/';
 
     if (str_ends_with($endpointUrl, '/')) {
       $endpointUrl = substr($endpointUrl, 0, -1);
@@ -88,57 +88,61 @@ class LocalContextsHubManager implements LocalContextsHubManagerInterface {
 
       // Labels.
       $labelRefs = [];
-      if (!empty($data['tk_labels'])) {
-        $labelStorage = $this->entityTypeManager->getStorage('lclabel');
-        foreach ($data['tk_labels'] as $hubLabel) {
-          // Try to get existing label entity.
-          $labels = $labelStorage->loadByProperties([
-            'label_type' => $hubLabel['label_type'],
-            'project_uuid' => $uuid,
-          ]);
-
-          if (empty($labels)) {
-            // No existing label, create one.
-            $label = LocalContextsLabel::create([
+      foreach (['tk_labels', 'bc_labels'] as $labelClassKey) {
+        if (!empty($data[$labelClassKey])) {
+          $labelStorage = $this->entityTypeManager->getStorage('lclabel');
+          $labelClass = str_replace('_labels', '', $labelClassKey);
+          foreach ($data[$labelClassKey] as $hubLabel) {
+            // Try to get existing label entity.
+            $labels = $labelStorage->loadByProperties([
               'label_type' => $hubLabel['label_type'],
               'project_uuid' => $uuid,
             ]);
-          }
-          else {
-            // Use existing.
-            /**
-             * @var \Drupal\mukurtu_rights\LocalContextsLabelInterface
-             */
-            $label = $labels[array_key_first($labels)];
-          }
 
-          // Populate label fields.
-          $label->set('project_title', $data['title'] ?? '');
-          $label->set('name', $hubLabel['name'] ?? '');
-          $label->set('text', $hubLabel['default_text'] ?? '');
-          $label->set('community', $hubLabel['community'] ?? '');
-          $label->set('image_url', $hubLabel['img_url'] ?? '');
+            if (empty($labels)) {
+              // No existing label, create one.
+              $label = LocalContextsLabel::create([
+                'label_type' => $hubLabel['label_type'],
+                'project_uuid' => $uuid,
+              ]);
+            }
+            else {
+              // Use existing.
+              /**
+               * @var \Drupal\mukurtu_rights\LocalContextsLabelInterface
+               */
+              $label = $labels[array_key_first($labels)];
+            }
 
-          if (isset($hubLabel['created'])) {
-            $label->set('hub_created', substr($hubLabel['created'], 0, -8));
-          }
+            // Populate label fields.
+            $label->set('project_title', $data['title'] ?? '');
+            $label->set('name', $hubLabel['name'] ?? '');
+            $label->set('text', $hubLabel['default_text'] ?? '');
+            $label->set('community', $hubLabel['community'] ?? '');
+            $label->set('image_url', $hubLabel['img_url'] ?? '');
+            $label->set('label_class', $labelClass);
 
-          if (isset($hubLabel['updated'])) {
-            $label->set('hub_updated', substr($hubLabel['updated'], 0, -8));
-          }
+            if (isset($hubLabel['created'])) {
+              $label->set('hub_created', substr($hubLabel['created'], 0, -8));
+            }
 
-          try {
-            $label->save();
-            // Add the label to the list of references.
-            $labelRefs[] = $label->id();
-          }
-          catch (Exception $e) {
-            // Intentionally left blank.
-          }
+            if (isset($hubLabel['updated'])) {
+              $label->set('hub_updated', substr($hubLabel['updated'], 0, -8));
+            }
 
+            try {
+              $label->save();
+              // Add the label to the list of references.
+              $labelRefs[] = $label->id();
+            }
+            catch (Exception $e) {
+              // Intentionally left blank.
+            }
+
+          }
         }
+        $project->set('labels', $labelRefs);
       }
-      $project->set('labels', $labelRefs);
     }
 
     return $project;

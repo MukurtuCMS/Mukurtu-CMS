@@ -28,6 +28,7 @@ use Drupal\mukurtu_rights\LocalContextsLabelInterface;
  *     "uuid" = "uuid",
  *   },
  * handlers = {
+ *    "access" = "Drupal\mukurtu_rights\LocalContextsLabelAccessControlHandler",
  *    "views_data" = "Drupal\views\EntityViewsData",
  *  },
  * )
@@ -83,6 +84,10 @@ class LocalContextsLabel extends ContentEntityBase implements LocalContextsLabel
     $fields['name'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Label Title'))
       ->setDescription(t('The label title.'));
+
+    $fields['label_class'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Label Class'))
+      ->setDescription(t('The label class (e.g., TK or BC).'));
 
     $fields['label_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Label Type'))
