@@ -1,0 +1,8 @@
+name: Mukurtu
+description: 'The Mukurtu base theme.'
+core: 8.x
+core_version_requirement: ^8 || ^9
+type: theme
+base theme: classy
+libraries:
+  - mukurtu_base_theme/global-styling

@@ -1,0 +1,18 @@
+{% if maplink %}
+  {{ maplink }}
+{% endif %}
+
+<div class="md:tw-flex tw-p-1">
+ {% if facets %}
+  <div class="md:tw-order-last md:tw-min-w-1/4 tw-p-4">
+    {% for facet in facets %}
+      {{ facet }}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="md:tw-min-w-3/4 md:tw-grow md:tw-flex-grow tw-p-4">
+   {{ results }}
+  </div>
+
+</div>

@@ -1,0 +1,18 @@
+<article{{attributes.addClass('node')}}>
+	<div{{content_attributes.addClass(['node-content','tw-flex', 'tw-flex-row'])}}>
+		<div class="tw-basis-1/3 tw-w-1/3 tw-shrink tw-p-4 main-content">
+			{{ content.field_representative_media }}
+		</div>
+		<div class="tw-basis-2/3 tw-w-2/3 tw-flex-none tw-p-4 metadata">
+			{{ title_prefix }}
+			{% if not page %}
+				<h2{{title_attributes.addClass(['tw-text-2xl', 'tw-font-medium'])}}>
+					<a href="{{ url }}" rel="bookmark">{{ label }}</a>
+				</h2>
+			{% endif %}
+			{{ title_suffix }}
+			{{ content.field_mukurtu_community }}
+			{{ content.field_category }}
+		</div>
+	</div>
+</article>
