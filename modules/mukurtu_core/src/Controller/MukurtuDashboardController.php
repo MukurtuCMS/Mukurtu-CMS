@@ -28,7 +28,7 @@ class MukurtuDashboardController extends ControllerBase {
       '#type' => 'view',
       '#name' => 'mukurtu_message_log',
       '#display_id' => 'mukurtu_message_log_block',
-      '#embed' => TRUE,
+      '#embed' => FALSE,
     ];
 
     // Display all recent content.
@@ -36,7 +36,7 @@ class MukurtuDashboardController extends ControllerBase {
       '#type' => 'view',
       '#name' => 'mukurtu_recent_content',
       '#display_id' => 'all_recent_content_block',
-      '#embed' => TRUE,
+      '#embed' => FALSE,
     ];
 
     // Display all the user's recent content.
@@ -44,7 +44,7 @@ class MukurtuDashboardController extends ControllerBase {
       '#type' => 'view',
       '#name' => 'mukurtu_recent_content',
       '#display_id' => 'user_recent_content_block',
-      '#embed' => TRUE,
+      '#embed' => FALSE,
     ];
 
     return [

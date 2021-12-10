@@ -30,7 +30,7 @@
   {% import _self as menus %}
   {% if items %}
     {% if menu_level == 0 %}
-      <ul{{ attributes.addClass(['menu', 'tw-inline-flex', 'tw-bg-gray-300']) }}>
+      <ul{{ attributes.addClass(['menu']) }}>
     {% else %}
       <ul class="menu">
     {% endif %}
@@ -38,7 +38,6 @@
       {%
         set classes = [
           'menu-item',
-          'tw-flex-1',
           'tw-p-1',
           'hover:tw-bg-gray-700',
           'hover:tw-text-white',
