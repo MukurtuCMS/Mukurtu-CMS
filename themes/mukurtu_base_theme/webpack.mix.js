@@ -12,7 +12,8 @@ mix.purgeCss({
   paths: () => glob.sync([
     path.join(__dirname, '**/*.twig'),
     '/var/www/sites/*/{modules,themes}/custom/**/*.twig',
-    '/var/www/{modules,themes}/custom/**/*.twig'
+    '/var/www/{modules,themes}/custom/**/*.twig',
+    './templates/**/*.twig'
   ]),
   whitelistPatterns: [],
   whitelistPatternsChildren: []
