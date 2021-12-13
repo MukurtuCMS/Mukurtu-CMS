@@ -41,6 +41,15 @@
   @apply tw-mb-4
 }
 
+.field a {
+  color: #138AAB;
+}
+
+.field a:hover {
+    color: #E6AB49;
+    text-decoration: none;
+}
+
 .node__content p,
 .node__content ul,
 .node__content ol {

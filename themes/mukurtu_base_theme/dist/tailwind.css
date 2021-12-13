@@ -383,6 +383,15 @@ Ensure the default browser behavior of the `hidden` attribute.
   margin-bottom: 1rem;
 }
 
+.field a {
+  color: #138AAB;
+}
+
+.field a:hover {
+    color: #E6AB49;
+    text-decoration: none;
+}
+
 .node__content p, .node__content ul, .node__content ol {
   margin-bottom: 1rem;
   line-height: 1.5;
