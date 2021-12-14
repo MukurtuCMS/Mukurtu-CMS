@@ -5,3 +5,14 @@ mukurtu_rights.localcontextshub_settings:
     _title: 'Mukurtu Local Contexts Hub Settings'
   requirements:
     _permission: 'administer site configuration'
+mukurtu_rights.manage_hub_community_project:
+  path: '/node/{node}/manage-hub-project'
+  defaults:
+    _title_callback: '\Drupal\mukurtu_rights\Controller\MukurtuManageCommunityHubProjectController::getTitle'
+    _controller: '\Drupal\mukurtu_rights\Controller\MukurtuManageCommunityHubProjectController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_rights\Controller\MukurtuManageCommunityHubProjectController::access'

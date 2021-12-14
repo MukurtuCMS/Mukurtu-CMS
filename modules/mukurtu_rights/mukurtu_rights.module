@@ -9,8 +9,6 @@ use Drupal\field\Entity\FieldStorageConfig;
 function mukurtu_rights_theme($existing, $type, $theme, $path) {
   $theme = [
     'lclabel' => [
-      'path' => $path . '/templates',
-      'template'  => 'lclabel',
       'render element' => 'elements',
     ],
   ];
@@ -19,20 +17,39 @@ function mukurtu_rights_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function mukurtu_rights_theme_suggestions_lclabel(array $variables) {
+  $suggestions = [];
+  $lclabel = $variables['elements']['#lclabel'];
+  $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
+
+  $suggestions[] = 'lclabel__' . $sanitized_view_mode;
+  $suggestions[] = 'lclabel__' . $lclabel->id();
+  $suggestions[] = 'lclabel__' . $lclabel->id() . '__' . $sanitized_view_mode;
+
+  return $suggestions;
+}
+
+/**
  * Prepares variables for lclabel templates.
  *
  * Default template: lclabel.html.twig.
  */
 function template_preprocess_lclabel(&$variables) {
-/*   $variables['lclabel'] = $variables['elements']['#lclabel'];
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+
+  $variables += ['content' => []];
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
-  } */
+  }
 
   $entity = $variables['elements']['#lclabel'];
   $variables['title'] = $entity->getTitle();
   $variables['image_url'] = $entity->getImageUrl();
   $variables['text'] = $entity->getText();
+  $variables['hub_project_title'] = $entity->getProjectTitle();
+  $variables['hub_community'] = $entity->getHubCommunity();
 }
 
 /**

@@ -18,6 +18,22 @@ interface LocalContextsLabelInterface extends ContentEntityInterface {
   public function getTitle(): string;
 
   /**
+   * Get the local contexts hub community name.
+   *
+   * @return string
+   *   The local contexts hub community name.
+   */
+  public function getHubCommunity(): string;
+
+  /**
+   * Get the project title.
+   *
+   * @return string
+   *   The title of the label hub project.
+   */
+  public function getProjectTitle(): string;
+
+  /**
    * Get the label text.
    *
    * @return string

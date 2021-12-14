@@ -45,6 +45,20 @@ class LocalContextsLabel extends ContentEntityBase implements LocalContextsLabel
   /**
    * {@inheritdoc}
    */
+  public function getProjectTitle() : string {
+    return $this->get('project_title')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getHubCommunity() : string {
+    return $this->get('community')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getText() : string {
     return $this->get('text')->value;
   }
@@ -103,7 +117,7 @@ class LocalContextsLabel extends ContentEntityBase implements LocalContextsLabel
 
     $fields['community'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Community'))
-      ->setDescription(t('The label community.'));
+      ->setDescription(t('The label community from the Local Contexts Hub.'));
 
     $fields['hub_created'] = BaseFieldDefinition::create('datetime')
       ->setLabel(t('Hub Creation Time'))

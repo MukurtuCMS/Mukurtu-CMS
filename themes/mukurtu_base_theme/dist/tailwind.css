@@ -450,8 +450,35 @@ Ensure the default browser behavior of the `hidden` attribute.
 .tw-min-w-full {
   min-width: 100% !important;
 }
+.tw-min-w-\[25\%\] {
+  min-width: 25% !important;
+}
+.tw-max-w-sm {
+  max-width: 24rem !important;
+}
+.tw-max-w-\[25\%\] {
+  max-width: 25% !important;
+}
+.tw-flex-initial {
+  flex: 0 1 auto !important;
+}
+.tw-flex-1 {
+  flex: 1 1 0% !important;
+}
 .tw-flex-none {
   flex: none !important;
+}
+.tw-flex-initial {
+  flex: 0 1 auto !important;
+}
+.tw-flex-1 {
+  flex: 1 1 0% !important;
+}
+.tw-flex-initial {
+  flex: 0 1 auto !important;
+}
+.tw-flex-1 {
+  flex: 1 1 0% !important;
 }
 .tw-shrink {
   flex-shrink: 1 !important;
