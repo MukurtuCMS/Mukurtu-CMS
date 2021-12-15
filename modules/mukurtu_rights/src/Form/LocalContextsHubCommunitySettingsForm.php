@@ -72,6 +72,9 @@ class LocalContextsHubCommunitySettingsForm extends ConfigFormBase {
 
     $communityId = $form_state->get('community');
 
+    // Set the community relationship.
+    $project->setCommunity($communityId);
+
     if ($project) {
       try {
         // Save the project.

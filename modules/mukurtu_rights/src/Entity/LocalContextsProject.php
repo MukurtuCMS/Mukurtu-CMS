@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\mukurtu_rights\LocalContextsProjectInterface;
+use Exception;
 
 /**
  * Defines the LocalContextsProject entity.
@@ -45,6 +46,26 @@ class LocalContextsProject extends ContentEntityBase implements LocalContextsPro
   /**
    * {@inheritdoc}
    */
+  public function setCommunity(int $community): void {
+    $this->set('field_mukurtu_community', ['target_id' => $community]);
+    $labels = $this->get('labels')->referencedEntities();
+
+    if (!empty($labels)) {
+      /** @var \Drupal\mukurtu_rights\Entity\LocalContextsLabel $labelEntity */
+      foreach ($labels as $label) {
+        try {
+          $label->setCommunity($community);
+          $label->save();
+        } catch (Exception $e) {
+
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = [];
 
@@ -75,6 +96,12 @@ class LocalContextsProject extends ContentEntityBase implements LocalContextsPro
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The timestamp when the label was last changed locally.'));
+
+    $fields['field_mukurtu_community'] = BaseFieldDefinition::create('og_standard_reference')
+      ->setLabel(t('Mukurtu Community'))
+      ->setDescription(t('The Mukurtu community the project belongs to.'))
+      ->setRequired(FALSE)
+      ->setSetting('target_type', 'node');
 
     return $fields;
   }

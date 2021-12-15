@@ -25,4 +25,12 @@ interface LocalContextsProjectInterface extends ContentEntityInterface {
    */
   public function getTitle(): string;
 
+  /**
+   * Set the community relationship.
+   *
+   * @param int $community
+   *   The ID of the community.
+   */
+  public function setCommunity(int $community): void;
+
 }

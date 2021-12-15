@@ -2,6 +2,7 @@
 use Drupal\Core\Render\Element;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_theme().
@@ -93,5 +94,26 @@ function mukurtu_rights_entity_bundle_create($entity_type_id, $bundle) {
   // For any new node type that is defined, add the labels field.
   if ($entity_type_id == 'node') {
     mukurtu_rights_create_labels_field($entity_type_id, $bundle);
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function mukurtu_rights_views_pre_render(ViewExecutable $view) {
+  // This is our slow and awkward filter to remove lclabels from
+  // views that a user doesn't have access to "apply".
+  // This breaks pagination.
+  $type = $view->getBaseEntityType();
+  if ($type && $type->id() == 'lclabel') {
+    $user = $view->getUser();
+    foreach ($view->result as $key => $result) {
+      /**
+       * @see \Drupal\mukurtu_rights\LocalContextsLabelAccessControlHandler
+       */
+      if (!$result->_entity->access('apply', $user)) {
+        unset($view->result[$key]);
+      }
+    }
   }
 }

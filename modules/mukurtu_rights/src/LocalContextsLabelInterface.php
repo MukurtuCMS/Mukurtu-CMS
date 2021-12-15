@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_rights;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Provides an interface defining a Local Contexts Label entity.
@@ -32,6 +33,22 @@ interface LocalContextsLabelInterface extends ContentEntityInterface {
    *   The title of the label hub project.
    */
   public function getProjectTitle(): string;
+
+  /**
+   * Set the community relationship.
+   *
+   * @param int $community
+   *   The ID of the community.
+   */
+  public function setCommunity(int $community): void;
+
+  /**
+   * Get the community group.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   The community entity.
+   */
+  public function getCommunity() : ?EntityInterface;
 
   /**
    * Get the label text.

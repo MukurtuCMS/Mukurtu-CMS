@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_rights\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\mukurtu_rights\LocalContextsLabelInterface;
@@ -54,6 +55,24 @@ class LocalContextsLabel extends ContentEntityBase implements LocalContextsLabel
    */
   public function getHubCommunity() : string {
     return $this->get('community')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setCommunity(int $community): void {
+    $this->set('field_mukurtu_community', ['target_id' => $community]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCommunity(): ?EntityInterface {
+    $ref = $this->get('field_mukurtu_community')->referencedEntities();
+    if ($ref && isset($ref[0])) {
+      return $ref[0];
+    }
+    return NULL;
   }
 
   /**
@@ -134,6 +153,12 @@ class LocalContextsLabel extends ContentEntityBase implements LocalContextsLabel
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The timestamp when the label was last changed locally.'));
+
+    $fields['field_mukurtu_community'] = BaseFieldDefinition::create('og_standard_reference')
+      ->setLabel(t('Mukurtu Community'))
+      ->setDescription(t('The Mukurtu community the label belongs to.'))
+      ->setRequired(FALSE)
+      ->setSetting('target_type', 'node');
 
     return $fields;
   }
