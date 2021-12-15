@@ -51,6 +51,14 @@ interface LocalContextsLabelInterface extends ContentEntityInterface {
   public function getCommunity() : ?EntityInterface;
 
   /**
+   * Check if the label is a legacy label.
+   *
+   * @return bool
+   *   TRUE for legacy, FALSE for a local contexts hub label.
+   */
+  public function isLegacy() : bool;
+
+  /**
    * Get the label text.
    *
    * @return string

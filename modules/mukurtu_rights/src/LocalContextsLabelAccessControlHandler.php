@@ -26,6 +26,11 @@ class LocalContextsLabelAccessControlHandler extends EntityAccessControlHandler 
 
     // This is our custom logic on who can "apply" a label.
     if (($entity instanceof LocalContextsLabel) && $operation == 'apply') {
+      // If this is a "legacy" label, nobody is allowed to use it.
+      if ($entity->isLegacy()) {
+        return AccessResult::forbidden();
+      }
+
       $community = $entity->getCommunity();
       if ($community) {
         // We need to check community specific access.
@@ -34,7 +39,8 @@ class LocalContextsLabelAccessControlHandler extends EntityAccessControlHandler 
         // Is the account a member of the community?
         if ($membership) {
           return AccessResult::allowed();
-        } else {
+        }
+        else {
           return AccessResult::forbidden();
         }
       }

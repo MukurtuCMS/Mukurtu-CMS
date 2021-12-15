@@ -85,6 +85,13 @@ class LocalContextsLabel extends ContentEntityBase implements LocalContextsLabel
   /**
    * {@inheritdoc}
    */
+  public function isLegacy(): bool {
+    return $this->get('hub_enabled')->value == FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getImageUrl() : string {
     return $this->get('image_url')->value ?? '';
   }
@@ -153,6 +160,12 @@ class LocalContextsLabel extends ContentEntityBase implements LocalContextsLabel
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The timestamp when the label was last changed locally.'));
+
+    $fields['hub_enabled'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Hub Label Status'))
+      ->setDefaultValue(TRUE)
+      ->setRequired(TRUE)
+      ->setDescription(t('Field is true for labels coming from the hub, false for legacy mode.'));
 
     $fields['field_mukurtu_community'] = BaseFieldDefinition::create('og_standard_reference')
       ->setLabel(t('Mukurtu Community'))
