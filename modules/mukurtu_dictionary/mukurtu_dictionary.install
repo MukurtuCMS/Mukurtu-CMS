@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_dictionary module.
+ */
+
+use Drupal\og\Og;
+use Drupal\og\Entity\OgRole;
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_dictionary_install() {
+  // Language Communities are groups.
+  try {
+    Og::addGroup('language_community', 'language_community');
+  } catch (InvalidArgumentException $e) {
+    // Intentionally left blank, already a group.
+  }
+
+  // Create Language community roles.
+  $languageStewardRole = OgRole::create([
+    'name' => 'language steward',
+  ]);
+  $languageStewardRole->setGroupType('language_community');
+  $languageStewardRole->setGroupBundle('language_community');
+  $languageStewardRole->save();
+
+  $languageContributorRole = OgRole::create([
+    'name' => 'language contributor',
+  ]);
+  $languageContributorRole->setGroupType('language_community');
+  $languageContributorRole->setGroupBundle('language_community');
+  $languageContributorRole->save();
+}

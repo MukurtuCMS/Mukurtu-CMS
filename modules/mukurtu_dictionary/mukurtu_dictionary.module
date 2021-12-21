@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
+
 /**
  * Implements hook_theme().
  */
@@ -13,4 +15,13 @@ function mukurtu_dictionary_theme($existing, $type, $theme, $path) {
       ],
     ],
   ];
+}
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function mukurtu_dictionary_entity_bundle_info_alter(array &$bundles): void {
+  if (isset($bundles['node']['dictionary_word'])) {
+    $bundles['node']['dictionary_word']['class'] = DictionaryWord::class;
+  }
 }

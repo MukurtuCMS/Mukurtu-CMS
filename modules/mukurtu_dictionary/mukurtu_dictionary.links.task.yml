@@ -1,0 +1,26 @@
+# Language community routing definition
+language_community.settings_tab:
+  route_name: language_community.settings
+  title: 'Settings'
+  base_route: language_community.settings
+
+entity.language_community.canonical:
+  route_name: entity.language_community.canonical
+  base_route: entity.language_community.canonical
+  title: 'View'
+
+entity.language_community.edit_form:
+  route_name: entity.language_community.edit_form
+  base_route: entity.language_community.canonical
+  title: 'Edit'
+
+entity.language_community.version_history:
+  route_name: entity.language_community.version_history
+  base_route: entity.language_community.canonical
+  title: 'Revisions'
+
+entity.language_community.delete_form:
+  route_name:  entity.language_community.delete_form
+  base_route:  entity.language_community.canonical
+  title: Delete
+  weight: 10

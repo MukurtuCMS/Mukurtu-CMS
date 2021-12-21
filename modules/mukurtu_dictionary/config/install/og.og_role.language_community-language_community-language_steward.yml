@@ -1,0 +1,16 @@
+langcode: en
+status: true
+id: language_community-language_community-language_steward
+label: 'Language Steward'
+weight: 7
+is_admin: null
+group_type: language_community
+group_bundle: language_community
+group_id: null
+permissions:
+  - 'add user'
+  - 'administer permissions'
+  - 'approve and deny subscription'
+  - 'manage members'
+  - 'update group'
+role_type: standard

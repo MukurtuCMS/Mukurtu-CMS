@@ -1,0 +1,31 @@
+add language community entities:
+  title: 'Create new Language community entities'
+
+administer language community entities:
+  title: 'Administer Language community entities'
+  description: 'Allow to access the administration form to configure Language community entities.'
+  restrict access: true
+
+delete language community entities:
+  title: 'Delete Language community entities'
+
+edit language community entities:
+  title: 'Edit Language community entities'
+
+view published language community entities:
+  title: 'View published Language community entities'
+
+view unpublished language community entities:
+  title: 'View unpublished Language community entities'
+
+view all language community revisions:
+  title: 'View all Language community revisions'
+
+revert all language community revisions:
+  title: 'Revert all Language community revisions'
+  description: 'Role requires permission <em>view Language community revisions</em> and <em>edit rights</em> for language community entities in question or <em>administer language community entities</em>.'
+
+delete all language community revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Language community revisions</em> and <em>delete rights</em> for language community entities in question or <em>administer language community entities</em>.'
+

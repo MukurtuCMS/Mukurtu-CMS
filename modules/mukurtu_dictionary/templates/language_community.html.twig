@@ -1,0 +1,22 @@
+{#
+/**
+ * @file language_community.html.twig
+ * Default theme implementation to present Language community data.
+ *
+ * This template is used when viewing Language community pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_language_community()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('language_community') }}>
+  {% if content %}
+    {{- content -}}
+  {% endif %}
+</div>

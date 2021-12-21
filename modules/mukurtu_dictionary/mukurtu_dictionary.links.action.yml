@@ -1,0 +1,5 @@
+entity.language_community.add_form:
+  route_name: entity.language_community.add_form
+  title: 'Add Language community'
+  appears_on:
+    - entity.language_community.collection

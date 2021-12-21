@@ -11,3 +11,17 @@ mukurtu_dictionary.create_dictionary_word:
   route_name: mukurtu_core.add
   route_parameters:
     node_type: dictionary_word
+
+# Language community menu items definition
+entity.language_community.collection:
+  title: 'Language community list'
+  route_name: entity.language_community.collection
+  description: 'List Language community entities'
+  parent: system.admin_structure
+  weight: 100
+
+language_community.admin.structure.settings:
+  title: 'Language community settings'
+  description: 'Configure Language community entities'
+  route_name: language_community.settings
+  parent: system.admin_structure
