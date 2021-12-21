@@ -93,7 +93,6 @@ dependencies:
   - mukurtu_browse
   - mukurtu_comments
   - mukurtu_notifications
-  - mukurtu_roundtrip
   - mukurtu_migrate
 
 themes:
