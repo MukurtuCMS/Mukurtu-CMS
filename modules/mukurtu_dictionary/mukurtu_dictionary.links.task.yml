@@ -24,3 +24,9 @@ entity.language_community.delete_form:
   base_route:  entity.language_community.canonical
   title: Delete
   weight: 10
+
+mukurtu_dictionary.add_word_to_list:
+  route_name: mukurtu_dictionary.add_word_to_list
+  base_route: entity.node.canonical
+  title: 'Add to Word List'
+  weight: 50
