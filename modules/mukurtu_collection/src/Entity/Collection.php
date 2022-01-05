@@ -5,6 +5,9 @@ namespace Drupal\mukurtu_collection\Entity;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\mukurtu_collection\Entity\CollectionInterface;
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\EntityStorageInterface;
+
 
 class Collection extends Node implements CollectionInterface {
   /**
@@ -38,6 +41,23 @@ class Collection extends Node implements CollectionInterface {
       }
     }
     $this->set(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, $items);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    // Invalid the cache of referenced entities
+    // to trigger recalculation of the computed fields.
+    $refs = $this->get(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)->referencedEntities() ?? NULL;
+    if (!empty($refs)) {
+      foreach ($refs as $ref) {
+        Cache::invalidateTags($ref->getCacheTagsToInvalidate());
+      }
+    }
+
+    // Invalid the collection's cache as well.
+    Cache::invalidateTags($this->getCacheTagsToInvalidate());
   }
 
 }

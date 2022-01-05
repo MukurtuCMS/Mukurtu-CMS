@@ -2,6 +2,9 @@
 
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
 use Drupal\mukurtu_dictionary\Entity\WordList;
+use Drupal\core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * Implements hook_theme().
@@ -30,5 +33,28 @@ function mukurtu_dictionary_entity_bundle_info_alter(array &$bundles): void {
   // Word list bundle class.
   if (isset($bundles['node']['word_list'])) {
     $bundles['node']['word_list']['class'] = WordList::class;
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function mukurtu_dictionary_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  if ($entity_type->id() == 'node' && $bundle == 'dictionary_word') {
+    $fields = [];
+    $fields['field_in_word_list'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_in_word_list')
+      ->setLabel(t('Word Lists'))
+      ->setDescription(t('Word lists this word is contained in.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_dictionary\Plugin\Field\MukurtuInWordListFieldItemsList')
+      ->setTargetEntityTypeId('node')
+      ->setTargetBundle('word_list')
+      ->setRevisionable(FALSE)
+      ->setTranslatable(FALSE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setDisplayConfigurable('view', TRUE);
+
+    return $fields;
   }
 }
