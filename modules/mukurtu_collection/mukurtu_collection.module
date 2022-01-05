@@ -12,6 +12,7 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\mukurtu_collection\Entity\Collection;
 
 define("MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION", "field_sequence_collection");
 define("MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION", "Sequence Collection");
@@ -240,6 +241,16 @@ function mukurtu_collection_multipage_sync_relationship(EntityInterface $entity)
         mukurtu_core_entity_batch_operation('mukurtu_core_batch_add_entity_reference', ['node' => $items_to_add], $fn_args);
       }
     }
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function mukurtu_collection_entity_bundle_info_alter(array &$bundles): void {
+  // Collection bundle class.
+  if (isset($bundles['node']['collection'])) {
+    $bundles['node']['collection']['class'] = Collection::class;
   }
 }
 

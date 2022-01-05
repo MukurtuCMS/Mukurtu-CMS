@@ -8,6 +8,7 @@ dependencies:
   - facets
   - mukurtu_core
   - mukurtu_community
+  - mukurtu_collection
   - mukurtu_taxonomy
   - search_api
   - search_api_glossary

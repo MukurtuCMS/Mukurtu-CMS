@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
+use Drupal\mukurtu_dictionary\Entity\WordList;
 
 /**
  * Implements hook_theme().
@@ -21,7 +22,13 @@ function mukurtu_dictionary_theme($existing, $type, $theme, $path) {
  * Implements hook_entity_bundle_info_alter().
  */
 function mukurtu_dictionary_entity_bundle_info_alter(array &$bundles): void {
+  // Dictionary word bundle class.
   if (isset($bundles['node']['dictionary_word'])) {
     $bundles['node']['dictionary_word']['class'] = DictionaryWord::class;
+  }
+
+  // Word list bundle class.
+  if (isset($bundles['node']['word_list'])) {
+    $bundles['node']['word_list']['class'] = WordList::class;
   }
 }
