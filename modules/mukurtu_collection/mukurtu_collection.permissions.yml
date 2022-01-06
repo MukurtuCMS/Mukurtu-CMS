@@ -1,0 +1,31 @@
+add personal collection entities:
+  title: 'Create new Personal collections'
+
+administer personal collection entities:
+  title: 'Administer Personal collection entities'
+  description: 'Allow to access the administration form to configure Personal collection entities.'
+  restrict access: true
+
+delete personal collection entities:
+  title: 'Delete Personal collections'
+
+edit personal collection entities:
+  title: 'Edit Personal collections'
+
+view published personal collection entities:
+  title: 'View published Personal collections'
+
+view unpublished personal collection entities:
+  title: 'View unpublished Personal collections'
+
+view all personal collection revisions:
+  title: 'View all Personal collection revisions'
+
+revert all personal collection revisions:
+  title: 'Revert all Personal collection revisions'
+  description: 'Role requires permission <em>view Personal collection revisions</em> and <em>edit rights</em> for personal collection entities in question or <em>administer personal collection entities</em>.'
+
+delete all personal collection revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Personal collection revisions</em> and <em>delete rights</em> for personal collection entities in question or <em>administer personal collection entities</em>.'
+

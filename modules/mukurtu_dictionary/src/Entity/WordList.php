@@ -12,12 +12,7 @@ class WordList extends Node implements WordListInterface {
   const WORDS_FIELD = 'field_words';
 
   /**
-   * Add a word to the word list.
-   *
-   * @param EntityInterface $entity
-   *   The word entity to add to the word list.
-   *
-   * @return void
+   * {@inheritdoc}
    */
   public function add(EntityInterface $entity): void {
     // Add the new entity to the entity ref field.
@@ -27,12 +22,7 @@ class WordList extends Node implements WordListInterface {
   }
 
   /**
-   * Remove a word from the word list.
-   *
-   * @param EntityInterface $entity
-   *   The word to remove from the word list.
-   *
-   * @return void
+   * {@inheritdoc}
    */
   public function remove(EntityInterface $entity): void {
     $needle = $entity->id();

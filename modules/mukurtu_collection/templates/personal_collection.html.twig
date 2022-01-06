@@ -1,0 +1,22 @@
+{#
+/**
+ * @file personal_collection.html.twig
+ * Default theme implementation to present Personal collection data.
+ *
+ * This template is used when viewing Personal collection pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_personal_collection()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('personal_collection') }}>
+  {% if content %}
+    {{- content -}}
+  {% endif %}
+</div>

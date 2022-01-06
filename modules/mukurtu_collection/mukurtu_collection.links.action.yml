@@ -5,3 +5,8 @@ mukurtu_collection.add_collection:
     node_type: 'collection'
   appears_on:
     - mukurtu_collection.collection_browse_page
+entity.personal_collection.add_form:
+  route_name: entity.personal_collection.add_form
+  title: 'Add Personal collection'
+  appears_on:
+    - entity.personal_collection.collection

@@ -11,12 +11,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 
 class Collection extends Node implements CollectionInterface {
   /**
-   * Add an entity to a collection.
-   *
-   * @param EntityInterface $entity
-   *   The entity to add to the collection.
-   *
-   * @return void
+   * {@inheritdoc}
    */
   public function add(EntityInterface $entity): void {
     $items = $this->get(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)->getValue();
@@ -25,12 +20,7 @@ class Collection extends Node implements CollectionInterface {
   }
 
   /**
-   * Remove an entity from a collection.
-   *
-   * @param EntityInterface $entity
-   *   The entity to remove from the collection.
-   *
-   * @return void
+   * {@inheritdoc}
    */
   public function remove(EntityInterface $entity): void {
     $needle = $entity->id();
