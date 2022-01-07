@@ -144,6 +144,13 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
   /**
    * {@inheritdoc}
    */
+  public function getTitle() {
+    return $this->getName();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCreatedTime() {
     return $this->get('created')->value;
   }
@@ -359,6 +366,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
         'auto_create' => FALSE,
       ])
       ->setRequired(FALSE)
+      ->setCardinality(-1)
       ->setTranslatable(FALSE)
       ->setDisplayOptions('view', [
         'label' => 'visible',

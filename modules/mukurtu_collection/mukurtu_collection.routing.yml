@@ -77,3 +77,15 @@ mukurtu_collection.my_personal_collections:
     _title: 'Personal Collections'
   requirements:
     _permission: 'view published personal collection entities'
+
+mukurtu_collection.add_item_to_personal_collection:
+  path: '/node/{node}/personal-collection/add'
+  defaults:
+    _title_callback: '\Drupal\mukurtu_collection\Controller\PersonalCollectionAddItemController::getTitle'
+    _controller: '\Drupal\mukurtu_collection\Controller\PersonalCollectionAddItemController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_collection\Controller\PersonalCollectionAddItemController::access'

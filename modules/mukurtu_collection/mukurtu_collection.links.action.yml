@@ -10,3 +10,4 @@ entity.personal_collection.add_form:
   title: 'Add Personal collection'
   appears_on:
     - entity.personal_collection.collection
+    - mukurtu_collection.my_personal_collections
