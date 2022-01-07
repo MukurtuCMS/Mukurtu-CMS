@@ -55,7 +55,7 @@ class MukurtuCollectionCreateMultipageController extends ControllerBase {
     ]);
 
     // Display the create collection form.
-    $form = \Drupal::service('entity.manager')
+    $form = $this->entityTypeManager()
       ->getFormObject('node', 'default')
       ->setEntity($collection);
 
@@ -68,7 +68,7 @@ class MukurtuCollectionCreateMultipageController extends ControllerBase {
       ],
     ];
 
-    $build[] = \Drupal::formBuilder()->getForm($form, $args);
+    $build[] = $this->formBuilder()->getForm($form, $args);
     return $build;
   }
 }

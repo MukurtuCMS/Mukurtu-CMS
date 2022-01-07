@@ -12,17 +12,18 @@ class MukurtuCategoryManageController extends ControllerBase {
    */
   public function content() {
     $build = [];
-    $vocabulary = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->load('category');
+    $vocabulary = $this->entityTypeManager()->getStorage('taxonomy_vocabulary')->load('category');
 
     if ($vocabulary) {
       // Render the taxonomy overview form.
-      $build[] = \Drupal::formBuilder()->getForm('Drupal\taxonomy\Form\OverviewTerms', $vocabulary);
+      $build[] = $this->formBuilder()->getForm('Drupal\taxonomy\Form\OverviewTerms', $vocabulary);
 
       // Render the form to add a new category.
       $newCategoryTerm = Term::create([
         'vid' => $vocabulary->id(),
       ]);
-      $form = \Drupal::service('entity.manager')
+
+      $form = $this->entityTypeManager()
         ->getFormObject('taxonomy_term', 'default')
         ->setEntity($newCategoryTerm);
 
@@ -30,7 +31,8 @@ class MukurtuCategoryManageController extends ControllerBase {
         '#type' => 'details',
         '#title' => $this->t('Add a new category'),
       ];
-      $build['add_category']['form'] = \Drupal::formBuilder()->getForm($form);
+
+      $build['add_category']['form'] = $this->formBuilder()->getForm($form);
     }
 
     return $build;

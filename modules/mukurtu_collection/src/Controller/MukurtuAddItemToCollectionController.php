@@ -124,7 +124,7 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
     // Existing collection.
     $collections = $this->getValidCollections($node);
     if (!empty($collections)) {
-      $build['existing'] = \Drupal::formBuilder()->getForm('Drupal\mukurtu_collection\Form\MukurtuAddItemToCollectionForm', $node, $collections);
+      $build['existing'] = $this->formBuilder()->getForm('Drupal\mukurtu_collection\Form\MukurtuAddItemToCollectionForm', $node, $collections);
     }
     return $build;
   }

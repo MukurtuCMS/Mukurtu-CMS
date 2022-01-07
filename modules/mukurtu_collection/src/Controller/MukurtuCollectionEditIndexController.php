@@ -46,11 +46,11 @@ class MukurtuCollectionEditIndexController extends ControllerBase {
       $collection = $collections[0] ?? NULL;
 
       // Display the edit form for that collection.
-      $form = \Drupal::service('entity.manager')
+      $form = $this->entityTypeManager()
         ->getFormObject('node', 'default')
         ->setEntity($collection);
 
-      $build[] = \Drupal::formBuilder()->getForm($form);
+      $build[] = $this->formBuilder()->getForm($form);
       return $build;
     }
   }
