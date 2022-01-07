@@ -25,3 +25,9 @@ personal_collection.admin.structure.settings:
   description: 'Configure Personal collections'
   route_name: personal_collection.settings
   parent: system.admin_structure
+
+mukurtu_collection.my_personal_collections:
+  title: 'Personal Collections'
+  description: 'My Personal Collections'
+  menu_name: mukurtu
+  route_name: mukurtu_collection.my_personal_collections

@@ -33,6 +33,11 @@ function mukurtu_collection_theme($existing, $type, $theme, $path) {
         'facets' => [],
       ],
     ],
+    'mukurtu_my_personal_collections' => [
+      'variables' => [
+        'results' => NULL,
+      ],
+    ],
   ];
 }
 

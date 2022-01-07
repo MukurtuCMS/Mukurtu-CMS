@@ -1,0 +1,40 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.personal_collection.teaser
+  module:
+    - layout_builder
+    - mukurtu_collection
+    - text
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: personal_collection.personal_collection.teaser
+targetEntityType: personal_collection
+bundle: personal_collection
+mode: teaser
+content:
+  field_description:
+    type: text_summary_or_trimmed
+    label: hidden
+    settings:
+      trim_length: 600
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  name:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  field_items_in_collection: true
+  field_media_assets: true
+  field_pc_privacy: true
+  search_api_excerpt: true
+  user_id: true
