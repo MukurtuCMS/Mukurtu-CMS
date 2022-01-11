@@ -25,4 +25,11 @@ interface CollectionInterface {
    */
   public function remove(EntityInterface $entity);
 
+  /**
+   * Count the number of items in the collection.
+   *
+   * @return int
+   */
+  public function getCount(): int;
+
 }

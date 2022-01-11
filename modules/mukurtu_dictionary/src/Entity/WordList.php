@@ -38,6 +38,17 @@ class WordList extends Node implements WordListInterface {
   /**
    * {@inheritdoc}
    */
+  public function getCount(): int {
+    $items = $this->get(self::WORDS_FIELD)->getValue();
+    if (is_countable($items)) {
+      return count($items);
+    }
+    return 0;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     // Invalid the cache of referenced entities
     // to trigger recalculation of the computed fields.

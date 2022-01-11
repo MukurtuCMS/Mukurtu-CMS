@@ -241,6 +241,17 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
   /**
    * {@inheritdoc}
    */
+  public function getCount(): int {
+    $items = $this->get('field_items_in_collection')->getValue();
+    if (is_countable($items)) {
+      return count($items);
+    }
+    return 0;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
