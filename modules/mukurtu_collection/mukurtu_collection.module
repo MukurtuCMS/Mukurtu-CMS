@@ -272,6 +272,11 @@ function mukurtu_collection_entity_bundle_field_info_alter(&$fields, EntityTypeI
   if (isset($fields[MUKURTU_COLLECTION_FIELD_NAME_ITEMS])) {
     $fields[MUKURTU_COLLECTION_FIELD_NAME_ITEMS]->addConstraint('ValidCollectionItem', []);
   }
+
+  // Child collection constraints.
+  if ($bundle == 'collection' && isset($fields['field_child_collections'])) {
+    $fields['field_child_collections']->addConstraint('ValidChildCollection', []);
+  }
 }
 
 /**
