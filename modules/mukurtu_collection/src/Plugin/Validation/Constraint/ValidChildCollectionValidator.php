@@ -4,11 +4,13 @@ namespace Drupal\mukurtu_collection\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Drupal\mukurtu_collection\Entity\Collection;
 
 /**
  * Validates the ValidChildCollection constraint.
  */
 class ValidChildCollectionValidator extends ConstraintValidator {
+
   /**
    * {@inheritdoc}
    */
@@ -42,14 +44,13 @@ class ValidChildCollectionValidator extends ConstraintValidator {
    *
    * @param \Drupal\mukurtu_collection\Entity\Collection $collection
    *   The collection that wants to own the child collection.
-   *
    * @param int $potentialChildCollectionId
    *   The ID of the child collection in question.
    *
    * @return bool
    *   True if in use by a collection other than $collection, false otherwise.
    */
-  private function inAnotherCollectionHierarchy($collection, $potentialChildCollectionId): bool {
+  private function inAnotherCollectionHierarchy(Collection $collection, $potentialChildCollectionId): bool {
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'collection')
       ->condition('field_child_collections', $potentialChildCollectionId, '=')

@@ -8,8 +8,8 @@ use Drupal\mukurtu_collection\Entity\CollectionInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
 
-
 class Collection extends Node implements CollectionInterface {
+
   /**
    * {@inheritdoc}
    */
@@ -65,6 +65,7 @@ class Collection extends Node implements CollectionInterface {
    * Get immediate (depth = 1) child collections.
    *
    * @return \Drupal\mukurtu_collection\Entity\CollectionInterface[]
+   *   The array of child collection entities.
    */
   public function getChildCollections() {
     $collections = $this->get('field_child_collections')->referencedEntities() ?? NULL;
@@ -72,17 +73,38 @@ class Collection extends Node implements CollectionInterface {
   }
 
   /**
-   * Add a collection as a sub-collection.
+   * Get the parent collection.
    *
-   * @param \Drupal\mukurtu_collection\Entity\Collection $collection
-   *   The parent collection.
-   *
-   * @return \Drupal\mukurtu_collection\Entity\Collection
-   *   The updated collection entity.
+   * @return null|\Drupal\mukurtu_collection\Entity\Collection
+   *   Null if none, otherwise the parent collection entity.
    */
-  private function setParentCollection(CollectionInterface $collection): Collection {
-    $this->set('field_parent_collection', ['target_id' => $collection->id()]);
-    return $this;
+  public function getParentCollection() {
+    $id = $this->getParentCollectionId();
+    if ($id) {
+      return $this->entityTypeManager()->getStorage('node')->load($id);
+    }
+    return NULL;
+  }
+
+  /**
+   * Get the parent collection node ID.
+   *
+   * @return null|int
+   *   Null if none, otherwise the parent collection id.
+   */
+  public function getParentCollectionId() {
+    $query = \Drupal::entityQuery('node')
+      ->condition('type', 'collection')
+      ->condition('field_child_collections', $this->id(), '=')
+      ->accessCheck(FALSE);
+    $results = $query->execute();
+
+    // Not in use at all.
+    if (count($results) == 0) {
+      return NULL;
+    }
+
+    return reset($results);
   }
 
   /**
@@ -100,10 +122,20 @@ class Collection extends Node implements CollectionInterface {
     $childCollectionsRefs[] = ['target_id' => $collection->id()];
     $this->set('field_child_collections', $childCollectionsRefs);
 
-    // Set the parent collection relationship.
-    $collection->setParentCollection($this);
-
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    $parentCollectionId = $this->getParentCollectionId();
+    if ($parentCollectionId) {
+      $this->set('field_parent_collection', ['target_id' => $parentCollectionId]);
+    }
+    else {
+      $this->set('field_parent_collection', []);
+    }
   }
 
   /**
