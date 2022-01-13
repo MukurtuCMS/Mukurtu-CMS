@@ -3,11 +3,13 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.full
+    - field.field.node.collection.field_child_collections
     - field.field.node.collection.field_collection_type
     - field.field.node.collection.field_content_type
     - field.field.node.collection.field_description
     - field.field.node.collection.field_items_in_collection
     - field.field.node.collection.field_keywords
+    - field.field.node.collection.field_parent_collection
     - field.field.node.collection.field_related_content
     - node.type.collection
   module:
@@ -17,32 +19,40 @@ dependencies:
     - user
 third_party_settings:
   layout_builder:
-    allow_custom: false
     enabled: false
+    allow_custom: false
 id: node.collection.full
 targetEntityType: node
 bundle: collection
 mode: full
 content:
+  field_child_collections:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
   field_description:
     type: text_default
-    weight: 0
-    region: content
     label: above
     settings: {  }
     third_party_settings: {  }
+    weight: 0
+    region: content
   field_items_in_collection:
     type: slick_entityreference_vanilla
-    weight: 1
-    region: content
     label: above
     settings:
       optionset: mukurtu_multipage_item
-      skin: ''
       view_mode: content_browser
       cache: 0
       current_view_mode: full
-      override: false
+      skin: ''
+      fx: ''
+      style: ''
       overridables:
         arrows: '0'
         autoplay: '0'
@@ -52,75 +62,108 @@ content:
         mouseWheel: '0'
         randomize: '0'
         variableWidth: '0'
+      override: false
       skin_arrows: ''
       skin_dots: ''
-      fx: ''
-      style: ''
+      use_theme_field: false
     third_party_settings: {  }
+    weight: 1
+    region: content
   field_keywords:
-    weight: 2
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
     type: entity_reference_label
-    region: content
-  field_related_content:
-    weight: 3
     label: above
     settings:
       link: true
-      view_mode: default
     third_party_settings: {  }
-    type: entity_reference_entity_view
-    region: content
-  flag_email_node:
-    weight: 5
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  flag_email_og:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  flag_favorite:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  flag_subscribe_node:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  flag_subscribe_og:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
-  links:
     weight: 4
     region: content
+  field_parent_collection:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_related_content:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: true
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  flag_email_node:
     settings: {  }
     third_party_settings: {  }
+    weight: 7
+    region: content
+  flag_email_og:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  flag_favorite:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  flag_mukurtu_email_collection:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 9
+    region: content
+  flag_mukurtu_email_og:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  flag_mukurtu_follow_collection:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 11
+    region: content
+  flag_subscribe_node:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 12
+    region: content
+  flag_subscribe_og:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 13
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
   og_audience:
-    label: above
     type: entity_reference_label
+    label: above
     settings:
       link: true
-    weight: 102
     third_party_settings: {  }
+    weight: 102
     region: content
 hidden:
+  field_all_community_records: true
   field_collection_type: true
   field_content_type: true
+  field_in_collection: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
   field_mukurtu_community: true
+  field_mukurtu_geojson: true
+  field_mukurtu_original_record: true
   field_mukurtu_protocol_inherit: true
   field_mukurtu_protocol_r_scope: true
   field_mukurtu_protocol_read: true
   field_mukurtu_protocol_w_scope: true
   field_mukurtu_protocol_write: true
+  field_representative_media: true
   field_sequence_collection: true
   field_title: true
   search_api_excerpt: true
