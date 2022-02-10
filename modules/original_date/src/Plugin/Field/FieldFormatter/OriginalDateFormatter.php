@@ -19,6 +19,8 @@ use Drupal\Core\Field\FieldItemListInterface;
  */
 class OriginalDateFormatter extends FormatterBase
 {
+    // TODO: verify that there's nothing we need to change here to get everything running smoothly
+
 
     /**
      * {@inheritdoc}

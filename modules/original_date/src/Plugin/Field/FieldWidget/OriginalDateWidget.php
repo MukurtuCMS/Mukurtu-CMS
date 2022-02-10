@@ -27,16 +27,44 @@ class OriginalDateWidget extends WidgetBase
      */
     public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state)
     {
-        $value = isset($items[$delta]->value) ? $items[$delta]->value : '';
-        $element += [
+        // TODO
+
+        $element['year'] = array (
             '#type' => 'textfield',
-            '#default_value' => $value,
-            '#size' => 10,
-            '#maxlength' => 10,
+            '#title' => t('Year'),
+            '#size' => 5,
+            '#maxlength' => 5,
+            '#default_value' => isset($items[$delta]->year) ? $items[$delta]->year : '',
             '#element_validate' => [
                 [static::class, 'validate'],
-            ],
-        ];
+            ]
+        );
+
+        $element['month'] = array(
+            '#type' => 'number',
+            '#title' => t('Month'),
+            '#size' => 5,
+            '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : '',
+            '#element_validate' => [
+                [static::class, 'validate'],
+            ]
+        );
+
+        $element['day'] = array(
+            '#type' => 'number',
+            '#title' => t('Day'),
+            '#size' => 5,
+            '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : '',
+            '#element_validate' => [
+                [static::class, 'validate'],
+            ]
+        );
+
+        $element += array(
+            '#type' => 'fieldset',
+            '#attributes' => array('class' => array('container-inline')),
+        );
+
         return ['value' => $element];
     }
 
@@ -45,25 +73,18 @@ class OriginalDateWidget extends WidgetBase
      */
     public static function validate($element, FormStateInterface $form_state)
     {
-        $value = $element['#value'];
-        $valueToLower = strtolower($value);
+        $year = $element['year']['#value'];
+        $month = $form_state->getValue('month');
+        $day = $form_state->getValue('day');
 
-        $yearMonthDayExpression = '/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/';
-        $yearMonthExpression = '/^\d{4}-(0[1-9]|1[0-2])$/';
-        $yearExpression = '/^\d{4}$/';
+        //dpm($year, $month, $day);
 
-        if (strlen($value) == 0) {
-            $form_state->setValueForElement($element, '');
-            return;
-        }
+        //dpm($form_state->getValues());
 
-        // check if the date matches one of the three valid formats
-        if (
-            !preg_match($yearMonthDayExpression, $valueToLower) &&
-            !preg_match($yearMonthExpression, $valueToLower) &&
-            !preg_match($yearExpression, $valueToLower)
-        ) {
-            $form_state->setError($element, t("Date must be in format YYYY, YYYY-MM, or YYYY-MM-DD."));
-        }
+        $field_name = $element['#array_parents'][0];
+
+        //dpm($field_name);
+
+        dpm($form_state->getValue('field_original_date'));
     }
 }

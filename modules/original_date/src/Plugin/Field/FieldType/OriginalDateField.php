@@ -28,10 +28,32 @@ class OriginalDateField extends FieldItemBase
     {
         return array(
             'columns' => array(
-                'value' => array(
+                'date_external' => array(
                     'type' => 'text',
                     'size' => 'tiny',
                     'not null' => FALSE,
+                ),
+                'date_internal' => array(
+                    'type' => 'int',
+                    'size' => 'tiny',
+                    'not null' => FALSE,
+                ),
+                // the rest of these components are for the date widget, but do we need them?
+                // TODO: make these unsigned?
+                'year' => array(
+                    'type' => 'text',
+                    'size' => 'tiny',
+                    'not null' => FALSE,
+                ),
+                'month' => array(
+                    'type' => 'int',
+                    'size' => 'tiny',
+                    'unsigned' => TRUE,
+                ),
+                'day' => array(
+                    'type' => 'int',
+                    'size' => 'tiny',
+                    'unsigned' => TRUE,
                 ),
             ),
         );
@@ -42,8 +64,10 @@ class OriginalDateField extends FieldItemBase
      */
     public function isEmpty()
     {
-        $value = $this->get('value')->getValue();
-        return $value === NULL || $value === '';
+        $external = $this->get('date_external')->getValue();
+        $internal = $this->get('date_internal')->getValue();
+        return empty($external) && empty($internal); // TODO: can I use this
+        // TODO: do we need to enforce isEmpty() on the widget components too?
     }
 
     /**
@@ -51,12 +75,19 @@ class OriginalDateField extends FieldItemBase
      */
     public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition)
     {
-        $properties['value'] = DataDefinition::create('string')
+        $properties['date_external'] = DataDefinition::create('string')
             ->setLabel(t('Original date'));
-        $properties['year'] = DataDefinition::create('integer')
+
+        $properties['date_internal'] = DataDefinition::create('integer')
+            ->setLabel(t('Internal date'));
+        //->setComputed(TRUE);
+
+        $properties['year'] = DataDefinition::create('string')
             ->setLabel(t('Year'));
+
         $properties['month'] = DataDefinition::create('integer')
             ->setLabel(t('Month'));
+
         $properties['day'] = DataDefinition::create('integer')
             ->setLabel(t('Day'));
 
@@ -67,41 +98,6 @@ class OriginalDateField extends FieldItemBase
      * {@inheritdoc}
      */
     public function preSave() {
-        // TODO: put this into a dateParse() method and factor it out
-
-        // check what format the date is in with regex from the field widget
-        // then parse the date and store it appropriately
-
-        $value = $element['#value'];
-
-        $yearMonthDayExpression = '/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/';
-        $yearMonthExpression = '/^\d{4}-(0[1-9]|1[0-2])$/';
-        $yearExpression = '/^\d{4}$/';
-
-        // case 1: YYYY
-        if (preg_match($yearExpression, $value)) {
-            $properties['year'] = intval($value);
-            // set the month and day to just be 01 and 01
-            $properties['month'] = 1;
-            $properties['day'] = 1;
-        }
-        // case 2: YYYY-MM
-        else if (preg_match($yearMonthExpression, $value)) {
-            $tokens = [];
-            $tokens = explode("-", $value);
-
-            $properties['year'] = intval($tokens[0]);
-            $properties['month'] = intval($tokens[1]);
-            $properties['day'] = 1;
-        }
-        // case 3: YYYY-MM-DD
-        else if (preg_match($yearMonthDayExpression, $value)) {
-            $tokens = [];
-            $tokens = explode("-", $value);
-
-            $properties['year']->setValue(intval($tokens[0]));
-            $properties['month'] = intval($tokens[1]);
-            $properties['day'] = intval($tokens[2]);
-        }
+        // TODO
     }
 }
