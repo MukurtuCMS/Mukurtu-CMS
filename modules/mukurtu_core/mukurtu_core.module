@@ -246,7 +246,8 @@ function mukurtu_core_create_content_type_field($entity_type, $bundle) {
   $entityFieldManager = \Drupal::service('entity_field.manager');
   $fields = $entityFieldManager->getFieldDefinitions($entity_type, $bundle);
 
-  if (!isset($fields['field_content_type'])) {
+  // @todo What are we doing about this field?
+  if (FALSE && !isset($fields['field_content_type'])) {
     FieldConfig::create([
       'field_name' => 'field_content_type',
       'entity_type' => $entity_type,

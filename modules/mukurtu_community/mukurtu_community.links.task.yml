@@ -1,0 +1,26 @@
+# Community routing definition
+community.settings_tab:
+  route_name: community.settings
+  title: 'Settings'
+  base_route: community.settings
+
+entity.community.canonical:
+  route_name: entity.community.canonical
+  base_route: entity.community.canonical
+  title: 'View'
+
+entity.community.edit_form:
+  route_name: entity.community.edit_form
+  base_route: entity.community.canonical
+  title: 'Edit'
+
+entity.community.version_history:
+  route_name: entity.community.version_history
+  base_route: entity.community.canonical
+  title: 'Revisions'
+
+entity.community.delete_form:
+  route_name:  entity.community.delete_form
+  base_route:  entity.community.canonical
+  title: Delete
+  weight: 10

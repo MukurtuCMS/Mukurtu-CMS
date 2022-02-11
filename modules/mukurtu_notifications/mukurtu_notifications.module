@@ -97,6 +97,7 @@ function mukurtu_notifications_query_message_access_alter(AlterableInterface $qu
  * Implements hook_node_insert().
  */
 function mukurtu_notifications_node_insert(Node $node) {
+  return;
   // Record the node insert event.
   $template = 'mukurtu_single_node_insert';
   $message = Message::create([
@@ -138,6 +139,7 @@ function mukurtu_notifications_node_insert(Node $node) {
  * Implements hook_node_update().
  */
 function mukurtu_notifications_node_update(Node $node) {
+  return;
   //$notifier = \Drupal::service('message_notify.sender');
   $subscribers = \Drupal::service('message_subscribe.subscribers');
 

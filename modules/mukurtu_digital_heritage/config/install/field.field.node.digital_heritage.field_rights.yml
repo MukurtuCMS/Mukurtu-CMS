@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_rights
+    - node.type.digital_heritage
+id: node.digital_heritage.field_rights
+field_name: field_rights
+entity_type: node
+bundle: digital_heritage
+label: Rights
+description: 'A statement about who holds the legal rights to the Digital Heritage Item, Media Asset, or presented knowledge. Consider adding contact information if the rights holder should be contacted for permission to use, reproduce, circulate, reference, or cite the Digital Heritage Item.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

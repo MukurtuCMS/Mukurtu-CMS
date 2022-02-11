@@ -5,10 +5,11 @@ namespace Drupal\mukurtu_collection\Entity;
 use Drupal\Core\Entity\EntityInterface;
 
 interface CollectionInterface {
+
   /**
    * Add an entity to a collection.
    *
-   * @param EntityInterface $entity
+   * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity to add to the collection.
    *
    * @return void
@@ -18,7 +19,7 @@ interface CollectionInterface {
   /**
    * Remove an entity from a collection.
    *
-   * @param EntityInterface $entity
+   * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity to remove from the collection.
    *
    * @return void

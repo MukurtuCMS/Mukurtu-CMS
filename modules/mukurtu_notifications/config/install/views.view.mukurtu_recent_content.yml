@@ -1,9 +1,6 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - node.type.community
-    - node.type.protocol
   module:
     - node
     - user
@@ -16,50 +13,12 @@ base_table: node_field_data
 base_field: nid
 display:
   default:
-    display_plugin: default
     id: default
-    display_title: Master
+    display_title: Default
+    display_plugin: default
     position: 0
     display_options:
-      access:
-        type: perm
-        options:
-          perm: 'access content'
-      cache:
-        type: tag
-        options: {  }
-      query:
-        type: views_query
-        options:
-          disable_sql_rewrite: false
-          distinct: false
-          replica: false
-          query_comment: ''
-          query_tags: {  }
-      exposed_form:
-        type: basic
-        options:
-          submit_button: Apply
-          reset_button: false
-          reset_button_label: Reset
-          exposed_sorts_label: 'Sort by'
-          expose_sort_order: true
-          sort_asc_label: Asc
-          sort_desc_label: Desc
-      pager:
-        type: some
-        options:
-          items_per_page: 10
-          offset: 0
-      style:
-        type: default
-      row:
-        type: fields
-        options:
-          default_field_elements: true
-          inline: {  }
-          separator: ''
-          hide_empty: false
+      title: 'All Recent Content'
       fields:
         changed:
           id: changed
@@ -68,6 +27,9 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          entity_type: node
+          entity_field: changed
+          plugin_id: field
           label: ''
           exclude: false
           alter:
@@ -125,34 +87,43 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-          entity_type: node
-          entity_field: changed
-          plugin_id: field
         title:
           id: title
           table: node_field_data
           field: title
-          entity_type: node
-          entity_field: title
-          label: ''
-          alter:
-            alter_text: false
-            make_link: false
-            absolute: false
-            trim: false
-            word_boundary: false
-            ellipsis: false
-            strip_tags: false
-            html: false
-          hide_empty: false
-          empty_zero: false
-          settings:
-            link_to_entity: true
-          plugin_id: field
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: field
+          label: ''
           exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
           element_type: ''
           element_class: ''
           element_label_type: ''
@@ -162,9 +133,13 @@ display:
           element_wrapper_class: ''
           element_default_classes: true
           empty: ''
+          hide_empty: false
+          empty_zero: false
           hide_alter_empty: true
           click_sort_column: value
           type: string
+          settings:
+            link_to_entity: true
           group_column: value
           group_columns: {  }
           group_rows: true
@@ -182,6 +157,9 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          entity_type: node
+          entity_field: type
+          plugin_id: field
           label: ''
           exclude: false
           alter:
@@ -237,83 +215,74 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-          entity_type: node
-          entity_field: type
-          plugin_id: field
-      filters:
-        status:
-          value: '1'
-          table: node_field_data
-          field: status
-          plugin_id: boolean
-          entity_type: node
-          entity_field: status
-          id: status
-          expose:
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-          group: 1
-        type:
-          id: type
-          table: node_field_data
-          field: type
-          relationship: none
-          group_type: group
-          admin_label: ''
-          operator: 'not in'
-          value:
-            community: community
-            protocol: protocol
-          group: 1
-          exposed: false
-          expose:
-            operator_id: ''
-            label: ''
-            description: ''
-            use_operator: false
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: ''
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-            reduce: false
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          entity_type: node
-          entity_field: type
-          plugin_id: bundle
+      pager:
+        type: some
+        options:
+          offset: 0
+          items_per_page: 10
+      exposed_form:
+        type: basic
+        options:
+          submit_button: Apply
+          reset_button: false
+          reset_button_label: Reset
+          exposed_sorts_label: 'Sort by'
+          expose_sort_order: true
+          sort_asc_label: Asc
+          sort_desc_label: Desc
+      access:
+        type: perm
+        options:
+          perm: 'access content'
+      cache:
+        type: tag
+        options: {  }
+      empty: {  }
       sorts:
         created:
           id: created
           table: node_field_data
           field: created
-          order: DESC
-          entity_type: node
-          entity_field: created
-          plugin_id: date
           relationship: none
           group_type: group
           admin_label: ''
-          exposed: false
+          entity_type: node
+          entity_field: created
+          plugin_id: date
+          order: DESC
           expose:
             label: ''
+            field_identifier: ''
+          exposed: false
           granularity: second
-      title: 'Mukurtu Recent Content'
+      arguments: {  }
+      filters:
+        status:
+          id: status
+          table: node_field_data
+          field: status
+          entity_type: node
+          entity_field: status
+          plugin_id: boolean
+          value: '1'
+          group: 1
+          expose:
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+      style:
+        type: default
+      row:
+        type: fields
+      query:
+        type: views_query
+        options:
+          query_comment: ''
+          disable_sql_rewrite: false
+          distinct: false
+          replica: false
+          query_tags: {  }
+      relationships: {  }
       header:
         area:
           id: area
@@ -322,16 +291,13 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: text
           empty: false
-          tokenize: false
           content:
             value: '<h2>[view:title]</h2>'
             format: basic_html
-          plugin_id: text
+          tokenize: false
       footer: {  }
-      empty: {  }
-      relationships: {  }
-      arguments: {  }
       display_extenders: {  }
     cache_metadata:
       max-age: -1
@@ -342,17 +308,13 @@ display:
         - user.permissions
       tags: {  }
   all_recent_content_block:
-    display_plugin: block
     id: all_recent_content_block
     display_title: 'All Recent Content'
+    display_plugin: block
     position: 1
     display_options:
-      display_extenders: {  }
       display_description: ''
-      block_description: 'All Recent Content'
-      title: 'All Recent Content'
-      defaults:
-        title: false
+      display_extenders: {  }
     cache_metadata:
       max-age: -1
       contexts:
@@ -362,53 +324,11 @@ display:
         - user.permissions
       tags: {  }
   user_recent_content_block:
-    display_plugin: block
     id: user_recent_content_block
     display_title: 'My Recent Content'
+    display_plugin: block
     position: 1
     display_options:
-      display_extenders: {  }
-      display_description: ''
-      sorts:
-        created:
-          id: created
-          table: node_field_data
-          field: created
-          order: DESC
-          entity_type: node
-          entity_field: created
-          plugin_id: date
-          relationship: none
-          group_type: group
-          admin_label: ''
-          exposed: false
-          expose:
-            label: ''
-          granularity: second
-      defaults:
-        sorts: false
-        filters: false
-        filter_groups: false
-        arguments: false
-        title: false
-      filters:
-        status:
-          value: '1'
-          table: node_field_data
-          field: status
-          plugin_id: boolean
-          entity_type: node
-          entity_field: status
-          id: status
-          expose:
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-          group: 1
-      filter_groups:
-        operator: AND
-        groups:
-          1: AND
       arguments:
         uid:
           id: uid
@@ -417,6 +337,9 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          entity_type: node
+          entity_field: uid
+          plugin_id: numeric
           default_action: default
           exception:
             value: all
@@ -430,8 +353,8 @@ display:
           summary_options:
             base_path: ''
             count: true
-            items_per_page: 25
             override: false
+            items_per_page: 25
           summary:
             sort_order: asc
             number_of_records: 0
@@ -443,11 +366,10 @@ display:
           validate_options: {  }
           break_phrase: false
           not: false
-          entity_type: node
-          entity_field: uid
-          plugin_id: numeric
-      block_description: 'User''s Recent Content'
-      title: 'My Recent Content'
+      defaults:
+        arguments: false
+      display_description: ''
+      display_extenders: {  }
     cache_metadata:
       max-age: -1
       contexts:

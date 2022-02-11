@@ -2,17 +2,17 @@ langcode: en
 status: true
 dependencies:
   module:
+    - mukurtu_protocol
     - node
-    - taxonomy
-id: node.field_category
-field_name: field_category
+id: node.field_protocol_control
+field_name: field_protocol_control
 entity_type: node
 type: entity_reference
 settings:
-  target_type: taxonomy_term
+  target_type: protocol_control
 module: core
 locked: false
-cardinality: -1
+cardinality: 1
 translatable: true
 indexes: {  }
 persist_with_no_fields: false

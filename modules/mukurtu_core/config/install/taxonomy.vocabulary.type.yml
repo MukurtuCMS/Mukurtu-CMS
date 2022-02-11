@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+name: Type
+vid: type
+description: ''
+weight: 0

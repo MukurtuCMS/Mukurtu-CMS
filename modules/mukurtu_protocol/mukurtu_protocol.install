@@ -6,49 +6,8 @@
  */
 
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\Entity\OgRole;
-use Drupal\Core\Entity\EntityTypeBundleManagerInterface;
-
-/**
- * Implements hook_install().
- */
-function mukurtu_protocol_install() {
-  // Create the protocol field on all pre-existing node types.
-  foreach (node_type_get_names() as $bundle => $label) {
-    mukurtu_protocol_create_protocol_field('node', $bundle);
-  }
-
-  // Create the protocol field for all pre-existing media types.
-  $entity_type_bundle = \Drupal::service('entity_type.bundle.info');
-  $media_types = $entity_type_bundle->getBundleInfo('media');
-  foreach ($media_types as $media_type => $media_label) {
-    mukurtu_protocol_create_protocol_field('media', $media_type);
-  }
-
-  // Create the protocol fields on the default Drupal comments.
-  // mukurtu_protocol_create_protocol_field('comment', 'comment');
-
-  // Protocols are special, add the owning community field.
-  $settings['field_name'] = MUKURTU_PROTOCOL_FIELD_NAME_COMMUNITY;
-  $settings['field_config']['label'] = "Parent Community";
-  $settings['field_config']['description'] = "Community that owns the protocol.";
-/*   $settings['field_config']['handler'] = 'default:node';
-  $settings['field_config']['handler_settings'] = [
-    'target_bundles' => ['community' => 'community'],
-    'auto_create' => FALSE,
-  ]; */
-  Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'protocol', $settings);
-
-  // Protocols are also groups.
-  Og::addGroup('node', 'protocol');
-
-  // Delete the default 'administrator' role from protocols.
-  $role = OgRole::getRole('node', 'protocol', 'administrator');
-  if ($role) {
-    $role->delete();
-  }
-}
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Implements hook_schema().
@@ -59,10 +18,9 @@ function mukurtu_protocol_schema() {
     'fields' => [
       'protocol_set_id' => [
         'description' => 'The ID of the protocol set.',
-        'type' => 'int',
+        'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => 0,
       ],
       'protocol_set' => [
         'description' => 'The set of protocols',
@@ -76,62 +34,19 @@ function mukurtu_protocol_schema() {
     ],
   ];
 
-  $schema['mukurtu_protocol_access'] = [
-    'description' => 'Mukurtu Protocol Access System',
-    'fields' => [
-      'id' => [
-        'description' => 'The ID of the entity.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ],
-      'entity_type' => [
-        'description' => 'The entity type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => 'en',
-      ],
-      'langcode' => [
-        'description' => 'The language.langcode of this entity.',
-        'type' => 'varchar_ascii',
-        'length' => 12,
-        'not null' => TRUE,
-        'default' => 'en',
-      ],
-      'protocol_set_id' => [
-        'description' => 'The ID of the protocol set',
-        'type' => 'int',
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-      ],
-      'grant_view' => [
-        'description' => 'Boolean indicating whether a user with the protocol set can view this entity.',
-        'type' => 'int',
-        'size' => 'tiny',
-        'default' => 0,
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-      ],
-      'grant_update' => [
-        'description' => 'Boolean indicating whether a user with the protocol set can update this entity.',
-        'type' => 'int',
-        'size' => 'tiny',
-        'default' => 0,
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-      ],
-      'grant_delete' => [
-        'description' => 'Boolean indicating whether a user with the protocol set can delete this entity.',
-        'type' => 'int',
-        'size' => 'tiny',
-        'default' => 0,
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-      ],
-    ],
-  ];
-
   return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_protocol_install() {
+  // Protocols are groups.
+  Og::addGroup('protocol', 'protocol');
+
+  // Delete the default 'administrator' role from protocols.
+  $role = OgRole::getRole('protocol', 'protocol', 'administrator');
+  if ($role) {
+    $role->delete();
+  }
 }

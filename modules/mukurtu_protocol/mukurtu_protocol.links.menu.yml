@@ -1,0 +1,28 @@
+
+# Protocol menu items definition
+entity.protocol.collection:
+  title: 'Protocol list'
+  route_name: entity.protocol.collection
+  description: 'List Protocol entities'
+  parent: system.admin_structure
+  weight: 100
+
+protocol.admin.structure.settings:
+  title: 'Protocol settings'
+  description: 'Configure Protocol entities'
+  route_name: protocol.settings
+  parent: system.admin_structure
+
+# Protocol control menu items definition
+entity.protocol_control.collection:
+  title: 'Protocol control list'
+  route_name: entity.protocol_control.collection
+  description: 'List Protocol control entities'
+  parent: system.admin_structure
+  weight: 100
+
+protocol_control.admin.structure.settings:
+  title: 'Protocol control settings'
+  description: 'Configure Protocol control entities'
+  route_name: protocol_control.settings
+  parent: system.admin_structure

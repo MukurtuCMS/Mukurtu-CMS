@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_publisher
+    - node.type.digital_heritage
+    - taxonomy.vocabulary.publisher
+id: node.digital_heritage.field_publisher
+field_name: field_publisher
+entity_type: node
+bundle: digital_heritage
+label: Publisher
+description: 'A Publisher can be a person, an organization, or a service responsible for publishing the media asset or Digital Heritage Item.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      publisher: publisher
+    sort:
+      field: name
+      direction: asc
+    auto_create: true
+    auto_create_bundle: ''
+field_type: entity_reference

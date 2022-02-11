@@ -1,0 +1,22 @@
+{#
+/**
+ * @file protocol_control.html.twig
+ * Default theme implementation to present Protocol control data.
+ *
+ * This template is used when viewing Protocol control pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_protocol_control()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('protocol_control') }}>
+  {% if content %}
+    {{- content -}}
+  {% endif %}
+</div>

@@ -7,6 +7,6 @@ package: 'Mukurtu'
 dependencies:
   - og
   - mukurtu_core
-  - mukurtu_content_warnings
+
 
 version: '8.x-1.x-dev'

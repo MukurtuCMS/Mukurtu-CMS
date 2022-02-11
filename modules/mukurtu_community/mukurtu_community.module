@@ -44,8 +44,8 @@ function mukurtu_community_entity_insert(EntityInterface $entity) {
 
     // There are some cases where we don't want to auto generate the protocol (e.g., import).
     if ($type == "community" && !$suppress_protocol_creation) {
-      $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-      $protocol_manager->createProtocol($entity, 'community');
+      //$protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+      //$protocol_manager->createProtocol($entity, 'community');
     }
   }
 }

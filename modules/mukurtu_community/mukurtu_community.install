@@ -12,7 +12,7 @@ use Drupal\og\Entity\OgRole;
  * Implements hook_install().
  */
 function mukurtu_community_install() {
-  // Communities are groups.
+ /*  // Communities are groups.
   Og::addGroup('node', 'community');
 
   // Create the community field on all pre-existing node types.
@@ -30,5 +30,5 @@ function mukurtu_community_install() {
   $role = OgRole::getRole('node', 'community', 'administrator');
   if ($role) {
     $role->delete();
-  }
+  } */
 }

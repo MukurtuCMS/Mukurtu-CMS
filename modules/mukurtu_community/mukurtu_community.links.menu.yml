@@ -3,10 +3,25 @@ mukurtu_community.manage_communities:
   description: 'Manage Communities'
   parent: mukurtu
   menu_name: mukurtu
-  route_name: mukurtu_community.manage_communities
-mukurtu_community.browse_communities:
-  title: "Communities"
-  menu_name: main
-  description: "Browse the site communities"
-  route_name: view.mukurtu_communities_browse.browse_communities_page
-  weight: -20
+  route_name: entity.community.collection
+  #route_name: mukurtu_community.manage_communities
+#mukurtu_community.browse_communities:
+#  title: "Communities"
+#  menu_name: main
+#  description: "Browse the site communities"
+#  route_name: view.mukurtu_communities_browse.browse_communities_page
+#  weight: -20
+
+# Community menu items definition
+entity.community.collection:
+  title: 'Community list'
+  route_name: entity.community.collection
+  description: 'List Communities'
+  parent: system.admin_structure
+  weight: 100
+
+community.admin.structure.settings:
+  title: 'Community settings'
+  description: 'Configure Communities'
+  route_name: community.settings
+  parent: system.admin_structure

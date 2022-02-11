@@ -10,6 +10,7 @@ libraries:
 dependencies:
   - blazy
   - entity_browser
+  - geofield
   - media
   - media_library
   - node
