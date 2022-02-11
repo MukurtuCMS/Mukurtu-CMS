@@ -1,7 +1,5 @@
 <?php
 
-//https://www.drupal.org/docs/creating-custom-modules/creating-custom-field-types-widgets-and-formatters/create-a-custom-field-formatter
-
 namespace Drupal\original_date\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
@@ -27,27 +25,34 @@ class OriginalDateWidget extends WidgetBase
      */
     public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state)
     {
-        // TODO
+        $element += [
+            '#element_validate' => [
+                [$this, 'validate'],
+            ]
+        ];
+
+        $element['date_external'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Original Date'),
+            '#size' => 10,
+            '#maxlength' => 10,
+            '#default_value' => isset($items[$delta]->date_external) ? $items[$delta]->date_external : '',
+        );
 
         $element['year'] = array (
             '#type' => 'textfield',
             '#title' => t('Year'),
-            '#size' => 5,
-            '#maxlength' => 5,
+            '#size' => 4,
+            '#maxlength' => 4,
             '#default_value' => isset($items[$delta]->year) ? $items[$delta]->year : '',
-            '#element_validate' => [
-                [static::class, 'validate'],
-            ]
         );
 
+        // TODO: how to prevent month and day dropdowns from going negative
         $element['month'] = array(
             '#type' => 'number',
             '#title' => t('Month'),
             '#size' => 5,
             '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : '',
-            '#element_validate' => [
-                [static::class, 'validate'],
-            ]
         );
 
         $element['day'] = array(
@@ -55,9 +60,6 @@ class OriginalDateWidget extends WidgetBase
             '#title' => t('Day'),
             '#size' => 5,
             '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : '',
-            '#element_validate' => [
-                [static::class, 'validate'],
-            ]
         );
 
         $element += array(
@@ -74,17 +76,28 @@ class OriginalDateWidget extends WidgetBase
     public static function validate($element, FormStateInterface $form_state)
     {
         $year = $element['year']['#value'];
-        $month = $form_state->getValue('month');
-        $day = $form_state->getValue('day');
+        $month = $element['month']['#value'];
+        $day = $element['day']['#value'];
 
-        //dpm($year, $month, $day);
-
-        //dpm($form_state->getValues());
-
-        $field_name = $element['#array_parents'][0];
-
-        //dpm($field_name);
-
-        dpm($form_state->getValue('field_original_date'));
+        // 1. ensure date in acceptable format
+        if ($year && $month && $day ||
+            $year && $month && !$day ||
+            $year && !$month && !$day
+        )
+        {
+            // 2. Ensure date is valid
+            if (!$month) {
+                $month = 1;
+            }
+            if (!$day) {
+                $day = 1;
+            }
+            if (!checkdate($month, $day, $year)) {
+                $form_state->setError($element, "Invalid date.");
+            }
+        }
+        else {
+            $form_state->setError($element, "Acceptable date formats are YYYY, YYYY-MM, or YYYY-MM-DD.");
+        }
     }
 }

@@ -38,8 +38,6 @@ class OriginalDateField extends FieldItemBase
                     'size' => 'tiny',
                     'not null' => FALSE,
                 ),
-                // the rest of these components are for the date widget, but do we need them?
-                // TODO: make these unsigned?
                 'year' => array(
                     'type' => 'text',
                     'size' => 'tiny',
@@ -66,8 +64,11 @@ class OriginalDateField extends FieldItemBase
     {
         $external = $this->get('date_external')->getValue();
         $internal = $this->get('date_internal')->getValue();
-        return empty($external) && empty($internal); // TODO: can I use this
-        // TODO: do we need to enforce isEmpty() on the widget components too?
+        $year = $this->get('year')->getValue();
+        $month = $this->get('month')->getValue();
+        $day = $this->get('day')->getValue();
+
+        return empty($external) && empty($internal) && empty($year) && empty($month) && empty($day);
     }
 
     /**
@@ -80,7 +81,6 @@ class OriginalDateField extends FieldItemBase
 
         $properties['date_internal'] = DataDefinition::create('integer')
             ->setLabel(t('Internal date'));
-        //->setComputed(TRUE);
 
         $properties['year'] = DataDefinition::create('string')
             ->setLabel(t('Year'));
@@ -97,7 +97,29 @@ class OriginalDateField extends FieldItemBase
     /**
      * {@inheritdoc}
      */
-    public function preSave() {
-        // TODO
+    public function setValue($values, $notify = TRUE) {
+
+        $year = $values['value']['year'];
+        $month = $values['value']['month'];
+        $day = $values['value']['day'];
+
+        // 1. Store the date string for the user-facing date display
+        $externalDate = $year; // year is guaranteed
+
+        $externalDate = $externalDate . ($month ? ("-" . str_pad(strval($month), 2, "0", STR_PAD_LEFT)) : "");
+
+        $externalDate = $externalDate . ($day ? ("-" . str_pad(strval($day), 2, "0", STR_PAD_LEFT)) : "");
+
+        $values['value']['date_external'] = $externalDate;
+
+        dpm($values['value']['date_external']);
+
+        // 2. Calculate the internal date
+
+        $internalDate = strtotime($externalDate);
+
+        $values['value']['date_internal'] = $internalDate;
+
+        parent::setValue($values, $notify);
     }
 }
