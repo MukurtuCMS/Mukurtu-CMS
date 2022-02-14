@@ -23,28 +23,28 @@ class MukurtuCommunityManageController extends ControllerBase {
     $op = is_null($parent) ? 'IS NULL' : '=';
     $query = \Drupal::entityQuery('community')
       //->condition('type', 'community')
-      //->condition('field_parent_community', $parent, $op)
+      ->condition('field_parent_community', $parent, $op)
       ->sort('name');
     $entity_ids = $query->execute();
-    dpm($entity_ids);
-    return $build;
+/*     dpm($entity_ids);
+    return $build; */
 
     if (empty($entity_ids)) {
       return $build;
     }
 
     $build[] = ['#markup' => '<ul>'];
-    $nodes = \Drupal::entityTypeManager()->getStorage('community')->loadMultiple($entity_ids);
-    foreach ($nodes as $node) {
+    $communities = \Drupal::entityTypeManager()->getStorage('community')->loadMultiple($entity_ids);
+    foreach ($communities as $community) {
       $nodeBuild = [];
 
       // Render the current community.
       $nodeBuild[] = ['#markup' => '<li>'];
-      $nodeBuild[] = $view_builder->view($node, $view_mode);
+      $nodeBuild[] = $view_builder->view($community, $view_mode);
       //$nodeBuild[] = $this->displayCommunityProtocols($node);
 
       // Get any child communities.
-      $nodeBuild[] = $this->displayCommunities($node->id());
+      //$nodeBuild[] = $this->displayCommunities($community->id());
       $nodeBuild[] = ['#markup' => '</li>'];
 
       $build[] = $nodeBuild;
