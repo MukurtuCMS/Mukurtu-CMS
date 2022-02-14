@@ -10,7 +10,7 @@ dependencies:
   - media
   - media_library
   - mukurtu_core
-  - mukurtu_community
+  - mukurtu_protocol
   - mukurtu_taxonomy
 
 version: '8.x-1.x-dev'

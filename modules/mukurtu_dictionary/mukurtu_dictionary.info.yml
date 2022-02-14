@@ -7,7 +7,7 @@ package: 'Mukurtu'
 dependencies:
   - facets
   - mukurtu_core
-  - mukurtu_community
+  - mukurtu_protocol
   - mukurtu_collection
   - mukurtu_taxonomy
   - search_api

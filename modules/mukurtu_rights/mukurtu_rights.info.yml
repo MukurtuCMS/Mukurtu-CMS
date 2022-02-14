@@ -7,6 +7,6 @@ package: 'Mukurtu'
 version: '8.x-1.x-dev'
 dependencies:
   - mukurtu_core
-  - mukurtu_community
+  - mukurtu_protocol
   - entity_browser
   - user

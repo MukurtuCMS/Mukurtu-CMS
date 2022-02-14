@@ -8,3 +8,9 @@ entity.protocol_control.add_form:
   title: 'Add Protocol control'
   appears_on:
     - entity.protocol_control.collection
+entity.community.add_form:
+  route_name: entity.community.add_form
+  title: 'Add Community'
+  appears_on:
+    - entity.community.collection
+    - mukurtu_community.manage_communities

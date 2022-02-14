@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: protocol-protocol-non-member
+label: Non-member
+weight: 3
+is_admin: null
+group_type: protocol
+group_bundle: protocol
+group_id: null
+permissions:
+  - subscribe
+role_type: required

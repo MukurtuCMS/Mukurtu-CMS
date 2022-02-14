@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: protocol-protocol-protocol_steward
+label: 'Protocol Steward'
+weight: 7
+is_admin: null
+group_type: protocol
+group_bundle: protocol
+group_id: null
+permissions:
+  - 'add user'
+  - 'administer permissions'
+  - 'approve and deny subscription'
+  - 'create collection content'
+  - 'create digital_heritage content'
+  - 'delete any collection content'
+  - 'delete any digital_heritage content'
+  - 'delete own collection content'
+  - 'delete own digital_heritage content'
+  - 'edit any collection content'
+  - 'edit any digital_heritage content'
+  - 'edit own collection content'
+  - 'edit own digital_heritage content'
+  - 'manage members'
+  - 'update group'
+role_type: standard
