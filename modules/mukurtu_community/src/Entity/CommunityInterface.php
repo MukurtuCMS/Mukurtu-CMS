@@ -104,6 +104,17 @@ interface CommunityInterface extends ContentEntityInterface, RevisionLogInterfac
   public function getParentCommunity(): ?CommunityInterface;
 
   /**
+   * Set the parent community.
+   *
+   * @param \Drupal\mukurtu_community\Entity\CommunityInterface $community
+   *   The parent community entity.
+   *
+   * @return \Drupal\mukurtu_community\Entity\CommunityInterface
+   *   The called Community entity.
+   */
+  public function setParentCommunity(CommunityInterface $community): CommunityInterface;
+
+  /**
    * Get the child communities.
    *
    * @return \Drupal\mukurtu_community\Entity\CommunityInterface[]
