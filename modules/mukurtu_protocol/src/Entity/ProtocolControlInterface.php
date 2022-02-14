@@ -198,4 +198,12 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
    */
   public function inAllGroups(AccountInterface $user): bool;
 
+  /**
+   * Get the community affiliations.
+   *
+   * @return \Drupal\mukurtu_community\Entity\CommunityInterface[]
+   *   The communities.
+   */
+  public function getCommunities();
+
 }

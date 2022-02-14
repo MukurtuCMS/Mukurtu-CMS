@@ -232,6 +232,30 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function getCommunities() {
+    $communities = [];
+    $pids = $this->getProtocols();
+    if (!empty($pids)) {
+      $protocols = $this->entityTypeManager()->getStorage('protocol')->loadMultiple($pids);
+      // Get the communities for each protocol.
+      foreach ($protocols as $protocol) {
+        /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol */
+        $pCommunities = $protocol->getCommunities();
+        // Build a community list without duplicates.
+        foreach ($pCommunities as $pCommunity) {
+          if (!isset($communities[$pCommunity->id()])) {
+            $communities[$pCommunity->id()] = $pCommunity;
+          }
+        }
+      }
+    }
+
+    return $communities;
+  }
+
+  /**
    * Get the protocol set.
    *
    * @return string
@@ -296,7 +320,7 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
 
     $protocols = $this->getProtocols();
     if (!empty($protocols)) {
-      $protocols = \Drupal::entityTypeManager()->getStorage('protocol')->loadMultiple($protocols);
+      $protocols = $this->entityTypeManager()->getStorage('protocol')->loadMultiple($protocols);
       foreach ($protocols as $protocol) {
         //dpm("checking protocol {$protocol->getName()}");
         /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol */

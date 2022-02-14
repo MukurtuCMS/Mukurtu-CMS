@@ -1,9 +1,11 @@
 <?php
 
 use Drupal\Core\Entity\FieldableEntityInterface;
-use \Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolControl;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * @file
@@ -77,4 +79,25 @@ function mukurtu_protocol_entity_type_build(array &$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   $entity_types['node']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolNodeAccessControlHandler');
   //$entity_types['media']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolAccessControlHandler');
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+
+  if ($entity_type->id() == 'node' || $entity_type->id() == 'media') {
+    // Define a computed field for community affiliation.
+    $fields['field_communities'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_communities')
+      ->setLabel(t('Communities'))
+      ->setDescription(t('Community affiliations'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityAffiliationItemList')
+      ->setSetting('target_type', 'community')
+      ->setCardinality(-1)
+      ->setDisplayConfigurable('view', TRUE);
+  }
+  return $fields;
 }
