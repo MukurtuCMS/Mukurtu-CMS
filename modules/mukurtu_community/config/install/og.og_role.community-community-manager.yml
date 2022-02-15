@@ -1,13 +1,13 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - node.type.community
-id: node-community-manager
+  module:
+    - mukurtu_community
+id: community-community-manager
 label: 'Community Manager'
 weight: 2
 is_admin: false
-group_type: node
+group_type: community
 group_bundle: community
 group_id: null
 permissions:

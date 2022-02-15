@@ -1,0 +1,46 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+    - options
+    - text
+id: protocol.protocol.default
+targetEntityType: protocol
+bundle: protocol
+mode: default
+content:
+  field_access_mode:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_communities:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_description:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  name:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  og_group: true
+  search_api_excerpt: true
+  user_id: true

@@ -27,13 +27,13 @@ protocol_control.admin.structure.settings:
   route_name: protocol_control.settings
   parent: system.admin_structure
 
-mukurtu_protocol.manage_communities:
-  title: 'Manage Communities'
-  description: 'Manage Communities'
-  parent: mukurtu
-  menu_name: mukurtu
-  route_name: entity.community.collection
-  #route_name: mukurtu_community.manage_communities
+#mukurtu_protocol.manage_communities:
+#  title: 'Manage Communities'
+#  description: 'Manage Communities'
+#  parent: mukurtu
+#  menu_name: mukurtu
+#  route_name: entity.community.collection
+#  route_name: mukurtu_community.manage_communities
 #mukurtu_community.browse_communities:
 #  title: "Communities"
 #  menu_name: main

@@ -1,13 +1,13 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - node.type.community
-id: node-community-member
+  module:
+    - mukurtu_community
+id: community-community-member
 label: Member
 weight: 1
 is_admin: null
-group_type: node
+group_type: community
 group_bundle: community
 group_id: null
 permissions: {  }

@@ -1,14 +1,14 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - node.type.protocol
-id: node-protocol-non-member
+  module:
+    - mukurtu_community
+id: community-community-non-member
 label: Non-member
-weight: 3
+weight: 6
 is_admin: null
-group_type: node
-group_bundle: protocol
+group_type: community
+group_bundle: community
 group_id: null
 permissions:
   - subscribe
