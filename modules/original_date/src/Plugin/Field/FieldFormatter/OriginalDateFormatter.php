@@ -38,8 +38,7 @@ class OriginalDateFormatter extends FormatterBase
         $element = [];
 
         foreach ($items as $delta => $item) {
-            // Render each element as markup.
-            $element[$delta] = ['#markup' => $item->value];
+            $element[$delta] = ['#markup' => $item->date_external];
         }
 
         return $element;

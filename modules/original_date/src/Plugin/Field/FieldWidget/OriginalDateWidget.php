@@ -23,6 +23,19 @@ class OriginalDateWidget extends WidgetBase
     /**
      * {@inheritdoc}
      */
+    public function massageFormValues(array $values, array $form, FormStateInterface $form_state)
+    {
+        foreach ($values as $key => $value) {
+            $values[$key]['year'] = ($value['year'] != '' ? $value['year'] : '');
+            $values[$key]['month'] = ($value['month'] != '' ? $value['month'] : NULL);
+            $values[$key]['day'] = ($value['day'] != '' ? $value['day'] : NULL);
+        }
+        return $values;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state)
     {
         $element += [
@@ -30,14 +43,6 @@ class OriginalDateWidget extends WidgetBase
                 [$this, 'validate'],
             ]
         ];
-
-        $element['date_external'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Original Date'),
-            '#size' => 10,
-            '#maxlength' => 10,
-            '#default_value' => isset($items[$delta]->date_external) ? $items[$delta]->date_external : '',
-        );
 
         $element['year'] = array (
             '#type' => 'textfield',
@@ -47,7 +52,6 @@ class OriginalDateWidget extends WidgetBase
             '#default_value' => isset($items[$delta]->year) ? $items[$delta]->year : '',
         );
 
-        // TODO: how to prevent month and day dropdowns from going negative
         $element['month'] = array(
             '#type' => 'number',
             '#title' => t('Month'),
@@ -67,17 +71,23 @@ class OriginalDateWidget extends WidgetBase
             '#attributes' => array('class' => array('container-inline')),
         );
 
-        return ['value' => $element];
+        return $element;
     }
 
     /**
-     * Validate the original date text field.
+     * {@inheritdoc}
      */
     public static function validate($element, FormStateInterface $form_state)
     {
         $year = $element['year']['#value'];
         $month = $element['month']['#value'];
         $day = $element['day']['#value'];
+
+        // if empty, return
+        if (!$year && !$month && !$day) {
+            $form_state->setValueForElement($element, '');
+            return;
+        }
 
         // 1. ensure date in acceptable format
         if ($year && $month && $day ||
