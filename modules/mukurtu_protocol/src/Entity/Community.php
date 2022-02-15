@@ -351,6 +351,21 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setDisplayConfigurable('view', TRUE)
       ->setRequired(TRUE);
 
+    $fields['field_description'] = BaseFieldDefinition::create('text_with_summary')
+      ->setLabel(t('Description'))
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'text_default',
+        'weight' => 0,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'text_textarea_with_summary',
+        'weight' => 0,
+        'rows' => 6,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $fields['field_parent_community'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Parent Community'))
       ->setSetting('target_type', 'community')

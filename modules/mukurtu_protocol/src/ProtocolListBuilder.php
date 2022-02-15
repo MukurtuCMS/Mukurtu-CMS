@@ -30,7 +30,7 @@ class ProtocolListBuilder extends EntityListBuilder {
     $row['id'] = $entity->id();
     $row['name'] = Link::createFromRoute(
       $entity->label(),
-      'entity.protocol.edit_form',
+      'entity.protocol.canonical',
       ['protocol' => $entity->id()]
     );
     return $row + parent::buildRow($entity);
