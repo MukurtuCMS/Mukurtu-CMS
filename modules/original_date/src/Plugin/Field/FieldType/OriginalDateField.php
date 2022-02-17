@@ -21,104 +21,103 @@ use Drupal\Core\TypedData\DataDefinition;
  */
 class OriginalDateField extends FieldItemBase
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function schema(FieldStorageDefinitionInterface $field_definition)
-    {
-        return array(
-            'columns' => array(
-                'date_external' => array(
-                    'type' => 'text',
-                    'size' => 'tiny',
-                    'not null' => FALSE,
-                ),
-                'date_internal' => array(
-                    'type' => 'int',
-                    'unsigned' => TRUE, // there is a small chance a Unix timestamp is negative, but it *generally* should not be
-                    'size' => 'normal',
-                    'not null' => FALSE,
-                ),
-                'year' => array(
-                    'type' => 'text',
-                    'size' => 'tiny',
-                    'not null' => FALSE,
-                ),
-                'month' => array(
-                    'type' => 'int',
-                    'size' => 'tiny',
-                    'unsigned' => TRUE,
-                ),
-                'day' => array(
-                    'type' => 'int',
-                    'size' => 'tiny',
-                    'unsigned' => TRUE,
-                ),
-            ),
-        );
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public static function schema(FieldStorageDefinitionInterface $field_definition)
+  {
+    return array(
+      'columns' => array(
+        'date' => array(
+          'type' => 'text',
+          'size' => 'tiny',
+          'not null' => false,
+        ),
+        'timestamp' => array(
+          'type' => 'int',
+          'size' => 'big',
+          'not null' => false,
+        ),
+        'year' => array(
+          'type' => 'text',
+          'size' => 'tiny',
+          'not null' => false,
+        ),
+        'month' => array(
+          'type' => 'int',
+          'size' => 'tiny',
+          'unsigned' => true,
+        ),
+        'day' => array(
+          'type' => 'int',
+          'size' => 'tiny',
+          'unsigned' => true,
+        ),
+      ),
+    );
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isEmpty()
-    {
-        $external = $this->get('date_external')->getValue();
-        $internal = $this->get('date_internal')->getValue();
-        $year = $this->get('year')->getValue();
-        $month = $this->get('month')->getValue();
-        $day = $this->get('day')->getValue();
+  /**
+   * {@inheritdoc}
+   */
+  public function isEmpty()
+  {
+    $date = $this->get('date')->getValue();
+    $timestamp = $this->get('timestamp')->getValue();
+    $year = $this->get('year')->getValue();
+    $month = $this->get('month')->getValue();
+    $day = $this->get('day')->getValue();
 
-        return empty($external) && empty($internal) && empty($year) && empty($month) && empty($day);
-    }
+    return empty($date) && empty($timestamp) && empty($year) && empty($month) && empty($day);
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition)
-    {
-        $properties['date_external'] = DataDefinition::create('string')
-            ->setLabel(t('Original date'));
+  /**
+   * {@inheritdoc}
+   */
+  public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition)
+  {
+    $properties['date'] = DataDefinition::create('string')
+      ->setLabel(t('Original date'));
 
-        $properties['date_internal'] = DataDefinition::create('integer')
-            ->setLabel(t('Internal date'));
+    $properties['timestamp'] = DataDefinition::create('integer')
+      ->setLabel(t('UNIX Timestamp'));
 
-        $properties['year'] = DataDefinition::create('string')
-            ->setLabel(t('Year'));
+    $properties['year'] = DataDefinition::create('string')
+      ->setLabel(t('Year'));
 
-        $properties['month'] = DataDefinition::create('integer')
-            ->setLabel(t('Month'));
+    $properties['month'] = DataDefinition::create('integer')
+      ->setLabel(t('Month'));
 
-        $properties['day'] = DataDefinition::create('integer')
-            ->setLabel(t('Day'));
+    $properties['day'] = DataDefinition::create('integer')
+      ->setLabel(t('Day'));
 
-        return $properties;
-    }
+    return $properties;
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setValue($values, $notify = TRUE) {
+  /**
+   * {@inheritdoc}
+   */
+  public function setValue($values, $notify = true)
+  {
+    $year = $values['year'];
+    $month = $values['month'];
+    $day = $values['day'];
 
-        $year = $values['year'];
-        $month = $values['month'];
-        $day = $values['day'];
+    // 1. Store the date string for the user-facing date display
+    $date = $year; // year is guaranteed
 
-        // 1. Store the date string for the user-facing date display
-        $externalDate = $year; // year is guaranteed
+    $date = $date . ($month ? ("-" . str_pad(strval($month), 2, "0", STR_PAD_LEFT)) : "");
 
-        $externalDate = $externalDate . ($month ? ("-" . str_pad(strval($month), 2, "0", STR_PAD_LEFT)) : "");
+    $date = $date . ($day ? ("-" . str_pad(strval($day), 2, "0", STR_PAD_LEFT)) : "");
 
-        $externalDate = $externalDate . ($day ? ("-" . str_pad(strval($day), 2, "0", STR_PAD_LEFT)) : "");
+    $values['date'] = $date;
 
-        $values['date_external'] = $externalDate;
+    // 2. Calculate the internal date
 
-        // 2. Calculate the internal date
+    $timestamp = strtotime($date);
 
-        $internalDate = strtotime($externalDate);
+    $values['timestamp'] = $timestamp;
 
-        $values['date_internal'] = $internalDate;
-
-        parent::setValue($values, $notify);
-    }
+    parent::setValue($values, $notify);
+  }
 }

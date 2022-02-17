@@ -19,28 +19,27 @@ use Drupal\Core\Field\FieldItemListInterface;
  */
 class OriginalDateFormatter extends FormatterBase
 {
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsSummary()
+  {
+    $summary = [];
+    $summary[] = $this->t('Displays the original date.');
+    return $summary;
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function settingsSummary()
-    {
-        $summary = [];
-        $summary[] = $this->t('Displays the original date.');
-        return $summary;
+  /**
+   * {@inheritdoc}
+   */
+  public function viewElements(FieldItemListInterface $items, $langcode)
+  {
+    $element = [];
+
+    foreach ($items as $delta => $item) {
+      $element[$delta] = ['#markup' => $item->date];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function viewElements(FieldItemListInterface $items, $langcode)
-    {
-        $element = [];
-
-        foreach ($items as $delta => $item) {
-            $element[$delta] = ['#markup' => $item->date_external];
-        }
-
-        return $element;
-    }
+    return $element;
+  }
 }
