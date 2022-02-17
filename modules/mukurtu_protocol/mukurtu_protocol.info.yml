@@ -10,6 +10,5 @@ dependencies:
   - media
   - message
   - mukurtu_core
-  - mukurtu_community
 
 version: '8.x-1.x-dev'

@@ -41,12 +41,15 @@ function mukurtu_protocol_schema() {
  * Implements hook_install().
  */
 function mukurtu_protocol_install() {
-  // Protocols are groups.
-  Og::addGroup('protocol', 'protocol');
+  $groupTypes = ['community', 'protocol'];
 
-  // Delete the default 'administrator' role from protocols.
-  $role = OgRole::getRole('protocol', 'protocol', 'administrator');
-  if ($role) {
-    $role->delete();
+  foreach ($groupTypes as $groupType) {
+    Og::addGroup($groupType, $groupType);
+
+    // Delete the default 'administrator' role.
+    $role = OgRole::getRole($groupType, $groupType, 'administrator');
+    if ($role) {
+      $role->delete();
+    }
   }
 }

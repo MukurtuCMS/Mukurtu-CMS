@@ -13,4 +13,4 @@ entity.community.add_form:
   title: 'Add Community'
   appears_on:
     - entity.community.collection
-    - mukurtu_community.manage_communities
+    - mukurtu_protocol.manage_communities

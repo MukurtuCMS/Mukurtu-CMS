@@ -5,3 +5,11 @@ mukurtu_protocol.manage_communities:
     _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuCommunityManageController::content'
   requirements:
     _permission: 'create community content,edit community content'
+
+mukurtu_protocol.permissions_overview:
+  path: '/dashboard/group/permissions/{entity_type_id}/{bundle_id}'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgPermissionsForm'
+    _title_callback: '\Drupal\mukurtu_protocol\Form\MukurtuOgPermissionsForm::titleCallback'
+  requirements:
+    _permission: 'administer organic groups'

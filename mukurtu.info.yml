@@ -83,7 +83,6 @@ dependencies:
   - token
   - views_bulk_operations
   - mukurtu_core
-#  - mukurtu_community
   - mukurtu_protocol
   - mukurtu_taxonomy
   - mukurtu_digital_heritage

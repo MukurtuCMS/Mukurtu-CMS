@@ -7,7 +7,6 @@ package: 'Mukurtu'
 dependencies:
   - comment
   - mukurtu_core
-  #- mukurtu_community
   - mukurtu_protocol
 
 version: '8.x-1.x-dev'
