@@ -78,6 +78,9 @@ function mukurtu_protocol_entity_type_build(array &$entity_types) {
   // This is where we attach the Mukurtu protocol access handlers.
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   $entity_types['node']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolNodeAccessControlHandler');
+
+  // We are taking over some of the default OG entity handling.
+  $entity_types['og_role']->setHandlerClass('list_builder', 'Drupal\mukurtu_protocol\Entity\MukurtuOgRoleListBuilder');
   //$entity_types['media']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolAccessControlHandler');
 }
 

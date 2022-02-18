@@ -13,3 +13,28 @@ mukurtu_protocol.permissions_overview:
     _title_callback: '\Drupal\mukurtu_protocol\Form\MukurtuOgPermissionsForm::titleCallback'
   requirements:
     _permission: 'administer organic groups'
+
+mukurtu_protocol.permissions_edit_form:
+  path: '/dashboard/group/permissions/{entity_type_id}/{bundle_id}/{role_name}'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgRolePermissionsForm'
+    _title_callback: '\Drupal\mukurtu_protocol\Form\MukurtuOgRolePermissionsForm::rolePermissionTitleCallback'
+  requirements:
+    _permission: 'administer organic groups'
+
+mukurtu_protocol.community_roles:
+  path: '/dashboard/community/roles'
+  defaults:
+    _entity_list: 'og_role'
+    _title: 'Community Roles'
+  requirements:
+    _permission: 'administer organic groups'
+
+mukurtu_protocol.protocol_roles:
+  path: '/dashboard/protocol/roles'
+  defaults:
+    _entity_list: 'og_role'
+    _title: 'Protocol Roles'
+  requirements:
+    _permission: 'administer organic groups'
+

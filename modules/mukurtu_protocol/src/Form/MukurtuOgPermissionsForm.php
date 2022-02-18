@@ -94,7 +94,7 @@ class MukurtuOgPermissionsForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'group_permissions';
+    return 'mukurtu_group_permissions';
   }
 
   /**
@@ -109,7 +109,7 @@ class MukurtuOgPermissionsForm extends FormBase {
    *   The group permission title.
    */
   public function titleCallback($entity_type_id, $bundle_id) {
-    return $this->t('@bundle permissions', [
+    return $this->t('Site-wide @bundle Permissions', [
       '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'],
     ]);
   }
@@ -154,6 +154,8 @@ class MukurtuOgPermissionsForm extends FormBase {
       throw new NotFoundHttpException();
     }
 
+    $label = $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'];
+
     // Render the link for hiding descriptions.
     $form['system_compact_link'] = [
       '#id' => FALSE,
@@ -192,8 +194,8 @@ class MukurtuOgPermissionsForm extends FormBase {
     $group_content_permissions = $this->permissionManager->getDefaultEntityOperationPermissions($entity_type_id, $bundle_id, $bundles);
 
     $permissions_by_provider = [
-      'Group' => [],
-      'Group content' => [],
+      "$label" => [],
+      "$label content" => [],
     ];
 
     foreach ($group_permissions as $permission) {
@@ -201,7 +203,7 @@ class MukurtuOgPermissionsForm extends FormBase {
         $permissions_by_provider[$permission->getProvider()][$permission->getName()] = $permission;
       }
       else {
-        $permissions_by_provider['Group'][$permission->getName()] = $permission;
+        $permissions_by_provider["$label"][$permission->getName()] = $permission;
       }
     }
 
@@ -210,7 +212,7 @@ class MukurtuOgPermissionsForm extends FormBase {
         $permissions_by_provider[$permission->getProvider()][$permission->getName()] = $permission;
       }
       else {
-        $permissions_by_provider['Group content'][$permission->getName()] = $permission;
+        $permissions_by_provider["$label content"][$permission->getName()] = $permission;
       }
     }
 

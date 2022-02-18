@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_protocol;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
@@ -45,9 +46,14 @@ class MukurtuOgGroupAudienceHelper implements OgGroupAudienceHelperInterface {
    * {@inheritdoc}
    */
   public function hasGroupAudienceField($entity_type_id, $bundle_id) {
-    $fields = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle_id);
-    if (isset($fields['field_protocol_control'])) {
-      return TRUE;
+    if ($bundle_id) {
+      $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+      if ($entity_type->entityClassImplements(FieldableEntityInterface::class)) {
+        $fields = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle_id);
+        if (isset($fields['field_protocol_control'])) {
+          return TRUE;
+        }
+      }
     }
 
     return FALSE;

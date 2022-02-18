@@ -14,3 +14,19 @@ entity.community.add_form:
   appears_on:
     - entity.community.collection
     - mukurtu_protocol.manage_communities
+mukurtu_protocol.add_community_role:
+  route_name: entity.og_role.add_form
+  title: 'Add role'
+  appears_on:
+    - mukurtu_protocol.community_roles
+  route_parameters:
+    entity_type_id: community
+    bundle_id: community
+mukurtu_protocol.add_protocol_role:
+  route_name: entity.og_role.add_form
+  title: 'Add role'
+  appears_on:
+    - mukurtu_protocol.protocol_roles
+  route_parameters:
+    entity_type_id: protocol
+    bundle_id: protocol
