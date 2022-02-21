@@ -47,11 +47,13 @@ class OriginalDateField extends FieldItemBase
           'type' => 'int',
           'size' => 'tiny',
           'unsigned' => true,
+          'not null' => false,
         ),
         'day' => array(
           'type' => 'int',
           'size' => 'tiny',
           'unsigned' => true,
+          'not null' => false,
         ),
       ),
     );
@@ -116,7 +118,7 @@ class OriginalDateField extends FieldItemBase
 
     $timestamp = strtotime($date);
 
-    $values['timestamp'] = $timestamp;
+    $values['timestamp'] = $timestamp === FALSE ? NULL : $timestamp;
 
     parent::setValue($values, $notify);
   }

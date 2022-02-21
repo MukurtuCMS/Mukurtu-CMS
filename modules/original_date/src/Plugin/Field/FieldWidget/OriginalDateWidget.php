@@ -26,9 +26,12 @@ class OriginalDateWidget extends WidgetBase
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state)
   {
     foreach ($values as $key => $value) {
+      $monthCleaned = (int) ltrim($value['month'], "0");
+      $dayCleaned = (int) ltrim($value['day'], "0");
+
       $values[$key]['year'] = ltrim($value['year'], "0");
-      $values[$key]['month'] = ltrim($value['month'], "0");
-      $values[$key]['day'] = ltrim($value['day'], "0");
+      $values[$key]['month'] = $monthCleaned ? $monthCleaned : null;
+      $values[$key]['day'] = $dayCleaned ? $dayCleaned : null;
     }
     return $values;
   }
@@ -58,7 +61,7 @@ class OriginalDateWidget extends WidgetBase
       '#min' => 1,
       '#max' => 12,
       '#size' => 5,
-      '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : '',
+      '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : null,
     );
 
     $element['day'] = array(
@@ -67,7 +70,7 @@ class OriginalDateWidget extends WidgetBase
       '#min' => 1,
       '#max' => 31,
       '#size' => 5,
-      '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : '',
+      '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : null,
     );
 
     $element += array(
@@ -84,8 +87,8 @@ class OriginalDateWidget extends WidgetBase
   public static function validate($element, FormStateInterface $form_state)
   {
     $year = ltrim($element['year']['#value'], "0"); // in case of leading zeros
-    $month = ltrim($element['month']['#value'], "0");
-    $day = ltrim($element['day']['#value'], "0");
+    $month = (int) ltrim($element['month']['#value'], "0");
+    $day = (int) ltrim($element['day']['#value'], "0");
 
     // if empty, return
     if (!$year && !$month && !$day) {
@@ -96,7 +99,7 @@ class OriginalDateWidget extends WidgetBase
     // 1. ensure date in acceptable format
     if ($year && $month && $day || $year && $month && !$day || $year && !$month && !$day) {
       // 2. Ensure date is valid
-      if (!checkdate(($month == '' ? 1 : $month), ($day == '' ? 1 : $day), $year)) {
+      if (!checkdate(($month == 0 ? 1 : $month), ($day == 0 ? 1 : $day), $year)) {
         $form_state->setError($element, "Invalid date.");
       }
     }
