@@ -39,8 +39,8 @@ class OriginalDateField extends FieldItemBase
           'not null' => false,
         ),
         'year' => array(
-          'type' => 'text',
-          'size' => 'tiny',
+          'type' => 'varchar',
+          'length' => 4,
           'not null' => false,
         ),
         'month' => array(

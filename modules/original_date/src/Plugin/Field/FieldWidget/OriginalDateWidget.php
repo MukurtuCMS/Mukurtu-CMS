@@ -26,9 +26,9 @@ class OriginalDateWidget extends WidgetBase
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state)
   {
     foreach ($values as $key => $value) {
-      $values[$key]['year'] = ($value['year'] != '' ? $value['year'] : '');
-      $values[$key]['month'] = ($value['month'] != '' ? $value['month'] : 0);
-      $values[$key]['day'] = ($value['day'] != '' ? $value['day'] : 0);
+      $values[$key]['year'] = ltrim($value['year'], "0");
+      $values[$key]['month'] = ltrim($value['month'], "0");
+      $values[$key]['day'] = ltrim($value['day'], "0");
     }
     return $values;
   }
@@ -55,6 +55,8 @@ class OriginalDateWidget extends WidgetBase
     $element['month'] = array(
       '#type' => 'number',
       '#title' => t('Month'),
+      '#min' => 1,
+      '#max' => 12,
       '#size' => 5,
       '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : '',
     );
@@ -62,6 +64,8 @@ class OriginalDateWidget extends WidgetBase
     $element['day'] = array(
       '#type' => 'number',
       '#title' => t('Day'),
+      '#min' => 1,
+      '#max' => 31,
       '#size' => 5,
       '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : '',
     );
@@ -79,9 +83,9 @@ class OriginalDateWidget extends WidgetBase
    */
   public static function validate($element, FormStateInterface $form_state)
   {
-    $year = $element['year']['#value'];
-    $month = $element['month']['#value'];
-    $day = $element['day']['#value'];
+    $year = ltrim($element['year']['#value'], "0"); // in case of leading zeros
+    $month = ltrim($element['month']['#value'], "0");
+    $day = ltrim($element['day']['#value'], "0");
 
     // if empty, return
     if (!$year && !$month && !$day) {
