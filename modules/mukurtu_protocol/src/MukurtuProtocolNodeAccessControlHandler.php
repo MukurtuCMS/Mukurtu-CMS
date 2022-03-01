@@ -3,15 +3,11 @@
 namespace Drupal\mukurtu_protocol;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityPublishedInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
-use Drupal\user\EntityOwnerInterface;
-use Drupal\node\NodeInterface;
 use Drupal\node\NodeAccessControlHandler;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
+use Drupal\mukurtu_protocol\Entity\ProtocolControl;
 
 /**
  * Access controller for node entities under Mukurtu protocol control.
@@ -32,21 +28,14 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
       return parent::checkAccess($entity, $operation, $account);
     }
 
-    // Try to load the protocol control entity.
-    $fieldProtocolControl = $entity->get('field_protocol_control')->getValue();
-    $protocolControlId = array_column($fieldProtocolControl, 'target_id');
-
-    if (empty($protocolControlId)) {
-      $protocolControlEntity = NULL;
-    }
-    else {
-      $protocolControlEntity = \Drupal::entityTypeManager()->getStorage('protocol_control')->load($protocolControlId[0]);
-    }
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $protocolControlEntity */
+    // Try to load the protocol control entity.
+    $protocolControlEntity = ProtocolControl::getProtocolControlEntity($entity);
 
-    // No protocol control entity (but DOES have a protocol control field)
-    // or an invalid reference. Here we'll default to owner only for everything.
-    if (!$protocolControlEntity) {
+    // No valid protocol control entity (but DOES have a protocol control
+    // field) or an empty protocol list. Here we'll default to owner
+    // only for everything.
+    if (!$protocolControlEntity || empty($protocolControlEntity->getProtocols())) {
       if ($entity->getOwnerId() == $account->id()) {
         return parent::checkAccess($entity, $operation, $account);
       }
@@ -57,7 +46,6 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
     // protocol control entity.
     // For non-members we can deny immediately.
     if (!$protocolControlEntity->inGroup($account)) {
-      dpm("PCE non-member, early denial");
       return AccessResult::forbidden();
     }
 
@@ -67,26 +55,18 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
 
       case 'update':
       case 'delete':
+        // Ask each member OG group about specific permissions.
         $ogAccessService = \Drupal::service('og.access');
-        $result = AccessResult::neutral();
+        $result = AccessResult::forbidden();
         $protocols = $protocolControlEntity->getMemberProtocols($account);
-        if ($protocolControlEntity->getPrivacySetting() == 'all') {
-          dpm("all");
-          foreach ($protocols as $protocol) {
-            $result = $result->andIf($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
-            dpm("asking OG about protocol {$protocol->getName()} for operation {$operation} on entity {$entity->getTitle()}");
-            //dpm($result);
-          }
+        $modeFn = ($protocolControlEntity->getPrivacySetting() == 'any') ? 'orIf' : 'andIf';
+        foreach ($protocols as $protocol) {
+          $result = $result->{$modeFn}($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
         }
-        else {
-          dpm("any");
-          foreach ($protocols as $protocol) {
-            $result = $result->orIf($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
-            dpm("asking OG about protocol {$protocol->getName()} for operation {$operation} on entity {$entity->getTitle()}");
-            //dpm($result);
-          }
-        }
-        return $result;
+
+        // Protocols are very opinionated, neutral is not good enough for
+        // update/delete, allowed is required.
+        return $result->isNeutral() ? AccessResult::forbidden() : $result;
     }
 
     // Unknown operation, no opinion.
@@ -97,7 +77,19 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIfHasPermission($account, 'add protocol control entities');
+    /*
+     * To create a node of type entity_bundle, the account needs at least
+     * one protocol membership that grants the 'Create new' permission
+     * for that entity_bundle.
+     */
+    $memberships = Og::getMemberships($account);
+
+    foreach ($memberships as $membership) {
+      if ($membership->hasPermission("create $entity_bundle content")) {
+        return AccessResult::allowed();
+      }
+    }
+    return AccessResult::forbidden();
   }
 
 }
