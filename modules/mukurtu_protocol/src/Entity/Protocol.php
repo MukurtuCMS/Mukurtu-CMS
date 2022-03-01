@@ -10,6 +10,12 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
+use Drupal\og\Entity\OgRole;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Defines the Protocol entity.
@@ -76,6 +82,43 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
   use EntityChangedTrait;
   use EntityPublishedTrait;
+
+  /**
+   * Create the protocol control field for an entity type/bundle.
+   */
+  public static function createField($entity_type_id, $bundle) {
+    // Create the field storage if necessary.
+    $fieldStorage = FieldStorageConfig::loadByName($entity_type_id, 'field_protocol_control');
+    if (is_null($fieldStorage)) {
+      $fieldStorage = FieldStorageConfig::create([
+        'entity_type' => $entity_type_id,
+        'field_name' => 'field_protocol_control',
+        'type' => 'entity_reference',
+        'settings' => ['target_type' => 'protocol_control'],
+        'cardinality' => 1,
+      ]);
+      $fieldStorage->save();
+    }
+
+    // Add the field if necessary.
+    $fieldConfig = FieldConfig::loadByName($entity_type_id, $bundle, 'field_protocol_control');
+    if (is_null($fieldConfig)) {
+      $fieldConfig = FieldConfig::create([
+        'entity_type' => $entity_type_id,
+        'bundle' => $bundle,
+        'field_name' => 'field_protocol_control',
+        'label' => 'Protocols',
+        'settings' => [
+          'handler' => 'default:protocol_control',
+          'handler_settings' => [
+            'target_bundles' => NULL,
+            'auto_create' => FALSE,
+          ],
+        ],
+      ]);
+      $fieldConfig->save();
+    }
+  }
 
   /**
    * {@inheritdoc}
@@ -174,6 +217,41 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
    */
   public function getCommunities() {
     return $this->get('field_communities')->referencedEntities() ?? [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addMember(AccountInterface $account, $roles = []): MukurtuGroupInterface {
+    $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
+    if (!$membership) {
+      // Load OgRoles from role ids.
+      $ogRoles = [];
+      foreach ($roles as $role) {
+        $ogRole = OgRole::getRole('protocol', 'protocol', $role);
+        if ($ogRole) {
+          $ogRoles[] = $ogRole;
+        }
+      }
+
+      // Create the membership and add the roles.
+      $membership = Og::createMembership($this, $account);
+      $membership->setRoles($ogRoles);
+      $membership->save();
+    }
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeMember(AccountInterface $account): MukurtuGroupInterface {
+    $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
+    if ($membership) {
+      $membership->delete();
+    }
+
+    return $this;
   }
 
   /**

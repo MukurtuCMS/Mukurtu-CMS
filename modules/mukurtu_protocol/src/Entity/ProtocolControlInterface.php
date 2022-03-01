@@ -206,4 +206,15 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
    */
   public function getCommunities();
 
+  /**
+   * Get the protocol control entity for an entity under protocol control.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface
+   *   The protocol control interface.
+   */
+  public static function getProtocolControlEntity(EntityInterface $entity);
+
 }

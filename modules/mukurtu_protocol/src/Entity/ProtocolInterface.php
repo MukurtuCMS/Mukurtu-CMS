@@ -7,13 +7,14 @@ use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\mukurtu_protocol\Entity\MukurtuGroupInterface;
 
 /**
  * Provides an interface for defining Protocol entities.
  *
  * @ingroup mukurtu_protocol
  */
-interface ProtocolInterface extends ContentEntityInterface, RevisionLogInterface, EntityChangedInterface, EntityPublishedInterface, EntityOwnerInterface {
+interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterface, RevisionLogInterface, EntityChangedInterface, EntityPublishedInterface, EntityOwnerInterface {
 
   /**
    * Add get/set methods for your configuration properties here.

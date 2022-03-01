@@ -14,6 +14,7 @@ use Drupal\user\UserInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\og\Og;
 
 /**
@@ -87,6 +88,21 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
     $values += [
       'user_id' => \Drupal::currentUser()->id(),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getProtocolControlEntity(EntityInterface $entity) {
+    if ($entity instanceof FieldableEntityInterface) {
+      if ($entity->hasField('field_protocol_control')) {
+        $pcs = $entity->get('field_protocol_control')->referencedEntities();
+        if (is_array($pcs)) {
+          return reset($pcs);
+        }
+      }
+    }
+    return NULL;
   }
 
   /**
