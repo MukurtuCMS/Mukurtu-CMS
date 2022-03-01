@@ -2,7 +2,6 @@ name: 'Mukurtu Protocols'
 type: module
 description: 'Provides access control that is fundamental to the Mukurtu platform.'
 core_version_requirement: ^8 || ^9
-core: 8.x
 package: 'Mukurtu'
 dependencies:
   - comment

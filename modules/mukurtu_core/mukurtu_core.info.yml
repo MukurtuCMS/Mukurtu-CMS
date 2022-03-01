@@ -2,7 +2,6 @@ name: 'Mukurtu Core'
 type: module
 description: 'Provides the base level functionality needed by more specific Mukurtu modules.'
 core_version_requirement: ^8 || ^9
-core: 8.x
 package: 'Mukurtu'
 version: '8.x-1.x-dev'
 libraries:
