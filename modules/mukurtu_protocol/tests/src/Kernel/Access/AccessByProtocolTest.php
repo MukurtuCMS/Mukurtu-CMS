@@ -17,7 +17,6 @@ use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\mukurtu_protocol\Entity\ProtocolControl;
 
-
 /**
  * Tests access to content by OgMembership.
  *
@@ -85,6 +84,12 @@ class AccessByProtocolTest extends KernelTestBase {
    * @var \Drupal\Core\Session\AccountInterface[]
    */
   protected $users;
+
+  /**
+   * A user not involved in testing to use as the owner for content.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
   protected $owner;
 
   /**
@@ -208,7 +213,6 @@ class AccessByProtocolTest extends KernelTestBase {
    *   The array of protocol entities to use in protocol control.
    * @param mixed $scenarios
    *   The array of scenarios.
-   *
    */
   protected function runProtocolControlScenarios($access_setting, array $protocols, $scenarios) {
     // Create the content to test.
@@ -218,10 +222,11 @@ class AccessByProtocolTest extends KernelTestBase {
       'status' => TRUE,
       'uid' => $this->owner->id(),
     ]);
+
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $pc */
     $pc = ProtocolControl::getProtocolControlEntity($content);
     $pc->setPrivacySetting($access_setting);
-    $pc->setProtocols($protocols);
+    $pc->setProtocols(array_values($protocols));
     $content->save();
 
     foreach ($scenarios as $scenario) {
@@ -236,7 +241,9 @@ class AccessByProtocolTest extends KernelTestBase {
 
       // Add user to the protocols with the requested roles.
       foreach ($scenario['memberships'] as $protocolId => $roles) {
-        $protocols[$protocolId]->addMember($user, $roles);
+        if (!empty($roles)) {
+          $protocols[$protocolId]->addMember($user, $roles);
+        }
       }
 
       // Run the access checks.
@@ -299,35 +306,890 @@ class AccessByProtocolTest extends KernelTestBase {
   }
 
   /**
-   * Tests access for a single protocol.
+   * Tests access for a single open protocol.
    */
-  public function testSingleProtocol() {
-    $setting = 'all';
+  public function testSingleOpenProtocol() {
     $protocols = ['open1' => $this->openProtocols[1]];
     $scenarios = [
       [
         'owner' => FALSE,
         'memberships' => ['open1' => []],
-        'expected_access' => ['view' => TRUE, 'update' => FALSE, 'delete' => FALSE],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
       ],
       [
         'owner' => TRUE,
         'memberships' => ['open1' => []],
-        'expected_access' => ['view' => TRUE, 'update' => FALSE, 'delete' => FALSE],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
       ],
       [
         'owner' => FALSE,
         'memberships' => ['open1' => ['member']],
-        'expected_access' => ['view' => TRUE, 'update' => FALSE, 'delete' => FALSE],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
       ],
       [
         'owner' => TRUE,
         'memberships' => ['open1' => ['member']],
-        'expected_access' => ['view' => TRUE, 'update' => TRUE, 'delete' => TRUE],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => ['open1' => ['contributor']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => ['open1' => ['contributor']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => ['open1' => ['protocol_steward']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => ['open1' => ['protocol_steward']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
       ],
     ];
 
-    $this->runProtocolControlScenarios($setting, $protocols, $scenarios);
+    // Any/All expects the same result for a single protocol.
+    // We can run the same scenarios to cover both.
+    $this->runProtocolControlScenarios('all', $protocols, $scenarios);
+    $this->runProtocolControlScenarios('any', $protocols, $scenarios);
+  }
+
+  /**
+   * Tests access for a single strict protocol.
+   */
+  public function testSingleStrictProtocol() {
+    $protocols = ['strict1' => $this->strictProtocols[1]];
+    $scenarios = [
+      [
+        'owner' => FALSE,
+        'memberships' => ['strict1' => []],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => ['strict1' => []],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => ['strict1' => ['member']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => ['strict1' => ['member']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => ['strict1' => ['contributor']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => ['strict1' => ['contributor']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => ['strict1' => ['protocol_steward']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => ['strict1' => ['protocol_steward']],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+    ];
+
+    // Any/All expects the same result for a single protocol.
+    // We can run the same scenarios to cover both.
+    $this->runProtocolControlScenarios('all', $protocols, $scenarios);
+    $this->runProtocolControlScenarios('any', $protocols, $scenarios);
+  }
+
+  /**
+   * Tests access for two protocols/any.
+   */
+  public function testTwoProtocolsTwoOpenAny() {
+    $protocols = [
+      'open1' => $this->openProtocols[1],
+      'open2' => $this->openProtocols[2],
+    ];
+
+    $scenarios = [
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => [],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => [],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['member'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['member'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['member'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['member'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => ['contributor'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => ['contributor'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['contributor'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['contributor'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['protocol_steward'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['protocol_steward'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+    ];
+    $this->runProtocolControlScenarios('any', $protocols, $scenarios);
+  }
+
+  /**
+   * Tests access for two protocols/all.
+   */
+  public function testTwoProtocolsTwoOpenAll() {
+    $protocols = [
+      'open1' => $this->openProtocols[1],
+      'open2' => $this->openProtocols[2],
+    ];
+
+    $scenarios = [
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => [],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => [],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['member'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['member'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => [],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['member'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['member'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => ['contributor'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['contributor'],
+          'open2' => ['contributor'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['contributor'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['contributor'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['protocol_steward'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'open2' => ['protocol_steward'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+    ];
+
+    $this->runProtocolControlScenarios('all', $protocols, $scenarios);
+  }
+
+  /**
+   * Tests access for two protocols, strict/open.
+   */
+  public function testTwoProtocolsMixed() {
+    $protocols = [
+      'open1' => $this->openProtocols[1],
+      'strict1' => $this->strictProtocols[1],
+    ];
+
+    /*
+     * There's only one diffence in expected results between
+     * open/open and open/strict and that's the case
+     * of non-member/non-member for 'all' (deny view).
+     * We'll test that case specifically here.
+     */
+    $scenarios = [
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => [],
+          'strict1' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => [],
+          'strict1' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+    ];
+
+    $this->runProtocolControlScenarios('all', $protocols, $scenarios);
+  }
+
+  /**
+   * Tests access for two protocols, strict/strict, any.
+   */
+  public function testTwoProtocolsBothStrictAny() {
+    $protocols = [
+      'strict1' => $this->strictProtocols[1],
+      'strict2' => $this->strictProtocols[2],
+    ];
+
+    /*
+     * There's only one diffence in expected results between
+     * open/strict and strict/strict and that's the case
+     * of non-member/non-member for 'any' (deny view).
+     * We'll test that case specifically here.
+     */
+    $scenarios = [
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'strict1' => [],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'strict1' => [],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+    ];
+
+    $this->runProtocolControlScenarios('any', $protocols, $scenarios);
+  }
+
+  /**
+   * Tests access for two protocols, strict/strict, all.
+   */
+  public function testTwoProtocolsBothStrictAll() {
+    $protocols = [
+      'strict1' => $this->strictProtocols[1],
+      'strict2' => $this->strictProtocols[2],
+    ];
+
+    /*
+     * In the case of strict/strict all the only difference
+     * is view denials when a user is a non-member for one
+     * protocol. We'll test those specifically here.
+     */
+    $scenarios = [
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'strict1' => [],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'strict1' => [],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'strict1' => ['member'],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'strict1' => ['member'],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'strict1' => ['contributor'],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'strict1' => ['contributor'],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'strict1' => ['protocol_steward'],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'strict1' => ['protocol_steward'],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+    ];
+
+    $this->runProtocolControlScenarios('all', $protocols, $scenarios);
   }
 
 }
