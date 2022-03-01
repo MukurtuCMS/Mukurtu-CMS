@@ -57,9 +57,14 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
       case 'delete':
         // Ask each member OG group about specific permissions.
         $ogAccessService = \Drupal::service('og.access');
-        $result = AccessResult::forbidden();
         $protocols = $protocolControlEntity->getMemberProtocols($account);
+
+        // Our initial result needs to be "allowed" for all, "neutral" for any.
+        // Check the truth tables on AccessResult orIf/andIf for why.
+        $result = ($protocolControlEntity->getPrivacySetting() == 'all') ? AccessResult::allowed() : AccessResult::neutral();
         $modeFn = ($protocolControlEntity->getPrivacySetting() == 'any') ? 'orIf' : 'andIf';
+
+        // Check each protocol.
         foreach ($protocols as $protocol) {
           $result = $result->{$modeFn}($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
         }
