@@ -6,6 +6,8 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolControl;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
 
 /**
  * @file
@@ -104,4 +106,31 @@ function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setDisplayConfigurable('view', TRUE);
   }
   return $fields;
+}
+
+/**
+ * Implements hook_node_grants().
+ */
+function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
+  $grants = [];
+
+  if ($op == 'view') {
+    $grants['protocols'] = ProtocolControl::getAccountGrantIds($account);
+  }
+
+  return $grants;
+}
+
+/**
+ * Implements hook_node_access_records().
+ */
+function mukurtu_protocol_node_access_records(NodeInterface $node) {
+  /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $protocolControlEntity */
+  // Load the protocol control entity.
+  $protocolControlEntity = ProtocolControl::getProtocolControlEntity($node);
+  if (!$protocolControlEntity) {
+    return [];
+  }
+
+  return $protocolControlEntity->getNodeAccessGrants();
 }

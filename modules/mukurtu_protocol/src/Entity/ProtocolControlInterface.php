@@ -217,4 +217,20 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
    */
   public static function getProtocolControlEntity(EntityInterface $entity);
 
+  /**
+   * Get the protocol set ID.
+   *
+   * @return int
+   *   The protocol set ID.
+   */
+  public function getProtocolSetId();
+
+  /**
+   * Return the node access grants.
+   *
+   * @return mixed
+   *   The grants array.
+   */
+  public function getNodeAccessGrants();
+
 }

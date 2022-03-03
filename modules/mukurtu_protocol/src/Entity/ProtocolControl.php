@@ -16,6 +16,7 @@ use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\og\Og;
+use Drupal\user\Entity\User;
 
 /**
  * Defines the Protocol control entity.
@@ -272,14 +273,9 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
   }
 
   /**
-   * Get the protocol set.
-   *
-   * @return string
-   *   The protocol set.
+   * Create a hash key for a protocol set.
    */
-  protected function getProtocolSet() {
-    $protocols = $this->getProtocols();
-
+  protected static function buildProtocolSetKey($protocols) {
     // Filter out any non IDs (nulls, whitespace).
     $filtered_protocols = array_filter($protocols, 'is_numeric');
 
@@ -293,19 +289,30 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
   }
 
   /**
-   * Get the protocol set ID.
+   * Get the protocol set.
    *
-   * @return int
-   *   The protocol set ID.
+   * @return string
+   *   The protocol set.
    */
-  protected function getProtocolSetId() {
-    $set = $this->getProtocolSet();
+  protected function getProtocolSet() {
+    $protocols = $this->getProtocols();
+    return $this->buildProtocolSetKey($protocols);
+  }
+
+  /**
+   * Handle protocol hash key to ID resolution.
+   */
+  protected static function protocolSetKeyToId($key) {
+    if (empty($key)) {
+      return NULL;
+    }
+
     $database = \Drupal::database();
 
     // Check if this set already has an ID.
     $query = $database->select('mukurtu_protocol_map', 'mpm')
       ->fields('mpm', ['protocol_set_id'])
-      ->condition('protocol_set', $set)
+      ->condition('protocol_set', $key)
       ->range(0, 1);
     $result = $query->execute()->fetch();
 
@@ -317,10 +324,152 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
     // ID doesn't exist, insert it here and return new ID.
     $result = $database->insert('mukurtu_protocol_map')
       ->fields([
-        'protocol_set' => $set,
+        'protocol_set' => $key,
       ])->execute();
 
     return $result;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getProtocolSetId() {
+    $set = $this->getProtocolSet();
+    return $this->protocolSetKeyToId($set);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getNodeAccessGrants() {
+    $grants = [];
+
+    // Deny grant for missing/broken protocols.
+    $grants[] = [
+      'realm' => 'protocols',
+      'gid' => 0,
+      'grant_view' => 0,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+    ];
+
+    if ($this->getPrivacySetting() == 'all') {
+      // User needs the grant that represents the set of all the
+      // node's protocols.
+      $gid = $this->getProtocolSetId();
+
+      if ($gid) {
+        $grants[] = [
+          'realm' => 'protocols',
+          'gid' => $gid,
+          'grant_view' => 1,
+          'grant_update' => 0,
+          'grant_delete' => 0,
+          'priority' => 0,
+        ];
+      }
+    }
+    else {
+      // In this case, membership in any of involved protocols is
+      // sufficient.
+      $protocols = $this->getProtocols();
+      foreach ($protocols as $protocol) {
+        $gid = $this->protocolSetKeyToId($this->buildProtocolSetKey([$protocol]));
+        if ($gid) {
+          $grants[] = [
+            'realm' => 'protocols',
+            'gid' => $gid,
+            'grant_view' => 1,
+            'grant_update' => 0,
+            'grant_delete' => 0,
+            'priority' => 0,
+          ];
+        }
+      }
+    }
+
+    return $grants;
+  }
+
+  /**
+   * Get a list of all compound protocols in use on the site.
+   */
+  protected static function getCompoundProtocols() {
+    $compoundProtocols = [];
+    $database = \Drupal::database();
+
+    $query = $database->select('mukurtu_protocol_map', 'mpm')
+      ->fields('mpm', ['protocol_set_id', 'protocol_set']);
+    $result = $query->execute()->fetchAll();
+    foreach ($result as $ps) {
+      if (str_contains($ps->protocol_set, ',')) {
+        $compoundProtocols[$ps->protocol_set_id] = explode(',', $ps->protocol_set);
+      }
+    }
+
+    return $compoundProtocols;
+  }
+
+  /**
+   * Get the IDs of all published open protocols.
+   */
+  protected static function getAllOpenProtocols() {
+    $query = \Drupal::entityQuery('protocol')
+      ->condition('field_access_mode', 'open')
+      ->condition('status', 1)
+      ->accessCheck(FALSE);
+    $results = $query->execute();
+
+    return $results ? $results : [];
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function getAccountGrantIds(AccountInterface $account) {
+    $grants = [];
+
+    // Deny grant for missing protocols.
+    $grants[0] = 0;
+
+    /** @var \Drupal\og\OgMembershipInterface[] $memberships */
+    $memberships = Og::getMemberships($account);
+    $memberships = array_filter($memberships, fn ($e) => $e->getGroupEntityType() == 'protocol');
+
+    // Get the protocol NID list and sort them.
+    $protocols = array_map(fn ($e) => $e->getGroupId(), $memberships);
+    sort($protocols);
+
+    // User has access to all open protocols.
+    foreach (self::getAllOpenProtocols() as $openProtocol) {
+      $p_gid = self::protocolSetKeyToId(self::buildProtocolSetKey([$openProtocol]));
+      $grants[$p_gid] = $p_gid;
+    }
+
+    // User has access to each single protocol they are a member of.
+    foreach ($protocols as $protocol) {
+      $p_gid = self::protocolSetKeyToId(self::buildProtocolSetKey([$protocol]));
+      $grants[$p_gid] = $p_gid;
+    }
+
+    // Search the entire protocol table for combinations of protocols
+    // that the user is a member of. This is potentially slow, but it's faster
+    // than computing the super set of user protocols.
+    foreach (self::getCompoundProtocols() as $id => $setProtocols) {
+      $inAll = TRUE;
+      foreach ($setProtocols as $setProtocol) {
+        if (!in_array($setProtocol, $protocols)) {
+          $inAll = FALSE;
+          break;
+        }
+      }
+      if ($inAll) {
+        $grants[$id] = $id;
+      }
+    }
+
+    return $grants;
   }
 
   /**
@@ -331,14 +480,13 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
 
     if (!$user) {
       $current_user = \Drupal::currentUser();
-      $user = \Drupal\user\Entity\User::load($current_user->id());
+      $user = User::load($current_user->id());
     }
 
     $protocols = $this->getProtocols();
     if (!empty($protocols)) {
       $protocols = $this->entityTypeManager()->getStorage('protocol')->loadMultiple($protocols);
       foreach ($protocols as $protocol) {
-        //dpm("checking protocol {$protocol->getName()}");
         /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol */
         if ($protocol->isOpen()) {
           // Everybody is a "member" of an open protocol.
@@ -347,14 +495,13 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
         else {
           // Strict protocol, need to lookup actual membership.
           $membership = Og::getMembership($protocol, $user);
-          //dpm($membership);
           if ($membership) {
             $memberships[$protocol->id()] = $protocol;
           }
         }
       }
     }
-    // $current_user = \Drupal::currentUser();
+
     return $memberships;
   }
 
