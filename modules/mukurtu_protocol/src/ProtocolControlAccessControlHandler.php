@@ -19,9 +19,14 @@ class ProtocolControlAccessControlHandler extends EntityAccessControlHandler {
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $entity */
+    /** @var \Drupal\Core\Entity\EntityInterface $targetEntity */
+    $targetEntity = $entity->getControlledEntity();
+    $new = is_null($targetEntity);
 
-    // For non-members we can deny immediately.
-    if (!$entity->inGroup($account)) {
+    // For existing content we can deny users who
+    // cannot see all involved protocols immediately
+    // for any operation.
+    if (!$new && !$entity->inAllGroups($account)) {
       return AccessResult::forbidden();
     }
 
@@ -36,26 +41,23 @@ class ProtocolControlAccessControlHandler extends EntityAccessControlHandler {
         if ($account->id() == 1) {
           return AccessResult::allowed();
         }
-        // Can only update if the user can see ALL protocols involved
-        // AND can edit the target entity.
-        $targetEntity = $entity->getControlledEntity();
-        /** @var \Drupal\Core\Entity\EntityInterface $targetEntity */
-        if ($targetEntity && $targetEntity->access('update', $account)) {
-          return $entity->inAllGroups($account) ? AccessResult::allowed() : AccessResult::forbidden();
+
+        // For new content, let anybody create.
+        if ($new) {
+          return AccessResult::allowedIfHasPermission($account, 'add protocol control entities');
+        }
+
+        // For existing content, user needs edit access to the
+        // controlled entity.
+        if ($targetEntity->access('update', $account)) {
+          return AccessResult::allowedIfHasPermission($account, 'edit protocol control entities');
         }
         return AccessResult::forbidden();
 
-        //return AccessResult::allowedIfHasPermission($account, 'edit protocol control entities');
-
       case 'delete':
         // Only the system gets to delete PCEs.
-        if ($account->id() == 1) {
-          return AccessResult::allowed();
-        }
-        else {
-          return AccessResult::forbidden();
-        }
-        //return AccessResult::allowedIfHasPermission($account, 'delete protocol control entities');
+        return $account->id() == 1 ? AccessResult::allowed() : AccessResult::forbidden();
+
     }
 
     // Unknown operation, no opinion.
