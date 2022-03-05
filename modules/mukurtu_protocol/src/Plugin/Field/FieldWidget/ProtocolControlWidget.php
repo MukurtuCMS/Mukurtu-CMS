@@ -22,6 +22,9 @@ use Exception;
  */
 class ProtocolControlWidget extends WidgetBase {
 
+  /**
+   * Custom submit handler for the protocol control widget.
+   */
   public static function customSubmit(array $form, FormStateInterface $form_state) {
    // $dump = print_r($form_state->getValue('field_protocol_control'), TRUE);
    //dpm("here first");
@@ -106,7 +109,7 @@ class ProtocolControlWidget extends WidgetBase {
 
     /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
     $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load('protocol_control.protocol_control.default');
-    $fieldnames = ['field_sharing_setting', 'field_protocols'];
+    $fieldnames = ['field_protocols', 'field_sharing_setting'];
     //$name = 'field_privacy_setting';
     foreach ($fieldnames as $name) {
       /**

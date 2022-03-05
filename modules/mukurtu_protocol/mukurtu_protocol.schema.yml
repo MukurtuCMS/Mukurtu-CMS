@@ -1,0 +1,3 @@
+entity_reference_selection.mukurtu_protocol:
+  type: entity_reference_selection.default
+  label: 'Protocol Selection'

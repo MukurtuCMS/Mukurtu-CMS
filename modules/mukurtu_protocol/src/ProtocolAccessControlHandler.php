@@ -28,6 +28,11 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::allowed();
       }
 
+      // Anbody can view an open protocol.
+      if ($entity->isOpen()) {
+        return AccessResult::allowed();
+      }
+
       // Users with an active membership in the protocol can view.
       $membership = Og::getMembership($entity, $account);
       if ($membership) {

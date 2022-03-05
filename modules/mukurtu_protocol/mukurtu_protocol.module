@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeInterface;
+use Drupal\Core\Database\Query\AlterableInterface;
 
 /**
  * @file
@@ -133,4 +134,79 @@ function mukurtu_protocol_node_access_records(NodeInterface $node) {
   }
 
   return $protocolControlEntity->getNodeAccessGrants();
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * Handle query accessCheck for protocol entities. This only
+ * scopes it to visibility. It does not handle specific access
+ * considerations like update/delete.
+ */
+function mukurtu_protocol_query_protocol_access_alter(AlterableInterface $query) {
+  if (!$account = $query->getMetaData('account')) {
+    $account = \Drupal::currentUser();
+  }
+
+  // Grab the protocol table alias.
+  $tables = $query->getTables();
+  $protocolTable = array_search('protocol', array_map(fn($e) => $e['table'], $tables));
+
+  if ($protocolTable) {
+    // Join with the protocol field table;
+    $query->leftJoin('protocol_field_data', 'pf', "{$protocolTable}.id = pf.id");
+
+    // Join with the OG membership table.
+    $query->leftJoin('og_membership', 'og', "{$protocolTable}.id = og.entity_id");
+
+    // Build the conditions to capture strict protocols.
+    $strict_conditions = $query->andConditionGroup()
+      // Limit to the user being used in the query.
+      ->condition('og.uid', $account->id())
+      // Limit to protocol memberships only.
+      ->condition('og.entity_type', 'protocol')
+      // Limit to active memberships only.
+      ->condition('og.state', 'active');
+
+    // Build the conditions to capture open protocols.
+    $open_conditions = $query->andConditionGroup()
+      ->condition('pf.field_access_mode', 'open');
+
+    // User can only see open protocols or
+    // strict protocols they are a member of.
+    $open_or_strict = $query->orConditionGroup()
+      ->condition($strict_conditions)
+      ->condition($open_conditions);
+    $query->condition($open_or_strict);
+  }
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * Filter a protocol query down to members only.
+ */
+function mukurtu_protocol_query_protocol_members_alter(AlterableInterface $query) {
+  if (!$account = $query->getMetaData('account')) {
+    $account = \Drupal::currentUser();
+  }
+
+  // Grab the protocol table alias.
+  $tables = $query->getTables();
+  $protocolTable = array_search('protocol', array_map(fn($e) => $e['table'], $tables));
+
+  if ($protocolTable) {
+    // Join with the OG membership table.
+    $query->leftJoin('og_membership', 'og', "{$protocolTable}.id = og.entity_id");
+
+    // Build the conditions to capture strict protocols.
+    $member_conditions = $query->andConditionGroup()
+      // Limit to the user being used in the query.
+      ->condition('og.uid', $account->id())
+      // Limit to protocol memberships only.
+      ->condition('og.entity_type', 'protocol')
+      // Limit to active memberships only.
+      ->condition('og.state', 'active');
+    $query->condition($member_conditions);
+  }
 }

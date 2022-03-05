@@ -68,9 +68,6 @@ administer protocol control entities:
   description: 'Allow to access the administration form to configure Protocol control entities.'
   restrict access: true
 
-delete protocol control entities:
-  title: 'Delete Protocol control entities'
-
 edit protocol control entities:
   title: 'Edit Protocol control entities'
 
@@ -86,8 +83,3 @@ view all protocol control revisions:
 revert all protocol control revisions:
   title: 'Revert all Protocol control revisions'
   description: 'Role requires permission <em>view Protocol control revisions</em> and <em>edit rights</em> for protocol control entities in question or <em>administer protocol control entities</em>.'
-
-delete all protocol control revisions:
-  title: 'Delete all revisions'
-  description: 'Role requires permission to <em>view Protocol control revisions</em> and <em>delete rights</em> for protocol control entities in question or <em>administer protocol control entities</em>.'
-
