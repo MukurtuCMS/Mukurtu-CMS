@@ -663,7 +663,7 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
       ->setLabel(t('Protocols'))
       ->setDescription(t('The Protocols in the Protocol Control set.'))
       ->setSetting('target_type', 'protocol')
-      ->setSetting('handler', 'default:protocol')
+      ->setSetting('handler', 'mukurtu_protocol')
       ->setSetting('handler_settings', [
         'auto_create' => FALSE,
       ])
