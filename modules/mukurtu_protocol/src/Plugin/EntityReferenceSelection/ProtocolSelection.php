@@ -3,8 +3,15 @@
 namespace Drupal\mukurtu_protocol\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
-use Drupal\Component\Utility\Html;
 use Drupal\og\Og;
+use Drupal\og\OgRoleManagerInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Session\AccountInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides an entity reference selection for protocols.
@@ -22,7 +29,61 @@ use Drupal\og\Og;
 class ProtocolSelection extends DefaultSelection {
 
   /**
-   * Builds an EntityQuery to get referenceable entities.
+   * The OG role manager.
+   *
+   * @var \Drupal\og\OgRoleManagerInterface
+   */
+  protected $ogRoleManager;
+
+  /**
+   * Constructs a new ProtocolSelection object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler service.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The current user.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
+   *   The entity field manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle info service.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository.
+   * @param \Drupal\og\OgRoleManagerInterface $ogRoleManager
+   *   The OG role manager.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, EntityRepositoryInterface $entity_repository, OgRoleManagerInterface $ogRoleManager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $module_handler, $current_user, $entity_field_manager, $entity_type_bundle_info, $entity_repository);
+    $this->ogRoleManager = $ogRoleManager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager'),
+      $container->get('module_handler'),
+      $container->get('current_user'),
+      $container->get('entity_field.manager'),
+      $container->get('entity_type.bundle.info'),
+      $container->get('entity.repository'),
+      $container->get('og.role_manager')
+    );
+  }
+
+  /**
+   * Builds an EntityQuery to get referenceable protocols.
    *
    * @param string|null $match
    *   (Optional) Text to match the label against. Defaults to NULL.
@@ -34,13 +95,36 @@ class ProtocolSelection extends DefaultSelection {
    *   The EntityQuery object with the basic conditions and sorting applied to
    *   it.
    */
-  protected function buildProtocolQuery($match = NULL, $match_operator = 'CONTAINS') {
+  protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS') {
+    // Look-up what OG roles can apply protocols.
+    $roles = $this->ogRoleManager->getRolesByPermissions(['apply protocol']);
+    $role_ids = array_keys($roles);
+
+    // Check if the user has any of those roles.
+    $memberships = Og::getMemberships($this->currentUser);
+    $protocols = [];
+    foreach ($memberships as $membership) {
+      if ($membership->getGroupEntityType() !== 'protocol') {
+        continue;
+      }
+
+      foreach ($role_ids as $role_id) {
+        if ($membership->hasRole($role_id)) {
+          $protocols[$membership->getGroupId()] = $membership->getGroupId();
+        }
+      }
+    }
+
+    // Build a normal entity query to handle the matching.
     $configuration = $this->getConfiguration();
     $target_type = $configuration['target_type'];
     $entity_type = $this->entityTypeManager->getDefinition($target_type);
 
     $query = $this->entityTypeManager->getStorage($target_type)->getQuery();
     $query->accessCheck(TRUE);
+
+    // Restrict our results to protocols with the required memberships.
+    $query->condition('id', $protocols, 'IN');
 
     // If 'target_bundles' is NULL, all bundles are referenceable, no further
     // conditions are needed.
@@ -73,58 +157,6 @@ class ProtocolSelection extends DefaultSelection {
     }
 
     return $query;
-  }
-
-  /**
-   * Check if user has create/update permission in protocol.
-   */
-  protected function canApplyProtocol($entity) {
-    $membership = Og::getMembership($entity, $this->currentUser);
-    return $membership ? $membership->hasPermission('apply protocol') : FALSE;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function getReferenceableEntities($match = NULL, $match_operator = 'CONTAINS', $limit = 0) {
-    $target_type = $this->getConfiguration()['target_type'];
-
-    $query = $this->buildProtocolQuery($match, $match_operator);
-    if ($limit > 0) {
-      $query->range(0, $limit);
-    }
-
-    $result = $query->execute();
-
-    if (empty($result)) {
-      return [];
-    }
-
-    $options = [];
-    $entities = $this->entityTypeManager->getStorage($target_type)->loadMultiple($result);
-    foreach ($entities as $entity_id => $entity) {
-      if ($this->canApplyProtocol($entity)) {
-        $bundle = $entity->bundle();
-        $protocolLabel = $this->entityRepository->getTranslationFromContext($entity)->label();
-        $options[$bundle][$entity_id] = Html::escape($protocolLabel ?? '');
-      }
-    }
-
-    return $options;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function countReferenceableEntities($match = NULL, $match_operator = 'CONTAINS') {
-    return 1;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function validateReferenceableEntities(array $ids) {
-    return [1];
   }
 
 }
