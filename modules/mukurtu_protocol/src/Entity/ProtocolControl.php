@@ -133,10 +133,6 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
     if (!$this->getRevisionUser()) {
       $this->setRevisionUserId($this->getOwnerId());
     }
-
-    // Resolve the protocol set to a protocol ID and save.
-    // dpm($this->getProtocolSetId());
-
   }
 
   /**
@@ -444,6 +440,9 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
     // User has access to all open protocols.
     foreach (self::getAllOpenProtocols() as $openProtocol) {
       $p_gid = self::protocolSetKeyToId(self::buildProtocolSetKey([$openProtocol]));
+      if (!in_array($openProtocol, $protocols)) {
+        $protocols[] = $openProtocol;
+      }
       $grants[$p_gid] = $p_gid;
     }
 

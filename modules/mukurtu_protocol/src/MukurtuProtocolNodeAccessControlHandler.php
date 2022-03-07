@@ -90,6 +90,14 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
     $memberships = Og::getMemberships($account);
 
     foreach ($memberships as $membership) {
+      if ($membership->getGroupEntityType() !== 'protocol') {
+        continue;
+      }
+
+      if (!$membership->hasPermission("apply protocol")) {
+        continue;
+      }
+
       if ($membership->hasPermission("create $entity_bundle content")) {
         return AccessResult::allowed();
       }

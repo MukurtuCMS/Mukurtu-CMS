@@ -4,8 +4,10 @@ namespace Drupal\mukurtu_protocol;
 
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\og\Og;
 
 /**
  * Access controller for the Protocol control entity.
@@ -13,6 +15,50 @@ use Drupal\Core\Access\AccessResult;
  * @see \Drupal\mukurtu_protocol\Entity\ProtocolControl.
  */
 class ProtocolControlAccessControlHandler extends EntityAccessControlHandler {
+
+  /**
+   * The OG role manager.
+   *
+   * @var \Drupal\og\OgRoleManagerInterface
+   */
+  protected $ogRoleManager;
+  //og.role_manager
+
+  /**
+   * Constructs an access control handler instance.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type definition.
+   */
+  public function __construct(EntityTypeInterface $entity_type) {
+    parent::__construct($entity_type);
+    $this->ogRoleManager = \Drupal::getContainer()->get('og.role_manager');
+  }
+
+  /**
+   * Get the protocols the account has permission to apply.
+   */
+  protected function getAccountApplyProtocols(AccountInterface $account) {
+    // Look-up what OG roles can apply protocols.
+    $roles = $this->ogRoleManager->getRolesByPermissions(['apply protocol']);
+    $role_ids = array_keys($roles);
+
+    // Check if the user has any of those roles.
+    $memberships = Og::getMemberships($account);
+    $protocols = [];
+    foreach ($memberships as $membership) {
+      if ($membership->getGroupEntityType() !== 'protocol') {
+        continue;
+      }
+
+      foreach ($role_ids as $role_id) {
+        if ($membership->hasRole($role_id)) {
+          $protocols[$membership->getGroupId()] = $membership->getGroupId();
+        }
+      }
+    }
+    return $protocols;
+  }
 
   /**
    * {@inheritdoc}
@@ -48,8 +94,11 @@ class ProtocolControlAccessControlHandler extends EntityAccessControlHandler {
         }
 
         // For existing content, user needs edit access to the
-        // controlled entity.
-        if ($targetEntity->access('update', $account)) {
+        // controlled entity and apply permission for each involved protocol.
+        $protocols = $entity->getProtocols();
+        $applyProtocols = $this->getAccountApplyProtocols($account);
+        $diff = array_diff($protocols, $applyProtocols);
+        if ($targetEntity->access('update', $account) && empty($diff)) {
           return AccessResult::allowedIfHasPermission($account, 'edit protocol control entities');
         }
         return AccessResult::forbidden();
@@ -68,7 +117,12 @@ class ProtocolControlAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIfHasPermission($account, 'add protocol control entities');
+    // User needs standard permission as well as at least one protocol
+    // they can "apply".
+    if (count($this->getAccountApplyProtocols($account)) > 0) {
+      return AccessResult::allowedIfHasPermission($account, 'add protocol control entities');
+    }
+    return AccessResult::forbidden();
   }
 
 }

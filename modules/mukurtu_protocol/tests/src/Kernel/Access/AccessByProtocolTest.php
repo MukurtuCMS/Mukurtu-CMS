@@ -34,6 +34,8 @@ class AccessByProtocolTest extends KernelTestBase {
     'block_content',
     'field',
     'node',
+    'node_access_test',
+    'media',
     'og',
     'options',
     'system',
@@ -106,7 +108,11 @@ class AccessByProtocolTest extends KernelTestBase {
     $this->installEntitySchema('community');
     $this->installEntitySchema('protocol');
     $this->installEntitySchema('protocol_control');
+    $this->installSchema('node', ['node_access']);
     $this->installSchema('system', 'sequences');
+    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
+
+    node_access_rebuild();
 
     // Flag protocol entity as an Og group so Og does its part for access control.
     Og::addGroup('protocol', 'protocol');
