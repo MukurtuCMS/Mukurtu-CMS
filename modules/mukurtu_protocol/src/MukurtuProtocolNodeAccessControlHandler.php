@@ -94,10 +94,12 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
         continue;
       }
 
+      // Account must be permitted to use the protocol on content.
       if (!$membership->hasPermission("apply protocol")) {
         continue;
       }
 
+      // Account must have create permission for the given type.
       if ($membership->hasPermission("create $entity_bundle content")) {
         return AccessResult::allowed();
       }

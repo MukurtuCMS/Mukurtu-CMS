@@ -17,12 +17,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Provides an entity reference selection for protocols.
  *
  * @EntityReferenceSelection(
- *   id = "mukurtu_protocol",
+ *   id = "default:protocol",
  *   label = @Translation("Protocol Selection for Protocol Control"),
  *   entity_types = {
  *     "protocol"
  *   },
- *   group = "mukurtu_protocol",
+ *   group = "default",
  *   weight = 1
  * )
  */

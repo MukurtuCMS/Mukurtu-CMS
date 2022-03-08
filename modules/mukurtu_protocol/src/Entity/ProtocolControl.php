@@ -219,20 +219,6 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
   /**
    * {@inheritdoc}
    */
-  public function getTarget() {
-    return $this->get('field_target_uuid')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setTarget($uuid) {
-    return $this->set('field_target_uuid', $uuid);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getProtocols() {
     return array_column($this->get('field_protocols')->getValue(), 'target_id');
   }
@@ -529,6 +515,14 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function setControlledEntity(EntityInterface $entity) {
+    $this->set('field_target_entity_type_id', $entity->getEntityTypeId());
+    return $this->set('field_target_uuid', $entity->uuid());
+  }
+
+  /**
    * {@inheritDoc}
    */
   public function getControlledEntity() {
@@ -662,7 +656,6 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
       ->setLabel(t('Protocols'))
       ->setDescription(t('The Protocols in the Protocol Control set.'))
       ->setSetting('target_type', 'protocol')
-      ->setSetting('handler', 'mukurtu_protocol')
       ->setSetting('handler_settings', [
         'auto_create' => FALSE,
       ])

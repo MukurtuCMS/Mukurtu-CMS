@@ -40,7 +40,6 @@ class ProtocolControlWidget extends WidgetBase {
     // set the new values as needed and update the protocol control entity.
     if ($entity && $protocolControlValues) {
       // Privacy Setting.
-      dpm($protocolControlValues);
       $field_privacy_setting = $protocolControlValues['field_sharing_setting'] ?? NULL;
       if ($field_privacy_setting && $entity->getPrivacySetting() != $field_privacy_setting) {
         $entity->setPrivacySetting($field_privacy_setting);
@@ -162,23 +161,25 @@ class ProtocolControlWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
-    foreach ($values as &$item) {
-/*       $entity = $form_state->get('protocol_control_entity');
-      if ($entity->isNew()) {
-        try {
-          $entity->save();
-          $item['target_id'] = $entity->id();
-          dpm("wow now we have {$entity->id()}");
-        } catch (Exception $e) {
-          dpm($e);
-        }
-      } */
-      //dpm($item);
-      //$item['target_id'] = $item['value']['target_id'] ?? NULL;
-      //$item['protocol_control_entity_values']['field_privacy_setting'] = $item['value']['field_privacy_setting'] ?? NULL;
-      //$form_state->set('protocol_control_test_entity', ['wow']);
-      //return $values[0]['value']['target_id'] ?? NULL;
+    $entity = $form_state->getformObject()->getEntity();
+    $pcEntity = $form_state->get('protocol_control_entity');
+
+    // If both the entity and PCE are new, we need to save the PCE
+    // and change the reference to use the PCE ID.
+    if ($entity->isNew() && $pcEntity->isNew()) {
+      try {
+        // Save the PCE.
+        $pcEntity->setControlledEntity($entity);
+        $pcEntity->save();
+
+        // Alter the entity reference to use the ID.
+        $values[0]['target_id'] = $pcEntity->id();
+      }
+      catch (Exception $e) {
+        // Blank.
+      }
     }
+
     return $values;
   }
 

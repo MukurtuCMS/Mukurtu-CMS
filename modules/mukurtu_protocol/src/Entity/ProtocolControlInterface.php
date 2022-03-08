@@ -143,15 +143,6 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
    *   The protocol control interface.
    */
   public function setProtocols($protocols);
-
-  /**
-   * Gets the target entity.
-   *
-   * @return \Drupal\Core\Entity\EntityIterface
-   *   The target entity.
-   */
-  public function getTarget();
-
   /**
    * Sets the target entity.
    *
@@ -161,7 +152,7 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
    * @return \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface
    *   The protocol control interface.
    */
-  public function setTarget(EntityInterface $entity);
+  public function setControlledEntity(EntityInterface $entity);
 
   /**
    * Get the entity this PCE controls.

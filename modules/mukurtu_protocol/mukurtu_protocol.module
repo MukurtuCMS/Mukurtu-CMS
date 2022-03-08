@@ -15,12 +15,12 @@ use Drupal\Core\Database\Query\AlterableInterface;
  * Provide Mukurtu Protocols (access control).
  */
 
- /**
-  * Implements hook_entity_create().
-  */
+/**
+* Implements hook_entity_create().
+*/
 function mukurtu_protocol_entity_create(EntityInterface $entity) {
   if ($entity instanceof FieldableEntityInterface) {
-    if ($entity->hasField('field_protocol_control')) {
+    if ($entity->hasField('field_protocol_control') && $entity->get('field_protocol_control')->isEmpty()) {
       // For brand new protocol controlled entities,
       // instantiate a new protocol control entity.
       $name = "{$entity->getEntityTypeId()}:{$entity->uuid()}";
@@ -28,39 +28,7 @@ function mukurtu_protocol_entity_create(EntityInterface $entity) {
         'name' => $name,
         'field_sharing_setting' => 'all',
       ]);
-      $pcEntity->save();
-      $entity->set('field_protocol_control', $pcEntity->id());
-    }
-  }
-}
-
- /**
-  * Implements hook_entity_insert().
-  */
-function mukurtu_protocol_entity_insert(EntityInterface $entity) {
-  if ($entity instanceof FieldableEntityInterface) {
-    if ($entity->hasField('field_protocol_control')) {
-/*       $query = \Drupal::entityQuery('protocol_control')
-        ->condition('field_child_collections', $this->id(), '=')
-        ->accessCheck(FALSE);
-      $results = $query->execute();
-
-      // Not in use at all.
-      if (count($results) > 0) {
-        return TRUE;
-      } */
-    }
-  }
-}
-
- /**
-  * Implements hook_entity_presave().
-  */
-function mukurtu_protocol_entity_presave(EntityInterface $entity) {
-  if ($entity instanceof FieldableEntityInterface) {
-    if ($entity->hasField('field_protocol_control')) {
-      ///dpm("presave");
-      //dpm($entity->get('field_protocol_control')->getValue());
+      $entity->set('field_protocol_control', [$pcEntity]);
     }
   }
 }
