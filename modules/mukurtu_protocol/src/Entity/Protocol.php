@@ -394,7 +394,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
     $fields['field_communities'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Communities'))
       ->setSetting('target_type', 'community')
-      ->setSetting('handler', 'default:community')
+      ->setSetting('handler', 'community_selection_for_protocols')
       ->setSetting('handler_settings', [
         'auto_create' => FALSE,
       ])
