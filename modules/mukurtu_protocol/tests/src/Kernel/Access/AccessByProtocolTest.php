@@ -18,9 +18,9 @@ use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\mukurtu_protocol\Entity\ProtocolControl;
 
 /**
- * Tests access to content by OgMembership.
+ * Tests access to content by protocol control.
  *
- * @group og
+ * @group mukurtu_protocol
  */
 class AccessByProtocolTest extends KernelTestBase {
 
@@ -30,7 +30,7 @@ class AccessByProtocolTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'block_content',
     'field',
     'node',
@@ -114,7 +114,8 @@ class AccessByProtocolTest extends KernelTestBase {
 
     node_access_rebuild();
 
-    // Flag protocol entity as an Og group so Og does its part for access control.
+    // Flag protocol entity as an Og group so Og does its
+    // part for access control.
     Og::addGroup('protocol', 'protocol');
 
     // Create a node type to test under protocol control.
@@ -182,7 +183,8 @@ class AccessByProtocolTest extends KernelTestBase {
     $contributorRole->setGroupBundle('protocol');
     $contributorRole->save();
 
-    // User to own content in tests where the tested user shouldn't be the owner.
+    // User to own content in tests where the tested user shouldn't
+    // be the owner.
     $owner = User::create([
       'name' => $this->randomString(),
     ]);

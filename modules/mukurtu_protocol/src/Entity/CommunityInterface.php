@@ -13,7 +13,7 @@ use Drupal\user\EntityOwnerInterface;
  *
  * @ingroup mukurtu_protocol
  */
-interface CommunityInterface extends ContentEntityInterface, RevisionLogInterface, EntityChangedInterface, EntityPublishedInterface, EntityOwnerInterface {
+interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterface, RevisionLogInterface, EntityChangedInterface, EntityPublishedInterface, EntityOwnerInterface {
 
   /**
    * Add get/set methods for your configuration properties here.

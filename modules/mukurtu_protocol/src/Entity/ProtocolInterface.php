@@ -83,6 +83,17 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   public function getCommunities();
 
   /**
+   * Set the communities this protocol belongs to.
+   *
+   * @var \Drupal\mukurtu_community\Entity\CommunityInterface[] $communities
+   *   The community entities.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface
+   *   The called Protocol entity.
+   */
+  public function setCommunities($communities);
+
+  /**
    * Gets the Protocol creation timestamp.
    *
    * @return int

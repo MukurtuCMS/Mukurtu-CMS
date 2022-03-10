@@ -10,6 +10,10 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
+use Drupal\og\Entity\OgRole;
 
 /**
  * Defines the Community entity.
@@ -293,6 +297,41 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     }
 
     return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addMember(AccountInterface $account, $roles = []): MukurtuGroupInterface {
+    $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
+    if (!$membership) {
+      // Load OgRoles from role ids.
+      $ogRoles = [];
+      foreach ($roles as $role) {
+        $ogRole = OgRole::getRole('community', 'community', $role);
+        if ($ogRole) {
+          $ogRoles[] = $ogRole;
+        }
+      }
+
+      // Create the membership and add the roles.
+      $membership = Og::createMembership($this, $account);
+      $membership->setRoles($ogRoles);
+      $membership->save();
+    }
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeMember(AccountInterface $account): MukurtuGroupInterface {
+    $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
+    if ($membership) {
+      $membership->delete();
+    }
+
+    return $this;
   }
 
   /**

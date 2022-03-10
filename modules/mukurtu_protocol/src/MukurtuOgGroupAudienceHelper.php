@@ -46,6 +46,10 @@ class MukurtuOgGroupAudienceHelper implements OgGroupAudienceHelperInterface {
    * {@inheritdoc}
    */
   public function hasGroupAudienceField($entity_type_id, $bundle_id) {
+    if ($entity_type_id == 'protocol') {
+      return TRUE;
+    }
+
     if ($bundle_id) {
       $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
       if ($entity_type->entityClassImplements(FieldableEntityInterface::class)) {
@@ -70,7 +74,12 @@ class MukurtuOgGroupAudienceHelper implements OgGroupAudienceHelperInterface {
    * {@inheritdoc}
    */
   public function getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id, $group_entity_type_id = NULL, $group_bundle_id = NULL) {
-    $return = [];
+    if ($group_content_entity_type_id == 'protocol') {
+      $fieldDefinitions = $this->entityFieldManager->getFieldDefinitions('protocol', 'protocol');
+
+    }
+
+    return [];
   }
 
 }

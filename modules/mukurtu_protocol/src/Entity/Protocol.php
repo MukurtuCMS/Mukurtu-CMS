@@ -213,6 +213,13 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function setCommunities($communities) {
+    return $this->set('field_communities', $communities);
+  }
+
+  /**
    * {@inheritDoc}
    */
   public function getCommunities() {
@@ -373,7 +380,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
     $fields['status']->setDescription(t('A boolean indicating whether the Protocol is published.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
-        'weight' => -3,
+        'weight' => 100,
       ]);
 
     $fields['created'] = BaseFieldDefinition::create('created')

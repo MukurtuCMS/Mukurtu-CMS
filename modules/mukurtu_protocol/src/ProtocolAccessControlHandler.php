@@ -22,12 +22,12 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface $entity */
     $communities = $entity->getCommunities();
 
-    if ($operation == 'view') {
-      // Anybody can view during creation.
-      if ($entity->isNew()) {
-        return AccessResult::allowed();
-      }
+    // Not attached to communities yet, we don't care.
+    if ($entity->isNew()) {
+      return AccessResult::allowed();
+    }
 
+    if ($operation == 'view') {
       // Anbody can view an open protocol.
       if ($entity->isOpen()) {
         return AccessResult::allowed();
@@ -39,34 +39,36 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::allowed();
       }
 
-      // Otherwise user must be a member of ALL owning communities to view.
-      foreach ($communities as $community) {
-        $membership = Og::getMembership($community, $account);
-        if (!$membership) {
-          return AccessResult::forbidden();
-        }
-      }
-
-      return AccessResult::forbidden();
-    }
-
-    // Not attached to communities yet.
-    // It's fine to update/delete.
-    if ($entity->isNew()) {
-      return AccessResult::allowed();
+      // Otherwise user must be a member of ALL owning communities
+      // and have protocol update permission to view.
+      return $this->checkAccess($entity, 'update', $account);
     }
 
     // If this protocol is attached to communities, user must have all
     // relevant OG permissions for each.
     if (!empty($communities)) {
-      $ogAccessService = \Drupal::service('og.access');
-      $result = AccessResult::allowed();
-
-      // Check each community.
+      // Check operation for each community.
       foreach ($communities as $community) {
-        $result = $result->andIf($ogAccessService->userAccessGroupContentEntityOperation($operation, $community, $entity, $account));
+        // Get the membership for this specific community.
+        $membership = Og::getMembership($community, $account);
+
+        // Deny immediately if any memberships are missing.
+        if (!$membership) {
+          return AccessResult::forbidden();
+        }
+
+        // If they have 'any' we can skip to the next community.
+        if ($membership->hasPermission("$operation any protocol protocol")) {
+          continue;
+        }
+
+        // Check for ownership + own permission.
+        if (!($membership->hasPermission("$operation own protocol protocol") && $entity->getOwnerId() == $account->id())) {
+          return AccessResult::forbidden();
+        }
       }
-      return $result;
+
+      return AccessResult::allowed();
     }
 
     return AccessResult::forbidden();
