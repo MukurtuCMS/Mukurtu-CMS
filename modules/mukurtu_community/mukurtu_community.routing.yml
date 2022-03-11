@@ -1,7 +1,0 @@
-mukurtu_community.manage_communities:
-  path: '/dashboard/communities'
-  defaults:
-    _title: 'Manage Communities'
-    _controller: '\Drupal\mukurtu_community\Controller\MukurtuCommunityManageController::content'
-  requirements:
-    _permission: 'create community content,edit community content'
