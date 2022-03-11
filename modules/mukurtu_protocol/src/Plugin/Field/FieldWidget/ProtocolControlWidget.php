@@ -115,9 +115,23 @@ class ProtocolControlWidget extends WidgetBase {
        * @var \Drupal\Core\Field\PluginSettingsInterface $widget
        */
       $widget = $form_display->getRenderer($name);
+
+      /** @var \Drupal\Core\Field\EntityReferenceFieldItemList $items */
       $items = $entity->get($name);
+
       $items->filterEmptyItems();
-      $mockedWidget = $widget->form($items, $form, $form_state);
+      /** @var \Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsButtonsWidget $widget */
+      // UID 1 should be the only user to be able to throw an exception here.
+      // It happens when a user can skip the createAccess check for protocol
+      // controlled entities and they do not have any protocols they have
+      // 'apply protocol' permission for. In this case, we don't render
+      // the widget.
+      try {
+        $mockedWidget = $widget->form($items, $form, $form_state);
+      }
+      catch (Exception $e) {
+        return [];
+      }
       $element[$name]['#access'] = $items->access('edit');
       $element[$name] = $mockedWidget['widget'];
       unset($element[$name]['#parents']);

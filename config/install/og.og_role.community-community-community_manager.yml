@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: community-community-community_manager
+label: 'Community Manager'
+weight: 13
+group_id: null
+group_type: community
+group_bundle: community
+is_admin: null
+permissions:
+  - 'add user'
+  - 'approve and deny subscription'
+  - 'create protocol protocol'
+  - 'delete any protocol protocol'
+  - 'delete own protocol protocol'
+  - 'manage members'
+  - 'update any protocol protocol'
+  - 'update group'
+  - 'update own protocol protocol'
+role_type: standard

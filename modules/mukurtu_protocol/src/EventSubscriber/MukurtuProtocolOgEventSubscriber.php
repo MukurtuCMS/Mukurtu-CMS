@@ -13,6 +13,7 @@ use Drupal\og\OgAccessInterface;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\GroupPermission;
+use Drupal\og\GroupContentOperationPermission;
 
 /**
  * Event subscribers for Organic Groups.
@@ -74,7 +75,8 @@ class MukurtuProtocolOgEventSubscriber extends OgEventSubscriber {
   public static function getSubscribedEvents() {
     return [
       PermissionEventInterface::EVENT_NAME => [
-        ['provideApplyProtocolPermission'],
+        ['provideDefaultProtocolsPermission'],
+        ['provideDefaultCommunityPermissions'],
       ],
     ];
   }
@@ -85,7 +87,78 @@ class MukurtuProtocolOgEventSubscriber extends OgEventSubscriber {
    * @param \Drupal\og\Event\PermissionEventInterface $event
    *   The OG permission event.
    */
-  public function provideApplyProtocolPermission(PermissionEventInterface $event) {
+  public function provideDefaultMediaPermissions(PermissionEventInterface $event) {
+  }
+
+  /**
+   * Provides Mukurtu specific OG permissions.
+   *
+   * @param \Drupal\og\Event\PermissionEventInterface $event
+   *   The OG permission event.
+   */
+  public function provideDefaultCommunityPermissions(PermissionEventInterface $event) {
+    if ($event->getGroupEntityTypeId() === 'community') {
+      $event->setPermissions([
+        new GroupContentOperationPermission([
+          'name' => 'create protocol protocol',
+          'title' => $this->t('Create new protocols'),
+          'entity type' => 'protocol',
+          'bundle' => 'protocol',
+          'operation' => 'create',
+          'default roles' => [],
+          'restrict access' => FALSE,
+        ]),
+        new GroupContentOperationPermission([
+          'name' => 'update own protocol protocol',
+          'title' => $this->t('Edit own protocols'),
+          'entity type' => 'protocol',
+          'bundle' => 'protocol',
+          'operation' => 'update',
+          'owner' => TRUE,
+          'default roles' => [],
+          'restrict access' => FALSE,
+        ]),
+        new GroupContentOperationPermission([
+          'name' => 'update any protocol protocol',
+          'title' => $this->t('Edit any protocols'),
+          'entity type' => 'protocol',
+          'bundle' => 'protocol',
+          'operation' => 'update',
+          'owner' => FALSE,
+          'default roles' => [],
+          'restrict access' => FALSE,
+        ]),
+        new GroupContentOperationPermission([
+          'name' => 'delete own protocol protocol',
+          'title' => $this->t('Delete own protocols'),
+          'entity type' => 'protocol',
+          'bundle' => 'protocol',
+          'operation' => 'delete',
+          'owner' => TRUE,
+          'default roles' => [],
+          'restrict access' => FALSE,
+        ]),
+        new GroupContentOperationPermission([
+          'name' => 'delete any protocol protocol',
+          'title' => $this->t('Delete any protocols'),
+          'entity type' => 'protocol',
+          'bundle' => 'protocol',
+          'operation' => 'delete',
+          'owner' => FALSE,
+          'default roles' => [],
+          'restrict access' => FALSE,
+        ]),
+      ]);
+    }
+  }
+
+  /**
+   * Provides Mukurtu specific OG permissions.
+   *
+   * @param \Drupal\og\Event\PermissionEventInterface $event
+   *   The OG permission event.
+   */
+  public function provideDefaultProtocolsPermission(PermissionEventInterface $event) {
     if ($event->getGroupEntityTypeId() === 'protocol') {
       $event->setPermissions([
         new GroupPermission([
@@ -96,7 +169,29 @@ class MukurtuProtocolOgEventSubscriber extends OgEventSubscriber {
           'restrict access' => FALSE,
         ]),
       ]);
+
+      // Add a list of generic CRUD permissions for all group content.
+      $group_content_permissions = $this->getDefaultEntityOperationPermissions($event->getGroupContentBundleIds());
+      $event->setPermissions($group_content_permissions);
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function getDefaultEntityOperationPermissions(array $group_content_bundle_ids) {
+    $permissions = [];
+
+    foreach ($group_content_bundle_ids as $group_content_entity_type_id => $bundle_ids) {
+      foreach ($bundle_ids as $bundle_id) {
+        $bundle_permissions = $this->generateEntityOperationPermissionList($group_content_entity_type_id, $bundle_id);
+        foreach ($bundle_permissions as $bundle_permission) {
+          $permissions[] = $bundle_permission;
+        }
+      }
+    }
+
+    return $permissions;
   }
 
 }
