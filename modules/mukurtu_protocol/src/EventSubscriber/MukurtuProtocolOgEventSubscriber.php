@@ -185,9 +185,7 @@ class MukurtuProtocolOgEventSubscriber extends OgEventSubscriber {
     foreach ($group_content_bundle_ids as $group_content_entity_type_id => $bundle_ids) {
       foreach ($bundle_ids as $bundle_id) {
         $bundle_permissions = $this->generateEntityOperationPermissionList($group_content_entity_type_id, $bundle_id);
-        foreach ($bundle_permissions as $bundle_permission) {
-          $permissions[] = $bundle_permission;
-        }
+        $permissions = array_merge($permissions, $bundle_permissions);
       }
     }
 
