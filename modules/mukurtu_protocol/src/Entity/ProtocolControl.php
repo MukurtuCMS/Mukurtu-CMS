@@ -527,9 +527,12 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
    */
   public function getControlledEntity() {
     $entity_repository = \Drupal::service('entity.repository');
-    // @todo we need to change this to store entity type id in the entity.
-    list($id, $uuid) = explode(':', $this->getName());
-    return $entity_repository->loadEntityByUuid($id, $uuid);
+    $entity_type_id = $this->get('field_target_entity_type_id')->value;
+    $uuid = $this->get('field_target_uuid')->value;
+    if ($entity_type_id && $uuid) {
+      return $entity_repository->loadEntityByUuid($entity_type_id, $uuid);
+    }
+    return NULL;
   }
 
   /**
