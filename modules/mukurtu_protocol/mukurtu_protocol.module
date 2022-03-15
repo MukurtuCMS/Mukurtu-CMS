@@ -16,29 +16,12 @@ use Drupal\Core\Database\Query\AlterableInterface;
  */
 
 /**
-* Implements hook_entity_create().
-*/
-function mukurtu_protocol_entity_create(EntityInterface $entity) {
-  if ($entity instanceof FieldableEntityInterface) {
-    if ($entity->hasField('field_protocol_control') && $entity->get('field_protocol_control')->isEmpty()) {
-      // For brand new protocol controlled entities,
-      // instantiate a new protocol control entity.
-      $name = "{$entity->getEntityTypeId()}:{$entity->uuid()}";
-      $pcEntity = ProtocolControl::create([
-        'name' => $name,
-        'field_sharing_setting' => 'all',
-      ]);
-      $entity->set('field_protocol_control', [$pcEntity]);
-    }
-  }
-}
-
-/**
  * Implements hook_form_alter().
  */
 function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (!empty($form['field_protocol_control'])) {
     $form['actions']['submit']['#submit'] = array_merge([['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']], $form['actions']['submit']['#submit']);
+        //$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);    //$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);    //$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);
   }
 }
 
