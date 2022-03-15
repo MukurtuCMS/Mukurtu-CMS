@@ -2,7 +2,6 @@
 
 namespace Drupal\mukurtu_protocol\Entity;
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EditorialContentEntityBase;
@@ -12,7 +11,6 @@ use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\og\Og;
@@ -404,6 +402,82 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
     $results = $query->execute();
 
     return $results ? $results : [];
+  }
+
+  /**
+   * Check if an entity supports protocol control.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to check.
+   *
+   * @return bool
+   *   TRUE if it supports protocol control, FALSE otherwise.
+   */
+  public static function supportsProtocolControl(EntityInterface $entity) {
+    if ($entity instanceof FieldableEntityInterface) {
+      if ($entity->hasField('field_protocol_control')) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
+   * Delete inactive protocol control entities for a given entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to clean up PCEs for.
+   *
+   * @return void
+   */
+  public static function removeInactiveControlEntities(EntityInterface $entity) {
+    if (!self::supportsProtocolControl($entity)) {
+      return;
+    }
+
+    // Get the active PCE.
+    $pce = self::getProtocolControlEntity($entity);
+
+    $query = \Drupal::entityQuery('protocol_control')
+      ->condition('field_target_entity_type_id', $entity->getEntityTypeId())
+      ->condition('field_target_uuid', $entity->uuid())
+      ->accessCheck(FALSE);
+
+    // Don't delete the active PCE.
+    if ($pce) {
+      $query->condition('id', $pce->id(), '<>');
+    }
+    $results = $query->execute();
+
+    if (!empty($results)) {
+      $storage = \Drupal::entityTypeManager()->getStorage('protocol_control');
+      $unused = $storage->loadMultiple($results);
+      $storage->delete($unused);
+    }
+  }
+
+  /**
+   * Delete all protocol control entities for a deleted entity.
+   *
+   * @param string $entity_type_id
+   *   The entity type id of the deleted entity.
+   * @param string $uuid
+   *   The uuid of the deleted entity.
+   *
+   * @return void
+   */
+  public static function removeAllControlEntities($entity_type_id, $uuid) {
+    $query = \Drupal::entityQuery('protocol_control')
+      ->condition('field_target_entity_type_id', $entity_type_id)
+      ->condition('field_target_uuid', $uuid)
+      ->accessCheck(FALSE);
+    $results = $query->execute();
+
+    if (!empty($results)) {
+      $storage = \Drupal::entityTypeManager()->getStorage('protocol_control');
+      $unused = $storage->loadMultiple($results);
+      $storage->delete($unused);
+    }
   }
 
   /**

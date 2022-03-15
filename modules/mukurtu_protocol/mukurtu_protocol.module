@@ -16,6 +16,29 @@ use Drupal\Core\Database\Query\AlterableInterface;
  */
 
 /**
+ * Implements hook_entity_insert().
+ */
+function mukurtu_protocol_entity_insert($entity) {
+  ProtocolControl::removeInactiveControlEntities($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function mukurtu_protocol_entity_update($entity) {
+  ProtocolControl::removeInactiveControlEntities($entity);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function mukurtu_protocol_entity_delete($entity) {
+  if (ProtocolControl::supportsProtocolControl($entity)) {
+    ProtocolControl::removeAllControlEntities($entity->getEntityTypeId(), $entity->uuid());
+  }
+}
+
+/**
  * Implements hook_form_alter().
  */
 function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $form_id) {
