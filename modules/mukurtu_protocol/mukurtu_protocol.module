@@ -20,6 +20,7 @@ use Drupal\Core\Database\Query\AlterableInterface;
  */
 function mukurtu_protocol_entity_insert($entity) {
   ProtocolControl::removeInactiveControlEntities($entity);
+  ProtocolControl::buildAccessGrants($entity);
 }
 
 /**
@@ -27,6 +28,7 @@ function mukurtu_protocol_entity_insert($entity) {
  */
 function mukurtu_protocol_entity_update($entity) {
   ProtocolControl::removeInactiveControlEntities($entity);
+  ProtocolControl::buildAccessGrants($entity);
 }
 
 /**
@@ -35,6 +37,7 @@ function mukurtu_protocol_entity_update($entity) {
 function mukurtu_protocol_entity_delete($entity) {
   if (ProtocolControl::supportsProtocolControl($entity)) {
     ProtocolControl::removeAllControlEntities($entity->getEntityTypeId(), $entity->uuid());
+    ProtocolControl::removeAccessGrants($entity);
   }
 }
 
@@ -108,6 +111,47 @@ function mukurtu_protocol_node_access_records(NodeInterface $node) {
   }
 
   return $protocolControlEntity->getNodeAccessGrants();
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * Handle query accessCheck for media entities. This only
+ * scopes it to visibility. It does not handle specific access
+ * considerations like update/delete.
+ */
+function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
+  if (!$account = $query->getMetaData('account')) {
+    $account = \Drupal::currentUser();
+  }
+
+  // Don't alter for UID 1.
+  if ($account->id() == 1) {
+    return;
+  }
+
+  // Get the user's grants.
+  $grants = ProtocolControl::getAccountGrantIds($account);
+
+  // Grab the media table alias.
+  $tables = $query->getTables();
+  $mediaTable = array_search('media', array_map(fn($e) => $e['table'], $tables));
+  if (!$mediaTable) {
+    $mediaTable = array_search('media_field_data', array_map(fn($e) => $e['table'], $tables));
+  }
+
+  if ($mediaTable) {
+    $query->leftJoin('mukurtu_protocol_access', 'mpa', "{$mediaTable}.mid = mpa.id");
+    $query->condition('mpa.entity_type_id', 'media');
+    $query->condition('mpa.grant_view', 1);
+
+    // User can access media for any of these protocol set grants.
+    $inProtocolGrantSet = $query->orConditionGroup();
+    foreach ($grants as $grant) {
+      $inProtocolGrantSet->condition('protocol_set_id', $grant);
+    }
+    $query->condition($inProtocolGrantSet);
+  }
 }
 
 /**

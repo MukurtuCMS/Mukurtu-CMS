@@ -319,6 +319,83 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
   }
 
   /**
+   * Remove the Mukurtu protocol grants for an entity.
+   */
+  public static function removeAccessGrants(EntityInterface $entity) {
+    $connection = \Drupal::database();
+    // No matter what, we're clearing out the old grants.
+    $connection->delete('mukurtu_protocol_access')
+      ->condition('id', $entity->id())
+      ->condition('langcode', $entity->langcode->value)
+      ->condition('entity_type_id', $entity->getEntityTypeId())
+      ->execute();
+  }
+
+  /**
+   * Build the Mukurtu protocol set grants for non-nodes.
+   */
+  public static function buildAccessGrants(EntityInterface $entity) {
+    if (ProtocolControl::supportsProtocolControl($entity)) {
+      // We only care about non-node entities, nodes have the
+      // node_access grant system.
+      if ($entity->getEntityTypeId() != 'node') {
+        // No matter what, we're clearing out the old grants.
+        self::removeAccessGrants($entity);
+
+        // Get the current protocols and refresh grants.
+        $pcEntity = ProtocolControl::getProtocolControlEntity($entity);
+        if (!$pcEntity) {
+          return;
+        }
+        $grants = $pcEntity->getAccessGrants();
+        if (!empty($grants)) {
+          $connection = \Drupal::database();
+
+          // We've got new grants, add them to the table.
+          foreach ($grants as $grant) {
+            $connection->insert('mukurtu_protocol_access')
+              ->fields([
+                'id' => $entity->id(),
+                'langcode' => $entity->langcode->value,
+                'entity_type_id' => $entity->getEntityTypeId(),
+                'protocol_set_id' => $grant,
+                'grant_view' => 1,
+              ])
+              ->execute();
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getAccessGrants() {
+    $grants = [];
+    if ($this->getPrivacySetting() == 'all') {
+      // User needs the grant that represents the set of all the
+      // node's protocols.
+      $gid = $this->getProtocolSetId();
+      if ($gid) {
+        $grants[] = $gid;
+      }
+    }
+    else {
+      // In this case, membership in any of involved protocols is
+      // sufficient.
+      $protocols = $this->getProtocols();
+      foreach ($protocols as $protocol) {
+        $gid = $this->protocolSetKeyToId($this->buildProtocolSetKey([$protocol]));
+        if ($gid) {
+          $grants[] = $gid;
+        }
+      }
+    }
+    return $grants;
+  }
+
+  /**
    * {@inheritDoc}
    */
   public function getNodeAccessGrants() {

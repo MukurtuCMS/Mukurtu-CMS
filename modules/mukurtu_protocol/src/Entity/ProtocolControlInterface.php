@@ -224,4 +224,12 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
    */
   public function getNodeAccessGrants();
 
+  /**
+   * Return the access grants (protocol sets for non-node entities).
+   *
+   * @return mixed
+   *   The array of protocol sets.
+   */
+  public function getAccessGrants();
+
 }
