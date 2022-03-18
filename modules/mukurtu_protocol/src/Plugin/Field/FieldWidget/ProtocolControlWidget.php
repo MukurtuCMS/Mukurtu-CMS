@@ -40,6 +40,13 @@ class ProtocolControlWidget extends WidgetBase {
       $pcEntity->setProtocols($protocols);
     }
 
+    // Inheritance.
+    $inheritance = $values[0]['field_inheritance_target'];
+    if ($inheritance) {
+      $target = array_column($inheritance, 'target_id');
+      $pcEntity->setInheritanceTargetId($target);
+    }
+
     return $pcEntity;
   }
 
@@ -75,11 +82,26 @@ class ProtocolControlWidget extends WidgetBase {
         $needSave = TRUE;
       }
 
+      // Inheritance.
+      $newInheritanceTargetId = $protocolControlValues['field_inheritance_target'][0]['target_id'] ?? NULL;
+      $currentTarget = $pcEntity->getInheritanceTarget();
+      $currentTargetId = $currentTarget ? $currentTarget->id() : NULL;
+      if ($newInheritanceTargetId != $currentTargetId) {
+        $pcEntity->setInheritanceTargetId($newInheritanceTargetId);
+        $needSave = TRUE;
+      }
+
       // Save the protocol control entity if data was altered.
       if ($needSave) {
         try {
           $pcEntity->setControlledEntity($entity);
-          $pcEntity->save();
+          $violations = $pcEntity->validate();
+          if ($violations->count() == 0) {
+            $pcEntity->save();
+          }
+          else {
+            \Drupal::messenger()->addError(t("Failed to update protocols."));
+          }
         }
         catch (Exception $e) {
           // Can't use DI because we're in a static method.
@@ -135,7 +157,11 @@ class ProtocolControlWidget extends WidgetBase {
 
     /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
     $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load('protocol_control.protocol_control.default');
-    $fieldnames = ['field_protocols', 'field_sharing_setting'];
+    $fieldnames = [
+      'field_protocols',
+      'field_sharing_setting',
+      'field_inheritance_target',
+    ];
     foreach ($fieldnames as $name) {
       /**
        * @var \Drupal\Core\Field\PluginSettingsInterface $widget
@@ -190,6 +216,8 @@ class ProtocolControlWidget extends WidgetBase {
     // Alter the entity reference to use the ID.
     $values[0]['target_id'] = $pcEntity->id();
 
+    $form_state->set('protocol_control_entity', $pcEntity);
+
     return $values;
   }
 
@@ -207,7 +235,16 @@ class ProtocolControlWidget extends WidgetBase {
    * {@inheritDoc}
    */
   public static function validate($element, FormStateInterface $form_state) {
-    $value = $element['#value'];
+    // $form_state->input["field_protocol_control"][0]['field_inheritance_target'][0]['target_id']
+    // PCEs are assigned at entity creation and the reference should not be
+    // altered in the form ever.
+    if (is_numeric($element['#value']) && is_numeric($element['#default_value'])) {
+      if ($element['#value'] != $element['#default_value']) {
+        $form_state->setError($element, t("The protocol control reference cannot be changed after creation."));
+      }
+    }
+
+    // @todo Need to do proper widget validation here.
   }
 
 }

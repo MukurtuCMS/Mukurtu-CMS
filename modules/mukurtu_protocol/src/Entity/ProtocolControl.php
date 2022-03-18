@@ -131,6 +131,82 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
     if (!$this->getRevisionUser()) {
       $this->setRevisionUserId($this->getOwnerId());
     }
+
+    // Resolve protocol inheritance.
+    $inheritanceTarget = $this->getInheritanceTarget();
+    if ($inheritanceTarget) {
+      $inheritanceTargetPcEntity = self::getProtocolControlEntity($inheritanceTarget);
+      if ($inheritanceTargetPcEntity) {
+        $this->copyProtocols($inheritanceTargetPcEntity);
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+
+    // Don't need to do anything if this is an insert.
+    // Brand new entity can't be an inheritance target.
+    if (!$update) {
+      return;
+    }
+
+    // Check if we need to resolve protocol inheritance.
+    $changed = FALSE;
+    if ($this->getPrivacySetting() != $this->original->getPrivacySetting()) {
+      $changed = TRUE;
+    }
+
+    if (!$changed) {
+      $oldProtocols = $this->original->getProtocols();
+      $newProtocols = $this->getProtocols();
+      sort($oldProtocols);
+      sort($newProtocols);
+      if ($newProtocols != $oldProtocols) {
+        $changed = TRUE;
+      }
+    }
+
+    // If we do have a change, we need to check if anybody is
+    // targeting this for inheritance and ask them to update.
+    if ($changed) {
+      $target = $this->getControlledEntity();
+      if ($target) {
+        $query = \Drupal::entityQuery('protocol_control')
+          ->condition('field_inheritance_target')
+          ->accessCheck(FALSE);
+        $results = $query->execute();
+
+        if (!empty($results)) {
+          // Need to save each PC entity.
+          $updateEntities = $storage->loadMultiple($results);
+          foreach ($updateEntities as $updateEntity) {
+            $updateEntity->save();
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getCacheTagsToInvalidate() {
+    // Invalidate controlled entity tags.
+    $target = $this->getControlledEntity();
+    $targetTags = $target ? $target->getCacheTagsToInvalidate() : [];
+    return array_merge(parent::getCacheTagsToInvalidate(), $targetTags);
+  }
+
+  /**
+   * Copy protocol fields from pcEntity.
+   */
+  protected function copyProtocols(ProtocolControlInterface $pcEntity) {
+    $this->setPrivacySetting($pcEntity->getPrivacySetting());
+    $this->setProtocols($pcEntity->getProtocols());
   }
 
   /**
@@ -226,6 +302,39 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
    */
   public function setProtocols($protocols) {
     return $this->set('field_protocols', $protocols);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getInheritanceTarget() {
+    $targets = $this->get('field_inheritance_target')->referencedEntities();
+    if (is_array($targets)) {
+      return reset($targets);
+    }
+    return NULL;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setInheritanceTarget(EntityInterface $entity) {
+    return $this->set('field_inheritance_target', [$entity->id()]);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setInheritanceTargetId($id) {
+    if (is_array($id)) {
+      return $this->set('field_inheritance_target', reset($id));
+    }
+
+    if (is_numeric($id)) {
+      return $this->set('field_inheritance_target', [$id]);
+    }
+
+    return $this;
   }
 
   /**
@@ -780,8 +889,9 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
         'auto_create' => FALSE,
       ])
       ->setRequired(FALSE)
-      ->setCardinality(-1)
+      ->setCardinality(1)
       ->setTranslatable(FALSE)
+      ->addConstraint('ProtocolInheritanceTargetConstraint')
       ->setDisplayOptions('view', [
         'label' => 'visible',
         'type' => 'string',

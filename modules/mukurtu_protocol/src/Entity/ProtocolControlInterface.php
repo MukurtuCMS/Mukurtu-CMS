@@ -143,6 +143,7 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
    *   The protocol control interface.
    */
   public function setProtocols($protocols);
+
   /**
    * Sets the target entity.
    *
@@ -161,6 +162,36 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
    *   The entity that uses this protocol control.
    */
   public function getControlledEntity();
+
+  /**
+   * Sets the inheritance target entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The target entity to inherit protocols from.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface
+   *   The protocol control interface.
+   */
+  public function setInheritanceTarget(EntityInterface $entity);
+
+  /**
+   * Sets the inheritance target entity.
+   *
+   * @param mixed $id
+   *   The target entity ID to inherit protocols from.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface
+   *   The protocol control interface.
+   */
+  public function setInheritanceTargetId($id);
+
+  /**
+   * Get the inheritance target entity.
+   *
+   * @return \Drupal\Core\Entity\EntityIterface|null
+   *   The inheritance target entity or null if not using inheritance.
+   */
+  public function getInheritanceTarget();
 
   /**
    * Find the protocols (from the PC entity) the user is a member of.
