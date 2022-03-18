@@ -1,0 +1,8 @@
+mukurtu_person.create_person:
+  title: 'Person'
+  description: 'Add Person'
+  parent: mukurtu_core.create_content
+  menu_name: mukurtu
+  route_name: mukurtu_core.add
+  route_parameters:
+    node_type: person

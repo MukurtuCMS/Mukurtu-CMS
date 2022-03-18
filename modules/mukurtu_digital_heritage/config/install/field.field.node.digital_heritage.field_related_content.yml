@@ -3,16 +3,11 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_related_content
-    - node.type.article
-    - node.type.collection
-    - node.type.dictionary_word
     - node.type.digital_heritage
-    - node.type.page
-    - node.type.person
-id: node.collection.field_related_content
+id: node.digital_heritage.field_related_content
 field_name: field_related_content
 entity_type: node
-bundle: collection
+bundle: digital_heritage
 label: 'Related Content'
 description: ''
 required: false
@@ -22,13 +17,7 @@ default_value_callback: ''
 settings:
   handler: 'default:node'
   handler_settings:
-    target_bundles:
-      article: article
-      page: page
-      collection: collection
-      dictionary_word: dictionary_word
-      digital_heritage: digital_heritage
-      person: person
+    target_bundles: null
     sort:
       field: _none
     auto_create: false

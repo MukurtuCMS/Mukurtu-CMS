@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.browse_content
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
@@ -18,16 +17,16 @@ dependencies:
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
     - field.field.node.digital_heritage.field_people
+    - field.field.node.digital_heritage.field_protocol_control
     - field.field.node.digital_heritage.field_publisher
-    - field.field.node.digital_heritage.field_related_content
     - field.field.node.digital_heritage.field_rights
+    #- field.field.node.digital_heritage.field_sequence_collection
     - field.field.node.digital_heritage.field_source
     - field.field.node.digital_heritage.field_subject
     - field.field.node.digital_heritage.field_traditional_knowledge
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
-    - entity_browser
     - field_group
     - leaflet
     - media_library
@@ -43,68 +42,67 @@ third_party_settings:
         - group_rights_and_permissions
         - group_additional_metadata
         - group_relations
+      label: 'Main Tab'
+      region: content
       parent_name: ''
       weight: 0
       format_type: tabs
-      region: content
       format_settings:
-        id: ''
         classes: ''
+        id: ''
         direction: horizontal
-      label: 'Main Tab'
     group_mukurtu_essentials:
       children:
         - title
-        - field_mukurtu_protocol_inherit
-        - group_protocols
+        - field_protocol_control
         - field_media_assets
         - field_category
         - field_creator
         - field_contributor
         - field_date_description
+      label: 'Mukurtu Essentials'
+      region: content
       parent_name: group_main_tab
       weight: 20
       format_type: tab
-      region: content
       format_settings:
-        id: ''
         classes: ''
-        description: ''
+        id: ''
         formatter: open
+        description: ''
         required_fields: true
-      label: 'Mukurtu Essentials'
     group_mukurtu_core:
       children:
         - field_cultural_narrative
         - field_traditional_knowledge
         - field_description
         - field_keywords
+      label: 'Mukurtu Core'
+      region: content
       parent_name: group_main_tab
       weight: 21
       format_type: tab
-      region: content
       format_settings:
-        description: ''
-        formatter: closed
-        required_fields: true
-        id: ''
         classes: ''
-      label: 'Mukurtu Core'
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
     group_rights_and_permissions:
       children:
         - field_publisher
         - field_rights
+      label: 'Rights and Permissions'
+      region: content
       parent_name: group_main_tab
       weight: 22
       format_type: tab
-      region: content
       format_settings:
-        id: ''
         classes: ''
-        description: ''
+        id: ''
         formatter: closed
+        description: ''
         required_fields: true
-      label: 'Rights and Permissions'
     group_additional_metadata:
       children:
         - field_format
@@ -115,47 +113,30 @@ third_party_settings:
         - field_subject
         - field_people
         - field_coverage
+      label: 'Additional Metadata'
+      region: content
       parent_name: group_main_tab
       weight: 23
       format_type: tab
-      region: content
       format_settings:
-        id: ''
         classes: ''
-        description: ''
+        id: ''
         formatter: closed
+        description: ''
         required_fields: true
-      label: 'Additional Metadata'
     group_relations:
-      children:
-        - field_related_content
+      children: {  }
+      label: Relations
+      region: content
       parent_name: group_main_tab
       weight: 25
       format_type: tab
-      region: content
       format_settings:
-        id: ''
         classes: ''
-        description: ''
+        id: ''
         formatter: closed
-        required_fields: true
-      label: Relations
-    group_protocols:
-      children:
-        - field_mukurtu_protocol_r_scope
-        - field_mukurtu_protocol_read
-        - field_mukurtu_protocol_w_scope
-        - field_mukurtu_protocol_write
-      parent_name: group_mukurtu_essentials
-      weight: -5
-      format_type: fieldset
-      region: content
-      format_settings:
-        id: ''
-        classes: ''
         description: ''
         required_fields: true
-      label: Protocols
 id: node.digital_heritage.default
 targetEntityType: node
 bundle: digital_heritage
@@ -169,57 +150,62 @@ content:
     third_party_settings: {  }
   field_category:
     type: options_buttons
-    weight: -3
+    weight: -4
     region: content
     settings: {  }
     third_party_settings: {  }
   field_contributor:
-    weight: -1
+    type: entity_reference_autocomplete
+    weight: -2
+    region: content
     settings:
       match_operator: CONTAINS
       match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
   field_coverage:
+    type: leaflet_widget_default
     weight: 123
+    region: content
     settings:
       map:
         leaflet_map: 'OSM Mapnik'
-        height: '400'
-        locate: '1'
-        auto_center: '1'
+        height: 400
+        locate: 1
+        auto_center: 1
         map_position:
+          force: false
           center:
-            lat: '0'
-            lon: '0'
-          zoom: '12'
-          minZoom: '1'
-          maxZoom: '18'
-          zoomFiner: '0'
-          force: 0
-        scroll_zoom_enabled: '1'
+            lat: !!float 0
+            lon: !!float 0
+          zoom: 12
+          minZoom: 1
+          maxZoom: 18
+          zoomFiner: 0
+        scroll_zoom_enabled: 1
         fullscreen_control: '1'
+      input:
+        show: false
+        readonly: false
       toolbar:
         position: topright
-        marker: defaultMarker
-        drawPolyline: '1'
-        drawRectangle: '1'
-        drawPolygon: '1'
-        editMode: '1'
-        dragMode: '1'
-        removalMode: '1'
+        drawPolyline: true
+        drawRectangle: true
+        drawPolygon: true
         drawCircle: false
-        cutPolygon: 0
+        editMode: true
+        dragMode: true
+        cutPolygon: false
+        removalMode: true
+        marker: defaultMarker
       reset_map:
-        control: '1'
         position: topright
+        control: true
+      fullscreen:
+        control: false
+        options: '{"position":"topleft","pseudoFullscreen":false}'
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
-      input:
-        show: 0
-        readonly: 0
       geocoder:
         control: false
         settings:
@@ -232,85 +218,83 @@ content:
           popup: false
           options: ''
     third_party_settings: {  }
-    type: leaflet_widget_default
-    region: content
   field_creator:
-    weight: -2
+    type: entity_reference_autocomplete
+    weight: -3
+    region: content
     settings:
       match_operator: CONTAINS
       match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
   field_cultural_narrative:
+    type: text_textarea
     weight: 20
+    region: content
     settings:
       rows: 5
       placeholder: ''
     third_party_settings: {  }
-    type: text_textarea
-    region: content
   field_date_description:
-    weight: 0
+    type: string_textfield
+    weight: -1
+    region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   field_description:
+    type: text_textarea_with_summary
     weight: 22
+    region: content
     settings:
       rows: 9
       summary_rows: 3
       placeholder: ''
       show_summary: false
     third_party_settings: {  }
-    type: text_textarea_with_summary
-    region: content
   field_format:
+    type: entity_reference_autocomplete
     weight: 21
+    region: content
     settings:
       match_operator: CONTAINS
       match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
   field_identifier:
-    weight: 23
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
     type: string_textfield
-    region: content
-  field_keywords:
     weight: 23
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_keywords:
+    type: entity_reference_autocomplete
+    weight: 23
+    region: content
     settings:
       match_operator: CONTAINS
       match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
   field_language:
+    type: entity_reference_autocomplete
     weight: 24
+    region: content
     settings:
       match_operator: CONTAINS
       match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
   field_media_assets:
     type: media_library_widget
-    weight: -4
+    weight: -5
     region: content
     settings:
       media_types:
@@ -321,148 +305,100 @@ content:
         - video
     third_party_settings: {  }
   field_mukurtu_community_records:
+    type: entity_reference_autocomplete
     weight: 9
+    region: content
     settings:
       match_operator: CONTAINS
       match_limit: 10
       size: 60
       placeholder: ''
-    third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
-  field_mukurtu_protocol_inherit:
-    type: entity_browser_entity_reference
-    weight: -6
-    region: content
-    settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
-      field_widget_display_settings:
-        view_mode: content_browser
-      field_widget_remove: true
-      field_widget_replace: true
-      selection_mode: selection_append
-      field_widget_edit: false
-      open: false
-    third_party_settings: {  }
-  field_mukurtu_protocol_r_scope:
-    type: mukurtu_protocol_scope_widget
-    region: content
-    weight: -6
-    settings: {  }
-    third_party_settings: {  }
-  field_mukurtu_protocol_read:
-    type: mukurtu_protocol_widget
-    region: content
-    weight: -5
-    settings: {  }
-    third_party_settings: {  }
-  field_mukurtu_protocol_w_scope:
-    type: mukurtu_protocol_scope_widget
-    region: content
-    weight: -4
-    settings: {  }
-    third_party_settings: {  }
-  field_mukurtu_protocol_write:
-    type: mukurtu_protocol_widget
-    region: content
-    weight: -3
-    settings: {  }
     third_party_settings: {  }
   field_people:
+    type: entity_reference_autocomplete
     weight: 27
+    region: content
     settings:
       match_operator: CONTAINS
       match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: entity_reference_autocomplete
+  field_protocol_control:
+    type: mukurtu_protocol_control_widget
+    weight: -6
     region: content
-  field_publisher:
-    weight: 22
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
-  field_related_content:
-    weight: 10
-    settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
-      field_widget_display_settings:
-        view_mode: content_browser
-      field_widget_edit: true
-      field_widget_remove: true
-      selection_mode: selection_append
-      field_widget_replace: false
-      open: false
-    third_party_settings: {  }
-    type: entity_browser_entity_reference
-    region: content
-  field_rights:
-    weight: 23
-    settings:
-      rows: 5
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textarea
-    region: content
-  field_source:
-    weight: 25
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_subject:
-    weight: 26
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
-  field_traditional_knowledge:
-    weight: 21
-    settings:
-      rows: 5
-      placeholder: ''
-    third_party_settings: {  }
-    type: text_textarea
-    region: content
-  field_type:
-    weight: 22
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: entity_reference_autocomplete
-    region: content
-  name:
-    weight: -8
     settings: {  }
     third_party_settings: {  }
+  field_publisher:
+    type: entity_reference_autocomplete
+    weight: 22
     region: content
-  og_audience:
-    type: og_complex
     settings:
       match_operator: CONTAINS
-      size: 60
       match_limit: 10
+      size: 60
       placeholder: ''
-    weight: 122
     third_party_settings: {  }
+  field_rights:
+    type: string_textarea
+    weight: 23
     region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_source:
+    type: string_textfield
+    weight: 25
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_subject:
+    type: entity_reference_autocomplete
+    weight: 26
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_traditional_knowledge:
+    type: text_textarea
+    weight: 21
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_type:
+    type: entity_reference_autocomplete
+    weight: 22
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  name:
+    weight: -8
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  og_audience:
+    type: og_complex
+    weight: 122
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   path:
     type: path
     weight: 5
@@ -471,42 +407,42 @@ content:
     third_party_settings: {  }
   promote:
     type: boolean_checkbox
-    settings:
-      display_label: true
     weight: 3
     region: content
+    settings:
+      display_label: true
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    settings:
-      display_label: true
     weight: 6
     region: content
+    settings:
+      display_label: true
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
-    settings:
-      display_label: true
     weight: 4
     region: content
+    settings:
+      display_label: true
     third_party_settings: {  }
   title:
+    type: string_textfield
     weight: -7
+    region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   uid:
     type: entity_reference_autocomplete
     weight: 1
+    region: content
     settings:
       match_operator: CONTAINS
+      match_limit: 10
       size: 60
       placeholder: ''
-      match_limit: 10
-    region: content
     third_party_settings: {  }
   url_redirects:
     weight: 7

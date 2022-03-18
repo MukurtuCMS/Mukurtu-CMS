@@ -1,0 +1,13 @@
+name: 'Mukurtu Media'
+type: module
+description: 'Provides Mukurtu media types and customizations.'
+core_version_requirement: ^8 || ^9
+core: 8.x
+package: 'Mukurtu'
+dependencies:
+  - file
+  - path
+  - mukurtu_core
+  - mukurtu_protocol
+
+version: '8.x-1.x-dev'
