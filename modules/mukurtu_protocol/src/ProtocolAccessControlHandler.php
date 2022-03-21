@@ -83,10 +83,11 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
     foreach ($memberships as $membership) {
       if ($membership->getGroupEntityType() == 'community') {
         if ($membership->hasPermission("create protocol protocol")) {
-          return AccessResult::allowed();
+          return AccessResult::allowed()->addCacheableDependency($membership);
         }
       }
     }
+
     return AccessResult::forbidden();
   }
 
