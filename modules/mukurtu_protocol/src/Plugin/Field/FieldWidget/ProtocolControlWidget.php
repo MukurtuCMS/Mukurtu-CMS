@@ -184,7 +184,7 @@ class ProtocolControlWidget extends WidgetBase {
       catch (Exception $e) {
         return [];
       }
-      $element[$name]['#access'] = $items->access('edit');
+      $element[$name]['#access'] = $items->access('update');
       $element[$name] = $mockedWidget['widget'];
       unset($element[$name]['#parents']);
     }

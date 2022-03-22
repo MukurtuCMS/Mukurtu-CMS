@@ -32,7 +32,7 @@ use Drupal\og\Entity\OgRole;
  *
  *     "form" = {
  *       "default" = "Drupal\mukurtu_protocol\Form\CommunityForm",
- *       "add" = "Drupal\mukurtu_protocol\Form\CommunityForm",
+ *       "add" = "Drupal\mukurtu_protocol\Form\CommunityAddForm",
  *       "edit" = "Drupal\mukurtu_protocol\Form\CommunityForm",
  *       "delete" = "Drupal\mukurtu_protocol\Form\CommunityDeleteForm",
  *     },
@@ -178,6 +178,20 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   public function setName($name) {
     $this->set('name', $name);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription() {
+    return $this->get('field_description')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDescription($description) {
+    return $this->set('field_description', $description);
   }
 
   /**

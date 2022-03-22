@@ -39,6 +39,25 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
   public function setName($name);
 
   /**
+   * Gets the Community description.
+   *
+   * @return string
+   *   Description of the Community.
+   */
+  public function getDescription();
+
+  /**
+   * Sets the Community description.
+   *
+   * @param string $description
+   *   The Community description.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\CommunityInterface
+   *   The called Community entity.
+   */
+  public function setDescription($description);
+
+  /**
    * Gets the Community creation timestamp.
    *
    * @return int
