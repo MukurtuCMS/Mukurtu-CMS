@@ -17,7 +17,7 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
     ];
 
     // Load all facets configured to use our browse block as a datasource.
-    $facetEntities = \Drupal::entityTypeManager()
+    $facetEntities = $this->entityTypeManager()
       ->getStorage('facets_facet')
       ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_browse_collections__browse_collections_block']);
 
@@ -29,7 +29,7 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
         $config = [];
         $block_plugin = $block_manager->createInstance('facet_block' . PluginBase::DERIVATIVE_SEPARATOR . $facet_id, $config);
         if ($block_plugin) {
-          $access_result = $block_plugin->access(\Drupal::currentUser());
+          $access_result = $block_plugin->access($this->currentUser());
           if ($access_result) {
             $facets[$facet_id] = $block_plugin->build();
           }

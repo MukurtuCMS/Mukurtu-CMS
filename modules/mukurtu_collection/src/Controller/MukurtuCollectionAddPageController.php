@@ -101,7 +101,7 @@ class MukurtuCollectionAddPageController extends ControllerBase {
     ]);
 
     // Get the node form.
-    $form = \Drupal::service('entity.manager')
+    $form = $this->entityTypeManager()
         ->getFormObject('node', 'default')
         ->setEntity($node);
 
@@ -113,7 +113,7 @@ class MukurtuCollectionAddPageController extends ControllerBase {
         'target' => $collection->id(),
       ],
     ];
-    $build[] = \Drupal::formBuilder()->getForm($form, $args);
+    $build[] = $this->formBuilder()->getForm($form, $args);
 
     return $build;
   }

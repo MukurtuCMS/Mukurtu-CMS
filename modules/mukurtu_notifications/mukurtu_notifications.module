@@ -56,6 +56,7 @@ function mukurtu_notifications_entity_view_alter(array &$build, EntityInterface 
  * Implements hook_query_TAG_alter().
  */
 function mukurtu_notifications_query_message_access_alter(AlterableInterface $query) {
+  return;
   $account = User::load(\Drupal::currentUser()->id());
   if (is_null($account)) {
     $account = User::getAnonymousUser();
@@ -97,6 +98,7 @@ function mukurtu_notifications_query_message_access_alter(AlterableInterface $qu
  * Implements hook_node_insert().
  */
 function mukurtu_notifications_node_insert(Node $node) {
+  return;
   // Record the node insert event.
   $template = 'mukurtu_single_node_insert';
   $message = Message::create([
@@ -138,6 +140,7 @@ function mukurtu_notifications_node_insert(Node $node) {
  * Implements hook_node_update().
  */
 function mukurtu_notifications_node_update(Node $node) {
+  return;
   //$notifier = \Drupal::service('message_notify.sender');
   $subscribers = \Drupal::service('message_subscribe.subscribers');
 
@@ -202,6 +205,7 @@ function mukurtu_notifications_remove_notifications($template, $entity, $field =
  * Implements hook_node_update().
  */
 function mukurtu_notifications_node_delete(Node $node) {
+  return;
   // Remove any old notifications for the deleted node.
   mukurtu_notifications_remove_notifications('mukurtu_single_node_insert', $node);
 
@@ -284,6 +288,7 @@ function mukurtu_notifications_user_insert($entity) {
  * @return void
  */
 function mukurtu_notifications_notify_protocol(Node $node, $subscribers) {
+  return;
   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
 
   // If this node isn't using protocols we are done.

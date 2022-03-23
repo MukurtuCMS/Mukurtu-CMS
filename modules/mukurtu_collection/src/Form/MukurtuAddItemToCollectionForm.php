@@ -57,13 +57,18 @@ class MukurtuAddItemToCollectionForm extends FormBase {
     $collectionId = $form_state->getValue('collection');
     $nodeId = $form_state->getValue('node');
 
+    /**
+     * @var \Drupal\mukurtu_collection\Entity\Collection $collection
+     */
     $collection = \Drupal::entityTypeManager()->getStorage('node')->load($collectionId);
+
+    /**
+     * @var \Drupal\node\NodeInterface $node
+     */
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($nodeId);
 
     if ($node && $collection && $collection->bundle() == 'collection' && $collection->access('update')) {
-      $items = $collection->get(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)->getValue();
-      $items[] = ['target_id' => $nodeId];
-      $collection->set(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, $items);
+      $collection->add($node);
 
       // Add revision message if supported.
       if ($collection instanceof RevisionableInterface) {

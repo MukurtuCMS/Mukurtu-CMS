@@ -1,12 +1,79 @@
-mukurtu_protocol.add_new_protocol:
-  title: Create Protocol
-  route_name: mukurtu_protocol.add_new_protocol
-  base_route: entity.node.canonical
-mukurtu_protocol.manage_memberships:
-  title: Manage Memberships
-  route_name: mukurtu_protocol.manage_memberships
-  base_route: entity.node.canonical
-mukurtu_protocol.manage_user_memberships:
-  title: Manage Memberships
-  route_name: mukurtu_protocol.manage_user_memberships
-  base_route: entity.user.canonical
+# Protocol routing definition
+protocol.settings_tab:
+  route_name: protocol.settings
+  title: 'Settings'
+  base_route: protocol.settings
+
+entity.protocol.canonical:
+  route_name: entity.protocol.canonical
+  base_route: entity.protocol.canonical
+  title: 'View'
+
+entity.protocol.edit_form:
+  route_name: entity.protocol.edit_form
+  base_route: entity.protocol.canonical
+  title: 'Edit'
+
+entity.protocol.version_history:
+  route_name: entity.protocol.version_history
+  base_route: entity.protocol.canonical
+  title: 'Revisions'
+
+entity.protocol.delete_form:
+  route_name:  entity.protocol.delete_form
+  base_route:  entity.protocol.canonical
+  title: Delete
+  weight: 10
+# Protocol control routing definition
+protocol_control.settings_tab:
+  route_name: protocol_control.settings
+  title: 'Settings'
+  base_route: protocol_control.settings
+
+entity.protocol_control.canonical:
+  route_name: entity.protocol_control.canonical
+  base_route: entity.protocol_control.canonical
+  title: 'View'
+
+entity.protocol_control.edit_form:
+  route_name: entity.protocol_control.edit_form
+  base_route: entity.protocol_control.canonical
+  title: 'Edit'
+
+entity.protocol_control.version_history:
+  route_name: entity.protocol_control.version_history
+  base_route: entity.protocol_control.canonical
+  title: 'Revisions'
+
+entity.protocol_control.delete_form:
+  route_name:  entity.protocol_control.delete_form
+  base_route:  entity.protocol_control.canonical
+  title: Delete
+  weight: 10
+
+# Community routing definition
+community.settings_tab:
+  route_name: community.settings
+  title: 'Settings'
+  base_route: community.settings
+
+entity.community.canonical:
+  route_name: entity.community.canonical
+  base_route: entity.community.canonical
+  title: 'View'
+
+entity.community.edit_form:
+  route_name: entity.community.edit_form
+  base_route: entity.community.canonical
+  title: 'Edit'
+
+entity.community.version_history:
+  route_name: entity.community.version_history
+  base_route: entity.community.canonical
+  title: 'Revisions'
+
+entity.community.delete_form:
+  route_name:  entity.community.delete_form
+  base_route:  entity.community.canonical
+  title: Delete
+  weight: 10

@@ -1,0 +1,42 @@
+mukurtu_protocol.protocol_membership.add:
+  path: '/node/{nid}/membership/add/{user}'
+  defaults:
+    _title: 'Add User as Protocol member'
+    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuProtocolController::addUserAsProtocolMember'
+  requirements:
+    nid: \d+
+    user: \d+
+    _permission: 'access content'
+mukurtu_protocol.add_new_protocol:
+  path: '/node/{node}/add/protocol'
+  defaults:
+    _title: 'Create Protocol'
+    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuAddNewProtocolController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuAddNewProtocolController::access'
+mukurtu_protocol.manage_memberships:
+  path: '/node/{node}/memberships'
+  defaults:
+    _title: 'Manage Memberships'
+    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuManageMembershipsController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuManageMembershipsController::access'
+mukurtu_protocol.manage_user_memberships:
+  path: '/user/{user}/memberships'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::content'
+    _title_callback: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::getTitle'
+  options:
+    parameters:
+      node:
+        type: entity:user
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::access'

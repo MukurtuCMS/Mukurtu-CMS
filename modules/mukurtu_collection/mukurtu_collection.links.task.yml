@@ -18,3 +18,36 @@ mukurtu_collection.add_item_to_collection:
   base_route: entity.node.canonical
   title: 'Add to Collection'
   weight: 50
+
+# Personal collection routing definition
+personal_collection.settings_tab:
+  route_name: personal_collection.settings
+  title: 'Settings'
+  base_route: personal_collection.settings
+
+entity.personal_collection.canonical:
+  route_name: entity.personal_collection.canonical
+  base_route: entity.personal_collection.canonical
+  title: 'View'
+
+entity.personal_collection.edit_form:
+  route_name: entity.personal_collection.edit_form
+  base_route: entity.personal_collection.canonical
+  title: 'Edit'
+
+entity.personal_collection.version_history:
+  route_name: entity.personal_collection.version_history
+  base_route: entity.personal_collection.canonical
+  title: 'Revisions'
+
+entity.personal_collection.delete_form:
+  route_name:  entity.personal_collection.delete_form
+  base_route:  entity.personal_collection.canonical
+  title: Delete
+  weight: 10
+
+mukurtu_collection.add_item_to_personal_collection:
+  route_name: mukurtu_collection.add_item_to_personal_collection
+  base_route: entity.node.canonical
+  title: 'Add to Personal Collection'
+  weight: 50

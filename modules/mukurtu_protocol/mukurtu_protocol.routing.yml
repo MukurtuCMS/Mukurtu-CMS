@@ -1,42 +1,40 @@
-mukurtu_protocol.protocol_membership.add:
-  path: '/node/{nid}/membership/add/{user}'
+mukurtu_protocol.manage_communities:
+  path: '/dashboard/communities'
   defaults:
-    _title: 'Add User as Protocol member'
-    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuProtocolController::addUserAsProtocolMember'
+    _title: 'Manage Communities'
+    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuCommunityManageController::content'
   requirements:
-    nid: \d+
-    user: \d+
-    _permission: 'access content'
-mukurtu_protocol.add_new_protocol:
-  path: '/node/{node}/add/protocol'
+    _permission: 'create community content,edit community content'
+
+mukurtu_protocol.permissions_overview:
+  path: '/dashboard/group/permissions/{entity_type_id}/{bundle_id}'
   defaults:
-    _title: 'Create Protocol'
-    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuAddNewProtocolController::content'
-  options:
-    parameters:
-      node:
-        type: entity:node
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgPermissionsForm'
+    _title_callback: '\Drupal\mukurtu_protocol\Form\MukurtuOgPermissionsForm::titleCallback'
   requirements:
-    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuAddNewProtocolController::access'
-mukurtu_protocol.manage_memberships:
-  path: '/node/{node}/memberships'
+    _permission: 'administer organic groups'
+
+mukurtu_protocol.permissions_edit_form:
+  path: '/dashboard/group/permissions/{entity_type_id}/{bundle_id}/{role_name}'
   defaults:
-    _title: 'Manage Memberships'
-    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuManageMembershipsController::content'
-  options:
-    parameters:
-      node:
-        type: entity:node
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgRolePermissionsForm'
+    _title_callback: '\Drupal\mukurtu_protocol\Form\MukurtuOgRolePermissionsForm::rolePermissionTitleCallback'
   requirements:
-    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuManageMembershipsController::access'
-mukurtu_protocol.manage_user_memberships:
-  path: '/user/{user}/memberships'
+    _permission: 'administer organic groups'
+
+mukurtu_protocol.community_roles:
+  path: '/dashboard/community/roles'
   defaults:
-    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::content'
-    _title_callback: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::getTitle'
-  options:
-    parameters:
-      node:
-        type: entity:user
+    _entity_list: 'og_role'
+    _title: 'Community Roles'
   requirements:
-    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuManageUserMembershipsController::access'
+    _permission: 'administer organic groups'
+
+mukurtu_protocol.protocol_roles:
+  path: '/dashboard/protocol/roles'
+  defaults:
+    _entity_list: 'og_role'
+    _title: 'Protocol Roles'
+  requirements:
+    _permission: 'administer organic groups'
+

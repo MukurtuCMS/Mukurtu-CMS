@@ -1,13 +1,6 @@
 services:
-  mukurtu_protocol.protocol_manager:
-    class: Drupal\mukurtu_protocol\MukurtuProtocolManager
+  mukurtu_protocol.event_subscriber:
+    class: Drupal\mukurtu_protocol\EventSubscriber\MukurtuProtocolOgEventSubscriber
+    arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info', '@og.access']
     tags:
-      - { name: mukurtu }
-  mukurtu_protocol.membership_manager:
-    class: Drupal\mukurtu_protocol\MukurtuMembershipManager
-    tags:
-      - { name: mukurtu }
-  #mukurtu_protocol.query_access_subscriber:
-  #  class: Drupal\mukurtu_protocol\EventSubscriber\QueryAccessSubscriber
-  #  tags:
-  #    - { name: event_subscriber }
+      - { name: 'event_subscriber' }

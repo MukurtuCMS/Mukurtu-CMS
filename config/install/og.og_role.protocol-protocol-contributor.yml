@@ -1,0 +1,41 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - media.type.audio
+    - media.type.document
+    - media.type.image
+    - media.type.remote_video
+    - media.type.video
+    - node.type.digital_heritage
+  module:
+    - media
+    - mukurtu_protocol
+    - node
+id: protocol-protocol-contributor
+label: Contributor
+weight: 8
+group_id: null
+group_type: protocol
+group_bundle: protocol
+is_admin: null
+permissions:
+  - 'create audio media'
+  - 'create digital_heritage content'
+  - 'create document media'
+  - 'create image media'
+  - 'create remote_video media'
+  - 'create video media'
+  - 'delete own audio media'
+  - 'delete own digital_heritage content'
+  - 'delete own document media'
+  - 'delete own image media'
+  - 'delete own remote_video media'
+  - 'delete own video media'
+  - 'edit own digital_heritage content'
+  - 'update own audio media'
+  - 'update own document media'
+  - 'update own image media'
+  - 'update own remote_video media'
+  - 'update own video media'
+role_type: standard

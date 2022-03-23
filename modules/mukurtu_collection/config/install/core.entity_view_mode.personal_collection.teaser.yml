@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_collection
+id: personal_collection.teaser
+label: Teaser
+targetEntityType: personal_collection
+cache: true

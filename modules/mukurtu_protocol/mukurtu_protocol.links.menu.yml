@@ -1,0 +1,74 @@
+
+# Protocol menu items definition
+entity.protocol.collection:
+  title: 'Protocol list'
+  route_name: entity.protocol.collection
+  description: 'List Protocol entities'
+  parent: system.admin_structure
+  weight: 100
+
+protocol.admin.structure.settings:
+  title: 'Protocol settings'
+  description: 'Configure Protocol entities'
+  route_name: protocol.settings
+  parent: system.admin_structure
+
+# Protocol control menu items definition
+entity.protocol_control.collection:
+  title: 'Protocol control list'
+  route_name: entity.protocol_control.collection
+  description: 'List Protocol control entities'
+  parent: system.admin_structure
+  weight: 100
+
+protocol_control.admin.structure.settings:
+  title: 'Protocol control settings'
+  description: 'Configure Protocol control entities'
+  route_name: protocol_control.settings
+  parent: system.admin_structure
+
+mukurtu_protocol.manage_communities:
+  title: 'Manage Communities'
+  description: 'Manage Communities'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: entity.community.collection
+#  route_name: mukurtu_community.manage_communities
+#mukurtu_community.browse_communities:
+#  title: "Communities"
+#  menu_name: main
+#  description: "Browse the site communities"
+#  route_name: view.mukurtu_communities_browse.browse_communities_page
+#  weight: -20
+
+# Community menu items definition
+entity.community.collection:
+  title: 'Community list'
+  route_name: entity.community.collection
+  description: 'List Communities'
+  parent: system.admin_structure
+  weight: 100
+
+community.admin.structure.settings:
+  title: 'Community settings'
+  description: 'Configure Communities'
+  route_name: community.settings
+  parent: system.admin_structure
+
+mukurtu_protocol.config_community_permissions:
+  title: 'Configure Community Permissions'
+  description: 'Manage roles and permissions for all communities.'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_protocol.permissions_overview
+  route_parameters: { entity_type_id: 'community', bundle_id: 'community'}
+  weight: 800
+
+mukurtu_protocol.config_protocol_permissions:
+  title: 'Configure Protocol Permissions'
+  description: 'Manage roles and permissions for all protocols.'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_protocol.permissions_overview
+  route_parameters: { entity_type_id: 'protocol', bundle_id: 'protocol'}
+  weight: 810

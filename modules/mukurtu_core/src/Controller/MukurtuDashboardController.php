@@ -63,16 +63,15 @@ class MukurtuDashboardController extends ControllerBase {
   public function gettingStartedCommunityContent() {
     $build = [];
 
-    $query = \Drupal::entityQuery('node')
-      ->condition('type', 'community')
+    $query = \Drupal::entityQuery('community')
       ->condition('status', TRUE);
     $results = $query->execute();
 
     if (count($results) == 0) {
       $entityManager = \Drupal::entityTypeManager();
-      $accessControlHandler = $entityManager->getAccessControlHandler('node');
+      $accessControlHandler = $entityManager->getAccessControlHandler('community');
       if ($accessControlHandler->createAccess('community')) {
-        $build[] = ['#markup' => '<div class="mukurtu-getting-started mukurtu-getting-started-communities">' . $this->t('Communities are a foundational component of Mukurtu CMS. Get started by creating your first community <a href="@create-community-page">here</a>.', ['@create-community-page' => Url::fromRoute('mukurtu_core.add', ['node_type' => 'community'])->toString()]) . '</div>'];
+        $build[] = ['#markup' => '<div class="mukurtu-getting-started mukurtu-getting-started-communities">' . $this->t('Communities are a foundational component of Mukurtu CMS. Get started by creating your first community <a href="@create-community-page">here</a>.', ['@create-community-page' => Url::fromRoute('entity.community.add_form')->toString()]) . '</div>'];
       }
     }
 

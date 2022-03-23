@@ -1,0 +1,35 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: protocol_control.protocol_control.default
+targetEntityType: protocol_control
+bundle: protocol_control
+mode: default
+content:
+  field_inheritance_target:
+    type: entity_reference_autocomplete
+    weight: 2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_protocols:
+    type: options_buttons
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_sharing_setting:
+    type: options_buttons
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  name: true
+  user_id: true

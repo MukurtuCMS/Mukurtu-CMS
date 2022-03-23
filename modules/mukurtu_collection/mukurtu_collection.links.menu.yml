@@ -11,3 +11,23 @@ mukurtu_collection.browse_collections:
   description: 'Browse Site Collections'
   menu_name: main
   route_name: mukurtu_collection.collection_browse_page
+
+# Personal collection menu items definition
+entity.personal_collection.collection:
+  title: 'Personal collection list'
+  route_name: entity.personal_collection.collection
+  description: 'List Personal collections'
+  parent: system.admin_structure
+  weight: 100
+
+personal_collection.admin.structure.settings:
+  title: 'Personal collection settings'
+  description: 'Configure Personal collections'
+  route_name: personal_collection.settings
+  parent: system.admin_structure
+
+mukurtu_collection.my_personal_collections:
+  title: 'Personal Collections'
+  description: 'My Personal Collections'
+  menu_name: mukurtu
+  route_name: mukurtu_collection.my_personal_collections

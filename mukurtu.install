@@ -24,11 +24,14 @@ function mukurtu_install() {
   // dependency, so we'll install it here.
   \Drupal::service('module_installer')->install(['message_digest_ui']);
 
+  // Rebuild node access permissions.
+  node_access_rebuild();
+
   // Protocol field isn't always being created for DH on install,
   // so we'll double check it here.
-  mukurtu_protocol_create_protocol_field('node', 'digital_heritage');
-  mukurtu_community_records_create_community_records_field('node', 'digital_heritage');
+  //mukurtu_protocol_create_protocol_field('node', 'digital_heritage');
+  //mukurtu_community_records_create_community_records_field('node', 'digital_heritage');
 
   // Create the protocol fields on the default Drupal comments.
-  mukurtu_protocol_create_protocol_field('comment', 'comment');
+  //mukurtu_protocol_create_protocol_field('comment', 'comment');
 }

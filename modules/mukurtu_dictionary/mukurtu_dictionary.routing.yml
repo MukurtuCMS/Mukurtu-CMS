@@ -5,3 +5,14 @@ mukurtu_dictionary.dictionary_page:
     _title: 'Dictionary'
   requirements:
     _permission: 'access content'
+mukurtu_dictionary.add_word_to_list:
+  path: '/node/{node}/word-list/add'
+  defaults:
+    _title_callback: '\Drupal\mukurtu_dictionary\Controller\MukurtuAddWordToListController::getTitle'
+    _controller: '\Drupal\mukurtu_dictionary\Controller\MukurtuAddWordToListController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_dictionary\Controller\MukurtuAddWordToListController::access'

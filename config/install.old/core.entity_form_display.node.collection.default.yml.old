@@ -1,0 +1,275 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - entity_browser.browser.browse_content
+    - field.field.node.collection.field_child_collections
+    - field.field.node.collection.field_collection_type
+    - field.field.node.collection.field_content_type
+    - field.field.node.collection.field_description
+    - field.field.node.collection.field_items_in_collection
+    - field.field.node.collection.field_keywords
+    - field.field.node.collection.field_parent_collection
+    - field.field.node.collection.field_related_content
+    - node.type.collection
+  module:
+    - entity_browser
+    - field_group
+    - mukurtu_protocol
+    - path
+    - text
+third_party_settings:
+  field_group:
+    group_main_tab:
+      children:
+        - group_mukurtu_essentials
+        - group_relations
+      label: 'Main Tab'
+      region: content
+      parent_name: ''
+      weight: 0
+      format_type: tabs
+      format_settings:
+        classes: ''
+        id: ''
+        direction: horizontal
+    group_mukurtu_essentials:
+      children:
+        - title
+        - field_mukurtu_protocol_inherit
+        - group_protocols
+        - field_description
+        - field_keywords
+      label: 'Mukurtu Essentials'
+      region: content
+      parent_name: group_main_tab
+      weight: 20
+      format_type: tab
+      format_settings:
+        classes: ''
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_relations:
+      children:
+        - field_items_in_collection
+        - field_child_collections
+        - field_related_content
+      label: Relations
+      region: content
+      parent_name: group_main_tab
+      weight: 21
+      format_type: tab
+      format_settings:
+        classes: ''
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_protocols:
+      children:
+        - field_mukurtu_protocol_r_scope
+        - field_mukurtu_protocol_read
+        - field_mukurtu_protocol_w_scope
+        - field_mukurtu_protocol_write
+      label: Protocols
+      region: content
+      parent_name: group_mukurtu_essentials
+      weight: -5
+      format_type: fieldset
+      format_settings:
+        classes: ''
+        id: ''
+        description: ''
+        required_fields: true
+id: node.collection.default
+targetEntityType: node
+bundle: collection
+mode: default
+content:
+  created:
+    type: datetime_timestamp
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_child_collections:
+    type: entity_browser_entity_reference
+    weight: 8
+    region: content
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: false
+      field_widget_display_settings:
+        view_mode: content_browser
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_description:
+    type: text_textarea_with_summary
+    weight: -4
+    region: content
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
+    third_party_settings: {  }
+  field_items_in_collection:
+    type: entity_browser_entity_reference
+    weight: 7
+    region: content
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_edit: true
+      field_widget_remove: true
+      field_widget_replace: false
+      open: false
+      field_widget_display_settings:
+        view_mode: content_browser
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_keywords:
+    type: entity_reference_autocomplete
+    weight: -3
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_mukurtu_protocol_inherit:
+    type: entity_browser_entity_reference
+    weight: -6
+    region: content
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: true
+      open: false
+      field_widget_display_settings:
+        view_mode: content_browser
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_mukurtu_protocol_r_scope:
+    type: mukurtu_protocol_scope_widget
+    weight: -6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_read:
+    type: mukurtu_protocol_widget
+    weight: -5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_w_scope:
+    type: mukurtu_protocol_scope_widget
+    weight: -4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_mukurtu_protocol_write:
+    type: mukurtu_protocol_widget
+    weight: -3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_related_content:
+    type: entity_browser_entity_reference
+    weight: 9
+    region: content
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_edit: true
+      field_widget_remove: true
+      field_widget_replace: false
+      open: false
+      field_widget_display_settings:
+        view_mode: content_browser
+      selection_mode: selection_append
+    third_party_settings: {  }
+  name:
+    weight: -8
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  og_audience:
+    type: og_complex
+    weight: 122
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  promote:
+    type: boolean_checkbox
+    weight: 3
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    weight: 6
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  sticky:
+    type: boolean_checkbox
+    weight: 4
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: -7
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: 1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  url_redirects:
+    weight: 7
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_collection_type: true
+  field_content_type: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_community: true
+  field_mukurtu_geojson: true
+  field_mukurtu_original_record: true
+  field_parent_collection: true
+  field_sequence_collection: true

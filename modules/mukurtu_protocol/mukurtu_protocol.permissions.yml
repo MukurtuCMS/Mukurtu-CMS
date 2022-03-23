@@ -1,0 +1,85 @@
+add community entities:
+  title: 'Create new Community entities'
+
+administer community entities:
+  title: 'Administer Community entities'
+  description: 'Allow to access the administration form to configure Community entities.'
+  restrict access: true
+
+delete community entities:
+  title: 'Delete Community entities'
+
+edit community entities:
+  title: 'Edit Community entities'
+
+view published community entities:
+  title: 'View published Community entities'
+
+view unpublished community entities:
+  title: 'View unpublished Community entities'
+
+view all community revisions:
+  title: 'View all Community revisions'
+
+revert all community revisions:
+  title: 'Revert all Community revisions'
+  description: 'Role requires permission <em>view Community revisions</em> and <em>edit rights</em> for community entities in question or <em>administer community entities</em>.'
+
+delete all community revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Community revisions</em> and <em>delete rights</em> for community entities in question or <em>administer community entities</em>.'
+
+add protocol entities:
+  title: 'Create new Protocol entities'
+
+administer protocol entities:
+  title: 'Administer Protocol entities'
+  description: 'Allow to access the administration form to configure Protocol entities.'
+  restrict access: true
+
+delete protocol entities:
+  title: 'Delete Protocol entities'
+
+edit protocol entities:
+  title: 'Edit Protocol entities'
+
+view published protocol entities:
+  title: 'View published Protocol entities'
+
+view unpublished protocol entities:
+  title: 'View unpublished Protocol entities'
+
+view all protocol revisions:
+  title: 'View all Protocol revisions'
+
+revert all protocol revisions:
+  title: 'Revert all Protocol revisions'
+  description: 'Role requires permission <em>view Protocol revisions</em> and <em>edit rights</em> for protocol entities in question or <em>administer protocol entities</em>.'
+
+delete all protocol revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Protocol revisions</em> and <em>delete rights</em> for protocol entities in question or <em>administer protocol entities</em>.'
+
+add protocol control entities:
+  title: 'Create new Protocol control entities'
+
+administer protocol control entities:
+  title: 'Administer Protocol control entities'
+  description: 'Allow to access the administration form to configure Protocol control entities.'
+  restrict access: true
+
+edit protocol control entities:
+  title: 'Edit Protocol control entities'
+
+view published protocol control entities:
+  title: 'View published Protocol control entities'
+
+view unpublished protocol control entities:
+  title: 'View unpublished Protocol control entities'
+
+view all protocol control revisions:
+  title: 'View all Protocol control revisions'
+
+revert all protocol control revisions:
+  title: 'Revert all Protocol control revisions'
+  description: 'Role requires permission <em>view Protocol control revisions</em> and <em>edit rights</em> for protocol control entities in question or <em>administer protocol control entities</em>.'

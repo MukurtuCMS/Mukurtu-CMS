@@ -7,7 +7,6 @@ package: 'Mukurtu'
 dependencies:
   - field_group
   - mukurtu_core
-  - mukurtu_community
   - mukurtu_protocol
   - mukurtu_digital_heritage
 

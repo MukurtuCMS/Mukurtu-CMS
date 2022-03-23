@@ -12,6 +12,7 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\mukurtu_collection\Entity\Collection;
 
 define("MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION", "field_sequence_collection");
 define("MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION", "Sequence Collection");
@@ -30,6 +31,11 @@ function mukurtu_collection_theme($existing, $type, $theme, $path) {
       'variables' => [
         'results' => NULL,
         'facets' => [],
+      ],
+    ],
+    'mukurtu_my_personal_collections' => [
+      'variables' => [
+        'results' => NULL,
       ],
     ],
   ];
@@ -244,6 +250,16 @@ function mukurtu_collection_multipage_sync_relationship(EntityInterface $entity)
 }
 
 /**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function mukurtu_collection_entity_bundle_info_alter(array &$bundles): void {
+  // Collection bundle class.
+  if (isset($bundles['node']['collection'])) {
+    $bundles['node']['collection']['class'] = Collection::class;
+  }
+}
+
+/**
  * Implements hook_entity_bundle_field_info_alter().
  */
 function mukurtu_collection_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
@@ -255,6 +271,11 @@ function mukurtu_collection_entity_bundle_field_info_alter(&$fields, EntityTypeI
   // Constraint for items in collection.
   if (isset($fields[MUKURTU_COLLECTION_FIELD_NAME_ITEMS])) {
     $fields[MUKURTU_COLLECTION_FIELD_NAME_ITEMS]->addConstraint('ValidCollectionItem', []);
+  }
+
+  // Child collection constraints.
+  if ($bundle == 'collection' && isset($fields['field_child_collections'])) {
+    $fields['field_child_collections']->addConstraint('ValidChildCollection', []);
   }
 }
 

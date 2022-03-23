@@ -14,7 +14,6 @@ dependencies:
   - message_subscribe_email
   - message_ui
   - mukurtu_core
-  - mukurtu_community
   - mukurtu_protocol
   - mukurtu_collection
 
