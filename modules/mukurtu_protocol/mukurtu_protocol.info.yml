@@ -6,6 +6,7 @@ package: 'Mukurtu'
 dependencies:
   - comment
   - og
+  - og_ui
   - media
   - message
   - mukurtu_core
