@@ -278,6 +278,31 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   /**
    * {@inheritdoc}
    */
+  public function addRole(AccountInterface $account, $roles = []): MukurtuGroupInterface {
+    $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
+    if ($membership) {
+      // Load OgRoles from role ids.
+      $ogRoles = [];
+      foreach ($roles as $role) {
+        $ogRole = OgRole::getRole('protocol', 'protocol', $role);
+        if ($ogRole) {
+          $ogRoles[] = $ogRole;
+        }
+      }
+
+      // Add the roles.
+      $membership->setRoles($ogRoles);
+      $membership->save();
+    }
+    else {
+      dpm("Member does not exist; failed to add roles.");
+    }
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCreatedTime() {
     return $this->get('created')->value;
   }
