@@ -186,6 +186,20 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   /**
    * {@inheritdoc}
    */
+  public function getDescription() {
+    return $this->get('field_description')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDescription($description) {
+    return $this->set('field_description', $description);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSharingSetting() {
     return $this->get('field_access_mode')->value;
   }

@@ -40,6 +40,25 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   public function setName($name);
 
   /**
+   * Gets the Protocol description.
+   *
+   * @return string
+   *   Description of the Protocol.
+   */
+  public function getDescription();
+
+  /**
+   * Sets the Protocol description.
+   *
+   * @param string $description
+   *   The Protocol description.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface
+   *   The called Protocol entity.
+   */
+  public function setDescription($description);
+
+  /**
    * Gets the sharing setting.
    *
    * @return string
