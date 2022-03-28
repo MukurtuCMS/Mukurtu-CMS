@@ -351,6 +351,30 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function setRoles(AccountInterface $account, $roles = []): MukurtuGroupInterface
+  {
+    $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
+    if ($membership) {
+      // Load OgRoles from role ids.
+      $ogRoles = [];
+      foreach ($roles as $role) {
+        $ogRole = OgRole::getRole('community', 'community', $role);
+        if ($ogRole) {
+          $ogRoles[] = $ogRole;
+        }
+      }
+
+      // Add the roles.
+      $membership->setRoles($ogRoles);
+      $membership->save();
+    }
+
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 

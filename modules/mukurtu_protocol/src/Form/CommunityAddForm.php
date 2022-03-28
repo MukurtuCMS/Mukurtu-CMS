@@ -114,7 +114,7 @@ class CommunityAddForm extends EntityForm {
       /** @var \Drupal\core\Session\AccountInterface[] $managers */
       $managers = $this->entityTypeManager->getStorage('user')->loadMultiple($this->communityManagers);
       foreach ($managers as $manager) {
-        $community->addMember($manager, ['community_manager']);
+        $community->addMember($manager)->setRoles($manager, ['community_manager']);
       }
 
       // @todo We'll want to redirect to the protocol creation form if the author is
