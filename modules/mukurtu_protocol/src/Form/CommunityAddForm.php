@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Url;
 
 /**
  * Form controller for Community creation forms.
@@ -117,9 +118,15 @@ class CommunityAddForm extends EntityForm {
         $community->addMember($manager)->setRoles($manager, ['community_manager']);
       }
 
-      // @todo We'll want to redirect to the protocol creation form if the author is
+      // Redirect to the protocol creation form if the author is
       // a community manager.
-      $form_state->setRedirect('entity.community.canonical', ['community' => $community->id()]);
+      $protocolCreateUrl = Url::fromRoute('mukurtu_protocol.add_protocol_from_community', ['communityID' => $community->id()]);
+      if ($protocolCreateUrl->access()) {
+        $form_state->setRedirect('mukurtu_protocol.add_protocol_from_community', ['communityID' => $community->id()]);
+      }
+      else {
+        $form_state->setRedirect('entity.community.canonical', ['community' => $community->id()]);
+      }
     }
   }
 
