@@ -139,7 +139,7 @@ class ProtocolAddForm extends EntityForm {
     $actions['submit_another'] = [
       '#type' => 'submit',
       '#value' => $this
-        ->t('Save and create another'),
+        ->t('Add Another'),
       '#submit' => [
         '::submitForm',
         '::save',
@@ -149,7 +149,7 @@ class ProtocolAddForm extends EntityForm {
     $actions['submit_done'] = [
       '#type' => 'submit',
       '#value' => $this
-        ->t('Save and view community'),
+        ->t('Save'),
       '#submit' => [
         '::submitForm',
         '::save',
@@ -184,6 +184,9 @@ class ProtocolAddForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     if ($this->entity->save()) {
+      // Add the success message.
+      $this->messenger()->addStatus(t('Created %protocol.', ['%protocol' => $this->entity->getName()]));
+
       /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
       $protocol = $this->entity;
 
