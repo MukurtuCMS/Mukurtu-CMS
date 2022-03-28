@@ -278,7 +278,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   /**
    * {@inheritdoc}
    */
-  public function addRole(AccountInterface $account, $roles = []): MukurtuGroupInterface {
+  public function setRoles(AccountInterface $account, $roles = []): MukurtuGroupInterface {
     $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
     if ($membership) {
       // Load OgRoles from role ids.
@@ -294,9 +294,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       $membership->setRoles($ogRoles);
       $membership->save();
     }
-    else {
-      dpm("Member does not exist; failed to add roles.");
-    }
+
     return $this;
   }
 

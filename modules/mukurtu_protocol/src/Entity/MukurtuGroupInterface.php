@@ -36,7 +36,7 @@ interface MukurtuGroupInterface {
   public function removeMember(AccountInterface $account): MukurtuGroupInterface;
 
   /**
-   * Add roles to a member.
+   * Set roles for a member.
    *
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The account to add.
@@ -45,5 +45,5 @@ interface MukurtuGroupInterface {
    * @return \Drupal\mukurtu_protocol\Entity\MukurtuGroupInterface
    *   The group.
    */
-  public function addRole(AccountInterface $account, $roles = []): MukurtuGroupInterface;
+  public function setRoles(AccountInterface $account, $roles = []): MukurtuGroupInterface;
 }

@@ -351,7 +351,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
-  public function addRole(AccountInterface $account, $roles = []): MukurtuGroupInterface
+  public function setRoles(AccountInterface $account, $roles = []): MukurtuGroupInterface
   {
     $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
     if ($membership) {
@@ -368,9 +368,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       $membership->setRoles($ogRoles);
       $membership->save();
     }
-    else {
-      dpm("Member does not exist; failed to add roles.");
-    }
+
     return $this;
   }
 
