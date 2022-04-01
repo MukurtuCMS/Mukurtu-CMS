@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\og\Og;
 
 /**
  * Access controller for the Community entity.
@@ -28,8 +29,24 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
           return AccessResult::allowedIfHasPermission($account, 'view unpublished community entities');
         }
 
+        // if field_access_mode is "open", anyone can view
+        if ($entity->getSharingSetting() == 'open') {
+          return AccessResult::allowedIfHasPermission($account, 'view published community entities');
+        }
 
-        return AccessResult::allowedIfHasPermission($account, 'view published community entities');
+        // if field_access_mode is "strict", only members can view
+        else if ($entity->getSharingSetting() == 'strict') {
+
+          // get membership
+          $membership = Og::getMembership($entity, $account);
+
+          if ($membership) {
+            return AccessResult::allowedIfHasPermission($account, 'view published community entities');
+          }
+
+          // if not member, not allowed to view
+          return AccessResult::forbidden();
+        }
 
       case 'update':
 
