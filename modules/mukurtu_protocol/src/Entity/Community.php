@@ -500,6 +500,32 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE);
 
+    $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
+    ->setLabel(t('Sharing Protocol'))
+    ->setDescription(t('TODO'))
+    ->setSettings([
+      'allowed_values' => [
+        'strict' => 'Strict',
+        'open' => 'Open',
+      ],
+    ])
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'list_default',
+        'weight' => 10,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
+        'weight' => 10,
+      ])
+      ->setDefaultValue('strict')
+      ->setCardinality(1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     return $fields;
   }
 
