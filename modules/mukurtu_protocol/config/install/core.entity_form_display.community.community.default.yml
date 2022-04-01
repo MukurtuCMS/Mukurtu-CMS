@@ -1,52 +1,79 @@
 langcode: en
 status: true
 dependencies:
+  config:
+    - field.field.community.community.field_sharing_protocol
   module:
     - mukurtu_protocol
+    - og
+    - options
     - text
+_core:
+  default_config_hash: HNvtOwPTKfQ5FgbgFwiFvA0H6Nmqn_LSwyBmsGtQrK4
 id: community.community.default
 targetEntityType: community
 bundle: community
 mode: default
 content:
+  field_access_mode:
+    type: list_default
+    label: visible
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
   field_child_communities:
-    type: entity_reference_autocomplete
-    weight: 2
-    region: content
+    type: entity_reference_label
+    label: above
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      link: true
     third_party_settings: {  }
-  field_description:
-    type: text_textarea_with_summary
-    weight: 1
-    region: content
-    settings:
-      rows: 9
-      summary_rows: 3
-      placeholder: ''
-      show_summary: false
-    third_party_settings: {  }
-    rows: 6
-  name:
-    type: string_textfield
-    weight: 0
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  user_id:
-    type: entity_reference_autocomplete
     weight: 3
     region: content
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+  field_description:
+    type: text_default
+    label: above
+    settings: {  }
     third_party_settings: {  }
+    weight: 1
+    region: content
+  field_parent_community:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_sharing_protocol:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 11
+    region: content
+  name:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  og_group:
+    type: og_group_subscribe
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  user_id:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 4
+    region: content
 hidden:
-  field_parent_community: true
+  search_api_excerpt: true
