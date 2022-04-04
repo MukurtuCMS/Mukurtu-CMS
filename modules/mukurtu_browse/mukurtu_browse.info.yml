@@ -9,6 +9,9 @@ libraries:
 dependencies:
   - mukurtu_core
   - mukurtu_protocol
+  - mukurtu_digital_heritage
+  - mukurtu_dictionary
   - search_api
+  - search_api_db
 
 version: '8.x-1.x-dev'
