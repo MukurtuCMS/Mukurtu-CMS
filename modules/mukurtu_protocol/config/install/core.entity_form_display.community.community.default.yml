@@ -8,8 +8,6 @@ dependencies:
     - og
     - options
     - text
-_core:
-  default_config_hash: HNvtOwPTKfQ5FgbgFwiFvA0H6Nmqn_LSwyBmsGtQrK4
 id: community.community.default
 targetEntityType: community
 bundle: community
