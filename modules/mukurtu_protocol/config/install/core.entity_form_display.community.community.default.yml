@@ -1,6 +1,8 @@
 langcode: en
 status: true
 dependencies:
+  config:
+    - field.field.community.community.field_sharing_protocol
   module:
     - mukurtu_protocol
     - text
@@ -9,6 +11,22 @@ targetEntityType: community
 bundle: community
 mode: default
 content:
+  community_type:
+    type: entity_reference_autocomplete
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_access_mode:
+    type: options_buttons
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_child_communities:
     type: entity_reference_autocomplete
     weight: 2
@@ -30,6 +48,12 @@ content:
       show_summary: false
     third_party_settings: {  }
     rows: 6
+  field_sharing_protocol:
+    type: options_select
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   name:
     type: string_textfield
     weight: 0
