@@ -503,9 +503,16 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['community_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Community Type'))
       ->setDescription(t('todo'))
-      ->setSetting('target_type', 'taxonomy') // taxonomy? taxonomy_vocabulary?
+      ->setSetting('target_type', 'taxonomy_vocabulary') // right target type?
       ->setRequired(FALSE)
-      ->setCardinality(1);
+      ->setCardinality(1)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 4,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     return $fields;
   }
