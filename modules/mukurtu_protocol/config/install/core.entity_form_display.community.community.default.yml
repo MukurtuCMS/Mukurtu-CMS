@@ -30,10 +30,6 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_child_communities:
-    type: entity_reference_autocomplete
-    weight: 2
-    region: content
-  field_child_communities:
     type: entity_reference_label
     label: above
     settings:
@@ -61,7 +57,6 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-<<<<<<< HEAD
     rows: 6
   field_sharing_protocol:
     type: options_select
@@ -69,10 +64,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-=======
-    weight: 11
-    region: content
->>>>>>> 24-add-sharing-protocol-communities
   name:
     type: string
     label: hidden
