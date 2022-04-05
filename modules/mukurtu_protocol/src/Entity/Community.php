@@ -502,7 +502,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['community_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Community Type'))
-      ->setDescription(t('todo'))
+      ->setDescription(t('Indicates the type of community.'))
       ->setSetting('target_type', 'taxonomy_term')
       ->setSetting('handler', 'default:taxonomy_term')
       ->setSetting(
