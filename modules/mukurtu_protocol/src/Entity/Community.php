@@ -197,6 +197,23 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function getSharingSetting()
+  {
+    return $this->get('field_access_mode')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setSharingSetting($sharing)
+  {
+    $this->set('field_access_mode', $sharing);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCreatedTime() {
     return $this->get('created')->value;
   }
@@ -520,6 +537,29 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
         'type' => 'string',
         'weight' => 4,
       ])
+    $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
+    ->setLabel(t('Sharing Protocol'))
+    ->setDescription(t('TODO'))
+    ->setSettings([
+      'allowed_values' => [
+        'strict' => 'Strict',
+        'open' => 'Open',
+      ],
+    ])
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'list_default',
+        'weight' => 10,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
+        'weight' => 10,
+      ])
+      ->setDefaultValue('strict')
+      ->setCardinality(1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 

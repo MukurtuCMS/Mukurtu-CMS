@@ -58,6 +58,25 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
   public function setDescription($description);
 
   /**
+   * Gets the sharing setting.
+   *
+   * @return string
+   *   Sharing setting machine name.
+   */
+  public function getSharingSetting();
+
+  /**
+   * Sets the sharing setting.
+   *
+   * @param string $sharing
+   *   The sharing setting machine name.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface
+   *   The called Community entity.
+   */
+  public function setSharingSetting($sharing);
+
+  /**
    * Gets the Community creation timestamp.
    *
    * @return int
