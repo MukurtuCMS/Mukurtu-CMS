@@ -5,12 +5,12 @@ core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
 dependencies:
-  - paragraphs
   - facets
+  - mukurtu_collection
   - mukurtu_core
   - mukurtu_protocol
-  - mukurtu_collection
   - mukurtu_taxonomy
+  - paragraphs
   - search_api
   - search_api_glossary
   - text
