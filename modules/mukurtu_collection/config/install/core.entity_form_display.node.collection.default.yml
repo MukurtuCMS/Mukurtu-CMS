@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - entity_browser.browser.browse_content
     - field.field.node.collection.field_child_collections
     - field.field.node.collection.field_collection_type
     - field.field.node.collection.field_content_type
@@ -9,6 +10,7 @@ dependencies:
     - field.field.node.collection.field_items_in_collection
     - field.field.node.collection.field_keywords
     - field.field.node.collection.field_parent_collection
+    - field.field.node.collection.field_protocol_control
     - field.field.node.collection.field_related_content
     - node.type.collection
   module:
@@ -35,8 +37,7 @@ third_party_settings:
     group_mukurtu_essentials:
       children:
         - title
-        - field_mukurtu_protocol_inherit
-        - group_protocols
+        - field_protocol_control
         - field_description
         - field_keywords
       label: 'Mukurtu Essentials'
@@ -64,22 +65,6 @@ third_party_settings:
         classes: ''
         id: ''
         formatter: closed
-        description: ''
-        required_fields: true
-    group_protocols:
-      children:
-        - field_mukurtu_protocol_r_scope
-        - field_mukurtu_protocol_read
-        - field_mukurtu_protocol_w_scope
-        - field_mukurtu_protocol_write
-      label: Protocols
-      region: content
-      parent_name: group_mukurtu_essentials
-      weight: -5
-      format_type: fieldset
-      format_settings:
-        classes: ''
-        id: ''
         description: ''
         required_fields: true
 id: node.collection.default
@@ -110,7 +95,7 @@ content:
     third_party_settings: {  }
   field_description:
     type: text_textarea_with_summary
-    weight: -4
+    weight: -5
     region: content
     settings:
       rows: 9
@@ -135,7 +120,7 @@ content:
     third_party_settings: {  }
   field_keywords:
     type: entity_reference_autocomplete
-    weight: -3
+    weight: -4
     region: content
     settings:
       match_operator: CONTAINS
@@ -179,6 +164,12 @@ content:
   field_mukurtu_protocol_write:
     type: mukurtu_protocol_widget
     weight: -3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_protocol_control:
+    type: mukurtu_protocol_control_widget
+    weight: -6
     region: content
     settings: {  }
     third_party_settings: {  }
