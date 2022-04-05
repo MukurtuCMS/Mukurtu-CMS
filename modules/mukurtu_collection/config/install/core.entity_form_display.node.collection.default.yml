@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.browse_content
     - field.field.node.collection.field_child_collections
     - field.field.node.collection.field_collection_type
     - field.field.node.collection.field_content_type
