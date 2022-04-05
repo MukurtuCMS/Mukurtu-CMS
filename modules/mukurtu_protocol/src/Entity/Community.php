@@ -517,26 +517,6 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE);
 
-    $fields['community_type'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Community Type'))
-      ->setDescription(t('Indicates the type of community.'))
-      ->setSetting('target_type', 'taxonomy_term')
-      ->setSetting('handler', 'default:taxonomy_term')
-      ->setSetting(
-        'handler_settings',
-        array(
-          'target_bundles' => array(
-            'community_type' => 'community_type'
-          )
-        )
-      )
-      ->setRequired(FALSE)
-      ->setCardinality(1)
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'string',
-        'weight' => 4,
-      ])
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
     ->setLabel(t('Sharing Protocol'))
     ->setDescription(t('TODO'))
@@ -560,6 +540,28 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['community_type'] = BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Community Type'))
+    ->setDescription(t('Indicates the type of community.'))
+    ->setSetting('target_type', 'taxonomy_term')
+    ->setSetting('handler', 'default:taxonomy_term')
+    ->setSetting(
+      'handler_settings', array(
+        'target_bundles' => array(
+          'community_type' => 'community_type'
+          )
+        )
+      )
+      ->setRequired(FALSE)
+      ->setCardinality(1)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 4,
+      ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
