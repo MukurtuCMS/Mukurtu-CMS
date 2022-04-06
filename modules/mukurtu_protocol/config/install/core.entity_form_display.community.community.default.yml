@@ -53,12 +53,6 @@ content:
     weight: 2
     region: content
   field_sharing_protocol:
-    type: list_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    rows: 6
-  field_sharing_protocol:
     type: options_select
     weight: 4
     region: content
