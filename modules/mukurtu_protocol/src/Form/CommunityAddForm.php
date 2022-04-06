@@ -65,7 +65,8 @@ class CommunityAddForm extends EntityForm {
       '#title' => $this->t('Community Managers'),
       '#description' => $this->t('Helper text about community managers.'),
       '#target_type' => 'user',
-      '#selection_handler' => 'default',
+      '#selection_handler' => 'mukurtu_user_selection',
+      '#selection_settings' => ['group' => $this->entity],
     ];
 
     return $form;
