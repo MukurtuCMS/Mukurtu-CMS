@@ -7,6 +7,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * @file
@@ -80,6 +81,31 @@ function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setSetting('target_type', 'community')
       ->setCardinality(-1)
       ->setDisplayConfigurable('view', TRUE);
+  }
+
+  /**
+   * Override the default OG user handler with mukurtu_user_selection.
+   */
+  if ($entity_type->id() == 'og_membership') {
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Username'))
+      ->setDescription(new TranslatableMarkup('The user ID of the member.'))
+      ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'mukurtu_user_selection')
+      ->setConstraints(['UniqueOgMembership' => []])
+      ->setDisplayOptions('form', [
+        'type' => 'og_autocomplete',
+        'weight' => -1,
+        'settings' => [
+          'match_operator' => 'CONTAINS',
+          'size' => 60,
+          'match_limit' => 10,
+          'placeholder' => '',
+        ],
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setRequired(TRUE);
   }
   return $fields;
 }

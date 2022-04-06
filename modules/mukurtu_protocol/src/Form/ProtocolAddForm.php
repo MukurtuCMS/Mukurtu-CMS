@@ -110,14 +110,14 @@ class ProtocolAddForm extends EntityForm {
       '#required' => FALSE,
     ];
 
-
     // Protocol Stewards.
     $form['protocol_stewards'] = [
       '#type' => 'entity_autocomplete',
       '#title' => $this->t('Protocol Stewards'),
       '#description' => $this->t('Helper text about protocol stewards.'),
       '#target_type' => 'user',
-      '#selection_handler' => 'default',
+      '#selection_handler' => 'mukurtu_user_selection',
+      '#selection_settings' => ['group' => $this->entity],
     ];
 
     // Protocol Members.
@@ -126,7 +126,8 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Members'),
       '#description' => $this->t('Helper text about protocol membership.'),
       '#target_type' => 'user',
-      '#selection_handler' => 'default',
+      '#selection_handler' => 'mukurtu_user_selection',
+      '#selection_settings' => ['group' => $this->entity],
     ];
 
     return $form;
