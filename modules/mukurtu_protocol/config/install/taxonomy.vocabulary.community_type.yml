@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Community Type'
+vid: community_type
+description: ''
+weight: 0

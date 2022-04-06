@@ -197,6 +197,23 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function getSharingSetting()
+  {
+    return $this->get('field_access_mode')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setSharingSetting($sharing)
+  {
+    $this->set('field_access_mode', $sharing);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCreatedTime() {
     return $this->get('created')->value;
   }
@@ -499,6 +516,54 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setReadOnly(TRUE)
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE);
+
+    $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
+    ->setLabel(t('Sharing Protocol'))
+    ->setDescription(t('TODO'))
+    ->setSettings([
+      'allowed_values' => [
+        'strict' => 'Strict',
+        'open' => 'Open',
+      ],
+    ])
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'list_default',
+        'weight' => 10,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
+        'weight' => 10,
+      ])
+      ->setDefaultValue('strict')
+      ->setCardinality(1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['community_type'] = BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Community Type'))
+    ->setDescription(t('Indicates the type of community.'))
+    ->setSetting('target_type', 'taxonomy_term')
+    ->setSetting('handler', 'default:taxonomy_term')
+    ->setSetting(
+      'handler_settings', array(
+        'target_bundles' => array(
+          'community_type' => 'community_type'
+          )
+        )
+      )
+      ->setRequired(FALSE)
+      ->setCardinality(1)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 4,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     return $fields;
   }
