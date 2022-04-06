@@ -11,6 +11,7 @@ dependencies:
   module:
     - media
     - mukurtu_protocol
+    - mukurtu_digital_heritage
     - node
 id: protocol-protocol-contributor
 label: Contributor
