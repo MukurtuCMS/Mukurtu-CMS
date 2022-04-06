@@ -34,7 +34,8 @@ class MukurtuDictionaryController extends ControllerBase {
           if ($access_result) {
             if ($facet_id == 'glossary_title') {
               $glossary = $block_plugin->build();
-            } else {
+            }
+            else {
               $facets[$facet_id] = $block_plugin->build();
             }
           }

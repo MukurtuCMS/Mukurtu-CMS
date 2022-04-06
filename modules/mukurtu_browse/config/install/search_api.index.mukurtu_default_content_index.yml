@@ -2,10 +2,8 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.body
     - field.storage.node.field_category
     - field.storage.node.field_collection_type
-    - field.storage.node.field_mukurtu_community
     - field.storage.node.field_description
     - field.storage.node.field_mukurtu_geojson
     - field.storage.node.field_keywords
@@ -25,24 +23,6 @@ name: 'Mukurtu Default content index'
 description: 'Default Mukurtu content index'
 read_only: false
 field_settings:
-  body:
-    label: Body
-    datasource_id: 'entity:node'
-    property_path: body
-    type: text
-    dependencies:
-      config:
-        - field.storage.node.body
-  community_title:
-    label: 'Community » Content » Title'
-    datasource_id: 'entity:node'
-    property_path: 'field_mukurtu_community:entity:title'
-    type: string
-    dependencies:
-      config:
-        - field.storage.node.field_mukurtu_community
-      module:
-        - node
   field_collection_type:
     label: 'Collection Type'
     datasource_id: 'entity:node'
@@ -210,7 +190,6 @@ processor_settings:
   html_filter:
     all_fields: true
     fields:
-      - body
       - community_title
       - field_collection_type
       - field_coverage
@@ -236,7 +215,6 @@ processor_settings:
   ignorecase:
     all_fields: false
     fields:
-      - body
       - field_collection_type
       - field_coverage
       - field_description
@@ -250,7 +228,6 @@ processor_settings:
   tokenizer:
     all_fields: true
     fields:
-      - body
       - field_coverage
       - field_description
       - field_mukurtu_geojson
@@ -265,7 +242,6 @@ processor_settings:
   transliteration:
     all_fields: true
     fields:
-      - body
       - community_title
       - field_collection_type
       - field_coverage

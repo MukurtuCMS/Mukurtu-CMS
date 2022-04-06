@@ -8,12 +8,14 @@ libraries:
   - mukurtu_core/mukurtu-leaflet-widget
 dependencies:
   - blazy
+  - content_browser
   - entity_browser
   - geofield
   - media
   - media_library
   - node
   - search_api
+  - search_api_db
   - search_api_glossary
   - taxonomy
   - views_bulk_operations

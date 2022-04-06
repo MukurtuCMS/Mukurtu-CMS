@@ -6,10 +6,13 @@ core: 8.x
 package: 'Mukurtu'
 dependencies:
   - blazy
+  - entity_browser
+  - field_group
   - media
   - media_library
   - mukurtu_core
   - mukurtu_protocol
+  - path
   - search_api
   - slick
   - slick_entityreference

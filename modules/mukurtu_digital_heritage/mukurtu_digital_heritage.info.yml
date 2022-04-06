@@ -5,6 +5,7 @@ core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
 dependencies:
+  - field_group
   - geofield
   - leaflet
   - media

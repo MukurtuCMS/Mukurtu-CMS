@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - search_api.index.mukurtu_default_content_index
+    - search_api.index.mukurtu_dictionary_index
     - views.view.mukurtu_dictionary
   module:
     - search_api
@@ -12,7 +12,7 @@ url_alias: keywords
 weight: 0
 min_count: 1
 show_only_one_result: false
-field_identifier: name_1
+field_identifier: name
 facet_source_id: 'search_api:views_block__mukurtu_dictionary__mukurtu_dictionary_block'
 widget:
   type: checkbox

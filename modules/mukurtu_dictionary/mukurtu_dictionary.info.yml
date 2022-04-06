@@ -6,10 +6,11 @@ core: 8.x
 package: 'Mukurtu'
 dependencies:
   - facets
+  - mukurtu_collection
   - mukurtu_core
   - mukurtu_protocol
-  - mukurtu_collection
   - mukurtu_taxonomy
+  - paragraphs
   - search_api
   - search_api_glossary
   - text

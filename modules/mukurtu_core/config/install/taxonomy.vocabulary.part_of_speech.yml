@@ -1,7 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-name: 'Part of Speech'
-vid: part_of_speech
-description: ''
-weight: 0

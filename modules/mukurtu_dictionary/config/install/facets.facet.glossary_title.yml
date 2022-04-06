@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - search_api.index.mukurtu_default_content_index
+    - search_api.index.mukurtu_dictionary_index
     - views.view.mukurtu_dictionary
   module:
     - search_api

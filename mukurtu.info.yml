@@ -87,9 +87,11 @@ dependencies:
   - mukurtu_taxonomy
   - mukurtu_media
   - mukurtu_digital_heritage
+  - mukurtu_dictionary
   - mukurtu_collection
   - mukurtu_notifications
   - mukurtu_person
+  - mukurtu_browse
 
 
 themes:
