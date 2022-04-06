@@ -9,6 +9,22 @@ targetEntityType: community
 bundle: community
 mode: default
 content:
+  community_type:
+    type: entity_reference_autocomplete
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_access_mode:
+    type: options_buttons
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_child_communities:
     type: entity_reference_autocomplete
     weight: 2
