@@ -1,21 +1,17 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - field.field.community.community.field_sharing_protocol
   module:
     - mukurtu_protocol
-    - og
-    - options
     - text
 id: community.community.default
 targetEntityType: community
 bundle: community
 mode: default
 content:
-  community_type:
+  field_child_communities:
     type: entity_reference_autocomplete
-    weight: 5
+    weight: 2
     region: content
     settings:
       match_operator: CONTAINS
@@ -23,63 +19,34 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_access_mode:
-    type: options_buttons
-    weight: 10
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  field_child_communities:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 3
-    region: content
   field_description:
-    type: text_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
+    type: text_textarea_with_summary
     weight: 1
     region: content
-  field_parent_community:
-    type: entity_reference_label
-    label: above
     settings:
-      link: true
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
     third_party_settings: {  }
-    weight: 2
-    region: content
-  field_sharing_protocol:
-    type: options_select
-    weight: 4
-    region: content
-    settings: {  }
-    third_party_settings: {  }
+    rows: 6
   name:
-    type: string
-    label: hidden
+    type: string_textfield
+    weight: 0
+    region: content
     settings:
-      link_to_entity: false
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-    weight: 0
-    region: content
-  og_group:
-    type: og_group_subscribe
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 0
-    region: content
   user_id:
-    type: entity_reference_label
-    label: hidden
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 4
+    type: entity_reference_autocomplete
+    weight: 3
     region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
 hidden:
-  search_api_excerpt: true
+  field_parent_community: true
