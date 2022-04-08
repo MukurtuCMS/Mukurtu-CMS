@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\mukurtu_protocol\Entity\Protocol;
+use Drupal\entity_browser\Element\EntityBrowserElement;
 
 /**
  * Form controller for Protocol creation forms.
@@ -30,14 +31,14 @@ class ProtocolAddForm extends EntityForm {
   /**
    * The user IDs of the protocol stewards.
    *
-   * @var int[]
+   * @var \Drupal\core\Session\AccountInterface[]
    */
   protected $protocolStewards;
 
   /**
    * The user IDs of the protocol members.
    *
-   * @var int[]
+   * @var \Drupal\core\Session\AccountInterface[]
    */
   protected $protocolMembers;
 
@@ -73,6 +74,7 @@ class ProtocolAddForm extends EntityForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state, $community = NULL) {
     $this->setModuleHandler($this->moduleHandler);
+    $currentUser = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
     // Set the community relationship.
     if ($community) {
@@ -111,23 +113,33 @@ class ProtocolAddForm extends EntityForm {
     ];
 
     // Protocol Stewards.
-    $form['protocol_stewards'] = [
-      '#type' => 'entity_autocomplete',
+    $form['protocol_stewards_item'] = [
+      '#type' => 'item',
       '#title' => $this->t('Protocol Stewards'),
       '#description' => $this->t('Helper text about protocol stewards.'),
-      '#target_type' => 'user',
-      '#selection_handler' => 'mukurtu_user_selection',
-      '#selection_settings' => ['group' => $this->entity],
+    ];
+    $form['protocol_stewards'] = [
+      '#type' => 'entity_browser',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#default_value' => [$currentUser],
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
     ];
 
     // Protocol Members.
+    $form['protocol_members_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Protocol Members'),
+      '#description' => $this->t('Helper text about protocol members.'),
+    ];
     $form['protocol_members'] = [
-      '#type' => 'entity_autocomplete',
-      '#title' => $this->t('Members'),
-      '#description' => $this->t('Helper text about protocol membership.'),
-      '#target_type' => 'user',
-      '#selection_handler' => 'mukurtu_user_selection',
-      '#selection_settings' => ['group' => $this->entity],
+      '#type' => 'entity_browser',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
+      '#default_value' => [],
     ];
 
     return $form;
@@ -173,9 +185,9 @@ class ProtocolAddForm extends EntityForm {
 
     // Set the memberships for the protocol.
     $stewards = $form_state->getValue('protocol_stewards');
-    $this->protocolStewards = [$stewards];
+    $this->protocolStewards = !empty($stewards['entities']) ? $stewards['entities'] : [];
     $members = $form_state->getValue('protocol_members');
-    $this->protocolMembers = [$members];
+    $this->protocolMembers = !empty($members['entities']) ? $members['entities'] : [];
 
     return $entity;
   }
@@ -192,21 +204,13 @@ class ProtocolAddForm extends EntityForm {
       $protocol = $this->entity;
 
       // Add protocol stewards.
-      /** @var \Drupal\core\Session\AccountInterface[] $stewards */
-      if (!empty($this->protocolStewards)) {
-        $stewards = $this->entityTypeManager->getStorage('user')->loadMultiple($this->protocolStewards);
-        foreach ($stewards as $steward) {
-          $protocol->addMember($steward)->setRoles($steward, ['protocol_steward']);
-        }
+      foreach ($this->protocolStewards as $steward) {
+        $protocol->addMember($steward)->setRoles($steward, ['protocol_steward']);
       }
 
       // Add protocol members.
-      /** @var \Drupal\core\Session\AccountInterface[] $members */
-      if (!empty($this->protocolMembers)) {
-        $members = $this->entityTypeManager->getStorage('user')->loadMultiple($this->protocolMembers);
-        foreach ($members as $member) {
-          $protocol->addMember($member);
-        }
+      foreach ($this->protocolMembers as $member) {
+        $protocol->addMember($member);
       }
     }
   }

@@ -1,0 +1,31 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+name: mukurtu_community_and_protocol_user_browser
+label: 'User Selection'
+display: modal
+display_configuration:
+  width: '650'
+  height: '500'
+  link_text: 'Select Members'
+  auto_open: false
+selection_display: multi_step_display
+selection_display_configuration:
+  entity_type: user
+  display: label
+  display_settings: {  }
+  select_text: Finished
+  selection_hidden: false
+widget_selector: single
+widget_selector_configuration: {  }
+widgets:
+  f503726d-709b-460d-9f7d-da39de306aa6:
+    id: mukurtu_user_selection
+    uuid: f503726d-709b-460d-9f7d-da39de306aa6
+    label: 'Select Users'
+    weight: 1
+    settings:
+      submit_text: 'Add Users'
+      auto_select: 0

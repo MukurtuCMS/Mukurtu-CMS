@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Url;
+use Drupal\entity_browser\Element\EntityBrowserElement;
 
 /**
  * Form controller for Community creation forms.
@@ -22,9 +23,9 @@ class CommunityAddForm extends EntityForm {
 
 
   /**
-   * The user IDs of the community managers.
+   * The users to be made community managers.
    *
-   * @var int[]
+   * @var \Drupal\core\Session\AccountInterface[]
    */
   protected $communityManagers;
 
@@ -43,6 +44,7 @@ class CommunityAddForm extends EntityForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
+    $currentUser = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
     // Community name.
     $form['name'] = [
@@ -60,13 +62,18 @@ class CommunityAddForm extends EntityForm {
     ];
 
     // Community Managers.
-    $form['community_managers'] = [
-      '#type' => 'entity_autocomplete',
+    $form['community_managers_item'] = [
+      '#type' => 'item',
       '#title' => $this->t('Community Managers'),
       '#description' => $this->t('Helper text about community managers.'),
-      '#target_type' => 'user',
-      '#selection_handler' => 'mukurtu_user_selection',
-      '#selection_settings' => ['group' => $this->entity],
+    ];
+
+    $form['community_managers'] = [
+      '#type' => 'entity_browser',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#default_value' => [$currentUser],
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
     ];
 
     return $form;
@@ -99,7 +106,7 @@ class CommunityAddForm extends EntityForm {
 
     // Grab the community managers.
     $managers = $form_state->getValue('community_managers');
-    $this->communityManagers = [$managers];
+    $this->communityManagers = !empty($managers['entities']) ? $managers['entities'] : [];
 
     return $entity;
   }
@@ -113,9 +120,7 @@ class CommunityAddForm extends EntityForm {
       $community = $this->entity;
 
       // Add community managers here.
-      /** @var \Drupal\core\Session\AccountInterface[] $managers */
-      $managers = $this->entityTypeManager->getStorage('user')->loadMultiple($this->communityManagers);
-      foreach ($managers as $manager) {
+      foreach ($this->communityManagers as $manager) {
         $community->addMember($manager)->setRoles($manager, ['community_manager']);
       }
 
