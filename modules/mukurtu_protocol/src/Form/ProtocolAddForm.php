@@ -7,6 +7,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\entity_browser\Element\EntityBrowserElement;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
 
 /**
  * Form controller for Protocol creation forms.
@@ -74,6 +76,7 @@ class ProtocolAddForm extends EntityForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state, $community = NULL) {
     $this->setModuleHandler($this->moduleHandler);
+    /** @var \Drupal\Core\Session\AccountInterface $currentUser */
     $currentUser = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
     // Set the community relationship.
@@ -118,13 +121,26 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Protocol Stewards'),
       '#description' => $this->t('Helper text about protocol stewards.'),
     ];
+    $defaultStatus = "<ul>";
+    $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
+    $defaultStatus .= "</ul>";
     $form['protocol_stewards'] = [
       '#type' => 'entity_browser',
+      '#id' => 'protocol-stewards',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#default_value' => [$currentUser],
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#widget_context' => ['group' => $this->entity],
+      '#prefix' => '<div id="role-protocol-stewards">',
+      '#suffix' => $defaultStatus . '</div>',
+      '#process' => [
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
     ];
 
     // Protocol Members.
@@ -135,14 +151,62 @@ class ProtocolAddForm extends EntityForm {
     ];
     $form['protocol_members'] = [
       '#type' => 'entity_browser',
+      '#id' => 'protocol-members',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#widget_context' => ['group' => $this->entity],
       '#default_value' => [],
+      '#prefix' => '<div id="role-protocol-members">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
     ];
 
     return $form;
+  }
+
+  /**
+   * Render API callback: Processes the entity browser element.
+   */
+  public static function processEntityBrowser(&$element, FormStateInterface $form_state, &$complete_form) {
+    $trigger = $form_state->getTriggeringElement();
+    $element['#default_value'] = $element['#value']['entities'] ?? $element['#default_value'];
+    $element['entity_ids']['#default_value'] = $trigger['#value'] ?? $element['entity_ids']['#default_value'];
+    $element['entity_ids']['#ajax'] = [
+      'callback' => [get_called_class(), 'updateCallback'],
+      'wrapper' => "role-{$element['#id']}",
+      'event' => 'entity_browser_value_updated',
+    ];
+    return $element;
+  }
+
+  /**
+   * AJAX callback: Re-renders the Entity Browser.
+   */
+  public static function updateCallback(array &$form, FormStateInterface $form_state) {
+    $trigger = $form_state->getTriggeringElement();
+    $parents = $trigger['#array_parents'];
+    $role = $parents[0];
+    $value = $form_state->getValue($role);
+    $status = "<ul>";
+    foreach ($value['entities'] as $user) {
+      $status .= "<li>{$user->getAccountName()} ({$user->getEmail()})</li>";
+    }
+    $status .= "</ul>";
+
+    unset($form[$role]['#default_value']);
+    unset($form[$role]['entity_ids']['#default_value']);
+    $form[$role]['#suffix'] = $status . '</div>';
+    $response = new AjaxResponse();
+    $roleID = str_replace('_', '-', $role);
+    $response->addCommand(new ReplaceCommand("#role-{$roleID}", $form[$role]));
+    return $response;
   }
 
   /**
