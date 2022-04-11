@@ -7,6 +7,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Url;
 use Drupal\entity_browser\Element\EntityBrowserElement;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Component\Utility\NestedArray;
 
 /**
  * Form controller for Community creation forms.
@@ -44,6 +47,7 @@ class CommunityAddForm extends EntityForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
+    /** @var \Drupal\Core\Session\AccountInterface $currentUser */
     $currentUser = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
     // Community name.
@@ -68,15 +72,67 @@ class CommunityAddForm extends EntityForm {
       '#description' => $this->t('Helper text about community managers.'),
     ];
 
+    $defaultStatus = "<ul>";
+    $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
+    $defaultStatus .= "</ul>";
+
     $form['community_managers'] = [
       '#type' => 'entity_browser',
+      '#id' => 'community-managers',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#default_value' => [$currentUser],
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#prefix' => '<div id="role-community-managers">',
+      '#suffix' => $defaultStatus . '</div>',
+      '#process' => [
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
     ];
 
     return $form;
+  }
+
+  /**
+   * Render API callback: Processes the entity browser element.
+   */
+  public static function processEntityBrowser(&$element, FormStateInterface $form_state, &$complete_form) {
+    $trigger = $form_state->getTriggeringElement();
+    $element['#default_value'] = $element['#value']['entities'] ?? $element['#default_value'];
+    $element['entity_ids']['#default_value'] = $trigger['#value'] ?? $element['entity_ids']['#default_value'];
+    $element['entity_ids']['#ajax'] = [
+      'callback' => [get_called_class(), 'updateCallback'],
+      'wrapper' => "role-{$element['#id']}",
+      'event' => 'entity_browser_value_updated',
+    ];
+    return $element;
+  }
+
+  /**
+   * AJAX callback: Re-renders the Entity Browser.
+   */
+  public static function updateCallback(array &$form, FormStateInterface $form_state) {
+    $trigger = $form_state->getTriggeringElement();
+    $parents = $trigger['#array_parents'];
+    $role = $parents[0];
+    $value = $form_state->getValue($role);
+    $status = "<ul>";
+    foreach ($value['entities'] as $user) {
+      $status .= "<li>{$user->getAccountName()} ({$user->getEmail()})</li>";
+    }
+    $status .= "</ul>";
+
+    unset($form[$role]['#default_value']);
+    unset($form[$role]['entity_ids']['#default_value']);
+    $form[$role]['#suffix'] = $status . '</div>';
+    $response = new AjaxResponse();
+    $roleID = str_replace('_', '-', $role);
+    $response->addCommand(new ReplaceCommand("#role-{$roleID}", $form[$role]));
+    return $response;
   }
 
   /**

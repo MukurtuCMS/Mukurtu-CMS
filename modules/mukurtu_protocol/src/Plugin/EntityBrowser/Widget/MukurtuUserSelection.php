@@ -121,6 +121,13 @@ class MukurtuUserSelection extends WidgetBase implements ContainerFactoryPluginI
       '#type' => 'textfield',
       '#title' => $this->t('Search'),
       '#default_value' => '',
+      '#size' => 60,
+      '#maxlength' => 128,
+    ];
+
+    $form['search_submit'] = [
+      '#type' => 'button',
+      '#value' => $this->t('Search'),
     ];
 
     // Get the already selected users so we can remove them from the query.
