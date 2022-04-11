@@ -135,6 +135,7 @@ class ProtocolAddForm extends EntityForm {
       '#prefix' => '<div id="role-protocol-stewards">',
       '#suffix' => $defaultStatus . '</div>',
       '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
         [
           '\Drupal\entity_browser\Element\EntityBrowserElement',
           'processEntityBrowser',
@@ -160,6 +161,7 @@ class ProtocolAddForm extends EntityForm {
       '#prefix' => '<div id="role-protocol-members">',
       '#suffix' => '</div>',
       '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
         [
           '\Drupal\entity_browser\Element\EntityBrowserElement',
           'processEntityBrowser',
@@ -169,6 +171,14 @@ class ProtocolAddForm extends EntityForm {
     ];
 
     return $form;
+  }
+
+  /**
+   * Keep default value for entity browser up to date.
+   */
+  public static function updateDefaultValues(&$element, FormStateInterface $form_state, &$complete_form) {
+    $element['#default_value'] = $element['#value']['entities'] ?? $element['#default_value'];
+    return $element;
   }
 
   /**

@@ -86,6 +86,7 @@ class CommunityAddForm extends EntityForm {
       '#prefix' => '<div id="role-community-managers">',
       '#suffix' => $defaultStatus . '</div>',
       '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
         [
           '\Drupal\entity_browser\Element\EntityBrowserElement',
           'processEntityBrowser',
@@ -98,12 +99,17 @@ class CommunityAddForm extends EntityForm {
   }
 
   /**
+   * Keep default value for entity browser up to date.
+   */
+  public static function updateDefaultValues(&$element, FormStateInterface $form_state, &$complete_form) {
+    $element['#default_value'] = $element['#value']['entities'] ?? $element['#default_value'];
+    return $element;
+  }
+
+  /**
    * Render API callback: Processes the entity browser element.
    */
   public static function processEntityBrowser(&$element, FormStateInterface $form_state, &$complete_form) {
-    $trigger = $form_state->getTriggeringElement();
-    $element['#default_value'] = $element['#value']['entities'] ?? $element['#default_value'];
-    $element['entity_ids']['#default_value'] = $trigger['#value'] ?? $element['entity_ids']['#default_value'];
     $element['entity_ids']['#ajax'] = [
       'callback' => [get_called_class(), 'updateCallback'],
       'wrapper' => "role-{$element['#id']}",
@@ -126,8 +132,6 @@ class CommunityAddForm extends EntityForm {
     }
     $status .= "</ul>";
 
-    unset($form[$role]['#default_value']);
-    unset($form[$role]['entity_ids']['#default_value']);
     $form[$role]['#suffix'] = $status . '</div>';
     $response = new AjaxResponse();
     $roleID = str_replace('_', '-', $role);
