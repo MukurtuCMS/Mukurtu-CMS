@@ -329,6 +329,7 @@ display:
     display_plugin: block
     position: 1
     display_options:
+      title: 'My Recent Content'
       arguments:
         uid:
           id: uid
@@ -367,6 +368,7 @@ display:
           break_phrase: false
           not: false
       defaults:
+        title: false
         arguments: false
       display_description: ''
       display_extenders: {  }
