@@ -23,6 +23,13 @@ use Drupal\og\Entity\OgRole;
  * @ContentEntityType(
  *   id = "community",
  *   label = @Translation("Community"),
+ *   label_collection = @Translation("Communities"),
+ *   label_singular = @Translation("Community"),
+ *   label_plural = @Translation("Communities"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count community",
+ *     plural = "@count communities",
+ *   ),
  *   handlers = {
  *     "storage" = "Drupal\mukurtu_protocol\CommunityStorage",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",

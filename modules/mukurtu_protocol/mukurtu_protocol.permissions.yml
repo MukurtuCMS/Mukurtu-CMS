@@ -1,64 +1,64 @@
 add community entities:
-  title: 'Create new Community entities'
+  title: 'Create new Communities'
 
 administer community entities:
   title: 'Administer Community entities'
-  description: 'Allow to access the administration form to configure Community entities.'
+  description: 'Allow to access the administration form to configure Communities.'
   restrict access: true
 
 delete community entities:
-  title: 'Delete Community entities'
+  title: 'Delete Communities'
 
 edit community entities:
-  title: 'Edit Community entities'
+  title: 'Edit Communities'
 
 view published community entities:
-  title: 'View published Community entities'
+  title: 'View published Communities'
 
 view unpublished community entities:
-  title: 'View unpublished Community entities'
+  title: 'View unpublished Communities'
 
 view all community revisions:
   title: 'View all Community revisions'
 
 revert all community revisions:
   title: 'Revert all Community revisions'
-  description: 'Role requires permission <em>view Community revisions</em> and <em>edit rights</em> for community entities in question or <em>administer community entities</em>.'
+  description: 'Role requires permission <em>view Community revisions</em> and <em>edit rights</em> for communities in question or <em>administer communities</em>.'
 
 delete all community revisions:
   title: 'Delete all revisions'
-  description: 'Role requires permission to <em>view Community revisions</em> and <em>delete rights</em> for community entities in question or <em>administer community entities</em>.'
+  description: 'Role requires permission to <em>view Community revisions</em> and <em>delete rights</em> for communities in question or <em>administer communities</em>.'
 
 add protocol entities:
-  title: 'Create new Protocol entities'
+  title: 'Create new Cultural Protocols'
 
 administer protocol entities:
   title: 'Administer Protocol entities'
-  description: 'Allow to access the administration form to configure Protocol entities.'
+  description: 'Allow to access the administration form to configure Cultural Protocols.'
   restrict access: true
 
 delete protocol entities:
-  title: 'Delete Protocol entities'
+  title: 'Delete Cultural Protocols'
 
 edit protocol entities:
-  title: 'Edit Protocol entities'
+  title: 'Edit Cultural Protocols'
 
 view published protocol entities:
-  title: 'View published Protocol entities'
+  title: 'View published Cultural Protocols'
 
 view unpublished protocol entities:
-  title: 'View unpublished Protocol entities'
+  title: 'View unpublished Cultural Protocols'
 
 view all protocol revisions:
-  title: 'View all Protocol revisions'
+  title: 'View all Cultural Protocol revisions'
 
 revert all protocol revisions:
-  title: 'Revert all Protocol revisions'
-  description: 'Role requires permission <em>view Protocol revisions</em> and <em>edit rights</em> for protocol entities in question or <em>administer protocol entities</em>.'
+  title: 'Revert all Cultural Protocol revisions'
+  description: 'Role requires permission <em>view Cultural Protocol revisions</em> and <em>edit rights</em> for cultural protocols in question or <em>administer cultural protocols</em>.'
 
 delete all protocol revisions:
   title: 'Delete all revisions'
-  description: 'Role requires permission to <em>view Protocol revisions</em> and <em>delete rights</em> for protocol entities in question or <em>administer protocol entities</em>.'
+  description: 'Role requires permission to <em>view Cultural Protocol revisions</em> and <em>delete rights</em> for cultural protocols in question or <em>administer cultural protocols</em>.'
 
 add protocol control entities:
   title: 'Create new Protocol control entities'
