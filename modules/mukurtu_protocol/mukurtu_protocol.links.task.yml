@@ -77,3 +77,9 @@ entity.community.delete_form:
   base_route:  entity.community.canonical
   title: Delete
   weight: 10
+
+mukurtu_protocol.create_protocol:
+  title: Create Protocol
+  route_name: mukurtu_protocol.community_add_protocol
+  base_route: entity.community.canonical
+  weight: 4

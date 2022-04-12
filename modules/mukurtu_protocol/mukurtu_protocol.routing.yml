@@ -39,10 +39,17 @@ mukurtu_protocol.protocol_roles:
     _permission: 'administer organic groups'
 
 mukurtu_protocol.add_protocol_from_community:
-  path: '/protocols/protocol/add/community/{communityID}'
+  path: '/protocols/protocol/add/community/{community}'
   defaults:
     _controller: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::createProtocolFromCommunityPage'
     _title_callback: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::getTitle'
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::access'
 
+mukurtu_protocol.community_add_protocol:
+  path: '/communities/community/{community}/add/protocol'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::createProtocolFromCommunityPage'
+    _title_callback: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::getTitle'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::access'

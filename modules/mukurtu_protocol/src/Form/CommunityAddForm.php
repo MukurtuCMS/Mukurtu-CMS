@@ -254,9 +254,9 @@ class CommunityAddForm extends EntityForm {
 
       // Redirect to the protocol creation form if the author is
       // a community manager.
-      $protocolCreateUrl = Url::fromRoute('mukurtu_protocol.add_protocol_from_community', ['communityID' => $community->id()]);
+      $protocolCreateUrl = Url::fromRoute('mukurtu_protocol.add_protocol_from_community', ['community' => $community->id()]);
       if ($protocolCreateUrl->access()) {
-        $form_state->setRedirect('mukurtu_protocol.add_protocol_from_community', ['communityID' => $community->id()]);
+        $form_state->setRedirect('mukurtu_protocol.add_protocol_from_community', ['community' => $community->id()]);
       }
       else {
         $form_state->setRedirect('entity.community.canonical', ['community' => $community->id()]);
