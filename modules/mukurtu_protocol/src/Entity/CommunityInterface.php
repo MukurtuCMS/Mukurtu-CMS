@@ -187,4 +187,12 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
    */
   public function isChildCommunity(): bool;
 
+  /**
+   * Get the protocols.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface[]
+   *   The protocol entities.
+   */
+  public function getProtocols();
+
 }

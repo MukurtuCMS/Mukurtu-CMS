@@ -399,6 +399,22 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function getProtocols() {
+    $query = $this->entityTypeManager()->getStorage('protocol')->getQuery();
+    $result = $query->condition('field_communities', $this->id(), '=')
+      ->accessCheck(FALSE)
+      ->execute();
+
+    $protocols = [];
+    if (!empty($result)) {
+      $protocols = $this->entityTypeManager()->getStorage('protocol')->loadMultiple($result);
+    }
+    return $protocols;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 

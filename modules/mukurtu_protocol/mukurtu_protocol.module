@@ -106,6 +106,17 @@ function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setDisplayConfigurable('view', TRUE);
   }
 
+  if ($entity_type->id() == 'community') {
+    $fields['field_protocols'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_protocols')
+      ->setLabel(t('Cultural Protocols'))
+      ->setDescription(t('Cultural Protocols for this community.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityProtocolsItemList')
+      ->setSetting('target_type', 'protocol')
+      ->setCardinality(-1)
+      ->setDisplayConfigurable('view', TRUE);
+  }
   /**
    * Override the default OG user handler with mukurtu_user_selection.
    */

@@ -41,7 +41,8 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
           $membership = Og::getMembership($entity, $account);
 
           if ($membership) {
-            return AccessResult::allowedIfHasPermission($account, 'view published community entities');
+            return AccessResult::allowed();
+            //return AccessResult::allowedIfHasPermission($account, 'view published community entities');
           }
 
           // if not member, not allowed to view
