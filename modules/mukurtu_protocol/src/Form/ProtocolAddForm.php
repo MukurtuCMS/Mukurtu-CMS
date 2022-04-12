@@ -31,21 +31,16 @@ class ProtocolAddForm extends EntityForm {
   protected $community;
 
   /**
-   * The user IDs of the protocol stewards.
+   * The users to add to the community.
    *
-   * @var \Drupal\core\Session\AccountInterface[]
+   * @var mixed
    */
-  protected $protocolStewards;
+  protected $members;
 
   /**
-   * The user IDs of the protocol members.
-   *
-   * @var \Drupal\core\Session\AccountInterface[]
+   * The Module Handler.
    */
-  protected $protocolMembers;
-
   protected $moduleHandler;
-
 
   /**
    * The user IDs of the community managers.
@@ -116,7 +111,7 @@ class ProtocolAddForm extends EntityForm {
     ];
 
     // Protocol Stewards.
-    $form['protocol_stewards_item'] = [
+    $form['protocol_steward_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Protocol Stewards'),
       '#description' => $this->t('Helper text about protocol stewards.'),
@@ -124,15 +119,15 @@ class ProtocolAddForm extends EntityForm {
     $defaultStatus = "<ul>";
     $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
     $defaultStatus .= "</ul>";
-    $form['protocol_stewards'] = [
+    $form['protocol_steward'] = [
       '#type' => 'entity_browser',
-      '#id' => 'protocol-stewards',
+      '#id' => 'protocol-steward',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#default_value' => [$currentUser],
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#widget_context' => ['group' => $this->entity],
-      '#prefix' => '<div id="role-protocol-stewards">',
+      '#prefix' => '<div id="role-protocol-steward">',
       '#suffix' => $defaultStatus . '</div>',
       '#process' => [
         [get_called_class(), 'updateDefaultValues'],
@@ -145,20 +140,20 @@ class ProtocolAddForm extends EntityForm {
     ];
 
     // Protocol Members.
-    $form['protocol_members_item'] = [
+    $form['protocol_member_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Protocol Members'),
       '#description' => $this->t('Helper text about protocol members.'),
     ];
-    $form['protocol_members'] = [
+    $form['protocol_member'] = [
       '#type' => 'entity_browser',
-      '#id' => 'protocol-members',
+      '#id' => 'protocol-member',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#widget_context' => ['group' => $this->entity],
       '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-members">',
+      '#prefix' => '<div id="role-protocol-member">',
       '#suffix' => '</div>',
       '#process' => [
         [get_called_class(), 'updateDefaultValues'],
@@ -257,11 +252,20 @@ class ProtocolAddForm extends EntityForm {
     $entity->setDescription($form_state->getValue('field_description'));
     $entity->setSharingSetting($form_state->getValue('field_access_mode'));
 
-    // Set the memberships for the protocol.
-    $stewards = $form_state->getValue('protocol_stewards');
-    $this->protocolStewards = !empty($stewards['entities']) ? $stewards['entities'] : [];
-    $members = $form_state->getValue('protocol_members');
-    $this->protocolMembers = !empty($members['entities']) ? $members['entities'] : [];
+    // Grab the memberships.
+    foreach (['protocol_steward', 'protocol_member'] as $role) {
+      $members = $form_state->getValue($role);
+      $users = !empty($members['entities']) ? $members['entities'] : [];
+      foreach ($users as $user) {
+        if (!isset($this->members[$user->id()])) {
+          $this->members[$user->id()] = ['entity' => $user, 'roles' => []];
+        }
+
+        if (!in_array($role, $this->members[$user->id()]['roles'])) {
+          $this->members[$user->id()]['roles'][] = $role;
+        }
+      }
+    }
 
     return $entity;
   }
@@ -277,14 +281,9 @@ class ProtocolAddForm extends EntityForm {
       /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
       $protocol = $this->entity;
 
-      // Add protocol stewards.
-      foreach ($this->protocolStewards as $steward) {
-        $protocol->addMember($steward)->setRoles($steward, ['protocol_steward']);
-      }
-
-      // Add protocol members.
-      foreach ($this->protocolMembers as $member) {
-        $protocol->addMember($member);
+      // Add members/roles.
+      foreach ($this->members as $member) {
+        $protocol->addMember($member['entity'])->setRoles($member['entity'], $member['roles']);
       }
     }
   }

@@ -229,7 +229,10 @@ class CommunityAddForm extends EntityForm {
         if (!isset($this->members[$user->id()])) {
           $this->members[$user->id()] = ['entity' => $user, 'roles' => []];
         }
-        $this->members[$user->id()]['roles'][] = $role;
+
+        if (!in_array($role, $this->members[$user->id()]['roles'])) {
+          $this->members[$user->id()]['roles'][] = $role;
+        }
       }
     }
 
