@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: community-community-community_affiliate
+label: 'Community Affiliate'
+weight: 17
+group_id: null
+group_type: community
+group_bundle: community
+is_admin: null
+permissions: null
+role_type: standard
