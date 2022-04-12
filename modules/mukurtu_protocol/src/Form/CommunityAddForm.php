@@ -6,6 +6,9 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Url;
+use Drupal\entity_browser\Element\EntityBrowserElement;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
 
 /**
  * Form controller for Community creation forms.
@@ -22,11 +25,18 @@ class CommunityAddForm extends EntityForm {
 
 
   /**
-   * The user IDs of the community managers.
+   * The users to be made community managers.
    *
-   * @var int[]
+   * @var \Drupal\core\Session\AccountInterface[]
    */
   protected $communityManagers;
+
+  /**
+   * The users to add to the community.
+   *
+   * @var mixed
+   */
+  protected $members;
 
   /**
    * {@inheritdoc}
@@ -35,6 +45,7 @@ class CommunityAddForm extends EntityForm {
     // Instantiates this form class.
     $instance = parent::create($container);
     $instance->account = $container->get('current_user');
+
     return $instance;
   }
 
@@ -43,6 +54,8 @@ class CommunityAddForm extends EntityForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
+    /** @var \Drupal\Core\Session\AccountInterface $currentUser */
+    $currentUser = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
     // Community name.
     $form['name'] = [
@@ -60,16 +73,127 @@ class CommunityAddForm extends EntityForm {
     ];
 
     // Community Managers.
-    $form['community_managers'] = [
-      '#type' => 'entity_autocomplete',
+    $form['community_manager_item'] = [
+      '#type' => 'item',
       '#title' => $this->t('Community Managers'),
       '#description' => $this->t('Helper text about community managers.'),
-      '#target_type' => 'user',
-      '#selection_handler' => 'mukurtu_user_selection',
-      '#selection_settings' => ['group' => $this->entity],
+    ];
+
+    $defaultStatus = "<ul>";
+    $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
+    $defaultStatus .= "</ul>";
+
+    $form['community_manager'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'community-manager',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#default_value' => [$currentUser],
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#prefix' => '<div id="role-community-manager">',
+      '#suffix' => $defaultStatus . '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Community Members.
+    $form['community_member_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Community Members'),
+      '#description' => $this->t('Helper text about community members.'),
+    ];
+
+    $form['community_member'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'community-member',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#prefix' => '<div id="role-community-member">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Community Affiliates.
+    $form['community_affiliate_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Community Affiliates'),
+      '#description' => $this->t('Helper text about community affiliates.'),
+    ];
+
+    $form['community_affiliate'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'community-affiliate',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#prefix' => '<div id="role-community-affiliate">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
     ];
 
     return $form;
+  }
+
+  /**
+   * Keep default value for entity browser up to date.
+   */
+  public static function updateDefaultValues(&$element, FormStateInterface $form_state, &$complete_form) {
+    $element['#default_value'] = $element['#value']['entities'] ?? $element['#default_value'];
+    return $element;
+  }
+
+  /**
+   * Render API callback: Processes the entity browser element.
+   */
+  public static function processEntityBrowser(&$element, FormStateInterface $form_state, &$complete_form) {
+    $element['entity_ids']['#ajax'] = [
+      'callback' => [get_called_class(), 'updateCallback'],
+      'wrapper' => "role-{$element['#id']}",
+      'event' => 'entity_browser_value_updated',
+    ];
+    return $element;
+  }
+
+  /**
+   * AJAX callback: Re-renders the Entity Browser.
+   */
+  public static function updateCallback(array &$form, FormStateInterface $form_state) {
+    $trigger = $form_state->getTriggeringElement();
+    $parents = $trigger['#array_parents'];
+    $role = $parents[0];
+    $value = $form_state->getValue($role);
+    $status = "<ul>";
+    foreach ($value['entities'] as $user) {
+      $status .= "<li>{$user->getAccountName()} ({$user->getEmail()})</li>";
+    }
+    $status .= "</ul>";
+
+    $form[$role]['#suffix'] = $status . '</div>';
+    $response = new AjaxResponse();
+    $roleID = str_replace('_', '-', $role);
+    $response->addCommand(new ReplaceCommand("#role-{$roleID}", $form[$role]));
+    return $response;
   }
 
   /**
@@ -97,9 +221,20 @@ class CommunityAddForm extends EntityForm {
     $entity->setName($form_state->getValue('name'));
     $entity->setDescription($form_state->getValue('field_description'));
 
-    // Grab the community managers.
-    $managers = $form_state->getValue('community_managers');
-    $this->communityManagers = [$managers];
+    // Grab the memberships.
+    foreach (['community_manager', 'community_member', 'community_affiliate'] as $role) {
+      $members = $form_state->getValue($role);
+      $users = !empty($members['entities']) ? $members['entities'] : [];
+      foreach ($users as $user) {
+        if (!isset($this->members[$user->id()])) {
+          $this->members[$user->id()] = ['entity' => $user, 'roles' => []];
+        }
+
+        if (!in_array($role, $this->members[$user->id()]['roles'])) {
+          $this->members[$user->id()]['roles'][] = $role;
+        }
+      }
+    }
 
     return $entity;
   }
@@ -112,18 +247,16 @@ class CommunityAddForm extends EntityForm {
       /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
       $community = $this->entity;
 
-      // Add community managers here.
-      /** @var \Drupal\core\Session\AccountInterface[] $managers */
-      $managers = $this->entityTypeManager->getStorage('user')->loadMultiple($this->communityManagers);
-      foreach ($managers as $manager) {
-        $community->addMember($manager)->setRoles($manager, ['community_manager']);
+      // Add members/roles.
+      foreach ($this->members as $member) {
+        $community->addMember($member['entity'])->setRoles($member['entity'], $member['roles']);
       }
 
       // Redirect to the protocol creation form if the author is
       // a community manager.
-      $protocolCreateUrl = Url::fromRoute('mukurtu_protocol.add_protocol_from_community', ['communityID' => $community->id()]);
+      $protocolCreateUrl = Url::fromRoute('mukurtu_protocol.add_protocol_from_community', ['community' => $community->id()]);
       if ($protocolCreateUrl->access()) {
-        $form_state->setRedirect('mukurtu_protocol.add_protocol_from_community', ['communityID' => $community->id()]);
+        $form_state->setRedirect('mukurtu_protocol.add_protocol_from_community', ['community' => $community->id()]);
       }
       else {
         $form_state->setRedirect('entity.community.canonical', ['community' => $community->id()]);

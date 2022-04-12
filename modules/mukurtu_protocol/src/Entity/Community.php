@@ -23,6 +23,13 @@ use Drupal\og\Entity\OgRole;
  * @ContentEntityType(
  *   id = "community",
  *   label = @Translation("Community"),
+ *   label_collection = @Translation("Communities"),
+ *   label_singular = @Translation("Community"),
+ *   label_plural = @Translation("Communities"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count community",
+ *     plural = "@count communities",
+ *   ),
  *   handlers = {
  *     "storage" = "Drupal\mukurtu_protocol\CommunityStorage",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
@@ -392,6 +399,22 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function getProtocols() {
+    $query = $this->entityTypeManager()->getStorage('protocol')->getQuery();
+    $result = $query->condition('field_communities', $this->id(), '=')
+      ->accessCheck(FALSE)
+      ->execute();
+
+    $protocols = [];
+    if (!empty($result)) {
+      $protocols = $this->entityTypeManager()->getStorage('protocol')->loadMultiple($result);
+    }
+    return $protocols;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -518,14 +541,14 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setTranslatable(TRUE);
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
-    ->setLabel(t('Sharing Protocol'))
-    ->setDescription(t('TODO'))
-    ->setSettings([
-      'allowed_values' => [
-        'strict' => 'Strict',
-        'open' => 'Open',
-      ],
-    ])
+      ->setLabel(t('Sharing Protocol'))
+      ->setDescription(t('TODO'))
+      ->setSettings([
+        'allowed_values' => [
+          'strict' => 'Strict',
+          'open' => 'Open',
+        ],
+      ])
       ->setDisplayOptions('view', [
         'label' => 'visible',
         'type' => 'list_default',
@@ -544,16 +567,16 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['community_type'] = BaseFieldDefinition::create('entity_reference')
-    ->setLabel(t('Community Type'))
-    ->setDescription(t('Indicates the type of community.'))
-    ->setSetting('target_type', 'taxonomy_term')
-    ->setSetting('handler', 'default:taxonomy_term')
-    ->setSetting(
-      'handler_settings', array(
-        'target_bundles' => array(
-          'community_type' => 'community_type'
-          )
-        )
+      ->setLabel(t('Community Type'))
+      ->setDescription(t('Indicates the type of community.'))
+      ->setSetting('target_type', 'taxonomy_term')
+      ->setSetting('handler', 'default:taxonomy_term')
+      ->setSetting('handler_settings',
+        [
+          'target_bundles' => [
+            'community_type' => 'community_type',
+          ],
+        ],
       )
       ->setRequired(FALSE)
       ->setCardinality(1)

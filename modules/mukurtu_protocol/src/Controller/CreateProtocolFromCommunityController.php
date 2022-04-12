@@ -15,8 +15,8 @@ class CreateProtocolFromCommunityController extends ControllerBase {
   /**
    * Page to create a new protocol given a community.
    */
-  public function createProtocolFromCommunityPage($communityID) {
-    $community = $this->entityTypeManager()->getStorage('community')->load($communityID);
+  public function createProtocolFromCommunityPage($community) {
+    $community = $this->entityTypeManager()->getStorage('community')->load($community);
 
     return [
       'form' => \Drupal::formBuilder()->getForm('\Drupal\mukurtu_protocol\Form\ProtocolAddForm', $community),
@@ -26,9 +26,9 @@ class CreateProtocolFromCommunityController extends ControllerBase {
   /**
    * Title callback for the add protocol form.
    */
-  public function getTitle($communityID) {
+  public function getTitle($community) {
     /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
-    $community = $this->entityTypeManager()->getStorage('community')->load($communityID);
+    $community = $this->entityTypeManager()->getStorage('community')->load($community);
     return $community ? $this->t('Creating cultural protocol for %community', ['%community' => $community->getName()]) : $this->t('Creating a new cultural protocol');
   }
 
@@ -37,15 +37,16 @@ class CreateProtocolFromCommunityController extends ControllerBase {
    *
    * @param \Drupal\Core\Session\AccountInterface $account
    *   Run access checks for this account.
-   * @param int $communityID
+   * @param int $community
    *   The ID of the community to own the new protocol.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(AccountInterface $account, $communityID) {
+  public function access(AccountInterface $account, $community) {
     /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
-    $community = $this->entityTypeManager()->getStorage('community')->load($communityID);
+    $community = $this->entityTypeManager()->getStorage('community')->load($community);
+
     if (!$community) {
       return AccessResult::forbidden();
     }

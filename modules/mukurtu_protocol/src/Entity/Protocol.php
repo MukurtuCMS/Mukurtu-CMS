@@ -24,7 +24,14 @@ use Drupal\field\Entity\FieldConfig;
  *
  * @ContentEntityType(
  *   id = "protocol",
- *   label = @Translation("Protocol"),
+ *   label = @Translation("Cultural Protocol"),
+ *   label_collection = @Translation("Cultural Protocols"),
+ *   label_singular = @Translation("Cultural Protocol"),
+ *   label_plural = @Translation("Cultural Protocols"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count cultural protocols",
+ *     plural = "@count cultural protocols",
+ *   ),
  *   handlers = {
  *     "storage" = "Drupal\mukurtu_protocol\ProtocolStorage",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",

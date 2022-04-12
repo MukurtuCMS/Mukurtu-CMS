@@ -3,19 +3,35 @@ status: true
 dependencies:
   module:
     - mukurtu_protocol
+    - options
     - text
 id: community.community.default
 targetEntityType: community
 bundle: community
 mode: default
 content:
+  community_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_access_mode:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
   field_child_communities:
     type: entity_reference_label
     label: above
     settings:
       link: true
     third_party_settings: {  }
-    weight: 3
+    weight: 4
     region: content
   field_description:
     type: text_default
@@ -24,13 +40,13 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
-  field_parent_community:
+  field_protocols:
     type: entity_reference_label
     label: above
     settings:
       link: true
     third_party_settings: {  }
-    weight: 2
+    weight: 5
     region: content
   name:
     type: string
@@ -40,13 +56,8 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
-  user_id:
-    type: entity_reference_label
-    label: hidden
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 4
-    region: content
 hidden:
+  field_parent_community: true
+  og_group: true
   search_api_excerpt: true
+  user_id: true

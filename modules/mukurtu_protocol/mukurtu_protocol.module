@@ -14,6 +14,29 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  * Provide Mukurtu Protocols (access control).
  */
 
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function mukurtu_protocol_theme_registry_alter(&$theme_registry) {
+  /** @var \Drupal\Core\Extension\ExtensionList $module_list */
+  $module_list = \Drupal::service('extension.list.module');
+
+  $entity_browser_iframe = &$theme_registry['html__entity_browser__iframe'];
+  if ($entity_browser_iframe['path'] === $module_list->getPath('entity_browser') . '/templates') {
+    $entity_browser_iframe['template'] = 'html--entity-browser--iframe-bartik';
+    $entity_browser_iframe['theme path'] = $module_list->getPath('mukurtu_protocol');
+    $entity_browser_iframe['path'] = $entity_browser_iframe['theme path'] . '/templates';
+  }
+  $entity_browser_iframe = &$theme_registry['html__entity_browser__modal'];
+  if ($entity_browser_iframe['path'] === $module_list->getPath('entity_browser') . '/templates') {
+    $entity_browser_iframe['template'] = 'html--entity-browser--iframe-bartik';
+    $entity_browser_iframe['theme path'] = $module_list->getPath('mukurtu_protocol');
+    $entity_browser_iframe['path'] = $entity_browser_iframe['theme path'] . '/templates';
+  }
+}
+
+
 /**
  * Implements hook_entity_insert().
  */
@@ -79,6 +102,31 @@ function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setComputed(TRUE)
       ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityAffiliationItemList')
       ->setSetting('target_type', 'community')
+      ->setCardinality(-1)
+      ->setDisplayConfigurable('view', TRUE);
+  }
+
+  if ($entity_type->id() == 'user') {
+    // Define a computed field for community affiliation for users.
+    $fields['field_communities'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_communities')
+      ->setLabel(t('Communities'))
+      ->setDescription(t('Community affiliations'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\UserCommunityMembershipItemList')
+      ->setSetting('target_type', 'community')
+      ->setCardinality(-1)
+      ->setDisplayConfigurable('view', TRUE);
+  }
+
+  if ($entity_type->id() == 'community') {
+    $fields['field_protocols'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_protocols')
+      ->setLabel(t('Cultural Protocols'))
+      ->setDescription(t('Cultural Protocols for this community.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityProtocolsItemList')
+      ->setSetting('target_type', 'protocol')
       ->setCardinality(-1)
       ->setDisplayConfigurable('view', TRUE);
   }
