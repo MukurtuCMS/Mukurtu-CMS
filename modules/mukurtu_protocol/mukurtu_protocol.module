@@ -106,6 +106,19 @@ function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setDisplayConfigurable('view', TRUE);
   }
 
+  if ($entity_type->id() == 'user') {
+    // Define a computed field for community affiliation for users.
+    $fields['field_communities'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_communities')
+      ->setLabel(t('Communities'))
+      ->setDescription(t('Community affiliations'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\UserCommunityMembershipItemList')
+      ->setSetting('target_type', 'community')
+      ->setCardinality(-1)
+      ->setDisplayConfigurable('view', TRUE);
+  }
+
   if ($entity_type->id() == 'community') {
     $fields['field_protocols'] = BaseFieldDefinition::create('entity_reference')
       ->setName('field_protocols')
@@ -117,6 +130,7 @@ function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setCardinality(-1)
       ->setDisplayConfigurable('view', TRUE);
   }
+
   /**
    * Override the default OG user handler with mukurtu_user_selection.
    */
