@@ -79,15 +79,10 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
 
-    $options = $this->getOptions($items->getEntity());
-    $communityCount = count($options);
+    /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $entity */
+    $entity = $items->getEntity();
+    $options = $this->getOptions($entity);
     $selected = $this->getSelectedOptions($items);
-
-    // If required and there is one single option, preselect it.
-    if ($this->required && count($options) == 1) {
-      reset($options);
-      $selected = [key($options)];
-    }
 
     // Build protocol selection.
     $communities = [];
@@ -96,63 +91,102 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
       '#description' => $this->getFilteredDescription(),
     ];
     $delta = 0;
-    $communityIDs = array_keys($options);
+
     foreach ($options as $communityID => $communityOption) {
-      //$protocolKeys = array_keys($communityOption['#options']);
+      // Build the community headers.
       $communities[$delta] = [
-        '#type' => 'details',
-        '#open' => $communityCount === 1,
+        '#type' => 'item',
         '#title' => $communityOption['#title'],
       ];
 
       foreach ($communityOption['#options'] as $id => $protocolOption) {
-        // If a protocol is in multiple communities, show them the others
-        // in the description.
+        // If a protocol is in multiple communities, show the
+        // communities in the checkbox description.
         $description = "";
-        $otherCommunities = [];
         if (count($protocolOption['#communities']) > 1) {
           $description = implode(', ', $protocolOption['#communities']);
         }
 
+        // Build the protocol checkboxes.
         $communities[$delta]['protocols'][$id] = [
           '#type' => 'checkbox',
           '#title' => $protocolOption['#title'],
           '#description' => $description,
           '#return_value' => $id,
           '#default_value' => in_array($id, $selected),
+          '#ajax' => [
+            'disable-refocus' => TRUE,
+            'callback' => [get_called_class(), 'updateProtocolSummaryCallback'],
+            'wrapper' => 'protocol-summary',
+          ],
         ];
-
-        /* if (count($protocolOption['#communities']) > 1) {
-          $checked = [];
-          $otherCommunities = $communityIDs;
-          unset($otherCommunities[array_search($communityID, $otherCommunities)]);
-          foreach ($otherCommunities as $otherCommunity) {
-            $checked[] = [':input[name="field_protocol_control[0][field_protocols][communities]['. $otherCommunity . '][protocols][7]"]' => ['value' => 0]];
-          }
-          $communities[$delta]['protocols'][$id]['#states'] = [
-            'disabled' => $checked,
-          ];
-          dpm($communities[$delta]['protocols'][$id]['#states']);
-        } */
       }
+
       $delta++;
     }
 
-    // field_protocol_control[0][field_protocols][communities][0][protocols][7]
-    $communities[3]['protocols'][7]['#states'] = [
-      'checked' => [
-        //'#edit-field-protocol-control-0-field-protocols-communities-0-protocols-7' => ['checked' => TRUE],
-        ':input[name="field_protocol_control[0][field_protocols][communities][0][protocols][7]"]' => ['checked' => TRUE],
-      ],
-    ];
-    $communities[0]['protocols'][7]['#states'] = [
-      'checked' => [
-        //'#edit-field-protocol-control-0-field-protocols-communities-3-protocols-7' => ['checked' => TRUE],
-        ':input[name="field_protocol_control[0][field_protocols][communities][3][protocols][7]"]' => ['checked' => TRUE],
-      ],
-    ];
+    // Build the initial protocol summary.
+    // This shows the currently selected protocols.
+    $summary = "";
+    $protocolIDs = $entity->getProtocols();
+    if (!empty($protocolIDs)) {
+      $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocolIDs);
+      $summary = self::buildProtocolSummaryLabel($protocols);
+    }
 
-    return $element += ['communities' => $communities];
+    return $element += [
+      'protocols' => [
+        '#type' => 'details',
+        '#title' => ['#markup' => $this->t('Cultural Protocol Selection') . '<div id="protocol-summary">' . $summary . '</div>'],
+        '#open' => $entity->isNew(),
+        'communities' => $communities,
+      ],
+    ];
+  }
+
+  /**
+   * Ajax callback to update the protocol summary.
+   */
+  public static function updateProtocolSummaryCallback(array &$form, FormStateInterface $form_state) {
+    $protocols = [];
+    $pc = $form_state->getValue('field_protocol_control');
+    if ($pc && isset($pc[0])) {
+      // Build the list of currently selected protocol IDs from the form.
+      foreach ($pc[0]['field_protocols'] as $key => $value) {
+        if (is_numeric($key)) {
+          $protocols[] = $value['target_id'];
+        }
+      }
+    }
+
+    // Load the protocols and capture their names.
+    $names = [];
+    if (!empty($protocols)) {
+      $protocols = \Drupal::entityTypeManager()->getStorage('protocol')->loadMultiple($protocols);
+      $names = array_map(fn($e) => "<em>{$e->getName()}</em>", $protocols);
+    }
+    $summary = implode(', ', $names);
+    $summary = self::buildProtocolSummaryLabel($protocols);
+
+    return ['#markup' => '<div id="protocol-summary">' . $summary . '</div>'];
+  }
+
+  /**
+   * Build a protocol summary label.
+   *
+   * @param Drupal\mukurtu_protocol\Entity\ProtocolInterface[] $protocols
+   *   The protocols.
+   *
+   * @return string
+   *   The return markup.
+   */
+  public static function buildProtocolSummaryLabel(array $protocols) {
+    $summary = "";
+    if (!empty($protocols)) {
+      $names = array_map(fn($e) => "<em>{$e->getName()}</em>", $protocols);
+      $summary = implode(', ', $names);
+    }
+    return '<div id="protocol-summary">' . $summary . '</div>';
   }
 
   /**
@@ -170,16 +204,27 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
       /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface[] $protocols */
       $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($values);
 
+      $multipleCommunities['#title'] = $this->t('Multiple Communities');
+      $multipleCommunities['#id'] = 'protocols-with-multiple-communities';
       foreach ($protocols as $protocol) {
         $communities = $protocol->getCommunities();
         $communityNames = array_map(fn($e) => $e->getName(), $communities);
-        foreach ($communities as $community) {
+
+        if (count($communities) > 1) {
+          $multipleCommunities['#options'][$protocol->id()]['#title'] = $protocol->getName();
+          $multipleCommunities['#options'][$protocol->id()]['#communities'] = $communityNames;
+        }
+        else {
+          $community = reset($communities);
           $options[$community->id()]['#title'] = $community->getName();
           $options[$community->id()]['#id'] = $community->id();
           $options[$community->id()]['#options'][$protocol->id()]['#title'] = $protocol->getName();
           $options[$community->id()]['#options'][$protocol->id()]['#communities'] = $communityNames;
         }
       }
+
+      // Put multiple communities at the bottom of the list.
+      $options['multiple'] = $multipleCommunities;
 
       $module_handler = \Drupal::moduleHandler();
       $context = [
@@ -201,13 +246,15 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
   public static function validateElement(array $element, FormStateInterface $form_state) {
     $values = [];
     $ids = [];
-    foreach ($element['communities'] as $community) {
-      foreach ($community['protocols'] as $id => $protocol) {
-        if (is_numeric($id) && $protocol['#value'] && !isset($ids[$protocol['#value']])) {
-          $values[]['target_id'] = $protocol['#value'];
+    foreach ($element['protocols']['communities'] as $community) {
+      if (!empty($community['protocols'])) {
+        foreach ($community['protocols'] as $id => $protocol) {
+          if (is_numeric($id) && $protocol['#value'] && !isset($ids[$protocol['#value']])) {
+            $values[]['target_id'] = $protocol['#value'];
 
-          // Track IDs for dedup.
-          $ids[$protocol['#value']] = $protocol['#value'];
+            // Track IDs for dedup.
+            $ids[$protocol['#value']] = $protocol['#value'];
+          }
         }
       }
     }
