@@ -9,6 +9,7 @@ use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsWidgetBase;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
+use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -184,7 +185,7 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
   public static function buildProtocolSummaryLabel(array $protocols) {
     $summary = "";
     if (!empty($protocols)) {
-      $names = array_map(fn($e) => "<em>{$e->getName()}</em>", $protocols);
+      $names = array_map(fn($e) => "<em>" . self::buildProtocolLabel($e) . "</em>", $protocols);
       $summary = implode(', ', $names);
     }
     return '<div id="protocol-summary">' . $summary . '</div>';
@@ -219,7 +220,7 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
         }
 
         if (count($communities) > 1) {
-          $multipleCommunities['#options'][$protocol->id()]['#title'] = $protocol->getName();
+          $multipleCommunities['#options'][$protocol->id()]['#title'] = $this->buildProtocolLabel($protocol);
           $multipleCommunities['#options'][$protocol->id()]['#communities'] = $communityNames;
         }
         else {
@@ -227,7 +228,7 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
           if ($community instanceof CommunityInterface) {
             $options[$community->id()]['#title'] = $community->getName();
             $options[$community->id()]['#id'] = $community->id();
-            $options[$community->id()]['#options'][$protocol->id()]['#title'] = $protocol->getName();
+            $options[$community->id()]['#options'][$protocol->id()]['#title'] = $this->buildProtocolLabel($protocol);
             $options[$community->id()]['#options'][$protocol->id()]['#communities'] = $communityNames;
           }
         }
@@ -250,6 +251,20 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
       $this->options = $options;
     }
     return $this->options;
+  }
+
+  /**
+   * Build a label for the protocol name + sharing setting.
+   *
+   * @param \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol
+   *   The protocol.
+   *
+   * @return string
+   *   The label string.
+   */
+  public static function buildProtocolLabel(ProtocolInterface $protocol) {
+    $sharingValues = $protocol->getFieldDefinition('field_access_mode')->getSetting('allowed_values');
+    return $protocol->getName() . " ({$sharingValues[$protocol->getSharingSetting()]})";
   }
 
   /**
