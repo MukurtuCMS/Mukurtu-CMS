@@ -19,7 +19,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_protocols:
-    type: options_buttons
+    type: protocol_options
     weight: 1
     region: content
     settings: {  }
