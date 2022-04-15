@@ -86,6 +86,10 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
     $options = $this->getOptions($entity);
     $selected = $this->getSelectedOptions($items);
 
+    // Unique ID for the protocol summary ajax element.
+    $pceID = $entity->id() ?? $entity->uuid();
+    $summaryID = "protocol-summary-{$pceID}";
+
     // Build protocol selection.
     $communities = [];
     $communities['description'] = [
@@ -119,7 +123,7 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
           '#ajax' => [
             'disable-refocus' => TRUE,
             'callback' => [get_called_class(), 'updateProtocolSummaryCallback'],
-            'wrapper' => 'protocol-summary',
+            'wrapper' => $summaryID,
           ],
         ];
       }
@@ -129,17 +133,17 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
 
     // Build the initial protocol summary.
     // This shows the currently selected protocols.
-    $summary = "";
+    $summary = "<div id={$summaryID}></div>";
     $protocolIDs = $entity->getProtocols();
     if (!empty($protocolIDs)) {
       $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocolIDs);
-      $summary = self::buildProtocolSummaryLabel($protocols);
+      $summary = self::buildProtocolSummaryLabel($summaryID, $protocols);
     }
 
     return $element += [
       'protocols' => [
         '#type' => 'details',
-        '#title' => ['#markup' => $this->t('Cultural Protocol Selection') . '<div id="protocol-summary">' . $summary . '</div>'],
+        '#title' => ['#markup' => $this->t('Cultural Protocol Selection') . $summary],
         '#open' => $entity->isNew(),
         'communities' => $communities,
       ],
@@ -152,7 +156,11 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
   public static function updateProtocolSummaryCallback(array &$form, FormStateInterface $form_state) {
     $protocols = [];
     $pc = $form_state->getValue('field_protocol_control');
+
+    $summaryID = "";
     if ($pc && isset($pc[0])) {
+      $pceID = $pc[0]['target_id'];
+      $summaryID = "protocol-summary-{$pceID}";
       // Build the list of currently selected protocol IDs from the form.
       foreach ($pc[0]['field_protocols'] as $key => $value) {
         if (is_numeric($key)) {
@@ -168,27 +176,29 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
       $names = array_map(fn($e) => "<em>{$e->getName()}</em>", $protocols);
     }
     $summary = implode(', ', $names);
-    $summary = self::buildProtocolSummaryLabel($protocols);
+    $summary = self::buildProtocolSummaryLabel($summaryID, $protocols);
 
-    return ['#markup' => '<div id="protocol-summary">' . $summary . '</div>'];
+    return ['#markup' => $summary];
   }
 
   /**
    * Build a protocol summary label.
    *
+   * @param string $id
+   *   The ID of the protocol summary div.
    * @param Drupal\mukurtu_protocol\Entity\ProtocolInterface[] $protocols
    *   The protocols.
    *
    * @return string
    *   The return markup.
    */
-  public static function buildProtocolSummaryLabel(array $protocols) {
+  public static function buildProtocolSummaryLabel($id, array $protocols) {
     $summary = "";
     if (!empty($protocols)) {
       $names = array_map(fn($e) => "<em>" . self::buildProtocolLabel($e) . "</em>", $protocols);
       $summary = implode(', ', $names);
     }
-    return '<div id="protocol-summary">' . $summary . '</div>';
+    return '<div id="' . $id . '">' . $summary . '</div>';
   }
 
   /**
