@@ -41,10 +41,12 @@ class ProtocolControlWidget extends WidgetBase {
     }
 
     // Inheritance.
-    $inheritance = $values[0]['field_inheritance_target'];
-    if ($inheritance) {
-      $target = array_column($inheritance, 'target_id');
-      $pcEntity->setInheritanceTargetId($target);
+    if (isset($values[0]['field_inheritance_target'])) {
+      $inheritance = $values[0]['field_inheritance_target'];
+      if ($inheritance) {
+        $target = array_column($inheritance, 'target_id');
+        $pcEntity->setInheritanceTargetId($target);
+      }
     }
 
     return $pcEntity;
@@ -83,12 +85,14 @@ class ProtocolControlWidget extends WidgetBase {
       }
 
       // Inheritance.
-      $newInheritanceTargetId = $protocolControlValues['field_inheritance_target'][0]['target_id'] ?? NULL;
-      $currentTarget = $pcEntity->getInheritanceTarget();
-      $currentTargetId = $currentTarget ? $currentTarget->id() : NULL;
-      if ($newInheritanceTargetId != $currentTargetId) {
-        $pcEntity->setInheritanceTargetId($newInheritanceTargetId);
-        $needSave = TRUE;
+      if (isset($protocolControlValues['field_inheritance_target'])) {
+        $newInheritanceTargetId = $protocolControlValues['field_inheritance_target'][0]['target_id'] ?? NULL;
+        $currentTarget = $pcEntity->getInheritanceTarget();
+        $currentTargetId = $currentTarget ? $currentTarget->id() : NULL;
+        if ($newInheritanceTargetId != $currentTargetId) {
+          $pcEntity->setInheritanceTargetId($newInheritanceTargetId);
+          $needSave = TRUE;
+        }
       }
 
       // Save the protocol control entity if data was altered.
@@ -119,7 +123,7 @@ class ProtocolControlWidget extends WidgetBase {
     $entity = $items->getEntity();
 
     $element = [
-      '#type' => 'details',
+      '#type' => 'fieldset',
       '#field_title' => $this->fieldDefinition->getLabel(),
       '#open' => TRUE,
     ] + $element;
@@ -160,7 +164,7 @@ class ProtocolControlWidget extends WidgetBase {
     $fieldnames = [
       'field_protocols',
       'field_sharing_setting',
-      'field_inheritance_target',
+      //'field_inheritance_target',
     ];
     foreach ($fieldnames as $name) {
       /**
