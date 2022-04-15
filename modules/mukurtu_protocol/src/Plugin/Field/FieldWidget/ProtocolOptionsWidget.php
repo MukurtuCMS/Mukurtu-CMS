@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsWidgetBase;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -208,7 +209,14 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
       $multipleCommunities['#id'] = 'protocols-with-multiple-communities';
       foreach ($protocols as $protocol) {
         $communities = $protocol->getCommunities();
-        $communityNames = array_map(fn($e) => $e->getName(), $communities);
+
+        // Handle orphaned protocols, even though that shouldn't happen...
+        if (empty($communities)) {
+          $communityNames = [$this->t('No Communities')];
+        }
+        else {
+          $communityNames = array_map(fn($e) => $e->getName(), $communities);
+        }
 
         if (count($communities) > 1) {
           $multipleCommunities['#options'][$protocol->id()]['#title'] = $protocol->getName();
@@ -216,15 +224,19 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
         }
         else {
           $community = reset($communities);
-          $options[$community->id()]['#title'] = $community->getName();
-          $options[$community->id()]['#id'] = $community->id();
-          $options[$community->id()]['#options'][$protocol->id()]['#title'] = $protocol->getName();
-          $options[$community->id()]['#options'][$protocol->id()]['#communities'] = $communityNames;
+          if ($community instanceof CommunityInterface) {
+            $options[$community->id()]['#title'] = $community->getName();
+            $options[$community->id()]['#id'] = $community->id();
+            $options[$community->id()]['#options'][$protocol->id()]['#title'] = $protocol->getName();
+            $options[$community->id()]['#options'][$protocol->id()]['#communities'] = $communityNames;
+          }
         }
       }
 
       // Put multiple communities at the bottom of the list.
-      $options['multiple'] = $multipleCommunities;
+      if (!empty($multipleCommunities['#options'])) {
+        $options['multiple'] = $multipleCommunities;
+      }
 
       $module_handler = \Drupal::moduleHandler();
       $context = [
