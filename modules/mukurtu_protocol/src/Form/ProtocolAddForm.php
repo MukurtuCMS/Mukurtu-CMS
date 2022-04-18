@@ -221,7 +221,7 @@ class ProtocolAddForm extends EntityForm {
     $actions['submit_another'] = [
       '#type' => 'submit',
       '#value' => $this
-        ->t('Add Another'),
+        ->t('Save and Create Another Protocol'),
       '#submit' => [
         '::submitForm',
         '::save',
