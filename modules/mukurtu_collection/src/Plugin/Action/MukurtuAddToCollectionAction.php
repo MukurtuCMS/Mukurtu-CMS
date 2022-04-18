@@ -8,10 +8,13 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\views\ViewExecutable;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Entity\NodeInterface;
+use Drupal\node\NodeInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Exception;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 
 /**
  * VBO for adding content to collections.
@@ -26,9 +29,45 @@ use Exception;
  *   },
  * )
  */
-class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase implements PluginFormInterface {
+class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase implements ContainerFactoryPluginInterface, PluginFormInterface {
 
   use StringTranslationTrait;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * Constructs a \Drupal\Component\Plugin\PluginBase object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->entityTypeManager = $entity_type_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager'),
+    );
+  }
 
 
   /**
@@ -41,7 +80,7 @@ class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase impleme
 
     // Get the collection.
     $collectionId = $this->configuration['collection'];
-    $collection = \Drupal::entityTypeManager()->getStorage('node')->load($collectionId);
+    $collection = $this->entityTypeManager->getStorage('node')->load($collectionId);
 
     // Add the entity to the collection.
     if ($collection && $collection->bundle() == 'collection' && $collection->access('update')) {
@@ -81,7 +120,7 @@ class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase impleme
       return $object->access('view', $account, $return_as_object);
     }
 
-    return $return_as_object ? FALSE : AccessResult::forbidden();
+    return $return_as_object ? AccessResult::forbidden() : FALSE;
   }
 
   /**
@@ -115,14 +154,15 @@ class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase impleme
    * Return a list of collections user can update.
    */
   protected function getCollections() {
-    $query = \Drupal::entityQuery('node')
+    $query = $this->entityTypeManager->getStorage('node')->getQuery()
       ->condition('type', 'collection')
       ->sort('changed', 'DESC');
     $allCollections = $query->execute();
 
     $collections = [];
     if (!empty($allCollections)) {
-      $collections = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($allCollections);
+
+      $collections = $this->entityTypeManager->getStorage('node')->loadMultiple($allCollections);
       foreach ($collections as $delta => $collection) {
         // Remove collections the user cannot update.
         if (!$collection->access('update')) {

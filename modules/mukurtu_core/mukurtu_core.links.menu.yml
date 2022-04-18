@@ -18,12 +18,12 @@ mukurtu_core.account_dashboard:
   menu_name: account
   route_name: mukurtu_core.dashboard
   weight: -1000
-#mukurtu_core.manage_content:
-#  title: 'Manage Content'
-#  description: 'Manage Content'
-#  parent: mukurtu
-#  menu_name: mukurtu
-#  route_name: view.mukurtu_manage_all_content.mukurtu_manage_content
+mukurtu_core.manage_content:
+  title: 'Manage Content'
+  description: 'Manage Content'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: view.mukurtu_manage_all_content.mukurtu_manage_content
 #mukurtu_core.manage_media:
 #  title: 'Manage Media'
 #  description: 'Manage Media'

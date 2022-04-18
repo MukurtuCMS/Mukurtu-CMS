@@ -6,7 +6,6 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\node\NodeInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Url;
 
 class MukurtuAddItemToCollectionController extends ControllerBase {
   /**
@@ -22,7 +21,11 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
    */
   public function access(AccountInterface $account, NodeInterface $node) {
     if ($this->isValidCollectionItemBundle($node)) {
-      //if ($this->userCanCreateCollections() || $this->userCanEditExistingCollections($node)) {
+      // Eventually we'll want to add "add to new collection" functionality.
+      /* if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection')) {
+        return AccessResult::allowed();
+      } */
+
       if ($this->userCanEditExistingCollections($node)) {
         return AccessResult::allowed();
       }
@@ -31,32 +34,28 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
+  /**
+   * Check if the node is of a bundle that can be added to a collection.
+   */
   protected function isValidCollectionItemBundle(NodeInterface $node) {
-    // Check if the node is of a bundle that can be added to a collection.
     $config = $this->entityTypeManager()->getStorage('field_config')->load('node.collection.' . MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
+
     if ($config) {
       $settings = $config->getSettings();
+      // Null target bundles means ALL bundles in Drupal.
+      if (is_null($settings['handler_settings']['target_bundles'])) {
+        return TRUE;
+      }
+
+      // Look for the specific bundle.
       if (isset($settings['handler_settings']['target_bundles'])) {
         $bundles = $settings['handler_settings']['target_bundles'];
-        if (in_array($node->bundle(), $bundles)) {
+        if (empty($bundles) || in_array($node->bundle(), $bundles)) {
           // The node is of the correct bundle.
           return TRUE;
         }
       }
     }
-    return FALSE;
-  }
-
-  /**
-   * Check if the current user can create or edit collections.
-   */
-  protected function userCanCreateCollections() {
-    // If the user can create a new collection, that's good enough.
-    $url = Url::fromRoute('node.add', ['node_type' => 'collection']);
-    if ($url->access(NULL)) {
-      return TRUE;
-    }
-
     return FALSE;
   }
 
