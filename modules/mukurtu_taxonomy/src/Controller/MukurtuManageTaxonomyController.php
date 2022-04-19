@@ -13,7 +13,7 @@ class MukurtuManageTaxonomyController extends ControllerBase {
    *   The access result.
    */
   public function access($taxonomy_vocabulary) {
-    $account = \Drupal::currentUser();
+    $account = $this->currentUser();
 
     if ($account->hasPermission("create terms in $taxonomy_vocabulary") && $account->hasPermission("edit terms in $taxonomy_vocabulary")) {
       return AccessResult::allowed();
@@ -27,17 +27,18 @@ class MukurtuManageTaxonomyController extends ControllerBase {
    */
   public function content($taxonomy_vocabulary) {
     $build = [];
-    $vocabulary = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->load($taxonomy_vocabulary);
+    $vocabulary = $this->entityTypeManager()->getStorage('taxonomy_vocabulary')->load($taxonomy_vocabulary);
 
     if ($vocabulary) {
       // Render the taxonomy overview form.
-      $build[] = \Drupal::formBuilder()->getForm('Drupal\taxonomy\Form\OverviewTerms', $vocabulary);
+      $build[] = $this->formBuilder()->getForm('Drupal\taxonomy\Form\OverviewTerms', $vocabulary);
 
       // Render the form to add a new term.
       $newTerm = Term::create([
         'vid' => $vocabulary->id(),
       ]);
-      $form = \Drupal::service('entity.manager')
+
+      $form = $this->entityTypeManager()
         ->getFormObject('taxonomy_term', 'default')
         ->setEntity($newTerm);
 
@@ -45,7 +46,7 @@ class MukurtuManageTaxonomyController extends ControllerBase {
         '#type' => 'details',
         '#title' => $this->t('Add a new term in %vocabulary', ['%vocabulary' => $vocabulary->get('name')]),
       ];
-      $build['add_term']['form'] = \Drupal::formBuilder()->getForm($form);
+      $build['add_term']['form'] = $this->formBuilder()->getForm($form);
     }
 
     return $build;
