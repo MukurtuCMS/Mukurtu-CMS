@@ -50,6 +50,13 @@ mukurtu_core.create_content:
   menu_name: mukurtu
   route_name: mukurtu_core.add_page
   expanded: TRUE
+mukurtu_core.site_configuration:
+  title: 'Site Configuration'
+  description: 'Links to site configuration pages.'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: system.admin_config
+  expanded: TRUE
 #mukurtu_core.manage_users:
 #  title: 'Manage Users'
 #  description: 'Manage site user accounts.'
@@ -64,10 +71,11 @@ mukurtu_core.categories:
   weight: -10
 mukurtu_core.settings:
   title: "Mukurtu Settings"
+  parent: mukurtu_core.site_configuration
   menu_name: mukurtu
   description: "Configuration form for Mukurtu specific options."
   route_name: mukurtu_core.settings
-  weight: 1000
+  weight: 0
 #mukurtu_core.create_person:
 #  title: 'Person'
 #  description: 'Add a Person'

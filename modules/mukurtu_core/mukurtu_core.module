@@ -39,6 +39,21 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_entity_type_build().
+ */
+function mukurtu_core_entity_type_build(array &$entity_types) {
+  // Prefix media URLs with 'dashboard'.
+  $entity_types['media']->setLinkTemplate('add-page', '/dashboard/media/add');
+  $entity_types['media']->setLinkTemplate('add-form', '/dashboard/media/add/{media_type}');
+  $entity_types['media']->setLinkTemplate('canonical', '/dashboard/media/{media}/edit');
+  $entity_types['media']->setLinkTemplate('delete-form', '/dashboard/media/{media}/delete');
+  $entity_types['media']->setLinkTemplate('delete-multiple-form', '/dashboard/media/delete');
+  $entity_types['media']->setLinkTemplate('edit-form', '/dashboard/media/{media}/edit');
+  $entity_types['media']->setLinkTemplate('revision', '/dashboard/media/{media}/revisions/{media_revision}/view');
+  //$entity_types['media']->setLinkTemplate('collection', '/dashboard/admin/content/media');
+}
+
+/**
  * Implements hook_page_attachments.
  */
 function mukurtu_core_page_attachments(array &$attachments) {
