@@ -296,6 +296,11 @@ class ProtocolOptionsWidget extends OptionsWidgetBase {
       }
     }
 
+    // Require at least one protocol.
+    if (empty($ids)) {
+      $form_state->setError($element, t('You must select at least one cultural protocol.'));
+    }
+
     if ($element['#required'] && empty($values)) {
       $form_state->setError($element, t('@name field is required.', ['@name' => $element['#title']]));
     }
