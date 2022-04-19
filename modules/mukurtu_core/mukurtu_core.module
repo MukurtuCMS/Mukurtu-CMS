@@ -196,7 +196,7 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setSetting('target_type', 'media')
       ->setCardinality(1)
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayOptions('view', ['label' => 'hidden', 'type' => 'blazy_media']);
+      ->setDisplayOptions('view', ['label' => 'hidden']);
   }
   return $fields;
 }

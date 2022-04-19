@@ -27,7 +27,6 @@
     }
   ],
   "require": {
-    "drupal/blazy": "^2.1",
     "drupal/core": "~8.8.8",
     "drupal/og": "*",
     "drupal/restui": "*",

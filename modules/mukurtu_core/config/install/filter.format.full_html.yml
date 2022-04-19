@@ -5,7 +5,6 @@ dependencies:
     - core.entity_view_mode.media.full
     - core.entity_view_mode.media.media_library
   module:
-    - blazy
     - editor
     - media
 name: 'Full HTML'
@@ -62,14 +61,3 @@ filters:
         default: default
         full: full
         media_library: media_library
-  blazy_filter:
-    id: blazy_filter
-    provider: blazy
-    status: true
-    weight: 3
-    settings:
-      filter_tags:
-        img: img
-        iframe: iframe
-      media_switch: ''
-      use_data_uri: '0'

@@ -7,7 +7,6 @@ version: '8.x-1.x-dev'
 libraries:
   - mukurtu_core/mukurtu-leaflet-widget
 dependencies:
-  - blazy
   - content_browser
   - entity_browser
   - geofield

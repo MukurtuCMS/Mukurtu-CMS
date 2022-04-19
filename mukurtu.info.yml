@@ -49,7 +49,6 @@ install:
   - diff
 
 dependencies:
-  - blazy
   - comment
   - content_browser
   - config_distro

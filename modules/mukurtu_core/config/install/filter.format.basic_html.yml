@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   module:
-    - blazy
     - editor
     - media
 name: 'Basic HTML'
@@ -42,17 +41,6 @@ filters:
     status: true
     weight: 11
     settings: {  }
-  blazy_filter:
-    id: blazy_filter
-    provider: blazy
-    status: true
-    weight: 3
-    settings:
-      filter_tags:
-        img: img
-        iframe: iframe
-      media_switch: ''
-      use_data_uri: '0'
   media_embed:
     id: media_embed
     provider: media
