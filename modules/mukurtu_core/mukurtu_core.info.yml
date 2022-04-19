@@ -7,6 +7,7 @@ version: '8.x-1.x-dev'
 libraries:
   - mukurtu_core/mukurtu-leaflet-widget
 dependencies:
+  - original_date
   - content_browser
   - entity_browser
   - geofield

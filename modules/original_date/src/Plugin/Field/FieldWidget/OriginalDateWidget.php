@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
  * @FieldWidget(
  *   id = "original_date_text",
  *   module = "original_date",
- *   label = @Translation("Original date the item was created."),
+ *   label = @Translation("Original date text fields"),
  *   field_types = {
  *     "original_date"
  *   }
