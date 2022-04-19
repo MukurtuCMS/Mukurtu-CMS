@@ -94,6 +94,14 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   public function isOpen() : bool;
 
   /**
+   * Check if a protocol is in use.
+   *
+   * @return bool
+   *   TRUE if open FALSE otherwise.
+   */
+  public function inUse() : bool;
+
+  /**
    * Get the communities this protocol belongs to.
    *
    * @return \Drupal\mukurtu_community\Entity\CommunityInterface[]

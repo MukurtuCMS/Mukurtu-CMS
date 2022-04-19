@@ -236,6 +236,18 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   /**
    * {@inheritdoc}
    */
+  public function inUse(): bool {
+    $query = $this->entityTypeManager()->getStorage('protocol_control')->getQuery();
+    $result = $query->condition('field_protocols', $this->id(), '=')
+      ->accessCheck(FALSE)
+      ->execute();
+
+    return !empty($result);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setCommunities($communities) {
     return $this->set('field_communities', $communities);
   }

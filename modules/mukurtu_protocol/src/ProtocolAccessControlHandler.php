@@ -44,6 +44,13 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
       return $this->checkAccess($entity, 'update', $account);
     }
 
+    // These are checks that happen regardless of OG specific permissions.
+    if ($operation == 'delete') {
+      if ($entity->inUse()) {
+        return AccessResult::forbidden();
+      }
+    }
+
     // If this protocol is attached to communities, user must have all
     // relevant OG permissions for each.
     if (!empty($communities)) {

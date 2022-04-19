@@ -54,7 +54,16 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::allowedIfHasPermission($account, 'edit community entities');
 
       case 'delete':
+        // Cannot delete a parent community.
+        if ($entity->isParentCommunity()) {
+          return AccessResult::forbidden();
+        }
 
+        // Cannot delete a community with protocols.
+        $protocols = $entity->getProtocols();
+        if (!empty($protocols)) {
+          return AccessResult::forbidden();
+        }
         return AccessResult::allowedIfHasPermission($account, 'delete community entities');
     }
 
