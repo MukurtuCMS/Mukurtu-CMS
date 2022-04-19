@@ -462,7 +462,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Sharing Protocol'))
-      ->setDescription(t('TODO'))
+      ->setDescription('')
       ->setSettings([
         'allowed_values' => [
           'strict' => 'Strict',

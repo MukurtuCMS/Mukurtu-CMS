@@ -918,7 +918,7 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
 
     $fields['field_protocols'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Protocols'))
-      ->setDescription(t('The Protocols in the Protocol Control set.'))
+      ->setDescription('')
       ->setSetting('target_type', 'protocol')
       ->setSetting('handler_settings', [
         'auto_create' => FALSE,
@@ -936,11 +936,11 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
 
     $fields['field_sharing_setting'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Sharing Protocol'))
-      ->setDescription(t('TODO'))
+      ->setDescription('')
       ->setSettings([
         'allowed_values' => [
-          'all' => 'All',
-          'any' => 'Any',
+          'all' => 'All: This item may only be shared with members belonging to ALL the protocols listed.',
+          'any' => 'Any: This item may be shared with members of ANY protocol listed.',
         ],
       ])
       ->setDisplayOptions('view', [
