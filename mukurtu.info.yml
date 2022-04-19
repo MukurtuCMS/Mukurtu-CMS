@@ -47,6 +47,7 @@ install:
   - tour
   - automated_cron
   - diff
+  - google_analytics
 
 dependencies:
   - comment
