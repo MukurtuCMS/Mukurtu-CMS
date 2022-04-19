@@ -566,7 +566,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $fields['community_type'] = BaseFieldDefinition::create('entity_reference')
+    $fields['field_community_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Community Type'))
       ->setDescription(t('Indicates the type of community.'))
       ->setSetting('target_type', 'taxonomy_term')
