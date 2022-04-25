@@ -952,7 +952,7 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
         'type' => 'options_buttons',
         'weight' => 10,
       ])
-      ->setDefaultValue('strict')
+      ->setDefaultValue('all')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
