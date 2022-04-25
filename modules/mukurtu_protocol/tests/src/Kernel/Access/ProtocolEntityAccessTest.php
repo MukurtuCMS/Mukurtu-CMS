@@ -32,6 +32,7 @@ class ProtocolEntityAccessTest extends KernelTestBase {
     'options',
     'system',
     'text',
+    'taxonomy',
     'user',
     'mukurtu_protocol',
   ];
@@ -59,8 +60,10 @@ class ProtocolEntityAccessTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
+    $this->installEntitySchema('taxonomy_term');
     $this->installEntitySchema('community');
     $this->installEntitySchema('protocol');
+    $this->installEntitySchema('protocol_control');
     $this->installSchema('system', 'sequences');
 
     // Flag protocol and community entities as Og groups

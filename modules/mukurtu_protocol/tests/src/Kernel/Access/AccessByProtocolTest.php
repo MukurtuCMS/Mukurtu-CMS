@@ -41,6 +41,7 @@ class AccessByProtocolTest extends KernelTestBase {
     'system',
     'text',
     'user',
+    'taxonomy',
     'mukurtu_protocol',
   ];
 
@@ -103,6 +104,7 @@ class AccessByProtocolTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('block_content');
     $this->installEntitySchema('node');
+    $this->installEntitySchema('taxonomy_term');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('community');
@@ -111,6 +113,7 @@ class AccessByProtocolTest extends KernelTestBase {
     $this->installSchema('node', ['node_access']);
     $this->installSchema('system', 'sequences');
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
+    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
 
     node_access_rebuild();
 
@@ -231,10 +234,19 @@ class AccessByProtocolTest extends KernelTestBase {
       'uid' => $this->owner->id(),
     ]);
 
+    // Create Protocol Control entity for the content.
+    $pcEntity = ProtocolControl::create([
+      'name' => "{$content->getEntityTypeId()}:{$content->uuid()}",
+    ]);
+    $pcEntity->setControlledEntity($content);
+    $pcEntity->save();
+    $content->set('field_protocol_control', [$pcEntity]);
+
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $pc */
     $pc = ProtocolControl::getProtocolControlEntity($content);
     $pc->setPrivacySetting($access_setting);
     $pc->setProtocols(array_values($protocols));
+    $pc->save();
     $content->save();
 
     foreach ($scenarios as $scenario) {
@@ -296,10 +308,19 @@ class AccessByProtocolTest extends KernelTestBase {
       'type' => 'thing',
       'uid' => $owner->id(),
     ]);
+
+    $pcEntity = ProtocolControl::create([
+      'name' => "{$content->getEntityTypeId()}:{$content->uuid()}",
+    ]);
+    $pcEntity->setControlledEntity($content);
+    $pcEntity->save();
+    $content->set('field_protocol_control', [$pcEntity]);
+
     $pc = ProtocolControl::getProtocolControlEntity($content);
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $pc */
     $pc->setPrivacySetting('any');
     $pc->setProtocols([]);
+    $pc->save();
     $content->save();
 
     // Non-owner.
