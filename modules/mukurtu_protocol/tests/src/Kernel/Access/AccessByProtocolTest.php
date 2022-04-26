@@ -136,8 +136,8 @@ class AccessByProtocolTest extends KernelTestBase {
       'label' => 'authenticated',
     ]);
     $role->grantPermission('access content');
-    $role->grantPermission('edit own thing content');
-    $role->grantPermission('delete own thing content');
+    $role->grantPermission('update own thing node');
+    $role->grantPermission('delete own thing node');
     $role->save();
 
     // Create a community. Protocols require a community reference.
@@ -156,11 +156,11 @@ class AccessByProtocolTest extends KernelTestBase {
         'add user',
         'administer permissions',
         'approve and deny subscription',
-        'create thing content',
-        'delete any thing content',
-        'delete own thing content',
-        'edit any thing content',
-        'edit own thing content',
+        'create thing node',
+        'delete any thing node',
+        'delete own thing node',
+        'update any thing node',
+        'update own thing node',
         'manage members',
         'update group',
       ],
@@ -176,9 +176,9 @@ class AccessByProtocolTest extends KernelTestBase {
       'name' => 'contributor',
       'label' => 'Contributor',
       'permissions' => [
-        'create thing content',
-        'delete own thing content',
-        'edit own thing content',
+        'create thing node',
+        'delete own thing node',
+        'update own thing node',
       ],
     ];
     $contributorRole = OgRole::create($values);
