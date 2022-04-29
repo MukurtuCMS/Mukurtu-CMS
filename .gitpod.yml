@@ -8,7 +8,6 @@ tasks:
   - init: |
       cp /workspace/web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json /workspace/composer.json
       cd /workspace
-      ddev config global --use-docker-compose-from-path
       ddev config --php-version 7.4 --project-type=drupal9 --docroot=web --create-docroot
       ddev start -y
       ddev composer install --no-interaction
