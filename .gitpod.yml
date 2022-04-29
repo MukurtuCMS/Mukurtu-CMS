@@ -11,6 +11,8 @@ tasks:
       ddev config --php-version 7.4 --project-type=drupal9 --docroot=web --create-docroot
       ddev start -y
       ddev composer install --no-interaction
+      ddev composer install --no-interaction
+      ddev composer install --no-interaction
       ddev drush site-install mukurtu -y --account-pass=admin --site-name='Mukurtu CMS'
       ddev xdebug on
     command: |
