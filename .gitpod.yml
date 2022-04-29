@@ -6,9 +6,10 @@ checkoutLocation: "/web/profiles/mukurtu-cms"
 # when starting a workspace all docker images are ready
 tasks:
   - init: |
-      cd /workspace
       cp /workspace/web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json /workspace/composer.json
-      ddev config --project-type=drupal9 --docroot=web --create-docroot
+      cd /workspace
+      ddev config global --use-docker-compose-from-path
+      ddev config --php-version 7.4 --project-type=drupal9 --docroot=web --create-docroot
       ddev start -y
       ddev composer install --no-interaction
       ddev drush site-install mukurtu -y --account-pass=admin --site-name='Mukurtu CMS'
