@@ -17,19 +17,19 @@
             "type": "composer",
             "url": "https://asset-packagist.org"
         },
-	{
-	    "type": "package",
-	    "package": {
+        {
+            "type": "package",
+            "package": {
                 "name": "mukurtu/og",
-		"version": "1.0.0",
-		"type": "drupal-module",
-		"source": {
-                  "url": "https://github.com/zerolab/og.git",
-		  "type": "git",
-		  "reference": "196-redux"
-		}
-	    }
-	},
+                "version": "1.0.0",
+                "type": "drupal-module",
+                "source": {
+                    "url": "https://github.com/zerolab/og.git",
+                    "type": "git",
+                    "reference": "196-redux"
+                }
+            }
+        },
         {
             "type": "package",
             "package": {
@@ -40,18 +40,6 @@
                     "type": "zip"
                 },
                 "type": "drupal-library"
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "mukurtu/mukurtu-cms",
-                "version": "1.2.3",
-                "type": "drupal-profile",
-                "source": {
-                    "type": "path",
-                    "url": "/workspace/mukurtu-cms"
-                }
             }
         }
     ],
@@ -104,7 +92,6 @@
         "drupal/views_bulk_operations": "*",
         "drush/drush": "^10",
         "mukurtu/masonry": "*",
-        "mukurtu/mukurtu-cms": "*",
         "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
