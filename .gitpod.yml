@@ -7,7 +7,7 @@ checkoutLocation: "/site/web/profiles/mukurtu-cms"
 tasks:
   - init: |
       cp /workspace/site/web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json /workspace/site/composer.json
-      cd site
+      cd /workspace/site
       ddev config --project-type=drupal9 --docroot=web --create-docroot
       ddev start -y
       ddev composer install --no-interaction
