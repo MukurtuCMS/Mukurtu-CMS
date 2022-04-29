@@ -1,6 +1,6 @@
 image: drupalpod/drupalpod-gitpod-base:20220322
 
-checkoutLocation: "/workspace/mukurtu-cms"
+checkoutLocation: "/mukurtu-cms"
 
 # ddev and composer are running as part of the prebuild
 # when starting a workspace all docker images are ready
