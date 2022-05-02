@@ -1,5 +1,6 @@
 image: drupalpod/drupalpod-gitpod-base:20220322
 checkoutLocation: "/web/profiles/mukurtu-cms"
+workspaceLocation: "/web"
 experimentalNetwork: true
 
 # ddev and composer are running as part of the prebuild
