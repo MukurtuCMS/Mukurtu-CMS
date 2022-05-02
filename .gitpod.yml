@@ -1,4 +1,4 @@
-image: drupalpod/drupalpod-gitpod-base
+image: drupalpod/drupalpod-gitpod-base:20220322
 checkoutLocation: "/web/profiles/mukurtu-cms"
 experimentalNetwork: true
 
@@ -8,7 +8,7 @@ tasks:
   - init: |
       cp /workspace/web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json /workspace/composer.json
       cd /workspace
-      ddev config --php-version 7.4 --project-type=drupal9 --docroot=web --create-docroot
+      ddev config --php-version 8.0 --project-type=drupal9 --docroot=web --create-docroot
       ddev start -y
       echo "Sleeping while we wait for network..."
       sleep 3
