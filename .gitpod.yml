@@ -6,6 +6,7 @@ workspaceLocation: "/web"
 # when starting a workspace all docker images are ready
 tasks:
   - init: |
+      cp -R web/profiles/mukurtu-cms/.vscode/ .
       cp /workspace/web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json /workspace/composer.json
       cd /workspace
       ddev config --php-version 8.0 --project-type=drupal9 --docroot=web --create-docroot
