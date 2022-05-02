@@ -8,11 +8,10 @@ tasks:
   - init: |
       cp /workspace/web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json /workspace/composer.json
       cd /workspace
-      ddev config --php-version 7.2 --project-type=drupal9 --docroot=web --create-docroot
+      ddev config --php-version 7.3 --project-type=drupal9 --docroot=web --create-docroot
       ddev start -y
       ddev composer install --no-interaction
-      ddev composer install --no-interaction
-      ddev composer install --no-interaction
+      while [ $? -ne 0 ]; do !!; done
       ddev drush site-install mukurtu -y --account-pass=admin --site-name='Mukurtu CMS'
       ddev xdebug on
     command: |
