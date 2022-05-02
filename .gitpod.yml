@@ -10,6 +10,9 @@ tasks:
       cd /workspace
       ddev config --php-version 7.4 --project-type=drupal9 --docroot=web --create-docroot
       ddev start -y
+      echo "Waiting for network..."
+      sleep 3
+      ddev composer config --global repo.packagist composer https://packagist.org
       ddev composer install --no-interaction --no-cache
       ddev composer install --no-interaction --no-cache
       ddev composer install --no-interaction --no-cache
