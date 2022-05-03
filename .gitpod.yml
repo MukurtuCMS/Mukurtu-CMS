@@ -1,15 +1,20 @@
 image: drupalpod/drupalpod-gitpod-base:20220322
-
 checkoutLocation: "/web/profiles/mukurtu-cms"
+workspaceLocation: "/web"
 
 # ddev and composer are running as part of the prebuild
 # when starting a workspace all docker images are ready
 tasks:
   - init: |
+      cp -R /workspace/web/profiles/mukurtu-cms/.vscode/ /workspace/web
       cp /workspace/web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json /workspace/composer.json
       cd /workspace
       ddev config --php-version 7.4 --project-type=drupal9 --docroot=web --create-docroot
       ddev start -y
+      echo "Sleeping while we wait for network..."
+      sleep 3
+      ddev composer install --no-interaction
+      ddev composer install --no-interaction
       ddev composer install --no-interaction
       ddev composer install --no-interaction
       ddev composer install --no-interaction
@@ -62,16 +67,16 @@ github:
     # enable for the master/default branch (defaults to true)
     master: true
     # enable for all branches in this repo (defaults to false)
-    branches: true
+    branches: false
     # enable for pull requests coming from this repo (defaults to true)
     pullRequests: true
     # enable for pull requests coming from forks (defaults to false)
-    pullRequestsFromForks: true
+    pullRequestsFromForks: false
     # add a check to pull requests (defaults to true)
     addCheck: true
     # add a "Review in Gitpod" button as a comment to pull requests (defaults to false)
     addComment: false
     # add a "Review in Gitpod" button to the pull request's description (defaults to false)
-    addBadge: true
+    addBadge: false
     # add a label once the prebuild is ready to pull requests (defaults to false)
-    addLabel: true
+    addLabel: false
