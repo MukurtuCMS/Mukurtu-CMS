@@ -1,0 +1,49 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.collection
+    - node.type.digital_heritage
+  module:
+    - comment
+    - devel
+    - flag
+    - google_analytics
+    - media
+    - mukurtu_protocol
+    - node
+    - system
+id: authenticated
+label: 'Authenticated user'
+weight: 1
+is_admin: false
+permissions:
+  - 'access comments'
+  - 'access content'
+  - 'add protocol control entities'
+  - 'edit protocol control entities'
+  - 'flag mukurtu_email_collection'
+  - 'flag mukurtu_email_community'
+  - 'flag mukurtu_email_content'
+  - 'flag mukurtu_email_node'
+  - 'flag mukurtu_email_og'
+  - 'flag mukurtu_email_term'
+  - 'flag mukurtu_email_user'
+  - 'flag mukurtu_follow_collection'
+  - 'flag mukurtu_follow_community'
+  - 'flag mukurtu_follow_content'
+  - 'opt-in or out of google analytics tracking'
+  - 'unflag mukurtu_email_collection'
+  - 'unflag mukurtu_email_community'
+  - 'unflag mukurtu_email_content'
+  - 'unflag mukurtu_email_node'
+  - 'unflag mukurtu_email_og'
+  - 'unflag mukurtu_email_term'
+  - 'unflag mukurtu_email_user'
+  - 'unflag mukurtu_follow_collection'
+  - 'unflag mukurtu_follow_community'
+  - 'unflag mukurtu_follow_content'
+  - 'view collection revisions'
+  - 'view digital_heritage revisions'
+  - 'view media'
+  - 'view published protocol control entities'
