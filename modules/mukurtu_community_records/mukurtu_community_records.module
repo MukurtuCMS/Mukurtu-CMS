@@ -94,6 +94,7 @@ function mukurtu_community_records_entity_type_supports_records($entity_type_id,
  * Create the community field for an entity type/bundle.
  */
 function mukurtu_community_records_create_community_records_field($entity_type_id, $bundle) {
+  return;
   if ($entity_type_id != 'node') {
     return;
   }

@@ -10,7 +10,7 @@
  */
 function mukurtu_community_records_install() {
   // Create the community records field on all pre-existing node types.
-  foreach (node_type_get_names() as $bundle => $label) {
+/*   foreach (node_type_get_names() as $bundle => $label) {
     mukurtu_community_records_create_community_records_field('node', $bundle);
-  }
+  } */
 }
