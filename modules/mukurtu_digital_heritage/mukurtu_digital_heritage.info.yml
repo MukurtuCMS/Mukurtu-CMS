@@ -14,5 +14,6 @@ dependencies:
   - mukurtu_protocol
   - mukurtu_taxonomy
   - mukurtu_collection
+  - mukurtu_community_records
 
 version: '8.x-1.x-dev'

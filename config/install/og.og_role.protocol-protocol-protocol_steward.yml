@@ -22,6 +22,7 @@ group_bundle: protocol
 is_admin: null
 permissions:
   - 'add user'
+  - 'administer community records'
   - 'administer permissions'
   - 'apply protocol'
   - 'approve and deny subscription'

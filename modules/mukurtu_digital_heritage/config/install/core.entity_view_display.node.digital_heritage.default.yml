@@ -1,0 +1,143 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.digital_heritage.comment
+    - field.field.node.digital_heritage.field_category
+    - field.field.node.digital_heritage.field_content_type
+    - field.field.node.digital_heritage.field_contributor
+    - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_creator
+    - field.field.node.digital_heritage.field_cultural_narrative
+    - field.field.node.digital_heritage.field_date_description
+    - field.field.node.digital_heritage.field_description
+    - field.field.node.digital_heritage.field_format
+    - field.field.node.digital_heritage.field_identifier
+    - field.field.node.digital_heritage.field_keywords
+    - field.field.node.digital_heritage.field_language
+    - field.field.node.digital_heritage.field_media_assets
+    - field.field.node.digital_heritage.field_mukurtu_original_record
+    - field.field.node.digital_heritage.field_original_date
+    - field.field.node.digital_heritage.field_people
+    - field.field.node.digital_heritage.field_protocol_control
+    - field.field.node.digital_heritage.field_publisher
+    - field.field.node.digital_heritage.field_related_content
+    - field.field.node.digital_heritage.field_rights
+    - field.field.node.digital_heritage.field_source
+    - field.field.node.digital_heritage.field_subject
+    - field.field.node.digital_heritage.field_traditional_knowledge
+    - field.field.node.digital_heritage.field_type
+    - node.type.digital_heritage
+  module:
+    - user
+id: node.digital_heritage.default
+targetEntityType: node
+bundle: digital_heritage
+mode: default
+content:
+  field_all_community_records:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_communities:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_representative_media:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 12
+    region: content
+  field_title:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  flag_email_node:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  flag_email_og:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  flag_mukurtu_email_content:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  flag_mukurtu_email_node:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  flag_mukurtu_email_og:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  flag_mukurtu_follow_content:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  flag_subscribe_node:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 9
+    region: content
+  flag_subscribe_og:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 11
+    region: content
+hidden:
+  comment: true
+  field_category: true
+  field_content_type: true
+  field_contributor: true
+  field_coverage: true
+  field_creator: true
+  field_cultural_narrative: true
+  field_date_description: true
+  field_description: true
+  field_format: true
+  field_identifier: true
+  field_in_collection: true
+  field_keywords: true
+  field_language: true
+  field_media_assets: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_mukurtu_original_record: true
+  field_original_date: true
+  field_people: true
+  field_protocol_control: true
+  field_publisher: true
+  field_related_content: true
+  field_rights: true
+  field_sequence_collection: true
+  field_source: true
+  field_subject: true
+  field_traditional_knowledge: true
+  field_type: true
+  search_api_excerpt: true
