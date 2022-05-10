@@ -28,11 +28,18 @@ protocol_control.admin.structure.settings:
   parent: system.admin_structure
 
 mukurtu_protocol.manage_communities:
-  title: 'Manage Communities'
-  description: 'Manage Communities'
+  title: 'Communities'
+  description: 'Manage Communities and memberships.'
   parent: mukurtu
   menu_name: mukurtu
   route_name: entity.community.collection
+
+mukurtu_protocol.manage_protocols:
+  title: 'Cultural Protocols'
+  description: 'Manage Cultural Protocols and memberships.'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: entity.protocol.collection
 #  route_name: mukurtu_community.manage_communities
 #mukurtu_community.browse_communities:
 #  title: "Communities"

@@ -67,6 +67,14 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   public function getSharingSetting();
 
   /**
+   * Gets the sharing setting label.
+   *
+   * @return string
+   *   Sharing setting label.
+   */
+  public function getSharingSettingLabel();
+
+  /**
    * Sets the sharing setting.
    *
    * @param string $sharing

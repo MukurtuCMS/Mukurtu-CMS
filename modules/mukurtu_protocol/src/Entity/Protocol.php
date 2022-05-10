@@ -80,7 +80,7 @@ use Drupal\field\Entity\FieldConfig;
  *     "revision_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert",
  *     "revision_delete" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/delete",
  *     "translation_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert/{langcode}",
- *     "collection" = "/protocols/protocol",
+ *     "collection" = "/dashboard/protocols",
  *   },
  *   field_ui_base_route = "protocol.settings"
  * )
@@ -209,6 +209,15 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
    */
   public function getSharingSetting() {
     return $this->get('field_access_mode')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSharingSettingLabel() {
+    $setting = $this->getSharingSetting();
+    $values = $this->getFieldDefinition('field_access_mode')->getSetting('allowed_values');
+    return $values[$setting] ?? $setting;
   }
 
   /**

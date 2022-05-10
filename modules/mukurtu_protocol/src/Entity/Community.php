@@ -78,7 +78,7 @@ use Drupal\og\Entity\OgRole;
  *     "revision_revert" = "/communities/community/{community}/revisions/{community_revision}/revert",
  *     "revision_delete" = "/communities/community/{community}/revisions/{community_revision}/delete",
  *     "translation_revert" = "/communities/community/{community}/revisions/{community_revision}/revert/{langcode}",
- *     "collection" = "/dashboard/communities/community",
+ *     "collection" = "/dashboard/communities",
  *   },
  *   field_ui_base_route = "community.settings"
  * )

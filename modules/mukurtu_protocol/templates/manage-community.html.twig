@@ -1,0 +1,23 @@
+<div>
+  <div class="management-links">
+    <ul>
+      {% for link in links %}
+        <li>{{ link }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% if sharing %}
+    {{ sharing }}
+  {% endif %}
+  {% if description %}
+    {{ description }}
+  {% endif %}
+  <div class="protocols">
+    <label>{{ 'Cultural Protocols'|t }}</label>
+    <ul>
+    {% for protocol in protocols %}
+      <li><a href="{{ path('mukurtu_protocol.manage_protocol', {'group': protocol.id()}) }}">{{ protocol.getName() }} ({{ protocol.getSharingSettingLabel() }})</a></li>
+    {% endfor %}
+    </ul>
+  </div>
+</div>

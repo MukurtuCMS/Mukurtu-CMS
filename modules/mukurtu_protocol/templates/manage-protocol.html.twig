@@ -1,0 +1,23 @@
+<div>
+  <div class="management-links">
+    <ul>
+      {% for link in links %}
+        <li>{{ link }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% if sharing %}
+    {{ sharing }}
+  {% endif %}
+  {% if description %}
+    {{ description }}
+  {% endif %}
+  <div class="communities">
+    <label>{{ 'Communities'|t }}</label>
+    <ul>
+    {% for community in communities %}
+      <li><a href="{{ path('mukurtu_protocol.manage_community', {'group': community.id()}) }}">{{ community.getName() }}</a></li>
+    {% endfor %}
+    </ul>
+  </div>
+</div>

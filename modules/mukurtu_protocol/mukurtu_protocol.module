@@ -38,6 +38,32 @@ function mukurtu_protocol_theme_registry_alter(&$theme_registry) {
 
 
 /**
+ * Implements hook_theme().
+ */
+function mukurtu_protocol_theme($existing, $type, $theme, $path) {
+  return [
+    'manage-community' => [
+      'variables' => [
+        'community' => NULL,
+        'links' => NULL,
+        'sharing' => NULL,
+        'description' => NULL,
+        'protocols' => NULL,
+      ],
+    ],
+    'manage-protocol' => [
+      'variables' => [
+        'protocol' => NULL,
+        'links' => NULL,
+        'sharing' => NULL,
+        'description' => NULL,
+        'communities' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
  * Implements hook_entity_insert().
  */
 function mukurtu_protocol_entity_insert($entity) {
