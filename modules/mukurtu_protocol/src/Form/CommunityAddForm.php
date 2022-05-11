@@ -259,7 +259,7 @@ class CommunityAddForm extends EntityForm {
         $form_state->setRedirect('mukurtu_protocol.add_protocol_from_community', ['community' => $community->id()]);
       }
       else {
-        $form_state->setRedirect('entity.community.canonical', ['community' => $community->id()]);
+        $form_state->setRedirect('mukurtu_protocol.manage_community', ['group' => $community->id()]);
       }
     }
   }
