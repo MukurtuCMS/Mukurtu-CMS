@@ -5,7 +5,7 @@ namespace Drupal\mukurtu_protocol\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\Core\Url;
-use Drupal\Core\Link;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Controller for community management pages.
@@ -48,6 +48,12 @@ class ManageCommunitiesController extends ControllerBase {
       '#url' => Url::fromRoute('mukurtu_protocol.community_add_membership', ['group' => $community->id()]),
     ];
 
+    $links[] = [
+      '#title' => $this->t('Add Cultural Protocol'),
+      '#type' => 'link',
+      '#url' => Url::fromRoute('mukurtu_protocol.community_add_protocol', ['community' => $community->id()]),
+    ];
+
     // Sharing Setting.
     $visibilityMarkup['strict'] = $this->t('Strict: This community is visible to community members only.');
     $visibilityMarkup['open'] = $this->t('Open: This community is visible to all.');
@@ -77,6 +83,22 @@ class ManageCommunitiesController extends ControllerBase {
     ];
 
     return $build;
+  }
+
+  /**
+   * Redirect to management page.
+   */
+  public function manageCommunityRedirect(CommunityInterface $community) {
+    return $this->redirect('mukurtu_protocol.manage_community', ['group' => $community->id()], ['parameters' => ['group' => ['type' => 'entity:community']]]);
+  }
+
+  /**
+   * Access check for redirect to management page.
+   */
+  public function manageCommunityRedirectAccess(AccountInterface $account, CommunityInterface $community) {
+    /** @var \Drupal\og\Access\OgMembershipAddAccessCheck $og_access */
+    $og_access = \Drupal::service('access_check.og.membership.add');
+    return $og_access->access(\Drupal::routeMatch(), $account, $community);
   }
 
   /**

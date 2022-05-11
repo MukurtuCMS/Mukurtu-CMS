@@ -83,3 +83,15 @@ mukurtu_protocol.create_protocol:
   route_name: mukurtu_protocol.community_add_protocol
   base_route: entity.community.canonical
   weight: 4
+
+mukurtu_protocol.community_manage:
+  title: Manage
+  route_name: mukurtu_protocol.manage_community_canonical
+  base_route: entity.community.canonical
+  weight: 5
+
+mukurtu_protocol.protocol_manage:
+  title: Manage
+  route_name: mukurtu_protocol.manage_protocol_canonical
+  base_route: entity.protocol.canonical
+  weight: 5

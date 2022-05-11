@@ -5,7 +5,7 @@ namespace Drupal\mukurtu_protocol\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Url;
-use Drupal\Core\Link;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Controller for protocol management pages.
@@ -77,6 +77,22 @@ class ManageProtocolsController extends ControllerBase {
     ];
 
     return $build;
+  }
+
+  /**
+   * Redirect to management page.
+   */
+  public function manageProtocolRedirect(ProtocolInterface $protocol) {
+    return $this->redirect('mukurtu_protocol.manage_protocol', ['group' => $protocol->id()], ['parameters' => ['group' => ['type' => 'entity:protocol']]]);
+  }
+
+  /**
+   * Access check for redirect to management page.
+   */
+  public function manageProtocolRedirectAccess(AccountInterface $account, ProtocolInterface $protocol) {
+    /** @var \Drupal\og\Access\OgMembershipAddAccessCheck $og_access */
+    $og_access = \Drupal::service('access_check.og.membership.add');
+    return $og_access->access(\Drupal::routeMatch(), $account, $protocol);
   }
 
   /**

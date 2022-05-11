@@ -64,6 +64,15 @@ function mukurtu_protocol_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_local_tasks_alter().
+ */
+function mukurtu_protocol_local_tasks_alter(&$local_tasks) {
+  // Remove the default OG admin routes for our special group types.
+  unset($local_tasks['og.og_admin_routes:community.og_admin_routes']);
+  unset($local_tasks['og.og_admin_routes:protocol.og_admin_routes']);
+}
+
+/**
  * Implements hook_entity_insert().
  */
 function mukurtu_protocol_entity_insert($entity) {

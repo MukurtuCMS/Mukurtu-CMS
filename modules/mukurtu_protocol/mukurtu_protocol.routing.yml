@@ -67,6 +67,17 @@ mukurtu_protocol.manage_community:
   requirements:
     _og_membership_add_access: 'TRUE'
 
+mukurtu_protocol.manage_community_canonical:
+  path: '/communities/community/{community}/manage'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::manageCommunityRedirect'
+  options:
+    parameters:
+      group:
+        type: entity:community
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::manageCommunityRedirectAccess'
+
 mukurtu_protocol.manage_protocol:
   path: 'dashboard/protocols/{group}'
   defaults:
@@ -78,6 +89,17 @@ mukurtu_protocol.manage_protocol:
         type: entity:protocol
   requirements:
     _og_membership_add_access: 'TRUE'
+
+mukurtu_protocol.manage_protocol_canonical:
+  path: '/protocols/protocol/{protocol}/manage'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\ManageProtocolsController::manageProtocolRedirect'
+  options:
+    parameters:
+      group:
+        type: entity:protocol
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\ManageProtocolsController::manageProtocolRedirectAccess'
 
 mukurtu_protocol.community_members_list:
   path: 'dashboard/communities/{group}/members'
