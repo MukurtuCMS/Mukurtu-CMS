@@ -327,6 +327,13 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function getMembership(AccountInterface $account, array $states = [OgMembershipInterface::STATE_ACTIVE]): OgMembershipInterface {
+    return Og::getMembership($this, $account, $states);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getCreatedTime() {

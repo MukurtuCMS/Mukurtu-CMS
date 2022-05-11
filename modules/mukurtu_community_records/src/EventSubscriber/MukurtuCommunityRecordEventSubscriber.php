@@ -73,15 +73,17 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
    *   The OG permission event.
    */
   public function provideDefaultMukurtuOgPermissions(PermissionEventInterface $event) {
-    $event->setPermissions([
-      new GroupPermission([
-        'name' => 'administer community records',
-        'title' => t('Administer Community Records'),
-        'description' => t('Users may manage community records for content in this group.'),
-        'default roles' => [OgRoleInterface::ADMINISTRATOR],
-        'restrict access' => FALSE,
-      ]),
-    ]);
+    if ($event->getGroupEntityTypeId() == 'protocol') {
+      $event->setPermissions([
+        new GroupPermission([
+          'name' => 'administer community records',
+          'title' => t('Administer Community Records'),
+          'description' => t('Users may manage community records for content in this group.'),
+          'default roles' => [OgRoleInterface::ADMINISTRATOR],
+          'restrict access' => FALSE,
+        ]),
+      ]);
+    }
   }
 
 }

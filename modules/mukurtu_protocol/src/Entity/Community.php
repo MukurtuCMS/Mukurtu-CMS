@@ -397,6 +397,13 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function getMembership(AccountInterface $account, array $states = [OgMembershipInterface::STATE_ACTIVE]): OgMembershipInterface {
+    return Og::getMembership($this, $account, $states);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getProtocols() {

@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_protocol\Entity;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\og\OgMembershipInterface;
 
 /**
  * Provides an interface for Mukurtu groups (protocol/community memberships).
@@ -42,8 +43,26 @@ interface MukurtuGroupInterface {
    *   The account to add.
    * @param mixed $roles
    *   The group roles the member should be given.
+   *
    * @return \Drupal\mukurtu_protocol\Entity\MukurtuGroupInterface
    *   The group.
    */
   public function setRoles(AccountInterface $account, $roles = []): MukurtuGroupInterface;
+
+  /**
+   * Returns the group membership for a given user.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user to get the membership for.
+   * @param array $states
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
+   *
+   * @return \Drupal\og\OgMembershipInterface|null
+   *   The OgMembership entity. NULL will be returned if no membership is
+   *   available that matches the passed in $states.
+   */
+  public function getMembership(AccountInterface $account, array $states = [OgMembershipInterface::STATE_ACTIVE]): OgMembershipInterface;
+
 }
