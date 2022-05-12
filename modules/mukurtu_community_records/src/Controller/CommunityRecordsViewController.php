@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_community_records\Controller;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\node\Controller\NodeViewController;
+
 /**
  * Controller to view Community Records.
  */
@@ -67,7 +68,7 @@ class CommunityRecordsViewController extends NodeViewController {
   /**
    * Check if a display mode is configured for community records.
    *
-   * @param EntityInterface $node
+   * @param \Drupal\Core\Entity\EntityInterface $node
    *   The node being displayed.
    * @param string $view_mode
    *   The requested view mode.
@@ -106,11 +107,36 @@ class CommunityRecordsViewController extends NodeViewController {
     $results = $query->execute();
 
     $records = $this->entityTypeManager->getStorage($node->getEntityTypeId())->loadMultiple($results);
-    $allRecords = $allRecords + $records;
+    $records = $this->syncOriginalRecordMedia($original_record, $records);
+    $allRecords = array_merge($allRecords, $records);
 
     // @todo Ordering.
-
     return $allRecords;
+  }
+
+  /**
+   * Copy the original record media assets to the community records.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $originalRecord
+   *   The original record.
+   * @param \Drupal\Core\Entity\EntityInterface[] $communityRecords
+   *   The array of community records.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   The updated array of community records.
+   */
+  protected function syncOriginalRecordMedia(EntityInterface $originalRecord, array $communityRecords) {
+    if ($originalRecord->hasField('field_media_assets')) {
+      $orMedia = $originalRecord->get('field_media_assets')->getValue();
+      foreach ($communityRecords as &$communityRecord) {
+        if (!$communityRecord->hasField('field_media_assets')) {
+          continue;
+        }
+        $crMedia = $communityRecord->get('field_media_assets')->getValue();
+        $communityRecord->set('field_media_assets', array_merge($orMedia, $crMedia));
+      }
+    }
+    return $communityRecords;
   }
 
 }
