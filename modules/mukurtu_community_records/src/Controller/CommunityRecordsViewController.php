@@ -28,7 +28,8 @@ class CommunityRecordsViewController extends NodeViewController {
 
     foreach ($allRecords as $record) {
       $records[] = [
-        'id' => "record-{$record->id()}",
+        'id' => $record->id(),
+        'tabid' => "record-{$record->id()}",
         'communities' => $this->getCommunitiesLabel($record),
         'title' => $record->getTitle(),
         'content' => parent::view($record, "community_record_$view_mode"),//$viewBuilder->view($record, $displayMode),
@@ -37,6 +38,7 @@ class CommunityRecordsViewController extends NodeViewController {
 
     $build['template'] = [
       '#theme' => 'community_records',
+      '#active' => $node->id(),
       '#records' => $records,
       '#attached' => ['library' => ['field_group/element.horizontal_tabs']],
     ];

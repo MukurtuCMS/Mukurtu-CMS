@@ -23,6 +23,7 @@ function mukurtu_community_records_theme($existing, $type, $theme, $path) {
     'community_records' => [
       'template' => 'community-records',
       'variables' => [
+        'active' => NULL,
         'records' => NULL,
       ],
     ],
