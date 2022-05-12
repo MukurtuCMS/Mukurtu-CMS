@@ -61,6 +61,12 @@ function mukurtu_community_records_theme($existing, $type, $theme, $path) {
       'template' => 'mukurtu-select-community-record-type',
       'variables' => ['node' => NULL, 'types' => NULL],
     ],
+    'community_records' => [
+      'template' => 'community-records',
+      'variables' => [
+        'records' => NULL,
+      ],
+    ],
 /*     'node__community_records_full' => [
       'template' => 'node--community-records-full',
       'variables' => ['node' => NULL],

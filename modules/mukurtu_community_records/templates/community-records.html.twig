@@ -1,0 +1,25 @@
+{% if records|length == 1 %}
+  {{ records|first }}
+{% endif %}
+
+{% if records|length > 1 %}
+<div data-horizontal-tabs class="horizontal-tabs clearfix">
+  <ul data-horizontal-tabs-list class="horizontal-tabs-list visually-hidden"></ul>
+  <div{{ attributes.setAttribute('data-horizontal-tabs-panes', TRUE) }}>
+  {% for record in records %}
+    <details id={{ record.id }}>
+      <summary>
+        <div class="details-title">
+          <span>{{ record.communities }}</span>
+        </div>
+      </summary>
+      <div class="tab-content-wrapper">
+        <div class="tab-content-wrapper__content">
+          {{ record.content }}
+        </div>
+      </div>
+    </details>
+  {% endfor %}
+  </div>
+</div>
+{% endif %}
