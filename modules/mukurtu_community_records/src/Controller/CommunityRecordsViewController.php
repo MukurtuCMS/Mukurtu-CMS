@@ -32,7 +32,7 @@ class CommunityRecordsViewController extends NodeViewController {
         'tabid' => "record-{$record->id()}",
         'communities' => $this->getCommunitiesLabel($record),
         'title' => $record->getTitle(),
-        'content' => parent::view($record, "community_record_$view_mode"),//$viewBuilder->view($record, $displayMode),
+        'content' => parent::view($record, $view_mode),
       ];
     }
 
