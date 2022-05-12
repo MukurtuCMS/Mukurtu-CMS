@@ -2,35 +2,36 @@
 
 namespace Drupal\mukurtu_community_records\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\node\NodeInterface;
-
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\Controller\NodeViewController;
 /**
  * Controller to view Community Records.
  */
-class CommunityRecordsViewController extends ControllerBase {
-
-  /**
-   * Access Check for Community Records Display.
-   */
-  public function access(NodeInterface $node, AccountInterface $account) {
-    return $node->access('view', $account, TRUE);
-  }
+class CommunityRecordsViewController extends NodeViewController {
 
   /**
    * Community Records Display.
    */
-  public function viewRecords(NodeInterface $node) {
-    $viewBuilder = $this->entityTypeManager()->getViewBuilder('node');
-    $displayMode = $this->getRecordDisplayMode($node);
+  public function view(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
+    // If this display mode isn't set to display community records,
+    // fall back to the default node view controller.
+    if (!$this->isRecordDisplayMode($node, $view_mode)) {
+      return parent::view($node, $view_mode, $langcode);
+    }
 
-    foreach ($this->getAllRecords($node) as $record) {
+    // If CRs are broken or there are no CRs, fall back to the default node
+    // view controller.
+    $allRecords = $this->getAllRecords($node);
+    if (empty($allRecords) || count($allRecords) == 1) {
+      return parent::view($node, $view_mode, $langcode);
+    }
+
+    foreach ($allRecords as $record) {
       $records[] = [
         'id' => "record-{$record->id()}",
         'communities' => $this->getCommunitiesLabel($record),
         'title' => $record->getTitle(),
-        'content' => $viewBuilder->view($record, $displayMode),
+        'content' => parent::view($record, "community_record_$view_mode"),//$viewBuilder->view($record, $displayMode),
       ];
     }
 
@@ -46,13 +47,13 @@ class CommunityRecordsViewController extends ControllerBase {
   /**
    * Build the communities label.
    */
-  protected function getCommunitiesLabel(NodeInterface $node) {
+  protected function getCommunitiesLabel(EntityInterface $node) {
     $communities = $node->get('field_communities')->referencedEntities();
 
     $communityLabels = [];
     foreach ($communities as $community) {
       // Skip any communities the user can't see.
-      if (!$community->access('view', $this->currentUser())) {
+      if (!$community->access('view', $this->currentUser)) {
         continue;
       }
       // @todo ordering?
@@ -62,16 +63,24 @@ class CommunityRecordsViewController extends ControllerBase {
   }
 
   /**
-   * Get the display mode for community records.
+   * Check if a display mode is configured for community records.
+   *
+   * @param EntityInterface $node
+   *   The node being displayed.
+   * @param string $view_mode
+   *   The requested view mode.
+   *
+   * @return boolean
+   *   TRUE if configured to display community records.
    */
-  protected function getRecordDisplayMode(NodeInterface $node) {
-    return 'default';
+  protected function isRecordDisplayMode(EntityInterface $node, $view_mode) {
+    return $view_mode === 'full';
   }
 
   /**
    * Find all records associated with a node.
    */
-  protected function getAllRecords(NodeInterface $node) {
+  protected function getAllRecords(EntityInterface $node) {
     // Doesn't support/not configured for community records,
     // so exit early and display the single node.
     if (!$node->hasField('field_mukurtu_original_record')) {
@@ -82,19 +91,19 @@ class CommunityRecordsViewController extends ControllerBase {
     $original_record = $node->get('field_mukurtu_original_record')->referencedEntities()[0] ?? $node;
 
     // Check if the user can actually see the original record.
-    if ($original_record->access('view', $this->currentUser())) {
+    if ($original_record->access('view', $this->currentUser)) {
       $allRecords = [$original_record->id() => $original_record];
     }
 
     // Find all the community records for the original record.
     // The entity query system takes care of access checks for us here.
-    $query = $this->entityTypeManager()->getStorage($node->getEntityTypeId())->getQuery()
+    $query = $this->entityTypeManager->getStorage($node->getEntityTypeId())->getQuery()
       ->condition('field_mukurtu_original_record', $original_record->id())
       ->accessCheck(TRUE)
       ->sort('created', 'DESC');
     $results = $query->execute();
 
-    $records = $this->entityTypeManager()->getStorage($node->getEntityTypeId())->loadMultiple($results);
+    $records = $this->entityTypeManager->getStorage($node->getEntityTypeId())->loadMultiple($results);
     $allRecords = $allRecords + $records;
 
     // @todo Ordering.

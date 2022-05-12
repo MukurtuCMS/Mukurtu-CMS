@@ -291,39 +291,6 @@ function mukurtu_community_records_node_load(array $entities) {
 }
 
 /**
- * Implements hook_entity_view().
- */
-function mukurtu_community_records_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-  if ($entity->getEntityTypeId() != 'node'
-    || !$entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
-    return;
-  }
-
-  // Don't display the title (as a field) on the community record view.
-  $records = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS)->referencedEntities();
-  if ($view_mode == 'community_records_full' && !empty($records) && (count($records) > 1)) {
-    unset($build['title']);
-  }
-}
-
-/**
- * Implements hook_entity_view_mode_alter().
- */
-function mukurtu_community_records_entity_view_mode_alter(&$view_mode, EntityInterface $entity, $context) {
-  if ($entity->getEntityTypeId() != 'node'
-    || $view_mode != 'full'
-    || !$entity->hasField(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
-    return;
-  }
-
-  $records = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS)->referencedEntities();
-  //$parent_record = $entity->get(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)->referencedEntities();
-  if (!empty($records) && (count($records) > 1)) {
-    $view_mode = 'community_records_full';
-  }
-}
-
-/**
  * Implements hook_entity_access().
  */
 function mukurtu_community_records_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
