@@ -5,52 +5,11 @@
  * Provide Mukurtu Community Records.
  */
 
-define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS", "field_all_community_records");
 define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD", "field_mukurtu_original_record");
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Session\AccountInterface;
-
-/**
- * Implements hook_entity_bundle_create().
- */
-function mukurtu_community_records_entity_bundle_create($entity_type_id, $bundle) {
-  // For any new node type that is defined, add the community record field.
-  if ($entity_type_id == 'node') {
-    mukurtu_community_records_create_community_records_field($entity_type_id, $bundle);
-  }
-}
-
-/**
- * Implements hook_entity_bundle_field_info().
- */
-function mukurtu_community_records_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
-  $fields = [];
-
-  // @todo Only add this field to bundles configured to support CRs.
-  if ($entity_type->id() == 'node') {
-    // Define a computed field for community records. This flattens out the
-    // parent and all child records into a single list.
-    $fields['field_all_community_records'] = BaseFieldDefinition::create('entity_reference')
-      ->setName(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ALL_COMMUNITY_RECORDS)
-      ->setLabel(t('All Community Records'))
-      ->setDescription(t('All community records, including the current record.'))
-      ->setComputed(TRUE)
-      ->setClass('Drupal\mukurtu_community_records\Plugin\Field\CommunityRecordsItemList')
-      ->setSetting('target_type', 'node')
-      ->setCardinality(-1)
-      ->setDisplayConfigurable('view', TRUE);
-  }
-  return $fields;
-}
 
 /**
  * Implements hook_theme().
@@ -67,10 +26,6 @@ function mukurtu_community_records_theme($existing, $type, $theme, $path) {
         'records' => NULL,
       ],
     ],
-/*     'node__community_records_full' => [
-      'template' => 'node--community-records-full',
-      'variables' => ['node' => NULL],
-    ], */
   ];
 }
 
@@ -97,65 +52,10 @@ function mukurtu_community_records_entity_type_supports_records($entity_type_id,
 }
 
 /**
- * Create the community field for an entity type/bundle.
- */
-function mukurtu_community_records_create_community_records_field($entity_type_id, $bundle) {
-  return;
-  if ($entity_type_id != 'node') {
-    return;
-  }
-
-  // Create the original record field (parent record).
-  $field_storage = FieldStorageConfig::loadByName($entity_type_id, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD);
-  $field = FieldConfig::loadByName($entity_type_id, $bundle, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD);
-
-  if ($field_storage && empty($field)) {
-    $new_field = $field_storage->toArray();
-    unset($new_field['uuid']);
-    $new_field['label'] = "Original Record";
-    $new_field['bundle'] = $bundle;
-    $new_field['settings'] = [
-      'handler' => 'default:node',
-      'handler_settings' => [
-        'target_bundles' => [$bundle => $bundle],
-        'auto_create' => FALSE,
-      ],
-    ];
-    $new_field = FieldConfig::create($new_field);
-    try {
-      $new_field->save();
-    } catch (Exception $e) {
-
-    }
-  }
-}
-
-/**
  * Implements hook_ENTITY_TYPE_insert().
  */
 function mukurtu_community_records_entity_insert(EntityInterface $entity) {
   mukurtu_community_records_invalidate_record_tags($entity);
-}
-
-/**
- * Attach a record to an item.
- */
-function mukurtu_community_records_attach_record(EntityInterface $original, EntityInterface $record) {
-  // Set the record's original record field to reference the item.
-  if (mukurtu_community_records_has_record_field($record, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
-    $record->set(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, [$original->id()]);
-    $record->save();
-  }
-}
-
-/**
- * Detach a record from an item.
- */
-function mukurtu_community_records_detach_record(EntityInterface $original, EntityInterface $record) {
-  if (mukurtu_community_records_has_record_field($record, MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD)) {
-    $record->set(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, []);
-    $record->save();
-  }
 }
 
 /**
@@ -249,57 +149,4 @@ function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, Enti
   if (isset($fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD])) {
     $fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD]->addConstraint('ValidOriginalRecord', []);
   }
-}
-
-/**
- * Sync the shared field(s) between original record/community record.
- */
-function mukurtu_community_records_sync_shared_fields(EntityInterface &$community_record) {
-  $original_id = mukurtu_community_records_is_community_record($community_record);
-
-  // $community_record wasn't a community record.
-  if ($original_id === FALSE) {
-    return;
-  }
-
-  $original = \Drupal::entityTypeManager()->getStorage('node')->load($original_id);
-
-  // Static field list for development.
-  $shared_fields_settings = ['digital_heritage' => ['field_media_assets']];
-
-  // Get the shared field(s) for the given CR type.
-  $shared_fields = $shared_fields_settings[$original->bundle()] ?? NULL;
-
-  // Copy the shared fields from the original record to the community record.
-  if (!empty($shared_fields)) {
-    foreach ($shared_fields as $shared_field) {
-      if ($community_record->hasField($shared_field) && $original->hasField($shared_field)) {
-        $community_record->set($shared_field, $original->get($shared_field)->getValue());
-      }
-    }
-  }
-
-}
-
-/**
- * Implements hook_ENTITY_TYPE_load().
- */
-function mukurtu_community_records_node_load(array $entities) {
-  foreach ($entities as $entity) {
-    mukurtu_community_records_sync_shared_fields($entity);
-  }
-}
-
-/**
- * Implements hook_entity_access().
- */
-function mukurtu_community_records_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  // Do not allow the deletion of entities that have attached community records.
-  if ($operation === 'delete') {
-    if (mukurtu_community_records_is_original_record($entity) !== FALSE) {
-      return AccessResult::forbidden();
-    }
-  }
-
-  return AccessResult::neutral();
 }
