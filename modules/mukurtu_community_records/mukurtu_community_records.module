@@ -10,6 +10,7 @@ define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD", "field_mukurtu_or
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\node\NodeInterface;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 
 /**
@@ -89,13 +90,6 @@ function mukurtu_community_records_entity_type_supports_records($entity_type_id,
 }
 
 /**
- * Implements hook_ENTITY_TYPE_insert().
- */
-function mukurtu_community_records_entity_insert(EntityInterface $entity) {
-  mukurtu_community_records_invalidate_record_tags($entity);
-}
-
-/**
  * Check if an entity is a community record.
  */
 function mukurtu_community_records_is_community_record(EntityInterface $entity) {
@@ -132,51 +126,43 @@ function mukurtu_community_records_is_original_record(EntityInterface $entity) {
 }
 
 /**
- * Invalidate cache tags for all community records associated with entity.
- *
- * @param EntityInterface $entity
- * @return void
+ * Invalidate cache tags for all community records.
  */
-function mukurtu_community_records_invalidate_record_tags(EntityInterface $entity) {
-  if ($entity->getEntityTypeId() != 'node') {
+function mukurtu_community_records_invalidate_record_tags(NodeInterface $node) {
+  $original_record = $node->get('field_mukurtu_original_record')->referencedEntities()[0] ?? $node;
+
+  if (!$original_record) {
     return;
   }
 
-  $original_record_id = mukurtu_community_records_is_community_record($entity);
-
-  if ($original_record_id === FALSE) {
-    $original_record_id = $entity->id();
-  }
-
-  if ($original_record_id) {
-    $query = \Drupal::entityQuery('node')
-      ->condition(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, $original_record_id);
-    $results = $query->execute();
-    if (!empty($results)) {
-      // Add the original record to the tags list.
-      $tags = ["node:$original_record_id"];
-
-      // Add all the records.
-      foreach ($results as $vid => $nid) {
-        $tags[] = "node:$nid";
-      }
-      Cache::invalidateTags($tags);
+  // Find all the community records.
+  $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery()
+    ->condition('field_mukurtu_original_record', $original_record->id())
+    ->accessCheck(FALSE);
+  $results = $query->execute();
+   if (!empty($results)) {
+    // Invalidate all the CR node cache tags.
+    $tags = [];
+    foreach ($results as $nid) {
+      $tags[] = "node:$nid";
     }
+    dpm($tags);
+    Cache::invalidateTags($tags);
   }
 }
 
 /**
  * Implements hook_ENTITY_TYPE_update().
  */
-function mukurtu_community_records_entity_update(EntityInterface $entity) {
-  mukurtu_community_records_invalidate_record_tags($entity);
+function mukurtu_community_records_node_update(NodeInterface $node) {
+  mukurtu_community_records_invalidate_record_tags($node);
 }
 
 /**
  * Implements hook_ENTITY_TYPE_delete().
  */
-function mukurtu_community_records_entity_delete(EntityInterface $entity) {
-  mukurtu_community_records_invalidate_record_tags($entity);
+function mukurtu_community_records_node_delete(NodeInterface $node) {
+  mukurtu_community_records_invalidate_record_tags($node);
 }
 
 /**
