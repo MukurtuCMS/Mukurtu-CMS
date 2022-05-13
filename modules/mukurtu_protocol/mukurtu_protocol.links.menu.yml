@@ -40,13 +40,13 @@ mukurtu_protocol.manage_protocols:
   parent: mukurtu
   menu_name: mukurtu
   route_name: entity.protocol.collection
-#  route_name: mukurtu_community.manage_communities
-#mukurtu_community.browse_communities:
-#  title: "Communities"
-#  menu_name: main
-#  description: "Browse the site communities"
-#  route_name: view.mukurtu_communities_browse.browse_communities_page
-#  weight: -20
+
+mukurtu_protocol.communities_page:
+  title: "Communities"
+  menu_name: main
+  description: "Browse the site communities"
+  route_name: mukurtu_protocol.communities_page
+  weight: -20
 
 # Community menu items definition
 entity.community.collection:

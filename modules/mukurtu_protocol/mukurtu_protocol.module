@@ -42,6 +42,11 @@ function mukurtu_protocol_theme_registry_alter(&$theme_registry) {
  */
 function mukurtu_protocol_theme($existing, $type, $theme, $path) {
   return [
+    'communities-page' => [
+      'variables' => [
+        'communities' => NULL,
+      ],
+    ],
     'manage-community' => [
       'variables' => [
         'community' => NULL,

@@ -14,6 +14,7 @@ dependencies:
   - media
   - media_library
   - node
+  - pathauto
   - search_api
   - search_api_db
   - search_api_glossary

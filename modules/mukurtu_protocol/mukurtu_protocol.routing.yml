@@ -6,6 +6,14 @@
 #  requirements:
 #    _permission: 'create community content,edit community content'
 
+mukurtu_protocol.communities_page:
+  path: '/communities'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\CommunitiesPageController::page'
+    _title: 'Communities'
+  requirements:
+    _permission: 'view published community entities'
+
 mukurtu_protocol.permissions_overview:
   path: '/dashboard/group/permissions/{entity_type_id}/{bundle_id}'
   defaults:

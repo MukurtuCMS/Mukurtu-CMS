@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: community.browse
+label: Browse
+targetEntityType: community
+cache: true

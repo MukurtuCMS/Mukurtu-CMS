@@ -1,0 +1,50 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.community.browse
+  module:
+    - layout_builder
+    - mukurtu_protocol
+    - text
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: community.community.browse
+targetEntityType: community
+bundle: community
+mode: browse
+content:
+  community_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_description:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  name:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  field_access_mode: true
+  field_child_communities: true
+  field_community_type: true
+  field_parent_community: true
+  field_protocols: true
+  og_group: true
+  search_api_excerpt: true
+  user_id: true

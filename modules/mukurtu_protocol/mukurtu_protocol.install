@@ -109,4 +109,13 @@ function mukurtu_protocol_install() {
       $role->delete();
     }
   }
+
+  // Enable community/protocol types for pathauto.
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('pathauto.settings');
+  $types = $config->get('enabled_entity_types');
+  $types[] = 'community';
+  $types[] = 'protocol';
+  $config->set('enabled_entity_types', $types);
+  $config->save();
 }
