@@ -41,7 +41,12 @@ class CommunityRecordsViewController extends NodeViewController {
       '#theme' => 'community_records',
       '#active' => $node->id(),
       '#records' => $records,
-      '#attached' => ['library' => ['field_group/element.horizontal_tabs']],
+      '#attached' => [
+        'library' => [
+          'field_group/element.horizontal_tabs',
+          'mukurtu_community_records/community-records'
+        ],
+      ],
     ];
 
     return $build;
