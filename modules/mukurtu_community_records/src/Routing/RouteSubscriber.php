@@ -6,13 +6,13 @@ use Drupal\Core\Routing\RouteSubscriberBase;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
-* Listens to the dynamic route events.
-*/
+ * Listens to the dynamic route events.
+ */
 class RouteSubscriber extends RouteSubscriberBase {
 
   /**
-  * {@inheritdoc}
-  */
+   * {@inheritdoc}
+   */
   protected function alterRoutes(RouteCollection $collection) {
     // Replace the default node view controller with our community record
     // aware controller.
