@@ -63,6 +63,6 @@ jobs:
       - name: Mukurtu Tests
         run: |
           cd ./web
-          sed '/core:.*/d' ./modules/contrib/config_sync/tests/modules/config_sync_test/config_sync_test.info.yml
+          sed -i '/core:.*/d' ./modules/contrib/config_sync/tests/modules/config_sync_test/config_sync_test.info.yml
           ../vendor/bin/phpunit --verbose --testsuite "${{ matrix.test-suite }}"
         continue-on-error: false
