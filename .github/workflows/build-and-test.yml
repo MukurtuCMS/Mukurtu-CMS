@@ -1,7 +1,9 @@
-name: build-and-test
+name: Mukurtu CI Tests
 on:
   push:
-    branches: [ develop ]
+    branches:
+      - main
+      - develop
 jobs:
   testing:
     name: Mukurtu v4 - PHP ${{ matrix.php-versions }}
