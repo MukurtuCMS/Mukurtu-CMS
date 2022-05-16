@@ -57,6 +57,7 @@ jobs:
         run: |
           cp ./web/profiles/mukurtu-cms/phpunit.xml ./web/phpunit.xml
           cp ./web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json composer.json
+          composer require --dev phpspec/prophecy-phpunit:^2
           composer --no-interaction --no-progress --prefer-dist --optimize-autoloader install
 
       - name: Mukurtu Tests
