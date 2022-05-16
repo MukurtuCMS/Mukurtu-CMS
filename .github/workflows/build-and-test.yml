@@ -1,0 +1,46 @@
+name: build-and-test
+on:
+  push:
+    branches: [ develop ]
+jobs:
+  testing:
+    name: Mukurtu v4 - PHP ${{ matrix.php-versions }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php-versions: ['7.4']
+        test-suite: ["kernel"]
+      include:
+          - php-versions: '7.4'
+            test-suite: "kernel"
+    services:
+      mysql:
+        image: mysql:"8.0"
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: drupal
+        ports:
+          - 3306:3306
+    steps:
+      - name: Set environment variables
+        run: |
+          echo "DRUPAL_DIR=/opt/drupal" >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: web/profiles/mukurtu-cms
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          tools: composer:v2
+      - name: Setup Mysql client
+        run: |
+          sudo apt-get update
+          sudo apt-get remove -y mysql-client mysql-common
+          sudo apt-get install -y mysql-client
+      - name: Install Mukurtu
+        run: |
+          sudo cp ./web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json composer.json
+          composer --no-interaction --no-progress --prefer-dist --optimize-autoloader install
