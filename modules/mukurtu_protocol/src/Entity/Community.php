@@ -204,16 +204,14 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
-  public function getSharingSetting()
-  {
+  public function getSharingSetting() {
     return $this->get('field_access_mode')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSharingSetting($sharing)
-  {
+  public function setSharingSetting($sharing) {
     $this->set('field_access_mode', $sharing);
     return $this;
   }
