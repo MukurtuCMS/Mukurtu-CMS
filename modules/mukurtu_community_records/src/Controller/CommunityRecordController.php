@@ -27,10 +27,19 @@ class CommunityRecordController extends ControllerBase {
    *   The access result.
    */
   public function access(NodeInterface $node, AccountInterface $account) {
+    // Check if CRs are enabled site wide for this bundle.
+    $crConfig = $this->config('mukurtu_community_records.settings');
+    $allowedBundles = $crConfig->get('allowed_community_record_bundles');
+    if (!in_array($node->bundle(), $allowedBundles)) {
+      // Not enabled for community records.
+      return AccessResult::forbidden();
+    }
+
     // Node might be a CR, find the OR.
     $originalRecord = $this->getOriginalRecord($node);
 
-    // Original record must support protocols in order to have community records.
+    // Original record must support protocols in order to have community
+    // records.
     if (!$originalRecord->hasField('field_protocol_control')) {
       return AccessResult::forbidden();
     }

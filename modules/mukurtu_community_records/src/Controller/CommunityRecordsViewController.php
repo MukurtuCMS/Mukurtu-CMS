@@ -4,6 +4,12 @@ namespace Drupal\mukurtu_community_records\Controller;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\node\Controller\NodeViewController;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Session\AccountInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Controller to view Community Records.
@@ -11,9 +17,45 @@ use Drupal\node\Controller\NodeViewController;
 class CommunityRecordsViewController extends NodeViewController {
 
   /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * {@inheritDoc}
+   */
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, RendererInterface $renderer, AccountInterface $current_user, EntityRepositoryInterface $entity_repository, ConfigFactoryInterface $config_factory) {
+    parent::__construct($entity_type_manager, $renderer, $current_user, $entity_repository);
+    $this->configFactory = $config_factory;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity_type.manager'),
+      $container->get('renderer'),
+      $container->get('current_user'),
+      $container->get('entity.repository'),
+      $container->get('config.factory'),
+    );
+  }
+
+  /**
    * Community Records Display.
    */
   public function view(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
+    // Check if CRs are enabled site wide for this bundle.
+    $crConfig = $this->configFactory->get('mukurtu_community_records.settings');
+    $allowedBundles = $crConfig->get('allowed_community_record_bundles');
+    if (!in_array($node->bundle(), $allowedBundles)) {
+      // Not enabled for community records, failover to standard node view.
+      return parent::view($node, $view_mode, $langcode);
+    }
+
     // If this display mode isn't set to display community records,
     // fall back to the default node view controller.
     if (!$this->isRecordDisplayMode($node, $view_mode)) {
