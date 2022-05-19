@@ -1,8 +1,15 @@
-mukurtu_community_records.settings:
-  path: '/admin/config/mukurtu/community-record-settings'
+mukurtu_community_records.types_settings:
+  path: '/admin/config/mukurtu/community-records/types'
   defaults:
     _form: '\Drupal\mukurtu_community_records\Form\MukurtuCommunityRecordSettingsForm'
-    _title: 'Mukurtu Community Records Settings'
+    _title: 'Mukurtu Community Records - Enabled Content'
+  requirements:
+    _permission: 'administer site configuration'
+mukurtu_community_records.order_settings:
+  path: '/admin/config/mukurtu/community-records/community-ordering'
+  defaults:
+    _form: '\Drupal\mukurtu_community_records\Form\MukurtuCommunityRecordOrderForm'
+    _title: 'Mukurtu Community Records - Community Ordering'
   requirements:
     _permission: 'administer site configuration'
 mukurtu_community_records.add_new_record:

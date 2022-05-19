@@ -1,13 +1,28 @@
-mukurtu_community_records.settings:
-  title: "Mukurtu Community Records Settings"
+mukurtu_community_records.types_settings:
+  title: "Community Records Content Types"
   menu_name: mukurtu
-  description: "Manage settings for Mukurtu community records."
-  route_name: mukurtu_community_records.settings
+  description: "Select which content types use community records."
+  route_name: mukurtu_community_records.types_settings
   parent: system.admin_config_content
   weight: 1000
-mukurtu_community_records.settings_dashboard:
-  title: "Community Records Settings"
+mukurtu_community_records.types_settings_dashboard:
+  title: "Community Records Content Types"
   menu_name: mukurtu
-  description: "Manage settings for Mukurtu community records."
-  route_name: mukurtu_community_records.settings
+  description: "Select which content types use community records."
+  route_name: mukurtu_community_records.types_settings
   parent: mukurtu_core.site_configuration
+  weight: 1000
+mukurtu_community_records.order_settings:
+  title: "Community Record Ordering Settings"
+  menu_name: mukurtu
+  description: "Configure the order in which community records appear."
+  route_name: mukurtu_community_records.order_settings
+  parent: system.admin_config_content
+  weight: 1000
+mukurtu_community_records.order_settings_dashboard:
+  title: "Community Record Ordering Settings"
+  menu_name: mukurtu
+  description: "Configure the order in which community records appear."
+  route_name: mukurtu_community_records.order_settings
+  parent: mukurtu_core.site_configuration
+  weight: 1000

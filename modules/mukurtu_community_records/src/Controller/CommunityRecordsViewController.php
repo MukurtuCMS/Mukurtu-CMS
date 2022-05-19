@@ -154,10 +154,90 @@ class CommunityRecordsViewController extends NodeViewController {
     $results = $query->execute();
 
     $records = $this->entityTypeManager->getStorage($node->getEntityTypeId())->loadMultiple($results);
-    $allRecords = array_merge($allRecords, $records);
+    $allRecords = $allRecords + $records;
 
-    // @todo Ordering.
-    return $allRecords;
+    return $this->sortRecords($allRecords);
+  }
+
+  /**
+   * Sort the records.
+   */
+  protected function sortRecords($records) {
+    $config = $this->configFactory->get('mukurtu_community_records.settings');
+    $weights = $config->get('community_record_weights');
+
+    // Dump the entities into a lighter weight structure to pass around.
+    // This might be unneeded, maybe PHP is smart?
+    $inputs = [];
+    foreach ($records as $record) {
+      $inputs[] = [
+        'id' => $record->id(),
+        'communities' => array_column($record->get('field_communities')->getValue(), 'target_id'),
+        'created' => $record->getCreatedTime(),
+      ];
+    }
+
+    // Hand our lightweight structure off to the real sort function.
+    $sorted = $this->weightSort($inputs, $weights);
+
+    // Put the actual entities in the correct order.
+    $sortedRecords = [];
+    foreach ($sorted as $s) {
+      $sortedRecords[] = $records[$s['id']];
+    }
+
+    return $sortedRecords;
+  }
+
+  /**
+   * Sort the input arrays defined in sortRecords by weight.
+   */
+  private function weightSort($inputs, $weights) {
+    // If we have no more inputs we are done.
+    if (empty($inputs)) {
+      return [];
+    }
+
+    // If we have no more community weights to evaluate, datesort the remaining
+    // inputs.
+    if (empty($weights)) {
+      return $this->dateSort($inputs);
+    }
+
+    // Grab the next community by weight.
+    $currentWeightKey = array_key_first($weights);
+
+    // Slice off the rest of the community weights.
+    $newWeights = array_slice($weights, 1, NULL, TRUE);
+
+    // Pull out any records that contain the current community.
+    $sorted = [];
+    $unsorted = [];
+    foreach ($inputs as $input) {
+      if (in_array($currentWeightKey, $input['communities'])) {
+        $sorted[] = $input;
+      }
+      else {
+        $unsorted[] = $input;
+      }
+    }
+
+    // Keep sorting!
+    return array_merge($this->dateSort($sorted), $this->weightSort($unsorted, $newWeights));
+  }
+
+  /**
+   * Sort the input arrays defined in sortRecords by creation date.
+   */
+  private function dateSort($inputs) {
+    $dates = array_column($inputs, 'created');
+    asort($dates);
+    $sortedInputs = [];
+    foreach ($dates as $key => $date) {
+      $sortedInputs[] = $inputs[$key];
+    }
+
+    return $sortedInputs;
   }
 
 }
