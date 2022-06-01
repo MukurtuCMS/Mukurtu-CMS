@@ -1,0 +1,185 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+  module:
+    - block
+    - block_content
+    - comment
+    - contact
+    - contextual
+    - embed
+    - entity_reference_revisions
+    - facets
+    - field_ui
+    - file
+    - filter
+    - flag
+    - google_analytics
+    - image
+    - leaflet
+    - media
+    - message
+    - message_digest
+    - message_notify_ui
+    - message_subscribe_ui
+    - message_ui
+    - mukurtu_collection
+    - mukurtu_dictionary
+    - mukurtu_protocol
+    - node
+    - og
+    - paragraphs
+    - path
+    - pathauto
+    - quickedit
+    - redirect
+    - rest
+    - search_api
+    - shortcut
+    - system
+    - taxonomy
+    - toolbar
+id: mukurtu_administrator
+label: 'Mukurtu Administrator'
+weight: 2
+is_admin: null
+permissions:
+  - 'access administration pages'
+  - 'access contextual links'
+  - 'access files overview'
+  - 'access in-place editing'
+  - 'access shortcuts'
+  - 'access site in maintenance mode'
+  - 'access site-wide contact form'
+  - 'access toolbar'
+  - 'access user contact forms'
+  - 'add JS snippets for google analytics'
+  - 'administer block_content display'
+  - 'administer block_content fields'
+  - 'administer block_content form display'
+  - 'administer blocks'
+  - 'administer comment display'
+  - 'administer comment fields'
+  - 'administer comment form display'
+  - 'administer comments'
+  - 'administer community display'
+  - 'administer community fields'
+  - 'administer community form display'
+  - 'administer contact forms'
+  - 'administer contact_message display'
+  - 'administer contact_message fields'
+  - 'administer contact_message form display'
+  - 'administer display modes'
+  - 'administer embed buttons'
+  - 'administer facets'
+  - 'administer filters'
+  - 'administer flagging display'
+  - 'administer flagging fields'
+  - 'administer flagging form display'
+  - 'administer flaggings'
+  - 'administer flags'
+  - 'administer google analytics'
+  - 'administer image styles'
+  - 'administer language_community display'
+  - 'administer language_community fields'
+  - 'administer language_community form display'
+  - 'administer media display'
+  - 'administer media fields'
+  - 'administer media form display'
+  - 'administer message digest'
+  - 'administer message display'
+  - 'administer message fields'
+  - 'administer message form display'
+  - 'administer message subscribe'
+  - 'administer message templates'
+  - 'administer messages'
+  - 'administer modules'
+  - 'administer node display'
+  - 'administer node fields'
+  - 'administer node form display'
+  - 'administer og_membership display'
+  - 'administer og_membership fields'
+  - 'administer og_membership form display'
+  - 'administer paragraph display'
+  - 'administer paragraph fields'
+  - 'administer paragraph form display'
+  - 'administer paragraphs settings'
+  - 'administer paragraphs types'
+  - 'administer pathauto'
+  - 'administer personal_collection display'
+  - 'administer personal_collection fields'
+  - 'administer personal_collection form display'
+  - 'administer protocol display'
+  - 'administer protocol fields'
+  - 'administer protocol form display'
+  - 'administer protocol_control display'
+  - 'administer protocol_control fields'
+  - 'administer protocol_control form display'
+  - 'administer redirect settings'
+  - 'administer redirects'
+  - 'administer rest resources'
+  - 'administer search_api'
+  - 'administer shortcuts'
+  - 'administer taxonomy_term display'
+  - 'administer taxonomy_term fields'
+  - 'administer taxonomy_term form display'
+  - 'administer themes'
+  - 'administer url aliases'
+  - 'administer user display'
+  - 'administer user fields'
+  - 'administer user form display'
+  - 'configure leaflet'
+  - 'create any message template'
+  - 'create mukurtu_batch_import_report message'
+  - 'create mukurtu_new_item_in_collection message'
+  - 'create mukurtu_new_item_in_community message'
+  - 'create mukurtu_new_item_in_protocol message'
+  - 'create mukurtu_new_user_registration message'
+  - 'create mukurtu_single_node_delete message'
+  - 'create mukurtu_single_node_insert message'
+  - 'create mukurtu_single_node_update message'
+  - 'create url aliases'
+  - 'customize shortcut links'
+  - 'delete any message template'
+  - 'delete mukurtu_batch_import_report message'
+  - 'delete mukurtu_new_item_in_collection message'
+  - 'delete mukurtu_new_item_in_community message'
+  - 'delete mukurtu_new_item_in_protocol message'
+  - 'delete mukurtu_new_user_registration message'
+  - 'delete mukurtu_single_node_delete message'
+  - 'delete mukurtu_single_node_insert message'
+  - 'delete mukurtu_single_node_update message'
+  - 'delete multiple messages'
+  - 'delete orphan revisions'
+  - 'edit any message template'
+  - 'edit behavior plugin settings'
+  - 'edit mukurtu_batch_import_report message'
+  - 'edit mukurtu_new_item_in_collection message'
+  - 'edit mukurtu_new_item_in_community message'
+  - 'edit mukurtu_new_item_in_protocol message'
+  - 'edit mukurtu_new_user_registration message'
+  - 'edit mukurtu_single_node_delete message'
+  - 'edit mukurtu_single_node_insert message'
+  - 'edit mukurtu_single_node_update message'
+  - 'edit own comments'
+  - 'flag email_node'
+  - 'notify of path changes'
+  - 'overview messages'
+  - 'post comments'
+  - 'send message through the ui'
+  - 'skip comment approval'
+  - 'switch shortcut sets'
+  - 'update tokens'
+  - 'use text format full_html'
+  - 'view any message template'
+  - 'view mukurtu_batch_import_report message'
+  - 'view mukurtu_new_item_in_collection message'
+  - 'view mukurtu_new_item_in_community message'
+  - 'view mukurtu_new_item_in_protocol message'
+  - 'view mukurtu_new_user_registration message'
+  - 'view mukurtu_single_node_delete message'
+  - 'view mukurtu_single_node_insert message'
+  - 'view mukurtu_single_node_update message'
+  - 'view unpublished paragraphs'
