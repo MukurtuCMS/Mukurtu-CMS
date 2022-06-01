@@ -5,9 +5,11 @@ core_version_requirement: ^8 || ^9
 package: 'Mukurtu'
 dependencies:
   - comment
+  - entity_browser
   - og
   - og_ui
   - media
+  - media_library
   - message
   - mukurtu_core
 
