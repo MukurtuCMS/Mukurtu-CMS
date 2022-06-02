@@ -204,6 +204,20 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function getCommunityType() {
+    return $this->get('field_community_type')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setCommunityType($community_type) {
+    return $this->set('field_community_type', $community_type);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSharingSetting() {
     return $this->get('field_access_mode')->value;
   }
@@ -373,8 +387,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
-  public function setRoles(AccountInterface $account, $roles = []): MukurtuGroupInterface
-  {
+  public function setRoles(AccountInterface $account, $roles = []): MukurtuGroupInterface {
     $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
     if ($membership) {
       // Load OgRoles from role ids.
@@ -453,7 +466,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
-      ->setDescription(t('The name of the Community entity.'))
+      ->setDescription(t('The name of the Community.'))
       ->setRevisionable(TRUE)
       ->setSettings([
         'max_length' => 50,
@@ -527,7 +540,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['status']->setDescription(t('A boolean indicating whether the Community is published.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
-        'weight' => -3,
+        'weight' => 30,
       ]);
 
     $fields['created'] = BaseFieldDefinition::create('created')

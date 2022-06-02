@@ -58,6 +58,25 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
   public function setDescription($description);
 
   /**
+   * Gets the Community type.
+   *
+   * @return null|\Drupal\taxonomy\Entity\Term
+   *   The community type term or null.
+   */
+  public function getCommunityType();
+
+  /**
+   * Sets the Community type.
+   *
+   * @param int $community_type
+   *   The community type term ID.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\CommunityInterface
+   *   The called Community entity.
+   */
+  public function setCommunityType($community_type);
+
+  /**
    * Gets the sharing setting.
    *
    * @return string

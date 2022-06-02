@@ -12,6 +12,7 @@
   {% if description %}
     {{ description }}
   {% endif %}
+  {% if protocols %}
   <div class="protocols">
     <label>{{ 'Cultural Protocols'|t }}</label>
     <ul>
@@ -20,4 +21,5 @@
     {% endfor %}
     </ul>
   </div>
+  {% endif %}
 </div>
