@@ -6,7 +6,7 @@ dependencies:
     - node.type.digital_heritage
   module:
     - comment
-    - devel
+    - entity_browser
     - flag
     - google_analytics
     - media
@@ -18,8 +18,11 @@ label: 'Authenticated user'
 weight: 1
 is_admin: false
 permissions:
+  - 'access browse_content entity browser pages'
+  - 'access browse_content_iframe entity browser pages'
   - 'access comments'
   - 'access content'
+  - 'access mukurtu_community_and_protocol_user_browser entity browser pages'
   - 'add protocol control entities'
   - 'edit protocol control entities'
   - 'flag mukurtu_email_collection'
