@@ -14,6 +14,7 @@ entity.community.add_form:
   appears_on:
     - entity.community.collection
     - mukurtu_protocol.manage_communities
+    - mukurtu_protocol.communities_page
 mukurtu_protocol.add_community_role:
   route_name: entity.og_role.add_form
   title: 'Add role'
