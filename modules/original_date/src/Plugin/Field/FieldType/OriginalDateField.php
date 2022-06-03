@@ -99,11 +99,23 @@ class OriginalDateField extends FieldItemBase
   /**
    * {@inheritdoc}
    */
-  public function setValue($values, $notify = true)
+  public function setValue($values, $notify = TRUE)
   {
-    $year = $values['year'];
-    $month = $values['month'];
-    $day = $values['day'];
+    if (!is_array($values)) {
+      $emptyValues = [
+        'year' => '',
+        'month' => '',
+        'day' => '',
+        'date' => '',
+        'timestamp' => '',
+      ];
+      parent::setValue($emptyValues, $notify);
+      return;
+    }
+
+    $year = $values['year'] ?? NULL;
+    $month = $values['month'] ?? "";
+    $day = $values['day'] ?? "";
 
     // 1. Store the date string for the user-facing date display
     $date = $year; // year is guaranteed
