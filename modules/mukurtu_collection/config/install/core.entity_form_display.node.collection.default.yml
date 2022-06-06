@@ -11,9 +11,6 @@ dependencies:
     - field.field.node.collection.field_description
     - field.field.node.collection.field_items_in_collection
     - field.field.node.collection.field_keywords
-    - field.field.node.collection.field_mukurtu_cluster_lat
-    - field.field.node.collection.field_mukurtu_cluster_long
-    - field.field.node.collection.field_mukurtu_geojson
     - field.field.node.collection.field_parent_collection
     - field.field.node.collection.field_protocol_control
     - field.field.node.collection.field_related_content
