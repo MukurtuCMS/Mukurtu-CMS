@@ -4,18 +4,26 @@ dependencies:
   config:
     - entity_browser.browser.browse_content
     - field.field.node.collection.field_child_collections
+    - field.field.node.collection.field_collection_image
     - field.field.node.collection.field_collection_type
     - field.field.node.collection.field_content_type
+    - field.field.node.collection.field_credit
     - field.field.node.collection.field_description
     - field.field.node.collection.field_items_in_collection
     - field.field.node.collection.field_keywords
+    - field.field.node.collection.field_mukurtu_cluster_lat
+    - field.field.node.collection.field_mukurtu_cluster_long
+    - field.field.node.collection.field_mukurtu_geojson
     - field.field.node.collection.field_parent_collection
     - field.field.node.collection.field_protocol_control
     - field.field.node.collection.field_related_content
+    - field.field.node.collection.field_summary
+    - image.style.thumbnail
     - node.type.collection
   module:
     - entity_browser
     - field_group
+    - image
     - mukurtu_protocol
     - path
     - text
@@ -37,8 +45,11 @@ third_party_settings:
     group_mukurtu_essentials:
       children:
         - title
-        - field_protocol_control
+        - field_summary
         - field_description
+        - field_collection_image
+        - field_credit
+        - field_protocol_control
         - field_keywords
       label: 'Mukurtu Essentials'
       region: content
@@ -93,6 +104,22 @@ content:
         view_mode: content_browser
       selection_mode: selection_append
     third_party_settings: {  }
+  field_collection_image:
+    type: image_image
+    weight: -4
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+  field_credit:
+    type: string_textfield
+    weight: -3
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   field_description:
     type: text_textarea_with_summary
     weight: -5
@@ -120,7 +147,7 @@ content:
     third_party_settings: {  }
   field_keywords:
     type: entity_reference_autocomplete
-    weight: -4
+    weight: -1
     region: content
     settings:
       match_operator: CONTAINS
@@ -169,7 +196,7 @@ content:
     third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget
-    weight: -6
+    weight: -2
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -187,6 +214,14 @@ content:
       field_widget_display_settings:
         view_mode: content_browser
       selection_mode: selection_append
+    third_party_settings: {  }
+  field_summary:
+    type: string_textfield
+    weight: -6
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   name:
     weight: -8
