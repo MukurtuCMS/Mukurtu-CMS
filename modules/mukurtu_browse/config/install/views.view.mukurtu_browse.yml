@@ -184,6 +184,16 @@ display:
         type: default
       row:
         type: search_api
+        options:
+          view_modes:
+            'entity:node':
+              article: default
+              collection: default
+              dictionary_word: default
+              digital_heritage: browse
+              page: default
+              person: default
+              word_list: default
       query:
         type: views_query
         options:
