@@ -11,11 +11,13 @@ dependencies:
     - field.field.node.digital_heritage.field_cultural_narrative
     - field.field.node.digital_heritage.field_date_description
     - field.field.node.digital_heritage.field_description
+    - field.field.node.digital_heritage.field_external_links
     - field.field.node.digital_heritage.field_format
     - field.field.node.digital_heritage.field_identifier
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
+    - field.field.node.digital_heritage.field_mukurtu_original_record
     - field.field.node.digital_heritage.field_original_date
     - field.field.node.digital_heritage.field_people
     - field.field.node.digital_heritage.field_protocol_control
@@ -24,15 +26,17 @@ dependencies:
     - field.field.node.digital_heritage.field_rights
     - field.field.node.digital_heritage.field_source
     - field.field.node.digital_heritage.field_subject
+    - field.field.node.digital_heritage.field_summary
     - field.field.node.digital_heritage.field_traditional_knowledge
+    - field.field.node.digital_heritage.field_transcription
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
     - field_group
     - leaflet
     - media_library
-    - mukurtu_core
     - mukurtu_protocol
+    - original_date
     - path
     - text
 third_party_settings:
@@ -56,10 +60,11 @@ third_party_settings:
     group_mukurtu_essentials:
       children:
         - title
-        - field_protocol_control
+        - field_summary
         - field_media_assets
-        - field_category
+        - field_protocol_control
         - field_creator
+        - field_category
         - field_contributor
         - field_original_date
         - field_date_description
@@ -114,6 +119,7 @@ third_party_settings:
         - field_language
         - field_source
         - field_subject
+        - field_transcription
         - field_people
         - field_coverage
       label: 'Additional Metadata'
@@ -153,13 +159,13 @@ content:
     third_party_settings: {  }
   field_category:
     type: options_buttons
-    weight: -4
+    weight: -2
     region: content
     settings: {  }
     third_party_settings: {  }
   field_contributor:
     type: entity_reference_autocomplete
-    weight: -2
+    weight: -1
     region: content
     settings:
       match_operator: CONTAINS
@@ -169,7 +175,7 @@ content:
     third_party_settings: {  }
   field_coverage:
     type: leaflet_widget_default
-    weight: 123
+    weight: 29
     region: content
     settings:
       map:
@@ -241,7 +247,7 @@ content:
     third_party_settings: {  }
   field_date_description:
     type: string_textfield
-    weight: 0
+    weight: 1
     region: content
     settings:
       size: 60
@@ -319,13 +325,13 @@ content:
     third_party_settings: {  }
   field_original_date:
     type: original_date_text
-    weight: -1
+    weight: 0
     region: content
     settings: {  }
     third_party_settings: {  }
   field_people:
     type: entity_reference_autocomplete
-    weight: 27
+    weight: 28
     region: content
     settings:
       match_operator: CONTAINS
@@ -335,7 +341,7 @@ content:
     third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget
-    weight: -6
+    weight: -4
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -375,9 +381,25 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_summary:
+    type: string_textfield
+    weight: -6
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   field_traditional_knowledge:
     type: text_textarea
     weight: 21
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_transcription:
+    type: string_textarea
+    weight: 27
     region: content
     settings:
       rows: 5
@@ -461,6 +483,7 @@ content:
 hidden:
   comment: true
   field_content_type: true
+  field_external_links: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_community: true
