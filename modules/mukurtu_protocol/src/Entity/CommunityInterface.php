@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
+use Drupal\media\MediaInterface;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -170,6 +171,22 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
    *   The called Community entity.
    */
   public function setParentCommunity(CommunityInterface $community): CommunityInterface;
+
+  /**
+   * Get the thumbnail image.
+   *
+   * @return \Drupal\media\MediaInterface|null
+   *   The thumbnail media.
+   */
+  public function getThumbnailImage(): ?MediaInterface;
+
+  /**
+   * Get the banner image.
+   *
+   * @return \Drupal\media\MediaInterface|null
+   *   The banner media.
+   */
+  public function getBannerImage(): ?MediaInterface;
 
   /**
    * Get the child communities.

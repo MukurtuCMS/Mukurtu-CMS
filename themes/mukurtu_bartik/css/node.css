@@ -1,0 +1,33 @@
+.node__content {
+  display: flex;
+}
+
+.node__content .item-content {
+  flex-basis: 66%;
+  flex-grow: 3;
+}
+
+.node__content .item-content .field {
+  padding-right: 20px;
+}
+
+.node__content .metadata {
+  flex-basis: 33%;
+  background-color: #F0EEE9;
+  border-top: 5px solid #D9D4C2;
+}
+
+.node__content .metadata .field {
+  padding: 10px 20px 10px;
+  margin: 0px;
+}
+
+.node__content .metadata .field::after {
+  content: "";
+  display: inline-block;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  border-bottom: 1px solid rgba(70, 70, 70, 0.25);
+}

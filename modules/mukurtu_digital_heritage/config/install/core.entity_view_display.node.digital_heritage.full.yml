@@ -1,0 +1,406 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.full
+    - field.field.node.digital_heritage.comment
+    - field.field.node.digital_heritage.field_category
+    - field.field.node.digital_heritage.field_content_type
+    - field.field.node.digital_heritage.field_contributor
+    - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_creator
+    - field.field.node.digital_heritage.field_cultural_narrative
+    - field.field.node.digital_heritage.field_date_description
+    - field.field.node.digital_heritage.field_description
+    - field.field.node.digital_heritage.field_external_links
+    - field.field.node.digital_heritage.field_format
+    - field.field.node.digital_heritage.field_identifier
+    - field.field.node.digital_heritage.field_keywords
+    - field.field.node.digital_heritage.field_language
+    - field.field.node.digital_heritage.field_media_assets
+    - field.field.node.digital_heritage.field_original_date
+    - field.field.node.digital_heritage.field_people
+    - field.field.node.digital_heritage.field_protocol_control
+    - field.field.node.digital_heritage.field_publisher
+    - field.field.node.digital_heritage.field_related_content
+    - field.field.node.digital_heritage.field_rights
+    - field.field.node.digital_heritage.field_source
+    - field.field.node.digital_heritage.field_subject
+    - field.field.node.digital_heritage.field_summary
+    - field.field.node.digital_heritage.field_traditional_knowledge
+    - field.field.node.digital_heritage.field_transcription
+    - field.field.node.digital_heritage.field_type
+    - node.type.digital_heritage
+  module:
+    - field_group
+    - layout_builder
+    - leaflet
+    - link
+    - original_date
+    - text
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+  field_group:
+    group_metadata:
+      children:
+        - field_communities
+        - field_category
+        - field_keywords
+        - field_in_collection
+        - field_original_date
+        - field_date_description
+        - field_creator
+        - field_contributor
+        - field_language
+        - field_rights
+        - field_source
+        - field_external_links
+        - field_publisher
+        - field_identifier
+        - field_subject
+        - field_type
+        - field_format
+      label: Metadata
+      parent_name: ''
+      region: content
+      weight: 1
+      format_type: html_element
+      format_settings:
+        classes: metadata
+        show_empty_fields: false
+        id: ''
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_primary_fields:
+      children:
+        - field_media_assets
+        - field_summary
+        - field_description
+        - field_cultural_narrative
+        - field_traditional_knowledge
+        - field_transcription
+        - field_people
+        - field_coverage
+      label: 'Primary Fields'
+      parent_name: ''
+      region: content
+      weight: 0
+      format_type: html_element
+      format_settings:
+        classes: item-content
+        show_empty_fields: false
+        id: ''
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+_core:
+  default_config_hash: OBfDQqHiEl9vuWwPuxOj_KlOx0zCEeXIN4PUtGa9RaA
+id: node.digital_heritage.full
+targetEntityType: node
+bundle: digital_heritage
+mode: full
+content:
+  field_all_community_records:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_category:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 18
+    region: content
+  field_communities:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 17
+    region: content
+  field_contributor:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 24
+    region: content
+  field_coverage:
+    type: leaflet_formatter_default
+    label: above
+    settings:
+      multiple_map: false
+      leaflet_map: 'OSM Mapnik'
+      height: 400
+      height_unit: px
+      hide_empty_map: false
+      disable_wheel: false
+      gesture_handling: false
+      reset_map:
+        control: false
+        position: topright
+      popup: false
+      popup_content: ''
+      map_position:
+        force: false
+        center:
+          lat: !!float 0
+          lon: !!float 0
+        zoom: 12
+        minZoom: 1
+        maxZoom: 18
+        zoomFiner: 0
+      icon:
+        iconType: marker
+        iconUrl: ''
+        shadowUrl: ''
+        className: ''
+        iconSize:
+          x: null
+          'y': null
+        iconAnchor:
+          x: null
+          'y': null
+        shadowSize:
+          x: null
+          'y': null
+        shadowAnchor:
+          x: null
+          'y': null
+        popupAnchor:
+          x: null
+          'y': null
+        html: '<div></div>'
+        html_class: leaflet-map-divicon
+        circle_marker_options: '{"radius": 100, "color": "red", "fillColor": "#f03", "fillOpacity": 0.5}'
+      leaflet_markercluster:
+        control: false
+        options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
+        include_path: false
+      fullscreen:
+        control: false
+        options: '{"position":"topleft","pseudoFullscreen":false}'
+      path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      geocoder:
+        control: false
+        settings:
+          position: topright
+          input_size: 25
+          providers: {  }
+          min_terms: 4
+          delay: 800
+          zoom: 16
+          popup: false
+          options: ''
+      weight: null
+    third_party_settings: {  }
+    weight: 40
+    region: content
+  field_creator:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 23
+    region: content
+  field_cultural_narrative:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 36
+    region: content
+  field_date_description:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 22
+    region: content
+  field_description:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 35
+    region: content
+  field_external_links:
+    type: link
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 28
+    region: content
+  field_format:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 33
+    region: content
+  field_identifier:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 30
+    region: content
+  field_in_collection:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 20
+    region: content
+  field_keywords:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 19
+    region: content
+  field_language:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 25
+    region: content
+  field_media_assets:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: full
+      link: false
+    third_party_settings: {  }
+    weight: 33
+    region: content
+  field_original_date:
+    type: original_date_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 21
+    region: content
+  field_people:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 39
+    region: content
+  field_publisher:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 29
+    region: content
+  field_rights:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 26
+    region: content
+  field_source:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 27
+    region: content
+  field_subject:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 31
+    region: content
+  field_summary:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 34
+    region: content
+  field_traditional_knowledge:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 37
+    region: content
+  field_transcription:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
+    region: content
+  field_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 32
+    region: content
+hidden:
+  comment: true
+  field_content_type: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_mukurtu_original_record: true
+  field_protocol_control: true
+  field_related_content: true
+  field_representative_media: true
+  field_sequence_collection: true
+  field_title: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_email_node: true
+  flag_mukurtu_email_og: true
+  flag_mukurtu_follow_content: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  links: true
+  search_api_excerpt: true

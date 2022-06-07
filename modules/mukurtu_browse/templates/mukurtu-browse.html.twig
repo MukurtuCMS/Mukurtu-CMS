@@ -1,9 +1,17 @@
-{% if maplink %}
-  {{ maplink }}
-{% endif %}
-{% if facets %}
-  {% for facet in facets %}
-    {{ facet }}
-  {% endfor %}
-{% endif %}
-{{ results }}
+<div class="browse-container">
+  <div class="browse-links">
+  {% if maplink %}
+    {{ maplink }}
+  {% endif %}
+  </div>
+  <div class="browse-facets">
+  {% if facets %}
+    {% for facet in facets %}
+      {{ facet }}
+    {% endfor %}
+  {% endif %}
+  </div>
+  <div class="browse-results">
+  {{ results }}
+  </div>
+</div>

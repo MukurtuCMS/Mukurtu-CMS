@@ -1,0 +1,43 @@
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+a {
+  border-bottom: none;
+}
+
+.page-title {
+  text-align: center;
+}
+
+.field {
+  padding-bottom: 10px;
+}
+
+.field .field__label {
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.field--name-field-banner-image .media.media--type-image.media--view-mode-full img {
+  width: 100%;
+}
+
+.mukurtu-getting-started {
+  border-radius: 25px;
+  border: 2px solid #0071b3;
+  padding: 10px;
+  margin: 10px;
+}
+
+.notice {
+  border-radius: 25px;
+  border: 2px solid #0071b3;
+  padding: 10px;
+  margin: 10px;
+}
+
+.notices {
+  margin-bottom: 20px;
+}

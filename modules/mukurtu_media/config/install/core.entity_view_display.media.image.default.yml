@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.media.image.field_keywords
+    - field.field.media.image.field_media_image
+    - field.field.media.image.field_protocol_control
+    - media.type.image
+  module:
+    - image
+id: media.image.default
+targetEntityType: media
+bundle: image
+mode: default
+content:
+  thumbnail:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: ''
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_communities: true
+  field_keywords: true
+  field_media_image: true
+  field_protocol_control: true
+  name: true
+  search_api_excerpt: true
+  uid: true

@@ -1,4 +1,9 @@
 <div>
+  {% if notices %}
+    <div class="notices">
+      {{ notices }}
+    </div>
+  {% endif %}
   <div class="management-links">
     <ul>
       {% for link in links %}

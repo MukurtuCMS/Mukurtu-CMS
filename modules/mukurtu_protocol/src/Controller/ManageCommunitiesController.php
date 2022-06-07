@@ -18,9 +18,29 @@ class ManageCommunitiesController extends ControllerBase {
   public function manageCommunity(CommunityInterface $group) {
     $community = $group;
     $build = [];
+    $notices = [];
 
     // Protocols.
     $protocols = $community->getProtocols();
+
+    // Check if the community has thumbnail/banner images.
+    $thumbnail = $community->getThumbnailImage();
+    $banner = $community->getBannerImage();
+
+    $editUrl = $group->toUrl('edit-form');
+
+    if ($editUrl->access() && !$banner && !$thumbnail) {
+      $notices[] = ['#markup' => $this->t('<div class="notice"><a href="@url">Add thumbnail and banner images for this community.</a></div>', ['@url' => $editUrl->toString()])];
+    }
+    else {
+      if (!$banner) {
+        $notices[] = ['#markup' => $this->t('<div class="notice"><a href="@url">Add a banner image for this community.</a></div>', ['@url' => $editUrl->toString()])];
+      }
+
+      if (!$thumbnail) {
+        $notices[] = ['#markup' => $this->t('<div class="notice"><a href="@url">Add a thumbnail image for this community.</a></div>', ['@url' => $editUrl->toString()])];
+      }
+    }
 
     // Build management Links.
     $links = [];
@@ -80,6 +100,7 @@ class ManageCommunitiesController extends ControllerBase {
       '#sharing' => $sharing,
       '#description' => $description,
       '#protocols' => $protocols,
+      '#notices' => $notices,
     ];
 
     return $build;

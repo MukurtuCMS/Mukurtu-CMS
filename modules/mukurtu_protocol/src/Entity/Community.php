@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
+use Drupal\media\MediaInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
@@ -300,6 +301,20 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
    */
   public function setParentCommunity(CommunityInterface $community): CommunityInterface {
     return $this->set('field_parent_community', $community->id());
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getThumbnailImage(): ?MediaInterface {
+    return $this->get('field_thumbnail_image')->referencedEntities()[0] ?? NULL;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getBannerImage(): ?MediaInterface {
+    return $this->get('field_banner_image')->referencedEntities()[0] ?? NULL;
   }
 
   /**

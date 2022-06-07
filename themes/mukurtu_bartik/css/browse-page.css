@@ -1,0 +1,62 @@
+.browse-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.browse-container .browse-links {
+  flex: 0 0 100%;
+}
+
+.browse-container .browse-facets {
+  width: 250px;
+}
+
+.browse-container .browse-results {
+  flex-grow: 3;
+  flex-basis: 66%;
+}
+
+.facets-widget-checkbox h3 {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.facets-widget-checkbox ul {
+  list-style-type: none;
+  padding-left: 10px;
+}
+
+.facets-widget-checkbox .facet-item label {
+  display: inline;
+  font-weight: normal;
+}
+
+.view-mukurtu-browse .form--inline {
+  display: flex;
+}
+
+.view-mukurtu-browse .form--inline .button {
+  margin-top: 12px;
+}
+
+.view-mukurtu-browse .views-row article {
+  display: flex;
+}
+
+.view-mukurtu-browse .views-row article .browse-result-media {
+  width: 33%;
+  padding-right: 20px;
+}
+
+.view-mukurtu-browse .views-row article .browse-result-content {
+  flex-grow: 3;
+}
+
+.view-mukurtu-browse .views-row article .browse-result-content .field {
+  margin: 0px;
+}
+
+.view-mukurtu-browse .views-row article .browse-result-content .field--name-field-content-type {
+  text-transform: uppercase;
+}

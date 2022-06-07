@@ -27,11 +27,10 @@ function mukurtu_install() {
   // Rebuild node access permissions.
   node_access_rebuild();
 
-  // Protocol field isn't always being created for DH on install,
-  // so we'll double check it here.
-  //mukurtu_protocol_create_protocol_field('node', 'digital_heritage');
-  //mukurtu_community_records_create_community_records_field('node', 'digital_heritage');
-
-  // Create the protocol fields on the default Drupal comments.
-  //mukurtu_protocol_create_protocol_field('comment', 'comment');
+  // Install and default to our testing bartik subtheme for now.
+  \Drupal::service('theme_installer')->install(['mukurtu_bartik']);
+  \Drupal::configFactory()
+    ->getEditable('system.theme')
+    ->set('default', 'mukurtu_bartik')
+    ->save();
 }

@@ -6,7 +6,6 @@ dependencies:
   module:
     - layout_builder
     - mukurtu_protocol
-    - text
 third_party_settings:
   layout_builder:
     enabled: false
@@ -24,10 +23,12 @@ content:
     third_party_settings: {  }
     weight: 2
     region: content
-  field_description:
-    type: text_default
-    label: above
-    settings: {  }
+  field_thumbnail_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: full
+      link: false
     third_party_settings: {  }
     weight: 1
     region: content
@@ -41,8 +42,11 @@ content:
     region: content
 hidden:
   field_access_mode: true
+  field_banner_image: true
   field_child_communities: true
   field_community_type: true
+  field_description: true
+  field_featured_content: true
   field_parent_community: true
   field_protocols: true
   og_group: true

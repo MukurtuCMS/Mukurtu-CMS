@@ -54,6 +54,7 @@ function mukurtu_protocol_theme($existing, $type, $theme, $path) {
         'sharing' => NULL,
         'description' => NULL,
         'protocols' => NULL,
+        'notices' => NULL,
       ],
     ],
     'manage-protocol' => [

@@ -1,14 +1,21 @@
 langcode: en
 status: true
 dependencies:
+  config:
+    - core.entity_view_mode.community.full
   module:
+    - layout_builder
     - mukurtu_protocol
     - options
     - text
-id: community.community.default
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: community.community.full
 targetEntityType: community
 bundle: community
-mode: default
+mode: full
 content:
   community_type:
     type: entity_reference_label

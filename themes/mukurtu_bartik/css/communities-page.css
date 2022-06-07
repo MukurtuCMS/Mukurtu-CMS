@@ -1,0 +1,33 @@
+.community-page-browse .communities {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.community-page-browse ul.communities {
+  list-style-type: none;
+  padding-left: 0px;
+}
+
+.community-page-browse .communities .community {
+  width: 250px;
+  padding-right: 20px;
+}
+
+.community-page-browse .communities li.community .field--name-name {
+  font-weight: bold;
+  letter-spacing: 1.2px;
+  position: absolute;
+  background-color: #0071b3;
+  padding: 15px;
+  z-index: 1;
+  width: 220px;
+}
+
+.community-page-browse .communities li.community .field--name-name a {
+  color: #ffffff;
+  border-bottom: none;
+}
+
+.community-page-browse .communities li.community .field--name-thumbnail img {
+  width: 250px;
+}
