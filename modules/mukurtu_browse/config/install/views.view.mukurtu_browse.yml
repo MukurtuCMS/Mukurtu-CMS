@@ -129,7 +129,7 @@ display:
         type: none
         options: {  }
       cache:
-        type: tag
+        type: none
         options: {  }
       empty: {  }
       sorts: {  }
