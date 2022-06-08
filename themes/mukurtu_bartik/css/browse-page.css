@@ -40,23 +40,23 @@
   margin-top: 12px;
 }
 
-.view-mukurtu-browse .views-row article {
+article {
   display: flex;
 }
 
-.view-mukurtu-browse .views-row article .browse-result-media {
+article .browse-result-media {
   width: 33%;
   padding-right: 20px;
 }
 
-.view-mukurtu-browse .views-row article .browse-result-content {
+article .browse-result-content {
   flex-grow: 3;
 }
 
-.view-mukurtu-browse .views-row article .browse-result-content .field {
+article .browse-result-content .field {
   margin: 0px;
 }
 
-.view-mukurtu-browse .views-row article .browse-result-content .field--name-field-content-type {
+article .browse-result-content .field--name-field-content-type {
   text-transform: uppercase;
 }

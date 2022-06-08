@@ -146,7 +146,7 @@ class CommunityRecordController extends ControllerBase {
 
     $form_title = $this->t('Original Record');
     $build[] = ['#type' => 'markup', '#markup' => "<h2>$form_title</h2>"];
-    $build[] = $this->entityTypeManager()->getViewBuilder('node')->view($originalRecord, 'content_browser');
+    $build[] = $this->entityTypeManager()->getViewBuilder('node')->view($originalRecord, 'browse');
     $build[] = $this->formBuilder()->getForm($form);
 
 
