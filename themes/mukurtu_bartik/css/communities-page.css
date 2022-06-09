@@ -16,7 +16,7 @@
 .community-page-browse .communities li.community .field--name-name {
   font-weight: bold;
   letter-spacing: 1.2px;
-  position: absolute;
+  position: relative;
   background-color: #0071b3;
   padding: 15px;
   z-index: 1;

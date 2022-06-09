@@ -1,30 +1,23 @@
-.node__content {
+.node--type-digital-heritage .node__content {
   display: flex;
 }
 
-.node__content .item-content {
+.node--type-digital-heritage .node__content .item-content {
   flex-basis: 66%;
   flex-grow: 3;
-  min-width: 66%;
 }
 
-.node__content .item-content .field {
-  padding-right: 20px;
-}
-
-.node__content .metadata {
+.node--type-digital-heritage .node__content .metadata {
   flex-basis: 33%;
-  max-width: 33%;
   background-color: #F0EEE9;
   border-top: 5px solid #D9D4C2;
 }
 
-.node__content .metadata .field {
+.node--type-digital-heritage .node__content .metadata .field {
   padding: 10px 20px 10px;
-  margin: 0px;
 }
 
-.node__content .metadata .field::after {
+.node--type-digital-heritage .node__content .metadata .field::after {
   content: "";
   display: inline-block;
   left: 0;
