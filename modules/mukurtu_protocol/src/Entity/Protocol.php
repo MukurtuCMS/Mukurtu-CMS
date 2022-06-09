@@ -417,7 +417,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setDescription(t('The name of the Protocol.'))
       ->setRevisionable(TRUE)
       ->setSettings([
-        'max_length' => 50,
+        'max_length' => 255,
         'text_processing' => 0,
       ])
       ->setDefaultValue('')
