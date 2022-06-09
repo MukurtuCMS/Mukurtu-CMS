@@ -1,0 +1,11 @@
+name: 'Mukurtu Demo Content'
+type: module
+description: 'Provides demo content for development testing.'
+core_version_requirement: ^8 || ^9
+core: 8.x
+package: 'Mukurtu'
+dependencies:
+  - mukurtu_digital_heritage
+  - mukurtu_dictionary
+
+version: '8.x-1.x-dev'
