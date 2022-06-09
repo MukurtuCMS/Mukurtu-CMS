@@ -313,8 +313,22 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritDoc}
    */
+  public function setThumbnailImage(MediaInterface $image): CommunityInterface {
+    return $this->set('field_thumbnail_image', $image->id());
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   public function getBannerImage(): ?MediaInterface {
     return $this->get('field_banner_image')->referencedEntities()[0] ?? NULL;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setBannerImage(MediaInterface $image): CommunityInterface {
+    return $this->set('field_banner_image', $image->id());
   }
 
   /**
@@ -484,7 +498,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setDescription(t('The name of the Community.'))
       ->setRevisionable(TRUE)
       ->setSettings([
-        'max_length' => 50,
+        'max_length' => 255,
         'text_processing' => 0,
       ])
       ->setDefaultValue('')

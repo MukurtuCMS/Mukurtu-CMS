@@ -181,12 +181,34 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
   public function getThumbnailImage(): ?MediaInterface;
 
   /**
+   * Set the thumbnail image.
+   *
+   * @param \Drupal\media\MediaInterface $image
+   *   The thumbnail image media entity.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\CommunityInterface
+   *   The called Community entity.
+   */
+  public function setThumbnailImage(MediaInterface $image): CommunityInterface;
+
+  /**
    * Get the banner image.
    *
    * @return \Drupal\media\MediaInterface|null
    *   The banner media.
    */
   public function getBannerImage(): ?MediaInterface;
+
+  /**
+   * Set the banner image.
+   *
+   * @param \Drupal\media\MediaInterface $image
+   *   The banner image media entity.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\CommunityInterface
+   *   The called Community entity.
+   */
+  public function setBannerImage(MediaInterface $image): CommunityInterface;
 
   /**
    * Get the child communities.
