@@ -15,12 +15,11 @@ dependencies:
     - field.field.node.collection.field_protocol_control
     - field.field.node.collection.field_related_content
     - field.field.node.collection.field_summary
-    - image.style.thumbnail
     - node.type.collection
   module:
     - entity_browser
     - field_group
-    - image
+    - media_library
     - mukurtu_protocol
     - path
     - text
@@ -102,12 +101,11 @@ content:
       selection_mode: selection_append
     third_party_settings: {  }
   field_collection_image:
-    type: image_image
+    type: media_library_widget
     weight: -4
     region: content
     settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
+      media_types: {  }
     third_party_settings: {  }
   field_credit:
     type: string_textfield
