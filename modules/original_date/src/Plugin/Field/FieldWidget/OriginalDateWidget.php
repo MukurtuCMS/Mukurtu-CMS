@@ -18,20 +18,23 @@ use Drupal\Core\Form\FormStateInterface;
  *   }
  * )
  */
-class OriginalDateWidget extends WidgetBase
-{
+class OriginalDateWidget extends WidgetBase {
+
   /**
    * {@inheritdoc}
    */
-  public function massageFormValues(array $values, array $form, FormStateInterface $form_state)
-  {
+  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
     foreach ($values as $key => $value) {
-      $monthCleaned = (int) ltrim($value['month'], "0");
-      $dayCleaned = (int) ltrim($value['day'], "0");
+      $year = $value['value']['year'] ?? '';
+      $month = $value['value']['month'] ?? '';
+      $day = $value['value']['day'] ?? '';
 
-      $values[$key]['year'] = ltrim($value['year'], "0");
-      $values[$key]['month'] = $monthCleaned ? $monthCleaned : null;
-      $values[$key]['day'] = $dayCleaned ? $dayCleaned : null;
+      $monthCleaned = (int) ltrim($month, "0");
+      $dayCleaned = (int) ltrim($day, "0");
+
+      $values[$key]['year'] = ltrim($year, "0");
+      $values[$key]['month'] = $monthCleaned ? $monthCleaned : NULL;
+      $values[$key]['day'] = $dayCleaned ? $dayCleaned : NULL;
     }
     return $values;
   }
@@ -39,66 +42,65 @@ class OriginalDateWidget extends WidgetBase
   /**
    * {@inheritdoc}
    */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state)
-  {
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element += [
       '#element_validate' => [
         [$this, 'validate'],
       ]
     ];
 
-    $element['year'] = array (
+    $element['year'] = [
       '#type' => 'textfield',
       '#title' => t('Year'),
       '#size' => 4,
       '#maxlength' => 4,
       '#default_value' => isset($items[$delta]->year) ? $items[$delta]->year : '',
-    );
+    ];
 
-    $element['month'] = array(
+    $element['month'] = [
       '#type' => 'number',
       '#title' => t('Month'),
       '#min' => 1,
       '#max' => 12,
       '#size' => 5,
-      '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : null,
-    );
+      '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : NULL,
+    ];
 
-    $element['day'] = array(
+    $element['day'] = [
       '#type' => 'number',
       '#title' => t('Day'),
       '#min' => 1,
       '#max' => 31,
       '#size' => 5,
-      '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : null,
-    );
+      '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : NULL,
+    ];
 
-    $element += array(
+    $element += [
       '#type' => 'fieldset',
-      '#attributes' => array('class' => array('container-inline')),
-    );
+      '#attributes' => ['class' => ['container-inline']],
+    ];
 
-    return $element;
+    return ['value' => $element];
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function validate($element, FormStateInterface $form_state)
-  {
-    $year = ltrim($element['year']['#value'], "0"); // in case of leading zeros
+  public static function validate($element, FormStateInterface $form_state) {
+    // In case of leading zeros.
+    $year = ltrim($element['year']['#value'], "0");
     $month = (int) ltrim($element['month']['#value'], "0");
     $day = (int) ltrim($element['day']['#value'], "0");
 
-    // if empty, return
+    // If empty, return.
     if (!$year && !$month && !$day) {
       $form_state->setValueForElement($element, '');
       return;
     }
 
-    // 1. ensure date in acceptable format
+    // 1. ensure date in acceptable format.
     if ($year && $month && $day || $year && $month && !$day || $year && !$month && !$day) {
-      // 2. Ensure date is valid
+      // 2. Ensure date is valid.
       if (!checkdate(($month == 0 ? 1 : $month), ($day == 0 ? 1 : $day), $year)) {
         $form_state->setError($element, "Invalid date.");
       }
@@ -107,4 +109,5 @@ class OriginalDateWidget extends WidgetBase
       $form_state->setError($element, "Acceptable date formats are year only, year/month, or year/month/day.");
     }
   }
+
 }

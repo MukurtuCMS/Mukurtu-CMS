@@ -3,7 +3,6 @@
 namespace Drupal\original_date\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
 
@@ -19,51 +18,49 @@ use Drupal\Core\TypedData\DataDefinition;
  * default_formatter = "original_date_formatter"
  * )
  */
-class OriginalDateField extends FieldItemBase
-{
+class OriginalDateField extends FieldItemBase {
+
   /**
    * {@inheritdoc}
    */
-  public static function schema(FieldStorageDefinitionInterface $field_definition)
-  {
-    return array(
-      'columns' => array(
-        'date' => array(
+  public static function schema(FieldStorageDefinitionInterface $field_definition) {
+    return [
+      'columns' => [
+        'date' => [
           'type' => 'text',
           'size' => 'tiny',
-          'not null' => false,
-        ),
-        'timestamp' => array(
+          'not null' => FALSE,
+        ],
+        'timestamp' => [
           'type' => 'int',
           'size' => 'big',
-          'not null' => false,
-        ),
-        'year' => array(
+          'not null' => FALSE,
+        ],
+        'year' => [
           'type' => 'varchar',
           'length' => 4,
-          'not null' => false,
-        ),
-        'month' => array(
+          'not null' => FALSE,
+        ],
+        'month' => [
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => true,
-          'not null' => false,
-        ),
-        'day' => array(
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ],
+        'day' => [
           'type' => 'int',
           'size' => 'tiny',
-          'unsigned' => true,
-          'not null' => false,
-        ),
-      ),
-    );
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ],
+      ],
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isEmpty()
-  {
+  public function isEmpty() {
     $date = $this->get('date')->getValue();
     $timestamp = $this->get('timestamp')->getValue();
     $year = $this->get('year')->getValue();
@@ -76,8 +73,7 @@ class OriginalDateField extends FieldItemBase
   /**
    * {@inheritdoc}
    */
-  public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition)
-  {
+  public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['date'] = DataDefinition::create('string')
       ->setLabel(t('Original date'));
 
@@ -99,11 +95,10 @@ class OriginalDateField extends FieldItemBase
   /**
    * {@inheritdoc}
    */
-  public function setValue($values, $notify = true)
-  {
-    $year = $values['year'];
-    $month = $values['month'];
-    $day = $values['day'];
+  public function setValue($values, $notify = TRUE) {
+    $year = $values['year'] ?? NULL;
+    $month = $values['month'] ?? "";
+    $day = $values['day'] ?? "";
 
     // 1. Store the date string for the user-facing date display
     $date = $year; // year is guaranteed
@@ -115,11 +110,11 @@ class OriginalDateField extends FieldItemBase
     $values['date'] = $date;
 
     // 2. Calculate the internal date
-
     $timestamp = strtotime($date);
 
     $values['timestamp'] = $timestamp === FALSE ? NULL : $timestamp;
 
     parent::setValue($values, $notify);
   }
+
 }
