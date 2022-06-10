@@ -6,3 +6,4 @@ global-styling:
       css/browse-page.css: {}
       css/node.css: {}
       css/dashboard.css: {}
+      css/collection.css: {}

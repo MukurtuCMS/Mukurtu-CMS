@@ -187,13 +187,13 @@ display:
         options:
           view_modes:
             'entity:node':
-              article: default
-              collection: default
-              dictionary_word: default
+              article: browse
+              collection: browse
+              dictionary_word: browse
               digital_heritage: browse
-              page: default
-              person: default
-              word_list: default
+              page: browse
+              person: browse
+              word_list: browse
       query:
         type: views_query
         options:

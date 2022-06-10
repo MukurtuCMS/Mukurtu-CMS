@@ -18,7 +18,7 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
     $entity = $this->getEntity();
     $user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
 
-    $media_fields = ['field_media_assets'];
+    $media_fields = ['field_media_assets', 'field_collection_image'];
 
     // Check available media fields. Find the first media item that is
     // accessible to the user and return that. This seems very heavy

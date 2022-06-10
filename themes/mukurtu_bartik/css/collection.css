@@ -1,0 +1,13 @@
+article.node--type-collection.node--view-mode-full .node__content {
+  flex-direction: column;
+}
+
+article.node--type-collection.node--view-mode-full .node__content .field--name-field-collection-image img {
+  max-width: 200px;
+}
+
+.view-mukurtu-browse-collections .view-content .views-row article .field--name-field-representative-media {
+  max-width: 250px;
+  padding: 0px;
+  margin: 0px;
+}
