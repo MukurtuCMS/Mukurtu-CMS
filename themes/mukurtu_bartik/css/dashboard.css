@@ -1,0 +1,14 @@
+.view-mukurtu-recent-content .view-content .views-row .views-field {
+  display: inline;
+}
+
+.view-mukurtu-recent-content .view-content .views-row .views-field.views-field-type {
+  background-color: #ddd;
+  border: none;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  border-radius: 16px;
+}

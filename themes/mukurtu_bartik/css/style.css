@@ -41,3 +41,7 @@ a {
 .notices {
   margin-bottom: 20px;
 }
+
+.media-library-selection .media-library-item article {
+  flex-direction: column;
+}

@@ -5,3 +5,4 @@ global-styling:
       css/communities-page.css: {}
       css/browse-page.css: {}
       css/node.css: {}
+      css/dashboard.css: {}
