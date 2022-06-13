@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - entity_browser.browser.browse_content
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_category
     - field.field.node.digital_heritage.field_content_type
@@ -32,6 +33,7 @@ dependencies:
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
+    - entity_browser
     - field_group
     - leaflet
     - media_library
@@ -134,7 +136,8 @@ third_party_settings:
         description: ''
         required_fields: true
     group_relations:
-      children: {  }
+      children:
+        - field_related_content
       label: Relations
       region: content
       parent_name: group_main_tab
@@ -355,6 +358,21 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_related_content:
+    type: entity_browser_entity_reference
+    weight: 0
+    region: content
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: false
+      field_widget_display_settings:
+        view_mode: content_browser
+      selection_mode: selection_append
+    third_party_settings: {  }
   field_rights:
     type: string_textarea
     weight: 23
@@ -489,5 +507,4 @@ hidden:
   field_mukurtu_community: true
   field_mukurtu_geojson: true
   field_mukurtu_original_record: true
-  field_related_content: true
   field_sequence_collection: true

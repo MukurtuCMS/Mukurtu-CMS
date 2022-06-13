@@ -197,7 +197,21 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setCardinality(1)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayOptions('view', ['label' => 'hidden']);
+
+    // Computed field for related content display.
+    // @see \Drupal\mukurtu_core\Plugin\Field\AllRelatedContentItemList.
+    $fields['field_all_related_content'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_all_related_content')
+      ->setLabel(t('Related Content'))
+      ->setDescription(t('Display field for related content.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_core\Plugin\Field\AllRelatedContentItemList')
+      ->setSetting('target_type', 'node')
+      ->setCardinality(-1)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayOptions('view', ['label' => 'hidden']);
   }
+
   return $fields;
 }
 

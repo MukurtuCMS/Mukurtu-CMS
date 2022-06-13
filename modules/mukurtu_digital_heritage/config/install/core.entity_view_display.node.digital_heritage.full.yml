@@ -89,6 +89,7 @@ third_party_settings:
         - field_transcription
         - field_people
         - field_coverage
+        - field_all_related_content
       label: 'Primary Fields'
       parent_name: ''
       region: content
@@ -105,8 +106,6 @@ third_party_settings:
         attributes: ''
         effect: none
         speed: fast
-_core:
-  default_config_hash: OBfDQqHiEl9vuWwPuxOj_KlOx0zCEeXIN4PUtGa9RaA
 id: node.digital_heritage.full
 targetEntityType: node
 bundle: digital_heritage
@@ -119,6 +118,14 @@ content:
       link: true
     third_party_settings: {  }
     weight: 2
+    region: content
+  field_all_related_content:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 41
     region: content
   field_category:
     type: entity_reference_label

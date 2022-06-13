@@ -1,0 +1,118 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.full
+    - field.field.node.collection.field_child_collections
+    - field.field.node.collection.field_collection_image
+    - field.field.node.collection.field_collection_type
+    - field.field.node.collection.field_content_type
+    - field.field.node.collection.field_credit
+    - field.field.node.collection.field_description
+    - field.field.node.collection.field_items_in_collection
+    - field.field.node.collection.field_keywords
+    - field.field.node.collection.field_parent_collection
+    - field.field.node.collection.field_protocol_control
+    - field.field.node.collection.field_related_content
+    - field.field.node.collection.field_summary
+    - node.type.collection
+  module:
+    - layout_builder
+    - text
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: node.collection.full
+targetEntityType: node
+bundle: collection
+mode: full
+content:
+  field_all_related_content:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  field_collection_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: full
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_communities:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_credit:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_description:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_items_in_collection:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: browse
+      link: false
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_keywords:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_summary:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
+hidden:
+  field_child_collections: true
+  field_collection_type: true
+  field_content_type: true
+  field_in_collection: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_parent_collection: true
+  field_protocol_control: true
+  field_related_content: true
+  field_representative_media: true
+  field_title: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_mukurtu_email_collection: true
+  flag_mukurtu_email_og: true
+  flag_mukurtu_follow_collection: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  links: true
+  search_api_excerpt: true
