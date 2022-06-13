@@ -45,3 +45,12 @@ a {
 .media-library-selection .media-library-item article {
   flex-direction: column;
 }
+
+.field--name-field-creative-commons .field__item p a {
+  display: flex;
+}
+
+.field--name-field-creative-commons .field__item p a img {
+  width: 30px;
+  padding-left: 5px;
+}

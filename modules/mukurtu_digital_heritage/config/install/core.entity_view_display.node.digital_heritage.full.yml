@@ -8,6 +8,7 @@ dependencies:
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
     - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_creative_commons
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
     - field.field.node.digital_heritage.field_date_description
@@ -36,6 +37,7 @@ dependencies:
     - layout_builder
     - leaflet
     - link
+    - mukurtu_core
     - original_date
     - text
     - user
@@ -55,6 +57,7 @@ third_party_settings:
         - field_creator
         - field_contributor
         - field_language
+        - field_creative_commons
         - field_rights
         - field_source
         - field_external_links
@@ -222,6 +225,13 @@ content:
     third_party_settings: {  }
     weight: 40
     region: content
+  field_creative_commons:
+    type: mukurtu_creative_commons_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 26
+    region: content
   field_creator:
     type: entity_reference_label
     label: above
@@ -262,7 +272,7 @@ content:
       rel: ''
       target: ''
     third_party_settings: {  }
-    weight: 28
+    weight: 29
     region: content
   field_format:
     type: entity_reference_label
@@ -270,7 +280,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 33
+    weight: 34
     region: content
   field_identifier:
     type: string
@@ -278,7 +288,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 30
+    weight: 31
     region: content
   field_in_collection:
     type: entity_reference_label
@@ -334,14 +344,14 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 29
+    weight: 30
     region: content
   field_rights:
     type: basic_string
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 26
+    weight: 27
     region: content
   field_source:
     type: string
@@ -349,7 +359,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 27
+    weight: 28
     region: content
   field_subject:
     type: entity_reference_label
@@ -357,7 +367,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 31
+    weight: 32
     region: content
   field_summary:
     type: string
@@ -387,7 +397,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 32
+    weight: 33
     region: content
 hidden:
   comment: true

@@ -8,6 +8,7 @@ dependencies:
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
     - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_creative_commons
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
     - field.field.node.digital_heritage.field_date_description
@@ -102,6 +103,7 @@ third_party_settings:
       children:
         - field_publisher
         - field_rights
+        - field_creative_commons
       label: 'Rights and Permissions'
       region: content
       parent_name: group_main_tab
@@ -229,6 +231,12 @@ content:
           zoom: 16
           popup: false
           options: ''
+    third_party_settings: {  }
+  field_creative_commons:
+    type: options_select
+    weight: 24
+    region: content
+    settings: {  }
     third_party_settings: {  }
   field_creator:
     type: entity_reference_autocomplete
