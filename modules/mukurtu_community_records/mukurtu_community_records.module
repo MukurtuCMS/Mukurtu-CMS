@@ -89,6 +89,7 @@ function mukurtu_community_records_entity_type_supports_records($entity_type_id,
   return isset($definitions[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD]);
 }
 
+
 /**
  * Check if an entity is a community record.
  */
@@ -129,6 +130,10 @@ function mukurtu_community_records_is_original_record(EntityInterface $entity) {
  * Invalidate cache tags for all community records.
  */
 function mukurtu_community_records_invalidate_record_tags(NodeInterface $node) {
+  if (!$node->hasField('field_mukurtu_original_record')) {
+    return;
+  }
+
   $original_record = $node->get('field_mukurtu_original_record')->referencedEntities()[0] ?? $node;
 
   if (!$original_record) {
@@ -146,7 +151,7 @@ function mukurtu_community_records_invalidate_record_tags(NodeInterface $node) {
     foreach ($results as $nid) {
       $tags[] = "node:$nid";
     }
-    dpm($tags);
+
     Cache::invalidateTags($tags);
   }
 }
