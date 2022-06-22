@@ -1,0 +1,11 @@
+mukurtu_core.media_found_in:
+  title: 'Found In'
+  route_name: mukurtu_core.media_found_in
+  base_route: entity.media.canonical
+  weight: 60
+
+#mukurtu_core.content_found_in:
+#  title: 'Found In'
+#  route_name: mukurtu_core.content_found_in
+#  base_route: entity.node.canonical
+#  weight: 60

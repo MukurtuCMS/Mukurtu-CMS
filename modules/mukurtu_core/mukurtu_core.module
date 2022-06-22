@@ -54,6 +54,28 @@ function mukurtu_core_entity_type_build(array &$entity_types) {
 }
 
 /**
+ * Implements hook_entity_operation().
+ */
+function mukurtu_core_entity_operation(EntityInterface $entity) {
+  $operations = [];
+  if ($entity->getEntityTypeId() == 'media') {
+    $operations['found_in'] = array(
+      'title' => t('Found In'),
+      'url' => Url::fromRoute('mukurtu_core.media_found_in', ["media" => $entity->id()]),
+      'weight' => 150,
+    );
+  }
+  if ($entity->getEntityTypeId() == 'node') {
+    $operations['found_in'] = array(
+      'title' => t('Found In'),
+      'url' => Url::fromRoute('mukurtu_core.content_found_in', ["node" => $entity->id()]),
+      'weight' => 150,
+    );
+  }
+  return $operations;
+}
+
+/**
  * Implements hook_page_attachments.
  */
 function mukurtu_core_page_attachments(array &$attachments) {

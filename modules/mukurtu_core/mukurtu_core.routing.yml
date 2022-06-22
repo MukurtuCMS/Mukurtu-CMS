@@ -57,4 +57,25 @@ mukurtu_core.block_user:
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
     uid: \d+
-
+mukurtu_core.content_found_in:
+  path: '/node/{node}/found-in'
+  defaults:
+    _title: 'Found In'
+    _controller: '\Drupal\mukurtu_core\Controller\ContentFoundInController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\ContentFoundInController::access'
+mukurtu_core.media_found_in:
+  path: '/media/{media}/found-in'
+  defaults:
+    _title: 'Found In'
+    _controller: '\Drupal\mukurtu_core\Controller\MediaFoundInController::content'
+  options:
+    parameters:
+      media:
+        type: entity:media
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MediaFoundInController::access'
