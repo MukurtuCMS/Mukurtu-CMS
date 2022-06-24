@@ -33,6 +33,7 @@ dependencies:
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
+    - comment
     - field_group
     - layout_builder
     - leaflet
@@ -114,6 +115,15 @@ targetEntityType: node
 bundle: digital_heritage
 mode: full
 content:
+  comment:
+    type: comment_default
+    label: above
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_all_community_records:
     type: entity_reference_label
     label: above
@@ -400,7 +410,6 @@ content:
     weight: 33
     region: content
 hidden:
-  comment: true
   field_content_type: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true

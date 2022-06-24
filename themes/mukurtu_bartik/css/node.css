@@ -1,5 +1,6 @@
 .node__content {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .node__content .item-content {
