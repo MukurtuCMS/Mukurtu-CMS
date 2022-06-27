@@ -8,6 +8,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 class TaxonomyRecordViewController implements ContainerInjectionInterface {
 
@@ -51,22 +52,69 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
 
   public function build(TermInterface $taxonomy_term) {
     $build = [];
+    $allRecords = $this->getTaxonomyTermRecords($taxonomy_term);
     $results = $this->referencedContent($taxonomy_term);
 
     // Load the entities so we can render them.
     $entities = !empty($results) ? $this->entityTypeManager->getStorage('node')->loadMultiple($results) : [];
-
-    // Render the entities.
-    $langcode = $this->languageManager->getCurrentLanguage()->getId();
     $entityViewBuilder = $this->entityTypeManager->getViewBuilder('node');
-    foreach ($entities as $entity) {
-      $build['reference_fields']['results'][] = $entityViewBuilder->view($entity, 'teaser', $langcode);
+    $langcode = $this->languageManager->getCurrentLanguage()->getId();
+
+    // Render any records.
+    $records = [];
+    foreach ($allRecords as $record) {
+      $records[] = [
+        'id' => $record->id(),
+        'tabid' => "record-{$record->id()}",
+        'communities' => $this->getCommunitiesLabel($record),
+        'title' => $record->getTitle(),
+        'content' => $entityViewBuilder->view($record, 'taxonomy_record', $langcode),
+      ];
     }
-    $build['reference_fields']['results'][] = [
-      '#type' => 'pager',
+
+    // Render the referenced entities.
+    $referencedContent = [];
+    if (!empty($entities)) {
+      foreach ($entities as $entity) {
+        $referencedContent[] = $entityViewBuilder->view($entity, 'teaser', $langcode);
+      }
+      $referencedContent[] = [
+        '#type' => 'pager',
+      ];
+    }
+
+    $build['records'] = [
+      '#theme' => 'taxonomy_records',
+      '#active' => 1,
+      '#records' => $records,
+      '#referenced_content' => $referencedContent,
+      '#attached' => [
+        'library' => [
+          'field_group/element.horizontal_tabs',
+          'mukurtu_community_records/community-records'
+        ],
+      ],
     ];
 
     return $build;
+  }
+
+  /**
+   * Build the communities label.
+   */
+  protected function getCommunitiesLabel(EntityInterface $node) {
+    $communities = $node->get('field_communities')->referencedEntities();
+
+    $communityLabels = [];
+    foreach ($communities as $community) {
+      // Skip any communities the user can't see.
+      if (!$community->access('view', $this->currentUser)) {
+        continue;
+      }
+      // @todo ordering?
+      $communityLabels[] = $community->getName();
+    }
+    return implode(', ', $communityLabels);
   }
 
   protected function getTaxonomyTermRecords(TermInterface $taxonomy_term) {
@@ -116,13 +164,17 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
     }
 
     // Query all those fields for references to the given media.
-    $conjunction = count($searchFields) == 1 ? 'AND' : 'OR';
-    $contentQuery = $this->entityTypeManager->getStorage('node')->getQuery($conjunction);
+    $contentQuery = $this->entityTypeManager->getStorage('node')->getQuery();
+    $fieldConditions = count($searchFields) == 1 ? $contentQuery->andConditionGroup() : $contentQuery->orConditionGroup();
 
     // Add all the field conditions.
     foreach ($searchFields as $fieldCondition) {
-      $contentQuery->condition($fieldCondition['fieldname'], $fieldCondition['value'], $fieldCondition['operator']);
+      $fieldConditions->condition($fieldCondition['fieldname'], $fieldCondition['value'], $fieldCondition['operator']);
     }
+    $contentQuery->condition($fieldConditions);
+
+    // Published only.
+    $contentQuery->condition('status', 1, '=');
 
     // Page the results.
     $contentQuery->pager(10);
