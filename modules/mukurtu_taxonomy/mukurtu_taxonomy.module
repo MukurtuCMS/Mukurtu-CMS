@@ -17,6 +17,14 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
       'template' => 'mukurtu-vocabulary-add-list',
       'variables' => ['content' => NULL],
     ],
+    'taxonomy_records' => [
+      'template' => 'taxonomy-records',
+      'variables' => [
+        'active' => NULL,
+        'records' => NULL,
+        'referenced_content' => NULL,
+      ],
+    ],
   ];
 }
 
