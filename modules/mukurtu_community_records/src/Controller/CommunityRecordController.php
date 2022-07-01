@@ -40,7 +40,7 @@ class CommunityRecordController extends ControllerBase {
 
     // Original record must support protocols in order to have community
     // records.
-    if (!$originalRecord->hasField('field_protocol_control')) {
+    if (!$originalRecord || !$originalRecord->hasField('field_protocol_control')) {
       return AccessResult::forbidden();
     }
 
@@ -88,10 +88,14 @@ class CommunityRecordController extends ControllerBase {
    * @param \Drupal\node\NodeInterface $node
    *   The content to find the original record for.
    *
-   * @return \Drupal\node\NodeInterface
+   * @return \Drupal\node\NodeInterface|null
    *   The original record node.
    */
   protected function getOriginalRecord(NodeInterface $node) {
+    if (!$node->hasField('field_mukurtu_original_record')) {
+      return NULL;
+    }
+
     // If node is a CR, find the OR.
     $original = $node->get('field_mukurtu_original_record')->referencedEntities();
     if (isset($original[0])) {
