@@ -64,6 +64,8 @@ jobs:
 
       - name: Mukurtu Tests
         run: |
+          ls /home/runner/work/mukurtu-cms/mukurtu-cms
+          ls /home/runner/work/mukurtu-cms
           cd /home/runner/work/mukurtu-cms/mukurtu-cms/
           sed -i '/core:.*/d' ./web/modules/contrib/config_sync/tests/modules/config_sync_test/config_sync_test.info.yml || true
           cd ./web
