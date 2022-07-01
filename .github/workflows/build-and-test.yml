@@ -64,6 +64,7 @@ jobs:
 
       - name: Mukurtu Tests
         run: |
+          cd /home/runner/work/mukurtu-cms/mukurtu-cms/
           sed -i '/core:.*/d' ./web/modules/contrib/config_sync/tests/modules/config_sync_test/config_sync_test.info.yml || true
           cd ./web
           ../vendor/bin/phpunit --verbose --testsuite "${{ matrix.test-suite }}"
