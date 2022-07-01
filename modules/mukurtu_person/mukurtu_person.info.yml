@@ -7,5 +7,6 @@ package: 'Mukurtu'
 dependencies:
   - mukurtu_core
   - mukurtu_protocol
+  - mukurtu_taxonomy
 
 version: '8.x-1.x-dev'

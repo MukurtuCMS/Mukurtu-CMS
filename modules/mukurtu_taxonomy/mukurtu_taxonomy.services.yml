@@ -1,0 +1,5 @@
+services:
+  mukurtu_community_records.route_subscriber:
+    class: Drupal\mukurtu_taxonomy\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -1,0 +1,35 @@
+{% if records|length == 1%}
+<div data-horizontal-tabs class="taxonomy-records">
+  {% set singlerecord = records|first %}
+  {{ singlerecord.content }}
+</div>
+{% else %}
+<div data-horizontal-tabs class="taxonomy-records horizontal-tabs clearfix">
+  <ul data-horizontal-tabs-list class="horizontal-tabs-list visually-hidden"></ul>
+  <div{{ attributes.setAttribute('data-horizontal-tabs-panes', TRUE) }}>
+  {% for record in records %}
+    <details id="{{ record.tabid }}">
+      {% if record.id == active %}
+      <input style="display:none;" class="horizontal-tabs-active-tab" value="{{ record.tabid }}" type="text">
+      {% endif %}
+      <summary>
+        <div class="details-title">
+          <span>{{ record.communities }}</span>
+        </div>
+      </summary>
+      <div class="tab-content-wrapper">
+        <div class="tab-content-wrapper__content">
+          {{ record.content }}
+        </div>
+      </div>
+    </details>
+  {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% if referenced_content is not empty %}
+  <h2>{{ 'Referenced Content'|t }}</h2>
+  <div class="referenced-content">
+  {{ referenced_content }}
+  </div>
+{% endif %}

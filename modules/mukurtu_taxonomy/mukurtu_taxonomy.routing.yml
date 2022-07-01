@@ -20,3 +20,10 @@ mukurtu_taxonomy.add_page:
   requirements:
     _node_add_access: 'taxonomy_term'
     _permission: 'access taxonomy overview'
+mukurtu_taxonomy.taxonomy_record_settings:
+  path: '/admin/config/mukurtu/taxonomy/records'
+  defaults:
+    _form: '\Drupal\mukurtu_taxonomy\Form\MukurtuTaxonomyRecordsSettingsForm'
+    _title: 'Mukurtu Taxonomy Record Settings'
+  requirements:
+    _permission: 'administer site configuration'
