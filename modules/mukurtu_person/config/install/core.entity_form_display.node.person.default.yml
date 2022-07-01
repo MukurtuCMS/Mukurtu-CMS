@@ -1,0 +1,137 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - entity_browser.browser.mukurtu_taxonomy_record_term_browser
+    - field.field.node.person.field_content_type
+    - field.field.node.person.field_keywords
+    - field.field.node.person.field_media_assets
+    - field.field.node.person.field_protocol_control
+    - field.field.node.person.field_related_content
+    - field.field.node.person.field_representative_terms
+    - node.type.person
+  module:
+    - entity_browser
+    - media_library
+    - mukurtu_protocol
+    - path
+id: node.person.default
+targetEntityType: node
+bundle: person
+mode: default
+content:
+  created:
+    type: datetime_timestamp
+    weight: 7
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_keywords:
+    type: entity_reference_autocomplete
+    weight: 3
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_media_assets:
+    type: media_library_widget
+    weight: 1
+    region: content
+    settings:
+      media_types: {  }
+    third_party_settings: {  }
+  field_protocol_control:
+    type: mukurtu_protocol_control_widget
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_related_content:
+    type: entity_browser_entity_reference
+    weight: 4
+    region: content
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: false
+      field_widget_display_settings:
+        view_mode: content_browser
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_representative_terms:
+    type: entity_browser_entity_reference
+    weight: 5
+    region: content
+    settings:
+      entity_browser: mukurtu_taxonomy_record_term_browser
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: false
+      field_widget_display_settings:
+        view_mode: default
+      selection_mode: selection_append
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  promote:
+    type: boolean_checkbox
+    weight: 8
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    weight: 12
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  sticky:
+    type: boolean_checkbox
+    weight: 9
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: 6
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  url_redirects:
+    weight: 11
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_content_type: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_sequence_collection: true

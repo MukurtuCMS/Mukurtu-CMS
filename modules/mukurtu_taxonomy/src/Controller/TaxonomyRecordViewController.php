@@ -44,12 +44,18 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, LanguageManagerInterface $language_manager) {
     $this->entityTypeManager = $entity_type_manager;
     $this->entityFieldManager = $entity_field_manager;
     $this->languageManager = $language_manager;
   }
 
+  /**
+   * Display the taxonomy term page.
+   */
   public function build(TermInterface $taxonomy_term) {
     $build = [];
     $allRecords = $this->getTaxonomyTermRecords($taxonomy_term);
@@ -117,10 +123,31 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
     return implode(', ', $communityLabels);
   }
 
+  /**
+   * Return content with the taxonomy record relationship for this term.
+   */
   protected function getTaxonomyTermRecords(TermInterface $taxonomy_term) {
-    return $this->entityTypeManager->getStorage('node')->loadMultiple([1]);
+    $config = \Drupal::config('mukurtu_taxonomy.settings');
+    $enabledVocabs = $config->get('enabled_vocabularies') ?? [];
+
+    // If the term vocabulary is not enabled for taxonomy records, return
+    // an empty array.
+    if (!in_array($taxonomy_term->bundle(), $enabledVocabs)) {
+      return [];
+    }
+
+    $query = $this->entityTypeManager->getStorage('node')->getQuery();
+    $query->condition('field_representative_terms', $taxonomy_term->id());
+    $query->condition('status', 1, '=');
+    $query->accessCheck(TRUE);
+    $results = $query->execute();
+    return empty($results) ? [] : $this->entityTypeManager->getStorage('node')->loadMultiple($results);
   }
 
+  /**
+   * Return an array of content IDs for content that references the term or
+   * any of its taxonomy records.
+   */
   protected function referencedContent(TermInterface $taxonomy_term) {
     // Get any taxonomy records associated with this term.
     $records = $this->getTaxonomyTermRecords($taxonomy_term);
