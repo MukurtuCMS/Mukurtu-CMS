@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.media.document.field_extracted_text
     - field.field.media.document.field_media_document
     - field.field.media.document.field_protocol_control
     - media.type.document
@@ -19,6 +20,14 @@ content:
     weight: 4
     region: content
     settings: {  }
+    third_party_settings: {  }
+  field_extracted_text:
+    type: string_textfield
+    weight: 26
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   field_media_document:
     type: file_generic
