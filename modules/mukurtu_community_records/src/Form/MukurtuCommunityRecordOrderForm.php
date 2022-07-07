@@ -94,8 +94,7 @@ class MukurtuCommunityRecordOrderForm extends ConfigFormBase {
     // Get all the communities. We are skipping the access check here, so
     // we could be leaking community names to admins.
     $query = $this->entityTypeManager->getStorage('community')->getQuery();
-    $ids = $query->accessCheck(FALSE)
-      ->execute();
+    $ids = $query->accessCheck(FALSE)->execute();
     $communities = $this->entityTypeManager->getStorage('community')->loadMultiple($ids);
 
     // Get the existing community weights.
@@ -104,11 +103,20 @@ class MukurtuCommunityRecordOrderForm extends ConfigFormBase {
     // Order the communities by weight and check if any unweighted communities
     // are now present.
     $weightedCommunities = [];
+    $dupes = [];
     $maxWeight = max($weights) + 1;
     foreach ($communities as $community) {
       $weight = $weights[$community->id()] ?? $maxWeight++;
+      if (isset($weightedCommunities[(string) $weight])) {
+        $dupes[$weight] = ($dupes[$weight] ?? 0) + 1;
+        $weight = $weight . '.' . $dupes[$weight];
+      }
+      else {
+        $weight = (string) $weight;
+      }
       $weightedCommunities[$weight] = $community;
     }
+
     ksort($weightedCommunities);
 
     // Build the table.
