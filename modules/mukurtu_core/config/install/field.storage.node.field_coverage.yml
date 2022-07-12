@@ -9,7 +9,7 @@ field_name: field_coverage
 entity_type: node
 type: geofield
 settings:
-  backend: geofield_backend_default
+  backend: geofield_backend_mukurtu
 module: geofield
 locked: false
 cardinality: 1

@@ -36,8 +36,8 @@ dependencies:
   module:
     - entity_browser
     - field_group
-    - leaflet
     - media_library
+    - mukurtu_core
     - mukurtu_protocol
     - original_date
     - path
@@ -179,47 +179,47 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_coverage:
-    type: leaflet_widget_default
+    type: geofield_mukurtu
     weight: 29
     region: content
     settings:
       map:
         leaflet_map: 'OSM Mapnik'
-        height: 400
-        locate: 1
-        auto_center: 1
+        height: '400'
+        locate: '1'
+        auto_center: '1'
         map_position:
-          force: false
           center:
-            lat: !!float 0
-            lon: !!float 0
-          zoom: 12
-          minZoom: 1
-          maxZoom: 18
-          zoomFiner: 0
-        scroll_zoom_enabled: 1
-        fullscreen_control: '1'
-      input:
-        show: false
-        readonly: false
+            lat: '0'
+            lon: '0'
+          zoom: '12'
+          minZoom: '1'
+          maxZoom: '18'
+          zoomFiner: '0'
+          force: 0
+        scroll_zoom_enabled: '1'
       toolbar:
         position: topright
         marker: defaultMarker
-        drawPolyline: true
-        drawRectangle: true
-        drawPolygon: true
+        drawPolyline: '1'
+        drawRectangle: '1'
+        drawPolygon: '1'
+        editMode: '1'
+        dragMode: '1'
+        removalMode: '1'
         drawCircle: false
-        editMode: true
-        dragMode: true
-        cutPolygon: false
-        removalMode: true
+        cutPolygon: 0
+        rotateMode: 0
       reset_map:
         position: topright
-        control: true
+        control: 0
       fullscreen:
-        control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
+        control: 0
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      input:
+        show: 0
+        readonly: 0
       geocoder:
         control: false
         settings:

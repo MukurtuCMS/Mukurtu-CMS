@@ -5,3 +5,4 @@ mukurtu-leaflet-widget:
   dependencies:
     - core/jquery
     - core/jquery.once
+    - leaflet/leaflet-widget

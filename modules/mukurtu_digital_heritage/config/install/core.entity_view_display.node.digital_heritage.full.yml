@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_display.comment.comment.default
     - core.entity_view_mode.node.full
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_category
@@ -36,7 +37,6 @@ dependencies:
     - comment
     - field_group
     - layout_builder
-    - leaflet
     - link
     - mukurtu_core
     - original_date
@@ -165,7 +165,7 @@ content:
     weight: 24
     region: content
   field_coverage:
-    type: leaflet_formatter_default
+    type: mukurtu_leaflet_formatter
     label: above
     settings:
       multiple_map: false
@@ -178,7 +178,7 @@ content:
       reset_map:
         control: false
         position: topright
-      popup: false
+      popup: true
       popup_content: ''
       map_position:
         force: false
@@ -195,23 +195,23 @@ content:
         shadowUrl: ''
         className: ''
         iconSize:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         iconAnchor:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         shadowSize:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         shadowAnchor:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         popupAnchor:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         html: '<div></div>'
         html_class: leaflet-map-divicon
-        circle_marker_options: '{"radius": 100, "color": "red", "fillColor": "#f03", "fillOpacity": 0.5}'
+        circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
         control: false
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
