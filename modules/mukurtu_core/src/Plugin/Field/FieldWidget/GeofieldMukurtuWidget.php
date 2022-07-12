@@ -2,6 +2,8 @@
 
 namespace Drupal\mukurtu_core\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\leaflet\Plugin\Field\FieldWidget\LeafletDefaultWidget;
 
 /**
@@ -29,6 +31,23 @@ class GeofieldMukurtuWidget extends LeafletDefaultWidget {
    */
   protected function geofieldBackendValue($value) {
     return $value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formElement(
+    FieldItemListInterface $items,
+    $delta,
+    array $element,
+    array &$form,
+    FormStateInterface $form_state
+  ) {
+    $element = parent::formElement($items, $delta, $element, $form, $form_state);
+    // LeafletDefaultWidget smashes our default value. We want to keep
+    // our GeoJSON untouched.
+    $element['value']['#default_value'] = $items[$delta]->value ?: NULL;
+    return $element;
   }
 
 }
