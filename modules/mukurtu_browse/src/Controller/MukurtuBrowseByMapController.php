@@ -74,7 +74,7 @@ class MukurtuBrowseByMapController extends ControllerBase {
         //  'mukurtu_browse/mukurtu-leaflet-custom-markercluster',
         //  'mukurtu_browse/mukurtu-leaflet-preview',
           'mukurtu_browse/mukurtu-browse-view-switch',
-          'mukurtu_browse/map-browse-bounding-box-query',
+          //'mukurtu_browse/map-browse-bounding-box-query',
           'mukurtu_browse/map-browse-teasers',
         ],
       ],
