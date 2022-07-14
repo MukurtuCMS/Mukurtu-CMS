@@ -168,32 +168,33 @@ content:
     type: mukurtu_leaflet_formatter
     label: above
     settings:
-      multiple_map: false
-      leaflet_map: 'OSM Mapnik'
-      height: 400
-      height_unit: px
-      hide_empty_map: false
-      disable_wheel: false
-      gesture_handling: false
-      reset_map:
-        control: false
-        position: topright
-      popup: true
+      multiple_map: '0'
+      popup: '1'
       popup_content: ''
+      leaflet_map: 'OSM Mapnik'
+      height: '400'
+      height_unit: px
+      hide_empty_map: '1'
+      reset_map:
+        position: topright
+        control: 0
       map_position:
-        force: false
         center:
-          lat: !!float 0
-          lon: !!float 0
-        zoom: 12
-        minZoom: 1
-        maxZoom: 18
-        zoomFiner: 0
+          lat: '0'
+          lon: '0'
+        zoom: '12'
+        minZoom: '1'
+        maxZoom: '18'
+        zoomFiner: '0'
+        force: 0
       icon:
         iconType: marker
         iconUrl: ''
         shadowUrl: ''
         className: ''
+        html: '<div></div>'
+        html_class: leaflet-map-divicon
+        circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
         iconSize:
           x: ''
           'y': ''
@@ -209,17 +210,17 @@ content:
         popupAnchor:
           x: ''
           'y': ''
-        html: '<div></div>'
-        html_class: leaflet-map-divicon
-        circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
-        control: false
-        options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
-        include_path: false
+        options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds":false}'
+        control: 0
+        include_path: 0
       fullscreen:
-        control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
+        control: 0
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      disable_wheel: 0
+      gesture_handling: 0
+      weight: null
       geocoder:
         control: false
         settings:
@@ -231,7 +232,6 @@ content:
           zoom: 16
           popup: false
           options: ''
-      weight: null
     third_party_settings: {  }
     weight: 40
     region: content
