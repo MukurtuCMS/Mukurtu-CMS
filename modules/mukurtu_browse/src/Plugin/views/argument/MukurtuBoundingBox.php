@@ -19,6 +19,7 @@ class MukurtuBoundingBox extends SearchApiStandard {
   protected function parseBoundingBox() {
     $bbox = [];
     $coordinates = explode(',', $this->argument);
+
     if (count($coordinates) == 4) {
       $bbox['left'] = (float) $coordinates[0];
       $bbox['bottom'] = (float) $coordinates[1];
@@ -38,16 +39,16 @@ class MukurtuBoundingBox extends SearchApiStandard {
 
     // Make sure our location fields exist.
     $fields = $this->query->getIndex()->getFields();
-    if (isset($fields['field_mukurtu_geojson'])) {
+    if (isset($fields['field_coverage'])) {
       //dpm($fields['field_mukurtu_geojson']);
     }
 
     // Alter the query to restrict to our bounding box.
     if (!empty($bbox)) {
-      $this->query->addCondition(MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LAT, $bbox['bottom'], '>=');
-      $this->query->addCondition(MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LAT, $bbox['top'], '<=');
-      $this->query->addCondition(MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LONG, $bbox['left'], '>=');
-      $this->query->addCondition(MUKURTU_BROWSE_FIELD_NAME_CLUSTER_LONG, $bbox['right'], '<=');
+      $this->query->addCondition('centroid_lat', $bbox['bottom'], '>=');
+      $this->query->addCondition('centroid_lat', $bbox['top'], '<=');
+      $this->query->addCondition('centroid_lon', $bbox['left'], '>=');
+      $this->query->addCondition('centroid_lon', $bbox['right'], '<=');
     }
   }
 

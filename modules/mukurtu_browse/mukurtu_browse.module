@@ -39,8 +39,8 @@ function mukurtu_browse_theme($existing, $type, $theme, $path) {
 function mukurtu_browse_ajax_render_alter(array &$data) {
   // On the map browse, remove the viewsScrollTop command so
   // we don't scroll on refresh.
-  $view_name = 'mukurtu_browse_map';
-  $view_display_id = 'mukurtu_browse_map_block';
+  $view_name = 'mukurtu_browse_by_map';
+  $view_display_id = 'map_block';
 
   if (isset($data[0]['settings']['views']['ajaxViews'])) {
     $view = reset($data[0]['settings']['views']['ajaxViews']);
