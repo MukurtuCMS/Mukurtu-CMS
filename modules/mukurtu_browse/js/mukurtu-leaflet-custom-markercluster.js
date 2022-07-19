@@ -11,8 +11,11 @@
             }, */
 
             getLatLng: function () {
-              this._latlng = this.getBounds().getCenter();
-              return this._latlng;
+               console.log(this);
+               /*
+              return;
+              this._latlng = this.getBounds().getCenter(); */
+              return this._latlngs[0][0];
             },
 
             setLatLng: function () { }
@@ -61,7 +64,11 @@
           });
 
           // Init clustering.
-          Drupal.behaviors.mukurtu_browse_leaflet_map.markerClusterLayer = L.markerClusterGroup({
+          /* Drupal.behaviors.mukurtu_browse_leaflet_map.markerClusterLayer = L.markerClusterGroup({
+            disableClusteringAtZoom: 13,
+            chunkedLoading: false,
+          }); */
+          Drupal.behaviors.mukurtu_browse_leaflet_map.markerClusterLayer = new L.MarkerClusterGroup({
             disableClusteringAtZoom: 13,
             chunkedLoading: false,
           });
@@ -85,16 +92,31 @@
       });
     },
 
-    mukurtuClusterableGeoJSON: function (feature) {
-      function geoJSONtoLeafletCoordinates(coordinates) {
+    oldmukurtuClusterableGeoJSON: function (feature) {
+      /* function geoJSONtoLeafletCoordinates(coordinates) {
         return coordinates.map(e => [e[1], e[0]]);
       }
-      let points = [geoJSONtoLeafletCoordinates(feature.geometry.coordinates[0])];
+      let points = [geoJSONtoLeafletCoordinates(feature.geometry.coordinates[0])]; */
+      let points = feature.geometry.coordinates[0];
       let layer = new L.PolygonClusterable(points);
       let popup = new DOMParser().parseFromString(feature.properties.popup, "text/html");
       let popupContent = popup.documentElement.textContent;
       layer.bindPopup(popupContent);
       layer.addTo(Drupal.behaviors.mukurtu_browse_leaflet_map.markerClusterLayer);
+
+      return layer;
+    },
+
+    mukurtuClusterableGeoJSON: function (feature) {
+      console.log(feature);
+      let layer = new L.geoJSON(feature);
+      let popup = new DOMParser().parseFromString(feature.properties.popup, "text/html");
+      let popupContent = "TODO";//popup.documentElement.textContent ?? "Missing";
+      console.log(popupContent);
+      //layer.bindPopup(popupContent);
+      layer.bindPopup("why no work?");
+      layer.addTo(Drupal.behaviors.mukurtu_browse_leaflet_map.map);
+      //layer.addTo(Drupal.behaviors.mukurtu_browse_leaflet_map.markerClusterLayer);
 
       return layer;
     },
@@ -107,22 +129,25 @@
         // Get the NID.
         let itemID = jQuery(this).find('.views-field-nid .field-content')[0].innerHTML.replace(/<!--.*?-->/sg, "").trim();
 
-        // Get the cached GeoJSON for the location fields.
-        let itemGeoJSON = jQuery(this).find('.views-field-field-mukurtu-geojson .field-content');
-
+        // Get the GeoJSON for the location fields.
+        let itemGeoJSON = jQuery(this).find('.views-field-field-coverage .field-content');
         if (itemGeoJSON[0] !== undefined) {
           // Remove HTML comments, used frequently for Drupal theme suggestion debuggging.
           let fieldValue = itemGeoJSON[0].innerHTML.replace(/<!--.*?-->/sg, "").trim();
 
-          if (fieldValue.length > 0) {
+          // Don't rerender features.
+          let rendered = true;
+          if (Drupal.behaviors.mukurtu_browse_leaflet_map.features[itemID] == undefined) {
+            Drupal.behaviors.mukurtu_browse_leaflet_map.features[itemID] = [];
+            rendered = false;
+          }
+          if (fieldValue.length > 0 && !rendered) {
             try {
-              let features = JSON.parse(fieldValue);
+              let featureCollection = JSON.parse(fieldValue);
+              let features = featureCollection['features'] ?? [];
               features.forEach(function (feature) {
                 freshFeatures[itemID] = parseInt(itemID);
-                // Render the feature if we haven't already.
-                if (Drupal.behaviors.mukurtu_browse_leaflet_map.features[itemID] == undefined) {
-                  Drupal.behaviors.mukurtu_browse_leaflet_map.features[itemID] = Drupal.behaviors.mukurtu_browse_leaflet_map.mukurtuClusterableGeoJSON(feature);
-                }
+                Drupal.behaviors.mukurtu_browse_leaflet_map.features[itemID].push(Drupal.behaviors.mukurtu_browse_leaflet_map.mukurtuClusterableGeoJSON(feature));
               });
             } catch (e) {
               console.log(e);
@@ -136,7 +161,9 @@
       Drupal.behaviors.mukurtu_browse_leaflet_map.features.forEach(function (feature, index) {
         if (!freshFeatures.includes(index)) {
           // Remove this feature layer from the map.
-          Drupal.behaviors.mukurtu_browse_leaflet_map.markerClusterLayer.removeLayer(Drupal.behaviors.mukurtu_browse_leaflet_map.features[index]);
+          for (const element of Drupal.behaviors.mukurtu_browse_leaflet_map.features[index]) {
+            Drupal.behaviors.mukurtu_browse_leaflet_map.markerClusterLayer.removeLayer(element);
+          }
 
           // Remove the feature from the list of features.
           delete Drupal.behaviors.mukurtu_browse_leaflet_map.features[index];

@@ -5,17 +5,24 @@ mukurtu_browse.browse_page:
     _title: 'Browse Content'
   requirements:
     _permission: 'access content'
+mukurtu_browse.old_map_browse_page:
+  path: '/browse/map-old'
+  defaults:
+    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuMapBrowseController::content'
+    _title: 'Browse Content'
+  requirements:
+    _permission: 'access content'
 mukurtu_browse.map_browse_page:
   path: '/browse/map'
   defaults:
-    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuMapBrowseController::content'
+    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::content'
     _title: 'Browse Content'
   requirements:
     _permission: 'access content'
 mukurtu_browse.map_browse_page_teasers:
   path: '/browse/map/teasers/{nodes}'
   defaults:
-    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuMapBrowseController::getTeasersAjax'
+    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::getTeasersAjax'
     nodes: '[\d\,]+'
   requirements:
     _access: 'TRUE'
@@ -23,3 +30,13 @@ mukurtu_browse.map_browse_page_teasers:
     parameters:
       nodes:
         type: 'nodes'
+mukurtu_browse.map_browse_single_teaser:
+  path: '/browse/map/teaser/{node}'
+  defaults:
+    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::getEntityTeaserAjax'
+  requirements:
+    _access: 'TRUE'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'

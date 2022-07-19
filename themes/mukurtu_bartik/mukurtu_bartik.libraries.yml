@@ -4,6 +4,7 @@ global-styling:
       css/style.css: {}
       css/communities-page.css: {}
       css/browse-page.css: {}
+      css/browse-map.css: {}
       css/node.css: {}
       css/dashboard.css: {}
       css/collection.css: {}
