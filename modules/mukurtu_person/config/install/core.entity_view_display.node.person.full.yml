@@ -22,6 +22,14 @@ targetEntityType: node
 bundle: person
 mode: full
 content:
+  field_all_related_content:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 3
+    region: content
   field_communities:
     type: entity_reference_label
     label: above
@@ -47,22 +55,14 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
-  field_related_content:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 3
-    region: content
 hidden:
-  field_all_related_content: true
   field_content_type: true
   field_in_collection: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
   field_protocol_control: true
+  field_related_content: true
   field_representative_media: true
   field_representative_terms: true
   field_sequence_collection: true
