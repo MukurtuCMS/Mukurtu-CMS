@@ -10,6 +10,7 @@ dependencies:
     - file
     - mukurtu_protocol
     - path
+    - text
 id: media.document.default
 targetEntityType: media
 bundle: document
@@ -22,11 +23,11 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_extracted_text:
-    type: string_textfield
+    type: text_textarea
     weight: 26
     region: content
     settings:
-      size: 60
+      rows: 5
       placeholder: ''
     third_party_settings: {  }
   field_media_document:
