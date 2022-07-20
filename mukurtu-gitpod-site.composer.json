@@ -109,6 +109,14 @@
                 "npm-asset-library": "web/libraries",
                 "bower-asset-library": "web/libraries"
             }
+        },
+        "allow-plugins": {
+            "composer/installers": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "drupal/console-extend-plugin": true,
+            "cweagans/composer-patches": true,
+            "drupal/core-composer-scaffold": true,
+            "drupal/core-project-message": true
         }
     },
     "extra": {
