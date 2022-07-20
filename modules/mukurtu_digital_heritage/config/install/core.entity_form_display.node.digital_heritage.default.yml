@@ -35,6 +35,7 @@ dependencies:
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
+    - comment
     - entity_browser
     - field_group
     - media_library
@@ -158,6 +159,12 @@ targetEntityType: node
 bundle: digital_heritage
 mode: default
 content:
+  comment:
+    type: comment_default
+    weight: 8
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   created:
     type: datetime_timestamp
     weight: 2
@@ -517,7 +524,6 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
-  comment: true
   field_content_type: true
   field_external_links: true
   field_mukurtu_cluster_lat: true

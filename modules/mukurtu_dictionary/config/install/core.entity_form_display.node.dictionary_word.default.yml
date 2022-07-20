@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.browse_content
+    - field.field.node.dictionary_word.comment
     - field.field.node.dictionary_word.field_content_type
     - field.field.node.dictionary_word.field_keywords
     - field.field.node.dictionary_word.field_language
@@ -12,6 +13,7 @@ dependencies:
     - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
+    - comment
     - entity_browser
     - field_group
     - media_library
@@ -80,13 +82,17 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-_core:
-  default_config_hash: D3ZAhuS4mdN-Skh2pa-wO9UaYw7WxThatFs2tjHiiZE
 id: node.dictionary_word.default
 targetEntityType: node
 bundle: dictionary_word
 mode: default
 content:
+  comment:
+    type: comment_default
+    weight: 123
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   created:
     type: datetime_timestamp
     weight: 2
