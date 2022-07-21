@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.browse_content
+    - field.field.node.collection.comment
     - field.field.node.collection.field_child_collections
     - field.field.node.collection.field_collection_image
     - field.field.node.collection.field_collection_type
@@ -17,6 +18,7 @@ dependencies:
     - field.field.node.collection.field_summary
     - node.type.collection
   module:
+    - comment
     - entity_browser
     - field_group
     - media_library
@@ -79,6 +81,12 @@ targetEntityType: node
 bundle: collection
 mode: default
 content:
+  comment:
+    type: comment_default
+    weight: 123
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   created:
     type: datetime_timestamp
     weight: 2

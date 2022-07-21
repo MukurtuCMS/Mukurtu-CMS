@@ -18,7 +18,7 @@ mukurtu_browse.map_browse_page:
     _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::content'
     _title: 'Browse Content'
   requirements:
-    _permission: 'access content'
+    _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::access'
 mukurtu_browse.map_browse_page_teasers:
   path: '/browse/map/teasers/{nodes}'
   defaults:

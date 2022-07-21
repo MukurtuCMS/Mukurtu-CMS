@@ -9,6 +9,7 @@ dependencies:
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
     - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_coverage_description
     - field.field.node.digital_heritage.field_creative_commons
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
@@ -20,6 +21,7 @@ dependencies:
     - field.field.node.digital_heritage.field_keywords
     - field.field.node.digital_heritage.field_language
     - field.field.node.digital_heritage.field_media_assets
+    - field.field.node.digital_heritage.field_mukurtu_original_record
     - field.field.node.digital_heritage.field_original_date
     - field.field.node.digital_heritage.field_people
     - field.field.node.digital_heritage.field_protocol_control
@@ -93,6 +95,7 @@ third_party_settings:
         - field_transcription
         - field_people
         - field_coverage
+        - field_coverage_description
         - field_all_related_content
       label: 'Primary Fields'
       parent_name: ''
@@ -138,7 +141,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 41
+    weight: 42
     region: content
   field_category:
     type: entity_reference_label
@@ -234,6 +237,13 @@ content:
           options: ''
     third_party_settings: {  }
     weight: 40
+    region: content
+  field_coverage_description:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 41
     region: content
   field_creative_commons:
     type: mukurtu_creative_commons_formatter

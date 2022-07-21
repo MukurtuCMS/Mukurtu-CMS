@@ -44,20 +44,18 @@
         }
     ],
     "require": {
-        "bower-asset/blazy": "^1.8",
         "bower-asset/jquery-mousewheel": "^3.1",
         "bower-asset/jquery.easing": "^1.3",
         "bower-asset/slick-carousel": "^1.8",
         "composer/installers": "^1.9",
         "cweagans/composer-patches": "^1.7",
-        "drupal/blazy": "^2.1",
         "drupal/config_sync": "^2.0@beta",
         "drupal/console": "~1.0",
         "drupal/content_browser": "*",
-        "drupal/core": "^9.3",
-        "drupal/core-composer-scaffold": "^9.3",
-        "drupal/core-project-message": "^9.3",
-        "drupal/core-recommended": "^9.3",
+        "drupal/core": "9.3.*",
+        "drupal/core-composer-scaffold": "9.3.*",
+        "drupal/core-project-message": "9.3.*",
+        "drupal/core-recommended": "9.3.*",
         "drupal/config_distro": "*",
         "drupal/csv_serialization": "*",
         "drupal/ctools": "*",
@@ -111,6 +109,14 @@
                 "npm-asset-library": "web/libraries",
                 "bower-asset-library": "web/libraries"
             }
+        },
+        "allow-plugins": {
+            "composer/installers": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "drupal/console-extend-plugin": true,
+            "cweagans/composer-patches": true,
+            "drupal/core-composer-scaffold": true,
+            "drupal/core-project-message": true
         }
     },
     "extra": {

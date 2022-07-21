@@ -8,9 +8,26 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Link;
 use Drupal\node\NodeInterface;
-use Drupal\views\Views;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
 
 class MukurtuBrowseByMapController extends ControllerBase {
+
+  public function access(AccountInterface $account) {
+    if (!$account->hasPermission('access content')) {
+      return AccessResult::forbidden();
+    }
+
+    // Do we have at least one published content item with location data?
+    $query = $this->entityTypeManager()->getStorage('node')->getQuery();
+    $query->condition('field_coverage', "Feature", 'CONTAINS')
+      ->condition('status', 1)
+      ->range(0, 1)
+      ->accessCheck(TRUE);
+
+    $results = $query->execute();
+    return empty($results) ? AccessResult::forbidden() : AccessResult::allowed();
+  }
 
   public function content() {
     // Browse link.

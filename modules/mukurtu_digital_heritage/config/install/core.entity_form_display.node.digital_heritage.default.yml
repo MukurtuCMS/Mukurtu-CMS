@@ -8,6 +8,7 @@ dependencies:
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_contributor
     - field.field.node.digital_heritage.field_coverage
+    - field.field.node.digital_heritage.field_coverage_description
     - field.field.node.digital_heritage.field_creative_commons
     - field.field.node.digital_heritage.field_creator
     - field.field.node.digital_heritage.field_cultural_narrative
@@ -34,6 +35,7 @@ dependencies:
     - field.field.node.digital_heritage.field_type
     - node.type.digital_heritage
   module:
+    - comment
     - entity_browser
     - field_group
     - media_library
@@ -126,6 +128,7 @@ third_party_settings:
         - field_transcription
         - field_people
         - field_coverage
+        - field_coverage_description
       label: 'Additional Metadata'
       region: content
       parent_name: group_main_tab
@@ -156,6 +159,12 @@ targetEntityType: node
 bundle: digital_heritage
 mode: default
 content:
+  comment:
+    type: comment_default
+    weight: 8
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   created:
     type: datetime_timestamp
     weight: 2
@@ -231,6 +240,14 @@ content:
           zoom: 16
           popup: false
           options: ''
+    third_party_settings: {  }
+  field_coverage_description:
+    type: text_textarea
+    weight: 30
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
     third_party_settings: {  }
   field_creative_commons:
     type: options_select
@@ -507,7 +524,6 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
-  comment: true
   field_content_type: true
   field_external_links: true
   field_mukurtu_cluster_lat: true
