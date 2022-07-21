@@ -2,8 +2,9 @@
 
 namespace Drupal\mukurtu_media\Entity;
 
-use Drupal\media\Entity\Media;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\media\Entity\Media;
 
 use Drupal\mukurtu_media\Entity\DocumentTextInterface;
 
@@ -43,8 +44,9 @@ class DocumentText extends Media implements DocumentTextInterface {
 
           // pdftotext is installed, run exec() with it
           $cmd = "pdftotext " . $full_path . " -";
+          $escapedCmd = escapeshellcmd($cmd);
 
-          exec($cmd, $output, $resultCode);
+          exec($escapedCmd, $output, $resultCode);
 
           $extractedText = implode("\n", $output);
 

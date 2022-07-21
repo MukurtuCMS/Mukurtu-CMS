@@ -58,7 +58,7 @@ hidden:
   field_protocol_control: true
   field_related_content: true
   field_representative_terms: true
-  field_sequence_collection: true
+  #field_sequence_collection: true
   field_title: true
   flag_email_node: true
   flag_email_og: true
