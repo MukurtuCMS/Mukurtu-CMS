@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.media.field_transcription
+    - media.type.audio
+  module:
+    - text
+id: media.audio.field_transcription
+field_name: field_transcription
+entity_type: media
+bundle: audio
+label: Transcription
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long
