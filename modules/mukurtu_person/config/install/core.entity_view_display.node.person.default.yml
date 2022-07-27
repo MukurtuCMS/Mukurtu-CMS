@@ -9,7 +9,6 @@ dependencies:
     - field.field.node.person.field_protocol_control
     - field.field.node.person.field_related_content
     - field.field.node.person.field_representative_terms
-    - field.field.node.person.field_sequence_collection
     - node.type.person
   module:
     - user
