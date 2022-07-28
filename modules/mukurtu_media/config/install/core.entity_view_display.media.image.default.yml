@@ -2,56 +2,32 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.media.audio.field_media_audio_file
-    - field.field.media.audio.field_protocol_control
-    - field.field.media.audio.field_transcription
-    - image.style.thumbnail
-    - media.type.audio
+    - field.field.media.image.field_keywords
+    - field.field.media.image.field_media_image
+    - field.field.media.image.field_protocol_control
+    - media.type.image
   module:
     - image
-    - text
-    - user
-id: media.audio.default
+id: media.image.default
 targetEntityType: media
-bundle: audio
+bundle: image
 mode: default
 content:
-  created:
-    type: timestamp
-    label: hidden
-    settings:
-      date_format: medium
-      custom_date_format: ''
-      timezone: ''
-    third_party_settings: {  }
-    weight: 0
-    region: content
-  field_transcription:
-    type: text_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 6
-    region: content
   thumbnail:
     type: image
     label: hidden
     settings:
       image_link: ''
-      image_style: thumbnail
-    third_party_settings: {  }
-    weight: 5
-    region: content
-  uid:
-    type: author
-    label: hidden
-    settings: {  }
+      image_style: ''
     third_party_settings: {  }
     weight: 0
     region: content
 hidden:
+  created: true
   field_communities: true
-  field_media_audio_file: true
+  field_keywords: true
+  field_media_image: true
   field_protocol_control: true
   name: true
   search_api_excerpt: true
+  uid: true
