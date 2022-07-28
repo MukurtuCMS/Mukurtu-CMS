@@ -60,6 +60,15 @@ field_settings:
     dependencies:
       module:
         - node
+  title_1:
+    label: 'Word Lists » Content » Title'
+    datasource_id: 'entity:node'
+    property_path: 'field_in_word_list:entity:title'
+    type: string
+    dependencies:
+      module:
+        - mukurtu_dictionary
+        - node
   uid:
     label: uid
     datasource_id: 'entity:node'
@@ -76,6 +85,7 @@ datasource_settings:
       default: false
       selected:
         - dictionary_word
+        - word_list
     languages:
       default: true
       selected: {  }
@@ -140,6 +150,7 @@ processor_settings:
       - glossaryaz_title
       - name
       - title
+      - title_1
 tracker_settings:
   default:
     indexing_order: fifo
