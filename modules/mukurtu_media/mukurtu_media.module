@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\mukurtu_media\Entity\Document;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_entity_bundle_field_info_alter().
@@ -8,5 +9,17 @@ use Drupal\mukurtu_media\Entity\Document;
 function mukurtu_media_entity_bundle_info_alter(array &$bundles): void {
   if (isset($bundles['media']['document'])) {
     $bundles['media']['document']['class'] = Document::class;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // For new document forms, don't show the "Extracted Text" field because
+  // no text has been extracted yet.
+  if (isset($form['field_extracted_text'])) {
+    $form['field_extracted_text']['#disabled'] = TRUE;
+    $form['field_extracted_text']['#type'] = 'hidden';
   }
 }
