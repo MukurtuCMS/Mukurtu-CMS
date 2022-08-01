@@ -1,0 +1,102 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.dictionary_word_entry.field_alternate_spelling
+    - field.field.paragraph.dictionary_word_entry.field_definition
+    - field.field.paragraph.dictionary_word_entry.field_part_of_speech
+    - field.field.paragraph.dictionary_word_entry.field_pronunciation
+    - field.field.paragraph.dictionary_word_entry.field_recording
+    - field.field.paragraph.dictionary_word_entry.field_sample_sentences
+    - field.field.paragraph.dictionary_word_entry.field_source
+    - field.field.paragraph.dictionary_word_entry.field_translation
+    - paragraphs.paragraphs_type.dictionary_word_entry
+  module:
+    - text
+id: paragraph.dictionary_word_entry.default
+targetEntityType: paragraph
+bundle: dictionary_word_entry
+mode: default
+content:
+  created:
+    type: datetime_timestamp
+    weight: 8
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_alternate_spelling:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_definition:
+    type: string_textarea
+    weight: 1
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_part_of_speech:
+    type: entity_reference_autocomplete
+    weight: 2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_pronunciation:
+    type: text_textfield
+    weight: 3
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_recording:
+    type: entity_reference_autocomplete
+    weight: 4
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_sample_sentences:
+    type: string_textarea
+    weight: 6
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_source:
+    type: string_textfield
+    weight: 7
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_translation:
+    type: string_textfield
+    weight: 5
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    weight: 9
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+hidden: {  }
