@@ -12,6 +12,7 @@ dependencies:
     - field.field.node.dictionary_word.field_related_content
     - field.field.node.dictionary_word.field_thumbnail
     - field.field.node.dictionary_word.field_word_entry
+    - image.style.thumbnail
     - node.type.dictionary_word
   module:
     - image
@@ -26,14 +27,31 @@ targetEntityType: node
 bundle: dictionary_word
 mode: map_browse
 content:
+  field_communities:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_media_assets:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: full
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
   field_thumbnail:
     type: image
     label: hidden
     settings:
       image_link: ''
-      image_style: ''
+      image_style: thumbnail
     third_party_settings: {  }
-    weight: 1
+    weight: 3
     region: content
   field_title:
     settings: {  }
@@ -43,13 +61,11 @@ content:
 hidden:
   comment: true
   field_all_related_content: true
-  field_communities: true
   field_content_type: true
   field_in_collection: true
   field_in_word_list: true
   field_keywords: true
   field_language: true
-  field_media_assets: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true

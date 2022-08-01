@@ -14,6 +14,7 @@ dependencies:
     - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
+    - entity_reference_revisions
     - image
     - layout_builder
     - user
@@ -26,25 +27,36 @@ targetEntityType: node
 bundle: dictionary_word
 mode: content_browser
 content:
+  field_content_type:
+    type: string
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
   field_thumbnail:
     type: image
-    label: hidden
+    label: inline
     settings:
       image_link: ''
       image_style: ''
     third_party_settings: {  }
-    weight: 1
+    weight: 2
     region: content
-  field_title:
-    settings: {  }
+  field_word_entry:
+    type: entity_reference_revisions_entity_view
+    label: visually_hidden
+    settings:
+      view_mode: preview
+      link: ''
     third_party_settings: {  }
-    weight: 0
+    weight: 1
     region: content
 hidden:
   comment: true
   field_all_related_content: true
   field_communities: true
-  field_content_type: true
   field_in_collection: true
   field_in_word_list: true
   field_keywords: true
@@ -57,7 +69,7 @@ hidden:
   field_related_content: true
   field_representative_media: true
   field_sequence_collection: true
-  field_word_entry: true
+  field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_mukurtu_email_content: true
