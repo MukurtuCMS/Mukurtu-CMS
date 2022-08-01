@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.node.content_browser
     - field.field.node.dictionary_word.comment
     - field.field.node.dictionary_word.field_content_type
     - field.field.node.dictionary_word.field_keywords
@@ -14,11 +15,16 @@ dependencies:
     - node.type.dictionary_word
   module:
     - image
+    - layout_builder
     - user
-id: node.dictionary_word.default
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: node.dictionary_word.content_browser
 targetEntityType: node
 bundle: dictionary_word
-mode: default
+mode: content_browser
 content:
   field_thumbnail:
     type: image
