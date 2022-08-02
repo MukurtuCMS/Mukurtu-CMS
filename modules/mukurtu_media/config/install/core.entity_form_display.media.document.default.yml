@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.media.document.field_extracted_text
     - field.field.media.document.field_media_document
     - field.field.media.document.field_protocol_control
     - media.type.document
@@ -9,6 +10,7 @@ dependencies:
     - file
     - mukurtu_protocol
     - path
+    - text
 id: media.document.default
 targetEntityType: media
 bundle: document
@@ -19,6 +21,14 @@ content:
     weight: 4
     region: content
     settings: {  }
+    third_party_settings: {  }
+  field_extracted_text:
+    type: text_textarea
+    weight: 26
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
     third_party_settings: {  }
   field_media_document:
     type: file_generic
