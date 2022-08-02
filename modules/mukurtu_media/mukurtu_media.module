@@ -23,3 +23,13 @@ function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInter
     $form['field_extracted_text']['#type'] = 'hidden';
   }
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // For existing document forms, make the "Extracted Text" field read only.
+  if (isset($form['field_extracted_text'])) {
+    $form['field_extracted_text']['#disabled'] = TRUE;
+  }
+}
