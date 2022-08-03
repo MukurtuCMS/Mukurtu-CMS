@@ -6,6 +6,7 @@ dependencies:
     - search_api.server.mukurtu_database_server
   module:
     - node
+    - taxonomy
     - search_api
     - search_api_glossary
 id: mukurtu_dictionary_index
@@ -13,14 +14,6 @@ name: 'Mukurtu Dictionary Index'
 description: 'Index for the Mukurtu dictionary.'
 read_only: false
 field_settings:
-  field_keywords:
-    label: Keywords
-    datasource_id: 'entity:node'
-    property_path: field_keywords
-    type: integer
-    dependencies:
-      config:
-        - field.storage.node.field_keywords
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
@@ -28,6 +21,16 @@ field_settings:
     indexed_locked: true
     type_locked: true
     hidden: true
+  keyword:
+    label: 'Keywords » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_keywords:entity:name'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_keywords
+      module:
+        - taxonomy
   node_grants:
     label: 'Node access information'
     property_path: search_api_node_grants
@@ -141,6 +144,7 @@ processor_settings:
     all_fields: true
     fields:
       - glossaryaz_title
+      - keyword
       - title
       - type
 tracker_settings:
