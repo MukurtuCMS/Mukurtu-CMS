@@ -2,15 +2,15 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.paragraph.field_part_of_speech
+    - field.storage.paragraph.field_word_type
     - paragraphs.paragraphs_type.dictionary_word_entry
-    - taxonomy.vocabulary.part_of_speech
-id: paragraph.dictionary_word_entry.field_part_of_speech
-field_name: field_part_of_speech
+    - taxonomy.vocabulary.word_type
+id: paragraph.dictionary_word_entry.field_word_type
+field_name: field_word_type
 entity_type: paragraph
 bundle: dictionary_word_entry
-label: 'Part of Speech'
-description: 'Choose one or more parts of speech that best matches your word entry. This field can be used for content browsing.'
+label: 'Word Type'
+description: ''
 required: false
 translatable: false
 default_value: {  }
@@ -19,7 +19,7 @@ settings:
   handler: 'default:taxonomy_term'
   handler_settings:
     target_bundles:
-      part_of_speech: part_of_speech
+      word_type: word_type
     sort:
       field: name
       direction: asc

@@ -4,8 +4,8 @@ dependencies:
   module:
     - paragraphs
     - taxonomy
-id: paragraph.field_part_of_speech
-field_name: field_part_of_speech
+id: paragraph.field_word_type
+field_name: field_word_type
 entity_type: paragraph
 type: entity_reference
 settings:

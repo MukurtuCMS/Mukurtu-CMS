@@ -1,7 +1,7 @@
 langcode: en
 status: true
 dependencies: {  }
-name: 'Part of Speech'
-vid: part_of_speech
+name: 'Word Type'
+vid: word_type
 description: ''
 weight: 0
