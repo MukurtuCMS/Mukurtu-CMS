@@ -3,13 +3,15 @@ status: true
 dependencies:
   config:
     - field.field.paragraph.dictionary_word_entry.field_alternate_spelling
+    - field.field.paragraph.dictionary_word_entry.field_contributor
     - field.field.paragraph.dictionary_word_entry.field_definition
-    - field.field.paragraph.dictionary_word_entry.field_part_of_speech
     - field.field.paragraph.dictionary_word_entry.field_pronunciation
     - field.field.paragraph.dictionary_word_entry.field_recording
     - field.field.paragraph.dictionary_word_entry.field_sample_sentences
     - field.field.paragraph.dictionary_word_entry.field_source
     - field.field.paragraph.dictionary_word_entry.field_translation
+    - field.field.paragraph.dictionary_word_entry.field_word_origin
+    - field.field.paragraph.dictionary_word_entry.field_word_type
     - paragraphs.paragraphs_type.dictionary_word_entry
   module:
     - text
@@ -20,7 +22,7 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 8
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -32,9 +34,19 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_contributor:
+    type: entity_reference_autocomplete
+    weight: 9
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   field_definition:
     type: string_textarea
-    weight: 1
+    weight: 2
     region: content
     settings:
       rows: 5
@@ -92,9 +104,27 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_word_origin:
+    type: string_textfield
+    weight: 8
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_word_type:
+    type: entity_reference_autocomplete
+    weight: 1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 9
+    weight: 11
     region: content
     settings:
       display_label: true

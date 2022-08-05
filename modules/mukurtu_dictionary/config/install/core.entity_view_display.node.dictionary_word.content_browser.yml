@@ -14,8 +14,8 @@ dependencies:
     - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
+    - blazy
     - entity_reference_revisions
-    - image
     - layout_builder
     - user
 third_party_settings:
@@ -35,14 +35,49 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
+  field_language:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
   field_thumbnail:
-    type: image
+    type: blazy_media
     label: inline
     settings:
-      image_link: ''
+      caption: {  }
+      class: ''
+      id: ''
+      image: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      layout: ''
+      view_mode: ''
+      cache: 0
+      skin: ''
+      lazy: ''
+      style: ''
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      loading: lazy
+      preload: false
+      responsive_image_style: ''
+      box_style: ''
       image_style: ''
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      grid: ''
+      grid_medium: ''
+      grid_small: ''
     third_party_settings: {  }
-    weight: 2
+    weight: 3
     region: content
   field_word_entry:
     type: entity_reference_revisions_entity_view
@@ -51,7 +86,7 @@ content:
       view_mode: preview
       link: ''
     third_party_settings: {  }
-    weight: 1
+    weight: 2
     region: content
 hidden:
   comment: true
@@ -60,7 +95,6 @@ hidden:
   field_in_collection: true
   field_in_word_list: true
   field_keywords: true
-  field_language: true
   field_media_assets: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
