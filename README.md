@@ -13,6 +13,8 @@ Beginning with version 4, Mukurtu CMS has been implemented as a [Drupal](https:/
 
 There is an available [Mukurtu CMS project template](https://github.com/MukurtuCMS/Mukurtu-CMS-v4-Project-Template) with a `composer.json` preconfigured to download the Mukurtu CMS installation profile.
 
+> :warning: Access control in Mukurtu depends on the Drupal private file system. You must configure the 'file_private_path' setting in settings.php.
+
 ## Contributing
 Mukurtu CMS v4 is extremely unstable and under active development. If you wish to contribute, please first discuss it with us by starting an issue or discussion on the [Mukurtu CMS GitHub page](https://github.com/MukurtuCMS/Mukurtu-CMS) or contact us via [mukurtu.org](https://mukurtu.org/). Unsolicited pull requests will likely not receive attention at this point in development.
 
