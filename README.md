@@ -15,6 +15,9 @@ There is an available [Mukurtu CMS project template](https://github.com/MukurtuC
 
 > :warning: Access control in Mukurtu depends on the Drupal private file system. You must configure the 'file_private_path' setting in settings.php.
 
+## External Dependencies
+* Requires `pdftotext` to be installed on the hosting system for PDF text extraction to function.
+
 ## Contributing
 Mukurtu CMS v4 is extremely unstable and under active development. If you wish to contribute, please first discuss it with us by starting an issue or discussion on the [Mukurtu CMS GitHub page](https://github.com/MukurtuCMS/Mukurtu-CMS) or contact us via [mukurtu.org](https://mukurtu.org/). Unsolicited pull requests will likely not receive attention at this point in development.
 
