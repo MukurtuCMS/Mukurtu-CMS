@@ -36,6 +36,7 @@ permissions:
   - 'flag mukurtu_follow_community'
   - 'flag mukurtu_follow_content'
   - 'opt-in or out of google analytics tracking'
+  - 'post comments'
   - 'unflag mukurtu_email_collection'
   - 'unflag mukurtu_email_community'
   - 'unflag mukurtu_email_content'
