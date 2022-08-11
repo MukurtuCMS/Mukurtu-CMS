@@ -132,16 +132,25 @@ function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $fo
 function mukurtu_protocol_entity_type_build(array &$entity_types) {
   // This is where we attach the Mukurtu protocol access handlers.
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
-  $entity_types['node']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolNodeAccessControlHandler');
-  $entity_types['media']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolMediaAccessControlHandler');
+  if (isset($entity_types['node'])) {
+    $entity_types['node']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolNodeAccessControlHandler');
+  }
+
+  if (isset($entity_types['media'])) {
+    $entity_types['media']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolMediaAccessControlHandler');
+  }
 
   // Mukurtu Comment handlers.
-  $entity_types['comment']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuCommentAccessControlHandler');
-  $entity_types['comment']->setHandlerClass('storage', 'Drupal\mukurtu_protocol\MukurtuCommentStorage');
+  if (isset($entity_types['comment'])) {
+    $entity_types['comment']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuCommentAccessControlHandler');
+    $entity_types['comment']->setHandlerClass('storage', 'Drupal\mukurtu_protocol\MukurtuCommentStorage');
+  }
 
   // We are taking over some of the default OG entity handling.
-  $entity_types['og_role']->setHandlerClass('list_builder', 'Drupal\mukurtu_protocol\Entity\MukurtuOgRoleListBuilder');
-  //$entity_types['media']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolAccessControlHandler');
+  if (isset($entity_types['og_role'])) {
+    $entity_types['og_role']->setHandlerClass('list_builder', 'Drupal\mukurtu_protocol\Entity\MukurtuOgRoleListBuilder');
+    //$entity_types['media']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolAccessControlHandler');
+  }
 }
 
 /**
