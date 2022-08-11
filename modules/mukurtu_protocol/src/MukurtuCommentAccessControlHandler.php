@@ -78,7 +78,8 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
-    $entity = $items->getEntity();
+    $entity = $items ? $items->getEntity() : NULL;
+
     if ($operation == 'edit') {
       // Only users with the "administer comments" permission can edit
       // administrative fields.
@@ -89,7 +90,10 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
         'date',
       ];
       if (in_array($field_definition->getName(), $administrative_fields, TRUE)) {
-        return AccessResult::allowedIf(ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $account, TRUE));
+        if ($entity) {
+          return AccessResult::allowedIf(ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $account, TRUE));
+        }
+        return AccessResult::allowedIfHasPermission($account, 'administer comments');
       }
 
       // No user can change read-only fields.
@@ -135,7 +139,12 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
         $entity = $items->getEntity();
         $commented_entity = $entity->getCommentedEntity();
         $anonymous_contact = $commented_entity->get($entity->getFieldName())->getFieldDefinition()->getSetting('anonymous');
-        $admin_access = AccessResult::allowedIf(ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $account, TRUE));
+
+        $admin_access = AccessResult::allowedIfHasPermission($account, 'administer comments');
+        if ($entity) {
+          $admin_access = AccessResult::allowedIf(ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $account, TRUE));
+        }
+
         $anonymous_access = AccessResult::allowedIf($entity->isNew() && $account->isAnonymous() && ($anonymous_contact != CommentInterface::ANONYMOUS_MAYNOT_CONTACT || $is_name) && $account->hasPermission('post comments'))
           ->cachePerPermissions()
           ->addCacheableDependency($entity)
