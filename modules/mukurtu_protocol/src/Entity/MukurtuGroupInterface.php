@@ -63,6 +63,5 @@ interface MukurtuGroupInterface {
    *   The OgMembership entity. NULL will be returned if no membership is
    *   available that matches the passed in $states.
    */
-  public function getMembership(AccountInterface $account, array $states = [OgMembershipInterface::STATE_ACTIVE]): OgMembershipInterface;
-
+  public function getMembership(AccountInterface $account, array $states = [OgMembershipInterface::STATE_ACTIVE]): ?OgMembershipInterface;
 }

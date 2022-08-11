@@ -107,6 +107,50 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
   /**
    * {@inheritdoc}
    */
+  public static function hasSiteOrProtocolPermission(EntityInterface $entity, $permission, AccountInterface $account, $force_require_all = FALSE) {
+    // Site level has precedence.
+    if ($account->hasPermission($permission)) {
+      return TRUE;
+    }
+
+    /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $protocolControlEntity */
+    // Try to load the protocol control entity.
+    $protocolControlEntity = ProtocolControl::getProtocolControlEntity($entity);
+
+    // No valid protocol control entity (but DOES have a protocol control
+    // field) or an empty protocol list.
+    if (!$protocolControlEntity || empty($protocolControlEntity->getProtocols())) {
+      return FALSE;
+    }
+
+    // Now we can finally see if they have protocol level comment permission.
+    $protocols = $protocolControlEntity->getProtocolEntities();
+
+    // Do we require agreement on all protocols or just one?
+    if ($force_require_all || $protocolControlEntity->getPrivacySetting() === 'all') {
+      $hasProtocolLevelPermission = TRUE;
+      $and = TRUE;
+    }
+    else {
+      $hasProtocolLevelPermission = FALSE;
+      $and = FALSE;
+    }
+    foreach ($protocols as $protocol) {
+      $membership = $protocol->getMembership($account);
+      if ($and) {
+        $hasProtocolLevelPermission = $hasProtocolLevelPermission && ($membership && $membership->hasPermission($permission));
+      }
+      else {
+        $hasProtocolLevelPermission = $hasProtocolLevelPermission || ($membership && $membership->hasPermission($permission));
+      }
+    }
+
+    return $hasProtocolLevelPermission;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function urlRouteParameters($rel) {
     $uri_route_parameters = parent::urlRouteParameters($rel);
 
@@ -295,6 +339,13 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
    */
   public function getProtocols() {
     return array_column($this->get('field_protocols')->getValue(), 'target_id');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getProtocolEntities() {
+    return $this->get('field_protocols')->referencedEntities();
   }
 
   /**

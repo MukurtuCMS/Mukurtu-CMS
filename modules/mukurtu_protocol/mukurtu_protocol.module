@@ -36,6 +36,17 @@ function mukurtu_protocol_theme_registry_alter(&$theme_registry) {
   }
 }
 
+/**
+ * Implements hook_field_info_alter().
+ */
+function mukurtu_protocol_field_info_alter(&$info) {
+  if (isset($info['comment']['default_formatter'])) {
+    $info['comment']['default_formatter'] = 'mukurtu_comment_default';
+  }
+  if (isset($info['comment'])) {
+    $info['comment']['list_class'] = '\Drupal\mukurtu_protocol\MukurtuCommentFieldItemList';
+  }
+}
 
 /**
  * Implements hook_theme().
@@ -64,6 +75,7 @@ function mukurtu_protocol_theme($existing, $type, $theme, $path) {
         'sharing' => NULL,
         'description' => NULL,
         'communities' => NULL,
+        'comment_status' => NULL,
       ],
     ],
   ];
@@ -122,6 +134,10 @@ function mukurtu_protocol_entity_type_build(array &$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   $entity_types['node']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolNodeAccessControlHandler');
   $entity_types['media']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolMediaAccessControlHandler');
+
+  // Mukurtu Comment handlers.
+  $entity_types['comment']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuCommentAccessControlHandler');
+  $entity_types['comment']->setHandlerClass('storage', 'Drupal\mukurtu_protocol\MukurtuCommentStorage');
 
   // We are taking over some of the default OG entity handling.
   $entity_types['og_role']->setHandlerClass('list_builder', 'Drupal\mukurtu_protocol\Entity\MukurtuOgRoleListBuilder');

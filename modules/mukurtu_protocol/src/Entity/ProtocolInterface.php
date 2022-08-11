@@ -110,6 +110,25 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   public function inUse() : bool;
 
   /**
+   * Gets the comment status setting.
+   *
+   * @return boolean
+   *   TRUE = comments enabled.
+   */
+  public function getCommentStatus(): bool;
+
+  /**
+   * Sets the comment status setting.
+   *
+   * @param bool $status
+   *   TRUE = comments enabled.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface
+   *   The called Protocol entity.
+   */
+  public function setCommentStatus($status) : ProtocolInterface;
+
+  /**
    * Get the communities this protocol belongs to.
    *
    * @return \Drupal\mukurtu_community\Entity\CommunityInterface[]

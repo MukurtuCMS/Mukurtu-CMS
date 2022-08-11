@@ -46,6 +46,15 @@ class ManageProtocolsController extends ControllerBase {
       '#url' => Url::fromRoute('mukurtu_protocol.protocol_add_membership', ['group' => $protocol->id()]),
     ];
 
+    $membership = $group->getMembership($this->currentUser());
+    if ($membership && $membership->hasPermission('administer comments')) {
+      $links[] = [
+        '#title' => $this->t('Comment Settings'),
+        '#type' => 'link',
+        '#url' => Url::fromRoute('mukurtu_protocol.manage_protocol_comment_settings', ['group' => $protocol->id()]),
+      ];
+    }
+
     // Sharing Protocol.
     $visibilityMarkup['strict'] = $this->t('Strict: This cultural protocol is visible to members only.');
     $visibilityMarkup['open'] = $this->t('Open: This cultural protocol is visible to all.');
@@ -53,6 +62,13 @@ class ManageProtocolsController extends ControllerBase {
       '#type' => 'item',
       '#title' => $this->t('Sharing Protocol'),
       '#markup' => $visibilityMarkup[$group->getSharingSetting()],
+    ];
+
+    // Comment status.
+    $commentStatus = [
+      '#type' => 'item',
+      '#title' => $this->t('Commenting'),
+      '#markup' => $group->getCommentStatus() ? $this->t('Comments are enabled for this protocol.') : $this->t('Comments are disabled for this protocol.'),
     ];
 
     // Description.
@@ -72,6 +88,7 @@ class ManageProtocolsController extends ControllerBase {
       '#links' => $links,
       '#protocol' => $protocol,
       '#sharing' => $sharing,
+      '#comment_status' => $commentStatus,
       '#description' => $description,
       '#communities' => $communities,
     ];

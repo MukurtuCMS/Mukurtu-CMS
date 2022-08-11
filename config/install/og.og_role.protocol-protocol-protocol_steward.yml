@@ -22,6 +22,7 @@ group_bundle: protocol
 is_admin: null
 permissions:
   - 'add user'
+  - 'administer comments'
   - 'administer community records'
   - 'administer permissions'
   - 'apply protocol'
@@ -52,6 +53,7 @@ permissions:
   - 'edit own collection content'
   - 'edit own digital_heritage content'
   - 'manage members'
+  - 'skip comment approval'
   - 'update any audio media'
   - 'update any document media'
   - 'update any image media'

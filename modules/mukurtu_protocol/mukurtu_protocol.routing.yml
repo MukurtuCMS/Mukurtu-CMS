@@ -170,3 +170,23 @@ mukurtu_protocol.protocol_add_membership:
     parameters:
       group:
         type: entity:protocol
+
+mukurtu_protocol.comment_settings:
+  path: '/admin/config/mukurtu/commenting/settings'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\CommentSettingsForm'
+    _title: 'Mukurtu Site Commenting Settings'
+  requirements:
+    _permission: 'administer site configuration,administer comments'
+
+mukurtu_protocol.manage_protocol_comment_settings:
+  path: 'dashboard/protocols/{group}/comment-settings'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::content'
+    _title_callback: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::getTitle'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::access'
+  options:
+    parameters:
+      group:
+        type: entity:protocol

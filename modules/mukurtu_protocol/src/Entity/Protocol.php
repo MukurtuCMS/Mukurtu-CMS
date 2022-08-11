@@ -269,6 +269,20 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function getCommentStatus(): bool {
+    return $this->get('field_comment_status')->value;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setCommentStatus($status): ProtocolInterface {
+    return $this->set('field_comment_status', $status);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function addMember(AccountInterface $account, $roles = []): MukurtuGroupInterface {
@@ -329,7 +343,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   /**
    * {@inheritDoc}
    */
-  public function getMembership(AccountInterface $account, array $states = [OgMembershipInterface::STATE_ACTIVE]): OgMembershipInterface {
+  public function getMembership(AccountInterface $account, array $states = [OgMembershipInterface::STATE_ACTIVE]): ?OgMembershipInterface {
     return Og::getMembership($this, $account, $states);
   }
 
@@ -448,6 +462,15 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_comment_status'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Comments Status'))
+      ->setDescription(t('If comments are enabled for the protocol.'))
+      ->setRevisionable(FALSE)
+      ->setDefaultValue(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setDisplayConfigurable('form', FALSE);
 
     $fields['status']->setDescription(t('A boolean indicating whether the Protocol is published.'))
       ->setDisplayOptions('form', [

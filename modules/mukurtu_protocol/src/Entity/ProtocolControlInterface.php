@@ -128,10 +128,18 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
   /**
    * Get the Protocol control protocols.
    *
-   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface[]
-   *   An array of protocols.
+   * @return int[]
+   *   An array of protocols IDs.
    */
   public function getProtocols();
+
+  /**
+   * Get the Protocol control protocols.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface[]
+   *   An array of protocols entities.
+   */
+  public function getProtocolEntities();
 
   /**
    * Set the protocol control protocols.
@@ -158,7 +166,7 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
   /**
    * Get the entity this PCE controls.
    *
-   * @return \Drupal\Core\Entity\EntityIterface
+   * @return \Drupal\Core\Entity\EntityInterface
    *   The entity that uses this protocol control.
    */
   public function getControlledEntity();
@@ -188,7 +196,7 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
   /**
    * Get the inheritance target entity.
    *
-   * @return \Drupal\Core\Entity\EntityIterface|null
+   * @return \Drupal\Core\Entity\EntityInterface|null
    *   The inheritance target entity or null if not using inheritance.
    */
   public function getInheritanceTarget();
@@ -238,6 +246,24 @@ interface ProtocolControlInterface extends ContentEntityInterface, RevisionLogIn
    *   The protocol control interface.
    */
   public static function getProtocolControlEntity(EntityInterface $entity);
+
+  /**
+   * Check if a user has a permission at the site or protocol level.
+   *
+   * @param EntityInterface $entity
+   *   The entity under protocol. These are the protocols that will be queried.
+   * @param string $permission
+   *   The permission string.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The account to check.
+   * @param boolean $force_require_all
+   *   If true, the user will need the permission in all protocols regardless of
+   *   privacy setting (any/all).
+   *
+   * @return boolean
+   *   True if the user has the resultant permission. False otherwise.
+   */
+  public static function hasSiteOrProtocolPermission(EntityInterface $entity, $permission, AccountInterface $account, $force_require_all = FALSE);
 
   /**
    * Get the protocol set ID.

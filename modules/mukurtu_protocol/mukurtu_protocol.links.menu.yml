@@ -79,3 +79,11 @@ mukurtu_protocol.config_protocol_permissions:
   route_name: mukurtu_protocol.permissions_overview
   route_parameters: { entity_type_id: 'protocol', bundle_id: 'protocol'}
   weight: 810
+
+mukurtu_protocol.comment_settings:
+  title: "Site Comment Settings"
+  parent: mukurtu_core.site_configuration
+  menu_name: mukurtu
+  description: "Configuration form for side wide commenting options."
+  route_name: mukurtu_protocol.comment_settings
+  weight: 1

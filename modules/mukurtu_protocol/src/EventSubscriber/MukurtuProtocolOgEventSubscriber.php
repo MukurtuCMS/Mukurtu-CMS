@@ -168,6 +168,20 @@ class MukurtuProtocolOgEventSubscriber extends OgEventSubscriber {
           'default roles' => [OgRoleInterface::ADMINISTRATOR],
           'restrict access' => FALSE,
         ]),
+        new GroupPermission([
+          'name' => 'administer comments',
+          'title' => $this->t('Administer comments and comment settings'),
+          'description' => $this->t('Approve/unpublish commments and change comment settings at the protocol level.'),
+          'default roles' => [OgRoleInterface::ADMINISTRATOR],
+          'restrict access' => FALSE,
+        ]),
+        new GroupPermission([
+          'name' => 'skip comment approval',
+          'title' => $this->t('Skip comment approval'),
+          'description' => $this->t('Comments can be immediately be published unless overridden by site or other protocol configuration.'),
+          'default roles' => [OgRoleInterface::ADMINISTRATOR],
+          'restrict access' => FALSE,
+        ]),
       ]);
 
       // Add a list of generic CRUD permissions for all group content.
