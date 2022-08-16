@@ -129,6 +129,25 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   public function setCommentStatus($status) : ProtocolInterface;
 
   /**
+   * Gets the comment approval setting.
+   *
+   * @return boolean
+   *   TRUE = comments require approval.
+   */
+  public function getCommentRequireApproval(): bool;
+
+  /**
+   * Sets the comment approval setting.
+   *
+   * @param bool $require
+   *   TRUE = comments require approval.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface
+   *   The called Protocol entity.
+   */
+  public function setCommentRequireApproval($require): ProtocolInterface;
+
+  /**
    * Get the communities this protocol belongs to.
    *
    * @return \Drupal\mukurtu_community\Entity\CommunityInterface[]

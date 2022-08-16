@@ -44,6 +44,9 @@
     <testsuite name="kernel">
       <directory>./profiles/mukurtu-cms/modules/mukurtu_protocol/tests/src/Kernel</directory>
     </testsuite>
+    <testsuite name="functional">
+      <directory>./profiles/mukurtu-cms/modules/mukurtu_protocol/tests/src/Functional</directory>
+    </testsuite>
   </testsuites>
   <listeners>
     <listener class="\Drupal\Tests\Listeners\DrupalListener">

@@ -12,10 +12,7 @@ jobs:
       fail-fast: true
       matrix:
         php-versions: ['7.4']
-        test-suite: ["kernel"]
-        include:
-          - php-versions: '7.4'
-            test-suite: "kernel"
+        test-suite: ["kernel", "functional"]
     services:
       mariadb:
         image: mariadb:10.5

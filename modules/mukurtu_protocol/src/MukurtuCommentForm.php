@@ -13,6 +13,7 @@ use Drupal\comment\CommentInterface;
 use Drupal\comment\CommentForm;
 use Drupal\mukurtu_protocol\Entity\ProtocolControl;
 use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Mukurtu base handler for comment forms.
@@ -89,7 +90,8 @@ class MukurtuCommentForm extends CommentForm {
     else {
       $status = CommentInterface::NOT_PUBLISHED;
       if (ProtocolControl::hasSiteOrProtocolPermission($entity, 'skip comment approval', $this->currentUser, TRUE)
-       || ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) {
+       || ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)
+       || !$this->anyProtocolsRequireCommentApproval($entity)) {
           $status = CommentInterface::PUBLISHED;
       }
     }
@@ -316,6 +318,30 @@ class MukurtuCommentForm extends CommentForm {
       // Redirect the user to the entity they are commenting on.
     }
     $form_state->setRedirectUrl($uri);
+  }
+
+  /**
+   * Check if any item is in any protocols that require comment approval.
+   *
+   * @param EntityInterface $entity
+   *   The entity.
+   *
+   * @return bool
+   *   TRUE if any protocol requires comment approval.
+   */
+  private function anyProtocolsRequireCommentApproval(EntityInterface $entity) {
+    $pce = ProtocolControl::getProtocolControlEntity($entity);
+    if (!$pce) {
+      return TRUE;
+    }
+
+    $protocols = $pce->getProtocolEntities();
+    foreach ($protocols as $protocol) {
+      if ($protocol->getCommentRequireApproval()) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
 }

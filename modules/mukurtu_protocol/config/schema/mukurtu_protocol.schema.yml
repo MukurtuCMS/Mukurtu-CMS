@@ -13,3 +13,10 @@ entity_browser.browser.widget.mukurtu_taxonomy_record_term_selection:
     submit_text:
       type: label
       label: 'Submit button text'
+
+mukurtu_protocol.comment_settings:
+  type: config_object
+  label: 'Mukurtu Comment Settings'
+  mapping:
+    site_comments_enabled:
+      type: integer

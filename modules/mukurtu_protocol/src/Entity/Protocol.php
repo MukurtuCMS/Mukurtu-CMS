@@ -283,6 +283,20 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function getCommentRequireApproval(): bool {
+    return $this->get('field_comment_require_approval')->value;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setCommentRequireApproval($require): ProtocolInterface {
+    return $this->set('field_comment_require_approval', $require);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function addMember(AccountInterface $account, $roles = []): MukurtuGroupInterface {
@@ -466,6 +480,15 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
     $fields['field_comment_status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Comments Status'))
       ->setDescription(t('If comments are enabled for the protocol.'))
+      ->setRevisionable(FALSE)
+      ->setDefaultValue(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setDisplayConfigurable('form', FALSE);
+
+    $fields['field_comment_require_approval'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Comments Require Approval'))
+      ->setDescription(t('If comments require approval for the protocol.'))
       ->setRevisionable(FALSE)
       ->setDefaultValue(TRUE)
       ->setTranslatable(FALSE)

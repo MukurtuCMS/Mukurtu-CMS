@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\comment\Plugin\Field\FieldFormatter;
+namespace Drupal\mukurtu_protocol\Plugin\Field\FieldFormatter;
 
 use Drupal\comment\Plugin\Field\FieldFormatter\CommentDefaultFormatter;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
