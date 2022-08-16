@@ -217,6 +217,7 @@ content:
         dragMode: '1'
         removalMode: '1'
         drawCircle: false
+        drawText: false
         cutPolygon: 0
         rotateMode: 0
       reset_map:
@@ -226,6 +227,7 @@ content:
         options: '{"position":"topleft","pseudoFullscreen":false}'
         control: 0
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      geometry_validation: 0
       input:
         show: 0
         readonly: 0

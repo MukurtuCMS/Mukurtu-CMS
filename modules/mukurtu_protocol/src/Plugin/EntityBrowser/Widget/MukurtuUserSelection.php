@@ -16,7 +16,6 @@ use Drupal\og\OgRoleInterface;
  *   label = @Translation("Mukurtu User Selection"),
  *   provider = "mukurtu_protocol",
  *   description = @Translation("Select users for protocols and communities using Mukurtu roles."),
- *   auto_select = TRUE
  * )
  */
 class MukurtuUserSelection extends WidgetBase implements ContainerFactoryPluginInterface {

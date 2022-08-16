@@ -1,0 +1,15 @@
+entity_browser.browser.widget.mukurtu_user_selection:
+  type: mapping
+  label: 'View widget configuration'
+  mapping:
+    submit_text:
+      type: label
+      label: 'Submit button text'
+
+entity_browser.browser.widget.mukurtu_taxonomy_record_term_selection:
+  type: mapping
+  label: 'View widget configuration'
+  mapping:
+    submit_text:
+      type: label
+      label: 'Submit button text'

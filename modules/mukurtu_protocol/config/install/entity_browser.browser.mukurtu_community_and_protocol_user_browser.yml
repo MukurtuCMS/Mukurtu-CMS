@@ -22,10 +22,9 @@ widget_selector: single
 widget_selector_configuration: {  }
 widgets:
   f503726d-709b-460d-9f7d-da39de306aa6:
-    id: mukurtu_user_selection
-    uuid: f503726d-709b-460d-9f7d-da39de306aa6
-    label: 'Select Users'
-    weight: 1
     settings:
       submit_text: 'Add Users'
-      auto_select: 0
+    uuid: f503726d-709b-460d-9f7d-da39de306aa6
+    weight: 1
+    label: 'Select Users'
+    id: mukurtu_user_selection

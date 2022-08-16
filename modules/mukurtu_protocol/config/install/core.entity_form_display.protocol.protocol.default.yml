@@ -35,7 +35,6 @@ content:
       placeholder: ''
       show_summary: false
     third_party_settings: {  }
-    rows: 6
   name:
     type: string_textfield
     weight: 0

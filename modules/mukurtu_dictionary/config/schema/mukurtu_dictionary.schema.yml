@@ -1,0 +1,31 @@
+plugin.plugin_configuration.search_api_processor.glossary:
+  type: search_api.fields_processor_configuration
+  label: 'Glossary configuration'
+  mapping:
+    glossarytable:
+      type: string
+    field_enabled:
+      type: integer
+    weights:
+      type: mapping
+      mapping:
+        preprocess_index:
+          type: integer
+    grouping_defaults:
+      type: mapping
+      mapping:
+        grouping_other:
+          type: string
+        grouping_az:
+          type: integer
+        grouping_09:
+          type: integer
+
+facet.widget.config.glossaryaz:
+  type: facet.widget.default_config
+  label: 'Glossary widget configuration'
+  mapping:
+    show_count:
+      type: integer
+    enable_default_theme:
+      type: integer

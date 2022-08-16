@@ -1,0 +1,9 @@
+mukurtu_community_records.settings:
+  type: config_object
+  mapping:
+    allowed_community_record_bundles:
+      type: sequence
+      label: 'Content bundles enabled for community records'
+      sequence:
+        type: string
+        label: 'Content bundle machine name'

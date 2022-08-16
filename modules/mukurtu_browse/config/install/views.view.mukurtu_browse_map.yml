@@ -322,7 +322,6 @@ display:
             fail: 'not found'
           validate_options: {  }
           break_phrase: false
-          not: 0
           plugin_id: mukurtu_bounding_box
       display_extenders: {  }
       use_ajax: true

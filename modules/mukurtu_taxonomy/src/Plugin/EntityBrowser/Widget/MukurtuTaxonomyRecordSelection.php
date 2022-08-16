@@ -14,7 +14,6 @@ use Drupal\Core\Form\FormStateInterface;
  *   label = @Translation("Mukurtu Taxonomy Record Term Selection"),
  *   provider = "mukurtu_taxonomy",
  *   description = @Translation("Select taxonomy record terms."),
- *   auto_select = TRUE
  * )
  */
 class MukurtuTaxonomyRecordSelection extends WidgetBase implements ContainerFactoryPluginInterface {

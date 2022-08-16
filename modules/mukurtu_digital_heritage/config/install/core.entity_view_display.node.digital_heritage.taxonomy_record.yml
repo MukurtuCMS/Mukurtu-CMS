@@ -155,7 +155,7 @@ content:
     weight: 24
     region: content
   field_coverage:
-    type: leaflet_formatter_default
+    type: mukurtu_leaflet_formatter
     label: above
     settings:
       multiple_map: false
@@ -221,7 +221,6 @@ content:
           zoom: 16
           popup: false
           options: ''
-      weight: null
     third_party_settings: {  }
     weight: 40
     region: content

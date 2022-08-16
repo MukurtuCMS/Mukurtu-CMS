@@ -63,7 +63,6 @@ content:
       placeholder: ''
       show_summary: false
     third_party_settings: {  }
-    rows: 6
   field_featured_content:
     type: entity_browser_entity_reference
     weight: 6

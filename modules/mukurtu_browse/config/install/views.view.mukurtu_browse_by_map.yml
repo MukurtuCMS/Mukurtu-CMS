@@ -389,7 +389,6 @@ display:
             fail: 'not found'
           validate_options: {  }
           break_phrase: false
-          not: 0
       filters:
         status:
           id: status

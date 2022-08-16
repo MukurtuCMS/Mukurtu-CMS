@@ -1,12 +1,23 @@
+entity_browser.browser.widget.mukurtu_user_selection:
+  type: mapping
+  label: 'View widget configuration'
+  mapping:
+    submit_text:
+      type: label
+      label: 'Submit button text'
+
+
 #entity_reference_selection.mukurtu_protocol:
 #  type: entity_reference_selection.default
 #  label: 'Protocol Selection'
 #entity_reference_selection.default:protocol_control:
 #  type: entity_reference_selection.default
 #  label: 'Protocol Control Selection'
+
 entity_reference_selection.community_selection_for_protocols:
   type: entity_reference_selection.default
   label: 'Community Selection for Protocols'
 entity_reference_selection.mukurtu_user_selection:
   type: entity_reference_selection.default
   label: 'User Selection for Mukurtu'
+
