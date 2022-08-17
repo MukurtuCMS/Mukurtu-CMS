@@ -85,6 +85,7 @@ permissions:
   - 'administer comment form display'
   - 'administer comments'
   - 'administer community display'
+  - 'administer community entities'
   - 'administer community fields'
   - 'administer community form display'
   - 'administer contact forms'

@@ -29,16 +29,30 @@ class CommunityListBuilder extends EntityListBuilder {
    */
   protected function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
-    $operations['members'] = [
-      'title' => $this->t('Manage Members'),
-      'weight' => 100,
-      'url' => Url::fromRoute('mukurtu_protocol.community_members_list', ['group' => $entity->id()]),
-    ];
-    $operations['add-member'] = [
-      'title' => $this->t('Add Member'),
-      'weight' => 100,
-      'url' => Url::fromRoute('mukurtu_protocol.community_add_membership', ['group' => $entity->id()]),
-    ];
+    $access_manager = \Drupal::service('access_manager');
+
+    if ($access_manager->checkNamedRoute('entity.community.canonical', ['community' => $entity->id()])) {
+      $operations['members'] = [
+        'title' => $this->t('View'),
+        'weight' => 100,
+        'url' => Url::fromRoute('entity.community.canonical', ['community' => $entity->id()]),
+      ];
+    }
+
+    if ($access_manager->checkNamedRoute('mukurtu_protocol.community_members_list', ['group' => $entity->id()])) {
+      $operations['members'] = [
+        'title' => $this->t('Manage Members'),
+        'weight' => 100,
+        'url' => Url::fromRoute('mukurtu_protocol.community_members_list', ['group' => $entity->id()]),
+      ];
+    }
+    if ($access_manager->checkNamedRoute('mukurtu_protocol.community_add_membership', ['group' => $entity->id()])) {
+      $operations['add-member'] = [
+        'title' => $this->t('Add Member'),
+        'weight' => 100,
+        'url' => Url::fromRoute('mukurtu_protocol.community_add_membership', ['group' => $entity->id()]),
+      ];
+    }
     return $operations;
   }
 
@@ -46,14 +60,19 @@ class CommunityListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
+    $access_manager = \Drupal::service('access_manager');
     /** @var \Drupal\mukurtu_protocol\Entity\Community $entity */
 
     // Name.
-    $row['name'] = Link::createFromRoute(
-      $entity->label(),
-      'mukurtu_protocol.manage_community',
-      ['group' => $entity->id()]
-    );
+    if ($access_manager->checkNamedRoute('mukurtu_protocol.manage_community', ['group' => $entity->id()])) {
+      $row['name'] = Link::createFromRoute(
+        $entity->label(),
+        'mukurtu_protocol.manage_community',
+        ['group' => $entity->id()]
+      );
+    } else {
+      $row['name'] = $entity->label();
+    }
 
     // Description.
     $row['description'] = $entity->getDescription();
