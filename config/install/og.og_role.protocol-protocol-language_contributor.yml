@@ -7,14 +7,14 @@ dependencies:
     - media.type.image
     - media.type.remote_video
     - media.type.video
-    - node.type.digital_heritage
-    - node.type.person
+    - node.type.dictionary_word
+    - node.type.word_list
   module:
     - media
     - mukurtu_protocol
     - node
-id: protocol-protocol-contributor
-label: Contributor
+id: protocol-protocol-language_contributor
+label: 'Language Contributor'
 weight: 8
 group_id: null
 group_type: protocol
@@ -22,21 +22,25 @@ group_bundle: protocol
 is_admin: null
 permissions:
   - 'create audio media'
-  - 'create digital_heritage content'
+  - 'create dictionary_word content'
   - 'create document media'
   - 'create image media'
-  - 'create person content'
   - 'create remote_video media'
   - 'create video media'
+  - 'create word_list content'
+  - 'delete any dictionary_word content'
+  - 'delete any word_list content'
   - 'delete own audio media'
-  - 'delete own digital_heritage content'
+  - 'delete own dictionary_word content'
   - 'delete own document media'
   - 'delete own image media'
-  - 'delete own person content'
   - 'delete own remote_video media'
   - 'delete own video media'
-  - 'edit own digital_heritage content'
-  - 'edit own person content'
+  - 'delete own word_list content'
+  - 'edit any dictionary_word content'
+  - 'edit any word_list content'
+  - 'edit own dictionary_word content'
+  - 'edit own word_list content'
   - 'update own audio media'
   - 'update own document media'
   - 'update own image media'

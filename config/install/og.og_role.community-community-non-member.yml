@@ -3,12 +3,13 @@ status: true
 dependencies:
   module:
     - mukurtu_protocol
-id: community-community-community_member
-label: 'Community Member'
-weight: 15
+id: community-community-non-member
+label: Non-member
+weight: 14
 group_id: null
 group_type: community
 group_bundle: community
 is_admin: null
-permissions: {  }
-role_type: standard
+permissions:
+  - subscribe
+role_type: required

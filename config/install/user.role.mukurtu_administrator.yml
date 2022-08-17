@@ -3,6 +3,21 @@ status: true
 dependencies:
   config:
     - filter.format.full_html
+    - taxonomy.vocabulary.authors
+    - taxonomy.vocabulary.category
+    - taxonomy.vocabulary.community_type
+    - taxonomy.vocabulary.contributor
+    - taxonomy.vocabulary.creator
+    - taxonomy.vocabulary.format
+    - taxonomy.vocabulary.interpersonal_relationship
+    - taxonomy.vocabulary.keywords
+    - taxonomy.vocabulary.language
+    - taxonomy.vocabulary.people
+    - taxonomy.vocabulary.publisher
+    - taxonomy.vocabulary.subject
+    - taxonomy.vocabulary.tags
+    - taxonomy.vocabulary.type
+    - taxonomy.vocabulary.word_type
   module:
     - block
     - block_content
@@ -41,6 +56,7 @@ dependencies:
     - system
     - taxonomy
     - toolbar
+    - tour
 id: mukurtu_administrator
 label: 'Mukurtu Administrator'
 weight: 2
@@ -53,9 +69,13 @@ permissions:
   - 'access shortcuts'
   - 'access site in maintenance mode'
   - 'access site-wide contact form'
+  - 'access taxonomy overview'
   - 'access toolbar'
+  - 'access tour'
   - 'access user contact forms'
+  - 'access user profiles'
   - 'add JS snippets for google analytics'
+  - 'add community entities'
   - 'administer block_content display'
   - 'administer block_content fields'
   - 'administer block_content form display'
@@ -88,6 +108,7 @@ permissions:
   - 'administer media display'
   - 'administer media fields'
   - 'administer media form display'
+  - 'administer menu'
   - 'administer message digest'
   - 'administer message display'
   - 'administer message fields'
@@ -122,6 +143,7 @@ permissions:
   - 'administer rest resources'
   - 'administer search_api'
   - 'administer shortcuts'
+  - 'administer taxonomy'
   - 'administer taxonomy_term display'
   - 'administer taxonomy_term fields'
   - 'administer taxonomy_term form display'
@@ -140,9 +162,25 @@ permissions:
   - 'create mukurtu_single_node_delete message'
   - 'create mukurtu_single_node_insert message'
   - 'create mukurtu_single_node_update message'
+  - 'create terms in authors'
+  - 'create terms in category'
+  - 'create terms in community_type'
+  - 'create terms in contributor'
+  - 'create terms in creator'
+  - 'create terms in format'
+  - 'create terms in interpersonal_relationship'
+  - 'create terms in keywords'
+  - 'create terms in language'
+  - 'create terms in people'
+  - 'create terms in publisher'
+  - 'create terms in subject'
+  - 'create terms in tags'
+  - 'create terms in type'
+  - 'create terms in word_type'
   - 'create url aliases'
   - 'customize shortcut links'
   - 'delete any message template'
+  - 'delete community entities'
   - 'delete mukurtu_batch_import_report message'
   - 'delete mukurtu_new_item_in_collection message'
   - 'delete mukurtu_new_item_in_community message'
@@ -153,8 +191,24 @@ permissions:
   - 'delete mukurtu_single_node_update message'
   - 'delete multiple messages'
   - 'delete orphan revisions'
+  - 'delete terms in authors'
+  - 'delete terms in category'
+  - 'delete terms in community_type'
+  - 'delete terms in contributor'
+  - 'delete terms in creator'
+  - 'delete terms in format'
+  - 'delete terms in interpersonal_relationship'
+  - 'delete terms in keywords'
+  - 'delete terms in language'
+  - 'delete terms in people'
+  - 'delete terms in publisher'
+  - 'delete terms in subject'
+  - 'delete terms in tags'
+  - 'delete terms in type'
+  - 'delete terms in word_type'
   - 'edit any message template'
   - 'edit behavior plugin settings'
+  - 'edit community entities'
   - 'edit mukurtu_batch_import_report message'
   - 'edit mukurtu_new_item_in_collection message'
   - 'edit mukurtu_new_item_in_community message'
@@ -164,15 +218,30 @@ permissions:
   - 'edit mukurtu_single_node_insert message'
   - 'edit mukurtu_single_node_update message'
   - 'edit own comments'
-  - 'flag email_node'
+  - 'edit terms in authors'
+  - 'edit terms in category'
+  - 'edit terms in community_type'
+  - 'edit terms in contributor'
+  - 'edit terms in creator'
+  - 'edit terms in format'
+  - 'edit terms in interpersonal_relationship'
+  - 'edit terms in keywords'
+  - 'edit terms in language'
+  - 'edit terms in people'
+  - 'edit terms in publisher'
+  - 'edit terms in subject'
+  - 'edit terms in tags'
+  - 'edit terms in type'
+  - 'edit terms in word_type'
   - 'notify of path changes'
   - 'overview messages'
   - 'post comments'
+  - 'revert all community revisions'
   - 'send message through the ui'
-  - 'skip comment approval'
   - 'switch shortcut sets'
   - 'update tokens'
   - 'use text format full_html'
+  - 'view all community revisions'
   - 'view any message template'
   - 'view mukurtu_batch_import_report message'
   - 'view mukurtu_new_item_in_collection message'
@@ -182,4 +251,9 @@ permissions:
   - 'view mukurtu_single_node_delete message'
   - 'view mukurtu_single_node_insert message'
   - 'view mukurtu_single_node_update message'
+  - 'view own unpublished content'
+  - 'view own unpublished media'
+  - 'view the administration theme'
+  - 'view unpublished community entities'
   - 'view unpublished paragraphs'
+  - 'view user email addresses'
