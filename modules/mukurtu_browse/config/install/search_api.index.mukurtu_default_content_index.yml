@@ -57,39 +57,6 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.field_description
-  field_has_location:
-    label: 'Has Location'
-    datasource_id: 'entity:node'
-    property_path: field_mukurtu_geojson
-    type: boolean
-    dependencies:
-      config:
-        - field.storage.node.field_mukurtu_geojson
-  field_mukurtu_cluster_lat:
-    label: 'Mukurtu Coverage - Cluster Latitude'
-    datasource_id: 'entity:node'
-    property_path: field_mukurtu_cluster_lat
-    type: decimal
-    dependencies:
-      config:
-        - field.storage.node.field_mukurtu_cluster_lat
-  field_mukurtu_cluster_long:
-    label: 'Mukurtu Coverage - Cluster Longitude'
-    datasource_id: 'entity:node'
-    property_path: field_mukurtu_cluster_long
-    type: decimal
-    dependencies:
-      config:
-        - field.storage.node.field_mukurtu_cluster_long
-  field_mukurtu_geojson:
-    label: 'Mukurtu GeoJSON'
-    datasource_id: 'entity:node'
-    property_path: field_mukurtu_geojson
-    type: text
-    boost: !!float 0
-    dependencies:
-      config:
-        - field.storage.node.field_mukurtu_geojson
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
