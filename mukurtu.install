@@ -33,4 +33,14 @@ function mukurtu_install() {
     ->getEditable('system.theme')
     ->set('default', 'mukurtu_bartik')
     ->save();
+
+  // Delete unused user flags that crash user registration page.
+  $flagStorage = \Drupal::entityTypeManager()->getStorage('flag');
+  foreach (['email_user', 'subscribe_user'] as $userFlagID) {
+    $flag = $flagStorage->load($userFlagID);
+    if ($flag) {
+      $flag->delete();
+    }
+  }
+
 }
