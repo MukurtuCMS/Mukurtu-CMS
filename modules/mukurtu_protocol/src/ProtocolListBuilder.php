@@ -103,4 +103,16 @@ class ProtocolListBuilder extends EntityListBuilder {
     return $row + parent::buildRow($entity);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function render() {
+    $build = parent::render();
+    $build['#cache']['contexts'][] = 'user.roles';
+    $build['#cache']['contexts'][] = 'og_group_context';
+    $build['#cache']['contexts'][] = 'og_membership_state';
+    $build['#cache']['contexts'][] = 'og_role';
+    return $build;
+  }
+
 }
