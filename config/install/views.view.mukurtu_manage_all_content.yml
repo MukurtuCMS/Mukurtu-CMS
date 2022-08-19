@@ -6,10 +6,11 @@ dependencies:
     - field.storage.node.field_keywords
     - taxonomy.vocabulary.category
     - taxonomy.vocabulary.keywords
+    - user.role.mukurtu_administrator
   module:
+    - mukurtu_protocol
     - node
     - taxonomy
-    - user
     - views_bulk_operations
 id: mukurtu_manage_all_content
 label: 'Mukurtu Manage All Content'
@@ -564,9 +565,16 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: perm
+        type: site_and_mukurtu_role
         options:
-          perm: 'access content'
+          site-role:
+            mukurtu_administrator: mukurtu_administrator
+          community-role: {  }
+          protocol-role:
+            protocol-protocol-contributor: protocol-protocol-contributor
+            protocol-protocol-language_contributor: protocol-protocol-language_contributor
+            protocol-protocol-language_steward: protocol-protocol-language_steward
+            protocol-protocol-protocol_steward: protocol-protocol-protocol_steward
       cache:
         type: tag
         options: {  }
@@ -909,7 +917,7 @@ display:
         - url.query_args
         - user
         - 'user.node_grants:view'
-        - user.permissions
+        - user.roles
       tags:
         - 'config:field.storage.node.field_category'
         - 'config:field.storage.node.field_keywords'
@@ -930,7 +938,7 @@ display:
         - url.query_args
         - user
         - 'user.node_grants:view'
-        - user.permissions
+        - user.roles
       tags:
         - 'config:field.storage.node.field_category'
         - 'config:field.storage.node.field_keywords'

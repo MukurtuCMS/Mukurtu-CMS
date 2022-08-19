@@ -4,3 +4,8 @@ services:
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info', '@og.access']
     tags:
       - { name: 'event_subscriber' }
+  access_check.user.mukurtu_role:
+    class: Drupal\mukurtu_protocol\Access\MukurtuRoleAccessCheck
+    arguments: ['@og.role_manager', '@og.membership_manager']
+    tags:
+      - { name: access_check, applies_to: _mukurtu_role }
