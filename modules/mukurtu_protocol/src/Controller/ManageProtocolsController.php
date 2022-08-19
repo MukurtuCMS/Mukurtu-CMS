@@ -22,29 +22,41 @@ class ManageProtocolsController extends ControllerBase {
     // Build management Links.
     $links = [];
 
-    $links[] = [
-      '#title' => $this->t('View'),
-      '#type' => 'link',
-      '#url' => Url::fromRoute('entity.protocol.canonical', ['protocol' => $protocol->id()]),
-    ];
+    $access_manager = \Drupal::service('access_manager');
+    if ($access_manager->checkNamedRoute('entity.protocol.canonical', ['protocol' => $protocol->id()])) {
+      $links[] = [
+        '#title' => $this->t('View'),
+        '#type' => 'link',
+        '#url' => Url::fromRoute('entity.protocol.canonical', ['protocol' => $protocol->id()]),
+      ];
+    }
 
-    $links[] = [
-      '#title' => $this->t('Edit'),
-      '#type' => 'link',
-      '#url' => $group->toUrl('edit-form'),
-    ];
+    $editUrl = $group->toUrl('edit-form');
+    if ($editUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('Edit'),
+        '#type' => 'link',
+        '#url' => $editUrl,
+      ];
+    }
 
-    $links[] = [
-      '#title' => $this->t('Manage Members'),
-      '#type' => 'link',
-      '#url' => Url::fromRoute('mukurtu_protocol.protocol_members_list', ['group' => $protocol->id()]),
-    ];
+    $manageUrl = Url::fromRoute('mukurtu_protocol.protocol_members_list', ['group' => $protocol->id()]);
+    if ($manageUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('Manage Members'),
+        '#type' => 'link',
+        '#url' => $manageUrl,
+      ];
+    }
 
-    $links[] = [
-      '#title' => $this->t('Add Member'),
-      '#type' => 'link',
-      '#url' => Url::fromRoute('mukurtu_protocol.protocol_add_membership', ['group' => $protocol->id()]),
-    ];
+    $addMemberUrl = Url::fromRoute('mukurtu_protocol.protocol_add_membership', ['group' => $protocol->id()]);
+    if ($addMemberUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('Add Member'),
+        '#type' => 'link',
+        '#url' => $addMemberUrl,
+      ];
+    }
 
     $membership = $group->getMembership($this->currentUser());
     if ($membership && $membership->hasPermission('administer comments')) {

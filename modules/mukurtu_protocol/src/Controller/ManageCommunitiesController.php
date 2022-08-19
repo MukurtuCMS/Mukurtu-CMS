@@ -44,35 +44,51 @@ class ManageCommunitiesController extends ControllerBase {
 
     // Build management Links.
     $links = [];
-    $links[] = [
-      '#title' => $this->t('View'),
-      '#type' => 'link',
-      '#url' => Url::fromRoute('entity.community.canonical', ['community' => $community->id()]),
-    ];
 
-    $links[] = [
-      '#title' => $this->t('Edit'),
-      '#type' => 'link',
-      '#url' => $group->toUrl('edit-form'),
-    ];
+    $viewUrl = Url::fromRoute('entity.community.canonical', ['community' => $community->id()]);
+    if ($viewUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('View'),
+        '#type' => 'link',
+        '#url' => $viewUrl,
+      ];
+    }
 
-    $links[] = [
-      '#title' => $this->t('Manage Members'),
-      '#type' => 'link',
-      '#url' => Url::fromRoute('mukurtu_protocol.community_members_list', ['group' => $community->id()]),
-    ];
+    $editUrl = $group->toUrl('edit-form');
+    if ($editUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('Edit'),
+        '#type' => 'link',
+        '#url' => $editUrl,
+      ];
+    }
 
-    $links[] = [
-      '#title' => $this->t('Add Member'),
-      '#type' => 'link',
-      '#url' => Url::fromRoute('mukurtu_protocol.community_add_membership', ['group' => $community->id()]),
-    ];
+    $manageMembersUrl = Url::fromRoute('mukurtu_protocol.community_members_list', ['group' => $community->id()]);
+    if ($manageMembersUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('Manage Members'),
+        '#type' => 'link',
+        '#url' => $manageMembersUrl,
+      ];
+    }
 
-    $links[] = [
-      '#title' => $this->t('Add Cultural Protocol'),
-      '#type' => 'link',
-      '#url' => Url::fromRoute('mukurtu_protocol.community_add_protocol', ['community' => $community->id()]),
-    ];
+    $addMemberUrl = Url::fromRoute('mukurtu_protocol.community_add_membership', ['group' => $community->id()]);
+    if ($addMemberUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('Add Member'),
+        '#type' => 'link',
+        '#url' => $addMemberUrl,
+      ];
+    }
+
+    $addProtocolUrl = Url::fromRoute('mukurtu_protocol.community_add_protocol', ['community' => $community->id()]);
+    if ($addProtocolUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('Add Cultural Protocol'),
+        '#type' => 'link',
+        '#url' => $addProtocolUrl,
+      ];
+    }
 
     // Sharing Setting.
     $visibilityMarkup['strict'] = $this->t('Strict: This community is visible to community members only.');

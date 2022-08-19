@@ -28,19 +28,38 @@ class ProtocolListBuilder extends EntityListBuilder {
   /**
    * {@inheritDoc}
    */
-  protected function getDefaultOperations(EntityInterface $entity)
-  {
+  protected function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
-    $operations['members'] = [
-      'title' => $this->t('Manage Members'),
-      'weight' => 100,
-      'url' => Url::fromRoute('mukurtu_protocol.protocol_members_list', ['group' => $entity->id()]),
-    ];
-    $operations['add-member'] = [
-      'title' => $this->t('Add Member'),
-      'weight' => 100,
-      'url' => Url::fromRoute('mukurtu_protocol.protocol_add_membership', ['group' => $entity->id()]),
-    ];
+    $access_manager = \Drupal::service('access_manager');
+
+    if ($access_manager->checkNamedRoute('entity.protocol.canonical', ['protocol' => $entity->id()])) {
+      $operations['view'] = [
+        'title' => $this->t('View'),
+        'weight' => 100,
+        'url' => Url::fromRoute('entity.protocol.canonical', ['protocol' => $entity->id()]),
+      ];
+    }
+    if ($access_manager->checkNamedRoute('mukurtu_protocol.manage_protocol', ['group' => $entity->id()])) {
+      $operations['manage'] = [
+        'title' => $this->t('Manage Protocol'),
+        'weight' => 100,
+        'url' => Url::fromRoute('mukurtu_protocol.manage_protocol', ['group' => $entity->id()]),
+      ];
+    }
+    if ($access_manager->checkNamedRoute('mukurtu_protocol.protocol_members_list', ['group' => $entity->id()])) {
+      $operations['members'] = [
+        'title' => $this->t('Manage Members'),
+        'weight' => 100,
+        'url' => Url::fromRoute('mukurtu_protocol.protocol_members_list', ['group' => $entity->id()]),
+      ];
+    }
+    if ($access_manager->checkNamedRoute('mukurtu_protocol.protocol_add_membership', ['group' => $entity->id()])) {
+      $operations['add-member'] = [
+        'title' => $this->t('Add Member'),
+        'weight' => 100,
+        'url' => Url::fromRoute('mukurtu_protocol.protocol_add_membership', ['group' => $entity->id()]),
+      ];
+    }
     return $operations;
   }
 
@@ -50,13 +69,18 @@ class ProtocolListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     /** @var \Drupal\mukurtu_protocol\Entity\Protocol $entity */
     //$row['id'] = $entity->id();
+    $access_manager = \Drupal::service('access_manager');
 
     // Name.
-    $row['name'] = Link::createFromRoute(
-      $entity->label(),
-      'mukurtu_protocol.manage_protocol',
-      ['group' => $entity->id()]
-    );
+    if ($access_manager->checkNamedRoute('mukurtu_protocol.manage_protocol', ['group' => $entity->id()])) {
+      $row['name'] = Link::createFromRoute(
+        $entity->label(),
+        'mukurtu_protocol.manage_protocol',
+        ['group' => $entity->id()]
+      );
+    } else {
+      $row['name'] = $entity->label();
+    }
 
     // Description.
     $row['description'] = $entity->getDescription();
@@ -64,11 +88,15 @@ class ProtocolListBuilder extends EntityListBuilder {
     // Communities.
     $communities = [];
     foreach ($entity->getCommunities() as $community) {
-      $communities[] = Link::createFromRoute(
-        $community->label(),
-        'mukurtu_protocol.manage_community',
-        ['group' => $community->id()]
-      )->toString()->getGeneratedLink();
+      if ($access_manager->checkNamedRoute('mukurtu_protocol.manage_community', ['group' => $entity->id()])) {
+        $communities[] = Link::createFromRoute(
+          $community->label(),
+          'mukurtu_protocol.manage_community',
+          ['group' => $community->id()]
+        )->toString()->getGeneratedLink();
+      } else {
+        $communities[] = $community->label();
+      }
     }
 
     $row['communities']['data']['#markup'] = implode(', ', $communities);

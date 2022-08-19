@@ -32,10 +32,18 @@ class CommunityListBuilder extends EntityListBuilder {
     $access_manager = \Drupal::service('access_manager');
 
     if ($access_manager->checkNamedRoute('entity.community.canonical', ['community' => $entity->id()])) {
-      $operations['members'] = [
+      $operations['view'] = [
         'title' => $this->t('View'),
         'weight' => 100,
         'url' => Url::fromRoute('entity.community.canonical', ['community' => $entity->id()]),
+      ];
+    }
+
+    if ($access_manager->checkNamedRoute('mukurtu_protocol.manage_community', ['group' => $entity->id()])) {
+      $operations['manage'] = [
+        'title' => $this->t('Manage Community'),
+        'weight' => 100,
+        'url' => Url::fromRoute('mukurtu_protocol.manage_community', ['group' => $entity->id()]),
       ];
     }
 
