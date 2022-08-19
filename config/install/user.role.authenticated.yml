@@ -50,4 +50,5 @@ permissions:
   - 'unflag mukurtu_follow_content'
   - 'view media'
   - 'view published community entities'
+  - 'view published personal collection entities'
   - 'view published protocol control entities'
