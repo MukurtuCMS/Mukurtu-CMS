@@ -9,3 +9,8 @@ services:
     arguments: ['@og.role_manager', '@og.membership_manager']
     tags:
       - { name: access_check, applies_to: _mukurtu_role }
+  access_check.user.mukurtu_permission:
+    class: Drupal\mukurtu_protocol\Access\MukurtuPermissionAccessCheck
+    arguments: ['@og.role_manager', '@og.membership_manager']
+    tags:
+      - { name: access_check, applies_to: _mukurtu_permission }
