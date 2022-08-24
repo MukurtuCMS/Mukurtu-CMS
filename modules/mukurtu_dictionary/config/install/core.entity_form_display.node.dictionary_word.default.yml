@@ -12,13 +12,11 @@ dependencies:
     - field.field.node.dictionary_word.field_related_content
     - field.field.node.dictionary_word.field_thumbnail
     - field.field.node.dictionary_word.field_word_entry
-    - image.style.thumbnail
     - node.type.dictionary_word
   module:
     - comment
     - entity_browser
     - field_group
-    - image
     - media_library
     - mukurtu_protocol
     - paragraphs
@@ -44,9 +42,9 @@ third_party_settings:
         - title
         - field_protocol_control
         - field_language
-        - field_keywords
-        - field_media_assets
         - field_thumbnail
+        - field_media_assets
+        - field_keywords
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -105,7 +103,7 @@ content:
     third_party_settings: {  }
   field_keywords:
     type: entity_reference_autocomplete
-    weight: -4
+    weight: -2
     region: content
     settings:
       match_operator: CONTAINS
@@ -191,12 +189,11 @@ content:
       selection_mode: selection_append
     third_party_settings: {  }
   field_thumbnail:
-    type: image_image
-    weight: -2
+    type: media_library_widget
+    weight: -4
     region: content
     settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
+      media_types: {  }
     third_party_settings: {  }
   field_word_entry:
     type: entity_reference_paragraphs

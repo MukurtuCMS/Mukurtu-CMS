@@ -59,10 +59,11 @@ content:
     weight: 3
     region: content
   field_recording:
-    type: entity_reference_label
+    type: entity_reference_entity_view
     label: above
     settings:
-      link: true
+      view_mode: full
+      link: false
     third_party_settings: {  }
     weight: 4
     region: content
