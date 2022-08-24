@@ -147,13 +147,20 @@ function mukurtu_community_records_invalidate_record_tags(NodeInterface $node) {
   $results = $query->execute();
    if (!empty($results)) {
     // Invalidate all the CR node cache tags.
-    $tags = [];
+    $tags = ['node_view'];
     foreach ($results as $nid) {
       $tags[] = "node:$nid";
     }
 
     Cache::invalidateTags($tags);
   }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function mukurtu_community_records_node_insert(NodeInterface $node) {
+  mukurtu_community_records_invalidate_record_tags($node);
 }
 
 /**
