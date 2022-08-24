@@ -38,6 +38,7 @@ dependencies:
     - comment
     - entity_browser
     - field_group
+    - link
     - media_library
     - mukurtu_core
     - mukurtu_protocol
@@ -124,6 +125,7 @@ third_party_settings:
         - field_identifier
         - field_language
         - field_source
+        - field_external_links
         - field_subject
         - field_transcription
         - field_people
@@ -189,24 +191,25 @@ content:
     third_party_settings: {  }
   field_coverage:
     type: geofield_mukurtu
-    weight: 29
+    weight: 30
     region: content
     settings:
+      geometry_validation: 0
       map:
         leaflet_map: 'OSM Mapnik'
         height: '400'
         locate: '1'
         auto_center: '1'
+        scroll_zoom_enabled: '1'
         map_position:
-          center:
-            lat: '0'
-            lon: '0'
           zoom: '12'
           minZoom: '1'
           maxZoom: '18'
           zoomFiner: '0'
           force: 0
-        scroll_zoom_enabled: '1'
+          center:
+            lat: '0'
+            lon: '0'
       toolbar:
         position: topright
         marker: defaultMarker
@@ -227,7 +230,6 @@ content:
         options: '{"position":"topleft","pseudoFullscreen":false}'
         control: 0
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
-      geometry_validation: 0
       input:
         show: 0
         readonly: 0
@@ -245,7 +247,7 @@ content:
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea
-    weight: 30
+    weight: 31
     region: content
     settings:
       rows: 5
@@ -292,6 +294,14 @@ content:
       summary_rows: 3
       placeholder: ''
       show_summary: false
+    third_party_settings: {  }
+  field_external_links:
+    type: link_default
+    weight: 26
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
     third_party_settings: {  }
   field_format:
     type: entity_reference_autocomplete
@@ -361,7 +371,7 @@ content:
     third_party_settings: {  }
   field_people:
     type: entity_reference_autocomplete
-    weight: 28
+    weight: 29
     region: content
     settings:
       match_operator: CONTAINS
@@ -418,7 +428,7 @@ content:
     third_party_settings: {  }
   field_subject:
     type: entity_reference_autocomplete
-    weight: 26
+    weight: 27
     region: content
     settings:
       match_operator: CONTAINS
@@ -444,7 +454,7 @@ content:
     third_party_settings: {  }
   field_transcription:
     type: string_textarea
-    weight: 27
+    weight: 28
     region: content
     settings:
       rows: 5
@@ -527,7 +537,6 @@ content:
     third_party_settings: {  }
 hidden:
   field_content_type: true
-  field_external_links: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_community: true
