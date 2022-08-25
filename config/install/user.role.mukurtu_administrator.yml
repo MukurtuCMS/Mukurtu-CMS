@@ -146,6 +146,7 @@ permissions:
   - 'administer rest resources'
   - 'administer search_api'
   - 'administer shortcuts'
+  - 'administer site configuration'
   - 'administer taxonomy'
   - 'administer taxonomy_term display'
   - 'administer taxonomy_term fields'
