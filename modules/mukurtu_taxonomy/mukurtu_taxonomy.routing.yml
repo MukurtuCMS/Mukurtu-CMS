@@ -18,7 +18,6 @@ mukurtu_taxonomy.add_page:
     _title: 'Manage Taxonomy Vocabularies'
     _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::addPage'
   requirements:
-    _node_add_access: 'taxonomy_term'
     _permission: 'access taxonomy overview'
 mukurtu_taxonomy.taxonomy_record_settings:
   path: '/admin/config/mukurtu/taxonomy/records'
