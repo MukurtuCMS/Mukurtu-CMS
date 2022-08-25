@@ -68,8 +68,7 @@ class MukurtuDashboardController extends ControllerBase {
     $results = $query->execute();
 
     if (count($results) == 0) {
-      $entityManager = \Drupal::entityTypeManager();
-      $accessControlHandler = $entityManager->getAccessControlHandler('community');
+      $accessControlHandler = $this->entityTypeManager()->getAccessControlHandler('community');
       if ($accessControlHandler->createAccess('community')) {
         $build[] = ['#markup' => '<div class="mukurtu-getting-started mukurtu-getting-started-communities">' . $this->t('Communities are a foundational component of Mukurtu CMS. Get started by creating your first community <a href="@create-community-page">here</a>.', ['@create-community-page' => Url::fromRoute('entity.community.add_form')->toString()]) . '</div>'];
       }
@@ -84,7 +83,7 @@ class MukurtuDashboardController extends ControllerBase {
   public function gettingStartedCategoryContent() {
     $build = [];
 
-    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree('category');
+    $terms = $this->entityTypeManager()->getStorage('taxonomy_term')->loadTree('category');
 
     if (count($terms) == 1 && $terms[0]->name == 'Default') {
       $account = \Drupal::currentUser();
