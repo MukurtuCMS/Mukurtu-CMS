@@ -198,6 +198,7 @@ function mukurtu_core_entity_extra_field_info() {
  */
 function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
   $fields = [];
+
   if ($entity_type->id() == 'node') {
     // Define a computed field for representative media, a single media entity that
     // represents the specific content.
@@ -225,6 +226,16 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setCardinality(-1)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayOptions('view', ['label' => 'hidden']);
+
+    $fields['field_citation'] = BaseFieldDefinition::create('text_long')
+      ->setName('field_citation')
+      ->setLabel(t('Citation'))
+      ->setDescription(t('Citation for the item.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_core\Plugin\Field\CitationItemList')
+      ->setCardinality(1)
+      ->setDisplayConfigurable('view', TRUE)
+      //->setDisplayOptions('view', ['label' => 'hidden']);
   }
 
   return $fields;
