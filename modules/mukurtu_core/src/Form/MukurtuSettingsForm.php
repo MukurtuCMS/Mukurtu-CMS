@@ -68,25 +68,6 @@ class MukurtuSettingsForm extends ConfigFormBase {
       ],
     ];
 
-    $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
-
-    foreach ($bundleInfo as $bundleName => $bundleValue) {
-      $form['citation_templates'][$bundleName] = [
-        '#type' => 'textarea',
-        '#title' => $this->t(ucfirst($bundleName) . ' Citation Template'),
-        '#description' => $this->t('Manage citation template for content type ' . ucfirst($bundleName) . '.'),
-        '#default_value' => $config->get($bundleName) ?? ''
-      ];
-    }
-
-    // Add the token tree UI.
-    $form['token_tree'] = array(
-      '#theme' => 'token_tree_link',
-      '#token_types' => array('user'),
-      '#show_restricted' => TRUE,
-      '#weight' => 90,
-    );
-
     return parent::buildForm($form, $form_state);
   }
 
@@ -94,14 +75,6 @@ class MukurtuSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-
-    $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
-
-    foreach ($bundleInfo as $bundle => $bundleValue) {
-      $this->configFactory->getEditable(static::SETTINGS)
-        ->set($bundle, $form_state->getValue($bundle))
-        ->save();
-    }
 
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('mukurtu_default_image', $form_state->getValue('mukurtu_default_image'))
