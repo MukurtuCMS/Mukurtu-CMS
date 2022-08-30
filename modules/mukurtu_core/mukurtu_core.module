@@ -234,8 +234,8 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setComputed(TRUE)
       ->setClass('Drupal\mukurtu_core\Plugin\Field\CitationItemList')
       ->setCardinality(1)
-      ->setDisplayConfigurable('view', TRUE);
-      //->setDisplayOptions('view', ['label' => 'hidden']);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayOptions('view', ['label' => 'above']);
   }
 
   return $fields;

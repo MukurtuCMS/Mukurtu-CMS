@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_core\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Cache\Cache;
 
 /**
  * Configure Mukurtu core settings for this site.
@@ -73,19 +74,18 @@ class MukurtuSettingsForm extends ConfigFormBase {
     foreach ($bundleInfo as $bundleName => $bundleValue) {
       $form['citation_templates'][$bundleName] = [
         '#type' => 'textarea',
-        '#title' => $this->t(ucfirst($bundleName) . ' Citation Template'),
-        '#description' => $this->t('Manage citation template for content type ' . ucfirst($bundleName) . '.'),
+        '#title' => $this->t($bundleValue['label'] . ' Citation Template'),
+        '#description' => $this->t('Manage citation template for ' . $bundleValue['label'] . '.'),
         '#default_value' => $config->get($bundleName) ?? ''
       ];
     }
 
-    // Add the token tree UI.
-    $form['token_tree'] = array(
+    $form['token_tree'] = [
       '#theme' => 'token_tree_link',
-      '#token_types' => array('user'),
-      '#show_restricted' => TRUE,
+      '#token_types' => ['current-user', 'node'],
+      '#show_restricted' => FALSE,
       '#weight' => 90,
-    );
+    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -108,6 +108,7 @@ class MukurtuSettingsForm extends ConfigFormBase {
       ->set('mukurtu_related_content_display', $form_state->getValue('mukurtu_related_content_display'))
       ->save();
 
+    Cache::invalidateTags(['node_view']);
     parent::submitForm($form, $form_state);
   }
 
