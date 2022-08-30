@@ -49,6 +49,21 @@ class MukurtuPermissionAccessCheck implements AccessInterface {
     $foundPermissions = [];
     $memberships = $this->membershipManager->getMemberships($account->id());
     foreach ($permissions as $permission) {
+      // Site permissions are indicated by a 'site:' prefix.
+      if (substr_compare($permission, 'site:', 0, 5) == 0) {
+        $sitePermission = substr($permission, 5);
+        if ($account->hasPermission($sitePermission)) {
+          if ($conjunction == 'OR') {
+            return AccessResult::allowed();
+          }
+          $foundPermissions[] = $permission;
+          continue;
+        }
+        // Failed the check due to an AND conjunction.
+        return AccessResult::forbidden();
+      }
+
+      // Check OG memberships for OG level permissions.
       foreach ($memberships as $membership) {
         if ($membership->hasPermission($permission)) {
           if ($conjunction == 'OR') {

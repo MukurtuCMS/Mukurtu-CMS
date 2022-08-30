@@ -217,7 +217,7 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title_arguments' => $label->getArguments(),
           '_title_context' => $label->getOption('context'),
         ])
-        ->setRequirement('_mukurtu_permission', 'update group+approve and deny subscription+manage members');
+        ->setRequirement('_mukurtu_permission', 'site:administer site configuration+update group+approve and deny subscription+manage members');
       return $route;
     }
   }
