@@ -24,6 +24,7 @@ dependencies:
     - comment
     - contact
     - contextual
+    - devel
     - embed
     - entity_reference_revisions
     - facets
@@ -64,6 +65,7 @@ is_admin: null
 permissions:
   - 'access administration pages'
   - 'access contextual links'
+  - 'access devel information'
   - 'access files overview'
   - 'access in-place editing'
   - 'access shortcuts'
