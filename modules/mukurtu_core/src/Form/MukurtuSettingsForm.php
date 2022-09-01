@@ -76,8 +76,9 @@ class MukurtuSettingsForm extends ConfigFormBase {
         '#type' => 'textarea',
         '#title' => $this->t($bundleValue['label'] . ' Citation Template'),
         '#description' => $this->t('Manage citation template for ' . $bundleValue['label'] . '.'),
-        '#default_value' => $config->get($bundleName) ?? ''
+        '#default_value' => $config->get($bundleName) ?? '',
       ];
+
     }
 
     $form['token_tree'] = [
@@ -95,12 +96,20 @@ class MukurtuSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
+    $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
+
+    foreach ($bundleInfo as $bundle => $bundleValue) {
+      $this->configFactory->getEditable(static::SETTINGS)
+        ->set($bundle, $form_state->getValue($bundle))
+        ->save();
+    }
+
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('mukurtu_default_image', $form_state->getValue('mukurtu_default_image'))
       ->set('mukurtu_related_content_display', $form_state->getValue('mukurtu_related_content_display'))
       ->save();
 
-    Cache::invalidateTags(['node_view']);
+    //Cache::invalidateTags(['node_view']);
     parent::submitForm($form, $form_state);
   }
 
