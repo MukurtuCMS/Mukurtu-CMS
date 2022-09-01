@@ -59,17 +59,35 @@ class MukurtuPermissionAccessCheck implements AccessInterface {
           $foundPermissions[] = $permission;
           continue;
         }
+
         // Failed the check due to an AND conjunction.
-        return AccessResult::forbidden();
+        if ($conjunction == 'AND') {
+          return AccessResult::forbidden();
+        }
+      }
+
+      $permission_components = explode(':', $permission, 2);
+      $groupType = NULL;
+      $groupPermission = $permission;
+      if (count($permission_components) == 2) {
+        $groupType = $permission_components[0];
+        $groupPermission = $permission_components[1];
       }
 
       // Check OG memberships for OG level permissions.
       foreach ($memberships as $membership) {
-        if ($membership->hasPermission($permission)) {
+
+        // Skip if group bundle type specified and this membership doesn't
+        // belong to that type.
+        if ($groupType && $membership->getGroupBundle() != $groupType) {
+          continue;
+        }
+
+        if ($membership->hasPermission($groupPermission)) {
           if ($conjunction == 'OR') {
             return AccessResult::allowed();
           }
-          $foundPermissions[] = $permission;
+          $foundPermissions[] = $groupPermission;
           break;
         }
       }
