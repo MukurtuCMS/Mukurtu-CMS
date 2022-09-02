@@ -78,12 +78,11 @@ class MukurtuSettingsForm extends ConfigFormBase {
         '#description' => $this->t('Manage citation template for ' . $bundleValue['label'] . '.'),
         '#default_value' => $config->get($bundleName) ?? '',
       ];
-
     }
 
     $form['token_tree'] = [
       '#theme' => 'token_tree_link',
-      '#token_types' => ['current-user', 'node'],
+      '#token_types' => ['user', 'node'],
       '#show_restricted' => FALSE,
       '#weight' => 90,
     ];

@@ -34,7 +34,20 @@ class CitationItemList extends FieldItemList
 
     $tokenService = \Drupal::service("token");
 
-    $citation = $tokenService->replace($targetTemplate);
+    // Token::replace() requires a keyed array of token types.
+    // Some tokens are not replaced by default.
+    $data = [
+      'node' => $entity,
+      'language' => $entity->language(),
+      'random' => $entity,
+    ];
+
+    // Clear tokens that do not have a replacement value.
+    $options = [
+      'clear' => TRUE
+    ];
+
+    $citation = $tokenService->replace($targetTemplate, $data, $options);
 
     $this->list[0] = $this->createItem(0, $citation);
   }
