@@ -227,6 +227,8 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayOptions('view', ['label' => 'hidden']);
 
+    // Computed field for citation.
+    // @see \Drupal\mukurtu_core\Plugin\Field\CitationItemList.
     $fields['field_citation'] = BaseFieldDefinition::create('text_long')
       ->setName('field_citation')
       ->setLabel(t('Citation'))
