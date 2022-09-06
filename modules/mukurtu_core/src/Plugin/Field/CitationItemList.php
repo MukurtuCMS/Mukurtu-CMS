@@ -6,7 +6,7 @@ use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\TypedData\ComputedItemListTrait;
 
 /**
- * TermStatusItemList class to generate a computed field.
+ * CitationItemList class to generate a computed field.
  */
 class CitationItemList extends FieldItemList
 {
@@ -49,6 +49,7 @@ class CitationItemList extends FieldItemList
 
     $citation = $tokenService->replace($targetTemplate, $data, $options);
 
-    $this->list[0] = $this->createItem(0, $citation);
+    $this->list[0] = $this->createItem(0, ['value' => $citation, 'format' => 'basic_html']);
   }
+
 }
