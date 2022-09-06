@@ -226,6 +226,18 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setCardinality(-1)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayOptions('view', ['label' => 'hidden']);
+
+    // Computed field for citation.
+    // @see \Drupal\mukurtu_core\Plugin\Field\CitationItemList.
+    $fields['field_citation'] = BaseFieldDefinition::create('text_long')
+      ->setName('field_citation')
+      ->setLabel(t('Citation'))
+      ->setDescription(t('Citation for the item.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_core\Plugin\Field\CitationItemList')
+      ->setCardinality(1)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayOptions('view', ['label' => 'above']);
   }
 
   return $fields;
