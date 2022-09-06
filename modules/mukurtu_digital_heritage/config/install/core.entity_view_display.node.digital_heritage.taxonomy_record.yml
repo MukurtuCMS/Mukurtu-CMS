@@ -401,6 +401,7 @@ content:
 hidden:
   comment: true
   field_content_type: true
+  field_citation: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true

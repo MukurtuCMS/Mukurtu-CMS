@@ -49,6 +49,7 @@ content:
     region: content
 hidden:
   field_all_related_content: true
+  field_citation: true
   field_in_collection: true
   field_keywords: true
   field_media_assets: true

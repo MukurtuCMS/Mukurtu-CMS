@@ -536,6 +536,7 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
+  field_citation: true
   field_content_type: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true

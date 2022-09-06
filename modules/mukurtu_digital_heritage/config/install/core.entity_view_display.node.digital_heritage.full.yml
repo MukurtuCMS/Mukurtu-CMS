@@ -419,6 +419,7 @@ content:
     weight: 33
     region: content
 hidden:
+  field_citation: true
   field_content_type: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true

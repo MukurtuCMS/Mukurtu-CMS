@@ -71,6 +71,7 @@ content:
 hidden:
   comment: true
   field_all_related_content: true
+  field_citation: true
   field_communities: true
   field_content_type: true
   field_in_collection: true

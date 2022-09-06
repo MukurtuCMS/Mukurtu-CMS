@@ -97,6 +97,7 @@ content:
 hidden:
   comment: true
   field_all_related_content: true
+  field_citation: true
   field_contributor: true
   field_coverage: true
   field_creative_commons: true

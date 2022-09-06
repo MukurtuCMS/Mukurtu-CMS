@@ -63,6 +63,7 @@ content:
 hidden:
   comment: true
   field_all_related_content: true
+  field_citation: true
   field_in_collection: true
   field_in_word_list: true
   field_keywords: true

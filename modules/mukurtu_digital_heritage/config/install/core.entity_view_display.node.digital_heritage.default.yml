@@ -111,6 +111,7 @@ content:
 hidden:
   comment: true
   field_category: true
+  field_citation: true
   field_content_type: true
   field_contributor: true
   field_coverage: true

@@ -29,6 +29,7 @@ hidden:
   body: true
   comment: true
   field_all_related_content: true
+  field_citation: true
   field_communities: true
   field_description: true
   field_in_collection: true
