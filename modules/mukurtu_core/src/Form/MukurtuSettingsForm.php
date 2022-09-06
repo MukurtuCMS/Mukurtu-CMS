@@ -71,6 +71,11 @@ class MukurtuSettingsForm extends ConfigFormBase {
 
     $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
 
+    $form['citation_templates'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Citation Field Templates'),
+    ];
+
     foreach ($bundleInfo as $bundleName => $bundleValue) {
       $form['citation_templates'][$bundleName] = [
         '#type' => 'textarea',
