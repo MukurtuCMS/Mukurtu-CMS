@@ -99,21 +99,24 @@ class MukurtuSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-
+    $config = $this->configFactory->getEditable(static::SETTINGS);
     $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
 
+    // Citation templates.
     foreach ($bundleInfo as $bundle => $bundleValue) {
-      $this->configFactory->getEditable(static::SETTINGS)
-        ->set($bundle, $form_state->getValue($bundle))
-        ->save();
+        $config->set($bundle, $form_state->getValue($bundle));
     }
 
-    $this->configFactory->getEditable(static::SETTINGS)
-      ->set('mukurtu_default_image', $form_state->getValue('mukurtu_default_image'))
-      ->set('mukurtu_related_content_display', $form_state->getValue('mukurtu_related_content_display'))
-      ->save();
+    // Default Image.
+    $config->set('mukurtu_default_image', $form_state->getValue('mukurtu_default_image'));
 
-    //Cache::invalidateTags(['node_view']);
+    // Related content.
+    $config->set('mukurtu_related_content_display', $form_state->getValue('mukurtu_related_content_display'));
+    $config->save();
+
+    // Computed citation field needs the node_view tag invalidated.
+    Cache::invalidateTags(['node_view']);
+
     parent::submitForm($form, $form_state);
   }
 
