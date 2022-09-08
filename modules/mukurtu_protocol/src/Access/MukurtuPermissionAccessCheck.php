@@ -44,7 +44,7 @@ class MukurtuPermissionAccessCheck implements AccessInterface {
     );
   }
 
-  protected function hasMukurtuPermissions(AccountInterface $account, $permissions, $conjunction = 'AND') {
+  public function hasMukurtuPermissions(AccountInterface $account, $permissions, $conjunction = 'AND') {
     // Get the account's community and protocol memberships.
     $foundPermissions = [];
     $memberships = $this->membershipManager->getMemberships($account->id());
