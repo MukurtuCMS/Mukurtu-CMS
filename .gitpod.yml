@@ -9,14 +9,14 @@ tasks:
       cp -R /workspace/web/profiles/mukurtu-cms/.vscode/ /workspace/web
       cp /workspace/web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json /workspace/composer.json
       cd /workspace
-      wget https://dl.xpdfreader.com/xpdf-tools-linux-4.04.tar.gz
-      tar xzf xpdf-tools-linux-4.04.tar.gz
-      sudo cp xpdf-tools-linux-4.04/bin64/pdftotext /usr/local/bin/
-      rm -rf xpdf-tools-linux-4.04
-      rm xpdf-tools-linux-4.04.tar.gz
       ddev config --php-version 7.4 --project-type=drupal9 --docroot=web --create-docroot
       echo "\$settings['file_private_path'] = './private_files';" | tee -a /workspace/web/sites/default/settings.php
       ddev start -y
+      ddev exec wget https://dl.xpdfreader.com/xpdf-tools-linux-4.04.tar.gz
+      ddev exec tar xzf xpdf-tools-linux-4.04.tar.gz
+      ddev exec sudo cp xpdf-tools-linux-4.04/bin64/pdftotext /usr/local/bin/
+      ddev exec rm -rf xpdf-tools-linux-4.04
+      ddev exec rm xpdf-tools-linux-4.04.tar.gz
       echo "Sleeping while we wait for network..."
       sleep 3
       ddev composer install --no-interaction
