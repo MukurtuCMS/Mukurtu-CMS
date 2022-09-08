@@ -1,4 +1,4 @@
-image: drupalpod/drupalpod-gitpod-base:20220322
+image: drupalpod/drupalpod-gitpod-base:latest
 checkoutLocation: "/web/profiles/mukurtu-cms"
 workspaceLocation: "/web"
 
