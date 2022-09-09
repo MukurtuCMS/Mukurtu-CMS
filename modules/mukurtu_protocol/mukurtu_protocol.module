@@ -8,6 +8,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_protocol\Entity\MukurtuUser;
 
 /**
  * @file
@@ -45,6 +46,31 @@ function mukurtu_protocol_field_info_alter(&$info) {
   }
   if (isset($info['comment'])) {
     $info['comment']['list_class'] = '\Drupal\mukurtu_protocol\MukurtuCommentFieldItemList';
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function mukurtu_protocol_entity_bundle_info_alter(array &$bundles) {
+  if (isset($bundles['user']['user'])) {
+    $bundles['user']['user']['class'] = MukurtuUser::class;
+  }
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function mukurtu_protocol_views_data_alter(array &$data) {
+  //dpm(array_keys($data));
+  if (isset($data['users'])) {
+    // Add the current company computed field to Views.
+    $data['users']['communities'] = [
+      'title' => t('Communities'),
+      'field' => [
+        'id' => 'user_community',
+      ],
+    ];
   }
 }
 
