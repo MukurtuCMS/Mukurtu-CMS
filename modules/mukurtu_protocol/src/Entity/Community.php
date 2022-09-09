@@ -2,19 +2,20 @@
 
 namespace Drupal\mukurtu_protocol\Entity;
 
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EditorialContentEntityBase;
-use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\user\UserInterface;
-use Drupal\media\MediaInterface;
+use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\media\MediaInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
-use Drupal\og\Entity\OgRole;
+use Drupal\user\UserInterface;
 
 /**
  * Defines the Community entity.
@@ -397,6 +398,10 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       $membership = Og::createMembership($this, $account);
       $membership->setRoles($ogRoles);
       $membership->save();
+
+      // @todo Do better, repeated too much, factor out.
+      Cache::invalidateTags(["user:{$account->id()}", "user_roles"]);
+      \Drupal::service('cache.render')->invalidateAll();
     }
     return $this;
   }
@@ -409,6 +414,10 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     if ($membership) {
       $membership->delete();
     }
+
+    // @todo Do better, repeated too much, factor out.
+    Cache::invalidateTags(["user:{$account->id()}", "user_roles"]);
+    \Drupal::service('cache.render')->invalidateAll();
 
     return $this;
   }
@@ -431,6 +440,10 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       // Add the roles.
       $membership->setRoles($ogRoles);
       $membership->save();
+
+      // @todo Do better, repeated too much, factor out.
+      Cache::invalidateTags(["user:{$account->id()}", "user_roles"]);
+      \Drupal::service('cache.render')->invalidateAll();
     }
 
     return $this;
