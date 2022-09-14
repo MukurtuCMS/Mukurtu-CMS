@@ -9,6 +9,8 @@ use Drupal\node\NodeInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\Entity\MukurtuUser;
+use Drupal\Component\Utility\Html;
+use Drupal\node\Entity\Node;
 
 /**
  * @file
@@ -391,5 +393,37 @@ function mukurtu_protocol_query_protocol_members_alter(AlterableInterface $query
       // Limit to active memberships only.
       ->condition('og.state', 'active');
     $query->condition($member_conditions);
+  }
+}
+
+/**
+ * Implements hook_field_widget_single_element_WIDGET_TYPE_form_alter().
+ */
+function mukurtu_protocol_field_widget_single_element_entity_browser_entity_reference_form_alter(array &$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context) {
+  $display_type = $context["widget"]->getSetting("field_widget_display");
+
+  // Only supporting these two display modes for entity browser at the moment.
+  if ($display_type !== 'label' && $display_type !== 'rendered_entity') {
+    return;
+  }
+
+  // Provide an id to distinguish inaccessible references from each other.
+  $id = 0;
+  foreach ($element['current']['items'] as $delta => &$item) {
+    // Try to find the entity we are displaying.
+    $entity = NULL;
+    if ($display_type == 'label') {
+      $entity = $element["entity_browser"]["#default_value"][$delta] ?? NULL;
+    }
+    if ($display_type == 'rendered_entity') {
+      $entity = $item["display"]["#node"] ?? NULL;
+    }
+
+    // If the entity is protocol controlled, check if it should be displayed.
+    if ($entity && ProtocolControl::supportsProtocolControl($entity) && !$entity->access('view')) {
+      $id += 1;
+      $item['#attributes']['class'][] = 'inaccessible-reference';
+      $item['display'] = ['#markup' => Html::escape(t("<Inaccessible Reference @id>", ['@id' => $id]))];
+    }
   }
 }
