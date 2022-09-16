@@ -59,10 +59,8 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
   public function build(TermInterface $taxonomy_term) {
     $build = [];
     $allRecords = $this->getTaxonomyTermRecords($taxonomy_term);
-    $results = $this->referencedContent($taxonomy_term);
 
     // Load the entities so we can render them.
-    $entities = !empty($results) ? $this->entityTypeManager->getStorage('node')->loadMultiple($results) : [];
     $entityViewBuilder = $this->entityTypeManager->getViewBuilder('node');
     $langcode = $this->languageManager->getCurrentLanguage()->getId();
 
@@ -79,15 +77,7 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
     }
 
     // Render the referenced entities.
-    $referencedContent = [];
-    if (!empty($entities)) {
-      foreach ($entities as $entity) {
-        $referencedContent[] = $entityViewBuilder->view($entity, 'teaser', $langcode);
-      }
-      $referencedContent[] = [
-        '#type' => 'pager',
-      ];
-    }
+    $referencedContent = \Drupal::formBuilder()->getForm('Drupal\mukurtu_taxonomy\Form\TaxonomyRecordReferencedContentForm', $this->getTaxonomyTermRecords($taxonomy_term), $taxonomy_term);
 
     $build['records'] = [
       '#theme' => 'taxonomy_records',
@@ -142,73 +132,6 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
     $query->accessCheck(TRUE);
     $results = $query->execute();
     return empty($results) ? [] : $this->entityTypeManager->getStorage('node')->loadMultiple($results);
-  }
-
-  /**
-   * Return an array of content IDs for content that references the term or
-   * any of its taxonomy records.
-   */
-  protected function referencedContent(TermInterface $taxonomy_term) {
-    // Get any taxonomy records associated with this term.
-    $records = $this->getTaxonomyTermRecords($taxonomy_term);
-
-    // Get all field definitions for nodes.
-    $fields = $this->entityFieldManager->getActiveFieldStorageDefinitions('node');
-
-    // Build a list of all the fields we should be searching.
-    $searchFields = [];
-
-    // Entity Reference Fields.
-    foreach ($fields as $fieldname => $field) {
-      if ($field->gettype() == 'entity_reference'){
-        // Find all entity reference field references to this taxonomy term.
-        if ($field->getSetting('target_type') == 'taxonomy_term') {
-          $searchFields[] = ['fieldname' => $fieldname, 'value' => $taxonomy_term->id(), 'operator' => NULL];
-        }
-        // Find all entity reference field references to any associated taxonomy records.
-        if ($field->getSetting('target_type') == 'node') {
-          foreach ($records as $record) {
-            $searchFields[] = ['fieldname' => $fieldname, 'value' => $record->id(), 'operator' => NULL];
-          }
-        }
-      }
-    }
-
-    // Text Fields that support embeds. Search for embeds of the record(s).
-    if (count($records) > 0) {
-      foreach ($fields as $fieldname => $field) {
-        if (in_array($field->gettype(), ['text', 'text_long', 'text_with_summary'])) {
-          foreach ($records as $record) {
-            $searchFields[] = ['fieldname' => $fieldname, 'value' => $record->uuid(), 'operator' => 'CONTAINS'];
-          }
-        }
-      }
-    }
-
-    // Return early if there are no supported fields to query.
-    if (count($searchFields) == 0) {
-      return [];
-    }
-
-    // Query all those fields for references to the given media.
-    $contentQuery = $this->entityTypeManager->getStorage('node')->getQuery();
-    $fieldConditions = count($searchFields) == 1 ? $contentQuery->andConditionGroup() : $contentQuery->orConditionGroup();
-
-    // Add all the field conditions.
-    foreach ($searchFields as $fieldCondition) {
-      $fieldConditions->condition($fieldCondition['fieldname'], $fieldCondition['value'], $fieldCondition['operator']);
-    }
-    $contentQuery->condition($fieldConditions);
-
-    // Published only.
-    $contentQuery->condition('status', 1, '=');
-
-    // Page the results.
-    $contentQuery->pager(10);
-
-    // Respect access.
-    $contentQuery->accessCheck(TRUE);
-    return $contentQuery->execute();
   }
 
 }
