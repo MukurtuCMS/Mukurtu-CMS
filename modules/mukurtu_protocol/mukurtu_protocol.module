@@ -423,7 +423,11 @@ function mukurtu_protocol_field_widget_single_element_entity_browser_entity_refe
     if ($entity && ProtocolControl::supportsProtocolControl($entity) && !$entity->access('view')) {
       $id += 1;
       $item['#attributes']['class'][] = 'inaccessible-reference';
-      $item['display'] = ['#markup' => Html::escape(t("<Inaccessible Reference @id>", ['@id' => $id]))];
+
+      $item['display'] = ['#markup' => "<div>" . Html::escape(t("#@id. This @entity_type_label is not available to you.", [
+        '@id' => $id, '@entity_type_label' => lcfirst($entity->getEntityType()->getLabel()),
+      ])) . "</div>"
+      ];
     }
   }
 }
