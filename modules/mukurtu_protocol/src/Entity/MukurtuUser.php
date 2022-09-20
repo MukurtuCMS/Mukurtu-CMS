@@ -2,11 +2,23 @@
 
 namespace Drupal\mukurtu_protocol\Entity;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\user\Entity\User;
 use Drupal\mukurtu_protocol\Entity\MukurtuUserInterface;
 use Drupal\og\Og;
 
-class MukurtuUser extends User implements MukurtuUserInterface{
+class MukurtuUser extends User implements MukurtuUserInterface {
+
+  /**
+   * {@inheritDoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    // Use the account name as the display name by default.
+    if ($this->hasField('field_display_name') && empty($this->get('field_display_name')->getValue())) {
+      $this->set('field_display_name', $this->getAccountName());
+    }
+  }
+
   /**
    * {@inheritDoc}
    */
