@@ -236,6 +236,7 @@ function mukurtu_notifications_node_delete(Node $node) {
  * Implements hook_ENTITY_TYPE_insert().
  */
 function mukurtu_notifications_user_insert($entity) {
+  return;
   // Only want to send notifications for users that
   // require action to be unblocked.
   if ($entity->isActive()) {
