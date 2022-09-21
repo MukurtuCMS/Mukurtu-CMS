@@ -113,15 +113,12 @@ class CommunityManagerUserCreationForm extends FormBase {
     $username = $results['username'];
     $email = $results['email'];
 
-    // TODO: test if we can make a new user now
     $user = User::create();
     $user->setUsername($username);
     $user->setEmail($email);
-    $user->set('message_digest', 'message_digest:daily');
     $user->save();
 
-    // TODO: Test with mailhog (ddev launch -m)
-    //_user_mail_notify('register_admin_created', $newUser);
+    _user_mail_notify('register_admin_created', $user);
 
     $results = $results['table'];
 
@@ -143,7 +140,7 @@ class CommunityManagerUserCreationForm extends FormBase {
       $community = $entityTypeManager->getStorage('community')->load($id);
 
       // Add new user to community with their selected roles.
-      // $community->addMember($user, $roleNames);
+      $community->addMember($user, $roleNames);
     }
   }
 
@@ -153,10 +150,15 @@ class CommunityManagerUserCreationForm extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $username = $form_state->getValue('username');
 
-    // TODO: Test if this works.
-    // $query = \Drupal::entityQuery('user')
-    //   ->condition('name', $username)
-    //   ->execute();
+    $result = \Drupal::entityQuery('user')
+      ->condition('name', $username)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    // Entity query should return nothing.
+    if ($result) {
+      $form_state->setErrorByName('username', t('User already exists with that username.'));
+    }
 
     $emailValidator = \Drupal::service("email.validator");
     $email = $form_state->getValue('email');
@@ -164,8 +166,5 @@ class CommunityManagerUserCreationForm extends FormBase {
     if (!$emailValidator->isValid($email)) {
       $form_state->setErrorByName('email', t('Please enter a valid email address.'));
     }
-
-    return;
   }
-
 }
