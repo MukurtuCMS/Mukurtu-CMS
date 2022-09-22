@@ -42,35 +42,6 @@ function mukurtu_collection_theme($existing, $type, $theme, $path) {
 }
 
 /**
- * Create the sequence collection field.
- */
-function mukurtu_collection_create_sequence_field($entity_type_id, $bundle) {
-  $skip_list = ['collection', 'community', 'protocol'];
-  if (in_array($bundle, $skip_list)) {
-    return;
-  }
-
-  $entityFieldManager = \Drupal::service('entity_field.manager');
-  $fields = $entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
-  if (!isset($fields[MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION])) {
-    FieldConfig::create([
-      'field_name' => MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION,
-      'entity_type' => $entity_type_id,
-      'bundle' => $bundle,
-      'label' => MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION,
-      'description' => '',
-      'required' => FALSE,
-      'settings' => [
-        'handler' => 'default:node',
-        'handler_settings' => [
-          'target_bundles' => ['collection'],
-        ],
-      ],
-    ])->save();
-  }
-}
-
-/**
  * Implements hook_entity_bundle_field_info().
  */
 function mukurtu_collection_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
@@ -91,16 +62,6 @@ function mukurtu_collection_entity_bundle_field_info(EntityTypeInterface $entity
       //      ->setDisplayOptions('view', ['label' => 'above', 'type' => 'entity_reference_label', 'weight' => 3]);
 
     return $fields;
-  }
-}
-
-/**
- * Implements hook_entity_bundle_create().
- */
-function mukurtu_collection_entity_bundle_create($entity_type_id, $bundle) {
-  // For any new node that is defined, add the sequence collection field.
-  if ($entity_type_id == 'node') {
-    mukurtu_collection_create_sequence_field($entity_type_id, $bundle);
   }
 }
 
