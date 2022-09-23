@@ -1,0 +1,10 @@
+entity.multipage_item.settings:
+  title: Multipage Item
+  description: Configure a Multipage Item entity type
+  route_name:  entity.multipage_item.settings
+  parent: system.admin_structure
+entity.multipage_item.collection:
+  title: Multipage Items
+  description: List of multipage items
+  route_name: entity.multipage_item.collection
+  parent: system.admin_content

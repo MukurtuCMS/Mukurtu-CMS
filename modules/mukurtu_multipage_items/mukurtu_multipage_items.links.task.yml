@@ -1,0 +1,22 @@
+entity.multipage_item.settings:
+  title: Settings
+  route_name: entity.multipage_item.settings
+  base_route: entity.multipage_item.settings
+entity.multipage_item.view:
+  title: View
+  route_name: entity.multipage_item.canonical
+  base_route: entity.multipage_item.canonical
+entity.multipage_item.edit_form:
+  title: Edit
+  route_name: entity.multipage_item.edit_form
+  base_route: entity.multipage_item.canonical
+entity.multipage_item.delete_form:
+  title: Delete
+  route_name: entity.multipage_item.delete_form
+  base_route: entity.multipage_item.canonical
+  weight: 10
+entity.multipage_item.collection:
+  title: Multipage Item
+  route_name: entity.multipage_item.collection
+  base_route: system.admin_content
+  weight: 10

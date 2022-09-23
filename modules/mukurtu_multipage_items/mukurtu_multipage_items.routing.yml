@@ -1,0 +1,7 @@
+entity.multipage_item.settings:
+  path: 'admin/structure/multipage-item'
+  defaults:
+    _form: '\Drupal\mukurtu_multipage_items\Form\MultipageItemSettingsForm'
+    _title: 'Multipage Item'
+  requirements:
+    _permission: 'administer multipage item'

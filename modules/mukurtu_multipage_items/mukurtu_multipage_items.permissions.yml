@@ -1,0 +1,5 @@
+administer multipage item:
+  title: 'Administer multipage item settings'
+  restrict access: true
+access multipage item overview:
+  title: 'Access multipage item overview page'

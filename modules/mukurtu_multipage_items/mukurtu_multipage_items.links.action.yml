@@ -1,0 +1,5 @@
+multipage_item.add_form:
+  route_name: entity.multipage_item.add_form
+  title: 'Add multipage item'
+  appears_on:
+    - entity.multipage_item.collection
