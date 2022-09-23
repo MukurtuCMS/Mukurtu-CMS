@@ -116,11 +116,14 @@ class CommunityManagerUserCreationForm extends FormBase {
     $user = User::create();
     $user->setUsername($username);
     $user->setEmail($email);
+    $user->activate();
     $user->save();
 
-    _user_mail_notify('register_admin_created', $user);
+    _user_mail_notify('status_activated', $user);
 
     $results = $results['table'];
+
+    $entityTypeManager = \Drupal::service("entity_type.manager");
 
     // Track communities and roles.
     foreach ($results as $id => $result) {
@@ -133,15 +136,20 @@ class CommunityManagerUserCreationForm extends FormBase {
         foreach ($roles as $name => $label) {
           array_push($roleNames, $name);
         }
+
+        // Load the community entity.
+        $community = $entityTypeManager->getStorage('community')->load($id);
+
+        // Add new user to community with their selected roles.
+        $community->addMember($user, $roleNames);
       }
-
-      // Load the community entity.
-      $entityTypeManager = \Drupal::service("entity_type.manager");
-      $community = $entityTypeManager->getStorage('community')->load($id);
-
-      // Add new user to community with their selected roles.
-      $community->addMember($user, $roleNames);
     }
+
+    $this->messenger()->addMessage($this->t('New user @user has been created. Login instructions were sent to @email.', [
+      '@user' => $username,
+      '@email' => $email,
+    ]));
+
   }
 
   /**

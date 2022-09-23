@@ -6,13 +6,13 @@
 #  requirements:
 #    _permission: 'create community content,edit community content'
 
-mukurtu_protocol.new_user:
-  path: '/dashboard/protocols/{group}/new-user'
+mukurtu_protocol.community_manager_create_user:
+  path: '/dashboard/communities/create-user'
   defaults:
     _form: '\Drupal\mukurtu_protocol\Form\CommunityManagerUserCreationForm'
-    _title: 'Create New User'
+    _title: 'Create User'
   requirements:
-    _permission: 'community:manage members'
+    _mukurtu_permission: 'community:manage members'
 
 mukurtu_protocol.communities_page:
   path: '/communities'
