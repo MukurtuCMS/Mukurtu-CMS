@@ -1,0 +1,15 @@
+{% if pages %}
+<div id="mukurtu-multipage-item-page-nav" {{ page_nav_attributes }}>
+  <ul>
+  {% for page in pages %}
+    <li>{{ page }}</li>
+  {% endfor %}
+  </ul>
+</div>
+{% endif %}
+{% if current_page %}
+<div id="mukurtu-multipage-item-selected-page" {{ current_page_attributes }}>
+  {{ current_page }}
+</div>
+{% endif %}
+

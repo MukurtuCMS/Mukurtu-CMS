@@ -5,3 +5,30 @@ entity.multipage_item.settings:
     _title: 'Multipage Item'
   requirements:
     _permission: 'administer multipage item'
+
+mukurtu_multipage_items.multipage_view:
+  path: '/multi-page/{node}/page/{page}'
+  defaults:
+    _title: 'Example'
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::build'
+  options:
+    parameters:
+      node:
+        type: entity:node
+      page:
+        type: integer
+  requirements:
+    _permission: 'access content'
+
+mukurtu_multipage_items.select_page_ajax:
+  path: '/multipageitem/{multipageitem}/{page}/ajax'
+  defaults:
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::getSelectedPageAjax'
+  requirements:
+    _access: 'TRUE'
+  options:
+    parameters:
+      multipageitem:
+        type: 'entity:multipage_item'
+      page:
+        type: 'entity:node'

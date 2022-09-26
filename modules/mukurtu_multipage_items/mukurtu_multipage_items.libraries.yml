@@ -1,0 +1,7 @@
+multipage-view-nav:
+  version: 1.x
+  js:
+    js/multipage-nav.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once

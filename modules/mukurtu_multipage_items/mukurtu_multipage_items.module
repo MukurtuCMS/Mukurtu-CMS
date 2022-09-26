@@ -15,6 +15,16 @@ function mukurtu_multipage_items_theme() {
     'multipage_item' => [
       'render element' => 'elements',
     ],
+    'multipage_item_book_view' => [
+      'variables' => [
+        'pages' => [],
+        'page_nav_attributes' => NULL,
+        'current_page' => NULL,
+        'current_page_attributes' => NULL,
+/*         'next_page' => NULL,
+        'previous_page' => NULL, */
+      ],
+    ],
   ];
 }
 

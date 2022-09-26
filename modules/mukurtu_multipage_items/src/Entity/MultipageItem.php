@@ -301,7 +301,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
   /**
    * {@inheritdoc}
    */
-  public function setFirstPage($node): MultipageItemInterface {
+  public function setFirstPage(NodeInterface $node): MultipageItemInterface {
     $page_ids = array_column($this->get('field_pages')->getValue(), 'target_id');
 
     // If page is already included, remove it.
@@ -311,6 +311,34 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
     // Stick the requested node on the front of the list.
     $new_refs = array_merge([$node->id()], $page_ids);
     return $this->set('field_pages', $new_refs);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPages($accessCheck = FALSE) {
+    $page_ids = array_column($this->get('field_pages')->getValue(), 'target_id');
+    // Using entity query to do quick access checking.
+    if ($accessCheck) {
+      $query = $this->entityTypeManager()->getStorage('node')->getQuery();
+      $query->condition('nid', $page_ids, 'IN')
+        ->condition('status', 1)
+        ->accessCheck(TRUE);
+      $page_ids = $query->execute();
+    }
+    if (!empty($page_ids)) {
+      return $this->entityTypeManager()->getStorage('node')->loadMultiple($page_ids);
+    }
+
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasPage(NodeInterface $node): bool {
+    $page_ids = array_column($this->get('field_pages')->getValue(), 'target_id');
+    return in_array($node->id(), $page_ids);
   }
 
 }

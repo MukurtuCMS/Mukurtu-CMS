@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\node\NodeInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Provides an interface defining a multipage item entity type.
@@ -86,6 +87,28 @@ interface MultipageItemInterface extends ContentEntityInterface, EntityOwnerInte
    * @return MultipageItemInterface
    *   The multipage entity.
    */
-  public function setFirstPage($node): MultipageItemInterface;
+  public function setFirstPage(NodeInterface $node): MultipageItemInterface;
+
+  /**
+   * Get the pages of the multipage item.
+   *
+   * @param bool $accessCheck
+   *   (optional) TRUE if the results should be filtered for access for the current user.
+   *
+   * @return \Drupal\node\NodeInterface[]
+   *   The page nodes.
+   */
+  public function getPages($accessCheck = FALSE);
+
+  /**
+   * Checks if a node is a page in a multipage item.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node.
+   *
+   * @return bool
+   *   TRUE if the node is a page in the multipage item.
+   */
+  public function hasPage(NodeInterface $node): bool;
 
 }

@@ -84,12 +84,12 @@ class MukurtuBrowseByMapController extends ControllerBase {
       '#teasers' => $teasers,
       '#map' => $map_browse_view_block,
       '#facets' => $facets,
-       '#attached' => [
+      '#attached' => [
         'library' => [
-        //  'leaflet/leaflet',
-        //  'mukurtu_browse/mukurtu-leaflet-markercluster',
-        //  'mukurtu_browse/mukurtu-leaflet-custom-markercluster',
-        //  'mukurtu_browse/mukurtu-leaflet-preview',
+          //  'leaflet/leaflet',
+          //  'mukurtu_browse/mukurtu-leaflet-markercluster',
+          //  'mukurtu_browse/mukurtu-leaflet-custom-markercluster',
+          //  'mukurtu_browse/mukurtu-leaflet-preview',
           'mukurtu_browse/mukurtu-browse-view-switch',
           //'mukurtu_browse/map-browse-bounding-box-query',
           'mukurtu_browse/map-browse-teasers',
