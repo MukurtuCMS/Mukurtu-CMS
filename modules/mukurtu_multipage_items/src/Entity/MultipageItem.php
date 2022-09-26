@@ -292,7 +292,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
     $page_ids = array_column($this->get('field_pages')->getValue(), 'target_id');
     if (!empty($page_ids)) {
       $first = reset($page_ids);
-      return $this->entityTypeManager()->getStorage('multipage_item')->load($first);
+      return $this->entityTypeManager()->getStorage('node')->load($first);
     }
 
     return NULL;
