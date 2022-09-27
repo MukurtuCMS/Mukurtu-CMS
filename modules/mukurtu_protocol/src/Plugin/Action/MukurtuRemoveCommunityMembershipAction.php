@@ -92,7 +92,7 @@ class MukurtuRemoveCommunityMembershipAction extends ViewsBulkOperationsActionBa
   /**
    * {@inheritdoc}
    */
-  public static function customAccess(AccountInterface $account = NULL, ViewExecutable $view) {
+  public static function customAccess(AccountInterface $account, ViewExecutable $view) {
     // Get the OG Memberships for account.
     $memberships = array_filter(Og::getMemberships($account), fn ($m) => $m->getGroupBundle() === 'community');
 
