@@ -36,11 +36,12 @@ mukurtu_protocol.manage_communities:
   expanded: TRUE
 
 mukurtu_protocol.community_manager_create_user:
-  title: 'Community Manager Create User'
-  description: 'Create a new user and assign them to roles and communities.'
+  title: 'Add User'
+  description: 'Add a new user and assign them to roles and communities.'
   parent: mukurtu_protocol.manage_communities
   menu_name: mukurtu
   route_name: mukurtu_protocol.community_manager_create_user
+  weight: -20
 
 mukurtu_protocol.manage_protocols:
   title: 'Cultural Protocols'

@@ -41,7 +41,7 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     foreach ($rolesRaw as $roleKey => $roleValue) {
       if ($roleValue->getName() != "non-member") {
-        $roles[$roleValue->getName()] = t($roleValue->getLabel());
+        $roles[$roleValue->getName()] = $this->t($roleValue->getLabel());
       }
     }
 
@@ -56,19 +56,28 @@ class CommunityManagerUserCreationForm extends FormBase {
       $communities[$community->id()] = $community->getName();
     }
 
+    // Put communities in ascending alphabetical order.
+    asort($communities);
+
     // Build the form.
-    $form['username'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Username'),
-      '#description' => $this->t('Username of the new user.'),
-      '#default_value' => "",
+    $form['info'] = [
+      '#markup' => $this->t("This web page allows administrators to register new users. Users' email addresses and usernames must be unique."),
     ];
 
     $form['email'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Email'),
-      '#description' => $this->t('Email of the new user.'),
+      '#description' => $this->t('A valid email address. All emails from the system will be sent to this address. The email address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by email.'),
       '#default_value' => "",
+      '#required' => TRUE,
+    ];
+
+    $form['username'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Username'),
+      '#description' => $this->t("Several special characters are allowed, including space, period (.), hyphen (-), apostrophe ('), underscore (_), and the @ sign."),
+      '#default_value' => "",
+      '#required' => TRUE,
     ];
 
     $form['table'] = [
@@ -84,7 +93,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     foreach ($communities as $id => $community) {
       $form['table'][$id]['communities'] = [
         '#type' => 'item',
-        '#title' => t($community),
+        '#title' => $this->t($community),
       ];
       $form['table'][$id]['roles'] = [
         '#type' => 'checkboxes',
@@ -98,7 +107,7 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Submit'),
+      '#value' => $this->t('Create new account'),
     ];
 
     return $form;
@@ -145,11 +154,7 @@ class CommunityManagerUserCreationForm extends FormBase {
       }
     }
 
-    $this->messenger()->addMessage($this->t('New user @user has been created. Login instructions were sent to @email.', [
-      '@user' => $username,
-      '@email' => $email,
-    ]));
-
+    $this->messenger()->addMessage($this->t('A welcome message with further instructions has been emailed to the new user <a href=":url">%name</a>.', [':url' => $user->toUrl()->toString(), '%name' => $user->getAccountName()]));
   }
 
   /**
@@ -157,7 +162,9 @@ class CommunityManagerUserCreationForm extends FormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $username = $form_state->getValue('username');
+    $email = $form_state->getValue('email');
 
+    // Check that username is unique.
     $result = \Drupal::entityQuery('user')
       ->condition('name', $username)
       ->accessCheck(FALSE)
@@ -165,14 +172,25 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     // Entity query should return nothing.
     if ($result) {
-      $form_state->setErrorByName('username', t('User already exists with that username.'));
+      $form_state->setErrorByName('username', $this->t('The username @name is already taken.', ['@name' => $username]));
     }
 
+    // Check that email is unique.
+    $result = \Drupal::entityQuery('user')
+      ->condition('mail', $email)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    if ($result) {
+      $form_state->setErrorByName('email', $this->t('The email address @email is already taken.', ['@email' => $email]));
+    }
+
+    // Check that email is valid.
     $emailValidator = \Drupal::service("email.validator");
     $email = $form_state->getValue('email');
 
     if (!$emailValidator->isValid($email)) {
-      $form_state->setErrorByName('email', t('Please enter a valid email address.'));
+      $form_state->setErrorByName('email', $this->t('Please enter an email address.'));
     }
   }
 }
