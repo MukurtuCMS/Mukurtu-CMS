@@ -61,7 +61,7 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     // Build the form.
     $form['info'] = [
-      '#markup' => $this->t("This web page allows administrators to register new users. Users' email addresses and usernames must be unique."),
+      '#markup' => $this->t("This web page allows community administrators to register new users. Users' email addresses and usernames must be unique."),
     ];
 
     $form['email'] = [
