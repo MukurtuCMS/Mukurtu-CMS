@@ -7,6 +7,9 @@
   </ul>
 </div>
 {% endif %}
+{% if table_of_contents %}
+  {{ table_of_contents }}
+{% endif %}
 {% if current_page %}
 <div id="mukurtu-multipage-item-selected-page" {{ current_page_attributes }}>
   {{ current_page }}

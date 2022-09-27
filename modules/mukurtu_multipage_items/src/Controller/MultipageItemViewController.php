@@ -89,18 +89,26 @@ class MultipageItemViewController extends ControllerBase {
   /**
    * Builds the response.
    */
-  public function build($node, $page) {
+  public function build($mpi, $page = NULL) {
     $view_builder = $this->entityTypeManager()->getViewBuilder('node');
-    $mpi = $this->getMultipageEntity($node);
 
     /** @var \Drupal\mukurtu_multipage_items\Entity\MultipageItem $mpi */
-    $current_page = $mpi->getFirstPage();
+    $current_page = $page ?? $mpi->getFirstPage();
     $pages = $mpi->getPages(TRUE);
+    $toc_options = array_map(fn($p) => $p->getTitle(), $pages);
+    $toc = [
+      '#id' => 'multipage-item-table-of-contents',
+      '#type' => 'select',
+      '#title' => $this->t('Jump to page'),
+      '#options' => $toc_options,
+      '#value' => $current_page->id(),
+    ];
 
     return [
       '#theme' => 'multipage_item_book_view',
-      '#pages' => array_map(fn($page) => $view_builder->view($page, 'content_browser'), $pages),
+      '#pages' => array_map(fn($p) => $view_builder->view($p, 'content_browser'), $pages),
       '#page_nav_attributes' => NULL,
+      '#table_of_contents' => $toc,
       '#current_page_attributes' => ['id' => 'current-page'],
       '#current_page' => $view_builder->view($current_page, 'full'),
       '#attached' => [

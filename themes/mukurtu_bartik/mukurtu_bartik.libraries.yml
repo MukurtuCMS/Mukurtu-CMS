@@ -8,3 +8,4 @@ global-styling:
       css/node.css: {}
       css/dashboard.css: {}
       css/collection.css: {}
+      css/multipage.css: {}

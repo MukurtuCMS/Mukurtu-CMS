@@ -17,6 +17,7 @@ function mukurtu_multipage_items_theme() {
     ],
     'multipage_item_book_view' => [
       'variables' => [
+        'table_of_contents' => NULL,
         'pages' => [],
         'page_nav_attributes' => NULL,
         'current_page' => NULL,
