@@ -16,25 +16,32 @@
           return true;
         }
 
-        // On click method to trigger the ajax call to view a specific page.
-        var selectPage = function (event) {
-          let pageId = $(event.currentTarget.children[0]).attr("data-history-node-id");
-          if (loadPage(pageId)) {
-            // Change the TOC if we switched pages successfully.
-            $('#multipage-item-table-of-contents').val(pageId);
-          }
-        };
-
         // TOC On change method to trigger the ajax call to view a specific page.
         var jumpToPage = function (event) {
-          loadPage($('#multipage-item-table-of-contents').val());
+          Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider.go(event.target.selectedIndex);
         };
-
-        // Attach the handler to the page nav.
-        $('#mukurtu-multipage-item-page-nav ul li').once().click(selectPage);
 
         // Attach the table of contents handler.
         $('#multipage-item-table-of-contents').once().change(jumpToPage);
+
+        if (Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider == undefined) {
+          Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider = new Splide('.splide', {
+            perPage: 3,
+            isNavigation: true,
+            pagination: true,
+            updateOnMove: false,
+            trimSpace: false,
+            start: document.getElementById('multipage-item-table-of-contents').selectedIndex,
+          }).mount();
+
+          Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider.on('active', function (slide) {
+            let pageId = $($(slide.slide)[0].children[0]).attr("data-history-node-id");
+            if (loadPage(pageId)) {
+              // Change the TOC if we switched pages successfully.
+              $('#multipage-item-table-of-contents').val(pageId);
+            }
+          });
+        }
       });
     }
   };

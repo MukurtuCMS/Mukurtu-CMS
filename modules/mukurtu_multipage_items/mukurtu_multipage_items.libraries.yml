@@ -5,3 +5,10 @@ multipage-view-nav:
   dependencies:
     - core/jquery
     - core/jquery.once
+splide:
+  version: 4.1.2
+  js:
+    js/splide.min.js: {}
+  css:
+    theme:
+      css/splide.min.css: {}

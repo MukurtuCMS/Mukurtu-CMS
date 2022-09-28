@@ -1,11 +1,13 @@
 {% if pages %}
-<div id="mukurtu-multipage-item-page-nav" {{ page_nav_attributes }}>
-  <ul>
-  {% for page in pages %}
-    <li>{{ page }}</li>
-  {% endfor %}
-  </ul>
-</div>
+<section class="splide" aria-label="Splide Basic HTML Example">
+  <div class="splide__track" id="mukurtu-multipage-item-page-nav" {{ page_nav_attributes }}>
+    <ul class="splide__list">
+    {% for page in pages %}
+      <li class="splide__slide">{{ page }}</li>
+    {% endfor %}
+    </ul>
+  </div>
+</section>
 {% endif %}
 {% if table_of_contents %}
   {{ table_of_contents }}

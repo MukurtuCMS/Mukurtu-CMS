@@ -80,7 +80,7 @@ class MultipageItemViewController extends ControllerBase {
         ],
       ];
 
-      $content['mukurtu_multipage_item_selected_page']['teaser'] = $view_builder->view($page, 'map_browse');
+      $content['mukurtu_multipage_item_selected_page']['teaser'] = $view_builder->view($page, 'full');
       $response->addCommand(new ReplaceCommand('#mukurtu-multipage-item-selected-page', $content));
     }
     return $response;
@@ -112,7 +112,10 @@ class MultipageItemViewController extends ControllerBase {
       '#current_page_attributes' => ['id' => 'current-page'],
       '#current_page' => $view_builder->view($current_page, 'full'),
       '#attached' => [
-        'library' => ['mukurtu_multipage_items/multipage-view-nav'],
+        'library' => [
+          'mukurtu_multipage_items/multipage-view-nav',
+          'mukurtu_multipage_items/splide',
+        ],
       ],
     ];
   }
