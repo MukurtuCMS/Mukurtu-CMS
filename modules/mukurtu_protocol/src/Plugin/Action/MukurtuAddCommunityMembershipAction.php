@@ -76,7 +76,7 @@ class MukurtuAddCommunityMembershipAction extends ViewsBulkOperationsActionBase 
   /**
    * {@inheritdoc}
    */
-  public static function customAccess(AccountInterface $account, ViewExecutable $view) {
+  public static function customAccess(AccountInterface $account, ViewExecutable $view): bool {
     // Get the OG Memberships for account.
     $memberships = array_filter(Og::getMemberships($account), fn ($m) => $m->getGroupBundle() === 'community');
 

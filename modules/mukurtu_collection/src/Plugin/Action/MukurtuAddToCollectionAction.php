@@ -126,7 +126,7 @@ class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase impleme
   /**
    * {@inheritdoc}
    */
-  public static function customAccess(AccountInterface $account = NULL, ViewExecutable $view) {
+  public static function customAccess(AccountInterface $account, ViewExecutable $view): bool {
     return TRUE;
   }
 
