@@ -109,7 +109,6 @@ class MultipageItemViewController extends ControllerBase {
       '#pages' => array_map(fn($p) => $view_builder->view($p, 'content_browser'), $pages),
       '#page_nav_attributes' => NULL,
       '#table_of_contents' => $toc,
-      '#current_page_attributes' => ['id' => 'current-page'],
       '#current_page' => $view_builder->view($current_page, 'full'),
       '#attached' => [
         'library' => [
