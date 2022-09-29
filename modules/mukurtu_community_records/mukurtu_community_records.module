@@ -33,6 +33,16 @@ function mukurtu_community_records_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_entity_type_alter().
+ */
+function mukurtu_community_records_entity_type_alter(array &$entity_types) {
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  $entity_types['node']
+    ->setViewBuilderClass('Drupal\mukurtu_community_records\CommunityRecordNodeViewBuilder');
+}
+
+
+/**
  * Implements hook_node_view().
  *
  * This handles the media replication behavior for original record to
