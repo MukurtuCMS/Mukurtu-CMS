@@ -10,7 +10,7 @@ mukurtu_multipage_items.multipage_view:
   path: '/multi-page/{mpi}/page/{page}'
   defaults:
     _title: 'Example'
-    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::build'
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::view'
   options:
     parameters:
       mpi:
@@ -20,15 +20,25 @@ mukurtu_multipage_items.multipage_view:
   requirements:
     _permission: 'access content'
 
+mukurtu_multipage_items.multipage_node_view:
+  path: '/node/{node}/multipage'
+  defaults:
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::view'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _permission: 'access content'
+    _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::access'
+
 mukurtu_multipage_items.select_page_ajax:
-  path: '/multipageitem/{multipageitem}/{page}/ajax'
+  path: '/multipageitem/{page}/ajax'
   defaults:
     _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::getSelectedPageAjax'
   requirements:
     _access: 'TRUE'
   options:
     parameters:
-      multipageitem:
-        type: 'entity:multipage_item'
       page:
         type: 'entity:node'
