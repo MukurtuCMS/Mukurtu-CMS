@@ -42,3 +42,11 @@ mukurtu_multipage_items.select_page_ajax:
     parameters:
       page:
         type: 'entity:node'
+
+mukurtu_multipage_items.settings:
+  path: 'admin/config/mukurtu/multipage-item'
+  defaults:
+    _form: '\Drupal\mukurtu_multipage_items\Form\MultipageItemConfigForm'
+    _title: 'Multipage Item Config'
+  requirements:
+    _access: 'TRUE'
