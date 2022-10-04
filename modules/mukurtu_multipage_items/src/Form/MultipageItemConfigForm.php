@@ -33,7 +33,8 @@ class MultipageItemConfigForm extends ConfigFormBase
   public function buildForm(array $form, FormStateInterface $form_state)
   {
     $config = $this->config('mukurtu_multipage_items.settings');
-    $checked = array_keys(array_filter($config->get('bundles_config')));
+    $bundle_config = $config->get('bundles_config') ?? [];
+    $checked = array_keys(array_filter($bundle_config));
     $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
     $bundleNames = [];
     $preEnabledBundles = [];
@@ -57,7 +58,7 @@ class MultipageItemConfigForm extends ConfigFormBase
     $form['bundles_config'] = [
       '#type' => 'checkboxes',
       '#options' => $options,
-      '#title' => $this->t('Enable bundles for multipage items:'),
+      '#title' => $this->t('Enable content types for multipage items'),
       '#default_value' => $checked,
     ];
 
