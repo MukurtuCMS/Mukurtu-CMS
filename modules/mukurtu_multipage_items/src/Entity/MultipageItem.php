@@ -324,7 +324,11 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
       $query->condition('nid', $page_ids, 'IN')
         ->condition('status', 1)
         ->accessCheck(TRUE);
-      $page_ids = $query->execute();
+      $allowed_page_ids = $query->execute();
+      $denied = array_diff($page_ids, $allowed_page_ids);
+      foreach($denied as $k => $d) {
+        unset($page_ids[$k]);
+      }
     }
     if (!empty($page_ids)) {
       return $this->entityTypeManager()->getStorage('node')->loadMultiple($page_ids);
