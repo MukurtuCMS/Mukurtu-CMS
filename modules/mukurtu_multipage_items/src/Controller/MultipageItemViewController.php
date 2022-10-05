@@ -2,15 +2,17 @@
 
 namespace Drupal\mukurtu_multipage_items\Controller;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Session\AccountInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\node\NodeInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\mukurtu_multipage_items\MultipageItemInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Returns responses for Mukurtu Multipage Items routes.
@@ -61,17 +63,47 @@ class MultipageItemViewController extends ControllerBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('current_user'),
-      $container->get('config.factory')
+      $container->get('config.factory'),
     );
   }
 
-  protected function getMultipageEntity($node) {
-    return $this->entityTypeManager()->getStorage('multipage_item')->load(1);
+  public function viewRedirect(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
+    $config = $this->configFactory->get('mukurtu_multipage_items.settings');
+    $controllerString = $config->get('_controller');
+    list($controllerClass, $controllerMethod) = explode('::', $controllerString, 2);
+    $originalController = $controllerClass::create(\Drupal::getContainer());
+
+    $mpi = $this->getMultipageEntity($node);
+
+    // This conditional looks like a mistake but be careful,
+    // it's intentionally crafted to avoid a redirect loop with ::view.
+    if ($mpi && $mpi->access('view') && $this->access($this->currentUser(), $node)->isAllowed()) {
+      // Redirect to the multipage view.
+      $url = Url::fromRoute('mukurtu_multipage_items.multipage_node_view', ['node' => $node->id()]);
+      return new RedirectResponse($url->toString());
+    }
+
+    // Fail back to original view controller.
+    return $originalController->{$controllerMethod}($node, $view_mode, $langcode);
   }
 
-  public function getSelectedPageAjax(MultipageItemInterface $multipageitem, NodeInterface $page) {
+  protected function getMultipageEntity($node) {
+    $query = $this->entityTypeManager()->getStorage('multipage_item')->getQuery();
+    $result = $query->condition('field_pages', $node->id())
+      ->accessCheck(TRUE)
+      ->execute();
+    if (count($result) == 1) {
+      $mpiId = reset($result);
+      return $this->entityTypeManager()->getStorage('multipage_item')->load($mpiId);
+    }
+    return NULL;
+  }
+
+  public function getSelectedPageAjax(NodeInterface $page) {
+    /** @var \Drupal\mukurtu_multipage_items\MultipageItemInterface $multipageitem */
+    $multipageitem = $this->getMultipageEntity($page);
     $response = new AjaxResponse();
-    if ($multipageitem->hasPage($page) && $page->access('view')) {
+    if ($multipageitem && $multipageitem->hasPage($page) && $page->access('view')) {
       $view_builder = $this->entityTypeManager()->getViewBuilder('node');
       $content['mukurtu_multipage_item_selected_page'] = [
         '#type' => 'container',
@@ -87,13 +119,39 @@ class MultipageItemViewController extends ControllerBase {
   }
 
   /**
+   * Custom access for build route.
+   *
+   * @param AccountInterface $account
+   *   The account to check access for.
+   * @param NodeInterface $node
+   *   The page node to view.
+   *
+   * @return \Drupal\Core\Access\AccessResult
+   *   The access result.
+   */
+  public function access(AccountInterface $account, NodeInterface $node) {
+    // Only checking for access to the page. We want to keep the MPI URL
+    // durable (e.g., /node/{node}/multipage) even if the MPI gets deleted.
+    // If a user has access to the page but not the MPI we will redirect them
+    // in the view method to the node's canonical route.
+    return $node->access('view', $account, TRUE);
+  }
+
+  /**
    * Builds the response.
    */
-  public function build($mpi, $page = NULL) {
+  public function view(NodeInterface $node) {
+    $mpi = $this->getMultipageEntity($node);
     $view_builder = $this->entityTypeManager()->getViewBuilder('node');
 
+    // Redirect back to the single node if user can't see the MPI.
+    if (!$mpi || !$mpi->access('view')) {
+      $url = Url::fromRoute('entity.node.canonical', ['node' => $node->id()]);
+      return new RedirectResponse($url->toString());
+    }
+
     /** @var \Drupal\mukurtu_multipage_items\Entity\MultipageItem $mpi */
-    $current_page = $page ?? $mpi->getFirstPage();
+    $current_page = $node ?? $mpi->getFirstPage();
     $pages = $mpi->getPages(TRUE);
     $toc_options = array_map(fn($p) => $p->getTitle(), $pages);
     $toc = [

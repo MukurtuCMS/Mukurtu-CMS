@@ -1,0 +1,5 @@
+services:
+  mukurtu_multipage_items.route_subscriber:
+    class: Drupal\mukurtu_multipage_items\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -3,13 +3,15 @@
     attach: function (context, settings) {
       $(document).ready(function () {
         function loadPage(pageId) {
-          let url = document.URL;
-          let urlComponents = url.split('/');
-          let mpiId = urlComponents[urlComponents.length - 3];
           try {
-            Drupal.ajax({ url: `/multipageitem/${mpiId}/${pageId}/ajax` }).execute();
-            urlComponents[urlComponents.length - 1] = pageId;
-            window.history.replaceState({}, '', urlComponents.join('/'));
+            Drupal.ajax({ url: `/multipageitem/${pageId}/ajax` }).execute();
+            let nodeUrl = $('.splide__slide.is-active > .node').attr('about');
+
+            let newUrl = "/node/" + pageId;
+            if (nodeUrl != undefined) {
+              newUrl = nodeUrl;
+            }
+            window.history.replaceState({}, '', newUrl);
           } catch (error) {
             return false;
           }
@@ -35,7 +37,7 @@
           }).mount();
 
           Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider.on('active', function (slide) {
-            let pageId = $($(slide.slide)[0].children[0]).attr("data-history-node-id");
+            let pageId = slide.slide.firstElementChild.attributes["data-history-node-id"].value;
             if (loadPage(pageId)) {
               // Change the TOC if we switched pages successfully.
               $('#multipage-item-table-of-contents').val(pageId);
