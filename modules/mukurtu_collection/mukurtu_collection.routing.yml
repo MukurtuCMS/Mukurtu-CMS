@@ -1,56 +1,56 @@
-mukurtu_collection.add_page:
-  path: '/node/{node}/multipage/add-page'
-  defaults:
-    _title: 'Create a new page'
-    _controller: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionAddPageController::content'
-  options:
-    parameters:
-      node:
-        type: entity:node
-  requirements:
-    _custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionAddPageController::access'
-    _permission: 'create content'
-mukurtu_collection.add_page_by_bundle:
-  path: '/node/{node}/multipage/add-page/{bundle}'
-  defaults:
-    _title: 'Create a new page'
-    _controller: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionAddPageController::contentByBundle'
-  options:
-    parameters:
-      node:
-        type: entity:node
-      bundle:
-        type: bundle
-  requirements:
-    _custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionAddPageController::access'
-    _permission: 'create content'
-mukurtu_collection.create_multipage:
-  path: '/node/{node}/multipage/create'
-  defaults:
-    _title: 'Create a Multipage Collection'
-    _controller: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionCreateMultipageController::content'
-  options:
-    parameters:
-      node:
-        type: entity:node
-      bundle:
-        type: bundle
-  requirements:
-    _custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionCreateMultipageController::access'
-    _permission: 'create content'
-mukurtu_collection.edit_index:
-  path: '/node/{node}/multipage/edit'
-  defaults:
-    _title: 'Edit Multipage Index'
-    _controller: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionEditIndexController::content'
-  options:
-    parameters:
-      node:
-        type: entity:node
-  requirements:
-    _custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionEditIndexController::access'
-    _entity_access: node.update
-    _permission: 'access content'
+#mukurtu_collection.add_page:
+  #path: '/node/{node}/multipage/add-page'
+  #defaults:
+    #_title: 'Create a new page'
+    #_controller: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionAddPageController::content'
+  #options:
+    #parameters:
+      #node:
+        #type: entity:node
+  #requirements:
+    #_custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionAddPageController::access'
+    #_permission: 'create content'
+#mukurtu_collection.add_page_by_bundle:
+  #path: '/node/{node}/multipage/add-page/{bundle}'
+  #defaults:
+    #_title: 'Create a new page'
+    #_controller: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionAddPageController::contentByBundle'
+  #options:
+    #parameters:
+      #node:
+        #type: entity:node
+      #bundle:
+        #type: bundle
+  #requirements:
+    #_custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionAddPageController::access'
+    #_permission: 'create content'
+#mukurtu_collection.create_multipage:
+  #path: '/node/{node}/multipage/create'
+  #defaults:
+    #_title: 'Create a Multipage Collection'
+    #_controller: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionCreateMultipageController::content'
+  #options:
+    #parameters:
+      #node:
+        #type: entity:node
+      #bundle:
+        #type: bundle
+  #requirements:
+    #_custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionCreateMultipageController::access'
+    #_permission: 'create content'
+#mukurtu_collection.edit_index:
+  #path: '/node/{node}/multipage/edit'
+  #defaults:
+    #_title: 'Edit Multipage Index'
+    #_controller: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionEditIndexController::content'
+  #options:
+    #parameters:
+      #node:
+        #type: entity:node
+  #requirements:
+    #_custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuCollectionEditIndexController::access'
+    #_entity_access: node.update
+    #_permission: 'access content'
 mukurtu_collection.collection_browse_page:
   path: '/collections'
   defaults:
