@@ -1,0 +1,7 @@
+name: Seven - Mukurtu
+type: theme
+description: Mukurtu temporary admin theme.
+core_version_requirement: ^8 || ^9 || ^10
+base theme: seven
+libraries:
+  - mukurtu_seven/global-styling

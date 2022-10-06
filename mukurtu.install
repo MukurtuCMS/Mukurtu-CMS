@@ -27,11 +27,12 @@ function mukurtu_install() {
   // Rebuild node access permissions.
   node_access_rebuild();
 
-  // Install and default to our testing bartik subtheme for now.
-  \Drupal::service('theme_installer')->install(['mukurtu_bartik']);
+  // Install and default to our testing themes for now.
+  \Drupal::service('theme_installer')->install(['mukurtu_bartik', 'mukurtu_seven']);
   \Drupal::configFactory()
     ->getEditable('system.theme')
     ->set('default', 'mukurtu_bartik')
+    ->set('admin', 'mukurtu_seven')
     ->save();
 
   // Delete unused user flags that crash user registration page.
