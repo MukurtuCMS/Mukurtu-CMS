@@ -24,7 +24,35 @@ Mukurtu CMS v4 is extremely unstable and under active development. If you wish t
 ## Quick start for Personal Testing & Evaluation
 There are two easy methods to create a local installation of Mukurtu CMS:
 ### DDEV
-Mukurtu CMS can be installed easily using [DDEV](https://ddev.com/). Simply follow their [Drupal 9 instructions](https://ddev.readthedocs.io/en/stable/users/quickstart/#drupal) but substitute the `composer.json` file from our [Mukurtu CMS project template](https://github.com/MukurtuCMS/Mukurtu-CMS-v4-Project-Template).
+Mukurtu CMS can be installed locally using [DDEV](https://ddev.com/).
+* Download and install [DDEV](https://github.com/drud/ddev)
+* Create and navigate to a new folder (e.g., 'mukurtu'):
+```
+mkdir mukurtu && cd mukurtu
+```
+* Download the composer.json file from our [Mukurtu CMS project template](https://github.com/MukurtuCMS/Mukurtu-CMS-v4-Project-Template):
+```
+wget https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS-v4-Project-Template/main/composer.json
+```
+* Initialize the ddev project for Drupal 9:
+```
+ddev config --project-type=drupal9 --docroot=web --create-docroot
+```
+* Start ddev:
+```
+ddev start
+```
+* Run composer install:
+```
+ddev composer install
+```
+* You may be prompted to add your GitHub token. Follow the on-screen instructions for public repositories.
+* Launch your new ddev project:
+```
+ddev launch
+```
+* You should now see the standard Drupal 9 installer, configured to use the Mukurtu installation profile
+* Default admin credentials are admin/admin
 
 ### Gitpod
 Mukurtu CMS is configured to work with [Gitpod](https://www.gitpod.io/), a cloud based development environment.
