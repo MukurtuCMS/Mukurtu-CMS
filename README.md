@@ -38,6 +38,7 @@ wget https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS-v4-Project-Templat
 ```
 ddev config --project-type=drupal9 --docroot=web --create-docroot
 ```
+* Configure Drupal's `file_private_path` setting by creating a folder (outside of `/web`) and editing `sites/default/settings.php` and setting it to the absolute path of your new private folder.
 * Start ddev:
 ```
 ddev start
