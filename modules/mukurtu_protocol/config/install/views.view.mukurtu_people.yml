@@ -85,6 +85,10 @@ display:
               action_id: mukurtu_remove_community_membership_action
             5:
               action_id: mukurtu_add_community_membership_action
+            6:
+              action_id: mukurtu_remove_protocol_membership_action
+            7:
+              action_id: mukurtu_add_protocol_membership_action
         name:
           id: name
           table: users_field_data
