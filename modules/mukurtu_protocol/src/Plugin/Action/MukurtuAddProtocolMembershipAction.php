@@ -17,7 +17,7 @@ use Drupal\views\ViewExecutable;
  *
  * @Action(
  *   id = "mukurtu_add_protocol_membership_action",
- *   label = @Translation("Add user(s) to a protocol"),
+ *   label = @Translation("Add user(s) to a cultural protocol"),
  *   type = "user",
  *   confirm = TRUE,
  *   requirements = {
@@ -48,7 +48,7 @@ class MukurtuAddProtocolMembershipAction extends ViewsBulkOperationsActionBase i
     // Set membership and roles.
     $protocol->addMember($entity, array_keys(array_filter($this->configuration['roles'])));
 
-    return $this->t('Added user @user to protocol @protocol', ['@user' => $entity->getDisplayName(), '@protocol' => $protocol->getName()]);
+    return $this->t('Added user @user to cultural protocol @protocol', ['@user' => $entity->getDisplayName(), '@protocol' => $protocol->getName()]);
   }
 
   /**
@@ -135,8 +135,8 @@ class MukurtuAddProtocolMembershipAction extends ViewsBulkOperationsActionBase i
     }
 
     $form['protocol'] = [
-      '#title' => t('Protocol'),
-      '#description' => t('Select which protocol you want to alter membership & roles for.'),
+      '#title' => t('Cultural Protocol'),
+      '#description' => t('Select which cultural protocol you want to alter membership & roles for.'),
       '#type' => 'select',
       '#required' => TRUE,
       '#options' => $protocols,

@@ -17,7 +17,7 @@ use Drupal\views\ViewExecutable;
  *
  * @Action(
  *   id = "mukurtu_remove_protocol_membership_action",
- *   label = @Translation("Remove user(s) from a protocol"),
+ *   label = @Translation("Remove user(s) from a cultural protocol"),
  *   type = "user",
  *   confirm = TRUE,
  *   requirements = {
@@ -48,7 +48,7 @@ class MukurtuRemoveProtocolMembershipAction extends ViewsBulkOperationsActionBas
     // Set membership and roles.
     $protocol->removeMember($entity);
 
-    return $this->t('Removed user @user from protocol @protocol', ['@user' => $entity->getDisplayName(), '@protocol' => $protocol->getName()]);
+    return $this->t('Removed user @user from cultural protocol @protocol', ['@user' => $entity->getDisplayName(), '@protocol' => $protocol->getName()]);
   }
 
   /**
@@ -121,8 +121,8 @@ class MukurtuRemoveProtocolMembershipAction extends ViewsBulkOperationsActionBas
     }
 
     $form['protocol'] = [
-      '#title' => t('Protocol'),
-      '#description' => t('Select which protocol you want to alter membership & roles for.'),
+      '#title' => t('Cultural Protocol'),
+      '#description' => t('Select which cultural protocol you want to alter membership & roles for.'),
       '#type' => 'select',
       '#required' => TRUE,
       '#options' => $protocols,
