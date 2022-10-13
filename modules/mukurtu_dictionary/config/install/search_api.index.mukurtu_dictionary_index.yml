@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.storage.node.field_glossary_entry
     - field.storage.node.field_keywords
     - search_api.server.mukurtu_database_server
   module:
@@ -14,13 +15,14 @@ name: 'Mukurtu Dictionary Index'
 description: 'Index for the Mukurtu dictionary.'
 read_only: false
 field_settings:
-  glossaryaz_title:
-    label: 'Glossary AZ - Content » Title'
-    property_path: glossaryaz_title
+  field_glossary_entry:
+    label: 'Glossary Entry'
+    datasource_id: 'entity:node'
+    property_path: field_glossary_entry
     type: string
-    indexed_locked: true
-    type_locked: true
-    hidden: true
+    dependencies:
+      config:
+        - field.storage.node.field_glossary_entry
   keyword:
     label: 'Keywords » Taxonomy term » Name'
     datasource_id: 'entity:node'
@@ -143,7 +145,7 @@ processor_settings:
       preprocess_query: -20
     all_fields: true
     fields:
-      - glossaryaz_title
+      - field_glossary_entry
       - keyword
       - title
       - type
