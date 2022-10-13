@@ -32,7 +32,7 @@ class MukurtuDictionaryController extends ControllerBase {
         if ($block_plugin) {
           $access_result = $block_plugin->access(\Drupal::currentUser());
           if ($access_result) {
-            if ($facet_id == 'glossary_title') {
+            if ($facet_id == 'glossary_entry') {
               $glossary = $block_plugin->build();
             }
             else {
@@ -50,5 +50,4 @@ class MukurtuDictionaryController extends ControllerBase {
       '#glossary' => $glossary,
     ];
   }
-
 }

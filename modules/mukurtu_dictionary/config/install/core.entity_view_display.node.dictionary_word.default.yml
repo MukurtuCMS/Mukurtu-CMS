@@ -4,6 +4,7 @@ dependencies:
   config:
     - field.field.node.dictionary_word.comment
     - field.field.node.dictionary_word.field_content_type
+    - field.field.node.dictionary_word.field_glossary_entry
     - field.field.node.dictionary_word.field_keywords
     - field.field.node.dictionary_word.field_language
     - field.field.node.dictionary_word.field_media_assets
@@ -13,21 +14,29 @@ dependencies:
     - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
+    - blazy
     - entity_reference_revisions
-    - image
     - user
 id: node.dictionary_word.default
 targetEntityType: node
 bundle: dictionary_word
 mode: default
 content:
+  field_glossary_entry:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_in_word_list:
     type: entity_reference_label
     label: above
     settings:
       link: true
     third_party_settings: {  }
-    weight: 5
+    weight: 6
     region: content
   field_keywords:
     type: entity_reference_label
@@ -35,7 +44,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 4
+    weight: 5
     region: content
   field_language:
     type: entity_reference_label
@@ -43,14 +52,41 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 3
+    weight: 4
     region: content
   field_thumbnail:
-    type: image
+    type: blazy_media
     label: above
     settings:
-      image_link: ''
+      caption: {  }
+      class: ''
+      id: ''
+      image: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      layout: ''
+      view_mode: ''
+      cache: 0
+      skin: ''
+      lazy: ''
+      style: ''
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      loading: lazy
+      preload: false
+      responsive_image_style: ''
+      box_style: ''
       image_style: ''
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      grid: ''
+      grid_medium: ''
+      grid_small: ''
     third_party_settings: {  }
     weight: 1
     region: content
@@ -66,7 +102,7 @@ content:
       view_mode: default
       link: ''
     third_party_settings: {  }
-    weight: 2
+    weight: 3
     region: content
 hidden:
   comment: true
