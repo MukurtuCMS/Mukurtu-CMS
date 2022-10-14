@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: image_with_description
+label: 'Image with Description'
+revision: 0
+description: ''

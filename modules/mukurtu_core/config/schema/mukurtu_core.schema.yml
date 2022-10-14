@@ -560,3 +560,11 @@ field.formatter.settings.mukurtu_leaflet_formatter:
             options:
               type: string
               label: 'Options'
+
+block.settings.mukurtu_core_example:
+  type: block_settings
+  label: 'Example block'
+  mapping:
+    foo:
+      type: string
+      label: Foo

@@ -5,7 +5,7 @@
  * Install, update and uninstall functions for the mukurtu_core module.
  */
 
- use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Implements hook_install().

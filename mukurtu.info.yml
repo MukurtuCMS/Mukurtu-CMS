@@ -97,6 +97,7 @@ dependencies:
 themes:
   - bartik
   - seven
+  - mukurtu_bartik
 
 
 version: '8.x-1.x-dev'

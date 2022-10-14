@@ -79,3 +79,11 @@ mukurtu_core.media_found_in:
         type: entity:media
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MediaFoundInController::access'
+
+mukurtu_core.front_page:
+  path: '/home'
+  defaults:
+    _title: ''
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuFrontPageController::build'
+  requirements:
+    _access: 'TRUE'

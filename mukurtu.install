@@ -5,6 +5,9 @@
  * Install, update and uninstall functions for the mukurtu install profile.
  */
 
+use Drupal\block\Entity\Block;
+use Drupal\block_content\Entity\BlockContent;
+
 /**
  * Implements hook_install().
  *
@@ -35,6 +38,74 @@ function mukurtu_install() {
     ->set('admin', 'mukurtu_seven')
     ->save();
 
+  // Add default blocks.
+  // Hero Image for the front page.
+  $block_content = BlockContent::create([
+    'type' => 'image_with_description',
+    'info' => t('Hero Image and Site Description'),
+    'region' => 'content',
+    'weight' => 2,
+    'theme' => 'mukurtu_bartik',
+  ]);
+  $block_content->save();
+  $block = Block::create([
+    'id' => 'hero_image_and_site_description',
+    'settings' => [
+      'id' => 'block_content:' . $block_content->uuid(),
+      'label' => t('Hero Image and Site Description'),
+      'label_display' => 0,
+      'provider' => 'block_content',
+      'status' => 1,
+    ],
+    'region' => 'content',
+    'plugin' => 'block_content:' . $block_content->uuid(),
+    'theme' => 'mukurtu_bartik',
+  ]);
+  $block->save();
+  $block = Block::load('hero_image_and_site_description');
+  $block->setRegion('content');
+  $visibility = $block->getVisibility();
+  $visibility['request_path']['pages'] = '<front>';
+  $block->setVisibilityConfig('request_path', $visibility['request_path']);
+  $block->setRegion('content');
+  $block->setStatus(TRUE);
+  $block->setWeight(-4);
+  $block->save();
+
+  // Featured Content for the front page.
+  $block_content = BlockContent::create([
+    'type' => 'featured_content',
+    'info' => t('Front Page Featured Content'),
+    'region' => 'content',
+    'weight' => 3,
+    'theme' => 'mukurtu_bartik',
+  ]);
+  $block_content->save();
+  $block = Block::create([
+    'id' => 'front_page_featured_content',
+    'settings' => [
+      'id' => 'block_content:' . $block_content->uuid(),
+      'label' => t('Featured Content'),
+      'label_display' => 1,
+      'provider' => 'block_content',
+      'status' => 1,
+    ],
+    'region' => 'content',
+    'plugin' => 'block_content:' . $block_content->uuid(),
+    'theme' => 'mukurtu_bartik',
+  ]);
+  $block->save();
+  $block = Block::load('front_page_featured_content');
+  $block->setRegion('content');
+  $visibility = $block->getVisibility();
+  $visibility['request_path']['pages'] = '<front>';
+  $block->setVisibilityConfig('request_path', $visibility['request_path']);
+  $block->setRegion('content');
+  $block->setStatus(TRUE);
+  $block->setWeight(-3);
+  $block->save();
+
+
   // Delete unused user flags that crash user registration page.
   $flagStorage = \Drupal::entityTypeManager()->getStorage('flag');
   foreach (['email_user', 'subscribe_user'] as $userFlagID) {
@@ -42,6 +113,40 @@ function mukurtu_install() {
     if ($flag) {
       $flag->delete();
     }
+  }
+
+  function mukurtu_create_default_blocks() {
+    $block_content = BlockContent::create([
+      'type' => 'image_with_description',
+      'info' => t('Hero Image and Site Description'),
+      'region' => 'content',
+      'weight' => 2,
+      'theme' => 'mukurtu_bartik',
+    ]);
+    $block_content->save();
+    $block = Block::create([
+      'id' => 'heroimageandsitedescription',
+      'settings' => [
+        'id' => 'block_content:' . $block_content->uuid(),
+        'label' => t('Hero Image and Site Description'),
+        'label_display' => 0,
+        'provider' => 'block_content',
+        'status' => 1,
+      ],
+      'region' => 'content',
+      'plugin' => 'block_content:' . $block_content->uuid(),
+      'theme' => 'mukurtu_bartik',
+      'weight' => 4,
+    ]);
+    $block->setRegion('content');
+    $visibility = $block->getVisibility();
+    $visibility['request_path']['pages'] = '<front>';
+    $block->setVisibilityConfig('request_path', $visibility['request_path']);
+    $block = Block::load('heroimageandsitedescription');
+    $block->setRegion('content');
+    $block->setStatus(TRUE);
+    $block->setWeight(4);
+    $block->save();
   }
 
 }
