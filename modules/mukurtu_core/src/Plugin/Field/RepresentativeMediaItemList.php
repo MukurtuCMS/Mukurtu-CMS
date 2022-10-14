@@ -28,10 +28,15 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
     foreach ($media_fields as $media_field) {
       if ($entity->hasField($media_field)) {
         foreach ($entity->{$media_field} as $media_ref) {
-          $media = \Drupal::entityTypeManager()->getStorage('media')->load($media_ref->target_id);
-          if ($media->access('view', $user)) {
-            $this->list[0] = $this->createItem(0, $media->id());
-            return;
+          if ($media_ref) {
+            $target = $media_ref->getValue()['target_id'] ?? NULL;
+            if ($target) {
+              $media = \Drupal::entityTypeManager()->getStorage('media')->load($media_ref->target_id);
+              if ($media && $media->access('view', $user)) {
+                $this->list[0] = $this->createItem(0, $media->id());
+                return;
+              }
+            }
           }
         }
       }
