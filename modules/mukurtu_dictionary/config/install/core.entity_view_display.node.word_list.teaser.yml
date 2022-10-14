@@ -23,9 +23,17 @@ targetEntityType: node
 bundle: word_list
 mode: teaser
 content:
-  field_words:
+  field_communities:
     type: entity_reference_label
     label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_representative_media:
+    type: entity_reference_label
+    label: hidden
     settings:
       link: true
     third_party_settings: {  }
@@ -36,7 +44,6 @@ hidden:
   comment: true
   field_all_related_content: true
   field_citation: true
-  field_communities: true
   field_description: true
   field_in_collection: true
   field_keywords: true
@@ -45,9 +52,9 @@ hidden:
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
   field_protocol_control: true
-  field_representative_media: true
   field_sequence_collection: true
   field_title: true
+  field_words: true
   flag_email_node: true
   flag_email_og: true
   flag_mukurtu_email_og: true

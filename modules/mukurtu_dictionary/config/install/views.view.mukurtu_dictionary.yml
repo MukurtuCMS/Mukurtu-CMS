@@ -2,11 +2,9 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.body
     - search_api.index.mukurtu_dictionary_index
   module:
     - search_api
-    - text
 id: mukurtu_dictionary
 label: 'Mukurtu Dictionary'
 module: views
@@ -16,76 +14,23 @@ base_table: search_api_index_mukurtu_dictionary_index
 base_field: search_api_id
 display:
   default:
-    display_plugin: default
     id: default
     display_title: Master
+    display_plugin: default
     position: 0
     display_options:
-      access:
-        type: none
-        options: {  }
-      cache:
-        type: none
-        options: {  }
-      query:
-        type: views_query
-        options:
-          bypass_access: false
-          skip_access: false
-          preserve_facet_query_args: false
-      exposed_form:
-        type: basic
-        options:
-          submit_button: Apply
-          reset_button: false
-          reset_button_label: Reset
-          exposed_sorts_label: 'Sort by'
-          expose_sort_order: true
-          sort_asc_label: Asc
-          sort_desc_label: Desc
-      pager:
-        type: mini
-        options:
-          items_per_page: 20
-          offset: 0
-          id: 0
-          total_pages: null
-          tags:
-            previous: '‹ Previous'
-            next: 'Next ›'
-          expose:
-            items_per_page: false
-            items_per_page_label: 'Items per page'
-            items_per_page_options: '5, 10, 25, 50'
-            items_per_page_options_all: false
-            items_per_page_options_all_label: '- All -'
-            offset: false
-            offset_label: Offset
-      style:
-        type: default
-      row:
-        type: search_api
-        options:
-          view_modes:
-            'entity:node':
-              article: default
-              collection: default
-              community: default
-              dictionary_word: teaser
-              digital_heritage: default
-              page: default
-              person: default
+      title: 'Mukurtu Dictionary'
       fields:
         body:
+          id: body
           table: search_api_index_mukurtu_dictionary_index
           field: body
-          id: body
-          entity_type: null
-          entity_field: null
-          plugin_id: search_api_field
           relationship: none
           group_type: group
           admin_label: ''
+          entity_type: null
+          entity_field: null
+          plugin_id: search_api_field
           label: ''
           exclude: false
           alter:
@@ -147,6 +92,56 @@ display:
             use_highlighting: false
             multi_type: separator
             multi_separator: ', '
+      pager:
+        type: mini
+        options:
+          offset: 0
+          items_per_page: 20
+          total_pages: null
+          id: 0
+          tags:
+            next: 'Next ›'
+            previous: '‹ Previous'
+          expose:
+            items_per_page: false
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 25, 50'
+            items_per_page_options_all: false
+            items_per_page_options_all_label: '- All -'
+            offset: false
+            offset_label: Offset
+      exposed_form:
+        type: basic
+        options:
+          submit_button: Apply
+          reset_button: false
+          reset_button_label: Reset
+          exposed_sorts_label: 'Sort by'
+          expose_sort_order: true
+          sort_asc_label: Asc
+          sort_desc_label: Desc
+      access:
+        type: none
+        options: {  }
+      cache:
+        type: none
+        options: {  }
+      empty: {  }
+      sorts:
+        search_api_relevance:
+          id: search_api_relevance
+          table: search_api_index_mukurtu_dictionary_index
+          field: search_api_relevance
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: ASC
+          expose:
+            label: ''
+            field_identifier: ''
+          exposed: false
+      arguments: {  }
       filters:
         type:
           id: type
@@ -155,9 +150,11 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: search_api_options
           operator: or
           value:
             dictionary_word: dictionary_word
+            word_list: word_list
           group: 1
           exposed: false
           expose:
@@ -188,7 +185,6 @@ display:
             default_group_multiple: {  }
             group_items: {  }
           reduce_duplicates: false
-          plugin_id: search_api_options
         search_api_fulltext:
           id: search_api_fulltext
           table: search_api_index_mukurtu_dictionary_index
@@ -196,6 +192,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: search_api_fulltext
           operator: and
           value: ''
           group: 1
@@ -233,46 +230,52 @@ display:
           parse_mode: terms
           min_length: null
           fields: {  }
-          plugin_id: search_api_fulltext
-      sorts: {  }
-      title: 'Mukurtu Dictionary'
+      style:
+        type: default
+      row:
+        type: search_api
+        options:
+          view_modes:
+            'entity:node':
+              dictionary_word: teaser
+              word_list: teaser
+      query:
+        type: search_api_query
+        options:
+          bypass_access: false
+          skip_access: false
+          preserve_facet_query_args: false
+      relationships: {  }
+      use_ajax: true
       header: {  }
       footer: {  }
-      empty: {  }
-      relationships: {  }
-      arguments: {  }
       display_extenders: {  }
-      use_ajax: true
     cache_metadata:
       max-age: -1
       contexts:
-        - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
         - 'user.node_grants:view'
       tags:
-        - 'config:field.storage.node.body'
         - 'config:search_api.index.mukurtu_dictionary_index'
   mukurtu_dictionary_block:
-    display_plugin: block
     id: mukurtu_dictionary_block
     display_title: Block
+    display_plugin: block
     position: 1
     display_options:
-      display_extenders: {  }
       cache:
         type: none
       defaults:
         cache: false
+      display_extenders: {  }
     cache_metadata:
       max-age: -1
       contexts:
-        - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
         - 'user.node_grants:view'
       tags:
-        - 'config:field.storage.node.body'
         - 'config:search_api.index.mukurtu_dictionary_index'
