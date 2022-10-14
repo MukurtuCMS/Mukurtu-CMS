@@ -51,6 +51,7 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
 
     switch ($operation) {
       case 'view':
+      case 'view all revisions':
         return parent::checkAccess($entity, $operation, $account);
 
       case 'update':
