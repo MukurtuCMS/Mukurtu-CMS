@@ -124,6 +124,29 @@ function mukurtu_protocol_local_tasks_alter(&$local_tasks) {
 function mukurtu_protocol_entity_insert($entity) {
   ProtocolControl::removeInactiveControlEntities($entity);
   ProtocolControl::buildAccessGrants($entity);
+
+  // Make Devel Generate work with protocols.
+  // Right now it makes no attempt to do anything sensible, it simply attaches
+  // random protocols to the node.
+  if ($entity->getEntityTypeId() === 'node' && isset($entity->devel_generate)) {
+    $pce = ProtocolControl::getProtocolControlEntity($entity);
+    if ($pce) {
+      $protocols = \Drupal::entityTypeManager()->getStorage('protocol')->getQuery()->execute();
+      $max = count($protocols);
+      $pkeys = array_rand($protocols, mt_rand(1, $max));
+      if (!is_array($pkeys)) {
+        $pkeys = [$pkeys];
+      }
+      $newProtocols = [];
+      foreach ($pkeys as $pkey) {
+        $newProtocols[] = $protocols[$pkey];
+      }
+      $privacyOpts = ['any', 'all'];
+      $pce->setProtocols($newProtocols);
+      $pce->setPrivacySetting($privacyOpts[array_rand($privacyOpts)]);
+      $pce->save();
+    }
+  }
 }
 
 /**
