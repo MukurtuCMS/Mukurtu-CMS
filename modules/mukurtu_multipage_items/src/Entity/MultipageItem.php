@@ -54,7 +54,7 @@ use Drupal\user\UserInterface;
  *   },
  *   links = {
  *     "add-form" = "/admin/content/multipage-item/add",
- *     "canonical" = "/multipage_item/{multipage_item}",
+ *     "canonical" = "/multipage-item/{multipage_item}",
  *     "edit-form" = "/admin/content/multipage-item/{multipage_item}/edit",
  *     "delete-form" = "/admin/content/multipage-item/{multipage_item}/delete",
  *     "collection" = "/admin/content/multipage-item"
@@ -163,7 +163,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setLabel(t('Title'))
-      ->setDescription(t('The title of the multipage item entity.'))
+      ->setDescription(t('The title of the multipage item.'))
       ->setRequired(TRUE)
       ->setSetting('max_length', 255)
       ->setDisplayOptions('form', [
@@ -204,7 +204,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
           'field_widget_display_settings' => [
             'view_mode' => 'content_browser',
           ],
-          'field_widget_edit' => FALSE,
+          'field_widget_edit' => TRUE,
           'field_widget_remove' => TRUE,
           'field_widget_replace' => FALSE,
           'selection_mode' => 'selection_append',

@@ -6,36 +6,56 @@ entity.multipage_item.settings:
   requirements:
     _permission: 'administer multipage item'
 
-mukurtu_multipage_items.multipage_view:
-  path: '/multi-page/{mpi}/page/{page}'
+mukurtu_multipage_items.multipage_view_first_page:
+  path: '/multi-page/{mpi}'
   defaults:
     _title: 'Example'
-    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::view'
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewFirstPage'
   options:
     parameters:
       mpi:
         type: entity:multipage_item
-      page:
-        type: entity:node
   requirements:
-    _permission: 'access content'
+    _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewFirstPageAccess'
 
 mukurtu_multipage_items.multipage_node_view:
   path: '/node/{node}/multipage'
   defaults:
-    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::view'
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::view'
   options:
     parameters:
       node:
         type: entity:node
   requirements:
     _permission: 'access content'
-    _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::access'
+    _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewAccess'
+
+mukurtu_multipage_items.new_multipage_from_node:
+  path: '/node/{node}/new-multipage'
+  defaults:
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::newFromNode'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::newFromNodeAccess'
+
+mukurtu_multipage_items.multipage_edit:
+  path: '/node/{node}/multipage/edit'
+  defaults:
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::edit'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::editAccess'
 
 mukurtu_multipage_items.select_page_ajax:
   path: '/multipageitem/{page}/ajax'
   defaults:
-    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::getSelectedPageAjax'
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::getSelectedPageAjax'
   requirements:
     _access: 'TRUE'
   options:

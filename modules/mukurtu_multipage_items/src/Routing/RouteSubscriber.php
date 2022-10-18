@@ -18,7 +18,7 @@ class RouteSubscriber extends RouteSubscriberBase {
       $defaultController = $route->getDefault('_controller');
       $config = \Drupal::service('config.factory')->getEditable('mukurtu_multipage_items.settings');
       $config->set('_controller', $defaultController)->save();
-      $route->setDefault('_controller', '\Drupal\mukurtu_multipage_items\Controller\MultipageItemViewController::viewRedirect');
+      $route->setDefault('_controller', '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewRedirect');
     }
   }
 

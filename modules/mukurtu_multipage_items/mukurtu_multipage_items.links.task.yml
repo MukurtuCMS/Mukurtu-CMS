@@ -16,7 +16,22 @@ entity.multipage_item.delete_form:
   base_route: entity.multipage_item.canonical
   weight: 10
 entity.multipage_item.collection:
-  title: Multipage Item
+  title: Multi-page Items
   route_name: entity.multipage_item.collection
   base_route: system.admin_content
   weight: 10
+
+
+entity.node.create_multipage:
+  title: Create Multi-page Item
+  route_name: mukurtu_multipage_items.new_multipage_from_node
+  base_route: entity.node.canonical
+  weight: 60
+mukurtu_multipage_items.multipage_node_view:
+  title: View
+  route_name: mukurtu_multipage_items.multipage_node_view
+  base_route: mukurtu_multipage_items.multipage_node_view
+mukurtu_multipage_items.multipage_node_view.edit_form:
+  title: Edit
+  route_name: mukurtu_multipage_items.multipage_edit
+  base_route: mukurtu_multipage_items.multipage_node_view

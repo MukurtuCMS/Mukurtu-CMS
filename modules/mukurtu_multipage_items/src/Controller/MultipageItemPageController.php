@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_multipage_items\Controller;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -13,11 +14,13 @@ use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\mukurtu_multipage_items\MultipageItemInterface;
+use Drupal\mukurtu_multipage_items\Entity\MultipageItem;
 
 /**
  * Returns responses for Mukurtu Multipage Items routes.
  */
-class MultipageItemViewController extends ControllerBase {
+class MultipageItemPageController extends ControllerBase {
 
   /**
    * The entity type manager.
@@ -77,7 +80,7 @@ class MultipageItemViewController extends ControllerBase {
 
     // This conditional looks like a mistake but be careful,
     // it's intentionally crafted to avoid a redirect loop with ::view.
-    if ($mpi && $mpi->access('view') && $this->access($this->currentUser(), $node)->isAllowed()) {
+    if ($mpi && $mpi->access('view') && $this->viewAccess($this->currentUser(), $node)->isAllowed()) {
       // Redirect to the multipage view.
       $url = Url::fromRoute('mukurtu_multipage_items.multipage_node_view', ['node' => $node->id()]);
       return new RedirectResponse($url->toString());
@@ -85,6 +88,47 @@ class MultipageItemViewController extends ControllerBase {
 
     // Fail back to original view controller.
     return $originalController->{$controllerMethod}($node, $view_mode, $langcode);
+  }
+
+  public function viewFirstPage(MultipageItemInterface $mpi) {
+    $firstPage = $mpi->getFirstPage();
+    if ($firstPage) {
+      $url = Url::fromRoute('mukurtu_multipage_items.multipage_node_view', ['node' => $firstPage->id()]);
+      return new RedirectResponse($url->toString());
+    }
+    return [];
+  }
+
+  public function viewFirstPageAccess(AccountInterface $account, MultipageItemInterface $mpi) {
+    return $mpi->access('view', $account, TRUE);
+  }
+
+  public function newFromNode(NodeInterface $node) {
+    $build = [];
+    $mpi = MultipageItem::create(['title' => $node->getTitle(), 'field_pages' => [$node->id()]]);
+    $form = $this->entityTypeManager()
+      ->getFormObject('multipage_item', 'add')
+      ->setEntity($mpi);
+    $build[] = $this->formBuilder()->getForm($form);
+
+    return $build;
+  }
+
+
+  public function newFromNodeAccess(AccountInterface $account, NodeInterface $node) {
+    $access_handler = $this->entityTypeManager()->getAccessControlHandler('multipage_item');
+    // User must be able to create MPIs.
+    if (!$access_handler->createAccess()) {
+      return AccessResult::forbidden();
+    }
+
+    // Node cannot be in an existing MPI.
+    if($this->getMultipageEntity($node)) {
+      return AccessResult::forbidden();
+    }
+
+    // User must have edit access to the item as well.
+    return $node->access('update', $account, TRUE);
   }
 
   protected function getMultipageEntity($node) {
@@ -119,7 +163,7 @@ class MultipageItemViewController extends ControllerBase {
   }
 
   /**
-   * Custom access for build route.
+   * Custom access for view route.
    *
    * @param AccountInterface $account
    *   The account to check access for.
@@ -129,7 +173,7 @@ class MultipageItemViewController extends ControllerBase {
    * @return \Drupal\Core\Access\AccessResult
    *   The access result.
    */
-  public function access(AccountInterface $account, NodeInterface $node) {
+  public function viewAccess(AccountInterface $account, NodeInterface $node) {
     // Only checking for access to the page. We want to keep the MPI URL
     // durable (e.g., /node/{node}/multipage) even if the MPI gets deleted.
     // If a user has access to the page but not the MPI we will redirect them
@@ -138,7 +182,27 @@ class MultipageItemViewController extends ControllerBase {
   }
 
   /**
-   * Builds the response.
+   * Custom access for edit route.
+   *
+   * @param AccountInterface $account
+   *   The account to check access for.
+   * @param NodeInterface $node
+   *   The page node to of the multipage item to edit.
+   *
+   * @return \Drupal\Core\Access\AccessResult
+   *   The access result.
+   */
+  public function editAccess(AccountInterface $account, NodeInterface $node) {
+    $mpi = $this->getMultipageEntity($node);
+    if ($mpi) {
+      return $mpi->access('edit', $account, TRUE);
+    }
+    return AccessResult::forbidden();
+  }
+
+
+  /**
+   * Builds the view page.
    */
   public function view(NodeInterface $node) {
     $mpi = $this->getMultipageEntity($node);
@@ -175,6 +239,17 @@ class MultipageItemViewController extends ControllerBase {
         ],
       ],
     ];
+  }
+
+  /**
+   * Builds the edit page.
+   */
+  public function edit(NodeInterface $node) {
+    $mpi = $this->getMultipageEntity($node);
+    if ($mpi) {
+      $url = Url::fromRoute('entity.multipage_item.edit_form', ['multipage_item' => $mpi->id()]);
+      return new RedirectResponse($url->toString());
+    }
   }
 
 }
