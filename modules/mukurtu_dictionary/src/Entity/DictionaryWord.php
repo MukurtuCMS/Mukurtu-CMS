@@ -20,11 +20,11 @@ class DictionaryWord extends Node implements DictionaryWordInterface {
    */
   public function preSave(EntityStorageInterface $storage)
   {
-    $glossary_field = "";
-    $glossary_field = $this->get('field_glossary_entry')->getValue();
-
-    if (empty($glossary_field)) {
-      $this->set("field_glossary_entry", $this->getTitle()[0]);
+    if ($this->hasField('field_glossary_entry')) {
+      if (empty($this->get('field_glossary_entry')->getValue())) {
+        $this->set("field_glossary_entry", $this->getTitle()[0]);
+      }
     }
   }
+
 }
