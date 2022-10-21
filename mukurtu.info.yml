@@ -92,6 +92,7 @@ dependencies:
   - mukurtu_notifications
   - mukurtu_person
   - mukurtu_browse
+  - mukurtu_multipage_items
 
 
 themes:
