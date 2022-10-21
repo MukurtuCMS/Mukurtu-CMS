@@ -7,6 +7,7 @@
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Render\Element;
+use Drupal\mukurtu_multipage_items\MultipageItemInterface;
 use Drupal\node\NodeInterface;
 use Drupal\path_alias\PathAliasInterface;
 
@@ -36,14 +37,11 @@ function mukurtu_multipage_items_theme() {
  * Implements hook_entity_insert().
  */
 function mukurtu_multipage_items_entity_insert(EntityInterface $entity) {
-  // The first time we add a /node/ID alias, add the multipage alias as well.
-  if ($entity instanceof PathAliasInterface) {
-    preg_match('/\/node\/(\d+)$/', $entity->getPath(), $matches, PREG_UNMATCHED_AS_NULL);
-    $nid = $matches[1] ?? NULL;
-    if ($nid) {
-      $values = ['path' => "/node/{$nid}/multipage", 'alias' => "{$entity->getAlias()}/multipage"];
-      $alias = \Drupal::entityTypeManager()->getStorage('path_alias')->create($values);
-      $alias->save();
+  // New MPI, add all the page aliases.
+  if ($entity instanceof MultipageItemInterface) {
+    $page_ids = array_column($entity->get('field_pages')->getValue(), 'target_id') ?? [];
+    foreach ($page_ids as $id) {
+      mukurtu_multipage_items_update_node_page_alias($id);
     }
   }
 }
@@ -52,29 +50,58 @@ function mukurtu_multipage_items_entity_insert(EntityInterface $entity) {
  * Implements hook_entity_update().
  */
 function mukurtu_multipage_items_entity_update(EntityInterface $entity) {
-  // Update any existing MPI path alias for a node (the title could have changed).
-  if ($entity instanceof NodeInterface) {
-    $pam = \Drupal::service('path_alias.manager');
+  // If a node updates its path alias, update the multipage alias as well.
+  if ($entity instanceof PathAliasInterface) {
+    preg_match('/\/node\/(\d+)$/', $entity->getPath(), $matches, PREG_UNMATCHED_AS_NULL);
+    $nid = $matches[1] ?? NULL;
+    if ($nid) {
+      mukurtu_multipage_items_update_node_page_alias($nid, FALSE);
+    }
+  }
+
+  // Updated MPI, update the page aliases.
+  if ($entity instanceof MultipageItemInterface) {
+    $page_ids = array_column($entity->get('field_pages')->getValue(), 'target_id') ?? [];
+    foreach($page_ids as $id) {
+      mukurtu_multipage_items_update_node_page_alias($id);
+    }
+  }
+}
+
+/**
+ * Create a multipage path alias for a node.
+ *
+ * @param int $nid
+ *   The node id.
+ * @param bool $create
+ *   If TRUE, create the alias if one does not exist.
+ *
+ * @return void
+ */
+function mukurtu_multipage_items_update_node_page_alias($nid, $create = TRUE) {
+  $pam = \Drupal::service('path_alias.manager');
+  $nodeAlias = $pam->getAliasByPath("/node/{$nid}");
+  // Check if there's an existing alias for the node's canonical path.
+  // We're basing the multipage alias off of that.
+  if ($nodeAlias && $nodeAlias != "/node/{$nid}") {
+    // Check for an existing multipage alias.
     $query = \Drupal::entityTypeManager()->getStorage('path_alias')->getQuery();
-    $result = $query->condition('path', "/node/{$entity->id()}/multipage")
+    $result = $query->condition('path', "/node/{$nid}/multipage")
       ->accessCheck(FALSE)
       ->execute();
 
+    // Node has an existing multipage alias, update it.
     if (count($result) == 1) {
-      // Get the alias to the canonical route.
-      $nodeAlias = $pam->getAliasByPath("/node/{$entity->id()}");
-
-      // Build the updated multipage alias.
-      /** @var \Drupal\path_alias\Entity\PathAlias $alias */
+      /** @var \Drupal\path_alias\PathAliasInterface $alias */
       $alias = \Drupal::entityTypeManager()->getStorage('path_alias')->load(reset($result));
       $alias->setAlias("{$nodeAlias}/multipage");
       $alias->save();
+      return;
     }
 
-    // Create an alias on the off chance it doesn't exist.
-    if (empty($result)) {
-      $nodeAlias = $pam->getAliasByPath("/node/{$entity->id()}");
-      $values = ['path' => "/node/{$entity->id()}/multipage", 'alias' => "{$nodeAlias}/multipage"];
+    // Node does not have an existing multipage alias, create one.
+    if ($create) {
+      $values = ['path' => "/node/{$nid}/multipage", 'alias' => "{$nodeAlias}/multipage"];
       $alias = \Drupal::entityTypeManager()->getStorage('path_alias')->create($values);
       $alias->save();
     }
