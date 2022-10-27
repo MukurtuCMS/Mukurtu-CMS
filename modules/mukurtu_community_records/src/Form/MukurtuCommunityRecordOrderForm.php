@@ -98,13 +98,13 @@ class MukurtuCommunityRecordOrderForm extends ConfigFormBase {
     $communities = $this->entityTypeManager->getStorage('community')->loadMultiple($ids);
 
     // Get the existing community weights.
-    $weights = $config->get('community_record_weights');
+    $weights = $config->get('community_record_weights') ?? [];
 
     // Order the communities by weight and check if any unweighted communities
     // are now present.
     $weightedCommunities = [];
     $dupes = [];
-    $maxWeight = max($weights) + 1;
+    $maxWeight = !empty($weights) ? max($weights) + 1 : 0;
     foreach ($communities as $community) {
       $weight = $weights[$community->id()] ?? $maxWeight++;
       if (isset($weightedCommunities[(string) $weight])) {
