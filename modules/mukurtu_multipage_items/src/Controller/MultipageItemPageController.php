@@ -117,6 +117,12 @@ class MultipageItemPageController extends ControllerBase {
 
   public function newFromNodeAccess(AccountInterface $account, NodeInterface $node) {
     $access_handler = $this->entityTypeManager()->getAccessControlHandler('multipage_item');
+    // Node must be of a bundle that has been enabled for MPI.
+    $enabledBundles = $this->config('mukurtu_multipage_items.settings')->get('bundles_config');
+    if (!isset($enabledBundles[$node->bundle()]) || $enabledBundles[$node->bundle()] != 1) {
+      return AccessResult::forbidden();
+    }
+
     // User must be able to create MPIs.
     if (!$access_handler->createAccess()) {
       return AccessResult::forbidden();

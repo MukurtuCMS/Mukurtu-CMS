@@ -58,7 +58,7 @@ class MultipageItemConfigForm extends ConfigFormBase
     $form['bundles_config'] = [
       '#type' => 'checkboxes',
       '#options' => $options,
-      '#title' => $this->t('Enable content types for multipage items'),
+      '#title' => $this->t('Enabled content types for multipage items'),
       '#default_value' => $checked,
     ];
 
