@@ -67,6 +67,6 @@ mukurtu_multipage_items.settings:
   path: 'admin/config/mukurtu/multipage-item'
   defaults:
     _form: '\Drupal\mukurtu_multipage_items\Form\MultipageItemConfigForm'
-    _title: 'Multipage Item Config'
+    _title: 'Multipage Item Configuration'
   requirements:
-    _access: 'TRUE'
+    _permission: 'administer multipage item'
