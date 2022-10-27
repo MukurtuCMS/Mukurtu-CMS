@@ -76,14 +76,28 @@ class MultipageItemPageController extends ControllerBase {
     list($controllerClass, $controllerMethod) = explode('::', $controllerString, 2);
     $originalController = $controllerClass::create(\Drupal::getContainer());
 
-    $mpi = $this->getMultipageEntity($node);
+    if ($node instanceof NodeInterface) {
+      $mpi = $this->getMultipageEntity($node);
 
-    // This conditional looks like a mistake but be careful,
-    // it's intentionally crafted to avoid a redirect loop with ::view.
-    if ($mpi && $mpi->access('view') && $this->viewAccess($this->currentUser(), $node)->isAllowed()) {
-      // Redirect to the multipage view.
-      $url = Url::fromRoute('mukurtu_multipage_items.multipage_node_view', ['node' => $node->id()]);
-      return new RedirectResponse($url->toString());
+      // This conditional looks like a mistake but be careful,
+      // it's intentionally crafted to avoid a redirect loop with ::view.
+      if ($mpi && $mpi->access('view')) {
+        $page = $node;
+        // Check if node is a CR.
+        if ($node->hasField('field_mukurtu_original_record')) {
+          $records = $node->get('field_mukurtu_original_record')->referencedEntities();
+          if (!empty($records)) {
+            // Node is a CR, use its original record as the target page.
+            $page = reset($records);
+          }
+        }
+
+        if ($this->viewAccess($this->currentUser(), $page)->isAllowed()) {
+          // Redirect to the multipage view.
+          $url = Url::fromRoute('mukurtu_multipage_items.multipage_node_view', ['node' => $page->id()]);
+          return new RedirectResponse($url->toString());
+        }
+      }
     }
 
     // Fail back to original view controller.
@@ -137,12 +151,32 @@ class MultipageItemPageController extends ControllerBase {
     return $node->access('update', $account, TRUE);
   }
 
+  /**
+   * Get the multipage_item entity that contains the node.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node.
+   *
+   * @return \Drupal\mukurtu_multipage_items\MultipageItemInterface|null
+   *   The multipage_item entity or NULL if the node is not in a MPI.
+   */
   protected function getMultipageEntity($node) {
     $query = $this->entityTypeManager()->getStorage('multipage_item')->getQuery();
+
+    // CRs cannot be pages. Follow the OR relationship if node is a CR.
+    if ($node->hasField('field_mukurtu_original_record')) {
+      $records = $node->get('field_mukurtu_original_record')->referencedEntities();
+      if (!empty($records)) {
+        return $this->getMultipageEntity(reset($records));
+      }
+    }
+
+    // Check if node is in an MPI directly.
     $result = $query->condition('field_pages', $node->id())
-      ->accessCheck(TRUE)
+      ->accessCheck(FALSE)
       ->execute();
-    if (count($result) == 1) {
+
+    if (!empty($result)) {
       $mpiId = reset($result);
       return $this->entityTypeManager()->getStorage('multipage_item')->load($mpiId);
     }
@@ -252,7 +286,7 @@ class MultipageItemPageController extends ControllerBase {
    */
   public function edit(NodeInterface $node) {
     $mpi = $this->getMultipageEntity($node);
-    if ($mpi) {
+    if ($mpi && $mpi->access('update')) {
       $url = Url::fromRoute('entity.multipage_item.edit_form', ['multipage_item' => $mpi->id()]);
       return new RedirectResponse($url->toString());
     }
