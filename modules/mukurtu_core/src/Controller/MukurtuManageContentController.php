@@ -33,11 +33,6 @@ class MukurtuManageContentController extends ControllerBase {
 
     // Only use node types the user has access to.
     foreach ($this->entityTypeManager()->getStorage('node_type')->loadMultiple() as $type) {
-      // Skip community/protocol, they aren't "content".
-      if (in_array($type->get('type'), ['community', 'protocol'])) {
-        continue;
-      }
-
       $access = $this->entityTypeManager()->getAccessControlHandler('node')->createAccess($type->id(), NULL, [], TRUE);
       if ($access->isAllowed()) {
         $content[$type->id()] = $type;
