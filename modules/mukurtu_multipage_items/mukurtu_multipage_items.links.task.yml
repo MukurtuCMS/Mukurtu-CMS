@@ -35,3 +35,7 @@ mukurtu_multipage_items.multipage_node_view.edit_form:
   title: Edit
   route_name: mukurtu_multipage_items.multipage_edit
   base_route: mukurtu_multipage_items.multipage_node_view
+mukurtu_multipage_items.multipage_node_view.add_new_page:
+  title: Add New Page
+  route_name: mukurtu_multipage_items.multipage_add_new_page
+  base_route: mukurtu_multipage_items.multipage_node_view

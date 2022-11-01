@@ -10,6 +10,10 @@ use Drupal\Core\Render\Element;
 use Drupal\mukurtu_multipage_items\MultipageItemInterface;
 use Drupal\node\NodeInterface;
 use Drupal\path_alias\PathAliasInterface;
+use Drupal\Core\Url;
+use Drupal\Core\Link;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityFormInterface;
 
 /**
  * Implements hook_theme().
@@ -18,6 +22,10 @@ function mukurtu_multipage_items_theme() {
   return [
     'multipage_item' => [
       'render element' => 'elements',
+    ],
+    'mukurtu_multipage_items_add_page_list' => [
+      'template' => 'mukurtu-multipage-items-add-page-list',
+      'variables' => ['content' => NULL],
     ],
     'multipage_item_book_view' => [
       'variables' => [
@@ -31,6 +39,84 @@ function mukurtu_multipage_items_theme() {
       ],
     ],
   ];
+}
+
+/**
+ * Prepares variables for list of available node type templates.
+ *
+ * Default template: mukurtu-multipage-items-add-page-list.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - content: An array of content types.
+ */
+function template_preprocess_mukurtu_multipage_items_add_page_list(array &$variables) {
+  $variables['types'] = [];
+
+  if (!empty($variables['content'])) {
+    $enabledBundles = \Drupal::config('mukurtu_multipage_items.settings')->get('bundles_config');
+    $page_node = \Drupal::routeMatch()->getParameter('node');
+    foreach ($variables['content'] as $type) {
+      // Skip bundles not enabled for multipage.
+      if (!isset($enabledBundles[$type->id()]) || !$enabledBundles[$type->id()]) {
+        continue;
+      }
+
+      $variables['types'][$type->id()] = [
+        'type' => $type->id(),
+        'add_link' => Link::fromTextAndUrl($type->label(), Url::fromRoute('mukurtu_multipage_items.add', ['page_node' => $page_node->id(), 'node_type' => $type->id()]))->toString(),
+        'description' => [
+          '#markup' => $type->getDescription(),
+        ],
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function mukurtu_multipage_items_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if ($route_name == 'mukurtu_multipage_items.add') {
+    if ($page_node = \Drupal::routeMatch()->getParameter('page_node')) {
+      $mpiManager = \Drupal::service('mukurtu_multipage_items.multipage_item_manager');
+      if ($mpi = $mpiManager->getMultipageEntity($page_node)) {
+        // Store which MPI we're trying to add the page to.
+        $form_state->set('multipage_item_target', $mpi->id());
+
+        // Attach our custom sumbmit handler after save.
+        // @see mukurtu_multipage_items_add_new_page_callback.
+        $oldHandlers = $form["actions"]["submit"]["#submit"];
+        $newHandlers = [];
+        foreach ($oldHandlers as $handler) {
+          $newHandlers[] = $handler;
+          if ($handler == '::save') {
+            $newHandlers[] = 'mukurtu_multipage_items_add_new_page_callback';
+          }
+        }
+        $form["actions"]["submit"]["#submit"] = $newHandlers;
+      }
+    }
+  }
+}
+
+/**
+ * Submit handler to add a newly created page to a MPI entity.
+ *
+ * @see mukurtu_multipage_items_form_alter.
+ */
+function mukurtu_multipage_items_add_new_page_callback(array &$form, FormStateInterface $form_state) {
+  if ($form_state->getFormObject() instanceof EntityFormInterface) {
+    $newPageEntity = $form_state->getformObject()->getEntity();
+    if ($mpiId = $form_state->get('multipage_item_target')) {
+      if ($mpi = \Drupal::entityTypeManager()->getStorage('multipage_item')->load($mpiId)) {
+        /** @var \Drupal\mukurtu_multipage_items\MultipageItemInterface $mpi */
+        $mpi->addPage($newPageEntity);
+        $mpi->save();
+      }
+    }
+  }
 }
 
 /**

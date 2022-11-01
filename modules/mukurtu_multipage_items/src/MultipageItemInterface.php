@@ -90,6 +90,17 @@ interface MultipageItemInterface extends ContentEntityInterface, EntityOwnerInte
   public function setFirstPage(NodeInterface $node): MultipageItemInterface;
 
   /**
+   * Append a page to the multipage item.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node to add.
+   *
+   * @return MultipageItemInterface
+   *   The multipage entity.
+   */
+  public function addPage(NodeInterface $node): MultipageItemInterface;
+
+  /**
    * Get the pages of the multipage item.
    *
    * @param bool $accessCheck

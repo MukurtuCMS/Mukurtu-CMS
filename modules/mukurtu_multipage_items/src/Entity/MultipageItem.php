@@ -316,6 +316,15 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
   /**
    * {@inheritdoc}
    */
+  public function addPage(NodeInterface $node): MultipageItemInterface {
+    $page_ids = array_column($this->get('field_pages')->getValue(), 'target_id');
+    $page_ids[] = $node->id();
+    return $this->set('field_pages', $page_ids);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getPages($accessCheck = FALSE) {
     $page_ids = array_column($this->get('field_pages')->getValue(), 'target_id');
     // Using entity query to do quick access checking.

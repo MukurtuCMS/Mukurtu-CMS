@@ -16,6 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\mukurtu_multipage_items\MultipageItemInterface;
 use Drupal\mukurtu_multipage_items\Entity\MultipageItem;
+use Drupal\mukurtu_multipage_items\MultipageItemManager;
 
 /**
  * Returns responses for Mukurtu Multipage Items routes.
@@ -44,6 +45,13 @@ class MultipageItemPageController extends ControllerBase {
   protected $configFactory;
 
   /**
+   * The multipage item manager.
+   *
+   * @var \Drupal\mukurtu_multipage_items\MultipageItemManager
+   */
+  protected $multipageItemManager;
+
+  /**
    * The controller constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -53,10 +61,11 @@ class MultipageItemPageController extends ControllerBase {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user, ConfigFactoryInterface $config_factory) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user, ConfigFactoryInterface $config_factory, MultipageItemManager $multipage_item_manager) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $current_user;
     $this->configFactory = $config_factory;
+    $this->multipageItemManager = $multipage_item_manager;
   }
 
   /**
@@ -67,6 +76,7 @@ class MultipageItemPageController extends ControllerBase {
       $container->get('entity_type.manager'),
       $container->get('current_user'),
       $container->get('config.factory'),
+      $container->get('mukurtu_multipage_items.multipage_item_manager'),
     );
   }
 
@@ -77,7 +87,7 @@ class MultipageItemPageController extends ControllerBase {
     $originalController = $controllerClass::create(\Drupal::getContainer());
 
     if ($node instanceof NodeInterface) {
-      $mpi = $this->getMultipageEntity($node);
+      $mpi = $this->multipageItemManager->getMultipageEntity($node);
 
       // This conditional looks like a mistake but be careful,
       // it's intentionally crafted to avoid a redirect loop with ::view.
@@ -143,7 +153,7 @@ class MultipageItemPageController extends ControllerBase {
     }
 
     // Node cannot be in an existing MPI.
-    if($this->getMultipageEntity($node)) {
+    if($this->multipageItemManager->getMultipageEntity($node)) {
       return AccessResult::forbidden();
     }
 
@@ -151,41 +161,9 @@ class MultipageItemPageController extends ControllerBase {
     return $node->access('update', $account, TRUE);
   }
 
-  /**
-   * Get the multipage_item entity that contains the node.
-   *
-   * @param \Drupal\node\NodeInterface $node
-   *   The node.
-   *
-   * @return \Drupal\mukurtu_multipage_items\MultipageItemInterface|null
-   *   The multipage_item entity or NULL if the node is not in a MPI.
-   */
-  protected function getMultipageEntity($node) {
-    $query = $this->entityTypeManager()->getStorage('multipage_item')->getQuery();
-
-    // CRs cannot be pages. Follow the OR relationship if node is a CR.
-    if ($node->hasField('field_mukurtu_original_record')) {
-      $records = $node->get('field_mukurtu_original_record')->referencedEntities();
-      if (!empty($records)) {
-        return $this->getMultipageEntity(reset($records));
-      }
-    }
-
-    // Check if node is in an MPI directly.
-    $result = $query->condition('field_pages', $node->id())
-      ->accessCheck(FALSE)
-      ->execute();
-
-    if (!empty($result)) {
-      $mpiId = reset($result);
-      return $this->entityTypeManager()->getStorage('multipage_item')->load($mpiId);
-    }
-    return NULL;
-  }
-
   public function getSelectedPageAjax(NodeInterface $page) {
     /** @var \Drupal\mukurtu_multipage_items\MultipageItemInterface $multipageitem */
-    $multipageitem = $this->getMultipageEntity($page);
+    $multipageitem = $this->multipageItemManager->getMultipageEntity($page);
     $response = new AjaxResponse();
     if ($multipageitem && $multipageitem->hasPage($page) && $page->access('view')) {
       $view_builder = $this->entityTypeManager()->getViewBuilder('node');
@@ -233,7 +211,7 @@ class MultipageItemPageController extends ControllerBase {
    *   The access result.
    */
   public function editAccess(AccountInterface $account, NodeInterface $node) {
-    $mpi = $this->getMultipageEntity($node);
+    $mpi = $this->multipageItemManager->getMultipageEntity($node);
     if ($mpi) {
       return $mpi->access('edit', $account, TRUE);
     }
@@ -245,7 +223,7 @@ class MultipageItemPageController extends ControllerBase {
    * Builds the view page.
    */
   public function view(NodeInterface $node) {
-    $mpi = $this->getMultipageEntity($node);
+    $mpi = $this->multipageItemManager->getMultipageEntity($node);
     $view_builder = $this->entityTypeManager()->getViewBuilder('node');
 
     // Redirect back to the single node if user can't see the MPI.
@@ -285,11 +263,45 @@ class MultipageItemPageController extends ControllerBase {
    * Builds the edit page.
    */
   public function edit(NodeInterface $node) {
-    $mpi = $this->getMultipageEntity($node);
+    $mpi = $this->multipageItemManager->getMultipageEntity($node);
     if ($mpi && $mpi->access('update')) {
       $url = Url::fromRoute('entity.multipage_item.edit_form', ['multipage_item' => $mpi->id()]);
       return new RedirectResponse($url->toString());
     }
+  }
+
+  public function addNewPageTitle($node_type, $page_node) {
+    $mpi = $this->multipageItemManager->getMultipageEntity($page_node);
+    return $this->t("Adding new %type page to %title", ['%type' => $node_type->label(), '%title' => $mpi->getTitle()]);
+  }
+
+  public function addNewPage() {
+    $build = [
+      '#theme' => 'mukurtu_multipage_items_add_page_list',
+      '#cache' => [
+        'tags' => $this->entityTypeManager()->getDefinition('node_type')->getListCacheTags(),
+      ],
+    ];
+
+    $content = [];
+
+    // Only use node types the user has access to.
+    foreach ($this->entityTypeManager()->getStorage('node_type')->loadMultiple() as $type) {
+      $access = $this->entityTypeManager()->getAccessControlHandler('node')->createAccess($type->id(), NULL, [], TRUE);
+      if ($access->isAllowed()) {
+        $content[$type->id()] = $type;
+      }
+    }
+
+    // Bypass the node/add listing if only one content type is available.
+    if (count($content) == 1) {
+      $type = array_shift($content);
+      return $this->redirect('mukurtu_multipage_items.add', ['node_type' => $type->id()]);
+    }
+
+    $build['#content'] = $content;
+
+    return $build;
   }
 
 }

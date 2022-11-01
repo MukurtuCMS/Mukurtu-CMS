@@ -52,6 +52,34 @@ mukurtu_multipage_items.multipage_edit:
   requirements:
     _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::editAccess'
 
+
+mukurtu_multipage_items.add:
+  path: '/node/{page_node}/multipage/add-page/{node_type}'
+  defaults:
+    _entity_form: 'node.default'
+    _title_callback: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::addNewPageTitle'
+  requirements:
+    _node_add_access: 'node:{node_type}'
+  options:
+    _node_operation_route: TRUE
+    parameters:
+      node_type:
+        type: entity:node_type
+        with_config_overrides: TRUE
+      page_node:
+        type: entity:node
+
+mukurtu_multipage_items.multipage_add_new_page:
+  path: '/node/{node}/multipage/add-page'
+  defaults:
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::addNewPage'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::editAccess'
+
 mukurtu_multipage_items.select_page_ajax:
   path: '/multipageitem/{page}/ajax'
   defaults:
