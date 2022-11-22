@@ -1,0 +1,67 @@
+entity.mukurtu_import_strategy.collection:
+  path: '/admin/structure/mukurtu-import-strategy'
+  defaults:
+    _entity_list: 'mukurtu_import_strategy'
+    _title: 'mukurtu_import_strategy configuration'
+  requirements:
+    _permission: 'administer mukurtu_import_strategy'
+
+entity.mukurtu_import_strategy.add_form:
+  path: '/admin/structure/mukurtu_import_strategy/add'
+  defaults:
+    _entity_form: 'mukurtu_import_strategy.add'
+    _title: 'Add a mukurtu_import_strategy'
+  requirements:
+    _permission: 'administer mukurtu_import_strategy'
+
+entity.mukurtu_import_strategy.edit_form:
+  path: '/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}'
+  defaults:
+    _entity_form: 'mukurtu_import_strategy.edit'
+    _title: 'Edit a mukurtu_import_strategy'
+  requirements:
+    _permission: 'administer mukurtu_import_strategy'
+
+entity.mukurtu_import_strategy.delete_form:
+  path: '/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}/delete'
+  defaults:
+    _entity_form: 'mukurtu_import_strategy.delete'
+    _title: 'Delete a mukurtu_import_strategy'
+  requirements:
+    _permission: 'administer mukurtu_import_strategy'
+
+mukurtu_import.settings_form:
+  path: '/admin/config/system/mukurtu-import'
+  defaults:
+    _title: 'Mukurtu Import settings'
+    _form: 'Drupal\mukurtu_import\Form\SettingsForm'
+  requirements:
+    _permission: 'administer mukurtu_import configuration'
+
+mukurtu_import.file_upload:
+  path: '/dashboard/import'
+  defaults:
+    _title: 'Import'
+    _form: 'Drupal\mukurtu_import\Form\ImportFileUploadForm'
+  requirements:
+    _permission: 'access content'
+
+mukurtu_import.import_files:
+  path: '/dashboard/import/files'
+  defaults:
+    _title: 'Import File Summary'
+    _form: 'Drupal\mukurtu_import\Form\ImportFileSummaryForm'
+  requirements:
+    _permission: 'access content'
+
+mukurtu_import.custom_strategy_from_file_form:
+  path: '/dashboard/import/files/mapping/add/{file}'
+  defaults:
+    _form: '\Drupal\mukurtu_import\Form\CustomStrategyFromFileForm'
+    _title: 'Custom Import Settings'
+  requirements:
+    _permission: 'administer mukurtu_import_strategy'
+  options:
+    parameters:
+      file:
+        type: entity:file

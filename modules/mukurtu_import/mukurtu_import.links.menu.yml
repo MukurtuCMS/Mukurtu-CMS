@@ -1,0 +1,11 @@
+mukurtu_import.settings_form:
+  title: Mukurtu Import
+  description: Configure Mukurtu Import.
+  parent: system.admin_config_system
+  route_name: mukurtu_import.settings_form
+  weight: 10
+entity.mukurtu_import_strategy.overview:
+  title: mukurtu_import_strategies
+  parent: system.admin_structure
+  description: 'List of mukurtu_import_strategies to extend site functionality.'
+  route_name: entity.mukurtu_import_strategy.collection

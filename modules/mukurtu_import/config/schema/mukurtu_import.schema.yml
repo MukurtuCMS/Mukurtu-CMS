@@ -1,0 +1,18 @@
+mukurtu_import.mukurtu_import_strategy.*:
+  type: config_entity
+  label: Mukurtu Import Strategy
+  mapping:
+    id:
+      type: string
+      label: ID
+    label:
+      type: label
+      label: Label
+    uuid:
+      type: string
+    description:
+      type: string
+    entity_type_id:
+      type: string
+    bundle:
+      type: string
