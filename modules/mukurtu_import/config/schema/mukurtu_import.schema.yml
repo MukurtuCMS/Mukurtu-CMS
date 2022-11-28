@@ -16,3 +16,12 @@ mukurtu_import.mukurtu_import_strategy.*:
       type: string
     bundle:
       type: string
+    mappings:
+      type: sequence
+      sequence:
+        type: mapping
+        mapping:
+          source:
+            type: string
+          target:
+            type: string

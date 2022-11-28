@@ -58,7 +58,7 @@ mukurtu_import.custom_strategy_from_file_form:
   path: '/dashboard/import/files/mapping/add/{file}'
   defaults:
     _form: '\Drupal\mukurtu_import\Form\CustomStrategyFromFileForm'
-    _title: 'Custom Import Settings'
+    _title: 'Customize Import Settings'
   requirements:
     _permission: 'administer mukurtu_import_strategy'
   options:

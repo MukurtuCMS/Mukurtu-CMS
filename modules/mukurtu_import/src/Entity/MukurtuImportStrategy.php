@@ -42,7 +42,8 @@ use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
  *   config_export = {
  *     "id",
  *     "label",
- *     "description"
+ *     "description",
+ *     "entity_type_id"
  *   }
  * )
  */

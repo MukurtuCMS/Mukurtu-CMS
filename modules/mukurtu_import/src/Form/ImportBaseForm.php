@@ -7,6 +7,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\file\FileInterface;
+use Exception;
+use League\Csv\Reader;
 /**
  * Provides a Mukurtu Import form.
  */
@@ -98,6 +101,19 @@ class ImportBaseForm extends FormBase {
   public function getFileProcess($fid) {
     $processMap = $this->store->get('process_map') ?? [];
     return $processMap[$fid]['mapping'] ?? [];
+  }
+
+  /**
+   * Get the CSV headers from a file.
+   */
+  public function getCSVHeaders(FileInterface $file) {
+    try {
+      $csv = Reader::createFromPath($file->getFileUri(), 'r');
+    } catch (Exception $e) {
+      return [];
+    }
+    $csv->setHeaderOffset(0);
+    return $csv->getHeader();
   }
 
 }

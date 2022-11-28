@@ -4,9 +4,6 @@ namespace Drupal\mukurtu_import\Form;
 
 use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\file\FileInterface;
-use Exception;
-use League\Csv\Reader;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 
@@ -109,7 +106,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
       $form['table'][$fid]['edit'] = [
         '#type' => 'submit',
         '#name' => "edit-{$fid}",
-        '#value' => $this->t('Edit Field Mapping'),
+        '#value' => $this->t('Customize Settings'),
         '#button_type' => 'primary',
         '#submit' => ['::defineCustomMapping'],
       ];
@@ -152,7 +149,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
       ]);
     }
 
-    return $this->t("@num of @total fields mapped", [
+    return $this->t("@num of @total import fields mapped", [
       '@num' => $mappedCount,
       '@total' => count($fileHeaders),
     ]);
@@ -232,16 +229,6 @@ class ImportFileSummaryForm extends ImportBaseForm {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->messenger()->addStatus($this->t('The message has been sent.'));
     $form_state->setRedirect('<front>');
-  }
-
-  public function getCSVHeaders(FileInterface $file) {
-    try {
-      $csv = Reader::createFromPath($file->getFileUri(), 'r');
-    } catch (Exception $e) {
-      return [];
-    }
-    $csv->setHeaderOffset(0);
-    return $csv->getHeader();
   }
 
 }

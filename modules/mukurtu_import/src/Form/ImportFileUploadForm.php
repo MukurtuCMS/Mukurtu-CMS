@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_import\Form;
 use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\migrate\MigrateExecutable;
+use Exception;
 
 /**
  * Provides a Mukurtu Import form.
@@ -66,7 +67,28 @@ class ImportFileUploadForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    $metadataFiles = $form_state->getValue('metadata_files');
 
+    foreach ($metadataFiles as $fid) {
+      /** @var \Drupal\file\FileInterface $file */
+      $file = \Drupal::entityTypeManager()
+        ->getStorage('file')
+        ->load($fid);
+
+      if (!$file) {
+        $form_state->setError($form['metadata_files'], $this->t("There was an error reading the uploaded file. Remove the file and try uploading again."));
+        return;
+      }
+
+      // For CSV files, check if we can read the headers.
+      if ($file->getMimeType() == 'text/csv') {
+        try {
+          $headers = $this->getCSVHeaders($file);
+        } catch (Exception $e) {
+          $form_state->setError($form['metadata_files'], $this->t("Could not parse CSV for file %file.", ['%file' => $file->getFilename()]));
+        }
+      }
+    }
   }
 
   /**
@@ -92,7 +114,7 @@ class ImportFileUploadForm extends ImportBaseForm {
     }
 
     // Set process to defaults.
-    $this->initializeProcess($file->id());
+    //$this->initializeProcess($file->id());
 
 
     $data_rows = [
