@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.multipage_item_browser
+  module:
+    - views
+name: multipage_item_entity_browser
+label: 'Multipage Item Entity Browser'
+display: modal
+display_configuration:
+  width: '650'
+  height: '500'
+  link_text: 'Select entities'
+  auto_open: false
+selection_display: no_display
+selection_display_configuration: {  }
+widget_selector: single
+widget_selector_configuration: {  }
+widgets:
+  a8a43640-4429-40f1-90f8-9b54163d37c0:
+    id: view
+    uuid: a8a43640-4429-40f1-90f8-9b54163d37c0
+    label: view
+    weight: 1
+    settings:
+      submit_text: 'Select entities'
+      auto_select: false
+      view: multipage_item_browser
+      view_display: entity_browser
