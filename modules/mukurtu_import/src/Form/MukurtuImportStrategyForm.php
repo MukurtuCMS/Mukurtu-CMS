@@ -130,7 +130,6 @@ class MukurtuImportStrategyForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    dpm($this->entity->get('entity_type_id'));
     $result = parent::save($form, $form_state);
     $message_args = ['%label' => $this->entity->label()];
     $message = $result == SAVED_NEW

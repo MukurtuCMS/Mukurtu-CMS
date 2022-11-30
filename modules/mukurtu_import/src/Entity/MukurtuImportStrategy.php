@@ -77,4 +77,40 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    */
   protected $description;
 
+  protected $targetEntityTypeId;
+  protected $targetBundle;
+
+  /**
+   * [0] => Array
+   *  (
+   *     [target] => nid
+   *     [source] => id
+   *  )
+   */
+  protected $mapping;
+
+  public function setTargetEntityTypeId($entity_type_id) {
+    $this->targetEntityTypeId = $entity_type_id;
+  }
+
+  public function getTargetEntityTypeId() {
+    return $this->targetEntityTypeId ?? 'node';
+  }
+
+  public function setTargetBundle($bundle) {
+    $this->targetBundle = $bundle;
+  }
+
+  public function getTargetBundle() {
+    return $this->targetBundle ?? NULL;
+  }
+
+  public function getMapping() {
+    return $this->mapping ?? [];
+  }
+
+  public function setMapping($mapping) {
+    $this->mapping = $mapping;
+  }
+
 }

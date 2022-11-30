@@ -90,7 +90,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
           'id' => "mapping-config-$fid",
         ], */
         '#type' => 'select',
-        '#options' => ['custom' => 'Custom Mapping', 'existing' => 'Existing Test'],
+        '#options' => $this->getImportConfigOptions($fid),
         '#default_value' => 'custom',
         '#ajax' => [
           'callback' => [$this, 'mappingChangeAjaxCallback'],
@@ -129,14 +129,25 @@ class ImportFileSummaryForm extends ImportBaseForm {
     return $form;
   }
 
+  protected function getImportConfigOptions($fid) {
+    return ['custom' => 'Custom Mapping'];
+  }
+
   protected function getMappedFieldsMessage($fid) {
-    $process = $this->getFileProcess($fid);
+    // Get the import config for this file.
+    $importConfig = $this->getImportConfig($fid);
+
+    // Get the field mapping from the config.
+    $process = $importConfig->getMapping(); //$this->getFileProcess($fid);
+
+    // Load the file and read the headers.
     $file = $this->entityTypeManager->getStorage('file')->load($fid);
     $fileHeaders = $this->getCSVHeaders($file);
+
+    // Compare the import config to the headers.
     $mappingHeaders = array_column($process, 'source');
     $diff = array_diff($fileHeaders, $mappingHeaders);
     $mappedCount = count($fileHeaders) - count($diff);
-
     $targets = array_column($process, 'target');
     $targetCounts = array_count_values($targets);
     $ignored = $targetCounts[-1] ?? 0;
@@ -160,8 +171,10 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $fid = $element['#parents'][1] ?? NULL;
 
     // User changed the process, save this change.
-    $process = $this->getFileProcess($fid);
-    $this->setFileProcess($fid, $process);
+    //$process = $this->getFileProcess($fid);
+    //$this->setFileProcess($fid, $process);
+
+    // @todo Use setImportConfig here once we've got everything in place.
 
     // Update the field mapping message.
     $response = new AjaxResponse();

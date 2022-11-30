@@ -7,12 +7,23 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\file\FileInterface;
-
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides a Mukurtu Import form.
  */
 class CustomStrategyFromFileForm extends ImportBaseForm {
+  protected $importConfig;
   protected $fieldDefinitions;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager){
+    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager);
+    $this->importConfig = NULL;
+  }
 
   /**
    * {@inheritdoc}
@@ -25,8 +36,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, FileInterface $file = NULL) {
-    $entity_type_id = 'node';
-    $bundle = 'digital_heritage';
+    // Handle the initial loading of the import config for this file.
+    if (!$this->importConfig) {
+      $this->importConfig = $this->getImportConfig($file->id());
+    }
+    //$bundle = $this->importConfig->getBundle();
+
+    //$this->getImportConfig($fid);
 
     if(!$file) {
       return $form;
@@ -38,26 +54,29 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     $form['entity_type_id'] = [
-      '#type' => 'select',
+      '#type' => 'radios',
       '#options' => ['node' => 'Content', 'media' => 'Media'],
       '#title' => $this->t('Type'),
-      '#default_value' => $form_state->getValue('entity_type_id') ?? 'node',
+      '#default_value' => $form_state->getValue('entity_type_id') ?? $this->importConfig->getTargetEntityTypeId(),
       '#description' => $this->t('Type of import.'),
       '#required' => TRUE,
+      '#validated' => TRUE,
       '#ajax' => [
         'callback' => [$this, 'entityTypeChangeAjaxCallback'],
         'event' => 'change',
       ],
     ];
 
-    $entity_type_id = $form_state->getValue('entity_type_id') ?? 'node';
+    $entity_type_id = $form_state->getValue('entity_type_id') ?? $this->importConfig->getTargetEntityTypeId();
     $form['bundle'] = [
       '#type' => 'select',
       '#title' => $this->t('Sub-type'),
       '#options' => $this->getBundleOptions($entity_type_id),
-      '#description' => $this->t('Optional Sub-type.'),
+      '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle(),
+      '#description' => $this->t('Optional Sub-type. When importing new content or media, they will be of this type if not specified in the import metadata.'),
       '#prefix' => "<div id=\"bundle-select\">",
       '#suffix' => "</div>",
+      '#validated' => TRUE,
       '#ajax' => [
         'callback' => [$this, 'bundleChangeAjaxCallback'],
         'event' => 'change',
@@ -86,7 +105,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   protected function buildMappingTable(array &$form, FormStateInterface $form_state, FileInterface $file) {
     $userInput = $form_state->getUserInput();
     $entity_type_id = $form_state->getValue('entity_type_id') ?? ($userInput['entity_type_id'] ?? 'node');
-    $bundle = $form_state->getValue('bundle') ?? ($userInput['bundle'] ?? NULL);
+    $bundle = $form_state->getValue('bundle') ?? ($userInput['bundle'] ?? $this->importConfig->getTargetBundle());
     $headers = $this->getCSVHeaders($file);
     if (empty($headers)) {
       return $form;
@@ -169,7 +188,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       return [-1 => $this->t('No sub-types available')];
     }
 
-    $options = [-1 => $this->t('No sub-type: Base Fields Only')];
+    $options = [-1 => $this->t('None: Base Fields Only')];
     foreach ($bundleInfo[$entity_type_id] as $bundle => $info) {
       $options[$bundle] = $info['label'] ?? $bundle;
     }
@@ -183,7 +202,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     // Check how many fields for this file we have mapped with the selected process.
     $form['bundle']['#options'] = $this->getBundleOptions($form_state->getValue('entity_type_id'));
     $response->addCommand(new ReplaceCommand("#bundle-select", $form['bundle']));
-    //$response->addCommand(new ReplaceCommand("#mukurtu-import-import-file-summary .form-item-table-{$fid}-mapping", "<span>$fid:$entity_type_id</span>"));
     return $response;
   }
 
@@ -221,8 +239,14 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     $entity_type_id = $form_state->getValue('entity_type_id');
     $bundle = $form_state->getValue('bundle') == -1 ? NULL : $form_state->getValue('bundle');
+    //$this->setFileProcess($fid, $form_state->getValue('mappings'));
 
-    $this->setFileProcess($fid, $form_state->getValue('mappings'));
+    if ($this->importConfig) {
+      $this->importConfig->setTargetEntityTypeId($entity_type_id);
+      $this->importConfig->setTargetBundle($bundle);
+      $this->importConfig->setMapping($form_state->getValue('mappings'));
+      $this->setImportConfig($fid, $this->importConfig);
+    }
 
     // Go back to the file summary form.
     $form_state->setRedirect('mukurtu_import.import_files');
@@ -311,8 +335,18 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    * 2. Check for full field label matches (case insensitive).
    */
   protected function getAutoMappedTarget($source, $entity_type_id, $bundle = NULL) {
-    $needle = mb_strtolower($source);
     $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $configMapping = $this->importConfig ? $this->importConfig->getMapping() : [];
+
+    // If the selected config has an existing valid mapping for this field,
+    // it has precedence.
+    foreach ($configMapping as $mapping) {
+      if ($mapping['source'] == $source && in_array($mapping['target'], array_keys($fieldDefs))) {
+        return $mapping['target'];
+      }
+    }
+
+    $needle = mb_strtolower($source);
 
     // Check if we have a (case insensitive) field name match.
     if (isset($fieldDefs[$needle])) {

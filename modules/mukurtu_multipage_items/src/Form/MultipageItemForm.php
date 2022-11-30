@@ -14,7 +14,8 @@ class MultipageItemForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-
+    $query = $this->entityTypeManager->getStorage('multipage_item')->getQuery();
+    $query->condition('field')
     $entity = $this->getEntity();
     $result = $entity->save();
     $link = $entity->toLink($this->t('View'))->toRenderable();

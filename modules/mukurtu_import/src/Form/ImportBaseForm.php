@@ -10,6 +10,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\file\FileInterface;
 use Exception;
 use League\Csv\Reader;
+use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
+use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 /**
  * Provides a Mukurtu Import form.
  */
@@ -33,6 +35,10 @@ class ImportBaseForm extends FormBase {
    */
   protected $entityFieldManager;
 
+  protected $metadataFiles;
+  protected $binaryFiles;
+  protected $metadataFilesImportConfig;
+
   /**
    * {@inheritdoc}
    */
@@ -41,6 +47,9 @@ class ImportBaseForm extends FormBase {
     $this->store = $this->tempStoreFactory->get('mukurtu_import');
     $this->entityTypeManager = $entity_type_manager;
     $this->entityFieldManager = $entity_field_manager;
+
+    $this->metadataFiles = $this->store->get('metadata_files');
+    $this->metadataFilesImportConfig  = $this->store->get('import_config');
   }
 
   /**
@@ -81,26 +90,61 @@ class ImportBaseForm extends FormBase {
   }
 
   public function setMetadataFiles($files) {
+    $this->metadataFiles = $files;
     $this->store->set('metadata_files', $files);
   }
 
   public function getMetadataFiles() {
-    return $this->store->get('metadata_files');
+    return $this->metadataFiles;//$this->store->get('metadata_files');
   }
 
   protected function initializeProcess($fid) {
     $this->store->set('process_map', []);
   }
 
+  // Bad?
   public function setFileProcess($fid, $mapping) {
     $processMap = $this->store->get('process_map') ?? [];
     $processMap[$fid]['mapping'] = $mapping;
     $this->store->set('process_map', $processMap);
   }
 
+  // Bad?
   public function getFileProcess($fid) {
     $processMap = $this->store->get('process_map') ?? [];
     return $processMap[$fid]['mapping'] ?? [];
+  }
+
+  /**
+   * Set the import config for a specific file.
+   *
+   * @param int $fid
+   *   The file id.
+   * @param \Drupal\mukurtu_import\MukurtuImportStrategyInterface $config
+   *   The import config.
+   *
+   * @return void
+   */
+  public function setImportConfig($fid, MukurtuImportStrategyInterface $config) {
+    //dpm("Saving config for $fid");
+    //dpm($config);
+    $this->metadataFilesImportConfig[$fid] = $config;
+    $this->store->set('import_config', $this->metadataFilesImportConfig);
+  }
+
+  /**
+   * Get the import config for a specific file.
+   *
+   * @param int $fid
+   *   The file id.
+   *
+   * @return \Drupal\mukurtu_import\MukurtuImportStrategyInterface
+   *   The import config.
+   */
+  public function getImportConfig($fid) {
+    //dpm("Getting config for $fid");
+    //dpm($this->metadataFilesImportConfig[$fid]);
+    return $this->metadataFilesImportConfig[$fid] ?? MukurtuImportStrategy::create([]);
   }
 
   /**
