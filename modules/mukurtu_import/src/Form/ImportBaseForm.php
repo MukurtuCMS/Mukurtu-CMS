@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\file\FileInterface;
 use Exception;
 use League\Csv\Reader;
@@ -27,6 +28,7 @@ class ImportBaseForm extends FormBase {
   protected $store;
 
   protected $entityTypeManager;
+  protected $entityBundleInfo;
 
   /**
    * The entity field manager service.
@@ -42,11 +44,12 @@ class ImportBaseForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager) {
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info) {
     $this->tempStoreFactory = $temp_store_factory;
     $this->store = $this->tempStoreFactory->get('mukurtu_import');
     $this->entityTypeManager = $entity_type_manager;
     $this->entityFieldManager = $entity_field_manager;
+    $this->entityBundleInfo = $entity_bundle_info;
 
     $this->metadataFiles = $this->store->get('metadata_files');
     $this->metadataFilesImportConfig  = $this->store->get('import_config');
@@ -59,7 +62,8 @@ class ImportBaseForm extends FormBase {
     return new static(
       $container->get('tempstore.private'),
       $container->get('entity_type.manager'),
-      $container->get('entity_field.manager')
+      $container->get('entity_field.manager'),
+      $container->get('entity_type.bundle.info'),
     );
   }
 

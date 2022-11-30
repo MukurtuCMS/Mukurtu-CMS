@@ -28,9 +28,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $form['table'] = [
       '#type' => 'table',
       '#header' => [
-        // /'',
         $this->t('File'),
-        //$this->t('Type'),
         $this->t('Mapping'),
         '',
       ],
@@ -49,46 +47,14 @@ class ImportFileSummaryForm extends ImportBaseForm {
       if (!$metadataFile) {
         continue;
       }
-  /*
-        $form['table'][$fid] = [
-          'data' => [],
-        ]; */
-      //$form['table'][$fid]['#attributes']['class'] = ['draggable'];
-/*       $form['table'][$fid]['weight'] = [
-        '#type' => 'weight',
-        '#title' => t('Weight'),
-        '#title_display' => 'invisible',
-        '#default_value' => 0,
-        '#attributes' => [
-          'class' => [
-            'draggable-weight'
-          ]
-        ],
-      ]; */
+
       $form['table'][$fid]['label'] = [
         '#markup' => $metadataFile->label(),
       ];
 
-      /*       $form['table'][$fid]['entity_type_id'] = [
-        '#type' => 'select',
-        '#options' => [
-          'unknown' => $this->t('Select Type'),
-          'content' => $this->t('Content'),
-          'media' => $this->t('Media'),
-          'community' => $this->t('Community'),
-          'protocol' => $this->t('Cultural Protocol'),
-        ],
-        '#ajax' => [
-          'callback' => [$this, 'fileTypeAjaxCallback'],
-          'event' => 'change',
-        ],
-      ]; */
-
+      $typeMessage = $this->getTypeSummaryMessage($fid);
       $mappedFieldMsg = $this->getMappedFieldsMessage($fid);
       $form['table'][$fid]['mapping'] = [
-/*         '#attributes' => [
-          'id' => "mapping-config-$fid",
-        ], */
         '#type' => 'select',
         '#options' => $this->getImportConfigOptions($fid),
         '#default_value' => 'custom',
@@ -96,11 +62,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
           'callback' => [$this, 'mappingChangeAjaxCallback'],
           'event' => 'change',
         ],
-        '#suffix' => "<div id=\"mapping-summary-{$fid}\">{$mappedFieldMsg}</div>",
-        /* '#type' => 'submit',
-        '#value' => $this->t('Define Custom Mapping'),
-        '#button_type' => 'primary',
-        '#submit' => ['::defineCustomMapping'], */
+        '#suffix' => "<div id=\"mapping-summary-{$fid}\"><div>{$typeMessage}</div><div>{$mappedFieldMsg}</div></div>",
       ];
 
       $form['table'][$fid]['edit'] = [
@@ -133,12 +95,28 @@ class ImportFileSummaryForm extends ImportBaseForm {
     return ['custom' => 'Custom Mapping'];
   }
 
+  protected function getTypeSummaryMessage($fid) {
+    // Get the import config for this file.
+    $importConfig = $this->getImportConfig($fid);
+
+    $entity_type_id = $importConfig->getTargetEntityTypeId();
+    $entityLabel = $this->entityTypeManager->getDefinition($entity_type_id)->getLabel();
+    $bundle = $importConfig->getTargetBundle();
+    $bundleLabel = $this->entityBundleInfo->getBundleInfo($entity_type_id)[$bundle]['label'];
+
+    if ($bundle) {
+      return $this->t('Importing @type: @bundle', ['@type' => $entityLabel, '@bundle' => $bundleLabel]);
+    }
+
+    return $this->t('Importing @type', ['@type' => $entityLabel]);
+  }
+
   protected function getMappedFieldsMessage($fid) {
     // Get the import config for this file.
     $importConfig = $this->getImportConfig($fid);
 
     // Get the field mapping from the config.
-    $process = $importConfig->getMapping(); //$this->getFileProcess($fid);
+    $process = $importConfig->getMapping();
 
     // Load the file and read the headers.
     $file = $this->entityTypeManager->getStorage('file')->load($fid);
@@ -179,9 +157,10 @@ class ImportFileSummaryForm extends ImportBaseForm {
     // Update the field mapping message.
     $response = new AjaxResponse();
 
+    $typeMessage = $this->getTypeSummaryMessage($fid);
     // Check how many fields for this file we have mapped with the selected process.
     $msg = $this->getMappedFieldsMessage($fid);
-    $response->addCommand(new ReplaceCommand("#mapping-summary-{$fid}", "<div id=\"mapping-summary-{$fid}\">{$msg}</div>"));
+    $response->addCommand(new ReplaceCommand("#mapping-summary-{$fid}", "<div id=\"mapping-summary-{$fid}\"><div>{$typeMessage}</div><div>{$msg}</div></div>"));
     //$response->addCommand(new ReplaceCommand("#mukurtu-import-import-file-summary .form-item-table-{$fid}-mapping", "<span>$fid:$entity_type_id</span>"));
     return $response;
   }

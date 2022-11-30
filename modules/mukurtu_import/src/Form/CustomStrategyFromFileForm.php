@@ -9,6 +9,7 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\file\FileInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides a Mukurtu Import form.
@@ -20,8 +21,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager){
-    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager);
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info){
+    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info);
     $this->importConfig = NULL;
   }
 
