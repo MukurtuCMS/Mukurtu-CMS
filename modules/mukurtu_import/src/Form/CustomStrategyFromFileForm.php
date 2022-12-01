@@ -16,6 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class CustomStrategyFromFileForm extends ImportBaseForm {
   protected $importConfig;
+  protected $importConfigLoaded;
   protected $fieldDefinitions;
 
   /**
@@ -23,7 +24,12 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    */
   public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info){
     parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info);
-    $this->importConfig = NULL;
+
+    // Initializing importConfig with a fresh import config just to make my
+    // IDE happy... Loading the real config in buildForm where we have the
+    // file id.
+    $this->importConfig = $this->getImportConfig(-1);
+    $this->importConfigLoaded = FALSE;
   }
 
   /**
@@ -38,12 +44,10 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state, FileInterface $file = NULL) {
     // Handle the initial loading of the import config for this file.
-    if (!$this->importConfig) {
+    if (!$this->importConfigLoaded) {
       $this->importConfig = $this->getImportConfig($file->id());
+      $this->importConfigLoaded = TRUE;
     }
-    //$bundle = $this->importConfig->getBundle();
-
-    //$this->getImportConfig($fid);
 
     if(!$file) {
       return $form;
@@ -85,6 +89,34 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     $this->buildMappingTable($form, $form_state, $file);
+
+    // Provide an option to save this config for reuse.
+    $form['import_config'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Import Configuration Template'),
+    ];
+    $form['import_config']['config_save'] = [
+      '#type' => 'checkbox',
+      '#default_value' => FALSE,
+      '#title' => $this->importConfig->isNew() ? $this->t('Save this import configuration as a template for future imports.') : $this->t('Save the changes to this existing template.'),
+      '#attributes' => [
+        'name' => 'config_save',
+      ],
+    ];
+
+    $form['import_config']['config_title'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Title'),
+      '#default_value' => $this->importConfig->isNew() ? '' : $this->importConfig->getLabel(),
+      '#states' => [
+        'visible' => [
+          ':input[name="config_save"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    if ($this->importConfig->isNew()) {
+
+    }
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -240,14 +272,21 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     $entity_type_id = $form_state->getValue('entity_type_id');
     $bundle = $form_state->getValue('bundle') == -1 ? NULL : $form_state->getValue('bundle');
-    //$this->setFileProcess($fid, $form_state->getValue('mappings'));
 
-    if ($this->importConfig) {
-      $this->importConfig->setTargetEntityTypeId($entity_type_id);
-      $this->importConfig->setTargetBundle($bundle);
-      $this->importConfig->setMapping($form_state->getValue('mappings'));
-      $this->setImportConfig($fid, $this->importConfig);
+    $this->importConfig->setTargetEntityTypeId($entity_type_id);
+    $this->importConfig->setTargetBundle($bundle);
+    $this->importConfig->setMapping($form_state->getValue('mappings'));
+
+    if ($form_state->getValue('config_save')) {
+      $userProvidedLabel = $form_state->getValue('config_title');
+      if (trim($userProvidedLabel) != '') {
+        $this->importConfig->setLabel($userProvidedLabel);
+      }
+      $this->importConfig->setOwnerId($this->currentUser()->id());
+      $this->importConfig->save();
     }
+    $this->setImportConfig($fid, $this->importConfig);
+
 
     // Go back to the file summary form.
     $form_state->setRedirect('mukurtu_import.import_files');

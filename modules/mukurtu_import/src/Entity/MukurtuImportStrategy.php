@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_import\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Defines the mukurtu_import_strategy entity type.
@@ -41,9 +42,12 @@ use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
  *   },
  *   config_export = {
  *     "id",
+ *     "uid",
  *     "label",
  *     "description",
- *     "entity_type_id"
+ *     "target_entity_type_id",
+ *     "target_bundle",
+ *     "mapping",
  *   }
  * )
  */
@@ -77,8 +81,9 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    */
   protected $description;
 
-  protected $targetEntityTypeId;
-  protected $targetBundle;
+  protected $target_entity_type_id;
+  protected $target_bundle;
+  protected $uid;
 
   /**
    * [0] => Array
@@ -89,20 +94,27 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    */
   protected $mapping;
 
+  /**
+   * {@inheritdoc}
+   */
+  public function id() {
+    return $this->id;
+  }
+
   public function setTargetEntityTypeId($entity_type_id) {
-    $this->targetEntityTypeId = $entity_type_id;
+    $this->target_entity_type_id = $entity_type_id;
   }
 
   public function getTargetEntityTypeId() {
-    return $this->targetEntityTypeId ?? 'node';
+    return $this->target_entity_type_id ?? 'node';
   }
 
   public function setTargetBundle($bundle) {
-    $this->targetBundle = $bundle;
+    $this->target_bundle = $bundle;
   }
 
   public function getTargetBundle() {
-    return $this->targetBundle ?? NULL;
+    return $this->target_bundle ?? NULL;
   }
 
   public function getMapping() {
@@ -111,6 +123,46 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
   public function setMapping($mapping) {
     $this->mapping = $mapping;
+  }
+
+  public function getLabel() {
+    return $this->label;
+  }
+
+  public function setLabel($label) {
+    $this->label = $label;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function save() {
+    if (!$this->id()) {
+      $this->id = $this->uuidGenerator()->generate();
+    }
+
+    if (!$this->uid) {
+      $this->uid = 1;
+    }
+    parent::save();
+  }
+
+  public function getOwner() {
+    return $this->entityTypeManager()->getStorage('user')->load($this->getOwnerId());
+  }
+
+  public function setOwner(UserInterface $account) {
+    $this->uid = $account->id();
+    return $this;
+  }
+
+  public function getOwnerId() {
+    return $this->uid ?: 1;
+  }
+
+  public function setOwnerId($uid) {
+    $this->uid = $uid;
+    return $this;
   }
 
 }

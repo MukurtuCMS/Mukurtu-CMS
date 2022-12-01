@@ -37,12 +37,6 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#disabled' => !$this->entity->isNew(),
     ];
 
-/*     $form['status'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Enabled'),
-      '#default_value' => $this->entity->status(),
-    ]; */
-
     $form['description'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Description'),
@@ -50,11 +44,11 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#description' => $this->t('Description.'),
     ];
 
-    $form['entity_type_id'] = [
+    $form['target_entity_type_id'] = [
       '#type' => 'select',
       '#options' => ['node' => 'Content', 'media' => 'Media'],
       '#title' => $this->t('Type'),
-      '#default_value' => $this->entity->get('entity_type_id') ?? 'node',
+      '#default_value' => $this->entity->get('target_entity_type_id') ?? 'node',
       '#description' => $this->t('Type of import.'),
       '#required' => TRUE,
       '#ajax' => [
@@ -63,11 +57,12 @@ class MukurtuImportStrategyForm extends EntityForm {
       ],
     ];
 
-    $entity_type_id = $form_state->getValue('entity_type_id') ?? $this->entity->get('entity_type_id');
-    $form['bundle'] = [
+    $target_entity_type_id = $form_state->getValue('target_entity_type_id') ?? $this->entity->get('target_entity_type_id');
+    $form['target_bundle'] = [
       '#type' => 'select',
       '#title' => $this->t('Sub-type'),
-      '#options' => $this->getBundleOptions($entity_type_id),
+      '#options' => $this->getBundleOptions($target_entity_type_id),
+      '#default_value' => $this->entity->get('target_bundle') ?? -1,
       '#description' => $this->t('Optional Sub-type.'),
       '#prefix' => "<div id=\"bundle-select\">",
       '#suffix' => "</div>",
@@ -145,9 +140,9 @@ class MukurtuImportStrategyForm extends EntityForm {
     $response = new AjaxResponse();
 
     // Check how many fields for this file we have mapped with the selected process.
-    $form['bundle']['#options'] = $this->getBundleOptions($form_state->getValue('entity_type_id'));
-    $response->addCommand(new ReplaceCommand("#bundle-select", $form['bundle']));
-    //$response->addCommand(new ReplaceCommand("#mukurtu-import-import-file-summary .form-item-table-{$fid}-mapping", "<span>$fid:$entity_type_id</span>"));
+    $form['target_bundle']['#options'] = $this->getBundleOptions($form_state->getValue('target_entity_type_id'));
+    $response->addCommand(new ReplaceCommand("#bundle-select", $form['target_bundle']));
+
     return $response;
   }
 

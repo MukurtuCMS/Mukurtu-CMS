@@ -29,11 +29,11 @@ class ImportFileSummaryForm extends ImportBaseForm {
       '#type' => 'table',
       '#header' => [
         $this->t('File'),
-        $this->t('Mapping'),
+        $this->t('Import Configuration'),
         '',
       ],
       '#attributes' => [
-        'id' => 'my-module-table'
+        'id' => 'import-configuration-summary'
       ],
       '#tabledrag' => [[
         'action' => 'order',
@@ -43,6 +43,8 @@ class ImportFileSummaryForm extends ImportBaseForm {
     ];
 
     foreach ($metadataFiles as $fid) {
+      $config = $this->getImportConfig($fid);
+      $configId = $config->id() ?? 'custom';
       $metadataFile = $this->entityTypeManager->getStorage('file')->load($fid);
       if (!$metadataFile) {
         continue;
@@ -57,7 +59,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
       $form['table'][$fid]['mapping'] = [
         '#type' => 'select',
         '#options' => $this->getImportConfigOptions($fid),
-        '#default_value' => 'custom',
+        '#default_value' => $configId,
         '#ajax' => [
           'callback' => [$this, 'mappingChangeAjaxCallback'],
           'event' => 'change',
@@ -92,7 +94,20 @@ class ImportFileSummaryForm extends ImportBaseForm {
   }
 
   protected function getImportConfigOptions($fid) {
-    return ['custom' => 'Custom Mapping'];
+    $options = ['custom' => 'Custom Settings'];
+
+    // Get the user's available import configs.
+    $query = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->getQuery();
+    $result = $query->condition('uid', $this->currentUser()->id())->execute();
+
+    if (!empty($result)) {
+      $configs = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->loadMultiple($result);
+      foreach ($configs as $config_id => $config) {
+        $options[$config_id] = $config->getLabel();
+      }
+    }
+
+    return $options;
   }
 
   protected function getTypeSummaryMessage($fid) {
@@ -147,12 +162,18 @@ class ImportFileSummaryForm extends ImportBaseForm {
   public function mappingChangeAjaxCallback(array &$form, FormStateInterface $form_state) {
     $element = $form_state->getTriggeringElement();
     $fid = $element['#parents'][1] ?? NULL;
+    $table = $form_state->getValue('table');
+    $newConfigId = $table[$fid]['mapping'] ?? 'custom';
+    $currentConfig = $this->getImportConfig($fid);
 
-    // User changed the process, save this change.
-    //$process = $this->getFileProcess($fid);
-    //$this->setFileProcess($fid, $process);
-
-    // @todo Use setImportConfig here once we've got everything in place.
+    // If the config has actually changed, save the new change.
+    if ($newConfigId != $currentConfig->id()) {
+      // A new import config has been selected.
+      $newConfig = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->load($newConfigId);
+      if ($newConfig) {
+        $this->setImportConfig($fid, $newConfig);
+      }
+    }
 
     // Update the field mapping message.
     $response = new AjaxResponse();
@@ -161,39 +182,8 @@ class ImportFileSummaryForm extends ImportBaseForm {
     // Check how many fields for this file we have mapped with the selected process.
     $msg = $this->getMappedFieldsMessage($fid);
     $response->addCommand(new ReplaceCommand("#mapping-summary-{$fid}", "<div id=\"mapping-summary-{$fid}\"><div>{$typeMessage}</div><div>{$msg}</div></div>"));
-    //$response->addCommand(new ReplaceCommand("#mukurtu-import-import-file-summary .form-item-table-{$fid}-mapping", "<span>$fid:$entity_type_id</span>"));
+
     return $response;
-  }
-
-  public function fileTypeAjaxCallback(array &$form, FormStateInterface $form_state) {
-    $element = $form_state->getTriggeringElement();
-    $fid = $element['#parents'][1] ?? NULL;
-    if ($fid) {
-      $settings = $form_state->getValue('table');
-      $entity_type_id = $settings[$fid]['entity_type_id'] ?? NULL;
-    }
-
-    $form['table'][$fid]['mapping'] = [
-      '#attributes' => [
-        'id' => "mapping-config-$fid",
-      ],
-      '#type' => 'select',
-      '#options' => ['custom' => "Custom Mapping ($entity_type_id)", 'existing' => 'Existing Test'],
-      '#default_value' => 'custom',
-      /* '#type' => 'submit',
-        '#value' => $this->t('Define Custom Mapping'),
-        '#button_type' => 'primary',
-        '#submit' => ['::defineCustomMapping'], */
-    ];
-
-    $response = new AjaxResponse();
-    $response->addCommand(new ReplaceCommand("#mapping-config-{$fid}", $form['table'][$fid]['mapping']));
-    //$response->addCommand(new ReplaceCommand("#mukurtu-import-import-file-summary .form-item-table-{$fid}-mapping", "<span>$fid:$entity_type_id</span>"));
-    return $response;
-  }
-
-  protected function getMappingOptions($entity_type_id) {
-
   }
 
   /**

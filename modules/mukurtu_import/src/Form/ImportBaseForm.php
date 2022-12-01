@@ -148,7 +148,7 @@ class ImportBaseForm extends FormBase {
   public function getImportConfig($fid) {
     //dpm("Getting config for $fid");
     //dpm($this->metadataFilesImportConfig[$fid]);
-    return $this->metadataFilesImportConfig[$fid] ?? MukurtuImportStrategy::create([]);
+    return $this->metadataFilesImportConfig[$fid] ?? MukurtuImportStrategy::create(['uid' => $this->currentUser()->id()]);
   }
 
   /**

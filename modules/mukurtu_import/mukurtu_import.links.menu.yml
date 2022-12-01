@@ -9,3 +9,8 @@ entity.mukurtu_import_strategy.overview:
   parent: system.admin_structure
   description: 'List of mukurtu_import_strategies to extend site functionality.'
   route_name: entity.mukurtu_import_strategy.collection
+mukurtu_import.import:
+  title: Import
+  description: Import Content and Media
+  menu_name: mukurtu
+  route_name: mukurtu_import.file_upload

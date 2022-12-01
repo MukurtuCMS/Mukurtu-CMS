@@ -1,21 +1,25 @@
 mukurtu_import.mukurtu_import_strategy.*:
   type: config_entity
-  label: Mukurtu Import Strategy
+  label: 'Mukurtu Import Strategy'
   mapping:
     id:
       type: string
-      label: ID
+      label: 'ID'
+    uid:
+      type: integer
     label:
       type: label
-      label: Label
+      label: 'Label'
     uuid:
       type: string
     description:
       type: string
-    entity_type_id:
+    target_entity_type_id:
       type: string
-    bundle:
+      label: 'Target Entity Type ID'
+    target_bundle:
       type: string
+      label: 'Target Bundle'
     mappings:
       type: sequence
       sequence:
