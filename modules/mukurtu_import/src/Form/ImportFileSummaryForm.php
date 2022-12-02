@@ -173,10 +173,20 @@ class ImportFileSummaryForm extends ImportBaseForm {
 
     // If the config has actually changed, save the new change.
     if ($newConfigId != $currentConfig->id()) {
-      // A new import config has been selected.
-      $newConfig = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->load($newConfigId);
-      if ($newConfig) {
+      // Switching from non-custom to custom is a special case.
+      if ($newConfigId == 'custom') {
+        // User switched from non-custom to custom. Duplicate the config
+        // and blank out the title so it's a "fresh" custom config but
+        // retains the field mapping/settings of the previously selected config.
+        $newConfig = $currentConfig->createDuplicate();
+        $newConfig->setLabel('');
         $this->setImportConfig($fid, $newConfig);
+      } else {
+        // A new import config has been selected.
+        $newConfig = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->load($newConfigId);
+        if ($newConfig) {
+          $this->setImportConfig($fid, $newConfig);
+        }
       }
     }
 
