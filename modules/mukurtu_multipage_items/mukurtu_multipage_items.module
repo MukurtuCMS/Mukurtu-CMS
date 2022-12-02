@@ -256,6 +256,9 @@ function mukurtu_multipage_items_views_query_alter(ViewExecutable $view, QueryPl
       ->distinct(TRUE)
       ->execute()->fetchCol();
 
-    $query->addWhere('notPages', 'nid', $result, 'NOT IN');
+    // Only query when there are existing pages, or else it will crash.
+    if ($result) {
+      $query->addWhere('notPages', 'nid', $result, 'NOT IN');
+    }
   }
 }
