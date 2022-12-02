@@ -5,7 +5,9 @@ namespace Drupal\mukurtu_import\Entity;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Drupal\user\UserInterface;
-
+use Drupal\file\FileInterface;
+use League\Csv\Reader;
+use Exception;
 /**
  * Defines the mukurtu_import_strategy entity type.
  *
@@ -163,6 +165,26 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   public function setOwnerId($uid) {
     $this->uid = $uid;
     return $this;
+  }
+
+  public function applies(FileInterface $file) {
+    $headers = $this->getCSVHeaders($file);
+    $mapping = $this->getMapping();
+    $diff = array_diff(array_column($mapping, 'source'), $headers);
+    if (empty($diff)) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  protected function getCSVHeaders(FileInterface $file) {
+    try {
+      $csv = Reader::createFromPath($file->getFileUri(), 'r');
+    } catch (Exception $e) {
+      return [];
+    }
+    $csv->setHeaderOffset(0);
+    return $csv->getHeader();
   }
 
 }

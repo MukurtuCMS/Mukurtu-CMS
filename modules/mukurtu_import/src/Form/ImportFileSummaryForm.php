@@ -94,6 +94,9 @@ class ImportFileSummaryForm extends ImportBaseForm {
   }
 
   protected function getImportConfigOptions($fid) {
+    $file = $this->entityTypeManager->getStorage('file')->load($fid);
+
+    // Custom is always available and is the default.
     $options = ['custom' => 'Custom Settings'];
 
     // Get the user's available import configs.
@@ -103,7 +106,9 @@ class ImportFileSummaryForm extends ImportBaseForm {
     if (!empty($result)) {
       $configs = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->loadMultiple($result);
       foreach ($configs as $config_id => $config) {
-        $options[$config_id] = $config->getLabel();
+        if ($config->applies($file)) {
+          $options[$config_id] = $config->getLabel();
+        }
       }
     }
 

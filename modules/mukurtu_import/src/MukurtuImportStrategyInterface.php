@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_import;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\file\FileInterface;
 
 /**
  * Provides an interface defining a mukurtu_import_strategy entity type.
@@ -17,4 +18,5 @@ interface MukurtuImportStrategyInterface extends ConfigEntityInterface, EntityOw
   public function getTargetBundle();
   public function setLabel($label);
   public function getLabel();
+  public function applies(FileInterface $file);
 }
