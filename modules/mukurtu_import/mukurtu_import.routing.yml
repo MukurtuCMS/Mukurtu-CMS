@@ -2,7 +2,7 @@ entity.mukurtu_import_strategy.collection:
   path: '/admin/structure/mukurtu-import-strategy'
   defaults:
     _entity_list: 'mukurtu_import_strategy'
-    _title: 'mukurtu_import_strategy configuration'
+    _title: 'Import Configuration Templates'
   requirements:
     _permission: 'administer mukurtu_import_strategy'
 
@@ -10,7 +10,7 @@ entity.mukurtu_import_strategy.add_form:
   path: '/admin/structure/mukurtu_import_strategy/add'
   defaults:
     _entity_form: 'mukurtu_import_strategy.add'
-    _title: 'Add a mukurtu_import_strategy'
+    _title: 'Add an import configuration template'
   requirements:
     _permission: 'administer mukurtu_import_strategy'
 
@@ -18,7 +18,7 @@ entity.mukurtu_import_strategy.edit_form:
   path: '/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}'
   defaults:
     _entity_form: 'mukurtu_import_strategy.edit'
-    _title: 'Edit a mukurtu_import_strategy'
+    _title: 'Edit an import configuration template'
   requirements:
     _permission: 'administer mukurtu_import_strategy'
 
@@ -26,7 +26,7 @@ entity.mukurtu_import_strategy.delete_form:
   path: '/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}/delete'
   defaults:
     _entity_form: 'mukurtu_import_strategy.delete'
-    _title: 'Delete a mukurtu_import_strategy'
+    _title: 'Delete an import configuration template'
   requirements:
     _permission: 'administer mukurtu_import_strategy'
 

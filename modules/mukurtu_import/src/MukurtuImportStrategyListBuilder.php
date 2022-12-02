@@ -15,8 +15,9 @@ class MukurtuImportStrategyListBuilder extends ConfigEntityListBuilder {
    */
   public function buildHeader() {
     $header['label'] = $this->t('Label');
-    $header['id'] = $this->t('Machine name');
-    $header['status'] = $this->t('Status');
+    $header['entity_type_id'] = $this->t('Target Entity Type ID');
+    $header['bundle'] = $this->t('Target Bundle');
+    $header['uid'] = $this->t('UID');
     return $header + parent::buildHeader();
   }
 
@@ -26,8 +27,9 @@ class MukurtuImportStrategyListBuilder extends ConfigEntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     /** @var \Drupal\mukurtu_import2\MukurtuImportStrategyInterface $entity */
     $row['label'] = $entity->label();
-    $row['id'] = $entity->id();
-    $row['status'] = $entity->status() ? $this->t('Enabled') : $this->t('Disabled');
+    $row['entity_type_id'] = $entity->getTargetEntityTypeId();
+    $row['bundle'] = $entity->getTargetBundle();
+    $row['uid'] = $entity->getOwnerId();
     return $row + parent::buildRow($entity);
   }
 

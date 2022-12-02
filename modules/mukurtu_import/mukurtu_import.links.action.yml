@@ -1,5 +1,5 @@
 entity.mukurtu_import_strategy.add_form:
   route_name: 'entity.mukurtu_import_strategy.add_form'
-  title: 'Add mukurtu_import_strategy'
+  title: 'Add Import Configuration Template'
   appears_on:
     - entity.mukurtu_import_strategy.collection

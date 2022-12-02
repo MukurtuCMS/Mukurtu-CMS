@@ -28,15 +28,6 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#required' => TRUE,
     ];
 
-    $form['id'] = [
-      '#type' => 'machine_name',
-      '#default_value' => $this->entity->id(),
-      '#machine_name' => [
-        'exists' => '\Drupal\mukurtu_import\Entity\MukurtuImportStrategy::load',
-      ],
-      '#disabled' => !$this->entity->isNew(),
-    ];
-
     $form['description'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Description'),
