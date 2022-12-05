@@ -87,7 +87,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
     ];
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Next'),
+      '#value' => $this->t('Import'),
     ];
 
     return $form;
@@ -122,7 +122,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $entity_type_id = $importConfig->getTargetEntityTypeId();
     $entityLabel = $this->entityTypeManager->getDefinition($entity_type_id)->getLabel();
     $bundle = $importConfig->getTargetBundle();
-    $bundleLabel = $this->entityBundleInfo->getBundleInfo($entity_type_id)[$bundle]['label'];
+    $bundleLabel = $this->entityBundleInfo->getBundleInfo($entity_type_id)[$bundle]['label'] ?? '';
 
     if ($bundle) {
       return $this->t('Importing @type: @bundle', ['@type' => $entityLabel, '@bundle' => $bundleLabel]);
@@ -224,8 +224,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->messenger()->addStatus($this->t('The message has been sent.'));
-    $form_state->setRedirect('<front>');
+    $form_state->setRedirect('mukurtu_import.execute_import');
   }
 
 }

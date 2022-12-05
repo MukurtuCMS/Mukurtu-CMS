@@ -187,4 +187,38 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return $csv->getHeader();
   }
 
+  protected function getDefinitionId(FileInterface $file) {
+    return $this->getOwnerId() . "_" . $file->id() . "_" . $this->getTargetEntityTypeId() . "_" . $this->getTargetBundle();
+  }
+
+  public function toDefinition(FileInterface $file) {
+    $mapping = $this->getMapping();
+    $naiveProcess = array_combine(array_column($mapping, 'target'), array_column($mapping, 'source'));
+
+    $entity_type_id = $this->getTargetEntityTypeId();
+    $bundle = $this->getTargetBundle();
+    $definition = [
+      'id' => $this->getDefinitionId($file),
+      'migration_tags' => ['importtest'],
+      'source' => [
+        'plugin' => 'csv',
+        'path' => $file->getFileUri(),
+        //'ids' => ['id', 'title'],
+        //'ids' => ['title'],
+        'ids' => ['id'],
+        //'ids' => ['uuid'],
+        'track_changes' => TRUE,
+      ],
+      'process' => $naiveProcess,
+      'destination' => [
+        'plugin' => "entity:$entity_type_id",
+        'default_bundle' => $bundle,
+        'overwrite_properties' => ['title'],
+        'validate' => TRUE,
+      ],
+    ];
+
+    return $definition;
+  }
+
 }
