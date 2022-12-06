@@ -32,3 +32,13 @@ mukurtu_protocol.add_protocol_role:
   route_parameters:
     entity_type_id: protocol
     bundle_id: protocol
+mukurtu_protocol.community_add_membership:
+  route_name: mukurtu_protocol.community_add_membership
+  title: 'Add New Member'
+  appears_on:
+    - mukurtu_protocol.community_members_list
+mukurtu_protocol.protocol_add_membership:
+  route_name: mukurtu_protocol.protocol_add_membership
+  title: 'Add New Member'
+  appears_on:
+    - mukurtu_protocol.protocol_members_list
