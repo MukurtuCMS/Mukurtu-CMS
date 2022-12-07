@@ -14,18 +14,32 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
    * {@inheritdoc}
    */
   public function validate($value, Constraint $constraint) {
+    $uniqueItems = [];
+
     foreach ($value as $item) {
+      $id = $item->getValue()['target_id'];
+      $entity = \Drupal::entityTypeManager()->getStorage('node')->load($id);
+      $title = $entity->label();
+
+      // Item is unique.
+      if (!in_array($id, $uniqueItems)) {
+        array_push($uniqueItems, $id);
+      }
+      // Item is a duplicate.
+      elseif (in_array($id, $uniqueItems)) {
+        $this->context->addViolation($constraint->isDuplicate, ['%value' => $title]);
+      }
       // Check if the node is already in an MPI.
-      if ($this->alreadyInMPI($item->getValue())) {
-        $this->context->addViolation($constraint->alreadyInMPI, ['%value' => $item->getValue()['target_id']]);
+      if ($this->alreadyInMPI($id)) {
+        $this->context->addViolation($constraint->alreadyInMPI, ['%value' => $title]);
       }
       // Check if the node is a community record.
-      if ($this->isCommunityRecord($item->getValue())) {
-        $this->context->addViolation($constraint->isCommunityRecord, ['%value' => $item->getValue()['target_id']]);
+      if ($this->isCommunityRecord($id)) {
+        $this->context->addViolation($constraint->isCommunityRecord, ['%value' => $title]);
       }
-      // Check if the node is of type enabled .
-      if (!$this->isEnabledBundleType($item->getValue())) {
-        $this->context->addViolation($constraint->notEnabledBundleType, ['%value' => $item->getValue()['target_id']]);
+      // Check if the node is of type enabled for multipage items.
+      if (!$this->isEnabledBundleType($id)) {
+        $this->context->addViolation($constraint->notEnabledBundleType, ['%value' => $title]);
       }
     }
   }
@@ -36,25 +50,16 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
    * @param string $value
    */
   private function alreadyInMPI($value) {
-    $table_mapping = \Drupal::entityTypeManager()->getStorage('multipage_item')->getTableMapping();
-    $field_table = $table_mapping->getFieldTableName('field_pages');
-    $field_storage_definitions = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('multipage_item')['field_pages'];
-    $field_column = $table_mapping->getFieldColumnName($field_storage_definitions, 'target_id');
+    // $value = [pages]
+    $query = \Drupal::entityQuery('multipage_item')
+      ->condition('field_pages', $value)
+      ->condition('id', $this->context->getRoot()->getEntity()->id(), '!=')
+      ->accessCheck(FALSE);
+    $result = $query->execute();
 
-    $connection = \Drupal::database();
-    $result = $connection->select($field_table, 'f')
-      ->fields('f', array($field_column))
-      ->distinct(TRUE)
-      ->execute()->fetchCol();
-
-    // Could be refactored.
     if ($result) {
-      if (in_array($value['target_id'], $result)) {
-        return true;
-      }
-      return false;
+      return true;
     }
-    // There are no MPI pages yet.
     return false;
   }
 
@@ -70,9 +75,8 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
       ->accessCheck(FALSE)
       ->execute();
 
-    // Could be refactored.
     if ($result) {
-      if (in_array($value['target_id'], $result)) {
+      if (in_array($value, $result)) {
         return true;
       }
     }
@@ -95,9 +99,8 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
       ->accessCheck(FALSE)
       ->execute();
 
-    // Could be refactored.
     if ($result) {
-      if (in_array($value['target_id'], $result)) {
+      if (in_array($value, $result)) {
         return true;
       }
     }

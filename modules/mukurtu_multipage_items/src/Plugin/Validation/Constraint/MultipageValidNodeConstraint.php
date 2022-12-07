@@ -15,14 +15,12 @@ use Symfony\Component\Validator\Constraint;
  */
 class MultipageValidNodeConstraint extends Constraint {
 
-  // The message that will be shown if the node is already in an MPI.
-  public $alreadyInMPI = '%value is already contained in an existing multipage item.';
+  public $isDuplicate = '%value is a duplicate.';
 
-  // The message that will be shown if the node is a community record.
-  public $isCommunityRecord = '%value is a community record.';
+  public $alreadyInMPI = '%value is a page in a different multipage item. Multipage items cannot share pages.';
 
-  // The message that will be shown if the node is of a bundle type not enabled
-  // for use as an MPI.
-  public $notEnabledBundleType = '%value is not of bundle type enabled for multipage items.';
+  public $isCommunityRecord = '%value: Community records cannot be pages of a multipage item.';
+
+  public $notEnabledBundleType = '%value: This content type is not enabled for multipage items.';
 
 }
