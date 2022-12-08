@@ -23,4 +23,6 @@ class MultipageValidNodeConstraint extends Constraint {
 
   public $notEnabledBundleType = '%value: This content type is not enabled for multipage items.';
 
+  protected $enabledBundles;
+
 }

@@ -18,8 +18,6 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
 
     foreach ($value as $item) {
       $id = $item->getValue()['target_id'];
-      $entity = \Drupal::entityTypeManager()->getStorage('node')->load($id);
-      $title = $entity->label();
 
       // Item is unique.
       if (!in_array($id, $uniqueItems)) {
@@ -27,19 +25,19 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
       }
       // Item is a duplicate.
       elseif (in_array($id, $uniqueItems)) {
-        $this->context->addViolation($constraint->isDuplicate, ['%value' => $title]);
+        $this->context->addViolation($constraint->isDuplicate, ['%value' => $this->getTitle($id)]);
       }
       // Check if the node is already in an MPI.
       if ($this->alreadyInMPI($id)) {
-        $this->context->addViolation($constraint->alreadyInMPI, ['%value' => $title]);
+        $this->context->addViolation($constraint->alreadyInMPI, ['%value' => $this->getTitle($id)]);
       }
       // Check if the node is a community record.
       if ($this->isCommunityRecord($id)) {
-        $this->context->addViolation($constraint->isCommunityRecord, ['%value' => $title]);
+        $this->context->addViolation($constraint->isCommunityRecord, ['%value' => $this->getTitle($id)]);
       }
       // Check if the node is of type enabled for multipage items.
       if (!$this->isEnabledBundleType($id)) {
-        $this->context->addViolation($constraint->notEnabledBundleType, ['%value' => $title]);
+        $this->context->addViolation($constraint->notEnabledBundleType, ['%value' => $this->getTitle($id)]);
       }
     }
   }
@@ -90,8 +88,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
    */
   private function isEnabledBundleType($value)
   {
-    $bundles_config = \Drupal::config('mukurtu_multipage_items.settings')->get('bundles_config');
-    $enabledBundles = array_keys(array_filter($bundles_config));
+    $enabledBundles = $this->getEnabledBundles();
 
     $nodeStorage = \Drupal::entityTypeManager()->getStorage('node');
     $result = $nodeStorage->getQuery()
@@ -105,5 +102,23 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
       }
     }
     return false;
+  }
+
+  /**
+   * Fetch enabled bundles.
+   */
+  private function getEnabledBundles() {
+    if (!$this->enabledBundles) {
+      $this->enabledBundles = array_keys(array_filter(\Drupal::config('mukurtu_multipage_items.settings')->get('bundles_config')));
+    }
+    return $this->enabledBundles;
+  }
+
+  /**
+   * Fetch the node title.
+   */
+  private function getTitle($id) {
+    $entity = \Drupal::entityTypeManager()->getStorage('node')->load($id);
+    return $entity->label();
   }
 }
