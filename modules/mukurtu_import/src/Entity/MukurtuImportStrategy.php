@@ -191,10 +191,23 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return $this->getOwnerId() . "_" . $file->id() . "_" . $this->getTargetEntityTypeId() . "_" . $this->getTargetBundle();
   }
 
-  public function toDefinition(FileInterface $file) {
+  protected function getProcess() {
     $mapping = $this->getMapping();
+
+    // This will cause collisions if there are dupes. Do we care?
     $naiveProcess = array_combine(array_column($mapping, 'target'), array_column($mapping, 'source'));
 
+    // Remove ignored mappings. This depends on the above dupe behavior.
+    if (isset($naiveProcess['-1'])) {
+      unset($naiveProcess['-1']);
+    }
+
+    // @todo Add process plugins as appropriate for the target field type.
+
+    return $naiveProcess;
+  }
+
+  public function toDefinition(FileInterface $file) {
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
     $definition = [
@@ -209,7 +222,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         //'ids' => ['uuid'],
         'track_changes' => TRUE,
       ],
-      'process' => $naiveProcess,
+      'process' => $this->getProcess(),//$naiveProcess,
       'destination' => [
         'plugin' => "entity:$entity_type_id",
         'default_bundle' => $bundle,
@@ -219,6 +232,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     ];
 
     return $definition;
+  }
+
+  public function mappedFieldsCount(FileInterface $file) {
+    $fileHeaders = $this->getCSVHeaders($file);
+    $process = $this->getMapping();
+    // Compare the import config to the headers.
+    $mappingHeaders = array_column($process, 'source');
+    $diff = array_diff($fileHeaders, $mappingHeaders);
+    $mappedCount = count($fileHeaders) - count($diff);
+    return $mappedCount;
   }
 
 }

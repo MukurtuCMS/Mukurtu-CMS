@@ -52,7 +52,7 @@ class ImportBaseForm extends FormBase {
     $this->entityBundleInfo = $entity_bundle_info;
 
     $this->metadataFiles = $this->store->get('metadata_files');
-    $this->metadataFilesImportConfig  = $this->store->get('import_config');
+    $this->metadataFilesImportConfig = $this->store->get('import_config');
   }
 
   /**

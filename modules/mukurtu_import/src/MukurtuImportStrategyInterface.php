@@ -20,4 +20,5 @@ interface MukurtuImportStrategyInterface extends ConfigEntityInterface, EntityOw
   public function getLabel();
   public function applies(FileInterface $file);
   public function toDefinition(FileInterface $file);
+  public function mappedFieldsCount(FileInterface $file);
 }

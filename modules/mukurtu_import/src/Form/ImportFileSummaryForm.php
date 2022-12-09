@@ -25,6 +25,16 @@ class ImportFileSummaryForm extends ImportBaseForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $metadataFiles = $this->getMetadataFiles();
 
+    $form['all_files_ready'] = [
+      '#type' => 'hidden',
+      '#value' => $this->allFilesReady() ? "1" : "0",
+      '#attributes' => [
+        'name' => 'all-files-ready',
+      ],
+      '#prefix' => "<div id=\"all-files-ready\">",
+      '#suffix' => "</div>",
+    ];
+
     $form['table'] = [
       '#type' => 'table',
       '#header' => [
@@ -88,6 +98,14 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Import'),
+      '#states' => [
+        'disabled' => [
+          ':input[name="all-files-ready"]' => ['value' => '0'],
+        ],
+        'enabled' => [
+          ':input[name="all-files-ready"]' => ['value' => '1'],
+        ],
+      ],
     ];
 
     return $form;
@@ -198,7 +216,25 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $msg = $this->getMappedFieldsMessage($fid);
     $response->addCommand(new ReplaceCommand("#mapping-summary-{$fid}", "<div id=\"mapping-summary-{$fid}\"><div>{$typeMessage}</div><div>{$msg}</div></div>"));
 
+    // Check if all files are valid enough to proceed with import.
+    $form['all_files_ready']['#value'] = $this->allFilesReady() ? "1" : "0";
+    $response->addCommand(new ReplaceCommand("#all-files-ready", $form['all_files_ready']));
     return $response;
+  }
+
+  protected function allFilesReady() {
+    $metadataFiles = $this->getMetadataFiles();
+    foreach ($metadataFiles as $fid) {
+      $config = $this->getImportConfig($fid);
+      $metadataFile = $this->entityTypeManager->getStorage('file')->load($fid);
+      if (!$metadataFile) {
+        continue;
+      }
+      if ($config->mappedFieldsCount($metadataFile) == 0) {
+        return FALSE;
+      }
+    }
+    return TRUE;
   }
 
   /**
