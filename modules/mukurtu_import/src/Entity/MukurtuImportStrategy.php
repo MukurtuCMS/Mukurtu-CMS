@@ -191,22 +191,105 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return $this->getOwnerId() . "_" . $file->id() . "_" . $this->getTargetEntityTypeId() . "_" . $this->getTargetBundle();
   }
 
+  protected function getFieldDefinitions($entity_type_id, $bundle = NULL) {
+    if ($bundle) {
+      return \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+    }
+    return \Drupal::service('entity_field.manager')->getBaseFieldDefinitions($entity_type_id);
+  }
+
   protected function getProcess() {
+    $entity_type_id = $this->getTargetEntityTypeId();
+    $bundle = $this->getTargetBundle();
     $mapping = $this->getMapping();
+
+    // Get the field definitions for the target.
+    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
 
     // This will cause collisions if there are dupes. Do we care?
     $naiveProcess = array_combine(array_column($mapping, 'target'), array_column($mapping, 'source'));
 
-    // Remove ignored mappings. This depends on the above dupe behavior.
+    // Remove ignored mappings. This depends on the above dupe collision behavior.
     if (isset($naiveProcess['-1'])) {
       unset($naiveProcess['-1']);
     }
 
     // @todo Add process plugins as appropriate for the target field type.
+    foreach ($naiveProcess as $target => $source) {
+      $fieldDef = $fieldDefs[$target] ?? NULL;
+      if (!$fieldDef) {
+        continue;
+      }
+      //dpm("$target is {$fieldDef->getType()}");
 
+      if ($fieldDef->getType() == 'entity_reference') {
+        $refType = $fieldDef->getSetting('target_type');
+
+        if ($refType == 'taxonomy_term') {
+          $targetBundles = $fieldDef->getSetting('handler_settings')['target_bundles'] ?? [];
+          $newSource = [];
+          $newSource[] = [
+            'plugin' => 'explode',
+            'delimiter' => ';',
+          ];
+          $newSource[] = [
+            'plugin' => 'entity_lookup',//$fieldDef->getSetting('handler_settings')['auto_create'] ? 'entity_generate' : 'entity_lookup',
+            'source' => $source,
+            'value_key' => 'name',
+            'bundle_key' => 'vid',
+            'bundle' => array_keys($targetBundles),
+            'entity_type' => $fieldDef->getSetting('target_type'),
+            'ignore_case' => TRUE,
+            //'operator' => 'STARTS_WITH',
+          ];
+          $naiveProcess[$target] = $newSource;
+        }
+      }
+    }
+dpm($naiveProcess);
     return $naiveProcess;
   }
 
+  /**
+   * Get the fields that are allowed to be altered for existing entities.
+   *
+   * @return mixed
+   */
+  protected function getOverwriteProperties() {
+    $entity_type_id = $this->getTargetEntityTypeId();
+    $bundle = $this->getTargetBundle();
+    $mapping = $this->getMapping();
+    $targets = array_column($mapping, 'target');
+
+    // Get the field definitions for the target.
+    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
+
+    $writableFields = [];
+    foreach ($fieldDefs as $fieldName => $fieldDef) {
+      if (in_array($fieldName,['default_langcode'])) {
+        continue;
+      }
+
+      // Sometimes there are fields that are marked as writable but the migrate
+      // system will fail to import if they are specified as overwritable. Here
+      // we get around this by only specifying what is absolutely necessary for
+      // the given import input.
+      if (!$fieldDef->isReadOnly() && in_array($fieldName, $targets)) {
+        $writableFields[] = $fieldName;
+      }
+    }
+
+    return $writableFields;
+  }
+
+  /**
+   * Generate a Migrate API definition for a given file.
+   *
+   * @param \Drupal\file\FileInterface $file
+   *   The import input file.
+   * @return mixed
+   *   The migration definition array
+   */
   public function toDefinition(FileInterface $file) {
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
@@ -222,11 +305,11 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         //'ids' => ['uuid'],
         'track_changes' => TRUE,
       ],
-      'process' => $this->getProcess(),//$naiveProcess,
+      'process' => $this->getProcess(),
       'destination' => [
         'plugin' => "entity:$entity_type_id",
         'default_bundle' => $bundle,
-        'overwrite_properties' => ['title'],
+        'overwrite_properties' => $this->getOverwriteProperties(),
         'validate' => TRUE,
       ],
     ];
