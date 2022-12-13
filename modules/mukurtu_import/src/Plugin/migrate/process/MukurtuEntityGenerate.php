@@ -4,17 +4,16 @@ declare(strict_types = 1);
 
 namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
-use Drupal\migrate_plus\Plugin\migrate\process\EntityLookup;
+use Drupal\migrate_plus\Plugin\migrate\process\EntityGenerate;
 
 /**
  * This plugin looks for existing entities.
  *
  * @MigrateProcessPlugin(
- *   id = "mukurtu_entity_lookup",
- *   handle_multiples = FALSE
+ *   id = "mukurtu_entity_generate"
  * )
  */
-class MukurtuEntityLookup extends EntityLookup {
+class MukurtuEntityGenerate extends EntityGenerate {
 
   /**
    * Determine if a value is a valid entity ID for the user to reference.
