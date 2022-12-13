@@ -62,7 +62,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
   }
 
   /**
-   * See if the value represents a node already in an MPI.
+   * See if the value is a community record.
    *
    * @param string $value
    */
