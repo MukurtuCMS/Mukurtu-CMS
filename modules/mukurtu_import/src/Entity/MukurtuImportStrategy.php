@@ -220,7 +220,6 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       if (!$fieldDef) {
         continue;
       }
-      //dpm("$target is {$fieldDef->getType()}");
 
       if ($fieldDef->getType() == 'entity_reference') {
         $refType = $fieldDef->getSetting('target_type');
@@ -230,23 +229,60 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
           $newSource = [];
           $newSource[] = [
             'plugin' => 'explode',
+            'source' => $source,
             'delimiter' => ';',
           ];
+          $allTargetBundles = array_keys($targetBundles);
+          $targetBundle = reset($allTargetBundles);
           $newSource[] = [
-            'plugin' => 'entity_lookup',//$fieldDef->getSetting('handler_settings')['auto_create'] ? 'entity_generate' : 'entity_lookup',
-            'source' => $source,
+            'plugin' => $fieldDef->getSetting('handler_settings')['auto_create'] ? 'mukurtu_entity_generate' : 'mukurtu_entity_lookup',
             'value_key' => 'name',
             'bundle_key' => 'vid',
-            'bundle' => array_keys($targetBundles),
+            'bundle' => $targetBundle,
             'entity_type' => $fieldDef->getSetting('target_type'),
             'ignore_case' => TRUE,
             //'operator' => 'STARTS_WITH',
           ];
           $naiveProcess[$target] = $newSource;
         }
+
+        if ($refType == 'node') {
+          $newSource = [];
+          $newSource[] = [
+            'plugin' => 'explode',
+            'source' => $source,
+            'delimiter' => ';',
+          ];
+          $newSource[] = [
+            'plugin' => 'mukurtu_entity_lookup',
+            'value_key' => 'title',
+            'entity_type' => $fieldDef->getSetting('target_type'),
+          ];
+          $naiveProcess[$target] = $newSource;
+        }
+
+        if (in_array($refType, ['community', 'protocol'])) {
+          $newSource = [];
+          $newSource[] = [
+            'plugin' => 'explode',
+            'source' => $source,
+            'delimiter' => ';',
+          ];
+          $newSource[] = [
+            'plugin' => 'mukurtu_entity_lookup',
+            'value_key' => 'name',
+            'entity_type' => $fieldDef->getSetting('target_type'),
+          ];
+          $naiveProcess[$target] = $newSource;
+        }
+
+        // @todo Paragraphs.
+        // @todo Users.
+        // @todo Protocol Control Entities.
+
       }
     }
-dpm($naiveProcess);
+
     return $naiveProcess;
   }
 
@@ -300,6 +336,7 @@ dpm($naiveProcess);
         'plugin' => 'csv',
         'path' => $file->getFileUri(),
         //'ids' => ['id', 'title'],
+        //'ids' => ['identifier', 'title'],
         //'ids' => ['title'],
         'ids' => ['id'],
         //'ids' => ['uuid'],
