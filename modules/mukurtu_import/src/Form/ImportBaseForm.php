@@ -93,13 +93,31 @@ class ImportBaseForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
   }
 
+  /**
+   * Reset the import operation to a clean initial state.
+   *
+   * @return void
+   */
+  protected function reset() {
+    // Delete all the temporary metadata files.
+    foreach ($this->getMetadataFiles() as $fid) {
+      if ($file = $this->entityTypeManager->getStorage('file')->load($fid)) {
+        $file->delete();
+      }
+    }
+
+    $this->store->set('metadata_files', NULL);
+    $this->metadataFilesImportConfig = [];
+    $this->store->set('import_config', []);
+  }
+
   public function setMetadataFiles($files) {
     $this->metadataFiles = $files;
     $this->store->set('metadata_files', $files);
   }
 
   public function getMetadataFiles() {
-    return $this->metadataFiles;//$this->store->get('metadata_files');
+    return $this->metadataFiles;
   }
 
   protected function initializeProcess($fid) {
