@@ -18,13 +18,14 @@ class MukurtuEntityGenerate extends EntityGenerate {
   /**
    * Determine if a value is a valid entity ID for the user to reference.
    *
-   * @param mixed $id
+   * @param mixed $value
    *   The value of the potential ID.
    *
    * @return boolean
    *   True if a valid ID, False otherwise.
    */
-  protected function isValidIdentifier($id) {
+  protected function isValidIdentifier($value) {
+    $id = is_array($value) ? reset($value) : $value;
     if (is_numeric($id)) {
       $entity = $this->entityTypeManager->getStorage($this->lookupEntityType)->load($id);
       if ($entity && (!$this->accessCheck || $entity->access('view'))) {
