@@ -60,7 +60,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     $form['entity_type_id'] = [
       '#type' => 'radios',
-      '#options' => ['node' => 'Content', 'media' => 'Media'],
+      '#options' => $this->getEntityTypeIdOptions(),
       '#title' => $this->t('Type'),
       '#default_value' => $form_state->getValue('entity_type_id') ?? $this->importConfig->getTargetEntityTypeId(),
       '#description' => $this->t('Type of import.'),
@@ -133,6 +133,21 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     return $form;
+  }
+
+  /**
+   * Get the options array for available target entity types.
+   */
+  protected function getEntityTypeIdOptions() {
+    $definitons = $this->entityTypeManager->getDefinitions();
+    $options = [];
+    foreach (['node', 'media', 'community', 'protocol'] as $entity_type_id) {
+      if (isset($definitons[$entity_type_id])) {
+        $options[$entity_type_id] = $definitons[$entity_type_id]->getLabel();
+      }
+    }
+
+    return $options;
   }
 
   protected function buildMappingTable(array &$form, FormStateInterface $form_state, FileInterface $file) {
