@@ -4,10 +4,8 @@ namespace Drupal\mukurtu_import\Form;
 
 use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\migrate_tools\MigrateBatchExecutable;
+use Drupal\mukurtu_import\ImportBatchExecutable;
 use Drupal\migrate\MigrateMessage;
-use Drupal\migrate\MigrateExecutable;
-use Drupal\migrate\Plugin\MigrationInterface;
 use Exception;
 
 class ExecuteImportForm extends ImportBaseForm {
@@ -22,40 +20,13 @@ class ExecuteImportForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $metadataFiles = $this->getMetadataFiles();
-
-    $form['debug_message'] = ['#markup' => "<div>This is only a temporary debug screen.</div>"];
-    foreach ($metadataFiles as $fid) {
-      $config = $this->getImportConfig($fid);
-      $metadataFile = $this->entityTypeManager->getStorage('file')->load($fid);
-      if (!$metadataFile) {
-        continue;
-      }
-
-      $importDefinition = $config->toDefinition($metadataFile);
-      $migration = \Drupal::service('plugin.manager.migration')->createStubMigration($importDefinition);
-      $migration->setTrackLastImported(TRUE);
-
-      $migrateMessage = new MigrateMessage();
-      $executable = new MigrateBatchExecutable($migration, $migrateMessage);
-      //$executable = new MigrateExecutable($migration);
-
-      try {
-        //$result = $executable->batchImport();
-        $result = $executable->import();
-        if ($result === MigrationInterface::RESULT_COMPLETED) {
-          $id_map = $migration->getIdMap();
-          $imported = $id_map->importedCount();
-          $form[$fid] = ['#markup' => "<div>{$metadataFile->getFilename()}:$imported imported</div>"];
-
-        } else {
-          $form[$fid] = ['#markup' => "<div>{$metadataFile->getFilename()}: Something bad happened ($result)</div>"];
-        }
-      } catch (Exception $e) {
-        dpm($e);
-      }
-    }
-
+    $form['debug_message'] = ['#markup' => "<div>This is only a temporary debug form.</div>"];
+    $form['import'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Start Import'),
+      '#button_type' => 'primary',
+      '#submit' => ['::startImport'],
+    ];
     $form['actions'] = [
       '#type' => 'actions',
     ];
@@ -83,6 +54,33 @@ class ExecuteImportForm extends ImportBaseForm {
 
   public function submitBack(array &$form, FormStateInterface $form_state) {
     $form_state->setRedirect('mukurtu_import.import_files');
+  }
+
+  public function startImport(array &$form, FormStateInterface $form_state) {
+    $metadataFiles = $this->getMetadataFiles();
+    $migrationDefinitions = [];
+
+    // Build migrations for each input file.
+    foreach ($metadataFiles as $fid) {
+      $config = $this->getImportConfig($fid);
+      $metadataFile = $this->entityTypeManager->getStorage('file')->load($fid);
+      if (!$metadataFile) {
+        continue;
+      }
+
+      $migrationDefinitions[] = $config->toDefinition($metadataFile);
+    }
+
+    // Run the migrations.
+    $migrateMessage = new MigrateMessage();
+    $bootstrapMigration = \Drupal::service('plugin.manager.migration')->createStubMigration(reset($migrationDefinitions));
+    $executable = new ImportBatchExecutable($bootstrapMigration, $migrateMessage);
+
+    try {
+      $executable->batchImportMultiple($migrationDefinitions);
+    } catch (Exception $e) {
+      dpm($e);
+    }
   }
 
   /**
