@@ -176,6 +176,11 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
       $this->setRevisionUserId($this->getOwnerId());
     }
 
+    // Default name.
+    if ($this->getName() == '' && $entity = $this->getControlledEntity()) {
+      $this->setName("{$entity->getEntityTypeId()}:{$entity->uuid()}");
+    }
+
     // Resolve protocol inheritance.
     $inheritanceTarget = $this->getInheritanceTarget();
     if ($inheritanceTarget) {

@@ -215,7 +215,14 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     }
 
     // @todo Add process plugins as appropriate for the target field type.
-    foreach ($naiveProcess as $target => $source) {
+    foreach ($naiveProcess as $targetOption => $source) {
+      $fieldComponents = explode(':', $targetOption, 2);
+      $target = $targetOption;
+      $sub_target = "";
+      if (count($fieldComponents) > 1) {
+        list($target, $sub_target) = $fieldComponents;
+      }
+
       $fieldDef = $fieldDefs[$target] ?? NULL;
       if (!$fieldDef) {
         continue;
@@ -256,9 +263,38 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
           $newSource[] = [
             'plugin' => 'mukurtu_entity_lookup',
             'value_key' => 'title',
+            'ignore_case' => TRUE,
             'entity_type' => $fieldDef->getSetting('target_type'),
           ];
           $naiveProcess[$target] = $newSource;
+        }
+
+        // Protocol Handling.
+        if ($refType == 'protocol_control') {
+          $newSource = [];
+          if ($sub_target == 'field_sharing_setting') {
+            $newSource[] = [
+              'plugin' => 'callback',
+              'callable' => 'mb_strtolower',
+              'field_name' => $sub_target,
+              'source' => $source,
+            ];
+          }
+          if ($sub_target == 'field_protocols') {
+            $newSource[] = [
+              'plugin' => 'explode',
+              'source' => $source,
+              'delimiter' => ';',
+            ];
+            $newSource[] = [
+              'plugin' => 'mukurtu_entity_lookup',
+              'value_key' => 'name',
+              'field_name' => $sub_target,
+              'entity_type' => 'protocol',
+              'ignore_case' => TRUE,
+            ];
+          }
+          $naiveProcess[$targetOption] = $newSource;
         }
 
         if (in_array($refType, ['community', 'protocol'])) {

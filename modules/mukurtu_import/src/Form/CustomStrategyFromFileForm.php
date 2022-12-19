@@ -375,8 +375,20 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    *   The select form element.
    */
   protected function buildTargetOptions($entity_type_id, $bundle = NULL) {
+    $pceFields = $this->getFieldDefinitions('protocol_control');
+
     $options = [-1 => $this->t('Ignore - Do not import')];
     foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
+      if ($field_definition->getType() == 'entity_reference') {
+        if($field_definition->getSetting('target_type') == 'protocol_control') {
+          // Split our protocol control reference into the individual sharing
+          // setting/protocols components. We'll stitch them back together into
+          // the protocol control entity in the destination plugin.
+          $options["$field_name:field_sharing_setting"] = $pceFields['field_sharing_setting']->getLabel();
+          $options["$field_name:field_protocols"] = $pceFields['field_protocols']->getLabel();
+          continue;
+        }
+      }
       $options[$field_name] = $field_definition->getLabel();
     }
 

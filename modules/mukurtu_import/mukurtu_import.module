@@ -1,1 +1,15 @@
 <?php
+
+/**
+ * Implements hook_migrate_destination_info_alter().
+ */
+function mukurtu_import_migrate_destination_info_alter(array &$definitions) {
+  // Use the Mukurtu destination class for node and media.
+  // This class handles protocol aware content.
+  if (isset($definitions['entity:node'])) {
+    $definitions['entity:node']['class'] = 'Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareEntityContent';
+  }
+  if (isset($definitions['entity:media'])) {
+    $definitions['entity:media']['class'] = 'Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareEntityContent';
+  }
+}
