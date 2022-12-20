@@ -408,7 +408,11 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     // If the selected config has an existing valid mapping for this field,
     // it has precedence.
     foreach ($configMapping as $mapping) {
-      if ($mapping['source'] == $source && in_array($mapping['target'], array_keys($fieldDefs))) {
+      // Break up any subfields.
+      $target = reset(explode(':', $mapping['target'], 2));
+
+      // Checking if we have a mapping and the root of the target field exists.
+      if ($mapping['source'] == $source && in_array($target, array_keys($fieldDefs))) {
         return $mapping['target'];
       }
     }
