@@ -409,7 +409,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     // it has precedence.
     foreach ($configMapping as $mapping) {
       // Break up any subfields.
-      $target = reset(explode(':', $mapping['target'], 2));
+      $subfields = explode(':', $mapping['target'], 2);
+      $target = reset($subfields);
 
       // Checking if we have a mapping and the root of the target field exists.
       if ($mapping['source'] == $source && in_array($target, array_keys($fieldDefs))) {
