@@ -8,6 +8,7 @@ use Drupal\user\UserInterface;
 use Drupal\file\FileInterface;
 use League\Csv\Reader;
 use Exception;
+
 /**
  * Defines the mukurtu_import_strategy entity type.
  *
@@ -223,10 +224,13 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         list($target, $sub_target) = $fieldComponents;
       }
 
+      /** @var \Drupal\field\FieldConfigInterface $fieldDef */
       $fieldDef = $fieldDefs[$target] ?? NULL;
       if (!$fieldDef) {
         continue;
       }
+      $cardinality = $fieldDef->getFieldStorageDefinition()->getCardinality();
+      $multiple = $cardinality == -1 || $cardinality > 1;
 
       if ($fieldDef->getType() == 'entity_reference') {
         $refType = $fieldDef->getSetting('target_type');
@@ -314,8 +318,23 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
         // @todo Paragraphs.
         // @todo Users.
-        // @todo Protocol Control Entities.
 
+      }
+
+      // Link fields.
+      if ($fieldDef->getType() == 'link') {
+        $newSource = [];
+        if ($multiple) {
+          $newSource[] = [
+            'plugin' => 'explode',
+            'delimiter' => ';',
+          ];
+        }
+        $newSource[] = [
+          'plugin' => 'markdown_link',
+        ];
+        $newSource[0]['source'] = $source;
+        $naiveProcess[$target] = $newSource;
       }
     }
 
