@@ -232,6 +232,18 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $cardinality = $fieldDef->getFieldStorageDefinition()->getCardinality();
       $multiple = $cardinality == -1 || $cardinality > 1;
 
+      if ($fieldDef->getType() == 'list_string') {
+        $newSource = [];
+        $newSource[] = [
+          'plugin' => 'label_lookup',
+          'source' => $source,
+          'entity_type' => $fieldDef->get('entity_type'),
+          'field_name' => $fieldDef->get('field_name'),
+          'bundle' => $fieldDef->get('bundle'),
+        ];
+        $naiveProcess[$target] = $newSource;
+      }
+
       if ($fieldDef->getType() == 'entity_reference') {
         $refType = $fieldDef->getSetting('target_type');
 
