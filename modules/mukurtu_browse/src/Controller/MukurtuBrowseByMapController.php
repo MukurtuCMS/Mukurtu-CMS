@@ -26,10 +26,11 @@ class MukurtuBrowseByMapController extends ControllerBase {
       ->accessCheck(TRUE);
 
     $results = $query->execute();
+
     return empty($results) ? AccessResult::forbidden() : AccessResult::allowed();
   }
 
-  public function content() {
+  public function content($view) {
     // Browse link.
     $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link']];
     $map_browse_link = Link::createFromRoute(t('Switch to List View'), 'mukurtu_browse.browse_page', [], $options);
@@ -37,7 +38,7 @@ class MukurtuBrowseByMapController extends ControllerBase {
     // Render the map browse view block.
     $map_browse_view_block = [
       '#type' => 'view',
-      '#name' => 'mukurtu_browse_by_map',
+      '#name' => $view,
       '#display_id' => 'map_block',
       '#embed' => TRUE,
     ];

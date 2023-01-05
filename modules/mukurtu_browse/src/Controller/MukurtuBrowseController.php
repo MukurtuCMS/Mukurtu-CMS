@@ -8,7 +8,7 @@ use Drupal\Core\Link;
 
 class MukurtuBrowseController extends ControllerBase {
 
-  public function content() {
+  public function content($view) {
     // Map browse link.
     $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link']];
 
@@ -21,7 +21,7 @@ class MukurtuBrowseController extends ControllerBase {
     // Render the browse view block.
     $browse_view_block = [
       '#type' => 'view',
-      '#name' => 'mukurtu_browse',
+      '#name' => $view,
       '#display_id' => 'mukurtu_browse_block',
       '#embed' => TRUE,
     ];
