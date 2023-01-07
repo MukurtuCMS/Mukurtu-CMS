@@ -40,6 +40,8 @@ class ImportBaseForm extends FormBase {
   protected $metadataFiles;
   protected $binaryFiles;
   protected $metadataFilesImportConfig;
+  protected $importId;
+
 
   /**
    * {@inheritdoc}
@@ -50,6 +52,11 @@ class ImportBaseForm extends FormBase {
     $this->entityTypeManager = $entity_type_manager;
     $this->entityFieldManager = $entity_field_manager;
     $this->entityBundleInfo = $entity_bundle_info;
+    $import_id = $this->store->get('import_id');
+    if (empty($import_id)) {
+      $import_id = \Drupal::service('uuid')->generate();
+    }
+    $this->importId = $import_id;
 
     $this->metadataFiles = $this->store->get('metadata_files');
     $this->metadataFilesImportConfig = $this->store->get('import_config');
@@ -106,6 +113,7 @@ class ImportBaseForm extends FormBase {
       }
     }
 
+    $this->store->set('import_id', NULL);
     $this->store->set('metadata_files', NULL);
     $this->metadataFilesImportConfig = [];
     $this->store->set('import_config', []);
@@ -118,6 +126,10 @@ class ImportBaseForm extends FormBase {
 
   public function getMetadataFiles() {
     return $this->metadataFiles;
+  }
+
+  public function getImportId() {
+    return $this->importId;
   }
 
   protected function initializeProcess($fid) {

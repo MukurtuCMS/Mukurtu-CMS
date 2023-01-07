@@ -68,7 +68,7 @@ class ExecuteImportForm extends ImportBaseForm {
         continue;
       }
 
-      $migrationDefinitions[] = $config->toDefinition($metadataFile);
+      $migrationDefinitions[] = $config->toDefinition($metadataFile) + ['mukurtu_import_id' => $this->getImportId()];
     }
 
     // Run the migrations.

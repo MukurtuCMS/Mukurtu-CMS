@@ -9,6 +9,7 @@ use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolControl;
 use Drupal\migrate\Exception\EntityValidationException;
+use Drupal\Core\Entity\RevisionLogInterface;
 use Exception;
 
 class ProtocolAwareEntityContent extends EntityContentBase {
@@ -39,6 +40,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       if ($savePce) {
         $pceViolations = $pce->validate();
         if (count($pceViolations) > 0) {
+          // @todo Need to create our own version of this with a better message and ideally row number.
           throw new EntityValidationException($pceViolations);
         }
         try {
@@ -57,6 +59,24 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       $ids[] = $entity->language()->getId();
     }
     return $ids;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function save(ContentEntityInterface $entity, array $old_destination_id_values = []) {
+    if ($entity instanceof RevisionLogInterface) {
+      $import_id = $this->migration->pluginDefinition["mukurtu_import_id"] ?? '';
+
+      // @todo This probably shouldn't be done here.
+      $currentUser = \Drupal::entityTypeManager()->getStorage('user')->load(\Drupal::currentUser()->id());
+      $message = $this->t("Imported by @username (Import ID: @import_id)", ['@import_id' => $import_id, '@username' => $currentUser->getDisplayName()]);
+      $entity->setRevisionUserId($currentUser->id());
+      $entity->setNewRevision(TRUE);
+      $entity->setRevisionLogMessage($message);
+    }
+    $entity->save();
+    return [$entity->id()];
   }
 
 }
