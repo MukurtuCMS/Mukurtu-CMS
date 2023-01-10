@@ -66,12 +66,8 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    */
   protected function save(ContentEntityInterface $entity, array $old_destination_id_values = []) {
     if ($entity instanceof RevisionLogInterface) {
-      $import_id = $this->migration->pluginDefinition["mukurtu_import_id"] ?? '';
-
-      // @todo This probably shouldn't be done here.
-      $currentUser = \Drupal::entityTypeManager()->getStorage('user')->load(\Drupal::currentUser()->id());
-      $message = $this->t("Imported by @username (Import ID: @import_id)", ['@import_id' => $import_id, '@username' => $currentUser->getDisplayName()]);
-      $entity->setRevisionUserId($currentUser->id());
+      $message = $this->migration->pluginDefinition["mukurtu_import_message"] ?? '';
+      $entity->setRevisionUserId(\Drupal::currentUser()->id());
       $entity->setNewRevision(TRUE);
       $entity->setRevisionLogMessage($message);
     }

@@ -54,6 +54,14 @@ mukurtu_import.import_files:
   requirements:
     _permission: 'access content'
 
+mukurtu_import.import_results:
+  path: '/dashboard/import/results'
+  defaults:
+    _title: 'Import Results'
+    _form: 'Drupal\mukurtu_import\Form\ImportResultsForm'
+  requirements:
+    _permission: 'access content'
+
 mukurtu_import.custom_strategy_from_file_form:
   path: '/dashboard/import/files/mapping/add/{file}'
   defaults:

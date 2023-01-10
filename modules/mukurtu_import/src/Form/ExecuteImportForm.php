@@ -36,20 +36,8 @@ class ExecuteImportForm extends ImportBaseForm {
       '#button_type' => 'primary',
       '#submit' => ['::submitBack'],
     ];
-    $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Start a new import'),
-    ];
 
     return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->reset();
-    $form_state->setRedirect('mukurtu_import.file_upload');
   }
 
   public function submitBack(array &$form, FormStateInterface $form_state) {
@@ -68,7 +56,7 @@ class ExecuteImportForm extends ImportBaseForm {
         continue;
       }
 
-      $migrationDefinitions[] = $config->toDefinition($metadataFile) + ['mukurtu_import_id' => $this->getImportId()];
+      $migrationDefinitions[] = $config->toDefinition($metadataFile) + ['mukurtu_import_message' => $this->getImportRevisionMessage()];
     }
 
     // Run the migrations.
@@ -81,6 +69,8 @@ class ExecuteImportForm extends ImportBaseForm {
     } catch (Exception $e) {
       dpm($e);
     }
+
+    $form_state->setRedirect('mukurtu_import.import_results');
   }
 
   /**

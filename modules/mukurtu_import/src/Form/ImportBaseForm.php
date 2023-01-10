@@ -55,6 +55,7 @@ class ImportBaseForm extends FormBase {
     $import_id = $this->store->get('import_id');
     if (empty($import_id)) {
       $import_id = \Drupal::service('uuid')->generate();
+      $this->store->set('import_id', str_replace('-', '', $import_id));
     }
     $this->importId = $import_id;
 
@@ -132,6 +133,10 @@ class ImportBaseForm extends FormBase {
     return $this->importId;
   }
 
+  public function getImportRevisionMessage() {
+    return $this->t("Imported by @username (Import ID: @import_id)", ['@import_id' => $this->getImportId(), '@username' => $this->currentUser()->getDisplayName()]);
+  }
+
   protected function initializeProcess($fid) {
     $this->store->set('process_map', []);
   }
@@ -160,8 +165,6 @@ class ImportBaseForm extends FormBase {
    * @return void
    */
   public function setImportConfig($fid, MukurtuImportStrategyInterface $config) {
-    //dpm("Saving config for $fid");
-    //dpm($config);
     $this->metadataFilesImportConfig[$fid] = $config;
     $this->store->set('import_config', $this->metadataFilesImportConfig);
   }
@@ -176,8 +179,6 @@ class ImportBaseForm extends FormBase {
    *   The import config.
    */
   public function getImportConfig($fid) {
-    //dpm("Getting config for $fid");
-    //dpm($this->metadataFilesImportConfig[$fid]);
     return $this->metadataFilesImportConfig[$fid] ?? MukurtuImportStrategy::create(['uid' => $this->currentUser()->id()]);
   }
 
