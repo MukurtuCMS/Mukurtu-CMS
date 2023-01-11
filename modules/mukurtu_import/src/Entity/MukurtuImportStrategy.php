@@ -229,6 +229,13 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       if (!$fieldDef) {
         continue;
       }
+/*
+      $property_definitions = $fieldDef
+        ->getFieldStorageDefinition()
+        ->getPropertyDefinitions();
+      dpm($targetOption);
+      dpm(array_keys($property_definitions)); */
+
       $cardinality = $fieldDef->getFieldStorageDefinition()->getCardinality();
       $multiple = $cardinality == -1 || $cardinality > 1;
 
@@ -264,12 +271,11 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
             'bundle' => $targetBundle,
             'entity_type' => $fieldDef->getSetting('target_type'),
             'ignore_case' => TRUE,
-            //'operator' => 'STARTS_WITH',
           ];
           $naiveProcess[$target] = $newSource;
         }
 
-        if ($refType == 'node') {
+        if (in_array($refType, ['community', 'media', 'node', 'protocol'])) {
           $newSource = [];
           $newSource[] = [
             'plugin' => 'explode',
@@ -278,7 +284,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
           ];
           $newSource[] = [
             'plugin' => 'mukurtu_entity_lookup',
-            'value_key' => 'title',
+            'value_key' => $this->entityTypeManager()->getDefinition($refType)->getKey('label'),
             'ignore_case' => TRUE,
             'entity_type' => $fieldDef->getSetting('target_type'),
           ];
@@ -311,21 +317,6 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
             ];
           }
           $naiveProcess[$targetOption] = $newSource;
-        }
-
-        if (in_array($refType, ['community', 'protocol'])) {
-          $newSource = [];
-          $newSource[] = [
-            'plugin' => 'explode',
-            'source' => $source,
-            'delimiter' => ';',
-          ];
-          $newSource[] = [
-            'plugin' => 'mukurtu_entity_lookup',
-            'value_key' => 'name',
-            'entity_type' => $fieldDef->getSetting('target_type'),
-          ];
-          $naiveProcess[$target] = $newSource;
         }
 
         // @todo Paragraphs.
