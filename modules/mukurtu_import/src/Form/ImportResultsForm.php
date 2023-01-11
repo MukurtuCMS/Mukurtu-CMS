@@ -43,6 +43,24 @@ class ImportResultsForm extends ImportBaseForm {
   protected function buildTable(array &$form, FormStateInterface $form_state, $entity_type_id) {
     $message = $this->getImportRevisionMessage();
 
+    $communities_block = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_import_results_communities',
+      '#display_id' => 'results',
+      '#embed' => TRUE,
+      '#arguments' => [$message->render()],
+    ];
+    $form['protocol_results'] = $communities_block;
+
+    $protocol_block = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_import_results_cultural_protocols',
+      '#display_id' => 'results',
+      '#embed' => TRUE,
+      '#arguments' => [$message->render()],
+    ];
+    $form['protocol_results'] = $protocol_block;
+
     $media_block = [
       '#type' => 'view',
       '#name' => 'mukurtu_import_results_media',
