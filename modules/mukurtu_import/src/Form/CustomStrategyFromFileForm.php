@@ -331,6 +331,12 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
           continue;
         }
 
+        // Remove the revision log message as a valid target. We are using
+        // specific revision log messages to control import behavior.
+        if ($field_name == 'revision_log') {
+          unset($fieldDefs[$field_name]);
+        }
+
         // Remove computed and read-only fields.
         if ($fieldDef->isComputed() || $fieldDef->isReadOnly()) {
           unset($fieldDefs[$field_name]);
