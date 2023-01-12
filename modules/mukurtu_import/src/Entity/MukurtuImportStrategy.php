@@ -385,22 +385,39 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    *   The migration definition array
    */
   public function toDefinition(FileInterface $file) {
+    $mapping = $this->getMapping();
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
+    $idKey = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('id');
+    $uuidKey = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
+    $process = $this->getProcess();
+
+    $ids = [];
+    // Entity ID has priority.
+    if (!empty($process[$idKey])) {
+      $ids = array_filter(array_map(fn($v) => $v['target'] == $idKey ? $v['source'] : NULL, $mapping));
+    }
+
+    // UUID has next priority.
+    if (empty($ids) && !empty($process[$uuidKey])) {
+      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuidKey ? $v['source'] : NULL, $mapping));
+    }
+
+    // If we have no ID or UUID, use all input fields as the collective ID.
+    // This will effectively make each row a unique item.
+    if (empty($ids)) {
+      $ids = array_map(fn ($v) => $v['source'], $mapping);
+    }
+
     $definition = [
       'id' => $this->getDefinitionId($file),
-      'migration_tags' => ['importtest'],
       'source' => [
         'plugin' => 'csv',
         'path' => $file->getFileUri(),
-        //'ids' => ['id', 'title'],
-        //'ids' => ['identifier', 'title'],
-        //'ids' => ['title'],
-        'ids' => ['id'],
-        //'ids' => ['uuid'],
+        'ids' => $ids,
         'track_changes' => TRUE,
       ],
-      'process' => $this->getProcess(),
+      'process' => $process,
       'destination' => [
         'plugin' => "entity:$entity_type_id",
         'default_bundle' => $bundle,
