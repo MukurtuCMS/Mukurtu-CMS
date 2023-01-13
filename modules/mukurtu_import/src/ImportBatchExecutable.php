@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_import;
 use Drupal\migrate_tools\MigrateBatchExecutable;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
+use Drupal\Core\Utility\Error;
 
 /**
  * Defines an import executable class for batch import via migrate API.
@@ -32,7 +33,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         'init_message' => $this->t('Start importing %migrate', ['%migrate' => $this->migration->label()]),
         'progress_message' => $this->t('Importing %migrate', ['%migrate' => $this->migration->label()]),
         'error_message' => $this->t('An error occurred while importing %migrate.', ['%migrate' => $this->migration->label()]),
-        'finished' => '\Drupal\migrate_tools\MigrateBatchExecutable::batchFinishedImport',
+        'finished' => '\Drupal\mukurtu_import\ImportBatchExecutable::batchFinishedImport',
       ];
 
       batch_set($batch);
@@ -66,15 +67,17 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $context['sandbox']['operation'] = self::BATCH_IMPORT;
     }
     $message = new MigrateMessage();
+
     $migration = \Drupal::getContainer()->get('plugin.manager.migration')->createStubMigration($migration_definition);
     unset($options['configuration']);
     if (!empty($options['limit']) && isset($context['results'][$migration->id()]['@numitems'])) {
       $options['limit'] -= $context['results'][$migration->id()]['@numitems'];
     }
-    $executable = new MigrateBatchExecutable($migration, $message, $options);
+    $executable = new ImportBatchExecutable($migration, $message, $options);
     if (empty($context['sandbox']['total'])) {
       $context['sandbox']['total'] = $executable->getSource()->count();
       $context['sandbox']['batch_limit'] = $executable->calculateBatchLimit($context);
+      $context['results']['messages'] = [];
       $context['results'][$migration->id()] = [
         '@numitems' => 0,
         '@created' => 0,
@@ -93,6 +96,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
 
     // Do the import.
     $result = $executable->import();
+
+    // Save the messages.
+    $context['results']['messages'] = array_merge($context['results']['messages'], iterator_to_array($executable->getIdMap()->getMessages()));
 
     // Store the result; will need to combine the results of all our iterations.
     $context['results'][$migration->id()] = [
@@ -118,6 +124,44 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         ]);
       }
     }
+  }
+
+  /**
+   * Finished callback for import batches.
+   *
+   * @param bool $success
+   *   A boolean indicating whether the batch has completed successfully.
+   * @param array $results
+   *   The value set in $context['results'] by callback_batch_operation().
+   * @param array $operations
+   *   If $success is FALSE, contains the operations that remained unprocessed.
+   */
+  public static function batchFinishedImport(bool $success, array $results, array $operations): void {
+    $tempstore = \Drupal::service('tempstore.private');
+    $store = $tempstore->get('mukurtu_import');
+    $store->set('batch_results_success', $success);
+
+    $messages = [];
+    foreach ($results['messages'] as $rawMessage) {
+      $parts = explode(':', $rawMessage->message);
+
+      if (isset($parts[0])) {
+        preg_match('/^\d+__(\d+)__.*/', $parts[0], $matches);
+        $fid = $matches[1] ?? NULL;
+        if ($fid) {
+          /** @var \Drupal\file\FileInterface $file */
+          $file = \Drupal::entityTypeManager()->getStorage('file')->load(intval($fid));
+          if ($file) {
+            $parts[0] = $file->getFilename();
+          }
+        }
+        $message = join(':', $parts);
+      } else {
+        $message = $rawMessage->message;
+      }
+      $messages[] = $message;
+    }
+    $store->set('batch_results_messages', $messages);
   }
 
 }

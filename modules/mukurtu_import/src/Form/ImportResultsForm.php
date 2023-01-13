@@ -4,8 +4,6 @@ namespace Drupal\mukurtu_import\Form;
 
 use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\ReplaceCommand;
 
 /**
  * Provides a Mukurtu Import Results form.
@@ -23,11 +21,27 @@ class ImportResultsForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $success = $this->store->get('batch_results_success') ?? FALSE;
+    $messages = $this->store->get('batch_results_messages') ?? [];
+    if (!empty($messages)) {
+      foreach($messages as $message) {
+        $this->messenger()->addError($message);
+      }
+    }
     $this->buildTable($form, $form_state, 'node');
-    $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Start a new import'),
-    ];
+
+    if (!empty($messages) || !$success) {
+      $form['actions']['back'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Return to Uploaded Files'),
+        '#submit' => ['::submitReturnToFiles'],
+      ];
+    } else {
+      $form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Start a new import'),
+      ];
+    }
 
     return $form;
   }
@@ -37,6 +51,10 @@ class ImportResultsForm extends ImportBaseForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->reset();
+    $form_state->setRedirect('mukurtu_import.file_upload');
+  }
+
+  public function submitReturnToFiles(array &$form, FormStateInterface $form_state) {
     $form_state->setRedirect('mukurtu_import.file_upload');
   }
 

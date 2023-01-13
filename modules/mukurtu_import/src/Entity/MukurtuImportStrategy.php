@@ -189,7 +189,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   }
 
   protected function getDefinitionId(FileInterface $file) {
-    return $this->getOwnerId() . "_" . $file->id() . "_" . $this->getTargetEntityTypeId() . "_" . $this->getTargetBundle();
+    return $this->getOwnerId() . "__" . $file->id() . "__" . $this->getTargetEntityTypeId() . "__" . $this->getTargetBundle();
   }
 
   protected function getFieldDefinitions($entity_type_id, $bundle = NULL) {
