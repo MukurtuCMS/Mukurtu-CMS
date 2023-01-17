@@ -39,7 +39,7 @@ class MukurtuBrowseByMapController extends ControllerBase {
     $map_browse_view_block = [
       '#type' => 'view',
       '#name' => $view,
-      '#display_id' => 'map_block',
+      '#display_id' => $view == 'mukurtu_browse_by_map' ? 'map_block' : 'digital_heritage_map_block',
       '#embed' => TRUE,
     ];
 
@@ -58,10 +58,17 @@ class MukurtuBrowseByMapController extends ControllerBase {
       ],
     ];
 
+    if ($view == 'mukurtu_browse_by_map') {
+      $facetSourceId = "search_api:views_block__{$view}__map_block";
+    }
+    else {
+      $facetSourceId = "search_api:views_block__{$view}__digital_heritage_map_block";
+    }
+    // mukurtu_digital_heritage_browse_by_map
     // Load all facets configured to use our browse block as a datasource.
     $facetEntities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_browse_by_map__map_block']);
+      ->loadByProperties(['facet_source_id' => $facetSourceId]);
 
     // Render the facet block for each of them.
     $facets = [];

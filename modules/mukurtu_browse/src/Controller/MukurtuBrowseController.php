@@ -22,14 +22,16 @@ class MukurtuBrowseController extends ControllerBase {
     $browse_view_block = [
       '#type' => 'view',
       '#name' => $view,
-      '#display_id' => 'mukurtu_browse_block',
+      '#display_id' => "{$view}_block",
       '#embed' => TRUE,
     ];
 
     // Load all facets configured to use our browse block as a datasource.
+
+    $facetSourceId = "search_api:views_block__{$view}__{$view}_block";
     $facetEntities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_browse__mukurtu_browse_block']);
+      ->loadByProperties(['facet_source_id' => $facetSourceId]);
 
     // Render the facet block for each of them.
     $facets = [];

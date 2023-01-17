@@ -29,7 +29,7 @@ mukurtu_browse.map_browse_page:
   defaults:
     _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::content'
     _title: 'Browse Content'
-    view: 'mukurtu_browse'
+    view: 'mukurtu_browse_by_map'
   requirements:
     _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::access'
 
@@ -38,7 +38,7 @@ mukurtu_browse.map_browse_digital_heritage_page:
   defaults:
     _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::content'
     _title: 'Browse Digital Heritage'
-    view: 'mukurtu_browse'
+    view: 'mukurtu_browse_by_map'
   requirements:
     _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::access'
 
