@@ -28,7 +28,7 @@ tasks:
       ddev xdebug on
     command: |
       ddev start -y
-      gp await-port 8080 && gp preview $(gp url 8080)
+      gp ports await 8080 && gp preview $(gp url 8080)
 
 # VScode xdebug extension
 vscode:
