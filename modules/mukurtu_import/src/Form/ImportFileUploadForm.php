@@ -5,12 +5,20 @@ namespace Drupal\mukurtu_import\Form;
 use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\migrate\MigrateExecutable;
+use Drupal\Core\Security\TrustedCallbackInterface;
+use Drupal\file\Element\ManagedFile;
 use Exception;
 
 /**
  * Provides a Mukurtu Import form.
  */
-class ImportFileUploadForm extends ImportBaseForm {
+class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInterface {
+
+  public static function trustedCallbacks() {
+    return [
+      'processManagedFile',
+    ];
+  }
 
   /**
    * {@inheritdoc}
@@ -24,17 +32,11 @@ class ImportFileUploadForm extends ImportBaseForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $metadataFiles = $this->getMetadataFiles();
-    // Show any existing error messages if this is a return from a previous
-    // import run.
-    if ($messages = $this->getMessages()) {
-      foreach ($messages as $message) {
-        $this->messenger()->addError($message['message']);
-      }
-    }
 
     $form['metadata_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Metadata Files'),
+      '#process' => [[static::class, 'processManagedFile']],
       '#multiple' => TRUE,
       '#default_value' => $metadataFiles,
       '#upload_location' => 'private://importfiles',
@@ -68,6 +70,28 @@ class ImportFileUploadForm extends ImportBaseForm {
     ];
 
     return $form;
+  }
+
+  /**
+   * Process callback for the managed file upload to add file specific import errors.
+   */
+  public static function processManagedFile(&$element, FormStateInterface $form_state, &$complete_form) {
+    // Call the original handler.
+    $element = ManagedFile::processManagedFile($element, $form_state, $complete_form);
+
+    // Get our messages and mark up the file titles as needed.
+    $tempstore = \Drupal::service('tempstore.private');
+    $store = $tempstore->get('mukurtu_import');
+    $messages = $store->get('batch_results_messages') ?? [];
+    foreach ($messages as $message) {
+      if (isset($message['fid']) && isset($element["file_{$message['fid']}"])) {
+        $errorComponents = explode(':', $message['message'], 2);
+        $errorMessage = $errorComponents[1] ?? $errorComponents[0];
+        $element["file_{$message['fid']}"]["selected"]["#title"] .= "<span class=\"import-error\">{$errorMessage}</span>";
+      }
+    }
+
+    return $element;
   }
 
   /**
@@ -105,7 +129,6 @@ class ImportFileUploadForm extends ImportBaseForm {
     $metadataFiles = $form_state->getValue('metadata_files');
     $this->setMetadataFiles($metadataFiles);
 
-
     $fid = $form_state->getValue('metadata_files')[0] ?? NULL;
     if (!$fid) {
       return;
@@ -120,47 +143,6 @@ class ImportFileUploadForm extends ImportBaseForm {
       return;
     }
 
-    // Set process to defaults.
-    //$this->initializeProcess($file->id());
-
-
-    $data_rows = [
-      ['id' => '100047', 'title' => 'Wow this is a title'],
-    ];
-    //$ids = ['id' => ['type' => 'integer'], 'title' => ['type' => 'string']];
-    $ids = ['id', 'title'];
-    $definition = [
-      'id' => 'mukurtu_test_import',
-      'migration_tags' => ['Import and rollback test'],
-      'source' => [
-        'plugin' => 'csv',
-        'path' => $file->getFileUri(),
-        //'data_rows' => $data_rows,
-        'ids' => $ids,
-        'track_changes' => TRUE,
-      ],
-      'process' => [
-        'nid' => 'id',
-        'title' => 'title',
-        'field_description' => 'Da Desc',
-        'field_cultural_narrative' => 'field_cultural_narrative',
-      ],
-      'destination' => ['plugin' => 'entity:node'],
-    ];
-
-    $migration = \Drupal::service('plugin.manager.migration')->createStubMigration($definition);
-    $id_map = $migration->getIdMap();
-
-    $executable = new MigrateExecutable($migration);
-    //$map = $executable->getIdMap();
-    //dpm($map);
-    //$executable->import();
-
-    //$migration = \Drupal::service('plugin.manager.migration')->createInstance('playing_around');
-    //$migration->getIdMap()->prepareUpdate(); // <-- this :)
-    //$executable = new \Drupal\migrate_tools\MigrateExecutable($migration, new \Drupal\migrate\MigrateMessage());
-    //$executable->import();
-    //$this->messenger()->addStatus($this->t('The message has been sent.'));
     $form_state->setRedirect('mukurtu_import.import_files');
   }
 
