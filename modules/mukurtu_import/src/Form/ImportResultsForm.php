@@ -22,10 +22,10 @@ class ImportResultsForm extends ImportBaseForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $success = $this->store->get('batch_results_success') ?? FALSE;
-    $messages = $this->store->get('batch_results_messages') ?? [];
+    $messages = $this->getMessages();
     if (!empty($messages)) {
       foreach($messages as $message) {
-        $this->messenger()->addError($message);
+        $this->messenger()->addError($message['message']);
       }
     }
     $this->buildTable($form, $form_state, 'node');

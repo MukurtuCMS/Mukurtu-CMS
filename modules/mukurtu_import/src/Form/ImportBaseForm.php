@@ -118,6 +118,7 @@ class ImportBaseForm extends FormBase {
     $this->store->set('metadata_files', NULL);
     $this->metadataFilesImportConfig = [];
     $this->store->set('import_config', []);
+    $this->store->set('batch_results_messages', []);
   }
 
   public function setMetadataFiles($files) {
@@ -180,6 +181,10 @@ class ImportBaseForm extends FormBase {
    */
   public function getImportConfig($fid) {
     return $this->metadataFilesImportConfig[$fid] ?? MukurtuImportStrategy::create(['uid' => $this->currentUser()->id()]);
+  }
+
+  public function getMessages() {
+    return $this->store->get('batch_results_messages') ?? [];
   }
 
   /**

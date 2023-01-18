@@ -24,6 +24,13 @@ class ImportFileUploadForm extends ImportBaseForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $metadataFiles = $this->getMetadataFiles();
+    // Show any existing error messages if this is a return from a previous
+    // import run.
+    if ($messages = $this->getMessages()) {
+      foreach ($messages as $message) {
+        $this->messenger()->addError($message['message']);
+      }
+    }
 
     $form['metadata_files'] = [
       '#type' => 'managed_file',

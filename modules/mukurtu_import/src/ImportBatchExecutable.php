@@ -159,7 +159,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       } else {
         $message = $rawMessage->message;
       }
-      $messages[] = $message;
+      $messages[] = ['fid' => $fid ?? NULL, 'message' => $message];
     }
     $store->set('batch_results_messages', $messages);
   }
