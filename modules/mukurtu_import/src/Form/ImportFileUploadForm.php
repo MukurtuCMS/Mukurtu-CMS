@@ -4,7 +4,7 @@ namespace Drupal\mukurtu_import\Form;
 
 use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\migrate\MigrateExecutable;
+use Drupal\file\FileInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\file\Element\ManagedFile;
 use Exception;
@@ -49,7 +49,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $form['binary_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Media/Binary Files'),
-      '#process' => [[static::class, 'testProcessManagedFile'],[static::class, 'processManagedFile']],
+      '#process' => [[static::class, 'flagPermanentFiles']],
       '#multiple' => TRUE,
       '#default_value' => $this->getBinaryFiles(),
       '#upload_location' => $this->getBinaryUploadLocation(),
@@ -60,6 +60,9 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
         'name' => 'import_file_upload',
       ],
     ];
+
+    // This is unfortunate but we need to pass this path to flagPermanentFiles.
+    $form_state->set('binary_file_upload_location', $this->getBinaryUploadLocation());
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -94,9 +97,32 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     return $element;
   }
 
-  public static function testProcessManagedFile(&$element, FormStateInterface $form_state, &$complete_form)
-  {
-    //dpm($element);
+  /**
+   * Process callback to disable the removal checkbox for permanent files.
+   */
+  public static function flagPermanentFiles(&$element, FormStateInterface $form_state, &$complete_form) {
+    // Call the original handler.
+    $element = ManagedFile::processManagedFile($element, $form_state, $complete_form);
+
+    // Get the upload folder for the binary files.
+    $uploadLocation = $form_state->get('binary_file_upload_location');
+
+    if ($uploadLocation) {
+      $query = \Drupal::entityTypeManager()->getStorage('file')->getQuery();
+      $permanentFiles = $query->condition('uri', $uploadLocation, 'STARTS_WITH')
+        ->condition('status', FileInterface::STATUS_PERMANENT)
+        ->accessCheck(TRUE)
+        ->execute();
+
+      // Disable the remove checkbox for all the permanent files.
+      foreach ($permanentFiles as $pf) {
+        if (isset($element["file_$pf"])) {
+          $element["file_$pf"]['selected']['#disabled'] = TRUE;
+          $element["file_$pf"]['selected']['#attributes'] = ['title' => t("This file is in use and cannot be removed.")];
+        }
+      }
+    }
+
     return $element;
   }
 
