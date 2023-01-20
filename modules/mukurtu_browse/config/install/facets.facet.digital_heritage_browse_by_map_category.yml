@@ -6,13 +6,13 @@ dependencies:
     - views.view.mukurtu_digital_heritage_browse_by_map
   module:
     - search_api
-id: digital_heritage_map_keywords
-name: Keywords
+id: digital_heritage_browse_by_map_category
+name: Category
 weight: 0
 min_count: 1
-url_alias: browse_by_map_keywords
+url_alias: browse_by_map_category
 facet_source_id: 'search_api:views_block__mukurtu_digital_heritage_browse_by_map__digital_heritage_map_block'
-field_identifier: name_1
+field_identifier: name
 query_operator: or
 hard_limit: 0
 exclude: false

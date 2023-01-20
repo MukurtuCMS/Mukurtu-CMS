@@ -3,16 +3,16 @@ mukurtu_browse.browse_page:
   defaults:
     _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseController::content'
     _title: 'Browse Content'
-    view: 'mukurtu_browse'
   requirements:
     _permission: 'access content'
 
 mukurtu_browse.browse_digital_heritage_page:
-  path: '/digital-heritage/{view}'
+  path: '/digital-heritage'
   defaults:
-    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseController::content'
+    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuDigitalHeritageBrowseController::content'
     _title: 'Browse Digital Heritage'
-    view: 'mukurtu_browse'
+    view: 'mukurtu_digital_heritage_browse'
+    block: 'mukurtu_digital_heritage_browse_block'
   requirements:
     _permission: 'access content'
 
@@ -29,18 +29,18 @@ mukurtu_browse.map_browse_page:
   defaults:
     _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::content'
     _title: 'Browse Content'
-    view: 'mukurtu_browse_by_map'
   requirements:
     _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::access'
 
 mukurtu_browse.map_browse_digital_heritage_page:
-  path: '/digital-heritage/map/{view}'
+  path: '/digital-heritage/map'
   defaults:
-    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::content'
+    _controller: '\Drupal\mukurtu_browse\Controller\MukurtuDigitalHeritageBrowseByMapController::content'
     _title: 'Browse Digital Heritage'
-    view: 'mukurtu_browse_by_map'
+    view: 'mukurtu_digital_heritage_browse_by_map'
+    block: 'digital_heritage_map_block'
   requirements:
-    _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::access'
+    _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuDigitalHeritageBrowseByMapController::access'
 
 mukurtu_browse.map_browse_page_teasers:
   path: '/browse/map/teasers/{nodes}'

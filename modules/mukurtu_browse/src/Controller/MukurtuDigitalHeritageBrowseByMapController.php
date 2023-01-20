@@ -11,19 +11,19 @@ use Drupal\node\NodeInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 
-class MukurtuBrowseByMapController extends ControllerBase {
-
+class MukurtuDigitalHeritageBrowseByMapController extends ControllerBase
+{
   protected $bundles;
 
-  public function getBundles()
-  {
+  public function getBundles() {
     if (!$this->bundles) {
       $this->bundles = array_keys(\Drupal::service('entity_type.bundle.info')->getBundleInfo('node'));
     }
     return $this->bundles;
   }
 
-  public function access(AccountInterface $account) {
+  public function access(AccountInterface $account)
+  {
     if (!$account->hasPermission('access content')) {
       return AccessResult::forbidden();
     }
@@ -46,22 +46,23 @@ class MukurtuBrowseByMapController extends ControllerBase {
     return empty($results) ? AccessResult::forbidden() : AccessResult::allowed();
   }
 
-  public function content() {
+  public function content($view, $block)
+  {
     // Browse link.
     $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link']];
-    $map_browse_link = Link::createFromRoute(t('Switch to List View'), 'mukurtu_browse.browse_page', [], $options);
+    $map_browse_link = Link::createFromRoute(t('Switch to List View'), 'mukurtu_browse.browse_digital_heritage_page', [], $options);
 
     // Render the map browse view block.
     $map_browse_view_block = [
       '#type' => 'view',
-      '#name' => 'mukurtu_browse_by_map',
-      '#display_id' => 'map_block',
+      '#name' => $view,
+      '#display_id' => $block,
       '#embed' => TRUE,
     ];
 
-/*     $teaserView = Views::getView('mukurtu_browse_by_map');
+    /*     $teaserView = Views::getView('mukurtu_browse_by_map');
     dpm($teaserView); */
-   /*  $teasers = [
+    /*  $teasers = [
       '#type' => 'view',
       '#name' => 'mukurtu_browse_by_map',
       '#display_id' => 'teaser_block',
@@ -75,9 +76,10 @@ class MukurtuBrowseByMapController extends ControllerBase {
     ];
 
     // Load all facets configured to use our browse block as a datasource.
+    $facetSourceId = "search_api:views_block__{$view}__{$block}";
     $facetEntities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => "search_api:views_block__mukurtu_browse_by_map__map_block"]);
+      ->loadByProperties(['facet_source_id' => $facetSourceId]);
 
     // Render the facet block for each of them.
     $facets = [];
@@ -115,7 +117,8 @@ class MukurtuBrowseByMapController extends ControllerBase {
     ];
   }
 
-  public function getEntityTeaserAjax(NodeInterface $node) {
+  public function getEntityTeaserAjax(NodeInterface $node)
+  {
     $view_builder = $this->entityTypeManager()->getViewBuilder('node');
     $response = new AjaxResponse();
     $content['mukurtu_map_browse_teasers'] = [
@@ -133,7 +136,8 @@ class MukurtuBrowseByMapController extends ControllerBase {
     return $response;
   }
 
-  public function getTeasersAjax($nodes) {
+  public function getTeasersAjax($nodes)
+  {
     $renderer = \Drupal::service('renderer');
     $response = new AjaxResponse();
 
@@ -162,7 +166,8 @@ class MukurtuBrowseByMapController extends ControllerBase {
     return $response;
   }
 
-  public function getTeasersAjaxOld($nodes) {
+  public function getTeasersAjaxOld($nodes)
+  {
     $response = new AjaxResponse();
 
     $content['mukurtu_map_browse_teasers'] = [
@@ -183,5 +188,4 @@ class MukurtuBrowseByMapController extends ControllerBase {
 
     return $response;
   }
-
 }

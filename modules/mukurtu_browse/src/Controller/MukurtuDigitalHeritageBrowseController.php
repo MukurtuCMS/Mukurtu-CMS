@@ -6,30 +6,33 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Link;
 
-class MukurtuBrowseController extends ControllerBase {
+class MukurtuDigitalHeritageBrowseController extends ControllerBase
+{
 
-  public function content() {
+  public function content($view, $block)
+  {
     // Map browse link.
     $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link']];
 
     $map_browse_link = NULL;
     $access_manager = \Drupal::accessManager();
-    if ($access_manager->checkNamedRoute('mukurtu_browse.map_browse_page')) {
-      $map_browse_link = Link::createFromRoute(t('Switch to Map View'), 'mukurtu_browse.map_browse_page', [], $options);
+    if ($access_manager->checkNamedRoute('mukurtu_browse.map_browse_digital_heritage_page')) {
+      $map_browse_link = Link::createFromRoute(t('Switch to Map View'), 'mukurtu_browse.map_browse_digital_heritage_page', [], $options);
     }
 
     // Render the browse view block.
     $browse_view_block = [
       '#type' => 'view',
-      '#name' => 'mukurtu_browse',
-      '#display_id' => 'mukurtu_browse_block',
+      '#name' => $view,
+      '#display_id' => $block,
       '#embed' => TRUE,
     ];
 
     // Load all facets configured to use our browse block as a datasource.
+    $facetSourceId = "search_api:views_block__{$view}__{$block}";
     $facetEntities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_browse__mukurtu_browse_block']);
+      ->loadByProperties(['facet_source_id' => $facetSourceId]);
 
     // Render the facet block for each of them.
     $facets = [];
@@ -59,5 +62,4 @@ class MukurtuBrowseController extends ControllerBase {
       ],
     ];
   }
-
 }

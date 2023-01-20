@@ -3,15 +3,15 @@ status: true
 dependencies:
   config:
     - search_api.index.mukurtu_default_content_index
-    - views.view.mukurtu_digital_heritage_browse_by_map
+    - views.view.mukurtu_digital_heritage_browse
   module:
     - search_api
-id: digital_heritage_map_category
+id: digital_heritage_browse_category
 name: Category
 weight: 0
 min_count: 1
-url_alias: browse_by_map_category
-facet_source_id: 'search_api:views_block__mukurtu_digital_heritage_browse_by_map__digital_heritage_map_block'
+url_alias: category
+facet_source_id: 'search_api:views_block__mukurtu_digital_heritage_browse__mukurtu_digital_heritage_browse_block'
 field_identifier: name
 query_operator: or
 hard_limit: 0
@@ -24,7 +24,7 @@ widget:
   type: checkbox
   config:
     show_numbers: true
-    soft_limit: 0
+    soft_limit: 20
     show_reset_link: false
     reset_text: 'Show all'
     hide_reset_when_no_selection: false
@@ -55,6 +55,11 @@ processor_configs:
       sort: 40
     settings:
       sort: ASC
+  list_item:
+    processor_id: list_item
+    weights:
+      build: 5
+    settings: {  }
   url_processor_handler:
     processor_id: url_processor_handler
     weights:
