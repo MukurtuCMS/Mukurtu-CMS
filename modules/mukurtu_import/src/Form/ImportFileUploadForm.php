@@ -31,16 +31,13 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $metadataFiles = $this->getMetadataFiles();
-    $binaryFiles = $this->getBinaryFiles();
-
     $form['metadata_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Metadata Files'),
       '#process' => [[static::class, 'processManagedFile']],
       '#multiple' => TRUE,
-      '#default_value' => $metadataFiles,
-      '#upload_location' => $this->getUploadLocation() . "/metadata",
+      '#default_value' => $this->getMetadataFiles(),
+      '#upload_location' => $this->getMetadataUploadLocation(),
       '#upload_validators' => [
         'file_validate_extensions' => ['csv'],
       ],
@@ -52,9 +49,10 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $form['binary_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Media/Binary Files'),
+      '#process' => [[static::class, 'testProcessManagedFile'],[static::class, 'processManagedFile']],
       '#multiple' => TRUE,
-      '#default_value' => $binaryFiles,
-      '#upload_location' => $this->getUploadLocation(),
+      '#default_value' => $this->getBinaryFiles(),
+      '#upload_location' => $this->getBinaryUploadLocation(),
       '#upload_validators' => [
         'file_validate_extensions' => [],
       ],
@@ -96,11 +94,21 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     return $element;
   }
 
+  public static function testProcessManagedFile(&$element, FormStateInterface $form_state, &$complete_form)
+  {
+    //dpm($element);
+    return $element;
+  }
+
   /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $metadataFiles = $form_state->getValue('metadata_files');
+
+    if (empty($metadataFiles)) {
+      $form_state->setError($form['metadata_files'], $this->t("You must upload at least one file to import."));
+    }
 
     foreach ($metadataFiles as $fid) {
       /** @var \Drupal\file\FileInterface $file */
@@ -128,23 +136,6 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $metadataFiles = $form_state->getValue('metadata_files');
-    $this->setMetadataFiles($metadataFiles);
-
-    $fid = $form_state->getValue('metadata_files')[0] ?? NULL;
-    if (!$fid) {
-      return;
-    }
-
-    /** @var \Drupal\file\FileInterface|null $file*/
-    $file = \Drupal::entityTypeManager()
-      ->getStorage('file')
-      ->load($fid);
-
-    if (!$file) {
-      return;
-    }
-
     $form_state->setRedirect('mukurtu_import.import_files');
   }
 

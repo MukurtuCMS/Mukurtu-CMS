@@ -37,8 +37,6 @@ class ImportBaseForm extends FormBase {
    */
   protected $entityFieldManager;
 
-  protected $metadataFiles;
-  protected $binaryFiles;
   protected $metadataFilesImportConfig;
   protected $importId;
 
@@ -58,8 +56,6 @@ class ImportBaseForm extends FormBase {
       $this->store->set('import_id', str_replace('-', '', $import_id));
     }
     $this->importId = $import_id;
-
-    $this->metadataFiles = $this->store->get('metadata_files');
     $this->metadataFilesImportConfig = $this->store->get('import_config');
   }
 
@@ -115,31 +111,35 @@ class ImportBaseForm extends FormBase {
     }
 
     $this->store->set('import_id', NULL);
-    $this->store->set('metadata_files', NULL);
     $this->metadataFilesImportConfig = [];
     $this->store->set('import_config', []);
     $this->store->set('batch_results_messages', []);
   }
 
-  public function setMetadataFiles($files) {
-    $this->metadataFiles = $files;
-    $this->store->set('metadata_files', $files);
-  }
-
   public function getMetadataFiles() {
-    return $this->metadataFiles;
+    $query = $this->entityTypeManager->getStorage('file')->getQuery();
+    return $query->condition('uri', $this->getMetadataUploadLocation(), 'STARTS_WITH')
+      ->accessCheck(TRUE)
+      ->execute();
   }
 
   public function getBinaryFiles() {
-    return $this->binaryFiles;
+    $query = $this->entityTypeManager->getStorage('file')->getQuery();
+    return $query->condition('uri', $this->getBinaryUploadLocation(), 'STARTS_WITH')
+      ->accessCheck(TRUE)
+      ->execute();
   }
 
   public function getImportId() {
     return $this->importId;
   }
 
-  public function getUploadLocation() {
-    return "private://{$this->getImportId()}/";
+  public function getBinaryUploadLocation() {
+    return "private://{$this->getImportId()}/files/";
+  }
+
+  public function getMetadataUploadLocation() {
+    return "private://{$this->getImportId()}/metadata/";
   }
 
   public function getImportRevisionMessage() {
@@ -174,7 +174,7 @@ class ImportBaseForm extends FormBase {
    * @return void
    */
   public function setImportConfig($fid, MukurtuImportStrategyInterface $config) {
-    $config->setConfig('upload_location', $this->getUploadLocation());
+    $config->setConfig('upload_location', $this->getBinaryUploadLocation());
     $this->metadataFilesImportConfig[$fid] = $config;
     $this->store->set('import_config', $this->metadataFilesImportConfig);
   }

@@ -56,7 +56,7 @@ class ExecuteImportForm extends ImportBaseForm {
         continue;
       }
 
-      $migrationDefinitions[] = $config->toDefinition($metadataFile) + ['mukurtu_import_message' => $this->getImportRevisionMessage(), 'mukurtu_upload_location' => $this->getUploadLocation()];
+      $migrationDefinitions[] = $config->toDefinition($metadataFile) + ['mukurtu_import_message' => $this->getImportRevisionMessage()];
     }
 
     // Run the migrations.
