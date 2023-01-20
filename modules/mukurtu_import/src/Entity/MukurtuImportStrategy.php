@@ -96,6 +96,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    *  )
    */
   protected $mapping;
+  protected $configuration;
 
   /**
    * {@inheritdoc}
@@ -126,6 +127,14 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
   public function setMapping($mapping) {
     $this->mapping = $mapping;
+  }
+
+  public function setConfig($key, $value) {
+    $this->configuration[$key] = $value;
+  }
+
+  public function getConfig($key) {
+    return $this->configuration[$key] ?? NULL;
   }
 
   public function getLabel() {
@@ -291,7 +300,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
           $naiveProcess[$target] = $newSource;
         }
 
-        // Protocol Handling.
+        // Protocol Control Handling.
         if ($refType == 'protocol_control') {
           $newSource = [];
           if ($sub_target == 'field_sharing_setting') {
@@ -335,6 +344,23 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         }
         $newSource[] = [
           'plugin' => 'markdown_link',
+        ];
+        $newSource[0]['source'] = $source;
+        $naiveProcess[$target] = $newSource;
+      }
+
+      // Image fields.
+      if ($fieldDef->getType() == 'image') {
+        $newSource = [];
+        if ($multiple) {
+          $newSource[] = [
+            'plugin' => 'explode',
+            'delimiter' => ';',
+          ];
+        }
+        $newSource[] = [
+          'plugin' => 'mukurtu_imageitem',
+          'upload_location' => $this->getConfig('upload_location'),
         ];
         $newSource[0]['source'] = $source;
         $naiveProcess[$target] = $newSource;

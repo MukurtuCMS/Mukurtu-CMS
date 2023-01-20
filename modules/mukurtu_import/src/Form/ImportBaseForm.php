@@ -130,8 +130,16 @@ class ImportBaseForm extends FormBase {
     return $this->metadataFiles;
   }
 
+  public function getBinaryFiles() {
+    return $this->binaryFiles;
+  }
+
   public function getImportId() {
     return $this->importId;
+  }
+
+  public function getUploadLocation() {
+    return "private://{$this->getImportId()}/";
   }
 
   public function getImportRevisionMessage() {
@@ -166,6 +174,7 @@ class ImportBaseForm extends FormBase {
    * @return void
    */
   public function setImportConfig($fid, MukurtuImportStrategyInterface $config) {
+    $config->setConfig('upload_location', $this->getUploadLocation());
     $this->metadataFilesImportConfig[$fid] = $config;
     $this->store->set('import_config', $this->metadataFilesImportConfig);
   }

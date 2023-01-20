@@ -32,6 +32,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $metadataFiles = $this->getMetadataFiles();
+    $binaryFiles = $this->getBinaryFiles();
 
     $form['metadata_files'] = [
       '#type' => 'managed_file',
@@ -39,7 +40,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#process' => [[static::class, 'processManagedFile']],
       '#multiple' => TRUE,
       '#default_value' => $metadataFiles,
-      '#upload_location' => 'private://importfiles',
+      '#upload_location' => $this->getUploadLocation() . "/metadata",
       '#upload_validators' => [
         'file_validate_extensions' => ['csv'],
       ],
@@ -52,7 +53,8 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#type' => 'managed_file',
       '#title' => $this->t('Media/Binary Files'),
       '#multiple' => TRUE,
-      '#upload_location' => 'private://importfiles',
+      '#default_value' => $binaryFiles,
+      '#upload_location' => $this->getUploadLocation(),
       '#upload_validators' => [
         'file_validate_extensions' => [],
       ],
