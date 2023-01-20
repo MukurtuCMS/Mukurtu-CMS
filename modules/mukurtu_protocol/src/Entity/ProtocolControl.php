@@ -96,7 +96,7 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
     if ($entity instanceof FieldableEntityInterface) {
       if ($entity->hasField('field_protocol_control')) {
         $pcs = $entity->get('field_protocol_control')->referencedEntities();
-        if (is_array($pcs)) {
+        if (is_array($pcs) && !empty($pcs)) {
           return reset($pcs);
         }
       }

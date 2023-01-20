@@ -44,7 +44,9 @@ class ProtocolAwareEntityContent extends EntityContentBase {
           throw new EntityValidationException($pceViolations);
         }
         try {
+          $pce->setControlledEntity($entity);
           $pce->save();
+          $entity->set('field_protocol_control', $pce->id());
         } catch (Exception $e) {
           throw new MigrateException('Unable to save protocol control entity');
         }
