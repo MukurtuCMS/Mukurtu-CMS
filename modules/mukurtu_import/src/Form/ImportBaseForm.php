@@ -52,6 +52,7 @@ class ImportBaseForm extends FormBase {
     $this->entityBundleInfo = $entity_bundle_info;
     $import_id = $this->store->get('import_id');
     if (empty($import_id)) {
+      $this->reset();
       $import_id = \Drupal::service('uuid')->generate();
       $this->store->set('import_id', str_replace('-', '', $import_id));
     }
@@ -104,11 +105,11 @@ class ImportBaseForm extends FormBase {
    */
   protected function reset() {
     // Delete all the temporary metadata files.
-    foreach ($this->getMetadataFiles() as $fid) {
+/*     foreach ($this->getMetadataFiles() as $fid) {
       if ($file = $this->entityTypeManager->getStorage('file')->load($fid)) {
         $file->delete();
       }
-    }
+    } */
 
     $this->store->set('import_id', NULL);
     $this->metadataFilesImportConfig = [];

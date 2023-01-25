@@ -88,9 +88,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $messages = $store->get('batch_results_messages') ?? [];
     foreach ($messages as $message) {
       if (isset($message['fid']) && isset($element["file_{$message['fid']}"])) {
-        $errorComponents = explode(':', $message['message'], 2);
-        $errorMessage = $errorComponents[1] ?? $errorComponents[0];
-        $element["file_{$message['fid']}"]["selected"]["#title"] .= "<span class=\"import-error\">{$errorMessage}</span>";
+        $element["file_{$message['fid']}"]["selected"]["#title"] .= "<span class=\"import-error\">{$message['message']->message}</span>";
       }
     }
 
@@ -166,3 +164,4 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
   }
 
 }
+

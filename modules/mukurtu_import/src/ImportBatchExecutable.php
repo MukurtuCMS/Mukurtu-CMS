@@ -7,7 +7,6 @@ namespace Drupal\mukurtu_import;
 use Drupal\migrate_tools\MigrateBatchExecutable;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
-use Drupal\Core\Utility\Error;
 
 /**
  * Defines an import executable class for batch import via migrate API.
@@ -142,24 +141,30 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     $store->set('batch_results_success', $success);
 
     $messages = [];
-    foreach ($results['messages'] as $rawMessage) {
-      $parts = explode(':', $rawMessage->message);
+    $exceptionFid = NULL;
 
-      if (isset($parts[0])) {
-        preg_match('/^\d+__(\d+)__.*/', $parts[0], $matches);
+    // Find our failure point.
+    foreach (array_keys($results) as $migration_id) {
+      if ($migration_id == 'message') {
+        continue;
+      }
+
+      if ($results[$migration_id]['@failures'] > 0) {
+        preg_match('/^\d+__(\d+)__.*/', $migration_id, $matches);
         $fid = $matches[1] ?? NULL;
         if ($fid) {
           /** @var \Drupal\file\FileInterface $file */
-          $file = \Drupal::entityTypeManager()->getStorage('file')->load(intval($fid));
-          if ($file) {
-            $parts[0] = $file->getFilename();
+          if ($file = \Drupal::entityTypeManager()->getStorage('file')->load(intval($fid))) {
+            $exceptionFid = $fid;
           }
         }
-        $message = join(':', $parts);
-      } else {
-        $message = $rawMessage->message;
       }
-      $messages[] = ['fid' => $fid ?? NULL, 'message' => $message];
+    }
+
+    // Tag the error messages with the fid so we can display it next to the
+    // file later.
+    foreach ($results['messages'] as $rawMessage) {
+      $messages[] = ['fid' => $exceptionFid ?? NULL, 'message' => $rawMessage];
     }
     $store->set('batch_results_messages', $messages);
   }
