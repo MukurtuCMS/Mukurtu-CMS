@@ -382,6 +382,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    */
   protected function buildTargetOptions($entity_type_id, $bundle = NULL) {
     $pceFields = $this->getFieldDefinitions('protocol_control');
+    $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entityKeys = $entityDefinition->getKeys();
 
     $options = [-1 => $this->t('Ignore - Do not import')];
     foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
@@ -395,7 +397,15 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
           continue;
         }
       }
+
       $options[$field_name] = $field_definition->getLabel();
+    }
+
+    // Very Mukurtu specific. We ship with a "Language" field which has
+    // the exact same label as content entity langcodes. Here we disambiguate
+    // the two.
+    if (isset($options[$entityKeys['langcode']])) {
+      $options[$entityKeys['langcode']] .= $this->t(' (langcode)');
     }
 
     return $options;
