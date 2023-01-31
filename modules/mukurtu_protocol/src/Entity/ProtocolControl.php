@@ -988,7 +988,8 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
         'weight' => 4,
       ])
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
+      ->setDisplayConfigurable('form', TRUE)
+      ->addConstraint('ProtocolsRequiredConstraint');
 
     $fields['field_sharing_setting'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Sharing Protocol'))
