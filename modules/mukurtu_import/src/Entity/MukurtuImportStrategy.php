@@ -300,6 +300,23 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
           $naiveProcess[$target] = $newSource;
         }
 
+        // User ref. Only difference is value_key is set to 'name'.
+        if ($refType == 'user') {
+          $newSource = [];
+          $newSource[] = [
+            'plugin' => 'explode',
+            'source' => $source,
+            'delimiter' => ';',
+          ];
+          $newSource[] = [
+            'plugin' => 'mukurtu_entity_lookup',
+            'value_key' => 'name',
+            'ignore_case' => TRUE,
+            'entity_type' => $fieldDef->getSetting('target_type'),
+          ];
+          $naiveProcess[$target] = $newSource;
+        }
+
         // Protocol Control Handling.
         if ($refType == 'protocol_control') {
           $newSource = [];
