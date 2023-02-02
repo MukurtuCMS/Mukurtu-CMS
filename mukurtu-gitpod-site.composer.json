@@ -91,7 +91,6 @@
         "drupal/views_bulk_operations": "*",
         "drush/drush": "^10",
         "mukurtu/masonry": "*",
-        "mukurtu/mukurtu-cms": "*",
         "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
