@@ -100,7 +100,7 @@ class MukurtuSetProtocolMembershipAction extends ViewsBulkOperationsActionBase i
   /**
    * {@inheritdoc}
    */
-  public static function customAccess(AccountInterface $account = NULL, ViewExecutable $view) {
+  public static function customAccess(AccountInterface $account = NULL, ViewExecutable $view): bool {
     // Get the OG Memberships for account.
     $memberships = Og::getMemberships($account);
 

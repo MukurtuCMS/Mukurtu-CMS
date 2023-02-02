@@ -85,7 +85,7 @@ class MukurtuSetProtocolAction extends ViewsBulkOperationsActionBase implements 
   /**
    * {@inheritdoc}
    */
-  public static function customAccess(AccountInterface $account = NULL, ViewExecutable $view) {
+  public static function customAccess(AccountInterface $account = NULL, ViewExecutable $view): bool {
     return TRUE;
   }
 
