@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php-versions: ['7.4']
+        php-versions: ['8.1']
         test-suite: ["kernel"]
     services:
       mariadb:

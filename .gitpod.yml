@@ -9,7 +9,7 @@ tasks:
       cp -R /workspace/web/profiles/mukurtu-cms/.vscode/ /workspace/web
       cp /workspace/web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json /workspace/composer.json
       cd /workspace
-      ddev config --php-version 7.4 --project-type=drupal9 --docroot=web --create-docroot
+      ddev config --php-version 8.1 --project-type=drupal9 --docroot=web --create-docroot
       echo "\$settings['file_private_path'] = './private_files';" | tee -a /workspace/web/sites/default/settings.php
       ddev start -y
       ddev exec wget https://dl.xpdfreader.com/xpdf-tools-linux-4.04.tar.gz
