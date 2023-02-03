@@ -5,6 +5,7 @@ namespace Drupal\original_date\Plugin\Field\FieldType;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
+use InvalidArgumentException;
 
 /**
  * Plugin implementation of the 'original_date' field type.
@@ -39,18 +40,16 @@ class OriginalDateField extends FieldItemBase {
         'year' => [
           'type' => 'varchar',
           'length' => 4,
-          'not null' => FALSE,
+          'not null' => TRUE,
         ],
         'month' => [
-          'type' => 'int',
-          'size' => 'tiny',
-          'unsigned' => TRUE,
+          'type' => 'varchar',
+          'length' => 4,
           'not null' => FALSE,
         ],
         'day' => [
-          'type' => 'int',
-          'size' => 'tiny',
-          'unsigned' => TRUE,
+          'type' => 'varchar',
+          'length' => 4,
           'not null' => FALSE,
         ],
       ],
@@ -83,10 +82,10 @@ class OriginalDateField extends FieldItemBase {
     $properties['year'] = DataDefinition::create('string')
       ->setLabel(t('Year'));
 
-    $properties['month'] = DataDefinition::create('integer')
+    $properties['month'] = DataDefinition::create('string')
       ->setLabel(t('Month'));
 
-    $properties['day'] = DataDefinition::create('integer')
+    $properties['day'] = DataDefinition::create('string')
       ->setLabel(t('Day'));
 
     return $properties;
@@ -96,9 +95,24 @@ class OriginalDateField extends FieldItemBase {
    * {@inheritdoc}
    */
   public function setValue($values, $notify = TRUE) {
+    if (isset($values) && !is_array($values)) {
+      // Handle unprocessed values coming directly from set, rather than the
+      // widget.
+      $dateComponents = explode('-', $values);
+      $values = [];
+
+      $values['year'] = $dateComponents[0] ?? NULL;
+      $values['month'] = $dateComponents[1] ?? '';
+      $values['day'] = $dateComponents[2] ?? '';
+
+      if (!$values['year'] || !is_numeric($values['year'])) {
+        throw new InvalidArgumentException();
+      }
+    }
     $year = $values['year'] ?? NULL;
-    $month = $values['month'] ?? "";
-    $day = $values['day'] ?? "";
+    $month = $values['month'] ?? '';
+    $day = $values['day'] ?? '';
+
 
     // 1. Store the date string for the user-facing date display
     $date = $year; // year is guaranteed
