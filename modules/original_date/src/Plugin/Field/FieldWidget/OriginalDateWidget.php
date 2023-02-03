@@ -19,7 +19,6 @@ use Drupal\Core\Form\FormStateInterface;
  * )
  */
 class OriginalDateWidget extends WidgetBase {
-
   /**
    * {@inheritdoc}
    */
@@ -29,12 +28,9 @@ class OriginalDateWidget extends WidgetBase {
       $month = $value['value']['month'] ?? '';
       $day = $value['value']['day'] ?? '';
 
-      $monthCleaned = (int) ltrim($month, "0");
-      $dayCleaned = (int) ltrim($day, "0");
-
-      $values[$key]['year'] = ltrim($year, "0");
-      $values[$key]['month'] = $monthCleaned ? $monthCleaned : NULL;
-      $values[$key]['day'] = $dayCleaned ? $dayCleaned : NULL;
+      $values[$key]['year'] = $year;
+      $values[$key]['month'] = $month;
+      $values[$key]['day'] = $day;
     }
     return $values;
   }
@@ -58,21 +54,19 @@ class OriginalDateWidget extends WidgetBase {
     ];
 
     $element['month'] = [
-      '#type' => 'number',
+      '#type' => 'textfield',
       '#title' => t('Month'),
-      '#min' => 1,
-      '#max' => 12,
-      '#size' => 5,
-      '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : NULL,
+      '#size' => 2,
+      '#maxlength' => 2,
+      '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : '',
     ];
 
     $element['day'] = [
-      '#type' => 'number',
+      '#type' => 'textfield',
       '#title' => t('Day'),
-      '#min' => 1,
-      '#max' => 31,
-      '#size' => 5,
-      '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : NULL,
+      '#size' => 2,
+      '#maxlength' => 2,
+      '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : '',
     ];
 
     $element += [
@@ -87,10 +81,9 @@ class OriginalDateWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public static function validate($element, FormStateInterface $form_state) {
-    // In case of leading zeros.
-    $year = ltrim($element['year']['#value'], "0");
-    $month = (int) ltrim($element['month']['#value'], "0");
-    $day = (int) ltrim($element['day']['#value'], "0");
+    $year = $element['year']['#value'];
+    $month = $element['month']['#value'];
+    $day = $element['day']['#value'];
 
     // If empty, return.
     if (!$year && !$month && !$day) {
@@ -98,16 +91,19 @@ class OriginalDateWidget extends WidgetBase {
       return;
     }
 
-    // 1. ensure date in acceptable format.
+    // Ensure date in acceptable format.
     if ($year && $month && $day || $year && $month && !$day || $year && !$month && !$day) {
-      // 2. Ensure date is valid.
-      if (!checkdate(($month == 0 ? 1 : $month), ($day == 0 ? 1 : $day), $year)) {
+      $year = intval($year);
+      $month = $month == '' ? 1 : intval($month);
+      $day = $day == '' ? 1 : intval($day);
+
+      // Ensure date is valid.
+      if (!checkdate($month, $day, $year)) {
         $form_state->setError($element, "Invalid date.");
       }
     }
     else {
-      $form_state->setError($element, "Acceptable date formats are year only, year/month, or year/month/day.");
+      $form_state->setError($element, "Acceptable date formats are YYYY, YYYY-MM, or YYYY-MM-DD.");
     }
   }
-
 }

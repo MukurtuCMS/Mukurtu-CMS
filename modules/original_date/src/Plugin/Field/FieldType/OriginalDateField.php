@@ -44,12 +44,12 @@ class OriginalDateField extends FieldItemBase {
         ],
         'month' => [
           'type' => 'varchar',
-          'length' => 4,
+          'length' => 2,
           'not null' => FALSE,
         ],
         'day' => [
           'type' => 'varchar',
-          'length' => 4,
+          'length' => 2,
           'not null' => FALSE,
         ],
       ],
@@ -101,34 +101,53 @@ class OriginalDateField extends FieldItemBase {
       $dateComponents = explode('-', $values);
       $values = [];
 
-      $values['year'] = $dateComponents[0] ?? NULL;
+      $values['year'] = $dateComponents[0] ?? '';
       $values['month'] = $dateComponents[1] ?? '';
       $values['day'] = $dateComponents[2] ?? '';
 
-      if (!$values['year'] || !is_numeric($values['year'])) {
-        throw new InvalidArgumentException();
+      if (!$values['year'] || !is_numeric($values['year']) ||
+        intval($values['year']) < 1) {
+        throw new InvalidArgumentException("Invalid year '{$values['year']}'.");
       }
+      if ($values['month'] && (!is_numeric($values['month']) ||
+        intval($values['month']) < 1 || intval($values['month']) > 12)) {
+        throw new InvalidArgumentException("Invalid month '{$values['month']}'.");
+      }
+      if ($values['day'] && (!is_numeric($values['day']) ||
+        intval($values['day']) < 1 || intval($values['day']) > 31)) {
+        throw new InvalidArgumentException("Invalid day '{$values['day']}'.");
+      }
+
+      // Store the date string for the user-facing date display.
+      // Year is guaranteed.
+      $date = $values['year'];
+      $date = $date . ($values['month'] ? ("-" . str_pad($values['month'], 2, "0", STR_PAD_LEFT)) : "");
+      $date = $date . ($values['day'] ? ("-" . str_pad($values['day'], 2, "0", STR_PAD_LEFT)) : "");
+
+      $values['date'] = $date;
+
+      // Calculate the internal date.
+      $timestamp = strtotime($date);
+
+      $values['timestamp'] = $timestamp === FALSE ? NULL : $timestamp;
     }
-    $year = $values['year'] ?? NULL;
-    $month = $values['month'] ?? '';
-    $day = $values['day'] ?? '';
+    else {
+      $year = $values['year'] ?? '';
+      $month = $values['month'] ?? '';
+      $day = $values['day'] ?? '';
 
+      // Store the date string for the user-facing date display.
+      // Year is guaranteed.
+      $date = $year;
+      $date = $date . ($month ? ("-" . str_pad(strval($month), 2, "0", STR_PAD_LEFT)) : "");
+      $date = $date . ($day ? ("-" . str_pad(strval($day), 2, "0", STR_PAD_LEFT)) : "");
 
-    // 1. Store the date string for the user-facing date display
-    $date = $year; // year is guaranteed
+      $values['date'] = $date;
 
-    $date = $date . ($month ? ("-" . str_pad(strval($month), 2, "0", STR_PAD_LEFT)) : "");
-
-    $date = $date . ($day ? ("-" . str_pad(strval($day), 2, "0", STR_PAD_LEFT)) : "");
-
-    $values['date'] = $date;
-
-    // 2. Calculate the internal date
-    $timestamp = strtotime($date);
-
-    $values['timestamp'] = $timestamp === FALSE ? NULL : $timestamp;
-
+      // Calculate the internal date.
+      $timestamp = strtotime($date);
+      $values['timestamp'] = $timestamp === FALSE ? NULL : $timestamp;
+    }
     parent::setValue($values, $notify);
   }
-
 }
