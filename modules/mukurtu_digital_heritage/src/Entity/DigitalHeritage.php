@@ -18,6 +18,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDescription(t('The Cultural Narrative field is used to add historical or social context, expert community knowledge, community stories, and other relevant context to the Digital Heritage Item. This is generally information that is community specific. For example, if the item is a basket, this field may contain a narrative from the basket­maker about their technique, or it may tell a story about how the baskets were used by previous generations and how they are used today.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -27,6 +28,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDescription(t('Field for briefly describing the Media Asset within a Digital Heritage Item. This can include physical characteristics (i.e. photograph, manuscript, newspaper clipping), content information (i.e. what is depicted, content of text), and any other general relevant information. Audio or video are embedded by dragging Media Assets from the media library into this field. For the Media Asset to display correctly there must be a line break or text below where the Media Asset will be embedded. Note, certain media types (eg. audio, Youtube video) do not render fully within the edit box, but will display correctly when the Digital heritage Item is saved. Using the plain text editor setting provides better control over embedded media.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -36,6 +38,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDescription(t('A text description of the location.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -45,6 +48,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDescription(t('The Traditional Knowledge field is used to add in-­depth community-specific knowledge about the Digital Heritage Item, and is often used to provide information of social, spiritual, or esoteric significance. For example, if the item is a basket, this field may contain community, tribe, or clan specific knowledge about the significance of design that is not more generally known.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -58,6 +62,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -71,6 +76,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -84,6 +90,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -97,6 +104,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -110,6 +118,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -123,26 +132,28 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_protocol_control'] = BaseFieldDefinition::create('entity_reference')
+/*     $definitions['field_protocol_control'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Cultural Protocols'))
       ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'protocol_control',
         'handler' => 'default:protocol_control',
         'handler_settings' => [
-          'target_bundles' => NULL,
+          'target_bundles' => ['protocol_control' => 'protocol_control'],
           'auto_create' => FALSE,
         ]
       ])
     ->setCardinality(1)
     ->setRequired(TRUE)
+    ->setRevisionable(TRUE)
     ->setTranslatable(TRUE)
     ->setDisplayConfigurable('view', TRUE)
-    ->setDisplayConfigurable('form', TRUE);
+    ->setDisplayConfigurable('form', TRUE); */
 
     $definitions['field_mukurtu_original_record'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Original Record'))
@@ -159,6 +170,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
     ->setCardinality(1)
     ->setRequired(FALSE)
+    ->setRevisionable(TRUE)
     ->setTranslatable(TRUE)
     ->setDisplayConfigurable('view', TRUE)
     ->setDisplayConfigurable('form', TRUE);
@@ -176,6 +188,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
     ->setCardinality(-1)
     ->setRequired(FALSE)
+    ->setRevisionable(TRUE)
     ->setTranslatable(TRUE)
     ->setDisplayConfigurable('view', TRUE)
     ->setDisplayConfigurable('form', TRUE);
@@ -199,6 +212,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
     ->setCardinality(-1)
     ->setRequired(FALSE)
+    ->setRevisionable(TRUE)
     ->setTranslatable(FALSE)
     ->setDisplayConfigurable('view', TRUE)
     ->setDisplayConfigurable('form', TRUE);
@@ -211,6 +225,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
         'link_type' => 17,
       ])
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -220,6 +235,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDescription(t('Creative Commons licenses are an extension of Copyright that allow a copyright holder to specify the ways in which their work may be altered, shared, and used. For more information on Creative Commons licensing, visit <a href="http://creativecommons.org">creativecommons.org</a>'))
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -229,6 +245,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDescription(t(''))
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -238,6 +255,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDescription(t(''))
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -257,6 +275,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
     ->setCardinality(-1)
     ->setRequired(TRUE)
+    ->setRevisionable(TRUE)
     ->setTranslatable(FALSE)
     ->setDisplayConfigurable('view', TRUE)
     ->setDisplayConfigurable('form', TRUE);
@@ -276,6 +295,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -295,6 +315,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -314,6 +335,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -333,6 +355,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -352,6 +375,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
       ->setCardinality(1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -371,6 +395,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -390,6 +415,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -409,6 +435,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
@@ -428,6 +455,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);

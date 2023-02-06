@@ -64,9 +64,8 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles) {
  * Implements hook_views_data_alter().
  */
 function mukurtu_protocol_views_data_alter(array &$data) {
-  //dpm(array_keys($data));
   if (isset($data['users'])) {
-    // Add the current company computed field to Views.
+    // Add the communities field to Views.
     $data['users']['communities'] = [
       'title' => t('Communities'),
       'field' => [
