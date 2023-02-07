@@ -37,6 +37,7 @@ class MukurtuDigitalHeritageBrowseByMapController extends ControllerBase
     // Do we have at least one published content item with location data?
     $query = $this->entityTypeManager()->getStorage('node')->getQuery();
     $query->condition('field_coverage', "Feature", 'CONTAINS')
+      ->condition('type', 'digital_heritage')
       ->condition('status', 1)
       ->range(0, 1)
       ->accessCheck(TRUE);
@@ -160,29 +161,6 @@ class MukurtuDigitalHeritageBrowseByMapController extends ControllerBase
       '#element' => 1,
       '#quantity' => 1,
     ];
-
-    $response->addCommand(new ReplaceCommand('#mukurtu-map-browse-teasers', $content));
-
-    return $response;
-  }
-
-  public function getTeasersAjaxOld($nodes)
-  {
-    $response = new AjaxResponse();
-
-    $content['mukurtu_map_browse_teasers'] = [
-      '#type' => 'container',
-      '#attributes' => [
-        'id' => 'mukurtu-map-browse-teasers',
-      ],
-    ];
-
-    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
-
-    foreach ($nodes as $node) {
-      $pre_render = $view_builder->view($node, 'teaser');
-      $content['mukurtu_map_browse_teasers'][] = $pre_render;
-    }
 
     $response->addCommand(new ReplaceCommand('#mukurtu-map-browse-teasers', $content));
 
