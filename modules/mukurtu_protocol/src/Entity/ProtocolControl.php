@@ -694,7 +694,7 @@ class ProtocolControl extends EditorialContentEntityBase implements ProtocolCont
     if (!empty($results)) {
       $storage = \Drupal::entityTypeManager()->getStorage('protocol_control');
       $unused = $storage->loadMultiple($results);
-      $storage->delete($unused);
+      //$storage->delete($unused);
     }
   }
 

@@ -7,7 +7,7 @@
 
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
-use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\mukurtu_protocol\Entity\MukurtuNode;
 
 /**
  * Implements hook_schema().
@@ -118,4 +118,19 @@ function mukurtu_protocol_install() {
   $types[] = 'protocol';
   $config->set('enabled_entity_types', $types);
   $config->save();
+
+  // Field storage for cultural protocol fields.
+  $entity_type = 'node';
+  $fields = MukurtuNode::getProtocolFieldDefinitions();
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+
+  foreach ($fields as $field_name => $field_definition) {
+    $entity_definition_update_manager
+      ->installFieldStorageDefinition(
+        $field_name,
+        $entity_type,
+        'mukurtu_protocol',
+        $field_definition
+      );
+  }
 }

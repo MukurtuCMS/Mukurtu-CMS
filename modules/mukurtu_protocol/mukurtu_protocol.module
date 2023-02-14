@@ -10,7 +10,7 @@ use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\Entity\MukurtuUser;
 use Drupal\Component\Utility\Html;
-use Drupal\node\Entity\Node;
+use Drupal\mukurtu_protocol\Entity\MukurtuNode;
 
 /**
  * @file
@@ -57,6 +57,14 @@ function mukurtu_protocol_field_info_alter(&$info) {
 function mukurtu_protocol_entity_bundle_info_alter(array &$bundles) {
   if (isset($bundles['user']['user'])) {
     $bundles['user']['user']['class'] = MukurtuUser::class;
+  }
+
+  // For any node bundles missing a bundle class, give it our basic Mukurtu
+  // class for protocol support.
+  foreach($bundles['node'] as $key => $bundle) {
+    if (!isset($bundle['class'])) {
+      $bundles['node'][$key]['class'] = MukurtuNode::class;
+    }
   }
 }
 

@@ -2,16 +2,18 @@
 
 namespace Drupal\mukurtu_digital_heritage\Entity;
 
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_digital_heritage\DigitalHeritageInterface;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
-class DigitalHeritage extends Node implements DigitalHeritageInterface {
+class DigitalHeritage extends Node implements DigitalHeritageInterface, CulturalProtocolControlledInterface {
+  use CulturalProtocolControlledTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
-    $definitions = [];
+    $definitions = self::getProtocolFieldDefinitions();
 
     $definitions['field_cultural_narrative'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Cultural Narrative')
@@ -137,7 +139,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface {
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-/*     $definitions['field_protocol_control'] = BaseFieldDefinition::create('entity_reference')
+ /*    $definitions['field_protocol_control'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Cultural Protocols'))
       ->setDescription(t(''))
       ->setSettings([
