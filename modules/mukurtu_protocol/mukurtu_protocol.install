@@ -8,6 +8,7 @@
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
 use Drupal\mukurtu_protocol\Entity\MukurtuNode;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 
 /**
  * Implements hook_schema().
@@ -120,17 +121,19 @@ function mukurtu_protocol_install() {
   $config->save();
 
   // Field storage for cultural protocol fields.
-  $entity_type = 'node';
-  $fields = MukurtuNode::getProtocolFieldDefinitions();
+  $entity_types = ['node', 'media'];
+  $fields = CulturalProtocolControlledTrait::getProtocolFieldDefinitions();
   $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
 
-  foreach ($fields as $field_name => $field_definition) {
-    $entity_definition_update_manager
-      ->installFieldStorageDefinition(
-        $field_name,
-        $entity_type,
-        'mukurtu_protocol',
-        $field_definition
-      );
+  foreach ($entity_types as $entity_type) {
+    foreach ($fields as $field_name => $field_definition) {
+      $entity_definition_update_manager
+        ->installFieldStorageDefinition(
+          $field_name,
+          $entity_type,
+          'mukurtu_protocol',
+          $field_definition
+        );
+    }
   }
 }
