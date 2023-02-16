@@ -3,18 +3,6 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.full
-    - field.field.node.collection.field_child_collections
-    - field.field.node.collection.field_collection_image
-    - field.field.node.collection.field_collection_type
-    - field.field.node.collection.field_content_type
-    - field.field.node.collection.field_credit
-    - field.field.node.collection.field_description
-    - field.field.node.collection.field_items_in_collection
-    - field.field.node.collection.field_keywords
-    - field.field.node.collection.field_parent_collection
-    - field.field.node.collection.field_protocol_control
-    - field.field.node.collection.field_related_content
-    - field.field.node.collection.field_summary
     - node.type.collection
   module:
     - layout_builder
