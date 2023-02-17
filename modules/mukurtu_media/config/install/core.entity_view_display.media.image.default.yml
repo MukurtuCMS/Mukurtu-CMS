@@ -2,9 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.media.image.field_keywords
-    - field.field.media.image.field_media_image
-    - field.field.media.image.field_protocol_control
     - media.type.image
   module:
     - image

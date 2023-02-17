@@ -2,6 +2,7 @@
 
 use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Audio;
+use Drupal\mukurtu_media\Entity\Image;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -13,6 +14,9 @@ function mukurtu_media_entity_bundle_info_alter(array &$bundles): void {
   }
   if (isset($bundles['media']['audio'])) {
     $bundles['media']['audio']['class'] = Audio::class;
+  }
+  if (isset($bundles['media']['image'])) {
+    $bundles['media']['image']['class'] = Image::class;
   }
 }
 
