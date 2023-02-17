@@ -2,9 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.media.audio.field_media_audio_file
-    - field.field.media.audio.field_protocol_control
-    - field.field.media.audio.field_transcription
     - media.type.audio
   module:
     - file
