@@ -15,7 +15,7 @@ use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Tests access to content by protocol control.
@@ -234,19 +234,10 @@ class AccessByProtocolTest extends KernelTestBase {
       'uid' => $this->owner->id(),
     ]);
 
-    // Create Protocol Control entity for the content.
-    $pcEntity = ProtocolControl::create([
-      'name' => "{$content->getEntityTypeId()}:{$content->uuid()}",
-    ]);
-    $pcEntity->setControlledEntity($content);
-    $pcEntity->save();
-    $content->set('field_protocol_control', [$pcEntity]);
+    assert($content instanceof CulturalProtocolControlledInterface);
 
-    /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $pc */
-    $pc = ProtocolControl::getProtocolControlEntity($content);
-    $pc->setPrivacySetting($access_setting);
-    $pc->setProtocols(array_values($protocols));
-    $pc->save();
+    $content->setSharingSetting($access_setting);
+    $content->setProtocols(array_values($protocols));
     $content->save();
 
     foreach ($scenarios as $scenario) {
@@ -309,18 +300,10 @@ class AccessByProtocolTest extends KernelTestBase {
       'uid' => $owner->id(),
     ]);
 
-    $pcEntity = ProtocolControl::create([
-      'name' => "{$content->getEntityTypeId()}:{$content->uuid()}",
-    ]);
-    $pcEntity->setControlledEntity($content);
-    $pcEntity->save();
-    $content->set('field_protocol_control', [$pcEntity]);
+    assert($content instanceof CulturalProtocolControlledInterface);
 
-    $pc = ProtocolControl::getProtocolControlEntity($content);
-    /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $pc */
-    $pc->setPrivacySetting('any');
-    $pc->setProtocols([]);
-    $pc->save();
+    $content->setSharingSetting('any');
+    $content->setProtocols([]);
     $content->save();
 
     // Non-owner.

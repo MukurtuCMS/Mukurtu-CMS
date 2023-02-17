@@ -1,7 +1,6 @@
 <?php
 
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
@@ -10,7 +9,10 @@ use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\Entity\MukurtuUser;
 use Drupal\Component\Utility\Html;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_protocol\Entity\MukurtuNode;
+use Drupal\mukurtu_protocol\Entity\MukurtuMedia;
+use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * @file
@@ -64,6 +66,14 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles) {
   foreach($bundles['node'] as $key => $bundle) {
     if (!isset($bundle['class'])) {
       $bundles['node'][$key]['class'] = MukurtuNode::class;
+    }
+  }
+
+  // For any media bundles missing a bundle class, give it our basic Mukurtu
+  // class for protocol support.
+  foreach ($bundles['media'] as $key => $bundle) {
+    if (!isset($bundle['class'])) {
+      $bundles['media'][$key]['class'] = MukurtuMedia::class;
     }
   }
 }
@@ -129,15 +139,13 @@ function mukurtu_protocol_local_tasks_alter(&$local_tasks) {
  * Implements hook_entity_insert().
  */
 function mukurtu_protocol_entity_insert($entity) {
-  ProtocolControl::removeInactiveControlEntities($entity);
-  ProtocolControl::buildAccessGrants($entity);
+  if ($entity instanceof CulturalProtocolControlledInterface) {
+    $entity->buildAccessGrants();
 
-  // Make Devel Generate work with protocols.
-  // Right now it makes no attempt to do anything sensible, it simply attaches
-  // random protocols to the node.
-  if ($entity->getEntityTypeId() === 'node' && isset($entity->devel_generate)) {
-    $pce = ProtocolControl::getProtocolControlEntity($entity);
-    if ($pce) {
+    // Make Devel Generate work with protocols.
+    // Right now it makes no attempt to do anything sensible, it simply attaches
+    // random protocols to the entity.
+    if (isset($entity->devel_generate)) {
       $protocols = \Drupal::entityTypeManager()->getStorage('protocol')->getQuery()->execute();
       $max = count($protocols);
       $pkeys = array_rand($protocols, mt_rand(1, $max));
@@ -149,9 +157,8 @@ function mukurtu_protocol_entity_insert($entity) {
         $newProtocols[] = $protocols[$pkey];
       }
       $privacyOpts = ['any', 'all'];
-      $pce->setProtocols($newProtocols);
-      $pce->setPrivacySetting($privacyOpts[array_rand($privacyOpts)]);
-      $pce->save();
+      $entity->setProtocols($newProtocols);
+      $entity->setSharingSetting($privacyOpts[array_rand($privacyOpts)]);
     }
   }
 }
@@ -160,17 +167,17 @@ function mukurtu_protocol_entity_insert($entity) {
  * Implements hook_entity_update().
  */
 function mukurtu_protocol_entity_update($entity) {
-  ProtocolControl::removeInactiveControlEntities($entity);
-  ProtocolControl::buildAccessGrants($entity);
+  if ($entity instanceof CulturalProtocolControlledInterface) {
+    $entity->buildAccessGrants();
+  }
 }
 
 /**
  * Implements hook_entity_delete().
  */
 function mukurtu_protocol_entity_delete($entity) {
-  if (ProtocolControl::supportsProtocolControl($entity)) {
-    ProtocolControl::removeAllControlEntities($entity->getEntityTypeId(), $entity->uuid());
-    ProtocolControl::removeAccessGrants($entity);
+  if ($entity instanceof CulturalProtocolControlledInterface) {
+    $entity->removeAccessGrants();
   }
 }
 
@@ -178,6 +185,7 @@ function mukurtu_protocol_entity_delete($entity) {
  * Implements hook_form_alter().
  */
 function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // @todo remove.
   if (!empty($form['field_protocol_control'])) {
     $form['actions']['submit']['#submit'] = array_merge([['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']], $form['actions']['submit']['#submit']);
         //$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);    //$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);    //$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);
@@ -290,7 +298,7 @@ function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
   $grants = [];
 
   if ($op == 'view') {
-    $grants['protocols'] = ProtocolControl::getAccountGrantIds($account);
+    $grants['protocols'] = CulturalProtocols::getAccountGrantIds($account);
   }
 
   return $grants;
@@ -300,14 +308,10 @@ function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
  * Implements hook_node_access_records().
  */
 function mukurtu_protocol_node_access_records(NodeInterface $node) {
-  /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $protocolControlEntity */
-  // Load the protocol control entity.
-  $protocolControlEntity = ProtocolControl::getProtocolControlEntity($node);
-  if (!$protocolControlEntity) {
-    return [];
+  if ($node instanceof CulturalProtocolControlledInterface) {
+    return $node->getAccessGrants();
   }
-
-  return $protocolControlEntity->getNodeAccessGrants();
+  return [];
 }
 
 /**
@@ -328,7 +332,7 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
   }
 
   // Get the user's grants.
-  $grants = ProtocolControl::getAccountGrantIds($account);
+  $grants = CulturalProtocols::getAccountGrantIds($account);
 
   // Grab the media table alias.
   $tables = $query->getTables();
@@ -450,7 +454,8 @@ function mukurtu_protocol_field_widget_single_element_entity_browser_entity_refe
     }
 
     // If the entity is protocol controlled, check if it should be displayed.
-    if ($entity && ProtocolControl::supportsProtocolControl($entity) && !$entity->access('view')) {
+    /** @var \Drupal\Core\Entity\EntityInterface $entity */
+    if ($entity && ($entity instanceof CulturalProtocolControlledInterface) && !$entity->access('view')) {
       $id += 1;
       $item['#attributes']['class'][] = 'inaccessible-reference';
 

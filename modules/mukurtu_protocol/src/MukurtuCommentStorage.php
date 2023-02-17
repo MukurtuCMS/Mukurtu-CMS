@@ -7,7 +7,7 @@ use Drupal\comment\CommentManagerInterface;
 use Drupal\comment\CommentStorage;
 use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
+use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Defines the storage handler class for comments.
@@ -93,7 +93,7 @@ class MukurtuCommentStorage extends CommentStorage {
       $query->setCountQuery($count_query);
     }
 
-    if (!ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) {
+    if (!CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) {
       $query->condition('c.status', CommentInterface::PUBLISHED);
       if ($comments_per_page) {
         $count_query->condition('c.status', CommentInterface::PUBLISHED);

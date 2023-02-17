@@ -6,7 +6,7 @@ use Drupal\Tests\BrowserTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Functional test base for protocol aware content.
@@ -132,28 +132,19 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
    *   The values to pass to Node::create.
    * @param \Drupal\mukurtu_protocol\Entity\ProtocolInterface[] $protocols
    *   The protocol entities the new node should use.
-   * @param string $privacy_setting
+   * @param string $sharing_setting
    *   The privacy setting the new node should use.
    *
    * @return \Drupal\node\NodeInterface
    *   The created node.
    */
-  protected function mukurtuCreateNode($values, $protocols, $privacy_setting = 'all') {
+  protected function mukurtuCreateNode($values, $protocols, $sharing_setting = 'all') {
     $content = Node::create($values);
 
-    // Create Protocol Control entity for the content.
-    $pcEntity = ProtocolControl::create([
-      'name' => "{$content->getEntityTypeId()}:{$content->uuid()}",
-    ]);
-    $pcEntity->setControlledEntity($content);
-    $pcEntity->save();
-    $content->set('field_protocol_control', [$pcEntity]);
-
-    /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $pc */
-    $pce = ProtocolControl::getProtocolControlEntity($content);
-    $pce->setPrivacySetting($privacy_setting);
-    $pce->setProtocols(array_map(fn($p): int => $p->id(), $protocols));
-    $pce->save();
+    if ($content instanceof CulturalProtocolControlledInterface) {
+      $content->setProtocols(array_map(fn ($p): int => $p->id(), $protocols));
+      $content->setSharingSetting($sharing_setting);
+    }
     $content->save();
 
     return $content;

@@ -7,7 +7,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeInterface;
 use Drupal\node\Entity\Node;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Controller to manage Community Record creation/management.
@@ -40,16 +40,7 @@ class CommunityRecordController extends ControllerBase {
 
     // Original record must support protocols in order to have community
     // records.
-    if (!$originalRecord || !$originalRecord->hasField('field_protocol_control')) {
-      return AccessResult::forbidden();
-    }
-
-    /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $protocolControlEntity */
-    // Try to load the protocol control entity.
-    $protocolControlEntity = ProtocolControl::getProtocolControlEntity($originalRecord);
-
-    // Fail early if the node doesn't have a valid PCE.
-    if (!$protocolControlEntity) {
+    if (!($originalRecord instanceof CulturalProtocolControlledInterface)) {
       return AccessResult::forbidden();
     }
 
@@ -66,16 +57,12 @@ class CommunityRecordController extends ControllerBase {
 
     // Check for the community record admin permission in one of the
     // owning protocols.
-    $protocolIDs = $protocolControlEntity->getProtocols();
-    if (empty($protocolIDs)) {
-      return AccessResult::forbidden();
-    }
-
-    $protocols = $this->entityTypeManager()->getStorage('protocol')->loadMultiple($protocolIDs);
-    foreach ($protocols as $protocol) {
-      $membership = $protocol->getMembership($account);
-      if ($membership && $membership->hasPermission('administer community records')) {
-        return AccessResult::allowed();
+    if ($protocols = $originalRecord->getProtocolEntities()) {
+      foreach ($protocols as $protocol) {
+        $membership = $protocol->getMembership($account);
+        if ($membership && $membership->hasPermission('administer community records')) {
+          return AccessResult::allowed();
+        }
       }
     }
 

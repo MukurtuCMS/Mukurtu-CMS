@@ -247,6 +247,12 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
       $cardinality = $fieldDef->getFieldStorageDefinition()->getCardinality();
       $multiple = $cardinality == -1 || $cardinality > 1;
+      $newSource = [];
+      $newSource[] = [
+        'plugin' => 'explode',
+        'source' => $source,
+        'delimiter' => ';',
+      ];
 
       if ($fieldDef->getType() == 'list_string') {
         $newSource = [];
@@ -265,12 +271,6 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
         if ($refType == 'taxonomy_term') {
           $targetBundles = $fieldDef->getSetting('handler_settings')['target_bundles'] ?? [];
-          $newSource = [];
-          $newSource[] = [
-            'plugin' => 'explode',
-            'source' => $source,
-            'delimiter' => ';',
-          ];
           $allTargetBundles = array_keys($targetBundles);
           $targetBundle = reset($allTargetBundles);
           $newSource[] = [

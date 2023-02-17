@@ -5,7 +5,7 @@ namespace Drupal\mukurtu_protocol\Plugin\Field\FieldType;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
+use Drupal\mukurtu_protocol\CulturalProtocols;
 use Exception;
 
 /**
@@ -25,11 +25,6 @@ class CulturalProtocolItem extends FieldItemBase {
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     $schema = [
       'columns' => [
-        'target_id' => [
-          'description' => 'The ID of the Protocol Control Entity.',
-          'type' => 'int',
-          'unsigned' => TRUE,
-        ],
         'protocols' => [
           'description' => 'Comma delimited list of protocol IDs.',
           'type' => 'text',
@@ -40,9 +35,11 @@ class CulturalProtocolItem extends FieldItemBase {
           'type' => 'varchar',
           'length' => 512,
         ],
-      ],
-      'indexes' => [
-        'target_id' => ['target_id'],
+        'protocol_set' => [
+          'description' => 'Hash key for the protocol set.',
+          'type' => 'text',
+          'size' => 'normal',
+        ],
       ],
     ];
 
@@ -54,18 +51,16 @@ class CulturalProtocolItem extends FieldItemBase {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties = [];
-
-    $properties['target_id'] = DataDefinition::create('integer')
-    ->setLabel(t('Protocol Control ID'))
-    ->setSetting('unsigned', TRUE)
-    ->setRequired(FALSE);
-
     $properties['protocols'] = DataDefinition::create('string')
     ->setLabel(t('Protocols'))
-    ->setRequired(FALSE);
+    ->setRequired(TRUE);
 
     $properties['sharing_setting'] = DataDefinition::create('string')
     ->setLabel(t('Sharing Setting'))
+    ->setRequired(TRUE);
+
+    $properties['protocol_set_id'] = DataDefinition::create('integer')
+    ->setLabel(t('Protocol Set ID'))
     ->setRequired(FALSE);
 
     return $properties;
@@ -76,32 +71,10 @@ class CulturalProtocolItem extends FieldItemBase {
    */
   public function preSave() {
     parent::preSave();
-    $entity = $this->getEntity();
-    $target_id = $this->target_id;
-    $protocols = explode(',', $this->protocols);
-    $sharing = $this->sharing_setting;
-    if (empty($target_id)) {
-      $pce = ProtocolControl::create([]);
-    } else {
-      // @todo Need to figure out all the handling on this for mismatched/missing PCEs.
-      /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControl $pce */
-      $pce = \Drupal::entityTypeManager()->getStorage('protocol_control')->load($target_id);
-      if (empty($pce)) {
-        $pce = ProtocolControl::create([]);
-      } else {
-        $controlledEntity = $pce->getControlledEntity();
-        if ($controlledEntity->getEntityTypeId() !== $entity->getEntityTypeId()
-        || $controlledEntity->id() !== $entity->id()) {
-          throw new Exception("WRONG PCE");
-        }
-      }
-    }
-    $pce->setControlledEntity($entity);
-    $pce->setProtocols($protocols);
-    $pce->setPrivacySetting($sharing);
-    $pce->save();
 
-    $this->target_id = $pce->id();
+    // Build the protocol set ID.
+    $protocols = explode(',', $this->protocols);
+    $this->protocol_set_id = CulturalProtocols::getProtocolSetId($protocols);
   }
 
   /**

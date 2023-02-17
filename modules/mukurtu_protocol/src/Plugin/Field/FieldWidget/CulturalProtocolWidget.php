@@ -9,9 +9,9 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Mukurtu Cultural Protocol widget.
@@ -60,10 +60,7 @@ class CulturalProtocolWidget extends WidgetBase {
 
   protected function getOptions() {
     // Get the protocol options for the user.
-    $pcDefs = \Drupal::service('entity_field.manager')->getFieldDefinitions('protocol_control', 'protocol_control');
-    $protocolField = $pcDefs['field_protocols'];
-    $provider = $protocolField->getOptionsProvider('target_id', ProtocolControl::create([]));
-    $protocolIds = $provider->getSettableValues();
+    $protocolIds = CulturalProtocols::getProtocolsByUserPermission(['apply protocol']);
 
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface[] $protocols */
     $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocolIds);
