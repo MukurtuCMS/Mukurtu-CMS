@@ -4,6 +4,7 @@ use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Image;
 use Drupal\mukurtu_media\Entity\RemoteVideo;
+use Drupal\mukurtu_media\Entity\Video;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -21,6 +22,9 @@ function mukurtu_media_entity_bundle_info_alter(array &$bundles): void {
   }
   if (isset($bundles['media']['remote_video'])) {
     $bundles['media']['remote_video']['class'] = RemoteVideo::class;
+  }
+  if (isset($bundles['media']['video'])) {
+    $bundles['media']['video']['class'] = Video::class;
   }
 }
 

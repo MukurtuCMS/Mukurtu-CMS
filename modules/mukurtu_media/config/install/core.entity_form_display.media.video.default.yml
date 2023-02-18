@@ -2,8 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.media.video.field_media_video_file
-    - field.field.media.video.field_protocol_control
     - media.type.video
   module:
     - file
