@@ -2,8 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.media.remote_video.field_media_oembed_video
-    - field.field.media.remote_video.field_protocol_control
     - media.type.remote_video
   module:
     - mukurtu_protocol
