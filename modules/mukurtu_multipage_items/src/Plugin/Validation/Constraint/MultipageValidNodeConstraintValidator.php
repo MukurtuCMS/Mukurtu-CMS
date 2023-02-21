@@ -9,6 +9,7 @@ use Symfony\Component\Validator\ConstraintValidator;
  * Validates the MultipageValidNode constraint.
  */
 class MultipageValidNodeConstraintValidator extends ConstraintValidator {
+  protected $enabledBundles;
 
   /**
    * {@inheritdoc}

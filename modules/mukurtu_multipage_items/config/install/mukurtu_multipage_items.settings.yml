@@ -1,9 +1,9 @@
 _controller: '\Drupal\node\Controller\NodeViewController::view'
 bundles_config:
-  collection: 0
-  dictionary_word: 0
+  collection: false
+  dictionary_word: false
   digital_heritage: true
-  article: 0
-  page: 0
+  article: false
+  page: false
   person: true
-  word_list: 0
+  word_list: false
