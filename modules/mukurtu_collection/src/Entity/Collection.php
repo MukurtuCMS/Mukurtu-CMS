@@ -22,7 +22,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setLabel(t('Sub-Collections'))
       ->setDescription(t(''))
       ->setSettings([
-        'target_type' => 'collection',
+        'target_type' => 'node',
         'handler' => 'default:node',
         'handler_settings' => [
           'target_bundles' => [
