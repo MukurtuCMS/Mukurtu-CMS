@@ -28,3 +28,29 @@ field.field_settings.cultural_protocol:
     target_id:
       type: integer
       label: 'Protocol Control ID'
+
+views.access.mukurtu_permission:
+  type: mapping
+  label: 'Permission'
+  mapping:
+    site:
+      type: sequence
+      label: 'Site Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    community:
+      type: sequence
+      label: 'Community Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    protocol:
+      type: sequence
+      label: 'Protocol Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    conjunction:
+      type: string
+      label: 'Conjunction'
