@@ -2,15 +2,10 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_category
-    - field.storage.node.field_keywords
-    - taxonomy.vocabulary.category
-    - taxonomy.vocabulary.keywords
     - user.role.mukurtu_administrator
   module:
     - mukurtu_protocol
     - node
-    - taxonomy
     - views_bulk_operations
 id: mukurtu_manage_all_content
 label: 'Mukurtu Manage All Content'

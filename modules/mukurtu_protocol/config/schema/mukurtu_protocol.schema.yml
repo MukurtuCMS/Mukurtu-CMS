@@ -54,3 +54,27 @@ views.access.mukurtu_permission:
     conjunction:
       type: string
       label: 'Conjunction'
+
+views.access.site_and_mukurtu_role:
+  type: mapping
+  label: 'Permission'
+  mapping:
+    site-role:
+      type: sequence
+      label: 'Site Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    community-role:
+      type: sequence
+      label: 'Community Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    protocol-role:
+      type: sequence
+      label: 'Protocol Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+

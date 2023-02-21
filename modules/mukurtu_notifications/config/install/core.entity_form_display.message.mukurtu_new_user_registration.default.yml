@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.message.mukurtu_new_user_registration.field_user
+    - message.template.mukurtu_new_user_registration
+id: message.mukurtu_new_user_registration.default
+targetEntityType: message
+bundle: mukurtu_new_user_registration
+mode: default
+content: {  }
+hidden:
+  created: true
+  field_user: true
+  uid: true
