@@ -127,9 +127,6 @@ class AccessByProtocolTest extends KernelTestBase {
       'name' => 'Protocol Controlled Thing',
     ])->save();
 
-    // Make it protocol controlled by adding the protocol control field.
-    Protocol::createField('node', 'thing');
-
     // Create a user role for a standard authenticated user.
     $role = Role::create([
       'id' => 'authenticated',
