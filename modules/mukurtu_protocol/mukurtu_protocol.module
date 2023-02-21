@@ -63,17 +63,21 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles) {
 
   // For any node bundles missing a bundle class, give it our basic Mukurtu
   // class for protocol support.
-  foreach($bundles['node'] as $key => $bundle) {
-    if (!isset($bundle['class'])) {
-      $bundles['node'][$key]['class'] = MukurtuNode::class;
+  if (isset($bundles['node'])) {
+    foreach($bundles['node'] as $key => $bundle) {
+      if (!isset($bundle['class'])) {
+        $bundles['node'][$key]['class'] = MukurtuNode::class;
+      }
     }
   }
 
   // For any media bundles missing a bundle class, give it our basic Mukurtu
   // class for protocol support.
-  foreach ($bundles['media'] as $key => $bundle) {
-    if (!isset($bundle['class'])) {
-      $bundles['media'][$key]['class'] = MukurtuMedia::class;
+  if (isset($bundles['media'])) {
+    foreach ($bundles['media'] as $key => $bundle) {
+      if (!isset($bundle['class'])) {
+        $bundles['media'][$key]['class'] = MukurtuMedia::class;
+      }
     }
   }
 }
