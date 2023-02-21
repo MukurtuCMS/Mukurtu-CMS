@@ -36,6 +36,10 @@ trait CulturalProtocolControlledTrait {
   }
 
   public function getProtocols() {
+    $protocolString = $this->get('field_cultural_protocols')->protocols;
+    if (empty($protocolString)) {
+      return [];
+    }
     return explode(',', $this->get('field_cultural_protocols')->protocols);
   }
 
@@ -46,9 +50,9 @@ trait CulturalProtocolControlledTrait {
 
   public function setProtocols($protocols) {
     // Handle both array of IDs and array of protocol entities.
-    $protocol_ids = array_map(fn($p) => $p instanceof ProtocolInterface ? $p->id() : $p, $protocols);
-    if (is_array($protocol_ids)) {
-      $x = "wow";
+    $protocol_ids = [];
+    if (!empty($protocols)) {
+      $protocol_ids = array_map(fn($p) => $p instanceof ProtocolInterface ? $p->id() : $p, $protocols);
     }
     $value['protocols'] = implode(',', $protocol_ids);
     $value['sharing_setting'] = $this->get('field_cultural_protocols')->sharing_setting ?? 'all';
