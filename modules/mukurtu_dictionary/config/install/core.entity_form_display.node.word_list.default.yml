@@ -32,9 +32,9 @@ third_party_settings:
     group_mukurtu_essentials:
       children:
         - title
-        - field_protocol_control
         - field_description
         - field_media_assets
+        - field_cultural_protocols
         - field_keywords
       label: 'Mukurtu Essentials'
       region: content
@@ -74,9 +74,15 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_description:
     type: text_textarea_with_summary
-    weight: 3
+    weight: 2
     region: content
     settings:
       rows: 9
@@ -96,7 +102,7 @@ content:
     third_party_settings: {  }
   field_media_assets:
     type: entity_reference_autocomplete
-    weight: 4
+    weight: 3
     region: content
     settings:
       match_operator: CONTAINS

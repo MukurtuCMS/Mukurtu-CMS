@@ -19,6 +19,12 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_media_audio_file:
     type: file_generic
     weight: 2
@@ -26,15 +32,9 @@ content:
     settings:
       progress_indicator: throbber
     third_party_settings: {  }
-  field_protocol_control:
-    type: mukurtu_protocol_control_widget
-    weight: 1
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   field_transcription:
     type: text_textarea
-    weight: 26
+    weight: 7
     region: content
     settings:
       rows: 5
@@ -71,4 +71,3 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden: {  }

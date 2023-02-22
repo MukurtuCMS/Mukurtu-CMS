@@ -19,6 +19,12 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_keywords:
     type: entity_reference_autocomplete
     weight: 3
@@ -36,12 +42,6 @@ content:
     settings:
       progress_indicator: throbber
       preview_image_style: thumbnail
-    third_party_settings: {  }
-  field_protocol_control:
-    type: mukurtu_protocol_control_widget
-    weight: 1
-    region: content
-    settings: {  }
     third_party_settings: {  }
   name:
     type: string_textfield
@@ -74,4 +74,3 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden: {  }
