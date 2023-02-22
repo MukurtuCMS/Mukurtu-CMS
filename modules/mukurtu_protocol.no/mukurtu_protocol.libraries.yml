@@ -1,6 +1,0 @@
-mukurtu-protocol-role-management:
-  version: 1.x
-  js:
-    js/mukurtu-protocol-role-management.js: {}
-  dependencies:
-    - core/jquery

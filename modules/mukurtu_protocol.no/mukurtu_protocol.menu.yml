@@ -1,9 +1,0 @@
-mukurtu_protocol.protocol_membership.add:
-  title: Add as Member
-  description: 'Add user as protocol member'
-  route_name: mukurtu_protocol.protocol_membership.add
-  menu_name: main
-  options:
-    attributes:
-      class:
-        - use-ajax
