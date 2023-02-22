@@ -2,8 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.media.remote_video.field_media_oembed_video
-    - field.field.media.remote_video.field_protocol_control
     - media.type.remote_video
   module:
     - mukurtu_protocol
@@ -19,6 +17,12 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_media_oembed_video:
     type: string_textfield
     weight: 2
@@ -26,12 +30,6 @@ content:
     settings:
       size: 60
       placeholder: ''
-    third_party_settings: {  }
-  field_protocol_control:
-    type: mukurtu_protocol_control_widget
-    weight: 1
-    region: content
-    settings: {  }
     third_party_settings: {  }
   name:
     type: string_textfield
@@ -64,4 +62,3 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden: {  }

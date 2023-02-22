@@ -5,7 +5,8 @@ namespace Drupal\mukurtu_protocol;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\comment\CommentFieldItemList;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
+use Drupal\mukurtu_protocol\CulturalProtocols;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Defines an item list class for comment fields.
@@ -21,7 +22,7 @@ class MukurtuCommentFieldItemList extends CommentFieldItemList {
     if ($operation === 'edit') {
       // Only users with administer comments permission can edit the comment
       // status field.
-      $result = AccessResult::allowedIf(ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $account ?: \Drupal::currentUser(), TRUE));
+      $result = AccessResult::allowedIf(CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $account ?: \Drupal::currentUser(), TRUE));
       return $return_as_object ? $result : $result->isAllowed();
     }
     if ($operation === 'view') {
@@ -36,9 +37,8 @@ class MukurtuCommentFieldItemList extends CommentFieldItemList {
 
       // Check each of the entity's protocols for their protocol comment status.
       $protocolCommenting = TRUE;
-      $pce = ProtocolControl::getProtocolControlEntity($entity);
-      if ($pce) {
-        $protocols = $pce->getProtocolEntities();
+      if ($entity instanceof CulturalProtocolControlledInterface) {
+        $protocols = $entity->getProtocolEntities();
         foreach ($protocols as $protocol) {
           $protocolCommenting = $protocolCommenting && $protocol->getCommentStatus();
         }

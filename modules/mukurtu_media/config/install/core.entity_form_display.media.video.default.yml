@@ -2,8 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.media.video.field_media_video_file
-    - field.field.media.video.field_protocol_control
     - media.type.video
   module:
     - file
@@ -20,18 +18,18 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_media_video_file:
     type: file_generic
     weight: 2
     region: content
     settings:
       progress_indicator: throbber
-    third_party_settings: {  }
-  field_protocol_control:
-    type: mukurtu_protocol_control_widget
-    weight: 1
-    region: content
-    settings: {  }
     third_party_settings: {  }
   name:
     type: string_textfield
@@ -64,4 +62,3 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden: {  }

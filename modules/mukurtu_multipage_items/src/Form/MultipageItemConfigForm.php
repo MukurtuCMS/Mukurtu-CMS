@@ -78,8 +78,9 @@ class MultipageItemConfigForm extends ConfigFormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
+    $bundle_config = array_map(fn($x) => $x ? TRUE : FALSE, $form_state->getValue('bundles_config'));
     $this->config('mukurtu_multipage_items.settings')
-      ->set('bundles_config', $form_state->getValue('bundles_config'))
+      ->set('bundles_config', $bundle_config)
       ->save();
 
       parent::submitForm($form, $form_state);

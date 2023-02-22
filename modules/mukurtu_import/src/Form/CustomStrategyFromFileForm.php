@@ -10,7 +10,7 @@ use Drupal\file\FileInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+
 /**
  * Provides a Mukurtu Import form.
  */
@@ -381,19 +381,18 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    *   The select form element.
    */
   protected function buildTargetOptions($entity_type_id, $bundle = NULL) {
-    $pceFields = $this->getFieldDefinitions('protocol_control');
     $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
     $entityKeys = $entityDefinition->getKeys();
 
     $options = [-1 => $this->t('Ignore - Do not import')];
     foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
-      if ($field_definition->getType() == 'entity_reference') {
+      if ($field_definition->getType() == 'cultural_protocol') {
         if($field_definition->getSetting('target_type') == 'protocol_control') {
-          // Split our protocol control reference into the individual sharing
-          // setting/protocols components. We'll stitch them back together into
-          // the protocol control entity in the destination plugin.
-          $options["$field_name:field_sharing_setting"] = $pceFields['field_sharing_setting']->getLabel();
-          $options["$field_name:field_protocols"] = $pceFields['field_protocols']->getLabel();
+          // Split our protocol field into the individual sharing
+          // setting/protocols components. We'll stitch them back together
+          // in the destination plugin.
+          $options["$field_name:sharing_setting"] = $this->t('Sharing Setting');
+          $options["$field_name:protocols"] = $this->t('Cultural Protocols');
           continue;
         }
       }

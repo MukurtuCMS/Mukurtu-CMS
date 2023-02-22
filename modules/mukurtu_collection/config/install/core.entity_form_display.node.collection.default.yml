@@ -4,18 +4,6 @@ dependencies:
   config:
     - entity_browser.browser.browse_content
     - field.field.node.collection.comment
-    - field.field.node.collection.field_child_collections
-    - field.field.node.collection.field_collection_image
-    - field.field.node.collection.field_collection_type
-    - field.field.node.collection.field_content_type
-    - field.field.node.collection.field_credit
-    - field.field.node.collection.field_description
-    - field.field.node.collection.field_items_in_collection
-    - field.field.node.collection.field_keywords
-    - field.field.node.collection.field_parent_collection
-    - field.field.node.collection.field_protocol_control
-    - field.field.node.collection.field_related_content
-    - field.field.node.collection.field_summary
     - node.type.collection
   module:
     - comment
@@ -43,11 +31,11 @@ third_party_settings:
     group_mukurtu_essentials:
       children:
         - title
+        - field_cultural_protocols
         - field_summary
         - field_description
         - field_collection_image
         - field_credit
-        - field_protocol_control
         - field_keywords
       label: 'Mukurtu Essentials'
       region: content
@@ -110,22 +98,28 @@ content:
     third_party_settings: {  }
   field_collection_image:
     type: media_library_widget
-    weight: -4
+    weight: -3
     region: content
     settings:
       media_types: {  }
     third_party_settings: {  }
   field_credit:
     type: string_textfield
-    weight: -3
+    weight: -2
     region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: -6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_description:
     type: text_textarea_with_summary
-    weight: -5
+    weight: -4
     region: content
     settings:
       rows: 9
@@ -220,7 +214,7 @@ content:
     third_party_settings: {  }
   field_summary:
     type: string_textfield
-    weight: -6
+    weight: -5
     region: content
     settings:
       size: 60

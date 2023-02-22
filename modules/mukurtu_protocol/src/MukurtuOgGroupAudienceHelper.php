@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * OG audience field helper methods.
@@ -51,12 +52,10 @@ class MukurtuOgGroupAudienceHelper implements OgGroupAudienceHelperInterface {
     }
 
     if ($bundle_id) {
-      $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
-      if ($entity_type->entityClassImplements(FieldableEntityInterface::class)) {
-        $fields = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle_id);
-        if (isset($fields['field_protocol_control'])) {
-          return TRUE;
-        }
+      $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type_id);
+      $bundle_class = $bundle_info[$bundle_id]['class'] ?? NULL;
+      if ($bundle_class && in_array('Drupal\mukurtu_protocol\CulturalProtocolControlledInterface', class_implements($bundle_class))) {
+        return TRUE;
       }
     }
 
@@ -76,7 +75,6 @@ class MukurtuOgGroupAudienceHelper implements OgGroupAudienceHelperInterface {
   public function getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id, $group_entity_type_id = NULL, $group_bundle_id = NULL) {
     if ($group_content_entity_type_id == 'protocol') {
       $fieldDefinitions = $this->entityFieldManager->getFieldDefinitions('protocol', 'protocol');
-
     }
 
     return [];

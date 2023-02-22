@@ -1,6 +1,17 @@
 <?php
 
+use Drupal\mukurtu_digital_heritage\Entity\DigitalHeritage;
+
 /**
  * @file
  * Provide Mukurtu Digital Heritage Type.
  */
+
+ /**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function mukurtu_digital_heritage_entity_bundle_info_alter(array &$bundles) {
+  if (isset($bundles['node']['digital_heritage'])) {
+    $bundles['node']['digital_heritage']['class'] = DigitalHeritage::class;
+  }
+}

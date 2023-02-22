@@ -20,3 +20,61 @@ mukurtu_protocol.comment_settings:
   mapping:
     site_comments_enabled:
       type: integer
+
+field.field_settings.cultural_protocol:
+  type: mapping
+  label: 'Cultural Protocol settings'
+  mapping:
+    target_id:
+      type: integer
+      label: 'Protocol Control ID'
+
+views.access.mukurtu_permission:
+  type: mapping
+  label: 'Permission'
+  mapping:
+    site:
+      type: sequence
+      label: 'Site Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    community:
+      type: sequence
+      label: 'Community Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    protocol:
+      type: sequence
+      label: 'Protocol Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    conjunction:
+      type: string
+      label: 'Conjunction'
+
+views.access.site_and_mukurtu_role:
+  type: mapping
+  label: 'Permission'
+  mapping:
+    site-role:
+      type: sequence
+      label: 'Site Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    community-role:
+      type: sequence
+      label: 'Community Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+    protocol-role:
+      type: sequence
+      label: 'Protocol Permissions'
+      sequence:
+        type: string
+        label: 'Permission'
+

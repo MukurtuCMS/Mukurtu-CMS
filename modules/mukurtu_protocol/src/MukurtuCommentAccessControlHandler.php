@@ -2,13 +2,16 @@
 
 namespace Drupal\mukurtu_protocol;
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\comment\CommentAccessControlHandler;
+use Drupal\comment\CommentInterface;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Defines the access control handler for the comment entity type.
@@ -21,7 +24,8 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
-    /** @var \Drupal\comment\CommentInterface|\Drupal\user\EntityOwnerInterface $entity */
+    assert($entity instanceof CommentInterface);
+    assert($entity instanceof EntityPublishedInterface);
 
     // Mukurtu is only concerned with altering the approval behavior.
     // All other operations can be handled by the stock handler.
@@ -40,22 +44,12 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
 
     // Fall back to normal comment access checks if the entity doesn't have a
     // protocol field.
-    if (!$entity->getCommentedEntity()->hasField('field_protocol_control')) {
+    if (!($entity instanceof CulturalProtocolControlledInterface)) {
       return parent::checkAccess($entity, $operation, $account);
     }
 
-    /** @var \Drupal\mukurtu_protocol\Entity\ProtocolControlInterface $protocolControlEntity */
-    // Try to load the protocol control entity on the commented entity.
-    $protocolControlEntity = ProtocolControl::getProtocolControlEntity($entity->getCommentedEntity());
-
-    // No valid protocol control entity (but DOES have a protocol control
-    // field) or an empty protocol list. Fall back to parent check.
-    if (!$protocolControlEntity || empty($protocolControlEntity->getProtocols())) {
-      return parent::checkAccess($entity, $operation, $account);
-    }
-
-    // Now we can finally see if they have protocol level comment admin.
-    $protocols = $protocolControlEntity->getProtocolEntities();
+    // See if the user has protocol level comment admin.
+    $protocols = $entity->getProtocolEntities();
     $protocol_comment_admin = TRUE;
     foreach ($protocols as $protocol) {
       $membership = $protocol->getMembership($account);
@@ -91,7 +85,7 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
       ];
       if (in_array($field_definition->getName(), $administrative_fields, TRUE)) {
         if ($entity) {
-          return AccessResult::allowedIf(ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $account, TRUE));
+          return AccessResult::allowedIf(CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $account, TRUE));
         }
         return AccessResult::allowedIfHasPermission($account, 'administer comments');
       }
@@ -142,7 +136,7 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
 
         $admin_access = AccessResult::allowedIfHasPermission($account, 'administer comments');
         if ($entity) {
-          $admin_access = AccessResult::allowedIf(ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $account, TRUE));
+          $admin_access = AccessResult::allowedIf(CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $account, TRUE));
         }
 
         $anonymous_access = AccessResult::allowedIf($entity->isNew() && $account->isAnonymous() && ($anonymous_contact != CommentInterface::ANONYMOUS_MAYNOT_CONTACT || $is_name) && $account->hasPermission('post comments'))

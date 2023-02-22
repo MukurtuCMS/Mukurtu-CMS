@@ -5,11 +5,6 @@ dependencies:
     - core.entity_view_mode.node.taxonomy_record
     - field.field.node.word_list.body
     - field.field.node.word_list.comment
-    - field.field.node.word_list.field_description
-    - field.field.node.word_list.field_keywords
-    - field.field.node.word_list.field_media_assets
-    - field.field.node.word_list.field_protocol_control
-    - field.field.node.word_list.field_words
     - node.type.word_list
   module:
     - layout_builder

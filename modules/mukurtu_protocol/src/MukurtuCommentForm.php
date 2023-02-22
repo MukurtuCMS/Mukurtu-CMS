@@ -2,18 +2,18 @@
 
 namespace Drupal\mukurtu_protocol;
 
+use Drupal\comment\CommentForm;
+use Drupal\comment\CommentInterface;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
-use Drupal\comment\CommentInterface;
-use Drupal\comment\CommentForm;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
-use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Mukurtu base handler for comment forms.
@@ -48,7 +48,7 @@ class MukurtuCommentForm extends CommentForm {
     $form['#theme'] = ['comment_form__' . $entity->getEntityTypeId() . '__' . $entity->bundle() . '__' . $field_name, 'comment_form'];
 
     $anonymous_contact = $field_definition->getSetting('anonymous');
-    $is_admin = $comment->id() && ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE);
+    $is_admin = $comment->id() && CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE);
     if (!$this->currentUser->isAuthenticated() && $anonymous_contact != CommentInterface::ANONYMOUS_MAYNOT_CONTACT) {
       $form['#attached']['library'][] = 'core/drupal.form';
       $form['#attributes']['data-user-info-from-browser'] = TRUE;
@@ -89,8 +89,8 @@ class MukurtuCommentForm extends CommentForm {
     }
     else {
       $status = CommentInterface::NOT_PUBLISHED;
-      if (ProtocolControl::hasSiteOrProtocolPermission($entity, 'skip comment approval', $this->currentUser, TRUE)
-       || ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)
+      if (CulturalProtocols::hasSiteOrProtocolPermission($entity, 'skip comment approval', $this->currentUser, TRUE)
+       || CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)
        || !$this->anyProtocolsRequireCommentApproval($entity)) {
           $status = CommentInterface::PUBLISHED;
       }
@@ -206,7 +206,7 @@ class MukurtuCommentForm extends CommentForm {
 
     // Only show the save button if comment previews are optional or if we are
     // already previewing the submission.
-    $element['submit']['#access'] = ($comment->id() && ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) || $preview_mode != DRUPAL_REQUIRED || $form_state->get('comment_preview');
+    $element['submit']['#access'] = ($comment->id() && CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) || $preview_mode != DRUPAL_REQUIRED || $form_state->get('comment_preview');
 
     $element['preview'] = [
       '#type' => 'submit',
@@ -232,7 +232,7 @@ class MukurtuCommentForm extends CommentForm {
     }
     // Empty author ID should revert to anonymous.
     $author_id = $form_state->getValue('uid');
-    if ($comment->id() && ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) {
+    if ($comment->id() && CulturalProtocols::hasSiteOrProtocolPermission($comment, 'administer comments', $this->currentUser, TRUE)) {
       // Admin can leave the author ID blank to revert to anonymous.
       $author_id = $author_id ?: 0;
     }
@@ -276,13 +276,14 @@ class MukurtuCommentForm extends CommentForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
+    /** @var \Drupal\comment\CommentInterface $comment */
     $comment = $this->entity;
     $entity = $comment->getCommentedEntity();
     $field_name = $comment->getFieldName();
     $uri = $entity->toUrl();
     $logger = $this->logger('comment');
 
-    if ($this->currentUser->hasPermission('post comments') && (ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE) || $entity->{$field_name}->status == CommentItemInterface::OPEN)) {
+    if ($this->currentUser->hasPermission('post comments') && (CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE) || $entity->{$field_name}->status == CommentItemInterface::OPEN)) {
       $comment->save();
       $form_state->setValue('cid', $comment->id());
 
@@ -294,7 +295,7 @@ class MukurtuCommentForm extends CommentForm {
 
       // Explain the approval queue if necessary.
       if (!$comment->isPublished()) {
-        if (!ProtocolControl::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) {
+        if (!CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) {
           $this->messenger()->addStatus($this->t('Your comment has been queued for review by site administrators and will be published after approval.'));
         }
       }
@@ -330,12 +331,11 @@ class MukurtuCommentForm extends CommentForm {
    *   TRUE if any protocol requires comment approval.
    */
   private function anyProtocolsRequireCommentApproval(EntityInterface $entity) {
-    $pce = ProtocolControl::getProtocolControlEntity($entity);
-    if (!$pce) {
+    if (!($entity instanceof CulturalProtocolControlledInterface)) {
       return TRUE;
     }
 
-    $protocols = $pce->getProtocolEntities();
+    $protocols = $entity->getProtocolEntities();
     foreach ($protocols as $protocol) {
       if ($protocol->getCommentRequireApproval()) {
         return TRUE;

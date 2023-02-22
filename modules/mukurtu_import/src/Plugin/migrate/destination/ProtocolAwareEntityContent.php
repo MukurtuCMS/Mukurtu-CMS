@@ -7,10 +7,8 @@ use Drupal\migrate\Row;
 use Drupal\migrate\MigrateException;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\mukurtu_protocol\Entity\ProtocolControl;
-use Drupal\migrate\Exception\EntityValidationException;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
-use Exception;
 
 class ProtocolAwareEntityContent extends EntityContentBase {
   public function import(Row $row, array $old_destination_id_values = []) {
@@ -21,35 +19,15 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     }
     assert($entity instanceof ContentEntityInterface);
 
-    // Protocol Control.
-    if (ProtocolControl::supportsProtocolControl($entity)) {
-      $pce = ProtocolControl::getProtocolControlEntity($entity) ?? ProtocolControl::create([]);
-      $savePce = FALSE;
+    // Protocol Handling.
+    if ($entity instanceof CulturalProtocolControlledInterface) {
       // Sharing setting, any/all.
-      if ($row->hasDestinationProperty('field_protocol_control:field_sharing_setting')) {
-        $pce->setPrivacySetting($row->getDestinationProperty('field_protocol_control:field_sharing_setting'));
-        $savePce = TRUE;
+      if ($row->hasDestinationProperty('field_cultural_protocols:sharing_setting')) {
+        $entity->setSharingSetting($row->getDestinationProperty('field_cultural_protocols:sharing_setting'));
       }
       // Protocol list.
-      if ($row->hasDestinationProperty('field_protocol_control:field_protocols')) {
-        $pce->setProtocols($row->getDestinationProperty('field_protocol_control:field_protocols'));
-        $savePce = TRUE;
-      }
-
-      // Save the protocol control entity if valid.
-      if ($savePce) {
-        $pceViolations = $pce->validate();
-        if (count($pceViolations) > 0) {
-          // @todo Need to create our own version of this with a better message and ideally row number.
-          throw new EntityValidationException($pceViolations);
-        }
-        try {
-          $pce->setControlledEntity($entity);
-          $pce->save();
-          $entity->set('field_protocol_control', $pce->id());
-        } catch (Exception $e) {
-          throw new MigrateException('Unable to save protocol control entity');
-        }
+      if ($row->hasDestinationProperty('field_cultural_protocols:protocols')) {
+        $entity->setProtocols($row->getDestinationProperty('field_cultural_protocols:protocols'));
       }
     }
 
