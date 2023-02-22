@@ -65,7 +65,7 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles) {
   // class for protocol support.
   if (isset($bundles['node'])) {
     foreach($bundles['node'] as $key => $bundle) {
-      if (!isset($bundle['class'])) {
+      if (!isset($bundle['class']) && !in_array($key, ['article', 'page'])) {
         $bundles['node'][$key]['class'] = MukurtuNode::class;
       }
     }
