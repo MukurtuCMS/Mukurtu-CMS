@@ -96,7 +96,6 @@ hidden:
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
-  field_protocol_control: true
   field_related_content: true
   field_representative_media: true
   field_sequence_collection: true

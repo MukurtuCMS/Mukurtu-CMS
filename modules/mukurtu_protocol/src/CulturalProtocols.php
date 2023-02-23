@@ -66,6 +66,13 @@ class CulturalProtocols {
     return self::getProtocolSetIdFromKey($key);
   }
 
+  public static function getItemSharingSettingOptions() {
+    return [
+      'all' => t('All: This item may only be shared with members belonging to ALL the protocols listed.'),
+      'any' => t('Any: This item may be shared with members of ANY protocol listed.'),
+    ];
+  }
+
   /**
    * Get the IDs of all published open protocols.
    */

@@ -120,12 +120,11 @@ class CulturalProtocolWidget extends WidgetBase {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $protocols = $items[$delta]->protocols ?? "";
-    $selectedProtocols = explode(',', $protocols);
+    $selectedProtocols = str_replace('|', '', explode(',', $protocols));
     $sharing_setting = $items[$delta]->sharing_setting ?? NULL;
 
     // Get sharing setting options.
-    $pcDefs = \Drupal::service('entity_field.manager')->getFieldDefinitions('protocol_control', 'protocol_control');
-    $sharingOptions = $pcDefs['field_sharing_setting']->getSetting('allowed_values');
+    $sharingOptions = CulturalProtocols::getItemSharingSettingOptions();
 
     // Build the community/protocol options.
     $protocolsWithCommunityOptions = $this->getOptions();
@@ -198,7 +197,7 @@ class CulturalProtocolWidget extends WidgetBase {
         $protocols = array_merge(array_filter($community['protocols']), $protocols);
       }
       $massagedValues[$delta]['sharing_setting'] = $subvalue['sharing_setting'];
-      $massagedValues[$delta]['protocols'] = implode(',', $protocols);
+      $massagedValues[$delta]['protocols'] = implode(',', array_map(fn($p) => "|$p|", array_map('trim', $protocols)));
     }
 
     return $massagedValues;

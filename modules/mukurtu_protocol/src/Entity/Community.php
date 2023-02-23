@@ -16,6 +16,7 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\UserInterface;
+use Exception;
 
 /**
  * Defines the Community entity.
@@ -460,7 +461,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
    * {@inheritdoc}
    */
   public function getProtocols() {
-    $query = $this->entityTypeManager()->getStorage('protocol')->getQuery();
+    try {
+      $storage = $this->entityTypeManager()->getStorage('protocol');
+    } catch (Exception $e) {
+      return [];
+    }
+    $query = $storage->getQuery();
     $result = $query->condition('field_communities', $this->id(), '=')
       ->accessCheck(FALSE)
       ->execute();

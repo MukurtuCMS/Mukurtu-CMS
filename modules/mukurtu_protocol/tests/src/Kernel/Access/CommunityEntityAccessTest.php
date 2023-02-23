@@ -62,7 +62,6 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $this->installEntitySchema('taxonomy_term');
     $this->installEntitySchema('community');
     $this->installEntitySchema('protocol');
-    $this->installEntitySchema('protocol_control');
     $this->installSchema('system', 'sequences');
 
     // Flag community entities as Og groups

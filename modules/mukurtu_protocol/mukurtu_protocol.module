@@ -186,17 +186,6 @@ function mukurtu_protocol_entity_delete($entity) {
 }
 
 /**
- * Implements hook_form_alter().
- */
-function mukurtu_protocol_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  // @todo remove.
-  if (!empty($form['field_protocol_control'])) {
-    $form['actions']['submit']['#submit'] = array_merge([['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']], $form['actions']['submit']['#submit']);
-        //$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);    //$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);    //$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);$form['actions']['submit']['#submit'] = array_merge($form['actions']['submit']['#submit'], [['\Drupal\mukurtu_protocol\Plugin\Field\FieldWidget\ProtocolControlWidget', 'customSubmit']]);
-  }
-}
-
-/**
  * Implements hook_entity_type_build().
  */
 function mukurtu_protocol_entity_type_build(array &$entity_types) {

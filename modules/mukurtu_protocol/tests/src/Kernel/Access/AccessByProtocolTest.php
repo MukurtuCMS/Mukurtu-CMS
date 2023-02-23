@@ -109,7 +109,6 @@ class AccessByProtocolTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('community');
     $this->installEntitySchema('protocol');
-    $this->installEntitySchema('protocol_control');
     $this->installSchema('node', ['node_access']);
     $this->installSchema('system', 'sequences');
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');

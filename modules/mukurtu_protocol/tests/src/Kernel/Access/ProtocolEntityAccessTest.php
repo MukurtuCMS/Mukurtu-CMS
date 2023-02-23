@@ -28,12 +28,16 @@ class ProtocolEntityAccessTest extends KernelTestBase {
     'node',
     'node_access_test',
     'media',
+    'image',
+    'file',
+    'filter',
     'og',
     'options',
     'system',
     'text',
     'taxonomy',
     'user',
+    'mukurtu_core',
     'mukurtu_protocol',
   ];
 
@@ -57,14 +61,19 @@ class ProtocolEntityAccessTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->installConfig(['og']);
+    ///
+    $this->installSchema('system', 'sequences');
+    $this->installSchema('node', 'node_access');
+    $this->installEntitySchema('user');
+    $this->installEntitySchema('node');
+    $this->installEntitySchema('media');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('taxonomy_term');
     $this->installEntitySchema('community');
     $this->installEntitySchema('protocol');
-    $this->installEntitySchema('protocol_control');
-    $this->installSchema('system', 'sequences');
+    $this->installConfig(['og','node','media', 'filter']);
+
 
     // Flag protocol and community entities as Og groups
     // so Og does its part for access control.

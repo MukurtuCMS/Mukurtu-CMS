@@ -2,7 +2,6 @@
 
 namespace Drupal\mukurtu_protocol;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
@@ -40,7 +39,7 @@ trait CulturalProtocolControlledTrait {
     if (empty($protocolString)) {
       return [];
     }
-    return explode(',', $this->get('field_cultural_protocols')->protocols);
+    return str_replace('|', '', explode(',', $this->get('field_cultural_protocols')->protocols));
   }
 
   public function getProtocolEntities() {
@@ -54,9 +53,22 @@ trait CulturalProtocolControlledTrait {
     if (!empty($protocols)) {
       $protocol_ids = array_map(fn($p) => $p instanceof ProtocolInterface ? $p->id() : $p, $protocols);
     }
-    $value['protocols'] = implode(',', $protocol_ids);
+    $value['protocols'] = implode(',', array_map(fn($p) => "|$p|", array_map('trim', $protocol_ids)));//implode(',', $protocol_ids);
     $value['sharing_setting'] = $this->get('field_cultural_protocols')->sharing_setting ?? 'all';
     return $this->set('field_cultural_protocols', $value);
+  }
+
+  public function getCommunities() {
+    $communities = [];
+    $protocols = $this->getProtocolEntities();
+    /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol */
+    foreach ($protocols as $protocol) {
+      $pCommunities = $protocol->getCommunities();
+      foreach ($pCommunities as $pCommunity) {
+        $communities[$pCommunity->id()] = $pCommunity;
+      }
+    }
+    return $communities;
   }
 
   public function getMemberProtocols(?AccountInterface $user = NULL): array {

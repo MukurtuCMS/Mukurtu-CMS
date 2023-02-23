@@ -139,24 +139,6 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
- /*    $definitions['field_protocol_control'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Cultural Protocols'))
-      ->setDescription(t(''))
-      ->setSettings([
-        'target_type' => 'protocol_control',
-        'handler' => 'default:protocol_control',
-        'handler_settings' => [
-          'target_bundles' => ['protocol_control' => 'protocol_control'],
-          'auto_create' => FALSE,
-        ]
-      ])
-    ->setCardinality(1)
-    ->setRequired(TRUE)
-    ->setRevisionable(TRUE)
-    ->setTranslatable(TRUE)
-    ->setDisplayConfigurable('view', TRUE)
-    ->setDisplayConfigurable('form', TRUE); */
-
     $definitions['field_mukurtu_original_record'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Original Record'))
       ->setDescription(t(''))

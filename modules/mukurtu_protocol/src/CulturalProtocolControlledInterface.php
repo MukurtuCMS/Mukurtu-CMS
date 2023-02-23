@@ -57,6 +57,14 @@ interface CulturalProtocolControlledInterface {
   public function getProtocolEntities();
 
   /**
+   * Get the entity's affiliated communities.
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\CommunityInterface[]
+   *   An array of community entities.
+   */
+  public function getCommunities();
+
+  /**
    * Set the entity's protocols.
    *
    * @param mixed $protocols

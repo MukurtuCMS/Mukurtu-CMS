@@ -16,6 +16,7 @@ use Drupal\og\OgMembershipInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
+use Exception;
 
 /**
  * Defines the Protocol entity.
@@ -89,43 +90,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
   use EntityChangedTrait;
   use EntityPublishedTrait;
-
-  /**
-   * Create the protocol control field for an entity type/bundle.
-   */
-  public static function createField($entity_type_id, $bundle) {
-    // Create the field storage if necessary.
-    $fieldStorage = FieldStorageConfig::loadByName($entity_type_id, 'field_protocol_control');
-    if (is_null($fieldStorage)) {
-      $fieldStorage = FieldStorageConfig::create([
-        'entity_type' => $entity_type_id,
-        'field_name' => 'field_protocol_control',
-        'type' => 'entity_reference',
-        'settings' => ['target_type' => 'protocol_control'],
-        'cardinality' => 1,
-      ]);
-      $fieldStorage->save();
-    }
-
-    // Add the field if necessary.
-    $fieldConfig = FieldConfig::loadByName($entity_type_id, $bundle, 'field_protocol_control');
-    if (is_null($fieldConfig)) {
-      $fieldConfig = FieldConfig::create([
-        'entity_type' => $entity_type_id,
-        'bundle' => $bundle,
-        'field_name' => 'field_protocol_control',
-        'label' => 'Protocols',
-        'settings' => [
-          'handler' => 'default:protocol_control',
-          'handler_settings' => [
-            'target_bundles' => NULL,
-            'auto_create' => FALSE,
-          ],
-        ],
-      ]);
-      $fieldConfig->save();
-    }
-  }
 
   /**
    * {@inheritdoc}
@@ -246,12 +210,34 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
    * {@inheritdoc}
    */
   public function inUse(): bool {
-    $query = $this->entityTypeManager()->getStorage('protocol_control')->getQuery();
-    $result = $query->condition('field_protocols', $this->id(), '=')
-      ->accessCheck(FALSE)
-      ->execute();
+    $entityFieldManager = \Drupal::service('entity_field.manager');
 
-    return !empty($result);
+    foreach (['node', 'media'] as $entity_type_id) {
+      try {
+        $storage = $this->entityTypeManager()->getStorage($entity_type_id);
+      } catch (Exception $e) {
+        continue;
+      }
+
+      // Check if the protocol field exists.
+      $fields = $entityFieldManager->getActiveFieldStorageDefinitions($entity_type_id);
+      if (!isset($fields['field_cultural_protocols'])) {
+        // If the protocol field doesn't exist, don't try to query it otherwise
+        // it'll throw errors that mess up our kernel tests.
+        continue;
+      }
+
+      // Check if any entity has a reference to this protocol.
+      $query = $storage->getQuery();
+      $query->condition('field_cultural_protocols.protocols', "|{$this->id()}|", 'CONTAINS')
+        ->accessCheck(FALSE);
+      $results = $query->execute();
+      if (!empty($results)) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
   /**

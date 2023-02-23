@@ -3,8 +3,8 @@
 namespace Drupal\mukurtu_protocol\Plugin\Field;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\TypedData\ComputedItemListTrait;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * CommunityAffiliationItemList class to generate a computed field.
@@ -26,15 +26,9 @@ class CommunityAffiliationItemList extends EntityReferenceFieldItemList {
     $communities = [];
     $entity = $this->getEntity();
 
-    if ($entity instanceof FieldableEntityInterface) {
-      if ($entity->hasField('field_protocol_control')) {
-        // Get the protocol control entity.
-        $pc = $entity->get('field_protocol_control')->referencedEntities();
-        if (!empty($pc)) {
-          // Get all the associated communities.
-          $communities = $pc[0]->getCommunities();
-        }
-      }
+    if ($entity instanceof CulturalProtocolControlledInterface) {
+      // Get all the associated communities.
+      $communities = $entity->getCommunities();
     }
 
     foreach ($communities as $delta => $community) {

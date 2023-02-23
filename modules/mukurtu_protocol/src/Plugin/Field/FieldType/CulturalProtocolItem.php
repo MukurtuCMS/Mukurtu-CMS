@@ -97,7 +97,7 @@ class CulturalProtocolItem extends FieldItemBase {
       $values = [];
       $values['sharing_setting'] = strtolower($matches[1][0]);
       $protocols = explode(',', $matches[2][0]);
-      $values['protocols'] = implode(',', array_map('trim', $protocols));
+      $values['protocols'] = implode(',', array_map(fn($p) => "|$p|", array_map('trim', $protocols)));
     }
 
     parent::setValue($values, $notify);
@@ -108,7 +108,7 @@ class CulturalProtocolItem extends FieldItemBase {
    * {@inheritdoc}
    */
   public function isEmpty() {
-    return FALSE;
+    return empty($this->protocols) || empty($this->sharing_setting);
   }
 
 }

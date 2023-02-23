@@ -24,32 +24,6 @@ entity.protocol.delete_form:
   base_route:  entity.protocol.canonical
   title: Delete
   weight: 10
-# Protocol control routing definition
-protocol_control.settings_tab:
-  route_name: protocol_control.settings
-  title: 'Settings'
-  base_route: protocol_control.settings
-
-entity.protocol_control.canonical:
-  route_name: entity.protocol_control.canonical
-  base_route: entity.protocol_control.canonical
-  title: 'View'
-
-entity.protocol_control.edit_form:
-  route_name: entity.protocol_control.edit_form
-  base_route: entity.protocol_control.canonical
-  title: 'Edit'
-
-entity.protocol_control.version_history:
-  route_name: entity.protocol_control.version_history
-  base_route: entity.protocol_control.canonical
-  title: 'Revisions'
-
-entity.protocol_control.delete_form:
-  route_name:  entity.protocol_control.delete_form
-  base_route:  entity.protocol_control.canonical
-  title: Delete
-  weight: 10
 
 # Community routing definition
 community.settings_tab:
