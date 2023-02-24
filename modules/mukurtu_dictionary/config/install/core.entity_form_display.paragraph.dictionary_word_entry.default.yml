@@ -2,16 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.paragraph.dictionary_word_entry.field_alternate_spelling
-    - field.field.paragraph.dictionary_word_entry.field_contributor
-    - field.field.paragraph.dictionary_word_entry.field_definition
-    - field.field.paragraph.dictionary_word_entry.field_pronunciation
-    - field.field.paragraph.dictionary_word_entry.field_recording
-    - field.field.paragraph.dictionary_word_entry.field_sample_sentences
-    - field.field.paragraph.dictionary_word_entry.field_source
-    - field.field.paragraph.dictionary_word_entry.field_translation
-    - field.field.paragraph.dictionary_word_entry.field_word_origin
-    - field.field.paragraph.dictionary_word_entry.field_word_type
     - paragraphs.paragraphs_type.dictionary_word_entry
   module:
     - text
