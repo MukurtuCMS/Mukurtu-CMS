@@ -4,6 +4,7 @@ dependencies:
   config:
     - paragraphs.paragraphs_type.dictionary_word_entry
   module:
+    - media_library
     - text
 id: paragraph.dictionary_word_entry.default
 targetEntityType: paragraph
@@ -47,22 +48,19 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_pronunciation:
-    type: text_textfield
+    type: text_textarea
     weight: 3
     region: content
     settings:
-      size: 60
+      rows: 5
       placeholder: ''
     third_party_settings: {  }
   field_recording:
-    type: entity_reference_autocomplete
+    type: media_library_widget
     weight: 4
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      media_types: {  }
     third_party_settings: {  }
   field_sample_sentences:
     type: string_textarea
@@ -97,14 +95,10 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_word_type:
-    type: entity_reference_autocomplete
+    type: options_buttons
     weight: 1
     region: content
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+    settings: {  }
     third_party_settings: {  }
 hidden:
   created: true
