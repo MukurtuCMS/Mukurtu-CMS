@@ -1,5 +1,8 @@
 <?php
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -39,6 +42,18 @@ function mukurtu_dictionary_entity_bundle_info_alter(array &$bundles): void {
   // Dictionary Word Entry bundle class.
   if (isset($bundles['paragraph']['dictionary_word_entry'])) {
     $bundles['paragraph']['dictionary_word_entry']['class'] = DictionaryWordEntry::class;
+  }
+}
+
+/**
+ * Implements hook_entity_access().
+ */
+function mukurtu_dictionary_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($entity->getEntityTypeId() === 'paragraphs_type') {
+    if($entity->id() === 'dictionary_word_entry' && $operation === 'delete') {
+      // Don't allow the dictionary word entry paragraph type to be deleted.
+      return AccessResult::forbidden();
+    }
   }
 }
 
