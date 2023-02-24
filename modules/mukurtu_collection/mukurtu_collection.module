@@ -5,7 +5,6 @@
  * Provide Mukurtu Collection Type.
  */
 
-use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
@@ -13,6 +12,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\mukurtu_collection\Entity\Collection;
+use Drupal\Core\Breadcrumb\Breadcrumb;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 define("MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION", "field_sequence_collection");
 define("MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION", "Sequence Collection");
@@ -39,6 +40,39 @@ function mukurtu_collection_theme($existing, $type, $theme, $path) {
       ],
     ],
   ];
+}
+
+
+/**
+ * Implements hook_system_breadcrumb_alter().
+ *
+ */
+function mukurtu_collection_system_breadcrumb_alter(Breadcrumb &$breadcrumb, RouteMatchInterface $route_match, array $context) {
+  // Build the subcollection breadcrumbs.
+  if ($route_match->getRouteName() === 'entity.node.canonical') {
+    /** @var \Drupal\node\Entity\Node $node */
+    $node = $route_match->getParameter('node');
+    if ($node instanceof Collection) {
+      $branch = [];
+      while ($parent = $node->getParentCollection()) {
+        $branch[] = $parent;
+        $node = $parent;
+      }
+      $branch = array_reverse($branch);
+
+      // Need less aggressive caching so the breadcrumbs are built for each
+      // specific collection.
+      $breadcrumb->addCacheContexts(['url']);
+
+      // Add the collections landing page.
+      $breadcrumb->addLink(\Drupal\Core\Link::createFromRoute(t('Collections'), 'mukurtu_collection.collection_browse_page'));
+
+      // Add each parent collection in order.
+      foreach ($branch as $subcollection) {
+        $breadcrumb->addLink(\Drupal\Core\Link::createFromRoute($subcollection->getTitle(), 'entity.node.canonical', ['node' => $subcollection->id()]));
+      }
+    }
+  }
 }
 
 /**
