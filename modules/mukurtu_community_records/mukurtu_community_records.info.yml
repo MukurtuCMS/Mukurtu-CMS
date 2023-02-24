@@ -8,6 +8,5 @@ dependencies:
   - field_group
   - mukurtu_core
   - mukurtu_protocol
-  - mukurtu_digital_heritage
 
 version: '8.x-1.x-dev'
