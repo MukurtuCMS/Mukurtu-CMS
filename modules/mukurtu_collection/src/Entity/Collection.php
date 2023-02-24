@@ -121,6 +121,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_description'] = BaseFieldDefinition::create('text_with_summary')
       ->setLabel(t('Description'))
       ->setDescription(t(''))
@@ -135,6 +136,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_items_in_collection'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Items in Collection'))
       ->setDescription(t(''))
@@ -158,6 +160,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
       ->setDescription(t('Keywords provide added ways to group your content. They make it easier for users to search and retrieve content.'))
@@ -183,31 +186,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
-    $definitions['field_parent_collection'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Parent Collection'))
-      ->setDescription(t(''))
-      ->setSettings([
-        'target_type' => 'node',
-        'handler' => 'default:node',
-        'handler_settings' => [
-          'target_bundles' => [
-            'collection' => 'collection'
-          ],
-          'sort' => [
-            'field' => 'title',
-            'direction' => 'ASC'
-          ],
-          'auto_create' => FALSE,
-          'auto_create_bundle' => '',
-        ]
-      ])
-      ->setDefaultValue('')
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
       ->setDescription(t(''))
@@ -230,6 +209,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_summary'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Summary'))
       ->setDescription(t(''))
@@ -366,9 +346,10 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage) {
-    $parentCollectionId = $this->getParentCollectionId();
-    if ($parentCollectionId) {
-      $this->set('field_parent_collection', ['target_id' => $parentCollectionId]);
+    $parentCollection = $this->getParentCollection();
+    $this->addCacheableDependency($parentCollection);
+    if ($parentCollection) {
+      $this->set('field_parent_collection', ['target_id' => $parentCollection->id()]);
     }
     else {
       $this->set('field_parent_collection', []);

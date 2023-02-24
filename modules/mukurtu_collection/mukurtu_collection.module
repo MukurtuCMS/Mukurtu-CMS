@@ -62,6 +62,7 @@ function mukurtu_collection_system_breadcrumb_alter(Breadcrumb &$breadcrumb, Rou
 
       // Need less aggressive caching so the breadcrumbs are built for each
       // specific collection.
+      $breadcrumb->addCacheTags(['collection_list']);
       $breadcrumb->addCacheContexts(['url']);
 
       // Add the collections landing page.
@@ -93,7 +94,22 @@ function mukurtu_collection_entity_bundle_field_info(EntityTypeInterface $entity
       ->setTranslatable(FALSE)
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDisplayConfigurable('view', TRUE);
-      //      ->setDisplayOptions('view', ['label' => 'above', 'type' => 'entity_reference_label', 'weight' => 3]);
+
+    if ($bundle === 'collection') {
+      $fields['field_parent_collection'] = BaseFieldDefinition::create('entity_reference')
+        ->setName('field_parent_collection')
+        ->setLabel(t('Parent Collection'))
+        ->setDescription('')
+        ->setComputed(TRUE)
+        ->setClass('Drupal\mukurtu_collection\Plugin\Field\MukurtuParentCollectionFieldItemsList')
+        ->setTargetEntityTypeId('node')
+        ->setTargetBundle('collection')
+        ->setRevisionable(FALSE)
+        ->setTranslatable(FALSE)
+        ->setCardinality(1)
+        ->setDisplayConfigurable('view', TRUE);
+    }
+
 
     return $fields;
   }

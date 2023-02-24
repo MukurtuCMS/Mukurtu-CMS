@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.full
+    - field.field.node.collection.comment
     - node.type.collection
   module:
     - layout_builder
@@ -24,6 +25,14 @@ content:
       link: true
     third_party_settings: {  }
     weight: 7
+    region: content
+  field_child_collections:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 9
     region: content
   field_collection_image:
     type: entity_reference_entity_view
@@ -74,6 +83,14 @@ content:
     third_party_settings: {  }
     weight: 4
     region: content
+  field_parent_collection:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 8
+    region: content
   field_summary:
     type: string
     label: above
@@ -83,15 +100,15 @@ content:
     weight: 2
     region: content
 hidden:
+  comment: true
   field_citation: true
-  field_child_collections: true
   field_collection_type: true
   field_content_type: true
+  field_cultural_protocols: true
   field_in_collection: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
-  field_parent_collection: true
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
