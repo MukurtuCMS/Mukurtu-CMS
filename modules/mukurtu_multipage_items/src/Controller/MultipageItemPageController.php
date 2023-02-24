@@ -123,6 +123,10 @@ class MultipageItemPageController extends ControllerBase {
     return [];
   }
 
+  public function viewFirstPageEntity(MultipageItemInterface $multipage_item) {
+    return $this->viewFirstPage($multipage_item);
+  }
+
   public function viewFirstPageAccess(AccountInterface $account, MultipageItemInterface $mpi) {
     return $mpi->access('view', $account, TRUE);
   }

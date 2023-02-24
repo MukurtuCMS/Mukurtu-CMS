@@ -20,6 +20,11 @@ class RouteSubscriber extends RouteSubscriberBase {
       $config->set('_controller', $defaultController)->save();
       $route->setDefault('_controller', '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewRedirect');
     }
+
+    // Reroute display of the actual canonical MPI entity to the page view.
+    if ($route = $collection->get('entity.multipage_item.canonical')) {
+      $route->setDefault('_controller', '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewFirstPageEntity');
+    }
   }
 
 }

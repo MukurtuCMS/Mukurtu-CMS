@@ -18,6 +18,18 @@ mukurtu_multipage_items.multipage_view_first_page:
   requirements:
     _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewFirstPageAccess'
 
+# This is our replacement canonical route, needs to match the expected format.
+mukurtu_multipage_items.multipage_view_first_page_entity:
+  path: '/multi-page/{multipage_item}'
+  defaults:
+    _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewFirstPageEntity'
+  options:
+    parameters:
+      multipage_item:
+        type: entity:multipage_item
+  requirements:
+    _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewFirstPageAccess'
+
 mukurtu_multipage_items.multipage_node_view:
   path: '/node/{node}/multipage'
   defaults:
