@@ -18,20 +18,6 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
   {
     $definitions = self::getProtocolFieldDefinitions();
 
-    $definitions['field_content_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Content Type'))
-      ->setDescription(t(''))
-      ->setSettings([
-        'max_length' => 255,
-      ])
-      ->setDefaultValue('')
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
     $definitions['field_glossary_entry'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Glossary Entry'))
       ->setDescription(t(''))
@@ -45,6 +31,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
       ->setDescription(t('Keywords provide added ways to group your content. They make it easier for users to search and retrieve content. Separate multiple keywords with semicolons.'))
@@ -70,6 +57,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_language'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Language'))
       ->setDescription(t('A dictionary word must be associated with a single language on the site.'))
@@ -84,7 +72,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
             'field' => 'name',
             'direction' => 'asc'
           ],
-          'auto_create' => TRUE,
+          'auto_create' => FALSE,
           'auto_create_bundle' => '',
         ]
       ])

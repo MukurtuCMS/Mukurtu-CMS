@@ -15,20 +15,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
 
-    $definitions['field_content_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Content Type'))
-      ->setDescription(t(''))
-      ->setSettings([
-        'max_length' => 255,
-      ])
-      ->setDefaultValue('')
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
       ->setDescription(t('Keywords provide added ways to group your content. They make it easier for users to search and retrieve content.'))
@@ -139,4 +125,5 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     return $definitions;
   }
+
 }
