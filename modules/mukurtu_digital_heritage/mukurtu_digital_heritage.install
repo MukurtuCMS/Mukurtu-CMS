@@ -5,10 +5,30 @@
  * Install, update and uninstall functions for the mukurtu_digital_heritage module.
  */
 
-//use Drupal\og\Og;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * Implements hook_install().
  */
 function mukurtu_digital_heritage_install() {
+  // Install field storage definitions for digital heritage.
+  $fieldManager = \Drupal::service('entity_field.manager');
+
+  $types = [
+    ['node', 'digital_heritage'],
+  ];
+
+  foreach ($types as $type) {
+    list($entity_type_id, $bundle) = $type;
+    $fields = $fieldManager->getFieldDefinitions($entity_type_id, $bundle);
+    foreach ($fields as $field_name => $field) {
+      if ($field instanceof FieldStorageDefinitionInterface) {
+        try {
+          \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($field_name, $entity_type_id, 'mukurtu_digital_heritage', $field);
+        } catch (Exception $e) {
+          // Intentionally left blank. Many fields will already exist. This is fine.
+        }
+      }
+    }
+  }
 }

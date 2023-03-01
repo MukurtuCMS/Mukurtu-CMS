@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Install, update and uninstall functions for the mukurtu_collection module.
+ * Install, update and uninstall functions for the mukurtu_person module.
  */
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -10,12 +10,12 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 /**
  * Implements hook_install().
  */
-function mukurtu_collection_install() {
-  // Install field storage definitions for collections.
+function mukurtu_person_install() {
+  // Install field storage definitions for person.
   $fieldManager = \Drupal::service('entity_field.manager');
 
   $types = [
-    ['node', 'collection'],
+    ['node', 'person'],
   ];
 
   foreach ($types as $type) {
@@ -24,7 +24,7 @@ function mukurtu_collection_install() {
     foreach ($fields as $field_name => $field) {
       if ($field instanceof FieldStorageDefinitionInterface) {
         try {
-          \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($field_name, $entity_type_id, 'mukurtu_collection', $field);
+          \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($field_name, $entity_type_id, 'mukurtu_person', $field);
         } catch (Exception $e) {
           // Intentionally left blank. Many fields will already exist. This is fine.
         }

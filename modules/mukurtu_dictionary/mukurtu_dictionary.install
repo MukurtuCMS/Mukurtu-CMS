@@ -7,6 +7,7 @@
 
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * Implements hook_install().
@@ -14,7 +15,7 @@ use Drupal\og\Entity\OgRole;
 function mukurtu_dictionary_install() {
   // Language Communities are groups.
   try {
-    Og::addGroup('language_community', 'language_community');
+  Og::addGroup('language_community', 'language_community');
   } catch (InvalidArgumentException $e) {
     // Intentionally left blank, already a group.
   }
@@ -33,4 +34,27 @@ function mukurtu_dictionary_install() {
   $languageContributorRole->setGroupType('language_community');
   $languageContributorRole->setGroupBundle('language_community');
   $languageContributorRole->save();
+
+  // Install field storage definitions for our dictionary types.
+  $fieldManager = \Drupal::service('entity_field.manager');
+
+  $types = [
+    ['node', 'dictionary_word'],
+    ['node', 'word_list'],
+    ['paragraph', 'dictionary_word_entry'],
+  ];
+
+  foreach ($types as $type) {
+    list($entity_type_id, $bundle) = $type;
+    $fields = $fieldManager->getFieldDefinitions($entity_type_id, $bundle);
+    foreach ($fields as $field_name => $field) {
+      if ($field instanceof FieldStorageDefinitionInterface) {
+        try {
+            \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($field_name, $entity_type_id, 'mukurtu_dictionary', $field);
+        } catch (Exception $e) {
+          // Intentionally left blank. Many fields will already exist. This is fine.
+        }
+      }
+    }
+  }
 }
