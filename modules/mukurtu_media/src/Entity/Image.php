@@ -56,7 +56,6 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
       ->setDescription(t(''))
-      ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -68,7 +67,7 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
             'field' => 'name',
             'direction' => 'asc',
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
           'auto_create_bundle' => ''
         ]
       ])
@@ -78,6 +77,32 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('People'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => [
+            'people' => 'people'
+          ],
+          'sort' => [
+            'field' => 'name',
+            'direction' => 'asc',
+          ],
+          'auto_create' => TRUE,
+          'auto_create_bundle' => ''
+        ]
+      ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
 
     return $definitions;
   }
