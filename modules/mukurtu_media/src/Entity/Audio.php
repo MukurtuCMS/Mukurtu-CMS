@@ -160,6 +160,20 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_identifier'] = BaseFieldDefinition::create('string')
+      ->setLabel('Identifier')
+      ->setDescription('')
+      ->setSettings([
+        'max_length' => 255,
+      ])
+      ->setDefaultValue('')
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     return $definitions;
   }
 }
