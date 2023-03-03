@@ -318,6 +318,11 @@ function mukurtu_collection_slick_settings_alter(array &$build, $items) {
  * Implements hook_form_alter().
  */
 function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Hide revision log on personal collection edit and add forms.
+  if ($form_id == 'personal_collection_edit_form' || $form_id == 'personal_collection_add_form') {
+    $form['revision_log']['#access'] = FALSE;
+  }
+
   // Only run on node forms.
   if (strpos($form_id, 'node_') === 0 && strpos($form_id, '_edit_form') > 0) {
     $args = $form_state->getBuildInfo()['args'];

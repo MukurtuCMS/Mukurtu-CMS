@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 
 /**
  * Defines the Personal collection entity.
@@ -253,6 +254,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+
     $fields = parent::baseFieldDefinitions($entity_type);
 
     // Add the published field.
@@ -336,11 +338,12 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
         'weight' => -9,
       ])
       ->setDisplayOptions('form', [
-        'type' => 'radios',
+        'type' => 'options_buttons',
         'weight' => -9,
       ])
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
+      ->setDisplayConfigurable('form', TRUE)
+      ->setRequired(TRUE);
 
     $fields['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Personal Collection Image'))
@@ -403,9 +406,10 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $fields['status']->setDescription(t('A boolean indicating whether the Personal collection is published.'))
+    $fields['status'] = BaseFieldDefinition::create('boolean')
+      ->setDescription(t('A boolean indicating whether the Personal collection is published.'))
       ->setDisplayOptions('form', [
-        'type' => 'hidden',
+        'region' => 'hidden',
         'weight' => -3,
       ]);
 
