@@ -177,4 +177,227 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $this->assertEquals(FALSE, $this->community->access('delete', $user));
   }
 
+  /**
+   * Test getName().
+   */
+  public function testGetName()
+  {
+    $name = $this->randomString();
+    $testCommunity = Community::create([
+      'name' => $name,
+      'status' => TRUE,
+      'uid' => $this->owner->id(),
+    ]);
+    $this->assertEquals($name, $testCommunity->getName());
+  }
+
+  /**
+   * Test setName().
+   */
+  public function testSetName()
+  {
+    $testCommunity = Community::create([
+      'name' => $this->randomString(),
+      'status' => TRUE,
+      'uid' => $this->owner->id(),
+    ]);
+
+    $testCommunity->setName('newName');
+    $this->assertEquals('newName', $testCommunity->getName());
+  }
+
+  /**
+   * Test getDescription().
+   */
+  public function testGetDescription()
+  {
+    $description = $this->randomString();
+    $testCommunity = Community::create([
+      'name' => $this->randomString(),
+      'status' => TRUE,
+      'uid' => $this->owner->id(),
+      'field_description' => $description,
+    ]);
+    $this->assertEquals($description, $testCommunity->getDescription());
+  }
+
+  /**
+   * Test setDescription().
+   */
+  public function testSetDescription()
+  {
+    $testCommunity = Community::create([
+      'name' => $this->randomString(),
+      'status' => TRUE,
+      'uid' => $this->owner->id(),
+    ]);
+
+    $testCommunity->setDescription('new description');
+    $this->assertEquals('new description', $testCommunity->getDescription());
+  }
+
+  /**
+   * Test getCommunityType().
+   */
+  public function testGetCommunityType()
+  {
+    // TODO
+  }
+
+  /**
+   * Test setCommunityType().
+   */
+  public function testSetCommunityType()
+  {
+    // TODO
+  }
+
+  /**
+   * Test getSharingSetting().
+   */
+  public function testGetSharingSetting()
+  {
+    $testCommunity = Community::create([
+      'name' => $this->randomString(),
+      'status' => TRUE,
+      'uid' => $this->owner->id(),
+      'field_access_mode' => 'open',
+    ]);
+    $this->assertEquals('open', $testCommunity->getSharingSetting());
+  }
+
+  /**
+   * Test setSharingSetting().
+   */
+  public function testSetSharingSetting()
+  {
+    $testCommunity = Community::create([
+      'name' => $this->randomString(),
+      'status' => TRUE,
+      'uid' => $this->owner->id(),
+    ]);
+
+    $testCommunity->setSharingSetting('strict');
+    $this->assertEquals('strict', $testCommunity->getSharingSetting());
+  }
+
+  /**
+   * Test getCreatedTime().
+   */
+  public function testGetCreatedTime()
+  {
+    $createdTime = 1677537655;
+    $testCommunity = Community::create([
+      'name' => $this->randomString(),
+      'status' => TRUE,
+      'uid' => $this->owner->id(),
+      'created' => $createdTime,
+    ]);
+
+    $this->assertEquals($createdTime, $testCommunity->getCreatedTime());
+  }
+
+  /**
+   * Test setCreatedTime().
+   */
+  public function testSetCreatedTime()
+  {
+    $testCommunity = Community::create([
+      'name' => $this->randomString(),
+      'status' => TRUE,
+      'uid' => $this->owner->id(),
+    ]);
+
+    $createdTime = 1677537655;
+    $testCommunity->setCreatedTime($createdTime);
+    $this->assertEquals($createdTime, $testCommunity->getCreatedTime());
+  }
+
+  /**
+   * Test getParentCommunity().
+   */
+  public function testGetParentCommunity() {
+    // TODO
+  }
+
+  /**
+   * Test setParentCommunity().
+   */
+  public function testSetParentCommunity()
+  {
+    // TODO
+  }
+
+  /**
+   * Test getThumbnailImage().
+   */
+  public function testGetThumbnailImage()
+  {
+    // TODO?
+  }
+
+  /**
+   * Test setThumbnailImage().
+   */
+  public function testSetThumbnailImage()
+  {
+    // TODO?
+  }
+
+  /**
+   * Test getBannerImage().
+   */
+  public function testGetBannerImage()
+  {
+    // TODO?
+  }
+
+  /**
+   * Test setBannerImage().
+   */
+  public function testSetBannerImage()
+  {
+    // TODO?
+  }
+
+  /**
+   * Test getChildCommunities().
+   */
+  public function testGetChildCommunities()
+  {
+    // TODO
+  }
+
+  /**
+   * Test setChildCommunities().
+   */
+  public function testSetChildCommunities()
+  {
+    // TODO
+  }
+
+  /**
+   * Test isParentCommunity().
+   */
+  public function testIsParentCommunity()
+  {
+    // TODO
+  }
+
+  /**
+   * Test isChildCommunity().
+   */
+  public function testIsChildCommunity()
+  {
+    // TODO
+  }
+
+  /**
+   * Test getProtocols().
+   */
+  public function testGetProtocols()
+  {
+    // TODO
+  }
+
 }
