@@ -198,3 +198,11 @@ mukurtu_protocol.manage_protocol_comment_settings:
     parameters:
       group:
         type: entity:protocol
+
+mukurtu_protocol.community_organization:
+  path: '/dashboard/community-organization'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\CommunityOrganizationForm'
+    _title: 'Community Organization'
+  requirements:
+    _permission: 'add community entities'
