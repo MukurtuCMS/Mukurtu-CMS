@@ -446,7 +446,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
         // in the community access control handler so this should never trigger
         // but we'll have this just in case.
         if (in_array($settings['parent'], $communityIds)) {
-          $org[$id]['parent'] = '0';
+          $org[$id]['parent'] = 0;
         }
       }
 

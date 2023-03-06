@@ -114,6 +114,8 @@ class CommunityOrganizationForm extends FormBase {
     $values = $form_state->getValues();
     $communities = $values['communities'] ?? [];
     foreach ($communities as &$community) {
+      $community['parent'] = intval($community['parent']);
+      $community['weight'] = intval($community['weight']);
       if (isset($community['label'])) {
         unset($community['label']);
       }

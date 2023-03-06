@@ -21,6 +21,22 @@ mukurtu_protocol.comment_settings:
     site_comments_enabled:
       type: integer
 
+mukurtu_protocol.community_organization:
+  type: config_object
+  label: 'Community Organization Settings'
+  mapping:
+    organization:
+      type: sequence
+      sequence:
+        type: mapping
+        mapping:
+          parent:
+            type: integer
+            label: 'Parent ID'
+          weight:
+            type: integer
+            label: 'Weight'
+
 field.field_settings.cultural_protocol:
   type: mapping
   label: 'Cultural Protocol settings'
