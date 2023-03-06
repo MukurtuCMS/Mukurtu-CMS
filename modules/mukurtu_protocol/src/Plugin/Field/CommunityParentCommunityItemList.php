@@ -38,7 +38,9 @@ class CommunityParentCommunityItemList extends EntityReferenceFieldItemList {
     }
 
     $this->list = [];
-    $this->list[] = $this->createItem(0, $parent_id);
+    if ($parent_id) {
+      $this->list[] = $this->createItem(0, $parent_id);
+    }
   }
 
 }
