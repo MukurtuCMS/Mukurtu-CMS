@@ -391,6 +391,72 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+    if (!$update) {
+      // Update org list for brand new communities.
+      $config = \Drupal::service('config.factory')->getEditable('mukurtu_protocol.community_organization');
+      $org = $config->get('organization') ?? [];
+
+      // Put the new community at the end of the list (highest weight).
+      $weight = 0;
+      foreach ($org as $id => $settings) {
+        if ($settings['parent'] == 0 && $settings['weight'] > $weight) {
+          $weight = $settings['weight'];
+        }
+      }
+      $weight += 1;
+
+      // Save the updated list.
+      $org[$this->id()] = ['parent' => 0, 'weight' => $weight];
+      $config->set('organization', $org)->save();
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function postDelete(EntityStorageInterface $storage, array $entities) {
+    parent::postDelete($storage, $entities);
+
+    // Find communities that were deleted.
+    $communities = [];
+    foreach ($entities as $entity) {
+      if ($entity instanceof CommunityInterface) {
+        $communities[] = $entity;
+      }
+    }
+
+    // Remove them from the org list.
+    if (!empty($communities)) {
+      $communityIds = array_map(fn($c) => $c->id(), $communities);
+      $config = \Drupal::service('config.factory')->getEditable('mukurtu_protocol.community_organization');
+      $org = $config->get('organization') ?? [];
+      foreach ($org as $id => $settings) {
+        // Remove delete community.
+        if (in_array($id, $communityIds)) {
+          unset($org[$id]);
+          continue;
+        }
+
+        // Change any deleted parent reference to 0 which puts them back at
+        // root level. We have protection against deleting parent communities
+        // in the community access control handler so this should never trigger
+        // but we'll have this just in case.
+        if (in_array($settings['parent'], $communityIds)) {
+          $org[$id]['parent'] = '0';
+        }
+      }
+
+      // Save the updated list.
+      $config->set('organization', $org)->save();
+    }
+
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getProtocols() {
