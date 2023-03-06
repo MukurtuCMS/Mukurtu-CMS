@@ -140,11 +140,13 @@ function mukurtu_protocol_system_breadcrumb_alter(Breadcrumb &$breadcrumb, Route
   // Build the community breadcrumbs.
   if ($route_match->getRouteName() === 'entity.community.canonical') {
     $community = $route_match->getParameter('community');
+    $depth = 0;
     if ($community instanceof CommunityInterface) {
       $branch = [];
-      while ($parent = $community->getParentCommunity()) {
+      while (($parent = $community->getParentCommunity()) && $depth < 4) {
         $branch[] = $parent;
         $community = $parent;
+        $depth += 1;
       }
       $branch = array_reverse($branch);
 
