@@ -21,6 +21,13 @@ mukurtu_protocol.manage_communities:
   route_name: entity.community.collection
   expanded: TRUE
 
+mukurtu_protocol.community_organization:
+  title: 'Community Organization'
+  description: 'Alter the ordering of communities on the site.'
+  parent: mukurtu_protocol.manage_communities
+  menu_name: mukurtu
+  route_name: mukurtu_protocol.community_organization
+
 mukurtu_protocol.community_manager_create_user:
   title: 'Add User'
   description: 'Add a new user and assign them to roles and communities.'
