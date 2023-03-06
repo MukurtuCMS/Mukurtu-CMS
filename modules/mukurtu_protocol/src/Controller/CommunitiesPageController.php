@@ -12,14 +12,16 @@ class CommunitiesPageController extends ControllerBase {
   /**
    * The communities page.
    */
-  public function page($parent = NULL) {
-    $op = is_null($parent) ? 'IS NULL' : '=';
-    $query = $this->entityTypeManager()->getStorage('community')->getQuery();
-    $query->condition('field_parent_community', $parent, $op)
-      ->sort('name')
-      ->accessCheck(TRUE);
+  public function page($parent = 0) {
+    $config = $this->config('mukurtu_protocol.community_organization');
+    $org = $config->get('organization');
 
-    $communityIDs = $query->execute();
+    $communityIDs = [];
+    foreach ($org as $id => $settings) {
+      if (intval($settings['parent']) === intval($parent)) {
+        $communityIDs[$settings['weight']] = $id;
+      }
+    }
 
     $communities = empty($communityIDs) ? [] : $this->entityTypeManager()->getStorage('community')->loadMultiple($communityIDs);
 
