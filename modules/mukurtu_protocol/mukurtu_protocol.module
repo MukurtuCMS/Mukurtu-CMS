@@ -1,18 +1,20 @@
 <?php
 
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\node\NodeInterface;
-use Drupal\Core\Database\Query\AlterableInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\mukurtu_protocol\Entity\MukurtuUser;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Breadcrumb\Breadcrumb;
+use Drupal\Core\Database\Query\AlterableInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
-use Drupal\mukurtu_protocol\Entity\MukurtuNode;
-use Drupal\mukurtu_protocol\Entity\MukurtuMedia;
 use Drupal\mukurtu_protocol\CulturalProtocols;
+use Drupal\mukurtu_protocol\Entity\MukurtuMedia;
+use Drupal\mukurtu_protocol\Entity\MukurtuNode;
+use Drupal\mukurtu_protocol\Entity\MukurtuUser;
+use Drupal\node\NodeInterface;
+use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 
 /**
  * @file
@@ -128,6 +130,35 @@ function mukurtu_protocol_theme($existing, $type, $theme, $path) {
       ],
     ],
   ];
+}
+
+/**
+ * Implements hook_system_breadcrumb_alter().
+ *
+ */
+function mukurtu_protocol_system_breadcrumb_alter(Breadcrumb &$breadcrumb, RouteMatchInterface $route_match, array $context) {
+  // Build the community breadcrumbs.
+  if ($route_match->getRouteName() === 'entity.community.canonical') {
+    $community = $route_match->getParameter('community');
+    if ($community instanceof CommunityInterface) {
+      $branch = [];
+      while ($parent = $community->getParentCommunity()) {
+        $branch[] = $parent;
+        $community = $parent;
+      }
+      $branch = array_reverse($branch);
+
+      // Need less aggressive caching so the breadcrumbs are built for each
+      // specific community.
+      $breadcrumb->addCacheTags(['community_list']);
+      $breadcrumb->addCacheContexts(['url']);
+
+      // Add each parent community in order.
+      foreach ($branch as $sub) {
+        $breadcrumb->addLink(\Drupal\Core\Link::createFromRoute($sub->getName(), 'entity.community.canonical', ['community' => $sub->id()]));
+      }
+    }
+  }
 }
 
 /**
