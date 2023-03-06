@@ -142,42 +142,6 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
-  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
-    // We need to set the parent on all children.
-    $children = $this->getChildCommunities();
-    $childrenIds = [];
-    foreach ($children as $child) {
-      $childrenIds[$child->id()] = $child->id();
-
-      // Get the child's current parent.
-      $parent = $child->getParentCommunity();
-
-      // If it's empty or pointing to a different entity
-      // we need to set and save.
-      if (!$parent || $this->id() != $parent->id()) {
-        $child->setParentCommunity($this);
-        $child->save();
-      }
-    }
-
-    // Remove the parent relationship for any communities no longer
-    // in the child list.
-    $query = \Drupal::entityQuery('community')
-      ->condition('field_parent_community', $this->id(), '=')
-      ->accessCheck(FALSE);
-    $results = $query->execute();
-    $removeIds = array_diff($results, $childrenIds);
-    $removeEntities = $this->entityTypeManager()->getStorage('community')->loadMultiple($removeIds);
-    foreach ($removeEntities as $removeEntity) {
-      /** @var \Drupal\mukurtu_protocol\Entity\CommunityInterface $removeEntity */
-      $removeEntity->set('field_parent_community', NULL);
-      $removeEntity->save();
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getName() {
     return $this->get('name')->value;
   }
@@ -282,27 +246,8 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
    * {@inheritDoc}
    */
   public function getParentCommunity(): ?CommunityInterface {
-   /*  $query = \Drupal::entityQuery('community')
-      ->condition('field_child_collections', $this->id(), '=')
-      ->accessCheck(FALSE);
-    $results = $query->execute();
-
-    // Not in use at all.
-    if (count($results) == 0) {
-      return NULL;
-    }
-
-    $id = reset($results);
-    return $this->entityTypeManager()->getStorage('community')->load($id); */
     $entities = $this->get('field_parent_community')->referencedEntities();
     return $entities[0] ?? NULL;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function setParentCommunity(CommunityInterface $community): CommunityInterface {
-    return $this->set('field_parent_community', $community->id());
   }
 
   /**
@@ -338,18 +283,6 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
    */
   public function getChildCommunities() {
     return $this->get('field_child_communities')->referencedEntities() ?? [];
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function setChildCommunities(array $communities): CommunityInterface {
-    $ids = [];
-    foreach ($communities as $community) {
-      $ids[] = $community->id();
-    }
-    $this->set('field_child_communities', $ids);
-    return $this;
   }
 
   /**
@@ -549,31 +482,29 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+
     $fields['field_parent_community'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_parent_community')
       ->setLabel(t('Parent Community'))
+      ->setDescription('')
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityParentCommunityItemList')
       ->setSetting('target_type', 'community')
       ->setSetting('handler', 'default:community')
-      ->setSetting('handler_settings', [
-        'auto_create' => FALSE,
-      ])
       ->setRequired(FALSE)
       ->setCardinality(1)
       ->setTranslatable(FALSE)
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'string',
-        'weight' => 4,
-      ])
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayOptions('view', ['label' => 'hidden']);
 
     $fields['field_child_communities'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_child_communities')
       ->setLabel(t('Sub-communities'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityChildCommunitiesItemList')
       ->setSetting('target_type', 'community')
       ->setSetting('handler', 'default:community')
-      ->setSetting('handler_settings', [
-        'auto_create' => FALSE,
-      ])
       ->setRequired(FALSE)
       ->setCardinality(-1)
       ->setTranslatable(FALSE)

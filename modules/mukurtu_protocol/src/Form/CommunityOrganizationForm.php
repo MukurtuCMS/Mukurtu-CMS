@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -28,7 +29,7 @@ class CommunityOrganizationForm extends FormBase {
 
     $form['communities'] = [
       '#type' => 'table',
-      '#caption' => $this->t('Community Organization Structure'),
+      '#caption' => $this->t('Site Community Organization'),
       '#header' => [
         $this->t('Community'),
         $this->t('Weight'),
@@ -118,6 +119,12 @@ class CommunityOrganizationForm extends FormBase {
       }
     }
     $config->set('organization', $communities)->save();
+
+    // Invalidate cache tags to recalculate parent/child community fields.
+    $ids = array_keys($communities);
+    $tags = array_map(fn($id) => "community:$id", $ids);
+    $tags[] = 'community_list';
+    Cache::invalidateTags($tags);
   }
 
 }

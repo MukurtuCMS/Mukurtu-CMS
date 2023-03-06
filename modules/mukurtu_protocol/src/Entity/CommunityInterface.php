@@ -162,17 +162,6 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
   public function getParentCommunity(): ?CommunityInterface;
 
   /**
-   * Set the parent community.
-   *
-   * @param \Drupal\mukurtu_protocol\Entity\CommunityInterface $community
-   *   The parent community entity.
-   *
-   * @return \Drupal\mukurtu_protocol\Entity\CommunityInterface
-   *   The called Community entity.
-   */
-  public function setParentCommunity(CommunityInterface $community): CommunityInterface;
-
-  /**
    * Get the thumbnail image.
    *
    * @return \Drupal\media\MediaInterface|null
@@ -217,17 +206,6 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
    *   The child community entities.
    */
   public function getChildCommunities();
-
-  /**
-   * Set the child communities.
-   *
-   * @param \Drupal\mukurtu_protocol\Entity\CommunityInterface[] $communities
-   *   The child community entities.
-   *
-   * @return \Drupal\mukurtu_protocol\Entity\CommunityInterface
-   *   The called Community entity.
-   */
-  public function setChildCommunities(array $communities): CommunityInterface;
 
   /**
    * Check if the community has children.

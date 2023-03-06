@@ -321,14 +321,6 @@ class CommunityEntityAccessTest extends KernelTestBase {
   }
 
   /**
-   * Test setParentCommunity().
-   */
-  public function testSetParentCommunity()
-  {
-    // TODO
-  }
-
-  /**
    * Test getThumbnailImage().
    */
   public function testGetThumbnailImage()
@@ -364,14 +356,6 @@ class CommunityEntityAccessTest extends KernelTestBase {
    * Test getChildCommunities().
    */
   public function testGetChildCommunities()
-  {
-    // TODO
-  }
-
-  /**
-   * Test setChildCommunities().
-   */
-  public function testSetChildCommunities()
   {
     // TODO
   }
