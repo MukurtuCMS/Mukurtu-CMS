@@ -406,7 +406,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $fields['status'] = BaseFieldDefinition::create('boolean')
+    $fields['status']
       ->setDescription(t('A boolean indicating whether the Personal collection is published.'))
       ->setDisplayOptions('form', [
         'region' => 'hidden',
