@@ -1,9 +1,0 @@
-langcode: en
-status: true
-dependencies:
-  module:
-    - node
-id: node.multipage_navigation_teaser
-label: 'Multipage Navigation Teaser'
-targetEntityType: node
-cache: true

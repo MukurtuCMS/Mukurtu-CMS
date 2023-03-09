@@ -1,7 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-name: Publisher
-vid: publisher
-description: ''
-weight: 0

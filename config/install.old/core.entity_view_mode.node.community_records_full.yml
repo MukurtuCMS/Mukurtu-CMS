@@ -1,9 +1,0 @@
-langcode: en
-status: true
-dependencies:
-  module:
-    - node
-id: node.community_records_full
-label: 'Community Records Full'
-targetEntityType: node
-cache: true

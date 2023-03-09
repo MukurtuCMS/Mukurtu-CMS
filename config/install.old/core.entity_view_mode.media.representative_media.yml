@@ -1,9 +1,0 @@
-langcode: en
-status: true
-dependencies:
-  module:
-    - media
-id: media.representative_media
-label: 'Representative Media'
-targetEntityType: media
-cache: true

@@ -1,7 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-name: Subject
-vid: subject
-description: ''
-weight: 0
