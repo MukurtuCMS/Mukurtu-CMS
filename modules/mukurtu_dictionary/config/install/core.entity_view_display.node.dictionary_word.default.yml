@@ -3,7 +3,6 @@ status: true
 dependencies:
   config:
     - field.field.node.dictionary_word.comment
-    - field.field.node.dictionary_word.field_word_entry
     - node.type.dictionary_word
   module:
     - blazy

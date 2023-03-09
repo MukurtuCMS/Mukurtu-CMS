@@ -113,6 +113,32 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_word_entry'] = BaseFieldDefinition::create('entity_reference_revisions')
+      ->setLabel(t('Word Entry'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'target_type' => 'paragraph',
+        'handler' => 'default:paragraph',
+        'handler_settings' => [
+          'negate' => FALSE,
+          'target_bundles' => [
+            'dictionary_word_entry' => 'dictionary_word_entry'
+          ],
+          'target_bundles_drag_drop' => [
+            'dictionary_word_entry' => [
+              'enabled' => TRUE,
+              'weight' => 2,
+            ],
+          ],
+        ]
+      ])
+      ->setCardinality(-1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
       ->setDescription(t(''))

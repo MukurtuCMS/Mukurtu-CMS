@@ -4,7 +4,6 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.dictionary_word.comment
-    - field.field.node.dictionary_word.field_word_entry
     - image.style.thumbnail
     - node.type.dictionary_word
   module:
