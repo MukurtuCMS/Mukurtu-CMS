@@ -8,6 +8,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\node\NodeInterface;
+use Drupal\Core\TypedData\DataDefinitionInterface;
 
 /**
  * Class RelatedContentComputationSubscriber.
@@ -84,6 +85,7 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
    */
   protected function referencedContentConditionForTerm($terms, NodeInterface $record) {
     // Get all field definitions for nodes.
+    //$field = $this->entityFieldManager->getFieldDefinitions('node');
     $fields = $this->entityFieldManager->getActiveFieldStorageDefinitions('node');
 
     // Build a list of all the fields we should be searching.
@@ -91,7 +93,16 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
 
     // Entity Reference Fields.
     foreach ($fields as $fieldname => $field) {
-      if ($field->gettype() == 'entity_reference') {
+      if (!($field instanceof DataDefinitionInterface)) {
+        continue;
+      }
+
+      // Skip computed fields, they have no table storage.
+      if ($field->isComputed()) {
+        continue;
+      }
+
+      if ($field->getType() == 'entity_reference') {
         // Find all entity reference field references to this taxonomy term.
         if ($field->getSetting('target_type') == 'taxonomy_term') {
           foreach ($terms as $term) {
@@ -103,11 +114,9 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
           $searchFields[] = ['fieldname' => $fieldname, 'value' => $record->id(), 'operator' => NULL];
         }
       }
-    }
 
-    // Text Fields that support embeds. Search for embeds of the record.
-    foreach ($fields as $fieldname => $field) {
-      if (in_array($field->gettype(), ['text', 'text_long', 'text_with_summary'])) {
+      // Text Fields that support embeds. Search for embeds of the record.
+      if (in_array($field->getType(), ['text', 'text_long', 'text_with_summary'])) {
         $searchFields[] = ['fieldname' => $fieldname, 'value' => $record->uuid(), 'operator' => 'CONTAINS'];
       }
     }
