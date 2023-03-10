@@ -17,7 +17,6 @@ use Drupal\Core\Routing\RouteMatchInterface;
 
 define("MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION", "field_sequence_collection");
 define("MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION", "Sequence Collection");
-define("MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE", "field_collection_type");
 define("MUKURTU_COLLECTION_TYPE_MULTIPAGE", "multipage");
 define("MUKURTU_COLLECTION_FIELD_NAME_ITEMS", "field_items_in_collection");
 define("MUKURTU_COLLECTION_MULTIPAGE_NAVIGATION_VIEW_MODE", "full");
@@ -95,22 +94,6 @@ function mukurtu_collection_entity_bundle_field_info(EntityTypeInterface $entity
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDisplayConfigurable('view', TRUE);
 
-    if ($bundle === 'collection') {
-      $fields['field_parent_collection'] = BaseFieldDefinition::create('entity_reference')
-        ->setName('field_parent_collection')
-        ->setLabel(t('Parent Collection'))
-        ->setDescription('')
-        ->setComputed(TRUE)
-        ->setClass('Drupal\mukurtu_collection\Plugin\Field\MukurtuParentCollectionFieldItemsList')
-        ->setTargetEntityTypeId('node')
-        ->setTargetBundle('collection')
-        ->setRevisionable(FALSE)
-        ->setTranslatable(FALSE)
-        ->setCardinality(1)
-        ->setDisplayConfigurable('view', TRUE);
-    }
-
-
     return $fields;
   }
 }
@@ -119,8 +102,6 @@ function mukurtu_collection_entity_bundle_field_info(EntityTypeInterface $entity
  * Implements hook_entity_insert().
  */
 function mukurtu_collection_entity_insert(EntityInterface $entity) {
-  mukurtu_collection_multipage_sync_relationship($entity);
-
   if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'collection') {
     mukurtu_core_invalidate_entity_reference_field_references($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
   }
@@ -130,8 +111,6 @@ function mukurtu_collection_entity_insert(EntityInterface $entity) {
  * Implements hook_entity_update().
  */
 function mukurtu_collection_entity_update(EntityInterface $entity) {
-  mukurtu_collection_multipage_sync_relationship($entity);
-
   if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'collection') {
     mukurtu_core_invalidate_entity_reference_field_references($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
   }
@@ -143,13 +122,6 @@ function mukurtu_collection_entity_update(EntityInterface $entity) {
 function mukurtu_collection_entity_delete(EntityInterface $entity) {
   if ($entity->getEntityTypeId() !== 'node') {
     return;
-  }
-
-  if ($entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)) {
-    // Set the collection to empty and request a relationship sync.
-    // This will delete all the item level references to the collection.
-    $entity->set(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, []);
-    mukurtu_collection_multipage_sync_relationship($entity);
   }
 
   if ($entity->bundle() == 'collection') {
@@ -167,25 +139,6 @@ function mukurtu_collection_node_view(array &$build, EntityInterface $entity, En
       unset($build['title']);
     }
   }
-
-  if ($entity->getEntityTypeId() == 'node') {
-    // Collections.
-    if ($entity->bundle() == 'collection' && $entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)) {
-      $collection_type = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value;
-      if ($collection_type == MUKURTU_COLLECTION_TYPE_MULTIPAGE) {
-        // Add in the multipage navigation field.
-        $temp = $build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS] ?? [];
-        if (!empty($temp)) {
-          unset($build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS]);
-        }
-
-        if ($display->getComponent(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)) {
-          $build['field_multipage_navigation'] = $entity->{MUKURTU_COLLECTION_FIELD_NAME_ITEMS}->view('multipage_navigation');
-          $build[MUKURTU_COLLECTION_FIELD_NAME_ITEMS] = $temp;
-        }
-      }
-    }
-  }
 }
 
 /**
@@ -196,66 +149,12 @@ function mukurtu_collection_entity_view_mode_alter(&$view_mode, EntityInterface 
     return;
   }
 
-  // Alter view modes for collections.
-  if ($entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE) && $entity->bundle() == 'collection') {
-    $collection_type = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value;
-    if ($collection_type == MUKURTU_COLLECTION_TYPE_MULTIPAGE) {
-      if ($view_mode == 'full') {
-        // Display "full" mode multipage collections in "multipage_item" mode.
-        $view_mode = 'multipage_item';
-      }
-    }
-  }
-
   // Any full view content that is a member of a multipage collection.
   if ($view_mode == 'full' && $entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)) {
     $collections = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)->referencedEntities();
     $collection = $collections[0] ?? NULL;
     if ($collection) {
       $view_mode = 'multipage_full';
-    }
-  }
-}
-
-/**
- * Update the item references for a multi-page collection.
- */
-function mukurtu_collection_multipage_sync_relationship(EntityInterface $entity) {
-  // Multipage collections only work with nodes.
-  if ($entity->getEntityTypeId() != 'node') {
-    return;
-  }
-
-  if ($entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE) && $entity->bundle() == 'collection') {
-    $collection_type = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value;
-
-    // Collection is a multi-page item, check if any contained items
-    // need to be updated.
-    if ($collection_type == MUKURTU_COLLECTION_TYPE_MULTIPAGE) {
-      $old_items = [];
-
-      // Items can only be in a single multi-page collection at a time.
-      // Do a site-wide query to catch broken relationships.
-      $query = \Drupal::entityQuery('node');
-      $query->condition(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION, $entity->id());
-      $old_items = $query->execute();
-
-      $new_items = mukurtu_core_flatten_entity_ref_field($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
-      $items_to_remove = array_diff($old_items, $new_items);
-      $items_to_add = array_diff($new_items, $old_items);
-
-      $fn_args = [
-        'fieldname' => MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION,
-        'target_id' => $entity->id(),
-      ];
-      // Remove old items from the multi-page collection.
-      if (!empty($items_to_remove)) {
-        mukurtu_core_entity_batch_operation('mukurtu_core_batch_remove_entity_reference', ['node' => $items_to_remove], $fn_args);
-      }
-      // Add new items from the multi-page collection.
-      if (!empty($items_to_add)) {
-        mukurtu_core_entity_batch_operation('mukurtu_core_batch_add_entity_reference', ['node' => $items_to_add], $fn_args);
-      }
     }
   }
 }

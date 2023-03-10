@@ -44,6 +44,19 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_parent_collection'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_parent_collection')
+      ->setLabel(t('Parent Collection'))
+      ->setDescription('')
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_collection\Plugin\Field\MukurtuParentCollectionFieldItemsList')
+      ->setTargetEntityTypeId('node')
+      ->setTargetBundle('collection')
+      ->setRevisionable(FALSE)
+      ->setTranslatable(FALSE)
+      ->setCardinality(1)
+      ->setDisplayConfigurable('view', TRUE);
+
     $definitions['field_collection_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Image'))
       ->setDescription(t(''))
@@ -65,30 +78,6 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $definitions['field_collection_type'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Collection Type'))
-      ->setDescription(t(''))
-      ->setSettings([
-        'allowed_values' => [
-          '-' => [
-            'value' => 'default',
-            'label' => 'Default'
-          ],
-          '-' => [
-            'value' => 'multipage',
-            'label' => 'Multipage Item'
-          ]
-        ],
-        'allowed_values_function' => ''
-      ])
-      ->setDefaultValue('default')
-      ->setCardinality(1)
-      ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
@@ -346,6 +335,24 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
    * {@inheritdoc}
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    // Check for request to add as a subcollection.
+    if (isset($this->values["_parent_collection"]) && $id = intval($this->values["_parent_collection"])) {
+      /** @var \Drupal\mukurtu_collection\Entity\Collection $parentCollection */
+      $parentCollection = $this->entityTypeManager()->getStorage('node')->load($id);
+      if ($parentCollection && $parentCollection->access('update')) {
+        $parentCollection->addChildCollection($this);
+        $violationList = $parentCollection->validate();
+        if ($violationList->count() == 0) {
+          $parentCollection->save();
+        } else {
+          \Drupal::logger('mukurtu_collection')->error('Failed to add subcollection id:@subcollection to parent collection id:@parentcollection. Parent collection failed entity validation.', [
+            '@subcollection' => $this->id(),
+            '@parentcollection' => $id,
+          ]);
+        }
+      }
+    }
+
     // Invalid the cache of referenced entities
     // to trigger recalculation of the computed fields.
     $refs = $this->get(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)->referencedEntities() ?? NULL;

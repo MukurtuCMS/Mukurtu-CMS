@@ -21,6 +21,12 @@ mukurtu_collection.add_item_to_collection:
   title: 'Add to Collection'
   weight: 50
 
+mukurtu_collection.new_subcollection:
+  route_name: mukurtu_collection.new_subcollection
+  base_route: entity.node.canonical
+  title: 'Create Subcollection'
+  weight: 55
+
 # Personal collection routing definition
 personal_collection.settings_tab:
   route_name: personal_collection.settings

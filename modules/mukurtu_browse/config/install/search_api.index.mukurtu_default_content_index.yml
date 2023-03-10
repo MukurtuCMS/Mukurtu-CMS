@@ -3,7 +3,6 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_category
-    - field.storage.node.field_collection_type
     - field.storage.node.field_description
     - field.storage.node.field_mukurtu_geojson
     - field.storage.node.field_keywords
@@ -32,14 +31,6 @@ field_settings:
     dependencies:
       module:
         - mukurtu_protocol
-  field_collection_type:
-    label: 'Collection Type'
-    datasource_id: 'entity:node'
-    property_path: field_collection_type
-    type: string
-    dependencies:
-      config:
-        - field.storage.node.field_collection_type
   field_coverage:
     label: Location
     datasource_id: 'entity:node'
@@ -171,7 +162,6 @@ processor_settings:
     all_fields: true
     fields:
       - community_title
-      - field_collection_type
       - field_coverage
       - field_description
       - field_mukurtu_geojson
@@ -195,7 +185,6 @@ processor_settings:
       preprocess_query: -20
     all_fields: false
     fields:
-      - field_collection_type
       - field_coverage
       - field_description
       - title
@@ -223,7 +212,6 @@ processor_settings:
     all_fields: true
     fields:
       - community_title
-      - field_collection_type
       - field_coverage
       - field_description
       - field_mukurtu_geojson

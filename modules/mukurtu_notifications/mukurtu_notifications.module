@@ -10,6 +10,7 @@ use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Database\Query\Condition;
 use Drupal\user\Entity\User;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
+use Drupal\mukurtu_collection\Entity\Collection;
 
 /**
  * Implements hook_entity_type_alter().
@@ -385,12 +386,7 @@ function mukurtu_notifications_notify_community(Node $node, $subscribers) {
 
 function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
   // Only handling existing collections here.
-  if ($node->bundle() != 'collection' || !isset($node->original)) {
-    return;
-  }
-
-  // Only handling default type collections.
-  if ($node->get(MUKURTU_COLLECTION_FIELD_NAME_COLLECTION_TYPE)->value != 'default') {
+  if (!($node instanceof Collection) || !isset($node->original)) {
     return;
   }
 
