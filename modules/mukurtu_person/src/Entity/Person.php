@@ -70,6 +70,110 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_date_born'] = BaseFieldDefinition::create('datetime')
+      ->setLabel(t('Date Born'))
+      ->setDescription('')
+      ->setRevisionable(TRUE)
+      ->setSettings([
+        'datetime_type' => 'date',
+      ])
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'datetime_default',
+        'settings' => [
+          'format_type' => 'medium',
+        ],
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'datetime_default',
+        'weight' => -9,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $definitions['field_date_died'] = BaseFieldDefinition::create('datetime')
+      ->setLabel(t('Date Died'))
+      ->setDescription('')
+      ->setRevisionable(TRUE)
+      ->setSettings([
+        'datetime_type' => 'date',
+      ])
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'datetime_default',
+        'settings' => [
+          'format_type' => 'medium',
+        ],
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'datetime_default',
+        'weight' => -9,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $definitions['field_deceased'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Deceased'))
+      ->setDescription('')
+      ->setDefaultValue(FALSE)
+      ->setRevisionable(TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $definitions['field_sections'] = BaseFieldDefinition::create('entity_reference_revisions')
+      ->setLabel(t('Biographical Information Sections'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'target_type' => 'paragraph',
+        'handler' => 'default:paragraph',
+        'handler_settings' => [
+          'negate' => FALSE,
+          'target_bundles' => [
+            'formatted_text_with_title' => 'formatted_text_with_title'
+          ],
+          'target_bundles_drag_drop' => [
+            'formatted_text_with_title' => [
+              'enabled' => TRUE,
+              'weight' => 2,
+            ],
+          ],
+        ]
+      ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_related_people'] = BaseFieldDefinition::create('entity_reference_revisions')
+      ->setLabel(t('Related People'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'target_type' => 'paragraph',
+        'handler' => 'default:paragraph',
+        'handler_settings' => [
+          'negate' => FALSE,
+          'target_bundles' => [
+            'related_person' => 'related_person'
+          ],
+          'target_bundles_drag_drop' => [
+            'related_person' => [
+              'enabled' => TRUE,
+              'weight' => 2,
+            ],
+          ],
+        ]
+      ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
       ->setDescription(t(''))
@@ -78,18 +182,13 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
         'handler' => 'default:node',
         'handler_settings' => [
           'target_bundles' => NULL,
-          'sort' => [
-            'field' => '_none'
-          ],
           'auto_create' => FALSE,
-          'auto_create_bundle' => 'person',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 

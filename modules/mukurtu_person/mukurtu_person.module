@@ -1,6 +1,8 @@
 <?php
 
 use Drupal\mukurtu_person\Entity\Person;
+use Drupal\mukurtu_person\Entity\FormattedTextWithTitle;
+use Drupal\mukurtu_person\Entity\RelatedPerson;
 
 /**
 * @file
@@ -15,4 +17,13 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
   if (isset($bundles['node']['person'])) {
     $bundles['node']['person']['class'] = Person::class;
   }
+
+  if (isset($bundles['paragraph']['formatted_text_with_title'])) {
+    $bundles['paragraph']['formatted_text_with_title']['class'] = FormattedTextWithTitle::class;
+  }
+
+  if (isset($bundles['paragraph']['related_person'])) {
+    $bundles['paragraph']['related_person']['class'] = RelatedPerson::class;
+  }
+
 }
