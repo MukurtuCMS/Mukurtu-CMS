@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_taxonomy\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\taxonomy\TermInterface;
+use Drupal\Core\TypedData\DataDefinitionInterface;
 
 class TaxonomyRecordReferencedContentForm extends FormBase {
 
@@ -122,6 +123,15 @@ class TaxonomyRecordReferencedContentForm extends FormBase {
 
     // Entity Reference Fields.
     foreach ($fields as $fieldname => $field) {
+      if (!($field instanceof DataDefinitionInterface)) {
+        continue;
+      }
+
+      // Skip computed fields, they have no table storage.
+      if ($field->isComputed()) {
+        continue;
+      }
+
       if ($field->gettype() == 'entity_reference') {
         // Find all entity reference field references to this taxonomy term.
         if ($field->getSetting('target_type') == 'taxonomy_term') {
@@ -139,6 +149,15 @@ class TaxonomyRecordReferencedContentForm extends FormBase {
     // Text Fields that support embeds. Search for embeds of the record(s).
     if (count($records) > 0) {
       foreach ($fields as $fieldname => $field) {
+        if (!($field instanceof DataDefinitionInterface)) {
+          continue;
+        }
+
+        // Skip computed fields, they have no table storage.
+        if ($field->isComputed()) {
+          continue;
+        }
+
         if (in_array($field->gettype(), ['text', 'text_long', 'text_with_summary'])) {
           foreach ($records as $record) {
             $searchFields[] = ['fieldname' => $fieldname, 'value' => $record->uuid(), 'operator' => 'CONTAINS'];
