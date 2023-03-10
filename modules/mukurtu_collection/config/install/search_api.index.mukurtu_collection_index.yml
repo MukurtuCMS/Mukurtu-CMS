@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_description
     - search_api.server.mukurtu_database_server
   module:
     - node
@@ -18,8 +17,8 @@ field_settings:
     property_path: field_description
     type: text
     dependencies:
-      config:
-        - field.storage.node.field_description
+      module:
+        - node
   node_grants:
     label: 'Node access information'
     property_path: search_api_node_grants
@@ -27,8 +26,16 @@ field_settings:
     indexed_locked: true
     type_locked: true
     hidden: true
+  parent_collection_id:
+    label: 'Parent Collection'
+    datasource_id: 'entity:node'
+    property_path: 'field_parent_collection:entity:nid'
+    type: integer
+    dependencies:
+      module:
+        - node
   status:
-    label: null
+    label: status
     datasource_id: 'entity:node'
     property_path: status
     type: boolean
@@ -47,7 +54,7 @@ field_settings:
       module:
         - node
   uid:
-    label: null
+    label: uid
     datasource_id: 'entity:node'
     property_path: uid
     type: integer

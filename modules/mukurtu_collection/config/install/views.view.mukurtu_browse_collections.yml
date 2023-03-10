@@ -1,4 +1,3 @@
-uuid: ba6b6a10-d0eb-4bb1-b223-7b985bebddfe
 langcode: en
 status: true
 dependencies:
@@ -127,10 +126,36 @@ display:
         type: none
         options: {  }
       cache:
-        type: tag
+        type: none
         options: {  }
       empty: {  }
-      sorts: {  }
+      sorts:
+        search_api_relevance:
+          id: search_api_relevance
+          table: search_api_index_mukurtu_collection_index
+          field: search_api_relevance
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: DESC
+          expose:
+            label: ''
+            field_identifier: ''
+          exposed: false
+        parent_collection_id:
+          id: parent_collection_id
+          table: search_api_index_mukurtu_collection_index
+          field: parent_collection_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: ASC
+          expose:
+            label: ''
+            field_identifier: ''
+          exposed: false
       arguments: {  }
       filters:
         search_api_fulltext:
@@ -187,7 +212,7 @@ display:
             'entity:node':
               collection: browse
       query:
-        type: views_query
+        type: search_api_query
         options:
           bypass_access: false
           skip_access: false
