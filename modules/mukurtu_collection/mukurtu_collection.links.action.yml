@@ -5,6 +5,13 @@ mukurtu_collection.add_collection:
     node_type: 'collection'
   appears_on:
     - mukurtu_collection.collection_browse_page
+
+mukurtu_collection.new_subcollection:
+  title: 'New Subcollection'
+  route_name: mukurtu_collection.new_subcollection
+  appears_on:
+    - entity.node.canonical
+
 entity.personal_collection.add_form:
   route_name: entity.personal_collection.add_form
   title: 'Add Personal collection'
