@@ -1,0 +1,5 @@
+mukurtu_community_records.add_new_record:
+  title: 'Community Record'
+  route_name: mukurtu_community_records.add_new_record
+  appears_on:
+    - entity.node.canonical

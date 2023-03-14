@@ -1,5 +1,5 @@
-mukurtu_community_records.add_new_record:
-  title: Add Community Record
-  route_name: mukurtu_community_records.add_new_record
-  base_route: entity.node.canonical
-  weight: 30
+#mukurtu_community_records.add_new_record:
+#  title: Add Community Record
+#  route_name: mukurtu_community_records.add_new_record
+#  base_route: entity.node.canonical
+#  weight: 30
