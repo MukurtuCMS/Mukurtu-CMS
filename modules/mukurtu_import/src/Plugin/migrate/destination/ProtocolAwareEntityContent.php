@@ -20,15 +20,16 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     assert($entity instanceof ContentEntityInterface);
 
     // Protocol Handling.
+    // @todo I don't think this is needed after the most recent rewrite?
     if ($entity instanceof CulturalProtocolControlledInterface) {
       // Sharing setting, any/all.
-      if ($row->hasDestinationProperty('field_cultural_protocols:sharing_setting')) {
+/*       if ($row->hasDestinationProperty('field_cultural_protocols:sharing_setting')) {
         $entity->setSharingSetting($row->getDestinationProperty('field_cultural_protocols:sharing_setting'));
       }
       // Protocol list.
       if ($row->hasDestinationProperty('field_cultural_protocols:protocols')) {
         $entity->setProtocols($row->getDestinationProperty('field_cultural_protocols:protocols'));
-      }
+      } */
     }
 
     if ($this->isEntityValidationRequired($entity)) {

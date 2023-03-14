@@ -149,7 +149,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         continue;
       }
 
-      if ($results[$migration_id]['@failures'] > 0) {
+      if (isset($results[$migration_id]['@failures']) && $results[$migration_id]['@failures'] > 0) {
         preg_match('/^\d+__(\d+)__.*/', $migration_id, $matches);
         $fid = $matches[1] ?? NULL;
         if ($fid) {

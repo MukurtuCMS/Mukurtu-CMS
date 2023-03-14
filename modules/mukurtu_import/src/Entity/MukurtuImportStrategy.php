@@ -216,175 +216,40 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     // Get the field definitions for the target.
     $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
 
+    /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $manager */
+    $manager = \Drupal::service('plugin.manager.mukurtu_import_field_process');
+
     // This will cause collisions if there are dupes. Do we care?
-    $naiveProcess = array_combine(array_column($mapping, 'target'), array_column($mapping, 'source'));
+    $importProcess = array_combine(array_column($mapping, 'target'), array_column($mapping, 'source'));
 
     // Remove ignored mappings. This depends on the above dupe collision behavior.
-    if (isset($naiveProcess['-1'])) {
-      unset($naiveProcess['-1']);
+    if (isset($importProcess['-1'])) {
+      unset($importProcess['-1']);
     }
 
     // @todo Add process plugins as appropriate for the target field type.
-    foreach ($naiveProcess as $targetOption => $source) {
-      $fieldComponents = explode(':', $targetOption, 2);
-      $target = $targetOption;
-      $sub_target = "";
-      if (count($fieldComponents) > 1) {
-        list($target, $sub_target) = $fieldComponents;
-      }
+    foreach ($importProcess as $target_option => $source) {
+      list($target, $subtarget) = explode('/', $target_option, 2);
 
       /** @var \Drupal\field\FieldConfigInterface $fieldDef */
       $fieldDef = $fieldDefs[$target] ?? NULL;
       if (!$fieldDef) {
         continue;
       }
-/*
-      $property_definitions = $fieldDef
-        ->getFieldStorageDefinition()
-        ->getPropertyDefinitions();
-      dpm($targetOption);
-      dpm(array_keys($property_definitions)); */
 
-      $cardinality = $fieldDef->getFieldStorageDefinition()->getCardinality();
-      $multiple = $cardinality == -1 || $cardinality > 1;
-      $newSource = [];
-      $newSource[] = [
-        'plugin' => 'explode',
-        'source' => $source,
-        'delimiter' => ';',
-      ];
-
-      if ($fieldDef->getType() == 'list_string') {
-        $newSource = [];
-        $newSource[] = [
-          'plugin' => 'label_lookup',
-          'source' => $source,
-          'entity_type' => $fieldDef->get('entity_type'),
-          'field_name' => $fieldDef->get('field_name'),
-          'bundle' => $fieldDef->get('bundle'),
-        ];
-        $naiveProcess[$target] = $newSource;
-      }
-
-      if ($fieldDef->getType() == 'entity_reference') {
-        $refType = $fieldDef->getSetting('target_type');
-
-        if ($refType == 'taxonomy_term') {
-          $targetBundles = $fieldDef->getSetting('handler_settings')['target_bundles'] ?? [];
-          $allTargetBundles = array_keys($targetBundles);
-          $targetBundle = reset($allTargetBundles);
-          $newSource[] = [
-            'plugin' => $fieldDef->getSetting('handler_settings')['auto_create'] ? 'mukurtu_entity_generate' : 'mukurtu_entity_lookup',
-            'value_key' => 'name',
-            'bundle_key' => 'vid',
-            'bundle' => $targetBundle,
-            'entity_type' => $fieldDef->getSetting('target_type'),
-            'ignore_case' => TRUE,
-          ];
-          $naiveProcess[$target] = $newSource;
+      /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessInterface $processPlugin */
+      if ($processPlugin = $manager->getInstance(['field_definition' => $fieldDef])) {
+        $context = [];
+        $context['upload_location'] = $this->getConfig('upload_location') ?? NULL;
+        if ($subtarget) {
+          $context['subfield'] = $subtarget;
         }
-
-        if (in_array($refType, ['community', 'media', 'node', 'protocol'])) {
-          $newSource = [];
-          $newSource[] = [
-            'plugin' => 'explode',
-            'source' => $source,
-            'delimiter' => ';',
-          ];
-          $newSource[] = [
-            'plugin' => 'mukurtu_entity_lookup',
-            'value_key' => $this->entityTypeManager()->getDefinition($refType)->getKey('label'),
-            'ignore_case' => TRUE,
-            'entity_type' => $fieldDef->getSetting('target_type'),
-          ];
-          $naiveProcess[$target] = $newSource;
-        }
-
-        // User ref. Only difference is value_key is set to 'name'.
-        if ($refType == 'user') {
-          $newSource = [];
-          $newSource[] = [
-            'plugin' => 'explode',
-            'source' => $source,
-            'delimiter' => ';',
-          ];
-          $newSource[] = [
-            'plugin' => 'mukurtu_entity_lookup',
-            'value_key' => 'name',
-            'ignore_case' => TRUE,
-            'entity_type' => $fieldDef->getSetting('target_type'),
-          ];
-          $naiveProcess[$target] = $newSource;
-        }
-
-        // Protocol Control Handling.
-        if ($refType == 'protocol_control') {
-          $newSource = [];
-          if ($sub_target == 'field_sharing_setting') {
-            $newSource[] = [
-              'plugin' => 'callback',
-              'callable' => 'mb_strtolower',
-              'field_name' => $sub_target,
-              'source' => $source,
-            ];
-          }
-          if ($sub_target == 'field_protocols') {
-            $newSource[] = [
-              'plugin' => 'explode',
-              'source' => $source,
-              'delimiter' => ';',
-            ];
-            $newSource[] = [
-              'plugin' => 'mukurtu_entity_lookup',
-              'value_key' => 'name',
-              'field_name' => $sub_target,
-              'entity_type' => 'protocol',
-              'ignore_case' => TRUE,
-            ];
-          }
-          $naiveProcess[$targetOption] = $newSource;
-        }
-
-        // @todo Paragraphs.
-        // @todo Users.
-
-      }
-
-      // Link fields.
-      if ($fieldDef->getType() == 'link') {
-        $newSource = [];
-        if ($multiple) {
-          $newSource[] = [
-            'plugin' => 'explode',
-            'delimiter' => ';',
-          ];
-        }
-        $newSource[] = [
-          'plugin' => 'markdown_link',
-        ];
-        $newSource[0]['source'] = $source;
-        $naiveProcess[$target] = $newSource;
-      }
-
-      // Image fields.
-      if ($fieldDef->getType() == 'image') {
-        $newSource = [];
-        if ($multiple) {
-          $newSource[] = [
-            'plugin' => 'explode',
-            'delimiter' => ';',
-          ];
-        }
-        $newSource[] = [
-          'plugin' => 'mukurtu_imageitem',
-          'upload_location' => $this->getConfig('upload_location'),
-        ];
-        $newSource[0]['source'] = $source;
-        $naiveProcess[$target] = $newSource;
+        $importProcess[$target_option] = $processPlugin->getProcess($fieldDef, $source, $context);
       }
     }
+    dpm($importProcess);
 
-    return $naiveProcess;
+    return $importProcess;
   }
 
   /**

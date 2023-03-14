@@ -387,14 +387,11 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $options = [-1 => $this->t('Ignore - Do not import')];
     foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
       if ($field_definition->getType() == 'cultural_protocol') {
-        if($field_definition->getSetting('target_type') == 'protocol_control') {
-          // Split our protocol field into the individual sharing
-          // setting/protocols components. We'll stitch them back together
-          // in the destination plugin.
-          $options["$field_name:sharing_setting"] = $this->t('Sharing Setting');
-          $options["$field_name:protocols"] = $this->t('Cultural Protocols');
-          continue;
-        }
+        // Split our protocol field into the individual sharing
+        // setting/protocols subfields.
+        $options["{$field_name}/sharing_setting"] = $this->t('Sharing Setting');
+        $options["{$field_name}/protocols"] = $this->t('Cultural Protocols');
+        continue;
       }
 
       $options[$field_name] = $field_definition->getLabel();
