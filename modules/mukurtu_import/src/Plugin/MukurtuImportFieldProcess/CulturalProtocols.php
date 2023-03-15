@@ -38,6 +38,9 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
         'ignore_case' => TRUE,
         'entity_type' => 'protocol',
       ];
+      $process[] = [
+        'plugin' => 'protocols',
+      ];
       return $process;
     }
 

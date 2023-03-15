@@ -6,7 +6,6 @@ use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\mukurtu_protocol\CulturalProtocols;
-use Exception;
 
 /**
  * Provides a field type of CulturalProtocol.
@@ -77,6 +76,13 @@ class CulturalProtocolItem extends FieldItemBase {
     $this->protocol_set_id = CulturalProtocols::getProtocolSetId($protocols);
   }
 
+  public static function formatProtocols($value) {
+    if (is_array($value)) {
+      return implode(',', array_map(fn($p) => "|$p|", array_map('trim', $value)));
+    }
+    return $value;
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -88,6 +94,10 @@ class CulturalProtocolItem extends FieldItemBase {
       $value = $values;
     }
 
+    if (isset($values['protocols'])) {
+      $values['protocols'] = $this->formatProtocols($values['protocols']);
+    }
+
     if (!(isset($values['protocols']) && isset($values['sharing_setting']))) {
       preg_match('/^(\w+)\s*\((.+)\)\s*/', $value, $matches, PREG_OFFSET_CAPTURE);
       if (!isset($matches[1]) || !isset($matches[2])) {
@@ -96,8 +106,8 @@ class CulturalProtocolItem extends FieldItemBase {
       }
       $values = [];
       $values['sharing_setting'] = strtolower($matches[1][0]);
-      $protocols = explode(',', $matches[2][0]);
-      $values['protocols'] = implode(',', array_map(fn($p) => "|$p|", array_map('trim', $protocols)));
+      $values['protocols'] = explode(',', $matches[2][0]);
+      $values['protocols'] = $this->formatProtocols($value['protocols']);
     }
 
     parent::setValue($values, $notify);

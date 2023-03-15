@@ -247,7 +247,6 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         $importProcess[$target_option] = $processPlugin->getProcess($fieldDef, $source, $context);
       }
     }
-    dpm($importProcess);
 
     return $importProcess;
   }
@@ -261,7 +260,10 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
     $mapping = $this->getMapping();
-    $targets = array_column($mapping, 'target');
+    $rawTargets = array_column($mapping, 'target');
+
+    // For subfield processes, we only want the fieldname.
+    $targets = array_map(fn($t) => explode('/', $t, 2)[0], $rawTargets);
 
     // Get the field definitions for the target.
     $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
