@@ -236,7 +236,11 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       return [-1 => $this->t('No sub-types available')];
     }
 
-    $options = [-1 => $this->t('None: Base Fields Only')];
+    // Don't provide the base fields option if there is only one valid bundle.
+    if (count($bundleInfo[$entity_type_id]) > 1) {
+      $options = [-1 => $this->t('None: Base Fields Only')];
+    }
+
     foreach ($bundleInfo[$entity_type_id] as $bundle => $info) {
       $options[$bundle] = $info['label'] ?? $bundle;
     }
