@@ -56,6 +56,7 @@ class CulturalProtocolItem extends FieldItemBase {
 
     $properties['sharing_setting'] = DataDefinition::create('string')
     ->setLabel(t('Sharing Setting'))
+    ->addConstraint('ValidSharingSettingConstraint')
     ->setRequired(TRUE);
 
     $properties['protocol_set_id'] = DataDefinition::create('integer')
