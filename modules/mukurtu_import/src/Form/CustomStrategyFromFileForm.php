@@ -152,7 +152,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
   protected function buildMappingTable(array &$form, FormStateInterface $form_state, FileInterface $file) {
     $userInput = $form_state->getUserInput();
-    $entity_type_id = $form_state->getValue('entity_type_id') ?? ($userInput['entity_type_id'] ?? 'node');
+    $entity_type_id = $form_state->getValue('entity_type_id') ?? ($userInput['entity_type_id'] ?? ($form['entity_type_id']['#default_value'] ?? 'node'));
     $bundle = $form_state->getValue('bundle') ?? ($userInput['bundle'] ?? $this->importConfig->getTargetBundle());
     $headers = $this->getCSVHeaders($file);
     if (empty($headers)) {
@@ -176,7 +176,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
         '#plain_text' => $header,
       ];
 
-      //$form['mappings'][$delta]['target'] = $this->buildTargetOptions($entity_type_id, $bundle);
       $form['mappings'][$delta]['target'] = [
         '#type' => 'select',
         '#options' => $this->buildTargetOptions($entity_type_id, $bundle),
@@ -185,8 +184,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
         '#suffix' => "</div>",
       ];
 
-      //$form['mappings'][$delta]['target']['#prefix'] = "<div id=\"edit-mappings-{$delta}-target-options\">";
-      //$form['mappings'][$delta]['target']['#suffix'] = "</div>";
       $form['mappings'][$delta]['source'] = [
         '#type' => 'value',
         '#value' => $header,
@@ -253,7 +250,24 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     // Check how many fields for this file we have mapped with the selected process.
     $form['bundle']['#options'] = $this->getBundleOptions($form_state->getValue('entity_type_id'));
+    $default = reset(array_keys($form['bundle']['#options']));
+    $bundle = $default == -1 ? NULL : $default;
     $response->addCommand(new ReplaceCommand("#bundle-select", $form['bundle']));
+
+    // Changing the entity type will reset the bundle selector, so refresh the
+    // field mapper based on the new default bundle.
+    $form_state->setRebuild(TRUE);
+    $fid = $form_state->getValue('fid');
+    $file = $this->entityTypeManager->getStorage('file')->load($fid);
+    $userInput = $form_state->getUserInput();
+    $entity_type_id = $form_state->getValue('entity_type_id') ?? ($userInput['entity_type_id'] ?? 'node');
+    $headers = $this->getCSVHeaders($file);
+    foreach ($headers as $delta => $header) {
+      $form['mappings'][$delta]['target']['#options'] = $this->buildTargetOptions($entity_type_id, $bundle);
+      $form['mappings'][$delta]['target']['#default_value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle);
+      $form['mappings'][$delta]['target']['#value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle);
+      $response->addCommand(new ReplaceCommand("#edit-mappings-{$delta}-target-options", $form['mappings'][$delta]['target']));
+    }
     return $response;
   }
 
@@ -265,16 +279,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $entity_type_id = $form_state->getValue('entity_type_id') ?? ($userInput['entity_type_id'] ?? 'node');
     $bundle = $form_state->getValue('bundle') ?? ($userInput['bundle'] ?? NULL);
     $response = new AjaxResponse();
-    //$this->buildMappingTable($form, $form_state, $file);
     $headers = $this->getCSVHeaders($file);
     foreach ($headers as $delta => $header) {
       $form['mappings'][$delta]['target']['#options'] = $this->buildTargetOptions($entity_type_id, $bundle);
       $form['mappings'][$delta]['target']['#default_value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle);
       $form['mappings'][$delta]['target']['#value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle);
-      // edit-mappings-0-target-options
       $response->addCommand(new ReplaceCommand("#edit-mappings-{$delta}-target-options", $form['mappings'][$delta]['target']));
     }
-    //$response->addCommand(new ReplaceCommand("#import-field-mapping-config", $form['mappings']));
     return $response;
   }
 
@@ -425,7 +436,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     // it has precedence.
     foreach ($configMapping as $mapping) {
       // Break up any subfields.
-      $subfields = explode(':', $mapping['target'], 2);
+      $subfields = explode('/', $mapping['target'], 2);
       $target = reset($subfields);
 
       // Checking if we have a mapping and the root of the target field exists.
