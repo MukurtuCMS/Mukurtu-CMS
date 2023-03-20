@@ -44,7 +44,7 @@ mukurtu_import.file_upload:
     _title: 'Import'
     _form: 'Drupal\mukurtu_import\Form\ImportFileUploadForm'
   requirements:
-    _permission: 'access content'
+    _permission: 'access mukurtu import'
 
 mukurtu_import.import_files:
   path: '/dashboard/import/files'
@@ -52,7 +52,7 @@ mukurtu_import.import_files:
     _title: 'Import File Summary'
     _form: 'Drupal\mukurtu_import\Form\ImportFileSummaryForm'
   requirements:
-    _permission: 'access content'
+    _permission: 'access mukurtu import'
 
 mukurtu_import.import_results:
   path: '/dashboard/import/results'
@@ -60,7 +60,7 @@ mukurtu_import.import_results:
     _title: 'Import Results'
     _form: 'Drupal\mukurtu_import\Form\ImportResultsForm'
   requirements:
-    _permission: 'access content'
+    _permission: 'access mukurtu import'
 
 mukurtu_import.custom_strategy_from_file_form:
   path: '/dashboard/import/files/mapping/add/{file}'
@@ -68,7 +68,7 @@ mukurtu_import.custom_strategy_from_file_form:
     _form: '\Drupal\mukurtu_import\Form\CustomStrategyFromFileForm'
     _title: 'Customize Import Settings'
   requirements:
-    _permission: 'administer mukurtu_import_strategy'
+    _permission: 'access mukurtu import'
   options:
     parameters:
       file:
@@ -80,4 +80,4 @@ mukurtu_import.execute_import:
     _title: 'Running Import'
     _form: 'Drupal\mukurtu_import\Form\ExecuteImportForm'
   requirements:
-    _permission: 'access content'
+    _permission: 'access mukurtu import'

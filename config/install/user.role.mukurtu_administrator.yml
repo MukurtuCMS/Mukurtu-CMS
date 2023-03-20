@@ -68,6 +68,7 @@ permissions:
   - 'access devel information'
   - 'access files overview'
   - 'access in-place editing'
+  - 'access mukurtu import'
   - 'access shortcuts'
   - 'access site in maintenance mode'
   - 'access site-wide contact form'

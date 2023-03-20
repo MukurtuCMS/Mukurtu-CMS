@@ -1,2 +1,4 @@
 administer mukurtu_import_strategy:
   title: 'Administer mukurtu_import_strategy'
+access mukurtu import:
+  title: 'Access Mukurtu Import'
