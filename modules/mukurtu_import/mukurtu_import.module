@@ -12,4 +12,10 @@ function mukurtu_import_migrate_destination_info_alter(array &$definitions) {
   if (isset($definitions['entity:media'])) {
     $definitions['entity:media']['class'] = 'Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareEntityContent';
   }
+  if (isset($definitions['entity:community'])) {
+    $definitions['entity:community']['class'] = 'Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareEntityContent';
+  }
+  if (isset($definitions['entity:protocol'])) {
+    $definitions['entity:protocol']['class'] = 'Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareEntityContent';
+  }
 }

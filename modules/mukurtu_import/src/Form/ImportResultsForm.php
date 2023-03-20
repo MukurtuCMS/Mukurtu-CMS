@@ -69,7 +69,7 @@ class ImportResultsForm extends ImportBaseForm {
       '#embed' => TRUE,
       '#arguments' => [$message->render()],
     ];
-    $form['protocol_results'] = $communities_block;
+    $form['community_results'] = $communities_block;
 
     $protocol_block = [
       '#type' => 'view',

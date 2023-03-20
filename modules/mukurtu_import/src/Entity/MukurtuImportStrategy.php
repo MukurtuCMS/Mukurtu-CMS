@@ -229,7 +229,13 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
     // @todo Add process plugins as appropriate for the target field type.
     foreach ($importProcess as $target_option => $source) {
-      list($target, $subtarget) = explode('/', $target_option, 2);
+      $targets = explode('/', $target_option, 2);
+      $target = $targets[0];
+      $subtarget = NULL;
+      if (count($targets) > 1) {
+        list($target, $subtarget) = $targets;
+      }
+
 
       /** @var \Drupal\field\FieldConfigInterface $fieldDef */
       $fieldDef = $fieldDefs[$target] ?? NULL;
