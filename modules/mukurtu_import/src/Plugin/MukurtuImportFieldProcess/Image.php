@@ -34,7 +34,7 @@ class Image extends MukurtuImportFieldProcessPluginBase {
       }
       $process[] = [
         'plugin' => 'mukurtu_imageitem',
-        'upload_location' => $context('upload_location') ?? '',
+        'upload_location' => $context['upload_location'] ?? '',
       ];
       $process[0]['source'] = $source;
       return $process;
