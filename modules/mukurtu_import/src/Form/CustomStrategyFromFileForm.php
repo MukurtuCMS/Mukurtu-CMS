@@ -73,11 +73,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     $entity_type_id = $form_state->getValue('entity_type_id') ?? $this->importConfig->getTargetEntityTypeId();
+    $bundleOptions = $this->getBundleOptions($entity_type_id);
+    $bundleKeys = array_keys($bundleOptions);
     $form['bundle'] = [
-      '#type' => 'select',
+      '#type' => 'radios',
       '#title' => $this->t('Sub-type'),
-      '#options' => $this->getBundleOptions($entity_type_id),
-      '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle(),
+      '#options' => $bundleOptions,
+      '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle() ?? reset($bundleKeys),
       '#description' => $this->t('Optional Sub-type. When importing new content or media, they will be of this type if not specified in the import metadata.'),
       '#prefix' => "<div id=\"bundle-select\">",
       '#suffix' => "</div>",
@@ -254,6 +256,10 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $optionKeys = array_keys($form['bundle']['#options']);
     $default = reset($optionKeys);
     $bundle = $default == -1 ? NULL : $default;
+    $form['bundle']['#default_value'] = $default;
+    $form['bundle']['#value'] = $default;
+    $form['bundle'][$default]['#value'] = $default;
+    $form['bundle'][$default]['#default_value'] = $default;
     $form_state->setValue('bundle', $default);
     $response->addCommand(new ReplaceCommand("#bundle-select", $form['bundle']));
 
