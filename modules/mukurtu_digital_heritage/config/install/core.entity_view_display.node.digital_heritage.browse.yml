@@ -32,7 +32,7 @@ content:
     settings:
       link: false
     third_party_settings: {  }
-    weight: 3
+    weight: 4
     region: content
   field_communities:
     type: entity_reference_label
@@ -50,6 +50,14 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_multipage_page_of:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
@@ -65,7 +73,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 4
+    weight: 5
     region: content
 hidden:
   comment: true
@@ -73,9 +81,11 @@ hidden:
   field_citation: true
   field_contributor: true
   field_coverage: true
+  field_coverage_description: true
   field_creative_commons: true
   field_creator: true
   field_cultural_narrative: true
+  field_cultural_protocols: true
   field_date_description: true
   field_description: true
   field_external_links: true

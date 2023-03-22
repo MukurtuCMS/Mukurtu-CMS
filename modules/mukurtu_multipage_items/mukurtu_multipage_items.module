@@ -14,8 +14,10 @@ use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityFormInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * Implements hook_theme().
@@ -41,6 +43,26 @@ function mukurtu_multipage_items_theme() {
       ],
     ],
   ];
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function mukurtu_multipage_items_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+  if ($entity_type->id() == 'node') {
+    // Define a computed field for multipage.
+    $fields['field_multipage_page_of'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_multipage_page_of')
+      ->setLabel(t('Page of'))
+      ->setDescription('')
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_multipage_items\Plugin\Field\PageOfItemList')
+      ->setSetting('target_type', 'multipage_item')
+      ->setCardinality(1)
+      ->setDisplayConfigurable('view', TRUE);
+  }
+  return $fields;
 }
 
 /**
