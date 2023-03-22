@@ -92,14 +92,35 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     $this->buildMappingTable($form, $form_state, $file);
 
-    // File options for import like multivalue delimiter, line endings, etc.
+    // File options for import like multivalue delimiter, enclosure, etc.
     $form['file_settings'] = [
       '#type' => 'details',
       '#title' => $this->t('File Settings'),
     ];
+    $form['file_settings']['delimiter'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#maxlength' => 1,
+      '#title' => $this->t('CSV Delimiter'),
+      '#default_value' => $this->importConfig->getConfig('delimiter') ?? ',',
+    ];
+    $form['file_settings']['enclosure'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#maxlength' => 1,
+      '#title' => $this->t('CSV Enclosure'),
+      '#default_value' => $this->importConfig->getConfig('enclosure') ?? '"',
+    ];
+    $form['file_settings']['escape'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#maxlength' => 1,
+      '#title' => $this->t('CSV Escape Character'),
+      '#default_value' => $this->importConfig->getConfig('escape') ?? '\\',
+    ];
     $form['file_settings']['multivalue_delimiter'] = [
       '#type' => 'textfield',
-      '#size' => 10,
+      '#size' => 5,
       '#title' => $this->t('Multi-value Delimiter'),
       '#default_value' => $this->importConfig->getConfig('multivalue_delimiter') ?? ';',
     ];
@@ -337,6 +358,9 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $this->importConfig->setTargetEntityTypeId($entity_type_id);
     $this->importConfig->setTargetBundle($bundle);
     $this->importConfig->setMapping($form_state->getValue('mappings'));
+    $this->importConfig->setConfig('delimiter', $form_state->getValue('delimiter'));
+    $this->importConfig->setConfig('enclosure', $form_state->getValue('enclosure'));
+    $this->importConfig->setConfig('escape', $form_state->getValue('escape'));
     $this->importConfig->setConfig('multivalue_delimiter', $form_state->getValue('multivalue_delimiter'));
 
     if ($form_state->getValue('config_save')) {
