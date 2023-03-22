@@ -73,6 +73,17 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
+    // If the bundle class has its own check create access, run that and we will
+    // include that in the overall access check for the bundle.
+    $bundleClass = $this->entityTypeManager->getStorage('node')->getEntityClass($entity_bundle);
+    $bundleCheckResult = AccessResult::allowed();
+    if ($bundleClass) {
+      $interfaces = class_implements($bundleClass);
+      if (isset($interfaces['Drupal\mukurtu_core\Entity\BundleSpecificCheckCreateAccessInterface'])) {
+        $bundleCheckResult = $bundleClass::bundleCheckCreateAccess($account, $context);
+      }
+    }
+
     /*
      * To create a node of type entity_bundle, the account needs at least
      * one protocol membership that grants the 'Create new' permission
@@ -92,7 +103,7 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
 
       // Account must have create permission for the given type.
       if ($membership->hasPermission("create $entity_bundle content")) {
-        return AccessResult::allowed();
+        return AccessResult::allowedIf($bundleCheckResult->isAllowed());
       }
     }
     return AccessResult::forbidden();

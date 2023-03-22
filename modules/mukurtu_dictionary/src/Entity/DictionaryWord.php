@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_dictionary\Entity;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\node\Entity\Node;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -10,8 +11,9 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_core\Entity\BundleSpecificCheckCreateAccessInterface;
 
-class DictionaryWord extends Node implements DictionaryWordInterface, CulturalProtocolControlledInterface {
+class DictionaryWord extends Node implements DictionaryWordInterface, CulturalProtocolControlledInterface, BundleSpecificCheckCreateAccessInterface {
   use CulturalProtocolControlledTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
@@ -208,6 +210,16 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
         $this->set("field_glossary_entry", $this->getTitle()[0]);
       }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function bundleCheckCreateAccess(AccountInterface $account, array $context): AccessResult {
+    // Dictionary words require at least one language to be present on the site.
+    $query = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->getQuery();
+    $languages = $query->condition('vid', 'language')->accessCheck(TRUE)->execute();
+    return AccessResult::allowedIf(!empty($languages));
   }
 
 }
