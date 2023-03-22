@@ -24,13 +24,14 @@ class File extends MukurtuImportFieldProcessPluginBase {
    * {@inheritdoc}
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
+    $multivalue_delimiter = $context['multivalue_delimiter'] ?? ';';
     $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
     $multiple = $cardinality == -1 || $cardinality > 1;
     $process = [];
     if ($multiple) {
       $process[] = [
         'plugin' => 'explode',
-        'delimiter' => ';',
+        'delimiter' => $multivalue_delimiter,
       ];
     }
     $process[] = [

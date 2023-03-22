@@ -92,6 +92,19 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     $this->buildMappingTable($form, $form_state, $file);
 
+    // File options for import like multivalue delimiter, line endings, etc.
+    $form['file_settings'] = [
+      '#type' => 'details',
+      '#title' => $this->t('File Settings'),
+    ];
+    $form['file_settings']['multivalue_delimiter'] = [
+      '#type' => 'textfield',
+      '#size' => 10,
+      '#title' => $this->t('Multi-value Delimiter'),
+      '#default_value' => $this->importConfig->getConfig('multivalue_delimiter') ?? ';',
+    ];
+
+
     // Provide an option to save this config for reuse.
     $form['import_config'] = [
       '#type' => 'fieldset',
@@ -324,6 +337,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $this->importConfig->setTargetEntityTypeId($entity_type_id);
     $this->importConfig->setTargetBundle($bundle);
     $this->importConfig->setMapping($form_state->getValue('mappings'));
+    $this->importConfig->setConfig('multivalue_delimiter', $form_state->getValue('multivalue_delimiter'));
 
     if ($form_state->getValue('config_save')) {
       $userProvidedLabel = $form_state->getValue('config_title');

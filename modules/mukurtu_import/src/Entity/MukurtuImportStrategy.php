@@ -246,6 +246,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessInterface $processPlugin */
       if ($processPlugin = $manager->getInstance(['field_definition' => $fieldDef])) {
         $context = [];
+        $context['multivalue_delimiter'] = $this->getConfig('multivalue_delimiter') ?? ';';
         $context['upload_location'] = $this->getConfig('upload_location') ?? NULL;
         if ($subtarget) {
           $context['subfield'] = $subtarget;

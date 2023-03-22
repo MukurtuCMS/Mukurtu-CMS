@@ -23,6 +23,7 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
    * {@inheritdoc}
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
+    $multivalue_delimiter = $context['multivalue_delimiter'] ?? ';';
     $subfield = $context['subfield'] ?? NULL;
     $process = [];
 
@@ -30,7 +31,7 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
       $process[] = [
         'plugin' => 'explode',
         'source' => $source,
-        'delimiter' => ';',
+        'delimiter' => $multivalue_delimiter,
       ];
       $process[] = [
         'plugin' => 'mukurtu_entity_lookup',

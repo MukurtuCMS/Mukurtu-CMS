@@ -24,13 +24,14 @@ class DefaultProcess extends MukurtuImportFieldProcessPluginBase {
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
     $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
+    $multivalue_delimiter = $context['multivalue_delimiter'] ?? ';';
     $multiple = $cardinality == -1 || $cardinality > 1;
 
     if ($multiple) {
       return [
         'plugin' => 'explode',
         'source' => $source,
-        'delimiter' => ';',
+        'delimiter' => $multivalue_delimiter,
       ];
     }
 

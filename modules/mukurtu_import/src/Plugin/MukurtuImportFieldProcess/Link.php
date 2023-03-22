@@ -23,20 +23,21 @@ class Link extends MukurtuImportFieldProcessPluginBase {
    * {@inheritdoc}
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
-      $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
-      $multiple = $cardinality == -1 || $cardinality > 1;
-      $process = [];
-      if ($multiple) {
-        $process[] = [
-          'plugin' => 'explode',
-          'delimiter' => ';',
-        ];
-      }
+    $multivalue_delimiter = $context['multivalue_delimiter'] ?? ';';
+    $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
+    $multiple = $cardinality == -1 || $cardinality > 1;
+    $process = [];
+    if ($multiple) {
       $process[] = [
-        'plugin' => 'markdown_link',
+        'plugin' => 'explode',
+        'delimiter' => $multivalue_delimiter,
       ];
-      $process[0]['source'] = $source;
-      return $process;
+    }
+    $process[] = [
+      'plugin' => 'markdown_link',
+    ];
+    $process[0]['source'] = $source;
+    return $process;
   }
 
 }
