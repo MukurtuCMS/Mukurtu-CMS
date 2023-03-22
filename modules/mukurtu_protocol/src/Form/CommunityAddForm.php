@@ -96,7 +96,14 @@ class CommunityAddForm extends EntityForm {
     $form['field_access_mode'] = $this->renderField('field_access_mode', $form_state, $form);
 
     // Community Type.
-    $form['field_community_type'] = $this->renderField('field_community_type', $form_state, $form);
+    $query = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery();
+    $community_type_terms = $query->condition('vid', 'community_type')
+      ->accessCheck(TRUE)
+      ->execute();
+    // Don't display if there aren't any available terms.
+    if (!empty($community_type_terms)) {
+      $form['field_community_type'] = $this->renderField('field_community_type', $form_state, $form);
+    }
 
     // Community Managers.
     $form['community_manager_item'] = [
