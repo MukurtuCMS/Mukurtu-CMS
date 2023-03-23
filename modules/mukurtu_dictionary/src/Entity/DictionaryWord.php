@@ -52,7 +52,6 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -78,7 +77,6 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
@@ -107,7 +105,6 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
           'auto_create_bundle' => 'audio',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -156,7 +153,6 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
           'auto_create_bundle' => 'article',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -182,7 +178,6 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
