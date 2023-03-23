@@ -177,9 +177,12 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   protected function getEntityTypeIdOptions() {
     $definitons = $this->entityTypeManager->getDefinitions();
     $options = [];
-    foreach (['node', 'media', 'community', 'protocol'] as $entity_type_id) {
+    foreach (['node', 'media', 'community', 'protocol', 'paragraph'] as $entity_type_id) {
       if (isset($definitons[$entity_type_id])) {
         $options[$entity_type_id] = $definitons[$entity_type_id]->getLabel();
+        if ($entity_type_id === 'paragraph') {
+          $options[$entity_type_id] = $this->t('Compound Types');
+        }
       }
     }
 
