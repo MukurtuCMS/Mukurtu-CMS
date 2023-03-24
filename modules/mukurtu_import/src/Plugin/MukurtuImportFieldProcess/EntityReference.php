@@ -36,6 +36,12 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
       ];
     }
 
+    // Resolve UUIDs.
+    $process[] = [
+      'plugin' => 'uuid_lookup',
+      'entity_type' => $field_config->getSetting('target_type'),
+    ];
+
     // Default.
     $refProcess = [
       'plugin' => 'mukurtu_entity_lookup',
