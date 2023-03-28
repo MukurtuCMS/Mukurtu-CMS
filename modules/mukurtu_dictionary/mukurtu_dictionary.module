@@ -8,6 +8,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordEntry;
+use Drupal\mukurtu_dictionary\Entity\SampleSentence;
 use Drupal\mukurtu_dictionary\Entity\WordList;
 
 /**
@@ -42,6 +43,11 @@ function mukurtu_dictionary_entity_bundle_info_alter(array &$bundles): void {
   // Dictionary Word Entry bundle class.
   if (isset($bundles['paragraph']['dictionary_word_entry'])) {
     $bundles['paragraph']['dictionary_word_entry']['class'] = DictionaryWordEntry::class;
+  }
+
+  // Sample sentences bundle class.
+  if (isset($bundles['paragraph']['sample_sentence'])) {
+    $bundles['paragraph']['sample_sentence']['class'] = SampleSentence::class;
   }
 }
 

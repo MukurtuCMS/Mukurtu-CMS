@@ -4,6 +4,7 @@ dependencies:
   config:
     - paragraphs.paragraphs_type.dictionary_word_entry
   module:
+    - entity_reference_revisions
     - text
 id: paragraph.dictionary_word_entry.default
 targetEntityType: paragraph
@@ -58,9 +59,11 @@ content:
     weight: 4
     region: content
   field_sample_sentences:
-    type: basic_string
+    type: entity_reference_revisions_entity_view
     label: above
-    settings: {  }
+    settings:
+      view_mode: default
+      link: ''
     third_party_settings: {  }
     weight: 5
     region: content

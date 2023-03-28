@@ -90,13 +90,29 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_sample_sentences'] = BaseFieldDefinition::create('string_long')
+    $definitions['field_sample_sentences'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Sample Sentences'))
       ->setDescription(t('One or more example sentences that demonstrate use of the word entry.'))
+      ->setSettings([
+        'target_type' => 'paragraph',
+        'handler' => 'default:paragraph',
+        'handler_settings' => [
+          'negate' => FALSE,
+          'target_bundles' => [
+            'sample_sentence' => 'sample_sentence'
+          ],
+          'target_bundles_drag_drop' => [
+            'sample_sentence' => [
+              'enabled' => TRUE,
+              'weight' => 2,
+            ],
+          ],
+        ]
+      ])
       ->setCardinality(-1)
-      ->setRequired(FALSE)
+      ->setRequired(TRUE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 

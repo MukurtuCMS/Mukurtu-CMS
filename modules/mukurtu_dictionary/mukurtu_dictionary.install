@@ -42,6 +42,7 @@ function mukurtu_dictionary_install() {
     ['node', 'dictionary_word'],
     ['node', 'word_list'],
     ['paragraph', 'dictionary_word_entry'],
+    ['paragraph', 'sample_sentence'],
   ];
 
   foreach ($types as $type) {
