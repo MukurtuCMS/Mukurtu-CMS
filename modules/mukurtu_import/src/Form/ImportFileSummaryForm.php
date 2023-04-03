@@ -23,7 +23,8 @@ class ImportFileSummaryForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $metadataFiles = $this->getMetadataFiles();
+    $metadataFileWeights = $this->getMetadataFileWeights();
+    $metadataFiles = array_keys($metadataFileWeights);
 
     $form['all_files_ready'] = [
       '#type' => 'hidden',
@@ -37,19 +38,24 @@ class ImportFileSummaryForm extends ImportBaseForm {
 
     $form['table'] = [
       '#type' => 'table',
+      '#caption' => $this->t('Files will be imported top to bottom. Select your field mapping for each file by using the "Customize Settings" button.'),
       '#header' => [
         $this->t('File'),
         $this->t('Import Configuration'),
         '',
+        $this->t('Weight'),
       ],
       '#attributes' => [
         'id' => 'import-configuration-summary'
       ],
-      '#tabledrag' => [[
-        'action' => 'order',
-        'relationship' => 'sibling',
-        'group' => 'draggable-weight',
-      ]],
+      '#tableselect' => FALSE,
+      '#tabledrag' => [
+        [
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'file-order-weight',
+        ],
+      ],
     ];
 
     foreach ($metadataFiles as $fid) {
@@ -66,6 +72,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
 
       $typeMessage = $this->getTypeSummaryMessage($fid);
       $mappedFieldMsg = $this->getMappedFieldsMessage($fid);
+      $form['table'][$fid]['#attributes']['class'][] = 'draggable';
       $form['table'][$fid]['mapping'] = [
         '#type' => 'select',
         '#options' => $this->getImportConfigOptions($fid),
@@ -83,6 +90,14 @@ class ImportFileSummaryForm extends ImportBaseForm {
         '#value' => $this->t('Customize Settings'),
         '#button_type' => 'primary',
         '#submit' => ['::defineCustomMapping'],
+      ];
+
+      $form['table'][$fid]['weight'] = [
+        '#type' => 'weight',
+        '#title_display' => 'invisible',
+        '#title' => $this->t('Weight for @title', ['@title' => $metadataFile->getFilename()]),
+        '#default_value' => $metadataFileWeights[$fid] ?? 0,
+        '#attributes' => ['class' => ['file-order-weight']],
       ];
     }
 
@@ -260,6 +275,10 @@ class ImportFileSummaryForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $table = $form_state->getValue('table');
+    $weights = array_combine(array_keys($table), array_column($table, 'weight'));
+    $this->setMetadataFileWeights($weights);
+
     $form_state->setRedirect('mukurtu_import.execute_import');
   }
 

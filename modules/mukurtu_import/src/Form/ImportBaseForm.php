@@ -36,7 +36,7 @@ class ImportBaseForm extends FormBase {
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
   protected $entityFieldManager;
-
+  protected $metadataFileWeights;
   protected $metadataFilesImportConfig;
   protected $importId;
 
@@ -58,6 +58,7 @@ class ImportBaseForm extends FormBase {
     }
     $this->importId = $import_id;
     $this->metadataFilesImportConfig = $this->store->get('import_config');
+    $this->metadataFileWeights = $this->store->get('metadata_file_weights') ?? [];
   }
 
   /**
@@ -115,6 +116,7 @@ class ImportBaseForm extends FormBase {
     $this->metadataFilesImportConfig = [];
     $this->store->set('import_config', []);
     $this->store->set('batch_results_messages', []);
+    $this->store->set('metadata_file_weights', []);
   }
 
   public function getMetadataFiles() {
@@ -123,6 +125,25 @@ class ImportBaseForm extends FormBase {
       ->accessCheck(TRUE)
       ->execute();
   }
+
+  public function getMetadataFileWeights() {
+    $fids = $this->getMetadataFiles();
+    $weights = $this->metadataFileWeights;
+    // Remove any weights for files that no longer exist.
+    foreach ($weights as $fid => $weight) {
+      if (!in_array($fid, $fids)) {
+        unset($weights[$fid]);
+      }
+    }
+    asort($weights);
+    return $weights;
+  }
+
+  public function setMetadataFileWeights($weights) {
+    $this->metadataFileWeights = $weights;
+    $this->store->set('metadata_file_weights', $weights);
+  }
+
 
   public function getBinaryFiles() {
     $query = $this->entityTypeManager->getStorage('file')->getQuery();

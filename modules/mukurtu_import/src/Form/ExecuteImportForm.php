@@ -45,7 +45,8 @@ class ExecuteImportForm extends ImportBaseForm {
   }
 
   public function startImport(array &$form, FormStateInterface $form_state) {
-    $metadataFiles = $this->getMetadataFiles();
+    // $metadataFiles sorted by weight in this case.
+    $metadataFiles = array_keys($this->getMetadataFileWeights());
     $migrationDefinitions = [];
 
     // Build migrations for each input file.
