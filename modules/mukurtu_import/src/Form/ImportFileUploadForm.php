@@ -160,6 +160,16 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    // Add a default weight for any new metadata files.
+    $metadataFiles = $form_state->getValue('metadata_files');
+    $metadataFileWeights = $this->getMetadataFileWeights();
+    foreach ($metadataFiles as $fid ) {
+      if (!in_array($fid, $metadataFileWeights)) {
+        $metadataFileWeights[$fid] = 0;
+      }
+    }
+    $this->setMetadataFileWeights($metadataFileWeights);
+
     $form_state->setRedirect('mukurtu_import.import_files');
   }
 
