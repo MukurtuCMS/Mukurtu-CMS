@@ -9,6 +9,7 @@ dependencies:
   module:
     - entity_browser
     - field_group
+    - media_library
     - mukurtu_protocol
     - path
     - text
@@ -101,14 +102,11 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_media_assets:
-    type: entity_reference_autocomplete
+    type: media_library_widget
     weight: 3
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      media_types: {  }
     third_party_settings: {  }
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
