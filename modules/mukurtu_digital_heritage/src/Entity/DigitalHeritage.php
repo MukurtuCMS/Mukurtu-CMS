@@ -274,7 +274,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'target_bundles' => [
             'contributor' => 'contributor'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(-1)
@@ -294,7 +294,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'target_bundles' => [
             'creator' => 'creator'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(-1)
@@ -314,7 +314,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'target_bundles' => [
             'format' => 'format'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(-1)
@@ -334,7 +334,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'target_bundles' => [
             'keywords' => 'keywords'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(-1)
@@ -354,7 +354,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'target_bundles' => [
             'language' => 'language'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(1)
@@ -374,7 +374,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'target_bundles' => [
             'people' => 'people'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(-1)
@@ -394,7 +394,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'target_bundles' => [
             'publisher' => 'publisher'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(-1)
@@ -434,7 +434,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'target_bundles' => [
             'type' => 'type'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(-1)

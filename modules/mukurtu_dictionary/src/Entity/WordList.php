@@ -47,7 +47,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
             'field' => 'name',
             'direction' => 'asc'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
           'auto_create_bundle' => '',
         ]
       ])
