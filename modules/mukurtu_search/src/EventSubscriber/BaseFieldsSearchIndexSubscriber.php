@@ -35,13 +35,21 @@ class BaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
    * @param \Drupal\mukurtu_search\Event\FieldAvailableForIndexing $event
    *   Response event.
    */
-  public function indexFullTextField(FieldAvailableForIndexing $event) {
+  public function defaultFieldIndex(FieldAvailableForIndexing $event) {
     // Index text fields as full text.
     if (in_array($event->field_definition->getType(), ['string', 'string_long', 'text', 'text_long', 'text_with_summary'])) {
       $field_name = $event->field_definition->getName();
       $field_id = "{$event->entity_type_id}__{$field_name}";
       $label = $event->field_definition->getLabel();
       $event->indexField($field_id, $field_name, $label);
+    }
+
+    // Date fields.
+    if (in_array($event->field_definition->getType(), ['created', 'changed'])) {
+      $field_name = $event->field_definition->getName();
+      $field_id = "{$event->entity_type_id}__{$field_name}";
+      $label = $event->field_definition->getLabel();
+      $event->indexField($field_id, $field_name, $label, 'date');
     }
   }
 
@@ -50,8 +58,8 @@ class BaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents() {
     return [
-      FieldAvailableForIndexing::NEW_FIELD => ['indexFullTextField'],
-      FieldAvailableForIndexing::UPDATED_FIELD => ['indexFullTextField'],
+      FieldAvailableForIndexing::NEW_FIELD => ['defaultFieldIndex'],
+      FieldAvailableForIndexing::UPDATED_FIELD => ['defaultFieldIndex'],
     ];
   }
 

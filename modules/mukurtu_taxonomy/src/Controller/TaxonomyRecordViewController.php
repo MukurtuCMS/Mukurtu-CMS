@@ -77,7 +77,13 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
     }
 
     // Render the referenced entities.
-    $referencedContent = \Drupal::formBuilder()->getForm('Drupal\mukurtu_taxonomy\Form\TaxonomyRecordReferencedContentForm', $this->getTaxonomyTermRecords($taxonomy_term), $taxonomy_term);
+    $referencedContent = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_taxonomy_references',
+      '#display_id' => 'content_block',
+      '#embed' => TRUE,
+      '#arguments' => [$taxonomy_term->uuid()],
+    ];
 
     $build['records'] = [
       '#theme' => 'taxonomy_records',

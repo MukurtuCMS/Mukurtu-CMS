@@ -10,6 +10,7 @@ use Drupal\Core\Link;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_theme().
@@ -81,6 +82,30 @@ function template_preprocess_mukurtu_vocabulary_add_list(array &$variables) {
           '#markup' => $type->getDescription(),
         ],
       ];
+    }
+  }
+}
+
+
+/**
+ * Implements hook_views_pre_view().
+ */
+function mukurtu_taxonomy_views_pre_view(ViewExecutable $view) {
+  // This drives the handling of the taxonomy term page view.
+  // It injects the UUID of the term into the fulltext SAPI search.
+  if ($view->id() == 'mukurtu_taxonomy_references') {
+    if ($term_uuid = $view->args[0] ?? NULL) {
+      $filters = $view->display_handler->getOption('filters');
+
+      // Get the user's search terms.
+      $user_search = $filters['search_api_fulltext']['value'];
+
+      // Blank out the actual filter because we'll add it to the view arg.
+      $filters['search_api_fulltext']['value'] = '';
+      $view->display_handler->overrideOption('filters', $filters);
+
+      // Search for the term and whatever the user searched for.
+      $view->args[0] = "$term_uuid $user_search";
     }
   }
 }
