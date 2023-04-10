@@ -51,6 +51,12 @@ function mukurtu_taxonomy_entity_bundle_create($entity_type_id, $bundle) {
 function mukurtu_search_rebuild_index() {
   // Index taxonomy term references for fields that already exist.
   if ($index = Index::load('mukurtu_browse_auto_index')) {
+    // Clear old fields.
+    $fields = $index->getFields();
+    foreach($fields as $field) {
+      $index->removeField($field->getFieldIdentifier());
+    }
+
     // Add the entity type field.
     $field = $index->getField('entity_type') ?? new Field($index, 'entity_type');
     $field->setType('string');

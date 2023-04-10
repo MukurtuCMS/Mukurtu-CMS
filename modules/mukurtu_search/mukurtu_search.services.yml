@@ -1,0 +1,6 @@
+services:
+  mukurtu_search.event_subscriber:
+    class: Drupal\mukurtu_search\EventSubscriber\BaseFieldsSearchIndexSubscriber
+    arguments: ['@messenger']
+    tags:
+      - { name: event_subscriber }

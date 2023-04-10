@@ -1,15 +1,16 @@
 <?php
 
-namespace Drupal\mukurtu_taxonomy\EventSubscriber;
+namespace Drupal\mukurtu_search\EventSubscriber;
 
 use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\mukurtu_search\Event\FieldAvailableForIndexing;
 
+
 /**
- * Mukurtu Taxonomy event subscriber.
+ * Mukurtu Search event subscriber.
  */
-class TaxonomyFieldSearchIndexSubscriber implements EventSubscriberInterface {
+class BaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
 
   /**
    * The messenger.
@@ -34,13 +35,13 @@ class TaxonomyFieldSearchIndexSubscriber implements EventSubscriberInterface {
    * @param \Drupal\mukurtu_search\Event\FieldAvailableForIndexing $event
    *   Response event.
    */
-  public function indexTaxonomyField(FieldAvailableForIndexing $event) {
-    if ($event->field_definition->getType() == 'entity_reference' && $event->field_definition->getSetting('target_type') == 'taxonomy_term') {
+  public function indexFullTextField(FieldAvailableForIndexing $event) {
+    // Index text fields as full text.
+    if (in_array($event->field_definition->getType(), ['string', 'string_long', 'text', 'text_long', 'text_with_summary'])) {
       $field_name = $event->field_definition->getName();
-      $field_id = "{$event->entity_type_id}__{$field_name}__uuid";
-      $property_path = "{$field_name}:entity:uuid";
-      $label = "{$event->field_definition->getLabel()} » Taxonomy term » UUID";
-      $event->indexField($field_id, $property_path, $label);
+      $field_id = "{$event->entity_type_id}__{$field_name}";
+      $label = $event->field_definition->getLabel();
+      $event->indexField($field_id, $field_name, $label);
     }
   }
 
@@ -49,8 +50,8 @@ class TaxonomyFieldSearchIndexSubscriber implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents() {
     return [
-      FieldAvailableForIndexing::NEW_FIELD => ['indexTaxonomyField'],
-      FieldAvailableForIndexing::UPDATED_FIELD => ['indexTaxonomyField'],
+      FieldAvailableForIndexing::NEW_FIELD => ['indexFullTextField'],
+      FieldAvailableForIndexing::UPDATED_FIELD => ['indexFullTextField'],
     ];
   }
 
