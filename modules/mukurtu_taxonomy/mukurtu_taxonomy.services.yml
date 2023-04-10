@@ -8,3 +8,9 @@ services:
     arguments: ['@entity_field.manager']
     tags:
       - { name: event_subscriber }
+
+  mukurtu_taxonomy.event_subscriber:
+    class: Drupal\mukurtu_taxonomy\EventSubscriber\TaxonomyFieldSearchIndexSubscriber
+    arguments: ['@messenger']
+    tags:
+      - { name: event_subscriber }

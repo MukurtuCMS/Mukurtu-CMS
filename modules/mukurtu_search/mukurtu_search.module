@@ -1,0 +1,79 @@
+<?php
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\field\FieldConfigInterface;
+use Drupal\mukurtu_search\Event\FieldAvailableForIndexing;
+use Drupal\search_api\Entity\Index;
+use Drupal\search_api\Item\Field;
+
+/**
+ * @file
+ * Primary module hooks for Mukurtu Search module.
+ */
+
+/**
+ * Implements hook_entity_insert().
+ */
+function mukurtu_search_entity_insert(EntityInterface $entity) {
+  if ($entity instanceof FieldConfigInterface) {
+    $event = new FieldAvailableForIndexing($entity->getTargetEntityTypeId(), $entity->getTargetBundle(), $entity);
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event = $event_dispatcher->dispatch($event, FieldAvailableForIndexing::NEW_FIELD);
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function mukurtu_search_entity_update(EntityInterface $entity) {
+  if ($entity instanceof FieldConfigInterface) {
+    $event = new FieldAvailableForIndexing($entity->getTargetEntityTypeId(), $entity->getTargetBundle(), $entity);
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event = $event_dispatcher->dispatch($event, FieldAvailableForIndexing::UPDATED_FIELD);
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_create().
+ */
+function mukurtu_taxonomy_entity_bundle_create($entity_type_id, $bundle) {
+  $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+  foreach ($fields as $field_config) {
+    $event = new FieldAvailableForIndexing($entity_type_id, $bundle, $field_config);
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event = $event_dispatcher->dispatch($event, FieldAvailableForIndexing::NEW_FIELD);
+  }
+}
+
+/**
+ * Index all fields for search.
+ */
+function mukurtu_search_rebuild_index() {
+  // Index taxonomy term references for fields that already exist.
+  if ($index = Index::load('mukurtu_browse_auto_index')) {
+    // Add the entity type field.
+    $field = $index->getField('entity_type') ?? new Field($index, 'entity_type');
+    $field->setType('string');
+    $field->setPropertyPath("search_api_entity_type");
+    $field->setLabel("Entity type");
+    $index->addField($field);
+    $index->save();
+  }
+
+  foreach (['node', 'media', 'paragraph', 'community', 'protocol'] as $entity_type_id) {
+    // Get the bundles for the entity type.
+    $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type_id);
+    $bundles = array_keys($bundle_info) ?? [];
+
+    // For each bundle, check for fields that need indexing for taxonomy references.
+    foreach ($bundles as $bundle) {
+      // Get the field definitions.
+      $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+      foreach ($fields as $field_config) {
+        $event = new FieldAvailableForIndexing($entity_type_id, $bundle, $field_config);
+        $event_dispatcher = \Drupal::service('event_dispatcher');
+        $event = $event_dispatcher->dispatch($event, FieldAvailableForIndexing::NEW_FIELD);
+      }
+    }
+  }
+}

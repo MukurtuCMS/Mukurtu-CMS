@@ -1,0 +1,60 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.server.mukurtu_database_server
+  module:
+    - search_api
+    - mukurtu_protocol
+    - node
+    - media
+    - paragraphs
+id: mukurtu_browse_auto_index
+name: 'Mukurtu Browse Auto Index'
+description: ''
+read_only: false
+field_settings: {  }
+datasource_settings:
+  'entity:community':
+    languages:
+      default: true
+      selected: {  }
+  'entity:media':
+    bundles:
+      default: true
+      selected: {  }
+    languages:
+      default: true
+      selected: {  }
+  'entity:node':
+    bundles:
+      default: true
+      selected: {  }
+    languages:
+      default: true
+      selected: {  }
+  'entity:paragraph':
+    bundles:
+      default: true
+      selected: {  }
+    languages:
+      default: true
+      selected: {  }
+  'entity:protocol':
+    languages:
+      default: true
+      selected: {  }
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  entity_type: {  }
+  language_with_fallback: {  }
+  rendered_item: {  }
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  cron_limit: 50
+  index_directly: true
+  track_changes_in_references: true
+server: mukurtu_database_server

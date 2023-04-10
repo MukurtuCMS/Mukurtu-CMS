@@ -1,0 +1,13 @@
+name: Mukurtu Search
+type: module
+description: Handles search indexes.
+package: Mukurtu
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - mukurtu_core
+  - mukurtu_protocol
+  - search_api
+  - node
+  - media
+  - paragraphs

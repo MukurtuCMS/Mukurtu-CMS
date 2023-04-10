@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Mukurtu Search module.
+ */
+
+function mukurtu_search_install() {
+  mukurtu_search_rebuild_index();
+}

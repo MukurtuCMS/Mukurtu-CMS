@@ -7,11 +7,15 @@ package: 'Mukurtu'
 libraries:
   - mukurtu_browse/mukurtu-leaflet-preview
 dependencies:
+  - node
+  - media
+  - paragraphs
   - leaflet_views
   - mukurtu_core
   - mukurtu_protocol
   - mukurtu_digital_heritage
   - mukurtu_dictionary
+  - mukurtu_search
   - search_api
   - search_api_db
 

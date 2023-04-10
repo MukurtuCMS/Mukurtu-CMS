@@ -7,4 +7,6 @@ function mukurtu_browse_install() {
   foreach (node_type_get_names() as $bundle => $label) {
     mukurtu_browse_create_computed_fields('node', $bundle);
   }
+
+  mukurtu_search_rebuild_index();
 }
