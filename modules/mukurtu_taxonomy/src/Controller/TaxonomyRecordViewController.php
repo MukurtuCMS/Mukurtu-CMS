@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Plugin\PluginBase;
 
 class TaxonomyRecordViewController implements ContainerInjectionInterface {
 
@@ -77,19 +78,39 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
     }
 
     // Render the referenced entities.
+    // @see mukurtu_taxonomy_views_pre_view.
     $referencedContent = [
       '#type' => 'view',
       '#name' => 'mukurtu_taxonomy_references',
       '#display_id' => 'content_block',
       '#embed' => TRUE,
-      '#arguments' => [$taxonomy_term->uuid()],
     ];
+
+    // Facets.
+    // Load all facets configured to use our browse block as a datasource.
+    $facetEntities = \Drupal::entityTypeManager()
+      ->getStorage('facets_facet')
+      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_taxonomy_references__content_block']);
+
+    // Render the facet block for each of them.
+    $facets = [];
+    if ($facetEntities) {
+      $block_manager = \Drupal::service('plugin.manager.block');
+      foreach ($facetEntities as $facet_id => $facetEntity) {
+        $config = [];
+        $block_plugin = $block_manager->createInstance('facet_block' . PluginBase::DERIVATIVE_SEPARATOR . $facet_id, $config);
+        if ($block_plugin && $block_plugin->access(\Drupal::currentUser())) {
+            $facets[$facet_id] = $block_plugin->build();
+        }
+      }
+    }
 
     $build['records'] = [
       '#theme' => 'taxonomy_records',
       '#active' => 1,
       '#records' => $records,
       '#referenced_content' => $referencedContent,
+      '#facets' => $facets,
       '#attached' => [
         'library' => [
           'field_group/element.horizontal_tabs',

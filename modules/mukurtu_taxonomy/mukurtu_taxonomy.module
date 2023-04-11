@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
 
 /**
  * Implements hook_theme().
@@ -27,6 +28,7 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
         'active' => NULL,
         'records' => NULL,
         'referenced_content' => NULL,
+        'facets' => [],
       ],
     ],
   ];
@@ -94,18 +96,11 @@ function mukurtu_taxonomy_views_pre_view(ViewExecutable $view) {
   // This drives the handling of the taxonomy term page view.
   // It injects the UUID of the term into the fulltext SAPI search.
   if ($view->id() == 'mukurtu_taxonomy_references') {
-    if ($term_uuid = $view->args[0] ?? NULL) {
+    if ($term = \Drupal::routeMatch()->getParameter('taxonomy_term')) {
       $filters = $view->display_handler->getOption('filters');
-
-      // Get the user's search terms.
-      $user_search = $filters['search_api_fulltext']['value'];
-
-      // Blank out the actual filter because we'll add it to the view arg.
-      $filters['search_api_fulltext']['value'] = '';
+      $filters['search_api_fulltext']['value'] = $term->uuid();
       $view->display_handler->overrideOption('filters', $filters);
-
-      // Search for the term and whatever the user searched for.
-      $view->args[0] = "$term_uuid $user_search";
     }
   }
 }
+

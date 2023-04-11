@@ -196,41 +196,7 @@ display:
             label: 'Date Added (Oldest)'
             field_identifier: node_created_asc
           exposed: true
-      arguments:
-        search_api_fulltext:
-          id: search_api_fulltext
-          table: search_api_index_mukurtu_browse_auto_index
-          field: search_api_fulltext
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api_fulltext
-          default_action: empty
-          exception:
-            value: all
-            title_enable: false
-            title: All
-          title_enable: false
-          title: ''
-          default_argument_type: fixed
-          default_argument_options:
-            argument: ''
-          default_argument_skip_url: false
-          summary_options: {  }
-          summary:
-            sort_order: asc
-            number_of_records: 0
-            format: default_summary
-          specify_validation: false
-          validate:
-            type: none
-            fail: 'not found'
-          validate_options: {  }
-          break_phrase: true
-          not: false
-          parse_mode: terms
-          conjunction: AND
-          fields: {  }
+      arguments: {  }
       filters:
         entity_type:
           id: entity_type
@@ -282,12 +248,12 @@ display:
           field: search_api_fulltext
           relationship: none
           group_type: group
-          admin_label: ''
+          admin_label: 'Taxonomy UUID'
           plugin_id: search_api_fulltext
           operator: and
           value: ''
           group: 1
-          exposed: true
+          exposed: false
           expose:
             operator_id: search_api_fulltext_op
             label: Search
@@ -307,6 +273,52 @@ display:
             expose_fields: false
             placeholder: ''
             searched_fields_id: search_api_fulltext_searched_fields
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          parse_mode: phrase
+          min_length: null
+          fields: {  }
+        search_api_fulltext_1:
+          id: search_api_fulltext_1
+          table: search_api_index_mukurtu_browse_auto_index
+          field: search_api_fulltext
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_fulltext
+          operator: or
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: search_api_fulltext_1_op
+            label: Search
+            description: ''
+            use_operator: false
+            operator: search_api_fulltext_1_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: search_api_fulltext_user_search
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              mukurtu_administrator: '0'
+            expose_fields: false
+            placeholder: ''
+            searched_fields_id: search_api_fulltext_1_searched_fields
           is_grouped: false
           group_info:
             label: ''
@@ -359,7 +371,7 @@ display:
           preserve_facet_query_args: false
           query_tags: {  }
       relationships: {  }
-      use_ajax: true
+      use_ajax: false
       header: {  }
       footer: {  }
       display_extenders: {  }

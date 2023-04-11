@@ -27,6 +27,13 @@
   </div>
 </div>
 {% endif %}
+<div class="browse-facets">
+  {% if facets %}
+    {% for facet in facets %}
+      {{ facet }}
+    {% endfor %}
+  {% endif %}
+</div>
 {% if referenced_content is not empty %}
   <h2>{{ 'Referenced Content'|t }}</h2>
   <div class="referenced-content">
