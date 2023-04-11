@@ -64,6 +64,19 @@ class FieldAvailableForIndexing extends Event {
       $field->setPropertyPath($property_path);
       $field->setLabel($label);
       $this->index->addField($field);
+
+      // Make text ignore case by default. We want strings to be excluded.
+      if ($type === 'text') {
+        $processors = $this->index->getProcessors();
+        if ($processors && isset($processors['ignorecase'])) {
+          $ignorecaseConfig = $processors['ignorecase']->getConfiguration();
+          if (isset($ignorecaseConfig['fields']) && !in_array($id, $ignorecaseConfig['fields'])) {
+            $ignorecaseConfig['fields'][] = $id;
+            $processors['ignorecase']->setConfiguration($ignorecaseConfig);
+            $this->index->setProcessors($processors);
+          }
+        }
+      }
       $this->index->save();
     }
   }
