@@ -59,6 +59,11 @@ class BaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
     if ($field_name == 'field_keywords' && $event->field_definition->getType() == 'entity_reference') {
       $event->indexField($field_id . "__name", 'field_keywords:entity:name', $label, 'string');
     }
+
+    // Category.
+    if ($field_name == 'field_category' && $event->field_definition->getType() == 'entity_reference') {
+      $event->indexField($field_id . "__name", 'field_category:entity:name', $label, 'string');
+    }
   }
 
   /**
