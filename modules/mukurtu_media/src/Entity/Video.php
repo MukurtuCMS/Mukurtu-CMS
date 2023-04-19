@@ -8,6 +8,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Defines the Video media entity bundle class.
@@ -141,5 +142,15 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
       ->setDisplayConfigurable('form', TRUE);
 
     return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage)
+  {
+    // Set the 'thumbnail' field to our generated thumbnail.
+    $this->thumbnail->target_id = $this->get('field_thumbnail')->getValue()[0]['target_id'];
+    parent::preSave($storage);
   }
 }

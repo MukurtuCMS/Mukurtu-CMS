@@ -200,6 +200,10 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
         }
       }
     }
+
+    // Set the 'thumbnail' field to our generated thumbnail.
+    $this->thumbnail->target_id = $this->get('field_thumbnail')->getValue()[0]['target_id'];
+    parent::preSave($storage);
   }
 
 }
