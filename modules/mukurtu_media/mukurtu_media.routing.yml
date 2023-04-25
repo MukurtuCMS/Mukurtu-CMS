@@ -5,3 +5,4 @@ mukurtu_media.thumbnail_settings_form:
     _form: 'Drupal\mukurtu_media\Form\ThumbnailSettingsForm'
   requirements:
     _permission: 'administer mukurtu_media configuration'
+

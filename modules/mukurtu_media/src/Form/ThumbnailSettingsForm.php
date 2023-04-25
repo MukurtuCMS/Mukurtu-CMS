@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_media\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\Entity\File;
 
 /**
  * Configure default thumbnail settings for this site.
@@ -45,9 +46,9 @@ class ThumbnailSettingsForm extends ConfigFormBase
         '#type' => 'managed_file',
         '#title' => $this->t("{$value['label']} default thumbnail"),
         '#description' => $this->t("Manage default thumbnail for {$value['label']} media items."),
-        '#upload_location' => 'private://',
+        '#upload_location' => $this->t("private://"),
         '#upload_validators' => [
-          'file_validate_extensions' => ['jpg, jpeg, png, gif'],
+          'file_validate_extensions' => ['png gif jpg jpeg'],
         ],
         '#default_value' => $config->get("{$key}_default_thumbnail"),
       ];
@@ -60,13 +61,16 @@ class ThumbnailSettingsForm extends ConfigFormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-    dpm($form);
     $config = $this->config('mukurtu_thumbnail.settings');
     $mediaBundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
-    // TODO
     foreach ($mediaBundleInfo as $key => $value) {
-      dpm($form_state->getValue("{$key}_default_thumbnail"));
-      $config->set("{$key}_default_thumbnail", $form_state->getValue("{$key}_default_thumbnail"));
+      $formFile = $form_state->getValue("{$key}_default_thumbnail", 0);
+      if (isset($formFile[0]) && !empty($formFile[0])) {
+        $file = File::load($formFile[0]);
+        $file->setPermanent();
+        $file->save();
+      }
+      $config->set("{$key}_default_thumbnail", $formFile);
     }
     $config->save();
     parent::submitForm($form, $form_state);

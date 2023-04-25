@@ -10,11 +10,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\file\Entity\File;
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Implements hook_entity_bundle_field_info_alter().
@@ -59,7 +56,7 @@ function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInter
   $form['field_media_document']['widget'][0]['#process'][] = 'mukurtu_media_refresh_thumb_process';
 
   // Prepend a process callback for the thumbnail field to add our default thumbnail logic.
-  array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'processThumb');
+  array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
 }
 
 /**
@@ -81,7 +78,7 @@ function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterfac
   $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_thumb_process';
 
   // Prepend a process callback for the thumbnail field to add our default thumbnail logic.
-  array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'processThumb');
+  array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
 }
 
 /**
@@ -92,7 +89,7 @@ function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterfac
  * thumbnail ReplaceCommand with the output of uploadAjaxCallback, but I
  * couldn't see one the first time around.
  */
-function mukurtu_media_uploadAjaxCallback(array &$form, FormStateInterface $form_state, Request $request) {
+function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $form_state, Request $request) {
   /** @var \Drupal\Core\Render\RendererInterface $renderer */
   $renderer = \Drupal::service('renderer');
   $response = new AjaxResponse();
@@ -127,7 +124,7 @@ function mukurtu_media_uploadAjaxCallback(array &$form, FormStateInterface $form
  * Process callback for the video file upload to attach our AJAX callback.
  */
 function mukurtu_media_refresh_thumb_process(&$element, FormStateInterface $form_state, &$complete_form) {
-  $element['upload_button']['#ajax']['callback'] = 'mukurtu_media_uploadAjaxCallback';
+  $element['upload_button']['#ajax']['callback'] = 'mukurtu_media_upload_ajax_callback';
   return $element;
 }
 
@@ -135,147 +132,14 @@ function mukurtu_media_refresh_thumb_process(&$element, FormStateInterface $form
  * Process callback for the thumbnail field to generate a thumbnail from the
  * media file.
  */
-function processThumb(&$element, FormStateInterface $form_state, &$complete_form)
+function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, &$complete_form)
 {
-  if (str_contains($complete_form['#form_id'], 'video')) {
-    $videoFid = $form_state->getValue('field_media_video_file')[0]["fids"][0] ?? NULL;
-    if ($videoFid != NULL)  {
-      $thumbFid = extractVideoThumbnail($videoFid);
-      // Set the new thumbnail fid.
-      $element['#value']['fids'] = [$thumbFid];
+  $entity = $form_state->getformObject()->getEntity();
+  if (method_exists($entity, 'generateThumbnail')) {
+    $fid = $entity->generateThumbnail($element, $form_state, $complete_form);
+    if ($fid != NULL) {
+      $element['#value']['fids'] = [$fid];
     }
   }
-  elseif (str_contains($complete_form['#form_id'], 'document')) {
-    $documentId = $form_state->getValue('field_media_document')[0]["fids"][0] ?? NULL;
-    if ($documentId != NULL) {
-      $thumbFid = extractDocumentThumbnail($documentId);
-      // Set the new thumbnail fid.
-      if ($thumbFid != NULL) {
-        $element['#value']['fids'] = [$thumbFid];
-      }
-    }
-  }
-
   return $element;
-}
-
-function extractVideoThumbnail($fid) {
-  $fileSystem = \Drupal::service('file_system');
-  // Load the file with id $fid.
-  $file_storage = \Drupal::entityTypeManager()->getStorage('file');
-  $videoFile = $file_storage->load($fid);
-
-  // Get the video uri.
-  $uri = $videoFile->getFileUri();
-  $mediaRealPath = $fileSystem->realpath($uri);
-  $filename = $videoFile->getFilename();
-
-  $videoNameNoExt = substr($filename, 0, strrpos($filename, "."));
-  $thumbnailName = $videoNameNoExt . "_thumbnail.png";
-
-  // Verify ffmpeg is installed.
-  $resultCode = -1;
-  $output = [];
-  $cmd = "ffmpeg -version";
-  $escapedCmd = escapeshellcmd($cmd);
-  exec($escapedCmd, $output, $resultCode);
-  if ($resultCode == 127) {
-    return;
-  }
-
-  $tmpDir = $fileSystem->getTempDirectory();
-  $tempThumbnailDest = $tmpDir . "/{$thumbnailName}";
-
-  $resultCode = -1;
-  $output = [];
-  // Run ffmpeg with these parameters, downloading into /tmp.
-  $cmd = "ffmpeg -ss 00:00:00 -i '{$mediaRealPath}' -frames:v 1 '{$tempThumbnailDest}'";
-  $escapedCmd = escapeshellcmd($cmd);
-  exec($cmd, $output, $resultCode);
-  if ($resultCode == 127) {
-    return;
-  }
-
-  $targetDir = rtrim(str_replace($filename, "", $uri), '/');
-  moveThumbnailToDirectory($targetDir, $tempThumbnailDest);
-
-  // Create a File entity for the new thumbnail, passing the thumbnail info.
-  $thumbnailFile = File::create([
-    'filename' => $thumbnailName,
-    'uri' => $targetDir . '/' . $thumbnailName,
-    'uid' => 1,
-  ]);
-  $thumbnailFile->save();
-
-  // Return the new File's id.
-  return $thumbnailFile->id();
-}
-
-function moveThumbnailToDirectory($targetDir, $tempThumbLocation) {
-  // Use Drupal file ops to move the thumbnail file to private://.
-  $fileSystem = \Drupal::service('file_system');
-  $fileSystem->prepareDirectory($targetDir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
-  $destination = $targetDir . '/' . basename($tempThumbLocation);
-  $fileSystem->move($tempThumbLocation, $destination, FileSystemInterface::EXISTS_REPLACE);
-}
-
-function extractDocumentThumbnail($fid) {
-  $fileSystem = \Drupal::service('file_system');
-
-  // Load the file with id $fid.
-  $file_storage = \Drupal::entityTypeManager()->getStorage('file');
-  $docFile = $file_storage->load($fid);
-  $docName = $docFile->getFilename();
-
-  // Only attempt to extract the thumbnail if the document is a pdf.
-  $extension = substr($docName, -3);
-  if ($extension != 'pdf') {
-    return null;
-  }
-
-  // Get the video uri.
-  $uri = $docFile->getFileUri();
-
-  $docRealPath = $fileSystem->realpath($uri);
-  $docNameNoExtension = substr($docName, 0, strrpos($docName, "."));
-  $thumbnailName = $docNameNoExtension . '_thumbnail';
-
-  $tmpDir = $fileSystem->getTempDirectory();
-  $tempThumbnailDest = $tmpDir . "/{$thumbnailName}";
-
-  $resultCode = -1;
-  $output = [];
-
-  // Verify pdftoppm installed.
-  $cmd = "pdftoppm --help";
-  $escapedCmd = escapeshellcmd($cmd);
-  exec($escapedCmd, $output, $resultCode);
-  if ($resultCode == 127) {
-    return;
-  }
-
-  // Use pdftoppm to download the first page of the document as a png.
-  $cmd = "pdftoppm -singlefile -png '{$docRealPath}' '{$tempThumbnailDest}'";
-  $escapedCmd = escapeshellcmd($cmd);
-  exec($escapedCmd, $output, $resultCode);
-  if ($resultCode == 127) {
-    return;
-  }
-
-  $thumbnailName .= '.png';
-  $tempThumbnailDest .= '.png';
-  $targetDir = rtrim(str_replace($docName, "", $uri), '/');
-
-  moveThumbnailToDirectory($targetDir, $tempThumbnailDest);
-
-  // Create a File entity for the new thumbnail, passing the thumbnail info.
-  $thumbnailFile = File::create([
-    'filename' => $thumbnailName,
-    'uri' => $targetDir . '/' . $thumbnailName,
-    'uid' => 1,
-  ]);
-  $thumbnailFile->save();
-
-  // Return the new File's id.
-  return $thumbnailFile->id();
 }
