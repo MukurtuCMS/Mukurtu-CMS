@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: export_content
+label: 'Export Content'
+bundles: {  }
+entity_type: node
+global: false
+flag_short: 'Add to export list'
+flag_long: 'Add this item to the export list'
+flag_message: 'Added to export list'
+unflag_short: 'Remove from export list'
+unflag_long: 'Remove the item from the export list'
+unflag_message: 'Removed from export list'
+unflag_denied_text: ''
+weight: 0
+flag_type: 'entity:node'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links:
+    browse: browse
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  extra_permissions:
+    owner: '0'
+linkTypeConfig: {  }

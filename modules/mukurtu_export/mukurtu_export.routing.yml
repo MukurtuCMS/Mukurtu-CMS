@@ -1,0 +1,7 @@
+mukurtu_export.export_item_and_format_selection:
+  path: '/dashboard/export'
+  defaults:
+    _title: 'Export'
+    _form: 'Drupal\mukurtu_export\Form\ExportItemAndFormatSelection'
+  requirements:
+    _permission: 'access mukurtu export'
