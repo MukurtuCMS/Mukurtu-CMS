@@ -42,6 +42,12 @@ class BaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
 
     // Index text fields as full text.
     if (in_array($event->field_definition->getType(), ['string', 'string_long', 'text', 'text_long', 'text_with_summary'])) {
+      // @todo Disabling this for now. For some common DB configs, running into "1118 Row size too large" issues.
+      //$event->indexField($field_id, $field_name, $label);
+    }
+
+    // Cherry-picking title isn't ideal, but is our temporary workaround for the row size too large issues.
+    if ($field_name == 'title') {
       $event->indexField($field_id, $field_name, $label);
     }
 
