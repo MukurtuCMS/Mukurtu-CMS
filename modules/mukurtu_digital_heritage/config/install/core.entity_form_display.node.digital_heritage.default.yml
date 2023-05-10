@@ -475,14 +475,6 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_tbd:
-    type: string_textfield
-    weight: 24
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
   field_traditional_knowledge:
     type: text_textarea
     weight: 21
