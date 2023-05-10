@@ -112,8 +112,22 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_rights'] = BaseFieldDefinition::create('string_long')
-      ->setLabel('Rights')
+      ->setLabel('Rights Statement')
       ->setDescription(t('A statement about who holds the legal rights to the Digital Heritage Item, Media Asset, or presented knowledge. Consider adding contact information if the rights holder should be contacted for permission to use, reproduce, circulate, reference, or cite the Digital Heritage Item.'))
+      ->setSettings([
+        'max_length' => 255,
+      ])
+      ->setDefaultValue('')
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_indigenous_knowledge_keepers_citation'] = BaseFieldDefinition::create('string')
+      ->setLabel('Indigenous Elders and Knowledge Keepers')
+      ->setDescription(t('A field to cite indigenous elders and knowledge keepers.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -215,7 +229,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_creative_commons'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Licensing Options'))
+      ->setLabel(t('Creative Commons Licenses'))
       ->setDescription(t('Creative Commons licenses are an extension of Copyright that allow a copyright holder to specify the ways in which their work may be altered, shared, and used. For more information on Creative Commons licensing, visit <a href="http://creativecommons.org">creativecommons.org</a>'))
       ->setCardinality(1)
       ->setRequired(FALSE)
