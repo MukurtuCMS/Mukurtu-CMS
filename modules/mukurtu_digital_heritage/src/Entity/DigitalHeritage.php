@@ -125,7 +125,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_indigenous_knowledge_keepers_citation'] = BaseFieldDefinition::create('string')
+    $definitions['field_indigenous_knowledge'] = BaseFieldDefinition::create('string')
       ->setLabel('Indigenous Elders and Knowledge Keepers')
       ->setDescription(t('A field to cite indigenous elders and knowledge keepers.'))
       ->setSettings([

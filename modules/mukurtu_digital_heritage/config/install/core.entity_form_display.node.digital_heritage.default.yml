@@ -146,7 +146,7 @@ third_party_settings:
         required_fields: true
     group_rights:
       children:
-        - field_indigenous_knowledge_keepers_citation
+        - field_indigenous_knowledge
         - field_rights
       label: Rights
       region: content
@@ -344,7 +344,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_indigenous_knowledge_keepers_citation:
+  field_indigenous_knowledge:
     type: string_textfield
     weight: 22
     region: content
