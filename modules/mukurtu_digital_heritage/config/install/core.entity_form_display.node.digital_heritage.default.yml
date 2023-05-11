@@ -98,10 +98,10 @@ third_party_settings:
         - field_identifier
         - field_language
         - field_source
+        - field_publisher
         - field_external_links
         - field_subject
         - field_transcription
-        - field_publisher
         - field_people
         - field_coverage
         - field_coverage_description
@@ -135,7 +135,7 @@ third_party_settings:
       label: 'Labels and Notices'
       region: content
       parent_name: group_rights_and_permissions
-      weight: 26
+      weight: 20
       format_type: tab
       format_settings:
         classes: ''
@@ -146,12 +146,12 @@ third_party_settings:
         required_fields: true
     group_rights:
       children:
-        - field_rights
         - field_indigenous_knowledge_keepers_citation
+        - field_rights
       label: Rights
       region: content
       parent_name: group_rights_and_permissions
-      weight: 27
+      weight: 21
       format_type: tab
       format_settings:
         classes: ''
@@ -166,7 +166,7 @@ third_party_settings:
       label: 'Licensing Options'
       region: content
       parent_name: group_rights_and_permissions
-      weight: 28
+      weight: 22
       format_type: tab
       format_settings:
         classes: ''
@@ -274,7 +274,7 @@ content:
     third_party_settings: {  }
   field_creative_commons:
     type: options_select
-    weight: 29
+    weight: 23
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -320,7 +320,7 @@ content:
     third_party_settings: {  }
   field_external_links:
     type: link_default
-    weight: 26
+    weight: 27
     region: content
     settings:
       placeholder_url: ''
@@ -346,7 +346,7 @@ content:
     third_party_settings: {  }
   field_indigenous_knowledge_keepers_citation:
     type: string_textfield
-    weight: 26
+    weight: 22
     region: content
     settings:
       size: 60
@@ -418,7 +418,7 @@ content:
     third_party_settings: {  }
   field_publisher:
     type: entity_reference_autocomplete
-    weight: 29
+    weight: 26
     region: content
     settings:
       match_operator: CONTAINS
@@ -443,7 +443,7 @@ content:
     third_party_settings: {  }
   field_rights:
     type: string_textarea
-    weight: 25
+    weight: 23
     region: content
     settings:
       rows: 5
@@ -459,7 +459,7 @@ content:
     third_party_settings: {  }
   field_subject:
     type: entity_reference_autocomplete
-    weight: 27
+    weight: 28
     region: content
     settings:
       match_operator: CONTAINS
@@ -485,7 +485,7 @@ content:
     third_party_settings: {  }
   field_transcription:
     type: string_textarea
-    weight: 28
+    weight: 29
     region: content
     settings:
       rows: 5
