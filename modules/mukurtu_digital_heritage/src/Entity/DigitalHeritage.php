@@ -238,6 +238,16 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_rights_statement_org'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Rights Statement from rightsstatement.org'))
+      ->setDescription(t('For more information, visit <a href="https://rightsstatements.org/en/">rightsstatement.org</a>'))
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Location'))
       ->setDescription(t(''))

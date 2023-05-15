@@ -1,0 +1,56 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_rights_statement_org
+field_name: field_rights_statement_org
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: 'http://rightsstatements.org/vocab/InC/1.0/'
+      label: 'In Copyright'
+    -
+      value: 'http://rightsstatements.org/vocab/InC-OW-EU/1.0/'
+      label: 'In Copyright - EU Orphan Work'
+    -
+      value: 'http://rightsstatements.org/vocab/InC-EDU/1.0/'
+      label: 'In Copyright - Educational Use Permitted'
+    -
+      value: 'http://rightsstatements.org/vocab/InC-NC/1.0/'
+      label: 'In Copyright - Non-Commercial Use Permitted'
+    -
+      value: 'http://rightsstatements.org/vocab/InC-RUU/1.0/'
+      label: 'In Copyright - Rights-Holder(s) Unlocatable or Unidentifiable'
+    -
+      value: 'http://rightsstatements.org/vocab/NoC-CR/1.0/'
+      label: 'No Copyright - Contractual Restrictions'
+    -
+      value: 'http://rightsstatements.org/vocab/NoC-NC/1.0/'
+      label: 'No Copyright - Non-Commercial Use Only'
+    -
+      value: 'http://rightsstatements.org/vocab/NoC-OKLR/1.0/'
+      label: 'No Copyright - Other Known Legal Restrictions'
+    -
+      value: 'http://rightsstatements.org/vocab/NoC-US/1.0/'
+      label: 'No Copyright - United States'
+    -
+      value: 'http://rightsstatements.org/vocab/CNE/1.0/'
+      label: 'Copyright Not Evaluated'
+    -
+      value: 'http://rightsstatements.org/vocab/UND/1.0/'
+      label: 'Copyright Undetermined'
+    -
+      value: 'http://rightsstatements.org/vocab/NKC/1.0/'
+      label: 'No Known Copyright'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

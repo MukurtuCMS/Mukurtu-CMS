@@ -148,6 +148,7 @@ third_party_settings:
       children:
         - field_indigenous_knowledge
         - field_rights
+        - field_rights_statement_org
       label: Rights
       region: content
       parent_name: group_rights_and_permissions
@@ -166,7 +167,7 @@ third_party_settings:
       label: 'Licensing Options'
       region: content
       parent_name: group_rights_and_permissions
-      weight: 22
+      weight: 23
       format_type: tab
       format_settings:
         classes: ''
@@ -448,6 +449,12 @@ content:
     settings:
       rows: 5
       placeholder: ''
+    third_party_settings: {  }
+  field_rights_statement_org:
+    type: options_select
+    weight: 24
+    region: content
+    settings: {  }
     third_party_settings: {  }
   field_source:
     type: string_textfield
