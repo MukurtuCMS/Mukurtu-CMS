@@ -31,19 +31,31 @@ class ExportItemAndFormatSelection extends ExportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    /* $query = $this->entityTypeManager->getStorage('flagging')->getQuery();
-    $result = $query->condition('flag_id', 'export_content')
-      ->condition('entity_type', 'node')
-      ->condition('uid', $this->currentUser()->id())
-      ->execute(); */
-    //dpm($result);
 
-    $form['test'] = [
+    $form['export_list']['content'] = [
       '#type' => 'view',
-      '#name' => 'mukurtu_export_cart',
-      '#display_id' => 'node',
+      '#name' => 'export_list_content',
+      '#display_id' => 'export_content_list_block',
       '#embed' => TRUE,
     ];
+
+    $form['export_list']['media'] = [
+      '#type' => 'view',
+      '#name' => 'export_list_media',
+      '#display_id' => 'export_media_list_block',
+      '#embed' => TRUE,
+    ];
+
+    $form['actions'] = [
+      '#type' => 'actions',
+    ];
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Select Export Format: Not Implemented Yet'),
+      '#button_type' => 'primary',
+      //'#submit' => ['::submitBack'],
+    ];
+
     return $form;
   }
 
