@@ -42,7 +42,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
       if (in_array($key, $this->excludedMediaBundles)) {
         continue;
       }
-      $form["{$key}_default_thumbnail"] = [
+      $form["default_thumbnail"][$key] = [
         '#type' => 'managed_file',
         '#title' => $this->t("{$value['label']} default thumbnail"),
         '#description' => $this->t("Manage default thumbnail for {$value['label']} media items."),
@@ -50,7 +50,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
         '#upload_validators' => [
           'file_validate_extensions' => ['png gif jpg jpeg'],
         ],
-        '#default_value' => $config->get("{$key}_default_thumbnail"),
+        '#default_value' => $config->get($key) ?? NULL,
       ];
     }
     return parent::buildForm($form, $form_state);
@@ -64,13 +64,13 @@ class ThumbnailSettingsForm extends ConfigFormBase
     $config = $this->config('mukurtu_thumbnail.settings');
     $mediaBundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
     foreach ($mediaBundleInfo as $key => $value) {
-      $formFile = $form_state->getValue("{$key}_default_thumbnail", 0);
+      $formFile = $form_state->getValue($key);
       if (isset($formFile[0]) && !empty($formFile[0])) {
         $file = File::load($formFile[0]);
         $file->setPermanent();
         $file->save();
       }
-      $config->set("{$key}_default_thumbnail", $formFile);
+      $config->set($key, $formFile);
     }
     $config->save();
     parent::submitForm($form, $form_state);

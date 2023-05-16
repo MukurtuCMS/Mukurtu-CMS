@@ -21,26 +21,36 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
 {
   use CulturalProtocolControlledTrait;
 
-  protected $fileSystem;
-
-  protected $videoDefaultThumbnail;
-
-  protected function setFileSystem() {
-    if (!$this->fileSystem) {
-      $this->fileSystem = \Drupal::service('file_system');
-    }
+  /**
+   * {@inheritdoc}
+   */
+  function getDefaultThumbnail() {
+    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    $defaultVideoThumbnail = $config->get('video_default_thumbnail')[0] ?? NULL;
+    return $defaultVideoThumbnail;
   }
 
-  protected function getDefaultThumbnail() {
-    // Check the config if the user has set a default thumbnail for video.
-    // Will remain null if there is no default thumbnail set.
-    if (!$this->videoDefaultThumbnail) {
-      $config = \Drupal::config('mukurtu_thumbnail.settings');
-      if (isset($config->get('video_default_thumbnail')[0])) {
-        $this->videoDefaultThumbnail = $config->get('video_default_thumbnail')[0];
-      }
+  /**
+   * {@inheritdoc}
+   */
+  public function hasUploadedMediaFile() {
+    $fieldMediaValue = $this->get('field_media_video_file')->getValue()[0]['fids'][0] ?? NULL;
+    if ($fieldMediaValue) {
+      return TRUE;
     }
-    return $this->videoDefaultThumbnail;
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMediaFilename() {
+    $fid = $this->get('field_media_video_file')->getValue()[0]['fids'][0] ?? NULL;
+    if (!$fid) {
+      return NULL;
+    }
+    $file = \Drupal::entityTypeManager()->getStorage('file')->load($fid);
+    return $file->getFilename();
   }
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
@@ -176,8 +186,9 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
   public function preSave(EntityStorageInterface $storage)
   {
     // Set the 'thumbnail' field to our generated thumbnail.
-    if (isset($this->get('field_thumbnail')->getValue()[0]['target_id'])) {
-      $this->thumbnail->target_id = $this->get('field_thumbnail')->getValue()[0]['target_id'];
+    $defaultThumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if ($defaultThumb) {
+      $this->thumbnail->target_id = $defaultThumb;
     }
     parent::preSave($storage);
   }
@@ -187,20 +198,18 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
    */
   function generateThumbnail(&$element, FormStateInterface $form_state, &$complete_form)
   {
-    if (isset($form_state->getValue('field_media_video_file')[0]["fids"][0])) {
-      $videoFid = $form_state->getValue('field_media_video_file')[0]["fids"][0];
+    $videoFid = $form_state->getValue('field_media_video_file')[0]["fids"][0] ?? NULL;
+    if (!$videoFid) {
+      return NULL;
     }
-    else {
-      return null;
-    }
-    $this->setFileSystem();
+    $fileSystem = \Drupal::service('file_system');
 
     // Load the file.
     $videoFile = \Drupal::entityTypeManager()->getStorage('file')->load($videoFid);
 
     // Get the video's real path.
     $uri = $videoFile->getFileUri();
-    $mediaRealPath = $this->fileSystem->realpath($uri);
+    $mediaRealPath = $fileSystem->realpath($uri);
 
     // Compute the thumbnail name.
     $filename = $videoFile->getFilename();
@@ -214,10 +223,10 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
     $escapedCmd = escapeshellcmd($cmd);
     exec($escapedCmd, $output, $resultCode);
     if ($resultCode == 127) {
-      return null;
+      return NULL;
     }
     // Compute the thumbnail's temporary download location.
-    $tmpDir = $this->fileSystem->getTempDirectory();
+    $tmpDir = $fileSystem->getTempDirectory();
     $tempThumbnailDest = $tmpDir . "/{$thumbnailName}";
 
     // Use ffmpeg to extract the first frame of the video as a screenshot,
@@ -228,33 +237,27 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
     $escapedCmd = escapeshellcmd($cmd);
     exec($cmd, $output, $resultCode);
     if ($resultCode == 127) {
-      return null;
+      return NULL;
     }
     // Compute the permanent thumbnail location. It will be the directory of the
     // video.
     $targetDir = rtrim(str_replace($filename, "", $uri), '/');
 
     // Move the thumbnail to its permanent location in private://.
-    $this->fileSystem->prepareDirectory($targetDir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
+    $fileSystem->prepareDirectory($targetDir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
     $destination = $targetDir . '/' . basename($tempThumbnailDest);
-    $this->fileSystem->move($tempThumbnailDest, $destination, FileSystemInterface::EXISTS_REPLACE);
+    $fileSystem->move($tempThumbnailDest, $destination, FileSystemInterface::EXISTS_REPLACE);
 
     // Create a File entity for the new thumbnail, passing the thumbnail info.
+    $current_user = \Drupal::currentUser();
+    $uid = $current_user->id();
     $thumbnailFile = File::create([
       'filename' => $thumbnailName,
       'uri' => $targetDir . '/' . $thumbnailName,
-      'uid' => 1,
+      'uid' => $uid,
     ]);
     $thumbnailFile->save();
 
-    if ($thumbnailFile->id() == NULL) {
-      $defaultThumb = $this->getDefaultThumbnail();
-      // If the user has not set a default thumbnail for video, return null.
-      return $defaultThumb ? $defaultThumb : null;
-    }
-    else {
-      // Return the new File's id.
-      return $thumbnailFile->id();
-    }
+    return $thumbnailFile->id() ?? NULL;
   }
 }

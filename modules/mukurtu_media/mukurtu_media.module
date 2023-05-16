@@ -5,11 +5,11 @@ use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Image;
 use Drupal\mukurtu_media\Entity\RemoteVideo;
 use Drupal\mukurtu_media\Entity\Video;
-use Drupal\mukurtu_media\Entity\SoundcloudMedia;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Render\Element;
 use Drupal\Component\Utility\NestedArray;
 
@@ -32,9 +32,6 @@ function mukurtu_media_entity_bundle_info_alter(array &$bundles): void
   }
   if (isset($bundles['media']['video'])) {
     $bundles['media']['video']['class'] = Video::class;
-  }
-  if (isset($bundles['media']['soundcloud'])) {
-    $bundles['media']['soundcloud']['class'] = SoundcloudMedia::class;
   }
 }
 
@@ -82,7 +79,7 @@ function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterfac
 }
 
 /**
- * AJAX callback for video upload with our custom thumbnail field refresh.
+ * AJAX callback for media upload with our custom thumbnail field refresh.
  *
  * Note: This is almost a 100% duplication of ManagedFile::uploadAjaxCallback.
  * If it changes, we'll need to change this. Maybe there's a way to merge our
@@ -94,9 +91,21 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
   $renderer = \Drupal::service('renderer');
   $response = new AjaxResponse();
 
-  // Mukurtu specific: Rebuild the thumbnail field to reflect any thumbnails we might have generated.
-  // @todo Replace static #ajax-wrapper--2 with whatever form element actually contains it.
-  $response->addCommand(new ReplaceCommand("#ajax-wrapper--2 > div", $form['field_thumbnail']['widget']));
+  // Only run the callback if there is an uploaded media file.
+  $entity = $form_state->getformObject()->getEntity();
+  if (method_exists($entity, 'hasUploadedMediaFile') && !$entity->hasUploadedMediaFile()) {
+    return $response;
+  }
+
+  // Autofill the name of the media item based on the filename.
+  if (method_exists($entity, 'getMediaFilename')) {
+    $filename = $entity->getMediaFilename();
+    $filenameNoExt = substr($filename, 0, strrpos($filename, "."));
+    $form['name']['widget'][0]['value']['#value'] = $filenameNoExt;
+    $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
+  }
+
+  $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
 
   $form_parents = explode('/', $request->query->get('element_parents'));
 
@@ -121,10 +130,51 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
 }
 
 /**
- * Process callback for the video file upload to attach our AJAX callback.
+ * AJAX callback for media remove.
+ *
+ * Note: This is almost a 100% duplication of ManagedFile::uploadAjaxCallback.
+ * If it changes, we'll need to change this. Maybe there's a way to merge our
+ * thumbnail ReplaceCommand with the output of uploadAjaxCallback, but I
+ * couldn't see one the first time around.
+ */
+function mukurtu_media_remove_ajax_callback(array &$form, FormStateInterface $form_state, Request $request) {
+  /** @var \Drupal\Core\Render\RendererInterface $renderer */
+  $renderer = \Drupal::service('renderer');
+  $response = new AjaxResponse();
+
+  // Clear the field name.
+  $form['name']['widget'][0]['value']['#value'] = NULL;
+  $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
+
+  $form_parents = explode('/', $request->query->get('element_parents'));
+
+  // Sanitize form parents before using them.
+  $form_parents = array_filter($form_parents, [Element::class, 'child']);
+
+  // Retrieve the element to be rendered.
+  $form = NestedArray::getValue($form, $form_parents);
+
+  // Add the special AJAX class if a new file was added.
+  $current_file_count = $form_state->get('file_upload_delta_initial');
+  if (isset($form['#file_upload_delta']) && $current_file_count < $form['#file_upload_delta']) {
+    $form[$current_file_count]['#attributes']['class'][] = 'ajax-new-content';
+  }
+
+  $status_messages = ['#type' => 'status_messages'];
+  $form['#prefix'] .= $renderer->renderRoot($status_messages);
+  $output = $renderer->renderRoot($form);
+  $response->setAttachments($form['#attached']);
+  $response->addCommand(new ReplaceCommand(NULL, $output));
+  return $response;
+}
+
+/**
+ * Process callback for the media file upload to attach our AJAX callback.
  */
 function mukurtu_media_refresh_thumb_process(&$element, FormStateInterface $form_state, &$complete_form) {
   $element['upload_button']['#ajax']['callback'] = 'mukurtu_media_upload_ajax_callback';
+  $element['remove_button']['#ajax']['callback'] = 'mukurtu_media_remove_ajax_callback';
+
   return $element;
 }
 
@@ -135,10 +185,24 @@ function mukurtu_media_refresh_thumb_process(&$element, FormStateInterface $form
 function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, &$complete_form)
 {
   $entity = $form_state->getformObject()->getEntity();
-  if (method_exists($entity, 'generateThumbnail')) {
-    $fid = $entity->generateThumbnail($element, $form_state, $complete_form);
-    if ($fid != NULL) {
-      $element['#value']['fids'] = [$fid];
+  if (method_exists($entity, 'hasUploadedMediaFile') && $entity->hasUploadedMediaFile()) {
+    // Only try thumbnail generation if there is an uploaded media file.
+    // Then, only proceed if no thumbnail exists.
+    $existingThumb = $complete_form['field_thumbnail']['widget'][0]['#value']['fids'] ?? NULL;
+    if (!$existingThumb) {
+      if (method_exists($entity, 'generateThumbnail')) {
+        $fid = $entity->generateThumbnail($element, $form_state, $complete_form);
+        if ($fid) {
+          $element['#value']['fids'] = [$fid];
+        }
+        // If thumbnail generation failed, try and set the default thumbnail.
+        elseif (method_exists($entity, 'getDefaultThumbnail')) {
+          $defaultThumb = $entity->getDefaultThumbnail();
+          if ($defaultThumb) {
+            $element['#value']['fids'] = [$defaultThumb];
+          }
+        }
+      }
     }
   }
   return $element;

@@ -46,7 +46,7 @@ content:
     third_party_settings: {  }
   field_media_video_file:
     type: file_generic
-    weight: 1
+    weight: 0
     region: content
     settings:
       progress_indicator: throbber
@@ -71,7 +71,7 @@ content:
     third_party_settings: {  }
   name:
     type: string_textfield
-    weight: 0
+    weight: 1
     region: content
     settings:
       size: 60
