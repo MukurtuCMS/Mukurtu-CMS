@@ -103,6 +103,9 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
     $filenameNoExt = substr($filename, 0, strrpos($filename, "."));
     $form['name']['widget'][0]['value']['#value'] = $filenameNoExt;
     $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
+
+    // Use the new name as the alt text for the thumbnail image.
+    $form["field_thumbnail"]["widget"][0]["alt"]["#value"] = $filenameNoExt;
   }
 
   $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
@@ -142,9 +145,14 @@ function mukurtu_media_remove_ajax_callback(array &$form, FormStateInterface $fo
   $renderer = \Drupal::service('renderer');
   $response = new AjaxResponse();
 
-  // Clear the field name.
-  $form['name']['widget'][0]['value']['#value'] = NULL;
+  // The file has been removed, clear the name field.
+  $form['name']['widget'][0]['value']['#value'] = '';
+
+  // Redraw the name widget.
   $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
+
+  // Redraw the thumbnail field widget. The thumbnail may have been altered in the managed file process handler.
+  $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div", $form['field_thumbnail']['widget']));
 
   $form_parents = explode('/', $request->query->get('element_parents'));
 
@@ -204,6 +212,9 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
         }
       }
     }
+  } else {
+    // Entity does not have a media file. Remove old thumbnail references.
+    $element['#value']['fids'] = [];
   }
   return $element;
 }
