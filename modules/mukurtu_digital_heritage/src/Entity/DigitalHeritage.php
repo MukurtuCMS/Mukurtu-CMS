@@ -111,8 +111,8 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_rights'] = BaseFieldDefinition::create('string_long')
-      ->setLabel('Rights Statement')
+    $definitions['field_rights_and_usage'] = BaseFieldDefinition::create('string_long')
+      ->setLabel('Rights and Usage')
       ->setDescription(t('A statement about who holds the legal rights to the Digital Heritage Item, Media Asset, or presented knowledge. Consider adding contact information if the rights holder should be contacted for permission to use, reproduce, circulate, reference, or cite the Digital Heritage Item.'))
       ->setSettings([
         'max_length' => 255,
@@ -125,11 +125,24 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_indigenous_knowledge'] = BaseFieldDefinition::create('string')
-      ->setLabel('Indigenous Elders and Knowledge Keepers')
-      ->setDescription(t('A field to cite indigenous elders and knowledge keepers.'))
+    $definitions['field_knowledge_keepers'] = BaseFieldDefinition::create('entity_reference_revisions')
+      ->setLabel('Citing Indigenous Elders and Knowledge Keepers')
+      ->setDescription(t('A field to cite Indigenous elders and Knowledge Keepers.'))
       ->setSettings([
-        'max_length' => 255,
+        'target_type' => 'paragraph',
+        'handler' => 'default:paragraph',
+        'handler_settings' => [
+          'negate' => FALSE,
+          'target_bundles' => [
+            'indigenous_knowledge_keepers' => 'indigenous_knowledge_keepers'
+          ],
+          'target_bundles_drag_drop' => [
+            'indigenous_knowledge_keepers' => [
+              'enabled' => TRUE,
+              'weight' => 6,
+            ],
+          ],
+        ]
       ])
       ->setDefaultValue('')
       ->setCardinality(1)
@@ -238,8 +251,8 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_rights_statement_org'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Rights Statement from rightsstatement.org'))
+    $definitions['field_rights_statements'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Rights Statements'))
       ->setDescription(t('For more information, visit <a href="https://rightsstatements.org/en/">rightsstatement.org</a>'))
       ->setSettings([
         'allowed_values' => [

@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\mukurtu_digital_heritage\Entity\DigitalHeritage;
+use Drupal\mukurtu_digital_heritage\Entity\IndigenousKnowledgeKeepers;
 
 /**
  * @file
@@ -13,5 +14,10 @@ use Drupal\mukurtu_digital_heritage\Entity\DigitalHeritage;
 function mukurtu_digital_heritage_entity_bundle_info_alter(array &$bundles) {
   if (isset($bundles['node']['digital_heritage'])) {
     $bundles['node']['digital_heritage']['class'] = DigitalHeritage::class;
+  }
+
+  // Indigenous Knowledge Keepers Paragraph bundle class.
+  if (isset($bundles['paragraph']['indigenous_knowledge_keepers'])) {
+    $bundles['paragraph']['indigenous_knowledge_keepers']['class'] = IndigenousKnowledgeKeepers::class;
   }
 }

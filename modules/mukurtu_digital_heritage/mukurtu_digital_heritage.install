@@ -16,6 +16,7 @@ function mukurtu_digital_heritage_install() {
 
   $types = [
     ['node', 'digital_heritage'],
+    ['paragraph', 'indigenous_knowledge_keepers'],
   ];
 
   foreach ($types as $type) {

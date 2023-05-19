@@ -15,6 +15,7 @@ dependencies:
     - mukurtu_core
     - mukurtu_protocol
     - original_date
+    - paragraphs
     - path
     - text
 third_party_settings:
@@ -146,9 +147,9 @@ third_party_settings:
         required_fields: true
     group_rights:
       children:
-        - field_indigenous_knowledge
-        - field_rights
-        - field_rights_statement_org
+        - field_knowledge_keepers
+        - field_rights_and_usage
+        - field_rights_statements
       label: Rights
       region: content
       parent_name: group_rights_and_permissions
@@ -353,6 +354,18 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_indigenous_knowledges:
+    type: entity_reference_paragraphs
+    weight: 0
+    region: content
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: open
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: ''
+    third_party_settings: {  }
   field_keywords:
     type: entity_reference_autocomplete
     weight: 23
@@ -362,6 +375,18 @@ content:
       match_limit: 10
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  field_knowledge_keepers:
+    type: entity_reference_paragraphs
+    weight: 0
+    region: content
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: open
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: ''
     third_party_settings: {  }
   field_language:
     type: entity_reference_autocomplete
@@ -450,9 +475,23 @@ content:
       rows: 5
       placeholder: ''
     third_party_settings: {  }
+  field_rights_and_usage:
+    type: string_textarea
+    weight: 1
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
   field_rights_statement_org:
     type: options_select
     weight: 24
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_rights_statements:
+    type: options_select
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
