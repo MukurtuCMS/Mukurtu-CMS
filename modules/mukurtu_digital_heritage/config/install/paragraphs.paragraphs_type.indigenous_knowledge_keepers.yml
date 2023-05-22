@@ -2,8 +2,8 @@ langcode: en
 status: true
 dependencies: {  }
 id: indigenous_knowledge_keepers
-label: 'Indigenous Knowledge Keepers'
+label: ''
 icon_uuid: null
 icon_default: null
-description: ''
+description: 'A field to cite Indigenous elders and Knowledge Keepers.'
 behavior_plugins: {  }

@@ -78,6 +78,7 @@ third_party_settings:
     group_rights_and_permissions:
       children:
         - group_labels_and_notices
+        - group_knowledge_keepers
         - group_rights
         - group_licensing_options
       label: 'Permissions and Rights'
@@ -142,24 +143,23 @@ third_party_settings:
         classes: ''
         show_empty_fields: false
         id: ''
-        formatter: closed
+        formatter: open
         description: ''
         required_fields: true
     group_rights:
       children:
-        - field_knowledge_keepers
         - field_rights_and_usage
         - field_rights_statements
       label: Rights
       region: content
       parent_name: group_rights_and_permissions
-      weight: 21
+      weight: 22
       format_type: tab
       format_settings:
         classes: ''
         show_empty_fields: false
         id: ''
-        formatter: closed
+        formatter: open
         description: ''
         required_fields: true
     group_licensing_options:
@@ -174,7 +174,22 @@ third_party_settings:
         classes: ''
         show_empty_fields: false
         id: ''
-        formatter: closed
+        formatter: open
+        description: ''
+        required_fields: true
+    group_knowledge_keepers:
+      children:
+        - field_knowledge_keepers
+      label: 'Citing Indigenous Elders and Knowledge Keepers'
+      region: content
+      parent_name: group_rights_and_permissions
+      weight: 21
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
         description: ''
         required_fields: true
 id: node.digital_heritage.default

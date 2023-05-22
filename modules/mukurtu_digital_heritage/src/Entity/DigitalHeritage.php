@@ -244,6 +244,16 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
     $definitions['field_creative_commons'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Creative Commons Licenses'))
       ->setDescription(t('Creative Commons licenses are an extension of Copyright that allow a copyright holder to specify the ways in which their work may be altered, shared, and used. For more information on Creative Commons licensing, visit <a href="http://creativecommons.org">creativecommons.org</a>'))
+      ->setSettings([
+        'allowed_values' => [
+          'http://creativecommons.org/licenses/by/4.0' => t('Attribution 4.0 International (CC BY 4.0)'),
+          'http://creativecommons.org/licenses/by-nc/4.0' => t('Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)'),
+          'http://creativecommons.org/licenses/by-sa/4.0' => t('Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)'),
+          'http://creativecommons.org/licenses/by-nc-sa/4.0' => t('Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)'),
+          'http://creativecommons.org/licenses/by-nd/4.0' => t('Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)'),
+          'http://creativecommons.org/licenses/by-nc-nd/4.0' => t('Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)'),
+        ]
+      ])
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
