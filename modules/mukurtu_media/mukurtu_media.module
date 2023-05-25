@@ -91,12 +91,9 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
   $renderer = \Drupal::service('renderer');
   $response = new AjaxResponse();
 
-  // Only run the callback if there is an uploaded media file.
+  // Handle the thumbnail replacement only if there is an uploaded media file.
   $entity = $form_state->getformObject()->getEntity();
-  if (method_exists($entity, 'hasUploadedMediaFile') && !$entity->hasUploadedMediaFile()) {
-    return $response;
-  }
-
+  if (method_exists($entity, 'hasUploadedMediaFile') && $entity->hasUploadedMediaFile()) {
   // Autofill the name of the media item based on the filename.
   if (method_exists($entity, 'getMediaFilename')) {
     $filename = $entity->getMediaFilename();
@@ -109,6 +106,7 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
   }
 
   $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
+  }
 
   $form_parents = explode('/', $request->query->get('element_parents'));
 
