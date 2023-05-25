@@ -94,18 +94,18 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
   // Handle the thumbnail replacement only if there is an uploaded media file.
   $entity = $form_state->getformObject()->getEntity();
   if (method_exists($entity, 'hasUploadedMediaFile') && $entity->hasUploadedMediaFile()) {
-  // Autofill the name of the media item based on the filename.
-  if (method_exists($entity, 'getMediaFilename')) {
-    $filename = $entity->getMediaFilename();
-    $filenameNoExt = substr($filename, 0, strrpos($filename, "."));
-    $form['name']['widget'][0]['value']['#value'] = $filenameNoExt;
-    $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
+    // Autofill the name of the media item based on the filename.
+    if (method_exists($entity, 'getMediaFilename')) {
+      $filename = $entity->getMediaFilename();
+      $filenameNoExt = substr($filename, 0, strrpos($filename, "."));
+      $form['name']['widget'][0]['value']['#value'] = $filenameNoExt;
+      $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
 
-    // Use the new name as the alt text for the thumbnail image.
-    $form["field_thumbnail"]["widget"][0]["alt"]["#value"] = $filenameNoExt;
-  }
+      // Use the new name as the alt text for the thumbnail image.
+      $form["field_thumbnail"]["widget"][0]["alt"]["#value"] = $filenameNoExt;
+    }
 
-  $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
+    $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
   }
 
   $form_parents = explode('/', $request->query->get('element_parents'));
@@ -191,7 +191,15 @@ function mukurtu_media_refresh_thumb_process(&$element, FormStateInterface $form
 function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, &$complete_form)
 {
   $entity = $form_state->getformObject()->getEntity();
-  if (method_exists($entity, 'hasUploadedMediaFile') && $entity->hasUploadedMediaFile()) {
+
+  // If the user manually removes the thumbnail, don't immediately generated it again.
+  $triggeringElementName = $form_state->getTriggeringElement()['#name'] ?? NULL;
+  $isRemoveButton = FALSE;
+  if ($triggeringElementName) {
+    $isRemoveButton = preg_match('/field_thumbnail_\d+_remove_button/', $triggeringElementName) == 1;
+  }
+
+  if (!$isRemoveButton && method_exists($entity, 'hasUploadedMediaFile') && $entity->hasUploadedMediaFile()) {
     // Only try thumbnail generation if there is an uploaded media file.
     // Then, only proceed if no thumbnail exists.
     $existingThumb = $complete_form['field_thumbnail']['widget'][0]['#value']['fids'] ?? NULL;
