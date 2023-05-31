@@ -29,6 +29,22 @@ interface MukurtuThumbnailGenerationInterface
   public function generateThumbnail(&$element, FormStateInterface $form_state, &$complete_form);
 
   /**
+   * Checks based on the media bundle if the triggering element is the media
+   * upload button.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @param $triggeringElementName
+   *   Name of the triggering element in form state.
+   *
+   * @return bool
+   *   True if the media upload button is the triggering element, false
+   *   otherwise.
+   */
+  public function mediaUploadIsTriggeringElement(FormStateInterface $form_state, $triggeringElementName);
+
+  /**
    * Retrieves the default thumbnail of the media bundle, if set.
    *
    * @return string|null

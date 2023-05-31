@@ -251,6 +251,18 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
   /**
    * {@inheritdoc}
    */
+  public function mediaUploadIsTriggeringElement(FormStateInterface $form_state, $triggeringElementName) {
+    // "field_media_document_0_upload_button"
+    $result = FALSE;
+    if ($triggeringElementName) {
+      $result = preg_match('/field_media_document_\d+_upload_button/', $triggeringElementName) == 1;
+    }
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   function generateThumbnail(&$element, FormStateInterface $form_state, &$complete_form) {
     $docFid = $form_state->getValue('field_media_document')[0]["fids"][0] ?? NULL;
     if (!$docFid) {

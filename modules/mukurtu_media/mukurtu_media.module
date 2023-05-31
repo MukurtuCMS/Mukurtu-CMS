@@ -192,15 +192,15 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
 {
   $entity = $form_state->getformObject()->getEntity();
 
-  // If the user manually removes the thumbnail, don't immediately generated it again.
+  // If the user manually removes the thumbnail, don't immediately generate it again.
   $triggeringElementName = $form_state->getTriggeringElement()['#name'] ?? NULL;
-  $isRemoveButton = FALSE;
-  if ($triggeringElementName) {
-    $isRemoveButton = preg_match('/field_thumbnail_\d+_remove_button/', $triggeringElementName) == 1;
-  }
+  $isMediaUploadButton = FALSE;
 
-  if (!$isRemoveButton && method_exists($entity, 'hasUploadedMediaFile') && $entity->hasUploadedMediaFile()) {
-    // Only try thumbnail generation if there is an uploaded media file.
+  if ($triggeringElementName && method_exists($entity, 'mediaUploadIsTriggeringElement')) {
+    $isMediaUploadButton = $entity->mediaUploadIsTriggeringElement($form_state, $triggeringElementName);
+  }
+  if ($isMediaUploadButton) {
+    // Only try thumbnail generation if the user hit the media upload button.
     // Then, only proceed if no thumbnail exists.
     $existingThumb = $complete_form['field_thumbnail']['widget'][0]['#value']['fids'] ?? NULL;
     if (!$existingThumb) {
@@ -218,9 +218,6 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
         }
       }
     }
-  } else {
-    // Entity does not have a media file. Remove old thumbnail references.
-    $element['#value']['fids'] = [];
   }
   return $element;
 }

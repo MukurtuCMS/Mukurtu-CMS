@@ -196,6 +196,17 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
   /**
    * {@inheritdoc}
    */
+  public function mediaUploadIsTriggeringElement(FormStateInterface $form_state, $triggeringElementName) {
+    $result = FALSE;
+    if ($triggeringElementName) {
+      $result = preg_match('/field_media_video_file_\d+_upload_button/', $triggeringElementName) == 1;
+    }
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   function generateThumbnail(&$element, FormStateInterface $form_state, &$complete_form)
   {
     $videoFid = $form_state->getValue('field_media_video_file')[0]["fids"][0] ?? NULL;
