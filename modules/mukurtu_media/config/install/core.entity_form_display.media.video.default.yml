@@ -22,13 +22,13 @@ content:
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: 2
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
   field_identifier:
     type: string_textfield
-    weight: 3
+    weight: 4
     region: content
     settings:
       size: 60
@@ -36,7 +36,7 @@ content:
     third_party_settings: {  }
   field_keywords:
     type: entity_reference_autocomplete
-    weight: 5
+    weight: 6
     region: content
     settings:
       match_operator: CONTAINS
@@ -46,14 +46,14 @@ content:
     third_party_settings: {  }
   field_media_video_file:
     type: file_generic
-    weight: 1
+    weight: 0
     region: content
     settings:
       progress_indicator: throbber
     third_party_settings: {  }
   field_people:
     type: entity_reference_autocomplete
-    weight: 4
+    weight: 5
     region: content
     settings:
       match_operator: CONTAINS
@@ -63,7 +63,7 @@ content:
     third_party_settings: {  }
   field_thumbnail:
     type: image_image
-    weight: 6
+    weight: 2
     region: content
     settings:
       progress_indicator: throbber
@@ -71,7 +71,7 @@ content:
     third_party_settings: {  }
   name:
     type: string_textfield
-    weight: 0
+    weight: 1
     region: content
     settings:
       size: 60

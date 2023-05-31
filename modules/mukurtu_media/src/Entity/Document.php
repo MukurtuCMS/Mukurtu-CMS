@@ -9,13 +9,52 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_media\Entity\MukurtuThumbnailGenerationInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\Entity\File;
+use Drupal\Core\File\FileSystemInterface;
 
 /**
  * Defines the Document media entity bundle class.
  */
-class Document extends Media implements DocumentInterface, CulturalProtocolControlledInterface {
+class Document extends Media implements DocumentInterface, CulturalProtocolControlledInterface, MukurtuThumbnailGenerationInterface {
 
   use CulturalProtocolControlledTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultThumbnail()
+  {
+    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    $defaultDocumentThumbnail = $config->get('document_default_thumbnail')[0] ?? NULL;
+    return $defaultDocumentThumbnail;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasUploadedMediaFile()
+  {
+    $fieldMediaValue = $this->get('field_media_document')->getValue()[0]['fids'][0] ?? NULL;
+    if ($fieldMediaValue) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMediaFilename()
+  {
+    $fid = $this->get('field_media_document')->getValue()[0]['fids'][0] ?? NULL;
+    if (!$fid) {
+      return NULL;
+    }
+    $file = \Drupal::entityTypeManager()->getStorage('file')->load($fid);
+    return $file->getFilename();
+  }
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
@@ -200,6 +239,103 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
         }
       }
     }
+
+    // Set the 'thumbnail' field to our generated thumbnail.
+    $defaultThumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if ($defaultThumb) {
+      $this->thumbnail->target_id = $defaultThumb;
+    }
+    parent::preSave($storage);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function mediaUploadIsTriggeringElement(FormStateInterface $form_state, $triggeringElementName) {
+    // "field_media_document_0_upload_button"
+    $result = FALSE;
+    if ($triggeringElementName) {
+      $result = preg_match('/field_media_document_\d+_upload_button/', $triggeringElementName) == 1;
+    }
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  function generateThumbnail(&$element, FormStateInterface $form_state, &$complete_form) {
+    $docFid = $form_state->getValue('field_media_document')[0]["fids"][0] ?? NULL;
+    if (!$docFid) {
+      return NULL;
+    }
+    $fileSystem = \Drupal::service('file_system');
+    // Load the file.
+    $docFile = \Drupal::entityTypeManager()->getStorage('file')->load($docFid);
+
+    // Only attempt to extract the thumbnail if the document is a pdf.
+    $docName = $docFile->getFilename();
+    $extension = substr($docName, -3);
+    if ($extension != 'pdf') {
+      return NULL;
+    }
+
+    // Get the document's real path.
+    $uri = $docFile->getFileUri();
+    $docRealPath = $fileSystem->realpath($uri);
+
+    // Compute the thumbnail name without any extensions. This is necessary
+    // because pdftoppm does not accept extensions in the destination name.
+    // Rather, you specify the extension as an argument and pdftoppm takes care
+    // of the rest.
+    $docNameNoExtension = substr($docName, 0, strrpos($docName, "."));
+    $thumbnailName = $docNameNoExtension . '_thumbnail';
+
+    // The generated thumbnail will be first downloaded to the /tmp directory
+    // before it is moved to its permanent location in private://.
+    $tmpDir = $fileSystem->getTempDirectory();
+    $tempThumbnailDest = $tmpDir . "/{$thumbnailName}";
+
+    // Verify that pdftoppm is installed.
+    $resultCode = -1;
+    $output = [];
+    $cmd = "pdftoppm --help";
+    $escapedCmd = escapeshellcmd($cmd);
+    exec($escapedCmd, $output, $resultCode);
+    if ($resultCode == 127) {
+      return NULL;
+    }
+    // Use pdftoppm to download the first page of the document as a png.
+    $cmd = "pdftoppm -singlefile -png '{$docRealPath}' '{$tempThumbnailDest}'";
+    $escapedCmd = escapeshellcmd($cmd);
+    exec($escapedCmd, $output, $resultCode);
+    if ($resultCode == 127) {
+      return NULL;
+    }
+    // Now that the thumbnail has been downloaded and pdftoppm has given it a
+    // .png extension, we must update the name of the thumbnail and the path
+    // it was temporarily downloaded to.
+    $thumbnailName .= '.png';
+    $tempThumbnailDest .= '.png';
+
+    // Compute the permanent thumbnail location. It will be the directory of the
+    // document.
+    $targetDir = rtrim(str_replace($docName, "", $uri), '/');
+
+    // Move the thumbnail to its permanent location in private://.
+    $fileSystem->prepareDirectory($targetDir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
+    $destination = $targetDir . '/' . basename($tempThumbnailDest);
+    $fileSystem->move($tempThumbnailDest, $destination, FileSystemInterface::EXISTS_REPLACE);
+
+    // Create a File entity for the new thumbnail, passing the thumbnail info.
+    $current_user = \Drupal::currentUser();
+    $uid = $current_user->id();
+    $thumbnailFile = File::create([
+      'filename' => $thumbnailName,
+      'uri' => $targetDir . '/' . $thumbnailName,
+      'uid' => $uid,
+    ]);
+    $thumbnailFile->save();
+
+    return $thumbnailFile->id() ?? NULL;
+  }
 }

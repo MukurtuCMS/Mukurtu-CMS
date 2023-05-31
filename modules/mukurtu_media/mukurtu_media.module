@@ -6,11 +6,18 @@ use Drupal\mukurtu_media\Entity\Image;
 use Drupal\mukurtu_media\Entity\RemoteVideo;
 use Drupal\mukurtu_media\Entity\Video;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Render\Element;
+use Drupal\Component\Utility\NestedArray;
 
 /**
  * Implements hook_entity_bundle_field_info_alter().
  */
-function mukurtu_media_entity_bundle_info_alter(array &$bundles): void {
+function mukurtu_media_entity_bundle_info_alter(array &$bundles): void
+{
   if (isset($bundles['media']['document'])) {
     $bundles['media']['document']['class'] = Document::class;
   }
@@ -31,21 +38,186 @@ function mukurtu_media_entity_bundle_info_alter(array &$bundles): void {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
   // For new document forms, don't show the "Extracted Text" field because
   // no text has been extracted yet.
   if (isset($form['field_extracted_text'])) {
     $form['field_extracted_text']['#disabled'] = TRUE;
     $form['field_extracted_text']['#type'] = 'hidden';
   }
+
+  // Add a process callback for the document file field. This handler will attach our AJAX callback.
+  // We need to do this via a process callback because ManagedFile builds its AJAX callbacks
+  // inside of its own process callbacks.
+  $form['field_media_document']['widget'][0]['#process'][] = 'mukurtu_media_refresh_thumb_process';
+
+  // Prepend a process callback for the thumbnail field to add our default thumbnail logic.
+  array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
 }
 
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
   // For existing document forms, make the "Extracted Text" field read only.
   if (isset($form['field_extracted_text'])) {
     $form['field_extracted_text']['#disabled'] = TRUE;
   }
+}
+
+function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  // Add a process callback for the video file field. This handler will attach our AJAX callback.
+  // We need to do this via a process callback because ManagedFile builds its AJAX callbacks
+  // inside of its own process callbacks.
+  $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_thumb_process';
+
+  // Prepend a process callback for the thumbnail field to add our default thumbnail logic.
+  array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
+}
+
+/**
+ * AJAX callback for media upload with our custom thumbnail field refresh.
+ *
+ * Note: This is almost a 100% duplication of ManagedFile::uploadAjaxCallback.
+ * If it changes, we'll need to change this. Maybe there's a way to merge our
+ * thumbnail ReplaceCommand with the output of uploadAjaxCallback, but I
+ * couldn't see one the first time around.
+ */
+function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $form_state, Request $request) {
+  /** @var \Drupal\Core\Render\RendererInterface $renderer */
+  $renderer = \Drupal::service('renderer');
+  $response = new AjaxResponse();
+
+  // Handle the thumbnail replacement only if there is an uploaded media file.
+  $entity = $form_state->getformObject()->getEntity();
+  if (method_exists($entity, 'hasUploadedMediaFile') && $entity->hasUploadedMediaFile()) {
+    // Autofill the name of the media item based on the filename.
+    if (method_exists($entity, 'getMediaFilename')) {
+      $filename = $entity->getMediaFilename();
+      $filenameNoExt = substr($filename, 0, strrpos($filename, "."));
+      $form['name']['widget'][0]['value']['#value'] = $filenameNoExt;
+      $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
+
+      // Use the new name as the alt text for the thumbnail image.
+      $form["field_thumbnail"]["widget"][0]["alt"]["#value"] = $filenameNoExt;
+    }
+
+    $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
+  }
+
+  $form_parents = explode('/', $request->query->get('element_parents'));
+
+  // Sanitize form parents before using them.
+  $form_parents = array_filter($form_parents, [Element::class, 'child']);
+
+  // Retrieve the element to be rendered.
+  $form = NestedArray::getValue($form, $form_parents);
+
+  // Add the special AJAX class if a new file was added.
+  $current_file_count = $form_state->get('file_upload_delta_initial');
+  if (isset($form['#file_upload_delta']) && $current_file_count < $form['#file_upload_delta']) {
+    $form[$current_file_count]['#attributes']['class'][] = 'ajax-new-content';
+  }
+
+  $status_messages = ['#type' => 'status_messages'];
+  $form['#prefix'] .= $renderer->renderRoot($status_messages);
+  $output = $renderer->renderRoot($form);
+  $response->setAttachments($form['#attached']);
+  $response->addCommand(new ReplaceCommand(NULL, $output));
+  return $response;
+}
+
+/**
+ * AJAX callback for media remove.
+ *
+ * Note: This is almost a 100% duplication of ManagedFile::uploadAjaxCallback.
+ * If it changes, we'll need to change this. Maybe there's a way to merge our
+ * thumbnail ReplaceCommand with the output of uploadAjaxCallback, but I
+ * couldn't see one the first time around.
+ */
+function mukurtu_media_remove_ajax_callback(array &$form, FormStateInterface $form_state, Request $request) {
+  /** @var \Drupal\Core\Render\RendererInterface $renderer */
+  $renderer = \Drupal::service('renderer');
+  $response = new AjaxResponse();
+
+  // The file has been removed, clear the name field.
+  $form['name']['widget'][0]['value']['#value'] = '';
+
+  // Redraw the name widget.
+  $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
+
+  // Redraw the thumbnail field widget. The thumbnail may have been altered in the managed file process handler.
+  $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div", $form['field_thumbnail']['widget']));
+
+  $form_parents = explode('/', $request->query->get('element_parents'));
+
+  // Sanitize form parents before using them.
+  $form_parents = array_filter($form_parents, [Element::class, 'child']);
+
+  // Retrieve the element to be rendered.
+  $form = NestedArray::getValue($form, $form_parents);
+
+  // Add the special AJAX class if a new file was added.
+  $current_file_count = $form_state->get('file_upload_delta_initial');
+  if (isset($form['#file_upload_delta']) && $current_file_count < $form['#file_upload_delta']) {
+    $form[$current_file_count]['#attributes']['class'][] = 'ajax-new-content';
+  }
+
+  $status_messages = ['#type' => 'status_messages'];
+  $form['#prefix'] .= $renderer->renderRoot($status_messages);
+  $output = $renderer->renderRoot($form);
+  $response->setAttachments($form['#attached']);
+  $response->addCommand(new ReplaceCommand(NULL, $output));
+  return $response;
+}
+
+/**
+ * Process callback for the media file upload to attach our AJAX callback.
+ */
+function mukurtu_media_refresh_thumb_process(&$element, FormStateInterface $form_state, &$complete_form) {
+  $element['upload_button']['#ajax']['callback'] = 'mukurtu_media_upload_ajax_callback';
+  $element['remove_button']['#ajax']['callback'] = 'mukurtu_media_remove_ajax_callback';
+
+  return $element;
+}
+
+/**
+ * Process callback for the thumbnail field to generate a thumbnail from the
+ * media file.
+ */
+function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, &$complete_form)
+{
+  $entity = $form_state->getformObject()->getEntity();
+
+  // If the user manually removes the thumbnail, don't immediately generate it again.
+  $triggeringElementName = $form_state->getTriggeringElement()['#name'] ?? NULL;
+  $isMediaUploadButton = FALSE;
+
+  if ($triggeringElementName && method_exists($entity, 'mediaUploadIsTriggeringElement')) {
+    $isMediaUploadButton = $entity->mediaUploadIsTriggeringElement($form_state, $triggeringElementName);
+  }
+  if ($isMediaUploadButton) {
+    // Only try thumbnail generation if the user hit the media upload button.
+    // Then, only proceed if no thumbnail exists.
+    $existingThumb = $complete_form['field_thumbnail']['widget'][0]['#value']['fids'] ?? NULL;
+    if (!$existingThumb) {
+      if (method_exists($entity, 'generateThumbnail')) {
+        $fid = $entity->generateThumbnail($element, $form_state, $complete_form);
+        if ($fid) {
+          $element['#value']['fids'] = [$fid];
+        }
+        // If thumbnail generation failed, try and set the default thumbnail.
+        elseif (method_exists($entity, 'getDefaultThumbnail')) {
+          $defaultThumb = $entity->getDefaultThumbnail();
+          if ($defaultThumb) {
+            $element['#value']['fids'] = [$defaultThumb];
+          }
+        }
+      }
+    }
+  }
+  return $element;
 }
