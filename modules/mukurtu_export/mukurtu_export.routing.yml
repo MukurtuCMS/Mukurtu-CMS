@@ -5,3 +5,10 @@ mukurtu_export.export_item_and_format_selection:
     _form: 'Drupal\mukurtu_export\Form\ExportItemAndFormatSelection'
   requirements:
     _permission: 'access mukurtu export'
+mukurtu_export.export_settings:
+  path: '/dashboard/export/settings'
+  defaults:
+    _title: 'Export Settings'
+    _form: 'Drupal\mukurtu_export\Form\ExportSettings'
+  requirements:
+    _permission: 'access mukurtu export'

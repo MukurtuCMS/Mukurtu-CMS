@@ -1,0 +1,4 @@
+services:
+  plugin.manager.mukurtu_exporter:
+    class: Drupal\mukurtu_export\MukurtuExporterPluginManager
+    parent: default_plugin_manager
