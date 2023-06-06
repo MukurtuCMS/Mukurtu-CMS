@@ -252,7 +252,6 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
    * {@inheritdoc}
    */
   public function mediaUploadIsTriggeringElement(FormStateInterface $form_state, $triggeringElementName) {
-    // "field_media_document_0_upload_button"
     $result = FALSE;
     if ($triggeringElementName) {
       $result = preg_match('/field_media_document_\d+_upload_button/', $triggeringElementName) == 1;
