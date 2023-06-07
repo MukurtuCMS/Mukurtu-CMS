@@ -23,4 +23,35 @@ interface MukurtuExporterInterface extends ConfigurableInterface, PluginInspecti
      */
     public function settingsForm(array $form, FormStateInterface $form_state);
     public function getConfig(array &$form, FormStateInterface $form_state);
+
+
+    /**
+     * Export a single batch.
+     * 
+     * @param mixed $context
+     *   The batch context.
+     * 
+     * @return void
+     */
+    public static function batchExport(&$context);
+
+    /**
+     * Run at the start of the export process.
+     */
+    public static function exportSetup($entities, $options, &$context);
+
+    /**
+     * Run at the end of the export process.
+     */
+    public static function exportCompleted(&$context);
+
+    /**
+     * Run at the start of a single batch operation during the export process.
+     */
+    public static function batchSetup(&$context);
+
+    /**
+     * Run at the end of a single batch operation during the export process.
+     */
+    public static function batchCompleted(&$context);
 }

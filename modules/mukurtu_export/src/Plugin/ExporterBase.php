@@ -51,4 +51,32 @@ abstract class ExporterBase extends PluginBase implements MukurtuExporterInterfa
             'settings' => $this->pluginDefinition['settings'],
         ];
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function exportSetup($entities, $options, &$context) {
+
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function exportCompleted(&$context) {
+
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function batchSetup(&$context) {
+
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function batchCompleted(&$context) {
+
+    }
 }

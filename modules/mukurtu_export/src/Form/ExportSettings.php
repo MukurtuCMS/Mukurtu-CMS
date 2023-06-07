@@ -52,6 +52,8 @@ class ExportSettings extends ExportBaseForm
         $config = $this->exporter->getConfig($form, $form_state);
         $this->setExporterConfig($config);
 
-        $form_state->setRedirect('mukurtu_export.export_settings');
+        $this->executable->export();
+
+        //$form_state->setRedirect('mukurtu_export.export_settings');
     }
 }

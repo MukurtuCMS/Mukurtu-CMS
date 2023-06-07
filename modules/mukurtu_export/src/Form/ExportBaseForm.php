@@ -6,9 +6,11 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\mukurtu_export\FlaggedExporterSource;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\mukurtu_export\MukurtuExporterPluginManager;
+use Drupal\mukurtu_export\BatchExportExecutable;
 
 /**
  * Provides a Mukurtu Export base form.
@@ -39,6 +41,9 @@ class ExportBaseForm extends FormBase
   protected $exporterConfig;
   protected $exporter;
 
+  protected $source;
+  protected $executable;
+
 
   /**
    * {@inheritdoc}
@@ -54,6 +59,8 @@ class ExportBaseForm extends FormBase
     $this->exporterId = $this->getExporterId();
     $this->exporterConfig = $this->getExporterConfig();
     $this->exporter = $this->exporterId ? $this->exportPluginManager->getInstance(['id' => $this->exporterId, 'configuration' => $this->exporterConfig]) : NULL;
+    $this->source = new FlaggedExporterSource('node');
+    $this->executable = new BatchExportExecutable($this->source, $this->exporter);
   }
 
   /**
