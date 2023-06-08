@@ -2,13 +2,20 @@ mukurtu_export.export_item_and_format_selection:
   path: '/dashboard/export'
   defaults:
     _title: 'Export'
-    _form: 'Drupal\mukurtu_export\Form\ExportItemAndFormatSelection'
+    _form: 'Drupal\mukurtu_export\Form\ExportItemAndFormatSelectionForm'
   requirements:
     _permission: 'access mukurtu export'
 mukurtu_export.export_settings:
   path: '/dashboard/export/settings'
   defaults:
     _title: 'Export Settings'
-    _form: 'Drupal\mukurtu_export\Form\ExportSettings'
+    _form: 'Drupal\mukurtu_export\Form\ExportSettingsForm'
+  requirements:
+    _permission: 'access mukurtu export'
+mukurtu_export.export_results:
+  path: '/dashboard/export/results'
+  defaults:
+    _title: 'Export Results'
+    _form: 'Drupal\mukurtu_export\Form\ExportResultsForm'
   requirements:
     _permission: 'access mukurtu export'

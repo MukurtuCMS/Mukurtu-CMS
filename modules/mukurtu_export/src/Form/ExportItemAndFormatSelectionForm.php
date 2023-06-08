@@ -8,7 +8,7 @@ use Drupal\mukurtu_export\Form\ExportBaseForm;
 /**
  * Export Item Summary and Format Selection form.
  */
-class ExportItemAndFormatSelection extends ExportBaseForm {
+class ExportItemAndFormatSelectionForm extends ExportBaseForm {
 
   /**
    * {@inheritdoc}

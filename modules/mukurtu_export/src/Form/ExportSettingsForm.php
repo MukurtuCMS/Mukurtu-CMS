@@ -1,14 +1,14 @@
 <?php
 
 namespace Drupal\mukurtu_export\Form;
- 
+
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\mukurtu_export\Form\ExportBaseForm;
 
 /**
  * Export Plugin Configuration Form.
  */
-class ExportSettings extends ExportBaseForm
+class ExportSettingsForm extends ExportBaseForm
 {
     /**
      * {@inheritdoc}
@@ -54,6 +54,6 @@ class ExportSettings extends ExportBaseForm
 
         $this->executable->export();
 
-        //$form_state->setRedirect('mukurtu_export.export_settings');
+        $form_state->setRedirect('mukurtu_export.export_results');
     }
 }
