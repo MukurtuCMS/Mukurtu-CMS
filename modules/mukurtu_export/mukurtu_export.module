@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function mukurtu_export_entity_type_alter(array &$entity_types) {
+  //dpm($entity_types['node']);
+}
+
+
+function mukurtu_export_views_data() {
+  $data = [];
+  $data['flagging']['flagged_rendered_entity'] = [
+    'field' => [
+      'title' => t('Flagging: Rendered entity'),
+      'help' => t('Renders the flagged entity in a view mode.'),
+      'id' => 'flagged_rendered_entity',
+    ],
+  ];
+  return $data;
+}

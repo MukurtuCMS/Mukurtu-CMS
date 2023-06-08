@@ -4,3 +4,9 @@ services:
     arguments: ['@messenger']
     tags:
       - { name: event_subscriber }
+
+  mukurtu_search.gathering_datasources_event_subscriber:
+    class: Drupal\mukurtu_search\EventSubscriber\GatheringDatasourcesSubscriber
+    arguments: ['@messenger']
+    tags:
+      - { name: event_subscriber }

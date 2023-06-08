@@ -93,6 +93,7 @@ dependencies:
   - mukurtu_browse
   - mukurtu_multipage_items
   - mukurtu_import
+  - mukurtu_export
 
 
 themes:
