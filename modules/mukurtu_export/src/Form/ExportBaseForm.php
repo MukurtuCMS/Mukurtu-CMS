@@ -60,7 +60,7 @@ class ExportBaseForm extends FormBase
     $this->exporterConfig = $this->getExporterConfig();
     $this->exporter = $this->exporterId ? $this->exportPluginManager->getInstance(['id' => $this->exporterId, 'configuration' => $this->exporterConfig]) : NULL;
     $this->source = new FlaggedExporterSource('node');
-    $this->executable = new BatchExportExecutable($this->source, $this->exporter);
+    $this->executable = $this->exporter ? new BatchExportExecutable($this->source, $this->exporter) : NULL;
   }
 
   /**
