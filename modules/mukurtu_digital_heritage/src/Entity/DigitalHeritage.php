@@ -129,6 +129,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setLabel('Citing Indigenous Elders and Knowledge Keepers')
       ->setDescription(t('A field to cite Indigenous elders and Knowledge Keepers.'))
       ->setSettings([
+        'max_length' => 255,
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
         'handler_settings' => [
