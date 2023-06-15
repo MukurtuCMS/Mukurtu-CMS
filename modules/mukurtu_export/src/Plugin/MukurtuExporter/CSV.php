@@ -6,6 +6,7 @@ use Drupal\mukurtu_export\Plugin\ExporterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
 use Exception;
 
 /**
@@ -32,6 +33,7 @@ class CSV extends ExporterBase
               'digital_heritage' => [
                 'title' => 'Title',
                 'field_description' => "Description",
+                'field_media_assets' => "Media Assets",
                 'nid' => 'ID',
                 'uuid' => 'UUID',
               ],
@@ -272,11 +274,20 @@ class CSV extends ExporterBase
    */
   public static function export(EntityInterface $entity, &$context)
   {
+    //$moduleHandler = \Drupal::moduleHandler();
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+
     // Get mapping to determine what fields to export.
+    $multiValueDelimiter = '||';
     $field_mapping = $context['results']['settings']['field_mapping'];
     $export = [];
     foreach ($field_mapping[$entity->getEntityTypeId()][$entity->bundle()] as $field_name => $label) {
-      $export[] = $entity->get($field_name)->getValue()[0]['value'] ?? "";
+      $event = new EntityFieldExportEvent('csv', $entity, $field_name);
+      $event_dispatcher->dispatch($event, EntityFieldExportEvent::EVENT_NAME);
+      $exportValue = $event->getValue();
+
+      //$moduleHandler->alter("exporter_csv_field_{$fieldType}", $exportValue, $entity, $field_name);
+      $export[] = implode($multiValueDelimiter, $exportValue);
     }
     return $export;
   }
