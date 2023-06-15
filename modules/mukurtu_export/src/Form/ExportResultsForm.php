@@ -23,6 +23,7 @@ class ExportResultsForm extends ExportBaseForm
 
   public function submitNewExport(array &$form, FormStateInterface $form_state)
   {
+    $this->reset();
     $form_state->setRedirect('mukurtu_export.export_item_and_format_selection');
   }
 

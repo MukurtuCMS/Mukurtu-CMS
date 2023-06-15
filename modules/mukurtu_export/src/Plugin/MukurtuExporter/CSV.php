@@ -6,6 +6,7 @@ use Drupal\mukurtu_export\Plugin\ExporterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Exception;
 
 /**
  * Plugin implementation of MukurtuExporter for CSV.
@@ -13,31 +14,74 @@ use Drupal\Core\File\FileSystemInterface;
  * @MukurtuExporter(
  *   id = "csv",
  *   label = @Translation("CSV"),
- *   description = @Translation("Export to CSV.")
+ *   description = @Translation("Export to CSV."),
  * )
  */
 class CSV extends ExporterBase
 {
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration()
+  {
+    return [
+      'settings' => [
+        'binary_files' => 'metadata_and_binary',
+        'field_mapping' => [
+          'node' => [
+              'digital_heritage' => [
+                'title' => 'Title',
+                'field_description' => "Description",
+                'nid' => 'ID',
+                'uuid' => 'UUID',
+              ],
+          ],
+          'media' => [
+            'image' => [
+              'mid' => 'ID',
+              'uuid' => 'UUID',
+              'name' => 'Name',
+            ],
+          ],
+        ],
+      ],
+    ];
+  }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfiguration()
+  {
+    return [
+      'id' => $this->getPluginId(),
+      'settings' => $this->settings,
+    ];
+  }
   public function settingsForm(array $form, FormStateInterface $form_state)
   {
+    $settings = (array) $this->getConfiguration()['settings'] + $this->defaultConfiguration()['settings'];
+    dpm($settings);
     $form['binary_files'] = [
       '#type' => 'radios',
       '#title' => $this->t('Files to Export'),
-      '#default_value' => 'metadata',
+      '#default_value' => $settings['binary_files'],
       '#options' => [
         'metadata' => $this->t('Export metadata only'),
         'metadata_and_binary' => $this->t('Include media and other files'),
       ]
     ];
+
     return $form;
   }
 
-  public function getConfig(array &$form, FormStateInterface $form_state)
+  public function getSettings(array &$form, FormStateInterface $form_state)
   {
-    $config = [];
-    $config['binary_files'] = $form_state->getValue('binary_files');
-    return $config;
+    $settings = [];
+    $settings['binary_files'] = $form_state->getValue('binary_files');
+    // temp.
+    $settings['field_mapping'] = $this->defaultConfiguration()['settings']['field_mapping'];
+    return $settings;
   }
 
   /**
@@ -51,7 +95,7 @@ class CSV extends ExporterBase
     $context['results']['entities'] = $entities;
 
     // Export configuration options.
-    $context['results']['options'] = $options;
+    $context['results']['settings'] = $options['settings'] ?? [];
 
     // Track entities that have been exported.
     $context['results']['exported_entities'] = [];
@@ -63,19 +107,22 @@ class CSV extends ExporterBase
     });
     $context['results']['exported_entities_count'] = 0;
 
-    // Files IDs for metadata.
+    // Track if we've written headers for a given file yet.
+    $context['results']['headers_written'] = [];
+    //$context['results']['headers'] = [];
+    $context['results']['headers'] = $context['results']['settings']['field_mapping'];
+    //$context['results']['headers']['media'] = $context['results']['settings']['field_mapping']['media'];
+
+    // Files paths for metadata to include in the package.
     $context['results']['deliverables']['metadata'] = [];
 
-    // Files IDs for binary files to include in the package.
+    // Files paths for binary files to include in the package.
     $context['results']['deliverables']['files'] = [];
 
     // Create a directory for the output.
     $fs = \Drupal::service('file_system');
     $session_id = session_id();
     $context['results']['basepath'] = "private://exports/{$context['results']['uid']}/$session_id";
-
-    // Delete any existing files.
-    $fs->deleteRecursive($context['results']['basepath']);
 
     // @todo error handling here?
     $fs->prepareDirectory($context['results']['basepath'], FileSystemInterface::CREATE_DIRECTORY);
@@ -90,7 +137,11 @@ class CSV extends ExporterBase
   {
     // Clean-up.
     $fs = \Drupal::service('file_system');
-    $fs->deleteRecursive($context['results']['basepath']);
+    try {
+      $fs->deleteRecursive($context['results']['basepath']);
+    } catch (Exception $e) {
+
+    }
   }
 
   /**
@@ -105,17 +156,35 @@ class CSV extends ExporterBase
     $entity_type_id = reset($entity_types);
     $context['sandbox']['batch']['entity_type_id'] = $entity_type_id;
     $context['sandbox']['batch']['entities'] = array_slice($context['results']['entities'][$entity_type_id], 0, $size);
+  }
 
-    // Open the output file.
+  public static function getOutputFile($entity_type_id, $bundle, &$context) {
+    $existing = $context['sandbox']['batch']['output_files'][$entity_type_id][$bundle] ?? FALSE;
+    if ($existing) {
+      return $existing;
+    }
+
+    $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type_id);
     $entityType = \Drupal::service('entity_type.manager')->getDefinition($entity_type_id);
     $entityLabel = $entityType->getLabel();
-    $filePath = "{$context['results']['basepath']}/{$entityLabel}.csv";
+    $bundleLabel = $bundles[$bundle]['label'] ?? $bundle;
+    $filename = sprintf("%s - %s.csv", $entityLabel, $bundleLabel);
+    $filepath = "{$context['results']['basepath']}/$filename";
 
     // @todo handle error.
-    $context['sandbox']['batch']['output_file'] = fopen($filePath, 'a');
-    if (!isset($context['results']['deliverables']['metadata'][$entity_type_id])) {
-      $context['results']['deliverables']['metadata'][$entity_type_id] = $filePath;
+    $output = fopen($filepath, 'a');
+    $context['sandbox']['batch']['output_files'][$entity_type_id][$bundle] = $output;
+
+    // Add file as deliverable.
+    $context['results']['deliverables']['metadata'][] = $filepath;
+
+    // Check if we've written headers for this file.
+    if ($output && !isset($context['results']['headers_written'][$entity_type_id][$bundle])) {
+      fputcsv($output, $context['results']['headers'][$entity_type_id][$bundle]);
+      $context['results']['headers_written'][$entity_type_id][$bundle] = TRUE;
     }
+
+    return $output;
   }
 
   /**
@@ -123,18 +192,27 @@ class CSV extends ExporterBase
    */
   public static function batchExport(&$context)
   {
-    /** @var \Drupal\Core\File\FileSystemInterface $fs */
-    $fs = \Drupal::service('file_system');
     $entity_type_id = $context['sandbox']['batch']['entity_type_id'];
     $entities = $context['sandbox']['batch']['entities'];
     $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
-    $output = $context['sandbox']['batch']['output_file'];
-
 
     foreach ($entities as $id) {
       $alreadyExported = $context['results']['exported_entities'][$entity_type_id][$id] ?? FALSE;
       if (!$alreadyExported) {
         $entity = $storage->load($id);
+        if (!$entity) {
+          // @todo what do we do on this failure?
+          continue;
+        }
+
+        // Get output file for bundle.
+        $output = static::class::getOutputFile($entity_type_id, $entity->bundle(), $context);
+        if (!$output) {
+          // @todo what do we do on this failure?
+          continue;
+        }
+
+        // Export the entity.
         $result = static::class::export($entity, $context);
 
         // Write out.
@@ -160,7 +238,15 @@ class CSV extends ExporterBase
    */
   public static function batchCompleted(&$context)
   {
-    fclose($context['sandbox']['batch']['output_file']);
+    foreach ($context['sandbox']['batch']['output_files'] as $entity_type_id => $bundleFiles) {
+      foreach ($bundleFiles as $bundle => $outputfile) {
+        if ($outputfile) {
+          fclose($outputfile);
+          unset($context['sandbox']['batch']['output_files'][$entity_type_id][$bundle]);
+        }
+      }
+    }
+    //fclose($context['sandbox']['batch']['output_file']);
 
     // Remove any empty entity types from the export list.
     foreach ($context['results']['entities'] as $entity_type_id => $entities) {
@@ -186,7 +272,13 @@ class CSV extends ExporterBase
    */
   public static function export(EntityInterface $entity, &$context)
   {
-    return [$entity->id(), $entity->uuid()];
+    // Get mapping to determine what fields to export.
+    $field_mapping = $context['results']['settings']['field_mapping'];
+    $export = [];
+    foreach ($field_mapping[$entity->getEntityTypeId()][$entity->bundle()] as $field_name => $label) {
+      $export[] = $entity->get($field_name)->getValue()[0]['value'] ?? "";
+    }
+    return $export;
   }
 
 }
