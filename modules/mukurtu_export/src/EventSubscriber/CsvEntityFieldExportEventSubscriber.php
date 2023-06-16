@@ -14,7 +14,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface
   public static function getSubscribedEvents()
   {
     return [
-      EntityFieldExportEvent::EVENT_NAME => ['exportField', -100],
+      EntityFieldExportEvent::EVENT_NAME => ['exportField', 100],
     ];
   }
 
@@ -34,7 +34,6 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface
     foreach ($values as $value) {
       $exportValue[] = is_array($value) ? reset($value) : $value;
     }
-
     $event->setValue($exportValue);
   }
 

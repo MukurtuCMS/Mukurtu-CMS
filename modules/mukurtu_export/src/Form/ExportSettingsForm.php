@@ -36,7 +36,7 @@ class ExportSettingsForm extends ExportBaseForm
     ];
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Export'),
+      '#value' => $this->t('Start Export'),
       '#button_type' => 'primary',
     ];
     return $form;

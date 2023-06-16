@@ -63,7 +63,7 @@ class CSV extends ExporterBase
   public function settingsForm(array $form, FormStateInterface $form_state)
   {
     $settings = (array) $this->getConfiguration()['settings'] + $this->defaultConfiguration()['settings'];
-    dpm($settings);
+
     $form['binary_files'] = [
       '#type' => 'radios',
       '#title' => $this->t('Files to Export'),
@@ -125,6 +125,15 @@ class CSV extends ExporterBase
     $fs = \Drupal::service('file_system');
     $session_id = session_id();
     $context['results']['basepath'] = "private://exports/{$context['results']['uid']}/$session_id";
+
+    try {
+      $existingFiles = $fs->scanDirectory($context['results']['basepath'], '/.*/');
+      if (!empty($existingFiles)) {
+        $fs->deleteRecursive($context['results']['basepath']);
+      }
+    } catch (Exception $e) {
+
+    }
 
     // @todo error handling here?
     $fs->prepareDirectory($context['results']['basepath'], FileSystemInterface::CREATE_DIRECTORY);
@@ -282,13 +291,14 @@ class CSV extends ExporterBase
     $field_mapping = $context['results']['settings']['field_mapping'];
     $export = [];
     foreach ($field_mapping[$entity->getEntityTypeId()][$entity->bundle()] as $field_name => $label) {
-      $event = new EntityFieldExportEvent('csv', $entity, $field_name);
+      $event = new EntityFieldExportEvent('csv', $entity, $field_name, $context);
       $event_dispatcher->dispatch($event, EntityFieldExportEvent::EVENT_NAME);
       $exportValue = $event->getValue();
 
       //$moduleHandler->alter("exporter_csv_field_{$fieldType}", $exportValue, $entity, $field_name);
       $export[] = implode($multiValueDelimiter, $exportValue);
     }
+
     return $export;
   }
 

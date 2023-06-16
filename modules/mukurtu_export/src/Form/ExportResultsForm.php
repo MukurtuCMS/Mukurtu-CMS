@@ -21,6 +21,11 @@ class ExportResultsForm extends ExportBaseForm
     return 'mukurtu_export_results';
   }
 
+  public function submitForm(array &$form, FormStateInterface $form_state)
+  {
+    $form_state->setRedirect('mukurtu_export.export_settings');
+  }
+
   public function submitNewExport(array &$form, FormStateInterface $form_state)
   {
     $this->reset();
@@ -64,16 +69,16 @@ class ExportResultsForm extends ExportBaseForm
     $form['actions'] = [
       '#type' => 'actions',
     ];
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Back to Settings'),
+      '#button_type' => 'primary',
+    ];
     $form['actions']['new_export'] = [
       '#type' => 'submit',
       '#value' => $this->t('New Export'),
       '#button_type' => 'primary',
       '#submit' => ['::submitNewExport'],
-    ];
-    $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('TBD'),
-      '#button_type' => 'primary',
     ];
 
     return $form;

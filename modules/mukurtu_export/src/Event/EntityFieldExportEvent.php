@@ -34,18 +34,26 @@ class EntityFieldExportEvent extends Event
   public $field_name;
 
   /**
+   * The batch process context.
+   *
+   * @var mixed.
+   */
+  public $context;
+
+  /**
    * The field value to export.
    *
    * @var mixed
    */
   protected $value;
 
-  public function __construct($exporter_id, EntityInterface $entity, $field_name)
+  public function __construct($exporter_id, EntityInterface $entity, $field_name, &$context)
   {
     $this->exporter_id = $exporter_id;
     $this->entity = $entity;
     $this->field_name = $field_name;
     $this->value = [];
+    $this->context = $context;
   }
 
   public function getValue()
