@@ -1,0 +1,9 @@
+name: 'Nick Entity test module'
+type: module
+description: ''
+package: Testing
+version: VERSION
+dependencies:
+  - drupal:field
+  - drupal:text
+  - drupal:system
