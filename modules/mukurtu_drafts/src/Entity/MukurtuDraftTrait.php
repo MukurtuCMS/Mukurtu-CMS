@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
  */
 trait MukurtuDraftTrait
 {
-
   /**
    * Returns an array of base field definitions for draft status.
    *
@@ -31,6 +30,7 @@ trait MukurtuDraftTrait
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
+      ->setDefaultValue(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -42,7 +42,7 @@ trait MukurtuDraftTrait
    */
   public function isDraft()
   {
-    return (bool) $this->get('draft');
+    return (bool) $this->get('draft')->value;
   }
 
   /**
