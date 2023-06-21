@@ -33,7 +33,17 @@ class CsvExporterListBuilder extends ConfigEntityListBuilder {
 
   public function render()
   {
+    $build['settings_link_top'] = [
+      '#type' => 'link',
+      '#title' => $this->t('Back to export'),
+      '#url' => \Drupal\Core\Url::fromRoute('mukurtu_export.export_settings'),
+    ];
     $build[] = parent::render();
+    $build['settings_link_bottom'] = [
+      '#type' => 'link',
+      '#title' => $this->t('Back to export'),
+      '#url' => \Drupal\Core\Url::fromRoute('mukurtu_export.export_settings'),
+    ];
     return $build;
   }
 

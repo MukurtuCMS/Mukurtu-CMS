@@ -1,0 +1,34 @@
+mukurtu_export.csv_exporter.*:
+  type: config_entity
+  label : 'CSV Export Settings'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uid:
+      type: integer
+      label: 'Owner ID'
+    description:
+      type: text
+      label: 'Description'
+    site_wide:
+      type: boolean
+      label: 'Site-wide'
+    include_files:
+      type: boolean
+      label: 'Include files in export package'
+    entity_fields_export_list:
+      type: sequence
+      label: 'Entity fields to export'
+      sequence:
+        field_mapping:
+          type: sequence
+          label: 'Fieldname to label mapping'
+          sequence:
+            export_label:
+              type: string
+              label: 'Label'
+

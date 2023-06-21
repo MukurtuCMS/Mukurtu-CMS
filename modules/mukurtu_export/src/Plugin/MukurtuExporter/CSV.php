@@ -60,10 +60,41 @@ class CSV extends ExporterBase
       'settings' => $this->settings,
     ];
   }
+
+  protected function getSiteWideConfigOptions() {
+    $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+    $query = $storage->getQuery();
+    $result = $query->condition('site_wide', TRUE)->execute();
+    $options = [];
+    if (!empty($result)) {
+      $entities = $storage->loadMultiple($result);
+      foreach ($entities as $id => $entity) {
+        $options[$id] = $entity->label();
+      }
+    }
+    return $options;
+  }
+
+  protected function getUserConfigOptions()
+  {
+    $uid = \Drupal::currentUser()->id();
+    $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+    $query = $storage->getQuery();
+    $result = $query->condition('uid', $uid)->execute();
+    $options = [];
+    if (!empty($result)) {
+      $entities = $storage->loadMultiple($result);
+      foreach($entities as $id => $entity) {
+        $options[$id] = $entity->label();
+      }
+    }
+    return $options;
+  }
+
   public function settingsForm(array $form, FormStateInterface $form_state)
   {
-    $settings = (array) $this->getConfiguration()['settings'] + $this->defaultConfiguration()['settings'];
-
+  //  $settings = (array) $this->getConfiguration()['settings'] + $this->defaultConfiguration()['settings'];
+/*
     $form['binary_files'] = [
       '#type' => 'radios',
       '#title' => $this->t('Files to Export'),
@@ -72,15 +103,38 @@ class CSV extends ExporterBase
         'metadata' => $this->t('Export metadata only'),
         'metadata_and_binary' => $this->t('Include media and other files'),
       ]
+    ]; */
+
+    $options = $this->getSiteWideConfigOptions() + $this->getUserConfigOptions();
+    $ids = array_keys($options);
+    $default = reset($ids);
+
+    $form['export_settings'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Export Settings'),
+      '#default_value' => $default,
+      '#options' => $options,
     ];
 
+    $form['new_setting'] = [
+      '#type' => 'link',
+      '#title' => $this->t('New CSV export setting'),
+      '#url' => \Drupal\Core\Url::fromRoute('entity.csv_exporter.add_form'),
+    ];
+
+    $form['manage_settings'] = [
+      '#type' => 'link',
+      '#title' => $this->t('Manage saved CSV export settings'),
+      '#url' => \Drupal\Core\Url::fromRoute('entity.csv_exporter.collection'),
+    ];
     return $form;
   }
 
   public function getSettings(array &$form, FormStateInterface $form_state)
   {
     $settings = [];
-    $settings['binary_files'] = $form_state->getValue('binary_files');
+    $settings['settings_id'] = $form_state->getValue('export_settings');
+    //$settings['binary_files'] = $form_state->getValue('binary_files');
     // temp.
     $settings['field_mapping'] = $this->defaultConfiguration()['settings']['field_mapping'];
     return $settings;
@@ -91,6 +145,16 @@ class CSV extends ExporterBase
    */
   public static function exportSetup($entities, $options, &$context)
   {
+    // Load the settings config entity.
+    $id = $options['settings']['settings_id'];
+    // @todo error handling.
+    if (!$id) {
+      throw new Exception('Failed to load CSV exporter settings.');
+    }
+    /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
+    $config = \Drupal::entityTypeManager()->getStorage('csv_exporter')->load($id);
+
+
     $context['results']['uid'] = \Drupal::currentUser()->id();
 
     // List of entities to export. We will "consume" these as we export. Empty means done.

@@ -12,15 +12,10 @@ use Drupal\user\UserInterface;
  * @ConfigEntityType(
  *   id = "csv_exporter",
  *   label = @Translation("CSV Exporter Setting"),
- *   label_collection = @Translation("  CSV Exporter Settings"),
+ *   label_collection = @Translation("CSV Exporter Settings"),
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
- *     "uuid" = "uuid",
- *     "uid" = "uid",
- *     "description" = "description",
- *     "site_wide" = "site_wide",
- *     "include_files" = "include_files",
  *   },
  *   config_prefix = "csv_exporter",
  *   config_export = {
@@ -30,6 +25,7 @@ use Drupal\user\UserInterface;
  *     "description",
  *     "site_wide",
  *     "include_files",
+ *     "entity_fields_export_list",
  *   },
  *   handlers = {
  *     "access" = "Drupal\mukurtu_export\CsvExporterAccessController",
@@ -61,6 +57,8 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
   protected $description;
   protected $site_wide;
+
+  protected $entity_fields_export_list;
 
 
   /**
@@ -106,6 +104,11 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
     return $this->include_files;
   }
 
+  public function setIncludeFiles(bool $include_files) {
+    $this->include_files = $include_files;
+    return $this;
+  }
+
   public function getDescription() {
     return $this->description;
   }
@@ -117,6 +120,50 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
   public function isSiteWide() {
     return $this->site_wide == TRUE;
+  }
+
+  public function getMappedFields($entity_type_id, $bundle) {
+    $all_field_defs = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+    $entity_type = \Drupal::entityTypeManager()->getStorage($entity_type_id)->getEntityType();
+    $id_fields = [$entity_type->getKey('id'), $entity_type->getKey('uuid')];
+    $key = "{$entity_type_id}__{$bundle}";
+    $map = $this->get('entity_fields_export_list');
+    $result = [];
+
+    // Mapped fields are in the order we want them already.
+    if (isset($map[$key]) && !empty($map[$key])) {
+      foreach ($map[$key] as $mapped_field_name => $mapped_field_label) {
+        $result[] = [
+          'field_name' => $mapped_field_name,
+          'field_label' => $all_field_defs[$mapped_field_name]->getLabel(),
+          'csv_header_label' => $mapped_field_label,
+          'export' => TRUE,
+        ];
+
+        if (isset($all_field_defs[$mapped_field_name])) {
+          unset($all_field_defs[$mapped_field_name]);
+        }
+      }
+    }
+
+    // Add the remaining, unmapped fields to the end of the list.
+    foreach($all_field_defs as $field_name => $field_def) {
+      if ($field_def->isComputed()) {
+        continue;
+      }
+      $result[] = [
+        'field_name' => $field_name,
+        'field_label' => $field_def->getLabel(),
+        'csv_header_label' => $field_def->getLabel(),
+        'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
+      ];
+    }
+
+    return $result;
+  }
+
+  public function getSupportedEntityTypes() {
+    return ['node', 'media', 'community', 'protocol', 'paragraph'];
   }
 
 }
