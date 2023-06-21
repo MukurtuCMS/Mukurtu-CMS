@@ -162,6 +162,34 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
     return $result;
   }
 
+  public function getHeaders($entity_type_id, $bundle) {
+    $map = $this->get('entity_fields_export_list');
+    $key = "{$entity_type_id}__{$bundle}";
+    $headers = [];
+
+    // Mapped fields are in the order we want them already.
+    if (isset($map[$key]) && !empty($map[$key])) {
+      foreach ($map[$key] as $mapped_field_name => $mapped_field_label) {
+        $headers[$mapped_field_name] = $mapped_field_label;
+      }
+    }
+    return $headers;
+  }
+
+  public function getExportFields($entity_type_id, $bundle) {
+    $map = $this->get('entity_fields_export_list');
+    $key = "{$entity_type_id}__{$bundle}";
+    $fields = [];
+
+    // Mapped fields are in the order we want them already.
+    if (isset($map[$key]) && !empty($map[$key])) {
+      foreach ($map[$key] as $mapped_field_name => $mapped_field_label) {
+        $fields[] = $mapped_field_name;
+      }
+    }
+    return $fields;
+  }
+
   public function getSupportedEntityTypes() {
     return ['node', 'media', 'community', 'protocol', 'paragraph'];
   }

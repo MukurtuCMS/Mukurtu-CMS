@@ -151,10 +151,8 @@ class CSV extends ExporterBase
     if (!$id) {
       throw new Exception('Failed to load CSV exporter settings.');
     }
-    /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
-    $config = \Drupal::entityTypeManager()->getStorage('csv_exporter')->load($id);
 
-
+    $context['results']['config_id'] = $options['settings']['settings_id'];
     $context['results']['uid'] = \Drupal::currentUser()->id();
 
     // List of entities to export. We will "consume" these as we export. Empty means done.
@@ -175,9 +173,6 @@ class CSV extends ExporterBase
 
     // Track if we've written headers for a given file yet.
     $context['results']['headers_written'] = [];
-    //$context['results']['headers'] = [];
-    $context['results']['headers'] = $context['results']['settings']['field_mapping'];
-    //$context['results']['headers']['media'] = $context['results']['settings']['field_mapping']['media'];
 
     // Files paths for metadata to include in the package.
     $context['results']['deliverables']['metadata'] = [];
@@ -226,6 +221,10 @@ class CSV extends ExporterBase
   {
     $size = 10;
 
+    // Load the config entity.
+    /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
+    $context['sandbox']['config'] = \Drupal::entityTypeManager()->getStorage('csv_exporter')->load($context['results']['config_id']);
+
     // Identify the next batch of entities to export. We only get entities of a single type per batch.
     $entity_types = array_keys($context['results']['entities']);
     $entity_type_id = reset($entity_types);
@@ -255,7 +254,10 @@ class CSV extends ExporterBase
 
     // Check if we've written headers for this file.
     if ($output && !isset($context['results']['headers_written'][$entity_type_id][$bundle])) {
-      fputcsv($output, $context['results']['headers'][$entity_type_id][$bundle]);
+
+      $headers = $context['sandbox']['config']->getHeaders($entity_type_id, $bundle);
+
+      fputcsv($output, $headers);
       $context['results']['headers_written'][$entity_type_id][$bundle] = TRUE;
     }
 
@@ -352,9 +354,9 @@ class CSV extends ExporterBase
 
     // Get mapping to determine what fields to export.
     $multiValueDelimiter = '||';
-    $field_mapping = $context['results']['settings']['field_mapping'];
+
     $export = [];
-    foreach ($field_mapping[$entity->getEntityTypeId()][$entity->bundle()] as $field_name => $label) {
+    foreach($context['sandbox']['config']->getExportFields($entity->getEntityTypeId(), $entity->bundle()) as $field_name) {
       $event = new EntityFieldExportEvent('csv', $entity, $field_name, $context);
       $event_dispatcher->dispatch($event, EntityFieldExportEvent::EVENT_NAME);
       $exportValue = $event->getValue();
