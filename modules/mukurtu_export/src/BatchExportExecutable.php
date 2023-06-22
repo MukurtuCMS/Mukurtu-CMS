@@ -93,10 +93,10 @@ class BatchExportExecutable implements MukurtuExportExecutableInterface
     $context['sandbox']['deliverables'] = array_slice($context['sandbox']['deliverables'], $batchSize);
 
     // Zip the files.
-    foreach ($filesBatch as $fileUri) {
-      $filePath = $fs->realpath($fileUri);
+    foreach ($filesBatch as $fileToZip) {
+      $filePath = $fs->realpath($fileToZip['uri']);
       if ($filePath) {
-        $zip->addFile($filePath, basename($filePath));
+        $zip->addFile($filePath, $fileToZip['entryname'] ?? basename($filePath));
       }
       $context['sandbox']['packaged']++;
     }

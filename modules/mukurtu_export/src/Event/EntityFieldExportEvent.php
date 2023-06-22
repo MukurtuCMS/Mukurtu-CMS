@@ -67,4 +67,8 @@ class EntityFieldExportEvent extends Event
     return $this;
   }
 
+  public function packageFile($uri, $entryname) {
+    $this->context['results']['deliverables']['files'][] = ['uri' => $uri, 'entryname' => $entryname];
+  }
+
 }

@@ -250,7 +250,7 @@ class CSV extends ExporterBase
     $context['sandbox']['batch']['output_files'][$entity_type_id][$bundle] = $output;
 
     // Add file as deliverable.
-    $context['results']['deliverables']['metadata'][] = $filepath;
+    $context['results']['deliverables']['metadata'][] = ['uri' => $filepath, 'entryname' => basename($filepath)];
 
     // Check if we've written headers for this file.
     if ($output && !isset($context['results']['headers_written'][$entity_type_id][$bundle])) {

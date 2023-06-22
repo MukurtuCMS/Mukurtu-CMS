@@ -80,13 +80,6 @@ class CsvExporterFormBase extends EntityForm
       '#default_value' => $entity->getDescription(),
     ];
 
-    $form['include_files'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Include files in export package'),
-      '#description' => $this->t('If enabled, the binary files referenced by file fields will be included in the export package.'),
-      '#default_value' => $entity->getIncludeFiles(),
-    ];
-
     $form['csv'] = [
       '#type' => 'details',
       '#open' => TRUE,
@@ -104,6 +97,50 @@ class CsvExporterFormBase extends EntityForm
 
     $form['entity_fields_export_list'] = $this->buildEntityFieldMapping();
 
+    $form['field_type_specific'] = [
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#title' => $this->t("Field Type Settings")
+    ];
+
+    $form['field_type_specific']['file'] = [
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#title' => $this->t("File")
+    ];
+
+    $form['field_type_specific']['file']['include_files'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Include files in export package'),
+      '#description' => $this->t('If enabled, the binary files referenced by file fields will be included in the export package.'),
+      '#default_value' => $entity->getIncludeFiles(),
+    ];
+    $form['field_type_specific']['file']['field_file'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('File export handling'),
+      '#default_value' => $entity->getFileFieldSetting(),
+      '#options' => [
+        'id' => $this->t('Export identifier (file ID or UUID) only'),
+        'path_with_binary' => $this->t('Include the binary file in the export package and export the relative path to the file.')
+      ],
+    ];
+
+    $form['field_type_specific']['image'] = [
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#title' => $this->t("Image")
+    ];
+
+    $form['field_type_specific']['image']['field_image'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Image export handling'),
+      '#default_value' => $entity->getImageFieldSetting(),
+      '#options' => [
+        'id' => $this->t('Export identifier (file ID or UUID) only'),
+        'path_with_binary' => $this->t('Include the binary file in the export package and export the relative path to the file.')
+      ],
+    ];
+
     return $form;
   }
 
@@ -112,7 +149,8 @@ class CsvExporterFormBase extends EntityForm
     $entity = $this->entity;
 
     $build = [
-      '#type' => 'fieldset',
+      '#type' => 'details',
+      '#open' => TRUE,
       '#title' => $this->t("Field Mappings")
     ];
 
@@ -260,6 +298,7 @@ class CsvExporterFormBase extends EntityForm
     }
 
     $entity->setMultivalueDelimiter($form_state->getValue('multivalue_delimiter'));
+    $entity->setImageFieldSetting($form_state->getValue('field_image'));
     $entity->set('entity_fields_export_list', $field_list);
     $status = $entity->save();
     $form_state->setRedirect('mukurtu_export.export_settings');

@@ -27,6 +27,8 @@ use Drupal\user\UserInterface;
  *     "include_files",
  *     "entity_fields_export_list",
  *     "multivalue_delimiter",
+ *     "field_file",
+ *     "field_image",
  *   },
  *   handlers = {
  *     "access" = "Drupal\mukurtu_export\CsvExporterAccessController",
@@ -62,6 +64,8 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
   protected $entity_fields_export_list;
 
   protected $multivalue_delimiter;
+  protected $field_file;
+  protected $field_image;
 
 
   /**
@@ -75,6 +79,14 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
     if (!$this->getMultivalueDelimiter()) {
       $this->setMultivalueDelimiter('||');
+    }
+
+    if (!$this->getFileFieldSetting()) {
+      $this->setFileFieldSetting('id');
+    }
+
+    if (!$this->getImageFieldSetting()) {
+      $this->setImageFieldSetting('id');
     }
 
 
@@ -116,6 +128,28 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
   public function setIncludeFiles(bool $include_files) {
     $this->include_files = $include_files;
+    return $this;
+  }
+
+  public function getFileFieldSetting()
+  {
+    return $this->field_file;
+  }
+
+  public function setFileFieldSetting(string $file_field_option)
+  {
+    $this->field_file = $file_field_option;
+    return $this;
+  }
+
+  public function getImageFieldSetting()
+  {
+    return $this->field_image;
+  }
+
+  public function setImageFieldSetting(string $image_field_option)
+  {
+    $this->field_image = $image_field_option;
     return $this;
   }
 

@@ -34,4 +34,10 @@ mukurtu_export.csv_exporter.*:
     multivalue_delimiter:
       type: string
       label: 'Multivalue delimiter'
+    field_file:
+      type: string
+      label: 'File field export handling'
+    field_image:
+      type: string
+      label: 'Image field export handling'
 
