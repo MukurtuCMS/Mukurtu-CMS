@@ -26,6 +26,7 @@ use Drupal\user\UserInterface;
  *     "site_wide",
  *     "include_files",
  *     "entity_fields_export_list",
+ *     "multivalue_delimiter",
  *   },
  *   handlers = {
  *     "access" = "Drupal\mukurtu_export\CsvExporterAccessController",
@@ -60,14 +61,23 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
   protected $entity_fields_export_list;
 
+  protected $multivalue_delimiter;
+
 
   /**
    * {@inheritdoc}
    */
   public function __construct(array $values, $entity_type) {
     parent::__construct($values, $entity_type);
+
     $uid = $this->getOwnerId() ?? (\Drupal::currentUser()->id() ?? 1);
     $this->setOwnerId($uid);
+
+    if (!$this->getMultivalueDelimiter()) {
+      $this->setMultivalueDelimiter('||');
+    }
+
+
   }
 
   /**
@@ -120,6 +130,15 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
   public function isSiteWide() {
     return $this->site_wide == TRUE;
+  }
+
+  public function getMultivalueDelimiter() {
+    return $this->multivalue_delimiter;
+  }
+
+  public function setMultivalueDelimiter($multivalue_delimiter) {
+    $this->multivalue_delimiter = $multivalue_delimiter;
+    return $this;
   }
 
   public function getMappedFields($entity_type_id, $bundle) {

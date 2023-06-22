@@ -31,4 +31,7 @@ mukurtu_export.csv_exporter.*:
             export_label:
               type: string
               label: 'Label'
+    multivalue_delimiter:
+      type: string
+      label: 'Multivalue delimiter'
 

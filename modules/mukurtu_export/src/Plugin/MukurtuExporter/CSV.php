@@ -353,7 +353,7 @@ class CSV extends ExporterBase
     $event_dispatcher = \Drupal::service('event_dispatcher');
 
     // Get mapping to determine what fields to export.
-    $multiValueDelimiter = '||';
+    $multiValueDelimiter = $context['sandbox']['config']->getMultivalueDelimiter();
 
     $export = [];
     foreach($context['sandbox']['config']->getExportFields($entity->getEntityTypeId(), $entity->bundle()) as $field_name) {

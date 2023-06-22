@@ -87,6 +87,21 @@ class CsvExporterFormBase extends EntityForm
       '#default_value' => $entity->getIncludeFiles(),
     ];
 
+    $form['csv'] = [
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#title' => $this->t("CSV File Settings")
+    ];
+
+    $form['csv']['multivalue_delimiter'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Multi-value Delimiter'),
+      '#maxlength' => 255,
+      '#size' => 5,
+      '#default_value' => $entity->getMultivalueDelimiter(),
+      '#required' => TRUE,
+    ];
+
     $form['entity_fields_export_list'] = $this->buildEntityFieldMapping();
 
     return $form;
@@ -221,6 +236,7 @@ class CsvExporterFormBase extends EntityForm
 
   public function save(array $form, FormStateInterface $form_state)
   {
+    /** @var \Drupal\mukurtu_export\Entity\CsvExporter $entity */
     $entity = $this->getEntity();
     $values = $form_state->getValues();
 
@@ -243,6 +259,7 @@ class CsvExporterFormBase extends EntityForm
       }
     }
 
+    $entity->setMultivalueDelimiter($form_state->getValue('multivalue_delimiter'));
     $entity->set('entity_fields_export_list', $field_list);
     $status = $entity->save();
     $form_state->setRedirect('mukurtu_export.export_settings');
