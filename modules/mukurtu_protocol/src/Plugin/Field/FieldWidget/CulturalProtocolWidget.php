@@ -58,7 +58,15 @@ class CulturalProtocolWidget extends WidgetBase {
     $label = FieldFilteredMarkup::create($label);
   }
 
-  protected function getOptions() {
+  /**
+   * Fetch community/protocol options.
+   *
+   * @return mixed[]
+   *   Array of all community/protocol options, indexed by ID.
+   */
+  protected function getOptions(): array {
+    $options = [];
+
     // Get the protocol options for the user.
     $protocolIds = CulturalProtocols::getProtocolsByUserPermission(['apply protocol']);
 
