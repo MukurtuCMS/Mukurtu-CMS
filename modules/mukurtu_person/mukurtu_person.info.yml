@@ -8,5 +8,6 @@ dependencies:
   - mukurtu_core
   - mukurtu_protocol
   - mukurtu_taxonomy
+  - mukurtu_drafts
 
 version: '8.x-1.x-dev'

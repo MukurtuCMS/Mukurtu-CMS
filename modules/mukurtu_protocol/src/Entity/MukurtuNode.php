@@ -15,7 +15,10 @@ class MukurtuNode extends Node implements CulturalProtocolControlledInterface, M
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
+
+    // Add the drafts field.
+    $definitions += static::draftBaseFieldDefinitions($entity_type);
+
     return $definitions;
   }
-
 }

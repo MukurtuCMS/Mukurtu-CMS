@@ -8,12 +8,18 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_digital_heritage\DigitalHeritageInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftTrait;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 
-class DigitalHeritage extends Node implements DigitalHeritageInterface, CulturalProtocolControlledInterface {
+class DigitalHeritage extends Node implements DigitalHeritageInterface, CulturalProtocolControlledInterface, MukurtuDraftInterface {
   use CulturalProtocolControlledTrait;
+  use MukurtuDraftTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
+
+    // Add the drafts field.
+    $definitions += static::draftBaseFieldDefinitions($entity_type);
 
     $definitions['field_cultural_narrative'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Cultural Narrative')
