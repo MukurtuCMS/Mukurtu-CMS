@@ -24,7 +24,6 @@ use Drupal\user\UserInterface;
  *     "uid",
  *     "description",
  *     "site_wide",
- *     "include_files",
  *     "entity_fields_export_list",
  *     "multivalue_delimiter",
  *     "field_file",
@@ -55,8 +54,6 @@ use Drupal\user\UserInterface;
 class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 {
   protected $uid;
-
-  protected $include_files;
 
   protected $description;
   protected $site_wide;
@@ -119,15 +116,6 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
    */
   public function setOwnerId($uid) {
     $this->uid = $uid;
-    return $this;
-  }
-
-  public function getIncludeFiles() {
-    return $this->include_files;
-  }
-
-  public function setIncludeFiles(bool $include_files) {
-    $this->include_files = $include_files;
     return $this;
   }
 

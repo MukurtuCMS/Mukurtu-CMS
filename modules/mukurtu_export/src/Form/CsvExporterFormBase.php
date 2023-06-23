@@ -109,19 +109,14 @@ class CsvExporterFormBase extends EntityForm
       '#title' => $this->t("File")
     ];
 
-    $form['field_type_specific']['file']['include_files'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Include files in export package'),
-      '#description' => $this->t('If enabled, the binary files referenced by file fields will be included in the export package.'),
-      '#default_value' => $entity->getIncludeFiles(),
-    ];
     $form['field_type_specific']['file']['field_file'] = [
       '#type' => 'radios',
       '#title' => $this->t('File export handling'),
       '#default_value' => $entity->getFileFieldSetting(),
       '#options' => [
-        'id' => $this->t('Export identifier (file ID or UUID) only'),
-        'path_with_binary' => $this->t('Include the binary file in the export package and export the relative path to the file.')
+        'id' => $this->t('Export the identifier (file ID or UUID) only'),
+        'path_with_binary' => $this->t('Package the binary file and export the relative path.'),
+        'file_entity' => $this->t('Package the binary file and export the referenced file entity'),
       ],
     ];
 
@@ -137,8 +132,8 @@ class CsvExporterFormBase extends EntityForm
       '#default_value' => $entity->getImageFieldSetting(),
       '#options' => [
         'id' => $this->t('Export the identifier (file ID or UUID) only'),
-        'path_with_binary' => $this->t('Package the binary file and export the relative path to the file.'),
-        'file_entity' => $this->t('Package the binary file and export the referenced file entity'),
+        'path_with_binary' => $this->t('Package the binary image file and export the relative path.'),
+        'file_entity' => $this->t('Package the binary image file and export the referenced image file entity'),
       ],
     ];
 

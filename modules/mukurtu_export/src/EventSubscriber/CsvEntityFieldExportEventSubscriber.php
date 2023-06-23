@@ -33,6 +33,10 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface
     $field = $entity->get($field_name);
     $fieldType = $field->getFieldDefinition()->getType() ?? NULL;
 
+    if ($fieldType == 'file') {
+      return $this->exportFile($event, $field, $config);
+    }
+
     if ($fieldType == 'image') {
       return $this->exportImage($event, $field, $config);
     }
@@ -46,20 +50,50 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface
     $event->setValue($exportValue);
   }
 
-  protected function exportImage(EntityFieldExportEvent $event, $field, CsvExporter $config) {
-    $idSetting = $config->getImageFieldSetting();
+
+  protected function exportFile(EntityFieldExportEvent $event, $field, CsvExporter $config)
+  {
+    $setting = $config->getFileFieldSetting();
     $export = [];
 
     foreach ($field->getValue() as $value) {
       if ($fid = ($value['target_id'] ?? NULL)) {
         // Export path and package binary file.
-        if ($idSetting == 'path_with_binary') {
+        if ($setting == 'path_with_binary') {
           $export[] = $this->packageFile($event, $fid);
           continue;
         }
 
         // Export whole file entity.
-        if ($idSetting == 'file_entity') {
+        if ($setting == 'file_entity') {
+          if ($this->exportEntityById($event, 'file', $fid)) {
+            $export[] = $fid;
+            $this->packageFile($event, $fid);
+            continue;
+          }
+        }
+
+        // Default.
+        $export[] = $fid;
+      }
+    }
+    $event->setValue($export);
+  }
+
+  protected function exportImage(EntityFieldExportEvent $event, $field, CsvExporter $config) {
+    $setting = $config->getImageFieldSetting();
+    $export = [];
+
+    foreach ($field->getValue() as $value) {
+      if ($fid = ($value['target_id'] ?? NULL)) {
+        // Export path and package binary file.
+        if ($setting == 'path_with_binary') {
+          $export[] = $this->packageFile($event, $fid);
+          continue;
+        }
+
+        // Export whole file entity.
+        if ($setting == 'file_entity') {
           if($this->exportEntityById($event, 'file', $fid)) {
             $export[] = $fid;
             $this->packageFile($event, $fid);
