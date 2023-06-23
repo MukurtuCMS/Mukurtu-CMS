@@ -11,6 +11,7 @@ dependencies:
   - media_library
   - mukurtu_core
   - mukurtu_protocol
+  - mukurtu_drafts
   - path
   - search_api
   - slick

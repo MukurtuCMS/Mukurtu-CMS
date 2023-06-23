@@ -1,0 +1,9 @@
+name: 'Mukurtu Drafts testing module'
+type: module
+description: ''
+package: Testing
+version: '8.x-1.x-dev'
+dependencies:
+  - drupal:field
+  - drupal:text
+  - drupal:system

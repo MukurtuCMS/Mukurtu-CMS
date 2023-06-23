@@ -12,13 +12,19 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_core\Entity\BundleSpecificCheckCreateAccessInterface;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftTrait;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 
-class DictionaryWord extends Node implements DictionaryWordInterface, CulturalProtocolControlledInterface, BundleSpecificCheckCreateAccessInterface {
+class DictionaryWord extends Node implements DictionaryWordInterface, CulturalProtocolControlledInterface, BundleSpecificCheckCreateAccessInterface, MukurtuDraftInterface {
   use CulturalProtocolControlledTrait;
+  use MukurtuDraftTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
   {
     $definitions = self::getProtocolFieldDefinitions();
+
+    // Add the drafts field.
+    $definitions += static::draftBaseFieldDefinitions($entity_type);
 
     $definitions['field_glossary_entry'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Glossary Entry'))

@@ -1,13 +1,10 @@
-name: 'Mukurtu Person'
+name: 'Mukurtu Drafts'
 type: module
-description: 'Provides the person content type.'
+description: 'Provides capability for drafts.'
 core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
 dependencies:
   - mukurtu_core
   - mukurtu_protocol
-  - mukurtu_taxonomy
-  - mukurtu_drafts
-
 version: '8.x-1.x-dev'

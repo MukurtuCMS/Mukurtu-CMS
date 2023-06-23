@@ -15,5 +15,6 @@ dependencies:
   - mukurtu_taxonomy
   - mukurtu_collection
   - mukurtu_community_records
+  - mukurtu_drafts
 
 version: '8.x-1.x-dev'

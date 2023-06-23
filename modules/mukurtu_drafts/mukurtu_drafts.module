@@ -1,0 +1,26 @@
+<?php
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
+
+/**
+ * Implements hook_entity_access().
+ */
+function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, AccountInterface $account)
+{
+  if ($entity instanceof MukurtuDraftInterface) {
+    // Check if the entity is a draft.
+    if ($entity->isDraft()) {
+      if ($account->id() == $entity->getOwnerId()) {
+        // Only grant draft access to the entity's authored by uid.
+        return AccessResult::allowed();
+      }
+      return AccessResult::forbidden();
+    }
+  }
+  // If entity does not implement MukurtuDraftInterface, let others determine
+  // access.
+  return AccessResult::neutral();
+}

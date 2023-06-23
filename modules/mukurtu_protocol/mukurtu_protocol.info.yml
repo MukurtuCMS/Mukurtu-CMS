@@ -12,5 +12,6 @@ dependencies:
   - media_library
   - message
   - mukurtu_core
+  - mukurtu_drafts
 
 version: '8.x-1.x-dev'

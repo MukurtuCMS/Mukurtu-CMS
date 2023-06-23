@@ -8,12 +8,18 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_person\PersonInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftTrait;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 
-class Person extends Node implements PersonInterface, CulturalProtocolControlledInterface {
+class Person extends Node implements PersonInterface, CulturalProtocolControlledInterface, MukurtuDraftInterface {
   use CulturalProtocolControlledTrait;
+  use MukurtuDraftTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
+
+    // Add the drafts field.
+    $definitions += static::draftBaseFieldDefinitions($entity_type);
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
