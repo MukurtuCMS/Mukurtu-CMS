@@ -285,8 +285,18 @@ class CSV extends ExporterBase
       $alreadyExported = $context['results']['exported_entities'][$entity_type_id][$id] ?? FALSE;
       if (!$alreadyExported) {
         $entity = $storage->load($id);
+
+        // Regardless of the result, remove entity from the list.
+        unset($context['results']['entities'][$entity_type_id][$id]);
+
         if (!$entity) {
           // @todo what do we do on this failure?
+          continue;
+        }
+
+        // Confirm user has access to view this entity.
+        if (!$entity->access('view')) {
+          // @todo should we inform the user of this failure?
           continue;
         }
 
@@ -307,9 +317,6 @@ class CSV extends ExporterBase
         $context['results']['exported_entities'][$entity_type_id][$id] = $id;
         $context['results']['exported_entities_count']++;
       }
-
-      // Remove entity from the list.
-      unset($context['results']['entities'][$entity_type_id][$id]);
 
       // @todo check for memory limits and exit early if getting close?
     }

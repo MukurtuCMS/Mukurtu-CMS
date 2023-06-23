@@ -99,8 +99,8 @@ class CsvExporterFormBase extends EntityForm
       '#title' => $this->t('File export handling'),
       '#default_value' => $entity->getFileFieldSetting(),
       '#options' => [
-        'id' => $this->t('Export the identifier (file ID or UUID) only'),
-        'path_with_binary' => $this->t('Package the binary file and export the relative path.'),
+        'id' => $this->t('Export the identifier (file ID or UUID)'),
+        'path_with_binary' => $this->t('Package the binary file and export the relative path'),
         'file_entity' => $this->t('Package the binary file and export the referenced file entity'),
       ],
     ];
@@ -116,9 +116,67 @@ class CsvExporterFormBase extends EntityForm
       '#title' => $this->t('Image export handling'),
       '#default_value' => $entity->getImageFieldSetting(),
       '#options' => [
-        'id' => $this->t('Export the identifier (file ID or UUID) only'),
-        'path_with_binary' => $this->t('Package the binary image file and export the relative path.'),
+        'id' => $this->t('Export the identifier (image ID or UUID)'),
+        'path_with_binary' => $this->t('Package the binary image file and export the relative path'),
         'file_entity' => $this->t('Package the binary image file and export the referenced image file entity'),
+      ],
+    ];
+
+    $form['field_type_specific']['entity_reference'] = [
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#title' => $this->t("Relationships")
+    ];
+
+    $form['field_type_specific']['entity_reference']['entity_reference_node'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Content'),
+      '#default_value' => $entity->getEntityReferenceSetting('node'),
+      '#options' => [
+        'id' => $this->t('Export the identifier (node ID or UUID)'),
+        'entity' => $this->t('Export the referenced content'),
+      ],
+    ];
+
+    $form['field_type_specific']['entity_reference']['entity_reference_media'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Media'),
+      '#default_value' => $entity->getEntityReferenceSetting('media'),
+      '#options' => [
+        'id' => $this->t('Export the identifier (media ID or UUID)'),
+        'entity' => $this->t('Export the referenced media'),
+      ],
+    ];
+
+    $form['field_type_specific']['entity_reference']['entity_reference_taxonomy_term'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Taxonomy Terms'),
+      '#default_value' => $entity->getEntityReferenceSetting('taxonomy_term'),
+      '#options' => [
+        'id' => $this->t('Export the identifier (term ID or UUID)'),
+        'name' => $this->t('Export the term label'),
+        'entity' => $this->t('Export the referenced taxonomy term'),
+      ],
+    ];
+
+    $form['field_type_specific']['entity_reference']['entity_reference_user'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Users'),
+      '#default_value' => $entity->getEntityReferenceSetting('user'),
+      '#options' => [
+        'id' => $this->t('Export the identifier (user ID or UUID)'),
+        'username' => $this->t('Export the username'),
+        //'entity' => $this->t('Export the referenced user'),
+      ],
+    ];
+
+    $form['field_type_specific']['entity_reference']['entity_reference_paragraph'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Paragraphs'),
+      '#default_value' => $entity->getEntityReferenceSetting('paragraph'),
+      '#options' => [
+        'id' => $this->t('Export the identifier (paragraph ID or UUID)'),
+        'entity' => $this->t('Export the referenced paragraph'),
       ],
     ];
 

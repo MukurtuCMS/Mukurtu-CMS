@@ -41,6 +41,14 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface
       return $this->exportImage($event, $field, $config);
     }
 
+    if ($fieldType == 'cultural_protocol') {
+      return $this->exportCulturalProtocol($event, $field, $config);
+    }
+
+    if ($fieldType == 'entity_reference') {
+      return $this->exportEntityReference($event, $field, $config);
+    }
+
     // Default handling.
     $values = $entity->get($field_name)->getValue();
     $exportValue = [];
@@ -48,6 +56,56 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface
       $exportValue[] = is_array($value) ? reset($value) : $value;
     }
     $event->setValue($exportValue);
+  }
+
+  protected function exportEntityReference(EntityFieldExportEvent $event, $field, CsvExporter $config) {
+    $export = [];
+    $target_type = $field->getFieldDefinition()->getSettings()['target_type'] ?? NULL;
+    $option = $config->getEntityReferenceSetting($target_type);
+
+    foreach ($field->getValue() as $value) {
+      if ($id = ($value['target_id'] ?? NULL)) {
+        if ($option && $target_type) {
+          if ($option == 'id') {
+            $export[] = $id;
+            continue;
+          }
+
+          if ($option == 'entity') {
+            $this->exportEntityById($event, $target_type, $id);
+            $export[] = $id;
+            continue;
+          }
+
+          if ($target_type == 'user' && $option == 'username') {
+            if ($user = \Drupal::entityTypeManager()->getStorage($target_type)->load($id)) {
+              /** @var \Drupal\user\UserInterface $user */
+              $export[] = $user->getAccountName();
+            }
+          }
+
+          if ($target_type == 'taxonomy_term' && $option == 'name') {
+            if ($term = \Drupal::entityTypeManager()->getStorage($target_type)->load($id)) {
+              /** @var \Drupal\taxonomy\TermInterface $term */
+              $export[] = $term->getName();
+            }
+          }
+        }
+
+        $export[] = $id;
+      }
+    }
+    $event->setValue($export);
+  }
+
+  protected function exportCulturalProtocol(EntityFieldExportEvent $event, $field, CsvExporter $config) {
+    $export = [];
+
+    foreach ($field->getValue() as $value) {
+      $protocols = str_replace('|', '', $value['protocols']);
+      $export[] = "{$value['sharing_setting']}({$protocols})";
+    }
+    $event->setValue($export);
   }
 
 

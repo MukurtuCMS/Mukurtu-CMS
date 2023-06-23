@@ -32,6 +32,11 @@ use Drupal\user\UserInterface;
  *     "multivalue_delimiter",
  *     "field_file",
  *     "field_image",
+ *     "entity_reference_node",
+ *     "entity_reference_media",
+ *     "entity_reference_taxonomy_term",
+ *     "entity_reference_user",
+ *     "entity_reference_paragraph",
  *   },
  *   handlers = {
  *     "access" = "Drupal\mukurtu_export\CsvExporterAccessController",
@@ -71,6 +76,11 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
   protected $multivalue_delimiter;
   protected $field_file;
   protected $field_image;
+  protected $entity_reference_node;
+  protected $entity_reference_media;
+  protected $entity_reference_user;
+  protected $entity_reference_taxonomy_term;
+  protected $entity_reference_paragraph;
 
 
   /**
@@ -111,7 +121,11 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
       $this->setImageFieldSetting('id');
     }
 
-
+    foreach (['node', 'media', 'taxonomy_term', 'user', 'paragraph'] as $target_type) {
+      if (!$this->getEntityReferenceSetting($target_type)) {
+        $this->setEntityReferenceSetting($target_type, 'id');
+      }
+    }
   }
 
   /**
@@ -163,6 +177,16 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
   public function setImageFieldSetting(string $image_field_option)
   {
     $this->field_image = $image_field_option;
+    return $this;
+  }
+
+  public function getEntityReferenceSetting($target_type) {
+    return $this->{"entity_reference_{$target_type}"} ?? NULL;
+  }
+
+  public function setEntityReferenceSetting($target_type, $option)
+  {
+    $this->{"entity_reference_{$target_type}"} = $option;
     return $this;
   }
 
@@ -289,7 +313,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
   }
 
   public function getSupportedEntityTypes() {
-    return ['node', 'media', 'community', 'protocol', 'paragraph', 'file'];
+    return ['node', 'media', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term', 'user'];
   }
 
 }
