@@ -11,12 +11,18 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftTrait;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 
-class Collection extends Node implements CollectionInterface, CulturalProtocolControlledInterface {
+class Collection extends Node implements CollectionInterface, CulturalProtocolControlledInterface, MukurtuDraftInterface {
   use CulturalProtocolControlledTrait;
+  use MukurtuDraftTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
+
+    // Add the drafts field.
+    $definitions += static::draftBaseFieldDefinitions($entity_type);
 
     $definitions['field_child_collections'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Sub-Collections'))

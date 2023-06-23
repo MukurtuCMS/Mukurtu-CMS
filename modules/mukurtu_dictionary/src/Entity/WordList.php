@@ -11,12 +11,18 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftTrait;
+use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 
-class WordList extends Node implements WordListInterface, CulturalProtocolControlledInterface {
+class WordList extends Node implements WordListInterface, CulturalProtocolControlledInterface, MukurtuDraftInterface {
   use CulturalProtocolControlledTrait;
+  use MukurtuDraftTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
+
+    // Add the drafts field.
+    $definitions += static::draftBaseFieldDefinitions($entity_type);
 
     $definitions['field_description'] = BaseFieldDefinition::create('text_with_summary')
       ->setLabel(t('Description'))

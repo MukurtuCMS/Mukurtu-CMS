@@ -11,6 +11,7 @@ dependencies:
     - field_group
     - media_library
     - mukurtu_protocol
+    - mukurtu_drafts
     - path
     - text
 third_party_settings:
@@ -71,7 +72,7 @@ mode: default
 content:
   comment:
     type: comment_default
-    weight: 123
+    weight: 9
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -80,6 +81,13 @@ content:
     weight: 2
     region: content
     settings: {  }
+    third_party_settings: {  }
+  draft:
+    type: boolean_checkbox
+    weight: 6
+    region: content
+    settings:
+      display_label: true
     third_party_settings: {  }
   field_child_collections:
     type: entity_browser_entity_reference
@@ -250,7 +258,7 @@ content:
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 6
+    weight: 7
     region: content
     settings:
       display_label: true
@@ -281,7 +289,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   url_redirects:
-    weight: 7
+    weight: 8
     region: content
     settings: {  }
     third_party_settings: {  }
