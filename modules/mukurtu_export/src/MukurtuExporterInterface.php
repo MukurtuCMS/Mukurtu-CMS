@@ -21,7 +21,7 @@ interface MukurtuExporterInterface extends ConfigurableInterface, PluginInspecti
    *   The $form array with additional form elements for the settings of this
    *   exporter. The submitted form values should match $this->settings.
    */
-  public function settingsForm(array $form, FormStateInterface $form_state);
+  public function settingsForm(array $form, FormStateInterface $form_state, $settings = []);
   public function getSettings(array &$form, FormStateInterface $form_state);
 
 

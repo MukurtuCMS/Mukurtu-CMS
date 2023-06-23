@@ -61,22 +61,20 @@ class CSV extends ExporterBase
     ];
   }
 
-  protected function getSiteWideConfigOptions() {
+  protected function addSiteWideConfigOptions(&$element) {
     $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
     $query = $storage->getQuery();
     $result = $query->condition('site_wide', TRUE)->execute();
-    $options = [];
     if (!empty($result)) {
       $entities = $storage->loadMultiple($result);
       foreach ($entities as $id => $entity) {
-        $options[$id] = $entity->label();
+        $element['#options'][$id] = $entity->label();
+        $element[$id]['#description'] = $entity->getDescription();
       }
     }
-    return $options;
   }
 
-  protected function getUserConfigOptions()
-  {
+  protected function addUserConfigOptions(&$element) {
     $uid = \Drupal::currentUser()->id();
     $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
     $query = $storage->getQuery();
@@ -85,13 +83,13 @@ class CSV extends ExporterBase
     if (!empty($result)) {
       $entities = $storage->loadMultiple($result);
       foreach($entities as $id => $entity) {
-        $options[$id] = $entity->label();
+        $element['#options'][$id] = $entity->label();
+        $element[$id]['#description'] = $entity->getDescription();
       }
     }
-    return $options;
   }
 
-  public function settingsForm(array $form, FormStateInterface $form_state)
+  public function settingsForm(array $form, FormStateInterface $form_state, $settings = [])
   {
   //  $settings = (array) $this->getConfiguration()['settings'] + $this->defaultConfiguration()['settings'];
 /*
@@ -105,16 +103,14 @@ class CSV extends ExporterBase
       ]
     ]; */
 
-    $options = $this->getSiteWideConfigOptions() + $this->getUserConfigOptions();
-    $ids = array_keys($options);
-    $default = reset($ids);
-
     $form['export_settings'] = [
       '#type' => 'radios',
       '#title' => $this->t('Export Settings'),
-      '#default_value' => $default,
-      '#options' => $options,
+      '#default_value' => $settings['settings_id'] ?? NULL,
+      '#options' => [],//$options,
     ];
+    $this->addSiteWideConfigOptions($form['export_settings']);
+    $this->addUserConfigOptions($form['export_settings']);
 
     $form['new_setting'] = [
       '#type' => 'link',
@@ -135,8 +131,6 @@ class CSV extends ExporterBase
     $settings = [];
     $settings['settings_id'] = $form_state->getValue('export_settings');
     //$settings['binary_files'] = $form_state->getValue('binary_files');
-    // temp.
-    $settings['field_mapping'] = $this->defaultConfiguration()['settings']['field_mapping'];
     return $settings;
   }
 
@@ -364,7 +358,6 @@ class CSV extends ExporterBase
    */
   public static function export(EntityInterface $entity, &$context)
   {
-    //$moduleHandler = \Drupal::moduleHandler();
     $event_dispatcher = \Drupal::service('event_dispatcher');
 
     // Get mapping to determine what fields to export.
@@ -376,7 +369,6 @@ class CSV extends ExporterBase
       $event_dispatcher->dispatch($event, EntityFieldExportEvent::EVENT_NAME);
       $exportValue = $event->getValue();
 
-      //$moduleHandler->alter("exporter_csv_field_{$fieldType}", $exportValue, $entity, $field_name);
       $export[] = implode($multiValueDelimiter, $exportValue);
     }
 

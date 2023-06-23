@@ -23,7 +23,8 @@ class ExportSettingsForm extends ExportBaseForm
    */
   public function buildForm(array $form, FormStateInterface $form_state)
   {
-    $form += $this->exporter->settingsForm($form, $form_state);
+    $settings = $this->getExporterConfig()['settings'] ?? [];
+    $form += $this->exporter->settingsForm($form, $form_state, $settings);
 
     $form['actions'] = [
       '#type' => 'actions',
