@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_export\EventSubscriber;
 
+use Drupal\Core\Entity\EntityInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
 use Drupal\mukurtu_export\Entity\CsvExporter;
@@ -51,16 +52,34 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface
 
     foreach ($field->getValue() as $value) {
       if ($fid = ($value['target_id'] ?? NULL)) {
-        if ($idSetting == 'id') {
-          $export[] = $fid;
+        // Export path and package binary file.
+        if ($idSetting == 'path_with_binary') {
+          $export[] = $this->packageFile($event, $fid);
           continue;
         }
 
-        // Export path and package binary file.
-        $export[] = $this->packageFile($event, $fid);
+        // Export whole file entity.
+        if ($idSetting == 'file_entity') {
+          if($this->exportEntityById($event, 'file', $fid)) {
+            $export[] = $fid;
+            $this->packageFile($event, $fid);
+            continue;
+          }
+        }
+
+        // Default.
+        $export[] = $fid;
       }
     }
     $event->setValue($export);
+  }
+
+  protected function exportEntityById(EntityFieldExportEvent $event, $entity_type_id, $id): EntityInterface|null {
+    if ($entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($id)) {
+      $event->exportAdditionalEntity($entity);
+      return $entity;
+    }
+    return NULL;
   }
 
   protected function packageFile(EntityFieldExportEvent $event, $fid): string|null {

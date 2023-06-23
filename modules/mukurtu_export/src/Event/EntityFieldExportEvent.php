@@ -71,4 +71,8 @@ class EntityFieldExportEvent extends Event
     $this->context['results']['deliverables']['files'][] = ['uri' => $uri, 'entryname' => $entryname];
   }
 
+  public function exportAdditionalEntity(EntityInterface $entity) {
+    $this->context['results']['entities'][$entity->getEntityTypeId()][$entity->id()] = $entity->id();
+  }
+
 }

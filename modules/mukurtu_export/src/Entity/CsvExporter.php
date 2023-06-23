@@ -244,7 +244,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
   }
 
   public function getSupportedEntityTypes() {
-    return ['node', 'media', 'community', 'protocol', 'paragraph'];
+    return ['node', 'media', 'community', 'protocol', 'paragraph', 'file'];
   }
 
 }

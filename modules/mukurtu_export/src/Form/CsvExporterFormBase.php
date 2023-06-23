@@ -136,8 +136,9 @@ class CsvExporterFormBase extends EntityForm
       '#title' => $this->t('Image export handling'),
       '#default_value' => $entity->getImageFieldSetting(),
       '#options' => [
-        'id' => $this->t('Export identifier (file ID or UUID) only'),
-        'path_with_binary' => $this->t('Include the binary file in the export package and export the relative path to the file.')
+        'id' => $this->t('Export the identifier (file ID or UUID) only'),
+        'path_with_binary' => $this->t('Package the binary file and export the relative path to the file.'),
+        'file_entity' => $this->t('Package the binary file and export the referenced file entity'),
       ],
     ];
 
