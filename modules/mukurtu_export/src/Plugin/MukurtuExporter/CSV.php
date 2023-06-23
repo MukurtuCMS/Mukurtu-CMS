@@ -147,10 +147,18 @@ class CSV extends ExporterBase
   {
     // Load the settings config entity.
     $id = $options['settings']['settings_id'];
+    /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
+    $config = \Drupal::entityTypeManager()->getStorage('csv_exporter')->load($id);
     // @todo error handling.
-    if (!$id) {
+    if (!$config) {
       throw new Exception('Failed to load CSV exporter settings.');
     }
+
+    // CSV settings. These won't change from batch to batch.
+    $context['results']['csv']['separator'] = $config->getSeparator();
+    $context['results']['csv']['enclosure'] = $config->getEnclosure();
+    $context['results']['csv']['escape'] = $config->getEscape();
+    $context['results']['csv']['eol'] = $config->getEol();
 
     $context['results']['config_id'] = $options['settings']['settings_id'];
     $context['results']['uid'] = \Drupal::currentUser()->id();
@@ -257,7 +265,7 @@ class CSV extends ExporterBase
 
       $headers = $context['sandbox']['config']->getHeaders($entity_type_id, $bundle);
 
-      fputcsv($output, $headers);
+      fputcsv($output, $headers, $context['results']['csv']['separator'], $context['results']['csv']['enclosure'], $context['results']['csv']['escape']);
       $context['results']['headers_written'][$entity_type_id][$bundle] = TRUE;
     }
 
@@ -293,7 +301,7 @@ class CSV extends ExporterBase
         $result = static::class::export($entity, $context);
 
         // Write out.
-        fputcsv($output, $result);
+        fputcsv($output, $result, $context['results']['csv']['separator'], $context['results']['csv']['enclosure'], $context['results']['csv']['escape']);
 
         // Record export of this entity.
         $context['results']['exported_entities'][$entity_type_id][$id] = $id;

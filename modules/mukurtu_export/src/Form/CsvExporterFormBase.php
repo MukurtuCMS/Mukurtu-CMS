@@ -80,21 +80,6 @@ class CsvExporterFormBase extends EntityForm
       '#default_value' => $entity->getDescription(),
     ];
 
-    $form['csv'] = [
-      '#type' => 'details',
-      '#open' => TRUE,
-      '#title' => $this->t("CSV File Settings")
-    ];
-
-    $form['csv']['multivalue_delimiter'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Multi-value Delimiter'),
-      '#maxlength' => 255,
-      '#size' => 5,
-      '#default_value' => $entity->getMultivalueDelimiter(),
-      '#required' => TRUE,
-    ];
-
     $form['entity_fields_export_list'] = $this->buildEntityFieldMapping();
 
     $form['field_type_specific'] = [
@@ -135,6 +120,58 @@ class CsvExporterFormBase extends EntityForm
         'path_with_binary' => $this->t('Package the binary image file and export the relative path.'),
         'file_entity' => $this->t('Package the binary image file and export the referenced image file entity'),
       ],
+    ];
+
+    $form['csv'] = [
+      '#type' => 'details',
+      '#open' => FALSE,
+      '#title' => $this->t("CSV File Settings")
+    ];
+
+    $form['csv']['separator'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Field delimiter'),
+      '#maxlength' => 2,
+      '#size' => 2,
+      '#default_value' => $entity->getSeparator(),
+      '#required' => TRUE,
+    ];
+
+    $form['csv']['enclosure'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Field enclosure'),
+      '#maxlength' => 2,
+      '#size' => 2,
+      '#default_value' => $entity->getEnclosure(),
+      '#required' => TRUE,
+    ];
+
+    $form['csv']['escape'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Escape character'),
+      '#maxlength' => 2,
+      '#size' => 2,
+      '#default_value' => $entity->getEscape(),
+      '#required' => FALSE,
+    ];
+
+    /*     // Only in PHP 8.1
+        $form['csv']['eol'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('End of line sequence'),
+          '#maxlength' => 255,
+          '#size' => 5,
+          '#default_value' => $entity->getEol(),
+          '#required' => TRUE,
+        ]; */
+
+    $form['csv']['multivalue_delimiter'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Multi-value delimiter'),
+      '#maxlength' => 255,
+      '#size' => 5,
+      '#default_value' => $entity->getMultivalueDelimiter(),
+      '#required' => TRUE,
     ];
 
     return $form;

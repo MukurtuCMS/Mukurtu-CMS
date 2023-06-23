@@ -25,6 +25,10 @@ use Drupal\user\UserInterface;
  *     "description",
  *     "site_wide",
  *     "entity_fields_export_list",
+ *     "separator",
+ *     "enclosure",
+ *     "escape",
+ *     "eol",
  *     "multivalue_delimiter",
  *     "field_file",
  *     "field_image",
@@ -60,6 +64,10 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
   protected $entity_fields_export_list;
 
+  protected $separator;
+  protected $enclosure;
+  protected $escape;
+  protected $eol;
   protected $multivalue_delimiter;
   protected $field_file;
   protected $field_image;
@@ -73,6 +81,23 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
     $uid = $this->getOwnerId() ?? (\Drupal::currentUser()->id() ?? 1);
     $this->setOwnerId($uid);
+
+
+    if (!$this->getSeparator()) {
+      $this->setSeparator(",");
+    }
+
+    if (!$this->getEnclosure()) {
+      $this->setEnclosure('"');
+    }
+
+    if (!$this->getEscape()) {
+      $this->setEscape('\\');
+    }
+
+    if (!$this->getEol()) {
+      $this->setEol('\n');
+    }
 
     if (!$this->getMultivalueDelimiter()) {
       $this->setMultivalueDelimiter('||');
@@ -152,6 +177,38 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
   public function isSiteWide() {
     return $this->site_wide == TRUE;
+  }
+
+  public function getSeparator() {
+    return $this->separator;
+  }
+
+  public function setSeparator($separator) {
+    $this->separator = $separator;
+  }
+
+  public function getEnclosure() {
+    return $this->enclosure;
+  }
+
+  public function setEnclosure($enclosure) {
+    $this->enclosure = $enclosure;
+  }
+
+  public function getEscape() {
+    return $this->escape;
+  }
+
+  public function setEscape($escape) {
+    $this->escape = $escape;
+  }
+
+  public function getEol() {
+    return $this->eol;
+  }
+
+  public function setEol($eol) {
+    $this->eol = $eol;
   }
 
   public function getMultivalueDelimiter() {

@@ -31,6 +31,18 @@ mukurtu_export.csv_exporter.*:
             export_label:
               type: string
               label: 'Label'
+    separator:
+      type: string
+      label: 'Field delimiter character'
+    enclosure:
+      type: string
+      label: 'Field enclosure character'
+    escape:
+      type: string
+      label: 'Escape character'
+    eol:
+      type: string
+      label: 'End of line sequence'
     multivalue_delimiter:
       type: string
       label: 'Multivalue delimiter'
