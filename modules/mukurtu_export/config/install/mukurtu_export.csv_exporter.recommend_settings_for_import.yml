@@ -1,0 +1,339 @@
+langcode: en
+status: true
+dependencies: {  }
+id: recommend_settings_for_import
+label: 'Recommend Settings for Import'
+uid: 1
+description: 'Settings appropriate for export and subsequent import on the same site.'
+site_wide: true
+entity_fields_export_list:
+  node__article:
+    nid: ID
+    langcode: Language
+    uid: 'Authored by'
+    title: Title
+    field_mukurtu_geojson: 'Mukurtu GeoJSON'
+  node__collection:
+    nid: ID
+    uuid: UUID
+    langcode: Language
+    uid: 'Authored by'
+    title: Title
+    field_cultural_protocols: 'Cultural Protocols'
+    field_child_collections: Sub-Collections
+    field_collection_image: Image
+    field_credit: Credit
+    field_description: Description
+    field_items_in_collection: 'Items in Collection'
+    field_keywords: Keywords
+    field_related_content: 'Related Content'
+    field_summary: Summary
+    field_mukurtu_geojson: 'Mukurtu GeoJSON'
+  node__dictionary_word:
+    nid: ID
+    langcode: Language
+    uid: 'Authored by'
+    title: Title
+    field_cultural_protocols: 'Cultural Protocols'
+    field_glossary_entry: 'Glossary Entry'
+    field_keywords: Keywords
+    field_language: Language
+    field_media_assets: 'Media Assets'
+    field_word_entry: 'Word Entry'
+    field_related_content: 'Related Content'
+    field_thumbnail: Thumbnail
+    field_mukurtu_geojson: 'Mukurtu GeoJSON'
+  node__digital_heritage:
+    nid: ID
+    langcode: Language
+    uid: 'Authored by'
+    title: Title
+    default_langcode: 'Default translation'
+    field_cultural_protocols: 'Cultural Protocols'
+    field_cultural_narrative: 'Cultural Narrative'
+    field_description: Description
+    field_coverage_description: 'Location Description'
+    field_traditional_knowledge: 'Traditional Knowledge'
+    field_date_description: 'Date Description'
+    field_source: Source
+    field_summary: Summary
+    field_identifier: Identifier
+    field_rights_and_usage: 'Rights and Usage'
+    field_knowledge_keepers: 'Citing Indigenous Elders and Knowledge Keepers'
+    field_transcription: Transcription
+    field_mukurtu_original_record: 'Original Record'
+    field_related_content: 'Related Content'
+    field_media_assets: 'Media Assets'
+    field_external_links: 'External Links'
+    field_creative_commons: 'Creative Commons Licenses'
+    field_rights_statements: 'Rights Statements'
+    field_coverage: Location
+    field_original_date: 'Original Date'
+    field_category: Category
+    field_contributor: Contributor
+    field_creator: Creator
+    field_format: Format
+    field_keywords: Keyword
+    field_language: Language
+    field_people: People
+    field_publisher: Publisher
+    field_subject: Subject
+    field_type: Type
+    field_content_type: 'Content Type'
+    field_mukurtu_geojson: 'Mukurtu GeoJSON'
+  node__page:
+    nid: ID
+    langcode: Language
+    uid: 'Authored by'
+    title: Title
+    field_mukurtu_geojson: 'Mukurtu GeoJSON'
+  node__person:
+    nid: ID
+    uuid: UUID
+    langcode: Language
+    uid: 'Authored by'
+    title: Title
+    field_cultural_protocols: 'Cultural Protocols'
+    field_keywords: Keywords
+    field_media_assets: 'Media Assets'
+    field_date_born: 'Date Born'
+    field_date_died: 'Date Died'
+    field_deceased: Deceased
+    field_sections: 'Biographical Information Sections'
+    field_related_people: 'Related People'
+    field_related_content: 'Related Content'
+    field_representative_terms: 'Representative Terms'
+    field_mukurtu_geojson: 'Mukurtu GeoJSON'
+  node__word_list:
+    nid: ID
+    langcode: Language
+    uid: 'Authored by'
+    title: Title
+    field_cultural_protocols: 'Cultural Protocols'
+    field_description: Description
+    field_keywords: Keywords
+    field_media_assets: 'Media Assets'
+    field_words: Words
+    body: Body
+    field_mukurtu_geojson: 'Mukurtu GeoJSON'
+  media__audio:
+    mid: ID
+    langcode: Language
+    uid: 'Authored by'
+    name: Name
+    field_cultural_protocols: 'Cultural Protocols'
+    field_media_audio_file: 'Audio file'
+    field_transcription: Transcription
+    field_contributor: Contributor
+    field_keywords: Keywords
+    field_people: People
+    field_thumbnail: Thumbnail
+    field_identifier: Identifier
+  media__document:
+    mid: ID
+    langcode: Language
+    uid: 'Authored by'
+    name: Name
+    field_cultural_protocols: 'Cultural Protocols'
+    field_extracted_text: 'Extracted Text'
+    field_media_document: Document
+    field_keywords: Keywords
+    field_people: People
+    field_thumbnail: Thumbnail
+    field_identifier: Identifier
+  media__image:
+    mid: ID
+    langcode: Language
+    uid: 'Authored by'
+    name: Name
+    field_cultural_protocols: 'Cultural Protocols'
+    field_media_image: Image
+    field_keywords: Keywords
+    field_people: People
+    field_identifier: Identifier
+  media__remote_video:
+    mid: ID
+    langcode: Language
+    uid: 'Authored by'
+    name: Name
+    field_cultural_protocols: 'Cultural Protocols'
+    field_media_oembed_video: 'Video URL'
+    field_keywords: Keywords
+    field_people: People
+    field_thumbnail: Thumbnail
+    field_identifier: Identifier
+  media__video:
+    mid: ID
+    langcode: Language
+    uid: 'Authored by'
+    name: Name
+    field_cultural_protocols: 'Cultural Protocols'
+    field_media_video_file: 'Video file'
+    field_keywords: Keywords
+    field_people: People
+    field_thumbnail: Thumbnail
+    field_identifier: Identifier
+  community__community:
+    id: ID
+    langcode: Language
+    user_id: 'Authored by'
+    name: Name
+    field_description: Description
+    field_access_mode: 'Sharing Protocol'
+    field_community_type: 'Community Type'
+    field_featured_content: 'Featured Content'
+    field_banner_image: 'Banner Image'
+    field_thumbnail_image: 'Thumbnail Image'
+  protocol__protocol:
+    id: ID
+    langcode: Language
+    user_id: 'Authored by'
+    name: Name
+    field_description: Description
+    field_comment_status: 'Comments Status'
+    field_comment_require_approval: 'Comments Require Approval'
+    field_communities: Communities
+    field_access_mode: 'Sharing Protocol'
+  paragraph__dictionary_word_entry:
+    id: ID
+    langcode: 'Language code'
+    field_alternate_spelling: 'Alternate Spelling'
+    field_contributor: Contributor
+    field_definition: Definition
+    field_pronunciation: Pronunciation
+    field_recording: Recording
+    field_sample_sentences: 'Sample Sentences'
+    field_source: Source
+    field_translation: Translation
+    field_word_origin: 'Word Origin'
+    field_word_type: 'Word Type'
+  paragraph__formatted_text_with_title:
+    id: ID
+    langcode: 'Language code'
+    field_title: Title
+    field_body: Body
+  paragraph__indigenous_knowledge_keepers:
+    id: ID
+    langcode: 'Language code'
+    field_name: 'Name of the Elder or Knowledge Keeper'
+    field_nation: Nation/Community
+    field_treaty_territory: 'Treaty Territory'
+    field_living_place: 'City/Community They Live in'
+    field_teaching: 'A Brief Description or Title of the Teaching'
+    field_original_date: Date
+  paragraph__related_person:
+    id: ID
+    langcode: 'Language code'
+    field_related_person: 'Related Person'
+    field_relationship_type: 'Relationship Type'
+  paragraph__sample_sentence:
+    id: ID
+    langcode: 'Language code'
+    field_sentence: 'Sample Sentence'
+    field_sentence_recording: Recording
+  file__file:
+    fid: 'File ID'
+    uid: 'User ID'
+    filename: Filename
+    uri: URI
+    filemime: 'File MIME type'
+    filesize: 'File size'
+    created: Created
+    changed: Changed
+  taxonomy_term__authors:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__category:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+    default_langcode: 'Default translation'
+  taxonomy_term__community_type:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__contributor:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__creator:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__format:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+    revision_default: 'Default revision'
+  taxonomy_term__interpersonal_relationship:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__keywords:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__language:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__people:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__publisher:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__subject:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__tags:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__type:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  taxonomy_term__word_type:
+    tid: 'Term ID'
+    langcode: Language
+    name: Name
+    description: Description
+  user__user:
+    uid: 'User ID'
+    langcode: 'Language code'
+    name: Name
+    mail: Email
+    roles: Roles
+    field_display_name: 'Display Name'
+separator: ','
+enclosure: '"'
+escape: \
+eol: \n
+multivalue_delimiter: '||'
+field_file: id
+field_image: id
+field_id: id
+entity_reference_node: id
+entity_reference_media: id
+entity_reference_taxonomy_term: name
+entity_reference_user: username
+entity_reference_paragraph: entity
