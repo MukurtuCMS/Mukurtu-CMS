@@ -30,6 +30,7 @@ use Drupal\user\UserInterface;
  *     "escape",
  *     "eol",
  *     "multivalue_delimiter",
+ *     "field_id",
  *     "field_file",
  *     "field_image",
  *     "entity_reference_node",
@@ -74,6 +75,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
   protected $escape;
   protected $eol;
   protected $multivalue_delimiter;
+  protected $field_id;
   protected $field_file;
   protected $field_image;
   protected $entity_reference_node;
@@ -111,6 +113,10 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
 
     if (!$this->getMultivalueDelimiter()) {
       $this->setMultivalueDelimiter('||');
+    }
+
+    if (!$this->getIdFieldSetting()) {
+      $this->setIdFieldSetting('id');
     }
 
     if (!$this->getFileFieldSetting()) {
@@ -155,6 +161,18 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
    */
   public function setOwnerId($uid) {
     $this->uid = $uid;
+    return $this;
+  }
+
+
+  public function getIdFieldSetting()
+  {
+    return $this->field_id;
+  }
+
+  public function setIdFieldSetting(string $id_field_option)
+  {
+    $this->field_id = $id_field_option;
     return $this;
   }
 

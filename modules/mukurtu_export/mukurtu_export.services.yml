@@ -4,6 +4,8 @@ services:
     parent: default_plugin_manager
   mukurtu_export.csv_field_export_event_subscriber:
     class: Drupal\mukurtu_export\EventSubscriber\CsvEntityFieldExportEventSubscriber
-    arguments: ['@messenger']
+    arguments:
+      - '@messenger'
+      - '@entity_type.manager'
     tags:
       - { name: event_subscriber }

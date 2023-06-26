@@ -88,15 +88,43 @@ class CsvExporterFormBase extends EntityForm
       '#title' => $this->t("Field Type Settings")
     ];
 
-    $form['field_type_specific']['file'] = [
+    $form['field_type_specific']['entity_reference'] = [
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#title' => $this->t("Relationships")
+    ];
+
+    $form['field_type_specific']['entity_reference']['field_id'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Select the identifier format to export'),
+      '#default_value' => $entity->getIdFieldSetting(),
+      '#options' => [
+        'id' => $this->t('Export the ID'),
+        'uuid' => $this->t('Export the UUID'),
+      ],
+      'id' => ['#description' => $this->t("Exporting identifiers as IDs is suitable for importing the data back into the same site.")],
+      'uuid' => ['#description' => $this->t("Exporting identifiers as UUIDs is preferable for sharing data for use on other sites. ")],
+    ];
+
+    $form['field_type_specific']['entity_reference']['field_image'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Images'),
+      '#default_value' => $entity->getImageFieldSetting(),
+      '#options' => [
+        'id' => $this->t('Export the identifier (image ID or UUID)'),
+        'path_with_binary' => $this->t('Package the binary image file and export the relative path'),
+        'file_entity' => $this->t('Package the binary image file and export the referenced image file entity'),
+      ],
+    ];
+/*     $form['field_type_specific']['file'] = [
       '#type' => 'details',
       '#open' => TRUE,
       '#title' => $this->t("File")
-    ];
+    ]; */
 
-    $form['field_type_specific']['file']['field_file'] = [
+    $form['field_type_specific']['entity_reference']['field_file'] = [
       '#type' => 'radios',
-      '#title' => $this->t('File export handling'),
+      '#title' => $this->t('Files'),
       '#default_value' => $entity->getFileFieldSetting(),
       '#options' => [
         'id' => $this->t('Export the identifier (file ID or UUID)'),
@@ -105,28 +133,11 @@ class CsvExporterFormBase extends EntityForm
       ],
     ];
 
-    $form['field_type_specific']['image'] = [
+/*     $form['field_type_specific']['image'] = [
       '#type' => 'details',
       '#open' => TRUE,
       '#title' => $this->t("Image")
-    ];
-
-    $form['field_type_specific']['image']['field_image'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Image export handling'),
-      '#default_value' => $entity->getImageFieldSetting(),
-      '#options' => [
-        'id' => $this->t('Export the identifier (image ID or UUID)'),
-        'path_with_binary' => $this->t('Package the binary image file and export the relative path'),
-        'file_entity' => $this->t('Package the binary image file and export the referenced image file entity'),
-      ],
-    ];
-
-    $form['field_type_specific']['entity_reference'] = [
-      '#type' => 'details',
-      '#open' => TRUE,
-      '#title' => $this->t("Relationships")
-    ];
+    ]; */
 
     $form['field_type_specific']['entity_reference']['entity_reference_node'] = [
       '#type' => 'radios',
@@ -183,7 +194,7 @@ class CsvExporterFormBase extends EntityForm
     $form['csv'] = [
       '#type' => 'details',
       '#open' => FALSE,
-      '#title' => $this->t("CSV File Settings")
+      '#title' => $this->t("CSV File Format Settings")
     ];
 
     $form['csv']['separator'] = [
