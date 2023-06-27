@@ -80,17 +80,25 @@ display:
           clear_on_exposed: true
           force_selection_info: false
           selected_actions:
-            27:
+            4:
+              action_id: 'flag_action:export_content_flag'
+              preconfiguration:
+                add_confirmation: false
+            5:
+              action_id: 'flag_action:export_content_unflag'
+              preconfiguration:
+                add_confirmation: false
+            29:
               action_id: mukurtu_add_to_collection_action
-            30:
+            32:
               action_id: node_assign_owner_action
               preconfiguration:
                 add_confirmation: false
-            36:
+            37:
               action_id: 'entity:unpublish_action:node'
               preconfiguration:
                 add_confirmation: false
-            37:
+            39:
               action_id: 'entity:publish_action:node'
               preconfiguration:
                 add_confirmation: false
@@ -910,12 +918,9 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
-        - user
         - 'user.node_grants:view'
         - user.roles
-      tags:
-        - 'config:field.storage.node.field_category'
-        - 'config:field.storage.node.field_keywords'
+      tags: {  }
   mukurtu_manage_content:
     id: mukurtu_manage_content
     display_title: Page
@@ -931,9 +936,6 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
-        - user
         - 'user.node_grants:view'
         - user.roles
-      tags:
-        - 'config:field.storage.node.field_category'
-        - 'config:field.storage.node.field_keywords'
+      tags: {  }
