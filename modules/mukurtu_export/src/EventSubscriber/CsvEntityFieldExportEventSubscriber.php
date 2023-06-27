@@ -98,6 +98,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface
             if ($user = $this->entityTypeManager->getStorage($target_type)->load($id)) {
               /** @var \Drupal\user\UserInterface $user */
               $export[] = $user->getAccountName();
+              continue;
             }
           }
 
@@ -105,6 +106,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface
             if ($term = $this->entityTypeManager->getStorage($target_type)->load($id)) {
               /** @var \Drupal\taxonomy\TermInterface $term */
               $export[] = $term->getName();
+              continue;
             }
           }
         }
