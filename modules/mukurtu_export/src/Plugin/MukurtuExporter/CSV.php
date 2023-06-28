@@ -28,27 +28,8 @@ class CSV extends ExporterBase
   public function defaultConfiguration()
   {
     return [
-      'settings' => [
-        'binary_files' => 'metadata_and_binary',
-        'field_mapping' => [
-          'node' => [
-              'digital_heritage' => [
-                'title' => 'Title',
-                'field_description' => "Description",
-                'field_media_assets' => "Media Assets",
-                'nid' => 'ID',
-                'uuid' => 'UUID',
-              ],
-          ],
-          'media' => [
-            'image' => [
-              'mid' => 'ID',
-              'uuid' => 'UUID',
-              'name' => 'Name',
-            ],
-          ],
-        ],
-      ],
+      'id' => $this->getPluginId(),
+      'settings' => ['settings_id' => NULL],
     ];
   }
 
@@ -96,26 +77,16 @@ class CSV extends ExporterBase
 
   public function settingsForm(array $form, FormStateInterface $form_state, $settings = [])
   {
-  //  $settings = (array) $this->getConfiguration()['settings'] + $this->defaultConfiguration()['settings'];
-/*
-    $form['binary_files'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Files to Export'),
-      '#default_value' => $settings['binary_files'],
-      '#options' => [
-        'metadata' => $this->t('Export metadata only'),
-        'metadata_and_binary' => $this->t('Include media and other files'),
-      ]
-    ]; */
-
     $form['export_settings'] = [
       '#type' => 'radios',
       '#title' => $this->t('Export Settings'),
-      '#default_value' => $settings['settings_id'] ?? NULL,
-      '#options' => [],//$options,
+      '#options' => [],
     ];
     $this->addSiteWideConfigOptions($form['export_settings']);
     $this->addUserConfigOptions($form['export_settings']);
+
+    $option_keys = array_keys($form['export_settings']['#options']);
+    $form['export_settings']['#default_value'] = $settings['settings_id'] ?? reset($option_keys);
 
     $form['new_setting'] = [
       '#type' => 'link',
@@ -135,12 +106,16 @@ class CSV extends ExporterBase
   {
     $settings = [];
     $settings['settings_id'] = $form_state->getValue('export_settings');
-    //$settings['binary_files'] = $form_state->getValue('binary_files');
     return $settings;
   }
 
   public function duplicateSettings(array &$form, FormStateInterface $form_state) {
     $id = $form_state->getValue('export_settings');
+
+    if (!$id) {
+      return NULL;
+    }
+
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
     if ($config = \Drupal::entityTypeManager()->getStorage('csv_exporter')->load($id)) {
       $dupeConfig = $config->createDuplicate();
