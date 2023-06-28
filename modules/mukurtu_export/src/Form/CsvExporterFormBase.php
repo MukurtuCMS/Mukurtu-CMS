@@ -58,20 +58,10 @@ class CsvExporterFormBase extends EntityForm
       '#default_value' => $entity->label(),
       '#required' => TRUE,
     ];
+
     $form['id'] = [
-      '#type' => 'machine_name',
-      '#title' => $this
-        ->t('Machine name'),
-      '#default_value' => $entity->id(),
-      '#machine_name' => [
-        'exists' => [
-          $this,
-          'exists',
-        ],
-        'replace_pattern' => '([^a-z0-9_]+)|(^custom$)',
-        'error' => 'The machine-readable name must be unique, and can only contain lowercase letters, numbers, and underscores. Additionally, it can not be the reserved word "custom".',
-      ],
-      '#disabled' => !$entity->isNew(),
+      '#type' => 'value',
+      '#value' => $entity->id(),
     ];
 
     $form['description'] = [

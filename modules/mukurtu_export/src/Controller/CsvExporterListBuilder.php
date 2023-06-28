@@ -17,7 +17,7 @@ class CsvExporterListBuilder extends ConfigEntityListBuilder {
   public function buildHeader()
   {
     $header['label'] = $this->t('Name');
-    $header['machine_name'] = $this->t('Machine Name');
+    $header['scope'] = $this->t('Visibility');
     $header['description'] = $this->t('Description');
     return $header + parent::buildHeader();
   }
@@ -27,7 +27,7 @@ class CsvExporterListBuilder extends ConfigEntityListBuilder {
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $entity */
     if ($entity->access('view')) {
       $row['label'] = $entity->label();
-      $row['machine_name'] = $entity->id();
+      $row['scope'] = $entity->isSiteWide() ? $this->t('All Export Users') : $this->t('Only You');
       $row['description'] = $entity->getDescription();
       return $row + parent::buildRow($entity);
     }
