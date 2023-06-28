@@ -95,8 +95,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
     $this->setOwnerId($uid);
 
     if (!$this->id()) {
-      $uuid = \Drupal::service('uuid');
-      $uuid = $uuid->generate();
+      $uuid = $this->uuid();
       $uuid = str_replace('-', '_', $uuid);
       $this->set('id', $uuid);
     }

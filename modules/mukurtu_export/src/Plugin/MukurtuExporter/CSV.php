@@ -119,8 +119,7 @@ class CSV extends ExporterBase
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
     if ($config = \Drupal::entityTypeManager()->getStorage('csv_exporter')->load($id)) {
       $dupeConfig = $config->createDuplicate();
-      $uuid = \Drupal::service('uuid');
-      $uuid = $uuid->generate();
+      $uuid = $dupeConfig->uuid();
       $uuid = str_replace('-', '_', $uuid);
       $dupeConfig->set('id', $uuid);
       $dupeConfig->set('label', $this->t('Copy of ') . $config->get('label'));
