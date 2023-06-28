@@ -25,10 +25,12 @@ class CsvExporterListBuilder extends ConfigEntityListBuilder {
   public function buildRow(EntityInterface $entity)
   {
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $entity */
-    $row['label'] = $entity->label();
-    $row['machine_name'] = $entity->id();
-    $row['description'] = $entity->getDescription();
-    return $row + parent::buildRow($entity);
+    if ($entity->access('view')) {
+      $row['label'] = $entity->label();
+      $row['machine_name'] = $entity->id();
+      $row['description'] = $entity->getDescription();
+      return $row + parent::buildRow($entity);
+    }
   }
 
   public function render()

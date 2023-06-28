@@ -7,6 +7,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
+use Drupal\Core\Url;
+use Drupal\Core\Link;
 use Exception;
 
 /**
@@ -84,6 +86,9 @@ class CSV extends ExporterBase
       $entities = $storage->loadMultiple($result);
       foreach($entities as $id => $entity) {
         $element['#options'][$id] = $entity->label();
+        if ($entity->access('update')) {
+          $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Edit'), 'entity.csv_exporter.edit_form', ['csv_exporter' => $id], [])->toString() . ")";
+        }
         $element[$id]['#description'] = $entity->getDescription();
       }
     }
@@ -115,13 +120,13 @@ class CSV extends ExporterBase
     $form['new_setting'] = [
       '#type' => 'link',
       '#title' => $this->t('New CSV export setting'),
-      '#url' => \Drupal\Core\Url::fromRoute('entity.csv_exporter.add_form'),
+      '#url' => Url::fromRoute('entity.csv_exporter.add_form'),
     ];
 
     $form['manage_settings'] = [
       '#type' => 'link',
       '#title' => $this->t('Manage saved CSV export settings'),
-      '#url' => \Drupal\Core\Url::fromRoute('entity.csv_exporter.collection'),
+      '#url' => Url::fromRoute('entity.csv_exporter.collection'),
     ];
     return $form;
   }
@@ -132,6 +137,29 @@ class CSV extends ExporterBase
     $settings['settings_id'] = $form_state->getValue('export_settings');
     //$settings['binary_files'] = $form_state->getValue('binary_files');
     return $settings;
+  }
+
+  public function duplicateSettings(array &$form, FormStateInterface $form_state) {
+    $id = $form_state->getValue('export_settings');
+    /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
+    if ($config = \Drupal::entityTypeManager()->getStorage('csv_exporter')->load($id)) {
+      $dupeConfig = $config->createDuplicate();
+      $uuid = \Drupal::service('uuid');
+      $uuid = $uuid->generate();
+      $uuid = str_replace('-', '_', $uuid);
+      $dupeConfig->set('id', $uuid);
+      $dupeConfig->set('label', $this->t('Copy of ') . $config->get('label'));
+      // Force to user only.
+      $dupeConfig->set('site_wide', FALSE);
+
+      // Switch owner to duping user.
+      $dupeConfig->setOwnerId(\Drupal::currentUser()->id());
+      $dupeConfig->save();
+      $form_state->setValue('export_settings', $dupeConfig->id());
+      return $dupeConfig->id();
+    }
+
+    return NULL;
   }
 
   /**

@@ -43,6 +43,9 @@ dependencies:
     - message_ui
     - mukurtu_collection
     - mukurtu_dictionary
+    - mukurtu_export
+    - mukurtu_import
+    - mukurtu_multipage_items
     - mukurtu_protocol
     - node
     - og
@@ -68,6 +71,7 @@ permissions:
   - 'access devel information'
   - 'access files overview'
   - 'access in-place editing'
+  - 'access mukurtu export'
   - 'access mukurtu import'
   - 'access shortcuts'
   - 'access site in maintenance mode'
@@ -239,12 +243,16 @@ permissions:
   - 'edit terms in tags'
   - 'edit terms in type'
   - 'edit terms in word_type'
+  - 'flag export_content'
+  - 'flag export_media'
   - 'notify of path changes'
   - 'overview messages'
   - 'post comments'
   - 'revert all community revisions'
   - 'send message through the ui'
   - 'switch shortcut sets'
+  - 'unflag export_content'
+  - 'unflag export_media'
   - 'update tokens'
   - 'use text format full_html'
   - 'view all community revisions'

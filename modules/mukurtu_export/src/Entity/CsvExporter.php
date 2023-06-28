@@ -164,7 +164,6 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
     return $this;
   }
 
-
   public function getIdFieldSetting()
   {
     return $this->field_id;
@@ -218,7 +217,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
   }
 
   public function isSiteWide() {
-    return $this->site_wide == TRUE;
+    return $this->site_wide === TRUE;
   }
 
   public function getSeparator() {
@@ -331,7 +330,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
   }
 
   public function getSupportedEntityTypes() {
-    return ['node', 'media', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term', 'user'];
+    return ['node', 'media', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term'];
   }
 
 }
