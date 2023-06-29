@@ -24,3 +24,28 @@ function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, Accou
   // access.
   return AccessResult::neutral();
 }
+
+/**
+ * Implements hook_entity_views_data().
+ */
+function mukurtu_drafts_views_data()
+{
+  $data = [];
+  $data['node_field_data']['draft'] = [
+    'title' => t('Draft'),
+    'help' => t('Draft status'),
+    'field' => [
+      'id' => 'boolean',
+    ],
+    'sort' => [
+      'id' => 'standard',
+    ],
+    'filter' => [
+      'id' => 'boolean',
+      'label' => t('Is a Draft?'),
+      'type' => 'yes-no',
+      'use_equal' => TRUE,
+    ],
+  ];
+  return $data;
+}

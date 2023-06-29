@@ -6,6 +6,10 @@
   {{ getting_started_category }}
 {% endif %}
 
+{% if drafts_content %}
+  {{ drafts_content }}
+{% endif %}
+
 {% if activity_log %}
   <h2> {{ 'Recent Activity'|t }} </h2>
   {{ activity_log }}
@@ -17,4 +21,9 @@
 
 {% if user_recent_content %}
   {{ user_recent_content }}
+{% endif %}
+
+{% if draft_content %}
+  <h2> {{ 'Your Drafts'|t }} </h2>
+  {{ draft_content }}
 {% endif %}

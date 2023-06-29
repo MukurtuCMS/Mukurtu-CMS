@@ -47,6 +47,14 @@ class MukurtuDashboardController extends ControllerBase {
       '#embed' => FALSE,
     ];
 
+    // Display the user's draft content.
+    $draftContentBlock = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_draft_content',
+      '#display_id' => 'mukurtu_draft_content_block',
+      '#embed' => FALSE,
+    ];
+
     return [
       '#theme' => 'mukurtu_dashboard',
       '#getting_started_community' => $this->gettingStartedCommunityContent(),
@@ -54,6 +62,7 @@ class MukurtuDashboardController extends ControllerBase {
       '#activity_log' => $messageLogBlock,
       '#all_recent_content' => $allRecentContentBlock,
       '#user_recent_content' => $userRecentContentBlock,
+      '#draft_content' => $draftContentBlock,
     ];
   }
 
@@ -94,5 +103,4 @@ class MukurtuDashboardController extends ControllerBase {
 
     return $build;
   }
-
 }
