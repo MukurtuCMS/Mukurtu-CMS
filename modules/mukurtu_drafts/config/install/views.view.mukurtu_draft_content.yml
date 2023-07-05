@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
-    - system.menu.account
+    - system.menu.mukurtu
   module:
     - node
     - user
@@ -295,11 +295,11 @@ display:
       menu:
         type: normal
         title: 'Your Drafts'
-        description: ''
+        description: 'See all your draft content on the site.'
         weight: 0
-        expanded: false
-        menu_name: account
-        parent: mukurtu_core.account_dashboard
+        expanded: true
+        menu_name: mukurtu
+        parent: mukurtu_core.dashboard
         context: '0'
     cache_metadata:
       max-age: -1
