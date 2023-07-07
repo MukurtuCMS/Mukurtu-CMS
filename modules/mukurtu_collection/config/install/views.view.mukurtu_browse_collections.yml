@@ -119,7 +119,7 @@ display:
           reset_button: false
           reset_button_label: Reset
           exposed_sorts_label: 'Sort by'
-          expose_sort_order: true
+          expose_sort_order: false
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
@@ -140,9 +140,48 @@ display:
           plugin_id: search_api
           order: DESC
           expose:
-            label: ''
-            field_identifier: ''
-          exposed: false
+            label: 'Search Relevance'
+            field_identifier: search_api_relevance
+          exposed: true
+        title:
+          id: title
+          table: search_api_index_mukurtu_collection_index
+          field: title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: ASC
+          expose:
+            label: Title
+            field_identifier: title
+          exposed: true
+        changed:
+          id: changed
+          table: search_api_index_mukurtu_collection_index
+          field: changed
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: DESC
+          expose:
+            label: Newest
+            field_identifier: newest
+          exposed: true
+        changed_1:
+          id: changed_1
+          table: search_api_index_mukurtu_collection_index
+          field: changed
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: ASC
+          expose:
+            label: Oldest
+            field_identifier: oldest
+          exposed: true
         parent_collection_id:
           id: parent_collection_id
           table: search_api_index_mukurtu_collection_index
@@ -229,10 +268,12 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - 'url.query_args:sort_by'
         - 'user.node_grants:view'
       tags:
         - 'config:field.storage.node.field_description'
         - 'config:search_api.index.mukurtu_collection_index'
+        - 'search_api_list:mukurtu_collection_index'
   browse_collections_block:
     id: browse_collections_block
     display_title: Block
@@ -247,7 +288,9 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - 'url.query_args:sort_by'
         - 'user.node_grants:view'
       tags:
         - 'config:field.storage.node.field_description'
         - 'config:search_api.index.mukurtu_collection_index'
+        - 'search_api_list:mukurtu_collection_index'

@@ -2,12 +2,10 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_glossary_entry
-    - field.storage.node.field_keywords
     - search_api.server.mukurtu_database_server
   module:
-    - mukurtu_protocol
     - node
+    - mukurtu_protocol
     - taxonomy
     - search_api
     - search_api_glossary
@@ -16,6 +14,14 @@ name: 'Mukurtu Dictionary Index'
 description: 'Index for the Mukurtu dictionary.'
 read_only: false
 field_settings:
+  changed:
+    label: Changed
+    datasource_id: 'entity:node'
+    property_path: changed
+    type: date
+    dependencies:
+      module:
+        - node
   community_title:
     label: 'Communities » Community » Name'
     datasource_id: 'entity:node'
@@ -30,8 +36,8 @@ field_settings:
     property_path: field_glossary_entry
     type: string
     dependencies:
-      config:
-        - field.storage.node.field_glossary_entry
+      module:
+        - node
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
@@ -45,9 +51,8 @@ field_settings:
     property_path: 'field_keywords:entity:name'
     type: string
     dependencies:
-      config:
-        - field.storage.node.field_keywords
       module:
+        - node
         - taxonomy
   node_grants:
     label: 'Node access information'
@@ -163,6 +168,7 @@ processor_settings:
     fields:
       - community_title
       - field_glossary_entry
+      - glossaryaz_title
       - keyword
       - title
       - type

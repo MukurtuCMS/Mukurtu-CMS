@@ -2,19 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_category
-    - field.storage.node.field_description
-    - field.storage.node.field_mukurtu_geojson
-    - field.storage.node.field_keywords
-    - field.storage.node.field_coverage
-    - field.storage.node.field_media_assets
-    - field.storage.node.field_mukurtu_cluster_lat
-    - field.storage.node.field_mukurtu_cluster_long
     - search_api.server.mukurtu_database_server
   module:
+    - node
     - taxonomy
     - mukurtu_protocol
-    - node
     - media
     - search_api
     - search_api_glossary
@@ -23,6 +15,14 @@ name: 'Mukurtu Default content index'
 description: 'Default Mukurtu content index'
 read_only: false
 field_settings:
+  changed:
+    label: Changed
+    datasource_id: 'entity:node'
+    property_path: changed
+    type: date
+    dependencies:
+      module:
+        - node
   community_title:
     label: 'Communities » Community » Name'
     datasource_id: 'entity:node'
@@ -38,16 +38,16 @@ field_settings:
     type: text
     boost: !!float 0
     dependencies:
-      config:
-        - field.storage.node.field_coverage
+      module:
+        - node
   field_description:
     label: Description
     datasource_id: 'entity:node'
     property_path: field_description
     type: text
     dependencies:
-      config:
-        - field.storage.node.field_description
+      module:
+        - node
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
@@ -61,19 +61,17 @@ field_settings:
     property_path: 'field_media_assets:entity:bundle'
     type: string
     dependencies:
-      config:
-        - field.storage.node.field_media_assets
       module:
         - media
+        - node
   name:
     label: 'Category » Taxonomy term » Name'
     datasource_id: 'entity:node'
     property_path: 'field_category:entity:name'
     type: string
     dependencies:
-      config:
-        - field.storage.node.field_category
       module:
+        - node
         - taxonomy
   name_1:
     label: 'Keywords » Taxonomy term » Name'
@@ -81,9 +79,8 @@ field_settings:
     property_path: 'field_keywords:entity:name'
     type: string
     dependencies:
-      config:
-        - field.storage.node.field_keywords
       module:
+        - node
         - taxonomy
   node_grants:
     label: 'Node access information'
@@ -164,7 +161,6 @@ processor_settings:
       - community_title
       - field_coverage
       - field_description
-      - field_mukurtu_geojson
       - glossaryaz_title
       - media_type
       - name
@@ -199,7 +195,6 @@ processor_settings:
     fields:
       - field_coverage
       - field_description
-      - field_mukurtu_geojson
       - title
     spaces: ''
     ignored: ._-
@@ -214,7 +209,6 @@ processor_settings:
       - community_title
       - field_coverage
       - field_description
-      - field_mukurtu_geojson
       - glossaryaz_title
       - media_type
       - name

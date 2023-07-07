@@ -2,10 +2,8 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_collection_type
     - search_api.index.mukurtu_default_content_index
   module:
-    - options
     - search_api
 id: mukurtu_digital_heritage_browse
 label: 'Mukurtu Digital Heritage Browse'
@@ -122,7 +120,7 @@ display:
           reset_button: false
           reset_button_label: Reset
           exposed_sorts_label: 'Sort by'
-          expose_sort_order: true
+          expose_sort_order: false
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
@@ -132,7 +130,59 @@ display:
         type: none
         options: {  }
       empty: {  }
-      sorts: {  }
+      sorts:
+        search_api_relevance:
+          id: search_api_relevance
+          table: search_api_index_mukurtu_default_content_index
+          field: search_api_relevance
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: DESC
+          expose:
+            label: 'Search Relevance'
+            field_identifier: search_api_relevance
+          exposed: true
+        title:
+          id: title
+          table: search_api_index_mukurtu_default_content_index
+          field: title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: ASC
+          expose:
+            label: Title
+            field_identifier: title
+          exposed: true
+        changed:
+          id: changed
+          table: search_api_index_mukurtu_default_content_index
+          field: changed
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: DESC
+          expose:
+            label: Newest
+            field_identifier: newest
+          exposed: true
+        changed_1:
+          id: changed_1
+          table: search_api_index_mukurtu_default_content_index
+          field: changed
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: ASC
+          expose:
+            label: Oldest
+            field_identifier: oldest
+          exposed: true
       arguments: {  }
       filters:
         search_api_fulltext:
@@ -242,20 +292,21 @@ display:
           skip_access: false
           preserve_facet_query_args: false
       relationships: {  }
+      use_ajax: true
       header: {  }
       footer: {  }
       display_extenders: {  }
     cache_metadata:
       max-age: -1
       contexts:
-        - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
+        - 'url.query_args:sort_by'
         - 'user.node_grants:view'
       tags:
-        - 'config:field.storage.node.field_collection_type'
         - 'config:search_api.index.mukurtu_default_content_index'
+        - 'search_api_list:mukurtu_default_content_index'
   mukurtu_digital_heritage_browse_block:
     id: mukurtu_digital_heritage_browse_block
     display_title: Block
@@ -270,11 +321,11 @@ display:
     cache_metadata:
       max-age: -1
       contexts:
-        - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
+        - 'url.query_args:sort_by'
         - 'user.node_grants:view'
       tags:
-        - 'config:field.storage.node.field_collection_type'
         - 'config:search_api.index.mukurtu_default_content_index'
+        - 'search_api_list:mukurtu_default_content_index'

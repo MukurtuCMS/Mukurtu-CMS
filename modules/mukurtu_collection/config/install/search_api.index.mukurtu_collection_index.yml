@@ -11,6 +11,14 @@ name: 'Mukurtu Collection Index'
 description: 'Index for Mukurtu Collections.'
 read_only: false
 field_settings:
+  changed:
+    label: Changed
+    datasource_id: 'entity:node'
+    property_path: changed
+    type: date
+    dependencies:
+      module:
+        - node
   field_description:
     label: Description
     datasource_id: 'entity:node'
