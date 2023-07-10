@@ -28,9 +28,9 @@
   /**
    * Save location description.
    */
-  Drupal.mukurtuSetLocationDescription = function (id) {
-    Drupal.Leaflet['leaflet-map'].lMap._layers[id].feature.properties['location_description'] = $("#location-popup-" + id)[0].value;
-    Drupal.Leaflet['leaflet-map'].lMap._layers[id].closePopup();
+  Drupal.mukurtuSetLocationDescription = function (containerId, popupId) {
+    Drupal.Leaflet[containerId].lMap._layers[popupId].feature.properties['location_description'] = $("#location-popup-" + popupId)[0].value;
+    Drupal.Leaflet[containerId].lMap._layers[popupId].closePopup();
   }
 
 
@@ -89,8 +89,9 @@
    */
   Drupal.leaflet_widget.prototype.add_layer_listeners = function (layer) {
     // Mukurtu Location Description.
+    const containerId = $(layer._map._container).attr('id');
     const popupId = "location-popup-" + layer._leaflet_id;
-    layer.bindPopup('<label for="' + popupId + '">' + Drupal.t('Location Description') + '</label><input type="text" size="60" maxlength="255" id="' + popupId + '"></input><button type="button" onclick="Drupal.mukurtuSetLocationDescription(' + layer._leaflet_id + ')">' + Drupal.t('Save') + '</button>');
+    layer.bindPopup('<label for="' + popupId + '">' + Drupal.t('Location Description') + '</label><input type="text" size="60" maxlength="255" id="' + popupId + '"></input><button type="button" onclick="Drupal.mukurtuSetLocationDescription(\'' + containerId + '\',' + layer._leaflet_id + ')">' + Drupal.t('Save') + '</button>');
     layer.on('popupclose', function (event) {
       this.update_text();
     }, this);
