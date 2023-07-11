@@ -33,6 +33,7 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
         'activity_log' => NULL,
         'all_recent_content' => NULL,
         'user_recent_content' => NULL,
+        'draft_content' => NULL,
       ],
     ],
   ];

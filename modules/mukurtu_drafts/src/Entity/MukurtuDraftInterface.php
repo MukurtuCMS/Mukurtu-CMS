@@ -2,8 +2,6 @@
 
 namespace Drupal\mukurtu_drafts\Entity;
 
-use Drupal\Core\Entity\EntityInterface;
-
 /**
  * Provides an interface for access to an entity's draft state.
  *
@@ -23,14 +21,14 @@ interface MukurtuDraftInterface
   /**
    * Sets the entity as a draft.
    *
-   * @return $this
+   * @return \Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface
    */
   public function setDraft();
 
   /**
    * Unsets the entity as draft.
    *
-   * @return $this
+   * @return \Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface
    */
   public function unsetDraft();
 }

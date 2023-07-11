@@ -4,6 +4,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 
 /**
  * Implements hook_entity_access().
@@ -23,4 +24,41 @@ function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, Accou
   // If entity does not implement MukurtuDraftInterface, let others determine
   // access.
   return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_entity_views_data().
+ */
+function mukurtu_drafts_views_data()
+{
+  $data = [];
+  $data['node_field_data']['draft'] = [
+    'title' => t('Draft'),
+    'help' => t('Draft status'),
+    'field' => [
+      'id' => 'boolean',
+    ],
+    'sort' => [
+      'id' => 'standard',
+    ],
+    'filter' => [
+      'id' => 'boolean',
+      'label' => t('Is a Draft?'),
+      'type' => 'yes-no',
+      'use_equal' => TRUE,
+    ],
+  ];
+  return $data;
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function mukurtu_drafts_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+
+  if (!$entity instanceof MukurtuDraftInterface || !$entity->isDraft()) {
+    return;
+  }
+
+  $build['#attributes']['class'][] = 'node--unpublished';
 }
