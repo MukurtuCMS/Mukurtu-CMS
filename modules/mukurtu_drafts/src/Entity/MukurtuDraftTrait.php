@@ -50,9 +50,7 @@ trait MukurtuDraftTrait
    */
   public function setDraft()
   {
-    $this->set('draft', TRUE);
-
-    return $this;
+    return $this->set('draft', TRUE);
   }
 
   /**
@@ -60,8 +58,6 @@ trait MukurtuDraftTrait
    */
   public function unsetDraft()
   {
-    $this->set('draft', FALSE);
-
-    return $this;
+    return $this->set('draft', FALSE);
   }
 }
