@@ -1,0 +1,7 @@
+field.value.local_contexts_project:
+  type: mapping
+  label: Default value
+  mapping:
+    value:
+      type: label
+      label: Value

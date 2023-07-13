@@ -1,0 +1,6 @@
+services:
+  mukurtu_local_contexts.event_subscriber:
+    class: Drupal\mukurtu_local_contexts\EventSubscriber\MukurtuLocalContextsProjectReferenceUpdatedSubscriber
+    arguments: ['@messenger']
+    tags:
+      - { name: event_subscriber }
