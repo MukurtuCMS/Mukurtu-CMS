@@ -13,6 +13,7 @@ dependencies:
     - layout_builder
     - link
     - mukurtu_core
+    - mukurtu_local_contexts
     - original_date
     - text
     - user
@@ -33,7 +34,7 @@ third_party_settings:
         - field_contributor
         - field_language
         - field_creative_commons
-        - field_rights
+        - field_local_contexts_projects
         - field_source
         - field_external_links
         - field_publisher
@@ -206,6 +207,7 @@ content:
           zoom: 16
           popup: false
           options: ''
+      weight: null
     third_party_settings: {  }
     weight: 40
     region: content
@@ -305,6 +307,13 @@ content:
     third_party_settings: {  }
     weight: 25
     region: content
+  field_local_contexts_projects:
+    type: local_contexts_project
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 27
+    region: content
   field_media_assets:
     type: entity_reference_entity_view
     label: hidden
@@ -390,16 +399,27 @@ content:
     third_party_settings: {  }
     weight: 33
     region: content
+  flag_export_content:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
 hidden:
+  draft: true
   field_citation: true
   field_content_type: true
+  field_cultural_protocols: true
+  field_knowledge_keepers: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
   field_mukurtu_original_record: true
+  field_multipage_page_of: true
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
+  field_rights_and_usage: true
+  field_rights_statements: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true

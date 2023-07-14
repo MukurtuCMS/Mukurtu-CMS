@@ -16,5 +16,6 @@ dependencies:
   - mukurtu_collection
   - mukurtu_community_records
   - mukurtu_drafts
+  - mukurtu_local_contexts
 
 version: '8.x-1.x-dev'
