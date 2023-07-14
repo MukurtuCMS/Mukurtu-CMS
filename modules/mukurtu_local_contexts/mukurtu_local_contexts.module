@@ -1,2 +1,19 @@
 <?php
 
+/**
+ *  Implements hook_theme().
+ */
+function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
+  return [
+    'local_contexts_project' => [
+      'template' => 'local-contexts-project',
+      'variables' => [
+        'title' => [],
+        'privacy' => [],
+        'tk_labels' => [],
+        'bc_labels' => [],
+        'notices' => [],
+      ],
+    ],
+  ];
+}

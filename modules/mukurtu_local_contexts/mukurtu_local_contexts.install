@@ -148,6 +148,16 @@ function mukurtu_local_contexts_schema() {
         'not null' => TRUE,
         'description' => 'Image URL',
       ],
+      'svg_url' => [
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'SVG URL',
+      ],
+      'audio_url' => [
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Audio URL',
+      ],
       'community' => [
         'type' => 'text',
         'not null' => TRUE,

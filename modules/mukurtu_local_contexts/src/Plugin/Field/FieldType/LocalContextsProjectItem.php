@@ -12,7 +12,7 @@ use Drupal\mukurtu_local_contexts\Event\LocalContextsProjectReferenceUpdatedEven
  *   id = "local_contexts_project",
  *   label = @Translation("Local Contexts Project"),
  *   default_widget = "local_contexts_project",
- *   default_formatter = "string"
+ *   default_formatter = "local_contexts_project"
  * )
  */
 class LocalContextsProjectItem extends StringItem {
