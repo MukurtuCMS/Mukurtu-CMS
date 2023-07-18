@@ -176,7 +176,7 @@ function mukurtu_local_contexts_schema() {
         'default' => 0,
       ],
     ],
-    'primary key' => ['id'],
+    'primary key' => ['id', 'project_id'],
     'indexes' => [
       'project' => ['id', 'project_id'],
       'updated' => ['updated'],
@@ -191,7 +191,7 @@ function mukurtu_local_contexts_schema() {
         'not null' => TRUE,
         'description' => 'Translation ID',
       ],
-      'label_id' => [
+        'label_id' => [
         'type' => 'varchar',
         'length' => 36,
         'not null' => TRUE,
@@ -235,4 +235,15 @@ function mukurtu_local_contexts_schema() {
   ];
 
   return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_local_contexts_install() {
+  $fieldManager = \Drupal::service('entity_field.manager');
+  $fields = $fieldManager->getFieldDefinitions('user', 'user');
+  if (isset($fields['field_local_contexts_user_id'])) {
+    \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('field_local_contexts_user_id', 'user', 'mukurtu_local_contexts', $fields['field_local_contexts_user_id']);
+  }
 }

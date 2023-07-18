@@ -18,6 +18,9 @@ class LocalContextsProject extends LocalContextsHubBase {
   }
 
   protected function fetch($id) {
+    if (!$id) {
+      return NULL;
+    }
     $db = \Drupal::database();
     $query = $db->select('mukurtu_local_contexts_projects', 'project')
       ->condition('project.id', $id)
@@ -33,12 +36,17 @@ class LocalContextsProject extends LocalContextsHubBase {
         ];
       }
     }
+
     return $project;
   }
 
   protected function fetchProjectFromHub($id) {
     $db = \Drupal::database();
     if ($project = $this->get("projects/{$id}")) {
+      if (empty($project['unique_id'])) {
+        return $project;
+      }
+
       // Update our local cache of this project.
       $projectFields = [
           'id' => $project['unique_id'],
@@ -57,6 +65,11 @@ class LocalContextsProject extends LocalContextsHubBase {
       if (!$result) {
         $query = $db->insert('mukurtu_local_contexts_projects')->fields($projectFields);
         $result = $query->execute();
+        $prior_cached_tk_labels = [];
+      } else {
+        // Get any existing cached labels so we can compare to the response from
+        // the hub and delete any that are no longer there.
+        $prior_cached_tk_labels = $this->getTkLabels();
       }
 
       // Cache the labels.
@@ -81,6 +94,13 @@ class LocalContextsProject extends LocalContextsHubBase {
           ->condition('project_id', $project['unique_id'])
           ->fields($labelFields);
         $result = $query->execute();
+
+        // Track labels we've updated so we can compare versus our last result
+        // from the hub and determine if any have been deleted.
+        if (isset($prior_cached_tk_labels[$label['unique_id']])) {
+          unset($prior_cached_tk_labels[$label['unique_id']]);
+        }
+
         if (!$result) {
           $query = $db->insert('mukurtu_local_contexts_labels')->fields($labelFields);
           $result = $query->execute();
@@ -110,6 +130,18 @@ class LocalContextsProject extends LocalContextsHubBase {
         }
       }
 
+      // Delete any cached TK Labels and translations that no longer exist;
+      foreach ($prior_cached_tk_labels as $deleted_tk_label_id => $deleted_tk_label) {
+        $query = $db->delete('mukurtu_local_contexts_label_translations')
+          ->condition('label_id', $deleted_tk_label_id);
+        $query->execute();
+
+        $query = $db->delete('mukurtu_local_contexts_labels')
+          ->condition('id', $deleted_tk_label_id)
+          ->condition('project_id', $project['unique_id']);
+        $query->execute();
+      }
+
     }
     return $project;
   }
@@ -118,12 +150,13 @@ class LocalContextsProject extends LocalContextsHubBase {
     $db = \Drupal::database();
     $query = $db->select('mukurtu_local_contexts_labels', 'l')
       ->condition('l.project_id', $this->id)
-      ->fields('l', ['name', 'svg_url', 'default_text']);
+      ->fields('l', ['id', 'name', 'svg_url', 'default_text']);
     $result = $query->execute();
 
     $labels = [];
     while($label = $result->fetchAssoc()) {
-      $labels[] = [
+      $labels[$label['id']] = [
+        'id' => $label['id'],
         'name' => $label['name'],
         'svg_url' => $label['svg_url'],
         'text' => $label['default_text'],
