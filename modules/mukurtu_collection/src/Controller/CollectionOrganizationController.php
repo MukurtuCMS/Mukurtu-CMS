@@ -62,7 +62,7 @@ class CollectionOrganizationController extends ControllerBase {
 
   public function access(NodeInterface $node, AccountInterface $account) {
     if ($node instanceof Collection && $node->access('update', $account)) {
-      if ($this->hasUpdateAccessToAllChildCollections($node, $account)) {
+      if ($this->hasUpdateAccessToAllChildCollections($node, $account) && count($node->getChildCollectionIds()) > 0) {
         return AccessResult::allowed();
       }
     }

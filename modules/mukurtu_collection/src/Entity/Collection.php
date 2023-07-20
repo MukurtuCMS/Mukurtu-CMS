@@ -272,6 +272,17 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
   }
 
   /**
+   * Get child collection IDs.
+   *
+   * @return array
+   *   The array of child collection IDs.
+   */
+  public function getChildCollectionIds() {
+    $collections = $this->get('field_child_collections')->getValue() ?? [];
+    return array_column($collections, 'target_id');
+  }
+
+  /**
    * Set the child collections.
    *
    * @param array $child_collection_ids
