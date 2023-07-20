@@ -6,20 +6,20 @@ dependencies:
   module:
     - field_group
     - media_library
+    - paragraphs
     - text
 third_party_settings:
   field_group:
     group_additional_fields:
       children:
+        - field_sample_sentences
         - field_word_type
         - field_pronunciation
         - field_recording
         - field_translation
-        - field_sample_sentences
         - field_source
         - field_word_origin
         - field_contributor
-        - group_more_fields
       label: 'Additional Fields'
       region: content
       parent_name: ''
@@ -95,8 +95,8 @@ content:
     weight: 1
     region: content
     settings:
-      title: Sample Sentence
-      title_plural: Sample Sentences
+      title: 'Sample Sentence'
+      title_plural: 'Sample Sentences'
       edit_mode: open
       add_mode: dropdown
       form_display_mode: default
@@ -127,10 +127,14 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_word_type:
-    type: options_buttons
+    type: entity_reference_autocomplete
     weight: 21
     region: content
-    settings: {  }
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
 hidden:
   created: true

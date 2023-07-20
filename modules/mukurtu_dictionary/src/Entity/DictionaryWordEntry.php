@@ -168,7 +168,7 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
           'target_bundles' => [
             'word_type' => 'word_type',
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(-1)
