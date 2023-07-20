@@ -53,3 +53,9 @@ mukurtu_collection.add_item_to_personal_collection:
   base_route: entity.node.canonical
   title: 'Add to Personal Collection'
   weight: 50
+
+mukurtu_collection.collection_organization:
+  route_name: mukurtu_collection.collection_organization
+  base_route: entity.node.canonical
+  title: 'Manage Collection Organization'
+  weight: 50

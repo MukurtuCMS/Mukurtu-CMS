@@ -13,6 +13,7 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_drafts\Entity\MukurtuDraftTrait;
 use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
+use Exception;
 
 class Collection extends Node implements CollectionInterface, CulturalProtocolControlledInterface, MukurtuDraftInterface {
   use CulturalProtocolControlledTrait;
@@ -320,6 +321,27 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
     $childCollectionsRefs[] = ['target_id' => $collection->id()];
     $this->set('field_child_collections', $childCollectionsRefs);
 
+    return $this;
+  }
+
+  /**
+   * Globally remove this collection as a subcollection. Saves the parent collection.
+   */
+  public function removeAsChildCollection(): Collection {
+    if ($parent = $this->getParentCollection()) {
+      $childCollectionsRefs = $parent->get('field_child_collections')->getValue();
+      foreach ($childCollectionsRefs as $delta => $ref) {
+        if ($ref['target_id'] == $this->id()) {
+          unset($childCollectionsRefs[$delta]);
+          $parent->set('field_child_collections', $childCollectionsRefs);
+          try {
+            $parent->save();
+          } catch (Exception $e) {
+          }
+          return $this;
+        }
+      }
+    }
     return $this;
   }
 

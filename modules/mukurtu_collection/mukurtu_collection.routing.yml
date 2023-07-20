@@ -48,3 +48,15 @@ mukurtu_collection.new_subcollection:
         type: entity:node
   requirements:
     _custom_access: '\Drupal\mukurtu_collection\Controller\CollectionAddSubcollectionController::access'
+
+mukurtu_collection.collection_organization:
+  path: '/node/{node}/organization'
+  defaults:
+    _title: 'Manage Collection Organization'
+    _controller: '\Drupal\mukurtu_collection\Controller\CollectionOrganizationController::build'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _custom_access: '\Drupal\mukurtu_collection\Controller\CollectionOrganizationController::access'
