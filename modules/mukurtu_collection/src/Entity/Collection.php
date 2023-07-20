@@ -272,6 +272,18 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
   }
 
   /**
+   * Set the child collections.
+   *
+   * @param array $child_collection_ids
+   *  The array of child collection IDs.
+   *
+   * @return \Drupal\mukurtu_collection\Entity\Collection
+   */
+  public function setChildCollections(array $child_collection_ids) {
+    return $this->set('field_child_collections', $child_collection_ids);
+  }
+
+  /**
    * Get the parent collection.
    *
    * @return null|\Drupal\mukurtu_collection\Entity\Collection

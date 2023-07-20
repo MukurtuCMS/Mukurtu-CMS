@@ -125,6 +125,7 @@ class CollectionOrganizationForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $newOrganization = $form_state->getValue('collections');
+    $newChildren = [];
 
     foreach ($newOrganization as $info) {
       $id = reset($info['label']);
@@ -132,6 +133,10 @@ class CollectionOrganizationForm extends FormBase {
       if ($collection = $this->entityTypeManager->getStorage('node')->load($id)) {
         if ($info['parent'] == "0") {
           $collection->removeAsChildCollection();
+
+          // Parent === 0 is a "top level" collection which don't have weights,
+          // so we can move on.
+          continue;
         }
 
         /** @var \Drupal\mukurtu_collection\Entity\Collection $parent */
@@ -139,13 +144,24 @@ class CollectionOrganizationForm extends FormBase {
         if ($collection && $parent) {
           if ($collection->getParentCollectionId() != $parent->id()) {
             $collection->removeAsChildCollection();
-            $parent->addChildCollection($collection)->save();
           }
-          // Need to resolve weights somehow...
+
+          // Building the list of new parent -> child collections to
+          // 1. Resolve ordering (weight)
+          // 2. Delay saving until the end so we only save once per entity.
+          $newChildren[$parent->id()][] = $collection->id();
         }
       }
     }
-    //
+
+    // Save the final child collections.
+    foreach ($newChildren as $id => $childCollections) {
+      if ($collection = $this->entityTypeManager->getStorage('node')->load($id)) {
+        $collection->setChildCollections($childCollections)->save();
+      }
+    }
+
+    $this->messenger()->addStatus($this->t("Saved new collection organization."));
   }
 
 }
