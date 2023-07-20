@@ -105,7 +105,12 @@ display:
       cache:
         type: tag
         options: {  }
-      empty: {  }
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          plugin_id: text
       sorts:
         created:
           id: created
@@ -266,11 +271,26 @@ display:
         options:
           offset: 0
           items_per_page: 5
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: text
+          empty: true
+          content:
+            value: 'You currently have no drafts.'
+            format: basic_html
+          tokenize: false
       style:
         type: default
       row:
         type: fields
       defaults:
+        empty: false
         pager: false
         style: false
         row: false
@@ -290,6 +310,19 @@ display:
     display_plugin: page
     position: 1
     display_options:
+      empty:
+        title:
+          id: title
+          table: views
+          field: title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: title
+          empty: true
+          title: 'You currently have no drafts.'
+      defaults:
+        empty: false
       display_extenders: {  }
       path: dashboard/drafts
       menu:
