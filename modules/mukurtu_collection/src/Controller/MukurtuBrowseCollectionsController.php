@@ -4,6 +4,9 @@ namespace Drupal\mukurtu_collection\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\views\Views;
 
 class MukurtuBrowseCollectionsController extends ControllerBase {
 
@@ -42,5 +45,33 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
       '#results' => $browse_view_block,
       '#facets' => $facets,
     ];
+  }
+
+  /**
+   * Check access for the Collections route.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   Run access checks for this account.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function access(AccountInterface $account)
+  {
+    // Check if the collections browse view is empty.
+    $view = Views::getView('mukurtu_browse_collections');
+    $view->setDisplay('default');
+    $view->execute();
+    if (!empty($view->result)) {
+      return AccessResult::allowed();
+    }
+
+    // Check if the user has permission to create collections.
+    if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collections', $account)) {
+      return AccessResult::allowed();
+    }
+    // User cannot access the route if the collections browse view result is
+    // empty and if they lack permission to create collections.
+    return AccessResult::forbidden();
   }
 }

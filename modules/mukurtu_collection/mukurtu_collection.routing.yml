@@ -5,6 +5,7 @@ mukurtu_collection.collection_browse_page:
     _title: 'Collections'
   requirements:
     _permission: 'access content'
+    _custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuBrowseCollectionsController::access'
 mukurtu_collection.add_item_to_collection:
   path: '/node/{node}/collection/add'
   defaults:

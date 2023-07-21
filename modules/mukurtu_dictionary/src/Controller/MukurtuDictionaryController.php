@@ -5,7 +5,6 @@ namespace Drupal\mukurtu_dictionary\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\node\NodeInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\views\Views;
 
