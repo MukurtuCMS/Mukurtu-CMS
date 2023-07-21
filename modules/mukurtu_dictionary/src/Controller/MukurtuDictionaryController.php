@@ -4,6 +4,10 @@ namespace Drupal\mukurtu_dictionary\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\views\Views;
 
 class MukurtuDictionaryController extends ControllerBase {
 
@@ -49,5 +53,36 @@ class MukurtuDictionaryController extends ControllerBase {
       '#facets' => $facets,
       '#glossary' => $glossary,
     ];
+  }
+
+  /**
+   * Check access for the Dictionary route.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   Run access checks for this account.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function access(AccountInterface $account)
+  {
+    // Check if the dictionary view is empty.
+    $view = Views::getView('mukurtu_dictionary');
+    $view->setDisplay('default');
+    $view->execute();
+    if (!empty($view->result)) {
+      return AccessResult::allowed();
+    }
+
+    // Check if the user has permission to create dictionary words or word lists.
+    $hasDictWordCreateAccess = $this->entityTypeManager()->getAccessControlHandler('node')->createAccess('dictionary_word', $account);
+    $hasWordListCreateAccess = $this->entityTypeManager()->getAccessControlHandler('node')->createAccess('word_list', $account);
+
+    if ($hasDictWordCreateAccess || $hasWordListCreateAccess) {
+      return AccessResult::allowed();
+    }
+    // User cannot access the route if the dictionary view result is empty and
+    // if they lack permission to create dictionary words and word lists.
+    return AccessResult::forbidden();
   }
 }
