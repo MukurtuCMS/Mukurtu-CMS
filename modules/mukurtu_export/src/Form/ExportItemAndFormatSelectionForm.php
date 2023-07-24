@@ -65,10 +65,14 @@ class ExportItemAndFormatSelectionForm extends ExportBaseForm {
     }
     else {
       // Alternate form display if export list is empty.
-      $manageContentMarkup = '<a href="' . url::fromRoute("view.mukurtu_manage_all_content.mukurtu_manage_content")->toString() . '">Manage Content</a>';
-      $browseContentMarkup = '<a href="' . url::fromRoute("mukurtu_browse.browse_page")->toString() . '">Browse</a>';
       $form['message'] = [
-        '#markup' => 'You have no items marked for export. Please visit ' . $manageContentMarkup . ' or ' . $browseContentMarkup . ' to add items for export.',
+        '#type' => 'processed_text',
+        '#text' => $this->t('You currently have no items marked for export. You can visit <a href=":manageContent">Manage Content</a> and <a href=":browseContent">Browse Content</a> to add items for export.',
+          [
+            ':manageContent' => url::fromRoute("view.mukurtu_manage_all_content.mukurtu_manage_content")->toString(),
+            ':browseContent' => url::fromRoute("mukurtu_browse.browse_page")->toString(),
+          ]),
+        '#format' => 'full_html'
       ];
     }
 
