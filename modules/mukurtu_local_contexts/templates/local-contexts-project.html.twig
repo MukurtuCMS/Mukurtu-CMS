@@ -1,5 +1,6 @@
 <div class="local-contexts-project">
   <div class="project-title">{{ title }}</div>
+  {% if tk_labels %}
   <div class="tk-labels">
     {% for tk_label in tk_labels %}
     <div class="tk-label">
@@ -9,4 +10,5 @@
     </div>
     {% endfor %}
   </div>
+  {% endif %}
 </div>

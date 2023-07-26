@@ -166,6 +166,10 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $labels;
   }
 
+  public function id(){
+    return $this->id;
+  }
+
   public function getTitle() {
     return $this->title;
   }
@@ -176,6 +180,11 @@ class LocalContextsProject extends LocalContextsHubBase {
 
   public function isValid() {
     return $this->valid;
+  }
+
+  public function inUse() : bool {
+    // @todo Implement!
+    return FALSE;
   }
 
 }

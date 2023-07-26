@@ -9,6 +9,31 @@
  * Implements hook_schema().
  */
 function mukurtu_local_contexts_schema() {
+  $schema['mukurtu_local_contexts_supported_projects'] = [
+    'description' => 'List of Supported Projects',
+    'fields' => [
+      'project_id' => [
+        'type' => 'varchar',
+        'length' => 36,
+        'not null' => TRUE,
+        'description' => 'Project ID',
+      ],
+      'type' => [
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => TRUE,
+        'description' => 'Group entity type ID or site',
+      ],
+      'group_id' => [
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => 'Group entity ID or 0 for site',
+      ],
+    ],
+    'primary key' => ['project_id', 'type', 'group_id'],
+  ];
+
   $schema['mukurtu_local_contexts_projects'] = [
     'description' => 'Local Contexts Projects',
     'fields' => [
