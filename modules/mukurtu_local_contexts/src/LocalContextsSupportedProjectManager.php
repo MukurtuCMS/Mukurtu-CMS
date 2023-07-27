@@ -4,6 +4,8 @@ namespace Drupal\mukurtu_local_contexts;
 
 use PDO;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\og\Og;
+use Drupal\Core\Session\AccountInterface;
 
 class LocalContextsSupportedProjectManager {
   protected $db;
@@ -98,4 +100,16 @@ class LocalContextsSupportedProjectManager {
       ->condition('group_id', $group->id());
     return $query->execute();
   }
+
+  public function getUserProjects(AccountInterface $account) {
+    $projects = $this->getSiteSupportedProjects();
+
+    $memberships = Og::getMemberships($account);
+    foreach ($memberships as $membership) {
+      $projects += $this->getGroupSupportedProjects($membership->getGroup());
+    }
+
+    return $projects;
+  }
+
 }
