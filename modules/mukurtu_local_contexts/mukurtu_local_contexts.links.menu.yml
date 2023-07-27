@@ -1,0 +1,6 @@
+mukurtu_local_contexts.manage_projects:
+  title: 'Manage Local Contexts Projects'
+  description: 'Manage which Local Contexts Projects are available site wide for use.'
+  parent: mukurtu_core.site_configuration
+  menu_name: mukurtu
+  route_name: mukurtu_local_contexts.manage_site_supported_projects
