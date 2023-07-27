@@ -2,7 +2,6 @@
 
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldWidget;
 
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsSelectWidget;
 use Drupal\Core\Session\AccountInterface;
@@ -41,18 +40,6 @@ class LocalContextsProjectWidget extends OptionsSelectWidget {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static($plugin_id, $plugin_definition, $configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('current_user'));
-  }
-
-  protected function getOptions(FieldableEntityInterface $entity) {
-    if (!isset($this->options)) {
-      $options = [];
-      $userProjects = $this->localContextsProjectManager->getUserProjects($this->currentUser);
-      foreach ($userProjects as $id => $project) {
-        $options[$id] = $project['title'];
-      }
-      $this->options = $options;
-    }
-    return $this->options;
   }
 
 }

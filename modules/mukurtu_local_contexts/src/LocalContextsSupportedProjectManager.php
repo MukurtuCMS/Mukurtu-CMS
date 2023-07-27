@@ -37,6 +37,16 @@ class LocalContextsSupportedProjectManager {
     return empty($projects) ? FALSE : TRUE;
   }
 
+  public function getAllProjects() {
+    $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
+    $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
+    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+
+    $result = $query->execute();
+    $projects = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    return $projects;
+  }
+
   public function getSiteSupportedProjects() {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
