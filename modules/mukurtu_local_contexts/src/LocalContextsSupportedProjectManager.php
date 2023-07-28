@@ -47,6 +47,20 @@ class LocalContextsSupportedProjectManager {
     return $projects;
   }
 
+  public function getAllLabels() {
+    $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
+    $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
+    $query->fields('labels', ['id', 'name', 'type']);
+    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+
+    $result = $query->execute();
+    $options = [];
+    foreach ($result->fetchAllAssoc('id', PDO::FETCH_ASSOC) as $label) {
+      $options[$label['title']][$label['p_id'] . ':' . $label['id']] = $label['name'];
+    }
+    return $options;
+  }
+
   public function getSiteSupportedProjects() {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
@@ -103,6 +117,7 @@ class LocalContextsSupportedProjectManager {
       ->condition('group_id', 0);
     return $query->execute();
   }
+
   public function removeGroupProject(ContentEntityInterface $group, $project_id) {
     $query = $this->db->delete('mukurtu_local_contexts_supported_projects')
       ->condition('project_id', $project_id)
@@ -120,6 +135,47 @@ class LocalContextsSupportedProjectManager {
     }
 
     return $projects;
+  }
+
+  public function getSiteLabels() {
+    $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
+    $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
+    $query->join('mukurtu_local_contexts_supported_projects', 'sp', 'labels.project_id = sp.project_id');
+    $query
+      ->condition('sp.type', 'site')
+      ->condition('sp.group_id', 0);
+    $query->fields('labels', ['id', 'name', 'type']);
+    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+
+    $result = $query->execute();
+    $options = [];
+    foreach ($result->fetchAllAssoc('id', PDO::FETCH_ASSOC) as $label) {
+      $options[$label['title']][$label['p_id'] . ':' . $label['id']] = $label['name'];
+    }
+    dpm("getsitelabels");
+    dpm($options);
+    return $options;
+  }
+
+  public function getUserLabels(AccountInterface $account) {
+    $projects = $this->getSiteSupportedProjects();
+
+    $memberships = Og::getMemberships($account);
+    foreach ($memberships as $membership) {
+      $projects += $this->getGroupSupportedProjects($membership->getGroup());
+    }
+
+    $project_ids = array_keys($projects);
+    $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
+    $query->condition('project_id', $project_ids, 'IN');
+    $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
+    $query->fields('labels', ['id', 'name', 'type']);
+    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+
+    $result = $query->execute();
+    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+
+    return $labels;
   }
 
 }

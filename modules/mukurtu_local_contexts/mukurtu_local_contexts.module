@@ -19,6 +19,14 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'notices' => [],
       ],
     ],
+    'local_contexts_label' => [
+      'template' => 'local-contexts-label',
+      'variables' => [
+        'text' => [],
+        'name' => [],
+        'svg_url' => [],
+      ],
+    ],
   ];
 }
 

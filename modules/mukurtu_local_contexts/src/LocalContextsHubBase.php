@@ -24,6 +24,8 @@ class LocalContextsHubBase {
    */
   protected $endpointUrl;
 
+  protected $db;
+
   /**
    * Constructs a LocalContextsHubManager object.
    *
@@ -35,6 +37,7 @@ class LocalContextsHubBase {
   public function __construct()
   {
     $this->configFactory = \Drupal::service('config.factory');
+    $this->db = \Drupal::database();
     $endpointUrl = $this->configFactory->get(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? 'https://anth-ja77-lc-dev-42d5.uc.r.appspot.com/api/v1/';
 
     if (str_ends_with($endpointUrl, '/')) {

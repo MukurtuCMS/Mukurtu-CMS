@@ -21,8 +21,8 @@ class LocalContextsProject extends LocalContextsHubBase {
     if (!$id) {
       return NULL;
     }
-    $db = \Drupal::database();
-    $query = $db->select('mukurtu_local_contexts_projects', 'project')
+
+    $query = $this->db->select('mukurtu_local_contexts_projects', 'project')
       ->condition('project.id', $id)
       ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated']);
     $result = $query->execute();
@@ -41,7 +41,6 @@ class LocalContextsProject extends LocalContextsHubBase {
   }
 
   protected function fetchProjectFromHub($id) {
-    $db = \Drupal::database();
     if ($project = $this->get("projects/{$id}")) {
       if (empty($project['unique_id'])) {
         return $project;
@@ -56,14 +55,14 @@ class LocalContextsProject extends LocalContextsHubBase {
           'updated' => time(),
       ];
 
-      $query = $db->update('mukurtu_local_contexts_projects')
+      $query = $this->db->update('mukurtu_local_contexts_projects')
         ->condition('id', $id)
         ->fields($projectFields);
       $result = $query->execute();
 
       // Project doesn't exist in our local cache, insert it.
       if (!$result) {
-        $query = $db->insert('mukurtu_local_contexts_projects')->fields($projectFields);
+        $query = $this->db->insert('mukurtu_local_contexts_projects')->fields($projectFields);
         $result = $query->execute();
         $prior_cached_tk_labels = [];
       } else {
@@ -89,7 +88,7 @@ class LocalContextsProject extends LocalContextsHubBase {
           'updated' => time(),
         ];
 
-        $query = $db->update('mukurtu_local_contexts_labels')
+        $query = $this->db->update('mukurtu_local_contexts_labels')
           ->condition('id', $label['unique_id'])
           ->condition('project_id', $project['unique_id'])
           ->fields($labelFields);
@@ -102,7 +101,7 @@ class LocalContextsProject extends LocalContextsHubBase {
         }
 
         if (!$result) {
-          $query = $db->insert('mukurtu_local_contexts_labels')->fields($labelFields);
+          $query = $this->db->insert('mukurtu_local_contexts_labels')->fields($labelFields);
           $result = $query->execute();
         }
 
@@ -122,21 +121,21 @@ class LocalContextsProject extends LocalContextsHubBase {
           // alter locale/language as they see fit, so we will delete all
           // translations and insert them all fresh rather than trying to
           // update.
-          $query = $db->delete('mukurtu_local_contexts_label_translations')
+          $query = $this->db->delete('mukurtu_local_contexts_label_translations')
             ->condition('label_id', $label['unique_id']);
           $query->execute();
-          $query = $db->insert('mukurtu_local_contexts_label_translations')->fields($translationFields);
+          $query = $this->db->insert('mukurtu_local_contexts_label_translations')->fields($translationFields);
           $result = $query->execute();
         }
       }
 
       // Delete any cached TK Labels and translations that no longer exist;
       foreach ($prior_cached_tk_labels as $deleted_tk_label_id => $deleted_tk_label) {
-        $query = $db->delete('mukurtu_local_contexts_label_translations')
+        $query = $this->db->delete('mukurtu_local_contexts_label_translations')
           ->condition('label_id', $deleted_tk_label_id);
         $query->execute();
 
-        $query = $db->delete('mukurtu_local_contexts_labels')
+        $query = $this->db->delete('mukurtu_local_contexts_labels')
           ->condition('id', $deleted_tk_label_id)
           ->condition('project_id', $project['unique_id']);
         $query->execute();
@@ -147,8 +146,7 @@ class LocalContextsProject extends LocalContextsHubBase {
   }
 
   public function getTkLabels() {
-    $db = \Drupal::database();
-    $query = $db->select('mukurtu_local_contexts_labels', 'l')
+    $query = $this->db->select('mukurtu_local_contexts_labels', 'l')
       ->condition('l.project_id', $this->id)
       ->fields('l', ['id', 'name', 'svg_url', 'default_text']);
     $result = $query->execute();
@@ -183,7 +181,33 @@ class LocalContextsProject extends LocalContextsHubBase {
   }
 
   public function inUse() : bool {
-    // @todo Implement!
+    // @todo Decide if we should lookup ALL fields of our local contexts types
+    // or if we want to keep things hardwired to just our usage.
+
+    // Check if any content is using the projects in the projects field.
+    $query = \Drupal::entityQuery('node')
+      ->condition('field_local_contexts_projects', $this->id)
+      ->accessCheck(FALSE);
+    $results = $query->execute();
+    if (!empty($results)) {
+      return TRUE;
+    }
+
+    $labels = array_keys($this->getTkLabels());
+    if (!empty($labels)) {
+      // Build the project ID: label ID keys.
+      $values = array_map(fn($v) => $this->id . ':' . $v, $labels);
+
+      // Check if any content is using those keys.
+      $query = \Drupal::entityQuery('node')
+        ->condition('field_local_contexts_labels', $values, 'IN')
+        ->accessCheck(FALSE);
+      $results = $query->execute();
+      if (!empty($results)) {
+        return TRUE;
+      }
+    }
+
     return FALSE;
   }
 

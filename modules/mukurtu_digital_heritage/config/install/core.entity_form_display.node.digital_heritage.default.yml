@@ -136,6 +136,7 @@ third_party_settings:
     group_labels_and_notices:
       children:
         - field_local_contexts_projects
+        - field_local_contexts_labels
       label: 'Labels and Notices'
       region: content
       parent_name: group_rights_and_permissions
@@ -194,6 +195,8 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
+_core:
+  default_config_hash: u8_Er2gqLJP5eD6pFISlNfM4aHdUm6mjktdGUdIjDbs
 id: node.digital_heritage.default
 targetEntityType: node
 bundle: digital_heritage
@@ -421,6 +424,12 @@ content:
       match_limit: 10
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  field_local_contexts_labels:
+    type: local_contexts_label
+    weight: 1
+    region: content
+    settings: {  }
     third_party_settings: {  }
   field_local_contexts_projects:
     type: local_contexts_project
