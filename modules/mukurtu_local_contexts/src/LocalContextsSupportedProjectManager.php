@@ -152,8 +152,7 @@ class LocalContextsSupportedProjectManager {
     foreach ($result->fetchAllAssoc('id', PDO::FETCH_ASSOC) as $label) {
       $options[$label['title']][$label['p_id'] . ':' . $label['id']] = $label['name'];
     }
-    dpm("getsitelabels");
-    dpm($options);
+
     return $options;
   }
 
@@ -163,6 +162,10 @@ class LocalContextsSupportedProjectManager {
     $memberships = Og::getMemberships($account);
     foreach ($memberships as $membership) {
       $projects += $this->getGroupSupportedProjects($membership->getGroup());
+    }
+
+    if (empty($projects)) {
+      return [];
     }
 
     $project_ids = array_keys($projects);
