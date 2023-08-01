@@ -35,6 +35,11 @@ class MukurtuProtocolServiceProvider extends ServiceProviderBase {
         ->addArgument(new Reference('router.builder'))
         ->addArgument(new Reference('og.group_audience_helper'));
     }
+
+    if ($container->hasDefinition('content_moderation.state_transition_validation')) {
+      $definition = $container->getDefinition('content_moderation.state_transition_validation');
+      $definition->setClass('Drupal\mukurtu_protocol\ProtocolAwareStateTransitionValidation');
+    }
   }
 
 }

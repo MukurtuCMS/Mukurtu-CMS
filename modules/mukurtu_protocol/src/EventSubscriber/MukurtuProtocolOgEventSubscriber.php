@@ -14,6 +14,7 @@ use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\GroupPermission;
 use Drupal\og\GroupContentOperationPermission;
+use Drupal\content_moderation\Permissions as ContentModerationPermissions;
 
 /**
  * Event subscribers for Organic Groups.
@@ -183,6 +184,18 @@ class MukurtuProtocolOgEventSubscriber extends OgEventSubscriber {
           'restrict access' => FALSE,
         ]),
       ]);
+
+      // Workflows.
+      $workflowPermissions = new ContentModerationPermissions();
+      foreach ($workflowPermissions->transitionPermissions() as $id => $permission) {
+        $event->setPermission(new GroupPermission([
+          'name' => $id,
+          'title' => $permission['title'],
+          'description' => $permission['description'],
+          'default roles' => [OgRoleInterface::ADMINISTRATOR],
+          'restrict access' => FALSE,
+        ]));
+      }
 
       // Add a list of generic CRUD permissions for all group content.
       $group_content_permissions = $this->getDefaultEntityOperationPermissions($event->getGroupContentBundleIds());

@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_protocol\Access;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Routing\Access\AccessInterface;
+use Drupal\mukurtu_protocol\MukurtuPermissionsCheckInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\Routing\Route;
 use Drupal\og\OgRoleManagerInterface;
@@ -13,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Determines access to routes based on community/protocol permissions.
  */
-class MukurtuPermissionAccessCheck implements AccessInterface {
+class MukurtuPermissionAccessCheck implements AccessInterface, MukurtuPermissionsCheckInterface {
 
   /**
    * The OG role manager.
@@ -94,6 +95,20 @@ class MukurtuPermissionAccessCheck implements AccessInterface {
     }
 
     return count($foundPermissions) == count($permissions) ? AccessResult::allowed() : AccessResult::neutral();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function hasPermission(AccountInterface $account, $permission) {
+    return $this->hasMukurtuPermissions($account, [$permission])->isAllowed();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function hasPermissions(AccountInterface $account, array $permissions, $conjunction = 'AND') {
+    return $this->hasMukurtuPermissions($account, $permissions, $conjunction)->isAllowed();
   }
 
   /**
