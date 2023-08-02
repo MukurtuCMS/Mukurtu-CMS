@@ -1,0 +1,53 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.article
+    - node.type.collection
+    - node.type.dictionary_word
+    - node.type.digital_heritage
+    - node.type.page
+    - node.type.person
+    - node.type.word_list
+  module:
+    - content_moderation
+id: mukurtu_default_content_workflow
+label: 'Mukurtu Default Content Workflow'
+type: content_moderation
+type_settings:
+  states:
+    draft:
+      label: 'Under Review'
+      weight: 0
+      published: false
+      default_revision: false
+    published:
+      label: Published
+      weight: 1
+      published: true
+      default_revision: true
+  transitions:
+    create_new_draft:
+      label: 'Under Review'
+      from:
+        - draft
+        - published
+      to: draft
+      weight: 0
+    publish:
+      label: Publish
+      from:
+        - draft
+        - published
+      to: published
+      weight: 1
+  entity_types:
+    node:
+      - article
+      - collection
+      - dictionary_word
+      - digital_heritage
+      - page
+      - person
+      - word_list
+  default_moderation_state: draft

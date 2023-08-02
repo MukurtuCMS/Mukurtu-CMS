@@ -7,8 +7,12 @@ dependencies:
     - media.type.image
     - media.type.remote_video
     - media.type.video
+    - node.type.collection
     - node.type.digital_heritage
+    - workflows.workflow.mukurtu_default_content_workflow
   module:
+    - comment
+    - content_moderation
     - media
     - mukurtu_protocol
     - node
@@ -65,4 +69,6 @@ permissions:
   - 'update own image media'
   - 'update own remote_video media'
   - 'update own video media'
+  - 'use mukurtu_default_content_workflow transition create_new_draft'
+  - 'use mukurtu_default_content_workflow transition publish'
 role_type: standard
