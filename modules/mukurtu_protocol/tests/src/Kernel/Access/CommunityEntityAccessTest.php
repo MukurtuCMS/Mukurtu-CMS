@@ -23,6 +23,8 @@ class CommunityEntityAccessTest extends KernelTestBase {
    */
   protected static $modules = [
     'block_content',
+    'content_moderation',
+    'workflows',
     'field',
     'node',
     'node_access_test',
@@ -60,6 +62,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('taxonomy_term');
+    $this->installEntitySchema('workflow');
     $this->installEntitySchema('community');
     $this->installEntitySchema('protocol');
     $this->installSchema('system', 'sequences');

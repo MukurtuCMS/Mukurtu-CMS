@@ -1,0 +1,8 @@
+name: Mukurtu Workflows
+type: module
+description: Provides the default Mukurtu content moderation workflows.
+package: Mukurtu
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - mukurtu_protocol

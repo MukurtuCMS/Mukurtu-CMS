@@ -9,7 +9,6 @@ dependencies:
     - media.type.video
     - node.type.digital_heritage
     - node.type.person
-    - workflows.workflow.mukurtu_default_content_workflow
   module:
     - content_moderation
     - media
@@ -44,5 +43,4 @@ permissions:
   - 'update own image media'
   - 'update own remote_video media'
   - 'update own video media'
-  - 'use mukurtu_default_content_workflow transition create_new_draft'
 role_type: standard

@@ -32,6 +32,8 @@ class AccessByProtocolTest extends KernelTestBase {
    */
   protected static $modules = [
     'block_content',
+    'content_moderation',
+    'workflows',
     'field',
     'node',
     'node_access_test',
@@ -104,6 +106,7 @@ class AccessByProtocolTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('block_content');
     $this->installEntitySchema('node');
+    $this->installEntitySchema('workflow');
     $this->installEntitySchema('taxonomy_term');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
