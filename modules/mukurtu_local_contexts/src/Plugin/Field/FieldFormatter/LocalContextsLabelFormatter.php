@@ -27,7 +27,6 @@ class LocalContextsLabelFormatter extends FormatterBase {
 
     foreach ($items as $delta => $item) {
       $label = new LocalContextsLabel($item->value);
-      dpm($label);
 
       $element[$delta] = [
         '#theme' => 'local_contexts_label',
