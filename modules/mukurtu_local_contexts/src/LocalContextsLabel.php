@@ -8,9 +8,14 @@ class LocalContextsLabel extends LocalContextsHubBase {
   protected $valid;
   protected $project_id;
   protected $label_id;
+  protected $translationId;
   public $name;
   public $svg_url;
   public $default_text;
+  public $locale;
+  public $language;
+  public $translationName;
+  public $translationText;
 
   public function __construct($id) {
     parent::__construct();
@@ -25,10 +30,22 @@ class LocalContextsLabel extends LocalContextsHubBase {
       ->fields('l', ['id', 'name', 'svg_url', 'default_text']);
     $result = $query->execute();
 
+    $tQuery = $this->db->select('mukurtu_local_contexts_label_translations', 't')
+      ->condition('t.label_id', $this->label_id)
+      ->fields('t', ['id', 'locale', 'language', 'name', 'text']);
+    $tResult = $tQuery->execute();
+
     $label = $result->fetchAssoc();
     $this->name = $label['name'] ?? '';
     $this->svg_url = $label['svg_url'] ?? NULL;
     $this->default_text = $label['text'] ?? '';
+
+    $translationInfo = $tResult->fetchAssoc();
+    $this->translationId = $translationInfo['id'] ?? '';
+    $this->locale = $translationInfo['locale'] ?? '';
+    $this->language = $translationInfo['language'] ?? '';
+    $this->translationName = $translationInfo['name'] ?? '';
+    $this->translationText = $translationInfo['text'] ?? '';
   }
 
 }

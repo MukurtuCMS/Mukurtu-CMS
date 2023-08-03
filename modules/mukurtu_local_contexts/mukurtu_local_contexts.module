@@ -25,6 +25,10 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'text' => [],
         'name' => [],
         'svg_url' => [],
+        'locale' => [],
+        'language' => [],
+        'translationName' => [],
+        'translationText' => [],
       ],
     ],
   ];

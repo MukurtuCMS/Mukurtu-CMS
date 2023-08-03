@@ -27,12 +27,17 @@ class LocalContextsLabelFormatter extends FormatterBase {
 
     foreach ($items as $delta => $item) {
       $label = new LocalContextsLabel($item->value);
+      dpm($label);
 
       $element[$delta] = [
         '#theme' => 'local_contexts_label',
         '#name' => $label->name,
         '#text' => $label->default_text,
         '#svg_url' => $label->svg_url,
+        '#locale' => $label->locale,
+        '#language' => $label->language,
+        '#translationName' => $label->translationName,
+        '#translationText' => $label->translationText,
       ];
     }
 
