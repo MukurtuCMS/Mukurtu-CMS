@@ -11,6 +11,13 @@ use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
  * Provides a Local Contexts form.
  */
 class AddSiteSupportedProject extends FormBase {
+  protected $supportedProjectManager;
+  protected $siteSupportedProjects;
+
+  public function __construct() {
+    $this->supportedProjectManager = new LocalContextsSupportedProjectManager();
+    $this->siteSupportedProjects = array_keys($this->supportedProjectManager->getSiteSupportedProjects());
+  }
 
   /**
    * {@inheritdoc}
@@ -45,6 +52,10 @@ class AddSiteSupportedProject extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    if (in_array($form_state->getValue('project_id'), $this->siteSupportedProjects)) {
+      $form_state->setErrorByName('name', $this->t('This project is already in use.'));
+      return;
+    }
     if (mb_strlen($form_state->getValue('project_id')) != 36) {
       $form_state->setErrorByName('name', $this->t('ID must be in valid UUID format'));
       return;

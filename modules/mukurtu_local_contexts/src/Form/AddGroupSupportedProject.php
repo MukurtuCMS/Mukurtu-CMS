@@ -12,7 +12,12 @@ use Drupal\Core\Entity\ContentEntityInterface;
  * Provides a Local Contexts form.
  */
 class AddGroupSupportedProject extends FormBase {
+  protected $supportedProjectManager;
+  protected $groupSupportedProjects;
 
+  public function __construct() {
+    $this->supportedProjectManager = new LocalContextsSupportedProjectManager();
+  }
   /**
    * {@inheritdoc}
    */
@@ -24,6 +29,7 @@ class AddGroupSupportedProject extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ContentEntityInterface $group = NULL) {
+    $this->groupSupportedProjects = array_keys($this->supportedProjectManager->getGroupSupportedProjects($group));
     $form_state->set('group', $group);
     $form['project_id'] = [
       '#type' => 'textfield',
@@ -46,6 +52,10 @@ class AddGroupSupportedProject extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    if (in_array($form_state->getValue('project_id'), $this->groupSupportedProjects)) {
+      $form_state->setErrorByName('name', $this->t('This project is already in use.'));
+      return;
+    }
     if (mb_strlen($form_state->getValue('project_id')) != 36) {
       $form_state->setErrorByName('name', $this->t('ID must be in valid UUID format'));
       return;
