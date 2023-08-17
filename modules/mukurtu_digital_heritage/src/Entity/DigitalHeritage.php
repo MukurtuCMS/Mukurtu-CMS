@@ -240,7 +240,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setCardinality(-1)
       ->setSettings([
         'title' => 1,
-        'link_type' => 17,
+        'link_type' => 16,
       ])
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
