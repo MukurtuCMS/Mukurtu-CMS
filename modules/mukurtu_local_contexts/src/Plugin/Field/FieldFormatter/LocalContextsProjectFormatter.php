@@ -33,7 +33,8 @@ class LocalContextsProjectFormatter extends FormatterBase {
       $element[$delta] = [
         '#theme' => 'local_contexts_project',
         '#title' => $project->getTitle(),
-        '#tk_labels' => $project->getTkLabels(),
+        '#labels' => $project->getLabels(),
+        '#notices' => $project->getNotices(),
       ];
     }
 

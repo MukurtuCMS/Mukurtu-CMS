@@ -309,7 +309,7 @@ content:
     weight: 25
     region: content
   field_local_contexts_labels:
-    type: local_contexts_label
+    type: local_contexts_labels
     label: above
     settings: {  }
     third_party_settings: {  }

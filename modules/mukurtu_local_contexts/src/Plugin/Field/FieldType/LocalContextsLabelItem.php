@@ -11,21 +11,23 @@ use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Defines the 'local_contexts_label' field type.
+ * Defines the 'local_contexts_labels' field type.
  *
  * @FieldType(
- *   id = "local_contexts_label",
- *   label = @Translation("Local Contexts Label"),
- *   default_widget = "local_contexts_label",
- *   default_formatter = "local_contexts_label"
+ *   id = "local_contexts_labels",
+ *   label = @Translation("Local Contexts Labels and Notices"),
+ *   default_widget = "local_contexts_labels",
+ *   default_formatter = "local_contexts_labels"
  * )
  */
 class LocalContextsLabelItem extends StringItem implements OptionsProviderInterface {
   protected $localContextsProjectManager;
+  protected $noticeTypes;
 
   public function __construct(ComplexDataDefinitionInterface $definition, $name = NULL, TypedDataInterface $parent = NULL) {
     parent::__construct($definition, $name, $parent);
     $this->localContextsProjectManager = new LocalContextsSupportedProjectManager();
+    $this->noticeTypes = ['traditional_knowledge', 'biocultural', 'attribution_incomplete', 'open_to_collaborate'];
   }
 
   /**
@@ -50,12 +52,17 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
     }
   }
 
-  protected function flattenOptions(array $labels) {
+  protected function flattenOptions(array $values) {
     $options = [];
-    foreach ($labels as $id => $label) {
-      $options[$label['title']][$label['p_id'] . ':' . $label['id']] = $label['name'] ?? $this->t('Unknown Label');
+    foreach ($values as $id => $value) {
+      // If we're dealing with a notice, handle it differently.
+      if (in_array($value['type'], $this->noticeTypes)) {
+        $options[$value['title']][$value['p_id'] . ':' . $value['type']] = $value['name'] ?? $this->t('Unknown Notice');
+      }
+      else {
+        $options[$value['title']][$value['p_id'] . ':' . $value['id']] = $value['name'] ?? $this->t('Unknown Label');
+      }
     }
-
     return $options;
   }
 
@@ -63,10 +70,14 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
    * {@inheritDoc}
    */
   public function getPossibleValues(AccountInterface $account = NULL) {
-    $labels = $this->localContextsProjectManager->getAllLabels();
     $values = [];
+    $labels = $this->localContextsProjectManager->getAllLabels();
+    $notices = $this->localContextsProjectManager->getAllNotices();
     foreach ($labels as $label) {
       $values[] = $label['p_id'] . ':' . $label['id'];
+    }
+    foreach ($notices as $notice) {
+      $values[] = $notice['p_id'] . ':' . $notice['type'];
     }
     return $values;
   }
@@ -74,8 +85,10 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
   /**
    * {@inheritDoc}
    */
-  public function getPossibleOptions(AccountInterface $account = NULL){
-    return $this->flattenOptions($this->localContextsProjectManager->getAllLabels());
+  public function getPossibleOptions(AccountInterface $account = NULL) {
+    $labelOptions = $this->flattenOptions($this->localContextsProjectManager->getAllLabels());
+    $noticeOptions = $this->flattenOptions($this->localContextsProjectManager->getAllNotices());
+    return array_merge($labelOptions, $noticeOptions);
   }
 
   /**
@@ -83,9 +96,13 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
    */
   public function getSettableValues(AccountInterface $account = NULL) {
     $labels = $account ? $this->localContextsProjectManager->getUserLabels($account) : $this->localContextsProjectManager->getSiteLabels();
+    $notices = $account ? $this->localContextsProjectManager->getUserNotices($account) : $this->localContextsProjectManager->getSiteNotices();
     $values = [];
     foreach ($labels as $label) {
       $values[] = $label['p_id'] . ':' . $label['id'];
+    }
+    foreach ($notices as $notice) {
+      $values[] = $notice['p_id'] . ':' . $notice['type'];
     }
     return $values;
   }
@@ -95,7 +112,11 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
    */
   public function getSettableOptions(AccountInterface $account = NULL) {
     $labels = $account ? $this->localContextsProjectManager->getUserLabels($account) : $this->localContextsProjectManager->getSiteLabels();
-    return $this->flattenOptions($labels);
+    $notices = $account ? $this->localContextsProjectManager->getUserNotices($account) : $this->localContextsProjectManager->getSiteNotices();
+    $labelOptions = $this->flattenOptions($labels);
+    $noticeOptions = $this->flattenOptions($notices);
+    $options = array_merge($labelOptions, $noticeOptions);
+    return $options;
   }
-
 }
+

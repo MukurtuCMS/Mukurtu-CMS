@@ -38,7 +38,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
     $label = $result->fetchAssoc();
     $this->name = $label['name'] ?? '';
     $this->svg_url = $label['svg_url'] ?? NULL;
-    $this->default_text = $label['text'] ?? '';
+    $this->default_text = $label['default_text'] ?? '';
 
     $translationInfo = $tResult->fetchAssoc();
     $this->translationId = $translationInfo['id'] ?? '';

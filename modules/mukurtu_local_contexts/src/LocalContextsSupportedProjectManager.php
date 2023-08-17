@@ -61,6 +61,20 @@ class LocalContextsSupportedProjectManager {
     return $options;
   }
 
+  public function getAllNotices() {
+    $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
+    $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
+    $query->fields('notices', ['type', 'name', 'default_text']);
+    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+
+    $result = $query->execute();
+    $options = [];
+    foreach ($result->fetchAllAssoc('id', PDO::FETCH_ASSOC) as $notice) {
+      $options[$notice['title']][$notice['p_id'] . ':' . $notice['type']] = $notice['name'];
+    }
+    return $options;
+  }
+
   public function getSiteSupportedProjects() {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
@@ -156,6 +170,25 @@ class LocalContextsSupportedProjectManager {
     return $options;
   }
 
+  public function getSiteNotices() {
+    $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
+    $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
+    $query->join('mukurtu_local_contexts_supported_projects', 'sp', 'notices.project_id = sp.project_id');
+    $query
+      ->condition('sp.type', 'site')
+      ->condition('sp.group_id', 0);
+    $query->fields('notices', ['type', 'name', 'default_text']);
+    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+
+    $result = $query->execute();
+    $options = [];
+    foreach ($result->fetchAllAssoc('type', PDO::FETCH_ASSOC) as $notice) {
+      $options[$notice['title']][$notice['p_id'] . ':' . $notice['type']] = $notice['name'];
+    }
+
+    return $options;
+  }
+
   public function getUserLabels(AccountInterface $account) {
     $projects = $this->getSiteSupportedProjects();
 
@@ -176,9 +209,45 @@ class LocalContextsSupportedProjectManager {
     $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
 
     $result = $query->execute();
-    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
 
+    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
     return $labels;
+  }
+
+  public function getUserNotices(AccountInterface $account) {
+    $projects = $this->getSiteSupportedProjects();
+
+    $memberships = Og::getMemberships($account);
+    foreach ($memberships as $membership) {
+      $projects += $this->getGroupSupportedProjects($membership->getGroup());
+    }
+
+    if (empty($projects)) {
+      return [];
+    }
+
+    $project_ids = array_keys($projects);
+    $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
+    $query->condition('project_id', $project_ids, 'IN');
+    $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
+    $query->fields('notices', ['project_id', 'type', 'name', 'default_text']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+
+    $result = $query->execute();
+    $notices = [];
+    while ($notice = $result->fetchAssoc()) {
+      $noticeId = $notice['project_id'] . ':' . $notice['type'];
+      $notices[$noticeId] = [
+        'p_id' => $notice['project_id'],
+        'title' => $notice['title'],
+        'type' => $notice['type'],
+        'name' => $notice['name'],
+        'svg_url' => $notice['svg_url'],
+        'text' => $notice['default_text'],
+      ];
+    }
+
+    return $notices;
   }
 
 }

@@ -14,12 +14,11 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'variables' => [
         'title' => [],
         'privacy' => [],
-        'tk_labels' => [],
-        'bc_labels' => [],
+        'labels' => [],
         'notices' => [],
       ],
     ],
-    'local_contexts_label' => [
+    'local_contexts_labels' => [
       'template' => 'local-contexts-label',
       'variables' => [
         'text' => [],
@@ -35,13 +34,12 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
 }
 
 function mukurtu_local_contexts_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
-  if ($entity_type
-    ->id() == 'user' && $bundle == 'user') {
+  if ($entity_type->id() == 'user' && $bundle == 'user') {
     $fields = [];
     $fields['field_local_contexts_user_id'] = BaseFieldDefinition::create('integer')
-            ->setLabel(new TranslatableMarkup("Local Contexts Hub User ID"))
-            ->setDescription(new TranslatableMarkup("The Local Contexts Hub User ID to use for this user."))
-            ->setDisplayConfigurable('form', TRUE);
+      ->setLabel(new TranslatableMarkup("Local Contexts Hub User ID"))
+      ->setDescription(new TranslatableMarkup("The Local Contexts Hub User ID to use for this user."))
+      ->setDisplayConfigurable('form', TRUE);
     return $fields;
   }
 }

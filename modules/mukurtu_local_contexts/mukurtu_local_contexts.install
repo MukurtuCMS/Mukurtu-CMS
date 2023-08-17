@@ -74,62 +74,6 @@ function mukurtu_local_contexts_schema() {
     ],
   ];
 
-  $schema['mukurtu_local_contexts_notices'] = [
-    'description' => 'Local Contexts Notices',
-    'fields' => [
-      'id' => [
-        'type' => 'varchar',
-        'length' => 36,
-        'not null' => TRUE,
-        'description' => 'Notice ID',
-      ],
-      'project_id' => [
-        'type' => 'varchar',
-        'length' => 36,
-        'not null' => TRUE,
-        'description' => 'Project ID',
-      ],
-      'name' => [
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Name',
-      ],
-      'type' => [
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'description' => 'Type',
-      ],
-      'img_url' => [
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Image URL',
-      ],
-      'svg_url' => [
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'SVG URL',
-      ],
-      'default_text' => [
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Text',
-      ],
-      'updated' => [
-        'description' => 'The Unix timestamp when the notice was last fetched from the hub.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ],
-    ],
-    'primary key' => ['id'],
-    'indexes' => [
-      'project' => ['id', 'project_id'],
-      'updated' => ['updated'],
-    ],
-  ];
-
   $schema['mukurtu_local_contexts_labels'] = [
     'description' => 'Local Contexts Labels',
     'fields' => [
@@ -255,6 +199,107 @@ function mukurtu_local_contexts_schema() {
     'primary key' => ['id'],
     'indexes' => [
       'label' => ['id', 'label_id'],
+      'updated' => ['updated'],
+    ],
+  ];
+
+  $schema['mukurtu_local_contexts_notices'] = [
+    'description' => 'Local Contexts Notices',
+    'fields' => [
+      'project_id' => [
+        'type' => 'varchar',
+        'length' => 36,
+        'not null' => TRUE,
+        'description' => 'Project ID',
+      ],
+      'type' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Type',
+      ],
+      'name' => [
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'Name',
+      ],
+      'img_url' => [
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'Image URL',
+      ],
+      'svg_url' => [
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'SVG URL',
+      ],
+      'default_text' => [
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'Text',
+      ],
+      'updated' => [
+        'description' => 'The Unix timestamp when the notice was last fetched from the hub.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['project_id', 'type'],
+    'indexes' => [
+      'project' => ['project_id'],
+      'updated' => ['updated'],
+    ],
+  ];
+
+  $schema['mukurtu_local_contexts_notice_translations'] = [
+    'description' => 'Local Contexts Notice Translations',
+    'fields' => [
+      'project_id' => [
+        'type' => 'varchar',
+        'length' => 36,
+        'not null' => TRUE,
+        'description' => 'Project ID',
+      ],
+      'type' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Type',
+      ],
+      'locale' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Language code',
+      ],
+      'language' => [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'description' => 'Type',
+      ],
+      'name' => [
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Name',
+      ],
+      'text' => [
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Text',
+      ],
+      'updated' => [
+        'description' => 'The Unix timestamp when the translation was last fetched from the hub.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['locale'],
+    'indexes' => [
       'updated' => ['updated'],
     ],
   ];

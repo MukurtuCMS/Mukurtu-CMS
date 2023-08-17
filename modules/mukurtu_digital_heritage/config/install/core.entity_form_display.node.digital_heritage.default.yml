@@ -424,7 +424,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_local_contexts_labels:
-    type: local_contexts_label
+    type: local_contexts_labels
     weight: 1
     region: content
     settings: {  }

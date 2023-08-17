@@ -11,12 +11,12 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Defines the 'local_contexts_label' field widget.
+ * Defines the 'local_contexts_labels' field widget.
  *
  * @FieldWidget(
- *   id = "local_contexts_label",
- *   label = @Translation("Local Contexts Label Widget"),
- *   field_types = {"local_contexts_label"},
+ *   id = "local_contexts_labels",
+ *   label = @Translation("Local Contexts Labels and Notices Widget"),
+ *   field_types = {"local_contexts_labels"},
  *   multiple_values = TRUE
  * )
  */
