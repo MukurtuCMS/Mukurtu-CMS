@@ -483,7 +483,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'auto_create' => TRUE,
         ]
       ])
-      ->setCardinality(1)
+      ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
