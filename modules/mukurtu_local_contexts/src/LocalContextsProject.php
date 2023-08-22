@@ -134,7 +134,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $notices;
   }
 
-  public function cacheLabels($labels, $id, &$prior_cached_labels) {
+  protected function cacheLabels($labels, $id, &$prior_cached_labels) {
     // Cache tk and bc labels.
     foreach ($labels as $label) {
       $labelFields = [
@@ -149,6 +149,7 @@ class LocalContextsProject extends LocalContextsHubBase {
         'audio_url' => $label['audiofile'] ?? NULL,
         'community' => $label['community'],
         'default_text' => $label['label_text'],
+        'display' => 'label',
         'updated' => time(),
       ];
 
@@ -171,7 +172,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
   }
 
-  public function cacheLabelTranslations($labels) {
+  protected function cacheLabelTranslations($labels) {
     // Cache tk and bc label translations.
     foreach ($labels as $label) {
       $translations = $label['translations'] ?? [];
@@ -199,9 +200,9 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
   }
 
-  // For our db storage, notice translations need notice_type and project_id,
-  // so merging the caching of notices with translations makes more sense here.
-  public function cacheNoticesAndTranslations($notices, $projectId, &$prior_cached_notices) {
+  protected function cacheNoticesAndTranslations($notices, $projectId, &$prior_cached_notices) {
+    // For our db storage, notice translations need notice_type and project_id,
+    // so merging the caching of notices with translations makes more sense here.
     foreach ($notices as $notice) {
       $noticeFields = [
         'project_id' => $projectId,
@@ -210,6 +211,7 @@ class LocalContextsProject extends LocalContextsHubBase {
         'img_url' => $notice['img_url'],
         'svg_url' => $notice['svg_url'],
         'default_text' => $notice['default_text'],
+        'display' => 'notice',
         'updated' => time(),
       ];
 
@@ -237,7 +239,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
   }
 
-  public function cacheNoticeTranslations($notice, $projectId, $noticeType) {
+  protected function cacheNoticeTranslations($notice, $projectId, $noticeType) {
     $translations = $notice['translations'] ?? [];
     foreach ($translations as $translation) {
       $translationFields = [
@@ -265,7 +267,7 @@ class LocalContextsProject extends LocalContextsHubBase {
 
   }
 
-  public function deleteCachedLabelsAndTranslations(&$prior_cached_labels, $id) {
+  protected function deleteCachedLabelsAndTranslations(&$prior_cached_labels, $id) {
     foreach ($prior_cached_labels as $deleted_label_id => $deleted_label) {
       $query = $this->db->delete('mukurtu_local_contexts_label_translations')
         ->condition('label_id', $deleted_label_id);
@@ -278,7 +280,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
   }
 
-  public function deleteCachedNoticesAndTranslations(&$prior_cached_notices, $id) {
+  protected function deleteCachedNoticesAndTranslations(&$prior_cached_notices, $id) {
     $id = '';
     $noticeType = '';
 
@@ -336,7 +338,7 @@ class LocalContextsProject extends LocalContextsHubBase {
 
       // Check if any content is using those keys.
       $query = \Drupal::entityQuery('node')
-        ->condition('field_local_contexts_labels', $values, 'IN')
+        ->condition('field_local_contexts_labels_and_notices', $values, 'IN')
         ->accessCheck(FALSE);
       $results = $query->execute();
       if (!empty($results)) {
@@ -346,7 +348,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     else if (!empty($notices)) {
       // Check if any content is using those keys.
       $query = \Drupal::entityQuery('node')
-        ->condition('field_local_contexts_labels', $notices, 'IN')
+        ->condition('field_local_contexts_labels_and_notices', $notices, 'IN')
         ->accessCheck(FALSE);
       $results = $query->execute();
       if (!empty($results)) {

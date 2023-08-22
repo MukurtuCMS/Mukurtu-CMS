@@ -18,16 +18,13 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'notices' => [],
       ],
     ],
-    'local_contexts_labels' => [
-      'template' => 'local-contexts-label',
+    'local_contexts_labels_and_notices' => [
+      'template' => 'local-contexts-label-and-notice',
       'variables' => [
         'text' => [],
         'name' => [],
         'svg_url' => [],
-        'locale' => [],
-        'language' => [],
-        'translationName' => [],
-        'translationText' => [],
+        'translations' => [],
       ],
     ],
   ];

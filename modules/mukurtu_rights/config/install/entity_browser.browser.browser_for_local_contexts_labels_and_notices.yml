@@ -2,11 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
-    - views.view.content_browser_local_contexts_labels
+    - views.view.content_browser_local_contexts_labels_and_notices
   module:
     - views
-name: browser_for_local_contexts_labels
-label: 'Browser for Local Contexts Labels'
+name: browser_for_local_contexts_labels_and_notices
+label: 'Browser for Local Contexts Labels and Notices'
 display: modal
 display_configuration:
   width: '650'
@@ -20,7 +20,7 @@ widget_selector_configuration: {  }
 widgets:
   b382cebf-5b4b-4ea4-bc6f-57c95d0267a0:
     settings:
-      view: content_browser_local_contexts_labels
+      view: content_browser_local_contexts_labels_and_notices
       view_display: entity_browser_1
       submit_text: 'Select labels'
       auto_select: false
@@ -30,7 +30,7 @@ widgets:
     id: view
   8d2fc5a1-5a51-429d-b39f-0fd0dd7a6f59:
     settings:
-      view: content_browser_local_contexts_labels
+      view: content_browser_local_contexts_labels_and_notices
       view_display: entity_browser_2
       submit_text: 'Select labels'
       auto_select: false

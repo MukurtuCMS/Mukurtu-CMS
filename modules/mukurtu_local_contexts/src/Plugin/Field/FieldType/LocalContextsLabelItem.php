@@ -11,23 +11,21 @@ use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Defines the 'local_contexts_labels' field type.
+ * Defines the 'local_contexts_label_and_notice' field type.
  *
  * @FieldType(
- *   id = "local_contexts_labels",
- *   label = @Translation("Local Contexts Labels and Notices"),
- *   default_widget = "local_contexts_labels",
- *   default_formatter = "local_contexts_labels"
+ *   id = "local_contexts_label_and_notice",
+ *   label = @Translation("Local Contexts Label and Notice"),
+ *   default_widget = "local_contexts_label_and_notice",
+ *   default_formatter = "local_contexts_label_and_notice"
  * )
  */
 class LocalContextsLabelItem extends StringItem implements OptionsProviderInterface {
   protected $localContextsProjectManager;
-  protected $noticeTypes;
 
   public function __construct(ComplexDataDefinitionInterface $definition, $name = NULL, TypedDataInterface $parent = NULL) {
     parent::__construct($definition, $name, $parent);
     $this->localContextsProjectManager = new LocalContextsSupportedProjectManager();
-    $this->noticeTypes = ['traditional_knowledge', 'biocultural', 'attribution_incomplete', 'open_to_collaborate'];
   }
 
   /**
@@ -55,12 +53,11 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
   protected function flattenOptions(array $values) {
     $options = [];
     foreach ($values as $id => $value) {
-      // If we're dealing with a notice, handle it differently.
-      if (in_array($value['type'], $this->noticeTypes)) {
-        $options[$value['title']][$value['p_id'] . ':' . $value['type']] = $value['name'] ?? $this->t('Unknown Notice');
+      if ($value['display'] == 'notice') {
+        $options[$value['title']][$value['p_id'] . ':' . $value['type'] . ':' . $value['display']] = $value['name'] ?? $this->t('Unknown Notice');
       }
-      else {
-        $options[$value['title']][$value['p_id'] . ':' . $value['id']] = $value['name'] ?? $this->t('Unknown Label');
+      else if ($value['display'] == 'label') {
+        $options[$value['title']][$value['p_id'] . ':' . $value['id'] . ':' . $value['display']] = $value['name'] ?? $this->t('Unknown Label');
       }
     }
     return $options;
@@ -73,11 +70,12 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
     $values = [];
     $labels = $this->localContextsProjectManager->getAllLabels();
     $notices = $this->localContextsProjectManager->getAllNotices();
+
     foreach ($labels as $label) {
-      $values[] = $label['p_id'] . ':' . $label['id'];
+      $values[] = $label['p_id'] . ':' . $label['id'] . ':' . $label['display'];
     }
     foreach ($notices as $notice) {
-      $values[] = $notice['p_id'] . ':' . $notice['type'];
+      $values[] = $notice['p_id'] . ':' . $notice['type'] . ':' . $notice['display'];
     }
     return $values;
   }
@@ -98,11 +96,12 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
     $labels = $account ? $this->localContextsProjectManager->getUserLabels($account) : $this->localContextsProjectManager->getSiteLabels();
     $notices = $account ? $this->localContextsProjectManager->getUserNotices($account) : $this->localContextsProjectManager->getSiteNotices();
     $values = [];
+
     foreach ($labels as $label) {
-      $values[] = $label['p_id'] . ':' . $label['id'];
+      $values[] = $label['p_id'] . ':' . $label['id'] . ':' . $label['display'];
     }
     foreach ($notices as $notice) {
-      $values[] = $notice['p_id'] . ':' . $notice['type'];
+      $values[] = $notice['p_id'] . ':' . $notice['type'] . ':' . $notice['display'];
     }
     return $values;
   }

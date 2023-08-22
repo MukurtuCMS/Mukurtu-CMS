@@ -5,8 +5,8 @@ dependencies:
     - entity_browser
     - mukurtu_rights
     - user
-id: content_browser_local_contexts_labels
-label: 'Content Browser - Local Contexts Labels'
+id: content_browser_local_contexts_labels_and_notices
+label: 'Content Browser - Local Contexts Labels and Notices'
 module: views
 description: ''
 tag: ''

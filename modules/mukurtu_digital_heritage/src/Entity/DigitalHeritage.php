@@ -278,7 +278,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_local_contexts_labels'] = BaseFieldDefinition::create('local_contexts_labels')
+    $definitions['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
       ->setLabel(t('Local Contexts Labels and Notices'))
       ->setDescription(t('Local Contexts Labels and Notices from the Local Contexts Hub.'))
       ->setCardinality(-1)

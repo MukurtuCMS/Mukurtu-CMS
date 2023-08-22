@@ -136,7 +136,7 @@ third_party_settings:
     group_labels_and_notices:
       children:
         - field_local_contexts_projects
-        - field_local_contexts_labels
+        - field_local_contexts_labels_and_notices
       label: 'Labels and Notices'
       region: content
       parent_name: group_rights_and_permissions
@@ -423,8 +423,8 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_local_contexts_labels:
-    type: local_contexts_labels
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
     weight: 1
     region: content
     settings: {  }

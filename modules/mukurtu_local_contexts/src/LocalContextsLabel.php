@@ -8,18 +8,15 @@ class LocalContextsLabel extends LocalContextsHubBase {
   protected $valid;
   protected $project_id;
   protected $label_id;
-  protected $translationId;
+  protected $display;
   public $name;
   public $svg_url;
   public $default_text;
-  public $locale;
-  public $language;
-  public $translationName;
-  public $translationText;
+  public $translations;
 
   public function __construct($id) {
     parent::__construct();
-    list($this->project_id, $this->label_id) = explode(':', $id);
+    list($this->project_id, $this->label_id, $this->display) = explode(':', $id);
     $this->load();
   }
 
@@ -40,12 +37,10 @@ class LocalContextsLabel extends LocalContextsHubBase {
     $this->svg_url = $label['svg_url'] ?? NULL;
     $this->default_text = $label['default_text'] ?? '';
 
-    $translationInfo = $tResult->fetchAssoc();
-    $this->translationId = $translationInfo['id'] ?? '';
-    $this->locale = $translationInfo['locale'] ?? '';
-    $this->language = $translationInfo['language'] ?? '';
-    $this->translationName = $translationInfo['name'] ?? '';
-    $this->translationText = $translationInfo['text'] ?? '';
+    // Load every translation.
+    while ($translationInfo = $tResult->fetchAssoc()) {
+      $this->translations[] = $translationInfo;
+    }
   }
 
 }

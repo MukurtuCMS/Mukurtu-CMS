@@ -50,29 +50,36 @@ class LocalContextsSupportedProjectManager {
   public function getAllLabels() {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
-    $query->fields('labels', ['id', 'name', 'type']);
+    $query->fields('labels', ['id', 'name', 'type', 'display']);
     $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
 
     $result = $query->execute();
-    $options = [];
-    foreach ($result->fetchAllAssoc('id', PDO::FETCH_ASSOC) as $label) {
-      $options[$label['title']][$label['p_id'] . ':' . $label['id']] = $label['name'];
-    }
-    return $options;
+    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    return $labels;
   }
 
   public function getAllNotices() {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
-    $query->fields('notices', ['type', 'name', 'default_text']);
+    $query->fields('notices', ['type', 'name', 'default_text', 'display']);
     $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
 
     $result = $query->execute();
-    $options = [];
-    foreach ($result->fetchAllAssoc('id', PDO::FETCH_ASSOC) as $notice) {
-      $options[$notice['title']][$notice['p_id'] . ':' . $notice['type']] = $notice['name'];
+    $notices = [];
+    while ($notice = $result->fetchAssoc()) {
+      // We have to form the notices like this because they have compound ids.
+      $noticeId = $notice['project_id'] . ':' . $notice['type'];
+      $notices[$noticeId] = [
+        'p_id' => $notice['project_id'],
+        'title' => $notice['title'],
+        'type' => $notice['type'],
+        'name' => $notice['name'],
+        'svg_url' => $notice['svg_url'],
+        'text' => $notice['default_text'],
+        'display' => $notice['display'],
+      ];
     }
-    return $options;
+    return $notices;
   }
 
   public function getSiteSupportedProjects() {
@@ -158,16 +165,13 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0);
-    $query->fields('labels', ['id', 'name', 'type']);
+    $query->fields('labels', ['id', 'name', 'type', 'display']);
     $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
 
     $result = $query->execute();
-    $options = [];
-    foreach ($result->fetchAllAssoc('id', PDO::FETCH_ASSOC) as $label) {
-      $options[$label['title']][$label['p_id'] . ':' . $label['id']] = $label['name'];
-    }
+    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
 
-    return $options;
+    return $labels;
   }
 
   public function getSiteNotices() {
@@ -177,25 +181,29 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0);
-    $query->fields('notices', ['type', 'name', 'default_text']);
+    $query->fields('notices', ['type', 'name', 'default_text', 'display']);
     $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
 
     $result = $query->execute();
-    $options = [];
-    foreach ($result->fetchAllAssoc('type', PDO::FETCH_ASSOC) as $notice) {
-      $options[$notice['title']][$notice['p_id'] . ':' . $notice['type']] = $notice['name'];
+    $notices = [];
+    while ($notice = $result->fetchAssoc()) {
+      // We have to form the notices like this because they have compound ids.
+      $noticeId = $notice['project_id'] . ':' . $notice['type'];
+      $notices[$noticeId] = [
+        'p_id' => $notice['project_id'],
+        'title' => $notice['title'],
+        'type' => $notice['type'],
+        'name' => $notice['name'],
+        'svg_url' => $notice['svg_url'],
+        'text' => $notice['default_text'],
+        'display' => $notice['display'],
+      ];
     }
-
-    return $options;
+    return $notices;
   }
 
   public function getUserLabels(AccountInterface $account) {
-    $projects = $this->getSiteSupportedProjects();
-
-    $memberships = Og::getMemberships($account);
-    foreach ($memberships as $membership) {
-      $projects += $this->getGroupSupportedProjects($membership->getGroup());
-    }
+    $projects = $this->getUserProjects($account);
 
     if (empty($projects)) {
       return [];
@@ -205,7 +213,7 @@ class LocalContextsSupportedProjectManager {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
     $query->condition('project_id', $project_ids, 'IN');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
-    $query->fields('labels', ['id', 'name', 'type']);
+    $query->fields('labels', ['id', 'name', 'type', 'display']);
     $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
 
     $result = $query->execute();
@@ -215,12 +223,7 @@ class LocalContextsSupportedProjectManager {
   }
 
   public function getUserNotices(AccountInterface $account) {
-    $projects = $this->getSiteSupportedProjects();
-
-    $memberships = Og::getMemberships($account);
-    foreach ($memberships as $membership) {
-      $projects += $this->getGroupSupportedProjects($membership->getGroup());
-    }
+    $projects = $this->getUserProjects($account);
 
     if (empty($projects)) {
       return [];
@@ -230,12 +233,13 @@ class LocalContextsSupportedProjectManager {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
     $query->condition('project_id', $project_ids, 'IN');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
-    $query->fields('notices', ['project_id', 'type', 'name', 'default_text']);
+    $query->fields('notices', ['project_id', 'type', 'name', 'default_text', 'display']);
     $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
 
     $result = $query->execute();
     $notices = [];
     while ($notice = $result->fetchAssoc()) {
+      // We have to form the notices like this because they have compound ids.
       $noticeId = $notice['project_id'] . ':' . $notice['type'];
       $notices[$noticeId] = [
         'p_id' => $notice['project_id'],
@@ -244,6 +248,7 @@ class LocalContextsSupportedProjectManager {
         'name' => $notice['name'],
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
+        'display' => $notice['display'],
       ];
     }
 

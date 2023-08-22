@@ -9,19 +9,16 @@ class LocalContextsNotice extends LocalContextsHubBase
   protected $valid;
   protected $project_id;
   protected $type;
+  protected $display;
   public $name;
   public $svg_url;
   public $default_text;
   public $translations;
-  public $locale;
-  public $language;
-  public $translationName;
-  public $translationText;
 
   public function __construct($id)
   {
     parent::__construct();
-    list($this->project_id, $this->type) = explode(':', $id);
+    list($this->project_id, $this->type, $this->display) = explode(':', $id);
     $this->load();
   }
 
@@ -44,10 +41,9 @@ class LocalContextsNotice extends LocalContextsHubBase
       ->fields('t', ['locale', 'language', 'name', 'text']);
     $tResult = $tQuery->execute();
 
-    $translationInfo = $tResult->fetchAssoc();
-    $this->locale = $translationInfo['locale'] ?? '';
-    $this->language = $translationInfo['language'] ?? '';
-    $this->translationName = $translationInfo['name'] ?? '';
-    $this->translationText = $translationInfo['text'] ?? '';
+    // Load every translation.
+    while ($translationInfo = $tResult->fetchAssoc()) {
+      $this->translations[] = $translationInfo;
+    }
   }
 }

@@ -62,8 +62,8 @@ function mukurtu_rights_create_labels_field($entity_type_id, $bundle) {
     return;
   }
 
-  $field_storage = FieldStorageConfig::loadByName($entity_type_id, 'field_local_contexts_labels');
-  $field_config = FieldConfig::loadByName($entity_type_id, $bundle, 'field_local_contexts_labels');
+  $field_storage = FieldStorageConfig::loadByName($entity_type_id, 'field_local_contexts_labels_and_notices');
+  $field_config = FieldConfig::loadByName($entity_type_id, $bundle, 'field_local_contexts_labels_and_notices');
 
   if ($field_storage && is_null($field_config)) {
     $new_field = $field_storage->toArray();

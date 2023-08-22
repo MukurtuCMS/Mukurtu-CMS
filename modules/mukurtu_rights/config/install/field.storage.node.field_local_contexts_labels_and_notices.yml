@@ -4,8 +4,8 @@ dependencies:
   module:
     - mukurtu_rights
     - node
-id: node.field_local_contexts_labels
-field_name: field_local_contexts_labels
+id: node.field_local_contexts_labels_and_notices
+field_name: field_local_contexts_labels_and_notices
 entity_type: node
 type: entity_reference
 settings:

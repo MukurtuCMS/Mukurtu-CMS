@@ -100,6 +100,14 @@ function mukurtu_local_contexts_schema() {
         'not null' => TRUE,
         'description' => 'Type',
       ],
+      // Display tells if it's a label or notice.
+      'display' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Display',
+        'default' => 'label',
+      ],
       'locale' => [
         'type' => 'varchar',
         'length' => 64,
@@ -217,6 +225,14 @@ function mukurtu_local_contexts_schema() {
         'length' => 64,
         'not null' => TRUE,
         'description' => 'Type',
+      ],
+      // Display tells if it's a label or notice.
+      'display' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Display',
+        'default' => 'notice',
       ],
       'name' => [
         'type' => 'text',

@@ -35,7 +35,7 @@ third_party_settings:
         - field_language
         - field_creative_commons
         - field_local_contexts_projects
-        - field_local_contexts_labels
+        - field_local_contexts_labels_and_notices
         - field_source
         - field_external_links
         - field_publisher
@@ -308,8 +308,8 @@ content:
     third_party_settings: {  }
     weight: 25
     region: content
-  field_local_contexts_labels:
-    type: local_contexts_labels
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
     label: above
     settings: {  }
     third_party_settings: {  }
