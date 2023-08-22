@@ -65,7 +65,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_language'] = BaseFieldDefinition::create('entity_reference')
+    $definitions['field_dictionary_word_language'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Language'))
       ->setDescription(t('A dictionary word must be associated with a single language on the site.'))
       ->setSettings([

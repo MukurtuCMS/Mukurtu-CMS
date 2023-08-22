@@ -43,7 +43,7 @@ content:
     third_party_settings: {  }
     weight: 7
     region: content
-  field_language:
+  field_dictionary_word_language:
     type: entity_reference_label
     label: above
     settings:

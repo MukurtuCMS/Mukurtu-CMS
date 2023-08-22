@@ -34,7 +34,7 @@ third_party_settings:
       children:
         - title
         - field_cultural_protocols
-        - field_language
+        - field_dictionary_word_language
         - field_glossary_entry
         - field_thumbnail
         - field_media_assets
@@ -126,7 +126,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_language:
+  field_dictionary_word_language:
     type: entity_reference_autocomplete
     weight: -5
     region: content
