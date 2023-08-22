@@ -530,18 +530,11 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_subject'] = BaseFieldDefinition::create('entity_reference')
+    $definitions['field_subject'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Subject'))
       ->setDescription(t('The main topic or topics presented in the Digital Heritage Item. Subjects may be derived from existing classification systems (for example, Library of Congress Classification Numbers or Dewey Decimal numbers), controlled vocabularies (such as Medical Subject Headings or Art and Architecture Thesaurus descriptors), or can be created as needed within the site.'))
       ->setSettings([
-        'target_type' => 'taxonomy_term',
-        'handler' => 'default:taxonomy_term',
-        'handler_settings' => [
-          'target_bundles' => [
-            'subject' => 'subject'
-          ],
-          'auto_create' => FALSE,
-        ]
+        'max_length' => 255,
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
