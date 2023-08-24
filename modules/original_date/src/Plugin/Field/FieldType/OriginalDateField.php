@@ -66,7 +66,7 @@ class OriginalDateField extends FieldItemBase {
     $month = $this->get('month')->getValue();
     $day = $this->get('day')->getValue();
 
-    return empty($date) && empty($timestamp) && empty($year) && empty($month) && empty($day);
+    return $date == '' && $timestamp == '' && $year == '' && $month == '' && $day == '';
   }
 
   /**
@@ -136,7 +136,7 @@ class OriginalDateField extends FieldItemBase {
       $month = $values['month'] ?? '';
       $day = $values['day'] ?? '';
 
-      // Store the date string for the user-facing date display.
+      // Build the date string for the user-facing date display.
       // Year is guaranteed.
       $date = $year;
       $date = $date . ($month ? ("-" . str_pad(strval($month), 2, "0", STR_PAD_LEFT)) : "");

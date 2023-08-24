@@ -22,22 +22,6 @@ class OriginalDateWidget extends WidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
-    foreach ($values as $key => $value) {
-      $year = $value['value']['year'] ?? '';
-      $month = $value['value']['month'] ?? '';
-      $day = $value['value']['day'] ?? '';
-
-      $values[$key]['year'] = $year;
-      $values[$key]['month'] = $month;
-      $values[$key]['day'] = $day;
-    }
-    return $values;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element += [
       '#element_validate' => [
@@ -46,27 +30,28 @@ class OriginalDateWidget extends WidgetBase {
     ];
 
     $element['year'] = [
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => t('Year'),
-      '#size' => 4,
-      '#maxlength' => 4,
-      '#default_value' => isset($items[$delta]->year) ? $items[$delta]->year : '',
+      '#min' => 1,
+      # The max year is set to comply with PHP's checkdate().
+      '#max' => 32767,
+      '#default_value' => isset($items[$delta]->year) ? $items[$delta]->year : NULL,
     ];
 
     $element['month'] = [
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => t('Month'),
-      '#size' => 2,
-      '#maxlength' => 2,
-      '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : '',
+      '#min' => 1,
+      '#max' => 12,
+      '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : NULL,
     ];
 
     $element['day'] = [
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => t('Day'),
-      '#size' => 2,
-      '#maxlength' => 2,
-      '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : '',
+      '#min' => 1,
+      '#max' => 31,
+      '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : NULL,
     ];
 
     $element += [
@@ -79,7 +64,7 @@ class OriginalDateWidget extends WidgetBase {
       '#text' => $this->t('Acceptable date formats are YYYY, YYYY-MM, or YYYY-MM-DD.'),
     ];
 
-    return ['value' => $element];
+    return $element;
   }
 
   /**
@@ -91,13 +76,13 @@ class OriginalDateWidget extends WidgetBase {
     $day = $element['day']['#value'];
 
     // If empty, return.
-    if (!$year && !$month && !$day) {
-      $form_state->setValueForElement($element, '');
+    if ($year == '' && $month == '' && $day == '') {
+      $form_state->setValueForElement($element, NULL);
       return;
     }
 
     // Ensure date in acceptable format.
-    if ($year && $month && $day || $year && $month && !$day || $year && !$month && !$day) {
+    if ($year != '' && $month != '' && $day != '' || $year != '' && $month != '' && $day == '' || $year != '' && $month == '' && $day == '') {
       $year = intval($year);
       $month = $month == '' ? 1 : intval($month);
       $day = $day == '' ? 1 : intval($day);
