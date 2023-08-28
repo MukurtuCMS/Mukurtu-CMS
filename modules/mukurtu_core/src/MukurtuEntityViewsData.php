@@ -3,19 +3,13 @@
 namespace Drupal\mukurtu_core;
 
 use Drupal\views\EntityViewsData;
-use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\ContentEntityType;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
-use Drupal\Core\Entity\Sql\TableMappingInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 
@@ -263,8 +257,28 @@ class MukurtuEntityViewsData extends EntityViewsData {
     // Load all typed data definitions of all fields. This should cover each of
     // the entity base, revision, data tables.
     $field_definitions = $this->entityFieldManager->getBaseFieldDefinitions($this->entityType->id());
+
+    $field_storage_definitions = array_map(function (FieldDefinitionInterface $definition) {
+      return $definition->getFieldStorageDefinition();
+    }, $field_definitions);
+
+    // Add any bundle fields defined in code.
+    if ($this->entityType->hasKey('bundle')) {
+      $bundle_field_definitions = [];
+      foreach ($this->entityTypeBundleInfo->getBundleInfo($this->entityType->id()) as $bundle_id => $bundle_info) {
+        $bundle_field_definitions += $this->entityFieldManager->getFieldDefinitions($this->entityType->id(), $bundle_id);
+      }
+
+      $field_definitions += $bundle_field_definitions;
+    }
+
+    $field_storage_definitions = array_map(function (FieldDefinitionInterface $definition) {
+      return $definition->getFieldStorageDefinition();
+    }, $field_definitions);
+
     /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
-    if ($table_mapping = $this->storage->getTableMapping($field_definitions)) {
+    $table_mapping = $this->storage->getTableMapping($field_storage_definitions);
+    if ($table_mapping) {
       // Fetch all fields that can appear in both the base table and the data
       // table.
       $duplicate_fields = array_intersect_key($entity_keys, array_flip(['id', 'revision', 'bundle']));
@@ -282,13 +296,16 @@ class MukurtuEntityViewsData extends EntityViewsData {
           if ($data_table && ($table === $base_table || $table === $revision_table) && in_array($field_name, $duplicate_fields)) {
             continue;
           }
-          $this->mapFieldDefinition($table, $field_name, $field_definitions[$field_name], $table_mapping, $data[$table]);
+
+          if (isset($this->getFieldStorageDefinitions()[$field_name])) {
+            $this->mapFieldDefinition($table, $field_name, $field_definitions[$field_name], $table_mapping, $data[$table]);
+          }
         }
       }
 
-      foreach ($field_definitions as $field_definition) {
-        if ($table_mapping->requiresDedicatedTableStorage($field_definition->getFieldStorageDefinition())) {
-          $table = $table_mapping->getDedicatedDataTableName($field_definition->getFieldStorageDefinition());
+      foreach ($field_storage_definitions as $field_storage_definition) {
+        if ($table_mapping->requiresDedicatedTableStorage($field_storage_definition)) {
+          $table = $table_mapping->getDedicatedDataTableName($field_storage_definition);
 
           $data[$table]['table']['group'] = $this->entityType->getLabel();
           $data[$table]['table']['provider'] = $this->entityType->getProvider();
@@ -301,7 +318,7 @@ class MukurtuEntityViewsData extends EntityViewsData {
           ];
 
           if ($revisionable) {
-            $revision_table = $table_mapping->getDedicatedRevisionTableName($field_definition->getFieldStorageDefinition());
+            $revision_table = $table_mapping->getDedicatedRevisionTableName($field_storage_definition);
 
             $data[$revision_table]['table']['group'] = $this->t('@entity_type revision', ['@entity_type' => $this->entityType->getLabel()]);
             $data[$revision_table]['table']['provider'] = $this->entityType->getProvider();
