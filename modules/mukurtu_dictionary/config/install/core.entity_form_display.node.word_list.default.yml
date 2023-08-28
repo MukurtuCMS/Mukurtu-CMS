@@ -3,7 +3,6 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.browse_content
-    - field.field.node.word_list.body
     - field.field.node.word_list.comment
     - node.type.word_list
   module:
@@ -227,7 +226,6 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
-  body: true
   comment: true
   field_content_type: true
   field_mukurtu_cluster_lat: true

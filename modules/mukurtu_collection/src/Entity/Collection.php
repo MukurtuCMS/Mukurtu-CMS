@@ -104,14 +104,9 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_description'] = BaseFieldDefinition::create('text_with_summary')
-      ->setLabel(t('Description'))
+    $definitions['field_description'] = BaseFieldDefinition::create('text_long')
+      ->setLabel('Description')
       ->setDescription(t(''))
-      ->setSettings([
-        'display_summary' => TRUE,
-        'required_summary' => FALSE,
-      ])
-      ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

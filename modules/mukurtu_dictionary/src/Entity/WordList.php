@@ -24,18 +24,13 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
     // Add the drafts field.
     $definitions += static::draftBaseFieldDefinitions($entity_type);
 
-    $definitions['field_description'] = BaseFieldDefinition::create('text_with_summary')
+    $definitions['field_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
       ->setDescription(t(''))
-      ->setSettings([
-        'display_summary' => FALSE,
-        'required_summary' => FALSE,
-      ])
-      ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 

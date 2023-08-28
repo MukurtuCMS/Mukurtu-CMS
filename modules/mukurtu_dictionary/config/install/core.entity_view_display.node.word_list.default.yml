@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.word_list.body
     - field.field.node.word_list.comment
     - node.type.word_list
   module:
@@ -21,7 +20,6 @@ content:
     weight: 0
     region: content
 hidden:
-  body: true
   comment: true
   field_all_related_content: true
   field_citation: true
