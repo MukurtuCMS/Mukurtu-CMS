@@ -285,7 +285,7 @@ display:
           skip_access: false
           preserve_facet_query_args: false
       relationships: {  }
-      use_ajax: true
+      use_ajax: false
       header: {  }
       footer: {  }
       display_extenders: {  }
