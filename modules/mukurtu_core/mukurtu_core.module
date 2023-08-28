@@ -52,6 +52,16 @@ function mukurtu_core_entity_type_build(array &$entity_types) {
   $entity_types['media']->setLinkTemplate('edit-form', '/dashboard/media/{media}/edit');
   $entity_types['media']->setLinkTemplate('revision', '/dashboard/media/{media}/revisions/{media_revision}/view');
   //$entity_types['media']->setLinkTemplate('collection', '/dashboard/admin/content/media');
+
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  foreach (['media', 'paragraph', 'node'] as $entity_type_id) {
+    if (isset($entity_types[$entity_type_id])) {
+      // Take over the views_data handler until Drupal adds support for
+      // fields defined via bundle class bundleFieldDefinitions.
+      // See https://www.drupal.org/project/drupal/issues/2898635.
+      $entity_types[$entity_type_id]->setHandlerClass('views_data', 'Drupal\mukurtu_core\MukurtuEntityViewsData');
+    }
+  }
 }
 
 /**
