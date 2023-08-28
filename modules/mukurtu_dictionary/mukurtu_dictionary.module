@@ -52,6 +52,23 @@ function mukurtu_dictionary_entity_bundle_info_alter(array &$bundles): void {
 }
 
 /**
+ * Implements hook_entity_field_storage_info().
+ */
+function mukurtu_dictionary_entity_field_storage_info(EntityTypeInterface $entity_type){
+  if ($entity_type->id() == 'paragraph') {
+    $fields = SampleSentence::bundleFieldDefinitions($entity_type, 'sample_sentence', []);
+    $fields += DictionaryWordEntry::bundleFieldDefinitions($entity_type, 'dictionary_word_entry', []);
+    return $fields;
+  }
+
+  if ($entity_type->id() == 'node') {
+    $fields = DictionaryWord::bundleFieldDefinitions($entity_type, 'dictionary_word', []);
+    $fields += WordList::bundleFieldDefinitions($entity_type, 'word_list', []);
+    return $fields;
+  }
+}
+
+/**
  * Implements hook_entity_access().
  */
 function mukurtu_dictionary_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {

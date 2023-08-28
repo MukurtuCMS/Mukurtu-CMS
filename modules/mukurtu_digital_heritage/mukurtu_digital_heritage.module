@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_digital_heritage\Entity\DigitalHeritage;
 use Drupal\mukurtu_digital_heritage\Entity\IndigenousKnowledgeKeepers;
 
@@ -19,5 +20,19 @@ function mukurtu_digital_heritage_entity_bundle_info_alter(array &$bundles) {
   // Indigenous Knowledge Keepers Paragraph bundle class.
   if (isset($bundles['paragraph']['indigenous_knowledge_keepers'])) {
     $bundles['paragraph']['indigenous_knowledge_keepers']['class'] = IndigenousKnowledgeKeepers::class;
+  }
+}
+
+
+/**
+ * Implements hook_entity_field_storage_info().
+ */
+function mukurtu_digital_heritage_entity_field_storage_info(EntityTypeInterface $entity_type) {
+  if ($entity_type->id() == 'paragraph') {
+    return IndigenousKnowledgeKeepers::bundleFieldDefinitions($entity_type, 'indigenous_knowledge_keepers', []);
+  }
+
+  if ($entity_type->id() == 'node') {
+    return DigitalHeritage::bundleFieldDefinitions($entity_type, 'digital_heritage', []);
   }
 }

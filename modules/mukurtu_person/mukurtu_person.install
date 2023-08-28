@@ -5,30 +5,3 @@
  * Install, update and uninstall functions for the mukurtu_person module.
  */
 
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
-
-/**
- * Implements hook_install().
- */
-function mukurtu_person_install() {
-  // Install field storage definitions for person.
-  $fieldManager = \Drupal::service('entity_field.manager');
-
-  $types = [
-    ['node', 'person'],
-  ];
-
-  foreach ($types as $type) {
-    list($entity_type_id, $bundle) = $type;
-    $fields = $fieldManager->getFieldDefinitions($entity_type_id, $bundle);
-    foreach ($fields as $field_name => $field) {
-      if ($field instanceof FieldStorageDefinitionInterface) {
-        try {
-          \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($field_name, $entity_type_id, 'mukurtu_person', $field);
-        } catch (Exception $e) {
-          // Intentionally left blank. Many fields will already exist. This is fine.
-        }
-      }
-    }
-  }
-}

@@ -1,7 +1,8 @@
 <?php
 
-use Drupal\mukurtu_person\Entity\Person;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_person\Entity\FormattedTextWithTitle;
+use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\Entity\RelatedPerson;
 
 /**
@@ -25,5 +26,19 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
   if (isset($bundles['paragraph']['related_person'])) {
     $bundles['paragraph']['related_person']['class'] = RelatedPerson::class;
   }
+}
 
+/**
+ * Implements hook_entity_field_storage_info().
+ */
+function mukurtu_person_entity_field_storage_info(EntityTypeInterface $entity_type){
+  if ($entity_type->id() == 'paragraph') {
+    $fields = FormattedTextWithTitle::bundleFieldDefinitions($entity_type, 'formatted_text_with_title', []);
+    $fields += RelatedPerson::bundleFieldDefinitions($entity_type, 'related_person', []);
+    return $fields;
+  }
+
+  if ($entity_type->id() == 'node') {
+    return Person::bundleFieldDefinitions($entity_type, 'person', []);
+  }
 }

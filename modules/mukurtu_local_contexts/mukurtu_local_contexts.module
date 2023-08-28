@@ -1,9 +1,5 @@
 <?php
 
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-
 /**
  *  Implements hook_theme().
  */
@@ -28,15 +24,4 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       ],
     ],
   ];
-}
-
-function mukurtu_local_contexts_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
-  if ($entity_type->id() == 'user' && $bundle == 'user') {
-    $fields = [];
-    $fields['field_local_contexts_user_id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(new TranslatableMarkup("Local Contexts Hub User ID"))
-      ->setDescription(new TranslatableMarkup("The Local Contexts Hub User ID to use for this user."))
-      ->setDisplayConfigurable('form', TRUE);
-    return $fields;
-  }
 }

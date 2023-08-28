@@ -1,17 +1,17 @@
 <?php
 
-use Drupal\mukurtu_media\Entity\Document;
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\mukurtu_media\Entity\Audio;
+use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Image;
 use Drupal\mukurtu_media\Entity\RemoteVideo;
 use Drupal\mukurtu_media\Entity\Video;
-use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Ajax\InvokeCommand;
-use Drupal\Core\Render\Element;
-use Drupal\Component\Utility\NestedArray;
 
 /**
  * Implements hook_entity_bundle_field_info_alter().
@@ -32,6 +32,20 @@ function mukurtu_media_entity_bundle_info_alter(array &$bundles): void
   }
   if (isset($bundles['media']['video'])) {
     $bundles['media']['video']['class'] = Video::class;
+  }
+}
+
+/**
+ * Implements hook_entity_field_storage_info().
+ */
+function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_type){
+  if ($entity_type->id() == 'media') {
+    $fields = Document::bundleFieldDefinitions($entity_type, 'document', []);
+    $fields += Audio::bundleFieldDefinitions($entity_type, 'audio', []);
+    $fields += Image::bundleFieldDefinitions($entity_type, 'image', []);
+    $fields += RemoteVideo::bundleFieldDefinitions($entity_type, 'remote_video', []);
+    $fields += Video::bundleFieldDefinitions($entity_type, 'video', []);
+    return $fields;
   }
 }
 

@@ -322,14 +322,3 @@ function mukurtu_local_contexts_schema() {
 
   return $schema;
 }
-
-/**
- * Implements hook_install().
- */
-function mukurtu_local_contexts_install() {
-  $fieldManager = \Drupal::service('entity_field.manager');
-  $fields = $fieldManager->getFieldDefinitions('user', 'user');
-  if (isset($fields['field_local_contexts_user_id'])) {
-    \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('field_local_contexts_user_id', 'user', 'mukurtu_local_contexts', $fields['field_local_contexts_user_id']);
-  }
-}
