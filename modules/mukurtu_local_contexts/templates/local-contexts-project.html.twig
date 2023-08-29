@@ -1,14 +1,25 @@
 <div class="local-contexts-project">
   <div class="project-title">{{ title }}</div>
-  {% if tk_labels %}
-  <div class="tk-labels">
-    {% for tk_label in tk_labels %}
-    <div class="tk-label">
-      <img src="{{ tk_label.svg_url }}" alt="{{ tk_label.name }}">
-      <div class="name">{{ tk_label.name }}</div>
-      <div class="text">{{ tk_label.text }}</div>
+  {% if labels %}
+  <div class="labels">
+    {% for label in labels %}
+    <div class="label">
+      <img src="{{ label.svg_url }}" alt="{{ label.name }}">
+      <div class="name">{{ label.name }}</div>
+      <div class="text">{{ label.text }}</div>
     </div>
     {% endfor %}
   </div>
+  {% endif %}
+  {% if notices %}
+    <div class="notices">
+      {% for notice in notices %}
+        <div class="notice">
+          <img src="{{ notice.svg_url }}" alt="{{ notice.name }}">
+          <div class="name">{{ notice.name }}</div>
+          <div class="text">{{ notice.text }}</div>
+        </div>
+      {% endfor %}
+    </div>
   {% endif %}
 </div>

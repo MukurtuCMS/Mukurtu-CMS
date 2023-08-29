@@ -80,7 +80,7 @@ class LocalContextsProject extends LocalContextsHubBase {
       $this->cacheLabelTranslations($project['tk_labels']);
 
       // Cache the bc labels and their translations.
-      $this->cacheLabels($project['bc_labels'], $project['unique_id'], $prior_cached_bc_labels);
+      $this->cacheLabels($project['bc_labels'], $project['unique_id'], $prior_cached_labels);
       $this->cacheLabelTranslations($project['bc_labels']);
 
       // Cache the notices and their translations.
@@ -329,7 +329,9 @@ class LocalContextsProject extends LocalContextsHubBase {
       return TRUE;
     }
 
-    $labels = array_keys($this->getLabels());
+    $labels = $this->getLabels();
+    // Project ID: label ID keys are already present as the indices of $notices.,
+    // so it's not necessary to build them by hand.
     $notices = array_keys($this->getNotices());
 
     if (!empty($labels)) {
