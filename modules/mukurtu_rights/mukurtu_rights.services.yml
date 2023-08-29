@@ -1,6 +1,0 @@
-services:
-  mukurtu_rights.local_contexts_hub:
-    class: Drupal\mukurtu_rights\LocalContextsHubManager
-    arguments: ['@config.factory', '@entity_type.manager']
-    tags:
-      - { name: mukurtu }

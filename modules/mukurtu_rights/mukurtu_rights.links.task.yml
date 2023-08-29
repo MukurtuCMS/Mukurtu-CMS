@@ -1,7 +1,0 @@
-mukurtu_rights.manage_hub_community_project:
-  route_name: mukurtu_rights.manage_hub_community_project
-  base_route: entity.node.canonical
-  route_parameters:
-    node_type: community
-  title: 'Local Contexts Hub Settings'
-  weight: 50
