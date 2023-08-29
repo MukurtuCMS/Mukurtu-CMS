@@ -39,28 +39,30 @@ class OriginalDateWidget extends WidgetBase {
     ];
 
     // Set options for allowed months.
-    $options = [];
-    for ($i = 1; $i <= 12; $i++) {
-      $options += [strval($i) => $this->t(strval($i))];
+    $monthOptions = [];
+    $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    foreach (range(0, 11) as $i) {
+      $monthOptions += [strval($i + 1) => $this->t(strval($i + 1) . '-' . $months[$i])];
     }
 
     $element['month'] = [
       '#type' => 'select',
       '#title' => t('Month'),
-      '#options' => $options,
+      '#options' => $monthOptions,
       '#empty_option' => $this->t('- Select -'),
       '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : NULL,
     ];
 
-    // Fill in options for allowed days.
-    for ($i = 13; $i <= 31; $i++) {
-      $options += [strval($i) => $this->t(strval($i))];
+    // Set options for allowed days.
+    $dayOptions = [];
+    foreach (range(1, 31) as $i) {
+      $dayOptions += [strval($i) => $this->t(strval($i))];
     }
 
     $element['day'] = [
       '#type' => 'select',
       '#title' => t('Day'),
-      '#options' => $options,
+      '#options' => $dayOptions,
       '#empty_option' => $this->t('- Select -'),
       '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : NULL,
     ];
