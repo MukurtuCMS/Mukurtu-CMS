@@ -38,19 +38,30 @@ class OriginalDateWidget extends WidgetBase {
       '#default_value' => isset($items[$delta]->year) ? $items[$delta]->year : NULL,
     ];
 
+    // Set options for allowed months.
+    $options = [];
+    for ($i = 1; $i <= 12; $i++) {
+      $options += [strval($i) => $this->t(strval($i))];
+    }
+
     $element['month'] = [
-      '#type' => 'number',
+      '#type' => 'select',
       '#title' => t('Month'),
-      '#min' => 1,
-      '#max' => 12,
+      '#options' => $options,
+      '#empty_option' => $this->t('- Select -'),
       '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : NULL,
     ];
 
+    // Fill in options for allowed days.
+    for ($i = 13; $i <= 31; $i++) {
+      $options += [strval($i) => $this->t(strval($i))];
+    }
+
     $element['day'] = [
-      '#type' => 'number',
+      '#type' => 'select',
       '#title' => t('Day'),
-      '#min' => 1,
-      '#max' => 31,
+      '#options' => $options,
+      '#empty_option' => $this->t('- Select -'),
       '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : NULL,
     ];
 
