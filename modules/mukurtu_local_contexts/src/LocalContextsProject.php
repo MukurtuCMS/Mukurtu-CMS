@@ -34,7 +34,7 @@ class LocalContextsProject extends LocalContextsHubBase {
       if ($hubProject = $this->fetchProjectFromHub($id)) {
         return [
           'title' => $hubProject['title'],
-          'privacy' => $hubProject['privacy'],
+          'privacy' => $hubProject['project_privacy'],
         ];
       }
     }
@@ -51,7 +51,7 @@ class LocalContextsProject extends LocalContextsHubBase {
       // Update our local cache of this project.
       $projectFields = [
         'id' => $project['unique_id'],
-        'provider_id' => $project['provider_id'],
+        'provider_id' => $project['providers_id'],
         'title' => $project['title'],
         'privacy' => $project['project_privacy'],
         'updated' => time(),
@@ -76,15 +76,21 @@ class LocalContextsProject extends LocalContextsHubBase {
         $prior_cached_notices = $this->getNotices();
       }
       // Cache the tk labels and their translations.
-      $this->cacheLabels($project['tk_labels'], $project['unique_id'], $prior_cached_labels);
-      $this->cacheLabelTranslations($project['tk_labels']);
+      if (isset($project['tk_labels'])) {
+        $this->cacheLabels($project['tk_labels'], $project['unique_id'], $prior_cached_labels);
+        $this->cacheLabelTranslations($project['tk_labels']);
+      }
 
       // Cache the bc labels and their translations.
-      $this->cacheLabels($project['bc_labels'], $project['unique_id'], $prior_cached_labels);
-      $this->cacheLabelTranslations($project['bc_labels']);
+      if (isset($project['bc_labels'])) {
+        $this->cacheLabels($project['bc_labels'], $project['unique_id'], $prior_cached_labels);
+        $this->cacheLabelTranslations($project['bc_labels']);
+      }
 
       // Cache the notices and their translations.
-      $this->cacheNoticesAndTranslations($project['notice'], $project['unique_id'], $prior_cached_notices);
+      if (isset($project['notice'])) {
+        $this->cacheNoticesAndTranslations($project['notice'], $project['unique_id'], $prior_cached_notices);
+      }
 
       // Delete any cached tk, bc labels, notices, and their translations that
       // no longer exist.
@@ -178,7 +184,6 @@ class LocalContextsProject extends LocalContextsHubBase {
       $translations = $label['translations'] ?? [];
       foreach ($translations as $translation) {
         $translationFields = [
-          'id' => $translation['unique_id'],
           'label_id' => $label['unique_id'],
           'locale' => $translation['language_tag'] ?? NULL,
           'language' => $translation['language'] ?? NULL,
@@ -330,13 +335,11 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
 
     $labels = $this->getLabels();
-    // Project ID: label ID keys are already present as the indices of $notices.,
-    // so it's not necessary to build them by hand.
-    $notices = array_keys($this->getNotices());
+    $notices = $this->getNotices();
 
     if (!empty($labels)) {
-      // Build the project ID: label ID keys.
-      $values = array_map(fn($v) => $this->id . ':' . $v, $labels);
+      // Build the project ID: label ID: 'label' keys.
+      $values = array_map(fn($v) => $this->id . ':' . $v['id'] . ':' . 'label', $labels);
 
       // Check if any content is using those keys.
       $query = \Drupal::entityQuery('node')
@@ -348,9 +351,13 @@ class LocalContextsProject extends LocalContextsHubBase {
       }
     }
     else if (!empty($notices)) {
+      // Build the project ID: notice type: 'notice' keys.
+      $notices = array_keys($notices);
+      $values = array_map(fn($v) => strval($v) . ':' . 'notice', $notices);
+
       // Check if any content is using those keys.
       $query = \Drupal::entityQuery('node')
-        ->condition('field_local_contexts_labels_and_notices', $notices, 'IN')
+        ->condition('field_local_contexts_labels_and_notices', $values, 'IN')
         ->accessCheck(FALSE);
       $results = $query->execute();
       if (!empty($results)) {

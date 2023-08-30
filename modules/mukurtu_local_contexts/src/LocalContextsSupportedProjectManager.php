@@ -233,7 +233,7 @@ class LocalContextsSupportedProjectManager {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
     $query->condition('project_id', $project_ids, 'IN');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
-    $query->fields('notices', ['project_id', 'type', 'name', 'default_text', 'display']);
+    $query->fields('notices', ['project_id', 'type', 'name', 'default_text', 'display', 'svg_url']);
     $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
 
     $result = $query->execute();
