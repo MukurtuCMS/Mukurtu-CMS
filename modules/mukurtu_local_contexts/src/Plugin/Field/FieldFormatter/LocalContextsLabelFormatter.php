@@ -31,25 +31,25 @@ class LocalContextsLabelFormatter extends FormatterBase {
       list($first, $second, $third) = explode(':', $item->value);
       // $item->value = project_id:label_id_or_notice_type:label_or_notice.
 
-      // Check if third value in the $item->value throuple is a notice or label.
-      if ($third == 'notice') {
-        $notice = new LocalContextsNotice($item->value);
-        $element[$delta] = [
-          '#theme' => 'local_contexts_labels_and_notices',
-          '#name' => $notice->name,
-          '#text' => $notice->default_text,
-          '#svg_url' => $notice->svg_url,
-          '#translations' => $notice->translations,
-        ];
-      }
-      else if ($third == 'label') {
+      // Check if third value in the $item->value throuple is a label or notice.
+      if ($third == 'label') {
         $label = new LocalContextsLabel($item->value);
         $element[$delta] = [
-          '#theme' => 'local_contexts_labels_and_notices',
+          '#theme' => 'local_contexts_label',
           '#name' => $label->name,
           '#text' => $label->default_text,
           '#svg_url' => $label->svg_url,
           '#translations' => $label->translations,
+        ];
+      }
+      else if ($third == 'notice') {
+        $notice = new LocalContextsNotice($item->value);
+        $element[$delta] = [
+          '#theme' => 'local_contexts_notice',
+          '#name' => $notice->name,
+          '#text' => $notice->default_text,
+          '#svg_url' => $notice->svg_url,
+          '#translations' => $notice->translations,
         ];
       }
     }
