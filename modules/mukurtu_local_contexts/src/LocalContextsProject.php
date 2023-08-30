@@ -72,18 +72,18 @@ class LocalContextsProject extends LocalContextsHubBase {
         // Get any existing cached tk labels, bc labels, and notices so we can
         // compare to the response from the hub and delete any that are no
         // longer there.
-        $prior_cached_labels = $this->getLabels();
+        $prior_cached_labels = array_merge($this->getLabels("tk"), $this->getLabels("bc"));
         $prior_cached_notices = $this->getNotices();
       }
       // Cache the tk labels and their translations.
       if (isset($project['tk_labels'])) {
-        $this->cacheLabels($project['tk_labels'], $project['unique_id'], $prior_cached_labels);
+        $this->cacheLabels($project['tk_labels'], "tk", $project['unique_id'], $prior_cached_labels);
         $this->cacheLabelTranslations($project['tk_labels']);
       }
 
       // Cache the bc labels and their translations.
       if (isset($project['bc_labels'])) {
-        $this->cacheLabels($project['bc_labels'], $project['unique_id'], $prior_cached_labels);
+        $this->cacheLabels($project['bc_labels'], "bc", $project['unique_id'], $prior_cached_labels);
         $this->cacheLabelTranslations($project['bc_labels']);
       }
 
@@ -100,9 +100,10 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $project;
   }
 
-  public function getLabels() {
+  public function getLabels($tk_or_bc) {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'l')
       ->condition('l.project_id', $this->id)
+      ->condition('l.tk_or_bc', $tk_or_bc)
       ->fields('l', ['id', 'name', 'svg_url', 'default_text']);
     $result = $query->execute();
 
@@ -140,8 +141,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $notices;
   }
 
-  protected function cacheLabels($labels, $id, &$prior_cached_labels) {
-    // Cache tk and bc labels.
+  protected function cacheLabels($labels, $tk_or_bc, $id, &$prior_cached_labels) {
     foreach ($labels as $label) {
       $labelFields = [
         'id' => $label['unique_id'],
@@ -156,6 +156,7 @@ class LocalContextsProject extends LocalContextsHubBase {
         'community' => $label['community'],
         'default_text' => $label['label_text'],
         'display' => 'label',
+        'tk_or_bc' => $tk_or_bc,
         'updated' => time(),
       ];
 
@@ -179,7 +180,6 @@ class LocalContextsProject extends LocalContextsHubBase {
   }
 
   protected function cacheLabelTranslations($labels) {
-    // Cache tk and bc label translations.
     foreach ($labels as $label) {
       $translations = $label['translations'] ?? [];
       foreach ($translations as $translation) {
@@ -334,7 +334,7 @@ class LocalContextsProject extends LocalContextsHubBase {
       return TRUE;
     }
 
-    $labels = $this->getLabels();
+    $labels = array_merge($this->getLabels("tk"), $this->getLabels("bc"));
     $notices = $this->getNotices();
 
     if (!empty($labels)) {

@@ -108,6 +108,13 @@ function mukurtu_local_contexts_schema() {
         'description' => 'Display',
         'default' => 'label',
       ],
+      // Distinguishes whether the label is TK or BC.
+      'tk_or_bc' => [
+        'type' => 'varchar',
+        'length' => 2,
+        'not null' => TRUE,
+        'description' => 'TK or BC',
+      ],
       'locale' => [
         'type' => 'varchar',
         'length' => 64,

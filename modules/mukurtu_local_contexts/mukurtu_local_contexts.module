@@ -10,7 +10,8 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'variables' => [
         'title' => [],
         'privacy' => [],
-        'labels' => [],
+        'tk_labels' => [],
+        'bc_labels' => [],
         'notices' => [],
       ],
     ],
