@@ -4,4 +4,8 @@ description: 'Provides the functionality needed to live migrate from Mukurtu 2.x
 core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
+dependencies:
+  - drupal:migrate
+  - migrate_drupal
+  - migrate_drupal_ui
 version: '8.x-1.x-dev'

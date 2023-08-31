@@ -1,6 +1,6 @@
 mukurtu_migrate.migrate:
-  title: 'Import from Existing Mukurtu Site'
-  description: 'Migrate content from an existing Mukurtu CMS v2 or v3 site'
+  title: 'Migrate from Mukurtu CMS version 3'
+  description: 'Migrate content from an existing Mukurtu CMS version 3 site'
   parent: mukurtu
   menu_name: mukurtu
   route_name: mukurtu_migrate.migrate
