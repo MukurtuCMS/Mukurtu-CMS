@@ -28,6 +28,7 @@ class ProtocolUserSelection extends OgUserSelection {
     $query = parent::buildEntityQuery($match, $match_operator);
 
     // Get the group object (community/protocol).
+    $group = NULL;
     if (isset($this->configuration['group'])) {
       $group = $this->configuration['group'];
     }

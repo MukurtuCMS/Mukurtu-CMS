@@ -9,13 +9,13 @@ use \Drupal\Core\Database\Database;
 
 
 /**
- * Lookup a cultural protocol's communities.
+ * Lookup a node's OG group.
  *
  * @MigrateProcessPlugin(
- *   id = "mukurtu_migrate_lookup_protocol_communities"
+ *   id = "mukurtu_migrate_lookup_node_og_group"
  * )
  */
-class LookupProtocolCommunities extends ProcessPluginBase {
+class LookupNodeOgGroup extends ProcessPluginBase {
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     $key = $row->getSource()['key'] ?? NULL;
     if ($key) {
