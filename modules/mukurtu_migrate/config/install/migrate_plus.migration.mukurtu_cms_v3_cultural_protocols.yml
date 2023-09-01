@@ -1,0 +1,41 @@
+id: mukurtu_cms_v3_cultural_protocols
+label: Migrate Cultural Protocols
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: cultural_protocol_group
+
+destination:
+  plugin: entity:protocol
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_communities
+  optional:
+    - d7_field_instance
+
+process:
+  id: nid
+  langcode: language
+  name: title
+  field_description: body
+  field_communities:
+    plugin: mukurtu_migrate_lookup_protocol_communities
+    source: nid
+  field_access_mode:
+    -
+      plugin: static_map
+      source: group_access
+      map:
+        0: open
+        2: strict
+      default_value: strict
+  status: status
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate

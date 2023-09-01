@@ -1,0 +1,36 @@
+id: mukurtu_cms_v3_communities
+label: Migrate Communities
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: community
+
+destination:
+  plugin: entity:community
+
+migration_dependencies:
+  optional:
+    - d7_field_instance
+
+process:
+  id: nid
+  langcode: language
+  name: title
+  field_description: body
+  field_access_mode:
+    -
+      plugin: static_map
+      source: group_access
+      map:
+        0: open
+        2: strict
+      default_value: strict
+  status: status
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
