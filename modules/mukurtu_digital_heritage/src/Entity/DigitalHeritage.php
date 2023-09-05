@@ -186,12 +186,12 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'auto_create' => FALSE,
         ]
       ])
-    ->setCardinality(1)
-    ->setRequired(FALSE)
-    ->setRevisionable(TRUE)
-    ->setTranslatable(TRUE)
-    ->setDisplayConfigurable('view', TRUE)
-    ->setDisplayConfigurable('form', TRUE);
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
@@ -204,12 +204,12 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'auto_create' => FALSE,
         ]
       ])
-    ->setCardinality(-1)
-    ->setRequired(FALSE)
-    ->setRevisionable(TRUE)
-    ->setTranslatable(TRUE)
-    ->setDisplayConfigurable('view', TRUE)
-    ->setDisplayConfigurable('form', TRUE);
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Assets'))
@@ -228,12 +228,12 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'auto_create' => FALSE,
         ]
       ])
-    ->setCardinality(-1)
-    ->setRequired(FALSE)
-    ->setRevisionable(TRUE)
-    ->setTranslatable(FALSE)
-    ->setDisplayConfigurable('view', TRUE)
-    ->setDisplayConfigurable('form', TRUE);
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_external_links'] = BaseFieldDefinition::create('link')
       ->setLabel(t('External Links'))
@@ -360,6 +360,26 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Location'))
+    ->setDescription(t(''))
+    ->setSettings([
+      'target_type' => 'taxonomy_term',
+      'handler' => 'default:taxonomy_term',
+      'handler_settings' => [
+        'target_bundles' => [
+          'location' => 'location'
+        ],
+        'auto_create' => TRUE,
+      ]
+    ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_original_date'] = BaseFieldDefinition::create('original_date')
       ->setLabel(t('Original Date'))
       ->setDescription(t(''))
@@ -383,12 +403,12 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
           'auto_create' => FALSE,
         ]
       ])
-    ->setCardinality(-1)
-    ->setRequired(TRUE)
-    ->setRevisionable(TRUE)
-    ->setTranslatable(FALSE)
-    ->setDisplayConfigurable('view', TRUE)
-    ->setDisplayConfigurable('form', TRUE);
+      ->setCardinality(-1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))

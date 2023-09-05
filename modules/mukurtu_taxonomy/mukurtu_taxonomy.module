@@ -49,6 +49,7 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
       'interpersonal_relationship',
       'keywords',
       'language',
+      'location',
       'people',
       'publisher',
       'subject',

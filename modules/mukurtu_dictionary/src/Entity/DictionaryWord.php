@@ -65,6 +65,31 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Location'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => [
+            'location' => 'location'
+          ],
+          'sort' => [
+            'field' => 'name',
+            'direction' => 'asc'
+          ],
+          'auto_create' => TRUE,
+          'auto_create_bundle' => '',
+        ]
+      ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_dictionary_word_language'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Language'))
       ->setDescription(t('A dictionary word must be associated with a single language on the site.'))

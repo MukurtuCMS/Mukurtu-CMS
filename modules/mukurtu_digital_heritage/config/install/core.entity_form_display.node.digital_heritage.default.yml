@@ -108,6 +108,7 @@ third_party_settings:
         - field_people
         - field_coverage
         - field_coverage_description
+        - field_location
       label: 'Additional Metadata'
       region: content
       parent_name: group_main_tab
@@ -202,7 +203,7 @@ mode: default
 content:
   comment:
     type: comment_default
-    weight: 9
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -214,7 +215,7 @@ content:
     third_party_settings: {  }
   draft:
     type: boolean_checkbox
-    weight: 6
+    weight: 7
     region: content
     settings:
       display_label: true
@@ -435,6 +436,16 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_location:
+    type: entity_reference_autocomplete
+    weight: 33
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
     weight: -5
@@ -599,7 +610,7 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 5
+    weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -612,14 +623,14 @@ content:
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 7
+    weight: 8
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
-    weight: 4
+    weight: 5
     region: content
     settings:
       display_label: true
@@ -643,7 +654,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   url_redirects:
-    weight: 8
+    weight: 9
     region: content
     settings: {  }
     third_party_settings: {  }

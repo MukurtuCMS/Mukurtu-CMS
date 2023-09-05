@@ -39,6 +39,7 @@ third_party_settings:
         - field_thumbnail
         - field_media_assets
         - field_keywords
+        - field_location
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -108,6 +109,16 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_dictionary_word_language:
+    type: entity_reference_autocomplete
+    weight: -5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   field_glossary_entry:
     type: string_textfield
     weight: -4
@@ -126,9 +137,9 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_dictionary_word_language:
+  field_location:
     type: entity_reference_autocomplete
-    weight: -5
+    weight: 0
     region: content
     settings:
       match_operator: CONTAINS
