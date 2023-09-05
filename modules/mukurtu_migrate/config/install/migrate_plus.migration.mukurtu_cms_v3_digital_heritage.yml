@@ -26,6 +26,7 @@ migration_dependencies:
     - mukurtu_cms_v3_terms_publisher
     - mukurtu_cms_v3_terms_subject
     - mukurtu_cms_v3_terms_type
+    - mukurtu_cms_v3_media_image
   optional:
     - d7_field_instance
 
@@ -81,6 +82,17 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_creator
     source: field_creator
+  field_media_assets:
+    -
+      plugin: sub_process
+      source: field_media_asset
+      process:
+        target_id:
+          -
+            plugin: migration_lookup
+            migration:
+              - mukurtu_cms_v3_media_image
+            source: sid
   status: status
 
 dependencies:

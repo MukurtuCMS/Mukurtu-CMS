@@ -1,5 +1,5 @@
 id: mukurtu_cms_v3_media_image
-label: Migrate Media - Images
+label: Media - Images
 migration_group: mukurtu_cms_v3
 migration_tags:
   - Mukurtu 3
@@ -26,6 +26,8 @@ migration_dependencies:
     - mukurtu_cms_v3_terms_publisher
     - mukurtu_cms_v3_terms_subject
     - mukurtu_cms_v3_terms_type
+    - mukurtu_cms_v3_file_private
+    - mukurtu_cms_v3_file
   optional:
     - d7_field_instance
 
@@ -56,3 +58,9 @@ process:
       column_key: target_id
     -
       plugin: mukurtu_migrate_set_protocols
+  field_media_image:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_file_private
+      - mukurtu_cms_v3_file
+    source: scald_thumbnail/0/fid
