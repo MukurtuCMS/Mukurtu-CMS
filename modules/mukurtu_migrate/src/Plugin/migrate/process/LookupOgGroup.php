@@ -9,19 +9,23 @@ use \Drupal\Core\Database\Database;
 
 
 /**
- * Lookup a node's OG group.
+ * Lookup an entity's OG group.
  *
  * @MigrateProcessPlugin(
- *   id = "mukurtu_migrate_lookup_node_og_group"
+ *   id = "mukurtu_migrate_lookup_og_group"
  * )
  */
-class LookupNodeOgGroup extends ProcessPluginBase {
+class LookupOgGroup extends ProcessPluginBase {
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
+    $field_name = $this->configuration['group_field_name'] ?? 'og_group_ref';
+    $group_type = $this->configuration['group_type'] ?? 'node';
     $key = $row->getSource()['key'] ?? NULL;
     if ($key) {
       if ($db = Database::getConnection('default', $key)) {
-        $result = $db->query("SELECT gid FROM {og_membership} WHERE etid = :nid AND group_type = 'node' AND type = 'og_membership_type_default' AND state = 1 AND field_name = 'og_group_ref'",[
-          ':nid' => $value,
+        $result = $db->query("SELECT gid FROM {og_membership} WHERE etid = :id AND group_type = :group_type AND type = 'og_membership_type_default' AND state = 1 AND field_name = :field_name",[
+          ':id' => $value,
+          ':field_name' => $field_name,
+          ':group_type' => $group_type,
         ]);
         $gids = $result->fetchAllAssoc('gid');
         if (!empty($gids)) {

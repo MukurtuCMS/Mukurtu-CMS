@@ -23,7 +23,7 @@ process:
   name: title
   field_description: body
   field_communities:
-    plugin: mukurtu_migrate_lookup_node_og_group
+    plugin: mukurtu_migrate_lookup_og_group
     source: nid
   field_access_mode:
     -

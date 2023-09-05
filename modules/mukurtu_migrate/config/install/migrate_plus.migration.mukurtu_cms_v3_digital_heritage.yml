@@ -39,7 +39,7 @@ process:
       source: field_item_privacy_setting/0/value
   'field_cultural_protocols/protocols':
     -
-      plugin: mukurtu_migrate_lookup_node_og_group
+      plugin: mukurtu_migrate_lookup_og_group
       source: nid
     -
       plugin: migration_lookup
