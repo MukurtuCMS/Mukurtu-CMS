@@ -1,5 +1,5 @@
 id: mukurtu_cms_v3_file
-label: Public files
+label: Files - Public
 audit: true
 migration_tags:
   - Mukurtu 3

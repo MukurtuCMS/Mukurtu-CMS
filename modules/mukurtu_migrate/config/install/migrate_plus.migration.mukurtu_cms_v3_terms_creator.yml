@@ -1,5 +1,5 @@
 id: mukurtu_cms_v3_terms_creator
-label: Migrate Creator terms
+label: Taxonomy Terms - Creator
 migration_group: mukurtu_cms_v3
 migration_tags:
   - Mukurtu 3

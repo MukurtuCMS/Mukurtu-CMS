@@ -1,5 +1,5 @@
 id: mukurtu_cms_v3_digital_heritage
-label: Migrate Digital Heritage
+label: Digital Heritage
 migration_group: mukurtu_cms_v3
 migration_tags:
   - Mukurtu 3
@@ -27,6 +27,7 @@ migration_dependencies:
     - mukurtu_cms_v3_terms_subject
     - mukurtu_cms_v3_terms_type
     - mukurtu_cms_v3_media_image
+    - mukurtu_cms_v3_media_document
   optional:
     - d7_field_instance
 
@@ -92,6 +93,7 @@ process:
             plugin: migration_lookup
             migration:
               - mukurtu_cms_v3_media_image
+              - mukurtu_cms_v3_media_document
             source: sid
   status: status
 

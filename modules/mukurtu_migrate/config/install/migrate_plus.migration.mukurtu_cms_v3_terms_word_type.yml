@@ -1,5 +1,5 @@
 id: mukurtu_cms_v3_terms_word_type
-label: Migrate Part of Speech terms
+label: Taxonomy Terms - Part of Speech
 migration_group: mukurtu_cms_v3
 migration_tags:
   - Mukurtu 3

@@ -1,5 +1,5 @@
 id: mukurtu_cms_v3_terms_keywords
-label: Migrate Keywords terms
+label: Taxonomy Terms - Keywords
 migration_group: mukurtu_cms_v3
 migration_tags:
   - Mukurtu 3
