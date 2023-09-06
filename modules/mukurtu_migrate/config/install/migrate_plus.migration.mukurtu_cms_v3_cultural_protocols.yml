@@ -10,6 +10,7 @@ source:
 
 destination:
   plugin: entity:protocol
+  default_bundle: protocol
 
 migration_dependencies:
   required:
@@ -34,6 +35,9 @@ process:
         2: strict
       default_value: strict
   status: status
+  mukurtu_migrate:
+    plugin: default_value
+    default_value: true
 
 dependencies:
   enforced:

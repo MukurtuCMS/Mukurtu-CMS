@@ -237,7 +237,7 @@ class CommunityAddForm extends EntityForm {
     }
 
     // Hide extra fields.
-    $extra_fields = \Drupal::service('entity_field.manager')->getExtraFields($this->targetEntityType, $this->bundle);
+    $extra_fields = \Drupal::service('entity_field.manager')->getExtraFields($this->entity->getEntityTypeId(), $this->entity->bundle());
     $extra_fields = $extra_fields['form'] ?? [];
     foreach ($extra_fields as $extra_field => $info) {
       if (!$formDisplay->getComponent($extra_field)) {

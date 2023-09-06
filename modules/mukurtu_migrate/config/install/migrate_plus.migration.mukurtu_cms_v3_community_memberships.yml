@@ -1,0 +1,54 @@
+id: mukurtu_cms_v3_community_memberships
+label: Memberships - Community
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: mukurtu_v3_og_memberships
+  group_bundle: community
+
+destination:
+  plugin: entity:og_membership
+  default_bundle: community
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_communities
+    - mukurtu_cms_v3_users
+
+process:
+  uid:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_users
+    source: etid
+  entity_type:
+    plugin: default_value
+    default_value: community
+  entity_bundle:
+    plugin: default_value
+    default_value: community
+  entity_id:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_communities
+    source: gid
+  roles:
+    -
+      plugin: static_map
+      source: roles
+      map:
+        'community manager': community-community-community_manager
+      default_value: community-community-member
+  state:
+    -
+      plugin: static_map
+      source: state
+      map:
+        1: active
+        2: pending
+        3: blocked
+      default_value: active
+  created: created
+  language: language

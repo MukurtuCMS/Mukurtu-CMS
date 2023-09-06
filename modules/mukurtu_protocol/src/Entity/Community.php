@@ -96,9 +96,16 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
    */
   public static function preCreate(EntityStorageInterface $storage_controller, array &$values) {
     parent::preCreate($storage_controller, $values);
-    $values += [
-      'user_id' => \Drupal::currentUser()->id(),
-    ];
+
+    // Don't add the current user as the community owner if we are currently
+    // migrating. This would create the OG membership before we migrate
+    // the memberships which will create a sync issue.
+    $mukurtuMigrate = $values['mukurtu_migrate'] ?? FALSE;
+    if (!$mukurtuMigrate) {
+      $values += [
+        'user_id' => \Drupal::currentUser()->id(),
+      ];
+    }
   }
 
   /**

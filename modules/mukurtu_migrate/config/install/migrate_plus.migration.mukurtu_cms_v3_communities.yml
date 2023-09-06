@@ -10,6 +10,7 @@ source:
 
 destination:
   plugin: entity:community
+  default_bundle: community
 
 migration_dependencies:
   optional:
@@ -29,6 +30,9 @@ process:
         2: strict
       default_value: strict
   status: status
+  mukurtu_migrate:
+    plugin: default_value
+    default_value: true
 
 dependencies:
   enforced:
