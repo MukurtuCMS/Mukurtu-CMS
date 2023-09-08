@@ -9,7 +9,7 @@ use \Drupal\Core\Database\Database;
 
 
 /**
- * Lookup an entity's OG group.
+ * Lookup an entity's OG groups.
  *
  * @MigrateProcessPlugin(
  *   id = "mukurtu_migrate_lookup_og_group"
@@ -29,7 +29,8 @@ class LookupOgGroup extends ProcessPluginBase {
         ]);
         $gids = $result->fetchAllAssoc('gid');
         if (!empty($gids)) {
-          return array_keys($gids);
+          $multiple_gids = array_map(fn ($g) => ['target_id' => $g], array_keys($gids));
+          return $multiple_gids;
         }
       }
       return [];

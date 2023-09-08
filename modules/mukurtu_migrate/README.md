@@ -22,6 +22,10 @@
   - Public
   - Private
 - Personal Collections
+- Comments
+- Community Record Relationships
+- Multi-page Items
+- Taxonomy Record Relationships
 
 
 ### Taxonomy Vocabulary Mapping
@@ -72,10 +76,16 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |Word List|node|word_list|node|word_list||
 
 ### Migration from Scald to Drupal Media Entities
-Mukurtu CMS version 4 uses Drupal media entities in lieu of Scald atoms. The table below shows the mappings. Note that Video has been split into two separate bundles.
+Mukurtu CMS version 4 uses Drupal media entities in lieu of Scald atoms. The table below shows the mappings.
+
+> Note that Audio has been split into two separate bundles, local audio and Soundcloud.
+
+> Note that Video has been split into two separate bundles, local video and remote video.
+
 |Name|Version 3 Scald Type|Version 4 Entity Type ID|Version 4 Bundle|Migration ID|
 |-|-|-|-|-|
 |Audio|audio|media|audio||
+|Audio|audio|media|soundcloud|???|
 |File|file|media|document|`mukurtu_cms_v3_media_document`|
 |Image|image|media|image|`mukurtu_cms_v3_media_image`|
 |Video|video|media|video||
@@ -86,12 +96,14 @@ The following table shows the formatted text format mapping between version 3 an
 |Version 3|Version 4|
 |-|-|
 |filtered_html|basic_html|
-|plain_text|???|
+|plain_text|plain_text|
 |full_html|full_html|
 |markdown|???|
 |ds_code|???|
 
 ### Files
+> You MUST have Drupal private file storage configured prior to migration.
+
 |Type|Migration ID|
 |-|-|
 |Public|`mukurtu_cms_v3_file`|
@@ -110,3 +122,44 @@ The following table shows the base fields/sub-fields that will be migrated for a
 |description/value|
 |[description/format](#formatted-text-formats)|
 
+### Digital Heritage Field Migration
+The following table shows the fields that will be migrated from version 3 for Digital Heritage.
+
+|Source Field|
+|-|
+|title|
+|field_summary|
+|field_media_asset|
+|og_group_ref|
+|field_item_privacy_setting|
+|field_creator|
+|field_category|
+|field_contributor|
+|field_original_date|
+|field_date|
+|body|
+|field_tk_body|
+|field_description|
+|field_tags|
+|field_publisher|
+|field_rights|
+|field_licence_trad|
+|field_licence_std_cc|
+|field_format|
+|field_dh_type|
+|field_identifier|
+|field_language|
+|field_source|
+|field_subject|
+|field_people|
+|field_transcription|
+|field_coverage|
+|field_coverage_description|
+|field_external_links|
+|field_community_record_children|
+|field_book_children|
+|field_book_parent|
+|field_related_content|
+|field_collection|
+|field_personal_collections|
+|field_community_record_parent|

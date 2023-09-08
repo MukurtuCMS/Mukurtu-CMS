@@ -1,40 +1,45 @@
-id: mukurtu_cms_v3_media_image
-label: Media - Images
+id: mukurtu_cms_v3_media_video
+label: Media - Video
 migration_group: mukurtu_cms_v3
 migration_tags:
   - Mukurtu 3
 
 source:
   plugin: d7_scald_atom
-  atom_type: image
+  atom_type: video
 
 destination:
   plugin: entity:media
-  default_bundle: image
+  #default_bundle: audio
 
 migration_dependencies:
   required:
-    - mukurtu_cms_v3_communities
     - mukurtu_cms_v3_cultural_protocols
-    - mukurtu_cms_v3_terms_category
     - mukurtu_cms_v3_terms_contributor
-    - mukurtu_cms_v3_terms_creator
-    - mukurtu_cms_v3_terms_format
-    - mukurtu_cms_v3_terms_keywords
-    - mukurtu_cms_v3_terms_language
     - mukurtu_cms_v3_terms_people
-    - mukurtu_cms_v3_terms_publisher
-    - mukurtu_cms_v3_terms_subject
-    - mukurtu_cms_v3_terms_type
+    - mukurtu_cms_v3_terms_keywords
+    - mukurtu_cms_v3_terms_authors
     - mukurtu_cms_v3_file_private
     - mukurtu_cms_v3_file
   optional:
     - d7_field_instance
 
 process:
+  bundle:
+    -
+      plugin: static_map
+      source: provider
+      map:
+        scald_vimeo: remote_video
+        scald_video: video
+      default_value: video
   id: sid
   langcode: language
   name: title
+  field_contributor:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_contributor
+    source: field_contributor
   field_people:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_people
@@ -58,22 +63,41 @@ process:
       column_key: target_id
     -
       plugin: mukurtu_migrate_set_protocols
-  field_media_image/target_id:
+  field_media_video_file:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_file_private
+      - mukurtu_cms_v3_file
+    source: base_id
+  thumbnail/target_id:
     plugin: migration_lookup
     migration:
       - mukurtu_cms_v3_file_private
       - mukurtu_cms_v3_file
     source: scald_thumbnail/0/fid
-  field_media_image/alt:
+  thumbnail/alt:
     -
       plugin: null_coalesce
       source:
         - scald_thumbnail/0/field_caption
-        - scald_thumbnail/0/field_file_image_alt_text
         - title
         - scald_thumbnail/0/field_filename
     -
       plugin: default_value
       default_value: 'Missing Alt Text'
-  field_identifier: field_scald_identifier
-
+  field_thumbnail/target_id:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_file_private
+      - mukurtu_cms_v3_file
+    source: scald_thumbnail/0/fid
+  field_thumbnail/alt:
+    -
+      plugin: null_coalesce
+      source:
+        - scald_thumbnail/0/field_caption
+        - title
+        - scald_thumbnail/0/field_filename
+    -
+      plugin: default_value
+      default_value: 'Missing Alt Text'

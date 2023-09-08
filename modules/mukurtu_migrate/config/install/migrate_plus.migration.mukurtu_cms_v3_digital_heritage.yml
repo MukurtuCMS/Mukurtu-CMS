@@ -44,8 +44,11 @@ process:
       plugin: mukurtu_migrate_lookup_og_group
       source: nid
     -
-      plugin: migration_lookup
-      migration: mukurtu_cms_v3_cultural_protocols
+      plugin: sub_process
+      process:
+        plugin: migration_lookup
+        migration: mukurtu_cms_v3_cultural_protocols
+        source: target_id
     -
       plugin: mukurtu_migrate_set_protocols
 
