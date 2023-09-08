@@ -4,6 +4,7 @@ dependencies:
   config:
     - media.type.audio
     - media.type.document
+    - media.type.external_embed
     - media.type.image
     - media.type.remote_video
     - media.type.video
@@ -42,4 +43,7 @@ permissions:
   - 'update own image media'
   - 'update own remote_video media'
   - 'update own video media'
+  - 'create external_embed media'
+  - 'update own external_embed media'
+  - 'delete own external_embed media'
 role_type: standard

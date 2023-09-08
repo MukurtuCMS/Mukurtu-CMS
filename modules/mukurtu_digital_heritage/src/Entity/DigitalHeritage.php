@@ -224,6 +224,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
             'image' => 'image',
             'remote_video' => 'remote_video',
             'video' => 'video',
+            'external_embed' => 'external_embed',
           ],
           'auto_create' => FALSE,
         ]

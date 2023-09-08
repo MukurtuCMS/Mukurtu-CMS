@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+id: external_embed
+label: External Embed
+description: ''
+source: 'external_embed'
+queue_thumbnail_downloads: false
+new_revision: true
+source_configuration:
+  source_field: field_media_external_embed
+field_map:
+  name: name
