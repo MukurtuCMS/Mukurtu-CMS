@@ -28,13 +28,19 @@ migration_dependencies:
     - mukurtu_cms_v3_terms_type
     - mukurtu_cms_v3_media_image
     - mukurtu_cms_v3_media_document
+    - mukurtu_cms_v3_users
   optional:
     - d7_field_instance
 
 process:
   nid: nid
+  uid:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_users
+    source: uid
   langcode: language
   title: title
+  field_summary: field_summary
   'field_cultural_protocols/sharing_setting':
     -
       plugin: get
@@ -66,7 +72,22 @@ process:
   'field_cultural_narrative/format':
     -
       plugin: static_map
-      source: field_cultural_narrative/format
+      source: body/format
+      map:
+        'filtered_html': 'filtered_html'
+        'plain_text': 'plain_text'
+        'full_html': 'full_html'
+        'markdown': 'full_html'
+        'ds_code': 'full_html'
+      default_value: 'full_html'
+  'field_traditional_knowledge/value':
+    -
+      plugin: get
+      source: field_tk_body/value
+  'field_traditional_knowledge/format':
+    -
+      plugin: static_map
+      source: field_tk_body/format
       map:
         'filtered_html': 'filtered_html'
         'plain_text': 'plain_text'
@@ -82,13 +103,96 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_contributor
     source: field_contributor
+  'field_original_date/year':
+    -
+      plugin: get
+      source: field_original_date/0/from/year
+  'field_original_date/month':
+    -
+      plugin: get
+      source: field_original_date/0/from/month
+  'field_original_date/day':
+    -
+      plugin: get
+      source: field_original_date/0/from/day
+  field_date_description: field_date
   field_creator:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_creator
     source: field_creator
+  field_keywords:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_keywords
+    source: field_tags
+  field_publisher:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_publisher
+    source: field_publisher
+  field_format:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_format
+    source: field_format
+  field_type:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_type
+    source: field_dh_type
+  field_language:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_language
+    source: field_language
+  field_subject:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_subject
+    source: field_subject
+  field_people:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_people
+    source: field_people
+  field_source: field_source
+  field_identifier: field_identifier
+  'field_rights_and_usage/value':
+    -
+      plugin: get
+      source: field_rights/value
+  'field_rights_and_usage/format':
+    -
+      plugin: static_map
+      source: field_rights/format
+      map:
+        'filtered_html': 'filtered_html'
+        'plain_text': 'plain_text'
+        'full_html': 'full_html'
+        'markdown': 'full_html'
+        'ds_code': 'full_html'
+      default_value: 'full_html'
+
+  'field_coverage_description/value':
+    -
+      plugin: get
+      source: field_coverage_description/0/value
+  'field_coverage_description/format':
+    -
+      plugin: static_map
+      source: field_coverage_description/0/format
+      map:
+        'filtered_html': 'filtered_html'
+        'plain_text': 'plain_text'
+        'full_html': 'full_html'
+        'markdown': 'full_html'
+        'ds_code': 'full_html'
+      default_value: 'full_html'
+
+  # TODO: field_licence_trad
+  # TODO: field_licence_std_cc
+  # TODO: field_transcription
+  # TODO: field_coverage
+  # TODO: field_external_links
+
 
   # This only works if we maintain nids. Self migration_lookup wasn't working for me...
   field_mukurtu_original_record: field_community_record_parent
+  field_related_content: field_related_content
+
   field_media_assets:
     -
       plugin: sub_process

@@ -51,3 +51,4 @@ dependencies:
   enforced:
     module:
       - mukurtu_migrate
+

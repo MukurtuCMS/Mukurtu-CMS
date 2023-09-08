@@ -7,7 +7,7 @@ migration_tags:
 source:
   plugin: d7_taxonomy_term
   key: migrate
-  bundle: type
+  bundle: dh_type
 
 destination:
   plugin: entity:taxonomy_term

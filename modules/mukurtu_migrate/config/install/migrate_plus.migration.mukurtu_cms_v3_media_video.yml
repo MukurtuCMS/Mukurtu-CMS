@@ -48,19 +48,17 @@ process:
     -
       plugin: default_value
       default_value: any
+  # Protocols.
   'field_cultural_protocols/protocols':
     -
-      plugin: sub_process
+      plugin: mukurtu_migrate_lookup_og_group
       source: field_scald_protocol
-      process:
-        target_id:
-          -
-            plugin: migration_lookup
-            migration: mukurtu_cms_v3_cultural_protocols
-            source: target_id
     -
-      plugin: array_column
-      column_key: target_id
+      plugin: sub_process
+      process:
+        plugin: migration_lookup
+        migration: mukurtu_cms_v3_cultural_protocols
+        source: target_id
     -
       plugin: mukurtu_migrate_set_protocols
   field_media_video_file:
