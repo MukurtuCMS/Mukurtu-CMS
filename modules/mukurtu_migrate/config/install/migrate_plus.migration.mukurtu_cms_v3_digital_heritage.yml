@@ -74,7 +74,7 @@ process:
       plugin: static_map
       source: body/format
       map:
-        'filtered_html': 'filtered_html'
+        'filtered_html': 'basic_html'
         'plain_text': 'plain_text'
         'full_html': 'full_html'
         'markdown': 'full_html'
@@ -89,7 +89,7 @@ process:
       plugin: static_map
       source: field_tk_body/format
       map:
-        'filtered_html': 'filtered_html'
+        'filtered_html': 'basic_html'
         'plain_text': 'plain_text'
         'full_html': 'full_html'
         'markdown': 'full_html'
@@ -159,7 +159,7 @@ process:
       plugin: static_map
       source: field_rights/format
       map:
-        'filtered_html': 'filtered_html'
+        'filtered_html': 'basic_html'
         'plain_text': 'plain_text'
         'full_html': 'full_html'
         'markdown': 'full_html'
@@ -175,7 +175,7 @@ process:
       plugin: static_map
       source: field_coverage_description/0/format
       map:
-        'filtered_html': 'filtered_html'
+        'filtered_html': 'basic_html'
         'plain_text': 'plain_text'
         'full_html': 'full_html'
         'markdown': 'full_html'
@@ -183,11 +183,19 @@ process:
       default_value: 'full_html'
 
   # TODO: field_licence_trad
-  # TODO: field_licence_std_cc
-  # TODO: field_transcription
   # TODO: field_coverage
-  # TODO: field_external_links
 
+  field_creative_commons: field_licence_std_cc
+
+  field_transcription: field_transcription
+
+  field_external_links:
+    -
+      plugin: sub_process
+      source: field_external_links
+      process:
+        uri: url
+        title: title
 
   # This only works if we maintain nids. Self migration_lookup wasn't working for me...
   field_mukurtu_original_record: field_community_record_parent

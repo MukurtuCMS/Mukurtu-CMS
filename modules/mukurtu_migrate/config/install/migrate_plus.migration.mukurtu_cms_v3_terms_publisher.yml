@@ -6,7 +6,7 @@ migration_tags:
 
 source:
   plugin: d7_taxonomy_term
-  key: migrate
+  #key: migrate
   bundle: publisher
 
 destination:
