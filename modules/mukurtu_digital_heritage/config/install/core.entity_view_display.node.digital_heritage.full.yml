@@ -370,10 +370,10 @@ content:
     weight: 29
     region: content
   field_subject:
-    type: string
+    type: entity_reference_label
     label: above
     settings:
-      link_to_entity: false
+      link: true
     third_party_settings: {  }
     weight: 33
     region: content
