@@ -73,7 +73,7 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |Person|node|person|node|person||
 |Personal Collection|node|personal_collection|personal_collection|personal_collection||
 |Unit Plan|node|unit_plan|N/A|N/A||
-|Word List|node|word_list|node|word_list||
+|Word List|node|word_list|node|word_list|`mukurtu_cms_v3_word_list`|
 
 ### Migration from Scald to Drupal Media Entities
 Mukurtu CMS version 4 uses Drupal media entities in lieu of Scald atoms. The table below shows the mappings.
