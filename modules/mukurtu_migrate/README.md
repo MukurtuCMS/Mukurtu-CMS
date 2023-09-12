@@ -63,7 +63,7 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |Article|node|article|???|???||
 |Basic Page|node|page|???|???||
 |Collection|node|collection|node|collection||
-|Dictionary Word|node|dictionary_word|node|dictionary_word||
+|Dictionary Word|node|dictionary_word|node|dictionary_word|`mukurtu_cms_v3_dictionary_word`|
 |Digital Heritage|node|digital_heritage|node|digital_heritage|`mukurtu_cms_v3_digital_heritage`|
 |Digital Heritage Admin Notification|node|dhan|N/A|N/A||
 |Fixity Check|node|fixity_check|N/A|N/A||
@@ -88,7 +88,7 @@ Mukurtu CMS version 4 uses Drupal media entities in lieu of Scald atoms. The tab
 |Audio|audio|media|soundcloud|???|
 |File|file|media|document|`mukurtu_cms_v3_media_document`|
 |Image|image|media|image|`mukurtu_cms_v3_media_image`|
-|Video|video|media|video||
+|Video|video|media|video|`mukurtu_cms_v3_media_video`|
 |Video|video|media|remote_video||
 
 ### Formatted Text Formats

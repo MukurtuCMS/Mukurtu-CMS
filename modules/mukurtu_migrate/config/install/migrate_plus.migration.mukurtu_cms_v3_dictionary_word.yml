@@ -1,0 +1,92 @@
+id: mukurtu_cms_v3_dictionary_word
+label: Dictionary Word
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: dictionary_word
+
+destination:
+  plugin: entity:node
+  default_bundle: dictionary_word
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_paragraphs_dictionary_word_entry
+    - mukurtu_cms_v3_communities
+    - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_terms_keywords
+    - mukurtu_cms_v3_terms_language
+  optional:
+    - d7_field_instance
+
+process:
+  nid: nid
+  uid:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_users
+    source: uid
+  langcode: language
+  title: title
+  'field_cultural_protocols/sharing_setting':
+    -
+      plugin: get
+      source: field_item_privacy_setting/0/value
+  'field_cultural_protocols/protocols':
+    -
+      plugin: mukurtu_migrate_lookup_og_group
+      source: nid
+    -
+      plugin: sub_process
+      process:
+        plugin: migration_lookup
+        migration: mukurtu_cms_v3_cultural_protocols
+        source: target_id
+    -
+      plugin: mukurtu_migrate_set_protocols
+  field_dictionary_word_language:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_language
+    source: field_dictionary_word_language
+  field_word_entry:
+    -
+      plugin: sub_process
+      source: field_word_entry
+      process:
+        target_id:
+          -
+            plugin: migration_lookup
+            method: process
+            migration: mukurtu_cms_v3_paragraphs_dictionary_word_entry
+            source: value
+          -
+            plugin: extract
+            index:
+              - 0
+        target_revision_id:
+          -
+            plugin: migration_lookup
+            method: process
+            migration: mukurtu_cms_v3_paragraphs_dictionary_word_entry
+            source: value
+          -
+            plugin: extract
+            index:
+              - 1
+
+  field_keywords:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_keywords
+    source: field_tags
+  # This only works if we maintain nids. Self migration_lookup wasn't working for me...
+  field_related_content: field_related_content
+
+  # TODO: field_additional_media
+  # TODO: field_word_list
+  # TODO: field_collection
+  # TODO: field_personal_collections
+
+
