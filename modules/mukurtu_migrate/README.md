@@ -84,7 +84,7 @@ Mukurtu CMS version 4 uses Drupal media entities in lieu of Scald atoms. The tab
 
 |Name|Version 3 Scald Type|Version 4 Entity Type ID|Version 4 Bundle|Migration ID|
 |-|-|-|-|-|
-|Audio|audio|media|audio||
+|Audio|audio|media|audio|`mukurtu_cms_v3_media_audio`|
 |Audio|audio|media|soundcloud|???|
 |File|file|media|document|`mukurtu_cms_v3_media_document`|
 |Image|image|media|image|`mukurtu_cms_v3_media_image`|

@@ -1,0 +1,82 @@
+id: mukurtu_cms_v3_word_list
+label: Word List
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: word_list
+
+destination:
+  plugin: entity:node
+  default_bundle: word_list
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_dictionary_word
+    - mukurtu_cms_v3_communities
+    - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_terms_keywords
+    - mukurtu_cms_v3_terms_language
+  optional:
+    - d7_field_instance
+
+process:
+  nid: nid
+  uid:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_users
+    source: uid
+  langcode: language
+  status: status
+  title: title
+  # TODO: field_collection_summary
+  # TODO: field_collection_credit?
+  'field_description/value':
+    -
+      plugin: get
+      source: field_description/value
+  'field_description/format':
+    -
+      plugin: static_map
+      source: field_description/format
+      map:
+        'filtered_html': 'basic_html'
+        'plain_text': 'plain_text'
+        'full_html': 'full_html'
+        'markdown': 'full_html'
+        'ds_code': 'full_html'
+      default_value: 'full_html'
+  'field_media_assets/target_id':
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_file_private
+      - mukurtu_cms_v3_file
+    source: field_collection_image/0/fid
+  'field_media_assets/alt':
+    -
+      plugin: null_coalesce
+      source:
+        - field_collection_image/0/field_caption
+        - title
+        - field_collection_image/0/field_filename
+    -
+      plugin: default_value
+      default_value: 'Missing Alt Text'
+  field_keywords:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_keywords
+    source: field_tags
+  field_words:
+    plugin: sub_process
+    source: field_words
+    process:
+      target_id:
+        plugin: migration_lookup
+        migration:
+          - mukurtu_cms_v3_dictionary_word
+        source: target_id
+  # This only works if we maintain nids. Self migration_lookup wasn't working for me...
+  field_related_content: field_related_content

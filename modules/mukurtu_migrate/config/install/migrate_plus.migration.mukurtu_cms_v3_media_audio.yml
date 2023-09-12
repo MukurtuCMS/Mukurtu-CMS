@@ -75,13 +75,13 @@ process:
     -
       plugin: default_value
       default_value: 'Missing Alt Text'
-  field_thumbnail/target_id:
+  'field_thumbnail/target_id':
     plugin: migration_lookup
     migration:
       - mukurtu_cms_v3_file_private
       - mukurtu_cms_v3_file
     source: scald_thumbnail/0/fid
-  field_thumbnail/alt:
+  'field_thumbnail/alt':
     -
       plugin: null_coalesce
       source:
