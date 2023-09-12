@@ -17,9 +17,11 @@ class CommunitiesPageController extends ControllerBase {
     $org = $config->get('organization');
 
     $communityIDs = [];
-    foreach ($org as $id => $settings) {
-      if (intval($settings['parent']) === intval($parent)) {
-        $communityIDs[$settings['weight']] = $id;
+    if ($org != NULL) {
+      foreach ($org as $id => $settings) {
+        if (intval($settings['parent']) === intval($parent)) {
+          $communityIDs[$settings['weight']] = $id;
+        }
       }
     }
 
