@@ -62,7 +62,7 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |Cultural Protocol|node|cultural_protocol_group|protocol|protocol|`mukurtu_cms_v3_cultural_protocols`|
 |Article|node|article|???|???||
 |Basic Page|node|page|???|???||
-|Collection|node|collection|node|collection||
+|Collection|node|collection|node|collection|`mukurtu_cms_v3_collection`|
 |Dictionary Word|node|dictionary_word|node|dictionary_word|`mukurtu_cms_v3_dictionary_word`|
 |Digital Heritage|node|digital_heritage|node|digital_heritage|`mukurtu_cms_v3_digital_heritage`|
 |Digital Heritage Admin Notification|node|dhan|N/A|N/A||
@@ -71,7 +71,7 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |Lesson|node|lesson|N/A|N/A||
 |Panel|node|panel|N/A|N/A||
 |Person|node|person|node|person||
-|Personal Collection|node|personal_collection|personal_collection|personal_collection||
+|Personal Collection|node|personal_collection|personal_collection|personal_collection|`mukurtu_cms_v3_personal_collection`|
 |Unit Plan|node|unit_plan|N/A|N/A||
 |Word List|node|word_list|node|word_list|`mukurtu_cms_v3_word_list`|
 
@@ -163,3 +163,48 @@ The following table shows the fields that will be migrated from version 3 for Di
 |field_collection|
 |field_personal_collections|
 |field_community_record_parent|
+
+### Collection Field Migration
+The following table shows the fields that will be migrated from version 3 for Collections.
+
+|Source Field|
+|-|
+|changed|
+|created|
+|field_collection_credit|
+|field_collection_image|
+|field_collections_child_coll|
+|field_collections_parent_coll|
+|field_description|
+|field_digital_heritage_items|
+|field_item_privacy_setting|
+|field_related_content|
+|field_summary|
+|field_tags|
+|og_group_ref|
+|status|
+|title|
+|vid|
+
+### Personal Collection Field Migration
+The following table shows the fields that will be migrated from version 3 for Personal Collections.
+
+|Source Field|
+|-|
+|changed|
+|created|
+|field_collection_credit|
+|field_collection_image|
+|field_collections_child_coll|
+|field_collections_parent_coll|
+|field_description|
+|field_digital_heritage_items|
+|field_item_privacy_setting|
+|field_related_content|
+|field_summary|
+|field_tags|
+|field_user_id|
+|og_group_ref|
+|status|
+|title|
+|vid|

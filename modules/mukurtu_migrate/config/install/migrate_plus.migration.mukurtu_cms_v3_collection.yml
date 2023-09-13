@@ -84,6 +84,11 @@ process:
 
   field_child_collections: field_collections_child_coll
 
+  status: status
+  vid: vid
+  created: created
+  changed: changed
+
 dependencies:
   enforced:
     module:
