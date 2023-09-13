@@ -1,9 +1,12 @@
 langcode: en
 status: true
 dependencies:
+  config:
+    - filter.format.basic_html
   module:
     - comment
     - entity_browser
+    - filter
     - flag
     - google_analytics
     - media
@@ -49,6 +52,7 @@ permissions:
   - 'unflag mukurtu_follow_collection'
   - 'unflag mukurtu_follow_community'
   - 'unflag mukurtu_follow_content'
+  - 'use text format basic_html'
   - 'view media'
   - 'view published community entities'
   - 'view published personal collection entities'
