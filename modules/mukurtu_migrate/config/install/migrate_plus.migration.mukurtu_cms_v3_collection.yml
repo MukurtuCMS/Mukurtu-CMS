@@ -1,0 +1,90 @@
+id: mukurtu_cms_v3_collection
+label: Collection
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: collection
+
+destination:
+  plugin: entity:node
+  default_bundle: collection
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_communities
+    - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_terms_keywords
+    - mukurtu_cms_v3_media_image
+    - mukurtu_cms_v3_users
+  optional:
+    - d7_field_instance
+
+process:
+  nid: nid
+  uid:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_users
+    source: uid
+  langcode: language
+  title: title
+
+  field_summary: field_collection_summary
+
+  'field_description/value':
+    -
+      plugin: get
+      source: field_description/0/value
+  'field_description/format':
+    plugin: default_value
+    default_value: 'basic_html'
+
+  field_collection_image:
+    plugin: sub_process
+    source: field_collection_image
+    process:
+      target_id:
+        plugin: migration_lookup
+        migration:
+          - mukurtu_cms_v3_media_image
+        source: sid
+
+  field_credit: field_collection_credit
+
+  field_keywords:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_keywords
+    source: field_tags
+
+  field_items_in_collection: field_digital_heritage_items
+
+  # This only works if we maintain nids. Self migration_lookup wasn't working for me...
+  field_related_content: field_related_content
+
+  'field_cultural_protocols/sharing_setting':
+    -
+      plugin: get
+      source: field_item_privacy_setting/0/value
+  'field_cultural_protocols/protocols':
+    -
+      plugin: mukurtu_migrate_lookup_og_group
+      source: nid
+    -
+      plugin: sub_process
+      process:
+        plugin: migration_lookup
+        migration: mukurtu_cms_v3_cultural_protocols
+        source: target_id
+    -
+      plugin: mukurtu_migrate_set_protocols
+
+  field_parent_collection: field_collections_parent_coll
+
+  field_child_collections: field_collections_child_coll
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
