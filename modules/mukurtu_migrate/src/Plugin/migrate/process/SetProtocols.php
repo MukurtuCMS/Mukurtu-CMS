@@ -19,7 +19,18 @@ class SetProtocols extends ProcessPluginBase {
     if (!$value || empty($value) || !is_array($value)) {
       return "";
     }
-    $protocol_ids = array_column($value, 'source');
+
+    // Hack city. Rather than trying to figure out every different array format
+    // on the migrate config side, find the array key being used here (e.g.,
+    // target_id) and flatten the array for the protocols field. This is gross
+    // but 100% fine for migrating from v3 -> v4.
+    $protocol_ids = $value;
+    $first = reset($value);
+    if (is_array($first)) {
+      $keys = array_keys($first);
+      $key = reset($keys);
+      $protocol_ids = array_column($value, $key);
+    }
 
     // @todo This should really be calling something provided by
     // CulturalProtocolControlledTrait rather than embedding the logic directly.

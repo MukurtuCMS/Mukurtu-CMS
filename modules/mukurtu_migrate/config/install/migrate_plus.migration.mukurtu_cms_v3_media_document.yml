@@ -46,14 +46,13 @@ process:
   # Protocols.
   'field_cultural_protocols/protocols':
     -
-      plugin: mukurtu_migrate_lookup_og_group
-      source: field_scald_protocol
-    -
       plugin: sub_process
+      source: field_scald_protocol
       process:
-        plugin: migration_lookup
-        migration: mukurtu_cms_v3_cultural_protocols
-        source: target_id
+        target_id:
+          plugin: migration_lookup
+          migration: mukurtu_cms_v3_cultural_protocols
+          source: target_id
     -
       plugin: mukurtu_migrate_set_protocols
   field_media_document:
