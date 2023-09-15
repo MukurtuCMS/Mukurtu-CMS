@@ -9,14 +9,14 @@ site_wide: true
 entity_fields_export_list:
   node__article:
     nid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     title: Title
     field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__collection:
     nid: ID
     uuid: UUID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     title: Title
     field_cultural_protocols: 'Cultural Protocols'
@@ -31,13 +31,13 @@ entity_fields_export_list:
     field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__dictionary_word:
     nid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     title: Title
     field_cultural_protocols: 'Cultural Protocols'
     field_glossary_entry: 'Glossary Entry'
     field_keywords: Keywords
-    field_language: Language
+    field_dictionary_word_language: Language
     field_media_assets: 'Media Assets'
     field_word_entry: 'Word Entry'
     field_related_content: 'Related Content'
@@ -45,7 +45,7 @@ entity_fields_export_list:
     field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__digital_heritage:
     nid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     title: Title
     default_langcode: 'Default translation'
@@ -83,14 +83,14 @@ entity_fields_export_list:
     field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__page:
     nid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     title: Title
     field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__person:
     nid: ID
     uuid: UUID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     title: Title
     field_cultural_protocols: 'Cultural Protocols'
@@ -106,7 +106,7 @@ entity_fields_export_list:
     field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__word_list:
     nid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     title: Title
     field_cultural_protocols: 'Cultural Protocols'
@@ -114,11 +114,10 @@ entity_fields_export_list:
     field_keywords: Keywords
     field_media_assets: 'Media Assets'
     field_words: Words
-    body: Body
     field_mukurtu_geojson: 'Mukurtu GeoJSON'
   media__audio:
     mid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     name: Name
     field_cultural_protocols: 'Cultural Protocols'
@@ -131,7 +130,7 @@ entity_fields_export_list:
     field_identifier: Identifier
   media__document:
     mid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     name: Name
     field_cultural_protocols: 'Cultural Protocols'
@@ -143,7 +142,7 @@ entity_fields_export_list:
     field_identifier: Identifier
   media__image:
     mid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     name: Name
     field_cultural_protocols: 'Cultural Protocols'
@@ -153,7 +152,7 @@ entity_fields_export_list:
     field_identifier: Identifier
   media__remote_video:
     mid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     name: Name
     field_cultural_protocols: 'Cultural Protocols'
@@ -164,7 +163,7 @@ entity_fields_export_list:
     field_identifier: Identifier
   media__video:
     mid: ID
-    langcode: Language
+    langcode: Locale
     uid: 'Authored by'
     name: Name
     field_cultural_protocols: 'Cultural Protocols'
@@ -175,7 +174,7 @@ entity_fields_export_list:
     field_identifier: Identifier
   community__community:
     id: ID
-    langcode: Language
+    langcode: Locale
     user_id: 'Authored by'
     name: Name
     field_description: Description
@@ -186,7 +185,7 @@ entity_fields_export_list:
     field_thumbnail_image: 'Thumbnail Image'
   protocol__protocol:
     id: ID
-    langcode: Language
+    langcode: Locale
     user_id: 'Authored by'
     name: Name
     field_description: Description
@@ -242,79 +241,79 @@ entity_fields_export_list:
     changed: Changed
   taxonomy_term__authors:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__category:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
     default_langcode: 'Default translation'
   taxonomy_term__community_type:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__contributor:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__creator:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__format:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
     revision_default: 'Default revision'
   taxonomy_term__interpersonal_relationship:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__keywords:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__language:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__people:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__publisher:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__subject:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__tags:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__type:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   taxonomy_term__word_type:
     tid: 'Term ID'
-    langcode: Language
+    langcode: Locale
     name: Name
     description: Description
   user__user:
