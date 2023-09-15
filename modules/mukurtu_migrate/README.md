@@ -60,8 +60,8 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |-|-|-|-|-|-|
 |Community|node|community|community|community|`mukurtu_cms_v3_communities`|
 |Cultural Protocol|node|cultural_protocol_group|protocol|protocol|`mukurtu_cms_v3_cultural_protocols`|
-|Article|node|article|???|???||
-|Basic Page|node|page|???|???||
+|Article|node|article|node|article||
+|Basic Page|node|page|node|page||
 |Collection|node|collection|node|collection|`mukurtu_cms_v3_collection`|
 |Dictionary Word|node|dictionary_word|node|dictionary_word|`mukurtu_cms_v3_dictionary_word`|
 |Digital Heritage|node|digital_heritage|node|digital_heritage|`mukurtu_cms_v3_digital_heritage`|
@@ -93,13 +93,16 @@ Mukurtu CMS version 4 uses Drupal media entities in lieu of Scald atoms. The tab
 
 ### Formatted Text Formats
 The following table shows the formatted text format mapping between version 3 and version 4.
+
+> Note that markdown and Display Suite text formats will not be migrated.
+
 |Version 3|Version 4|
 |-|-|
 |filtered_html|basic_html|
 |plain_text|plain_text|
 |full_html|full_html|
-|markdown|???|
-|ds_code|???|
+|markdown|N/A|
+|ds_code|N/A|
 
 ### Files
 > You MUST have Drupal private file storage configured prior to migration.
