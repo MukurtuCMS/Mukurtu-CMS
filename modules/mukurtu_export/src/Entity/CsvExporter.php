@@ -277,14 +277,16 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
     // Mapped fields are in the order we want them already.
     if (isset($map[$key]) && !empty($map[$key])) {
       foreach ($map[$key] as $mapped_field_name => $mapped_field_label) {
-        $result[] = [
-          'field_name' => $mapped_field_name,
-          'field_label' => $all_field_defs[$mapped_field_name]->getLabel(),
-          'csv_header_label' => $mapped_field_label,
-          'export' => TRUE,
-        ];
+        if ($mappedField = $all_field_defs[$mapped_field_name]) {
+          $result[] = [
+            'field_name' => $mapped_field_name,
+            'field_label' => $mappedField->getLabel(),
+            'csv_header_label' => $mapped_field_label,
+            'export' => TRUE,
+          ];
 
-        if (isset($all_field_defs[$mapped_field_name])) {
+          // Remove the field from the list. The remainder of the list will
+          // be added to the end of the form for the user to assign mappings.
           unset($all_field_defs[$mapped_field_name]);
         }
       }
