@@ -1,0 +1,67 @@
+id: mukurtu_cms_v3_article
+label: Article
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: article
+
+destination:
+  plugin: entity:node
+  default_bundle: article
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_terms_category
+    - mukurtu_cms_v3_terms_keywords
+    - mukurtu_cms_v3_file_private
+    - mukurtu_cms_v3_file
+  optional:
+    - d7_field_instance
+
+process:
+  nid: nid
+  uid:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_users
+    source: uid
+  type: type
+  langcode: language
+  title: title
+
+  'body/value':
+    -
+      plugin: get
+      source: body/0/value
+  'body/format':
+    plugin: default_value
+    default_value: 'basic_html'
+
+  field_article_image:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_file_private
+      - mukurtu_cms_v3_file
+    source: field_image/0/fid
+
+  field_article_category:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_category
+    source: field_category
+
+  field_article_keywords:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_keywords
+    source: field_tags
+
+  status: status
+  created: created
+  changed: changed
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate

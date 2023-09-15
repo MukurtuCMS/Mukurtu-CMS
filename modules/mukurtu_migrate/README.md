@@ -60,7 +60,7 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |-|-|-|-|-|-|
 |Community|node|community|community|community|`mukurtu_cms_v3_communities`|
 |Cultural Protocol|node|cultural_protocol_group|protocol|protocol|`mukurtu_cms_v3_cultural_protocols`|
-|Article|node|article|node|article||
+|Article|node|article|node|article|`mukurtu_cms_v3_article`|
 |Basic Page|node|page|node|page||
 |Collection|node|collection|node|collection|`mukurtu_cms_v3_collection`|
 |Dictionary Word|node|dictionary_word|node|dictionary_word|`mukurtu_cms_v3_dictionary_word`|
@@ -187,7 +187,6 @@ The following table shows the fields that will be migrated from version 3 for Co
 |og_group_ref|
 |status|
 |title|
-|vid|
 
 ### Personal Collection Field Migration
 The following table shows the fields that will be migrated from version 3 for Personal Collections.
@@ -210,4 +209,18 @@ The following table shows the fields that will be migrated from version 3 for Pe
 |og_group_ref|
 |status|
 |title|
-|vid|
+
+### Article Field Migration
+The following table shows the fields that will be migrated from version 3 for Articles.
+
+|Source Field|
+|-|
+|body|
+|changed|
+|created|
+|field_category|
+|field_image|
+|field_tags|
+|status|
+|title|
+|type|
