@@ -61,7 +61,7 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |Community|node|community|community|community|`mukurtu_cms_v3_communities`|
 |Cultural Protocol|node|cultural_protocol_group|protocol|protocol|`mukurtu_cms_v3_cultural_protocols`|
 |Article|node|article|node|article|`mukurtu_cms_v3_article`|
-|Basic Page|node|page|node|page||
+|Basic Page|node|page|node|page|`mukurtu_cms_v3_page`|
 |Collection|node|collection|node|collection|`mukurtu_cms_v3_collection`|
 |Dictionary Word|node|dictionary_word|node|dictionary_word|`mukurtu_cms_v3_dictionary_word`|
 |Digital Heritage|node|digital_heritage|node|digital_heritage|`mukurtu_cms_v3_digital_heritage`|
@@ -221,6 +221,19 @@ The following table shows the fields that will be migrated from version 3 for Ar
 |field_category|
 |field_image|
 |field_tags|
+|status|
+|title|
+|type|
+
+### Basic Page Field Migration
+The following table shows the fields that will be migrated from version 3 for Basic Pages.
+
+|Source Field|
+|-|
+|body|
+|changed|
+|created|
+|field_media_asset|
 |status|
 |title|
 |type|

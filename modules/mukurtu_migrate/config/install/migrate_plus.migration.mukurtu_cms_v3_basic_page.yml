@@ -1,0 +1,63 @@
+id: mukurtu_cms_v3_page
+label: Basic Page
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: page
+
+destination:
+  plugin: entity:node
+  default_bundle: page
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_media_image
+    - mukurtu_cms_v3_media_audio
+    - mukurtu_cms_v3_media_video
+    - mukurtu_cms_v3_users
+  optional:
+    - d7_field_instance
+
+process:
+  nid: nid
+  uid:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_users
+    source: uid
+  type: type
+  langcode: language
+  title: title
+
+  'body/value':
+    -
+      plugin: get
+      source: body/0/value
+  'body/format':
+    plugin: default_value
+    default_value: 'basic_html'
+
+  field_page_media_assets:
+    -
+      plugin: sub_process
+      source: field_media_asset
+      process:
+        target_id:
+          -
+            plugin: migration_lookup
+            migration:
+              - mukurtu_cms_v3_media_image
+              - mukurtu_cms_v3_media_audio
+              - mukurtu_cms_v3_media_video
+            source: sid
+
+  status: status
+  created: created
+  changed: changed
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
