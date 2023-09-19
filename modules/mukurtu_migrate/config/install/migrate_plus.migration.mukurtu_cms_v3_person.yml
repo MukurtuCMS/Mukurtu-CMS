@@ -1,0 +1,110 @@
+id: mukurtu_cms_v3_person
+label: Person
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: person
+
+destination:
+  plugin: entity:node
+  default_bundle: person
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_paragraphs_related_person
+    - mukurtu_cms_v3_media_image
+    - mukurtu_cms_v3_media_audio
+    - mukurtu_cms_v3_media_video
+    - mukurtu_cms_v3_file_private
+    - mukurtu_cms_v3_file
+    - mukurtu_cms_v3_terms_keywords
+    - mukurtu_cms_v3_users
+  optional:
+    - d7_field_instance
+
+process:
+  nid: nid
+  uid:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_users
+    source: uid
+  type: type
+  langcode: language
+  title: title
+
+  field_media_assets:
+    -
+      plugin: sub_process
+      source: field_media_asset
+      process:
+        target_id:
+          -
+            plugin: migration_lookup
+            migration:
+              - mukurtu_cms_v3_media_image
+              - mukurtu_cms_v3_media_audio
+              - mukurtu_cms_v3_media_video
+              - mukurtu_cms_v3_file_private
+              - mukurtu_cms_v3_file
+            source: sid
+
+  field_date_born/value:
+    plugin: format_date
+    source: field_date_born/0/value
+    from_format: 'Y-m-d H:i:s'
+    to_format: 'Y-m-d'
+
+  field_date_died/value:
+    plugin: format_date
+    source: field_date_died/0/value
+    from_format: 'Y-m-d H:i:s'
+    to_format: 'Y-m-d'
+
+  field_deceased: field_deceased/0/value
+
+  field_keywords:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_keywords
+    source: field_tags
+
+  field_related_people:
+    -
+      plugin: sub_process
+      source: field_related_people
+      process:
+        target_id:
+          -
+            plugin: migration_lookup
+            method: process
+            migration: mukurtu_cms_v3_paragraphs_related_person
+            source: value
+          -
+            plugin: extract
+            index:
+              - 0
+        target_revision_id:
+          -
+            plugin: migration_lookup
+            method: process
+            migration: mukurtu_cms_v3_paragraphs_related_person
+            source: value
+          -
+            plugin: extract
+            index:
+              - 1
+
+  field_related_content: field_related_content
+
+  field_representative_terms: field_mukurtu_terms
+
+  status: status
+  created: created
+  changed: changed
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate

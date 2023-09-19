@@ -70,7 +70,7 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |Language Community|node|language_community|???|???||
 |Lesson|node|lesson|N/A|N/A||
 |Panel|node|panel|N/A|N/A||
-|Person|node|person|node|person||
+|Person|node|person|node|person|`mukurtu_cms_v3_person`|
 |Personal Collection|node|personal_collection|personal_collection|personal_collection|`mukurtu_cms_v3_personal_collection`|
 |Unit Plan|node|unit_plan|N/A|N/A||
 |Word List|node|word_list|node|word_list|`mukurtu_cms_v3_word_list`|
@@ -223,7 +223,6 @@ The following table shows the fields that will be migrated from version 3 for Ar
 |field_tags|
 |status|
 |title|
-|type|
 
 ### Basic Page Field Migration
 The following table shows the fields that will be migrated from version 3 for Basic Pages.
@@ -236,4 +235,21 @@ The following table shows the fields that will be migrated from version 3 for Ba
 |field_media_asset|
 |status|
 |title|
-|type|
+
+### Person Field Migration
+The following table shows the fields that will be migrated from version 3 for Person.
+
+|Source Field|
+|-|
+|changed|
+|created|
+|field_date_born|
+|field_date_died|
+|field_deceased|
+|field_media_asset|
+|field_mukurtu_terms|
+|field_related_content|
+|field_related_people|
+|field_tags|
+|status|
+|title|

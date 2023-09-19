@@ -1,0 +1,30 @@
+id: mukurtu_cms_v3_paragraphs_related_person
+label: Paragraphs - Related Person
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_paragraphs_item
+  bundle: person_relationship_bundle
+
+destination:
+  plugin: entity_reference_revisions:paragraph
+  default_bundle: related_person
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_media_audio
+  optional:
+    - d7_field_instance
+
+process:
+  field_related_person: field_related_person
+  field_relationship_type: field_relationship_type
+  status: status
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
