@@ -28,7 +28,6 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_users
     source: uid
-  type: type
   langcode: language
   title: title
 
