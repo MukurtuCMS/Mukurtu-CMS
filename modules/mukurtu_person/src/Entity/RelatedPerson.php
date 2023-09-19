@@ -22,12 +22,12 @@ class RelatedPerson extends Paragraph {
           'auto_create' => FALSE,
         ]
       ])
-    ->setCardinality(1)
-    ->setRequired(TRUE)
-    ->setRevisionable(TRUE)
-    ->setTranslatable(FALSE)
-    ->setDisplayConfigurable('view', TRUE)
-    ->setDisplayConfigurable('form', TRUE);
+      ->setCardinality(1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_relationship_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Relationship Type'))
