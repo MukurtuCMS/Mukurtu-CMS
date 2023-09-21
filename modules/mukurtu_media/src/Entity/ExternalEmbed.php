@@ -8,6 +8,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Defines the External Embed media entity bundle class.
@@ -19,7 +20,6 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
   {
     $definitions = self::getProtocolFieldDefinitions();
-
     $definitions['field_media_external_embed'] = BaseFieldDefinition::create('text_long')
       ->setLabel('External Embed')
       ->setDescription('Select Source in the editor to add your embed code.')
@@ -128,6 +128,20 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    return $definitions;
+
+      return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage)
+  {
+    // Set the 'thumbnail' field to the user-uploaded thumbnail.
+    $defaultThumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if ($defaultThumb) {
+      $this->thumbnail->target_id = $defaultThumb;
+    }
+    parent::preSave($storage);
   }
 }
