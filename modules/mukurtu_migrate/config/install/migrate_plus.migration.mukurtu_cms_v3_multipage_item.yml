@@ -1,0 +1,49 @@
+id: mukurtu_cms_v3_multipage_item
+label: Multipage Item
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_multipage_item
+
+destination:
+  plugin: entity:multipage_item
+  default_bundle: multipage_item
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_communities
+    - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_digital_heritage
+  optional:
+    - d7_field_instance
+
+process:
+  uid:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_users
+    source: uid
+
+  title: title
+
+  field_pages:
+    plugin: sub_process
+    source: field_pages
+    process:
+      target_id:
+        plugin: migration_lookup
+        migration:
+          - mukurtu_cms_v3_digital_heritage
+        source: target_id
+
+  status: status
+  created: created
+  changed: changed
+
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate

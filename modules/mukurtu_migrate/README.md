@@ -112,6 +112,19 @@ The following table shows the formatted text format mapping between version 3 an
 |Public|`mukurtu_cms_v3_file`|
 |Private|`mukurtu_cms_v3_file_private`|
 
+### Multi-page Items
+Multi-pages Items are a bespoke entity type in version 4. The title of page 1 from version 3 will be used as the title in version 4.
+
+Migration ID: `mukurtu_cms_v3_multipage_item`
+
+|Source Fields Migrated|
+|-|
+|changed|
+|created|
+|field_pages|
+|status|
+|title|
+
 ### Taxonomy Term - Base Field Migration
 The following table shows the base fields/sub-fields that will be migrated for all taxonomy terms in Mukurtu CMS version 3.
 |Source Fields Migrated|
