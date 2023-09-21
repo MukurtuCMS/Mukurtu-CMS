@@ -179,13 +179,13 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['field_pages'] = BaseFieldDefinition::create('entity_reference')
-    ->setLabel(t('Pages'))
-    ->setDescription(t('Item pages for the multipage item.'))
-    ->setSetting('target_type', 'node')
-    ->setSetting('handler', 'default:node')
-    ->setSetting('handler_settings', [
-      'auto_create' => FALSE,
-    ])
+      ->setLabel(t('Pages'))
+      ->setDescription(t('Item pages for the multipage item.'))
+      ->setSetting('target_type', 'node')
+      ->setSetting('handler', 'default:node')
+      ->setSetting('handler_settings', [
+        'auto_create' => FALSE,
+      ])
       ->setRequired(TRUE)
       ->setCardinality(-1)
       ->setTranslatable(FALSE)
