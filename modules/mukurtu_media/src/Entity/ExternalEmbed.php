@@ -22,7 +22,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
     $definitions = self::getProtocolFieldDefinitions();
     $definitions['field_media_external_embed'] = BaseFieldDefinition::create('text_long')
       ->setLabel('External Embed')
-      ->setDescription('Select Source in the editor to add your embed code.')
+      ->setDescription('')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
@@ -138,9 +138,9 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
   public function preSave(EntityStorageInterface $storage)
   {
     // Set the 'thumbnail' field to the user-uploaded thumbnail.
-    $defaultThumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
-    if ($defaultThumb) {
-      $this->thumbnail->target_id = $defaultThumb;
+    $thumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if ($thumb) {
+      $this->thumbnail->target_id = $thumb;
     }
     parent::preSave($storage);
   }

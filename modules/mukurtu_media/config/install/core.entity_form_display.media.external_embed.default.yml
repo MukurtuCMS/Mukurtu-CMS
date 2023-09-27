@@ -6,9 +6,9 @@ dependencies:
     - media.type.external_embed
   module:
     - image
+    - mukurtu_media
     - mukurtu_protocol
     - path
-    - text
 id: media.external_embed.default
 targetEntityType: media
 bundle: external_embed
@@ -45,12 +45,10 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_media_external_embed:
-    type: text_textarea
+    type: external_embed_widget
     weight: 1
     region: content
-    settings:
-      rows: 5
-      placeholder: ''
+    settings: {  }
     third_party_settings: {  }
   field_people:
     type: entity_reference_autocomplete
