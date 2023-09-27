@@ -36,8 +36,8 @@ third_party_settings:
         - field_summary
         - field_description
         - field_collection_image
-        - field_credit
         - field_keywords
+        - field_source
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -152,7 +152,7 @@ content:
     third_party_settings: {  }
   field_keywords:
     type: entity_reference_autocomplete
-    weight: -1
+    weight: -2
     region: content
     settings:
       match_operator: CONTAINS
@@ -219,6 +219,14 @@ content:
       field_widget_display_settings:
         view_mode: content_browser
       selection_mode: selection_append
+    third_party_settings: {  }
+  field_source:
+    type: string_textfield
+    weight: -1
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   field_summary:
     type: string_textfield

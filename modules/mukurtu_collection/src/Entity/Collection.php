@@ -90,8 +90,8 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_credit'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Credit'))
+    $definitions['field_source'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Source'))
       ->setDescription(t(''))
       ->setSettings([
         'max_length' => 255,

@@ -51,7 +51,7 @@ process:
           - mukurtu_cms_v3_media_image
         source: sid
 
-  field_credit: field_collection_credit
+  field_source: field_collection_credit
 
   field_keywords:
     plugin: migration_lookup
