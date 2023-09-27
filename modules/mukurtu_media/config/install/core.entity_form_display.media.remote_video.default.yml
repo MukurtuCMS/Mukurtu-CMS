@@ -33,7 +33,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_keywords:
+  field_media_tags:
     type: entity_reference_autocomplete
     weight: 4
     region: content

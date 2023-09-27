@@ -22,7 +22,7 @@ content:
 hidden:
   created: true
   field_communities: true
-  field_keywords: true
+  field_media_tags: true
   field_media_image: true
   field_protocol_control: true
   name: true

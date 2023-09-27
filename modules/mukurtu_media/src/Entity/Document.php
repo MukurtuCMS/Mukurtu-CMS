@@ -92,15 +92,15 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Keywords'))
+    $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Media Tags'))
       ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
         'handler_settings' => [
           'target_bundles' => [
-            'keywords' => 'keywords'
+            'media_tag' => 'media_tag'
           ],
           'sort' => [
             'field' => 'name',
