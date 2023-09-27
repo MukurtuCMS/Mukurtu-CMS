@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Media Tag'
+vid: media_tag
+description: 'Media tag vocabulary'
+weight: 0

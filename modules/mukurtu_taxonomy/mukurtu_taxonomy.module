@@ -50,6 +50,7 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
       'keywords',
       'language',
       'location',
+      'media_tag',
       'people',
       'publisher',
       'subject',
