@@ -48,7 +48,7 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |Part of Speech|Word Type|`mukurtu_cms_v3_terms_word_type`|
 |People|People|`mukurtu_cms_v3_terms_people`|
 |Publisher|Publisher|`mukurtu_cms_v3_terms_publisher`|
-|Scald tags|???||
+|Scald tags|Media Tags|`mukurtu_cms_v3_terms_media_tags`|
 |Subject|Subject|`mukurtu_cms_v3_terms_subject`|
 |Tags|Keywords|`mukurtu_cms_v3_terms_keywords`|
 |Teacher|N/A||

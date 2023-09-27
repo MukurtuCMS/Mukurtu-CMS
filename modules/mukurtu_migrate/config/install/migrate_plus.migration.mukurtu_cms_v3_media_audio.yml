@@ -17,7 +17,7 @@ migration_dependencies:
     - mukurtu_cms_v3_cultural_protocols
     - mukurtu_cms_v3_terms_contributor
     - mukurtu_cms_v3_terms_people
-    - mukurtu_cms_v3_terms_keywords
+    - mukurtu_cms_v3_terms_media_tags
     - mukurtu_cms_v3_terms_authors
     - mukurtu_cms_v3_file_private
     - mukurtu_cms_v3_file
@@ -90,3 +90,8 @@ process:
     -
       plugin: default_value
       default_value: 'Missing Alt Text'
+
+  field_media_tags:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_media_tags
+    source: scald_tags
