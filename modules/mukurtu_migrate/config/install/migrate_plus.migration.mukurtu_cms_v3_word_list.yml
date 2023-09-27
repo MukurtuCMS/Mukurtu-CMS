@@ -30,10 +30,12 @@ process:
     migration: mukurtu_cms_v3_users
     source: uid
   langcode: language
+  changed: changed
+  created: created
   status: status
   title: title
   # TODO: field_collection_summary
-  # TODO: field_collection_credit?
+  field_source: field_collection_credit/0/value
   'field_description/value':
     -
       plugin: get

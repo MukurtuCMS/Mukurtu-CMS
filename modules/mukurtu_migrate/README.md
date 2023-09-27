@@ -8,6 +8,8 @@
   - Cultural Protocol Memberships
 - Users
 - Content
+  - Article
+  - Basic Page
   - Collection
   - Dictionary Word
   - Digital Heritage
@@ -264,5 +266,21 @@ The following table shows the fields that will be migrated from version 3 for Pe
 |field_related_content|
 |field_related_people|
 |field_tags|
+|status|
+|title|
+
+### Word List Field Migration
+The following table shows the fields that will be migrated from version 3 for Word List.
+
+|Source Field|
+|-|
+|changed|
+|created|
+|field_collection_credit|
+|field_collection_image|
+|field_description|
+|field_related_content|
+|field_tags|
+|field_words|
 |status|
 |title|

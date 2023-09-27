@@ -34,6 +34,20 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_source'] = BaseFieldDefinition::create('string')
+      ->setLabel('Source')
+      ->setDescription(t(''))
+      ->setSettings([
+        'max_length' => 255,
+      ])
+      ->setDefaultValue('')
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
       ->setDescription(t(''))
