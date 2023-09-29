@@ -7,6 +7,7 @@ mukurtu_migrate.migrate:
     _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkAccess'
   options:
     _admin_route: TRUE
+    no_cache: TRUE
 
 mukurtu_migrate.credentials:
   path: '/dashboard/migrate/credentials'
@@ -22,6 +23,16 @@ mukurtu_migrate.review:
   path: '/dashboard/migrate/review'
   defaults:
     _form: '\Drupal\mukurtu_migrate\Form\ReviewForm'
+    _title: 'Migrate from Mukurtu CMS version 3'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkAccess'
+  options:
+    _admin_route: TRUE
+
+mukurtu_migrate.results:
+  path: '/dashboard/migrate/results'
+  defaults:
+    _form: '\Drupal\mukurtu_migrate\Form\ResultsForm'
     _title: 'Migrate from Mukurtu CMS version 3'
   requirements:
     _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkAccess'
