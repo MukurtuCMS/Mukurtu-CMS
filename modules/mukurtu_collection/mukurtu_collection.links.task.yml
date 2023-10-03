@@ -1,20 +1,3 @@
-#mukurtu_collection.multipage_add_page:
-  #route_name: mukurtu_collection.add_page
-  #base_route: entity.node.canonical
-  #title: 'Add Page'
-  #weight: 40
-#mukurtu_collection.multipage_edit_index:
-  #route_name: mukurtu_collection.edit_index
-  #base_route: entity.node.canonical
-  #title: 'Edit Multipage Index'
-  #weight: 43
-
-#mukurtu_collection.multipage_create:
-#  route_name: mukurtu_collection.create_multipage
-#  base_route: entity.node.canonical
-#  title: 'Create Multipage Collection'
-#  weight: 46
-
 mukurtu_collection.add_item_to_collection:
   route_name: mukurtu_collection.add_item_to_collection
   base_route: entity.node.canonical

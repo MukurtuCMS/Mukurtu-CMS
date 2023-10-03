@@ -7,7 +7,6 @@
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -15,11 +14,7 @@ use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Routing\RouteMatchInterface;
 
-define("MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION", "field_sequence_collection");
-define("MUKURTU_COLLECTION_LABEL_SEQUENCE_COLLECTION", "Sequence Collection");
-define("MUKURTU_COLLECTION_TYPE_MULTIPAGE", "multipage");
 define("MUKURTU_COLLECTION_FIELD_NAME_ITEMS", "field_items_in_collection");
-define("MUKURTU_COLLECTION_MULTIPAGE_NAVIGATION_VIEW_MODE", "full");
 
 
 /**
@@ -40,7 +35,6 @@ function mukurtu_collection_theme($existing, $type, $theme, $path) {
     ],
   ];
 }
-
 
 /**
  * Implements hook_system_breadcrumb_alter().
@@ -130,36 +124,6 @@ function mukurtu_collection_entity_delete(EntityInterface $entity) {
 }
 
 /**
- * Implements hook_ENTITY_TYPE_view().
- */
-function mukurtu_collection_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-  // Don't display the real title field for multipage view modes.
-  if (substr($view_mode, 0, 10) === 'multipage_') {
-    if (isset($build['title'])) {
-      unset($build['title']);
-    }
-  }
-}
-
-/**
- * Implements hook_entity_view_mode_alter().
- */
-function mukurtu_collection_entity_view_mode_alter(&$view_mode, EntityInterface $entity, $context) {
-  if ($entity->getEntityTypeId() != 'node') {
-    return;
-  }
-
-  // Any full view content that is a member of a multipage collection.
-  if ($view_mode == 'full' && $entity->hasField(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)) {
-    $collections = $entity->get(MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION)->referencedEntities();
-    $collection = $collections[0] ?? NULL;
-    if ($collection) {
-      $view_mode = 'multipage_full';
-    }
-  }
-}
-
-/**
  * Implements hook_entity_bundle_info_alter().
  */
 function mukurtu_collection_entity_bundle_info_alter(array &$bundles): void {
@@ -182,11 +146,6 @@ function mukurtu_collection_entity_field_storage_info(EntityTypeInterface $entit
  * Implements hook_entity_bundle_field_info_alter().
  */
 function mukurtu_collection_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
-  // Attach our contraint to the sequence collection field.
-  if (isset($fields[MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION])) {
-    $fields[MUKURTU_COLLECTION_FIELD_NAME_SEQUENCE_COLLECTION]->addConstraint('ValidSequenceCollection', []);
-  }
-
   // Constraint for items in collection.
   if (isset($fields[MUKURTU_COLLECTION_FIELD_NAME_ITEMS])) {
     $fields[MUKURTU_COLLECTION_FIELD_NAME_ITEMS]->addConstraint('ValidCollectionItem', []);
@@ -246,45 +205,6 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
 
       // Attach our custom submit handler that will run after the default handler.
       $form['actions']['submit']['#submit'][] = $args[0]['mukurtu_collection']['submit'][0];
-    }
-  }
-}
-
-/**
- * Submit handler for node create form to add node to collection after save.
- */
-function mukurtu_collection_multipage_add_page_form_submit(array &$form, FormStateInterface $form_state) {
-  // Get the collection ID, this is set in mukurtu_collection_form_alter.
-  $collection_id = $form_state->getValue('mukurtu_collection_target');
-  if ($collection_id) {
-    $collection = \Drupal::entityTypeManager()->getStorage('node')->load($collection_id);
-    if ($collection && $collection->access('update')) {
-      // Add the node to the collection's items field.
-      $items = mukurtu_core_flatten_entity_ref_field($collection, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
-      $items[] = $form_state->getformObject()->getEntity()->id();
-      $collection->set(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, $items);
-      $collection->save();
-    }
-  }
-}
-
-/**
- * Submit handler for node create form for multipage item creation.
- */
-function mukurtu_collection_multipage_create_multipage_form_submit(array &$form, FormStateInterface $form_state) {
-  // The nid of the node the user is converting into a brand new MPI.
-  $nid = $form_state->getValue('mukurtu_collection_target');
-
-  if ($nid) {
-    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
-    if ($node && $node->access('update')) {
-      // The ID of the new MPI collection.
-      $new_multipage_collection_id = $form_state->getformObject()->getEntity()->id();
-
-      // Have the original item (first page) inherit protocols from the collection.
-      // The protocols of the collection were initially copied from the node during creation.
-      $node->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $new_multipage_collection_id);
-      $node->save();
     }
   }
 }
