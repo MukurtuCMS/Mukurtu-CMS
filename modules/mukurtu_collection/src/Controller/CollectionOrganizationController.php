@@ -71,17 +71,29 @@ class CollectionOrganizationController extends ControllerBase {
         ->condition('title', '%' . $input . '%', 'LIKE')
         ->condition('type', 'collection')
         ->accessCheck(TRUE)
-        ->range(0, 10);
+        ->range(0, 20);
       $nids = $query->execute();
 
       if (!empty($nids)) {
-        $nodes = \Drupal\node\Entity\Node::loadMultiple($nids);
+        $nodes = $this->entityTypeManager()->getStorage('node')->loadMultiple($nids);
+
+        // This is slightly silly. Because we're doing some individual entity
+        // checks outside of the entityQuery, we're requesting 20 results from
+        // the query and returning 10. The hope being at least some of the query
+        // results make it through the individual checks. We don't want an empty
+        // autocomplete widget. The critical field, field_parent_collection, is
+        // a computed field so we can't use entityQuery on it here.
+        $count = 0;
         foreach ($nodes as $node) {
-          if ($node->access('update')) {
+          if ($node->access('update') && is_null($node->getParentCollectionId())) {
             $results[] = [
               'value' => $node->getTitle() . " ({$node->id()})",
               'label' => $node->getTitle(),
             ];
+            $count += 1;
+            if ($count >= 10) {
+              break;
+            }
           }
         }
       }
