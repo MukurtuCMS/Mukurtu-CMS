@@ -1,0 +1,39 @@
+id: mukurtu_cms_v3_language_communities
+label: Language Communities
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: language_community
+
+destination:
+  plugin: entity:community
+  default_bundle: community
+
+migration_dependencies:
+  optional:
+    - d7_field_instance
+
+process:
+  id: nid
+  langcode: language
+  name: title
+  status: status
+  field_access_mode:
+    -
+      plugin: static_map
+      #source: group_access
+      map:
+        0: open
+        2: strict
+      default_value: open
+  mukurtu_migrate:
+    plugin: default_value
+    default_value: true
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
