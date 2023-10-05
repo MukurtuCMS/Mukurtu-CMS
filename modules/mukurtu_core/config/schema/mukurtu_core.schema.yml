@@ -568,3 +568,7 @@ block.settings.mukurtu_core_example:
     foo:
       type: string
       label: Foo
+
+media.source.external_embed:
+  type: media.source.field_aware
+  label: '"External Embed" media source configuration'

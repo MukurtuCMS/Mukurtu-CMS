@@ -32,8 +32,6 @@ third_party_settings:
         open: false
         description: ''
         required_fields: true
-        effect: none
-        weight: 0
 id: paragraph.dictionary_word_entry.default
 targetEntityType: paragraph
 bundle: dictionary_word_entry

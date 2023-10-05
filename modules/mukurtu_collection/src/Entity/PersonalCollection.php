@@ -307,18 +307,14 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setDisplayConfigurable('view', TRUE)
       ->setRequired(TRUE);
 
-    $fields['field_description'] = BaseFieldDefinition::create('text_with_summary')
-      ->setLabel(t('Description'))
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'text_default',
-        'weight' => 0,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'text_textarea_with_summary',
-        'weight' => 0,
-        'rows' => 6,
-      ])
+
+    $fields['field_description'] = BaseFieldDefinition::create('text_long')
+      ->setLabel('Description')
+      ->setDescription(t(''))
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 

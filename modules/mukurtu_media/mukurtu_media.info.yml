@@ -5,6 +5,7 @@ core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
 dependencies:
+  - drupal:media
   - file
   - path
   - mukurtu_core

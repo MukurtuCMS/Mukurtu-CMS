@@ -65,16 +65,13 @@ bundle: personal_collection
 mode: default
 content:
   field_description:
-    type: text_textarea_with_summary
+    type: text_textarea
     weight: 5
     region: content
     settings:
       rows: 9
-      summary_rows: 3
       placeholder: ''
-      show_summary: false
     third_party_settings: {  }
-    rows: 6
   field_items_in_collection:
     type: entity_browser_entity_reference
     weight: 2

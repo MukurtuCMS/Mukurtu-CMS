@@ -18,7 +18,7 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = [];
+  protected static $modules = ['mukurtu_media'];
 
   /**
    * {@inheritDoc}
@@ -40,14 +40,14 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
   /**
    * Open protocol for Community 1.
    *
-   * @var \Drupal\mukurtu_protocol\Entity\ProtocolInterfacae
+   * @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface
    */
   protected $community1_open;
 
   /**
    * Strict protocol for Community 1.
    *
-   * @var \Drupal\mukurtu_protocol\Entity\ProtocolInterfacae
+   * @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface
    */
   protected $community1_strict;
 
@@ -61,14 +61,14 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
   /**
    * Open protocol for Community 2.
    *
-   * @var \Drupal\mukurtu_protocol\Entity\ProtocolInterfacae
+   * @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface
    */
   protected $community2_open;
 
   /**
    * Strict protocol for Community 2.
    *
-   * @var \Drupal\mukurtu_protocol\Entity\ProtocolInterfacae
+   * @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface
    */
   protected $community2_strict;
 

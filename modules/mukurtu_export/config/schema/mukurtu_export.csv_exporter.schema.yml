@@ -22,15 +22,12 @@ mukurtu_export.csv_exporter.*:
       label: 'Include files in export package'
     entity_fields_export_list:
       type: sequence
-      label: 'Entity fields to export'
+      label: 'Entity type and bundle (e.g., node__article)'
       sequence:
-        field_mapping:
           type: sequence
-          label: 'Fieldname to label mapping'
+          label: 'Field name to export label mapping'
           sequence:
-            export_label:
-              type: string
-              label: 'Label'
+            type: string
     separator:
       type: string
       label: 'Field delimiter character'
@@ -52,4 +49,15 @@ mukurtu_export.csv_exporter.*:
     field_image:
       type: string
       label: 'Image field export handling'
-
+    field_id:
+      type: string
+    entity_reference_node:
+      type: string
+    entity_reference_media:
+      type: string
+    entity_reference_taxonomy_term:
+      type: string
+    entity_reference_user:
+      type: string
+    entity_reference_paragraph:
+      type: string

@@ -208,7 +208,6 @@ content:
           zoom: 16
           popup: false
           options: ''
-      weight: null
     third_party_settings: {  }
     weight: 40
     region: content

@@ -3,7 +3,7 @@ status: true
 dependencies: {  }
 id: external_embed
 label: External Embed
-description: ''
+description: 'An embed code from a remote website.'
 source: 'external_embed'
 queue_thumbnail_downloads: false
 new_revision: true
