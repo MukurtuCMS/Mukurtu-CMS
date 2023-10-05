@@ -8,8 +8,17 @@ id: message.mukurtu_new_user_registration.default
 targetEntityType: message
 bundle: mukurtu_new_user_registration
 mode: default
-content: {  }
+content:
+  field_user:
+    type: entity_reference_autocomplete
+    weight: 0
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
 hidden:
   created: true
-  field_user: true
   uid: true
