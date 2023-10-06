@@ -24,7 +24,6 @@ process:
   field_access_mode:
     -
       plugin: static_map
-      #source: group_access
       map:
         0: open
         2: strict

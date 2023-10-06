@@ -17,6 +17,7 @@ migration_dependencies:
     - mukurtu_cms_v3_paragraphs_dictionary_word_entry
     - mukurtu_cms_v3_communities
     - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_language_community_protocols
     - mukurtu_cms_v3_users
     - mukurtu_cms_v3_terms_keywords
     - mukurtu_cms_v3_terms_language
@@ -35,16 +36,19 @@ process:
     -
       plugin: get
       source: field_item_privacy_setting/0/value
+  temp_cultural_protocols:
+    plugin: mukurtu_migrate_lookup_og_group
+    source: nid
+  temp_language_community_protocols:
+    plugin: mukurtu_migrate_lookup_og_group
+    source: nid
+    group_field_name: field_language_community
   'field_cultural_protocols/protocols':
     -
-      plugin: mukurtu_migrate_lookup_og_group
-      source: nid
-    -
-      plugin: sub_process
-      process:
-        plugin: migration_lookup
-        migration: mukurtu_cms_v3_cultural_protocols
-        source: target_id
+      plugin: merge
+      source:
+        - '@temp_cultural_protocols'
+        - '@temp_language_community_protocols'
     -
       plugin: mukurtu_migrate_set_protocols
   field_dictionary_word_language:
