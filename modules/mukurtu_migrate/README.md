@@ -4,6 +4,10 @@
 - [Taxonomy Vocabularies](#taxonomy-vocabulary-mapping)
 - Communities
   - Community Memberships
+- [Language Communities](#language-communities)
+  - [Language Community Memberships](#language-community-membership-mapping)
+    - Language Community Community Memberships
+    - Language Community Protocol Memberships
 - Cultural Protocols
   - Cultural Protocol Memberships
 - Users
@@ -56,12 +60,30 @@ In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no lon
 |Unit Length|N/A||
 |Week of|N/A||
 
+### Language Communities
+In Mukurtu CMS version 4, language communities no longer exist. During migration, version 3 language communities are transformed into version 4 communities, migrating only the source field 'title'. A new, open protocol of the same title is created and automatically assigned to the new community.
+
+### Language Community Membership Mapping
+Below are the mappings for language community memberships:
+
+Language Community Community Memberships (ID: `mukurtu_cms_v3_language_community_community_memberships`)
+|Version 3 Role Name|Version 4 Role Name|
+|-|-|
+|administrator member|community-community-community_manager|
+
+Language Community Protocol Memberships (ID: `mukurtu_cms_v3_language_community_protocol_memberships`)
+|Version 3 Role Name|Version 4 Role Name|
+|-|-|
+|language contributor|protocol-protocol-language_contributor|
+|language steward|protocol-protocol-language_steward|
 
 ### Entity/Bundle Mapping
 |Name|Version 3 Entity Type ID|Version 3 Bundle|Version 4 Entity Type ID|Version 4 Bundle|Migration ID|
 |-|-|-|-|-|-|
 |Community|node|community|community|community|`mukurtu_cms_v3_communities`|
+|Language Community|node|language_community|community|community|`mukurtu_cms_v3_language_communities`|
 |Cultural Protocol|node|cultural_protocol_group|protocol|protocol|`mukurtu_cms_v3_cultural_protocols`|
+|Language Community Protocol|node|language_community|protocol|protocol|`mukurtu_cms_v3_language_community_protocols`|
 |Article|node|article|node|article|`mukurtu_cms_v3_article`|
 |Basic Page|node|page|node|page|`mukurtu_cms_v3_page`|
 |Collection|node|collection|node|collection|`mukurtu_cms_v3_collection`|
@@ -114,31 +136,52 @@ The following table shows the formatted text format mapping between version 3 an
 |Public|`mukurtu_cms_v3_file`|
 |Private|`mukurtu_cms_v3_file_private`|
 
-### Multi-page Items
-Multi-pages Items are a bespoke entity type in version 4. The title of page 1 from version 3 will be used as the title in version 4.
+### Article Field Migration
+The following table shows the fields that will be migrated from version 3 for Articles.
 
-Migration ID: `mukurtu_cms_v3_multipage_item`
-
-|Source Fields Migrated|
+|Source Field|
 |-|
+|body|
 |changed|
 |created|
-|field_pages|
+|field_category|
+|field_image|
+|field_tags|
 |status|
 |title|
 
-### Taxonomy Term - Base Field Migration
-The following table shows the base fields/sub-fields that will be migrated for all taxonomy terms in Mukurtu CMS version 3.
-|Source Fields Migrated|
+### Basic Page Field Migration
+The following table shows the fields that will be migrated from version 3 for Basic Pages.
+
+|Source Field|
 |-|
-|tid|
-|language|
-|weight|
-|parent|
-|timestamp|
-|name|
-|description/value|
-|[description/format](#formatted-text-formats)|
+|body|
+|changed|
+|created|
+|field_media_asset|
+|status|
+|title|
+
+### Collection Field Migration
+The following table shows the fields that will be migrated from version 3 for Collections.
+
+|Source Field|
+|-|
+|changed|
+|created|
+|field_collection_credit|
+|field_collection_image|
+|field_collections_child_coll|
+|field_collections_parent_coll|
+|field_description|
+|field_digital_heritage_items|
+|field_item_privacy_setting|
+|field_related_content|
+|field_summary|
+|field_tags|
+|og_group_ref|
+|status|
+|title|
 
 ### Digital Heritage Field Migration
 The following table shows the fields that will be migrated from version 3 for Digital Heritage.
@@ -182,24 +225,30 @@ The following table shows the fields that will be migrated from version 3 for Di
 |field_personal_collections|
 |field_community_record_parent|
 
-### Collection Field Migration
-The following table shows the fields that will be migrated from version 3 for Collections.
+### Dictionary Word Field Migration
+The following table shows the fields that will be migrated from version 3 for Dictionary Word.
+
+> Note: The automatically-generated open protocol for language communities will be added onto the cultural protocols of the dictionary word during migration.
 
 |Source Field|
 |-|
-|changed|
-|created|
-|field_collection_credit|
-|field_collection_image|
-|field_collections_child_coll|
-|field_collections_parent_coll|
-|field_description|
-|field_digital_heritage_items|
+|field_dictionary_word_language|
 |field_item_privacy_setting|
 |field_related_content|
-|field_summary|
 |field_tags|
-|og_group_ref|
+|field_word_entry|
+|title|
+
+### Multi-page Items
+Multi-pages Items are a bespoke entity type in version 4. The title of page 1 from version 3 will be used as the title in version 4.
+
+Migration ID: `mukurtu_cms_v3_multipage_item`
+
+|Source Fields Migrated|
+|-|
+|changed|
+|created|
+|field_pages|
 |status|
 |title|
 
@@ -225,32 +274,6 @@ The following table shows the fields that will be migrated from version 3 for Pe
 |status|
 |title|
 
-### Article Field Migration
-The following table shows the fields that will be migrated from version 3 for Articles.
-
-|Source Field|
-|-|
-|body|
-|changed|
-|created|
-|field_category|
-|field_image|
-|field_tags|
-|status|
-|title|
-
-### Basic Page Field Migration
-The following table shows the fields that will be migrated from version 3 for Basic Pages.
-
-|Source Field|
-|-|
-|body|
-|changed|
-|created|
-|field_media_asset|
-|status|
-|title|
-
 ### Person Field Migration
 The following table shows the fields that will be migrated from version 3 for Person.
 
@@ -269,8 +292,25 @@ The following table shows the fields that will be migrated from version 3 for Pe
 |status|
 |title|
 
+### Taxonomy Term - Base Field Migration
+The following table shows the base fields/sub-fields that will be migrated for all taxonomy terms in Mukurtu CMS version 3.
+|Source Fields Migrated|
+|-|
+|tid|
+|language|
+|weight|
+|parent|
+|timestamp|
+|name|
+|description/value|
+|[description/format](#formatted-text-formats)|
+
+
+
 ### Word List Field Migration
 The following table shows the fields that will be migrated from version 3 for Word List.
+
+> Note: The automatically-generated open protocol for language communities will be added onto the cultural protocols of the word list during migration.
 
 |Source Field|
 |-|

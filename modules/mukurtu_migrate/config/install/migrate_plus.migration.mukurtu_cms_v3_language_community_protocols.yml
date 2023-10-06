@@ -1,0 +1,47 @@
+id: mukurtu_cms_v3_language_community_protocols
+label: Language Community Protocols
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: d7_node
+  node_type: language_community
+
+destination:
+  plugin: entity:protocol
+  default_bundle: protocol
+
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_language_communities
+  optional:
+    - d7_field_instance
+
+process:
+  id: nid
+  langcode: language
+  name: title
+  field_description: body
+  field_communities:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_language_communities
+    source: nid
+  field_access_mode:
+    -
+      plugin: static_map
+      source: group_access
+      map:
+        0: open
+        2: strict
+      default_value: open
+  status: status
+  mukurtu_migrate:
+    plugin: default_value
+    default_value: true
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
