@@ -20,9 +20,10 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
   {
     $definitions = self::getProtocolFieldDefinitions();
+
     $definitions['field_media_external_embed'] = BaseFieldDefinition::create('text_long')
       ->setLabel('External Embed')
-      ->setDescription('')
+      ->setDescription(t('Paste your embed code here. Note that externally hosted resources cannot be protected by cultural protocols.'))
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
