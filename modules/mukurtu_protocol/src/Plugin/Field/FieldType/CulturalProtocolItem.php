@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_protocol\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\mukurtu_protocol\CulturalProtocols;
 
@@ -66,6 +67,13 @@ class CulturalProtocolItem extends FieldItemBase {
     return $properties;
   }
 
+    /**
+   * {@inheritdoc}
+   */
+  public static function mainPropertyName() {
+    return 'protocols';
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -79,6 +87,7 @@ class CulturalProtocolItem extends FieldItemBase {
 
   public static function formatProtocols($value) {
     if (is_array($value)) {
+      sort($value, SORT_NUMERIC);
       return implode(',', array_map(fn($p) => "|$p|", array_map('trim', $value)));
     }
     return $value;
@@ -114,12 +123,46 @@ class CulturalProtocolItem extends FieldItemBase {
     parent::setValue($values, $notify);
   }
 
+  /**
+   * Deserialize the protocols property into an array of protocol IDs.
+   *
+   * @return array
+   */
+  public function getProtocolIds() {
+    if ($protocolIds = str_replace('|', '', explode(',', $this->protocols))) {
+      return array_map(fn ($p) => (int) $p, $protocolIds);
+    }
+
+    return [];
+  }
 
   /**
    * {@inheritdoc}
    */
   public function isEmpty() {
     return empty($this->protocols) || empty($this->sharing_setting);
+  }
+
+  /**
+   * Get the settable protocol ID options.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *  The account to be used to fetch protocols. Note that unlike
+   *  OptionsProviderInterface, providing NULL will use the current user.
+   *
+   * @return array
+   *  An array of protocol IDs.
+   */
+  public function getSettableProtocolIds(AccountInterface $account = NULL) {
+    $protocolIds = CulturalProtocols::getProtocolsByUserPermission(['apply protocol'], $account);
+    return $protocolIds;
+  }
+
+  /**
+   * Return the options array for the sharing settings.
+   */
+  public function getSettableSharingOptions(AccountInterface $account = NULL) {
+    return CulturalProtocols::getItemSharingSettingOptions();
   }
 
 }

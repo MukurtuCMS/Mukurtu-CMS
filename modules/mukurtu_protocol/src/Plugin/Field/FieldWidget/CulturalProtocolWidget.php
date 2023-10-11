@@ -10,8 +10,8 @@ use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
+use Drupal\mukurtu_protocol\Plugin\Field\FieldType\CulturalProtocolItem;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Mukurtu Cultural Protocol widget.
@@ -59,19 +59,19 @@ class CulturalProtocolWidget extends WidgetBase {
   }
 
   /**
-   * Fetch community/protocol options.
+   * Build the community/protocol options.
    *
    * @return mixed[]
    *   Array of all community/protocol options, indexed by ID.
    */
-  protected function getOptions(): array {
+  protected function buildOptions($protocol_ids): array {
     $options = [];
-
-    // Get the protocol options for the user.
-    $protocolIds = CulturalProtocols::getProtocolsByUserPermission(['apply protocol']);
+    $protocols = [];
 
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface[] $protocols */
-    $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocolIds);
+    if (!empty($protocol_ids)) {
+      $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocol_ids);
+    }
 
     $multipleCommunities['#title'] = $this->t('Multiple Communities');
     $multipleCommunities['#id'] = 'protocols-with-multiple-communities';
@@ -127,15 +127,12 @@ class CulturalProtocolWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $protocols = $items[$delta]->protocols ?? "";
-    $selectedProtocols = str_replace('|', '', explode(',', $protocols));
     $sharing_setting = $items[$delta]->sharing_setting ?? NULL;
-
-    // Get sharing setting options.
-    $sharingOptions = CulturalProtocols::getItemSharingSettingOptions();
+    $current_protocol_ids = $items[$delta]->getProtocolIds();
+    $used_protocol_ids = [];
 
     // Build the community/protocol options.
-    $protocolsWithCommunityOptions = $this->getOptions();
+    $protocolsWithCommunityOptions = $this->buildOptions($items[$delta]->getSettableProtocolIds());
     $communities = [
       '#type' => 'details',
       '#title' => $this->t("Select cultural protocols to apply to the item."),
@@ -164,11 +161,33 @@ class CulturalProtocolWidget extends WidgetBase {
           '#title' => $protocolOption['#title'],
           '#description' => $description,
           '#return_value' => $id,
-          '#default_value' => in_array($id, $selectedProtocols),
+          '#default_value' => in_array($id, $current_protocol_ids),
         ];
+
+        // Track the protocols we've rendered for the user, so that we can
+        // add any unused protocols (inaccessible references) as hidden values.
+        $used_protocol_ids[] = $id;
       }
 
       $c_delta++;
+    }
+
+    // Add any missing protocol IDs as hidden values. Currently we're not
+    // letting the user unset these. This may change. If we didn't add these
+    // here, they would be lost on submit.
+    $missing_protocol_ids = array_diff($current_protocol_ids, $used_protocol_ids);
+    if (!empty($missing_protocol_ids)) {
+      foreach ($missing_protocol_ids as $missing_protocol_id) {
+        $communities[0]['protocols'][$missing_protocol_id] = [
+          '#type' => 'hidden',
+          '#value' => $missing_protocol_id,
+        ];
+      }
+
+      $communities[0]['inaccessible_cultural_protocols'] = [
+        '#type' => 'processed_text',
+        '#text' => $this->t("There are some cultural protocols in use on this item that you do not have access to view."),
+      ];
     }
 
     $element+= [
@@ -178,7 +197,7 @@ class CulturalProtocolWidget extends WidgetBase {
       'sharing_setting' => [
         '#type' => 'radios',
         '#title' => $this->t('Sharing Setting'),
-        '#options' => $sharingOptions,
+        '#options' => $items[$delta]->getSettableSharingOptions(),
         '#default_value' => $sharing_setting ?? 'all',
       ],
       'protocol_selection' => $communities,
@@ -205,7 +224,7 @@ class CulturalProtocolWidget extends WidgetBase {
         $protocols = array_merge(array_filter($community['protocols']), $protocols);
       }
       $massagedValues[$delta]['sharing_setting'] = $subvalue['sharing_setting'];
-      $massagedValues[$delta]['protocols'] = implode(',', array_map(fn($p) => "|$p|", array_map('trim', $protocols)));
+      $massagedValues[$delta]['protocols'] = CulturalProtocolItem::formatProtocols($protocols);
     }
 
     return $massagedValues;
