@@ -150,7 +150,7 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   /**
    * Get the communities this protocol belongs to.
    *
-   * @return \Drupal\mukurtu_community\Entity\CommunityInterface[]
+   * @return \Drupal\mukurtu_protocol\Entity\CommunityInterface[]
    *   The community entities.
    */
   public function getCommunities();
@@ -158,7 +158,7 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   /**
    * Set the communities this protocol belongs to.
    *
-   * @var \Drupal\mukurtu_community\Entity\CommunityInterface[] $communities
+   * @var \Drupal\mukurtu_protocol\Entity\CommunityInterface[] $communities
    *   The community entities.
    *
    * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface
