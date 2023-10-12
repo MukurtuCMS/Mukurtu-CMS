@@ -186,7 +186,8 @@ class CulturalProtocolWidget extends WidgetBase {
 
       $communities[0]['inaccessible_cultural_protocols'] = [
         '#type' => 'processed_text',
-        '#text' => $this->t("There are some cultural protocols in use on this item that you do not have access to view."),
+        '#format' => 'full_html',
+        '#text' => $this->buildInaccessbileProtocolsMessage($missing_protocol_ids),
       ];
     }
 
@@ -207,6 +208,80 @@ class CulturalProtocolWidget extends WidgetBase {
     ];
 
     return ['value' => $element];
+  }
+
+  /**
+   * Build the inaccessible protocol message.
+   *
+   * @param array $missing_protocol_ids
+   *  The array of protocol IDs the user does not have access to.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *  The translated markup message.
+   */
+  protected function buildInaccessbileProtocolsMessage(array $missing_protocol_ids) {
+    if (empty($missing_protocol_ids)) {
+      return NULL;
+    }
+
+    // Fetch the communities for all the protocols the user is not able to see.
+    $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($missing_protocol_ids);
+    $user_can_view_all_communities = TRUE;
+    $visible_missing_protocol_names = [];
+    $missing_protocol_communities = [];
+
+    foreach ($protocols as $protocol) {
+      if ($protocol->access('view')) {
+        $visible_missing_protocol_names[$protocol->id()] = $protocol->getName();
+        continue;
+      }
+
+      // Check if the user can see the community. If they can, we want to
+      // show them the name so they have some idea who to talk to if they need
+      // to get these inaccessible protocols changed.
+      $communities = $protocol->getCommunities();
+      foreach ($communities as $community) {
+        if ($community->access('view')) {
+          $missing_protocol_communities[$community->id()] = $community->getName();
+        } else {
+          // Track if there are any communities the user cannot see. We want to
+          // change the message to the user if this is the case.
+          $user_can_view_all_communities = FALSE;
+        }
+      }
+    }
+
+    if (!empty($visible_missing_protocol_names) && empty($missing_protocol_communities)) {
+      return $this->t('There are cultural protocols in use on this item you do not have access to alter: %protocols.', [
+        '%protocols' => implode(', ', $visible_missing_protocol_names),
+      ]);
+    }
+
+    if (!empty($visible_missing_protocol_names) && !empty($missing_protocol_communities)) {
+      if ($user_can_view_all_communities) {
+        return $this->t('There are cultural protocols in use on this item you do not have access to alter: %protocols. There are cultural protocols in use on this item you do not have access to view, from the following communities: %communities.', [
+          '%protocols' => implode(', ', $visible_missing_protocol_names),
+          '%communities' => implode(', ', $missing_protocol_communities),
+        ]);
+      }
+      return $this->t('There are cultural protocols in use on this item you do not have access to alter: %protocols. There are cultural protocols in use on this item you do not have access to view, including some from communities you cannot view and others from the following communities: %communities.', [
+        '%protocols' => implode(', ', $visible_missing_protocol_names),
+        '%communities' => implode(', ', $missing_protocol_communities),
+      ]);
+    }
+
+    // $visible_missing_protocol_names is empty at this point.
+    if (!empty($missing_protocol_communities)) {
+      if ($user_can_view_all_communities) {
+        return $this->t("There are cultural protocols in use on this item you do not have access to view, from the following communities: %communities", [
+          '%communities' => implode(', ', $missing_protocol_communities),
+        ]);
+      }
+      return $this->t("There are cultural protocols in use on this item you do not have access to view, including some from communities you cannot view and others from the following communities: %communities.", [
+        '%communities' => implode(', ', $missing_protocol_communities),
+      ]);
+    }
+    return $this->t("There are cultural protocols in use on this item that you do not have access to view.");
   }
 
   /**
