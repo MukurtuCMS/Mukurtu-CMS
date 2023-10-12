@@ -172,10 +172,22 @@ class CulturalProtocolWidget extends WidgetBase {
       $c_delta++;
     }
 
+    $missing_protocol_ids = array_diff($current_protocol_ids, $used_protocol_ids);
+
+    // If the user can only apply a single currently enabled protocol, show
+    // them a message warning them that if they remove it, they won't be able
+    // to edit the item any more.
+    if (count($missing_protocol_ids) > 0 && (count($current_protocol_ids) - count($missing_protocol_ids) == 1)) {
+      $warning = $this->t('Warning: If you remove the single remaining cultural protocol you have permission to apply, you will no longer be able to edit this item.');
+      $communities['single_applicable_protocol_warning'] = [
+        '#type' => 'markup',
+        '#markup' => "<div class=\"messages messages--warning\">$warning</div>",
+      ];
+    }
+
     // Add any missing protocol IDs as hidden values. Currently we're not
     // letting the user unset these. This may change. If we didn't add these
     // here, they would be lost on submit.
-    $missing_protocol_ids = array_diff($current_protocol_ids, $used_protocol_ids);
     if (!empty($missing_protocol_ids)) {
       foreach ($missing_protocol_ids as $missing_protocol_id) {
         $communities[0]['protocols'][$missing_protocol_id] = [
@@ -184,10 +196,10 @@ class CulturalProtocolWidget extends WidgetBase {
         ];
       }
 
-      $communities[0]['inaccessible_cultural_protocols'] = [
-        '#type' => 'processed_text',
-        '#format' => 'full_html',
-        '#text' => $this->buildInaccessbileProtocolsMessage($missing_protocol_ids),
+      $inaccessibleMessage = $this->buildInaccessbileProtocolsMessage($missing_protocol_ids);
+      $communities['inaccessible_cultural_protocols'] = [
+        '#type' => 'markup',
+        '#markup' => "<div class=\"messages messages--warning\">$inaccessibleMessage</div>",
       ];
     }
 
@@ -314,7 +326,7 @@ class CulturalProtocolWidget extends WidgetBase {
       }
 
       foreach ($subelement['protocols'] as $j => $protocolCheckbox) {
-        if (is_numeric($j) && isset($protocolCheckbox['#type']) && $protocolCheckbox['#type'] == 'checkbox') {
+        if (is_numeric($j) && isset($protocolCheckbox['#type']) && ($protocolCheckbox['#type'] == 'checkbox' || $protocolCheckbox['#type'] == 'hidden')) {
           if ($protocolCheckbox['#value']) {
             $selectedProtocolCount += 1;
           }
