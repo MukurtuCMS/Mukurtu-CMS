@@ -133,6 +133,18 @@ function mukurtu_protocol_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_entity_field_storage_info().
+ */
+function mukurtu_protocol_entity_field_storage_info(EntityTypeInterface $entity_type) {
+  if ($entity_type->id() == 'node') {
+    return MukurtuNode::bundleFieldDefinitions($entity_type, '', []);
+  }
+  if ($entity_type->id() == 'media') {
+    return MukurtuMedia::bundleFieldDefinitions($entity_type, '', []);
+  }
+}
+
+/**
  * Implements hook_system_breadcrumb_alter().
  *
  */
