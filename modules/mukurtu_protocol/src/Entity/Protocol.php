@@ -14,8 +14,6 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\Entity\OgRole;
-use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\field\Entity\FieldConfig;
 use Exception;
 
 /**
@@ -308,6 +306,8 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       $membership = Og::createMembership($this, $account);
       $membership->setRoles($ogRoles);
       $membership->save();
+    } else {
+      return $this->setRoles($account, $roles);
     }
     return $this;
   }
