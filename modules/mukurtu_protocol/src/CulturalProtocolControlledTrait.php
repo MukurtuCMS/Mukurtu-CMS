@@ -7,6 +7,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\mukurtu_protocol\CulturalProtocols;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
+use Drupal\mukurtu_protocol\Plugin\Field\FieldType\CulturalProtocolItem;
 
 trait CulturalProtocolControlledTrait {
   public static function getProtocolFieldDefinitions(): array {
@@ -24,40 +25,64 @@ trait CulturalProtocolControlledTrait {
     return $definitions;
   }
 
+  /**
+   * Get the cultural protocol sharing setting.
+   *
+   * @return string
+   *  The sharing setting, 'any' or 'all'.
+   */
   public function getSharingSetting(): string {
     return $this->get('field_cultural_protocols')->sharing_setting ?? 'all';
   }
 
+  /**
+   * Get the cultural protocol sharing setting.
+   *
+   * @param string $option
+   *  The sharing setting, 'any' or 'all'.
+   *
+   * @return \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface
+   *  The protocol controlled entity.
+   */
   public function setSharingSetting($option): CulturalProtocolControlledInterface {
     $value['protocols'] = $this->get('field_cultural_protocols')->protocols ?? '';
     $value['sharing_setting'] = $option;
     return $this->set('field_cultural_protocols', $value);
   }
 
+  /**
+   * Get the protocol IDs.
+   */
   public function getProtocols() {
-    $protocolString = $this->get('field_cultural_protocols')->protocols;
-    if (empty($protocolString)) {
-      return [];
-    }
-    return str_replace('|', '', explode(',', $this->get('field_cultural_protocols')->protocols));
+    return CulturalProtocolItem::unformatProtocols($this->get('field_cultural_protocols')->protocols);
   }
 
+  /**
+   * Get the protocol entities.
+   */
   public function getProtocolEntities() {
     $ids = $this->getProtocols();
     return empty($ids) ? [] : $this->entityTypeManager()->getStorage('protocol')->loadMultiple($ids);
   }
 
+  /**
+   * Set the protocols.
+   */
   public function setProtocols($protocols) {
     // Handle both array of IDs and array of protocol entities.
     $protocol_ids = [];
     if (!empty($protocols)) {
       $protocol_ids = array_map(fn($p) => $p instanceof ProtocolInterface ? $p->id() : $p, $protocols);
     }
-    $value['protocols'] = implode(',', array_map(fn($p) => "|$p|", array_map('trim', $protocol_ids)));//implode(',', $protocol_ids);
+
+    $value['protocols'] = CulturalProtocolItem::formatProtocols($protocol_ids);
     $value['sharing_setting'] = $this->get('field_cultural_protocols')->sharing_setting ?? 'all';
     return $this->set('field_cultural_protocols', $value);
   }
 
+  /**
+   * Get the affiliated community entities, based on applied protocols.
+   */
   public function getCommunities() {
     $communities = [];
     $protocols = $this->getProtocolEntities();

@@ -121,6 +121,7 @@ class AccessByProtocolTest extends KernelTestBase {
 
     // Flag protocol entity as an Og group so Og does its
     // part for access control.
+    Og::addGroup('community', 'community');
     Og::addGroup('protocol', 'protocol');
 
     // Create a node type to test under protocol control.
@@ -139,12 +140,26 @@ class AccessByProtocolTest extends KernelTestBase {
     $role->grantPermission('delete own thing node');
     $role->save();
 
+    // User to own content in tests where the tested user shouldn't
+    // be the owner.
+    $owner = User::create([
+      'name' => $this->randomString(),
+    ]);
+    $owner->save();
+    $this->owner = $owner;
+
+    $container = \Drupal::getContainer();
+    $this->container
+      ->get('current_user')
+      ->setAccount($owner);
+
     // Create a community. Protocols require a community reference.
     $community = Community::create([
       'name' => 'Community 1',
     ]);
     $community->save();
     $this->community = $community;
+    $community->addMember($owner);
 
     // Create the protocol steward role with our
     // default Mukurtu permission set for the thing node type.
@@ -153,6 +168,7 @@ class AccessByProtocolTest extends KernelTestBase {
       'label' => 'Protocol Steward',
       'permissions' => [
         'add user',
+        'apply protocol',
         'administer permissions',
         'approve and deny subscription',
         'create thing node',
@@ -185,14 +201,6 @@ class AccessByProtocolTest extends KernelTestBase {
     $contributorRole->setGroupBundle('protocol');
     $contributorRole->save();
 
-    // User to own content in tests where the tested user shouldn't
-    // be the owner.
-    $owner = User::create([
-      'name' => $this->randomString(),
-    ]);
-    $owner->save();
-    $this->owner = $owner;
-
     // Create three strict and three open protocols.
     foreach ([1, 2, 3] as $n) {
       $p = Protocol::create([
@@ -202,6 +210,7 @@ class AccessByProtocolTest extends KernelTestBase {
       ]);
       $p->save();
       $this->strictProtocols[$n] = $p;
+      $p->addMember($owner, ['protocol_steward']);
 
       $p = Protocol::create([
         'name' => "Open $n",
@@ -210,6 +219,7 @@ class AccessByProtocolTest extends KernelTestBase {
       ]);
       $p->save();
       $this->openProtocols[$n] = $p;
+      $p->addMember($owner, ['protocol_steward']);
     }
 
   }

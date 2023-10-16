@@ -209,7 +209,7 @@ class CulturalProtocols {
 
   public static function getProtocolsByUserPermission(array $permissions, $account = NULL) {
     if (!$account) {
-      $account = User::load(\Drupal::currentUser()->id());
+      $account = \Drupal::currentUser()->getAccount();
     }
 
     // Look-up what OG roles can apply protocols.

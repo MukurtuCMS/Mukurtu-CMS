@@ -72,23 +72,29 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
    */
   protected $community2_strict;
 
+  protected $admin;
+
   /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
 
+    $this->admin = \Drupal::entityTypeManager()->getStorage('user')->load($this->rootUser->id());
+
     // Create our two test communities.
     $community = Community::create([
       'name' => 'Community 1',
     ]);
     $community->save();
+    $community->addMember($this->admin);
     $this->community1 = $community;
 
     $community = Community::create([
       'name' => 'Community 2',
     ]);
     $community->save();
+    $community->addMember($this->admin);
     $this->community2 = $community;
 
     // Create the protocols for those communities.
@@ -98,6 +104,7 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
       'field_access_mode' => 'open',
     ]);
     $protocol->save();
+    $protocol->addMember($this->admin, ['protocol_steward']);
     $this->community1_open = $protocol;
 
     $protocol = Protocol::create([
@@ -106,6 +113,7 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
       'field_access_mode' => 'strict',
     ]);
     $protocol->save();
+    $protocol->addMember($this->admin, ['protocol_steward']);
     $this->community1_strict = $protocol;
 
     $protocol = Protocol::create([
@@ -114,6 +122,7 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
       'field_access_mode' => 'open',
     ]);
     $protocol->save();
+    $protocol->addMember($this->admin, ['protocol_steward']);
     $this->community2_open = $protocol;
 
     $protocol = Protocol::create([
@@ -122,6 +131,7 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
       'field_access_mode' => 'strict',
     ]);
     $protocol->save();
+    $protocol->addMember($this->admin, ['protocol_steward']);
     $this->community2_strict = $protocol;
   }
 
@@ -140,6 +150,7 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
    */
   protected function mukurtuCreateNode($values, $protocols, $sharing_setting = 'all') {
     $content = Node::create($values);
+    $this->drupalLogin($this->rootUser);
 
     if ($content instanceof CulturalProtocolControlledInterface) {
       $content->setProtocols(array_map(fn ($p): int => $p->id(), $protocols));
