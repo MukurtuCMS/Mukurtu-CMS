@@ -42,4 +42,14 @@ class EntityReferenceRevisions extends EntityReference {
     return in_array($refType, ['paragraph','community','media','node','protocol','taxonomy_term','user']);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+    if ($this->isMultiple($field_config)) {
+      return t("The current entity revision IDs of the paragraphs, separated by your selected multi-value delimiter.");
+    }
+    return t('The current entity revision ID of the paragraph.');
+  }
+
 }

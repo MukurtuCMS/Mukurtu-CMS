@@ -100,4 +100,29 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
     return in_array($refType, ['community','media','node','protocol','taxonomy_term','user']);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+    $multiple = $this->isMultiple($field_config);
+    $refType = $field_config->getSetting('target_type');
+
+    if ($refType == 'user') {
+      $description = $multiple ? "Usernames, separated by your selected multi-value delimiter." : "The username.";
+      return t($description);
+    }
+
+    if ($refType == 'taxonomy_term') {
+      $auto_create = $field_config->getSetting('handler_settings')['auto_create'] ?? FALSE;
+      $description = $multiple ? "Taxonomy term names, separated by your selected multi-value delimiter." : "Taxonomy term name.";
+      if ($auto_create) {
+        $description .= " New terms will be created if they do not already exist.";
+      }
+      return t($description);
+    }
+
+    $description = $multiple ? "IDs or UUIDs of the references, separated by your selected multi-value delimiter." : "ID or UUID of the reference.";
+    return t($description);
+  }
+
 }

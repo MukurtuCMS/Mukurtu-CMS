@@ -30,4 +30,11 @@ interface MukurtuImportFieldProcessInterface {
    */
   public static function isApplicable(FieldDefinitionInterface $field_config): bool;
 
+  /**
+   * Get the format description.
+   *
+   * @return string|\Drupal\Core\StringTranslation\TranslatableMarkup
+   */
+  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL);
+
 }

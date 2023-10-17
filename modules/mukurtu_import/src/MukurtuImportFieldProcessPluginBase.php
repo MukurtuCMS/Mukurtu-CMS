@@ -41,4 +41,16 @@ class MukurtuImportFieldProcessPluginBase extends PluginBase implements MukurtuI
     return TRUE;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+    return '';
+  }
+
+  protected function isMultiple(FieldDefinitionInterface $field_definition) {
+    $cardinality = $field_definition->getFieldStorageDefinition()->getCardinality();
+    return $cardinality == -1 || $cardinality > 1;
+  }
+
 }

@@ -1,0 +1,10 @@
+{% for entity_type in entity_types %}
+  <h2>{{ entity_type_labels[entity_type] }}</h2>
+  <ul>
+  {% for entity_type_bundle_link in entity_type_bundle_links[entity_type] %}
+  <li>
+      {{ entity_type_bundle_link }}
+  </li>
+  {% endfor %}
+  </ul>
+{% endfor %}

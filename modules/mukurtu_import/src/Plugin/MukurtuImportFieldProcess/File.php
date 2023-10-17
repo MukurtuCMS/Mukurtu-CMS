@@ -25,10 +25,9 @@ class File extends MukurtuImportFieldProcessPluginBase {
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
     $multivalue_delimiter = $context['multivalue_delimiter'] ?? ';';
-    $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
-    $multiple = $cardinality == -1 || $cardinality > 1;
+
     $process = [];
-    if ($multiple) {
+    if ($this->isMultiple($field_config)) {
       $process[] = [
         'plugin' => 'explode',
         'delimiter' => $multivalue_delimiter,
@@ -40,6 +39,14 @@ class File extends MukurtuImportFieldProcessPluginBase {
     ];
     $process[0]['source'] = $source;
     return $process;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+    $description = $this->isMultiple($field_config) ? "The file IDs or filenames of the uploaded files, separated by your selected multi-value delimiter." : "The file ID or filename of the uploaded file.";
+    return t($description);
   }
 
 }

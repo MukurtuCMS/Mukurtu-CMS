@@ -19,3 +19,20 @@ function mukurtu_import_migrate_destination_info_alter(array &$definitions) {
     $definitions['entity:protocol']['class'] = 'Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareEntityContent';
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_import_theme($existing, $type, $theme, $path) {
+  return [
+    'mukurtu_import_entity_bundle_list' => [
+      'variables' => [
+        'entity_types' => NULL,
+        'entity_type_labels' => NULL,
+        'entity_type_bundle_links' => NULL,
+      ],
+      'template' => 'mukurtu-import-entity-bundle-list',
+      'base hook' => 'page',
+    ],
+  ];
+}

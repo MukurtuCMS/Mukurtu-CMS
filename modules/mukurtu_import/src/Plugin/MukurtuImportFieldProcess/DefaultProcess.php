@@ -23,11 +23,9 @@ class DefaultProcess extends MukurtuImportFieldProcessPluginBase {
    * {@inheritdoc}
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
-    $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
     $multivalue_delimiter = $context['multivalue_delimiter'] ?? ';';
-    $multiple = $cardinality == -1 || $cardinality > 1;
 
-    if ($multiple) {
+    if ($this->isMultiple($field_config)) {
       return [
         'plugin' => 'explode',
         'source' => $source,
@@ -38,4 +36,13 @@ class DefaultProcess extends MukurtuImportFieldProcessPluginBase {
     return $source;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+    if ($this->isMultiple($field_config)) {
+      return t("No special format, the values are used directly, separated by your selected multi-value delimiter.");
+    }
+    return t('No special format, the value is used directly.');
+  }
 }

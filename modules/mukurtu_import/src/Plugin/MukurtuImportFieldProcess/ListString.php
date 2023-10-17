@@ -32,4 +32,16 @@ class ListString extends MukurtuImportFieldProcessPluginBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+    $allowed_values = $field_config->getSetting('allowed_values');
+    $value = key($allowed_values);
+
+    $single_description = "The value (e.g., '%value') or the label of allowed values";
+    $description = $this->isMultiple($field_config) ? "$single_description, separated by your selected multi-value delimiter." : $single_description;
+    return t($description, ['%value' => $value]);
+  }
+
 }

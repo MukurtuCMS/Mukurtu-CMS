@@ -46,6 +46,22 @@ mukurtu_import.file_upload:
   requirements:
     _permission: 'access mukurtu import'
 
+mukurtu_import.bundles_list:
+  path: '/dashboard/import/format'
+  defaults:
+    _controller: '\Drupal\mukurtu_import\Controller\BundleListController::bundlesList'
+    _title: 'Import Formats'
+  requirements:
+    _permission: 'access mukurtu import'
+
+mukurtu_import.fields_list:
+  path: '/dashboard/import/format/{entity_type}/{bundle}'
+  defaults:
+    _form: '\Drupal\mukurtu_import\Form\ImportFieldDescriptionListForm'
+    _title_callback: '\Drupal\mukurtu_import\Controller\BundleListController::getFieldListTitle'
+  requirements:
+    _permission: 'access mukurtu import'
+
 mukurtu_import.import_files:
   path: '/dashboard/import/files'
   defaults:

@@ -24,10 +24,9 @@ class Link extends MukurtuImportFieldProcessPluginBase {
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
     $multivalue_delimiter = $context['multivalue_delimiter'] ?? ';';
-    $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
-    $multiple = $cardinality == -1 || $cardinality > 1;
+
     $process = [];
-    if ($multiple) {
+    if ($this->isMultiple($field_config)) {
       $process[] = [
         'plugin' => 'explode',
         'delimiter' => $multivalue_delimiter,
@@ -38,6 +37,15 @@ class Link extends MukurtuImportFieldProcessPluginBase {
     ];
     $process[0]['source'] = $source;
     return $process;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+    $single_description = "The link in Markdown format: [Title](https://url.com)";
+    $description = $this->isMultiple($field_config) ? "$single_description, separated by your selected multi-value delimiter." : $single_description;
+    return t($description);
   }
 
 }

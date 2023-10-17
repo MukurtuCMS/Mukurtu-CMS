@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\FileInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\file\Element\ManagedFile;
+use Drupal\Core\Link;
 use Exception;
 
 /**
@@ -31,6 +32,14 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $form['import_description_link'] = [
+      '#markup' => Link::createFromRoute(
+        $this->t('Import Format Information by Type'),
+        'mukurtu_import.bundles_list',
+        [],
+      )->toString(),
+    ];
+
     $form['metadata_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Metadata Files'),

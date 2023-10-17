@@ -17,7 +17,6 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 class CustomStrategyFromFileForm extends ImportBaseForm {
   protected $importConfig;
   protected $importConfigLoaded;
-  protected $fieldDefinitions;
 
   /**
    * {@inheritdoc}
@@ -382,47 +381,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   }
 
   /**
-   * Get the field definitions for an entity type/bundle.
-   *
-   * @param string $entity_type_id
-   *   The entity type id.
-   * @param string $bundle
-   *   The bundle.
-   * @return mixed
-   *   The field definitions.
-   */
-  protected function getFieldDefinitions($entity_type_id, $bundle = NULL) {
-    // Memoize the field defs.
-    if (empty($this->fieldDefinitions[$entity_type_id][$bundle])) {
-      $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
-      $entityKeys = $entityDefinition->getKeys();
-      $fieldDefs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
-
-      // Remove computed fields/fields that can't be targeted for import.
-      foreach ($fieldDefs as $field_name => $fieldDef) {
-        // Don't remove ID/UUID fields.
-        if ($field_name == $entityKeys['id'] || $field_name == $entityKeys['uuid']) {
-          continue;
-        }
-
-        // Remove the revision log message as a valid target. We are using
-        // specific revision log messages to control import behavior.
-        if ($field_name == 'revision_log') {
-          unset($fieldDefs[$field_name]);
-        }
-
-        // Remove computed and read-only fields.
-        if ($fieldDef->isComputed() || $fieldDef->isReadOnly()) {
-          unset($fieldDefs[$field_name]);
-        }
-      }
-      $this->fieldDefinitions[$entity_type_id][$bundle] = $fieldDefs;
-    }
-
-    return $this->fieldDefinitions[$entity_type_id][$bundle];
-  }
-
-  /**
    * Compare field labels against a search string.
    *
    * @param string $needle
@@ -442,43 +400,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       }
     }
     return NULL;
-  }
-
-  /**
-   * Build the mapper target options for a single source column.
-   *
-   * @param string $entity_type_id
-   *   The entity type id.
-   * @param string $bundle
-   *   The bundle.
-   * @return mixed
-   *   The select form element.
-   */
-  protected function buildTargetOptions($entity_type_id, $bundle = NULL) {
-    $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
-    $entityKeys = $entityDefinition->getKeys();
-
-    $options = [-1 => $this->t('Ignore - Do not import')];
-    foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
-      if ($field_definition->getType() == 'cultural_protocol') {
-        // Split our protocol field into the individual sharing
-        // setting/protocols subfields.
-        $options["{$field_name}/sharing_setting"] = $this->t('Sharing Setting');
-        $options["{$field_name}/protocols"] = $this->t('Cultural Protocols');
-        continue;
-      }
-
-      $options[$field_name] = $field_definition->getLabel();
-    }
-
-    // Very Mukurtu specific. We ship with a "Language" field which has
-    // the exact same label as content entity langcodes. Here we disambiguate
-    // the two.
-    if (isset($options[$entityKeys['langcode']])) {
-      $options[$entityKeys['langcode']] .= $this->t(' (langcode)');
-    }
-
-    return $options;
   }
 
   /**
