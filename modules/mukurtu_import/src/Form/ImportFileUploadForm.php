@@ -43,6 +43,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $form['metadata_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Metadata Files'),
+      '#description' => $this->t('Add your metadata files (e.g., CSV) here. You will configure how they are imported in the next step.'),
       '#process' => [[static::class, 'processManagedFile']],
       '#multiple' => TRUE,
       '#default_value' => $this->getMetadataFiles(),
@@ -58,6 +59,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $form['binary_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Media/Binary Files'),
+      '#description' => $this->t('Add your media & binary files here. You can reference these files by file name in your metadata files.'),
       '#process' => [[static::class, 'flagPermanentFiles']],
       '#multiple' => TRUE,
       '#default_value' => $this->getBinaryFiles(),
