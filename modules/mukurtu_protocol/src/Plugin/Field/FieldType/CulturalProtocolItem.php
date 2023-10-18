@@ -204,6 +204,14 @@ class CulturalProtocolItem extends FieldItemBase {
       $values['protocols'] = $this->formatProtocols($values['protocols']);
     }
 
+    // If the sharing setting is the only thing trying to be set, bring in the
+    // existing protocols if they exist.
+    if (isset($values['sharing_setting']) && !isset($values['protocols'])) {
+      if ($existingProtocols = $this->get('protocols')) {
+        $values['protocols'] = $existingProtocols->getValue();
+      }
+    }
+
     if (!(isset($values['protocols']) && isset($values['sharing_setting']))) {
       preg_match('/^(\w+)\s*\((.+)\)\s*/', $value, $matches, PREG_OFFSET_CAPTURE);
       if (!isset($matches[1]) || !isset($matches[2])) {

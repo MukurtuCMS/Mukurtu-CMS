@@ -46,7 +46,16 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
     }
 
     if ($subfield == 'sharing_setting') {
-      return $source;
+      $process[] = [
+        'plugin' => 'callback',
+        'callable' => 'trim',
+        'source' => $source,
+      ];
+      $process[] = [
+        'plugin' => 'callback',
+        'callable' => 'strtolower',
+      ];
+      return $process;
     }
 
     return $source;
