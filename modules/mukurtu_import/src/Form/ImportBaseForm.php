@@ -13,6 +13,8 @@ use Exception;
 use League\Csv\Reader;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
+use Drupal\Core\Session\AccountInterface;
+
 /**
  * Provides a Mukurtu Import form.
  */
@@ -184,6 +186,54 @@ class ImportBaseForm extends FormBase {
   public function getFileProcess($fid) {
     $processMap = $this->store->get('process_map') ?? [];
     return $processMap[$fid]['mapping'] ?? [];
+  }
+
+  /**
+   * Checks if a user has permission to create an entity of a specific type and bundle.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID, e.g., 'node', 'taxonomy_term', etc.
+   * @param string|null $bundle
+   *   (optional) The bundle, e.g., 'article', 'page', etc. If omitted, checks access for the entity type generally.
+   * @param \Drupal\Core\Session\AccountInterface|null $account
+   *   (optional) The user account for which to check access. Defaults to the current user.
+   *
+   * @return bool
+   *   TRUE if the user has access, FALSE otherwise.
+   */
+  function userCanCreateEntity($entity_type_id, $bundle = NULL, AccountInterface $account = NULL) {
+    // If no user account is provided, default to the current user.
+    if (!$account) {
+      $account = $this->currentUser();
+    }
+
+    // Use the access control handler to check create access.
+    $access = $this->entityTypeManager->getAccessControlHandler($entity_type_id)->createAccess($bundle, $account);
+
+    return $access;
+  }
+
+  /**
+   * Checks if a user can create any bundle of a specific entity type.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID, e.g., 'node', 'taxonomy_term', etc.
+   * @param \Drupal\Core\Session\AccountInterface|null $account
+   *   (optional) The user account for which to check access. Defaults to the current user.
+   *
+   * @return bool
+   *   TRUE if the user has access, FALSE otherwise.
+   */
+  function userCanCreateAnyBundleForEntityType($entity_type_id, AccountInterface $account = NULL) {
+    if (!$account) {
+      $account = $this->currentUser();
+    }
+
+    $bundleInfo = $this->entityBundleInfo->getAllBundleInfo();
+    if (isset($bundleInfo[$entity_type_id]) && !empty($bundleInfo[$entity_type_id])) {
+      return TRUE;
+    }
+    return FALSE;
   }
 
   /**
