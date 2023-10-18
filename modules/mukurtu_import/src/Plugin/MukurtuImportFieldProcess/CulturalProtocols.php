@@ -60,7 +60,7 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
       return t('IDs or UUIDs of the cultural protocols, separated by your selected multi-value delimiter.');
     }
     if ($field_property == 'sharing_setting') {
-      return t('Either Any or All, case insensitive.');
+      return t("Either 'Any' or 'All', case insensitive.");
     }
     return '';
   }

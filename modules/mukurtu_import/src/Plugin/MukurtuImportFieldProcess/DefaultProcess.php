@@ -40,6 +40,13 @@ class DefaultProcess extends MukurtuImportFieldProcessPluginBase {
    * {@inheritdoc}
    */
   public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+    $type = $this->getSchemaDescription($field_config);
+    if ($type) {
+      if ($this->isMultiple($field_config)) {
+        return t("@type values, separated by your selected multi-value delimiter.", ['@type' => $type]);
+      }
+      return t('@type value.', ['@type' => $type]);
+    }
     if ($this->isMultiple($field_config)) {
       return t("No special format, the values are used directly, separated by your selected multi-value delimiter.");
     }
