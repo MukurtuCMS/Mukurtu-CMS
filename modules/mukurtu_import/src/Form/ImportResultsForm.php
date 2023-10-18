@@ -24,11 +24,22 @@ class ImportResultsForm extends ImportBaseForm {
     $success = $this->store->get('batch_results_success') ?? FALSE;
     $messages = $this->getMessages();
 
+    $form['results_message'] = [
+      '#type' => 'markup',
+      '#markup' => "<div class=\"messages messages--status\">" . $this->t('All files imported successfully.') . "</div>",
+    ];
+
     if (!empty($messages)) {
-      foreach($messages as $message) {
-        $this->messenger()->addError($message['message']->message);
+      $form['results_message']['#markup'] = "<div class=\"messages messages--error\">" . $this->t('Some files failed to import.') . "</div>";
+      foreach ($messages as $message) {
+        $filename = $this->getImportFilename($message['fid']) ?? '';
+        $form["file_messages"][] = [
+          '#type' => 'markup',
+          '#markup' => "<div class=\"messages messages--error\">" . $filename . ": ". $message['message'] . "</div>",
+        ];
       }
     }
+
     $this->buildTable($form, $form_state, 'node');
 
     if (!empty($messages) || !$success) {
@@ -98,6 +109,23 @@ class ImportResultsForm extends ImportBaseForm {
       '#arguments' => [$message->render()],
     ];
     $form['content_results'] = $content_block;
+  }
+
+  /**
+   * Get the filename.
+   *
+   * @param int $fid
+   *  The fid of the file.
+   *
+   * @return string|null
+   *   The filename or null if the file does not exist.
+   */
+  protected function getImportFilename($fid) {
+    /** @var \Drupal\file\FileInterface $file */
+    if ($file = \Drupal::entityTypeManager()->getStorage('file')->load($fid)) {
+      return $file->getFilename();
+    }
+    return NULL;
   }
 
 }

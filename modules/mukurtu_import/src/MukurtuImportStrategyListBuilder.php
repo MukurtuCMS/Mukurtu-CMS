@@ -25,7 +25,7 @@ class MukurtuImportStrategyListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /** @var \Drupal\mukurtu_import2\MukurtuImportStrategyInterface $entity */
+    /** @var \Drupal\mukurtu_import\MukurtuImportStrategyInterface $entity */
     $row['label'] = $entity->label();
     $row['entity_type_id'] = $entity->getTargetEntityTypeId();
     $row['bundle'] = $entity->getTargetBundle();

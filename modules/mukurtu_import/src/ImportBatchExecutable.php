@@ -164,7 +164,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Tag the error messages with the fid so we can display it next to the
     // file later.
     foreach ($results['messages'] as $rawMessage) {
-      $messages[] = ['fid' => $exceptionFid ?? NULL, 'message' => $rawMessage];
+      $source_id = $rawMessage->src_ID ?? NULL;
+      $message = $source_id ? t("Problem with ID @source_id: @message", ['@source_id' => $source_id, '@message' => $rawMessage->message]) : $rawMessage->message;
+      $messages[] = ['fid' => $exceptionFid ?? NULL, 'message' => $message];
     }
     $store->set('batch_results_messages', $messages);
   }
