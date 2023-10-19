@@ -84,7 +84,18 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    */
   protected $description;
 
+  /**
+   * The target entity type id.
+   *
+   * @var string
+   */
   protected $target_entity_type_id;
+
+  /**
+   * The target bundle.
+   *
+   * @var string
+   */
   protected $target_bundle;
   protected $uid;
 

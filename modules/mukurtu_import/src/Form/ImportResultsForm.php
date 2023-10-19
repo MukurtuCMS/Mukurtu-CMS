@@ -111,21 +111,4 @@ class ImportResultsForm extends ImportBaseForm {
     $form['content_results'] = $content_block;
   }
 
-  /**
-   * Get the filename.
-   *
-   * @param int $fid
-   *  The fid of the file.
-   *
-   * @return string|null
-   *   The filename or null if the file does not exist.
-   */
-  protected function getImportFilename($fid) {
-    /** @var \Drupal\file\FileInterface $file */
-    if ($file = \Drupal::entityTypeManager()->getStorage('file')->load($fid)) {
-      return $file->getFilename();
-    }
-    return NULL;
-  }
-
 }

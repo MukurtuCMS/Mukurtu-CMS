@@ -93,7 +93,7 @@ mukurtu_import.custom_strategy_from_file_form:
 mukurtu_import.execute_import:
   path: '/dashboard/import/run'
   defaults:
-    _title: 'Running Import'
+    _title: 'Review Import'
     _form: 'Drupal\mukurtu_import\Form\ExecuteImportForm'
   requirements:
     _permission: 'access mukurtu import'

@@ -20,7 +20,46 @@ class ExecuteImportForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['debug_message'] = ['#markup' => "<div>This is only a temporary debug form.</div>"];
+    $form['table'] = [
+      '#type' => 'table',
+      '#caption' => $this->t('Review your import. Once you begin the import you cannot stop it. There is no way to rollback the import. Click the "Start Import" button to begin.'),
+      '#header' => [
+        $this->t('Filename'),
+        $this->t('Import Configuration'),
+        $this->t('Destination Import Type'),
+      ],
+      '#attributes' => [
+        'id' => 'import-review',
+      ],
+    ];
+
+    foreach ($this->getMetadataFiles() as $fid) {
+      $filename = $this->getImportFilename($fid);
+      $import_config_for_file = $this->getImportConfig((int) $fid);
+
+      // Filename.
+      $form['table'][$fid]['filename'] = [
+        '#type' => 'markup',
+        '#markup' => "<div>$filename</div>",
+      ];
+
+      // Import Configuration.
+      $form['table'][$fid]['config'] = [
+        '#type' => 'markup',
+        '#markup' => "<div>{$import_config_for_file->label()}</div>",
+      ];
+
+      // Destination Type.
+      $entity_label = $this->entityTypeManager->getDefinition($import_config_for_file->getTargetEntityTypeId())->getLabel();
+      $bundle_info = $this->entityBundleInfo->getBundleInfo($import_config_for_file->getTargetEntityTypeId());
+      $bundle_label = $bundle_info[$import_config_for_file->getTargetBundle()]['label'] ?? "";
+      $form['table'][$fid]['destination'] = [
+        '#type' => 'markup',
+        '#markup' => "<div>$entity_label: $bundle_label</div>",
+      ];
+
+    }
+
     $form['import'] = [
       '#type' => 'submit',
       '#value' => $this->t('Start Import'),
@@ -68,30 +107,11 @@ class ExecuteImportForm extends ImportBaseForm {
     try {
       $executable->batchImportMultiple($migrationDefinitions);
     } catch (Exception $e) {
+      // @todo remove this after testing.
       dpm($e);
     }
 
     $form_state->setRedirect('mukurtu_import.import_results');
-  }
-
-  /**
-   * Testing our ability to get info from the core migration tables for reporting.
-   */
-  protected function tableTest($migration) {
-    $map_table = $migration->getIdMap()->mapTableName();
-
-    $database = \Drupal::database();
-    if (!$database->schema()->tableExists($map_table)) {
-      throw new \InvalidArgumentException();
-    }
-
-    $query = $database->select($map_table, 'map')
-      ->fields('map', ['destid1', 'source_row_status', 'last_imported'])
-      ->orderBy('last_imported', 'DESC');
-    $results = $query->execute();
-    foreach ($results as $row) {
-      dpm($row->destid1);
-    }
   }
 
 }

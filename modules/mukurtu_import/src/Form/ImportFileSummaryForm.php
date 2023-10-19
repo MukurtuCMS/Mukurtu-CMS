@@ -2,10 +2,10 @@
 
 namespace Drupal\mukurtu_import\Form;
 
-use Drupal\mukurtu_import\Form\ImportBaseForm;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\mukurtu_import\Form\ImportBaseForm;
 
 /**
  * Provides a Mukurtu Import form.
@@ -112,7 +112,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
     ];
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Import'),
+      '#value' => $this->t('Review Import'),
       '#states' => [
         'disabled' => [
           ':input[name="all-files-ready"]' => ['value' => '0'],
@@ -237,7 +237,25 @@ class ImportFileSummaryForm extends ImportBaseForm {
     return $response;
   }
 
+  /**
+   * Check if all files are ready for import.
+   *
+   * @return boolean
+   *  TRUE if all files are ready, FALSE otherwise.
+   */
   protected function allFilesReady() {
+    $unready_fids = $this->getUnreadyFileIds();
+    return empty($unready_fids);
+  }
+
+  /**
+   * Get an array of files that have config with no mapped fields.
+   *
+   * @return int[]
+   *  The array of file IDs with incomplete config.
+   */
+  protected function getUnreadyFileIds() {
+    $unready_fids = [];
     $metadataFiles = $this->getMetadataFiles();
     foreach ($metadataFiles as $fid) {
       $config = $this->getImportConfig($fid);
@@ -246,16 +264,35 @@ class ImportFileSummaryForm extends ImportBaseForm {
         continue;
       }
       if ($config->mappedFieldsCount($metadataFile) == 0) {
-        return FALSE;
+        $unready_fids[] = $fid;
       }
     }
-    return TRUE;
+    return $unready_fids;
   }
 
   /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    $triggering_element = $form_state->getTriggeringElement();
+
+    if ($triggering_element['#type'] == 'submit') {
+      $callback = $triggering_element['#submit'][0] ?? NULL;
+      // Let the user go back a step, even if the form is invalid.
+      if ($callback == '::submitBack') {
+        return;
+      }
+
+      // Let the user define custom mappings, even if the form is invalid.
+      // Having undefined mappings is mostly the source of invalid state.
+      if ($callback == '::defineCustomMapping') {
+        return;
+      }
+    }
+
+    foreach ($this->getUnreadyFileIds() as $unready_fid) {
+      $form_state->setErrorByName("table][$unready_fid", $this->t("You must configure the import settings for this file."));
+    }
   }
 
   public function submitBack(array &$form, FormStateInterface $form_state) {
