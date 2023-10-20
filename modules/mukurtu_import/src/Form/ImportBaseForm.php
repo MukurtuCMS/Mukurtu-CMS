@@ -25,11 +25,23 @@ class ImportBaseForm extends FormBase {
   protected $tempStoreFactory;
 
   /**
-   * @var \Drupal\user\PrivateTempStore
+   * @var \Drupal\Core\TempStore\PrivateTempStore
    */
   protected $store;
 
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected $entityTypeManager;
+
+
+  /**
+   * The entity type bundle info service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
+   */
   protected $entityBundleInfo;
 
   /**
@@ -40,6 +52,12 @@ class ImportBaseForm extends FormBase {
   protected $entityFieldManager;
   protected $metadataFileWeights;
   protected $metadataFilesImportConfig;
+
+  /**
+   * The Mukurtu import ID.
+   *
+   * @var string
+   */
   protected $importId;
 
   protected $fieldDefinitions;
@@ -57,7 +75,7 @@ class ImportBaseForm extends FormBase {
     if (empty($import_id)) {
       $this->reset();
       $import_id = \Drupal::service('uuid')->generate();
-      $this->store->set('import_id', str_replace('-', '', $import_id));
+      $this->store->set('import_id', $import_id);
     }
     $this->importId = $import_id;
     $this->metadataFilesImportConfig = $this->store->get('import_config');
@@ -155,6 +173,11 @@ class ImportBaseForm extends FormBase {
       ->execute();
   }
 
+  /**
+   * Get the import ID.
+   *
+   * @return string
+   */
   public function getImportId() {
     return $this->importId;
   }
