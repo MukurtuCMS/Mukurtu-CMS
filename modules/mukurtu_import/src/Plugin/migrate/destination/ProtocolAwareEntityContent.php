@@ -34,6 +34,45 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   /**
    * {@inheritdoc}
    */
+  protected function getEntityId(Row $row) {
+    // ID get priority.
+    if ($id = $row->getDestinationProperty($this->getKey('id'))) {
+      return $id;
+    }
+
+    // UUID is next.
+    if ($uuid = $row->getDestinationProperty($this->getKey('uuid'))) {
+      // Need to lookup the ID from the UUID.
+      $destination_entity_type_id = $this->getPluginDefinition()['provider'] ?? NULL;
+      if ($destination_entity_type_id) {
+        return $this->getEntityIDfromUUID($destination_entity_type_id, $uuid);
+      }
+    }
+
+    // @todo Should this be null or an exception?
+    return NULL;
+  }
+
+  /**
+   * Gets the entity ID from its UUID.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID (e.g., 'node', 'user', 'taxonomy_term').
+   * @param string $uuid
+   *   The UUID of the entity.
+   *
+   * @return int|null
+   *   The entity ID or NULL if not found.
+   */
+  protected function getEntityIDfromUUID($entity_type_id, $uuid) {
+    $entities = \Drupal::entityTypeManager()->getStorage($entity_type_id)->loadByProperties(['uuid' => $uuid]);
+    $entity = reset($entities);
+    return $entity ? $entity->id() : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function validateEntity(FieldableEntityInterface $entity) {
     // EntityContentBase uses the accountSwitcher to switch to the
     // owner account. We don't want to do that. For the Mukurtu

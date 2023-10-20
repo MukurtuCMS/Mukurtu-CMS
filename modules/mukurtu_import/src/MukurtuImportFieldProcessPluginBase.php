@@ -48,11 +48,20 @@ class MukurtuImportFieldProcessPluginBase extends PluginBase implements MukurtuI
     return '';
   }
 
+  /**
+   * Check if a field is configured to use multiple values.
+   *
+   * @return bool
+   *  Returns TRUE if the field uses multiple values.
+   */
   protected function isMultiple(FieldDefinitionInterface $field_definition) {
     $cardinality = $field_definition->getFieldStorageDefinition()->getCardinality();
     return $cardinality == -1 || $cardinality > 1;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function getSchemaDescription(FieldDefinitionInterface $field_definition) {
     $field_type_id = $field_definition->getType();
     $settings = $field_definition->getSettings();

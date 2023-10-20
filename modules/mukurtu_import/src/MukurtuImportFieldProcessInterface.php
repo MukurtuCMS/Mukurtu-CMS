@@ -33,7 +33,7 @@ interface MukurtuImportFieldProcessInterface {
   /**
    * Get the format description.
    *
-   * @return string|\Drupal\Core\StringTranslation\TranslatableMarkup
+   * @return string|\Drupal\Core\StringTranslation\TranslatableMarkup|null
    */
   public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL);
 
