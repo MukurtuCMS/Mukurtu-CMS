@@ -41,7 +41,7 @@ mukurtu_import.settings_form:
 mukurtu_import.file_upload:
   path: '/dashboard/import'
   defaults:
-    _title: 'Import'
+    _title: 'Import - Upload Files'
     _form: 'Drupal\mukurtu_import\Form\ImportFileUploadForm'
   requirements:
     _permission: 'access mukurtu import'
@@ -50,7 +50,7 @@ mukurtu_import.bundles_list:
   path: '/dashboard/import/format'
   defaults:
     _controller: '\Drupal\mukurtu_import\Controller\BundleListController::bundlesList'
-    _title: 'Import Formats'
+    _title: 'Import - File Formats'
   requirements:
     _permission: 'access mukurtu import'
 
@@ -65,7 +65,7 @@ mukurtu_import.fields_list:
 mukurtu_import.import_files:
   path: '/dashboard/import/files'
   defaults:
-    _title: 'Import File Summary'
+    _title: 'Import - File Configuration'
     _form: 'Drupal\mukurtu_import\Form\ImportFileSummaryForm'
   requirements:
     _permission: 'access mukurtu import'
@@ -73,7 +73,7 @@ mukurtu_import.import_files:
 mukurtu_import.import_results:
   path: '/dashboard/import/results'
   defaults:
-    _title: 'Import Results'
+    _title: 'Import - Results'
     _form: 'Drupal\mukurtu_import\Form\ImportResultsForm'
   requirements:
     _permission: 'access mukurtu import'
@@ -93,7 +93,7 @@ mukurtu_import.custom_strategy_from_file_form:
 mukurtu_import.execute_import:
   path: '/dashboard/import/run'
   defaults:
-    _title: 'Review Import'
+    _title: 'Import - Review'
     _form: 'Drupal\mukurtu_import\Form\ExecuteImportForm'
   requirements:
     _permission: 'access mukurtu import'
