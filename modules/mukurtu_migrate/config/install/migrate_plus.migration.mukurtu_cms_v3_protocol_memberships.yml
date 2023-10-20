@@ -33,7 +33,7 @@ process:
   entity_id:
     plugin: migration_lookup
     migration:
-      - mukurtu_cms_v3_communities
+      - mukurtu_cms_v3_cultural_protocols
     source: gid
   roles:
     -

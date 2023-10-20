@@ -35,6 +35,9 @@ process:
         2: strict
       default_value: strict
   status: status
+
+  # This is a flag to prevent any default side effects (e.g., the creating user
+  # being added to the community as an owner.
   mukurtu_migrate:
     plugin: default_value
     default_value: true
