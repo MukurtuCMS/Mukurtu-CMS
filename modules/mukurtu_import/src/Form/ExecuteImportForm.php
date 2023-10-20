@@ -52,7 +52,7 @@ class ExecuteImportForm extends ImportBaseForm {
       // Destination Type.
       $entity_label = $this->entityTypeManager->getDefinition($import_config_for_file->getTargetEntityTypeId())->getLabel();
       $bundle_info = $this->entityBundleInfo->getBundleInfo($import_config_for_file->getTargetEntityTypeId());
-      $bundle_label = $bundle_info[$import_config_for_file->getTargetBundle()]['label'] ?? "";
+      $bundle_label = $bundle_info[$import_config_for_file->getTargetBundle()]['label'] ?? t("Base Fields");
       $form['table'][$fid]['destination'] = [
         '#type' => 'markup',
         '#markup' => "<div>$entity_label: $bundle_label</div>",
