@@ -78,7 +78,7 @@ class ImportBaseForm extends FormBase {
       $this->store->set('import_id', $import_id);
     }
     $this->importId = $import_id;
-    $this->metadataFilesImportConfig = $this->store->get('import_config');
+    $this->refreshMetadataFilesImportConfig();
     $this->metadataFileWeights = $this->store->get('metadata_file_weights') ?? [];
   }
 
@@ -140,6 +140,19 @@ class ImportBaseForm extends FormBase {
     $this->store->set('metadata_file_weights', []);
   }
 
+  /**
+   * Load the import config from the private store.
+   *
+   * This is a silly state management hack. Because of the ajax requests,
+   * the local object variable metadataFilesImportConfig can become out of
+   * sync with the "real" current value. The correct way to handle this is
+   * probably to remove the object variable completely and have the getter and
+   * setter only deal with the private store.
+   */
+  public function refreshMetadataFilesImportConfig() {
+    $this->metadataFilesImportConfig = $this->store->get('import_config');
+  }
+
   public function getMetadataFiles() {
     $query = $this->entityTypeManager->getStorage('file')->getQuery();
     return $query->condition('uri', $this->getMetadataUploadLocation(), 'STARTS_WITH')
@@ -164,7 +177,6 @@ class ImportBaseForm extends FormBase {
     $this->metadataFileWeights = $weights;
     $this->store->set('metadata_file_weights', $weights);
   }
-
 
   public function getBinaryFiles() {
     $query = $this->entityTypeManager->getStorage('file')->getQuery();
@@ -271,7 +283,8 @@ class ImportBaseForm extends FormBase {
    */
   public function setImportConfig($fid, MukurtuImportStrategyInterface $config) {
     $config->setConfig('upload_location', $this->getBinaryUploadLocation());
-    $this->metadataFilesImportConfig[$fid] = $config;
+    $this->refreshMetadataFilesImportConfig();
+    $this->metadataFilesImportConfig[(int) $fid] = $config;
     $this->store->set('import_config', $this->metadataFilesImportConfig);
   }
 
@@ -285,7 +298,15 @@ class ImportBaseForm extends FormBase {
    *   The import config.
    */
   public function getImportConfig($fid) {
-    return $this->metadataFilesImportConfig[$fid] ?? MukurtuImportStrategy::create(['uid' => $this->currentUser()->id()]);
+    $this->refreshMetadataFilesImportConfig();
+    $exitingConfigEntity = $this->metadataFilesImportConfig[(int) $fid] ?? NULL;
+    if ($exitingConfigEntity) {
+      return $exitingConfigEntity;
+    }
+
+    $newConfigEntity = MukurtuImportStrategy::create(['uid' => $this->currentUser()->id()]);
+    $this->setImportConfig($fid, $newConfigEntity);
+    return $newConfigEntity;
   }
 
   public function getMessages() {

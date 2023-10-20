@@ -23,6 +23,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $this->refreshMetadataFilesImportConfig();
     $metadataFileWeights = $this->getMetadataFileWeights();
     $metadataFiles = array_keys($metadataFileWeights);
 
@@ -216,12 +217,15 @@ class ImportFileSummaryForm extends ImportBaseForm {
         $this->setImportConfig($fid, $newConfig);
       } else {
         // A new import config has been selected.
+        /** @var \Drupal\mukurtu_import\MukurtuImportStrategyInterface */
         $newConfig = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->load($newConfigId);
         if ($newConfig) {
           $this->setImportConfig($fid, $newConfig);
         }
       }
     }
+
+    $form_state->setRebuild(TRUE);
 
     // Update the field mapping message.
     $response = new AjaxResponse();
@@ -259,10 +263,12 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $metadataFiles = $this->getMetadataFiles();
     foreach ($metadataFiles as $fid) {
       $config = $this->getImportConfig($fid);
+      /** @var \Drupal\file\FileInterface */
       $metadataFile = $this->entityTypeManager->getStorage('file')->load($fid);
       if (!$metadataFile) {
         continue;
       }
+
       if ($config->mappedFieldsCount($metadataFile) == 0) {
         $unready_fids[] = $fid;
       }
