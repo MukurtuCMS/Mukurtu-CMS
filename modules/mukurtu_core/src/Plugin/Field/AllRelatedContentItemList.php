@@ -20,17 +20,20 @@ class AllRelatedContentItemList extends EntityReferenceFieldItemList {
     $defaultRelatedContentOption = $config->get('mukurtu_related_content_display') ?? 'computed';
     $entity = $this->getEntity();
 
+    if (!$entity->hasField('field_related_content')) {
+      return;
+    }
+
     // Get the local refs for the related content field, if present.
     $relatedIds = [];
     $delta = 0;
-    if ($entity->hasField('field_related_content')) {
-      $related = $entity->get('field_related_content')->referencedEntities();
-      foreach ($related as $relatedContent) {
-        $this->list[$delta] = $this->createItem($delta++, $relatedContent->id());
 
-        // Track IDs of content we've already added so we don't dupe them later.
-        $relatedIds[] = $relatedContent->id();
-      }
+    $related = $entity->get('field_related_content')->referencedEntities();
+    foreach ($related as $relatedContent) {
+      $this->list[$delta] = $this->createItem($delta++, $relatedContent->id());
+
+      // Track IDs of content we've already added so we don't dupe them later.
+      $relatedIds[] = $relatedContent->id();
     }
 
     // If site is configured to display the related content field as is,

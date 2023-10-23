@@ -44,9 +44,10 @@ class ExecuteImportForm extends ImportBaseForm {
       ];
 
       // Import Configuration.
+      $label = $import_config_for_file->label() ?? $this->t("Custom");
       $form['table'][$fid]['config'] = [
         '#type' => 'markup',
-        '#markup' => "<div>{$import_config_for_file->label()}</div>",
+        '#markup' => "<div>{$label}</div>",
       ];
 
       // Destination Type.
@@ -91,6 +92,7 @@ class ExecuteImportForm extends ImportBaseForm {
     // Build migrations for each input file.
     foreach ($metadataFiles as $fid) {
       $config = $this->getImportConfig($fid);
+      /** @var \Drupal\file\FileInterface $metadataFile */
       $metadataFile = $this->entityTypeManager->getStorage('file')->load($fid);
       if (!$metadataFile) {
         continue;

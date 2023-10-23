@@ -132,6 +132,17 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return $this->target_bundle ?? NULL;
   }
 
+  /*
+  Example:
+   0 => array:2 [▼
+    "target" => "uuid"
+    "source" => "UUID"
+  ]
+  1 => array:2 [▼
+    "target" => "title"
+    "source" => "Title"
+  ]
+   */
   public function getMapping() {
     return $this->mapping ?? [];
   }
