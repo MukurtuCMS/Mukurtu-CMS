@@ -12,7 +12,7 @@ use Drupal\field\Entity\FieldConfig;
 
 
 /**
- * Test the ability of import to lookup entities by different ID types.
+ * Test the import of taxonomy terms..
  */
 class ImportTaxonomyTermsTest extends MukurtuImportTestBase {
   /**

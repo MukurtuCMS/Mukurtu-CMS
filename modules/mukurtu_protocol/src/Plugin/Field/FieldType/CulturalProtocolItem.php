@@ -189,42 +189,37 @@ class CulturalProtocolItem extends FieldItemBase {
     return [];
   }
 
+
   /**
    * {@inheritdoc}
    */
-  public function setValue($values, $notify = TRUE) {
-    // Treat the values as property value of the first property, if no array is
-    // given.
-    $value = $values['value'] ?? NULL;
-    if (isset($values) && !is_array($values)) {
-      $value = $values;
+  public function setValue($value, $notify = TRUE) {
+    $new_value['sharing_setting'] = $value['sharing_setting'] ?? ($this->get('sharing_setting')->getValue() ?? NULL);
+
+    if (isset($value['protocols'])) {
+      $new_value['protocols'] = is_array($value['protocols']) ? $this->formatProtocols($value['protocols']) : $value['protocols'];
+      return parent::setValue($new_value, $notify);
     }
 
-    if (isset($values['protocols'])) {
-      $values['protocols'] = $this->formatProtocols($values['protocols']);
-    }
-
-    // If the sharing setting is the only thing trying to be set, bring in the
-    // existing protocols if they exist.
-    if (isset($values['sharing_setting']) && !isset($values['protocols'])) {
-      if ($existingProtocols = $this->get('protocols')) {
-        $values['protocols'] = $existingProtocols->getValue();
-      }
-    }
-
-    if (!(isset($values['protocols']) && isset($values['sharing_setting']))) {
+    // Protocol string format, e.g.,: "all(1,2,3)".
+    if (is_string($value)) {
       preg_match('/^(\w+)\s*\((.+)\)\s*/', $value, $matches, PREG_OFFSET_CAPTURE);
-      if (!isset($matches[1]) || !isset($matches[2])) {
-        return;
-       //throw new \InvalidArgumentException();
+      if (isset($matches[1]) && isset($matches[2])) {
+        $new_value['sharing_setting'] = strtolower($matches[1][0]);
+        $new_value['protocols'] = $this->formatProtocols(explode(',', $matches[2][0]));
+        return parent::setValue($new_value, $notify);
       }
-      $values = [];
-      $values['sharing_setting'] = strtolower($matches[1][0]);
-      $values['protocols'] = explode(',', $matches[2][0]);
-      $values['protocols'] = $this->formatProtocols($value['protocols']);
     }
 
-    parent::setValue($values, $notify);
+    // At this point, we've either got only a sharing setting property coming in
+    // or invalid arguments.
+    // Try using the old protocols value.
+    $new_value['protocols'] = $this->get('protocols')->getValue() ?? NULL;
+    if ($new_value['sharing_setting'] && $new_value['protocols']) {
+      return parent::setValue($new_value, $notify);
+    }
+
+    throw new \InvalidArgumentException();
   }
 
   /**

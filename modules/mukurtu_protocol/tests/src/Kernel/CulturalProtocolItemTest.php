@@ -130,6 +130,55 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
+   * Updated entity, test all the setValue formats.
+   */
+  public function testUpdatedEntityProtocolsViaSetValue() {
+    $entity = $this->entity;
+
+    foreach (range(0, 2) as $delta) {
+      $this->communities[$delta]->addMember($this->currentUser);
+      $this->protocols[$delta]->addMember($this->currentUser, ['protocol_steward']);
+    }
+
+    // Set both sharing setting and protocols.
+    $original_protocol_ids = [$this->protocols[0]->id()];
+    $entity->setSharingSetting('any');
+    $entity->setProtocols($original_protocol_ids);
+    $entity->save();
+    $this->assertEqual($original_protocol_ids, $entity->getProtocols());
+
+    // Set three valid protocols.
+    $new_protocol_ids = [$this->protocols[0]->id(), $this->protocols[1]->id(), $this->protocols[2]->id()];
+    // Reload the entity fresh and set the protocols property directly.
+    $node = $this->entityTypeManager->getStorage('node')->load($entity->id());
+    $node->set('field_cultural_protocols', ['protocols' => $new_protocol_ids]);
+    $node->save();
+    $this->assertEqual('any', $node->getSharingSetting());
+    $this->assertEqual($new_protocol_ids, $node->getProtocols());
+
+    // Test the string format.
+    $node->set('field_cultural_protocols', "all({$this->protocols[1]->id()},{$this->protocols[2]->id()})");
+    $this->assertEqual('all', $node->getSharingSetting());
+    $this->assertEqual([$this->protocols[1]->id(), $this->protocols[2]->id()], $node->getProtocols());
+
+    // Test the string format with mixed case/spacing.
+    $node->set('field_cultural_protocols', "ANy   ({$this->protocols[2]->id()},   {$this->protocols[0]->id()})    ");
+    $this->assertEqual('any', $node->getSharingSetting());
+    // Protocols get sorted, order is not maintained.
+    $this->assertEqual([$this->protocols[0]->id(), $this->protocols[2]->id()], $node->getProtocols());
+
+    // Test setting sharing setting only.
+    $node->set('field_cultural_protocols', ['sharing_setting' => 'all']);
+    $this->assertEqual('all', $node->getSharingSetting());
+    $this->assertEqual([$this->protocols[0]->id(), $this->protocols[2]->id()], $node->getProtocols());
+
+    // Test setting both properties.
+    $node->set('field_cultural_protocols', ['sharing_setting' => 'any', 'protocols' => $new_protocol_ids]);
+    $this->assertEqual('any', $node->getSharingSetting());
+    $this->assertEqual($new_protocol_ids, $node->getProtocols());
+  }
+
+  /**
    * Updated entity, all valid protocols.
    */
   public function testUpdatedEntityAllValidProtocols() {
