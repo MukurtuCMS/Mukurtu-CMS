@@ -115,6 +115,61 @@ class ImportTaxonomyTermsTest extends MukurtuImportTestBase {
     // Make sure the terms got reused rather than created twice.
     $this->assertEquals($terms[0]->id(), $terms2[0]->id());
     $this->assertEquals($terms[2]->id(), $terms2[1]->id());
+
+    // Import terms by ID.
+    $data = [
+      ['nid', 'keywords'],
+      [$node->id(), "{$terms[2]->id()};{$terms[1]->id()}"],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_keywords', 'source' => 'keywords'],
+    ];
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+    $node = $this->entityTypeManager->getStorage('node')->load($node->id());
+    $newterms = $node->get('field_keywords')->referencedEntities();
+    $this->assertCount(2, $newterms);
+    $this->assertEquals($terms[2]->id(), $newterms[0]->id());
+    $this->assertEquals($terms[1]->id(), $newterms[1]->id());
+
+    // Import terms by UUID.
+    $data = [
+      ['nid', 'keywords'],
+      [$node->id(), "{$terms[0]->uuid()};{$terms[2]->uuid()}"],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_keywords', 'source' => 'keywords'],
+    ];
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+    $node = $this->entityTypeManager->getStorage('node')->load($node->id());
+    $newterms = $node->get('field_keywords')->referencedEntities();
+    $this->assertCount(2, $newterms);
+    $this->assertEquals($terms[0]->id(), $newterms[0]->id());
+    $this->assertEquals($terms[2]->id(), $newterms[1]->id());
+
+    // Mixed.
+    $data = [
+      ['nid', 'keywords'],
+      [$node->id(), "{$terms[0]->uuid()};{$terms[2]->id()};{$terms[1]->getName()}"],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_keywords', 'source' => 'keywords'],
+    ];
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+    $node = $this->entityTypeManager->getStorage('node')->load($node->id());
+    $newterms = $node->get('field_keywords')->referencedEntities();
+    $this->assertCount(3, $newterms);
+    $this->assertEquals($terms[0]->id(), $newterms[0]->id());
+    $this->assertEquals($terms[2]->id(), $newterms[1]->id());
+    $this->assertEquals($terms[1]->id(), $newterms[2]->id());
   }
 
 }
