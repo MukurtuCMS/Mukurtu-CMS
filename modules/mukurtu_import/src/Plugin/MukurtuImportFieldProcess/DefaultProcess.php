@@ -23,7 +23,7 @@ class DefaultProcess extends MukurtuImportFieldProcessPluginBase {
    * {@inheritdoc}
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
-    $multivalue_delimiter = $context['multivalue_delimiter'] ?? ';';
+    $multivalue_delimiter = $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER;
 
     if ($this->isMultiple($field_config)) {
       return [

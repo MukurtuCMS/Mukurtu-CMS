@@ -3,7 +3,6 @@
 namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
 use Drupal\migrate\ProcessPluginBase;
-use Drupal\migrate\MigrateException;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
 
@@ -28,36 +27,32 @@ use Drupal\migrate\Row;
  *
  */
 
-class LabelLookup extends ProcessPluginBase
-{
+class LabelLookup extends ProcessPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property)
-  {
+  public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     $allowedValues = [];
     $entityType = $this->configuration['entity_type'];
     $fieldName = $this->configuration['field_name'];
     $bundle = $this->configuration['bundle'];
 
     $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions($entityType, $bundle);
-    if (array_key_exists($fieldName, $fields)) {
-      /** @var \Drupal\field\Entity\FieldConfig $fieldConfig */
-      $fieldConfig = $fields[$fieldName];
-      $allowedValues = $fieldConfig->getSetting('allowed_values');
-      $lowercaseValues = array_map('strtolower', $allowedValues);
-      $machineName = array_search(strtolower($value), $lowercaseValues);
 
-      if ($machineName) {
-        return $machineName;
-      }
-      // If lookup does not resolve to a valid machine name, return the value.
-      else {
+    /** @var \Drupal\field\Entity\FieldConfig $fieldConfig */
+    if ($fieldConfig = $fields[$fieldName] ?? NULL) {
+      $allowedValues = $fieldConfig->getSetting('allowed_values');
+      if (isset($allowedValues[$value])) {
         return $value;
       }
+
+      $lowercaseValues = array_map('mb_strtolower', $allowedValues);
+      if ($key = array_search(mb_strtolower($value), $lowercaseValues)) {
+        return $key;
+      }
     }
-    else {
-      // Error out.
-    }
+
+    return $value;
   }
+
 }

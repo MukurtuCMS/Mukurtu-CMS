@@ -23,13 +23,22 @@ class ListString extends MukurtuImportFieldProcessPluginBase {
    * {@inheritdoc}
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
-    return [
+    $multivalue_delimiter = $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER;
+    $process = [];
+    if ($this->isMultiple($field_config)) {
+      $process[] = [
+        'plugin' => 'explode',
+        'delimiter' => $multivalue_delimiter,
+      ];
+    }
+    $process[] = [
       'plugin' => 'label_lookup',
-      'source' => $source,
-      'entity_type' => $field_config->getSetting('entity_type'),
+      'entity_type' => $field_config->getTargetEntityTypeId(),
       'field_name' => $field_config->getName(),
-      'bundle' => $field_config->getSetting('bundle'),
+      'bundle' => $field_config->getTargetBundle(),
     ];
+    $process[0]['source'] = $source;
+    return $process;
   }
 
   /**

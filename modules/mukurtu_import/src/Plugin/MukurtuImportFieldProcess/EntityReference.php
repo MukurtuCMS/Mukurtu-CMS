@@ -24,7 +24,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
     $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
-    $multivalue_delimiter = $context['multivalue_delimiter'] ?? ';';
+    $multivalue_delimiter = $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER;
     $refType = $field_config->getSetting('target_type');
     $multiple = $cardinality == -1 || $cardinality > 1;
     $process = [];

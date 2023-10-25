@@ -25,7 +25,6 @@ class ImportLinksTest extends MukurtuImportTestBase {
     parent::setUp();
 
     $this->installConfig(['link']);
-//    $this->installSchema('link',[]);
 
     $field_storage = FieldStorageConfig::create([
       'field_name' => 'field_links',

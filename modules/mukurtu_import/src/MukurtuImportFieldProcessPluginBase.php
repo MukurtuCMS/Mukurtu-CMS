@@ -9,7 +9,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
  * Base class for mukurtu_import_field_process plugins.
  */
 class MukurtuImportFieldProcessPluginBase extends PluginBase implements MukurtuImportFieldProcessInterface {
-
+  const MULTIVALUE_DELIMITER = ";";
   /**
    * An array of field types the process supports.
    *
@@ -17,6 +17,7 @@ class MukurtuImportFieldProcessPluginBase extends PluginBase implements MukurtuI
    */
   public $field_types = [];
   public $weight = 0;
+
 
 
   /**
