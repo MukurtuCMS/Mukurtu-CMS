@@ -114,7 +114,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
 
     if ($refType == 'taxonomy_term') {
       $auto_create = $field_config->getSetting('handler_settings')['auto_create'] ?? FALSE;
-      $description = $multiple ? "Taxonomy term names, separated by your selected multi-value delimiter." : "Taxonomy term name.";
+      $description = $multiple ? "Taxonomy term names, IDs, or UUIDs, separated by your selected multi-value delimiter. Each name must be exact and match only one term in that vocabulary." : "Taxonomy term name, ID, or UUID. The name must be exact and match only one term in that vocabulary.";
       if ($auto_create) {
         $description .= " New terms will be created if they do not already exist.";
       }
