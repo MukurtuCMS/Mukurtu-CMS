@@ -108,7 +108,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
     $refType = $field_config->getSetting('target_type');
 
     if ($refType == 'user') {
-      $description = $multiple ? "Usernames, separated by your selected multi-value delimiter." : "The username.";
+      $description = $multiple ? "Usernames or User IDs, separated by your selected multi-value delimiter." : "The username or user ID.";
       return t($description);
     }
 
