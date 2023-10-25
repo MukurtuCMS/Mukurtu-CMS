@@ -33,6 +33,12 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
         'source' => $source,
         'delimiter' => $multivalue_delimiter,
       ];
+      // Resolve any UUIDs.
+      $process[] = [
+        'plugin' => 'uuid_lookup',
+        'entity_type' => 'protocol',
+      ];
+      // Resolve any values passed by protocol name.
       $process[] = [
         'plugin' => 'mukurtu_entity_lookup',
         'value_key' => \Drupal::entityTypeManager()->getDefinition('protocol')->getKey('label'),

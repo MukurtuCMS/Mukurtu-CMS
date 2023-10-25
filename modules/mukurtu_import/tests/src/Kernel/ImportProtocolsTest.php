@@ -94,6 +94,27 @@ class ImportProtocolsTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Test importing protocols by UUID.
+   */
+  public function testProtocolOnlyByUUID() {
+    $data = [
+      ['nid', 'Protocols'],
+      [$this->node->id(), "{$this->protocol2->uuid()};{$this->protocol3->uuid()}"],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+    $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
+    $this->assertEquals([$this->protocol2->id(), $this->protocol3->id()], $updated_node->getProtocols());
+  }
+
+  /**
    * Test importing protocols, by name.
    */
   public function testProtocolOnlyByName() {
