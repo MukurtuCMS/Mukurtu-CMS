@@ -1,0 +1,43 @@
+id: mukurtu_cms_v3_legacy_tk_default_project_site_supported
+label: Legacy TK Default Project - Site Supported
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: empty
+
+process:
+  project_id:
+    plugin: default_value
+    default_value: default_tk
+  type:
+    plugin: default_value
+    default_value: site
+  group_id:
+    plugin: default_value
+    default_value: 0
+
+destination:
+  plugin: table
+  table_name: mukurtu_local_contexts_supported_projects
+  id_fields:
+    project_id:
+      type: string
+    type:
+      type: string
+    group_id:
+      type: integer
+  fields:
+    project_id: project_id
+    type: type
+    group_id: group_id
+
+migration_dependencies:
+  optional:
+    - d7_field_instance
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate

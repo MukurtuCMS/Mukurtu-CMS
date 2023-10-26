@@ -182,8 +182,11 @@ process:
         'ds_code': 'full_html'
       default_value: 'full_html'
 
-  # TODO: field_licence_trad
   # TODO: field_coverage
+
+  field_local_contexts_labels_and_notices:
+    plugin: transform_tk_label
+    source: field_licence_trad
 
   field_creative_commons: field_licence_std_cc
 

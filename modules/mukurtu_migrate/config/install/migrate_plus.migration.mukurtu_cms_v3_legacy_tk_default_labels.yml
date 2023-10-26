@@ -1,0 +1,57 @@
+id: mukurtu_cms_v3_legacy_tk_default_labels
+label: Legacy TK Default Labels
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: mukurtu_v3_legacy_tk_default_labels
+
+process:
+  id: id
+  project_id: project_id
+  name: name
+  locale: locale
+  language: language
+  img_url: img_url
+  svg_url: svg_url
+  audio_url: audio_url
+  community: community
+  type: type
+  display: display
+  tk_or_bc: tk_or_bc
+  default_text: default_text
+  updated: updated
+
+destination:
+  plugin: table
+  table_name: mukurtu_local_contexts_labels
+  id_fields:
+    id:
+      type: string
+    project_id:
+      type: string
+  fields:
+    id: id
+    project_id: project_id
+    name: name
+    locale: locale
+    language: language
+    img_url: img_url
+    svg_url: svg_url
+    audio_url: audio_url
+    community: community
+    type: type
+    display: display
+    tk_or_bc: tk_or_bc
+    default_text: default_text
+    updated: updated
+
+migration_dependencies:
+  optional:
+    - d7_field_instance
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate

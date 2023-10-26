@@ -125,7 +125,7 @@ function mukurtu_local_contexts_schema() {
         'type' => 'varchar',
         'length' => 128,
         'not null' => FALSE,
-        'description' => 'Type',
+        'description' => 'Language',
       ],
       'img_url' => [
         'type' => 'text',

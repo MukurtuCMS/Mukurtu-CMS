@@ -1,0 +1,49 @@
+id: mukurtu_cms_v3_legacy_tk_default_project
+label: Legacy TK Default Project
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: empty
+
+process:
+  id:
+    plugin: default_value
+    default_value: default_tk
+  privacy:
+    plugin: default_value
+    default_value: NULL
+  provider_id:
+    plugin: default_value
+    default_value: NULL
+  title:
+    plugin: default_value
+    default_value: TK Legacy Labels - Default
+  updated:
+    plugin: callback
+    callable: time
+    unpack_source: true
+    source: [  ]
+
+destination:
+  plugin: table
+  table_name: mukurtu_local_contexts_projects
+  id_fields:
+    id:
+      type: string
+  fields:
+    id: id
+    provider_id: provider_id
+    title: title
+    privacy: privacy
+    updated: updated
+
+migration_dependencies:
+  optional:
+    - d7_field_instance
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
