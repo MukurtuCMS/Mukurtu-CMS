@@ -64,7 +64,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t(''))
+      ->setDescription(t('Keywords provide added ways to group your content. They make it easier for users to search and retrieve content.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',

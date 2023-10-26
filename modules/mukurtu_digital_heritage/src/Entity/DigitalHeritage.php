@@ -472,7 +472,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Keyword'))
+      ->setLabel(t('Keywords'))
       ->setDescription(t('Keywords are terms used to describe a Digital Heritage Item to ensure that the item will be discoverable when searching or browsing. Keywords are more flexible and specific than Categories. Contributors can create new Keywords as needed when creating or editing a Digital Heritage Item. Consider adding 3-­5 Keywords that will help users discover the Digital Heritage Item through searching or browsing. Separate multiple Keywords with semicolons (eg: basket; weaving).'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
