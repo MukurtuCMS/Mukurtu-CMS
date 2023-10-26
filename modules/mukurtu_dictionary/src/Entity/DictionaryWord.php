@@ -65,6 +65,16 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
+      ->setLabel(t('Location'))
+      ->setDescription(t(''))
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
       ->setDescription(t(''))
