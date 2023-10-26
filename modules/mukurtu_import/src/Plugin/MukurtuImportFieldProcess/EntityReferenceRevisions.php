@@ -47,9 +47,9 @@ class EntityReferenceRevisions extends EntityReference {
    */
   public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
     if ($this->isMultiple($field_config)) {
-      return t("The current entity revision IDs of the paragraphs, separated by your selected multi-value delimiter.");
+      return t("The ID or UUIDs of the paragraphs, separated by your selected multi-value delimiter.");
     }
-    return t('The current entity revision ID of the paragraph.');
+    return t('The ID or UUID of the paragraph.');
   }
 
 }

@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
 use Drupal\Core\Entity\RevisionableInterface;
-use Drupal\mukurtu_import\Plugin\migrate\process\MukurtuEntityLookup;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\MigrateException;
 use Drupal\migrate\MigrateExecutableInterface;
@@ -40,8 +39,8 @@ class CurrentEntityRevision extends ProcessPluginBase {
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($target_id);
     if ($entity && $entity instanceof RevisionableInterface) {
       return [
-        'target_id' => $target_id,
-        'target_revision_id' => $entity->getRevisionId(),
+        'target_id' => (int) $target_id,
+        'target_revision_id' => (int) $entity->getRevisionId(),
       ];
     }
     throw new MigrateException(sprintf('Could not lookup current revision for ID "%s".', $target_id));
