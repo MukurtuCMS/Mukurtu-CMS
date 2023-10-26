@@ -8,8 +8,6 @@ use Drupal\og\Og;
 use Drupal\user\Entity\Role;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\mukurtu_protocol\Entity\Community;
-use Drupal\mukurtu_protocol\Entity\Protocol;
 
 class ProtocolAwareEntityTestBase extends EntityKernelTestBase {
   /**
@@ -94,6 +92,11 @@ class ProtocolAwareEntityTestBase extends EntityKernelTestBase {
         'administer permissions',
         'approve and deny subscription',
         'create protocol_aware_content node',
+        'create collection content',
+        'edit any collection content',
+        'delete any collection content',
+        'edit own collection content',
+        'delete own collection content',
         'delete any protocol_aware_content node',
         'delete own protocol_aware_content node',
         'update any protocol_aware_content node',
