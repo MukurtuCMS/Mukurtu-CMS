@@ -34,6 +34,10 @@ class File extends MukurtuImportFieldProcessPluginBase {
       ];
     }
     $process[] = [
+      'plugin' => 'uuid_lookup',
+      'entity_type' => 'file',
+    ];
+    $process[] = [
       'plugin' => 'mukurtu_fileitem',
       'upload_location' => $context['upload_location'] ?? '',
     ];

@@ -106,6 +106,7 @@ class MukurtuImportTestBase extends MigrateTestBase {
     $this->installEntitySchema('protocol');
     $this->installEntitySchema('node');
     $this->installEntitySchema('mukurtu_import_strategy');
+    $this->installSchema('file', 'file_usage');
     $this->installSchema('system', 'sequences');
     $this->installSchema('node', ['node_access']);
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');

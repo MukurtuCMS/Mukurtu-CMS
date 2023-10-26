@@ -10,7 +10,7 @@ class BundleListController extends ControllerBase {
 
   public function bundlesList() {
     $build = [];
-    $entity_types = ['node', 'media', 'paragraph'];
+    $entity_types = ['node', 'media', 'paragraph', 'file'];
     $entity_type_labels = [];
 
     foreach ($entity_types as $entity_type) {
