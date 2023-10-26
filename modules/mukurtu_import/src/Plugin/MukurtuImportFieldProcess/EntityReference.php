@@ -121,7 +121,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
       return t($description);
     }
 
-    $description = $multiple ? "IDs or UUIDs of the references, separated by your selected multi-value delimiter." : "ID or UUID of the reference.";
+    $description = $multiple ? "IDs, UUIDs, or titles of the references, separated by your selected multi-value delimiter. Each title must be exact and match only one item." : "ID, UUID, or title of the reference. The title must be exact and match only one item.";
     return t($description);
   }
 
