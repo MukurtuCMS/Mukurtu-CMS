@@ -10,7 +10,7 @@ third_party_settings:
     parent: 'main:'
 name: 'Word List'
 type: word_list
-description: ''
+description: 'A collection of dictionary words.'
 help: ''
 new_revision: true
 preview_mode: 1

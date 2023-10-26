@@ -10,7 +10,7 @@ third_party_settings:
     parent: 'main:'
 name: Person
 type: person
-description: ''
+description: 'Add detailed information about a specific person.'
 help: ''
 new_revision: true
 preview_mode: 1

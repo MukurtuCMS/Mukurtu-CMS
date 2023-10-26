@@ -10,7 +10,7 @@ third_party_settings:
     parent: 'main:'
 name: Collection
 type: collection
-description: ''
+description: 'A collection of digital heritage items.'
 help: ''
 new_revision: true
 preview_mode: 1
