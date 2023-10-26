@@ -34,6 +34,20 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_summary'] = BaseFieldDefinition::create('string')
+      ->setLabel('Summary')
+      ->setDescription(t(''))
+      ->setSettings([
+        'max_length' => 255,
+      ])
+      ->setDefaultValue('')
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_source'] = BaseFieldDefinition::create('string')
       ->setLabel('Source')
       ->setDescription(t(''))
@@ -126,6 +140,23 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Related Content'))
+      ->setDescription(t(''))
+        ->setSettings([
+          'target_type' => 'node',
+          'handler' => 'default:node',
+          'handler_settings' => [
+            'target_bundles' => NULL,
+            'auto_create' => FALSE,
+          ]
+        ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     return $definitions;
   }
