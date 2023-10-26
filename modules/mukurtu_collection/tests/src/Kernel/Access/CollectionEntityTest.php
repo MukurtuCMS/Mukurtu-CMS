@@ -2,45 +2,24 @@
 
 namespace Drupal\Tests\mukurtu_collection\Kernel\Access;
 
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\og\Entity\OgRole;
-use Drupal\og\Og;
-use Drupal\user\Entity\Role;
+use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 
 /**
  * Tests collection operations & functionality.
  *
  * @group mukurtu_collection
  */
-class CollectionEntityTest extends EntityKernelTestBase {
+class CollectionEntityTest extends ProtocolAwareEntityTestBase {
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = [
-    'block_content',
-    'content_moderation',
-    'workflows',
-    'field',
-    'filter',
-    'image',
-    'node',
-    'node_access_test',
-    'media',
-    'og',
-    'options',
-    'system',
-    'text',
-    'taxonomy',
-    'user',
-    'views',
-    'mukurtu_core',
-    'mukurtu_protocol',
     'mukurtu_collection'
   ];
 
@@ -77,89 +56,18 @@ class CollectionEntityTest extends EntityKernelTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->installConfig(['filter', 'og', 'system']);
-    $this->installEntitySchema('og_membership');
-    $this->installEntitySchema('user');
-    $this->installEntitySchema('taxonomy_term');
-    $this->installEntitySchema('workflow');
-    $this->installEntitySchema('community');
-    $this->installEntitySchema('protocol');
-    $this->installEntitySchema('node');
-    $this->installSchema('node', ['node_access']);
-    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
-    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
-
-    // Flag community entities as Og groups
-    // so Og does its part for access control.
-    Og::addGroup('community', 'community');
-    Og::addGroup('protocol', 'protocol');
-
     // Create the collection bundle.
     NodeType::create([
       'type' => 'collection',
       'name' => 'Collection',
     ])->save();
 
-    // Create a type to put in the collection.
-    NodeType::create([
-      'type' => 'thing',
-      'name' => 'Thing',
-    ])->save();
-
-    // Create a user role for a standard authenticated user.
-    $role = Role::create([
-      'id' => 'authenticated',
-      'label' => 'authenticated',
-    ]);
-    $role->grantPermission('access content');
-    $role->grantPermission('create collection content');
-    $role->grantPermission('create thing content');
-    $role->grantPermission('bypass node access');
-    $role->save();
-
-    // Create the protocol steward role with our
-    // default Mukurtu permission set for the thing node type.
-    $values = [
-      'name' => 'protocol_steward',
-      'label' => 'Protocol Steward',
-      'permissions' => [
-        'add user',
-        'administer permissions',
-        'approve and deny subscription',
-        'create thing node',
-        'delete any thing node',
-        'delete own thing node',
-        'update any thing node',
-        'update own thing node',
-        'create collection content',
-        'edit any collection content',
-        'delete any collection content',
-        'edit own collection content',
-        'delete own collection content',
-        'manage members',
-        'update group',
-      ],
-    ];
-    $protocolStewardRole = OgRole::create($values);
-    $protocolStewardRole->setGroupType('protocol');
-    $protocolStewardRole->setGroupBundle('protocol');
-    $protocolStewardRole->save();
-
-    // Create user and set as current user.
-    $owner = $this->createUser();
-    $owner->save();
-    $container = \Drupal::getContainer();
-    $container
-      ->get('current_user')
-      ->setAccount($owner);
-    $this->owner = $owner;
-
     $community = Community::create([
       'name' => 'Community',
     ]);
     $community->save();
     $this->community = $community;
-    $this->community->addMember($owner);
+    $this->community->addMember($this->currentUser);
 
     $protocol = Protocol::create([
       'name' => "Protocol",
@@ -167,7 +75,7 @@ class CollectionEntityTest extends EntityKernelTestBase {
       'field_access_mode' => 'open',
     ]);
     $protocol->save();
-    $protocol->addMember($owner, ['protocol_steward']);
+    $protocol->addMember($this->currentUser, ['protocol_steward']);
     $this->protocol = $protocol;
 
     $collection = $this->createEmptyCollection();
@@ -192,7 +100,7 @@ class CollectionEntityTest extends EntityKernelTestBase {
       'field_collection_image' => NULL,
       'field_related_content' => NULL,
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'uid' => $this->currentUser->id(),
     ]);
   }
 
@@ -219,9 +127,9 @@ class CollectionEntityTest extends EntityKernelTestBase {
     // Add an item to the collection.
     $thing = Node::create([
       'title' => $this->randomString(),
-      'type' => 'thing',
+      'type' => 'protocol_aware_content',
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'uid' => $this->currentUser->id(),
     ]);
     $thing->save();
     $this->assertEquals(0, $this->collection->getCount());
@@ -297,9 +205,9 @@ class CollectionEntityTest extends EntityKernelTestBase {
     foreach (range(0,2) as $delta) {
       $thing = Node::create([
         'title' => $this->randomString(),
-        'type' => 'thing',
+        'type' => 'protocol_aware_content',
         'status' => TRUE,
-        'uid' => $this->owner->id(),
+        'uid' => $this->currentUser->id(),
       ]);
       $thing->save();
       $things[$thing->id()] = $thing;
@@ -360,9 +268,9 @@ class CollectionEntityTest extends EntityKernelTestBase {
     foreach (range(0, 4) as $delta) {
       $thing = Node::create([
         'title' => $this->randomString(),
-        'type' => 'thing',
+        'type' => 'protocol_aware_content',
         'status' => TRUE,
-        'uid' => $this->owner->id(),
+        'uid' => $this->currentUser->id(),
       ]);
       $thing->save();
       $things[$thing->id()] = $thing;
@@ -381,9 +289,9 @@ class CollectionEntityTest extends EntityKernelTestBase {
     foreach (range(0, 4) as $delta) {
       $thing = Node::create([
         'title' => $this->randomString(),
-        'type' => 'thing',
+        'type' => 'protocol_aware_content',
         'status' => TRUE,
-        'uid' => $this->owner->id(),
+        'uid' => $this->currentUser->id(),
       ]);
       $thing->save();
       $things[$thing->id()] = $thing;
