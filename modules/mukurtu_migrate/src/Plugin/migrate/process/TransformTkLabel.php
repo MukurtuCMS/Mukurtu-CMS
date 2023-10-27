@@ -20,7 +20,7 @@ class TransformTkLabel extends ProcessPluginBase
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property)
   {
     // Cheat to get a db connection in here.
-    $mid = 'mukurtu_cms_v3_tk_default_labels';
+    $mid = 'mukurtu_cms_v3_legacy_tk_default_labels';
     $pmm = \Drupal::service('plugin.manager.migration');
     $migrations = $pmm->createInstances([$mid]);
     $key = $row->getSource()['key'] ?? 'migrate';
