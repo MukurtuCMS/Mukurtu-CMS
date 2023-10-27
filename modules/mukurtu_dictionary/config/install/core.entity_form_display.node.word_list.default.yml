@@ -106,7 +106,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_description:
-    type: external_embed_widget
+    type: text_textarea
     weight: 3
     region: content
     settings:
