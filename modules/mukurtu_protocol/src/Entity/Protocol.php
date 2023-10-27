@@ -434,7 +434,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Name'))
+      ->setLabel(t('Cultural protocol name'))
       ->setDescription(t('The name of the Protocol.'))
       ->setRevisionable(TRUE)
       ->setSettings([

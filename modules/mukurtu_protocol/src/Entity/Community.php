@@ -519,7 +519,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Name'))
+      ->setLabel(t('Community name'))
       ->setDescription(t('The name of the Community.'))
       ->setRevisionable(TRUE)
       ->setSettings([

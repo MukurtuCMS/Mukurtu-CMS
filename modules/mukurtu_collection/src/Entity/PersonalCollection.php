@@ -286,7 +286,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Name'))
+      ->setLabel(t('Personal collection name'))
       ->setDescription(t('The name of the Personal collection.'))
       ->setRevisionable(TRUE)
       ->setSettings([
