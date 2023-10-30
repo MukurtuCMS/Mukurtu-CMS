@@ -66,6 +66,14 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
 }
 
 /**
+ * Implements hook_form_form_id_alter().
+ */
+function mukurtu_taxonomy_form_taxonomy_term_category_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // Change Category title field label.
+  $form['name']['widget'][0]['value']['#title'] = t('Category name');
+}
+
+/**
  * Prepares variables for list of available vocabulary templates.
  *
  * Default template: mukurtu-vocabulary-add-list.html.twig.
