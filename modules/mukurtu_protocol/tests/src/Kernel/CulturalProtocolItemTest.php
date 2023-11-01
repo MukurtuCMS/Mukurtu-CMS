@@ -14,6 +14,13 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
 
   protected $entity;
 
+/**
+   * The admin account (UID 1).
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $admin;
+
   /**
    * The user account with high levels of access to all protocols.
    *
@@ -21,12 +28,26 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
    */
   protected $privilegedUser;
 
+  /**
+   * Another user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $otherUser;
+
   protected function setUp() {
     parent::setUp();
+
+    // Created in parent.
+    $this->admin = $this->currentUser;
 
     $user = $this->createUser();
     $user->save();
     $this->privilegedUser = $user;
+
+    $user = $this->createUser();
+    $user->save();
+    $this->otherUser = $user;
 
     foreach (range(0,2) as $delta) {
       $community = Community::create([
@@ -54,6 +75,8 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
       'uid' => $this->currentUser->id(),
     ]);
     $this->entity = $entity;
+
+    $this->setCurrentUser($this->otherUser);
   }
 
   /**
@@ -83,8 +106,8 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity = $this->entity;
 
     foreach (range(0,2) as $delta) {
-      $this->communities[$delta]->addMember($this->currentUser);
-      $this->protocols[$delta]->addMember($this->currentUser, ['protocol_steward']);
+      $this->communities[$delta]->addMember($this->otherUser);
+      $this->protocols[$delta]->addMember($this->otherUser, ['protocol_steward']);
     }
 
     $protocol_ids = [$this->protocols[0]->id(), $this->protocols[1]->id(), $this->protocols[2]->id()];
@@ -101,8 +124,8 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity = $this->entity;
 
     foreach (range(0, 1) as $delta) {
-      $this->communities[$delta]->addMember($this->currentUser);
-      $this->protocols[$delta]->addMember($this->currentUser, ['protocol_steward']);
+      $this->communities[$delta]->addMember($this->otherUser);
+      $this->protocols[$delta]->addMember($this->otherUser, ['protocol_steward']);
     }
 
     $protocol_ids = [$this->protocols[0]->id(), $this->protocols[1]->id(), $this->protocols[2]->id()];
@@ -136,8 +159,8 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity = $this->entity;
 
     foreach (range(0, 2) as $delta) {
-      $this->communities[$delta]->addMember($this->currentUser);
-      $this->protocols[$delta]->addMember($this->currentUser, ['protocol_steward']);
+      $this->communities[$delta]->addMember($this->otherUser);
+      $this->protocols[$delta]->addMember($this->otherUser, ['protocol_steward']);
     }
 
     // Set both sharing setting and protocols.
@@ -185,8 +208,8 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity = $this->entity;
 
     foreach (range(0, 2) as $delta) {
-      $this->communities[$delta]->addMember($this->currentUser);
-      $this->protocols[$delta]->addMember($this->currentUser, ['protocol_steward']);
+      $this->communities[$delta]->addMember($this->otherUser);
+      $this->protocols[$delta]->addMember($this->otherUser, ['protocol_steward']);
     }
 
     // Set one valid protocol.
@@ -210,8 +233,8 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity = $this->entity;
 
     foreach (range(0, 1) as $delta) {
-      $this->communities[$delta]->addMember($this->currentUser);
-      $this->protocols[$delta]->addMember($this->currentUser, ['protocol_steward']);
+      $this->communities[$delta]->addMember($this->otherUser);
+      $this->protocols[$delta]->addMember($this->otherUser, ['protocol_steward']);
     }
 
     // privilegedUser sets all protocols.
@@ -224,7 +247,7 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $this->assertEqual($original_protocol_ids, $entity->getProtocols());
 
     // Other user tries to unset a protocol they can't apply.
-    $this->setCurrentUser($this->currentUser);
+    $this->setCurrentUser($this->otherUser);
     $new_protocol_ids = [$this->protocols[0]->id(), $this->protocols[1]->id()];
     $entity->setProtocols($new_protocol_ids);
     $entity->save();
@@ -238,8 +261,8 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
   public function testUpdatedEntityRemovedAndAddedInaccessibleProtocols() {
     // Current user can apply protocol 0.
     $entity = $this->entity;
-    $this->communities[0]->addMember($this->currentUser);
-    $this->protocols[0]->addMember($this->currentUser, ['protocol_steward']);
+    $this->communities[0]->addMember($this->otherUser);
+    $this->protocols[0]->addMember($this->otherUser, ['protocol_steward']);
 
     // privilegedUser sets protocols 0 and 1.
     $this->setCurrentUser($this->privilegedUser);
@@ -251,7 +274,7 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $this->assertEqual($original_protocol_ids, $entity->getProtocols());
 
     // Current user tries to unset and set protocols they can't apply.
-    $this->setCurrentUser($this->currentUser);
+    $this->setCurrentUser($this->otherUser);
     $new_protocol_ids = [$this->protocols[2]->id()];
     $entity->setProtocols($new_protocol_ids);
     $entity->save();
