@@ -219,7 +219,11 @@ class CulturalProtocolItem extends FieldItemBase {
       return parent::setValue($new_value, $notify);
     }
 
-    throw new \InvalidArgumentException();
+    // Rather than throwing InvalidArgumentException for invalid arguments,
+    // we'll set the protocol field to NULLs. This isn't actually valid but
+    // this restricts access to UID 1 or the owner only. This is better than
+    // throwing the exception because it doesn't crash the site all the time.
+    return parent::setValue(['protocols' => NULL, 'sharing_setting' => NULL], $notify);
   }
 
   /**
