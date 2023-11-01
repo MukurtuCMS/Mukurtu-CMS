@@ -51,6 +51,9 @@
       <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/mukurtu_import/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
+      <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/mukurtu_export/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
       <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/mukurtu_drafts/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="functional">
