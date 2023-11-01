@@ -50,6 +50,7 @@ class CsvExportFieldTestBase extends ProtocolAwareEntityTestBase {
 
   protected function setUp(): void {
     parent::setUp();
+
     $community = Community::create([
       'name' => 'Community',
     ]);
@@ -66,7 +67,16 @@ class CsvExportFieldTestBase extends ProtocolAwareEntityTestBase {
     $protocol->addMember($this->currentUser, ['protocol_steward']);
     $this->protocol = $protocol;
 
-    $this->export_config = new CsvExporter([], 'node');
+    $this->export_config = CsvExporter::create([
+      'id' => 'test_csv_exporter',
+      'label' => 'Test CSV Exporter',
+      'entity_fields_export_list'  => [
+        'node__protocol_aware_content' => [
+          'title' => 'Title',
+        ]
+      ],
+    ]);
+    $this->export_config->save();
 
     $this->context = [
       'results' => [

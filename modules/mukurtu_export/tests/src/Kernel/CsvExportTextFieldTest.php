@@ -48,11 +48,17 @@ class CsvExportTextFieldTest extends CsvExportFieldTestBase {
     $this->event = new EntityFieldExportEvent('csv', $this->node, 'title', $this->context);
   }
 
+  /**
+   * Test exporting a single value text field.
+   */
   public function testSingleTextFieldExport() {
     $this->fieldExporter->exportField($this->event);
     $this->assertEquals($this->node->getTitle(), $this->event->getValue()[0]);
   }
 
+  /**
+   * Test exporting a multiple value text field.
+   */
   public function testMultipleTextFieldExport() {
     $event = new EntityFieldExportEvent('csv', $this->node, 'field_text_multiple', $this->context);
     $this->fieldExporter->exportField($event);
