@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_migrate\Plugin\migrate\process;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
+use Drupal\mukurtu_protocol\Plugin\Field\FieldType\CulturalProtocolItem;
 
 /**
  * Set protocols.
@@ -32,9 +33,7 @@ class SetProtocols extends ProcessPluginBase {
       $protocol_ids = array_column($value, $key);
     }
 
-    // @todo This should really be calling something provided by
-    // CulturalProtocolControlledTrait rather than embedding the logic directly.
-    return implode(',', array_map(fn($p) => "|$p|", array_map('trim', $protocol_ids)));
+    return CulturalProtocolItem::formatProtocols($protocol_ids);
   }
 
 }
