@@ -81,7 +81,7 @@ class CulturalProtocolItem extends FieldItemBase {
     parent::preSave();
 
     // @todo UID 1 handling?
-    if (\Drupal::currentUser()->id() !== 1) {
+    if ((int) \Drupal::currentUser()->id() !== 1) {
       // For existing entities, bring back in any protocol references that were
       // lost that the user does not have permission to discard.
       $protocol_ids_user_can_apply = $this->getSettableProtocolIds();
