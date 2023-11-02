@@ -4,10 +4,6 @@ audit: true
 migration_tags:
   - Mukurtu 3
 
-migration_dependencies:
-  required:
-    -
-
 source:
   plugin: d7_file
   scheme: private
