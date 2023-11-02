@@ -32,10 +32,25 @@ class MukurtuMigrateAccessCheck {
     // For now, migrating is a one-shot deal. Deny access if a migration has
     // already taken place.
     $store = \Drupal::service('tempstore.private')->get('mukurtu_migrate');
-    if($store->get('mukurtu_migrate.performed')) {
-      AccessResult::forbidden();
+    if ($store->get('mukurtu_migrate.performed')) {
+      return AccessResult::forbidden()->mergeCacheMaxAge(0);
     }
 
+    // The access result is uncacheable because it is just limiting access to
+    // the migrate UI which is not worth caching.
+    return AccessResultAllowed::allowedIf((int) $account->id() === 1)->mergeCacheMaxAge(0);
+  }
+
+  /**
+   * Checks if the user is user 1 and grants access if so.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The current user account.
+   *
+   * @return \Drupal\Core\Access\AccessResult
+   *   The access result.
+   */
+  public function checkAccessResults(AccountInterface $account) {
     // The access result is uncacheable because it is just limiting access to
     // the migrate UI which is not worth caching.
     return AccessResultAllowed::allowedIf((int) $account->id() === 1)->mergeCacheMaxAge(0);

@@ -44,7 +44,7 @@ class ScaldAtom extends FieldableEntity {
    * {@inheritdoc}
    */
    public function fields() {
-    $fields = array(
+    $fields = [
       'sid' => $this->t('Scald Atom ID'),
       'provider' => $this->t('Provider module name'),
       'type' => $this->t('Scald Atom type'),
@@ -56,7 +56,7 @@ class ScaldAtom extends FieldableEntity {
       'data' => $this->t('Scald Atom data'),
       'created' => $this->t('Created timestamp'),
       'changed' => $this->t('Modified timestamp'),
-    );
+    ];
     return $fields;
   }
 
