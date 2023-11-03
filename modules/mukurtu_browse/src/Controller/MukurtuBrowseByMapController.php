@@ -13,24 +13,8 @@ use Drupal\Core\Session\AccountInterface;
 
 class MukurtuBrowseByMapController extends ControllerBase {
 
-  protected $bundles;
-
-  public function getBundles()
-  {
-    if (!$this->bundles) {
-      $this->bundles = array_keys(\Drupal::service('entity_type.bundle.info')->getBundleInfo('node'));
-    }
-    return $this->bundles;
-  }
-
   public function access(AccountInterface $account) {
     if (!$account->hasPermission('access content')) {
-      return AccessResult::forbidden();
-    }
-
-    // Does the digital heritage content type exist?
-    $siteBundles = $this->getBundles();
-    if (!in_array('digital_heritage', $siteBundles)) {
       return AccessResult::forbidden();
     }
 
