@@ -48,7 +48,7 @@ mukurtu_browse.map_browse_page_teasers:
     _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::getTeasersAjax'
     nodes: '[\d\,]+'
   requirements:
-    _access: 'TRUE'
+    _permission: 'access content'
   options:
     parameters:
       nodes:
@@ -58,7 +58,7 @@ mukurtu_browse.map_browse_single_teaser:
   defaults:
     _controller: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseByMapController::getEntityTeaserAjax'
   requirements:
-    _access: 'TRUE'
+    _permission: 'access content'
   options:
     parameters:
       node:
