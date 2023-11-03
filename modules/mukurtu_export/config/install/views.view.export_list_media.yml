@@ -5,6 +5,7 @@ dependencies:
     - search_api.index.export_list_media
   module:
     - search_api
+    - user
     - views_bulk_operations
 id: export_list_media
 label: 'Export List: Media'
@@ -257,8 +258,9 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access mukurtu export'
       cache:
         type: none
         options: {  }
@@ -380,6 +382,7 @@ display:
         - url
         - url.query_args
         - user
+        - user.permissions
       tags:
         - 'config:search_api.index.export_list_media'
         - 'search_api_list:export_list_media'
@@ -398,6 +401,7 @@ display:
         - url
         - url.query_args
         - user
+        - user.permissions
       tags:
         - 'config:search_api.index.export_list_media'
         - 'search_api_list:export_list_media'
@@ -821,6 +825,7 @@ display:
         - url
         - url.query_args
         - user
+        - user.permissions
       tags:
         - 'config:search_api.index.export_list_media'
         - 'search_api_list:export_list_media'

@@ -336,7 +336,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'access content'
+          perm: 'access mukurtu export'
       cache:
         type: none
         options: {  }

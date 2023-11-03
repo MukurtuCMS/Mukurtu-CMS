@@ -365,7 +365,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'access content'
+          perm: 'access mukurtu import'
       cache:
         type: tag
         options: {  }

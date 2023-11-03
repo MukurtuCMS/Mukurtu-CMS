@@ -3,6 +3,7 @@ status: true
 dependencies:
   module:
     - mukurtu_protocol
+    - user
 id: mukurtu_import_results_communities
 label: 'Mukurtu Import Results: Communities'
 module: views
@@ -180,8 +181,9 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access mukurtu export'
       cache:
         type: tag
         options: {  }
@@ -316,6 +318,7 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.permissions
       tags: {  }
   results:
     id: results
@@ -331,4 +334,5 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.permissions
       tags: {  }

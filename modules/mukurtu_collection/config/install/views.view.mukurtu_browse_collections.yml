@@ -2,11 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
-    #- field.storage.node.field_description
     - search_api.index.mukurtu_collection_index
   module:
     - search_api
     - text
+    - user
 id: mukurtu_browse_collections
 label: 'Mukurtu Browse Collections'
 module: views
@@ -123,8 +123,9 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access content'
       cache:
         type: none
         options: {  }
@@ -270,8 +271,8 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
-        - 'config:field.storage.node.field_description'
         - 'config:search_api.index.mukurtu_collection_index'
         - 'search_api_list:mukurtu_collection_index'
   browse_collections_block:
@@ -290,7 +291,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
-        - 'config:field.storage.node.field_description'
         - 'config:search_api.index.mukurtu_collection_index'
         - 'search_api_list:mukurtu_collection_index'

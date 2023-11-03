@@ -2,13 +2,13 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_coverage
     - search_api.index.mukurtu_default_content_index
   module:
     - geofield
     - leaflet_views
     - mukurtu_browse
     - search_api
+    - user
 id: mukurtu_browse_by_map
 label: 'Mukurtu Browse by Map'
 module: views
@@ -349,10 +349,11 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access content'
       cache:
-        type: tag
+        type: none
         options: {  }
       empty: {  }
       sorts: {  }
@@ -495,7 +496,7 @@ display:
               person: content_browser
               word_list: content_browser
       query:
-        type: views_query
+        type: search_api_query
         options:
           bypass_access: false
           skip_access: false
@@ -513,9 +514,10 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
+        - user.permissions
       tags:
-        - 'config:field.storage.node.field_coverage'
         - 'config:search_api.index.mukurtu_default_content_index'
+        - 'search_api_list:mukurtu_default_content_index'
   map_block:
     id: map_block
     display_title: 'Map Block'
@@ -547,8 +549,8 @@ display:
           height: '600'
           height_unit: px
           hide_empty_map: false
-          disable_wheel: false
           gesture_handling: false
+          disable_wheel: false
           reset_map:
             control: false
             position: topright
@@ -612,9 +614,10 @@ display:
         - 'languages:language_interface'
         - url
         - 'user.node_grants:view'
+        - user.permissions
       tags:
-        - 'config:field.storage.node.field_coverage'
         - 'config:search_api.index.mukurtu_default_content_index'
+        - 'search_api_list:mukurtu_default_content_index'
   teaser_block:
     id: teaser_block
     display_title: 'Teaser Block'
@@ -651,6 +654,7 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
+        - user.permissions
       tags:
-        - 'config:field.storage.node.field_coverage'
         - 'config:search_api.index.mukurtu_default_content_index'
+        - 'search_api_list:mukurtu_default_content_index'

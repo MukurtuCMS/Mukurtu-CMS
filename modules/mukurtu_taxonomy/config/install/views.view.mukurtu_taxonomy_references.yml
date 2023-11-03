@@ -5,6 +5,7 @@ dependencies:
     - search_api.index.mukurtu_browse_auto_index
   module:
     - search_api
+    - user
 id: mukurtu_taxonomy_references
 label: 'Mukurtu Taxonomy References'
 module: views
@@ -124,8 +125,9 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access content'
       cache:
         type: none
         options: {  }
@@ -383,8 +385,10 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_browse_auto_index'
+        - 'search_api_list:mukurtu_browse_auto_index'
   content_block:
     id: content_block
     display_title: Content
@@ -401,5 +405,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_browse_auto_index'
+        - 'search_api_list:mukurtu_browse_auto_index'

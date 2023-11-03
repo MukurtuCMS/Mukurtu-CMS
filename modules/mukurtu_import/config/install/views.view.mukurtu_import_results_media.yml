@@ -300,7 +300,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'view media'
+          perm: 'access mukurtu import'
       cache:
         type: tag
         options: {  }

@@ -5,6 +5,7 @@ dependencies:
     - core.entity_view_mode.community.browse
   module:
     - mukurtu_protocol
+    - user
 id: browse_by_community
 label: 'Browse by Community'
 module: views
@@ -117,8 +118,9 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'view published community entities'
       cache:
         type: tag
         options: {  }
@@ -180,6 +182,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
+        - user.permissions
       tags: {  }
   community_browse_block:
     id: community_browse_block
@@ -195,4 +198,5 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
+        - user.permissions
       tags: {  }

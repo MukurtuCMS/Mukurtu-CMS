@@ -5,6 +5,7 @@ dependencies:
     - search_api.index.mukurtu_dictionary_index
   module:
     - search_api
+    - user
 id: mukurtu_dictionary
 label: 'Mukurtu Dictionary'
 module: views
@@ -121,8 +122,9 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access content'
       cache:
         type: none
         options: {  }
@@ -297,6 +299,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_dictionary_index'
         - 'search_api_list:mukurtu_dictionary_index'
@@ -319,6 +322,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_dictionary_index'
         - 'search_api_list:mukurtu_dictionary_index'
