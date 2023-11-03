@@ -181,7 +181,7 @@ class CulturalProtocolItem extends FieldItemBase {
     // Need to handle empty string specifically, otherwise thanks to the
     // behavior of explode we'll end up with an array like [0 => ''] which
     // isn't a valid protocol id state.
-    $explodedArray = trim($value) == "" ? [] : explode(',', $value);
+    $explodedArray = ($value == NULL || trim($value) == "") ? [] : explode(',', $value);
 
     if ($protocolIds = str_replace('|', '', $explodedArray)) {
       return array_map(fn($p) => (int) $p, $protocolIds);
