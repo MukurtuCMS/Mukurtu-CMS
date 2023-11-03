@@ -27,9 +27,9 @@ class OverviewForm extends MukurtuMigrateFormBase
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // If a migration has already been performed, redirect to the dashboard.
-    if ($this->state->get('mukurtu_migrate.performed')) {
-      return $this->redirect('mukurtu_core.dashboard');
+    // If a migration has already been performed, redirect to the results page.
+    if ($this->store->get('mukurtu_migrate.performed')) {
+      return $this->redirect('mukurtu_migrate.results');
     }
 
     $form = parent::buildForm($form, $form_state);

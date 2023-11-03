@@ -163,7 +163,7 @@ class ReviewForm extends MukurtuMigrateFormBase {
       ], [array_keys($this->migrations), $config])
       ->setFinishCallback([MukurtuMigrateImportBatch::class, 'finished']);
     batch_set($batch_builder->toArray());
-    $this->store->set('step', 'overview');
+    $this->store->set('step', 'results');
     $this->store->set('mukurtu_migrate.performed', REQUEST_TIME);
     $form_state->setRedirect('mukurtu_migrate.results');
   }
