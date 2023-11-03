@@ -90,8 +90,16 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
  * Implements hook_page_attachments.
  */
 function mukurtu_core_page_attachments(array &$attachments) {
+  // If the user is UID 1 and there is content on the site, warn them that
+  // might be a bad idea because UID 1 can do just about anything. If there's
+  // no content on the site, we assume they are setting things up and we don't
+  // want to bother them with the message.
   if (\Drupal::currentUser()->id() == 1) {
-    \Drupal::messenger()->addError(t('You are logged in as the super admin (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. Consider logging into a different account.'));
+    $query = \Drupal::entityQuery('node');
+    $contentCount = $query->count()->execute();
+    if ($contentCount) {
+      \Drupal::messenger()->addError(t('You are logged in as the super admin (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. Consider logging into a different account.'));
+    }
   }
 
   // Add our leaflet JS. We could scope this better.
