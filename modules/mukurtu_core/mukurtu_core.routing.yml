@@ -5,6 +5,7 @@ mukurtu_core.settings:
     _title: 'Mukurtu Settings'
   requirements:
     _permission: 'administer site configuration'
+
 mukurtu_core.dashboard:
   path: '/dashboard'
   defaults:
@@ -12,6 +13,7 @@ mukurtu_core.dashboard:
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::content'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
+
 mukurtu_core.add_page:
   path: '/dashboard/node/add'
   defaults:
@@ -21,6 +23,7 @@ mukurtu_core.add_page:
     _node_operation_route: TRUE
   requirements:
     _node_add_access: 'node'
+
 mukurtu_core.add:
   path: '/dashboard/node/add/{node_type}'
   defaults:
@@ -34,6 +37,7 @@ mukurtu_core.add:
       node_type:
         type: entity:node_type
         with_config_overrides: TRUE
+
 mukurtu_core.people:
   path: '/dashboard/admin/people'
   defaults:
@@ -41,6 +45,7 @@ mukurtu_core.people:
     _title: 'People - All User Accounts'
   requirements:
     _permission: 'administer users'
+
 mukurtu_core.approve_user:
   path: '/user/{uid}/approve'
   defaults:
@@ -49,6 +54,7 @@ mukurtu_core.approve_user:
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
     uid: \d+
+
 mukurtu_core.block_user:
   path: '/user/{uid}/block'
   defaults:
@@ -57,6 +63,7 @@ mukurtu_core.block_user:
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
     uid: \d+
+
 mukurtu_core.content_found_in:
   path: '/node/{node}/found-in'
   defaults:
@@ -68,6 +75,7 @@ mukurtu_core.content_found_in:
         type: entity:node
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\ContentFoundInController::access'
+
 mukurtu_core.media_found_in:
   path: '/media/{media}/found-in'
   defaults:

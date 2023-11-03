@@ -1,11 +1,3 @@
-#mukurtu_protocol.manage_communities:
-#  path: '/dashboard/communities'
-#  defaults:
-#    _title: 'Manage Communities'
-#    _controller: '\Drupal\mukurtu_protocol\Controller\MukurtuCommunityManageController::content'
-#  requirements:
-#    _permission: 'create community content,edit community content'
-
 mukurtu_protocol.community_manager_create_user:
   path: '/dashboard/communities/create-user'
   defaults:

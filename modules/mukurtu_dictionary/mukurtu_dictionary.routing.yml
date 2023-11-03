@@ -6,6 +6,7 @@ mukurtu_dictionary.dictionary_page:
   requirements:
     _permission: 'access content'
     _custom_access: '\Drupal\mukurtu_dictionary\Controller\MukurtuDictionaryController::access'
+
 mukurtu_dictionary.add_word_to_list:
   path: '/node/{node}/word-list/add'
   defaults:

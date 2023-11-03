@@ -5,6 +5,7 @@ mukurtu_community_records.types_settings:
     _title: 'Mukurtu Community Records - Enabled Content'
   requirements:
     _permission: 'administer site configuration'
+
 mukurtu_community_records.order_settings:
   path: '/admin/config/mukurtu/community-records/community-ordering'
   defaults:
@@ -12,6 +13,7 @@ mukurtu_community_records.order_settings:
     _title: 'Mukurtu Community Records - Community Ordering'
   requirements:
     _permission: 'administer site configuration'
+
 mukurtu_community_records.add_new_record:
   path: '/node/{node}/community-record/add'
   defaults:
@@ -23,19 +25,3 @@ mukurtu_community_records.add_new_record:
         type: entity:node
   requirements:
     _custom_access: '\Drupal\mukurtu_community_records\Controller\CommunityRecordController::access'
-    #_permission: 'create content'
-#mukurtu_community_records.add_new_record_by_type:
-#  path: '/node/{node}/community-record/add/{node_type}'
-#  defaults:
-#    _title: 'New Community Record'
-#    _controller: '\Drupal\mukurtu_community_records\Controller\MukurtuCommunityRecordAddNodeController::content'
-#  options:
-#    parameters:
-#      node:
-#        type: entity:node
-#      node_type:
-#        type: entity:node_type
-#        with_config_overrides: TRUE
-#  requirements:
-#    _custom_access: '\Drupal\mukurtu_community_records\Controller\MukurtuCommunityRecordAddNodeController::access'
-#    _create_community_record_access_check: 'TRUE'
