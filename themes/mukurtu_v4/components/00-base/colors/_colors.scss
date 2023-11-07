@@ -1,0 +1,93 @@
+// Main Colors.
+
+:root {
+  // Core Colors.
+
+  // Overridden by Palette Switcher.
+  --brand-primary: #159ec4;
+  --brand-secondary: #e6ab49;
+  --brand-primary-accent: #138aab;
+  --brand-secondary-accent: #f1b85a;
+  --mukurtu-navbar-collapse-link-hover-color: #e5ab48;
+  --mukurtu-breadcrumb-gradient-color: #b7873a;
+  --mukurtu-panel-pane-text-color: #fff;
+  --mukurtu-panel-pane-content-background-color: #eeecec;
+  --mukurtu-mejs-background-color: var(--brand-light-accent);
+  --mukurtu-mejs-time-rail-loaded-color: #e5e1e1;
+  --mukurtu-mejs-time-rail-current-color: #d1cbcb;
+  --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
+  --mukurtu-collection-title-font-color: #fff;
+  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
+
+  // Persistent Across Palettes Below.
+  --brand-text-color: #464646;
+  --brand-light: #e5e9e9;
+  --brand-light-accent: #f8f7f7;
+
+  --link-color: var(--brand-primary-accent);
+  --text-color: var(--brand-text-color);
+  --teaser-text-color: #333333;
+
+  // Footer.
+  --footer-text-color: #999999;
+  --footer-link-color: #cccccc;
+
+  // Nav.
+  --navbar-default-bg: #fff;
+  --navbar-mukurtu-bg: var(--brand-primary);
+
+  // Views.
+  --mukurtu-view-row-divider-color: #eeeaea;
+  --mukurtu-primary-field-divider-color: #e5e1e1;
+
+  // Mobile Menu/Collapse Navbar.
+  --mukurtu-navbar-collapse-bg: var(--brand-light-accent);
+  --mukurtu-navbar-collapse-link-color: var(--brand-primary-accent);
+
+  // Mukurtu Specific.
+  --mukurtu-text-box-background-color: #eeecec;
+  --mukurtu-title-accent-bar-color: var(--brand-secondary);
+  --mukurtu-left-right-title-color: #fff;
+  --mukurtu-dictionary-term-title-full-color: #fff;
+
+  // Breadcrumbs.
+  --mukurtu-breadcrumb-background-color: var(--brand-secondary);
+  --mukurtu-breadcrumb-link-color: #fff;
+  --mukurtu-breadcrumb-non-link-color: var(--text-color);
+
+  --mukurtu-default-container-bg-color: var(--brand-primary);
+  --mukurtu-default-container-bg-hover-color: var(--brand-primary-accent);
+  --mukurtu-default-container-font-color: #fff;
+
+  // Mukurtu Menu Navbar links.
+  --mukurtu-navbar-default-link-color: #fff;
+  -mukurtu-navbar-default-link-hover-color: #fff;
+  --mukurtu-navbar-default-link-hover-bg: var(--brand-primary-accent);
+
+  --mukurtu-navbar-default-link-active-color: #555;
+  --mukurtu-navbar-default-link-active-bg: darken(var(--navbar-default-bg), 6.5%);
+  --mukurtu-navbar-default-link-disabled-color: #ccc;
+  --mukurtu-navbar-default-link-disabled-bg: transparent;
+
+  // Media Element Controls.
+  --mukurtu-mejs-text-color: var(--brand-text-color);
+
+  // Dictionary.
+  --mukurtu-dictionary-facets-pane-background-color: var(--brand-primary);
+  --mukurtu-dictionary-facets-pane-contrast-color: var(--brand-secondary);
+  --mukurtu-dictionary-term-title-color: #fff;
+
+  // Collections.
+  // These values change based on the selected color palette - see these
+  // at the top of the file.
+
+  // Community.
+  --mukurtu-community-membership-status-color: var(--brand-primary);
+
+  // Browse By
+  --mukurtu-browse-by-background-color: var(--brand-primary);
+  --mukurtu-browse-by-title-color: var(--brand-secondary);
+}
+
+// See palettes folder for the different color palettes.
+// Those files are injected by Drupal so they shouldn't be bundled to style.css.
