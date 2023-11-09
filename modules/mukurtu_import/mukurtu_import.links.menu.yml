@@ -5,9 +5,9 @@ mukurtu_import.settings_form:
   route_name: mukurtu_import.settings_form
   weight: 10
 entity.mukurtu_import_strategy.overview:
-  title: mukurtu_import_strategies
+  title: Import Configuration Templates
   parent: system.admin_structure
-  description: 'List of mukurtu_import_strategies to extend site functionality.'
+  description: 'List of all Import Configuration Templates.'
   route_name: entity.mukurtu_import_strategy.collection
 mukurtu_import.import:
   title: Import

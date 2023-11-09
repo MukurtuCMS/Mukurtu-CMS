@@ -14,13 +14,13 @@ use Exception;
  *
  * @ConfigEntityType(
  *   id = "mukurtu_import_strategy",
- *   label = @Translation("Mukurtu Import Strategy"),
- *   label_collection = @Translation("mukurtu_import_strategies"),
- *   label_singular = @Translation("mukurtu_import_strategy"),
- *   label_plural = @Translation("mukurtu_import_strategies"),
+ *   label = @Translation("Import Configuration Templates"),
+ *   label_collection = @Translation("Import Configuration Templates"),
+ *   label_singular = @Translation("Import Configuration Template"),
+ *   label_plural = @Translation("Import Configuration Templates"),
  *   label_count = @PluralTranslation(
- *     singular = "@count mukurtu_import_strategy",
- *     plural = "@count mukurtu_import_strategies",
+ *     singular = "@count Import Configuration Template",
+ *     plural = "@count Import Configuration Templates",
  *   ),
  *   handlers = {
  *     "list_builder" = "Drupal\mukurtu_import\MukurtuImportStrategyListBuilder",
