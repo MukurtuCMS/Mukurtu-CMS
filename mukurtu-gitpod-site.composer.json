@@ -140,9 +140,6 @@
             ]
         },
         "patches": {
-            "drupal/og": {
-                "Add OG Roles UI": "https://github.com/Gizra/og/pull/243.patch"
-            },
             "drupal/message_ui": {
                 "Fix installation": "https://git.drupalcode.org/project/message_ui/-/merge_requests/2.diff"
             }
