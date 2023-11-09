@@ -14,6 +14,7 @@ dependencies:
     - mukurtu_protocol
     - paragraphs
     - path
+    - text
 third_party_settings:
   field_group:
     group_main_tab:
@@ -40,6 +41,7 @@ third_party_settings:
         - field_media_assets
         - field_keywords
         - field_coverage
+        - field_coverage_description
         - field_location
       label: 'Mukurtu Essentials'
       region: content
@@ -106,7 +108,7 @@ content:
     third_party_settings: {  }
   field_coverage:
     type: geofield_mukurtu
-    weight: 31
+    weight: 0
     region: content
     settings:
       geometry_validation: 0
@@ -160,6 +162,14 @@ content:
           popup: false
           options: ''
     third_party_settings: {  }
+  field_coverage_description:
+    type: text_textarea
+    weight: 1
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
     weight: -6
@@ -196,7 +206,7 @@ content:
     third_party_settings: {  }
   field_location:
     type: entity_reference_autocomplete
-    weight: 1
+    weight: 2
     region: content
     settings:
       match_operator: CONTAINS
@@ -280,7 +290,7 @@ content:
     third_party_settings: {  }
   field_word_entry:
     type: entity_reference_paragraphs
-    weight: 1
+    weight: 6
     region: content
     settings:
       title: Paragraph
