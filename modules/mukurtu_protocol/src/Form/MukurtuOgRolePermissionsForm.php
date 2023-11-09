@@ -6,12 +6,11 @@ namespace Drupal\mukurtu_protocol\Form;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Entity\OgRole;
-use Drupal\og_ui\Form\OgPermissionsForm;
 
 /**
  * Provide the group permissions form.
  */
-class MukurtuOgRolePermissionsForm extends OgPermissionsForm {
+class MukurtuOgRolePermissionsForm extends MukurtuOgPermissionsForm {
 
   /**
    * {@inheritdoc}

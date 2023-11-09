@@ -8,10 +8,12 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
 use Drupal\og\GroupTypeManager;
 use Drupal\og\Og;
 use Drupal\og\OgRoleManagerInterface;
+use Drupal\og\Permission;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\user\RoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -134,6 +136,19 @@ class MukurtuOgPermissionsForm extends FormBase {
   }
 
   /**
+   * This is a weird helper function to bridge the gap between the official OG
+   * branch and the experimental branch we were using. Once OG puts their
+   * version of these forms into production, we can likely get rid of this.
+   * OG Permission doesn't implement getProvider in the current offical release.
+   */
+  protected function getPermissionProvider(Permission $permission, $label) {
+    if ($permission instanceof GroupContentOperationPermission) {
+      return "$label content";
+    }
+    return "$label";
+  }
+
+  /**
    * The group permissions form constructor.
    *
    * @param array $form
@@ -199,8 +214,8 @@ class MukurtuOgPermissionsForm extends FormBase {
     ];
 
     foreach ($group_permissions as $permission) {
-      if (!empty($permission->getProvider())) {
-        $permissions_by_provider[$permission->getProvider()][$permission->getName()] = $permission;
+      if (!empty($this->getPermissionProvider($permission, $label))) {
+        $permissions_by_provider[$this->getPermissionProvider($permission, $label)][$permission->getName()] = $permission;
       }
       else {
         $permissions_by_provider["$label"][$permission->getName()] = $permission;
@@ -208,8 +223,8 @@ class MukurtuOgPermissionsForm extends FormBase {
     }
 
     foreach ($group_content_permissions as $permission) {
-      if (!empty($permission->getProvider())) {
-        $permissions_by_provider[$permission->getProvider()][$permission->getName()] = $permission;
+      if (!empty($this->getPermissionProvider($permission, $label))) {
+        $permissions_by_provider[$this->getPermissionProvider($permission, $label)][$permission->getName()] = $permission;
       }
       else {
         $permissions_by_provider["$label content"][$permission->getName()] = $permission;

@@ -61,7 +61,7 @@
     "drupal/migrate_source_csv": "^3.5",
     "drupal/migrate_tools": "^6.0",
     "drupal/google_analytics": "*",
-    "mukurtu/og": "*",
+    "drupal/og": "^1.x-dev",
     "drupal/paragraphs": "*",
     "drupal/pathauto": "*",
     "drupal/redirect": "*",
