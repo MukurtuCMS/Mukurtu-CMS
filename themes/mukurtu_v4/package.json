@@ -1,0 +1,22 @@
+{
+  "name": "mukurtu_v4",
+  "version": "1.0.0",
+  "description": "The base theme for Mukurtu Version 4",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-cli": "^2.3.0",
+    "gulp-eslint": "^6.0.0",
+    "gulp-if": "^3.0.0",
+    "gulp-imagemin": "^7.1.0",
+    "gulp-livereload": "^4.0.2",
+    "gulp-sass": "^5.1.0",
+    "gulp-sass-globbing": "^0.0.2",
+    "gulp-sass-lint": "^1.4.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "imagemin-pngquant": "^9.0.2"
+  }
+}
