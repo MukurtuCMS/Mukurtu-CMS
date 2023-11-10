@@ -1,6 +1,12 @@
 // Main Colors.
-main {
-  color: pink;
+h2 {
+  color: #138aab;
+}
+
+@include media(">=lg") {
+  h2 {
+    color: yellow;
+  }
 }
 
 :root {
@@ -29,6 +35,7 @@ main {
 
   --link-color: var(--brand-primary-accent);
   --text-color: var(--brand-text-color);
+  --light-text-color: #fff;
   --teaser-text-color: #333333;
 
   // Footer.

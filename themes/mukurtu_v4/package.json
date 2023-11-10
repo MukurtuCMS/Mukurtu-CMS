@@ -2,6 +2,7 @@
   "name": "mukurtu_v4",
   "version": "1.0.0",
   "description": "The base theme for Mukurtu Version 4",
+  "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,9 +15,13 @@
     "gulp-imagemin": "^7.1.0",
     "gulp-livereload": "^4.0.2",
     "gulp-sass": "^5.1.0",
+    "gulp-sass-glob": "^1.1.0",
     "gulp-sass-globbing": "^0.0.2",
     "gulp-sass-lint": "^1.4.0",
     "gulp-sourcemaps": "^3.0.0",
     "imagemin-pngquant": "^9.0.2"
+  },
+  "dependencies": {
+    "include-media": "^2.0.0"
   }
 }

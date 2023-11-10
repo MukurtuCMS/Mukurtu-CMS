@@ -2,33 +2,8 @@
 // @import '../node_modules/normalize.css/normalize';
 // @import '../node_modules/breakpoint-sass/stylesheets/breakpoint';
 
-// Base
-@import '00-base/base';
+// See https://eduardoboucas.github.io/include-media/ for detailed documentation on how to use @include media().
+@import '../node_modules/include-media/dist/include-media';
 
-// Atoms
-// @import '01-atoms/';
-
-// Molecules
-// @import '02-molecules/';
-
-// Organisms
-// @import '03-organisms/';
-
-// Templates
-// @import '04-templates/';
-
-
-// ### Pre unabstracted implementation ###
-
-// External Libraries
-// @import '~normalize.css/normalize';
-// @import '~breakpoint-sass/stylesheets/breakpoint';
-
-// Components
-// @import '00-base/base';
-// @import '01-atoms/**/*.scss';
-// @import '02-molecules/**/*.scss';
-// @import '03-organisms/**/*.scss';
-// @import '04-templates/**/*.scss';
-
-// @import '00-base/documentation/documentation';
+@import '00-base/**/*.scss';
+@import '01-atoms/**/*.scss';

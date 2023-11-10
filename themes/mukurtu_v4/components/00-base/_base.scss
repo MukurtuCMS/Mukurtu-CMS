@@ -1,0 +1,104 @@
+// Base HTML elements.
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  // Used for smoother scrolling by back-top.
+  scroll-behavior: smooth;
+
+  @media screen and (prefers-reduced-motion: reduce) {
+    scroll-behavior: initial;
+  }
+
+  // Disable horizontal scrolling.
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  // color: var(--text);
+  // font-size: var(--font-size-m);
+  // font-family: var(--font-body-face);
+  // line-height: var(--line-height-base);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  // background-color: clr(grayscale, 0);
+}
+
+ul li,
+ol li {
+  margin: 0;
+  // line-height: var(--line-height-base);
+}
+
+ul li {
+  list-style-type: square;
+  // padding-left: var(--v-space-5xs);
+
+  &::marker {
+    // color: var(--accent-secondary);
+  }
+}
+
+p {
+  // margin-top: var(--v-space-4xs);
+  // margin-bottom: var(--v-space-4xs);
+}
+
+dl,
+dt,
+dd {
+  margin: 0;
+}
+
+address {
+  font-style: normal;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  // color: var(--color-accent-light);
+  // text-decoration: underline solid 2px var(--color-accent);
+  text-underline-offset: 4px;
+  // transition: color $speed-normal ease-in, text-decoration-color $speed-normal ease-in;
+
+  &:hover {
+    // text-decoration-color: var(--color-transparent);
+    // transition: text-decoration-color $speed-normal ease-in;
+  }
+
+  &:hover,
+  &:focus,
+  &:focus-visible,
+  &:active {
+    // color: var(--color-black);
+  }
+
+  &:focus,
+  &:focus-visible,
+  &:active {
+    // outline: var(--color-blue-800) solid 2px;
+    // text-decoration-color: var(--color-transparent);
+  }
+
+  // Set link font on page only (skip admin toolbar).
+  .layout-container & {
+    // font-family: var(--font-display-face);
+  }
+}
+
+.clipboard-item {
+  position: relative;
+}
+
+// .visually-hidden {
+//   @include visually-hidden;
+// }

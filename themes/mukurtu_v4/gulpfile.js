@@ -9,6 +9,8 @@ var gulp = require("gulp"),
   imagemin = require("gulp-imagemin"),
   pngquant = require("imagemin-pngquant");
 
+var sassGlob = require("gulp-sass-glob");
+
 gulp.task("imagemin", function () {
   return gulp
     .src("./src/images/*")
@@ -22,14 +24,16 @@ gulp.task("imagemin", function () {
     .pipe(gulp.dest("./images"));
 });
 
-gulp.task("sass", function () {
+gulp.task("sass", function (done) {
   gulp
-    .src("./components/**/**/_*.scss")
+    .src("./components/**/*.scss")
     .pipe(sourcemaps.init())
+    .pipe(sassGlob())
     .pipe(sass({ outputStyle: "compressed" }).on("error", sass.logError))
     .pipe(autoprefixer("last 2 version"))
     .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("./css"));
+    done();
 });
 
 function isFixed(file) {
@@ -39,7 +43,7 @@ function isFixed(file) {
 
 gulp.task("eslint", function () {
   gulp
-    .src("./components/**/**/*.js")
+    .src("./components/**/*.js")
     .pipe(
       eslint({
         extends: "eslint:recommended",
@@ -156,14 +160,6 @@ gulp.task("eslint", function () {
 const sass = require("gulp-sass")(require("sass"));
 
 gulp.task("watch", function () {
-  livereload.listen();
-
-  gulp.watch("./components/**/**/_*.scss", gulp.series("sass"));
+  gulp.watch("./components/**/*.scss", gulp.series("sass"));
   gulp.watch("./components/**/*.js", gulp.series("eslint"));
-  // gulp.watch(
-  //   ["./css/style.css", "./**/*.html.twig", "./js/*.js"],
-  //   function (files) {
-  //     livereload.changed(files);
-  //   }
-  // );
 });

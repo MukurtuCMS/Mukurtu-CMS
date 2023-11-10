@@ -1,0 +1,26 @@
+// Defaults.
+button,
+input[type=button],
+input[type=submit],
+input[type=reset] {
+  @include info-md-heavy;
+  color: var(--light-text-color);
+  background: var(--brand-primary);
+  border: 0;
+  padding: var(--v-space-4xs) var(--v-space-2xs);
+
+  &:hover,
+  &:active {
+    color: var(--light-text-color);
+    background: var(--brand-primary-accent);
+  }
+
+  &:focus {
+    // outline: 2px solid var(--color-focus);
+  }
+
+  &:disabled {
+    color: var(--light-text-color);
+    background: var(--brand-text-color);
+  }
+}

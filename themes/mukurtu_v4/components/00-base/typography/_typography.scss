@@ -1,0 +1,450 @@
+:root {
+  // Typography.
+  --font-body-face: Georgia,
+    "Times New Roman",
+    Times,
+    serif;
+  --font-display-face: "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  --font-size-base: var(--font-size-small);
+}
+
+// Headings definition.
+@mixin heading-5xl {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-heading-5xl);
+  line-height: var(--line-height-heading-5xl);
+  letter-spacing: var(--letter-spacing-negative-xxl);
+  font-weight: 700;
+}
+
+@mixin heading-4xl {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-heading-4xl);
+  line-height: var(--line-height-heading-4xl);
+  letter-spacing: var(--letter-spacing-negative-xxl);
+  font-weight: 700;
+}
+
+@mixin heading-3xl {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-heading-3xl);
+  line-height: var(--line-height-heading-3xl);
+  letter-spacing: var(--letter-spacing-negative-xxl);
+  font-weight: 700;
+}
+
+@mixin heading-2xl {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-heading-2xl);
+  line-height: var(--line-height-heading-2xl);
+  letter-spacing: var(--letter-spacing-negative-xxl);
+  font-weight: 700;
+}
+
+@mixin heading-xl {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-heading-xl);
+  line-height: var(--line-height-3xl);
+  letter-spacing: var(--letter-spacing-negative-xll);
+  font-weight: 700;
+}
+
+@mixin heading-lg {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-heading-lg);
+  line-height: var(--line-height-2xl);
+  letter-spacing: var(--letter-spacing-negative-xll);
+  font-weight: 700;
+}
+
+@mixin heading-md {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-heading-md);
+  line-height: var(--line-height-xl);
+  font-weight: 700;
+}
+
+@mixin heading-sm {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-xl);
+  font-weight: 700;
+}
+
+@mixin heading-xs {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-m);
+  font-weight: 700;
+}
+
+@mixin heading-2xs {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-l);
+  line-height: var(--line-height-s);
+  font-weight: 700;
+}
+
+// Body styles.
+@mixin body-3xl {
+  font-family: var(--font-body-face);
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-3xl);
+  letter-spacing: var(--letter-spacing-negative-xxl);
+  font-weight: 400;
+}
+
+@mixin body-3xl-medium {
+  @include body-3xl;
+  font-weight: 600;
+}
+
+@mixin body-3xl-heavy {
+  @include body-3xl;
+  font-weight: 700;
+}
+
+@mixin body-2xl {
+  font-family: var(--font-body-face);
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-2xl);
+  font-weight: 400;
+}
+
+@mixin body-2xl-medium {
+  @include body-2xl;
+  font-weight: 600;
+}
+
+@mixin body-2xl-heavy {
+  @include body-2xl;
+  font-weight: 700;
+}
+
+@mixin body-xl {
+  font-family: var(--font-body-face);
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-xl);
+  font-weight: 400;
+}
+
+@mixin body-xl-medium {
+  @include body-xl;
+  font-weight: 600;
+}
+
+@mixin body-xl-heavy {
+  @include body-xl;
+  font-weight: 700;
+}
+
+@mixin body-lg {
+  font-family: var(--font-body-face);
+  font-size: var(--font-size-l);
+  line-height: var(--line-height-l);
+  font-weight: 400;
+}
+
+@mixin body-lg-medium {
+  @include body-lg;
+  font-weight: 600;
+}
+
+@mixin body-lg-heavy {
+  @include body-lg;
+  font-weight: 700;
+}
+
+@mixin body-md {
+  font-family: var(--font-body-face);
+  font-size: var(--font-size-m);
+  line-height: var(--line-height-m);
+  font-weight: 400;
+}
+
+@mixin body-md-medium {
+  @include body-md;
+  font-weight: 600;
+}
+
+@mixin body-md-heavy {
+  @include body-md;
+  font-weight: 700;
+}
+
+@mixin body-sm {
+  font-family: var(--font-body-face);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-m);
+  font-weight: 400;
+}
+
+@mixin body-sm-medium {
+  @include body-sm;
+  font-weight: 600;
+}
+
+@mixin body-sm-heavy {
+  @include body-sm;
+  font-weight: 700;
+}
+
+@mixin body-xs {
+  font-family: var(--font-body-face);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  font-weight: 400;
+}
+
+@mixin body-xs-medium {
+  @include body-xs;
+  font-weight: 600;
+}
+
+@mixin body-xs-heavy {
+  @include body-xs;
+  font-weight: 700;
+}
+
+// Labels definition.
+@mixin label-lg {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-s);
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+@mixin label-md {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-2xs);
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+@mixin label-sm {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-2xs);
+  letter-spacing: var(--letter-spacing-label);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+// Other/utility styles.
+@mixin info-xl {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-l);
+  font-weight: 400;
+}
+
+@mixin info-xl-medium {
+  @include info-xl;
+  font-weight: 600;
+}
+
+@mixin info-xl-heavy {
+  @include info-xl;
+  font-weight: 700;
+}
+
+@mixin info-lg {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-l);
+  line-height: var(--line-height-s);
+  font-weight: 400;
+}
+
+@mixin info-lg-medium {
+  @include info-lg;
+  font-weight: 600;
+}
+
+@mixin info-lg-heavy {
+  @include info-lg;
+  font-weight: 700;
+}
+
+@mixin info-md {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-m);
+  line-height: var(--line-height-s);
+  font-weight: 400;
+}
+
+@mixin info-md-medium {
+  @include info-md;
+  font-weight: 600;
+}
+
+@mixin info-md-heavy {
+  @include info-md;
+  font-weight: 700;
+}
+
+@mixin info-sm {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-s);
+  font-weight: 400;
+}
+
+@mixin info-sm-medium {
+  @include info-sm;
+  font-weight: 600;
+}
+
+@mixin info-sm-heavy {
+  @include info-sm;
+  font-weight: 700;
+}
+
+@mixin info-xs {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-2xs);
+  font-weight: 400;
+}
+
+@mixin info-xs-medium {
+  @include info-xs;
+  font-weight: 600;
+}
+
+@mixin info-xs-heavy {
+  @include info-xs;
+  font-weight: 700;
+}
+
+@mixin info-2xs {
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-3xs);
+  font-weight: 400;
+}
+
+@mixin info-2xs-medium {
+  @include info-2xs;
+  font-weight: 600;
+}
+
+@mixin info-2xs-heavy {
+  @include info-2xs;
+  letter-spacing: var(--letter-spacing-xs);
+  font-weight: 700;
+}
+
+// Heading assignments.
+// Classes allow styling using other heading classes (ex: <h2 class="h3">).
+h1,
+.h1 {
+  font-family: var(--font-display-face);
+  @include heading-sm;
+
+  a {
+    &:hover {
+      text-decoration-line: underline;
+      text-decoration-color: var(--link-color);
+    }
+
+    &:focus,
+    &:focus-visible {
+      // border: 2px solid var(--color-focus);
+    }
+  }
+
+  @include media('>=md') {
+    @include heading-lg;
+  }
+}
+
+h2,
+.h2 {
+  font-family: var(--font-display-face);
+  @include heading-xs;
+
+  a {
+    &:hover {
+      text-decoration-line: underline;
+      text-decoration-color: var(--link-color);
+    }
+
+    &:focus,
+    &:focus-visible {
+      // border: 2px solid var(--color-focus);
+    }
+  }
+
+  @include media('>=md') {
+    @include heading-md;
+  }
+}
+
+h3,
+.h3 {
+  font-family: var(--font-display-face);
+  @include heading-2xs;
+  margin: 0;
+
+  a {
+    &:hover {
+      text-decoration-line: underline;
+      text-decoration-color: var(--link-color);
+    }
+
+    &:focus,
+    &:focus-visible {
+      // border: 2px solid var(--color-focus);
+    }
+  }
+
+  @include media('>=md') {
+    @include heading-sm;
+  }
+}
+
+h4,
+.h4 {
+  font-family: var(--font-display-face);
+  @include info-md-heavy;
+
+  a {
+      text-decoration-line: underline;
+      text-decoration-color: var(--link-color);
+    }
+
+    &:focus,
+    &:focus-visible {
+      // border: 2px solid var(--color-focus);
+    }
+
+  @include media('>=md') {
+    @include heading-xs;
+  }
+}
+
+h5,
+.h5 h6 .h6 {
+  font-family: var(--font-display-face);
+  @include heading-2xs;
+
+  a {
+    &:hover {
+      text-decoration-line: underline;
+      text-decoration-color: var(--link-color);
+    }
+
+    &:focus,
+    &:focus-visible {
+      // border: 2px solid var(--color-focus);
+    }
+  }
+}
