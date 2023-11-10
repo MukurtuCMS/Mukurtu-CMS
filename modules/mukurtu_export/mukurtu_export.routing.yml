@@ -13,6 +13,7 @@ mukurtu_export.export_settings:
     _form: 'Drupal\mukurtu_export\Form\ExportSettingsForm'
   requirements:
     _permission: 'access mukurtu export'
+    _custom_access: '\Drupal\mukurtu_export\Form\ExportSettingsForm::access'
 
 mukurtu_export.export_results:
   path: '/dashboard/export/results'
@@ -21,3 +22,4 @@ mukurtu_export.export_results:
     _form: 'Drupal\mukurtu_export\Form\ExportResultsForm'
   requirements:
     _permission: 'access mukurtu export'
+    _custom_access: '\Drupal\mukurtu_export\Form\ExportResultsForm::access'

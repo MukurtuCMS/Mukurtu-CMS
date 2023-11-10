@@ -2,32 +2,37 @@
 
 namespace Drupal\mukurtu_export\Form;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\mukurtu_export\Form\ExportBaseForm;
-use Drupal\file\Entity\File;
-use \Drupal\Core\Url;
 use Drupal\Core\Link;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
+use Drupal\file\Entity\File;
+use Drupal\mukurtu_export\Form\ExportBaseForm;
 
 /**
  * Export Plugin Configuration Form.
  */
-class ExportResultsForm extends ExportBaseForm
-{
+class ExportResultsForm extends ExportBaseForm {
+
   /**
    * {@inheritdoc}
    */
-  public function getFormId()
-  {
+  public function getFormId() {
     return 'mukurtu_export_results';
   }
 
-  public function submitForm(array &$form, FormStateInterface $form_state)
-  {
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $form_state->setRedirect('mukurtu_export.export_settings');
   }
 
-  public function submitNewExport(array &$form, FormStateInterface $form_state)
-  {
+  /**
+   * Submit handler for "New Export".
+   */
+  public function submitNewExport(array &$form, FormStateInterface $form_state) {
     $this->reset();
     $form_state->setRedirect('mukurtu_export.export_item_and_format_selection');
   }
@@ -35,8 +40,7 @@ class ExportResultsForm extends ExportBaseForm
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state)
-  {
+  public function buildForm(array $form, FormStateInterface $form_state) {
     $fid = $_SESSION['mukurtu_export']['download_fid'];
 
     $form['exported'] = [
@@ -82,6 +86,22 @@ class ExportResultsForm extends ExportBaseForm
     ];
 
     return $form;
+  }
+
+  /**
+   * Provide an access check that ensures there is a result to report.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   Run access checks for this account.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function access(AccountInterface $account) {
+    if (!isset($_SESSION['mukurtu_export']) || !isset($_SESSION['mukurtu_export']['download_fid'])) {
+      return AccessResult::forbidden();
+    }
+    return AccessResult::allowed();
   }
 
 }
