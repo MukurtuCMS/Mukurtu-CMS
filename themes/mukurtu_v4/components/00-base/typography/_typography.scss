@@ -13,80 +13,76 @@
 }
 
 // Headings definition.
-@mixin heading-5xl {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
   font-family: var(--font-display-face);
-  font-size: var(--font-size-heading-5xl);
-  line-height: var(--line-height-heading-5xl);
-  letter-spacing: var(--letter-spacing-negative-xxl);
-  font-weight: 700;
+  font-weight: var(--headings-font-weight);
+  line-height: var(--line-height-heading);
+  color: var(--text-color);
+
+  a {
+    color: var(--brand-primary);
+  }
 }
 
-@mixin heading-4xl {
-  font-family: var(--font-display-face);
-  font-size: var(--font-size-heading-4xl);
-  line-height: var(--line-height-heading-4xl);
-  letter-spacing: var(--letter-spacing-negative-xxl);
-  font-weight: 700;
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3 {
+  margin-top: var(--v-space-4xs);
+  margin-bottom: (var(--v-space-4xs) / 2);
 }
 
-@mixin heading-3xl {
-  font-family: var(--font-display-face);
-  font-size: var(--font-size-heading-3xl);
-  line-height: var(--line-height-heading-3xl);
-  letter-spacing: var(--letter-spacing-negative-xxl);
-  font-weight: 700;
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6 {
+  margin-top: (var(--v-space-4xs) / 2);
+  margin-bottom: (var(--v-space-4xs) / 2);
 }
 
-@mixin heading-2xl {
-  font-family: var(--font-display-face);
-  font-size: var(--font-size-heading-2xl);
-  line-height: var(--line-height-heading-2xl);
-  letter-spacing: var(--letter-spacing-negative-xxl);
-  font-weight: 700;
-}
-
-@mixin heading-xl {
-  font-family: var(--font-display-face);
-  font-size: var(--font-size-heading-xl);
-  line-height: var(--line-height-3xl);
-  letter-spacing: var(--letter-spacing-negative-xll);
-  font-weight: 700;
-}
-
-@mixin heading-lg {
-  font-family: var(--font-display-face);
+h1,
+.h1 {
   font-size: var(--font-size-heading-lg);
-  line-height: var(--line-height-2xl);
-  letter-spacing: var(--letter-spacing-negative-xll);
-  font-weight: 700;
 }
 
-@mixin heading-md {
-  font-family: var(--font-display-face);
+h2,
+.h2 {
   font-size: var(--font-size-heading-md);
-  line-height: var(--line-height-xl);
-  font-weight: 700;
 }
 
-@mixin heading-sm {
-  font-family: var(--font-display-face);
+h3,
+.h3 {
   font-size: var(--font-size-3xl);
-  line-height: var(--line-height-xl);
-  font-weight: 700;
 }
 
-@mixin heading-xs {
-  font-family: var(--font-display-face);
+h4,
+.h4 {
+  font-size: var(--font-size-2xl);
+}
+
+h5,
+.h5 {
   font-size: var(--font-size-xl);
-  line-height: var(--line-height-m);
-  font-weight: 700;
 }
 
-@mixin heading-2xs {
-  font-family: var(--font-display-face);
+h6,
+.h6 {
   font-size: var(--font-size-l);
-  line-height: var(--line-height-s);
-  font-weight: 700;
 }
 
 // Body styles.
@@ -340,111 +336,4 @@
   @include info-2xs;
   letter-spacing: var(--letter-spacing-xs);
   font-weight: 700;
-}
-
-// Heading assignments.
-// Classes allow styling using other heading classes (ex: <h2 class="h3">).
-h1,
-.h1 {
-  font-family: var(--font-display-face);
-  @include heading-sm;
-
-  a {
-    &:hover {
-      text-decoration-line: underline;
-      text-decoration-color: var(--link-color);
-    }
-
-    &:focus,
-    &:focus-visible {
-      // border: 2px solid var(--color-focus);
-    }
-  }
-
-  @include media('>=md') {
-    @include heading-lg;
-  }
-}
-
-h2,
-.h2 {
-  font-family: var(--font-display-face);
-  @include heading-xs;
-
-  a {
-    &:hover {
-      text-decoration-line: underline;
-      text-decoration-color: var(--link-color);
-    }
-
-    &:focus,
-    &:focus-visible {
-      // border: 2px solid var(--color-focus);
-    }
-  }
-
-  @include media('>=md') {
-    @include heading-md;
-  }
-}
-
-h3,
-.h3 {
-  font-family: var(--font-display-face);
-  @include heading-2xs;
-  margin: 0;
-
-  a {
-    &:hover {
-      text-decoration-line: underline;
-      text-decoration-color: var(--link-color);
-    }
-
-    &:focus,
-    &:focus-visible {
-      // border: 2px solid var(--color-focus);
-    }
-  }
-
-  @include media('>=md') {
-    @include heading-sm;
-  }
-}
-
-h4,
-.h4 {
-  font-family: var(--font-display-face);
-  @include info-md-heavy;
-
-  a {
-      text-decoration-line: underline;
-      text-decoration-color: var(--link-color);
-    }
-
-    &:focus,
-    &:focus-visible {
-      // border: 2px solid var(--color-focus);
-    }
-
-  @include media('>=md') {
-    @include heading-xs;
-  }
-}
-
-h5,
-.h5 h6 .h6 {
-  font-family: var(--font-display-face);
-  @include heading-2xs;
-
-  a {
-    &:hover {
-      text-decoration-line: underline;
-      text-decoration-color: var(--link-color);
-    }
-
-    &:focus,
-    &:focus-visible {
-      // border: 2px solid var(--color-focus);
-    }
-  }
 }

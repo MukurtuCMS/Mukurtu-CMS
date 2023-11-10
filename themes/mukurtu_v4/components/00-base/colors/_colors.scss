@@ -19,13 +19,13 @@ h2 {
   --brand-secondary-accent: #f1b85a;
   --mukurtu-navbar-collapse-link-hover-color: #e5ab48;
   --mukurtu-breadcrumb-gradient-color: #b7873a;
-  --mukurtu-panel-pane-text-color: #fff;
+  --mukurtu-panel-pane-text-color: var(--color-white);
   --mukurtu-panel-pane-content-background-color: #eeecec;
   --mukurtu-mejs-background-color: var(--brand-light-accent);
   --mukurtu-mejs-time-rail-loaded-color: #e5e1e1;
   --mukurtu-mejs-time-rail-current-color: #d1cbcb;
   --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
-  --mukurtu-collection-title-font-color: #fff;
+  --mukurtu-collection-title-font-color: var(--color-white);
   --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
 
   // Persistent Across Palettes Below.
@@ -35,15 +35,23 @@ h2 {
 
   --link-color: var(--brand-primary-accent);
   --text-color: var(--brand-text-color);
-  --light-text-color: #fff;
+  --light-text-color: var(--color-white);
   --teaser-text-color: #333333;
+
+  // General colors.
+  --color-white: #ffffff;
+  --color-black: #000;
+  --color-gray: #555;
+  --color-transparent: rgba(0, 0, 0, 0);
+  --focus-color: #66afe9;
+  --placeholder-color: #999;
 
   // Footer.
   --footer-text-color: #999999;
   --footer-link-color: #cccccc;
 
   // Nav.
-  --navbar-default-bg: #fff;
+  --navbar-default-bg: var(--color-white);
   --navbar-mukurtu-bg: var(--brand-primary);
 
   // Views.
@@ -57,24 +65,24 @@ h2 {
   // Mukurtu Specific.
   --mukurtu-text-box-background-color: #eeecec;
   --mukurtu-title-accent-bar-color: var(--brand-secondary);
-  --mukurtu-left-right-title-color: #fff;
-  --mukurtu-dictionary-term-title-full-color: #fff;
+  --mukurtu-left-right-title-color: var(--color-white);
+  --mukurtu-dictionary-term-title-full-color: var(--color-white);
 
   // Breadcrumbs.
   --mukurtu-breadcrumb-background-color: var(--brand-secondary);
-  --mukurtu-breadcrumb-link-color: #fff;
+  --mukurtu-breadcrumb-link-color: var(--color-white);
   --mukurtu-breadcrumb-non-link-color: var(--text-color);
 
   --mukurtu-default-container-bg-color: var(--brand-primary);
   --mukurtu-default-container-bg-hover-color: var(--brand-primary-accent);
-  --mukurtu-default-container-font-color: #fff;
+  --mukurtu-default-container-font-color: var(--color-white);
 
   // Mukurtu Menu Navbar links.
-  --mukurtu-navbar-default-link-color: #fff;
-  -mukurtu-navbar-default-link-hover-color: #fff;
+  --mukurtu-navbar-default-link-color: var(--color-white);
+  -mukurtu-navbar-default-link-hover-color: var(--color-white);
   --mukurtu-navbar-default-link-hover-bg: var(--brand-primary-accent);
 
-  --mukurtu-navbar-default-link-active-color: #555;
+  --mukurtu-navbar-default-link-active-color: var(--color-gray);
   --mukurtu-navbar-default-link-active-bg: darken(var(--navbar-default-bg), 6.5%);
   --mukurtu-navbar-default-link-disabled-color: #ccc;
   --mukurtu-navbar-default-link-disabled-bg: transparent;
@@ -85,7 +93,7 @@ h2 {
   // Dictionary.
   --mukurtu-dictionary-facets-pane-background-color: var(--brand-primary);
   --mukurtu-dictionary-facets-pane-contrast-color: var(--brand-secondary);
-  --mukurtu-dictionary-term-title-color: #fff;
+  --mukurtu-dictionary-term-title-color: var(--color-white);
 
   // Collections.
   // These values change based on the selected color palette - see these
@@ -94,7 +102,7 @@ h2 {
   // Community.
   --mukurtu-community-membership-status-color: var(--brand-primary);
 
-  // Browse By
+  // Browse By.
   --mukurtu-browse-by-background-color: var(--brand-primary);
   --mukurtu-browse-by-title-color: var(--brand-secondary);
 }
