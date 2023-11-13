@@ -206,8 +206,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
     return $this->{"entity_reference_{$target_type}"} ?? NULL;
   }
 
-  public function setEntityReferenceSetting($target_type, $option)
-  {
+  public function setEntityReferenceSetting($target_type, $option) {
     $this->{"entity_reference_{$target_type}"} = $option;
     return $this;
   }
@@ -277,7 +276,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
     // Mapped fields are in the order we want them already.
     if (isset($map[$key]) && !empty($map[$key])) {
       foreach ($map[$key] as $mapped_field_name => $mapped_field_label) {
-        if ($mappedField = $all_field_defs[$mapped_field_name]) {
+        if ($mappedField = $all_field_defs[$mapped_field_name] ?? NULL) {
           $result[] = [
             'field_name' => $mapped_field_name,
             'field_label' => $mappedField->getLabel(),

@@ -83,6 +83,10 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportEntityReference($event, $field, $config);
     }
 
+    if ($fieldType == 'entity_reference_revisions') {
+      return $this->exportEntityReferenceRevision($event, $field, $config);
+    }
+
     // Default handling.
     $values = $entity->get($field_name)->getValue();
     $exportValue = [];
@@ -178,6 +182,47 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
         }
 
         $export[] = $id;
+      }
+    }
+    $event->setValue($export);
+  }
+
+  /**
+   * Exports the entity reference revision field values.
+   *
+   * This method processes an entity reference revision field and exports the field values
+   * based on the configuration provided.
+   *
+   * @param EntityFieldExportEvent $event
+   *   The entity field export event containing context and environment for the export.
+   * @param \Drupal\Core\Field\FieldItemListInterface $field
+   *   The field items list being exported, which contains the entity reference revision data.
+   * @param CsvExporter $config
+   *   The configuration object that provides settings for the export, such as the
+   *   desired format of the entity reference export (e.g., ID, UUID, username).
+   *
+   * @protected
+   */
+  protected function exportEntityReferenceRevision(EntityFieldExportEvent $event, $field, CsvExporter $config) {
+    $export = [];
+    $target_type = $field->getFieldDefinition()->getSettings()['target_type'] ?? NULL;
+    $option = $config->getEntityReferenceSetting($target_type);
+    $id_format = $config->getIdFieldSetting();
+
+    foreach ($field->getValue() as $value) {
+      if ($id = ($value['target_id'] ?? NULL)) {
+        if ($option && $target_type) {
+          if ($option == 'id') {
+            $export[] = $id_format === 'uuid' ? $this->getUUID($target_type, $id) : $id;
+            continue;
+          }
+
+          if ($option == 'entity') {
+            $this->exportEntityById($event, $target_type, $id);
+            $export[] = $id_format === 'uuid' ? $this->getUUID($target_type, $id) : $id;
+            continue;
+          }
+        }
       }
     }
     $event->setValue($export);
