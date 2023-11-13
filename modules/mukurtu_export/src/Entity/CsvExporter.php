@@ -61,27 +61,91 @@ use Drupal\user\UserInterface;
  *   }
  * )
  */
-class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
-{
+class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   protected $uid;
 
+  /**
+   * The description of the export config.
+   *
+   * @var string
+   */
   protected $description;
+
+  /**
+   * Boolean to indicate if the config is available site wide.
+   *
+   * @var bool
+   */
   protected $site_wide;
 
+  /**
+   * @var mixed
+   */
   protected $entity_fields_export_list;
 
+  /**
+   * @var string
+   */
   protected $separator;
+
+  /**
+   * @var string
+   */
   protected $enclosure;
+
+  /**
+   * @var string
+   */
   protected $escape;
+
+  /**
+   * @var string
+   */
   protected $eol;
+
+  /**
+   * @var string
+   */
   protected $multivalue_delimiter;
+
+  /**
+   * @var string
+   */
   protected $field_id;
+
+  /**
+   * @var string
+   */
   protected $field_file;
+
+  /**
+   * @var string
+   */
   protected $field_image;
+
+  /**
+   * @var string
+   */
   protected $entity_reference_node;
+
+  /**
+   * @var string
+   */
   protected $entity_reference_media;
+
+  /**
+   * @var string
+   */
   protected $entity_reference_user;
+
+  /**
+   * @var string
+   */
   protected $entity_reference_taxonomy_term;
+
+  /**
+   * @var string
+   */
   protected $entity_reference_paragraph;
 
 
@@ -169,35 +233,29 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface
     return $this;
   }
 
-  public function getIdFieldSetting()
-  {
+  public function getIdFieldSetting() {
     return $this->field_id;
   }
 
-  public function setIdFieldSetting(string $id_field_option)
-  {
+  public function setIdFieldSetting(string $id_field_option) {
     $this->field_id = $id_field_option;
     return $this;
   }
 
-  public function getFileFieldSetting()
-  {
+  public function getFileFieldSetting() {
     return $this->field_file;
   }
 
-  public function setFileFieldSetting(string $file_field_option)
-  {
+  public function setFileFieldSetting(string $file_field_option) {
     $this->field_file = $file_field_option;
     return $this;
   }
 
-  public function getImageFieldSetting()
-  {
+  public function getImageFieldSetting() {
     return $this->field_image;
   }
 
-  public function setImageFieldSetting(string $image_field_option)
-  {
+  public function setImageFieldSetting(string $image_field_option) {
     $this->field_image = $image_field_option;
     return $this;
   }
