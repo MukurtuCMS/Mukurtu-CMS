@@ -1,9 +1,8 @@
-// Defaults.
+/* Defaults. */
 button,
 input[type=button],
 input[type=submit],
 input[type=reset] {
-  @include info-md-heavy;
   color: var(--light-text-color);
   background: var(--brand-primary);
   border: 0;
@@ -16,7 +15,7 @@ input[type=reset] {
   }
 
   &:focus {
-    // outline: 2px solid var(--color-focus);
+    outline: 2px solid var(--color-focus);
   }
 
   &:disabled {

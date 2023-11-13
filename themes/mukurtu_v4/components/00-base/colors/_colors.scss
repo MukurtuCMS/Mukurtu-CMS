@@ -1,4 +1,4 @@
-// Main Colors.
+/* Main Colors. */
 h2 {
   color: #138aab;
 }
@@ -10,9 +10,9 @@ h2 {
 }
 
 :root {
-  // Core Colors.
+  /* Core Colors. */
 
-  // Overridden by Palette Switcher.
+  /* Overridden by Palette Switcher. */
   --brand-primary: #159ec4;
   --brand-secondary: #e6ab49;
   --brand-primary-accent: #138aab;
@@ -28,7 +28,7 @@ h2 {
   --mukurtu-collection-title-font-color: var(--color-white);
   --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
 
-  // Persistent Across Palettes Below.
+  /* Persistent Across Palettes Below. */
   --brand-text-color: #464646;
   --brand-light: #e5e9e9;
   --brand-light-accent: #f8f7f7;
@@ -38,7 +38,7 @@ h2 {
   --light-text-color: var(--color-white);
   --teaser-text-color: #333333;
 
-  // General colors.
+  /* General colors. */
   --color-white: #ffffff;
   --color-black: #000;
   --color-gray: #555;
@@ -46,29 +46,29 @@ h2 {
   --focus-color: #66afe9;
   --placeholder-color: #999;
 
-  // Footer.
+  /* Footer. */
   --footer-text-color: #999999;
   --footer-link-color: #cccccc;
 
-  // Nav.
+  /* Nav. */
   --navbar-default-bg: var(--color-white);
   --navbar-mukurtu-bg: var(--brand-primary);
 
-  // Views.
+  /* Views. */
   --mukurtu-view-row-divider-color: #eeeaea;
   --mukurtu-primary-field-divider-color: #e5e1e1;
 
-  // Mobile Menu/Collapse Navbar.
+  /* Mobile Menu/Collapse Navbar. */
   --mukurtu-navbar-collapse-bg: var(--brand-light-accent);
   --mukurtu-navbar-collapse-link-color: var(--brand-primary-accent);
 
-  // Mukurtu Specific.
+  /* Mukurtu Specific. */
   --mukurtu-text-box-background-color: #eeecec;
   --mukurtu-title-accent-bar-color: var(--brand-secondary);
   --mukurtu-left-right-title-color: var(--color-white);
   --mukurtu-dictionary-term-title-full-color: var(--color-white);
 
-  // Breadcrumbs.
+  /* Breadcrumbs. */
   --mukurtu-breadcrumb-background-color: var(--brand-secondary);
   --mukurtu-breadcrumb-link-color: var(--color-white);
   --mukurtu-breadcrumb-non-link-color: var(--text-color);
@@ -77,7 +77,7 @@ h2 {
   --mukurtu-default-container-bg-hover-color: var(--brand-primary-accent);
   --mukurtu-default-container-font-color: var(--color-white);
 
-  // Mukurtu Menu Navbar links.
+  /* Mukurtu Menu Navbar links. */
   --mukurtu-navbar-default-link-color: var(--color-white);
   -mukurtu-navbar-default-link-hover-color: var(--color-white);
   --mukurtu-navbar-default-link-hover-bg: var(--brand-primary-accent);
@@ -87,25 +87,25 @@ h2 {
   --mukurtu-navbar-default-link-disabled-color: #ccc;
   --mukurtu-navbar-default-link-disabled-bg: transparent;
 
-  // Media Element Controls.
+  /* Media Element Controls. */
   --mukurtu-mejs-text-color: var(--brand-text-color);
 
-  // Dictionary.
+  /* Dictionary. */
   --mukurtu-dictionary-facets-pane-background-color: var(--brand-primary);
   --mukurtu-dictionary-facets-pane-contrast-color: var(--brand-secondary);
   --mukurtu-dictionary-term-title-color: var(--color-white);
 
-  // Collections.
-  // These values change based on the selected color palette - see these
-  // at the top of the file.
+  /* Collections.
+  These values change based on the selected color palette - see these
+  at the top of the file. */
 
-  // Community.
+  /* Community. */
   --mukurtu-community-membership-status-color: var(--brand-primary);
 
-  // Browse By.
+  /* Browse By. */
   --mukurtu-browse-by-background-color: var(--brand-primary);
   --mukurtu-browse-by-title-color: var(--brand-secondary);
 }
 
-// See palettes folder for the different color palettes.
-// Those files are injected by Drupal so they shouldn't be bundled to style.css.
+/* See palettes folder for the different color palettes.
+Those files are injected by Drupal so they shouldn't be bundled to style.css. */

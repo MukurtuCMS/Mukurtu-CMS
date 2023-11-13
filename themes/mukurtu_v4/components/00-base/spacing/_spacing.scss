@@ -1,6 +1,6 @@
 :root {
-  // Vertical spacing.
-  // All vertical horizontal spacing is based on an 16px base unit system.
+  /* Vertical spacing.
+     All vertical horizontal spacing is based on an 16px base unit system. */
   --v-space-6xs: 0.25rem; // 4px
   --v-space-5xs: 0.5rem; // 8px
   --v-space-4xxs: 1rem; // 16px
@@ -18,7 +18,7 @@
   --v-space-5xl: 7.5rem; // 120px
   --v-space-6xl: 8rem; // 128px
 
-  // Top / bottom padding between components.
+  /* Top / bottom padding between components. */
   --v-separation-s: var(--v-space-3xs); // 24px
   --v-separation-m: var(--v-space-2xs); // 32px
   --v-separation-l: var(--v-space-s); // 48px

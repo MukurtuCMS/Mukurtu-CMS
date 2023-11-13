@@ -1,5 +1,5 @@
-// Drupal visually-hidden CSS class that hides content from visual users and
-// shows content to screen reader users.
+/* Drupal visually-hidden CSS class that hides content from visual users and
+   shows content to screen reader users. */
 @mixin visually-hidden {
   position: absolute !important;
   overflow: hidden;

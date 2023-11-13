@@ -1,10 +1,11 @@
-// Breakpoints.
-// See https://eduardoboucas.github.io/include-media/ for detailed documentation on how to use @include media().
+/* Breakpoints. */
+/* See https://eduardoboucas.github.io/include-media/ for detailed
+documentation on how to use @include media(). */
 $breakpoints: (
-  'xs': 24rem, // 375px.
-  'sm': 30rem, // 480px.
-  'md': 48rem, // 768px.
-  'lg': 60rem, // 960px.
-  'xl': 80rem, // 1280px.
-  '2xl': 90rem // 1440px.
+  'xs': 24rem, /* 375px. */
+  'sm': 30rem, /* 480px. */
+  'md': 48rem, /* 768px. */
+  'lg': 60rem, /* 960px. */
+  'xl': 80rem, /* 1280px. */
+  '2xl': 90rem /* 1440px. */
 );
