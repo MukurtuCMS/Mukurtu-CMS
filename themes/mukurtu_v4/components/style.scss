@@ -1,8 +1,5 @@
-/* External Libraries. */
+// External Libraries.
 
-/* See https://eduardoboucas.github.io/include-media/ for detailed
+/*! See https://eduardoboucas.github.io/include-media/ for detailed
 documentation on how to use @include media(). */
 @import '../node_modules/include-media/dist/include-media';
-
-@import '00-base/**/*.scss';
-@import '01-atoms/**/*.scss';

@@ -1,49 +1,49 @@
 :root {
-  /* Font sizes. */
-  --font-size-2xs: 0.75rem; /* 12px */
-  --font-size-xs: 0.875rem; /* 14px */
-  --font-size-s: 1rem; /* 16px */
-  --font-size-m: 1.125rem; /* 18px */
-  --font-size-l: 1.25rem; /* 20px */
-  --font-size-2l: 1.375rem; /* 22px */
-  --font-size-xl: 1.5rem; /* 24px */
-  --font-size-2xl: 1.75rem; /* 28px */
-  --font-size-2xxl: 1.875rem; /* 30px */
-  --font-size-3xl: 2rem; /* 32px */
-  --font-size-heading-md: 2.25rem; /* 36px */
-  --font-size-heading-lg: 2.5rem; /* 40px */
-  --font-size-heading-xl: 3rem; /* 48px */
-  --font-size-heading-2xl: 3.5rem; /* 56px */
-  --font-size-heading-3xl: 4rem; /* 64px */
-  --font-size-heading-4xl: 4.5rem; /* 72px */
-  --font-size-heading-5xl: 7rem; /* 112px */
+  // Font sizes.
+  --font-size-2xs: 0.75rem; // 12px
+  --font-size-xs: 0.875rem; // 14px
+  --font-size-s: 1rem; // 16px
+  --font-size-m: 1.125rem; // 18px
+  --font-size-l: 1.25rem; // 20px
+  --font-size-2l: 1.375rem; // 22px
+  --font-size-xl: 1.5rem; // 24px
+  --font-size-2xl: 1.75rem; // 28px
+  --font-size-2xxl: 1.875rem; // 30px
+  --font-size-3xl: 2rem; // 32px
+  --font-size-heading-md: 2.25rem; // 36px
+  --font-size-heading-lg: 2.5rem; // 40px
+  --font-size-heading-xl: 3rem; // 48px
+  --font-size-heading-2xl: 3.5rem; // 56px
+  --font-size-heading-3xl: 4rem; // 64px
+  --font-size-heading-4xl: 4.5rem; // 72px
+  --font-size-heading-5xl: 7rem; // 112px
 
   --font-size-base: var(--font-size-s);
 
-  /* Font weight. */
+  // Font weight.
   --headings-font-weight: 500;
 
-  /* Line heights. */
-  --line-height-3xs: 0.75rem; /* 12px */
-  --line-height-2xs: 1rem; /* 16px */
-  --line-height-xs: 1.5rem; /* 24px */
-  --line-height-s: var(--line-height-xs); /* 24px */
-  --line-height-m: 2rem; /* 32px */
-  --line-height-l: var(--line-height-m); /* 32px */
+  // Line heights.
+  --line-height-3xs: 0.75rem; // 12px
+  --line-height-2xs: 1rem; // 16px
+  --line-height-xs: 1.5rem; // 24px
+  --line-height-s: var(--line-height-xs); // 24px
+  --line-height-m: 2rem; // 32px
+  --line-height-l: var(--line-height-m); // 32px
   --line-height-xl: 2.5rem; // 40px
-  --line-height-2xl: 3rem; /* 48px */
-  --line-height-3xl: 3.5rem; /* 56px */
-  --line-height-heading: 1.1; /* 1.1 x heading size */
-  --line-height-heading-2xl: 4rem; /* 64px */
-  --line-height-heading-3xl: 4.5rem; /* 72px */
-  --line-height-heading-4xl: var(--line-height-heading-3xl); /* 72px */
-  --line-height-heading-5xl: 7rem; /* 112px */
-  --line-height-base: var(--line-height-l); /* (default) */
+  --line-height-2xl: 3rem; // 48px
+  --line-height-3xl: 3.5rem; // 56px
+  --line-height-heading: 1.1; // 1.1 x heading size
+  --line-height-heading-2xl: 4rem; // 64px
+  --line-height-heading-3xl: 4.5rem; // 72px
+  --line-height-heading-4xl: var(--line-height-heading-3xl); // 72px
+  --line-height-heading-5xl: 7rem; // 112px
+  --line-height-base: var(--line-height-l); // (default)
 
-  /* Letter spacing. */
-  --letter-spacing-xs: 0.01rem; /* 0.16px */
-  --letter-spacing-xl: 0.02rem; /* 0.32px */
-  --letter-spacing-negative-xll: -0.01rem; /* -0.16px */
-  --letter-spacing-negative-xxl: -0.02rem; /* -0.32px */
-  --letter-spacing-label: 0.1rem; /* 1.6px */
+  // Letter spacing.
+  --letter-spacing-xs: 0.01rem; // 0.16px
+  --letter-spacing-xl: 0.02rem; // 0.32px
+  --letter-spacing-negative-xll: -0.01rem; // -0.16px
+  --letter-spacing-negative-xxl: -0.02rem; // -0.32px
+  --letter-spacing-label: 0.1rem; // 1.6px
 }

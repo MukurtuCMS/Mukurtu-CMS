@@ -1,21 +1,21 @@
 :root {
-  /* Typography. */
-  /* @todo: add a serif font if using one, or remove this if not. */
+  // Typography.
+  // @todo: add a serif font if using one, or remove this if not.
 
-  /* --font-body-face: Georgia,
+  /*! --font-body-face: Georgia,
      "Times New Roman",
      Times,
      serif; */
   --font-display-face: 'BCSans',
-    'Noto Sans',
-    Verdana,
-    Arial,
-    sans-serif;
+  'Noto Sans',
+  Verdana,
+  Arial,
+  sans-serif;
 
   --font-size-base: var(--font-size-small);
 }
 
-/* Headings definition. */
+// Headings definition.
 h1,
 h2,
 h3,

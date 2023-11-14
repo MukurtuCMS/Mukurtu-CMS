@@ -10,7 +10,6 @@
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^8.0.0",
     "gulp-cli": "^2.3.0",
-    "gulp-csscombx": "^4.2.1",
     "gulp-eslint": "^6.0.0",
     "gulp-if": "^3.0.0",
     "gulp-imagemin": "^7.1.0",

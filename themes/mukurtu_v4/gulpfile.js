@@ -4,7 +4,7 @@ var gulp = require("gulp"),
   livereload = require("gulp-livereload"),
   gulpIf = require("gulp-if"),
   eslint = require("gulp-eslint"),
-  csscombx = require('gulp-csscombx'),
+  sassLint = require("gulp-sass-lint"),
   autoprefixer = require("gulp-autoprefixer"),
   sourcemaps = require("gulp-sourcemaps"),
   imagemin = require("gulp-imagemin"),
@@ -30,7 +30,10 @@ gulp.task("sass", function (done) {
     .src("./components/**/*.scss")
     .pipe(sourcemaps.init())
     .pipe(sassGlob())
-    .pipe(csscombx())
+    // Lint first
+    .pipe(sassLint())
+    .pipe(sassLint.format())
+    .pipe(sassLint.failOnError())
     .pipe(sass({ outputStyle: "compressed" }).on("error", sass.logError))
     .pipe(autoprefixer("last 2 version"))
     .pipe(sourcemaps.write("./"))
