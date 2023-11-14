@@ -76,7 +76,7 @@ entity_fields_export_list:
     field_contributor: Contributor
     field_creator: Creator
     field_format: Format
-    field_keywords: Keyword
+    field_keywords: Keywords
     field_language: Language
     field_people: People
     field_publisher: Publisher
