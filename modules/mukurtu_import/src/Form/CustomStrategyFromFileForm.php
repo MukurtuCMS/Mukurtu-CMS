@@ -398,19 +398,66 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    */
   protected function searchFieldLabels($needle, $entity_type_id, $bundle = NULL) {
     $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $matchingFields = [];
     foreach ($fieldDefs as $field_name => $field) {
       if ($needle == mb_strtolower($field->getLabel())) {
-        return $field_name;
+        $matchingFields[$field_name] = $field;
       }
     }
+
+    // If there are multiple matches, return the first bundle specific match.
+    if (count($matchingFields) > 1) {
+      foreach ($matchingFields as $matched_field_name => $matched_field) {
+        if ($matched_field->getTargetBundle()) {
+          return $matched_field_name;
+        }
+      }
+    }
+
+    // If all are base fields, return the first.
+    if (count($matchingFields) >= 1) {
+      $field_names = array_keys($matchingFields);
+      return reset($field_names);
+    }
+
+    return NULL;
+  }
+
+  /**
+   * Search for a cultural_protocol field for a given entity/bundle.
+   */
+  protected function getProtocolField($entity_type_id, $bundle = NULL) {
+    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $protocolFields = [];
+    foreach ($fieldDefs as $field_name => $field) {
+      if ($field->getType() == 'cultural_protocol') {
+        $protocolFields[$field_name] = $field_name;
+      }
+    }
+
+    if (count($protocolFields) == 1) {
+      return reset($protocolFields);
+    }
+
+    if (count($protocolFields) > 1) {
+      // If there are multiple protocol fields for some reason, but ours is
+      // present, default to that.
+      if (isset($protocolFields['field_cultural_protocols'])) {
+        return $protocolFields['field_cultural_protocols'];
+      }
+
+      // Otherwise use the first one.
+      return reset($protocolFields);
+    }
+
     return NULL;
   }
 
   /**
    * Some basic logic to try and auto-map source to target.
    *
-   * 1. Check for field name matches (case insensitive).
-   * 2. Check for full field label matches (case insensitive).
+   * 1. Check for full field label matches (case insensitive).
+   * 2. Check for field name matches (case insensitive).
    */
   protected function getAutoMappedTarget($source, $entity_type_id, $bundle = NULL) {
     $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
@@ -431,14 +478,34 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     $needle = mb_strtolower($source);
 
-    // Check if we have a (case insensitive) field name match.
-    if (isset($fieldDefs[$needle])) {
-      return $needle;
+    // Hardcode our protocol subfields. Not ideal, but these are some of the
+    // most commonly imported fields, so having a good user experience trumps
+    // is more important.
+    $protocolLabel = t("Protocols");
+    $sharingSettingLabel = t("Sharing Setting");
+    if ($needle == mb_strtolower("$protocolLabel")) {
+      if ($protocolField = $this->getProtocolField($entity_type_id, $bundle)) {
+        return $protocolField . "/protocols";
+      }
     }
+    if ($needle == mb_strtolower("$sharingSettingLabel")) {
+      if ($protocolField = $this->getProtocolField($entity_type_id, $bundle)) {
+        return $protocolField . "/sharing_setting";
+      }
+    }
+
+    // Similarly, resolve language/langcode here. Our field_language in English
+    // has a "Language" field label which keeps matching to the locale langcode.
+
 
     // Check for field label matches.
     if ($fieldLabelMatch = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
       return $fieldLabelMatch;
+    }
+
+    // Check if we have a (case insensitive) field name match.
+    if (isset($fieldDefs[$needle])) {
+      return $needle;
     }
 
     return -1;
