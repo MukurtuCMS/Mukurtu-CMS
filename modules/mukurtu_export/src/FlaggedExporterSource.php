@@ -2,8 +2,7 @@
 
 namespace Drupal\mukurtu_export;
 
-class FlaggedExporterSource implements MukurtuExporterSourceInterface
-{
+class FlaggedExporterSource implements MukurtuExporterSourceInterface {
     /**
      * {@inheritdoc}
      */
@@ -13,7 +12,7 @@ class FlaggedExporterSource implements MukurtuExporterSourceInterface
             'node' => 'export_content',
             'media' => 'export_media',
         ];
-   
+
         $uid = \Drupal::currentUser()->id();
         $database = \Drupal::database();
 

@@ -33,6 +33,13 @@ class EntityFieldExportEvent extends Event {
   public $field_name;
 
   /**
+   * The sub field name.
+   *
+   * @var string
+   */
+  public $sub_field_name;
+
+  /**
    * The batch process context.
    *
    * @var mixed.
@@ -49,7 +56,9 @@ class EntityFieldExportEvent extends Event {
   public function __construct($exporter_id, EntityInterface $entity, $field_name, &$context) {
     $this->exporter_id = $exporter_id;
     $this->entity = $entity;
-    $this->field_name = $field_name;
+    $fieldComponents = explode('/', $field_name);
+    $this->field_name = $fieldComponents[0];
+    $this->sub_field_name = $fieldComponents[1] ?? NULL;
     $this->value = [];
     $this->context = $context;
   }

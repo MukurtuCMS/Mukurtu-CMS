@@ -253,13 +253,25 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     $id_format = $config->getIdFieldSetting();
 
     foreach ($field->getValue() as $value) {
+      if ($event->sub_field_name == "sharing_setting") {
+        $export[] = $value['sharing_setting'];
+        continue;
+      }
+
       $protocols = str_replace('|', '', $value['protocols']);
       if ($id_format === 'uuid') {
         $ids = explode(',', $protocols);
         $uuids = array_map(fn($p) => $this->getUUID('protocol', $p), $ids);
         $protocols = implode(',', $uuids);
       }
-      $export[] = "{$value['sharing_setting']}({$protocols})";
+
+      if (!$event->sub_field_name) {
+        $export[] = "{$value['sharing_setting']}({$protocols})";
+      }
+
+      if ($event->sub_field_name == "protocols") {
+        $export[] = $protocols;
+      }
     }
     $event->setValue($export);
   }

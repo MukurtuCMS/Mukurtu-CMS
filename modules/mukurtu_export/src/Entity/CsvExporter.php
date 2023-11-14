@@ -328,13 +328,18 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
     $entity_type = \Drupal::entityTypeManager()->getStorage($entity_type_id)->getEntityType();
     $id_fields = [$entity_type->getKey('id'), $entity_type->getKey('uuid')];
     $key = "{$entity_type_id}__{$bundle}";
+    $mappedSubfields = [];
     $map = $this->get('entity_fields_export_list');
     $result = [];
 
     // Mapped fields are in the order we want them already.
     if (isset($map[$key]) && !empty($map[$key])) {
       foreach ($map[$key] as $mapped_field_name => $mapped_field_label) {
-        if ($mappedField = $all_field_defs[$mapped_field_name] ?? NULL) {
+        $mapped_field_components = explode('/', $mapped_field_name);
+        $mapped_base_field_name = $mapped_field_components[0];
+        $mapped_subfield_name = $mapped_field_components[1] ?? NULL;
+
+        if ($mappedField = $all_field_defs[$mapped_base_field_name] ?? NULL) {
           $result[] = [
             'field_name' => $mapped_field_name,
             'field_label' => $mappedField->getLabel(),
@@ -344,16 +349,50 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
 
           // Remove the field from the list. The remainder of the list will
           // be added to the end of the form for the user to assign mappings.
-          unset($all_field_defs[$mapped_field_name]);
+          if (!$mapped_subfield_name) {
+            unset($all_field_defs[$mapped_field_name]);
+          } else {
+            // Track subfields.
+            $mappedSubfields[$key][$mapped_base_field_name][] = $mapped_subfield_name;
+          }
         }
       }
     }
 
     // Add the remaining, unmapped fields to the end of the list.
+    /** @var \Drupal\Core\Field\FieldConfigInterface $field_def */
     foreach($all_field_defs as $field_name => $field_def) {
       if ($field_def->isComputed()) {
         continue;
       }
+
+      // Break protocol field into the two separate sub-fields.
+      // We are doing this because in v3, sharing setting and protocols were
+      // two separate fields and users expect this behavior.
+      // @todo this should really be an event/hook rather than hardcoded.
+      if ($field_def->getType() == "cultural_protocol") {
+        $protocolsSubfieldLabel = t("Protocols");
+        $sharingSubfieldLabel = t("Sharing Setting");
+
+        if (!in_array('protocols', $mappedSubfields[$key][$field_name] ?? [])) {
+          $result[] = [
+            'field_name' => $field_name . '/protocols',
+            'field_label' => $field_def->getLabel() . ": " . $protocolsSubfieldLabel,
+            'csv_header_label' => $protocolsSubfieldLabel,
+            'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
+          ];
+        }
+
+        if (!in_array('sharing_setting', $mappedSubfields[$key][$field_name] ?? [])) {
+          $result[] = [
+            'field_name' => $field_name . '/sharing_setting',
+            'field_label' => $field_def->getLabel() . ": " . $sharingSubfieldLabel,
+            'csv_header_label' => $sharingSubfieldLabel,
+            'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
+          ];
+        }
+      }
+
       $result[] = [
         'field_name' => $field_name,
         'field_label' => $field_def->getLabel(),

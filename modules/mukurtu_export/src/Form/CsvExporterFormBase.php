@@ -9,8 +9,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 
-class CsvExporterFormBase extends EntityForm
-{
+class CsvExporterFormBase extends EntityForm {
+
   /**
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
@@ -26,15 +26,13 @@ class CsvExporterFormBase extends EntityForm
    */
   protected $entityTypeBundleInfo;
 
-  public function __construct(EntityStorageInterface $entity_storage, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info)
-  {
+  public function __construct(EntityStorageInterface $entity_storage, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
     $this->entityStorage = $entity_storage;
     $this->entityFieldManager = $entity_field_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
   }
 
-  public static function create(ContainerInterface $container)
-  {
+  public static function create(ContainerInterface $container) {
     $form = new static(
       $container->get('entity_type.manager')->getStorage('csv_exporter'),
       $container->get('entity_field.manager'),
@@ -44,8 +42,7 @@ class CsvExporterFormBase extends EntityForm
     return $form;
   }
 
-  public function buildForm(array $form, FormStateInterface $form_state)
-  {
+  public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
 
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $entity */
@@ -257,7 +254,7 @@ class CsvExporterFormBase extends EntityForm
         '#title' => $entity_type->getLabel(),
       ];
 
-      foreach($all_bundle_info[$type] as $bundle => $bundle_info) {
+      foreach ($all_bundle_info[$type] as $bundle => $bundle_info) {
         $build[$type][$bundle] = [
           '#type' => 'details',
           '#open' => FALSE,
@@ -283,7 +280,7 @@ class CsvExporterFormBase extends EntityForm
           ],
         ];
 
-        foreach($entity->getMappedFields($type, $bundle) as $weight => $mapped_field) {
+        foreach ($entity->getMappedFields($type, $bundle) as $weight => $mapped_field) {
           $row = [
             '#attributes' => ['class' => ['draggable']],
             '#weight' => 0,
@@ -335,8 +332,7 @@ class CsvExporterFormBase extends EntityForm
     return $build;
   }
 
-  public function exists($entity_id, array $element, FormStateInterface $form_state)
-  {
+  public function exists($entity_id, array $element, FormStateInterface $form_state) {
     $query = $this->entityStorage->getQuery();
 
     $result = $query
@@ -346,8 +342,7 @@ class CsvExporterFormBase extends EntityForm
     return (bool) $result;
   }
 
-  protected function actions(array $form, FormStateInterface $form_state)
-  {
+  protected function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
     $actions['submit']['#value'] = $this->t('Save');
     return $actions;
@@ -356,16 +351,11 @@ class CsvExporterFormBase extends EntityForm
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state)
-  {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
   }
 
-
-
-
-  public function save(array $form, FormStateInterface $form_state)
-  {
+  public function save(array $form, FormStateInterface $form_state) {
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $entity */
     $entity = $this->getEntity();
     $values = $form_state->getValues();
@@ -395,4 +385,5 @@ class CsvExporterFormBase extends EntityForm
     $status = $entity->save();
     $form_state->setRedirect('mukurtu_export.export_settings');
   }
+
 }
