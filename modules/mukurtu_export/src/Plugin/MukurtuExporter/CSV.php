@@ -90,7 +90,8 @@ class CSV extends ExporterBase {
     $this->addUserConfigOptions($form['export_settings']);
 
     $option_keys = array_keys($form['export_settings']['#options']);
-    $form['export_settings']['#default_value'] = $settings['settings_id'] ?? reset($option_keys);
+    $default_settings_id = $settings['settings_id'] ?? NULL;
+    $form['export_settings']['#default_value'] = $default_settings_id && in_array($default_settings_id, $option_keys) ? $default_settings_id : reset($option_keys);
 
     $form['new_setting'] = [
       '#type' => 'link',
