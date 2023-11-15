@@ -34,11 +34,10 @@ class LocalContextsHubBase {
    * @param \Drupal\core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    */
-  public function __construct()
-  {
+  public function __construct() {
     $this->configFactory = \Drupal::service('config.factory');
     $this->db = \Drupal::database();
-    $endpointUrl = $this->configFactory->get(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? 'https://anth-ja77-lc-dev-42d5.uc.r.appspot.com/api/v1/';
+    $endpointUrl = $this->configFactory->get(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? 'https://sandbox.localcontextshub.org/api/v1/';
 
     if (str_ends_with($endpointUrl, '/')) {
       $endpointUrl = substr($endpointUrl, 0, -1);
