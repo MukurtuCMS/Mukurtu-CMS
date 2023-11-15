@@ -29,7 +29,11 @@ NOTICE_UUID:notice_type => [
         <div class="tk-labels">
         <h3>{{ 'TK Labels'|t }}</h3>
         {% for label in project.tk_labels %}
-          <div class="tk-label"><img src={{ label.svg_url }} alt="{{ label.name }}" title="{{ label.name }}"></div>
+          <div class="tk-label">
+            <img src={{ label.svg_url }} alt="{{ label.name }}" title="{{ label.name }}">
+            <div class="name">{{ label.name }}</div>
+            <div class="text">{{ label.text }}</div>
+          </div>
         {% endfor %}
         </div>
       {% endif %}
@@ -37,7 +41,11 @@ NOTICE_UUID:notice_type => [
         <div class="bc-labels">
         <h3>{{ 'BC Labels'|t }}</h3>
         {% for label in project.bc_labels %}
-          <div class="bc-label"><img src={{ label.svg_url }} alt="{{ label.name }}" title="{{ label.name }}"></div>
+          <div class="bc-label">
+            <img src={{ label.svg_url }} alt="{{ label.name }}" title="{{ label.name }}">
+            <div class="name">{{ label.name }}</div>
+            <div class="text">{{ label.text }}</div>
+          </div>
         {% endfor %}
         </div>
       {% endif %}
@@ -45,7 +53,11 @@ NOTICE_UUID:notice_type => [
         <div class="notices">
         <h3>{{ 'Notices'|t }}</h3>
         {% for notice in project.notices %}
-          <div class="notice"><img src={{ notice.svg_url }} alt="{{ notice.name }}" title="{{ notice.name }}"></div>
+          <div class="notice">
+            <img src={{ notice.svg_url }} alt="{{ notice.name }}" title="{{ notice.name }}">
+            <div class="name">{{ notice.name }}</div>
+            <div class="text">{{ notice.text }}</div>
+          </div>
         {% endfor %}
         </div>
       {% endif %}
