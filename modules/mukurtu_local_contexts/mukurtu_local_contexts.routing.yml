@@ -66,6 +66,14 @@ mukurtu_local_contexts.site_project_directory:
   path: '/local-contexts/projects'
   defaults:
     _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::siteDirectory'
-    _title: 'Site Local Contexts Projects'
+    _title: 'Site Local Contexts Projects Directory'
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::siteDirectoryAccess'
+
+mukurtu_local_contexts.manage_site_project_directory:
+  path: '/dashboard/local-contexts/projects/directory'
+  defaults:
+    _title: 'Manage Site Local Contexts Projects Directory'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageSiteProjectsDirectory'
+  requirements:
+    _permission: 'administer site configuration'

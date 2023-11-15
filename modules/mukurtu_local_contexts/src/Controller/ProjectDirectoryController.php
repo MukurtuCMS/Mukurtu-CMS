@@ -46,6 +46,7 @@ class ProjectDirectoryController extends ControllerBase {
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
 
     $projects = $this->localContextsProjectManager->getSiteSupportedProjects(TRUE);
+    $description = $this->t($this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_site_projects_directory_description')) ?? '';
 
     foreach ($projects as &$projectInfo) {
       $project = new LocalContextsProject($projectInfo['id']);
@@ -58,6 +59,7 @@ class ProjectDirectoryController extends ControllerBase {
     return [
       '#theme' => 'local_contexts_site_project_directory',
       '#projects' => $projects,
+      '#description'=> $description,
       '#cache' => [
         'max-age' => 0,
       ],
