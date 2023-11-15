@@ -1,0 +1,40 @@
+:root {
+  // Vertical spacing.
+  // All vertical horizontal spacing is based on an 16px base unit system.
+  --v-space-6xs: 0.25rem; // 4px
+  --v-space-5xs: 0.5rem; // 8px
+  --v-space-4xxs: 1rem; // 16px
+  --v-space-4xs: 1.25rem; // 20px
+  --v-space-3xs: 1.5rem; // 24px
+  --v-space-2xs: 2rem; // 32px
+  --v-space-xs: 2.5rem; // 40px
+  --v-space-s: 3rem; // 48px
+  --v-space-m: 3.5rem; // 56px
+  --v-space-l: 4rem; // 64px
+  --v-space-xl: 4.5rem; // 72px
+  --v-space-2xl: 5rem; // 80px
+  --v-space-3xl: 6rem; // 96px
+  --v-space-4xl: 6.5rem; // 104px
+  --v-space-5xl: 7.5rem; // 120px
+  --v-space-6xl: 8rem; // 128px
+
+  // Top / bottom padding between components.
+  --v-separation-s: var(--v-space-3xs); // 24px
+  --v-separation-m: var(--v-space-2xs); // 32px
+  --v-separation-l: var(--v-space-s); // 48px
+  --v-separation-xl: var(--v-space-l); // 64px
+  --v-separation-xxl: var(--v-space-6xl); // 64px
+  --v-separation: var(--v-separation-s); // Dynamic responsive value.
+
+  @include media('>=md') {
+    --v-separation: var(--v-separation-m);
+  }
+
+  @include media('>=lg') {
+    --v-separation: var(--v-separation-l);
+  }
+
+  @include media('>=xl') {
+    --v-separation: var(--v-separation-xl);
+  }
+}
