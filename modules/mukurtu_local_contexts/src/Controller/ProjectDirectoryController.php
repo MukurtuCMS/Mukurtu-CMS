@@ -58,6 +58,9 @@ class ProjectDirectoryController extends ControllerBase {
     return [
       '#theme' => 'local_contexts_site_project_directory',
       '#projects' => $projects,
+      '#cache' => [
+        'max-age' => 0,
+      ],
     ];
   }
 
