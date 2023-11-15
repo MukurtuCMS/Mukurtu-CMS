@@ -4,3 +4,5 @@ description: Provides integration with the Local Contexts Hub.
 package: Mukurtu
 core: 8.x
 core_version_requirement: ^8 || ^9
+dependencies:
+  - mukurtu_protocol

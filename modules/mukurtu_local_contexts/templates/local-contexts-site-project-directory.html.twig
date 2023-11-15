@@ -1,0 +1,56 @@
+{#
+project array has: ['id', 'provider_id', 'title', 'privacy', 'updated']
+
+'tk_labels' and 'bc_labels' format:
+  LABEL_UUID => [
+  "id" => LABEL_UUID,
+  "name" => "TK Outreach (TK O)",
+  "svg_url" => "https://storage.googleapis.com/local-context-hub-staging.appspot.com/labels/tklabels/tk-outreach.svg",
+  "text" => "This Label is being used to indicate that this material is traditionally and usually not publicly available...",
+]
+
+'notices' format:
+NOTICE_UUID:notice_type => [
+  "project_id" => NOTICE_UUID,
+  "notice_type" => "traditional_knowledge",
+  "name" => "Traditional Knowledge (TK) Notice",
+  "svg_url" => "https://storage.googleapis.com/local-context-hub-staging.appspot.com/labels/notices/tk-notice.svg",
+  "text" => "The TK (Traditional Knowledge) Notice is a visible notification that there are accompanying cultural rights and responsibilities that need further...",
+]
+
+#}
+<div class="local-contexts-projects">
+  {% if projects %}
+  <div class="projects">
+    {% for project in projects %}
+    <div class="project">
+      <div class="name"><a href={{ project.url }} title="{{'View the project details on the Local Contexts Hub'|t}}">{{ project.title }}</a></div>
+      {% if project.tk_labels %}
+        <div class="tk-labels">
+        <h3>{{ 'TK Labels'|t }}</h3>
+        {% for label in project.tk_labels %}
+          <div class="tk-label"><img src={{ label.svg_url }} alt="{{ label.name }}" title="{{ label.name }}"></div>
+        {% endfor %}
+        </div>
+      {% endif %}
+      {% if project.bc_labels %}
+        <div class="bc-labels">
+        <h3>{{ 'TK Labels'|t }}</h3>
+        {% for label in project.bc_labels %}
+          <div class="bc-label"><img src={{ label.svg_url }} alt="{{ label.name }}" title="{{ label.name }}"></div>
+        {% endfor %}
+        </div>
+      {% endif %}
+      {% if project.notices %}
+        <div class="notices">
+        <h3>{{ 'Notices'|t }}</h3>
+        {% for notice in project.notices %}
+          <div class="notice"><img src={{ notice.svg_url }} alt="{{ notice.name }}" title="{{ notice.name }}"></div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>

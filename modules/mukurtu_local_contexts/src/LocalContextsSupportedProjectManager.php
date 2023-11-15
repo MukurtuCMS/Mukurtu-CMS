@@ -123,7 +123,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The project information, keyed by project ID.
    */
-  public function getSiteSupportedProjects() {
+  public function getSiteSupportedProjects($exclude_legacy = FALSE) {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
     $query
@@ -133,6 +133,14 @@ class LocalContextsSupportedProjectManager {
 
     $result = $query->execute();
     $projects = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+
+    if ($exclude_legacy) {
+      foreach (['default_tk', 'sitewide_tk'] as $legacy_id) {
+        if (isset($projects[$legacy_id])) {
+          unset($projects[$legacy_id]);
+        }
+      }
+    }
     return $projects;
   }
 

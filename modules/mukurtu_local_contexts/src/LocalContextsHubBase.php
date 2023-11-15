@@ -11,6 +11,13 @@ class LocalContextsHubBase {
   const SETTINGS_CONFIG_KEY = 'mukurtu_local_contexts.settings';
 
   /**
+   * The default local contexts hub URL to use if one has not been set.
+   *
+   * @var string
+   */
+  const DEFAULT_HUB_URL = 'https://sandbox.localcontextshub.org/api/v1/';
+
+  /**
    * The config factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
@@ -37,7 +44,7 @@ class LocalContextsHubBase {
   public function __construct() {
     $this->configFactory = \Drupal::service('config.factory');
     $this->db = \Drupal::database();
-    $endpointUrl = $this->configFactory->get(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? 'https://sandbox.localcontextshub.org/api/v1/';
+    $endpointUrl = $this->configFactory->get(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? self::DEFAULT_HUB_URL;
 
     if (str_ends_with($endpointUrl, '/')) {
       $endpointUrl = substr($endpointUrl, 0, -1);

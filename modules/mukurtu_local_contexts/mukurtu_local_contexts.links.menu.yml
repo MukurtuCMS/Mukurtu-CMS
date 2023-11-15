@@ -4,3 +4,9 @@ mukurtu_local_contexts.manage_projects:
   parent: mukurtu_core.site_configuration
   menu_name: mukurtu
   route_name: mukurtu_local_contexts.manage_site_supported_projects
+
+mukurtu_local_contexts.site_projects_directory:
+  title: 'Local Contexts Projects'
+  description: 'View the directory of Local Contexts Projects specific to this site.'
+  menu_name: mukurtu
+  route_name: mukurtu_local_contexts.site_project_directory

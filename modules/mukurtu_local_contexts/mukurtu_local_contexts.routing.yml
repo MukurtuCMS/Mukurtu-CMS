@@ -61,3 +61,11 @@ mukurtu_local_contexts.add_protocol_supported_project:
     parameters:
       group:
         type: entity:protocol
+
+mukurtu_local_contexts.site_project_directory:
+  path: '/local-contexts/projects'
+  defaults:
+    _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::siteDirectory'
+    _title: 'Site Local Contexts Projects'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::siteDirectoryAccess'
