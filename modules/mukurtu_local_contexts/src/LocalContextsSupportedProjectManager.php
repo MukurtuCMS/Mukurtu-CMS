@@ -14,6 +14,14 @@ class LocalContextsSupportedProjectManager {
     $this->db = \Drupal::database();
   }
 
+  /**
+   * Add project ID as a site project.
+   *
+   * @param string $project_id
+   *   The project ID to add.
+   *
+   * @return void
+   */
   public function addSiteProject($project_id) {
     if (!$this->isSiteSupportedProject($project_id)) {
       $fields = [
@@ -26,7 +34,16 @@ class LocalContextsSupportedProjectManager {
     }
   }
 
-  public function isSiteSupportedProject($project_id) {
+  /**
+   * Check if a given project ID is a site project.
+   *
+   * @param string $project_id
+   *   The project ID.
+   *
+   * @return bool
+   *   True if the project is a site project.
+   */
+  public function isSiteSupportedProject($project_id): bool {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'projects')
       ->condition('projects.project_id', $project_id)
       ->condition('type', 'site')
@@ -37,6 +54,12 @@ class LocalContextsSupportedProjectManager {
     return empty($projects) ? FALSE : TRUE;
   }
 
+  /**
+   * Get all projects that have been added, regardless of scope.
+   *
+   * @return array
+   *   The project information, keyed by project ID.
+   */
   public function getAllProjects() {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
@@ -47,6 +70,12 @@ class LocalContextsSupportedProjectManager {
     return $projects;
   }
 
+  /**
+   * Get all labels that have been added, regardless of scope.
+   *
+   * @return array
+   *   The label information, keyed by label ID.
+   */
   public function getAllLabels() {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
@@ -58,6 +87,12 @@ class LocalContextsSupportedProjectManager {
     return $labels;
   }
 
+  /**
+   * Get all notices that have been added, regardless of scope.
+   *
+   * @return array
+   *   The notice information, keyed by notice ID.
+   */
   public function getAllNotices() {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
@@ -82,6 +117,12 @@ class LocalContextsSupportedProjectManager {
     return $notices;
   }
 
+  /**
+   * Get all site projects that have been added.
+   *
+   * @return array
+   *   The project information, keyed by project ID.
+   */
   public function getSiteSupportedProjects() {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
@@ -95,6 +136,15 @@ class LocalContextsSupportedProjectManager {
     return $projects;
   }
 
+  /**
+   * Get all group projects that have been added.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   *
+   * @return array
+   *   The project information, keyed by project ID.
+   */
   public function getGroupSupportedProjects(ContentEntityInterface $group) {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
@@ -108,6 +158,17 @@ class LocalContextsSupportedProjectManager {
     return $projects;
   }
 
+  /**
+   * Check if a given project ID is a group project.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   * @param string $project_id
+   *   The project ID.
+   *
+   * @return bool
+   *   True if the project is a group project.
+   */
   public function isGroupSupportedProject(ContentEntityInterface $group, $project_id) {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'projects')
       ->condition('projects.project_id', $project_id)
@@ -119,6 +180,16 @@ class LocalContextsSupportedProjectManager {
     return empty($projects) ? FALSE : TRUE;
   }
 
+  /**
+   * Add a given project ID as a group project.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   * @param string $project_id
+   *   The project ID to add.
+   *
+   * @return void
+   */
   public function addGroupProject(ContentEntityInterface $group, $project_id) {
     if (!$this->isGroupSupportedProject($group, $project_id)) {
       $fields = [
@@ -131,6 +202,14 @@ class LocalContextsSupportedProjectManager {
     }
   }
 
+  /**
+   * Remove a project ID as a site project.
+   *
+   * @param string $project_id
+   *   The project ID to remove.
+   *
+   * @return void
+   */
   public function removeSiteProject($project_id) {
     $query = $this->db->delete('mukurtu_local_contexts_supported_projects')
       ->condition('project_id', $project_id)
@@ -139,6 +218,16 @@ class LocalContextsSupportedProjectManager {
     return $query->execute();
   }
 
+  /**
+   * Remove a given project ID as a group project.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   * @param string $project_id
+   *   The project ID to remove.
+   *
+   * @return void
+   */
   public function removeGroupProject(ContentEntityInterface $group, $project_id) {
     $query = $this->db->delete('mukurtu_local_contexts_supported_projects')
       ->condition('project_id', $project_id)
@@ -147,6 +236,15 @@ class LocalContextsSupportedProjectManager {
     return $query->execute();
   }
 
+  /**
+   * Get all projects a user can use.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user account.
+   *
+   * @return array
+   *   The project information, keyed by project ID.
+   */
   public function getUserProjects(AccountInterface $account) {
     $projects = $this->getSiteSupportedProjects();
 
@@ -158,6 +256,12 @@ class LocalContextsSupportedProjectManager {
     return $projects;
   }
 
+  /**
+   * Get all site labels.
+   *
+   * @return array
+   *   The label information, keyed by label ID.
+   */
   public function getSiteLabels() {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
@@ -174,6 +278,12 @@ class LocalContextsSupportedProjectManager {
     return $labels;
   }
 
+  /**
+   * Get all site notices.
+   *
+   * @return array
+   *   The notice information, keyed by notice ID.
+   */
   public function getSiteNotices() {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
@@ -202,6 +312,15 @@ class LocalContextsSupportedProjectManager {
     return $notices;
   }
 
+  /**
+   * Get all user labels.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user account.
+   *
+   * @return array
+   *   The label information, keyed by label ID.
+   */
   public function getUserLabels(AccountInterface $account) {
     $projects = $this->getUserProjects($account);
 
@@ -222,6 +341,15 @@ class LocalContextsSupportedProjectManager {
     return $labels;
   }
 
+  /**
+   * Get all user notices.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user account.
+   *
+   * @return array
+   *   The notice information, keyed by notice ID.
+   */
   public function getUserNotices(AccountInterface $account) {
     $projects = $this->getUserProjects($account);
 
