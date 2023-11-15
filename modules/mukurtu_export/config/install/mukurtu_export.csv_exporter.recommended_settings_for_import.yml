@@ -1,8 +1,8 @@
 langcode: en
 status: true
 dependencies: {  }
-id: recommend_settings_for_import
-label: 'Recommend Settings for Import'
+id: recommended_settings_for_import
+label: 'Recommended Settings for Import'
 uid: 1
 description: 'Settings appropriate for export and subsequent import on the same site.'
 site_wide: true
