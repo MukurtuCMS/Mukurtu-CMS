@@ -45,7 +45,7 @@ use Drupal\user\UserInterface;
  *     "form" = {
  *       "add" = "Drupal\mukurtu_export\Form\CsvExporterAddForm",
  *       "edit" = "Drupal\mukurtu_export\Form\CsvExporterEditForm",
- *       "delete" = "Drupal\Core\Entity\EntityDeleteForm",
+ *       "delete" = "Drupal\mukurtu_export\Form\CsvExporterDeleteForm",
  *     },
  *     "route_provider" = {
  *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",

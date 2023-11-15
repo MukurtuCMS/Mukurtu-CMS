@@ -20,13 +20,11 @@ use Exception;
  *   description = @Translation("Export to CSV."),
  * )
  */
-class CSV extends ExporterBase
-{
+class CSV extends ExporterBase {
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration()
-  {
+  public function defaultConfiguration() {
     return [
       'id' => $this->getPluginId(),
       'settings' => ['settings_id' => NULL],
@@ -36,14 +34,16 @@ class CSV extends ExporterBase
   /**
    * {@inheritdoc}
    */
-  public function getConfiguration()
-  {
+  public function getConfiguration() {
     return [
       'id' => $this->getPluginId(),
       'settings' => $this->settings,
     ];
   }
 
+  /**
+   * Add sitewide csv_exporter entities to the form element.
+   */
   protected function addSiteWideConfigOptions(&$element) {
     $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
     $query = $storage->getQuery();
@@ -57,12 +57,14 @@ class CSV extends ExporterBase
     }
   }
 
+  /**
+   * Add csv_exporter entities owned by the user to the form element.
+   */
   protected function addUserConfigOptions(&$element) {
     $uid = \Drupal::currentUser()->id();
     $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
     $query = $storage->getQuery();
     $result = $query->condition('uid', $uid)->sort('label')->execute();
-    $options = [];
     if (!empty($result)) {
       $entities = $storage->loadMultiple($result);
       foreach($entities as $id => $entity) {
@@ -70,13 +72,15 @@ class CSV extends ExporterBase
         if ($entity->access('update')) {
           $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Edit'), 'entity.csv_exporter.edit_form', ['csv_exporter' => $id], [])->toString() . ")";
         }
+        if ($entity->access('delete')) {
+          $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Delete'), 'entity.csv_exporter.delete_form', ['csv_exporter' => $id], [])->toString() . ")";
+        }
         $element[$id]['#description'] = $entity->getDescription();
       }
     }
   }
 
-  public function settingsForm(array $form, FormStateInterface $form_state, $settings = [])
-  {
+  public function settingsForm(array $form, FormStateInterface $form_state, $settings = []) {
     $form['export_settings'] = [
       '#type' => 'radios',
       '#title' => $this->t('Export Settings'),
@@ -94,16 +98,17 @@ class CSV extends ExporterBase
       '#url' => Url::fromRoute('entity.csv_exporter.add_form'),
     ];
 
-    $form['manage_settings'] = [
-      '#type' => 'link',
-      '#title' => $this->t('Manage saved CSV export settings'),
-      '#url' => Url::fromRoute('entity.csv_exporter.collection'),
-    ];
+    if (\Drupal::currentUser()->hasPermission('administer mukurtu_import_strategy')) {
+      $form['manage_settings'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Manage saved CSV export settings'),
+        '#url' => Url::fromRoute('entity.csv_exporter.collection'),
+      ];
+    }
     return $form;
   }
 
-  public function getSettings(array &$form, FormStateInterface $form_state)
-  {
+  public function getSettings(array &$form, FormStateInterface $form_state) {
     $settings = [];
     $settings['settings_id'] = $form_state->getValue('export_settings');
     return $settings;
@@ -139,8 +144,7 @@ class CSV extends ExporterBase
   /**
    * {@inheritdoc}
    */
-  public static function exportSetup($entities, $options, &$context)
-  {
+  public static function exportSetup($entities, $options, &$context) {
     // Load the settings config entity.
     $id = $options['settings']['settings_id'];
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
@@ -207,8 +211,7 @@ class CSV extends ExporterBase
   /**
    * {@inheritdoc}
    */
-  public static function exportCompleted(&$context)
-  {
+  public static function exportCompleted(&$context) {
     // Clean-up.
     $fs = \Drupal::service('file_system');
     try {
@@ -221,8 +224,7 @@ class CSV extends ExporterBase
   /**
    * {@inheritdoc}
    */
-  public static function batchSetup(&$context)
-  {
+  public static function batchSetup(&$context) {
     $size = 10;
 
     // Load the config entity.
@@ -271,8 +273,7 @@ class CSV extends ExporterBase
   /**
    * {@inheritdoc}
    */
-  public static function batchExport(&$context)
-  {
+  public static function batchExport(&$context) {
     $entity_type_id = $context['sandbox']['batch']['entity_type_id'];
     $entities = $context['sandbox']['batch']['entities'];
     $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
@@ -324,8 +325,7 @@ class CSV extends ExporterBase
   /**
    * {@inheritdoc}
    */
-  public static function batchCompleted(&$context)
-  {
+  public static function batchCompleted(&$context) {
     foreach ($context['sandbox']['batch']['output_files'] as $entity_type_id => $bundleFiles) {
       foreach ($bundleFiles as $bundle => $outputfile) {
         if ($outputfile) {
@@ -358,8 +358,7 @@ class CSV extends ExporterBase
    * @return mixed
    *   The exported result.
    */
-  public static function export(EntityInterface $entity, &$context)
-  {
+  public static function export(EntityInterface $entity, &$context) {
     $event_dispatcher = \Drupal::service('event_dispatcher');
 
     // Get mapping to determine what fields to export.

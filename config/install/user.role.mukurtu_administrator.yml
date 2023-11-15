@@ -126,6 +126,7 @@ permissions:
   - 'administer message templates'
   - 'administer messages'
   - 'administer modules'
+  - 'administer mukurtu_import_strategy'
   - 'administer multipage item'
   - 'administer node display'
   - 'administer node fields'
