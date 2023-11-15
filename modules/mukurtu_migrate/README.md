@@ -32,6 +32,7 @@
 - Community Record Relationships
 - Multi-page Items
 - Taxonomy Record Relationships
+- [Local Contexts Legacy TK Labels](#local-contexts-legacy-tk-labels)
 
 
 ### Taxonomy Vocabulary Mapping
@@ -135,6 +136,21 @@ The following table shows the formatted text format mapping between version 3 an
 |-|-|
 |Public|`mukurtu_cms_v3_file`|
 |Private|`mukurtu_cms_v3_file_private`|
+
+### Local Contexts Legacy TK Labels
+In v3, there are TK labels that are outdated and no longer used by the Local Contexts Hub. There are three types of labels: community-customized, sitewide-customized, and not customized (default). However in v4, Local Context TK labels are always attached to a Local Contexts project. During migration from v3, a project is generated for sitewide labels, default labels, and for each community that has customized TK labels. Additional group- and site-supported projects are created for compatibility with v4.
+
+|Type|Migration ID|
+|-|-|
+|Community TK Labels|`mukurtu_cms_v3_legacy_tk_community_labels`|
+|Community TK Projects|`mukurtu_cms_v3_legacy_tk_community_projects`|
+|Group Supported Community TK Projects|`mukurtu_cms_v3_legacy_tk_community_projects_group_supported`|
+|Default TK Labels|`mukurtu_cms_v3_legacy_tk_default_labels`|
+|Default TK Project|`mukurtu_cms_v3_legacy_tk_default_project`|
+|Site Supported Default TK Project|`mukurtu_cms_v3_legacy_tk_default_project_site_supported`|
+|Sitewide TK Labels|`mukurtu_cms_v3_legacy_tk_sitewide_labels`|
+|Sitewide TK Project|`mukurtu_cms_v3_legacy_tk_sitewide_project`|
+|Site Supported Sitewide TK Labels|`mukurtu_cms_v3_legacy_tk_sitewide_project_site_supported`|
 
 ### Article Field Migration
 The following table shows the fields that will be migrated from version 3 for Articles.
