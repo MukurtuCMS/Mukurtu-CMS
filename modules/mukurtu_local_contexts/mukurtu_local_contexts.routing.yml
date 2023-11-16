@@ -26,6 +26,30 @@ mukurtu_local_contexts.manage_community_supported_projects:
       group:
         type: entity:community
 
+mukurtu_local_contexts.community_projects_directory:
+  path: '/dashboard/communities/{group}/local-contexts/project-directory'
+  defaults:
+    _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::title'
+    _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::communityDirectory'
+  options:
+    parameters:
+      group:
+        type: entity:community
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
+
+mukurtu_local_contexts.protocol_projects_directory:
+  path: '/dashboard/protocols/{group}/local-contexts/project-directory'
+  defaults:
+    _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::title'
+    _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::protocolDirectory'
+  options:
+    parameters:
+      group:
+        type: entity:protocol
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
+
 mukurtu_local_contexts.add_community_supported_project:
   path: '/dashboard/communities/{group}/local-contexts-projects/add'
   defaults:

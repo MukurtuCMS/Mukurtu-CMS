@@ -76,6 +76,15 @@ class ManageProtocolsController extends ControllerBase {
       ];
     }
 
+    $protocolProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.protocol_projects_directory', ['group' => $protocol->id()]);
+    if ($protocolProjectDirectoryUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('Local Contexts Project Directory'),
+        '#type' => 'link',
+        '#url' => $protocolProjectDirectoryUrl,
+      ];
+    }
+
     // Sharing Protocol.
     $visibilityMarkup['strict'] = $this->t('Strict: This cultural protocol is visible to members only.');
     $visibilityMarkup['open'] = $this->t('Open: This cultural protocol is visible to all.');

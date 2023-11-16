@@ -99,6 +99,15 @@ class ManageCommunitiesController extends ControllerBase {
       ];
     }
 
+    $communityProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.community_projects_directory', ['group' => $community->id()]);
+    if ($communityProjectDirectoryUrl->access()) {
+      $links[] = [
+        '#title' => $this->t('Local Contexts Project Directory'),
+        '#type' => 'link',
+        '#url' => $communityProjectDirectoryUrl,
+      ];
+    }
+
     // Sharing Setting.
     $visibilityMarkup['strict'] = $this->t('Strict: This community is visible to community members only.');
     $visibilityMarkup['open'] = $this->t('Open: This community is visible to all.');
