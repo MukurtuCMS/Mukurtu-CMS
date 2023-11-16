@@ -1,5 +1,7 @@
 files:
   include: '**/*.s+(a|c)ss'
+  ignore:
+    - 'components/style.scss'
 options:
   formatter: stylish
   merge-default-rules: false
@@ -65,7 +67,7 @@ rules:
   no-mergeable-selectors: 1
   no-misspelled-properties:
     - 1
-    - extra-properties: []
+    - extra-properties: [gap]
   no-qualifying-elements:
     - 0
     - allow-element-with-attribute: false

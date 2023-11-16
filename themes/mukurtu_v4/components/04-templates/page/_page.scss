@@ -1,0 +1,19 @@
+.layout-container {
+  @include layout--full-width-grid;
+
+  header {
+    grid-column: 1 / -1;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+  }
+
+  main {
+    grid-column: 1 / -1;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+  }
+}

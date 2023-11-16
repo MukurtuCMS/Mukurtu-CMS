@@ -1,0 +1,66 @@
+.dashboard {
+  //  Set up grid-like layout for Dashboard.
+  display: flex;
+  gap: var(--gutter);
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+
+  // Add elements to grid.
+  &__layout-sidebar-first,
+  &__menu,
+  &__main-content {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 100%;
+    flex: 1;
+    padding: var(--v-space-4xs);
+    border: 1px solid var(--mukurtu-primary-field-divider-color);
+  }
+
+  &__title {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding-block: var(--v-space-2xs);
+    background: linear-gradient(var(--brand-light), var(--color-white));
+    background-repeat: no-repeat;
+    background-size: 100% 12px;
+    background-position: bottom;
+    margin-block-end: var(--v-separation);
+
+    h1 {
+      margin-block: 0;
+    }
+  }
+
+  &__breadcrumbs {
+    @include layout--full-width-grid;
+    grid-column: 1 / -1;
+    background-color: var(--brand-secondary);
+
+    div:first-of-type {
+      grid-column: 1 / -1;
+
+      @include media('>=2xl') {
+        grid-column: 2 / -2;
+      }
+    }
+
+    ol {
+      li {
+        list-style-type: none;
+      }
+    }
+
+    a {
+      color: var(--brand-text-color);
+      text-decoration: underline solid 2px var(--brand-text-color);
+      transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+
+      &:hover {
+        text-decoration-color: var(--color-transparent);
+        transition: text-decoration-color 0.12s ease-in;
+      }
+    }
+  }
+}
