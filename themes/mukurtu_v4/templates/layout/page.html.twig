@@ -42,29 +42,51 @@
  */
 #}
 <div class="layout-container">
+  {# Account menu. #}
+  <div class="page__account-menu">
+    {{ page.navigation|without('mukurtu_v4_main_menu', 'mukurtu_v4_breadcrumbs') }}
+  </div>
 
   <header role="banner">
-    {{ page.header }}
+    {# Site branding and main menu. #}
+    <div class="page__logo">
+      {{ page.header }}
+    </div>
+    <div class="page__main-nav">
+      {{ page.navigation|without('mukurtu_v4_account_menu', 'mukurtu_v4_breadcrumbs') }}
+    </div>
   </header>
 
-  {{ page.navigation }}
+  <div class="page__breadcrumbs">
+    {# Breadcrumbs. #}
+    {{ page.navigation|without('mukurtu_v4_main_menu', 'mukurtu_v4_account_menu') }}
+  </div>
 
   {{ page.highlighted }}
 
   {{ page.help }}
 
-  <main role="main">
-    <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
+  {# {% if path('<current>') starts with path('mukurtu_core.dashboard') and page['#title'] %} #}
+    {% if page['#title'] %}
+    <div class="page__title">
+      <h1>{{ page['#title'] }}</h1>
+    </div>
+  {% endif %}
 
-    <div class="layout-content">
-      {{ page.content }}
-    </div>{# /.layout-content #}
+  <main id="main-content" role="main" tabindex="-1">
+  {# link is in html.html.twig #}
 
-    {% if page.sidebar_first %}
-      <aside class="layout-sidebar-first" role="complementary">
-        {{ page.sidebar_first }}
-      </aside>
-    {% endif %}
+    {% block page_content %}
+      <div class="layout-content">
+        {{ page.content }}
+      </div>{# /.layout-content #}
+
+      {% if page.sidebar_first %}
+        <aside class="layout-sidebar-first" role="complementary">
+          {{ page.sidebar_first }}
+        </aside>
+      {% endif %}
+    {% endblock %}
 
     {% if page.sidebar_second %}
       <aside class="layout-sidebar-second" role="complementary">

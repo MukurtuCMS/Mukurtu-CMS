@@ -67,8 +67,8 @@ img {
 }
 
 a {
-  color: var(--brand-primary-text);
-  text-decoration: underline solid 2px var(--brand-primary-text);
+  color: var(--brand-primary-dark);
+  text-decoration: underline solid 2px var(--brand-primary-dark);
   transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
 
   &:hover {
@@ -80,7 +80,7 @@ a {
   &:focus,
   &:focus-visible,
   &:active {
-    color: var(--brand-secondary-text);
+    color: var(--brand-secondary-dark);
   }
 
   &:focus,

@@ -1,6 +1,6 @@
-name: Mukurtu Version 4 Base Theme
+name: Mukurtu CMS Base Theme
 type: theme
-description: 'The default theme for Mukurtu V4.'
+description: 'The default theme for Mukurtu CMS.'
 core_version_requirement: ^9 || ^10
 base theme: stable9
 logo: logo.png

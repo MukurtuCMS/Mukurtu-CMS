@@ -41,21 +41,11 @@
  * @see html.html.twig
  */
 #}
-<div class="layout-container">
+{% extends "@mukurtu_v4/templates/layout/page.html.twig" %}
 
-  <header role="banner">
-    {{ page.header }}
-  </header>
+{% block page_content %}
 
-  <div class="dashboard__breadcrumbs">
-    {{ page.navigation|without('mukurtu_v4_main_menu', 'mukurtu_v4_account_menu') }}
-  </div>
-
-  <div class="dashboard__title">
-    <h1>Mukurtu Dashboard</h1>
-  </div>
-
-  <main class="dashboard">
+  <div class="dashboard">
     {# link is in html.html.twig #}
     {% if page.sidebar_first %}
       <aside class="dashboard__layout-sidebar-first" role="complementary">
@@ -63,23 +53,10 @@
       </aside>
     {% endif %}
 
-    <div class="dashboard__menu">
-        {{ page.navigation|without('mukurtu_v4_breadcrumbs') }}
-    </div>
-
     <div class="dashboard__main-content">
       {{ page.content|without('mukurtu_v4_page_title') }}
     </div>
     {# /.layout-content #}
 
-  </main>
-
-  {% if page.footer %}
-    <footer role="contentinfo">
-      {{ page.footer }}
-    </footer>
-  {% endif %}
-
-</div>
-{# /.layout-container #}
-
+  </div>
+{% endblock %}

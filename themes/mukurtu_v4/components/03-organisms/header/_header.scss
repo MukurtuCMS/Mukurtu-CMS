@@ -1,0 +1,24 @@
+// All header styling is here.
+// To find header grid placement, see _page.scss.
+header {
+  align-items: center;
+  padding-block: var(--v-space-4xxs);
+
+  a {
+    color: var(--brand-text-color);
+    text-decoration: underline solid 2px var(--brand-text-color);
+    transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+
+    &:hover {
+      text-decoration-color: var(--color-transparent);
+      transition: text-decoration-color 0.12s ease-in;
+    }
+
+    &:hover,
+    &:focus,
+    &:focus-visible,
+    &:active {
+      color: var(--brand-secondary-dark);
+    }
+  }
+}
