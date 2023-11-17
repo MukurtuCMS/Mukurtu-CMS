@@ -39,7 +39,6 @@ ol li {
 
 ul li {
   list-style-type: square;
-  padding-left: var(--v-space-5xs);
 
   &::marker {
     color: var(--accent-secondary);

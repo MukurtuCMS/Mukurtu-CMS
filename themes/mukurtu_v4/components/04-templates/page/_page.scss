@@ -1,38 +1,66 @@
 .layout-container {
-  @include layout--full-width-grid;
 
   header {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: var(--gutter);
-    width: 100%;
+    @include layout--full-width-grid;
 
-    @include media('>=2xl') {
-      grid-column: 2 / -2;
+    .page {
+      &__banner__wrapper {
+        display: flex;
+        align-items: center;
+        column-gap: var(--gutter);
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+
+        grid-column: 1 / -1;
+
+        @include media('>=2xl') {
+          grid-column: 2 / -2;
+        }
+      }
+
+      &__logo {
+        flex-shrink: 0;
+      }
+
+      &__main-nav {
+        flex-grow: 1;
+      }
     }
   }
 
   main {
-    grid-column: 1 / -1;
+    @include layout--full-width-grid;
+    margin-block-end: var(--v-separation);
 
-    @include media('>=2xl') {
-      grid-column: 2 / -2;
+    div:first-of-type {
+      grid-column: 1 / -1;
+
+      @include media('>=2xl') {
+        grid-column: 2 / -2;
+      }
     }
   }
 
   .page {
     &__account-menu {
-      grid-column: 1 / -1;
+      @include layout--full-width-grid;
 
       // Style this here for full bleed of color.
       background-color: var(--brand-primary-dark);
+
+      div:first-of-type {
+        grid-column: 1 / -1;
+
+        @include media('>=2xl') {
+          grid-column: 2 / -2;
+        }
+      }
     }
 
     &__breadcrumbs {
-      grid-column: 1 / -1;
-      background-color: var(--brand-secondary);
+      // Style this here for full bleed of color.
+      background: linear-gradient(180deg, var(--mukurtu-breadcrumb-gradient-color) 0%, var(--brand-secondary) 20%);
 
       @include layout--full-width-grid;
 
