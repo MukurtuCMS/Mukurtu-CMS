@@ -1,0 +1,26 @@
+.dashboard {
+  //  Set up grid-like layout for Dashboard.
+  display: flex;
+  gap: var(--gutter);
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+
+  grid-column: 1 / -1;
+
+  @include media('>=2xl') {
+    grid-column: 2 / -2;
+  }
+
+  // Add elements to grid.
+  &__layout-sidebar-first,
+  &__menu,
+  &__main-content {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 100%;
+    flex: 1;
+    padding: var(--v-space-4xs);
+    border: 1px solid var(--mukurtu-primary-field-divider-color);
+  }
+}

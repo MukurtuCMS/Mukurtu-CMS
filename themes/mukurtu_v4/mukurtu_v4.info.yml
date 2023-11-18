@@ -1,0 +1,19 @@
+name: Mukurtu CMS Base Theme
+type: theme
+description: 'The default theme for Mukurtu CMS.'
+core_version_requirement: ^9 || ^10
+base theme: stable9
+logo: logo.png
+libraries:
+  - mukurtu_v4/global-styling
+regions:
+  navigation: 'Navigation'
+  header: 'Header'
+  highlighted: 'Highlighted'
+  help: 'Help'
+  content: 'Content'
+  sidebar_first: 'Primary sidebar'
+  sidebar_second: 'Secondary sidebar'
+  footer: 'Footer'
+  page_top: 'Page top'
+  page_bottom: 'Page bottom'

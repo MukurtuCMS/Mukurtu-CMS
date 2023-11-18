@@ -1,0 +1,88 @@
+// All menu styling is here.
+// To find menu grid placement, see _page.scss.
+.menu {
+  // Account menu.
+  &__account-menu {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--gutter);
+    width: 100%;
+
+    li {
+      list-style: none;
+
+      a {
+        color: var(--light-text-color);
+        font-weight: var(--text-bold);
+        text-decoration: underline solid 2px var(--light-text-color);
+        transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+
+        &:hover {
+          text-decoration-color: var(--color-transparent);
+          transition: text-decoration-color 0.12s ease-in;
+        }
+
+        &:hover,
+        &:focus,
+        &:focus-visible,
+        &:active {
+          color: var(--brand-light-accent);
+        }
+
+        &:focus,
+        &:focus-visible,
+        &:active {
+          outline-color: var(--color-white);
+        }
+      }
+    }
+  }
+}
+
+// @todo: nest this under the menu class above once the main menu
+// template has been made.
+.page__main-nav {
+  ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+
+    li {
+      list-style: none;
+      position: relative;
+
+      &:not(:first-of-type) {
+        padding-inline-start: var(--v-space-4xxs);
+      }
+
+      &:not(:last-of-type) {
+        padding-inline-end: var(--v-space-4xxs);
+        border-right: 1.5px solid var(--main-nav-divider);
+      }
+
+      a {
+        color: var(--brand-text-color);
+        font-size: var(--font-size-l);
+        text-decoration: underline solid 2px var(--color-transparent);
+        transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+
+        &:hover {
+          text-decoration-color: var(--brand-secondary-dark);
+          text-underline-offset: 8px;
+          transition: text-decoration-color 0.12s ease-in;
+        }
+
+        &:hover,
+        &:focus,
+        &:focus-visible,
+        &:active {
+          color: var(--brand-secondary-dark);
+        }
+      }
+    }
+  }
+}

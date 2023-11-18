@@ -1,0 +1,10 @@
+.breadcrumb {
+  &__list-wrapper {
+    display: flex;
+    column-gap: var(--v-space-5xs);
+
+    li:nth-child(even) {
+      font-size: var(--font-size-2xs);
+    }
+  }
+}
