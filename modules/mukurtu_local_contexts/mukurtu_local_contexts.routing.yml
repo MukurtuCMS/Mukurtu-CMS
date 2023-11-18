@@ -27,7 +27,7 @@ mukurtu_local_contexts.manage_community_supported_projects:
         type: entity:community
 
 mukurtu_local_contexts.community_projects_directory:
-  path: '/dashboard/communities/{group}/local-contexts/project-directory'
+  path: '/dashboard/communities/{group}/local-contexts/projects'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::title'
     _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::communityDirectory'
@@ -38,8 +38,24 @@ mukurtu_local_contexts.community_projects_directory:
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
 
+mukurtu_local_contexts.manage_community_project_directory:
+  path: '/dashboard/communities/{group}/local-contexts/projects/directory'
+  defaults:
+    _title: 'Manage Community Local Contexts Projects Directory'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageCommunityProjectsDirectory'
+  requirements:
+    _permission: 'update group'
+
+mukurtu_local_contexts.manage_protocol_project_directory:
+  path: '/dashboard/protocols/{group}/local-contexts/projects/directory'
+  defaults:
+    _title: 'Manage Protocol Local Contexts Projects Directory'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageProtocolProjectsDirectory'
+  requirements:
+    _permission: 'update group'
+
 mukurtu_local_contexts.protocol_projects_directory:
-  path: '/dashboard/protocols/{group}/local-contexts/project-directory'
+  path: '/dashboard/protocols/{group}/local-contexts/projects'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::title'
     _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::protocolDirectory'
