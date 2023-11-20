@@ -6,10 +6,16 @@ use Drupal\Core\Form\FormStateInterface;
 
 class ImportFieldDescriptionListForm extends ImportBaseForm {
 
+  /**
+   * {@inheritDoc}
+   */
   public function getFormId() {
     return 'mukurtu_import_format_by_bundle';
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state, $entity_type = NULL, $bundle = NULL) {
     /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $manager */
     $importFieldManager = \Drupal::service('plugin.manager.mukurtu_import_field_process');
@@ -33,6 +39,15 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       ];
     }
 
+    $form['entity_type_id'] = [
+      '#type' => 'hidden',
+      '#value' => $entity_type,
+    ];
+    $form['bundle'] = [
+      '#type' => 'hidden',
+      '#value' => $bundle,
+    ];
+
     // Define tableselect.
     $form['table'] = [
       '#type' => 'tableselect',
@@ -53,7 +68,17 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     return $form;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $entity_type_id = $form_state->getValue('entity_type_id');
+    $bundle = $form_state->getValue('bundle');
+
+    $entity_type_label = $this->entityTypeManager->getDefinition($entity_type_id)->getLabel();
+    $bundle_info = $this->entityBundleInfo->getBundleInfo($entity_type_id);
+    $bundle_label = $bundle && isset($bundle_info[$bundle]) ? $bundle_info[$bundle]['label'] : '';
+    $filename = $bundle && $bundle != $entity_type_id ? "{$entity_type_label} - {$bundle_label}.csv" : "{$entity_type_label}.csv";
     $selected_fields = array_filter($form_state->getValue('table'));
 
     // Gather the selected field labels.
@@ -72,7 +97,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     // Trigger CSV download.
     $response = new \Symfony\Component\HttpFoundation\Response($csv);
     $response->headers->set('Content-Type', 'text/csv');
-    $response->headers->set('Content-Disposition', 'attachment; filename="fields.csv"');
+    $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
 
     $form_state->setResponse($response);
   }
