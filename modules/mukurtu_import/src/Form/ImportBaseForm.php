@@ -346,7 +346,7 @@ class ImportBaseForm extends FormBase {
         // Split our protocol field into the individual sharing
         // setting/protocols subfields.
         $options["{$field_name}/sharing_setting"] = $this->t('Sharing Setting');
-        $options["{$field_name}/protocols"] = $this->t('Cultural Protocols');
+        $options["{$field_name}/protocols"] = $this->t('Protocols');
         continue;
       }
 
