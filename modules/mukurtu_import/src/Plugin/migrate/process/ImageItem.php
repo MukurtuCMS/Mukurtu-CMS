@@ -26,7 +26,7 @@ class ImageItem extends ProcessPluginBase {
     if (is_numeric($image)) {
       $file = $fileStorage->load($image);
       if ($file) {
-        return ['target_id' => $image, 'alt' => $alt, 'title' => $title];
+        return $file->id();
       }
     }
 
@@ -40,7 +40,7 @@ class ImageItem extends ProcessPluginBase {
     if (!empty($results) && count($results) == 1) {
       /** @var \Drupal\file\FileInterface $file */
       if ($file = $fileStorage->load(reset($results))) {
-        return ['target_id' => $file->id(), 'alt' => $alt, 'title' => $title];
+        return $file->id();
       }
     }
 

@@ -22,7 +22,7 @@ class FileItem extends ProcessPluginBase {
     if (is_numeric($value)) {
       $file = $fileStorage->load($value);
       if ($file) {
-        return ['target_id' => $value];
+        return $file->id();
       }
     }
 
@@ -36,7 +36,7 @@ class FileItem extends ProcessPluginBase {
     if (!empty($results) && count($results) == 1) {
       /** @var \Drupal\file\FileInterface $file */
       if ($file = $fileStorage->load(reset($results))) {
-        return ['target_id' => $file->id()];
+        return $file->id();
       }
     }
   }
