@@ -1,0 +1,55 @@
+div.palette-demo {
+  position: relative;
+  display: flex;
+  padding: 8px;
+  height: 72px;
+  width: calc(72px * 3);
+
+  span {
+    position: relative;
+    flex: 1 1 0;
+    flex-direction: column;
+    display: flex;
+  }
+
+  .accent span {
+    position: relative;
+    flex: 1 1 0;
+    flex-direction: row;
+    width: calc(72px / 2);
+  }
+}
+
+$palettes: (
+  'red-bone': ('brand-primary': #ac143a,
+    'brand-secondary': #d9d4c2,
+    'brand-primary-accent': #9a1134,
+    'brand-secondary-accent': #c9c2a8,
+  ),
+  'blue-gold': ('brand-primary': #138aab,
+    'brand-secondary': #e6ab49,
+    'brand-primary-accent': #159ec4,
+    'brand-secondary-accent': #f1b85a,
+  ),
+);
+
+
+@mixin palette-demo {
+
+  @each $palette,
+  $values in $palettes {
+
+    .palette-demo--#{$palette} {
+
+      @each $key,
+      $value in $values {
+        .#{$key} {
+          background-color: #{$value};
+        }
+      }
+
+    }
+  }
+}
+
+@include palette-demo;
