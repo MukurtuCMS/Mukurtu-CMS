@@ -1,0 +1,7 @@
+name: Mukurtu Site Settings
+type: module
+description: Contains hooks for the Site Settings config pages.
+package: Custom
+core_version_requirement: ^9 || ^10
+dependencies:
+  - drupal:config_pages
