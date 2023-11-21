@@ -100,8 +100,7 @@ class ProjectDirectoryController extends ControllerBase {
 
     $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group);
     if ($projects) {
-      //$description = $this->t($this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_site_projects_directory_description')) ?? '';
-      $description = $this->t('');
+      $description = $this->t($this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_community_' . $group . '_projects_directory_description')) ?? '';
     }
     else {
       $description = $this->t("There are currently no Local Contexts projects for this community.");
@@ -137,8 +136,7 @@ class ProjectDirectoryController extends ControllerBase {
 
     $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group);
     if ($projects) {
-      //$description = $this->t($this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_site_projects_directory_description')) ?? '';
-      $description = $this->t('');
+      $description = $this->t($this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_protocol_' . $group . '_projects_directory_description')) ?? '';
     } else {
       $description = $this->t("There are currently no Local Contexts projects for this cultural protocol.");
     }

@@ -37,7 +37,7 @@ class ManageProtocolProjectsDirectory extends FormBase
     $protocolName = \Drupal::entityTypeManager()->getStorage('protocol')->load(intval($protocol))->getName();
     $form['description'] = [
       '#title' => $this->t('Description'),
-      '#description' => $this->t("Enter the description for " . $protocolName . "'s Local Contexts project directory page."),
+      '#description' => $this->t("Enter the description for @protocolName's Local Contexts project directory page.", ['@protocolName' => $protocolName]),
       '#default_value' => $description,
       '#type' => 'textarea',
     ];

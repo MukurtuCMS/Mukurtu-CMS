@@ -37,7 +37,7 @@ class ManageCommunityProjectsDirectory extends FormBase {
     $communityName = \Drupal::entityTypeManager()->getStorage('community')->load(intval($community))->getName();
     $form['description'] = [
       '#title' => $this->t('Description'),
-      '#description' => $this->t("Enter the description for " . $communityName . "'s Local Contexts project directory page."),
+      '#description' => $this->t("Enter the description for @communityName's Local Contexts project directory page.", ['@communityName' => $communityName]),
       '#default_value' => $description,
       '#type' => 'textarea',
     ];
