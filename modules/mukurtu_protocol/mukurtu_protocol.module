@@ -15,6 +15,7 @@ use Drupal\mukurtu_protocol\Entity\MukurtuNode;
 use Drupal\mukurtu_protocol\Entity\MukurtuUser;
 use Drupal\node\NodeInterface;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
+use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 
 /**
  * @file
@@ -225,6 +226,13 @@ function mukurtu_protocol_entity_update($entity) {
  * Implements hook_entity_delete().
  */
 function mukurtu_protocol_entity_delete($entity) {
+  // Delete config for community/protocol LC project directory description.
+  if ($entity instanceof CommunityInterface) {
+    Drupal::configFactory()->getEditable('mukurtu_local_contexts.settings')->clear('mukurtu_local_contexts_manage_community_' . $entity->id() . '_projects_directory_description')->save();
+  }
+  if ($entity instanceof ProtocolInterface) {
+    Drupal::configFactory()->getEditable('mukurtu_local_contexts.settings')->clear('mukurtu_local_contexts_manage_protocol_' . $entity->id() . '_projects_directory_description')->save();
+  }
   if ($entity instanceof CulturalProtocolControlledInterface) {
     $entity->removeAccessGrants();
   }
