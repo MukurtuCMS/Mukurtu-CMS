@@ -7,7 +7,6 @@ dependencies:
     - field.storage.node.field_content_type
     - field.storage.node.field_article_keywords
     - field.storage.node.field_page_media_assets
-    - field.storage.node.field_mukurtu_geojson
     - search_api.server.mukurtu_solr_server
   module:
     - search_api_solr
@@ -20,7 +19,6 @@ dependencies:
     - menu_link_content
     - token
     - mukurtu_multipage_items
-    - mukurtu_dictionary
     - search_api
 third_party_settings:
   search_api_solr:
