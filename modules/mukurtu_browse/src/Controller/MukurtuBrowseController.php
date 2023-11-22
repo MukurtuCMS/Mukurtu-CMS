@@ -7,6 +7,41 @@ use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Link;
 
 class MukurtuBrowseController extends ControllerBase {
+  protected $backend;
+
+  public function __construct() {
+    $this->backend = $this->config('mukurtu_search.settings')->get('backend') ?? 'db';
+  }
+
+  /**
+   * Return the machine name of the view to use based on the search backend config.
+   *
+   * @return string
+   *   The machine name of the view.
+   */
+  protected function getViewName() {
+    $views = [
+      'db' => 'mukurtu_browse',
+      'solr' => 'mukurtu_browse_solr',
+    ];
+
+    return $views[$this->backend];
+  }
+
+  /**
+   * Return the facet source ID to use based on the search backend config.
+   *
+   * @return string
+   *   The facet source ID.
+   */
+  protected function getFacetSourceId() {
+    $views = [
+      'db' => 'search_api:views_block__mukurtu_browse__mukurtu_browse_block',
+      'solr' => 'search_api:views_block__mukurtu_browse_solr__mukurtu_browse_block',
+    ];
+
+    return $views[$this->backend];
+  }
 
   public function content() {
     // Map browse link.
@@ -21,7 +56,7 @@ class MukurtuBrowseController extends ControllerBase {
     // Render the browse view block.
     $browse_view_block = [
       '#type' => 'view',
-      '#name' => 'mukurtu_browse',
+      '#name' => $this->getViewName(),
       '#display_id' => 'mukurtu_browse_block',
       '#embed' => TRUE,
     ];
@@ -29,7 +64,7 @@ class MukurtuBrowseController extends ControllerBase {
     // Load all facets configured to use our browse block as a datasource.
     $facetEntities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_browse__mukurtu_browse_block']);
+      ->loadByProperties(['facet_source_id' => $this->getFacetSourceId()]);
 
     // Render the facet block for each of them.
     $facets = [];

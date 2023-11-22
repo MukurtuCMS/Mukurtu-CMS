@@ -19,5 +19,6 @@ dependencies:
   - search_api
   - search_api_db
   - search_api_glossary
+  - search_api_solr
   - taxonomy
   - views_bulk_operations

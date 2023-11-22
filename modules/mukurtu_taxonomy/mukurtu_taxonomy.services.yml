@@ -3,6 +3,7 @@ services:
     class: Drupal\mukurtu_taxonomy\Routing\RouteSubscriber
     tags:
       - { name: event_subscriber }
+
   mukurtu_taxonomy.related_content_computation:
     class: Drupal\mukurtu_taxonomy\EventSubscriber\RelatedContentComputationSubscriber
     arguments: ['@entity_field.manager']

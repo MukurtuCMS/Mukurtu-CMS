@@ -1,6 +1,12 @@
 services:
-  mukurtu_search.event_subscriber:
+  mukurtu_search.sapi_db_search_index_subscriber:
     class: Drupal\mukurtu_search\EventSubscriber\BaseFieldsSearchIndexSubscriber
+    arguments: ['@messenger']
+    tags:
+      - { name: event_subscriber }
+
+  mukurtu_search.sapi_solr_search_index_subscriber:
+    class: Drupal\mukurtu_search\EventSubscriber\SolrBaseFieldsSearchIndexSubscriber
     arguments: ['@messenger']
     tags:
       - { name: event_subscriber }

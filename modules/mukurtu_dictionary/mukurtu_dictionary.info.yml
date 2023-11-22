@@ -8,12 +8,12 @@ dependencies:
   - facets
   - mukurtu_collection
   - mukurtu_core
+  - mukurtu_drafts
   - mukurtu_protocol
   - mukurtu_taxonomy
   - paragraphs
   - search_api
   - search_api_glossary
   - text
-  - mukurtu_drafts
 
 version: '8.x-1.x-dev'

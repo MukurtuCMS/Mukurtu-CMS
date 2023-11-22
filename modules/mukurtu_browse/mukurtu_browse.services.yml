@@ -4,3 +4,8 @@ services:
     arguments: ['@entity_type.manager']
     tags:
       - { name: paramconverter }
+
+  mukurtu_browse.media_type_indexing_items_subscriber:
+    class: Drupal\mukurtu_browse\EventSubscriber\MediaTypeIndexingItemsSubscriber
+    tags:
+      - { name: event_subscriber }
