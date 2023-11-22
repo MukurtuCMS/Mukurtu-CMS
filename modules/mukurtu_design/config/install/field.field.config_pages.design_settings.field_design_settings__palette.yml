@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.design_settings
+    - field.storage.config_pages.field_design_settings__palette
+  module:
+    - options
+id: config_pages.design_settings.field_design_settings__palette
+field_name: field_design_settings__palette
+entity_type: config_pages
+bundle: design_settings
+label: 'Design Settings Palette'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: blue-gold
+default_value_callback: ''
+settings: {  }
+field_type: list_string
