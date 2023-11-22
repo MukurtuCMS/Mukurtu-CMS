@@ -9,11 +9,6 @@ function mukurtu_v4_preprocess_breadcrumb(&$variables) {
   $page_title = \Drupal::service('title_resolver')->getTitle($request, $route);
 
   if ($page_title) {
-    // Add the divider.
-    $variables['breadcrumb'][] = array(
-      'text' => '>>'
-    );
-
     // Add current page title to breadcrumbs.
     $variables['breadcrumb'][] = array(
       'text' => $page_title
