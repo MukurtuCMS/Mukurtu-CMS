@@ -33,7 +33,8 @@
     @include layout--full-width-grid;
     margin-block-end: var(--v-separation);
 
-    div:first-of-type {
+    .dashboard,
+    .collections {
       grid-column: 1 / -1;
 
       @include media('>=2xl') {

@@ -1,0 +1,91 @@
+.collections {
+
+  &__collection-list {
+    // Search form.
+    .views-exposed-form {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .views-row {
+      display: flex;
+      flex-direction: row;
+
+      &:nth-of-type(even) {
+        flex-direction: row-reverse;
+      }
+
+      > * {
+        flex: 1;
+      }
+
+      &:not(:last-of-type) {
+        padding-block-end: var(--v-space-3xs);
+      }
+    }
+  }
+
+  // &__collection-item {
+  //   display: flex;
+  //   flex-direction: row-reverse;
+
+  //   &:nth-of-type(even) {
+  //     flex-direction: row;
+  //   }
+  // }
+  &__content {
+
+    &__container {
+      background-color: var(--brand-primary-dark);
+      color: var(--color-white);
+
+      h2 {
+        position: relative;
+
+        a {
+          span {
+            color: var(--light-text-color);
+          }
+        }
+
+        a:hover {
+          span {
+            text-decoration: underline solid 2px var(--brand-secondary);
+            transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+          }
+        }
+
+        &::after {
+          content: '';
+          display: block;
+          width: 136px;
+          height: 6px;
+          background-color: var(--brand-secondary);
+          position: absolute;
+        }
+      }
+    }
+  }
+
+  &__image {
+    &__container {
+      .field-reference {
+        height: 100%;
+
+        div {
+          height: 100%;
+        }
+
+        img {
+          height: 100%;
+        }
+      }
+    }
+  }
+
+  // @todo: remove this once image style is created if needed.
+  img {
+    aspect-ratio: 3 / 2;
+  }
+}
