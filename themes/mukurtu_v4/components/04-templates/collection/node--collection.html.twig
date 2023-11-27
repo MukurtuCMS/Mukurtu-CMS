@@ -67,6 +67,8 @@
  *
  */
 #}
+{% set item_count = collection_count ~ " Items" %}
+
 <div class="collections__content__container">
   {{ title_prefix }}
   {% if label and not page %}
@@ -75,8 +77,15 @@
     </h2>
   {% endif %}
   {{ title_suffix }}
-  {{ content|without('field_collection_image') }}
+  <div class="collections__content__count">
+    {{ item_count }}
   </div>
+  {{ content|without('field_collection_image') }}
+  <div class="collections__content__view-collection">
+    <a href="{{ url }}" rel="bookmark">{{ 'View Collection'|t }}</a>
+    {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
+  </div>
+</div>
 
 <div class="collections__image__container">
  {{ content|without('field_summary') }}

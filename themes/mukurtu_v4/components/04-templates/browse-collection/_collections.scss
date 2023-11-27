@@ -10,10 +10,23 @@
 
     .views-row {
       display: flex;
-      flex-direction: row;
+      flex-direction: column-reverse;
+      justify-content: center;
+
+      @include media('>=lg') {
+        flex-direction: row;
+      }
+
+      // Add horizontal spacing between collection and search.
+      &:first-of-type {
+        padding-block-start: var(--gutter);
+      }
 
       &:nth-of-type(even) {
-        flex-direction: row-reverse;
+        flex-direction: column-reverse;
+        @include media('>=lg') {
+          flex-direction: row-reverse;
+        }
       }
 
       > * {
@@ -26,14 +39,6 @@
     }
   }
 
-  // &__collection-item {
-  //   display: flex;
-  //   flex-direction: row-reverse;
-
-  //   &:nth-of-type(even) {
-  //     flex-direction: row;
-  //   }
-  // }
   &__content {
 
     &__container {
@@ -42,6 +47,16 @@
 
       h2 {
         position: relative;
+        margin-block-start: var(--v-space-s);
+        font-size: var(--font-size-xl);
+
+        @include media('>=lg') {
+          font-size: var(--font-size-2xxl);
+        }
+
+        @include media('>=xl') {
+          font-size: var(--font-size-heading-md);
+        }
 
         a {
           span {
@@ -63,7 +78,51 @@
           height: 6px;
           background-color: var(--brand-secondary);
           position: absolute;
+          bottom: -48px;
         }
+      }
+
+      > * {
+        margin-inline: var(--v-space-xs);
+        margin-block-end: var(--v-space-4xxs);
+
+        &:first-child {
+          margin-block-end: var(--v-space-l);
+        }
+
+        &:last-child {
+          margin-block-end: var(--v-space-s);
+        }
+      }
+    }
+
+    &__count {
+      color: var(--brand-light-accent);
+      font-weight: var(--text-bold);
+    }
+
+    &__view-collection {
+      display: flex;
+      column-gap: var(--v-space-5xs);
+      align-items: center;
+
+      a {
+        color: var(--brand-light-accent);
+        font-weight: var(--text-bold);
+        letter-spacing: var(--letter-spacing-label);
+        text-decoration: underline solid 2px var(--brand-light-accent);
+
+        &:hover {
+          text-decoration: underline solid 2px var(--color-transparent);
+          transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+          margin-right: var(--v-space-5xs);
+        }
+      }
+
+      svg {
+        fill: var(--brand-secondary);
+        width: 12px;
+        height: 18px;
       }
     }
   }
@@ -78,14 +137,29 @@
         }
 
         img {
-          height: 100%;
+          display: block;
+          max-width: 100%;
+          height: auto;
         }
       }
     }
   }
 
-  // @todo: remove this once image style is created if needed.
-  img {
-    aspect-ratio: 3 / 2;
+  .field-summary {
+    overflow: visible;
+    -webkit-box-orient: initial;
+    -webkit-line-clamp: initial;
+    display: block;
+
+    @include media('>=lg') {
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      display: -webkit-box;
+    }
+
+    @include media('>=xl') {
+      -webkit-line-clamp: 3;
+    }
   }
 }

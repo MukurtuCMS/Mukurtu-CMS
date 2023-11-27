@@ -22,3 +22,12 @@ function mukurtu_v4_preprocess_breadcrumb(&$variables) {
     $variables['#cache']['contexts'][] = 'url';
   }
 }
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function mukurtu_v4_preprocess_node(&$variables) {
+  if(get_class($variables['node']) === 'Drupal\mukurtu_collection\Entity\Collection') {
+    $variables['collection_count'] = $variables['node']->getCount();
+  }
+}
