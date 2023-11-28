@@ -10,11 +10,47 @@ use Drupal\views\Views;
 
 class MukurtuBrowseCollectionsController extends ControllerBase {
 
+  protected $backend;
+
+  public function __construct() {
+    $this->backend = $this->config('mukurtu_search.settings')->get('backend') ?? 'db';
+  }
+
+  /**
+   * Return the machine name of the view to use based on the search backend config.
+   *
+   * @return string
+   *   The machine name of the view.
+   */
+  protected function getViewName() {
+    $views = [
+      'db' => 'mukurtu_browse_collections',
+      'solr' => 'mukurtu_browse_collections_solr',
+    ];
+
+    return $views[$this->backend];
+  }
+
+  /**
+   * Return the facet source ID to use based on the search backend config.
+   *
+   * @return string
+   *   The facet source ID.
+   */
+  protected function getFacetSourceId() {
+    $views = [
+      'db' => 'search_api:views_block__mukurtu_browse_collections__browse_collections_block',
+      'solr' => 'search_api:views_block__mukurtu_browse_collections_solr__browse_collections_block',
+    ];
+
+    return $views[$this->backend];
+  }
+
   public function content() {
     // Render the browse view block.
     $browse_view_block = [
       '#type' => 'view',
-      '#name' => 'mukurtu_browse_collections',
+      '#name' => $this->getViewName(),
       '#display_id' => 'browse_collections_block',
       '#embed' => TRUE,
     ];
@@ -22,7 +58,7 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
     // Load all facets configured to use our browse block as a datasource.
     $facetEntities = $this->entityTypeManager()
       ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_browse_collections__browse_collections_block']);
+      ->loadByProperties(['facet_source_id' => $this->getFacetSourceId()]);
 
     // Render the facet block for each of them.
     $facets = [];
@@ -56,10 +92,13 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(AccountInterface $account)
-  {
+  public function access(AccountInterface $account) {
     // Check if the collections browse view is empty.
-    $view = Views::getView('mukurtu_browse_collections');
+    $view = Views::getView($this->getViewName());
+    if (!$view) {
+      return AccessResult::forbidden();
+    }
+
     $view->setDisplay('default');
     $view->execute();
     if (!empty($view->result)) {
