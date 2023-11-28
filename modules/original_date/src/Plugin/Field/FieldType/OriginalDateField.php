@@ -105,17 +105,20 @@ class OriginalDateField extends FieldItemBase {
       $values['month'] = $dateComponents[1] ?? '';
       $values['day'] = $dateComponents[2] ?? '';
 
-      if (!$values['year'] || !is_numeric($values['year']) ||
-        intval($values['year']) < 1) {
-        throw new InvalidArgumentException("Invalid year '{$values['year']}'.");
+      if ($values['year'] != '') {
+        if (!is_numeric($values['year']) || intval($values['year']) < 1) {
+          throw new InvalidArgumentException("Invalid year '{$values['year']}'.");
+        }
       }
-      if ($values['month'] && (!is_numeric($values['month']) ||
-        intval($values['month']) < 1 || intval($values['month']) > 12)) {
-        throw new InvalidArgumentException("Invalid month '{$values['month']}'.");
+      if ($values['month'] != '') {
+        if ((!is_numeric($values['month']) || intval($values['month']) < 1 || intval($values['month']) > 12)) {
+          throw new InvalidArgumentException("Invalid month '{$values['month']}'.");
+        }
       }
-      if ($values['day'] && (!is_numeric($values['day']) ||
-        intval($values['day']) < 1 || intval($values['day']) > 31)) {
-        throw new InvalidArgumentException("Invalid day '{$values['day']}'.");
+      if ($values['day'] != '') {
+        if (!is_numeric($values['day']) || intval($values['day']) < 1 || intval($values['day']) > 31) {
+          throw new InvalidArgumentException("Invalid day '{$values['day']}'.");
+        }
       }
 
       // Store the date string for the user-facing date display.
