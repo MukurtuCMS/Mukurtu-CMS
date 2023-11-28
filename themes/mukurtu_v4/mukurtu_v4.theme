@@ -9,11 +9,6 @@ function mukurtu_v4_preprocess_breadcrumb(&$variables) {
   $page_title = \Drupal::service('title_resolver')->getTitle($request, $route);
 
   if ($page_title) {
-    // Add the divider.
-    $variables['breadcrumb'][] = array(
-      'text' => '>>'
-    );
-
     // Add current page title to breadcrumbs.
     $variables['breadcrumb'][] = array(
       'text' => $page_title
@@ -29,5 +24,15 @@ function mukurtu_v4_preprocess_breadcrumb(&$variables) {
 function mukurtu_v4_preprocess_node(&$variables) {
   if ($variables['node'] instanceof \Drupal\mukurtu_collection\Entity\Collection) {
     $variables['collection_count'] = $variables['node']->getCount();
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_input_alter().
+ */
+function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variables) {
+  $element = $variables['element'];
+  if ($element['#type'] == 'submit' && strpos($element['#id'], 'edit-submit-mukurtu-browse-collections--2') === 0) {
+    $suggestions[] = 'input__collection__search';
   }
 }

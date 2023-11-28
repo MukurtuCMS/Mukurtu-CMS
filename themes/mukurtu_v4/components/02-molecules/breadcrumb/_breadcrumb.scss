@@ -1,10 +1,22 @@
 .breadcrumb {
   &__list-wrapper {
     display: flex;
-    column-gap: var(--v-space-5xs);
+    flex-wrap: wrap;
+  }
 
-    li:nth-child(even) {
+  &__list-item:not(:last-of-type) {
+    a {
+      padding-inline-end: var(--v-space-5xs);
+    }
+
+    &::after {
+      content: '>>';
+      color: var(--brand-text-color);
       font-size: var(--font-size-2xs);
     }
+  }
+
+  &__list-item:not(:first-of-type) {
+    padding-inline-start: var(--v-space-5xs);
   }
 }

@@ -9,16 +9,38 @@
       align-items: center;
       gap: var(--v-space-3xs);
 
+      // @include media('>=md') {
+      //   flex-direction: row;
+      //   justify-content: center;
+      // }
+
       input.form-text {
         padding: var(--v-space-4xxs) var(--v-space-2xs);
         border: none;
         background-color: var(--mukurtu-text-box-background-color);
         color: var(--brand-text-color);
         font-size: var(--font-size-base);
+        width: 100%;
+        text-align: center;
+
+        @include media('>=md') {
+          text-align: start;
+        }
       }
 
       .search-form {
         display: flex;
+        flex-wrap: wrap;
+
+        > * {
+          width: 100%;
+        }
+
+        @include media('>=md') {
+          > * {
+            width: auto;
+          }
+        }
       }
 
       // Search button.
@@ -46,6 +68,11 @@
           font-size: var(--font-size-base);
           font-weight: var(--text-bold);
           letter-spacing: var(--letter-spacing-label);
+          width: 100%;
+
+          @include media('>=md') {
+            width: auto;
+          }
 
           &:hover,
           &:focus {
@@ -63,9 +90,19 @@
 
       .form-item-sort-by {
         display: flex;
+        min-width: auto;
+        flex-wrap: wrap;
+        width: 100%;
 
         // Match the width of the search form.
-        min-width: 464.969px;
+        @include media('>=511px') {
+          min-width: 464.969px;
+          width: auto;
+        }
+
+        @include media('>=md') {
+          flex-wrap: nowrap;
+        }
 
         label {
           border: none;
@@ -77,14 +114,26 @@
           letter-spacing: var(--letter-spacing-label);
           text-align: center;
           width: 100%;
+
+          // @include media('>=md') {
+          //   width: auto;
+          // }
         }
 
         select {
           border: none;
-          padding-inline: var(--v-space-2xs);
+          // padding-inline: var(--v-space-2xs);
+          padding: var(--v-space-4xxs) var(--v-space-2xs);
           background-color: var(--mukurtu-text-box-background-color);
           color: var(--brand-text-color);
           font-size: var(--font-size-base);
+          width: 100%;
+          text-align: center;
+
+          @include media('>=md') {
+            text-align: start;
+            width: auto;
+          }
 
           &:hover {
             text-decoration: underline solid 2px var(--brand-text-color);

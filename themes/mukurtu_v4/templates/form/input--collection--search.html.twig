@@ -15,9 +15,5 @@
 .setAttribute('aria-label', 'Search')
 %}
 
-{# <div class="input--submit"> #}
-  {% include active_theme_path() ~ '/images/search.svg' %}
-  <input{{attributes}}/>{{ children }}
-{# </div> #}
-
-
+{% include active_theme_path() ~ '/images/search.svg' %}
+<input{{attributes}}/>{{ children }}
