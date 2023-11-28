@@ -10,11 +10,47 @@ use Drupal\views\Views;
 
 class MukurtuDictionaryController extends ControllerBase {
 
+  protected $backend;
+
+  public function __construct() {
+    $this->backend = $this->config('mukurtu_search.settings')->get('backend') ?? 'db';
+  }
+
+  /**
+   * Return the machine name of the view to use based on the search backend config.
+   *
+   * @return string
+   *   The machine name of the view.
+   */
+  protected function getViewName() {
+    $views = [
+      'db' => 'mukurtu_dictionary',
+      'solr' => 'mukurtu_dictionary_solr',
+    ];
+
+    return $views[$this->backend];
+  }
+
+  /**
+   * Return the facet source ID to use based on the search backend config.
+   *
+   * @return string
+   *   The facet source ID.
+   */
+  protected function getFacetSourceId() {
+    $views = [
+      'db' => 'search_api:views_block__mukurtu_dictionary__mukurtu_dictionary_block',
+      'solr' => 'search_api:views_block__mukurtu_dictionary_solr__mukurtu_dictionary_block',
+    ];
+
+    return $views[$this->backend];
+  }
+
   public function content() {
     // Render the browse view block.
     $browse_view_block = [
       '#type' => 'view',
-      '#name' => 'mukurtu_dictionary',
+      '#name' => $this->getViewName(),
       '#display_id' => 'mukurtu_dictionary_block',
       '#embed' => TRUE,
     ];
@@ -22,7 +58,7 @@ class MukurtuDictionaryController extends ControllerBase {
     // Load all facets configured to use our browse block as a datasource.
     $facetEntities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_dictionary__mukurtu_dictionary_block']);
+      ->loadByProperties(['facet_source_id' => $this->getFacetSourceId()]);
 
     // Render the facet block for each of them.
     $block_manager = \Drupal::service('plugin.manager.block');
@@ -35,7 +71,7 @@ class MukurtuDictionaryController extends ControllerBase {
         if ($block_plugin) {
           $access_result = $block_plugin->access(\Drupal::currentUser());
           if ($access_result) {
-            if ($facet_id == 'glossary_entry') {
+            if (strpos($facet_id, 'glossary_entry') !== FALSE) {
               $glossary = $block_plugin->build();
             }
             else {
@@ -63,10 +99,12 @@ class MukurtuDictionaryController extends ControllerBase {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(AccountInterface $account)
-  {
+  public function access(AccountInterface $account) {
     // Check if the dictionary view is empty.
-    $view = Views::getView('mukurtu_dictionary');
+    $view = Views::getView($this->getViewName());
+    if (!$view) {
+      return AccessResult::forbidden();
+    }
     $view->setDisplay('default');
     $view->execute();
     if (!empty($view->result)) {
@@ -84,4 +122,5 @@ class MukurtuDictionaryController extends ControllerBase {
     // if they lack permission to create dictionary words and word lists.
     return AccessResult::forbidden();
   }
+
 }

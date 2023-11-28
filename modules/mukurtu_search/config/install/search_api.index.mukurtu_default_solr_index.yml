@@ -388,6 +388,14 @@ field_settings:
     dependencies:
       module:
         - node
+  node__field_glossary_entry__facet:
+    label: 'Glossary Entry Facet'
+    datasource_id: 'entity:node'
+    property_path: field_glossary_entry
+    type: string
+    dependencies:
+      module:
+        - node
   node__field_identifier:
     label: Identifier
     datasource_id: 'entity:node'
@@ -898,6 +906,7 @@ processor_settings:
       - node__field_format__name__facet
       - node__field_format__uuid
       - node__field_glossary_entry
+      - node__field_glossary_entry__facet
       - node__field_identifier
       - node__field_in_collection__title
       - node__field_in_word_list__title
