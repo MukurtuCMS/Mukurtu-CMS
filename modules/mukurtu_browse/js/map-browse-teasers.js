@@ -7,7 +7,7 @@
           let browseMap = undefined;
           let viewInstances = Object.keys(Drupal.views.instances);
           for (const instanceKey of viewInstances) {
-            if (Drupal.views.instances[instanceKey].settings.view_name == 'mukurtu_browse_by_map') {
+            if (Drupal.views.instances[instanceKey].settings.view_name == 'mukurtu_browse_by_map' || Drupal.views.instances[instanceKey].settings.view_name == 'mukurtu_browse_by_map_solr') {
               let viewSelector = Drupal.views.instances[instanceKey].element_settings.selector;
               let mapId = $(viewSelector + ' .view-content > div').attr('id');
               if (mapId) {
@@ -83,7 +83,7 @@
         let browseMap = undefined;
         let viewInstances = Object.keys(Drupal.views.instances);
         for (const instanceKey of viewInstances) {
-          if (Drupal.views.instances[instanceKey].settings.view_name == 'mukurtu_browse_by_map') {
+          if (Drupal.views.instances[instanceKey].settings.view_name == 'mukurtu_browse_by_map' || Drupal.views.instances[instanceKey].settings.view_name == 'mukurtu_browse_by_map_solr') {
             let viewSelector = Drupal.views.instances[instanceKey].element_settings.selector;
             let mapId = $(viewSelector + ' .view-content > div').attr('id');
             if (mapId) {

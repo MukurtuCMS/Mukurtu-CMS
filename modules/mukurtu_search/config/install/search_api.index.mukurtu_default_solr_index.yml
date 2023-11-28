@@ -267,6 +267,15 @@ field_settings:
       module:
         - node
         - taxonomy
+  node__field_coverage:
+    label: Location
+    datasource_id: 'entity:node'
+    property_path: field_coverage
+    type: text
+    boost: !!float 0
+    dependencies:
+      module:
+        - node
   node__field_coverage_description:
     label: 'Location Description'
     datasource_id: 'entity:node'
@@ -822,7 +831,7 @@ field_settings:
     type_locked: true
     hidden: true
   status:
-    label: status
+    label: Published
     datasource_id: 'entity:node'
     property_path: status
     type: boolean
@@ -892,6 +901,7 @@ processor_settings:
       - node__field_contributor__name
       - node__field_contributor__name__facet
       - node__field_contributor__uuid
+      - node__field_coverage
       - node__field_coverage_description
       - node__field_creator__name
       - node__field_creator__name__facet
