@@ -11,8 +11,6 @@ mukurtu_browse.browse_digital_heritage_page:
   defaults:
     _controller: '\Drupal\mukurtu_browse\Controller\MukurtuDigitalHeritageBrowseController::content'
     _title: 'Browse Digital Heritage'
-    view: 'mukurtu_digital_heritage_browse'
-    block: 'mukurtu_digital_heritage_browse_block'
   requirements:
     _permission: 'access content'
 
