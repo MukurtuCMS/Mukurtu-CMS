@@ -14,6 +14,8 @@ dependencies:
     - link
     - mukurtu_core
     - mukurtu_local_contexts
+    - mukurtu_protocol
+    - options
     - original_date
     - text
     - user
@@ -25,6 +27,7 @@ third_party_settings:
     group_metadata:
       children:
         - field_communities
+        - field_cultural_protocols
         - field_category
         - field_keywords
         - field_in_collection
@@ -43,6 +46,8 @@ third_party_settings:
         - field_subject
         - field_type
         - field_format
+        - field_rights_and_usage
+        - field_rights_statements
       label: Metadata
       parent_name: ''
       region: content
@@ -99,7 +104,7 @@ content:
       view_mode: default
       pager_id: 0
     third_party_settings: {  }
-    weight: 2
+    weight: 3
     region: content
   field_all_community_records:
     type: entity_reference_label
@@ -115,7 +120,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 42
+    weight: 43
     region: content
   field_category:
     type: entity_reference_label
@@ -123,7 +128,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 18
+    weight: 19
     region: content
   field_communities:
     type: entity_reference_label
@@ -139,7 +144,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 24
+    weight: 25
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -208,22 +213,23 @@ content:
           zoom: 16
           popup: false
           options: ''
+      weight: null
     third_party_settings: {  }
-    weight: 40
+    weight: 41
     region: content
   field_coverage_description:
     type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 41
+    weight: 42
     region: content
   field_creative_commons:
     type: mukurtu_creative_commons_formatter
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 26
+    weight: 27
     region: content
   field_creator:
     type: entity_reference_label
@@ -231,7 +237,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 23
+    weight: 24
     region: content
   field_cultural_narrative:
     type: text_default
@@ -240,13 +246,20 @@ content:
     third_party_settings: {  }
     weight: 36
     region: content
+  field_cultural_protocols:
+    type: cultural_protocol_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 18
+    region: content
   field_date_description:
     type: string
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 22
+    weight: 23
     region: content
   field_description:
     type: text_default
@@ -265,7 +278,7 @@ content:
       rel: ''
       target: ''
     third_party_settings: {  }
-    weight: 30
+    weight: 31
     region: content
   field_format:
     type: entity_reference_label
@@ -273,7 +286,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 35
+    weight: 36
     region: content
   field_identifier:
     type: string
@@ -281,7 +294,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 32
+    weight: 33
     region: content
   field_in_collection:
     type: entity_reference_label
@@ -289,7 +302,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 20
+    weight: 21
     region: content
   field_keywords:
     type: entity_reference_label
@@ -297,7 +310,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 19
+    weight: 20
     region: content
   field_language:
     type: entity_reference_label
@@ -305,21 +318,21 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 25
+    weight: 26
     region: content
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 28
+    weight: 29
     region: content
   field_local_contexts_projects:
     type: local_contexts_project
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 27
+    weight: 28
     region: content
   field_media_assets:
     type: entity_reference_entity_view
@@ -335,7 +348,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 21
+    weight: 22
     region: content
   field_people:
     type: entity_reference_label
@@ -343,7 +356,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 39
+    weight: 40
     region: content
   field_publisher:
     type: entity_reference_label
@@ -351,7 +364,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 31
+    weight: 32
     region: content
   field_rights:
     type: basic_string
@@ -360,13 +373,27 @@ content:
     third_party_settings: {  }
     weight: 27
     region: content
+  field_rights_and_usage:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 37
+    region: content
+  field_rights_statements:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
+    region: content
   field_source:
     type: string
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 29
+    weight: 30
     region: content
   field_subject:
     type: entity_reference_label
@@ -374,7 +401,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 33
+    weight: 34
     region: content
   field_summary:
     type: string
@@ -404,18 +431,17 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 34
+    weight: 35
     region: content
   flag_export_content:
     settings: {  }
     third_party_settings: {  }
-    weight: 10
+    weight: 4
     region: content
 hidden:
   draft: true
   field_citation: true
   field_content_type: true
-  field_cultural_protocols: true
   field_knowledge_keepers: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
@@ -425,8 +451,6 @@ hidden:
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
-  field_rights_and_usage: true
-  field_rights_statements: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true
