@@ -5,6 +5,7 @@ mukurtu_browse.browse_page:
     _title: 'Browse Content'
   requirements:
     _permission: 'access content'
+    _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuBrowseController::access'
 
 mukurtu_browse.browse_digital_heritage_page:
   path: '/digital-heritage'
@@ -13,6 +14,7 @@ mukurtu_browse.browse_digital_heritage_page:
     _title: 'Browse Digital Heritage'
   requirements:
     _permission: 'access content'
+    _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuDigitalHeritageBrowseController::access'
 
 mukurtu_browse.old_map_browse_page:
   path: '/browse/map-old'

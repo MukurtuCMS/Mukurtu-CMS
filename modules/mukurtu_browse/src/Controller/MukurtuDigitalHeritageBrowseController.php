@@ -2,9 +2,12 @@
 
 namespace Drupal\mukurtu_browse\Controller;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Link;
+use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\views\Views;
 
 class MukurtuDigitalHeritageBrowseController extends ControllerBase {
   protected $backend;
@@ -94,4 +97,23 @@ class MukurtuDigitalHeritageBrowseController extends ControllerBase {
       ],
     ];
   }
+
+
+  /**
+   * Check access for the browse DH route.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   Run access checks for this account.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function access(AccountInterface $account) {
+    $view = Views::getView($this->getViewName());
+    if (!$view) {
+      return AccessResult::forbidden();
+    }
+    return AccessResult::allowed();
+  }
+
 }
