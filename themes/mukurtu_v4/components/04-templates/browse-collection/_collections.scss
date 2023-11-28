@@ -5,7 +5,92 @@
     .views-exposed-form {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--v-space-3xs);
+
+      input.form-text {
+        padding: var(--v-space-4xxs) var(--v-space-2xs);
+        border: none;
+        background-color: var(--mukurtu-text-box-background-color);
+        color: var(--brand-text-color);
+        font-size: var(--font-size-base);
+      }
+
+      .search-form {
+        display: flex;
+      }
+
+      // Search button.
+      .form-wrapper {
+        background-color: var(--brand-secondary);
+        border: none;
+        padding-inline-start: var(--v-space-4xs);
+        padding-inline-end: var(--v-space-3xs);
+        display: flex;
+        align-items: center;
+
+        &:hover,
+        &:focus {
+          background-color: var(--brand-secondary-dark);
+
+          svg {
+            fill: var(--light-text-color);
+          }
+        }
+
+        input[type=submit] {
+          color: var(--brand-text-color);
+          background-color: var(--brand-secondary);
+          padding: var(--v-space-4xxs);
+          font-size: var(--font-size-base);
+          font-weight: var(--text-bold);
+          letter-spacing: var(--letter-spacing-label);
+
+          &:hover,
+          &:focus {
+            background-color: var(--brand-secondary-dark);
+            color: var(--light-text-color);
+          }
+        }
+
+        svg {
+          fill: var(--brand-text-color);
+          width: var(--v-space-4xxs);
+          height: var(--v-space-4xxs);
+        }
+      }
+
+      .form-item-sort-by {
+        display: flex;
+
+        // Match the width of the search form.
+        min-width: 464.969px;
+
+        label {
+          border: none;
+          padding: var(--v-space-5xs) var(--v-space-2xs);
+          color: var(--brand-text-color);
+          background: var(--brand-secondary);
+          font-size: var(--font-size-base);
+          font-weight: var(--text-bold);
+          letter-spacing: var(--letter-spacing-label);
+          text-align: center;
+          width: 100%;
+        }
+
+        select {
+          border: none;
+          padding-inline: var(--v-space-2xs);
+          background-color: var(--mukurtu-text-box-background-color);
+          color: var(--brand-text-color);
+          font-size: var(--font-size-base);
+
+          &:hover {
+            text-decoration: underline solid 2px var(--brand-text-color);
+          }
+        }
+      }
     }
 
     .views-row {
@@ -129,8 +214,25 @@
 
   &__image {
     &__container {
-      .field-reference {
+      display: flex;
+      align-items: center;
+      background: var(--color-gray);
+      position: relative;
+
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
         height: 100%;
+        background-color: rgba(0, 0, 0, 0.25);
+        z-index: 10;
+      }
+
+      .field-reference {
+        height: auto;
 
         div {
           height: 100%;

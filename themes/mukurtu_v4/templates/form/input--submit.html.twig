@@ -10,11 +10,14 @@
  * @see template_preprocess_input()
  */
 #}
-{% set attributes = attributes.setAttribute('value', 'Search') %}
+{% set attributes = attributes
+.setAttribute('value', 'Search')
+.setAttribute('aria-label', 'Search')
+%}
 
-<div class="input--submit">
+{# <div class="input--submit"> #}
   {% include active_theme_path() ~ '/images/search.svg' %}
   <input{{attributes}}/>{{ children }}
-</div>
+{# </div> #}
 
 
