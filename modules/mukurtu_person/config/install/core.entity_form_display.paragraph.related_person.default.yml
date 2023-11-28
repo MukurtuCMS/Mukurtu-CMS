@@ -27,10 +27,14 @@ content:
       selection_mode: selection_append
     third_party_settings: {  }
   field_relationship_type:
-    type: options_select
+    type: entity_reference_autocomplete
     weight: 1
     region: content
-    settings: {  }
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
 hidden:
   created: true
