@@ -3,7 +3,6 @@ status: true
 dependencies:
   config:
     - field.storage.node.body
-    - search_api.index.mukurtu_default_solr_index
   module:
     - search_api
     - text
