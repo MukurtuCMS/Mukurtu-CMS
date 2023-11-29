@@ -174,7 +174,6 @@ function mukurtu_browse_compute_geojson($entity) {
  * Implements hook_views_data_alter().
  */
 function mukurtu_browse_views_data_alter(array &$data) {
-  //dpm(array_keys($data));
   if (isset($data['search_api_index_mukurtu_default_content_index'])) {
     $data['search_api_index_mukurtu_default_content_index']['mukurtu_bounding_box'] = [
       'title' => t('Mukurtu Bounding Box'),

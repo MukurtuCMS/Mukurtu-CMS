@@ -75,6 +75,7 @@ mukurtu_core.settings:
   menu_name: mukurtu
   description: "Configuration form for Mukurtu specific options."
   route_name: mukurtu_core.settings
+  expanded: TRUE
   weight: 0
 #mukurtu_core.create_person:
 #  title: 'Person'

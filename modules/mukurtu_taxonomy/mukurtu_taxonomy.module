@@ -105,7 +105,7 @@ function template_preprocess_mukurtu_vocabulary_add_list(array &$variables) {
 function mukurtu_taxonomy_views_pre_view(ViewExecutable $view) {
   // This drives the handling of the taxonomy term page view.
   // It injects the UUID of the term into the fulltext SAPI search.
-  if ($view->id() == 'mukurtu_taxonomy_references') {
+  if (strpos($view->id(),'mukurtu_taxonomy_references') !== FALSE) {
     if ($term = \Drupal::routeMatch()->getParameter('taxonomy_term')) {
       $filters = $view->display_handler->getOption('filters');
       $filters['search_api_fulltext']['value'] = $term->uuid();

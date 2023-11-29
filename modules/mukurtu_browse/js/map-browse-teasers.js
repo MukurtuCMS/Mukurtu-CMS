@@ -1,13 +1,21 @@
 (function ($, Drupal) {
   Drupal.behaviors.mukurtu_browse_leaflet_preview = {
     attach: function (context, settings) {
-      $(document).ready(function () {
+      $(document).once('mukurtu_browse_leaflet_preview').ready(function () {
+        const viewNames = [
+          'mukurtu_browse_by_map',
+          'mukurtu_browse_by_map_solr',
+          'mukurtu_digital_heritage_browse_by_map',
+          'mukurtu_digital_heritage_browse_by_map_solr'
+        ];
+
         var refreshPreviewFromLeaflet = function () {
           // Find the current map.
           let browseMap = undefined;
           let viewInstances = Object.keys(Drupal.views.instances);
+
           for (const instanceKey of viewInstances) {
-            if (Drupal.views.instances[instanceKey].settings.view_name == 'mukurtu_browse_by_map') {
+            if (viewNames.includes(Drupal.views.instances[instanceKey].settings.view_name)) {
               let viewSelector = Drupal.views.instances[instanceKey].element_settings.selector;
               let mapId = $(viewSelector + ' .view-content > div').attr('id');
               if (mapId) {
@@ -83,7 +91,7 @@
         let browseMap = undefined;
         let viewInstances = Object.keys(Drupal.views.instances);
         for (const instanceKey of viewInstances) {
-          if (Drupal.views.instances[instanceKey].settings.view_name == 'mukurtu_browse_by_map') {
+          if (viewNames.includes(Drupal.views.instances[instanceKey].settings.view_name)) {
             let viewSelector = Drupal.views.instances[instanceKey].element_settings.selector;
             let mapId = $(viewSelector + ' .view-content > div').attr('id');
             if (mapId) {
@@ -91,6 +99,7 @@
             }
           }
         }
+
         //let browseMap = drupalSettings.leaflet['leaflet-map-view-mukurtu-browse-by-map-map-block'];
         //browseMap.lMap.on("moveend", refreshPreviewFromLeaflet);
         browseMap.lMap.on('popupopen', loadEntityTeaser);

@@ -1,0 +1,7 @@
+mukurtu_search.settings:
+  path: '/admin/config/mukurtu/search/settings'
+  defaults:
+    _form: '\Drupal\mukurtu_search\Form\SearchSettingsForm'
+    _title: 'Mukurtu Search Settings'
+  requirements:
+    _permission: 'administer site configuration'

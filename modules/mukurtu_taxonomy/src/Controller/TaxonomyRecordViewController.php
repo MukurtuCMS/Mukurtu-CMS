@@ -2,16 +2,20 @@
 
 namespace Drupal\mukurtu_taxonomy\Controller;
 
-use Drupal\taxonomy\TermInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\taxonomy\TermInterface;
+use Drupal\views\Views;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class TaxonomyRecordViewController implements ContainerInjectionInterface {
+class TaxonomyRecordViewController extends ControllerBase implements ContainerInjectionInterface {
 
   /**
    * The entity type manager service.
@@ -34,6 +38,8 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
    */
   protected $languageManager;
 
+  protected $backend;
+
   /**
    * {@inheritdoc}
    */
@@ -52,6 +58,37 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
     $this->entityTypeManager = $entity_type_manager;
     $this->entityFieldManager = $entity_field_manager;
     $this->languageManager = $language_manager;
+    $this->backend = $this->config('mukurtu_search.settings')->get('backend') ?? 'db';
+  }
+
+  /**
+   * Return the machine name of the view to use based on the search backend config.
+   *
+   * @return string
+   *   The machine name of the view.
+   */
+  protected function getViewName() {
+    $views = [
+      'db' => 'mukurtu_taxonomy_references',
+      'solr' => 'mukurtu_taxonomy_references_solr',
+    ];
+
+    return $views[$this->backend];
+  }
+
+  /**
+   * Return the facet source ID to use based on the search backend config.
+   *
+   * @return string
+   *   The facet source ID.
+   */
+  protected function getFacetSourceId() {
+    $views = [
+      'db' => 'search_api:views_block__mukurtu_taxonomy_references__content_block',
+      'solr' => 'search_api:views_block__mukurtu_taxonomy_references_solr__content_block',
+    ];
+
+    return $views[$this->backend];
   }
 
   /**
@@ -77,11 +114,17 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
       ];
     }
 
+    // If the view has been deleted, we're done.
+    $view = Views::getView($this->getViewName());
+    if (!$view) {
+      return $build;
+    }
+
     // Render the referenced entities.
     // @see mukurtu_taxonomy_views_pre_view.
     $referencedContent = [
       '#type' => 'view',
-      '#name' => 'mukurtu_taxonomy_references',
+      '#name' => $this->getViewName(),
       '#display_id' => 'content_block',
       '#embed' => TRUE,
     ];
@@ -90,7 +133,7 @@ class TaxonomyRecordViewController implements ContainerInjectionInterface {
     // Load all facets configured to use our browse block as a datasource.
     $facetEntities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => 'search_api:views_block__mukurtu_taxonomy_references__content_block']);
+      ->loadByProperties(['facet_source_id' => $this->getFacetSourceId()]);
 
     // Render the facet block for each of them.
     $facets = [];

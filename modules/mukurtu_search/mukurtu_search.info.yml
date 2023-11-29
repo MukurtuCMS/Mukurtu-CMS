@@ -6,8 +6,11 @@ core: 8.x
 core_version_requirement: ^8 || ^9
 dependencies:
   - mukurtu_core
+  - mukurtu_collection
   - mukurtu_protocol
+  - mukurtu_multipage_items
   - search_api
+  - search_api_solr
   - node
   - media
   - paragraphs
