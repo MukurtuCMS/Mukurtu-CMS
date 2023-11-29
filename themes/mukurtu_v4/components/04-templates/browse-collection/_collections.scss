@@ -9,11 +9,6 @@
       align-items: center;
       gap: var(--v-space-3xs);
 
-      // @include media('>=md') {
-      //   flex-direction: row;
-      //   justify-content: center;
-      // }
-
       input.form-text {
         padding: var(--v-space-4xxs) var(--v-space-2xs);
         border: none;
@@ -114,15 +109,10 @@
           letter-spacing: var(--letter-spacing-label);
           text-align: center;
           width: 100%;
-
-          // @include media('>=md') {
-          //   width: auto;
-          // }
         }
 
         select {
           border: none;
-          // padding-inline: var(--v-space-2xs);
           padding: var(--v-space-4xxs) var(--v-space-2xs);
           background-color: var(--mukurtu-text-box-background-color);
           color: var(--brand-text-color);
@@ -265,7 +255,7 @@
     &__container {
       display: flex;
       align-items: center;
-      background: var(--color-gray);
+      background: var(--brand-primary);
       position: relative;
 
       &::before {

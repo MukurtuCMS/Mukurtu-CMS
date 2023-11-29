@@ -17,9 +17,4 @@
 
 {{ form.sort_by }}
 
-{#3.include all other form elment ex submit button but to prevent
-duplication remove other one #}
 {{ form|without('search_api_fulltext','actions', 'sort_by') }}
-
-
-{# {{ dump(form) }} #}
