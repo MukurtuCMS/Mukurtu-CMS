@@ -206,7 +206,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
 
         // Check file MIME type.
         $mediaDocument = $this->get('field_media_document');
-        $file_type = $mediaDocument ? $mediaDocument->entity->getMimeType() : NULL;
+        $file_type = ($mediaDocument && $mediaDocument->entity) ? $mediaDocument->entity->getMimeType() : NULL;
 
         // Only proceed if type is application/pdf.
         if ($file_type == 'application/pdf') {
