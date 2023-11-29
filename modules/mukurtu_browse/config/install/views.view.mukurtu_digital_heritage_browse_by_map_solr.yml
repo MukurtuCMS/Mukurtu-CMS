@@ -8,8 +8,8 @@ dependencies:
     - leaflet_views
     - search_api
     - user
-id: mukurtu_browse_by_map_solr
-label: 'Mukurtu Browse by Map Solr'
+id: mukurtu_digital_heritage_browse_by_map_solr
+label: 'Mukurtu Digital Heritage Browse by Map Solr'
 module: views
 description: ''
 tag: ''
@@ -22,7 +22,7 @@ display:
     display_plugin: default
     position: 0
     display_options:
-      title: 'Mukurtu Browse by Map'
+      title: 'Mukurtu Digital Heritage Browse by Map'
       fields:
         node_title:
           id: node_title
@@ -427,6 +427,47 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
+        type:
+          id: type
+          table: search_api_index_mukurtu_default_solr_index
+          field: type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_options
+          operator: or
+          value:
+            digital_heritage: digital_heritage
+          group: 1
+          exposed: false
+          expose:
+            operator_id: ''
+            label: ''
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: ''
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
       style:
         type: leaflet_map
         options:
@@ -489,13 +530,6 @@ display:
           path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
       row:
         type: fields
-        options:
-          default_field_elements: true
-          inline:
-            node_title: node_title
-            uuid: uuid
-          separator: ''
-          hide_empty: false
       query:
         type: search_api_query
         options:
@@ -518,8 +552,8 @@ display:
       tags:
         - 'config:search_api.index.mukurtu_default_solr_index'
         - 'search_api_list:mukurtu_default_solr_index'
-  map_block:
-    id: map_block
+  digital_heritage_map_block:
+    id: digital_heritage_map_block
     display_title: 'Map Block'
     display_plugin: block
     position: 1

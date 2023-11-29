@@ -37,8 +37,6 @@ mukurtu_browse.map_browse_digital_heritage_page:
   defaults:
     _controller: '\Drupal\mukurtu_browse\Controller\MukurtuDigitalHeritageBrowseByMapController::content'
     _title: 'Browse Digital Heritage'
-    view: 'mukurtu_digital_heritage_browse_by_map'
-    block: 'digital_heritage_map_block'
   requirements:
     _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuDigitalHeritageBrowseByMapController::access'
 
