@@ -42,9 +42,11 @@ class SearchSettingsForm extends ConfigFormBase {
     // 'db' or 'solr'.
     $backend = $config->get('backend') ?? 'db';
 
+    $link = \Drupal\Core\Link::createFromRoute($this->t('Search API Configuration'), 'search_api.overview')->toString();
+
     $form['backend'] = [
       '#title' => 'Search Backend',
-      '#description' => $this->t('Select which Search API backend to use for search.'),
+      '#description' => $this->t('Select which Search API backend to use for search. Note that backends must be configured prior to use. See @link.', ['@link' => $link]),
       '#type'          => 'radios',
       '#options' => [
         'db' => $this->t('Search API Database'),
