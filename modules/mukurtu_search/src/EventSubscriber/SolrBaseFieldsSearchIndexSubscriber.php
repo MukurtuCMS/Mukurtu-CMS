@@ -41,9 +41,8 @@ class SolrBaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
     $label = $event->field_definition->getLabel();
     $indexes = ['mukurtu_default_solr_index'];
 
-    //$event->entity_type_id == 'node' &&
     // Index text fields as full text.
-    if (in_array($event->field_definition->getType(), ['string', 'string_long', 'text', 'text_long', 'text_with_summary']) && !in_array($field_name, ['revision_log','revision_log_message'])) {
+    if (in_array($event->field_definition->getType(), ['string', 'string_long', 'text', 'text_long', 'text_with_summary', 'geofield']) && !in_array($field_name, ['revision_log','revision_log_message'])) {
       $event->indexField($indexes, $field_id, $field_name, $label);
     }
 
@@ -75,6 +74,11 @@ class SolrBaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
             if ($reference_entity_type_id == 'taxonomy_term') {
               $event->indexField($indexes, $field_id . "__{$referencedLabelKey}__facet", "{$field_name}:entity:{$referencedLabelKey}", "$label " . t("Facet"), 'string');
             }
+          }
+
+          // For our media assets field, index the bundle for our Media Type facets.
+          if ($field_name == 'field_media_assets' && $reference_entity_type_id == 'media') {
+            $event->indexField($indexes, $field_id . "__bundle", "{$field_name}:entity:bundle", t("Media Type Facet"), 'string');
           }
         }
       }
