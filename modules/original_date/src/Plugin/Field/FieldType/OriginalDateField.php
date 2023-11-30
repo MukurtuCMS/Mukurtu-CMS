@@ -91,38 +91,59 @@ class OriginalDateField extends FieldItemBase {
     return $properties;
   }
 
+  protected function validateDate($date) {
+    $year = $date['year'];
+    $month = $date['month'];
+    $day = $date['day'];
+
+    // Validate each component of the date.
+    if ($year != '' && intval($year) < 1) {
+      throw new InvalidArgumentException("Invalid year '{$year}'.");
+    }
+    if ($month != '' && (intval($month) < 1 || intval($month) > 12)) {
+      throw new InvalidArgumentException("Invalid month '{$month}'.");
+    }
+    if ($day != '' && (intval($day) < 1 || intval($day) > 31)) {
+      throw new InvalidArgumentException("Invalid day '{$day}'.");
+    }
+  }
+
   /**
    * {@inheritdoc}
    */
   public function setValue($values, $notify = TRUE) {
     if (isset($values) && !is_array($values)) {
-      // Handle unprocessed values coming directly from set, rather than the
-      // widget.
-      $dateComponents = explode('-', $values);
-      $values = [];
+      // Handle unprocessed values coming directly from set instead of widget.
 
-      $values['year'] = $dateComponents[0] ?? '';
-      $values['month'] = $dateComponents[1] ?? '';
-      $values['day'] = $dateComponents[2] ?? '';
+      // Handle empty date.
+      if ($values == '') {
+        $values = [];
+        $values['year'] = '';
+        $values['month'] = '';
+        $values['day'] = '';
+      }
+      else {
+        // Perform regex matching for non-empty date.
+        // Matches dates with - or / delimiter (e.g. 12-2-22 or 12/2/22).
+        $exp_ymd = '~^([0-9]{1,4})[-/]([0-9]{1,2})[-/]([0-9]{1,2})$~';
+        $exp_ym = '~^([0-9]{1,4})[-/]([0-9]{1,2})$~';
+        $exp_y = '~^([0-9]{1,4})$~';
+        if (preg_match($exp_ymd, $values, $matches) || preg_match($exp_ym, $values, $matches) || preg_match($exp_y, $values, $matches)) {
+          $values = [];
+          $values['year'] = isset($matches[1]) ? $matches[1] : '';
+          $values['month'] = isset($matches[2]) ? $matches[2] : '';
+          $values['day'] = isset($matches[3]) ? $matches[3] : '';
 
-      if ($values['year'] != '') {
-        if (!is_numeric($values['year']) || intval($values['year']) < 1) {
-          throw new InvalidArgumentException("Invalid year '{$values['year']}'.");
+          $this->validateDate($values);
         }
-      }
-      if ($values['month'] != '') {
-        if ((!is_numeric($values['month']) || intval($values['month']) < 1 || intval($values['month']) > 12)) {
-          throw new InvalidArgumentException("Invalid month '{$values['month']}'.");
-        }
-      }
-      if ($values['day'] != '') {
-        if (!is_numeric($values['day']) || intval($values['day']) < 1 || intval($values['day']) > 31) {
-          throw new InvalidArgumentException("Invalid day '{$values['day']}'.");
+        else {
+          throw new InvalidArgumentException("Dates must be in YYYY, YYYY-MM, or YYYY-MM-DD format.");
         }
       }
 
       // Store the date string for the user-facing date display.
-      // Year is guaranteed.
+      // Strip leading zeros on year, if present.
+      $values['year'] = ltrim($values['year'], "0");
       $date = $values['year'];
       $date = $date . ($values['month'] ? ("-" . str_pad($values['month'], 2, "0", STR_PAD_LEFT)) : "");
       $date = $date . ($values['day'] ? ("-" . str_pad($values['day'], 2, "0", STR_PAD_LEFT)) : "");
