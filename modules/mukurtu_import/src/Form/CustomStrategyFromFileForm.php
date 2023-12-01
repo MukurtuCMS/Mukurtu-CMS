@@ -176,13 +176,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   protected function getEntityTypeIdOptions() {
     $definitons = $this->entityTypeManager->getDefinitions();
     $options = [];
-    foreach (['node', 'media', 'community', 'protocol', 'paragraph'] as $entity_type_id) {
+    foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item'] as $entity_type_id) {
       if (isset($definitons[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
         $options[$entity_type_id] = $definitons[$entity_type_id]->getLabel();
 
         // Override certain labels, including paragraphs.
         if ($entity_type_id === 'paragraph') {
-          $options[$entity_type_id] = $this->t('Compound Types');
+          $options[$entity_type_id] = $this->t('Compound Types (paragraphs)');
         }
       }
     }

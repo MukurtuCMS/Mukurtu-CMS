@@ -13,11 +13,17 @@ class BundleListController extends ControllerBase {
    */
   public function bundlesList() {
     $build = [];
-    $entity_types = ['node', 'media', 'community', 'protocol', 'paragraph', 'file'];
+    $entity_types = ['node', 'media', 'community', 'protocol', 'paragraph', 'file', 'multipage_item'];
     $entity_type_labels = [];
 
     foreach ($entity_types as $entity_type) {
       $entity_type_labels[$entity_type] = $this->entityTypeManager()->getDefinition($entity_type)->getLabel();
+
+      // Override the paragraph label.
+      if ($entity_type === 'paragraph') {
+        $entity_type_labels[$entity_type] = $this->t('Compound Types (paragraphs)');
+      }
+
       $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
       foreach ($bundles as $bundle_id => $bundle_info) {
         $url = Url::fromRoute('mukurtu_import.fields_list', ['entity_type' => $entity_type, 'bundle' => $bundle_id]);
