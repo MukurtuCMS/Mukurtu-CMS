@@ -72,6 +72,7 @@
         "drupal/restui": "*",
         "drupal/search_api": "*",
         "drupal/search_api_glossary": "*",
+        "drupal/search_api_solr": "^4.3",
         "drupal/slick": "^2.2",
         "drupal/slick_entityreference": "^2.0",
         "drupal/token": "*",
