@@ -1,0 +1,77 @@
+.collection {
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+
+    > * {
+      flex: 1;
+    }
+
+    &__image {
+      position: relative;
+
+      // Creates the 25% black effect over the image.
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.25);
+        z-index: 10;
+      }
+
+      img {
+        display: block;
+      }
+    }
+
+    &__text {
+      background-color: var(--brand-primary-dark);
+      color: var(--color-white);
+
+      h2 {
+        position: relative;
+        margin-block-start: var(--v-space-2xl);
+        margin-block-end: var(--v-space-2xl);
+
+        a {
+          color: var(--color-white);
+          font-size: var(--font-size-heading-2xl);
+        }
+
+        &::after {
+          content: '';
+          display: block;
+          width: 136px;
+          height: 6px;
+          background-color: var(--brand-secondary);
+          position: absolute;
+          bottom: -48px;
+        }
+      }
+
+      // Margin for left/right of text elements.
+      > * {
+        margin-inline: var(--v-space-xl);
+      }
+
+      .node-summary {
+        font-size: var(--font-size-l);
+        margin-block-end: var(--v-space-2xl);
+      }
+    }
+  }
+
+  &__items {
+    display: grid;
+    grid-template-columns: var(--grid-3col);
+    gap: var(--v-space-2xs);
+
+    > div {
+      border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+    }
+  }
+}
