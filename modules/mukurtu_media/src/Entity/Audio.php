@@ -8,12 +8,38 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_media\Entity\MukurtuFilenameGenerationInterface;
 
 /**
  * Defines the Audio media entity bundle class.
  */
-class Audio extends Media implements AudioInterface, CulturalProtocolControlledInterface {
+class Audio extends Media implements AudioInterface, CulturalProtocolControlledInterface, MukurtuFilenameGenerationInterface {
   use CulturalProtocolControlledTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasUploadedMediaFile()
+  {
+    $fieldMediaValue = $this->get('field_media_audio_file')->getValue()[0]['fids'][0] ?? NULL;
+    if ($fieldMediaValue) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMediaFilename()
+  {
+    $fid = $this->get('field_media_audio_file')->getValue()[0]['fids'][0] ?? NULL;
+    if (!$fid) {
+      return NULL;
+    }
+    $file = \Drupal::entityTypeManager()->getStorage('file')->load($fid);
+    return $file->getFilename();
+  }
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();

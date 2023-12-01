@@ -9,6 +9,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_media\Entity\MukurtuFilenameGenerationInterface;
 use Drupal\mukurtu_media\Entity\MukurtuThumbnailGenerationInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
@@ -17,7 +18,7 @@ use Drupal\Core\File\FileSystemInterface;
 /**
  * Defines the Document media entity bundle class.
  */
-class Document extends Media implements DocumentInterface, CulturalProtocolControlledInterface, MukurtuThumbnailGenerationInterface {
+class Document extends Media implements DocumentInterface, CulturalProtocolControlledInterface, MukurtuThumbnailGenerationInterface, MukurtuFilenameGenerationInterface {
 
   use CulturalProtocolControlledTrait;
 

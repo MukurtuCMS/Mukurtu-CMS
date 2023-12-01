@@ -9,6 +9,7 @@ use Drupal\Core\Render\Element;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Image;
+use Drupal\mukurtu_media\Entity\ImageInterface;
 use Drupal\mukurtu_media\Entity\RemoteVideo;
 use Drupal\mukurtu_media\Entity\Video;
 use Drupal\mukurtu_media\Entity\ExternalEmbed;
@@ -59,19 +60,20 @@ function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_typ
  */
 function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
-  // For new document forms, don't show the "Extracted Text" field because
-  // no text has been extracted yet.
+  // For new document forms, don't show the "Extracted Text" field because no
+  // text has been extracted yet.
   if (isset($form['field_extracted_text'])) {
     $form['field_extracted_text']['#disabled'] = TRUE;
     $form['field_extracted_text']['#type'] = 'hidden';
   }
 
-  // Add a process callback for the document file field. This handler will attach our AJAX callback.
-  // We need to do this via a process callback because ManagedFile builds its AJAX callbacks
-  // inside of its own process callbacks.
-  $form['field_media_document']['widget'][0]['#process'][] = 'mukurtu_media_refresh_thumb_process';
+  // Add a process callback for the document file field. This handler will
+  // attach our AJAX callback. We need to do this via a process callback because
+  // ManagedFile builds its AJAX callbacks inside of its own process callbacks.
+  $form['field_media_document']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
-  // Prepend a process callback for the thumbnail field to add our default thumbnail logic.
+  // Prepend a process callback for the thumbnail field to add our default
+  // thumbnail logic.
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
 }
 
@@ -88,13 +90,26 @@ function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInte
 
 function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
-  // Add a process callback for the video file field. This handler will attach our AJAX callback.
-  // We need to do this via a process callback because ManagedFile builds its AJAX callbacks
-  // inside of its own process callbacks.
-  $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_thumb_process';
+  $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
-  // Prepend a process callback for the thumbnail field to add our default thumbnail logic.
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  // Add custom handling on media upload/removal.
+  $form['field_media_audio_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_media_form_media_image_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  $form['field_media_image']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 }
 
 /**
@@ -121,7 +136,13 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
       $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
 
       // Use the new name as the alt text for the thumbnail image.
-      $form["field_thumbnail"]["widget"][0]["alt"]["#value"] = $filenameNoExt;
+      if ($entity instanceof ImageInterface) {
+        // Images require special handling.
+        $form['field_media_image']['widget'][0]['alt']['#value'] = $filenameNoExt;
+      }
+      else {
+        $form["field_thumbnail"]["widget"][0]["alt"]["#value"] = $filenameNoExt;
+      }
     }
 
     $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
@@ -196,7 +217,7 @@ function mukurtu_media_remove_ajax_callback(array &$form, FormStateInterface $fo
 /**
  * Process callback for the media file upload to attach our AJAX callback.
  */
-function mukurtu_media_refresh_thumb_process(&$element, FormStateInterface $form_state, &$complete_form) {
+function mukurtu_media_refresh_media_process(&$element, FormStateInterface $form_state, &$complete_form) {
   $element['upload_button']['#ajax']['callback'] = 'mukurtu_media_upload_ajax_callback';
   $element['remove_button']['#ajax']['callback'] = 'mukurtu_media_remove_ajax_callback';
 
@@ -211,7 +232,8 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
 {
   $entity = $form_state->getformObject()->getEntity();
 
-  // If the user manually removes the thumbnail, don't immediately generate it again.
+  // If the user manually removes the thumbnail, don't immediately generate it
+  // again.
   $triggeringElementName = $form_state->getTriggeringElement()['#name'] ?? NULL;
   $isMediaUploadButton = FALSE;
 

@@ -5,7 +5,7 @@ namespace Drupal\mukurtu_media\Entity;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Provides an interface defining generate thumbnail operations.
+ * Provides an interface defining thumbnail generation methods.
  */
 interface MukurtuThumbnailGenerationInterface
 {
@@ -51,20 +51,4 @@ interface MukurtuThumbnailGenerationInterface
    *   The file id of the default thumbnail (e.g. "4") if set, NULL otherwise.
    */
   public function getDefaultThumbnail();
-
-  /**
-   * Checks if the user has uploaded a media file.
-   *
-   * @return bool
-   *   True if the media item contains a media file, false otherwise.
-   */
-  public function hasUploadedMediaFile();
-
-  /**
-   * Retrieves the filename of the media file.
-   *
-   * @return string|null
-   *   The name of the media file if set, NULL otherwise.
-   */
-  public function getMediaFilename();
 }

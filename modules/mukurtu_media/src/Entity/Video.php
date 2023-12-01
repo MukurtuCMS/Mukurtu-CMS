@@ -10,6 +10,7 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\mukurtu_media\Entity\MukurtuThumbnailGenerationInterface;
+use Drupal\mukurtu_media\Entity\MukurtuFilenameGenerationInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
 use Drupal\Core\File\FileSystemInterface;
@@ -17,8 +18,7 @@ use Drupal\Core\File\FileSystemInterface;
 /**
  * Defines the Video media entity bundle class.
  */
-class Video extends Media implements VideoInterface, CulturalProtocolControlledInterface, MukurtuThumbnailGenerationInterface
-{
+class Video extends Media implements VideoInterface, CulturalProtocolControlledInterface, MukurtuThumbnailGenerationInterface, MukurtuFilenameGenerationInterface {
   use CulturalProtocolControlledTrait;
 
   /**
