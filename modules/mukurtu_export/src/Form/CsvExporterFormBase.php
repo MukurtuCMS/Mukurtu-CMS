@@ -281,6 +281,11 @@ class CsvExporterFormBase extends EntityForm {
         ];
 
         foreach ($entity->getMappedFields($type, $bundle) as $weight => $mapped_field) {
+          // Exclude 'behavior_settings' paragraph base field from the options.
+          if ($mapped_field['field_name'] == 'behavior_settings') {
+            continue;
+          }
+
           $row = [
             '#attributes' => ['class' => ['draggable']],
             '#weight' => 0,
