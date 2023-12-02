@@ -393,6 +393,11 @@ class ImportBaseForm extends FormBase {
           unset($fieldDefs[$field_name]);
         }
 
+        // Remove unwanted 'behavior_settings' paragraph base field.
+        if ($field_name == 'behavior_settings') {
+          unset($fieldDefs[$field_name]);
+        }
+
         // Remove computed and read-only fields.
         if ($fieldDef->isComputed() || $fieldDef->isReadOnly()) {
           unset($fieldDefs[$field_name]);
