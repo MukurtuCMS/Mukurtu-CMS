@@ -100,7 +100,9 @@ class ProjectDirectoryController extends ControllerBase {
 
     $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group);
     if ($projects) {
-      $description = $this->t($this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_community_' . $group . '_projects_directory_description')) ?? '';
+      $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_community_' . $group->id() . '_projects_directory_description');
+      // Exception throws if translated string is null, so check for this.
+      $description = ($description == NULL ? '' : $this->t($description));
     }
     else {
       $description = $this->t("There are currently no Local Contexts projects for this community.");
@@ -136,7 +138,9 @@ class ProjectDirectoryController extends ControllerBase {
 
     $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group);
     if ($projects) {
-      $description = $this->t($this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_protocol_' . $group . '_projects_directory_description')) ?? '';
+      $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_protocol_' . $group->id() . '_projects_directory_description');
+      // Exception throws if translated string is null, so check for this.
+      $description = ($description == NULL ? '' : $this->t($description));
     } else {
       $description = $this->t("There are currently no Local Contexts projects for this cultural protocol.");
     }
