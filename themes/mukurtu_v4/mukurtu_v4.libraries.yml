@@ -4,4 +4,6 @@ global-styling:
       css/style.css: {}
   js:
     js/script.js: {}
-
+    js/collection.js: {}
+    js/masonry.js: { attributes: { type: module }}
+    node_modules/masonry-layout/dist/masonry.pkgd.min.js: { minified: true }

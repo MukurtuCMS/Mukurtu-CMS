@@ -1,7 +1,13 @@
 .collection {
   &__header {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
+    margin-block-end: var(--v-space-xs);
+
+    @include media('>=lg') {
+      flex-direction: row;
+    }
 
     > * {
       flex: 1;
@@ -9,6 +15,7 @@
 
     &__image {
       position: relative;
+      background-color: var(--brand-primary);
 
       // Creates the 25% black effect over the image.
       &::before {
@@ -65,13 +72,88 @@
     }
   }
 
+  &__content {
+    &__body {
+      margin-block-end: var(--v-space-xs);
+      padding-inline: var(--layout-padding-full-width);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      // Create the 'shadow' look.
+      background: linear-gradient(var(--brand-light), var(--color-white));
+      background-repeat: no-repeat;
+      background-size: 100% 12px;
+      background-position: bottom;
+      padding-block-end: var(--v-space-2xs);
+    }
+  }
+
   &__items {
-    display: grid;
-    grid-template-columns: var(--grid-3col);
-    gap: var(--v-space-2xs);
+    padding-block-start: var(--v-space-2xs);
+    border-top: 5px solid var(--mukurtu-view-row-divider-color);
 
     > div {
+      height: fit-content;
       border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+      width: 100%;
+
+      @include media('>=sm') {
+        width: 200px;
+      }
+
+      @include media('>=md') {
+        width: 228px;
+      }
+
+      @include media('>=xl') {
+        width: 302px;
+      }
+
+      @include media('>=2xl') {
+        width: 342px;
+      }
     }
+
+    h2 {
+      font-size: var(--font-size-s);
+      font-weight: var(--text-bold);
+      margin-block-end: var(--v-space-3xs);
+    }
+
+    img {
+      display: block;
+    }
+
+    // Style the right arrow and title.
+    .digital-hertiage__content__text {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      svg {
+        width: 13px;
+        height: 20px;
+        fill: var(--brand-secondary);
+      }
+    }
+
+    &__label {
+      color: var(--brand-text-color);
+      font-weight: var(--text-bold);
+      font-size: var(--font-size-s);
+      margin-block-end: var(--v-space-xs);
+
+      @include media('>=lg') {
+        font-size: var(--font-size-m);
+      }
+    }
+  }
+
+  &__list {
+    padding-inline: var(--layout-padding-full-width);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 }

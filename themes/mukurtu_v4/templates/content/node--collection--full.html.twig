@@ -69,7 +69,7 @@
 #}
 <article{{ attributes }}>
 
-  <div{{ content_attributes }}>
+  <div{{ content_attributes }} class="collection__wrapper">
     <div class="collection__header">
       <div class="collection__header__image">
         {{ content.field_collection_image }}
@@ -86,7 +86,10 @@
       </div>
     </div>
     <div class="collection__content">
-      {{ content|without('field_collection_image', 'field_summary') }}
+      {{ content|without('field_collection_image', 'field_summary', 'field_items_in_collection') }}
+    </div>
+    <div class="collection__list">
+      {{ content|without('field_collection_image', 'field_summary', 'field_description') }}
     </div>
   </div>
 </article>

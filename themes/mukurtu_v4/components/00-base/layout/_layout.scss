@@ -27,6 +27,16 @@
     --layout-padding: 0;
   }
 
+  --layout-padding-full-width: var(--layout-padding-xs); // 24px (default)
+
+  @include media('>=md') {
+    --layout-padding-full-width: var(--layout-padding-s); // 48px
+  }
+
+  @include media('>=xl') {
+    --layout-padding-full-width: var(--layout-padding-m); // 72px
+  }
+
   // Basic reusable grid settings for grid-template-columns.
   --grid-1col: repeat(1, minmax(0, 1fr));
   --grid-2col: repeat(2, minmax(0, 1fr));

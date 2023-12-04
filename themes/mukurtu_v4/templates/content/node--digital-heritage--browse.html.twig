@@ -67,18 +67,22 @@
  *
  */
 #}
+
 <article{{ attributes }}>
 
-  <div{{ content_attributes }}>
+  <div class={{ content_attributes }}>
     <div class="digital-heritage__content">
       {{ content }}
-      {{ title_prefix }}
-      {% if label %}
-        <h2{{title_attributes}}>
-          <a href="{{ url }}" rel="bookmark">{{ label }}</a>
-        </h2>
-      {% endif %}
-      {{ title_suffix }}
+      <div class="digital-hertiage__content__text">
+        {{ title_prefix }}
+        {% if label %}
+          <h2{{title_attributes}}>
+            <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+          </h2>
+        {% endif %}
+        {{ title_suffix }}
+        {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
+      </div>
     </div>
   </div>
 </article>
