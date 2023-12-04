@@ -49,8 +49,14 @@ class ProjectDirectoryController extends ControllerBase {
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
 
     $projects = $this->localContextsProjectManager->getSiteSupportedProjects(TRUE);
-    $description = $this->t($this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_site_projects_directory_description')) ?? '';
-
+    if ($projects) {
+      $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_site_projects_directory_description');
+      // Exception throws if translated string is null, so check for this.
+      $description = ($description == NULL ? '' : $this->t($description));
+    }
+    else {
+      $description = $this->t("There are currently no sitewide Local Contexts projects.");
+    }
     foreach ($projects as &$projectInfo) {
       $project = new LocalContextsProject($projectInfo['id']);
       $projectInfo['tk_labels'] = $project->getLabels('tk');
@@ -79,12 +85,7 @@ class ProjectDirectoryController extends ControllerBase {
    *   The access result.
    */
   public function siteDirectoryAccess(AccountInterface $account) {
-    // Only show the page if there are projects to show.
-    $projects = $this->localContextsProjectManager->getSiteSupportedProjects(TRUE);
-    if ($projects) {
-      return AccessResult::allowed();
-    }
-    return AccessResult::forbidden();
+    return AccessResult::allowed();
   }
 
   /**
