@@ -95,6 +95,14 @@ a {
   }
 }
 
+input,
+select {
+  &:focus {
+    outline: var(--focus-color) solid 2px;
+    outline-offset: 2px;
+  }
+}
+
 .clipboard-item {
   position: relative;
 }

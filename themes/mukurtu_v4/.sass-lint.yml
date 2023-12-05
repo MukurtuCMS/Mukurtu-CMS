@@ -64,7 +64,7 @@ rules:
   no-mergeable-selectors: 1
   no-misspelled-properties:
     - 1
-    - extra-properties: [gap, text-underline-offset]
+    - extra-properties: [gap, text-underline-offset, aspect-ratio]
   no-qualifying-elements:
     - 0
     - allow-element-with-attribute: false
