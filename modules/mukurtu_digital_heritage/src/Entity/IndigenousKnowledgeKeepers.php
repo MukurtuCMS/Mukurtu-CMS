@@ -28,7 +28,7 @@ class IndigenousKnowledgeKeepers extends Paragraph implements IndigenousKnowledg
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_nation'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Nation/Community'))
+      ->setLabel(t('Nation or Community'))
       ->setDescription('')
       ->setSettings([
         'max_length' => 255,
@@ -54,7 +54,7 @@ class IndigenousKnowledgeKeepers extends Paragraph implements IndigenousKnowledg
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_living_place'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('City/Community They Live in'))
+      ->setLabel(t('City or Community They Live in'))
       ->setDescription(t(''))
       ->setSettings([
         'max_length' => 255,

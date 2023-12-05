@@ -225,9 +225,9 @@ entity_fields_export_list:
     id: ID
     langcode: 'Language code'
     field_name: 'Name of the Elder or Knowledge Keeper'
-    field_nation: Nation/Community
+    field_nation: 'Nation or Community'
     field_treaty_territory: 'Treaty Territory'
-    field_living_place: 'City/Community They Live in'
+    field_living_place: 'City or Community They Live in'
     field_teaching: 'A Brief Description or Title of the Teaching'
     field_original_date: Date
   paragraph__related_person:
