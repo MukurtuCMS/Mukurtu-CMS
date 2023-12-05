@@ -1,0 +1,19 @@
+:root {
+  // Overridden by Palette Switcher.
+  --brand-primary: #138aab;
+  --brand-primary-dark: #107996;
+  --brand-primary-accent: #159ec4;
+  --brand-secondary: #e6ab49;
+  --brand-secondary-dark: #9d6915;
+  --brand-secondary-accent: #f1b85a;
+  --mukurtu-navbar-collapse-link-hover-color: #e5ab48;
+  --mukurtu-breadcrumb-gradient-color: #b7873a;
+  --mukurtu-panel-pane-text-color: var(--color-white);
+  --mukurtu-panel-pane-content-background-color: #eeecec;
+  --mukurtu-mejs-background-color: var(--brand-light-accent);
+  --mukurtu-mejs-time-rail-loaded-color: #e5e1e1;
+  --mukurtu-mejs-time-rail-current-color: #d1cbcb;
+  --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
+  --mukurtu-collection-title-font-color: var(--color-white);
+  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
+}

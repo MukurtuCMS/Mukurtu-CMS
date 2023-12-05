@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.design_settings
+    - field.field.config_pages.design_settings.field_design_settings__palette
+  module:
+    - options
+id: config_pages.design_settings.default
+targetEntityType: config_pages
+bundle: design_settings
+mode: default
+content:
+  field_design_settings__palette:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  search_api_excerpt: true

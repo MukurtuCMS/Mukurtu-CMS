@@ -1,0 +1,84 @@
+{#
+/**
+ * @file
+ * Theme for mukurtu_palette_radio.
+ * Based on claro form-element override.
+ * This adds spans after the options so we can show a palette on each radio
+ * button.
+ *
+ * @see template_preprocess_mukurtu_palette_radio()
+ */
+#}
+{#
+Most of core-provided js assumes that the CSS class pattern js-form-item-[something] or
+js-form-type-[something] exists on form items. We have to keep them.
+#}
+{%
+  set classes = [
+  'js-form-item',
+  'form-item',
+  'js-form-type-' ~ type|clean_class,
+  'form-type--' ~ type|clean_class,
+  type in ['checkbox', 'radio'] ? 'form-type--boolean',
+  'js-form-item-' ~ name|clean_class,
+  'form-item--' ~ name|clean_class,
+  title_display not in ['after', 'before'] ? 'form-item--no-label',
+  disabled == 'disabled' ? 'form-item--disabled',
+  errors ? 'form-item--error',
+]
+%}
+{%
+  set description_classes = [
+  'form-item__description',
+  description_display == 'invisible' ? 'visually-hidden',
+]
+%}
+{%
+  set value = element['#return_value']
+%}
+<div{{ attributes.addClass(classes) }}>
+  {% if label_display in ['before', 'invisible'] %}
+    {{ label }}
+    <div class="palette-demo palette-demo--{{ value }}">
+      <span class="brand-primary"></span>
+      <span class="brand-secondary"></span>
+      <span class="accent">
+        <span class="brand-primary-accent"></span>
+        <span class="brand-secondary-accent"></span>
+      </span>
+    </div>
+  {% endif %}
+  {% if prefix is not empty %}
+    <span class="form-item__prefix{{disabled == 'disabled' ? ' is-disabled'}}">{{ prefix }}</span>
+  {% endif %}
+  {% if description_display == 'before' and description.content %}
+    <div{{ description.attributes.addClass(description_classes) }}>
+      {{ description.content }}
+    </div>
+  {% endif %}
+  {{ children }}
+  {% if suffix is not empty %}
+    <span class="form-item__suffix{{disabled == 'disabled' ? ' is-disabled'}}">{{ suffix }}</span>
+  {% endif %}
+  {% if label_display == 'after' %}
+    {{ label }}
+    <div class="palette-demo palette-demo--{{ value }}">
+      <span class="brand-primary"></span>
+      <span class="brand-secondary"></span>
+      <span class="accent">
+        <span class="brand-primary-accent"></span>
+        <span class="brand-secondary-accent"></span>
+      </span>
+    </div>
+  {% endif %}
+  {% if errors %}
+    <div class="form-item__error-message">
+      {{ errors }}
+    </div>
+  {% endif %}
+  {% if description_display in ['after', 'invisible'] and description.content %}
+    <div{{ description.attributes.addClass(description_classes) }}>
+      {{ description.content }}
+    </div>
+  {% endif %}
+</div>
