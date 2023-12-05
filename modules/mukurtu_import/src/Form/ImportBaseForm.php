@@ -394,7 +394,7 @@ class ImportBaseForm extends FormBase {
         }
 
         // Remove unwanted 'behavior_settings' paragraph base field.
-        if ($field_name == 'behavior_settings') {
+        if ($entity_type_id == "paragraph" && $field_name == 'behavior_settings') {
           unset($fieldDefs[$field_name]);
         }
 
