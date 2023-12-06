@@ -15,6 +15,7 @@ destination:
 migration_dependencies:
   required:
     - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
     - mukurtu_cms_v3_terms_category
     - mukurtu_cms_v3_terms_keywords
     - mukurtu_cms_v3_file_private
@@ -26,7 +27,9 @@ process:
   nid: nid
   uid:
     plugin: migration_lookup
-    migration: mukurtu_cms_v3_users
+    migration:
+      - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
     source: uid
   langcode: language
   title: title

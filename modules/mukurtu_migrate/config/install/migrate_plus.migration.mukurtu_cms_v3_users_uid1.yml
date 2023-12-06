@@ -1,17 +1,14 @@
-id: mukurtu_cms_v3_users
-label: User accounts
+id: mukurtu_cms_v3_users_uid1
+label: User accounts - Admin Account
 audit: true
 migration_tags:
   - Mukurtu 3
   - Drupal 7
 class: Drupal\user\Plugin\migrate\User
 source:
-  plugin: d7_non_admin_user
+  plugin: d7_admin_user
 process:
   uid: uid
-  name: name
-  pass: pass
-  mail: mail
   created: created
   access: access
   login: login

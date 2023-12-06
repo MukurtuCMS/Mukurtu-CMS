@@ -18,6 +18,7 @@ migration_dependencies:
     - mukurtu_cms_v3_communities
     - mukurtu_cms_v3_cultural_protocols
     - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
     - mukurtu_cms_v3_terms_keywords
     - mukurtu_cms_v3_terms_language
   optional:
@@ -27,7 +28,9 @@ process:
   nid: nid
   uid:
     plugin: migration_lookup
-    migration: mukurtu_cms_v3_users
+    migration:
+      - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
     source: uid
   langcode: language
   changed: changed

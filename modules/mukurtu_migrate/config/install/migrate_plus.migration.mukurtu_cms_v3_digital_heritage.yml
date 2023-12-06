@@ -29,6 +29,7 @@ migration_dependencies:
     - mukurtu_cms_v3_media_image
     - mukurtu_cms_v3_media_document
     - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
   optional:
     - d7_field_instance
 
@@ -36,7 +37,9 @@ process:
   nid: nid
   uid:
     plugin: migration_lookup
-    migration: mukurtu_cms_v3_users
+    migration:
+      - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
     source: uid
   langcode: language
   title: title

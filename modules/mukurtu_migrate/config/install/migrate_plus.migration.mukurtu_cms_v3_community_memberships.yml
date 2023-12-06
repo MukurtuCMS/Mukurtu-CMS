@@ -16,12 +16,14 @@ migration_dependencies:
   required:
     - mukurtu_cms_v3_communities
     - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
 
 process:
   uid:
     plugin: migration_lookup
     migration:
       - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
     source: etid
   entity_type:
     plugin: default_value

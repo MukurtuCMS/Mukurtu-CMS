@@ -14,6 +14,7 @@ destination:
 migration_dependencies:
   required:
     - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
     - mukurtu_cms_v3_communities
     - mukurtu_cms_v3_cultural_protocols
     - mukurtu_cms_v3_digital_heritage
@@ -23,7 +24,9 @@ migration_dependencies:
 process:
   uid:
     plugin: migration_lookup
-    migration: mukurtu_cms_v3_users
+    migration:
+      - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
     source: uid
 
   title: title
