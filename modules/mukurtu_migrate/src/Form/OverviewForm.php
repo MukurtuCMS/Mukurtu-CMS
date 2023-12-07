@@ -65,8 +65,27 @@ class OverviewForm extends MukurtuMigrateFormBase
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->store->set('step', 'credential');
-    $form_state->setRedirect('mukurtu_migrate.credentials');
+    // Check for existing entities on the site that could be overwritten.
+    // The content types were decided here:
+    // https://github.com/MukurtuCMS/Mukurtu-CMS/issues/135.
+
+    $contentTypes = ['node', 'media', 'community', 'protocol'];
+    $results = [];
+    foreach ($contentTypes as $contentType) {
+      $query = \Drupal::entityQuery($contentType)->accessCheck(FALSE);
+      $result = $query->execute();
+      if ($result) {
+        array_push($results, $result);
+      }
+    }
+    if ($results) {
+      // If there is existing content, redirect to the existing content route.
+      $form_state->setRedirect('mukurtu_migrate.existing_content');
+    }
+    else {
+      $this->store->set('step', 'credential');
+      $form_state->setRedirect('mukurtu_migrate.credentials');
+    }
   }
 
   /**

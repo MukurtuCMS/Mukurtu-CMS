@@ -116,27 +116,8 @@ class ReviewForm extends MukurtuMigrateFormBase {
       return $this->restartUpgradeForm();
     }
 
-    // Check for existing entities to warn the user they could be overwritten.
-    $contentTypes = ['node', 'media', 'community', 'protocol'];
-    $results = [];
-    foreach ($contentTypes as $contentType) {
-      $query = \Drupal::entityQuery($contentType)->accessCheck(FALSE);
-      array_push($results, $query->execute());
-    }
-
     $form = parent::buildForm($form, $form_state);
-    if ($results) {
-      $form['messages'] = [
-        '#type' => 'processed_text',
-        '#text' => $this->t("Warning: There are existing entities on your site that may be overwritten during migration. Please check before proceeding."),
-      ];
-    }
-    if ($results) {
-      $form['messages'] = [
-        '#type' => 'processed_text',
-        '#text' => $this->t("Warning: you have existing entities on your site that may be overwritten during migration. Please check before proceeding."),
-      ];
-    }
+
     $form['#title'] = $this->t('Migration Steps');
 
     $migrations = $this->migrationPluginManager->createInstances(array_keys($this->store->get('migrations')));

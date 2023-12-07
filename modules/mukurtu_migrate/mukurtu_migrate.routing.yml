@@ -38,3 +38,13 @@ mukurtu_migrate.results:
     _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkAccessResults'
   options:
     _admin_route: TRUE
+
+mukurtu_migrate.existing_content:
+  path: '/dashboard/migrate/existing-content'
+  defaults:
+    _form: '\Drupal\mukurtu_migrate\Form\ExistingContentForm'
+    _title: 'Error: Existing Content Found on Site'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkAccessResults'
+  options:
+    _admin_route: TRUE
