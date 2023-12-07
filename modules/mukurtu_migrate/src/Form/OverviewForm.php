@@ -58,6 +58,15 @@ class OverviewForm extends MukurtuMigrateFormBase
     $form['info_footer'] = [
       '#markup' => '<p>' . $this->t('The migration can take a long time. It is recommended to migrate from a local copy of your site instead of directly from your live site.'),
     ];
+
+    if ($this->siteHasContent) {
+      $form['existing_content_message'] = [
+        '#markup' => '<p>' . $this->t("You have existing content on your site and may not proceed with migration. Delete all existing content and try again."),
+      ];
+      // Remove the submit button from the form.
+      unset($form['actions']['submit']);
+    }
+
     return $form;
   }
 
@@ -65,27 +74,8 @@ class OverviewForm extends MukurtuMigrateFormBase
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Check for existing entities on the site that could be overwritten.
-    // The content types were decided here:
-    // https://github.com/MukurtuCMS/Mukurtu-CMS/issues/135.
-
-    $contentTypes = ['node', 'media', 'community', 'protocol'];
-    $results = [];
-    foreach ($contentTypes as $contentType) {
-      $query = \Drupal::entityQuery($contentType)->accessCheck(FALSE);
-      $result = $query->execute();
-      if ($result) {
-        array_push($results, $result);
-      }
-    }
-    if ($results) {
-      // If there is existing content, redirect to the existing content route.
-      $form_state->setRedirect('mukurtu_migrate.existing_content');
-    }
-    else {
-      $this->store->set('step', 'credential');
-      $form_state->setRedirect('mukurtu_migrate.credentials');
-    }
+    $this->store->set('step', 'credential');
+    $form_state->setRedirect('mukurtu_migrate.credentials');
   }
 
   /**

@@ -4,7 +4,7 @@ mukurtu_migrate.migrate:
     _form: '\Drupal\mukurtu_migrate\Form\OverviewForm'
     _title: 'Migrate from Mukurtu CMS version 3'
   requirements:
-    _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkAccess'
+    _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkOverviewAccess'
   options:
     _admin_route: TRUE
     no_cache: TRUE
@@ -34,16 +34,6 @@ mukurtu_migrate.results:
   defaults:
     _form: '\Drupal\mukurtu_migrate\Form\ResultsForm'
     _title: 'Migrate from Mukurtu CMS version 3'
-  requirements:
-    _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkAccessResults'
-  options:
-    _admin_route: TRUE
-
-mukurtu_migrate.existing_content:
-  path: '/dashboard/migrate/existing-content'
-  defaults:
-    _form: '\Drupal\mukurtu_migrate\Form\ExistingContentForm'
-    _title: 'Error: Existing Content Found on Site'
   requirements:
     _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkAccessResults'
   options:

@@ -37,6 +37,13 @@ abstract class MukurtuMigrateFormBase extends FormBase {
   protected $destinationSiteVersion;
 
   /**
+   * Flag indicating if the site has content.
+   *
+   * @var bool
+   */
+  protected $siteHasContent;
+
+  /**
    * Constructs the Form Base.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -53,6 +60,7 @@ abstract class MukurtuMigrateFormBase extends FormBase {
     $this->migrationPluginManager = $migration_plugin_manager;
     $this->state = $state;
     $this->store = $tempstore_private->get('mukurtu_migrate');
+    $this->siteHasContent = $this->siteHasContent();
   }
 
   /**
@@ -117,4 +125,25 @@ abstract class MukurtuMigrateFormBase extends FormBase {
     return $this->getMigrationPluginManager()->createInstancesByTag('Mukurtu 3');
   }
 
+  /**
+   * Checks if there are existing entities on the site.
+   * The content types were decided here:
+   * https://github.com/MukurtuCMS/Mukurtu-CMS/issues/135.
+   *
+   * @return bool
+   * TRUE if site has content, FALSE if not.
+   */
+  protected function siteHasContent() {
+    $contentTypes = ['node', 'media', 'community', 'protocol'];
+    foreach ($contentTypes as $contentType) {
+      $query = \Drupal::entityQuery($contentType)
+        ->range(0, 1)
+        ->accessCheck(FALSE);
+      $result = $query->execute();
+      if ($result) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
 }
