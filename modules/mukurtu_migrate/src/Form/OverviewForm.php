@@ -60,7 +60,26 @@ class OverviewForm extends MukurtuMigrateFormBase
     ];
 
     if ($this->siteHasContent) {
-      $form['existing_content_message'] = [
+      // Style the error like a classic Drupal error message.
+      $form['existing_content_message_wrapper'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => [
+            'messages__wrapper',
+          ],
+        ],
+      ];
+
+      $form['existing_content_message_wrapper']['existing_content_message'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => [
+            'messages',
+            'messages--error',
+          ],
+        ],
+      ];
+      $form['existing_content_message_wrapper']['existing_content_message']['text'] = [
         '#markup' => '<p>' . $this->t("You have existing content on your site and may not proceed with migration. Delete all existing content and try again."),
       ];
       // Remove the submit button from the form.
