@@ -4,8 +4,6 @@ dependencies: {  }
 name: browse_collections_3_2_
 label: 'Browse Collections (3:2)'
 effects:
-  c68939ce-106c-46fd-bc77-a180ead4836d:
-    uuid: c68939ce-106c-46fd-bc77-a180ead4836d
     id: image_scale_and_crop
     weight: 1
     data:
