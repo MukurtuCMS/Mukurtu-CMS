@@ -22,5 +22,19 @@ class ExternalEmbed extends MediaSourceBase
   /**
    * {@inheritdoc}
    */
-  public function getMetadataAttributes(){}
+  public function getMetadataAttributes(){
+
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMetadata(MediaInterface $media, $attribute_name) {
+    switch ($attribute_name) {
+      case 'default_name':
+        return '';
+      default:
+        return parent::getMetadata($media, $attribute_name);
+    }
+  }
 }

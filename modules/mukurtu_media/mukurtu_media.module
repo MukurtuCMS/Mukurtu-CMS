@@ -13,6 +13,7 @@ use Drupal\mukurtu_media\Entity\ImageInterface;
 use Drupal\mukurtu_media\Entity\RemoteVideo;
 use Drupal\mukurtu_media\Entity\Video;
 use Drupal\mukurtu_media\Entity\ExternalEmbed;
+use Drupal\mukurtu_media\Form\ExternalEmbedForm;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -37,6 +38,16 @@ function mukurtu_media_entity_bundle_info_alter(array &$bundles): void
   }
   if (isset($bundles['media']['external_embed'])) {
     $bundles['media']['external_embed']['class'] = ExternalEmbed::class;
+  }
+}
+
+/**
+ * Implements hook_media_source_info_alter().
+ */
+function mukurtu_media_media_source_info_alter(array &$sources)
+{
+  if (empty($sources['external_embed']['forms']['media_library_add'])) {
+    $sources['external_embed']['forms']['media_library_add'] = ExternalEmbedForm::class;
   }
 }
 
