@@ -4,7 +4,10 @@ input[type=button],
 input[type=submit],
 input[type=reset] {
   color: var(--light-text-color);
-  background: var(--brand-primary);
+  background: var(--brand-primary-dark);
+  font-size: var(--font-size-base);
+  font-weight: var(--text-bold);
+  letter-spacing: var(--letter-spacing-label);
   border: none;
   padding: var(--v-space-4xs) var(--v-space-2xs);
 

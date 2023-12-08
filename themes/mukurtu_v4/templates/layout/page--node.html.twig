@@ -41,68 +41,22 @@
  * @see html.html.twig
  */
 #}
-<div class="layout-container">
-  {# Account menu. #}
-  <div class="page__account-menu">
-    {{ page.navigation|without('mukurtu_v4_main_menu', 'mukurtu_v4_breadcrumbs') }}
-  </div>
+{% extends "@mukurtu_v4/templates/layout/page.html.twig" %}
 
-  <header role="banner">
-    {# Site branding and main menu. #}
-    <div class="page__banner__wrapper">
-      <div class="page__logo">
-        {{ page.header }}
-      </div>
-      <div class="page__main-nav">
-        {{ page.navigation|without('mukurtu_v4_account_menu', 'mukurtu_v4_breadcrumbs') }}
-      </div>
-    </div>
-  </header>
+{% block page_content %}
 
-  <div class="page__breadcrumbs">
-    {# Breadcrumbs. #}
-    {{ page.navigation|without('mukurtu_v4_main_menu', 'mukurtu_v4_account_menu') }}
-  </div>
-
-  {{ page.highlighted }}
-
-  {{ page.help }}
-
-  {# Print the page title outside of the page content for the Dashboard. #}
-  {% if page['#title'] == 'Mukurtu Dashboard' %}
-    <div class="page__title">
-      <h1>{{ page['#title'] }}</h1>
-    </div>
-  {% endif %}
-
-  <main id="main-content" role="main" tabindex="-1">
-  {# link is in html.html.twig #}
-
-    {% block page_content %}
-      <div class="layout-content">
-        {{ page.content }}
-        {# {{ page.content|without('mukurtu_v4_page_title') }} #}
-      </div>{# /.layout-content #}
-
-      {% if page.sidebar_first %}
-        <aside class="layout-sidebar-first" role="complementary">
-          {{ page.sidebar_first }}
-        </aside>
-      {% endif %}
-    {% endblock %}
-
-    {% if page.sidebar_second %}
-      <aside class="layout-sidebar-second" role="complementary">
-        {{ page.sidebar_second }}
+  <div class="node">
+    {# link is in html.html.twig #}
+    {% if page.sidebar_first %}
+      <aside class="node__layout-sidebar-first" role="complementary">
+        {{ page.sidebar_first }}
       </aside>
     {% endif %}
 
-  </main>
+    <div class="node__main-content">
+      {{ page.content|without('mukurtu_v4_page_title', 'mukurtu_v4_local_actions') }}
+    </div>
+    {# /.layout-content #}
 
-  {% if page.footer %}
-    <footer role="contentinfo">
-      {{ page.footer }}
-    </footer>
-  {% endif %}
-
-</div>{# /.layout-container #}
+  </div>
+{% endblock %}

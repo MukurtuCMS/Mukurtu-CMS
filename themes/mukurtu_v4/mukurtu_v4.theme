@@ -9,6 +9,7 @@ function mukurtu_v4_preprocess_breadcrumb(&$variables) {
   $route = \Drupal::routeMatch()->getRouteObject();
   $page_title = \Drupal::service('title_resolver')->getTitle($request, $route);
 
+  // @todo: add admin pages in here too
   if ($page_title) {
     // Add current page title to breadcrumbs.
     $variables['breadcrumb'][] = array(

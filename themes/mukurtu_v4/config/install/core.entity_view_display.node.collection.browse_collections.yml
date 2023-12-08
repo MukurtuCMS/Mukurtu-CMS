@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.browse
+    - core.entity_view_mode.node.browse_collections
     - field.field.node.collection.comment
     - field.field.node.collection.field_mukurtu_cluster_lat
     - field.field.node.collection.field_mukurtu_cluster_long
@@ -15,10 +15,10 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: node.collection.browse
+id: node.collection.browse_collections
 targetEntityType: node
 bundle: collection
-mode: browse
+mode: browse_collections
 content:
   field_collection_image:
     type: entity_reference_entity_view

@@ -46,8 +46,8 @@ ul li {
 }
 
 p {
-  margin-top: var(--v-space-4xs);
-  margin-bottom: var(--v-space-4xs);
+  margin-top: var(--v-space-4xxs);
+  margin-bottom: var(--v-space-4xxs);
 }
 
 dl,
@@ -63,6 +63,7 @@ address {
 img {
   max-width: 100%;
   height: auto;
+  display: block;
 }
 
 a {
@@ -109,4 +110,12 @@ select {
 
 .visually-hidden {
   @include visually-hidden;
+}
+
+// For Nodes whose bodies need a 'Show More'.
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }

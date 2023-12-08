@@ -2,7 +2,7 @@
 
 /*! See https://eduardoboucas.github.io/include-media/ for detailed
 documentation on how to use @include media(). */
-@import '../node_modules/include-media/dist/include-media';
+@import '../external/_include-media.scss';
 
 @import '00-base/**/*.scss';
 @import '01-atoms/**/*.scss';

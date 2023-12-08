@@ -30,15 +30,68 @@
   }
 
   main {
-    @include layout--full-width-grid;
-    margin-block-end: var(--v-separation);
+    display: block;
 
-    .dashboard,
+    .dashboard {
+      @include layout--full-width-grid;
+
+      &__layout-sidebar-first {
+        grid-column: 1 / -1;
+
+        @include media('>=lg') {
+          grid-column: 1 / span 6;
+        }
+
+        @include media('>=2xl') {
+          grid-column: 2 / span 6;
+        }
+      }
+
+      &__main-content {
+        grid-column: 1 / -1;
+
+        @include media('>=lg') {
+          grid-column: 7 / span 6;
+        }
+
+        @include media('>=2xl') {
+          grid-column: 8 / span 6;
+        }
+      }
+    }
+
     .collections {
-      grid-column: 1 / -1;
+      @include layout--full-width-grid;
 
-      @include media('>=2xl') {
-        grid-column: 2 / -2;
+      &__main-content {
+        grid-column: 1 / -1;
+
+        @include media('>=2xl') {
+          grid-column: 2 / -2;
+        }
+      }
+    }
+
+    .collection__wrapper {
+      @include layout--full-width-grid-no-padding;
+
+      .collection__header {
+        grid-column: 1 / -1;
+      }
+
+      .collection__content {
+        grid-column: 1 / -1;
+      }
+
+      // Add containers to the grid here.
+      // @todo: move these to their respective scss files.
+      .dashboard,
+      .collections {
+        grid-column: 1 / -1;
+
+        @include media('>=2xl') {
+          grid-column: 2 / -2;
+        }
       }
     }
   }

@@ -36,15 +36,22 @@
  * @see template_preprocess_field()
  */
 #}
+{%
+  set title_classes = [
+    label_display == 'visually_hidden' ? 'visually-hidden',
+  ]
+%}
 
-{% set attributes = attributes.addClass('clearfix', 'field-reference') %}
-{% set title_classes = 'field-title' %}
+{% set attributes = attributes
+  .setAttribute('class', 'node-summary')
+%}
+
 
 {% if label_hidden %}
   {% if multiple %}
     <div{{ attributes }}>
       {% for item in items %}
-        <div class="field-item" {{ item.attributes }}>{{ item.content }}</div>
+        <div{{ item.attributes }}>{{ item.content }}</div>
       {% endfor %}
     </div>
   {% else %}
@@ -56,14 +63,13 @@
   <div{{ attributes }}>
     <div{{ title_attributes.addClass(title_classes) }}>{{ label }}</div>
     {% if multiple %}
-      <div class="field-item__container">
+      <div>
     {% endif %}
     {% for item in items %}
-      <div class="field-item" {{ item.attributes }}>{{ item.content }}</div>
+      <div{{ item.attributes }}>{{ item.content }}</div>
     {% endfor %}
     {% if multiple %}
       </div>
     {% endif %}
   </div>
 {% endif %}
-

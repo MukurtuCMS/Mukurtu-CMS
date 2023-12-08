@@ -272,9 +272,10 @@
 
       .field-reference {
         height: auto;
+        // line-height: 0;
 
         div {
-          height: 100%;
+          height: auto;
         }
 
         img {
