@@ -87,6 +87,10 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportEntityReferenceRevision($event, $field, $config);
     }
 
+    if ($fieldType == 'link') {
+      return $this->exportLink($event, $field, $config);
+    }
+
     // Default handling.
     $values = $entity->get($field_name)->getValue();
     $exportValue = [];
@@ -370,6 +374,42 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       }
     }
     $event->setValue($export);
+  }
+
+  /**
+   * Exports link field values.
+   *
+   * @param EntityFieldExportEvent $event
+   *   The export event object which provides the context and the necessary environment
+   *   for the current export operation.
+   * @param \Drupal\Core\Field\FieldItemListInterface $field
+   *   The field items list containing link data to be exported.
+   *
+   * @protected
+   */
+  protected function exportLink(EntityFieldExportEvent $event, $field) {
+    // Link field values are wrapped in another array like this:
+    // values => [
+    //    value => [
+    //      'uri' => 'https://google.com',
+    //      'title' => 'Google',
+    //      'options => [...]
+    //    ]
+    // ]
+    // Default handling doesn't expect the values in this format, so we need to
+    // special handling for fields of type link.
+    $exportValue = [];
+    $values = isset($field->getValue()[0]) ? $field->getValue()[0] : NULL;
+    foreach ($values as $value) {
+      // Handle the options part of the link field.
+      if (is_array($value)) {
+        $exportValue[] = empty($value) ? '' : $value;
+      }
+      else {
+        $exportValue[] = $value;
+      }
+    }
+    $event->setValue($exportValue);
   }
 
   /**
