@@ -154,7 +154,7 @@ class CulturalProtocolItem extends FieldItemBase {
     $uid = $current_user->id();
     $logger = \Drupal::logger('mukurtu_protocol');
     $logger->info(
-      'User @uid attempted to add or remove protocols for which they did not have sufficent permissions from entity @type:@id. Those protocols were automatically restored.',
+      'User @uid attempted to add or remove protocols for which they did not have sufficient permissions from entity @type:@id. Those protocols were automatically restored.',
       [
         '@uid' => $uid,
         '@type' => $entity->getEntityTypeId(),
