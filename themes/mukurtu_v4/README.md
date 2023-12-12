@@ -51,7 +51,17 @@ As it stands, the `css` directory must be pushed up to the repo for the styles t
 
 The layout has been created with CSS Grid. The initialization can be found in `components/00-base/layout/_layout.scss`.
 
-@todo: add more about adding items to the grid.
+To use the grid, apply one of the grid mixins to your container class, then add each element within your container (your grid items) to the grid as needed.
+
+There are two main grid mixins used in the theme currently:
+- `layout--full-width-grid`
+- `layout--full-width-grid-no-padding`
+
+Full Width Grid can be applied to most content, and includes left and right padding. The grid itself starts after the left padding, and ends before the right padding. An example of this would be the body section of a page, for instance.
+
+Full Width Grid No Padding is for areas you need 'full bleed' or would like your content to run the full width of the page regardless of viewport size. And example of this would be the hero image/text on a page, the breacrumbs, menus, etc.
+
+If you need something to be full bleed, but also need its contents to adhere to the grid with padding, you can use `layout--full-width-grid-no-padding` on the container, then use `layout--full-width-grid` on an additional wrapper around your grid items.
 
 ## Icons
 

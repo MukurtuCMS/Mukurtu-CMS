@@ -12,9 +12,6 @@ var gulp = require("gulp"),
 
 var sassGlob = require("gulp-sass-glob");
 
-var gulpIgnore = require("gulp-ignore");
-var fileExclude = "./external/_include-media.scss";
-
 gulp.task("imagemin", function () {
   return gulp
     .src("./src/images/*")
@@ -30,8 +27,7 @@ gulp.task("imagemin", function () {
 
 gulp.task("sass", function (done) {
   gulp
-    .src("./components/**/*.scss")
-    .pipe(gulpIgnore.exclude(fileExclude))
+    .src("./components/**/_*.scss")
     .pipe(sourcemaps.init())
     .pipe(sassGlob())
     // Lint first
