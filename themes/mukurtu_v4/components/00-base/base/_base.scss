@@ -1,4 +1,4 @@
-@import 'defaults/mixins';
+@import '../defaults/mixins';
 
 // Base HTML elements.
 *,
@@ -46,8 +46,8 @@ ul li {
 }
 
 p {
-  margin-top: var(--v-space-4xs);
-  margin-bottom: var(--v-space-4xs);
+  margin-top: var(--v-space-4xxs);
+  margin-bottom: var(--v-space-4xxs);
 }
 
 dl,
@@ -63,6 +63,7 @@ address {
 img {
   max-width: 100%;
   height: auto;
+  display: block;
 }
 
 a {
@@ -95,10 +96,26 @@ a {
   }
 }
 
+input,
+select {
+  &:focus {
+    outline: var(--focus-color) solid 2px;
+    outline-offset: 2px;
+  }
+}
+
 .clipboard-item {
   position: relative;
 }
 
 .visually-hidden {
   @include visually-hidden;
+}
+
+// For Nodes whose bodies need a 'Show More'.
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }

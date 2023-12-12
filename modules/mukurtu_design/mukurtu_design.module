@@ -1,0 +1,67 @@
+<?php
+
+/**
+ * @file
+ * Contains mukurtu_design hooks.
+ */
+
+declare(strict_types=1);
+
+use Drupal\mukurtu_design\DesignPalette;
+
+/**
+ * Implements hook_page_attachments().
+ */
+function mukurtu_design_page_attachments(&$attachments) {
+  \Drupal::classResolver(DesignPalette::class)->enablePalette($attachments);
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function mukurtu_design_library_info_alter(array &$libraries, $extension) {
+  return \Drupal::classResolver(DesignPalette::class)
+    ->alterThemeLibraries($libraries, $extension);
+}
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_design_theme($existing, $type, $theme, $path) {
+  return [
+    'mukurtu_palette_radios' => [
+      'render element' => 'element',
+    ],
+    'mukurtu_palette_radio' => [
+      'render element' => 'element',
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for mukurtu_palette_radios templates.
+ *
+ * Default template: mukurtu_palette_radios.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #title, #value, #options, #description, #required,
+ *     #attributes, #children.
+ */
+function template_preprocess_mukurtu_palette_radios(array &$variables) {
+  template_preprocess_radios($variables);
+}
+
+/**
+ * Prepares variables for radios templates.
+ *
+ * Default template: mukurtu_palette_radio.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ */
+function template_preprocess_mukurtu_palette_radio(array &$variables) {
+  template_preprocess_form_element($variables);
+}

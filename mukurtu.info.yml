@@ -95,6 +95,8 @@ dependencies:
   - mukurtu_import
   - mukurtu_export
   - mukurtu_migrate
+  - mukurtu_design
+  - mukurtu_site_settings
 
 themes:
   - bartik

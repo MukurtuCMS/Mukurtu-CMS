@@ -1,0 +1,71 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.browse
+    - field.field.node.collection.comment
+    - field.field.node.collection.field_mukurtu_cluster_lat
+    - field.field.node.collection.field_mukurtu_cluster_long
+    - field.field.node.collection.field_mukurtu_geojson
+    - node.type.collection
+  module:
+    - layout_builder
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: node.collection.browse
+targetEntityType: node
+bundle: collection
+mode: browse
+content:
+  field_collection_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: browse
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_summary:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  comment: true
+  draft: true
+  field_all_related_content: true
+  field_child_collections: true
+  field_citation: true
+  field_communities: true
+  field_cultural_protocols: true
+  field_description: true
+  field_in_collection: true
+  field_items_in_collection: true
+  field_keywords: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_multipage_page_of: true
+  field_parent_collection: true
+  field_related_content: true
+  field_representative_media: true
+  field_source: true
+  field_title: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_collection: true
+  flag_mukurtu_email_og: true
+  flag_mukurtu_follow_collection: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

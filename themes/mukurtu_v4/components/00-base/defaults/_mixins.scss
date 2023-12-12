@@ -8,3 +8,12 @@
   height: 0.063rem;
   word-wrap: normal;
 }
+
+@mixin visually-unhide {
+  position: static;
+  overflow: visible;
+  clip: auto;
+  width: auto;
+  height: auto;
+  word-wrap: normal;
+}

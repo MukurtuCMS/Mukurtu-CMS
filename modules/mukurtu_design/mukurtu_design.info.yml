@@ -1,0 +1,8 @@
+name: Mukurtu Design
+type: module
+description: Contains custom design options for Mukurtu distributions.
+core_version_requirement: ^9 || ^10
+package: mukurtu
+dependencies:
+  - drupal:config_pages
+  - drupal:mukurtu_core

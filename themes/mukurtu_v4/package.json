@@ -23,6 +23,9 @@
   },
   "dependencies": {
     "@bcgov/bc-sans": "^2.1.0",
-    "include-media": "^2.0.0"
+    "bricks.js": "^1.8.0",
+    "gulp-ignore": "^3.0.0",
+    "include-media": "^2.0.0",
+    "masonry-layout": "^4.2.2"
   }
 }

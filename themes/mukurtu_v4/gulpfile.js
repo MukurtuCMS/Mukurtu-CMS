@@ -27,7 +27,7 @@ gulp.task("imagemin", function () {
 
 gulp.task("sass", function (done) {
   gulp
-    .src("./components/**/*.scss")
+    .src("./components/**/_*.scss")
     .pipe(sourcemaps.init())
     .pipe(sassGlob())
     // Lint first

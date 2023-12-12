@@ -1,0 +1,9 @@
+<article class="collections__collection-list">
+{% if facets %}
+  {% for facet in facets %}
+    {{ facet }}
+  {% endfor %}
+{% endif %}
+{{ results }}
+
+</article>

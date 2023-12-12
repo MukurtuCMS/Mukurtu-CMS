@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies: {  }
+id: design_settings
+label: 'Design Settings'
+token: false
+context:
+  show_warning: true
+  group:
+    language: false
+  fallback:
+    language: ''
+menu:
+  path: /admin/config/designsettings
+  weight: 0
+  description: 'Switch the color palette of your Mukurtu installation.'
