@@ -19,26 +19,19 @@ bundle: collection
 mode: full
 content:
   field_all_related_content:
-    type: entity_reference_label
+    type: entity_reference_entity_view
     label: above
     settings:
+      view_mode: default
       link: true
     third_party_settings: {  }
-    weight: 7
-    region: content
-  field_child_collections:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 9
+    weight: 4
     region: content
   field_collection_image:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: full
+      view_mode: browse
       link: false
     third_party_settings: {  }
     weight: 0
@@ -49,7 +42,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 1
+    weight: 5
     region: content
   field_credit:
     type: string
@@ -61,10 +54,10 @@ content:
     region: content
   field_description:
     type: text_default
-    label: above
+    label: hidden
     settings: {  }
     third_party_settings: {  }
-    weight: 3
+    weight: 2
     region: content
   field_items_in_collection:
     type: entity_reference_entity_view
@@ -73,52 +66,44 @@ content:
       view_mode: browse
       link: false
     third_party_settings: {  }
-    weight: 6
-    region: content
-  field_keywords:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 4
-    region: content
-  field_parent_collection:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 8
+    weight: 3
     region: content
   field_summary:
     type: string
-    label: above
+    label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 2
+    weight: 1
     region: content
 hidden:
   comment: true
+  draft: true
+  field_child_collections: true
   field_citation: true
   field_collection_type: true
   field_content_type: true
   field_cultural_protocols: true
   field_in_collection: true
+  field_keywords: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
+  field_multipage_page_of: true
+  field_parent_collection: true
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
+  field_source: true
   field_title: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_collection: true
   flag_mukurtu_email_og: true
   flag_mukurtu_follow_collection: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

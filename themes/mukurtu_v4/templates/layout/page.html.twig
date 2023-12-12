@@ -29,13 +29,14 @@
  *
  * Regions:
  * - page.header: Items for the header region.
- * - page.navigation: Items for the primary menu region.
- * - page.highlighted: Items for the highlighted content region.
- * - page.help: Dynamic help text, mostly for admin pages.
+ * - page.highlighted: Items for the highlighted region.
+ * - page.primary_menu: Items for the primary menu region.
+ * - page.secondary_menu: Items for the secondary menu region.
  * - page.content: The main content of the current page.
  * - page.sidebar_first: Items for the first sidebar.
  * - page.sidebar_second: Items for the second sidebar.
  * - page.footer: Items for the footer region.
+ * - page.breadcrumb: Items for the breadcrumb region.
  *
  * @see template_preprocess_page()
  * @see html.html.twig
@@ -44,7 +45,7 @@
 <div class="layout-container">
   {# Account menu. #}
   <div class="page__account-menu">
-    {{ page.navigation|without('mukurtu_v4_main_menu', 'mukurtu_v4_breadcrumbs') }}
+    {{ page.secondary_menu }}
   </div>
 
   <header role="banner">
@@ -54,14 +55,14 @@
         {{ page.header }}
       </div>
       <div class="page__main-nav">
-        {{ page.navigation|without('mukurtu_v4_account_menu', 'mukurtu_v4_breadcrumbs') }}
+        {{ page.primary_menu }}
       </div>
     </div>
   </header>
 
   <div class="page__breadcrumbs">
     {# Breadcrumbs. #}
-    {{ page.navigation|without('mukurtu_v4_main_menu', 'mukurtu_v4_account_menu') }}
+    {{ page.breadcrumb }}
   </div>
 
   {{ page.highlighted }}
@@ -81,7 +82,6 @@
     {% block page_content %}
       <div class="layout-content">
         {{ page.content }}
-        {# {{ page.content|without('mukurtu_v4_page_title') }} #}
       </div>{# /.layout-content #}
 
       {% if page.sidebar_first %}
