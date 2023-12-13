@@ -11,7 +11,7 @@ These are controlled by the `field_parent_collection` field which references the
 * Any single collection can only belong to a single collection hierarchy.
 * Currently, all collections in a given collection hierarchy can have their own protocol settings, so it is important to remember that how a collection looks could vary greatly by a user's memberships.
   * This means some operations involving a collection hierarchy can be "expensive" for large hierarchies (e.g., getCount, displaying the organization controls)
-  * Each node of the hierarchy tree is the source of the next leaf nodes (sub-collections), so when displaying a collection hierarchy, descent into sub-collections will stop for that branch if the user does not have access to the current node. For example if the following are all collections, but a user does not have access to collection `C`, they will not be shown `D` or `E`. Given a normal SAPI configuration, they will be able to find `D` and `E` individually on the collections browse page.
+  * Each node of the hierarchy tree is the source of the next leaf nodes (sub-collections), so when displaying a collection hierarchy, descent into sub-collections will stop for that branch if the user does not have access to the current node. For example if the following are all collections, but a user does not have access to collection `C`, they will not be shown `C`, `D` or `E` as part of the collection hierarchy. Given a stock Mukurtu SAPI configuration, they will be able to find `D` and `E` individually on the collections browse page.
 
 ```mermaid
 graph TD;
