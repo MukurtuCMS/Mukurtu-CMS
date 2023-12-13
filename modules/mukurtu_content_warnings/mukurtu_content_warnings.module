@@ -4,6 +4,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Implements hook_entity_base_field_info().
@@ -30,7 +31,7 @@ function mukurtu_content_warnings_entity_base_field_info(EntityTypeInterface $en
 function mukurtu_content_warnings_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   $entity_type_id = $entity->getEntityTypeId();
 
-  if ($entity_type_id != 'media' || !$entity->hasField('field_content_warnings')) {
+  if ($entity_type_id != 'media' || !($entity instanceof CulturalProtocolControlledInterface) || !$entity->hasField('field_content_warnings')) {
     return;
   }
 

@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_content_warnings\Plugin\Field;
 use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\TypedData\ComputedItemListTrait;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 class ContentWarningsField extends FieldItemList implements FieldItemListInterface {
 
@@ -13,23 +14,16 @@ class ContentWarningsField extends FieldItemList implements FieldItemListInterfa
   protected function computeValue() {
     $entity = $this->getEntity();
 
-    // Content warnings are only targeting media.
-    if ($entity->getEntityTypeId() != 'media') {
+    // Content warnings only work with protocol controlled media entities.
+    if ($entity->getEntityTypeId() != 'media' || !($entity instanceof CulturalProtocolControlledInterface)) {
       return;
     }
 
     // Check warnings. First get the content's communities.
-    $communities_value = $entity->get('field_mukurtu_community')->getValue();
-    $community_nids = [];
-    foreach ($communities_value as $community_value) {
-      $community_nids[] = $community_value['target_id'];
-    }
-
-    if (empty($community_nids)) {
+    $communities = $entity->getCommunities();
+    if (empty($communities)) {
       return;
     }
-
-    $communities = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($community_nids);
 
     // Check each community's warning config.
     foreach ($communities as $community) {
