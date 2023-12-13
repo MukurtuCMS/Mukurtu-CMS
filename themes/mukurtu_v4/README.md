@@ -29,6 +29,8 @@ Once this is complete, you should be able to run the following two commands:
 - `gulp sass`: run this any time you need to manually compile Sass.
 - `gulp watch`: once this command is running, Gulp will watch for any changes to Sass files in the theme, and will automatically compile all changes while it is running.
 
+_Note: if `gulp-watch` isn't tracking your changes, you may need to run `gulp-sass` once before running your `gulp-watch` command._
+
 ## Configuration
 
 Theme-specific configuration - such as display modes for content types or custom

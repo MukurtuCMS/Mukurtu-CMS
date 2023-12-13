@@ -69,14 +69,14 @@
 #}
 <article{{ attributes }}>
 
-  <div{{ content_attributes }} class="digital-hertiage__default__wrapper">
-    <div class="digital-hertiage__default__header">
+  <div{{ content_attributes }} class="digital-heritage__default__wrapper">
+    <div class="digital-heritage__default__header">
       {% if content.field_representative_media is not empty %}
-        <div class="digital-hertiage__default__header__image">
+        <div class="digital-heritage__default__header__image">
           {{ content.field_representative_media }}
         </div>
       {% endif %}
-      <div class="digital-hertiage__default__header__text">
+      <div class="digital-heritage__default__header__text">
         {{ title_prefix }}
         {% if label %}
           <h2{{title_attributes}}>
@@ -85,17 +85,17 @@
         {% endif %}
         {{ title_suffix }}
         {% if content.field_content_type is not empty %}
-          <div class="digital-hertiage__default__header__text__content-type">
+          <div class="digital-heritage__default__header__text__content-type">
             {{ content.field_content_type }}
           </div>
         {% endif %}
         {% if content.field_communities is not empty %}
-          <div class="digital-hertiage__default__header__text__communities">
+          <div class="digital-heritage__default__header__text__communities">
             {{ content.field_communities }}
           </div>
         {% endif %}
         {% if content.field_category is not empty %}
-          <div class="digital-hertiage__default__header__text__category">
+          <div class="digital-heritage__default__header__text__category">
             {{ content.field_category }}
           </div>
         {% endif %}

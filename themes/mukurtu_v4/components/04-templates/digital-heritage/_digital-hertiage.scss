@@ -1,4 +1,4 @@
-.digital-hertiage {
+.digital-heritage {
   // Default view mode is used in the Realted Content field on Collections.
   &__default {
     &__header {
@@ -86,6 +86,105 @@
               }
             }
           }
+        }
+      }
+    }
+  }
+
+  // Browse Digital Heritage page (this part sets up the grid).
+  &__main-content {
+    @include layout--full-width-grid;
+
+    // Add region to the main grid,
+    //then create a grid in it to add items to.
+    .region {
+      grid-column: 1 / -1;
+      @include layout--full-width-grid-no-padding;
+    }
+
+    #block-mukurtu-v4-page-title,
+    #block-mukurtu-v4-content {
+      grid-column: 1 / -1;
+
+      @include media('>=2xl') {
+        grid-column: 2 / -2;
+      }
+    }
+
+    // This is bound by the grid containing it, but also needs
+    // a grid to attach its children to.
+    .browse-container {
+      @include layout--full-width-grid-no-padding;
+
+      .browse-links {
+        grid-row: 1;
+      }
+
+      .browse-results {
+        grid-row: 2;
+        grid-column: 1 / span 9;
+
+        // Space between the rows.
+        .views-row {
+          // margin-block-end: var(--v-space-s);
+
+          &:first-of-type {
+            border-top: 5px solid var(--mukurtu-view-row-divider-color);
+          }
+
+          border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+        }
+      }
+
+      .browse-facets {
+        grid-row: 2;
+        grid-column: 10 / span 3;
+      }
+    }
+  }
+
+  // Each Browse item - this is in the context of the Browse Collection
+  // page and may need to be tweaked if there are other uses of this.
+  &__browse {
+    // Tan line above and below each row.
+    padding-block: var(--v-space-2xs);
+
+    // &:first-of-type {
+    //   border-top: 5px solid var(--mukurtu-view-row-divider-color);
+    // }
+
+    // border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+    // border-top: 5px solid var(--mukurtu-view-row-divider-color);
+
+    .digital-heritage__content {
+      // display: flex;
+      // gap: var(--v-space-2xs);
+      display: grid;
+      grid-template-columns: var(--grid-9col);
+      grid-gap: var(--v-space-2xs);
+
+      // Image container.
+      .field-reference {
+        // flex: 1;
+        grid-column: 1 / span 2;
+      }
+
+      .digital-heritage__content__text {
+        // flex: 3;
+        grid-column: 3 / span 7;
+
+        // Control the text and the right arrow icon.
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        column-gap: var(--v-space-4xxs);
+
+        h2 {
+          max-width: 90%;
+        }
+
+        svg {
+          fill: var(--brand-secondary);
         }
       }
     }

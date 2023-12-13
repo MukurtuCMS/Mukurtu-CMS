@@ -4,14 +4,14 @@
     {{ maplink }}
   {% endif %}
   </div>
-  <div class="browse-facets">
-  {% if facets %}
-    {% for facet in facets %}
-      {{ facet }}
-    {% endfor %}
-  {% endif %}
-  </div>
   <div class="browse-results">
   {{ results }}
   </div>
+  <aside class="browse-facets">
+    {% if facets %}
+      {% for facet in facets %}
+        {{ facet }}
+      {% endfor %}
+    {% endif %}
+  </aside>
 </div>
