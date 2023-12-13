@@ -51,7 +51,7 @@ function mukurtu_community_records_entity_type_alter(array &$entity_types) {
 function mukurtu_community_records_node_view(&$build, $node, $view_mode, $langcode) {
   $media_field = 'field_media_assets';
   if ($node->hasField('field_mukurtu_original_record') && $node->hasField($media_field)) {
-    // Is the node a commmunty record?
+    // Is the node a community record?
     $original_record = $node->get('field_mukurtu_original_record')->referencedEntities()[0] ?? NULL;
     if ($original_record && $original_record->hasField($media_field)) {
       // CR media field should be OR media + CR media.
