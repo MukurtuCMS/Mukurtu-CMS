@@ -1,30 +1,31 @@
 # Description
 
-The Mukurtu Collections module provides a "collection" content type. A collection contains a sequence of other content in the "Items in Collection" field as well as other metadata fields that represent the collection as a whole. The module provides several specific modes of operation for collections, controlled by the "Collection Type" field.
+The Mukurtu Collections module provides a "Collection" content type. A collection contains a sequence of other content in the "Items in Collection" field as well as other metadata fields that represent the collection as a whole. It also provides a custom entity for "Personal Collections", which are user specific collections that can be private to the user or shared publicly.
+
+# Collections
+Collections are nodes and have a custom bundle class `Collection`. They are protocol controlled. The protocol settings only impact the collection entity itself, not the items contained within. Each item within the collection should have its individual protocol settings respected.
+
+## Sub-Collections
+Mukurtu CMS has a notion of sub-collections, which is a way to organize collections in a hierarchy, primarily for display.
+These are controlled by the `field_parent_collection` field which references the single parent collection and `field_child_collections` which references zero to many child (sub) collections.
+* Any single collection can only belong to a single collection hierarchy.
+* Currently, all collections in a given collection hierarchy can have their own protocol settings, so it is important to remember that how a collection looks could vary greatly by a user's memberships.
+  * This means some operations involving a collection hierarchy can be "expensive" for large hierarchies (e.g., getCount, displaying the organization controls)
+  * Each node of the hierarchy tree is the source of the next leaf nodes (sub-collections), so when displaying a collection hierarchy, descent into sub-collections will stop for that branch if the user does not have access to the current node. For example if the following are all collections, but a user does not have access to collection `C`, they will not be shown `D` or `E`. Given a normal SAPI configuration, they will be able to find `D` and `E` individually on the collections browse page.
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    C-->D;
+    C-->E;
+```
+
+# Personal Collections
+Personal collections have a custom entity type `personal_collection`. They are not protocol controlled, they have their own set of access logic controlled by `PersonalCollectionAccessControlHandler`. Mostly this is the standard Drupal permissions with some additional logic for the "Privacy Setting" field, which scopes the level of view access to either the owner (`private`) or everybody (`public`).
 
 
-# Collection Type Modes
+# Computed Fields
 
-## Multipage Documents
-
-Multipage documents are collections that are used to bundle content together in a way that makes them appear as a singular, connected piece of content.
-
-When content is added to the multipage collection:
-- The Sequence Collection (field_sequence_collection) field is set to target the collection.
-- The content's 'full' view mode will be replaced by the 'multipage_full' view mode. The entire collection will be shown.
-- The Sequence Collection field is managed by the module, you should not attempt to change it via the content edit form or programmatically.
-- The collection's Items in Collection field can be altered in the edit form or programmatically.
-
-### Multipage View Modes
-
-|View Mode|Machine Name|Description|
-|---|---|---|
-|Multipage Navigation|multipage_navigation|Controls the display for the overall multipage navigation (e.g., a carousel). In general this  mode should not be altered unless you are very familar with the inner workings of the collections module. This mode should be implemented for collections only.
-|Multipage Navigation Teaser|multipage_navigation_teaser|This mode controls the display of individual item teasers in the navigation control (e.g., a single page in the carousel). **This mode must be implemented for each content type that is available to be added to a collection.**
-|Multipage Item|multipage_item|When viewing a multipage item, this view mode controls the display of the currently selected page. **This mode must be implemented for each content type that is available to be added to a collection.**
-|Multipage Full|multipage_full|This view mode is for nodes that are in a multipage item collection. It will display the entire multipage document instead of only the single item page. **This mode must be implemented for each content type that is available to be added to a collection. All content types should have the exact same implementation of this mode.**
-
-## Computed Fields
-
-### Node - Collections (field_in_collection)
-This computed field contains the collections the content is a member of.
+## Node - Collections (field_in_collection)
+This computed field, controlled by `MukurtuInCollectionFieldItemsList`, contains a list of the collections (not including personal collections) that the content is found in.
