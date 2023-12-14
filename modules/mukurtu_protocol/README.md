@@ -17,6 +17,8 @@ For the purposes of development, Communities primarily exist to:
 ## Cultural Protocols
 Cultural Protocols, often shortened to just "Protocols", are the main access control system in Mukurtu CMS. They have a significant field `field_access_mode` which can be either `open` or `strict`. When set to `open`, all site users including unauthenticated users, are considered "members" of that protocol. When set to `strict`, users need to have an OG group role assigned for that protocol entity to be considered a member.
 
+> Warning: Having this finer level of granularity of access is not something some areas of Drupal and/or Contrib modules expect. If you are not careful, you will encounter the [Inaccessible Reference Problem](https://github.com/WSU-CDSC/mukurtu-cms/discussions/35) and expose private information.
+
 So called "Protocol Aware" entities are those that have a `CulturalProtocolItem` field (ideally via `CulturalProtocolControlledTrait`). The `cultural_protocol` field has two significant subfields:
 * The `protocols` subfield holds a list of protocol entity IDs
 * The `sharing_setting` subfield has value `any` or `all`. Essentially this is the logical conjunction for the above protocols subfield (any is OR, all is AND)
