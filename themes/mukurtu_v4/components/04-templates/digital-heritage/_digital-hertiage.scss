@@ -114,22 +114,172 @@
     // This is bound by the grid containing it, but also needs
     // a grid to attach its children to.
     .browse-container {
-      @include layout--full-width-grid-no-padding;
+      display: grid;
+      grid-template-columns: var(--grid-12col);
+      column-gap: var(--gutter);
 
       .browse-links {
         grid-row: 1;
+        // grid-column: 10 / span 3;
+        grid-column: 1 / -1;
+        margin-block-end: var(--v-space-4xxs);
+
+        // Style the 'Switch to Map' button.
+        a {
+          background-color: var(--brand-primary-dark);
+          color: var(--color-white);
+          font-weight: var(--text-bold);
+          text-decoration: none;
+          padding: var(--v-space-5xs);
+        }
       }
 
       .browse-results {
         grid-row: 2;
         grid-column: 1 / span 9;
 
+        // Search section.
+        .views-exposed-form {
+          // display: flex;
+          // flex-wrap: wrap;
+          // flex-direction: column;
+          // align-items: center;
+          // gap: var(--v-space-3xs);
+          margin-top: var(--v-space-3xs);
+          display: flex;
+          flex-wrap: wrap;
+          flex-direction: column;
+          align-items: center;
+          gap: var(--v-space-3xs);
+
+          input.form-text {
+            padding: var(--v-space-4xxs) var(--v-space-2xs);
+            border: none;
+            background-color: var(--mukurtu-text-box-background-color);
+            color: var(--brand-text-color);
+            font-size: var(--font-size-base);
+            width: 100%;
+            text-align: center;
+
+            @include media('>=md') {
+              text-align: start;
+            }
+          }
+
+          .search-form {
+            display: flex;
+            flex-wrap: wrap;
+
+            >* {
+              width: 100%;
+            }
+
+            @include media('>=md') {
+              >* {
+                width: auto;
+              }
+            }
+          }
+
+          // Search button.
+          .form-wrapper {
+            background-color: var(--brand-secondary);
+            border: none;
+            padding-inline-start: var(--v-space-4xs);
+            padding-inline-end: var(--v-space-3xs);
+            display: flex;
+            align-items: center;
+
+            &:hover,
+            &:focus {
+              background-color: var(--brand-secondary-dark);
+
+              svg {
+                fill: var(--light-text-color);
+              }
+            }
+
+            input[type=submit] {
+              color: var(--brand-text-color);
+              background-color: var(--brand-secondary);
+              padding: var(--v-space-4xxs);
+              font-size: var(--font-size-base);
+              font-weight: var(--text-bold);
+              letter-spacing: var(--letter-spacing-label);
+              width: 100%;
+
+              @include media('>=md') {
+                width: auto;
+              }
+
+              &:hover,
+              &:focus {
+                background-color: var(--brand-secondary-dark);
+                color: var(--light-text-color);
+              }
+            }
+
+            svg {
+              fill: var(--brand-text-color);
+              width: var(--v-space-4xxs);
+              height: var(--v-space-4xxs);
+            }
+          }
+
+          .form-item-sort-by {
+            display: flex;
+            min-width: auto;
+            flex-wrap: wrap;
+            width: 100%;
+
+            // Match the width of the search form.
+            @include media('>=511px') {
+              min-width: 464.969px;
+              width: auto;
+            }
+
+            @include media('>=md') {
+              flex-wrap: nowrap;
+            }
+
+            label {
+              border: none;
+              padding: var(--v-space-5xs) var(--v-space-2xs);
+              color: var(--brand-text-color);
+              background: var(--brand-secondary);
+              font-size: var(--font-size-base);
+              font-weight: var(--text-bold);
+              letter-spacing: var(--letter-spacing-label);
+              text-align: center;
+              width: 100%;
+            }
+
+            select {
+              border: none;
+              padding: var(--v-space-4xxs) var(--v-space-2xs);
+              background-color: var(--mukurtu-text-box-background-color);
+              color: var(--brand-text-color);
+              font-size: var(--font-size-base);
+              width: 100%;
+              text-align: center;
+
+              @include media('>=md') {
+                text-align: start;
+                width: auto;
+              }
+
+              &:hover {
+                text-decoration: underline solid 2px var(--brand-text-color);
+              }
+            }
+          }
+        }
+
         // Space between the rows.
         .views-row {
-          // margin-block-end: var(--v-space-s);
-
           &:first-of-type {
             border-top: 5px solid var(--mukurtu-view-row-divider-color);
+            margin-block-start: var(--v-space-3xs);
           }
 
           border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
@@ -139,6 +289,29 @@
       .browse-facets {
         grid-row: 2;
         grid-column: 10 / span 3;
+        background-color: var(--mukurtu-panel-pane-content-background-color);
+        // padding: var(--v-space-4xxs);
+        // padding-block-start: 0;
+
+        .facets-widget-checkbox {
+          h3 {
+            background-color: var(--brand-primary-dark);
+            color: var(--light-text-color);
+            font-size: var(--font-size-m);
+            font-weight: var(--text-bold);
+            margin-block-start: 0;
+            padding-inline: var(--v-space-4xxs);
+            padding-block: var(--v-space-4xs);
+          }
+
+          ul {
+            padding-inline: var(--v-space-4xxs);
+
+            li {
+              list-style: none;
+            }
+          }
+        }
       }
     }
   }
@@ -181,12 +354,27 @@
 
         h2 {
           max-width: 90%;
+          font-size: var(--font-size-2xxl);
         }
 
         svg {
           fill: var(--brand-secondary);
         }
       }
+    }
+  }
+
+  .pager {
+    // Unordered list.
+    &__items {
+      display: flex;
+      gap: var(--v-space-4xxs);
+      padding: 0;
+    }
+
+    // List item.
+    &__item {
+      list-style: none;
     }
   }
 }
