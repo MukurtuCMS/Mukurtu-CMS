@@ -377,7 +377,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Exports link field values.
+   * Exports link field values in markdown format.
    *
    * @param EntityFieldExportEvent $event
    *   The export event object which provides the context and the necessary environment
@@ -396,17 +396,15 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     //      'options => [...]
     //    ]
     // ]
-    // Default handling doesn't expect the values in this format, so we need to
-    // special handling for fields of type link.
+    // Link options attribute is an internal Drupal field we don't need, so we
+    // don't include it in export.
+    $links = $field->getValue() ?? NULL;
     $exportValue = [];
-    $values = isset($field->getValue()[0]) ? $field->getValue()[0] : NULL;
-    foreach ($values as $value) {
-      // Handle the options part of the link field.
-      if (is_array($value)) {
-        $exportValue[] = empty($value) ? '' : $value;
-      }
-      else {
-        $exportValue[] = $value;
+    if ($links) {
+      foreach ($links as $link) {
+        $title = $link['title'];
+        $uri = $link['uri'];
+        $exportValue[] = "[$title]($uri)";
       }
     }
     $event->setValue($exportValue);
