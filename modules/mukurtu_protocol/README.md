@@ -1,6 +1,8 @@
 # Description
 This module provides the community and cultural protocol entities, which are the basis for grouping and access control in Mukurtu.
 
+>Warning: You must use Drupal's private file system for protocols to function as intended. The public file system allows the web server to serve files directly without verifying access.
+
 # Communities & Cultural Protocols
 Communities and Cultural Protocols in Mukurtu CMS are both a custom entity (See `./src/Entity/Community.php` and `./src/Entity/Protocol.php) and Organic Groups groups.
 
