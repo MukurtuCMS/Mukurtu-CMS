@@ -152,6 +152,14 @@
           font-weight: var(--text-bold);
           text-decoration: none;
           padding: var(--v-space-5xs);
+
+          &:hover {
+            background-color: var(--brand-primary-accent);
+          }
+
+          &:focus {
+            outline-offset: 1px;
+          }
         }
       }
 
@@ -239,7 +247,6 @@
             select {
               border-color: var(--mukurtu-text-box-background-color);
               padding: var(--v-space-4xxs) var(--v-space-2xs);
-              // background-color: var(--mukurtu-text-box-background-color);
               color: var(--brand-text-color);
               font-size: var(--font-size-base);
               width: 100%;
@@ -295,21 +302,6 @@
 
       .digital-heritage__content__text {
         grid-column: 3 / span 7;
-
-        // // Control the text and the right arrow icon.
-        // display: flex;
-        // align-items: baseline;
-        // justify-content: space-between;
-        // column-gap: var(--v-space-4xxs);
-
-        // h2 {
-        //   max-width: 90%;
-        //   font-size: var(--font-size-2xxl);
-        // }
-
-        // svg {
-        //   fill: var(--brand-secondary);
-        // }
       }
 
       .digital-heritage__content__title {
