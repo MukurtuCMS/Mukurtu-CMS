@@ -39,7 +39,7 @@ class OriginalDateField extends FieldItemBase {
         ],
         'year' => [
           'type' => 'varchar',
-          'length' => 4,
+          'length' => 5,
           'not null' => TRUE,
         ],
         'month' => [
@@ -97,7 +97,7 @@ class OriginalDateField extends FieldItemBase {
     $day = $date['day'];
 
     // Validate each component of the date.
-    if ($year != '' && intval($year) < 1) {
+    if ($year != '' && (intval($year) < 1 || intval($year) > 32767)) {
       throw new InvalidArgumentException("Invalid year '{$year}'.");
     }
     if ($month != '' && (intval($month) < 1 || intval($month) > 12)) {
@@ -140,13 +140,17 @@ class OriginalDateField extends FieldItemBase {
           throw new InvalidArgumentException("Dates must be in YYYY, YYYY-MM, or YYYY-MM-DD format.");
         }
       }
+      // Strip leading zeros on date components, if present.
+      $values['year'] = ltrim($values['year'], "0");
+      $values['month'] = ltrim($values['month'], "0");
+      $values['day'] = ltrim($values['day'], "0");
 
       // Store the date string for the user-facing date display.
-      // Strip leading zeros on year, if present.
-      $values['year'] = ltrim($values['year'], "0");
-      $date = $values['year'];
-      $date = $date . ($values['month'] ? ("-" . str_pad($values['month'], 2, "0", STR_PAD_LEFT)) : "");
-      $date = $date . ($values['day'] ? ("-" . str_pad($values['day'], 2, "0", STR_PAD_LEFT)) : "");
+      $year = $values['year'] ?? '';
+      $month = $values['month'] ?? '';
+      $day = $values['day'] ?? '';
+
+      $date = $this->generateUserFacingDate($year, $month, $day);
 
       $values['date'] = $date;
 
@@ -156,16 +160,18 @@ class OriginalDateField extends FieldItemBase {
       $values['timestamp'] = $timestamp === FALSE ? NULL : $timestamp;
     }
     else {
+      // Handle values coming from the original date widget.
+
+      // Strip leading zeros on year, if present.
+      $values['year'] = ltrim($values['year'], "0");
+
       $year = $values['year'] ?? '';
       $month = $values['month'] ?? '';
       $day = $values['day'] ?? '';
 
-      // Build the date string for the user-facing date display.
-      // Year is guaranteed.
-      $date = $year;
-      $date = $date . ($month ? ("-" . str_pad(strval($month), 2, "0", STR_PAD_LEFT)) : "");
-      $date = $date . ($day ? ("-" . str_pad(strval($day), 2, "0", STR_PAD_LEFT)) : "");
+      $date = $this->generateUserFacingDate($year, $month, $day);
 
+      // Date validation was performed earlier in the widget's validate().
       $values['date'] = $date;
 
       // Calculate the internal date.
@@ -173,5 +179,13 @@ class OriginalDateField extends FieldItemBase {
       $values['timestamp'] = $timestamp === FALSE ? NULL : $timestamp;
     }
     parent::setValue($values, $notify);
+  }
+
+  // Builds the date string for the user-facing date display.
+  protected function generateUserFacingDate($year, $month, $day) {
+    $date = $year;
+    $date = $date . ($month ? ("-" . str_pad(strval($month), 2, "0", STR_PAD_LEFT)) : "");
+    $date = $date . ($day ? ("-" . str_pad(strval($day), 2, "0", STR_PAD_LEFT)) : "");
+    return $date;
   }
 }

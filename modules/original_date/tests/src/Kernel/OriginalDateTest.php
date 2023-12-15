@@ -170,6 +170,32 @@ class OriginalDateTest extends KernelTestBase {
   }
 
   /**
+   * Test setting trailing zero month.
+   */
+  public function testTrailingZeroMonth()
+  {
+    $this->node->set('field_original_date', '1999-08');
+    $originalDate = $this->node->get('field_original_date')->getValue();
+    $this->assertEquals('1999-08', $originalDate[0]['date']);
+    $this->assertEquals('1999', $originalDate[0]['year']);
+    $this->assertEquals('8', $originalDate[0]['month']);
+    $this->assertEquals('', $originalDate[0]['day']);
+  }
+
+  /**
+   * Test setting trailing zero day.
+   */
+  public function testTrailingZeroDay()
+  {
+    $this->node->set('field_original_date', '1999-8-03');
+    $originalDate = $this->node->get('field_original_date')->getValue();
+    $this->assertEquals('1999-08-03', $originalDate[0]['date']);
+    $this->assertEquals('1999', $originalDate[0]['year']);
+    $this->assertEquals('8', $originalDate[0]['month']);
+    $this->assertEquals('3', $originalDate[0]['day']);
+  }
+
+  /**
    * Test setting invalid month.
    */
   public function testInvalidMonth()
