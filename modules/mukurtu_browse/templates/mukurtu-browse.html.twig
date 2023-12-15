@@ -1,13 +1,14 @@
 <div class="browse-container">
-  <div class="browse-links">
-    {% if maplink %}
-      {{ maplink }}
-    {% endif %}
-  </div>
   <div class="browse-results">
-  {{ results }}
+    <div class="browse-links">
+      {% if maplink %}
+        {{ maplink }}
+      {% endif %}
+    </div>
+    {{ results }}
   </div>
   <aside class="browse-facets">
+    {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') }}
     {% if facets %}
       {% for facet in facets %}
         {{ facet }}

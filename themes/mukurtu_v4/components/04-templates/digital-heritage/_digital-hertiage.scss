@@ -91,6 +91,21 @@
     }
   }
 
+  // Display title and drop shadow.
+  #block-mukurtu-v4-page-title {
+    grid-column: 1 / -1;
+    text-align: center;
+
+    // Shadow.
+    background: linear-gradient(var(--brand-light), var(--color-white));
+    background-repeat: no-repeat;
+    background-size: 100% 12px;
+    background-position: bottom;
+    padding: 0;
+    padding-block-end: var(--v-space-2xs);
+    margin-block-end: var(--v-separation);
+  }
+
   // Browse Digital Heritage page (this part sets up the grid).
   &__main-content {
     @include layout--full-width-grid;
@@ -102,7 +117,6 @@
       @include layout--full-width-grid-no-padding;
     }
 
-    #block-mukurtu-v4-page-title,
     #block-mukurtu-v4-content {
       grid-column: 1 / -1;
 
@@ -115,14 +129,21 @@
     // a grid to attach its children to.
     .browse-container {
       display: grid;
-      grid-template-columns: var(--grid-12col);
+      grid-template-columns: var(--grid-9col);
       column-gap: var(--gutter);
 
+      @include media('>=xl') {
+        grid-template-columns: var(--grid-12col);
+      }
+
       .browse-links {
-        grid-row: 1;
-        // grid-column: 10 / span 3;
-        grid-column: 1 / -1;
-        margin-block-end: var(--v-space-4xxs);
+        margin-block: var(--v-space-4xxs);
+        text-align: center;
+
+        @include media('>=lg') {
+          margin-block-start: 0;
+          text-align: start;
+        }
 
         // Style the 'Switch to Map' button.
         a {
@@ -136,144 +157,19 @@
 
       .browse-results {
         grid-row: 2;
-        grid-column: 1 / span 9;
+        grid-column: 1 / -1;
 
-        // Search section.
-        .views-exposed-form {
-          // display: flex;
-          // flex-wrap: wrap;
-          // flex-direction: column;
-          // align-items: center;
-          // gap: var(--v-space-3xs);
-          margin-top: var(--v-space-3xs);
-          display: flex;
-          flex-wrap: wrap;
-          flex-direction: column;
-          align-items: center;
-          gap: var(--v-space-3xs);
-
-          input.form-text {
-            padding: var(--v-space-4xxs) var(--v-space-2xs);
-            border: none;
-            background-color: var(--mukurtu-text-box-background-color);
-            color: var(--brand-text-color);
-            font-size: var(--font-size-base);
-            width: 100%;
-            text-align: center;
-
-            @include media('>=md') {
-              text-align: start;
-            }
-          }
-
-          .search-form {
-            display: flex;
-            flex-wrap: wrap;
-
-            >* {
-              width: 100%;
-            }
-
-            @include media('>=md') {
-              >* {
-                width: auto;
-              }
-            }
-          }
-
-          // Search button.
-          .form-wrapper {
-            background-color: var(--brand-secondary);
-            border: none;
-            padding-inline-start: var(--v-space-4xs);
-            padding-inline-end: var(--v-space-3xs);
-            display: flex;
-            align-items: center;
-
-            &:hover,
-            &:focus {
-              background-color: var(--brand-secondary-dark);
-
-              svg {
-                fill: var(--light-text-color);
-              }
-            }
-
-            input[type=submit] {
-              color: var(--brand-text-color);
-              background-color: var(--brand-secondary);
-              padding: var(--v-space-4xxs);
-              font-size: var(--font-size-base);
-              font-weight: var(--text-bold);
-              letter-spacing: var(--letter-spacing-label);
-              width: 100%;
-
-              @include media('>=md') {
-                width: auto;
-              }
-
-              &:hover,
-              &:focus {
-                background-color: var(--brand-secondary-dark);
-                color: var(--light-text-color);
-              }
-            }
-
-            svg {
-              fill: var(--brand-text-color);
-              width: var(--v-space-4xxs);
-              height: var(--v-space-4xxs);
-            }
-          }
-
-          .form-item-sort-by {
-            display: flex;
-            min-width: auto;
-            flex-wrap: wrap;
-            width: 100%;
-
-            // Match the width of the search form.
-            @include media('>=511px') {
-              min-width: 464.969px;
-              width: auto;
-            }
-
-            @include media('>=md') {
-              flex-wrap: nowrap;
-            }
-
-            label {
-              border: none;
-              padding: var(--v-space-5xs) var(--v-space-2xs);
-              color: var(--brand-text-color);
-              background: var(--brand-secondary);
-              font-size: var(--font-size-base);
-              font-weight: var(--text-bold);
-              letter-spacing: var(--letter-spacing-label);
-              text-align: center;
-              width: 100%;
-            }
-
-            select {
-              border: none;
-              padding: var(--v-space-4xxs) var(--v-space-2xs);
-              background-color: var(--mukurtu-text-box-background-color);
-              color: var(--brand-text-color);
-              font-size: var(--font-size-base);
-              width: 100%;
-              text-align: center;
-
-              @include media('>=md') {
-                text-align: start;
-                width: auto;
-              }
-
-              &:hover {
-                text-decoration: underline solid 2px var(--brand-text-color);
-              }
-            }
-          }
+        @include media('>=lg') {
+          grid-row: 1;
+          grid-column: 1 / span 6;
         }
+
+        @include media('>=xl') {
+          grid-column: 1 / span 9;
+        }
+
+        // Space between main content and footer.
+        margin-block-end: var(--v-separation);
 
         // Space between the rows.
         .views-row {
@@ -287,13 +183,78 @@
       }
 
       .browse-facets {
-        grid-row: 2;
-        grid-column: 10 / span 3;
-        background-color: var(--mukurtu-panel-pane-content-background-color);
-        // padding: var(--v-space-4xxs);
-        // padding-block-start: 0;
+        grid-row: 1;
+        grid-column: 1 / -1;
+
+        @include media('>=lg') {
+          grid-column: 7 / span 3;
+        }
+
+        @include media('>=xl') {
+          grid-column: 10 / span 3;
+        }
+
+        // Search box at the top of the sidebar.
+        .views-exposed-form {
+          margin-block-end: var(--v-space-3xs);
+
+          // Labels for Search and Sort By
+          label {
+            display: block;
+            background-color: var(--brand-primary-dark);
+            color: var(--light-text-color);
+            font-size: var(--font-size-m);
+            font-weight: var(--text-bold);
+            margin-block-start: 0;
+            margin-block-end: var(--v-space-5xs);
+            padding-inline: var(--v-space-4xxs);
+            padding-block: var(--v-space-4xs);
+          }
+
+          .search-form {
+            display: flex;
+            flex-direction: column;
+
+            input[type='text'] {
+              padding: var(--v-space-4xxs) var(--v-space-2xs);
+              border: none;
+              background-color: var(--mukurtu-text-box-background-color);
+              box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+              color: var(--brand-text-color);
+              font-size: var(--font-size-base);
+              width: 100%;
+            }
+          }
+
+          // The Sort By dropdown.
+          .js-form-type-select {
+            display: flex;
+            flex-direction: column;
+            margin-block: var(--v-space-3xs);
+
+            label {
+              margin-block-end: 0;
+            }
+
+            select {
+              border-color: var(--mukurtu-text-box-background-color);
+              padding: var(--v-space-4xxs) var(--v-space-2xs);
+              // background-color: var(--mukurtu-text-box-background-color);
+              color: var(--brand-text-color);
+              font-size: var(--font-size-base);
+              width: 100%;
+            }
+          }
+
+          // Align button to the right.
+          .form-actions {
+            text-align: right;
+          }
+        }
 
         .facets-widget-checkbox {
+          background-color: var(--mukurtu-panel-pane-content-background-color);
+
           h3 {
             background-color: var(--brand-primary-dark);
             color: var(--light-text-color);
@@ -306,6 +267,7 @@
 
           ul {
             padding-inline: var(--v-space-4xxs);
+            padding-block-end: var(--v-space-4xs);
 
             li {
               list-style: none;
@@ -319,33 +281,38 @@
   // Each Browse item - this is in the context of the Browse Collection
   // page and may need to be tweaked if there are other uses of this.
   &__browse {
-    // Tan line above and below each row.
     padding-block: var(--v-space-2xs);
 
-    // &:first-of-type {
-    //   border-top: 5px solid var(--mukurtu-view-row-divider-color);
-    // }
-
-    // border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
-    // border-top: 5px solid var(--mukurtu-view-row-divider-color);
-
     .digital-heritage__content {
-      // display: flex;
-      // gap: var(--v-space-2xs);
       display: grid;
       grid-template-columns: var(--grid-9col);
       grid-gap: var(--v-space-2xs);
 
       // Image container.
-      .field-reference {
-        // flex: 1;
+      .field-representative-media {
         grid-column: 1 / span 2;
       }
 
       .digital-heritage__content__text {
-        // flex: 3;
         grid-column: 3 / span 7;
 
+        // // Control the text and the right arrow icon.
+        // display: flex;
+        // align-items: baseline;
+        // justify-content: space-between;
+        // column-gap: var(--v-space-4xxs);
+
+        // h2 {
+        //   max-width: 90%;
+        //   font-size: var(--font-size-2xxl);
+        // }
+
+        // svg {
+        //   fill: var(--brand-secondary);
+        // }
+      }
+
+      .digital-heritage__content__title {
         // Control the text and the right arrow icon.
         display: flex;
         align-items: baseline;
@@ -354,11 +321,49 @@
 
         h2 {
           max-width: 90%;
-          font-size: var(--font-size-2xxl);
+          font-size: var(--font-size-xl);
+          margin-block-start: 0;
+
+          @include media('>=lg') {
+            font-size: var(--font-size-2xxl);
+          }
         }
 
         svg {
           fill: var(--brand-secondary);
+        }
+      }
+
+      .digital-heritage__content__block {
+        margin-block-start: var(--v-space-3xs);
+
+        .field-reference {
+          display: flex;
+          gap: var(--v-space-5xs);
+
+          &:first-of-type {
+            margin-block-end: var(--v-space-5xs);
+          }
+
+          .field-title {
+            font-weight: var(--text-bold);
+
+            &::after {
+              content: ':';
+            }
+          }
+
+          .field-item__container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--v-space-6xs);
+
+            .field-item:not(:last-of-type) {
+              &::after {
+                content: ',';
+              }
+            }
+          }
         }
       }
     }
@@ -375,6 +380,17 @@
     // List item.
     &__item {
       list-style: none;
+      font-weight: var(--text-bold);
+    }
+
+    .is-active {
+      a {
+        color: var(--brand-text-color);
+        text-decoration: none;
+        border-bottom: 5px solid var(--brand-secondary);
+        padding-block-end: var(--v-space-6xs);
+        padding-inline: var(--v-space-6xs);
+      }
     }
   }
 }
