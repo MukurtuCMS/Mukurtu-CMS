@@ -79,13 +79,13 @@ class ImportOriginalDateTest extends MukurtuImportTestBase {
 
     $this->assertEquals('1979-08', $dates[1]['date']);
     $this->assertEquals('1979', $dates[1]['year']);
-    $this->assertEquals('08', $dates[1]['month']);
+    $this->assertEquals('8', $dates[1]['month']);
     $this->assertEquals('', $dates[1]['day']);
 
     $this->assertEquals('1234-01-02', $dates[2]['date']);
     $this->assertEquals('1234', $dates[2]['year']);
-    $this->assertEquals('01', $dates[2]['month']);
-    $this->assertEquals('02', $dates[2]['day']);
+    $this->assertEquals('1', $dates[2]['month']);
+    $this->assertEquals('2', $dates[2]['day']);
   }
 
 }
