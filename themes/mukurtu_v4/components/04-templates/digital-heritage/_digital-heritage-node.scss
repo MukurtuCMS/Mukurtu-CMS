@@ -1,0 +1,49 @@
+// If a title is printing from community-records.html.twig, we want to
+// suppress the node title so that duplicate title aren't printed.
+.has-title {
+  .digital-heritage-node__header__text {
+    h1 {
+      display: none;
+    }
+  }
+}
+
+.digital-heritage-node {
+  h1 {
+    text-align: center;
+
+    // Shadow.
+    background: linear-gradient(var(--brand-light), var(--color-white));
+    background-repeat: no-repeat;
+    background-size: 100% 12px;
+    background-position: bottom;
+    padding: 0;
+    padding-block-end: var(--v-space-2xs);
+    margin-block-end: var(--v-separation);
+  }
+}
+
+.digital-heritage__community-record {
+  h1 {
+    text-align: center;
+    margin-block-end: var(--v-space-2xs);
+  }
+
+  .horizontal-tabs-list {
+    display: flex;
+    flex-wrap: wrap;
+
+    li {
+      list-style: none;
+    }
+  }
+
+  .horizontal-tabs-panes {
+    background: linear-gradient(var(--brand-light), var(--color-white));
+    background-repeat: no-repeat;
+    background-size: 100% 12px;
+    background-position: top;
+    padding: 0;
+    padding-block-start: var(--v-space-2xs);
+  }
+}

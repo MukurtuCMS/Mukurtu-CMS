@@ -234,6 +234,14 @@
             }
           }
 
+          // The Apply button.
+          input[type='submit'] {
+            background-color: var(--brand-secondary);
+            color: var(--brand-text-color);
+            border-radius: 5px;
+            width: 100%;
+          }
+
           // The Sort By dropdown.
           .js-form-type-select {
             display: flex;

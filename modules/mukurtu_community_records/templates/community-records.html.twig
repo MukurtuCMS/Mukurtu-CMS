@@ -1,22 +1,28 @@
-<div data-horizontal-tabs class="community-records horizontal-tabs clearfix">
-  <ul data-horizontal-tabs-list class="horizontal-tabs-list visually-hidden"></ul>
-  <div{{ attributes.setAttribute('data-horizontal-tabs-panes', TRUE) }}>
-  {% for record in records %}
-    <details id="{{ record.tabid }}">
-      {% if record.id == active %}
-      <input style="display:none;" class="horizontal-tabs-active-tab" value="{{ record.tabid }}" type="text">
-      {% endif %}
-      <summary>
-        <div class="details-title">
-          <span>{{ record.communities }}</span>
-        </div>
-      </summary>
-      <div class="tab-content-wrapper">
-        <div class="tab-content-wrapper__content">
-          {{ record.content }}
-        </div>
-      </div>
-    </details>
-  {% endfor %}
+<article class="digital-heritage__community-record">
+  <div class="digital-heritage__community-record__title">
+    <h1>{{ records.0.title }}</h1>
   </div>
-</div>
+  <div data-horizontal-tabs class="community-records horizontal-tabs clearfix">
+      {# <span class="community-records__tabs__label">View Record:</span> #}
+      <ul data-horizontal-tabs-list class="horizontal-tabs-list visually-hidden"></ul>
+    <div{{ attributes.setAttribute('data-horizontal-tabs-panes', TRUE) }}>
+    {% for record in records %}
+      <details class={{record.title ? "has-title" : ""}} id="{{ record.tabid }}">
+        {% if record.id == active %}
+        <input style="display:none;" class="horizontal-tabs-active-tab" value="{{ record.tabid }}" type="text">
+        {% endif %}
+        <summary>
+          <div class="details-title">
+            <span>{{ record.communities }}</span>
+          </div>
+        </summary>
+        <div class="tab-content-wrapper">
+          <div class="tab-content-wrapper__content">
+            {{ record.content }}
+          </div>
+        </div>
+      </details>
+    {% endfor %}
+    </div>
+  </div>
+</article>
