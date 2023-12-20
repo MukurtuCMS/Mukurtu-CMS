@@ -240,6 +240,15 @@
             color: var(--brand-text-color);
             border-radius: 5px;
             width: 100%;
+
+            &:hover {
+              background-color: var(--brand-secondary-accent);
+            }
+
+            &:focus {
+              outline: var(--focus-color) solid 2px;
+              outline-offset: 2px;
+            }
           }
 
           // The Sort By dropdown.

@@ -71,9 +71,6 @@
 
   <div{{ content_attributes }} class="digital-heritage-node">
     <div class="digital-heritage-node__header">
-      <div class="digital-heritage-node__header__image">
-        {# {{ content.field_digital-heritage-node_image }} #}
-      </div>
       <div class="digital-heritage-node__header__text">
         {{ title_prefix }}
         {% if label %}
@@ -82,29 +79,30 @@
           </h1>
         {% endif %}
         {{ title_suffix }}
-        {# {{ content.field_summary }} #}
       </div>
     </div>
-    <div class="digital-heritage-node__content">
-      {{ content }}
-    </div>
+    <div class="digital-heritage-node__grid">
+      <div class="digital-heritage-node__wrapper">
+        <div class="digital-heritage-node__content">
+          {{ content.group_primary_fields }}
+        </div>
 
-    {# What is added here must match what's added to the aside below. #}
-    {% if content.field_communities is not empty %}
-      <div class="digital-heritage-node__list">
-    {% else %}
-      <div class="digital-heritage-node__list__full">
-    {% endif %}
-        {# {{ content.field_items_in_digital-heritage-node }} #}
-        {# As more content is made available to the sidebar, add it below. #}
-        {% if content.field_communities is not empty %}
-          <aside class="digital-heritage-node__sidebar">
-            {{ content.field_communities }}
-          </aside>
+        {% if content.group_metadata is not empty %}
+          <div class="digital-heritage-node__list">
+        {% else %}
+          <div class="digital-heritage-node__list__full">
         {% endif %}
+            {# {{ content.field_items_in_digital-heritage-node }} #}
+            {% if content.group_metadata is not empty %}
+              <aside class="digital-heritage-node__sidebar">
+                {{ content.group_metadata }}
+              </aside>
+            {% endif %}
+          </div>
       </div>
-    <div class="digital-heritage-node__related-content">
-      {{ content.field_all_related_content }}
+      <div class="digital-heritage-node__related-content">
+        {{ content.field_all_related_content }}
+      </div>
     </div>
   </div>
 </article>

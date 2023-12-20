@@ -8,7 +8,167 @@
   }
 }
 
+.digital-heritage-node__grid {
+  @include layout--full-width-grid;
+
+  @include media('>=2xl') {
+    padding-right: var(--layout-padding);
+    padding-left: var(--layout-padding);
+    column-gap: var(--gutter);
+    grid-template-columns: var(--grid-12col);
+  }
+}
+
 .digital-heritage-node {
+  &__wrapper {
+    display: flex;
+    column-gap: var(--v-space-l);
+    grid-column: 1 / -1;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+  }
+
+  &__content {
+    flex: 3;
+
+    .digital-heritage-node__description,
+    .digital-heritage-node__coverage,
+    .digital-heritage-node__cultural-narrative,
+    .digital-heritage-node__trad-know {
+      padding-block-start: var(--v-space-3xs);
+      padding-block-end: var(--v-space-m);
+      border-top: 5px solid var(--mukurtu-view-row-divider-color);
+
+      &__label {
+        color: var(--brand-text-color);
+        font-weight: var(--text-bold);
+        font-size: var(--font-size-s);
+        letter-spacing: var(--letter-spacing-label);
+        margin-block-end: var(--v-space-2xs);
+
+        @include media('>=lg') {
+          font-size: var(--font-size-m);
+        }
+      }
+    }
+
+    .field-item {
+      padding-inline: var(--v-space-6xl);
+
+      // @todo: once the Download button is added, update this
+      // value to --v-space-xs.
+      padding-block-end: var(--v-space-xl);
+    }
+  }
+
+  &__list {
+    flex: 1;
+  }
+
+  &__sidebar {
+    background-color: var(--brand-light-accent);
+    border-top: 5px solid var(--brand-secondary);
+    padding-inline: var(--v-space-4xs);
+    padding-block-start: var(--v-space-4xxs);
+    padding-block-end: var(--v-space-s);
+
+    .field-reference {
+      padding-block-end: var(--v-space-4xxs);
+      border-bottom: 1px solid var(--brand-light);
+
+      .field-title {
+        font-weight: var(--text-bold);
+        letter-spacing: var(--letter-spacing-label);
+        padding-block-start: var(--v-space-5xs);
+      }
+    }
+
+    .field-reference:last-of-type {
+      padding-block-end: 0;
+      border-bottom: none;
+    }
+
+    .field-source {
+      padding-block-end: var(--v-space-4xxs);
+      border-bottom: 1px solid var(--brand-light);
+
+      .field-title {
+        font-weight: var(--text-bold);
+        letter-spacing: var(--letter-spacing-label);
+        padding-block-start: var(--v-space-5xs);
+      }
+    }
+
+    .field-date-description {
+      padding-block-end: var(--v-space-4xxs);
+      border-bottom: 1px solid var(--brand-light);
+
+      .field-title {
+        font-weight: var(--text-bold);
+        letter-spacing: var(--letter-spacing-label);
+        padding-block-start: var(--v-space-5xs);
+      }
+    }
+
+    .field-identifier {
+      padding-block-end: var(--v-space-4xxs);
+      border-bottom: 1px solid var(--brand-light);
+
+      .field-title {
+        font-weight: var(--text-bold);
+        letter-spacing: var(--letter-spacing-label);
+        padding-block-start: var(--v-space-5xs);
+      }
+    }
+  }
+
+  &__related-content {
+    grid-column: 1 / -1;
+
+    display: grid;
+    grid-template-columns: var(--grid-6col);
+    margin-block: var(--v-separation);
+
+    @include media('>=lg') {
+      grid-template-columns: var(--grid-12col);
+    }
+
+    background: linear-gradient(var(--brand-light), var(--color-white));
+    background-repeat: no-repeat;
+    background-size: 100% 12px;
+    background-position: top;
+    padding-block-start: var(--v-space-s);
+
+    // @include media('>=2xl') {
+    //   grid-column: 2 / -2;
+    // }
+
+    .related-content {
+      grid-column: 1 / -1;
+
+      @include media('>=2xl') {
+        grid-column: 2 / -2;
+      }
+
+      ul {
+        padding: 0;
+
+        li {
+          font-size: var(--font-size-m);
+          list-style: none;
+          padding-block-end: var(--v-space-2xs);
+          border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+
+          &:not(:last-of-type) {
+            margin-block-end: var(--v-space-2xs);
+          }
+        }
+      }
+    }
+  }
+
   h1 {
     text-align: center;
 
@@ -44,6 +204,10 @@
     background-size: 100% 12px;
     background-position: top;
     padding: 0;
-    padding-block-start: var(--v-space-2xs);
+
+    details {
+      padding: 0;
+      padding-block-start: var(--v-separation);
+    }
   }
 }
