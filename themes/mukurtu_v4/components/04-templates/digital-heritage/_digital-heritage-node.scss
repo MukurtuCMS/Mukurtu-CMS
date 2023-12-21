@@ -22,8 +22,21 @@
 .digital-heritage-node {
   &__wrapper {
     display: flex;
-    column-gap: var(--v-space-l);
+    flex-direction: column;
+    column-gap: var(--v-space-3xs);
     grid-column: 1 / -1;
+
+    @include media('>=md') {
+      flex-direction: row;
+    }
+
+    @include media('>=lg') {
+      column-gap: var(--v-space-xs);
+    }
+
+    @include media('>=xl') {
+      column-gap: var(--v-space-l);
+    }
 
     @include media('>=2xl') {
       grid-column: 2 / -2;
@@ -31,15 +44,23 @@
   }
 
   &__content {
-    flex: 3;
+    flex: 2;
+
+    @include media('>=lg') {
+      flex: 3;
+    }
 
     .digital-heritage-node__description,
     .digital-heritage-node__coverage,
     .digital-heritage-node__cultural-narrative,
     .digital-heritage-node__trad-know {
       padding-block-start: var(--v-space-3xs);
-      padding-block-end: var(--v-space-m);
+      padding-block-end: var(--v-space-3xs);
       border-top: 5px solid var(--mukurtu-view-row-divider-color);
+
+      @include media('>md') {
+        padding-block-end: var(--v-space-m);
+      }
 
       &__label {
         color: var(--brand-text-color);
@@ -126,6 +147,7 @@
 
   &__related-content {
     grid-column: 1 / -1;
+    position: relative;
 
     display: grid;
     grid-template-columns: var(--grid-6col);
@@ -135,15 +157,40 @@
       grid-template-columns: var(--grid-12col);
     }
 
+    // Create shadow.
     background: linear-gradient(var(--brand-light), var(--color-white));
     background-repeat: no-repeat;
     background-size: 100% 12px;
     background-position: top;
     padding-block-start: var(--v-space-s);
 
-    // @include media('>=2xl') {
-    //   grid-column: 2 / -2;
-    // }
+    // With the way the grid is working on this page, the shadow can't
+    // extend naturally, so this extends that.
+    &::before {
+      position: absolute;
+      content: '';
+      background: linear-gradient(var(--brand-light), var(--color-white));
+      background-repeat: no-repeat;
+      background-size: 100% 12px;
+      background-position: top;
+      padding-block-start: var(--v-space-s);
+      height: 12px;
+      width: 100%;
+      left: -75px;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      background: linear-gradient(var(--brand-light), var(--color-white));
+      background-repeat: no-repeat;
+      background-size: 100% 12px;
+      background-position: top;
+      padding-block-start: var(--v-space-s);
+      height: 12px;
+      width: 100%;
+      right: -75px;
+    }
 
     .related-content {
       grid-column: 1 / -1;
@@ -192,9 +239,63 @@
   .horizontal-tabs-list {
     display: flex;
     flex-wrap: wrap;
+    padding-inline: calc(var(--v-separation) * 2);
 
     li {
       list-style: none;
+
+      &:last-of-type {
+        border-right: none;
+      }
+
+      &:has(.selected) {
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          width: 20px;
+          height: 20px;
+          background: var(--color-white);
+          margin-left: -10px;
+          transform: rotate(45deg);
+          z-index: -1;
+        }
+      }
+    }
+
+    .horizontal-tab-button.selected {
+      position: relative;
+      background-color: var(--brand-primary-dark);
+      border-bottom: none;
+
+      a {
+        color: var(--light-text-color);
+
+        &:hover {
+          color: var(--light-text-color);
+          background-color: var(--brand-primary-dark);
+        }
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        background: var(--brand-primary-dark);
+        margin-left: -10px;
+        transform: rotate(45deg);
+        z-index: 10;
+      }
+
+      &:hover {
+        background-color: var(--brand-primary-dark);
+      }
     }
   }
 

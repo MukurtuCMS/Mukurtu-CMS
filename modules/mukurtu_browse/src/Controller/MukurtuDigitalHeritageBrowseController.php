@@ -53,7 +53,7 @@ class MukurtuDigitalHeritageBrowseController extends ControllerBase {
     $map_browse_link = NULL;
     $access_manager = \Drupal::accessManager();
     if ($access_manager->checkNamedRoute('mukurtu_browse.map_browse_digital_heritage_page')) {
-      $map_browse_link = Link::createFromRoute(t('Switch to Map View'), 'mukurtu_browse.map_browse_digital_heritage_page', [], $options);
+      $map_browse_link = Link::createFromRoute(t('Map'), 'mukurtu_browse.map_browse_digital_heritage_page', [], $options);
     }
 
     // Render the browse view block.

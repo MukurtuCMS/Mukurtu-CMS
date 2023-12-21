@@ -139,6 +139,8 @@
       .browse-links {
         margin-block: var(--v-space-4xxs);
         text-align: center;
+        display: flex;
+        gap: var(--v-space-5xs);
 
         @include media('>=lg') {
           margin-block-start: 0;
@@ -150,8 +152,10 @@
           background-color: var(--brand-primary-dark);
           color: var(--color-white);
           font-weight: var(--text-bold);
+          line-height: normal;
           text-decoration: none;
-          padding: var(--v-space-5xs);
+          padding-block: var(--v-space-6xs);
+          padding-inline: var(--v-space-5xs);
 
           &:hover {
             background-color: var(--brand-primary-accent);
@@ -159,6 +163,17 @@
 
           &:focus {
             outline-offset: 1px;
+          }
+        }
+
+        a.active-toggle {
+          background-color: var(--color-white);
+          border: 1px solid var(--brand-primary-dark);
+          color: var(--brand-primary-dark);
+
+          &:hover {
+            background-color: var(--brand-primary-dark);
+            color: var(--color-white);
           }
         }
       }

@@ -65,6 +65,22 @@ Full Width Grid No Padding is for areas you need 'full bleed' or would like your
 
 If you need something to be full bleed, but also need its contents to adhere to the grid with padding, you can use `layout--full-width-grid-no-padding` on the container, then use `layout--full-width-grid` on an additional wrapper around your grid items.
 
+## Breakpoints and Media Queries
+
+This theme uses the [`include-media` library](https://eduardoboucas.github.io/include-media/), which is imported directly into the theme, and can be used in your .scss files without any additional comfiguration.
+
+To use `include-media`, you can use the following syntax to wrap your styles:
+
+`@include media('<breakpoint>') {<styles go here>}`
+
+Example:
+
+`@include media('>=md') {color: var(--brand-text-color);}`
+
+This theme adheres to a specific set of breakpoints, which can be used in these media queries to control your styles. To find the available breakpoints, you can find the following file from the root of the theme:
+
+`components/00-base/breakpoints/_breakpoints.scss`
+
 ## Icons
 
 The icons used on the site can be found in the `images` folder of the theme. They will have .svg file extensions.
@@ -84,3 +100,27 @@ While you should have all of the icons necessary for theme development in the `i
 The main font on the site is [BC Sans](https://developer.gov.bc.ca/Typography), which was selected for its wide support of Indigenous languages. If newer versions of the font become available and you'd like to add them to the theme, simply download the appropriate font files (WOFF and WOFF2 generally) to the `fonts` folder in the theme, and update the relative path in `components/00-base/typography/_fonts.scss` as needed.
 
 If a serif font is ever required, I would recommend checking out [First Nations Unicode Font](https://fnel.arts.ubc.ca/resources/font/#:~:text=The%20First%20Nations%20Unicode%20Font,First%20Nations%20Unicode%20Font%20%5BFNuni_v2.), which seems similar to BC Sans in its support of Indigenous languages.
+
+Various font characteristics have been defined as variables in the theme to help prevent duplication and enforce consistency. These characteristics range from `font-size` and `font-weight`, to `line-height` and `letter-spacing`. From the root of the theme, these can be found at `components/00-base/typography/_type-settings.scss`.
+
+You can use these variables like any of the others, by wrapping the `var()` function around the variable in the attribute you are setting.
+
+Example:
+
+`p { font-size: var(--font-size-base); }`
+
+## Spacing
+
+In addition to layout, color, and font variables, the theme includes `rem` based spacing variables that can be used for padding, margins, gaps, and anything else spacing might be useful for. It should encompass most - if not all - of what you need, as the site is based on a `16px` font base, and all values multiple/divide nicely with the number 16.
+
+These values can be used in the same way other variables are used on the site. From the root of the theme, you can find these at `components/00-base/spacing/_spacing.scss`.
+
+## Color Palette Switcher
+
+This isn't something that's unique to the theme, but it's a custom module that interacts with the theme, and therefore merits mentioning.
+
+If you visit the Extend page of a Mukurtu Drupal instance, you'll find the following two modules:
+
+`Mukurtu Design` and `Mukurtu Site Settings`
+
+When both of these are enabled, a new config page is created under the Configuration page of the Drupal instance, with a section called "Design Settings". If you click on the link under this header, you will be taken to a page that contains two color palettes, which are the default Mukurtu color palettes - Red Bone, and Blue Gold. Blue Gold is the default color palette, which comes preinstalled when an instance is created, and Red Bone is an alternative option that can be selected. When a new palette is selected, all of the colored elements on the site will update to reflect the new color palette. This includes elements like links, buttons, icons, and any other decorative elemements that have color variables applied.
