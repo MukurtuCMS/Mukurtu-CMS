@@ -115,6 +115,16 @@ In addition to layout, color, and font variables, the theme includes `rem` based
 
 These values can be used in the same way other variables are used on the site. From the root of the theme, you can find these at `components/00-base/spacing/_spacing.scss`.
 
+## Twig Templates
+
+This project includes the [Twig Tweak module](https://www.drupal.org/project/twig_tweak), which make it so a number of additional Twig filters are available for use in Twig templates. You can see an example of this by looking at `drupal_block` within the `mukurt-browse.html.twig` file.
+
+There are many other options available, which can be found on the [Cheat Sheet](https://git.drupalcode.org/project/twig_tweak/-/blob/3.x/docs/cheat-sheet.md).
+
+When theming a new content type, it's usually helpful to create a Twig template for the content type, and any block/field/section that might need custom properties (like classes and ids) added to its elements, or its data moved around.
+
+The Collection and Digital Heritage portions of the site are good examples of this, as they have templates for various display modes, contexts, and more.
+
 ## Color Palette Switcher
 
 This isn't something that's unique to the theme, but it's a custom module that interacts with the theme, and therefore merits mentioning.

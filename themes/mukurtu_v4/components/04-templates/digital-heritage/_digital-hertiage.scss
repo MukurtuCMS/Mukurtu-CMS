@@ -203,6 +203,38 @@
 
           border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
         }
+
+        // When the Grid button is selected on the Browse Digital Heritage page,
+        // a masonry grid layout is applied.
+        .browse-dh-grid {
+          column-count: 1;
+
+          @include media('>=lg') {
+            column-count: 2;
+            column-gap: var(--v-space-3xs);
+          }
+
+          @include media('>=xl') {
+            column-gap: var(--v-space-2xs);
+          }
+
+          @include media('>=2xl') {
+            column-count: 3;
+          }
+
+          .views-row {
+            break-inside: avoid;
+
+            .digital-heritage__content {
+              display: flex;
+              flex-direction: column;
+            }
+
+            .digital-heritage__content__block {
+              display: none;
+            }
+          }
+        }
       }
 
       .browse-facets {

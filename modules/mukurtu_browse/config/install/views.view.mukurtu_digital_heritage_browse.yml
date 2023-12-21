@@ -295,6 +295,7 @@ display:
           skip_access: false
           preserve_facet_query_args: false
       relationships: {  }
+      css_class: browse-dh-list
       use_ajax: false
       header: {  }
       footer: {  }
