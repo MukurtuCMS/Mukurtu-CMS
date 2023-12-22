@@ -48,7 +48,8 @@ class MukurtuDigitalHeritageBrowseController extends ControllerBase {
 
   public function content() {
     // Map browse link.
-    $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link']];
+    $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link'],
+                'query' => ['active' => 'map']];
 
     $map_browse_link = NULL;
     $access_manager = \Drupal::accessManager();

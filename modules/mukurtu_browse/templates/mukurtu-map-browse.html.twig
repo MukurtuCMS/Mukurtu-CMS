@@ -1,9 +1,12 @@
 <div class="browse-container">
   <div class="browse-results">
     <div class="browse-links">
+      <a href="/digital-heritage?active=grid" id="mukurtu-browse-map-grid-switch-link" aria-label="Switch to grid view">Grid</a>
       {% if browselink %}
         {{ browselink }}
       {% endif %}
+<a class="active-toggle" id="mukurtu-browse-mode-switch-link" aria-label="Switch to map view">Map</a>
+
     </div>
     <div id="mukurtu-map-browse-container">
       <div id="mukurtu-map-browse-map">{{ map }}</div>
