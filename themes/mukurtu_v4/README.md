@@ -47,7 +47,7 @@ module, rather than creating a new file in `mukurtu_v4/config/install`.
 
 ## Styles
 
-As it stands, the `css` directory must be pushed up to the repo for the styles to be applied to the live site. When making changes locally, be sure to run `gulp sass` (to build the styles), or `gulp watch` (while developing) to ensure changes are captured. When done, commit all of your changes, including scss, css, templates, or configuration.
+Currently, the `css` directory must be pushed up to the repo for the styles to be applied to the live site. When making changes locally, be sure to run `gulp sass` (to build the styles), or `gulp watch` (while developing) to ensure changes are captured. When done, commit all of your changes, including scss, css, templates, or configuration.
 
 ## Layout
 
