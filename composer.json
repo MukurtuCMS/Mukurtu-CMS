@@ -73,6 +73,7 @@
     "drupal/slick": "^2.2",
     "drupal/slick_entityreference": "^2.0",
     "drupal/token": "*",
+    "drupal/twig_tweak": "^3.2",
     "drupal/views_bulk_operations": "*",
     "drush/drush": "^10",
     "mukurtu/masonry": "*",
