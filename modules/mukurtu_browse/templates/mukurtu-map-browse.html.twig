@@ -1,12 +1,26 @@
-{% if browselink %}
-  {{ browselink }}
-{% endif %}
-{% if facets %}
-  {% for facet in facets %}
-    {{ facet }}
-  {% endfor %}
-{% endif %}
-<div id="mukurtu-map-browse-container">
-<div id="mukurtu-map-browse-map">{{ map }}</div>
-<div id="mukurtu-map-browse-teasers">{{ teasers }}</div>
+<div class="browse-container">
+  <div class="browse-results">
+    <div class="browse-links">
+      <a href="/digital-heritage?active=grid" id="mukurtu-browse-map-grid-switch-link" aria-label="Switch to grid view">Grid</a>
+      {% if browselink %}
+        {{ browselink }}
+      {% endif %}
+<a class="active-toggle" id="mukurtu-browse-mode-switch-link" aria-label="Switch to map view">Map</a>
+
+    </div>
+    <div id="mukurtu-map-browse-container">
+      <div id="mukurtu-map-browse-map">{{ map }}</div>
+      <div id="mukurtu-map-browse-teasers">{{ teasers }}</div>
+    </div>
+  </div>
+  <aside class="browse-facets">
+    {% if drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') %}
+      {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') }}
+    {% endif %}
+    {% if facets %}
+      {% for facet in facets %}
+        {{ facet }}
+      {% endfor %}
+    {% endif %}
+  </aside>
 </div>

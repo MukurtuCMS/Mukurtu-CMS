@@ -36,29 +36,34 @@
  * @see template_preprocess_field()
  */
 #}
-{%
-  set title_classes = [
-    label_display == 'visually_hidden' ? 'visually-hidden',
-  ]
-%}
 
-{% set attributes = attributes
-  .setAttribute('class', 'related-content')
-%}
+{% set attributes = attributes.addClass('clearfix', 'field-representative-media') %}
+{% set title_classes = 'field-title' %}
 
-<div{{attributes}}>
-  {% if label %}
-    <div class="related-content__label">
-      {{ label }}
+{% if label_hidden %}
+  {% if multiple %}
+    <div{{ attributes }}>
+      {% for item in items %}
+        <div class="field-item" {{ item.attributes }}>{{ item.content }}</div>
+      {% endfor %}
     </div>
-  {% endif %}
-  <ul class="realted-content__list">
+  {% else %}
     {% for item in items %}
-      <li class="related-content__item">
-        <div class="related-content__item__text">
-          {{ item.content }}
-        </div>
-      </li>
+      <div{{ attributes }}>{{ item.content }}</div>
     {% endfor %}
-  </ul>
-</div>
+  {% endif %}
+{% else %}
+  <div{{ attributes }}>
+    <div{{ title_attributes.addClass(title_classes) }}>{{ label }}</div>
+    {% if multiple %}
+      <div class="field-item__container">
+    {% endif %}
+    {% for item in items %}
+      <div class="field-item" {{ item.attributes }}>{{ item.content }}</div>
+    {% endfor %}
+    {% if multiple %}
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+

@@ -69,36 +69,38 @@
 #}
 <article{{ attributes }}>
 
-  <div{{ content_attributes }} class="digital-heritage__default__wrapper">
-    <div class="digital-heritage__default__header">
-      {% if content.field_representative_media is not empty %}
-        <div class="digital-heritage__default__header__image">
-          {{ content.field_representative_media }}
-        </div>
-      {% endif %}
-      <div class="digital-heritage__default__header__text">
+  <div{{ content_attributes }} class="digital-heritage-node">
+    <div class="digital-heritage-node__header">
+      <div class="digital-heritage-node__header__text">
         {{ title_prefix }}
         {% if label %}
-          <h2{{title_attributes}}>
-            <a href="{{ url }}" rel="bookmark">{{ label }}</a>
-          </h2>
+          <h1{{title_attributes}}>
+            {{ label }}
+          </h1>
         {% endif %}
         {{ title_suffix }}
-        {% if content.field_content_type is not empty %}
-          <div class="digital-heritage__default__header__text__content-type">
-            {{ content.field_content_type }}
-          </div>
+      </div>
+    </div>
+    <div class="digital-heritage-node__grid">
+      <div class="digital-heritage-node__wrapper">
+        <div class="digital-heritage-node__content">
+          {{ content.group_primary_fields }}
+        </div>
+
+        {% if content.group_metadata is not empty %}
+          <div class="digital-heritage-node__list">
+        {% else %}
+          <div class="digital-heritage-node__list__full">
         {% endif %}
-        {% if content.field_communities is not empty %}
-          <div class="digital-heritage__default__header__text__communities">
-            {{ content.field_communities }}
+            {% if content.group_metadata is not empty %}
+              <aside class="digital-heritage-node__sidebar">
+                {{ content.group_metadata }}
+              </aside>
+            {% endif %}
           </div>
-        {% endif %}
-        {% if content.field_category is not empty %}
-          <div class="digital-heritage__default__header__text__category">
-            {{ content.field_category }}
-          </div>
-        {% endif %}
+      </div>
+      <div class="digital-heritage-node__related-content">
+        {{ content.field_all_related_content }}
       </div>
     </div>
   </div>

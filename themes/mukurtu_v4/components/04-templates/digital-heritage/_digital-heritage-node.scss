@@ -1,0 +1,314 @@
+// If a title is printing from community-records.html.twig, we want to
+// suppress the node title so that duplicate title aren't printed.
+.has-title {
+  .digital-heritage-node__header__text {
+    h1 {
+      display: none;
+    }
+  }
+}
+
+.digital-heritage-node__grid {
+  @include layout--full-width-grid;
+
+  @include media('>=2xl') {
+    padding-right: var(--layout-padding);
+    padding-left: var(--layout-padding);
+    column-gap: var(--gutter);
+    grid-template-columns: var(--grid-12col);
+  }
+}
+
+.digital-heritage-node {
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    column-gap: var(--v-space-3xs);
+    grid-column: 1 / -1;
+
+    @include media('>=md') {
+      flex-direction: row;
+    }
+
+    @include media('>=lg') {
+      column-gap: var(--v-space-xs);
+    }
+
+    @include media('>=xl') {
+      column-gap: var(--v-space-l);
+    }
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+  }
+
+  &__content {
+    flex: 2;
+
+    @include media('>=lg') {
+      flex: 3;
+    }
+
+    .digital-heritage-node__description,
+    .digital-heritage-node__coverage,
+    .digital-heritage-node__cultural-narrative,
+    .digital-heritage-node__trad-know {
+      padding-block-start: var(--v-space-3xs);
+      padding-block-end: var(--v-space-3xs);
+      border-top: 5px solid var(--mukurtu-view-row-divider-color);
+
+      @include media('>md') {
+        padding-block-end: var(--v-space-m);
+      }
+
+      &__label {
+        color: var(--brand-text-color);
+        font-weight: var(--text-bold);
+        font-size: var(--font-size-s);
+        letter-spacing: var(--letter-spacing-label);
+        margin-block-end: var(--v-space-2xs);
+
+        @include media('>=lg') {
+          font-size: var(--font-size-m);
+        }
+      }
+    }
+
+    .field-item {
+      padding-inline: var(--v-space-6xl);
+
+      // @todo: once the Download button is added, update this
+      // value to --v-space-xs.
+      padding-block-end: var(--v-space-xl);
+    }
+  }
+
+  &__list {
+    flex: 1;
+  }
+
+  &__sidebar {
+    background-color: var(--brand-light-accent);
+    border-top: 5px solid var(--brand-secondary);
+    padding-inline: var(--v-space-4xs);
+    padding-block-start: var(--v-space-4xxs);
+    padding-block-end: var(--v-space-s);
+
+    .field-reference {
+      padding-block-end: var(--v-space-4xxs);
+      border-bottom: 1px solid var(--brand-light);
+
+      .field-title {
+        font-weight: var(--text-bold);
+        letter-spacing: var(--letter-spacing-label);
+        padding-block-start: var(--v-space-5xs);
+      }
+    }
+
+    .field-reference:last-of-type {
+      padding-block-end: 0;
+      border-bottom: none;
+    }
+
+    .field-source {
+      padding-block-end: var(--v-space-4xxs);
+      border-bottom: 1px solid var(--brand-light);
+
+      .field-title {
+        font-weight: var(--text-bold);
+        letter-spacing: var(--letter-spacing-label);
+        padding-block-start: var(--v-space-5xs);
+      }
+    }
+
+    .field-date-description {
+      padding-block-end: var(--v-space-4xxs);
+      border-bottom: 1px solid var(--brand-light);
+
+      .field-title {
+        font-weight: var(--text-bold);
+        letter-spacing: var(--letter-spacing-label);
+        padding-block-start: var(--v-space-5xs);
+      }
+    }
+
+    .field-identifier {
+      padding-block-end: var(--v-space-4xxs);
+      border-bottom: 1px solid var(--brand-light);
+
+      .field-title {
+        font-weight: var(--text-bold);
+        letter-spacing: var(--letter-spacing-label);
+        padding-block-start: var(--v-space-5xs);
+      }
+    }
+  }
+
+  &__related-content {
+    grid-column: 1 / -1;
+    position: relative;
+
+    display: grid;
+    grid-template-columns: var(--grid-6col);
+    margin-block: var(--v-separation);
+
+    @include media('>=lg') {
+      grid-template-columns: var(--grid-12col);
+    }
+
+    // Create shadow.
+    background: linear-gradient(var(--brand-light), var(--color-white));
+    background-repeat: no-repeat;
+    background-size: 100% 12px;
+    background-position: top;
+    padding-block-start: var(--v-space-s);
+
+    // With the way the grid is working on this page, the shadow can't
+    // extend naturally, so this extends that.
+    &::before {
+      position: absolute;
+      content: '';
+      background: linear-gradient(var(--brand-light), var(--color-white));
+      background-repeat: no-repeat;
+      background-size: 100% 12px;
+      background-position: top;
+      padding-block-start: var(--v-space-s);
+      height: 12px;
+      width: 100%;
+      left: -75px;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      background: linear-gradient(var(--brand-light), var(--color-white));
+      background-repeat: no-repeat;
+      background-size: 100% 12px;
+      background-position: top;
+      padding-block-start: var(--v-space-s);
+      height: 12px;
+      width: 100%;
+      right: -75px;
+    }
+
+    .related-content {
+      grid-column: 1 / -1;
+
+      @include media('>=2xl') {
+        grid-column: 2 / -2;
+      }
+
+      ul {
+        padding: 0;
+
+        li {
+          font-size: var(--font-size-m);
+          list-style: none;
+          padding-block-end: var(--v-space-2xs);
+          border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+
+          &:not(:last-of-type) {
+            margin-block-end: var(--v-space-2xs);
+          }
+        }
+      }
+    }
+  }
+
+  h1 {
+    text-align: center;
+
+    // Shadow.
+    background: linear-gradient(var(--brand-light), var(--color-white));
+    background-repeat: no-repeat;
+    background-size: 100% 12px;
+    background-position: bottom;
+    padding: 0;
+    padding-block-end: var(--v-space-2xs);
+    margin-block-end: var(--v-separation);
+  }
+}
+
+.digital-heritage__community-record {
+  h1 {
+    text-align: center;
+    margin-block-end: var(--v-space-2xs);
+  }
+
+  .horizontal-tabs-list {
+    display: flex;
+    flex-wrap: wrap;
+    padding-inline: calc(var(--v-separation) * 2);
+
+    li {
+      list-style: none;
+
+      &:last-of-type {
+        border-right: none;
+      }
+
+      &:has(.selected) {
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          width: 20px;
+          height: 20px;
+          background: var(--color-white);
+          margin-left: -10px;
+          transform: rotate(45deg);
+          z-index: -1;
+        }
+      }
+    }
+
+    .horizontal-tab-button.selected {
+      position: relative;
+      background-color: var(--brand-primary-dark);
+      border-bottom: none;
+
+      a {
+        color: var(--light-text-color);
+
+        &:hover {
+          color: var(--light-text-color);
+          background-color: var(--brand-primary-dark);
+        }
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        background: var(--brand-primary-dark);
+        margin-left: -10px;
+        transform: rotate(45deg);
+        z-index: 10;
+      }
+
+      &:hover {
+        background-color: var(--brand-primary-dark);
+      }
+    }
+  }
+
+  .horizontal-tabs-panes {
+    background: linear-gradient(var(--brand-light), var(--color-white));
+    background-repeat: no-repeat;
+    background-size: 100% 12px;
+    background-position: top;
+    padding: 0;
+
+    details {
+      padding: 0;
+      padding-block-start: var(--v-separation);
+    }
+  }
+}

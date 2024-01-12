@@ -214,6 +214,7 @@ display:
             remember_roles:
               authenticated: authenticated
               anonymous: '0'
+              mukurtu_administrator: '0'
             expose_fields: false
             placeholder: ''
             searched_fields_id: search_api_fulltext_searched_fields
@@ -294,6 +295,7 @@ display:
           skip_access: false
           preserve_facet_query_args: false
       relationships: {  }
+      css_class: browse-dh-list
       use_ajax: false
       header: {  }
       footer: {  }
@@ -320,6 +322,7 @@ display:
         type: none
       defaults:
         cache: false
+      exposed_block: true
       display_extenders: {  }
     cache_metadata:
       max-age: -1

@@ -3,4 +3,6 @@ global-styling:
     theme:
       css/style.css: {}
   js:
-    js/script.js: {}
+    # Any JS necessary for the theme should be added below in the same format.
+    # js/script.js: {}
+    js/toggle-dh-view.js: {}

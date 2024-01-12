@@ -85,7 +85,7 @@
       background-repeat: no-repeat;
       background-size: 100% 12px;
       background-position: bottom;
-      padding-block-end: var(--v-space-s);
+      padding-block-end: var(--v-space-2xs);
 
       p {
         font-size: var(--font-size-m);
@@ -155,7 +155,6 @@
   // With sidebar.
   &__list {
     grid-column: 1 / -1;
-    // margin-inline: var(--layout-padding-full-width);
     padding-block-end: var(--v-separation);
     @include layout--full-width-grid;
 
