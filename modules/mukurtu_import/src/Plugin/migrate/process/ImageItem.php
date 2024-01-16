@@ -17,16 +17,24 @@ class ImageItem extends ProcessPluginBase {
     $importUriBase = $this->configuration['upload_location'] ?? "private://";
     $fileStorage = \Drupal::entityTypeManager()->getStorage('file');
 
+    // Match image info in markdown format: ![alt text](image.jpg "title") OR
+    // ![alt text](<image id or uuid> "title")
     preg_match('/!\[(.*?)\]\s*?\((.+?)\s*([\"].+[\"])?\)/', $value, $matches, PREG_UNMATCHED_AS_NULL);
     $alt = $matches[1] ?? "";
-    $title = $matches[3] ?? $alt;
+    // If $title gets a match, it gets double-encapsulated in quotes
+    // (e.g. ""title""), so chop off one set of quotes.
+    $title = $matches[3] ? substr($matches[3], 1, -1) : $alt;
     $image = $matches[2] ?? $value;
 
     // Check if incoming value is an existing file ID.
     if (is_numeric($image)) {
       $file = $fileStorage->load($image);
       if ($file) {
-        return $file->id();
+        return [
+          'target_id' => $file->id(),
+          'alt' => $alt,
+          'title' => $title,
+        ];
       }
     }
 
@@ -40,7 +48,11 @@ class ImageItem extends ProcessPluginBase {
     if (!empty($results) && count($results) == 1) {
       /** @var \Drupal\file\FileInterface $file */
       if ($file = $fileStorage->load(reset($results))) {
-        return $file->id();
+        return [
+          'target_id' => $file->id(),
+          'alt' => $alt,
+          'title' => $title,
+        ];
       }
     }
 
