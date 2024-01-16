@@ -369,8 +369,13 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
           }
         }
 
-        // Default.
-        $export[] = $config->getIdFieldSetting() === 'uuid' ? $this->getUUID('file', $fid) : $fid;
+        // Default: build the image export value in markdown format:
+        // ![alt text](<image fid or uuid> "title")
+        $exportId = $config->getIdFieldSetting() === 'uuid' ? $this->getUUID('file', $fid) : $fid;
+        $alt = $value['alt'] ?? NULL;
+        $title = $value['title'] ?? NULL;
+
+        $export[] = '![' . $alt . '](' . strval($exportId) . ' "' . $title . '")';
       }
     }
     $event->setValue($export);
