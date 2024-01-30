@@ -85,7 +85,7 @@ class TransformTkLabel extends ProcessPluginBase
       // Community
       else {
         // Get the community id from the row's field_community_ref field:
-        // we only care about the first one haha.
+        // we only care about the first one since that was the behavior in v3.
         $communityId = $row->getSourceProperty('field_community_ref')[0]['nid'];
         $newValue = [];
 
