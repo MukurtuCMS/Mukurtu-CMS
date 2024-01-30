@@ -185,7 +185,51 @@ process:
         'ds_code': 'full_html'
       default_value: 'full_html'
 
-  # TODO: field_coverage
+  'field_coverage/value':
+    -
+      plugin: geolocation
+      source: field_coverage/0/geom
+
+  'field_coverage/geo_type':
+    -
+      plugin: callback
+      source: field_coverage/0/geo_type
+      callable: ucfirst
+
+  'field_coverage/lat':
+    -
+      plugin: get
+      source: field_coverage/0/lat
+
+  'field_coverage/lon':
+    -
+      plugin: get
+      source: field_coverage/0/lon
+
+  'field_coverage/left':
+    -
+      plugin: get
+      source: field_coverage/0/left
+
+  'field_coverage/top':
+    -
+      plugin: get
+      source: field_coverage/0/top
+
+  'field_coverage/right':
+    -
+      plugin: get
+      source: field_coverage/0/right
+
+  'field_coverage/bottom':
+    -
+      plugin: get
+      source: field_coverage/0/bottom
+
+  'field_coverage/geohash':
+    -
+      plugin: get
+      source: field_coverage/0/geohash
 
   field_local_contexts_labels_and_notices:
     plugin: transform_tk_label
