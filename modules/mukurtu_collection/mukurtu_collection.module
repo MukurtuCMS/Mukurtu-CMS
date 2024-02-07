@@ -13,6 +13,8 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Access\AccessResult;
 
 define("MUKURTU_COLLECTION_FIELD_NAME_ITEMS", "field_items_in_collection");
 
@@ -206,5 +208,16 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       // Attach our custom submit handler that will run after the default handler.
       $form['actions']['submit']['#submit'][] = $args[0]['mukurtu_collection']['submit'][0];
     }
+  }
+}
+
+/**
+ * Implements hook_entity_access().
+ */
+function mukurtu_collection_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // Allow viewing of collections. Protocol access checks down the line will
+  // catch any forbidden access.
+  if ($operation == 'view') {
+    return AccessResult::allowed();
   }
 }
