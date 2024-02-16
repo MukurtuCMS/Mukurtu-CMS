@@ -48,6 +48,7 @@ install:
   - automated_cron
   - diff
   - google_analytics
+  - twig_tweak
 
 dependencies:
   - comment
