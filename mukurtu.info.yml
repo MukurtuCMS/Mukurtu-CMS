@@ -98,6 +98,7 @@ dependencies:
   - mukurtu_migrate
   - mukurtu_design
   - mukurtu_site_settings
+  - mukurtu_footer
 
 themes:
   - bartik

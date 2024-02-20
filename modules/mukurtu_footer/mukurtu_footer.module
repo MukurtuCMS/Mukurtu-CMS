@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_footer_theme($existing, $type, $theme, $path) {
+  return [
+    'mukurtu_footer' => [
+      'template' => 'mukurtu-footer',
+      'variables' => [
+        'logos' => [],
+        'email_us_text' => [],
+        'contact_email_address' => [],
+        'twitter_message_text' => [],
+        'twitter_accounts' => [],
+        'facebook_message_text' => [],
+        'facebook_accounts' => [],
+        'instagram_message_text' => [],
+        'instagram_accounts' => [],
+        'copyright_message' => [],
+      ],
+    ],
+  ];
+}

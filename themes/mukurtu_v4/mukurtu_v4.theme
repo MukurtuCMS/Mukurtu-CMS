@@ -38,3 +38,13 @@ function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variable
     $suggestions[] = 'input__collection__search';
   }
 }
+
+/**
+ * Implements template_preprocess_block().
+ */
+function mukurtu_v4_preprocess_block(&$variables) {
+  // Directs the theme to use the block template for the Mukurtu footer,
+  // mukurtu-footer.html.twig. Otherwise, it would use the default template,
+  // block.html.twig, and our footer would not display.
+  $variables['plugin_id'] = 'mukurtu_footer';
+}
