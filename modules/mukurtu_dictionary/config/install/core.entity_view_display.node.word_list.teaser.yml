@@ -7,6 +7,7 @@ dependencies:
     - node.type.word_list
   module:
     - layout_builder
+    - media
     - user
 third_party_settings:
   layout_builder:
@@ -26,10 +27,13 @@ content:
     weight: 1
     region: content
   field_representative_media:
-    type: entity_reference_label
+    type: media_thumbnail
     label: hidden
     settings:
-      link: true
+      image_link: ''
+      image_style: ''
+      image_loading:
+        attribute: lazy
     third_party_settings: {  }
     weight: 0
     region: content

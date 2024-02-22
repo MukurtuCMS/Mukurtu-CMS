@@ -28,7 +28,7 @@ content:
     region: content
   field_category:
     type: entity_reference_label
-    label: above
+    label: inline
     settings:
       link: true
     third_party_settings: {  }
@@ -36,7 +36,7 @@ content:
     region: content
   field_communities:
     type: entity_reference_label
-    label: above
+    label: inline
     settings:
       link: true
     third_party_settings: {  }
@@ -44,7 +44,7 @@ content:
     region: content
   field_content_type:
     type: string
-    label: above
+    label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }

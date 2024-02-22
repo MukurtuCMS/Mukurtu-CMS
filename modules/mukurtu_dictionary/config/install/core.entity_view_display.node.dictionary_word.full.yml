@@ -21,12 +21,21 @@ bundle: dictionary_word
 mode: full
 content:
   field_all_related_content:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: false
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_dictionary_word_language:
     type: entity_reference_label
     label: above
     settings:
       link: true
     third_party_settings: {  }
-    weight: 4
+    weight: 1
     region: content
   field_glossary_entry:
     type: string
@@ -42,15 +51,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 5
-    region: content
-  field_dictionary_word_language:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 1
+    weight: 4
     region: content
   field_thumbnail:
     type: media_thumbnail
@@ -58,6 +59,8 @@ content:
     settings:
       image_link: ''
       image_style: medium
+      image_loading:
+        attribute: lazy
     third_party_settings: {  }
     weight: 0
     region: content

@@ -3,9 +3,11 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
+    - field.field.node.person.comment
     - node.type.person
   module:
     - layout_builder
+    - media
     - user
 third_party_settings:
   layout_builder:
@@ -22,7 +24,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 2
+    weight: 1
     region: content
   field_content_type:
     type: string
@@ -33,11 +35,13 @@ content:
     weight: 1
     region: content
   field_representative_media:
-    type: entity_reference_entity_view
+    type: media_thumbnail
     label: hidden
     settings:
-      view_mode: full
-      link: false
+      image_link: ''
+      image_style: ''
+      image_loading:
+        attribute: lazy
     third_party_settings: {  }
     weight: 0
     region: content

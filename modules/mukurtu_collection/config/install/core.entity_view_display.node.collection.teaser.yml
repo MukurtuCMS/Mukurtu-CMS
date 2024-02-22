@@ -3,11 +3,9 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
-    - field.field.node.dictionary_word.comment
-    - image.style.thumbnail
-    - node.type.dictionary_word
+    - field.field.node.collection.comment
+    - node.type.collection
   module:
-    - blazy
     - layout_builder
     - media
     - user
@@ -15,41 +13,25 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: node.dictionary_word.teaser
+id: node.collection.teaser
 targetEntityType: node
-bundle: dictionary_word
+bundle: collection
 mode: teaser
 content:
   field_communities:
     type: entity_reference_label
     label: above
     settings:
-      link: true
-    third_party_settings: {  }
-    weight: 3
-    region: content
-  field_dictionary_word_language:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
+      link: false
     third_party_settings: {  }
     weight: 1
     region: content
-  field_glossary_entry:
-    type: string
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    weight: 2
-    region: content
-  field_thumbnail:
+  field_representative_media:
     type: media_thumbnail
-    label: above
+    label: hidden
     settings:
       image_link: ''
-      image_style: thumbnail
+      image_style: ''
       image_loading:
         attribute: lazy
     third_party_settings: {  }
@@ -57,29 +39,33 @@ content:
     region: content
 hidden:
   comment: true
+  draft: true
   field_all_related_content: true
+  field_child_collections: true
   field_citation: true
-  field_content_type: true
+  field_collection_image: true
+  field_cultural_protocols: true
+  field_description: true
   field_in_collection: true
-  field_in_word_list: true
+  field_items_in_collection: true
   field_keywords: true
-  field_media_assets: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
-  field_protocol_control: true
+  field_multipage_page_of: true
+  field_parent_collection: true
   field_related_content: true
-  field_representative_media: true
-  field_sequence_collection: true
+  field_source: true
+  field_summary: true
   field_title: true
-  field_word_entry: true
   flag_email_node: true
   flag_email_og: true
-  flag_mukurtu_email_content: true
-  flag_mukurtu_email_node: true
+  flag_export_content: true
+  flag_mukurtu_email_collection: true
   flag_mukurtu_email_og: true
-  flag_mukurtu_follow_content: true
+  flag_mukurtu_follow_collection: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

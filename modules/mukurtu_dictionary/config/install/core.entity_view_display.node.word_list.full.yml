@@ -18,6 +18,15 @@ targetEntityType: node
 bundle: word_list
 mode: full
 content:
+  field_all_related_content:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: false
+    third_party_settings: {  }
+    weight: 4
+    region: content
   field_description:
     type: text_default
     label: above
