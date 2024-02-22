@@ -48,8 +48,6 @@ class MukurtuSettingsForm extends ConfigFormBase {
       $default_media = NULL;
     }
 
-    $defaultRelatedContentOption = $config->get('mukurtu_related_content_display') ?? 'computed';
-
     $form['mukurtu_default_image'] = [
       '#title' => 'Default Image',
       '#description' => $this->t('This image will be used when media is not available for a field or item.'),
@@ -57,6 +55,8 @@ class MukurtuSettingsForm extends ConfigFormBase {
       '#target_type'   => 'media',
       '#default_value' => $default_media,
     ];
+
+    $defaultRelatedContentOption = $config->get('mukurtu_related_content_display') ?? 'computed';
 
     $form['mukurtu_related_content_display'] = [
       '#title' => 'Related Content Display',
@@ -66,6 +66,20 @@ class MukurtuSettingsForm extends ConfigFormBase {
       '#options' => [
         'localonly' => $this->t('Display value of the item\'s related content field as is.'),
         'computed' => $this->t('Display value of the item\'s related content field, but also include content that includes this item as related content.'),
+      ],
+    ];
+
+    // Show related content teasers by default.
+    $defaultRelatedContentTeasersOption = $config->get('mukurtu_related_content_teasers_display') ?? 'show';
+
+    $form['mukurtu_related_content_teasers_display'] = [
+      '#title' => 'Related Content Teasers Display',
+      '#description' => $this->t('Toggle visibility of related content teasers at the bottom and top right of content items.'),
+      '#type' => 'radios',
+      '#default_value' => $defaultRelatedContentTeasersOption,
+      '#options' => [
+        'show' => $this->t('Show related content teasers.'),
+        'hide' => $this->t('Hide related content teasers.'),
       ],
     ];
 
@@ -109,7 +123,7 @@ class MukurtuSettingsForm extends ConfigFormBase {
 
     // Citation templates.
     foreach ($bundleInfo as $bundle => $bundleValue) {
-        $config->set($bundle, $form_state->getValue($bundle));
+      $config->set($bundle, $form_state->getValue($bundle));
     }
 
     // Default Image.
@@ -117,6 +131,10 @@ class MukurtuSettingsForm extends ConfigFormBase {
 
     // Related content.
     $config->set('mukurtu_related_content_display', $form_state->getValue('mukurtu_related_content_display'));
+
+    // Related content teasers.
+    $config->set('mukurtu_related_content_teasers_display', $form_state->getValue('mukurtu_related_content_teasers_display'));
+
     $config->save();
 
     // Computed citation field needs the node_view tag invalidated.
