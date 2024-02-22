@@ -28,11 +28,13 @@ class MukurtuFooterBlock extends BlockBase {
     // put in the img src attribute. Filename is used as the alt text for now.
     foreach ($config['logo_upload'] as $i => $fid) {
       $logoFile = File::load($fid);
-      $logoUrl =\Drupal::service('file_url_generator')->generateAbsoluteString($logoFile->getFileUri());
-      $this->configuration['logo_upload'][$i] = [
-        'url' => $logoUrl,
-        'alt' => $logoFile->getFilename(),
-      ];
+      if ($logoFile) {
+        $logoUrl = \Drupal::service('file_url_generator')->generateAbsoluteString($logoFile->getFileUri());
+        $this->configuration['logo_upload'][$i] = [
+          'url' => $logoUrl,
+          'alt' => $logoFile->getFilename(),
+        ];
+      }
     }
     // We must refresh the config object to get our changes.
     $config = $this->getConfiguration();
