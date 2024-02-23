@@ -70,16 +70,27 @@ class MukurtuSettingsForm extends ConfigFormBase {
     ];
 
     // Show related content teasers by default.
-    $defaultRelatedContentTeasersOption = $config->get('mukurtu_related_content_teasers_display') ?? 'show';
+    $defaultRelatedContentTeasersTopRightOption = $config->get('mukurtu_related_content_teasers_display_top_right') ?? 'show';
+    $defaultRelatedContentTeasersBottomOption = $config->get('mukurtu_related_content_teasers_display_bottom') ?? 'show';
 
-    $form['mukurtu_related_content_teasers_display'] = [
-      '#title' => 'Related Content Teasers Display',
-      '#description' => $this->t('Toggle visibility of related content teasers at the bottom and top right of content items.'),
+    $form['mukurtu_related_content_teasers_display_top_right'] = [
+      '#title' => 'Related Content Teasers Display -- Top Right',
+      '#description' => $this->t('Toggle visibility of related content teasers at the top right of content items.'),
       '#type' => 'radios',
-      '#default_value' => $defaultRelatedContentTeasersOption,
+      '#default_value' => $defaultRelatedContentTeasersTopRightOption,
       '#options' => [
-        'show' => $this->t('Show related content teasers.'),
-        'hide' => $this->t('Hide related content teasers.'),
+        'show' => $this->t('Show'),
+        'hide' => $this->t('Hide'),
+      ],
+    ];
+    $form['mukurtu_related_content_teasers_display_bottom'] = [
+      '#title' => 'Related Content Teasers Display -- Bottom',
+      '#description' => $this->t('Toggle visibility of related content teasers at the bottom of content items.'),
+      '#type' => 'radios',
+      '#default_value' => $defaultRelatedContentTeasersBottomOption,
+      '#options' => [
+        'show' => $this->t('Show'),
+        'hide' => $this->t('Hide'),
       ],
     ];
 
@@ -133,7 +144,8 @@ class MukurtuSettingsForm extends ConfigFormBase {
     $config->set('mukurtu_related_content_display', $form_state->getValue('mukurtu_related_content_display'));
 
     // Related content teasers.
-    $config->set('mukurtu_related_content_teasers_display', $form_state->getValue('mukurtu_related_content_teasers_display'));
+    $config->set('mukurtu_related_content_teasers_display_top_right', $form_state->getValue('mukurtu_related_content_teasers_display_top_right'));
+    $config->set('mukurtu_related_content_teasers_display_bottom', $form_state->getValue('mukurtu_related_content_teasers_display_bottom'));
 
     $config->save();
 
