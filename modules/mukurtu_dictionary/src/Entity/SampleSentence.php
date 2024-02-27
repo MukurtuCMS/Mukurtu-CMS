@@ -6,6 +6,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\mukurtu_dictionary\Entity\SampleSentenceInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 class SampleSentence extends Paragraph implements SampleSentenceInterface {
 
@@ -45,4 +46,27 @@ class SampleSentence extends Paragraph implements SampleSentenceInterface {
     return $definitions;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    // If the sample sentence field is empty but the sentence recording is not,
+    // autofill the sample sentence field with the recording transcription.
+    $fieldSentenceRecordingValue = $this->get('field_sentence_recording')->getValue() ?? NULL;
+    $fieldSentenceValue = $this->get('field_sentence')->getValue() ?? NULL;
+    if ($fieldSentenceRecordingValue && !$fieldSentenceValue) {
+      $audioEntityId = $fieldSentenceRecordingValue[0]['target_id'];
+      $audioEntity = \Drupal::entityTypeManager()->getStorage('media')->load($audioEntityId);
+      if ($audioEntity) {
+        $transcriptionField = $audioEntity->get('field_transcription')->getValue() ?? NULL;
+        if ($transcriptionField) {
+          $transcriptionValue = $transcriptionField[0]['value'] ?? NULL;
+          if ($transcriptionValue) {
+            $this->set('field_sentence', strip_tags($transcriptionValue));
+          }
+        }
+      }
+    }
+  }
 }
