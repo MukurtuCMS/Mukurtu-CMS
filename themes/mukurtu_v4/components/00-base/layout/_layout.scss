@@ -73,7 +73,6 @@
     grid-template-columns: var(--grid-12col);
   }
 
-
   @include media('>=2xl') {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }

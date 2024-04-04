@@ -6,8 +6,8 @@
  * Displays status, error, and warning messages, grouped by type.
  *
  * An invisible heading identifies the messages for assistive technology.
- * Sighted users see a colored box. See http://www.w3.org/TR/WCAG-TECHS/H69.html
- * for info.
+ * Sighted users see a colored box. See
+ * https://www.w3.org/TR/WCAG-TECHS/H69.html for info.
  *
  * Add an ARIA label to the contentinfo area so that assistive technology
  * user agents will better describe this landmark.
@@ -19,27 +19,56 @@
  *   - class: HTML classes.
  */
 #}
-<div class='data-drupal-messages' data-drupal-messages>
-{% for type, messages in message_list %}
-  <div role="contentinfo" aria-label="{{ status_headings[type] }}"{{ attributes|without('role', 'aria-label') }}>
-    {% if type == 'error' %}
-      <div role="alert">
-    {% endif %}
-    {% if status_headings[type] %}
-      <h2 class="visually-hidden">{{ status_headings[type] }}</h2>
-    {% endif %}
-    {% if messages|length > 1 %}
-      <ul>
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      {{ messages|first }}
-    {% endif %}
-    {% if type == 'error' %}
+
+<div data-drupal-messages class="messages-list">
+  <div class="messages__wrapper layout-container">
+    {% for type, messages in message_list %}
+      {%
+        set classes = [
+        'messages-list__item',
+        'messages',
+        'messages--' ~ type,
+      ]
+      %}
+
+      <div{{ attributes
+        .addClass(classes)
+        .setAttribute('data-drupal-selector', 'messages')
+        .setAttribute('role', 'contentinfo')
+        .setAttribute('aria-label', status_headings[type])
+        }}>
+        <div class="messages__container" data-drupal-selector="messages-container"{% if type == 'error' %} role="alert"{% endif %}>
+          {% if status_headings[type] %}
+            <div class="messages__header">
+            <h2 class="visually-hidden">{{ status_headings[type] }}</h2>
+              {# <div class="messages__icon">
+                {% if type == 'error' %}
+                  {% include "@olivero/../images/error.svg" %}
+                {% elseif type == 'warning' %}
+                  {% include "@olivero/../images/warning.svg" %}
+                {% elseif type == 'status' %}
+                  {% include "@olivero/../images/status.svg" %}
+                {% elseif type == 'info' %}
+                  {% include "@olivero/../images/info.svg" %}
+                {% endif %}
+              </div> #}
+            </div>
+          {% endif %}
+          <div class="messages__content">
+            {% if messages|length > 1 %}
+              <ul class="messages__list">
+                {% for message in messages %}
+                  <li class="messages__item">{{ message }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              {{ messages|first }}
+            {% endif %}
+          </div>
+        </div>
       </div>
-    {% endif %}
+      {# Remove type specific classes. #}
+      {% set attributes = attributes.removeClass(classes) %}
+    {% endfor %}
   </div>
-{% endfor %}
 </div>

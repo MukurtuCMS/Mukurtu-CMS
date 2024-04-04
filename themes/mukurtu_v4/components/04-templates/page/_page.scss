@@ -134,14 +134,40 @@
   }
 
   // Make sure Drupal messages are within the grid.
-  div.data-drupal-messages {
+  .region__highlighted {
     @include layout--full-width-grid;
 
-    div:first-of-type {
+    .messages-list {
       grid-column: 1 / -1;
 
       @include media('>=2xl') {
         grid-column: 2 / -2;
+      }
+
+      .messages {
+        padding: var(--v-space-4xxs);
+        margin: var(--v-space-4xxs) 0;
+        border-radius: 3px;
+        line-height: var(--line-height-s);
+        font-weight: 900;
+      }
+
+      .messages--status {
+        border: 2px solid var(--color-status-dark);
+        color: var(--color-status-dark);
+        background-color: var(--color-status-light);
+      }
+
+      .messages--warning {
+        border: 2px solid var(--color-warning-dark);
+        color: var(--color-warning-dark);
+        background-color: var(--color-warning-light);
+      }
+
+      .messages--error {
+        border: 2px solid var(--color-error-dark);
+        color: var(--color-error-dark);
+        background-color: var(--color-error-light);
       }
     }
   }
