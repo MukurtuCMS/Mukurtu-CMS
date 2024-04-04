@@ -18,7 +18,7 @@ input[type=reset] {
   }
 
   &:focus {
-    outline: 2px solid var(--color-focus);
+    outline: 2px solid var(--focus-color);
   }
 
   &:disabled {

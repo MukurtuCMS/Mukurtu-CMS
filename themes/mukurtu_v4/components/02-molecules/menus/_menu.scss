@@ -41,21 +41,17 @@
   }
 }
 
-// @todo: nest this under the menu class above once the main menu
-// template has been made.
 .header__main-nav {
   ul {
+    padding: 0;
+
     li {
       list-style: none;
       position: relative;
       display: inline-block;
-
-      &:not(:first-of-type) {
-        padding: var(--v-space-4xxs);
-      }
+      margin: var(--v-space-5xs) 0;
 
       &:not(:last-of-type) {
-        padding: var(--v-space-4xxs);
         border-inline-end: 1.5px solid var(--main-nav-divider);
       }
 
@@ -63,10 +59,10 @@
         color: var(--brand-text-color);
         font-size: var(--font-size-l);
         text-decoration: none;
-        padding: var(--v-space-4xxs) var(--v-space-5xs);
+        padding: var(--v-space-4xxs);
         border-block-end: 4px solid;
         border-block-end-color: var(--color-transparent);
-        transition: color 0.12s ease-in, border-bottom-color 0.12s ease-in;
+        transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
 
         &:hover {
           border-block-end-color: var(--brand-secondary-dark);
@@ -78,6 +74,78 @@
         &:active {
           color: var(--brand-secondary-dark);
         }
+      }
+    }
+  }
+}
+
+// Mobile menu control.
+.main-navigation {
+  display: none;
+
+  @include media('>=lg') {
+    display: block;
+  }
+}
+
+.mobile-nav-button {
+  display: block;
+
+  @include media('>=lg') {
+    display: none;
+  }
+
+  &__button {
+    float: right;
+    background: none;
+    position: relative;
+    text-indent: -9999px;
+    cursor: pointer;
+
+    &:hover {
+      background: none;
+    }
+  }
+
+  &__icon {
+
+    position: absolute;
+    block-size: 0;
+    inline-size: var(--v-space-2xs);
+    transform: translate(-50%, -50%);
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    border-block-start: solid 3px var(--mukurtu-navbar-collapse-link-color);
+
+    &::before,
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      inline-size: 100%;
+      transition: inset-block-start 0.1s, transform 0.1s;
+      border-block-start: solid 3px var(--mukurtu-navbar-collapse-link-color);
+    }
+
+    &::before {
+      inset-block-start: -11px;
+    }
+
+    &::after {
+      inset-block-start: 5px;
+    }
+
+    [aria-expanded='true'] & {
+      border-block-start: 0;
+
+      &::before {
+        inset-block-start: 0;
+        transform: rotate(45deg);
+      }
+
+      &::after {
+        inset-block-start: 0;
+        transform: rotate(-45deg);
       }
     }
   }
