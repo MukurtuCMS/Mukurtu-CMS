@@ -1,0 +1,32 @@
+// Styles for the local tasks tabs that logged in users see on node edit screens. /
+
+.local-tasks {
+
+  li {
+    border: 2px solid var(--brand-primary);
+    border-radius: 3px;
+    background-color: var(--color-white);
+    padding: var(--v-space-5xs);
+    list-style-type: none;
+    display: inline;
+    transition: background-color 0.12s ease-in;
+
+    &:hover {
+      background-color: var(--brand-primary);
+
+      a {
+        color: var(--color-white);
+      }
+    }
+  }
+
+  a {
+    color: var(--brand-primary);
+    font-family: var(--font-display-face);
+    font-size: var(--font-size-xs);
+    font-weight: var(--text-bold);
+    text-decoration: none;
+    padding: var(--v-space-5xs);
+  }
+
+}

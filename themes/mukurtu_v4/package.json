@@ -19,7 +19,8 @@
     "gulp-sass-globbing": "^0.0.2",
     "gulp-sass-lint": "^1.4.0",
     "gulp-sourcemaps": "^3.0.0",
-    "imagemin-pngquant": "^9.0.2"
+    "imagemin-pngquant": "^9.0.2",
+    "sass": "^1.72.0"
   },
   "dependencies": {
     "@bcgov/bc-sans": "^2.1.0",
