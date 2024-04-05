@@ -1,6 +1,6 @@
 "use strict";
 
-var gulp = require("gulp"),
+const gulp = require("gulp"),
   livereload = require("gulp-livereload"),
   gulpIf = require("gulp-if"),
   eslint = require("gulp-eslint"),
@@ -10,7 +10,7 @@ var gulp = require("gulp"),
   imagemin = require("gulp-imagemin"),
   pngquant = require("imagemin-pngquant");
 
-var sassGlob = require("gulp-sass-glob");
+const sassGlob = require("gulp-sass-glob");
 
 gulp.task("imagemin", function () {
   return gulp

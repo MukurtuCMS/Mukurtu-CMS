@@ -8,7 +8,7 @@
 
   const gridContainer = document.getElementsByClassName("browse-dh-list")[0];
 
-  gridLink.addEventListener("click", (event) => {
+  gridLink?.addEventListener("click", (event) => {
     // Toggle button style class.
     gridLink.classList.toggle("active-toggle");
     listLink.className = listLink.className.replace("active-toggle", "");
@@ -20,7 +20,7 @@
     );
   });
 
-  listLink.addEventListener("click", (event) => {
+  listLink?.addEventListener("click", (event) => {
     // Toggle button style class.
     listLink.classList.toggle("active-toggle");
     gridLink.className = gridLink.className.replace("active-toggle", "");
@@ -32,7 +32,7 @@
     );
   });
 
-  mapLink.addEventListener("click", (event) => {
+  mapLink?.addEventListener("click", (event) => {
     // Toggle button style class.
     mapLink.classList.toggle("active-toggle");
     gridLink.className = gridLink.className.replace("active-toggle", "");

@@ -65,14 +65,13 @@
 @mixin layout--full-width-grid {
   display: grid;
   grid-template-columns: var(--grid-6col);
-  padding-right: var(--layout-padding);
-  padding-left: var(--layout-padding);
+  padding-inline-end: var(--layout-padding);
+  padding-inline-start: var(--layout-padding);
   column-gap: var(--gutter);
 
   @include media('>=lg') {
     grid-template-columns: var(--grid-12col);
   }
-
 
   @include media('>=2xl') {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
@@ -85,8 +84,8 @@
 @mixin layout--full-width-grid-no-padding {
   display: grid;
   grid-template-columns: var(--grid-6col);
-  padding-left: 0;
-  padding-right: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
   column-gap: var(--gutter);
 
   @include media('>=lg') {
@@ -135,6 +134,6 @@
 
 // Add top/bottom padding to each component block.
 .layout__region--content>.block {
-  padding-top: var(--v-separation);
-  padding-bottom: var(--v-separation);
+  padding-block-start: var(--v-separation);
+  padding-block-end: var(--v-separation);
 }

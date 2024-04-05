@@ -2,7 +2,23 @@ global-styling:
   css:
     theme:
       css/style.css: {}
-  js:
+  # js:
     # Any JS necessary for the theme should be added below in the same format.
-    # js/script.js: {}
+  #   js/toggle-dh-view.js: {}
+  # dependencies:
+  #   - core/drupal
+  #   - core/once
+
+toggle-dh-view:
+  js:
     js/toggle-dh-view.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+mobile-nav:
+  js:
+    js/mobile-nav.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/once

@@ -1,6 +1,56 @@
-// All header styling is here.
-// To find header grid placement, see _page.scss.
 header {
   align-items: center;
   padding-block: var(--v-space-4xxs);
+}
+
+.header {
+  @include layout--full-width-grid;
+  
+  justify-content: center;
+  align-items: center;
+
+  &__logo {
+    grid-column: 1 / span 1;
+
+    a {
+      display: inline-block;
+      padding: var(--v-space-5xs);
+      margin: var(--v-space-5xs);
+      margin-left: -0.5rem;
+    }
+
+    img {
+      width: 100px;
+      max-width: none;
+    }
+
+    @include media('>=lg') {
+      grid-column: 1 / span 1;
+
+      img {
+        width: 70px;
+      }
+    }
+
+    @include media('>=2xl') {
+      grid-column: 2 / span 1;
+
+      img {
+        width: 100px;
+      }
+    }
+
+  }
+
+  &__main-nav {
+    grid-column: 2 / span 5;
+
+    @include media('>=lg') {
+      grid-column: 2 / span 12;
+    }
+
+    @include media('>=2xl') {
+      grid-column: 4 / span 12;
+    }
+  }
 }

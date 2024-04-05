@@ -147,10 +147,11 @@
           text-align: start;
         }
 
-        // Style the 'Switch to Map' button.
+        // Style the 'Switch to Grid' button.
         a {
-          background-color: var(--brand-primary-dark);
-          color: var(--color-white);
+          background-color: var(--color-white);
+          border: 1px solid var(--brand-primary-dark);
+          color: var(--brand-primary-dark);
           font-weight: var(--text-bold);
           line-height: normal;
           text-decoration: none;
@@ -158,7 +159,8 @@
           padding-inline: var(--v-space-5xs);
 
           &:hover {
-            background-color: var(--brand-primary-accent);
+            background-color: var(--brand-primary-dark);
+            color: var(--color-white);
           }
 
           &:focus {
@@ -167,13 +169,11 @@
         }
 
         a.active-toggle {
-          background-color: var(--color-white);
-          border: 1px solid var(--brand-primary-dark);
-          color: var(--brand-primary-dark);
+          background-color: var(--brand-primary-dark);
+          color: var(--color-white);
 
           &:hover {
-            background-color: var(--brand-primary-dark);
-            color: var(--color-white);
+            background-color: var(--brand-primary-accent);
           }
         }
       }
