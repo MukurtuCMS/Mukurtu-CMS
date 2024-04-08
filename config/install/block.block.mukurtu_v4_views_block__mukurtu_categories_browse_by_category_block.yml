@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.mukurtu_categories
+  module:
+    - system
+    - views
+  theme:
+    - mukurtu_v4
+
+id: mukurtu_v4_views_block__mukurtu_categories_browse_by_category_block
+theme: mukurtu_v4
+region: content
+weight: 5
+provider: null
+plugin: 'views_block:mukurtu_categories-browse_by_category_block'
+settings:
+  id: 'views_block:mukurtu_categories-browse_by_category_block'
+  label: ''
+  label_display: visible
+  provider: views
+  views_label: ''
+  items_per_page: '20'
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: '<front>'
