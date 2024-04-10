@@ -104,6 +104,7 @@ themes:
   - bartik
   - seven
   - mukurtu_bartik
+  - mukurtu_v4
 
 
 version: '8.x-1.x-dev'

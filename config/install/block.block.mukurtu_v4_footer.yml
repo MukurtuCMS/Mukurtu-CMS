@@ -7,7 +7,6 @@ dependencies:
     - system
   theme:
     - mukurtu_v4
-
 id: mukurtu_v4_footer
 theme: mukurtu_v4
 region: sidebar_first
