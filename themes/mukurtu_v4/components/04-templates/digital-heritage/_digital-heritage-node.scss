@@ -1,53 +1,46 @@
-// If a title is printing from community-records.html.twig, we want to
-// suppress the node title so that duplicate title aren't printed.
-.has-title {
-  .digital-heritage-node__header__text {
-    h1 {
-      display: none;
-    }
-  }
-}
-
 .digital-heritage-node__grid {
   @include layout--full-width-grid;
-
-  @include media('>=2xl') {
-    padding-right: var(--layout-padding);
-    padding-left: var(--layout-padding);
-    column-gap: var(--gutter);
-    grid-template-columns: var(--grid-12col);
-  }
+  // @include media('>=2xl') {
+  //   padding-right: var(--layout-padding);
+  //   padding-left: var(--layout-padding);
+  //   column-gap: var(--gutter);
+  //   grid-template-columns: var(--grid-12col);
+  // }
 }
 
 .digital-heritage-node {
-  &__wrapper {
-    display: flex;
-    flex-direction: column;
-    column-gap: var(--v-space-3xs);
-    grid-column: 1 / -1;
+//   &__wrapper {
+
+//     grid-column: 1 / -1;
+
+//     @include layout--full-width-grid;
+
+//     @include media('>=2xl') {
+//       padding-right: var(--layout-padding);
+//       padding-left: var(--layout-padding);
+//       column-gap: var(--gutter);
+//       grid-template-columns: var(--grid-12col);
+//     }
+
+    // @include media('>=md') {
+    // }
+
+
+  // }
+
+  &__content {
+    grid-column: 1 / span 6;
 
     @include media('>=md') {
-      flex-direction: row;
+      grid-column: 1 / span 4;
     }
 
     @include media('>=lg') {
-      column-gap: var(--v-space-xs);
-    }
-
-    @include media('>=xl') {
-      column-gap: var(--v-space-l);
+      grid-column: 1 / span 8;
     }
 
     @include media('>=2xl') {
-      grid-column: 2 / -2;
-    }
-  }
-
-  &__content {
-    flex: 2;
-
-    @include media('>=lg') {
-      flex: 3;
+      grid-column: 2 / span 8;
     }
 
     .digital-heritage-node__description,
@@ -76,7 +69,7 @@
     }
 
     .field-item {
-      padding-inline: var(--v-space-6xl);
+      // padding-inline: var(--v-space-6xl);
 
       // @todo: once the Download button is added, update this
       // value to --v-space-xs.
@@ -85,7 +78,19 @@
   }
 
   &__list {
-    flex: 1;
+    grid-column: 1 / span 6;
+
+    @include media('>=md') {
+      grid-column: 5 / span 2;
+    }
+
+    @include media('>=lg') {
+      grid-column: 9 / span 4;
+    }
+
+    @include media('>=2xl') {
+      grid-column: 10 / span 4;
+    }
   }
 
   &__sidebar {
@@ -95,146 +100,117 @@
     padding-block-start: var(--v-space-4xxs);
     padding-block-end: var(--v-space-s);
 
-    .field-reference {
+    .field {
       padding-block-end: var(--v-space-4xxs);
       border-bottom: 1px solid var(--brand-light);
 
-      .field-title {
+      &__label {
         font-weight: var(--text-bold);
         letter-spacing: var(--letter-spacing-label);
         padding-block-start: var(--v-space-5xs);
       }
+
+      &__item {
+        line-height: var(--line-height-s);
+      }
     }
 
-    .field-reference:last-of-type {
+    .field:last-of-type {
       padding-block-end: 0;
       border-bottom: none;
     }
-
-    .field-source {
-      padding-block-end: var(--v-space-4xxs);
-      border-bottom: 1px solid var(--brand-light);
-
-      .field-title {
-        font-weight: var(--text-bold);
-        letter-spacing: var(--letter-spacing-label);
-        padding-block-start: var(--v-space-5xs);
-      }
-    }
-
-    .field-date-description {
-      padding-block-end: var(--v-space-4xxs);
-      border-bottom: 1px solid var(--brand-light);
-
-      .field-title {
-        font-weight: var(--text-bold);
-        letter-spacing: var(--letter-spacing-label);
-        padding-block-start: var(--v-space-5xs);
-      }
-    }
-
-    .field-identifier {
-      padding-block-end: var(--v-space-4xxs);
-      border-bottom: 1px solid var(--brand-light);
-
-      .field-title {
-        font-weight: var(--text-bold);
-        letter-spacing: var(--letter-spacing-label);
-        padding-block-start: var(--v-space-5xs);
-      }
-    }
   }
 
-  &__related-content {
-    grid-column: 1 / -1;
-    position: relative;
+  // &__related-content {
+  //   grid-column: 1 / -1;
+  //   position: relative;
 
-    display: grid;
-    grid-template-columns: var(--grid-6col);
-    margin-block: var(--v-separation);
+  //   display: grid;
+  //   grid-template-columns: var(--grid-6col);
+  //   margin-block: var(--v-separation);
 
-    @include media('>=lg') {
-      grid-template-columns: var(--grid-12col);
-    }
+  //   @include media('>=lg') {
+  //     grid-template-columns: var(--grid-12col);
+  //   }
 
-    // Create shadow.
-    background: linear-gradient(var(--brand-light), var(--color-white));
-    background-repeat: no-repeat;
-    background-size: 100% 12px;
-    background-position: top;
-    padding-block-start: var(--v-space-s);
+  //   // Create shadow.
+  //   background: linear-gradient(var(--brand-light), var(--color-white));
+  //   background-repeat: no-repeat;
+  //   background-size: 100% 12px;
+  //   background-position: top;
+  //   padding-block-start: var(--v-space-s);
 
-    // With the way the grid is working on this page, the shadow can't
-    // extend naturally, so this extends that.
-    &::before {
-      position: absolute;
-      content: '';
-      background: linear-gradient(var(--brand-light), var(--color-white));
-      background-repeat: no-repeat;
-      background-size: 100% 12px;
-      background-position: top;
-      padding-block-start: var(--v-space-s);
-      height: 12px;
-      width: 100%;
-      left: -75px;
-    }
+  //   // With the way the grid is working on this page, the shadow can't
+  //   // extend naturally, so this extends that.
+  //   &::before {
+  //     position: absolute;
+  //     content: '';
+  //     background: linear-gradient(var(--brand-light), var(--color-white));
+  //     background-repeat: no-repeat;
+  //     background-size: 100% 12px;
+  //     background-position: top;
+  //     padding-block-start: var(--v-space-s);
+  //     height: 12px;
+  //     width: 100%;
+  //     left: -75px;
+  //   }
 
-    &::after {
-      content: '';
-      position: absolute;
-      background: linear-gradient(var(--brand-light), var(--color-white));
-      background-repeat: no-repeat;
-      background-size: 100% 12px;
-      background-position: top;
-      padding-block-start: var(--v-space-s);
-      height: 12px;
-      width: 100%;
-      right: -75px;
-    }
+  //   &::after {
+  //     content: '';
+  //     position: absolute;
+  //     background: linear-gradient(var(--brand-light), var(--color-white));
+  //     background-repeat: no-repeat;
+  //     background-size: 100% 12px;
+  //     background-position: top;
+  //     padding-block-start: var(--v-space-s);
+  //     height: 12px;
+  //     width: 100%;
+  //     right: -75px;
+  //   }
 
-    .related-content {
-      grid-column: 1 / -1;
+  //   .related-content {
+  //     grid-column: 1 / -1;
 
-      @include media('>=2xl') {
-        grid-column: 2 / -2;
-      }
+  //     @include media('>=2xl') {
+  //       grid-column: 2 / -2;
+  //     }
 
-      ul {
-        padding: 0;
+  //     ul {
+  //       padding: 0;
 
-        li {
-          font-size: var(--font-size-m);
-          list-style: none;
-          padding-block-end: var(--v-space-2xs);
-          border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+  //       li {
+  //         font-size: var(--font-size-m);
+  //         list-style: none;
+  //         padding-block-end: var(--v-space-2xs);
+  //         border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
 
-          &:not(:last-of-type) {
-            margin-block-end: var(--v-space-2xs);
-          }
-        }
-      }
-    }
-  }
-
-  h1 {
-    text-align: center;
-
-    // Shadow.
-    background: linear-gradient(var(--brand-light), var(--color-white));
-    background-repeat: no-repeat;
-    background-size: 100% 12px;
-    background-position: bottom;
-    padding: 0;
-    padding-block-end: var(--v-space-2xs);
-    margin-block-end: var(--v-separation);
-  }
+  //         &:not(:last-of-type) {
+  //           margin-block-end: var(--v-space-2xs);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 }
+  // h1 {
+  //   text-align: center;
+
+  //   // Shadow.
+  //   background: linear-gradient(var(--brand-light), var(--color-white));
+  //   background-repeat: no-repeat;
+  //   background-size: 100% 12px;
+  //   background-position: bottom;
+  //   padding: 0;
+  //   padding-block-end: var(--v-space-2xs);
+  //   margin-block-end: var(--v-separation);
+  // }
+
 
 .digital-heritage__community-record {
-  h1 {
-    text-align: center;
-    margin-block-end: var(--v-space-2xs);
-  }
+  // h1 {
+  //   text-align: center;
+  //   margin-block-end: var(--v-space-2xs);
+  // }
 
   .horizontal-tabs-list {
     display: flex;
@@ -243,6 +219,9 @@
 
     li {
       list-style: none;
+      width: fit-content;
+      max-width: 275px;
+
 
       &:last-of-type {
         border-right: none;
@@ -263,6 +242,12 @@
           transform: rotate(45deg);
           z-index: -1;
         }
+      }
+
+      .div-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
@@ -306,7 +291,7 @@
     background-position: top;
     padding: 0;
 
-    details {
+    .horizontal-tabs-pane {
       padding: 0;
       padding-block-start: var(--v-separation);
     }

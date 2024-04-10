@@ -53,10 +53,7 @@
    * Initialize event listeners and focus trap.
    */
   function init(el) {
-    console.log("we have liftoff");
     mobileNavButton = el.querySelector(".mobile-nav-button button");
-    console.log(mobileNavButton);
-
     mainMenu = el.querySelector(".main-navigation");
     
     // menuFocusTrap = createFocusTrap([".mobile-nav-button", ".main-navigation"], {

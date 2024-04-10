@@ -45,8 +45,7 @@
 
 {% block page_content %}
 
-  <div
-    class="collections">
+  <div class="collections">
     {# link is in html.html.twig #}
     {% if page.sidebar_first %}
       <aside class="collections__layout-sidebar-first" role="complementary">
@@ -55,7 +54,7 @@
     {% endif %}
 
     <div class="collections__main-content">
-      {{ page.content|without('mukurtu_v4_page_title') }}
+      {{ page.content }}
     </div>
     {# /.layout-content #}
 

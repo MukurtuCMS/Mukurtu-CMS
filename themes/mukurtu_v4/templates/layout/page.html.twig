@@ -29,9 +29,10 @@
  *
  * Regions:
  * - page.header: Items for the header region.
+ * - page.page_title: Prints the page title region.
  * - page.highlighted: Items for the highlighted region.
  * - page.primary_menu: Items for the primary menu region.
- * - page.secondary_menu: Items for the secondary menu region.
+ * - page.user_menu: Items for the secondary menu region.
  * - page.content: The main content of the current page.
  * - page.sidebar_first: Items for the first sidebar.
  * - page.sidebar_second: Items for the second sidebar.
@@ -45,19 +46,14 @@
 {{ attach_library('mukurtu_v4/mobile-nav') }}
 
 <div class="layout-container">
-  {# Account menu. #}
+  {# Account menu that displays when logged in. #}
   <div class="page__account-menu">
-    {{ page.secondary_menu }}
+    {{ page.user_menu }}
   </div>
 
   <header role="banner" class="header">
     {# Site branding and main menu. #}
-      <div class="header__logo">
-        {{ page.header }}
-      </div>
-      <div class="header__main-nav">
-        {{ page.primary_menu }}
-      </div>
+    {{ page.header }}
   </header>
 
   <div class="page__breadcrumbs">
@@ -69,33 +65,30 @@
 
   {{ page.help }}
 
-  {# Print the page title outside of the page content for the Dashboard. #}
-  {% if page['#title'] == 'Mukurtu Dashboard' %}
-    <div class="page__title">
-      <h1>{{ page['#title'] }}</h1>
-    </div>
-  {% endif %}
+  {{ page.page_title }}
 
   <main id="main-content" role="main" tabindex="-1">
   {# link is in html.html.twig #}
 
     {% block page_content %}
-      <div class="layout-content">
-        {{ page.content }}
-      </div>{# /.layout-content #}
 
-      {% if page.sidebar_first %}
-        <aside class="layout-sidebar-first" role="complementary">
-          {{ page.sidebar_first }}
-        </aside>
-      {% endif %}
-    {% endblock %}
+    {% if page.sidebar_first %}
+      <aside class="layout-sidebar-first" role="complementary">
+        {{ page.sidebar_first }}
+      </aside>
+    {% endif %}
+
+    <div class="layout-content">
+      {{ page.content }}
+    </div>{# /.layout-content #}
 
     {% if page.sidebar_second %}
       <aside class="layout-sidebar-second" role="complementary">
         {{ page.sidebar_second }}
       </aside>
     {% endif %}
+
+  {% endblock %}
 
   </main>
 

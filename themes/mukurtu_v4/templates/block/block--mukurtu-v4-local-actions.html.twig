@@ -1,7 +1,9 @@
 {#
 /**
  * @file
- * Theme override to display local tasks block.
+ * Theme override to display local actions block.
+ * This is pulled into the Add Community Record link under digital heritage items
+.
  *
  * Available variables:
  * - plugin_id: The ID of the block implementation.
@@ -26,10 +28,12 @@
  * @see template_preprocess_block()
  */
 #}
-<div{{ attributes.addClass("local-tasks") }}>
-  {{ title_prefix }}
-  {{ title_suffix }}
-  {% block content %}
-    {{ content }}
-  {% endblock %}
-</div>
+{% if content %}
+  <div{{ attributes.addClass("local-actions") }}>
+    {{ title_prefix }}
+    {{ title_suffix }}
+    {% block content %}
+      {{ content }}
+    {% endblock %}
+  </div>
+{% endif %}

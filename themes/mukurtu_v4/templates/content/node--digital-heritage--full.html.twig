@@ -68,40 +68,37 @@
  */
 #}
 <article{{ attributes }}>
-
   <div{{ content_attributes }} class="digital-heritage-node">
-    <div class="digital-heritage-node__header">
+    {{ title_prefix }}
+    {{ title_suffix }}
+
+     {#<div class="digital-heritage-node__header">
       <div class="digital-heritage-node__header__text">
-        {{ title_prefix }}
         {% if label %}
           <h1{{title_attributes}}>
             {{ label }}
-          </h1>
-        {% endif %}
-        {{ title_suffix }}
+          </h1> 
+        {% endif %} 
       </div>
-    </div>
+    </div> #}
     <div class="digital-heritage-node__grid">
-      <div class="digital-heritage-node__wrapper">
+      {# <div class="digital-heritage-node__wrapper"> #}
         <div class="digital-heritage-node__content">
           {{ content.group_primary_fields }}
+          <div class="digital-heritage-node__related-content">
+            {{ content.field_all_related_content }}
+          </div>
         </div>
 
         {% if content.group_metadata is not empty %}
           <div class="digital-heritage-node__list">
-        {% else %}
-          <div class="digital-heritage-node__list__full">
-        {% endif %}
-            {% if content.group_metadata is not empty %}
-              <aside class="digital-heritage-node__sidebar">
-                {{ content.group_metadata }}
-              </aside>
-            {% endif %}
+            <aside class="digital-heritage-node__sidebar">
+              {{ content.group_metadata }}
+            </aside>
           </div>
-      </div>
-      <div class="digital-heritage-node__related-content">
-        {{ content.field_all_related_content }}
-      </div>
-    </div>
+        {% endif %}
+
+    </div> {# __grid #}
+
   </div>
 </article>

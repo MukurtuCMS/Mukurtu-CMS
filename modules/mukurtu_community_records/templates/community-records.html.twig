@@ -1,9 +1,10 @@
+{# {{ dump() }} #}
+
+
+
 <article class="digital-heritage__community-record">
-  <div class="digital-heritage__community-record__title">
-    <h1>{{ records.0.title }}</h1>
-  </div>
-  <div data-horizontal-tabs class="community-records horizontal-tabs clearfix">
-      <ul data-horizontal-tabs-list class="horizontal-tabs-list visually-hidden"></ul>
+ <div data-horizontal-tabs class="community-records horizontal-tabs clearfix">
+    <ul data-horizontal-tabs-list class="horizontal-tabs-list visually-hidden"></ul>
     <div{{ attributes.setAttribute('data-horizontal-tabs-panes', TRUE) }}>
     {% for record in records %}
       <details class={{record.title ? "has-title" : ""}} id="{{ record.tabid }}">
@@ -11,7 +12,7 @@
         <input style="display:none;" class="horizontal-tabs-active-tab" value="{{ record.tabid }}" type="text">
         {% endif %}
         <summary>
-          <div class="details-title">
+          <div class="div-title">
             <span>{{ record.communities }}</span>
           </div>
         </summary>
@@ -24,4 +25,5 @@
     {% endfor %}
     </div>
   </div>
+
 </article>
