@@ -130,19 +130,6 @@ display:
         options: {  }
       empty: {  }
       sorts:
-        search_api_relevance:
-          id: search_api_relevance
-          table: search_api_index_mukurtu_dictionary_index
-          field: search_api_relevance
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: DESC
-          expose:
-            label: 'Search Relevance'
-            field_identifier: search_api_relevance
-          exposed: true
         title:
           id: title
           table: search_api_index_mukurtu_dictionary_index
@@ -153,34 +140,21 @@ display:
           plugin_id: search_api
           order: ASC
           expose:
-            label: Alphabetical
+            label: Term
             field_identifier: title
           exposed: true
-        changed:
-          id: changed
+        translation:
+          id: translation
           table: search_api_index_mukurtu_dictionary_index
-          field: changed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: DESC
-          expose:
-            label: Newest
-            field_identifier: newest
-          exposed: true
-        changed_1:
-          id: changed_1
-          table: search_api_index_mukurtu_dictionary_index
-          field: changed
+          field: field_translation
           relationship: none
           group_type: group
           admin_label: ''
           plugin_id: search_api
           order: ASC
           expose:
-            label: Oldest
-            field_identifier: oldest
+            label: Translation
+            field_identifier: translation
           exposed: true
       arguments: {  }
       filters:
@@ -278,7 +252,7 @@ display:
         options:
           view_modes:
             'entity:node':
-              dictionary_word: teaser
+              dictionary_word: search_preview
               word_list: teaser
       query:
         type: search_api_query

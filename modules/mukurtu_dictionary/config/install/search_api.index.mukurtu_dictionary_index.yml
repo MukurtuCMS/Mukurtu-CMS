@@ -7,8 +7,11 @@ dependencies:
     - node
     - mukurtu_protocol
     - taxonomy
+    - paragraphs
+    - mukurtu_dictionary
     - search_api
     - search_api_glossary
+    - search_api_solr
 id: mukurtu_dictionary_index
 name: 'Mukurtu Dictionary Index'
 description: 'Index for the Mukurtu dictionary.'
@@ -23,7 +26,7 @@ field_settings:
       module:
         - node
   community_title:
-    label: 'Communities » Community » Name'
+    label: Community
     datasource_id: 'entity:node'
     property_path: 'field_communities:entity:name'
     type: string
@@ -38,6 +41,15 @@ field_settings:
     dependencies:
       module:
         - node
+  field_translation:
+    label: 'Word Entry » Paragraph » Translation'
+    datasource_id: 'entity:node'
+    property_path: 'field_word_entry:entity:field_translation'
+    type: string
+    dependencies:
+      module:
+        - node
+        - paragraphs
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
@@ -46,9 +58,18 @@ field_settings:
     type_locked: true
     hidden: true
   keyword:
-    label: 'Keywords » Taxonomy term » Name'
+    label: Keywords
     datasource_id: 'entity:node'
     property_path: 'field_keywords:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  language:
+    label: Language
+    datasource_id: 'entity:node'
+    property_path: 'field_dictionary_word_language:entity:name'
     type: string
     dependencies:
       module:
@@ -98,6 +119,25 @@ field_settings:
     dependencies:
       module:
         - node
+  word_lists:
+    label: 'Word Lists'
+    datasource_id: 'entity:node'
+    property_path: 'field_in_word_list:entity:title'
+    type: string
+    dependencies:
+      module:
+        - mukurtu_dictionary
+        - node
+  word_type:
+    label: 'Word Type'
+    datasource_id: 'entity:node'
+    property_path: 'field_word_entry:entity:field_word_type:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - paragraphs
+        - taxonomy
 datasource_settings:
   'entity:node':
     bundles:
@@ -111,9 +151,11 @@ datasource_settings:
 processor_settings:
   add_url: {  }
   aggregated_field: {  }
+  auto_aggregated_fulltext_field: {  }
   content_access:
     weights:
       preprocess_query: -30
+  custom_value: {  }
   entity_status: {  }
   entity_type: {  }
   glossary:
@@ -149,6 +191,7 @@ processor_settings:
       - title
   language_with_fallback: {  }
   rendered_item: {  }
+  solr_date_range: {  }
   tokenizer:
     weights:
       preprocess_index: -6
@@ -168,10 +211,14 @@ processor_settings:
     fields:
       - community_title
       - field_glossary_entry
+      - field_translation
       - glossaryaz_title
       - keyword
+      - language
       - title
       - type
+      - word_lists
+      - word_type
 tracker_settings:
   default:
     indexing_order: fifo

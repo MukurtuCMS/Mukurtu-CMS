@@ -6,15 +6,15 @@ dependencies:
     - views.view.mukurtu_dictionary
   module:
     - search_api
-id: community
-name: Community/Protocol
+id: word_type
+name: 'Word Type'
 weight: 0
 min_count: 1
 missing: false
 missing_label: others
-url_alias: community
+url_alias: word_type
 facet_source_id: 'search_api:views_block__mukurtu_dictionary__mukurtu_dictionary_block'
-field_identifier: community_title
+field_identifier: word_type
 query_operator: or
 hard_limit: 0
 exclude: false
@@ -29,7 +29,7 @@ widget:
   type: dropdown
   config:
     show_numbers: true
-    default_option_label: Community/Protocol
+    default_option_label: 'Word Type'
 empty_behavior:
   behavior: none
 only_visible_when_facet_source_is_visible: false

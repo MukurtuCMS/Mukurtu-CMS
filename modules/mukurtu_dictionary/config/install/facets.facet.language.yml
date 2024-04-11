@@ -6,15 +6,15 @@ dependencies:
     - views.view.mukurtu_dictionary
   module:
     - search_api
-id: community
-name: Community/Protocol
+id: language
+name: Language
 weight: 0
 min_count: 1
 missing: false
 missing_label: others
-url_alias: community
+url_alias: language
 facet_source_id: 'search_api:views_block__mukurtu_dictionary__mukurtu_dictionary_block'
-field_identifier: community_title
+field_identifier: language
 query_operator: or
 hard_limit: 0
 exclude: false
@@ -28,8 +28,8 @@ enable_parent_when_child_gets_disabled: true
 widget:
   type: dropdown
   config:
-    show_numbers: true
-    default_option_label: Community/Protocol
+    show_numbers: false
+    default_option_label: Language
 empty_behavior:
   behavior: none
 only_visible_when_facet_source_is_visible: false

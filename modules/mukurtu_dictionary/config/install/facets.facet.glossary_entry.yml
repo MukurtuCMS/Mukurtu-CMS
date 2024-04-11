@@ -10,6 +10,8 @@ id: glossary_entry
 name: 'Glossary Entry'
 weight: 0
 min_count: 1
+missing: false
+missing_label: others
 url_alias: glossary_entry
 facet_source_id: 'search_api:views_block__mukurtu_dictionary__mukurtu_dictionary_block'
 field_identifier: field_glossary_entry
@@ -18,6 +20,9 @@ hard_limit: 0
 exclude: false
 use_hierarchy: false
 keep_hierarchy_parents_active: false
+hierarchy:
+  type: taxonomy
+  config: {  }
 expand_hierarchy: false
 enable_parent_when_child_gets_disabled: true
 widget:
@@ -35,7 +40,7 @@ empty_behavior:
   behavior: none
 only_visible_when_facet_source_is_visible: false
 show_only_one_result: false
-show_title: false
+show_title: true
 processor_configs:
   active_widget_order:
     processor_id: active_widget_order
@@ -55,10 +60,10 @@ processor_configs:
       sort: 40
     settings:
       sort: ASC
-  hide_1_result_facet:
-    processor_id: hide_1_result_facet
+  hierarchy_processor:
+    processor_id: hierarchy_processor
     weights:
-      build: 50
+      build: 100
     settings: {  }
   url_processor_handler:
     processor_id: url_processor_handler

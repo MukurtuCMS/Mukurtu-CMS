@@ -1,0 +1,55 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.paragraph.preview
+    - paragraphs.paragraphs_type.dictionary_word_entry
+  module:
+    - layout_builder
+    - media
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: paragraph.dictionary_word_entry.preview
+targetEntityType: paragraph
+bundle: dictionary_word_entry
+mode: preview
+content:
+  field_part_of_speech:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_recording:
+    type: media_thumbnail
+    label: above
+    settings:
+      image_link: ''
+      image_style: ''
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_translation:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  field_alternate_spelling: true
+  field_contributor: true
+  field_definition: true
+  field_pronunciation: true
+  field_sample_sentences: true
+  field_source: true
+  field_word_origin: true
+  field_word_type: true
+  search_api_excerpt: true
