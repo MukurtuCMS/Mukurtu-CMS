@@ -1,32 +1,24 @@
+.page-node-type-digital-heritage {
+  .layout-container {
+    .page__title {
+      background: none;
+      margin-block-start: var(--v-space-4xxs);
+      margin-block-end: var(--v-space-2xs);
+      margin-inline: 0;
+    }
+  }
+}
+
 .digital-heritage-node__grid {
   @include layout--full-width-grid;
-  // @include media('>=2xl') {
-  //   padding-right: var(--layout-padding);
-  //   padding-left: var(--layout-padding);
-  //   column-gap: var(--gutter);
-  //   grid-template-columns: var(--grid-12col);
-  // }
 }
 
 .digital-heritage-node {
-//   &__wrapper {
-
-//     grid-column: 1 / -1;
-
-//     @include layout--full-width-grid;
-
-//     @include media('>=2xl') {
-//       padding-right: var(--layout-padding);
-//       padding-left: var(--layout-padding);
-//       column-gap: var(--gutter);
-//       grid-template-columns: var(--grid-12col);
-//     }
-
-    // @include media('>=md') {
-    // }
-
-
-  // }
+  &__media-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
   &__content {
     grid-column: 1 / span 6;
@@ -69,14 +61,11 @@
     }
 
     .field-item {
-      // padding-inline: var(--v-space-6xl);
-
-      // @todo: once the Download button is added, update this
-      // value to --v-space-xs.
       padding-block-end: var(--v-space-xl);
     }
   }
 
+  // Sidebar.
   &__list {
     grid-column: 1 / span 6;
 
@@ -192,25 +181,8 @@
   //   }
   // }
 }
-  // h1 {
-  //   text-align: center;
-
-  //   // Shadow.
-  //   background: linear-gradient(var(--brand-light), var(--color-white));
-  //   background-repeat: no-repeat;
-  //   background-size: 100% 12px;
-  //   background-position: bottom;
-  //   padding: 0;
-  //   padding-block-end: var(--v-space-2xs);
-  //   margin-block-end: var(--v-separation);
-  // }
-
 
 .digital-heritage__community-record {
-  // h1 {
-  //   text-align: center;
-  //   margin-block-end: var(--v-space-2xs);
-  // }
 
   .horizontal-tabs-list {
     display: flex;
@@ -259,7 +231,8 @@
       a {
         color: var(--light-text-color);
 
-        &:hover {
+        &:hover,
+        &:active {
           color: var(--light-text-color);
           background-color: var(--brand-primary-dark);
         }

@@ -4,42 +4,84 @@
   @include layout--full-width-grid;
 
   ul {
-    grid-column: 2 / -1;
+    grid-column: 1 / -1;
+    padding-inline-start: 0;
+    text-transform: uppercase;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
   }
 
   li {
-    border: 2px solid var(--brand-primary);
-    border-radius: 3px;
-    background-color: var(--color-white);
-    padding: var(--v-space-5xs);
+    margin-inline-end: var(--v-space-6xs);
     list-style-type: none;
-    display: inline;
-    transition: background-color 0.12s ease-in;
-
-    &:hover {
-      background-color: var(--brand-primary);
-
-      a {
-        color: var(--color-white);
-      }
-    }
+    display: inline-block;
   }
 
   a {
     color: var(--brand-primary);
     font-family: var(--font-display-face);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-2xs);
     font-weight: var(--text-bold);
     text-decoration: none;
     padding: var(--v-space-5xs);
+    border: 1px solid var(--brand-primary);
+    background-color: var(--color-white);
+    transition: background-color 0.12s ease-in;
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: var(--brand-primary);
+      color: var(--color-white);
+    }
+
+    &.is-active {
+      background: var(--brand-light);
+      font-weight: var(--text-bold);
+      border: 1px solid var(--brand-light);
+
+      &:hover,
+      &:active,
+      &:focus {
+        background-color: var(--brand-primary);
+        color: var(--color-white);
+      }
+    }
   }
 }
 
 
+// Styles "add collection" button link.
 .local-actions {
   @include layout--full-width-grid;
 
   ul {
-    grid-column: 2 / -1;
+    grid-column: 1 / -1;
+    padding: 0;
+    margin: 0;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+
+    li {
+      list-style-type: none;
+    }
+
+    .button {
+      display: inline-block;
+      padding-block: var(--v-space-6xs);
+      padding-inline: var(--v-space-3xs);
+      margin-block: var(--v-space-4xxs);
+
+      &::before {
+        content: '+';
+        display: inline-block;
+        padding-inline-end: var(--v-space-5xs);
+        font-size: var(--font-size-l);
+      }
+    }
   }
 }
