@@ -123,7 +123,7 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: teaser
+      view_mode: browse
       link: false
     third_party_settings: {  }
     weight: 43
