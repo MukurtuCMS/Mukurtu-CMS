@@ -1,0 +1,19 @@
+// Override focus styles coming from field group module for tab focus to be clear.
+
+// Ideally the module would be updated to use <button> instead of <a>.
+.horizontal-tabs ul.horizontal-tabs-list {
+  a {
+    &:focus {
+      outline: 4px solid var(--focus-color);
+    }
+  }
+
+  li:not(.selected) {
+    a {
+      &:active,
+      &:focus {
+        background-color: var(--color-white);
+      }
+    }
+  }
+}

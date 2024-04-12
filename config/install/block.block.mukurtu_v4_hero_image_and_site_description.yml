@@ -11,7 +11,7 @@ dependencies:
 id: mukurtu_v4_hero_image_and_site_description
 theme: mukurtu_v4
 region: content
-weight: 2
+weight: 0
 provider: null
 plugin: 'block_content:99e32966-7d84-4652-b044-6de2e535774d'
 settings:

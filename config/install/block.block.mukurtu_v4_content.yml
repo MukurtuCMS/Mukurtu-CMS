@@ -8,7 +8,7 @@ dependencies:
 id: mukurtu_v4_content
 theme: mukurtu_v4
 region: content
-weight: 8
+weight: 6
 provider: null
 plugin: system_main_block
 settings:

@@ -8,11 +8,10 @@ dependencies:
     - views
   theme:
     - mukurtu_v4
-
 id: mukurtu_v4_views_block__mukurtu_categories_browse_by_category_block
 theme: mukurtu_v4
 region: content
-weight: 5
+weight: 3
 provider: null
 plugin: 'views_block:mukurtu_categories-browse_by_category_block'
 settings:

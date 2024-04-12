@@ -7,7 +7,7 @@ dependencies:
     - mukurtu_v4
 id: mukurtu_v4_help
 theme: mukurtu_v4
-region: content
+region: help
 weight: 1
 provider: null
 plugin: help_block

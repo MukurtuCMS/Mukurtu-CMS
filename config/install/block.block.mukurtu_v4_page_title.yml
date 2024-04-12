@@ -5,7 +5,7 @@ dependencies:
     - mukurtu_v4
 id: mukurtu_v4_page_title
 theme: mukurtu_v4
-region: content
+region: page_title
 weight: 0
 provider: null
 plugin: page_title_block

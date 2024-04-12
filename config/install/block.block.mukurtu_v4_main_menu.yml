@@ -9,8 +9,8 @@ dependencies:
     - mukurtu_v4
 id: mukurtu_v4_main_menu
 theme: mukurtu_v4
-region: primary_menu
-weight: 0
+region: header
+weight: 2
 provider: null
 plugin: 'system_menu_block:main'
 settings:

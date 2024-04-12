@@ -91,21 +91,6 @@
     }
   }
 
-  // Display title and drop shadow.
-  #block-mukurtu-v4-page-title {
-    grid-column: 1 / -1;
-    text-align: center;
-
-    // Shadow.
-    background: linear-gradient(var(--brand-light), var(--color-white));
-    background-repeat: no-repeat;
-    background-size: 100% 12px;
-    background-position: bottom;
-    padding: 0;
-    padding-block-end: var(--v-space-2xs);
-    margin-block-end: var(--v-separation);
-  }
-
   // Browse Digital Heritage page (this part sets up the grid).
   &__main-content {
     @include layout--full-width-grid;
@@ -393,7 +378,7 @@
       .digital-heritage__content__block {
         margin-block-start: var(--v-space-3xs);
 
-        .field-reference {
+        .field--type-entity-reference {
           display: flex;
           gap: var(--v-space-5xs);
 
@@ -401,7 +386,7 @@
             margin-block-end: var(--v-space-5xs);
           }
 
-          .field-title {
+          .field__label {
             font-weight: var(--text-bold);
 
             &::after {
@@ -409,12 +394,12 @@
             }
           }
 
-          .field-item__container {
+          .field__items {
             display: flex;
             flex-wrap: wrap;
             gap: var(--v-space-6xs);
 
-            .field-item:not(:last-of-type) {
+            .field__item:not(:last-of-type) {
               &::after {
                 content: ',';
               }

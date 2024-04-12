@@ -8,12 +8,12 @@ libraries:
   - mukurtu_v4/global-styling
 
 regions:
+  user_menu: 'User menu'
   header: 'Header'
-  primary_menu: 'Primary menu'
-  secondary_menu: 'Secondary menu'
   breadcrumb: 'Breadcrumb'
   highlighted: 'Highlighted'
   help: 'Help'
+  page_title: 'Page Title'
   sidebar_first: 'Left sidebar'
   content: 'Content'
   sidebar_second: 'Right sidebar'

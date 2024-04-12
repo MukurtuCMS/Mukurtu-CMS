@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+id: media.digital_heritage_full
+label: 'Digital Heritage Full'
+targetEntityType: media
+cache: true

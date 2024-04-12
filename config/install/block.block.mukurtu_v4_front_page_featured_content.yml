@@ -11,7 +11,7 @@ dependencies:
 id: mukurtu_v4_front_page_featured_content
 theme: mukurtu_v4
 region: content
-weight: 3
+weight: 1
 provider: null
 plugin: 'block_content:d53ac20e-0380-4eba-a8e7-b63ce135ebbb'
 settings:

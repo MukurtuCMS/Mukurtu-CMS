@@ -1,53 +1,34 @@
-// If a title is printing from community-records.html.twig, we want to
-// suppress the node title so that duplicate title aren't printed.
-.has-title {
-  .digital-heritage-node__header__text {
-    h1 {
-      display: none;
+.page-node-type-digital-heritage {
+  .layout-container {
+    .page__title {
+      background: none;
+      margin-block-start: var(--v-space-4xxs);
+      margin-block-end: var(--v-space-2xs);
+      margin-inline: 0;
     }
   }
 }
 
 .digital-heritage-node__grid {
   @include layout--full-width-grid;
-
-  @include media('>=2xl') {
-    padding-right: var(--layout-padding);
-    padding-left: var(--layout-padding);
-    column-gap: var(--gutter);
-    grid-template-columns: var(--grid-12col);
-  }
 }
 
 .digital-heritage-node {
-  &__wrapper {
+  &__media-image {
     display: flex;
     flex-direction: column;
-    column-gap: var(--v-space-3xs);
-    grid-column: 1 / -1;
-
-    @include media('>=md') {
-      flex-direction: row;
-    }
-
-    @include media('>=lg') {
-      column-gap: var(--v-space-xs);
-    }
-
-    @include media('>=xl') {
-      column-gap: var(--v-space-l);
-    }
-
-    @include media('>=2xl') {
-      grid-column: 2 / -2;
-    }
+    align-items: center;
   }
 
   &__content {
-    flex: 2;
+    grid-column: 1 / span 6;
 
     @include media('>=lg') {
-      flex: 3;
+      grid-column: 1 / span 8;
+    }
+
+    @include media('>=2xl') {
+      grid-column: 2 / span 8;
     }
 
     .digital-heritage-node__description,
@@ -76,16 +57,21 @@
     }
 
     .field-item {
-      padding-inline: var(--v-space-6xl);
-
-      // @todo: once the Download button is added, update this
-      // value to --v-space-xs.
       padding-block-end: var(--v-space-xl);
     }
   }
 
+  // Sidebar.
   &__list {
-    flex: 1;
+    grid-column: 1 / span 6;
+
+    @include media('>=lg') {
+      grid-column: 9 / span 4;
+    }
+
+    @include media('>=2xl') {
+      grid-column: 10 / span 4;
+    }
   }
 
   &__sidebar {
@@ -95,53 +81,24 @@
     padding-block-start: var(--v-space-4xxs);
     padding-block-end: var(--v-space-s);
 
-    .field-reference {
+    .field {
       padding-block-end: var(--v-space-4xxs);
       border-bottom: 1px solid var(--brand-light);
 
-      .field-title {
+      &__label {
         font-weight: var(--text-bold);
         letter-spacing: var(--letter-spacing-label);
         padding-block-start: var(--v-space-5xs);
       }
+
+      &__item {
+        line-height: var(--line-height-s);
+      }
     }
 
-    .field-reference:last-of-type {
+    .field:last-of-type {
       padding-block-end: 0;
       border-bottom: none;
-    }
-
-    .field-source {
-      padding-block-end: var(--v-space-4xxs);
-      border-bottom: 1px solid var(--brand-light);
-
-      .field-title {
-        font-weight: var(--text-bold);
-        letter-spacing: var(--letter-spacing-label);
-        padding-block-start: var(--v-space-5xs);
-      }
-    }
-
-    .field-date-description {
-      padding-block-end: var(--v-space-4xxs);
-      border-bottom: 1px solid var(--brand-light);
-
-      .field-title {
-        font-weight: var(--text-bold);
-        letter-spacing: var(--letter-spacing-label);
-        padding-block-start: var(--v-space-5xs);
-      }
-    }
-
-    .field-identifier {
-      padding-block-end: var(--v-space-4xxs);
-      border-bottom: 1px solid var(--brand-light);
-
-      .field-title {
-        font-weight: var(--text-bold);
-        letter-spacing: var(--letter-spacing-label);
-        padding-block-start: var(--v-space-5xs);
-      }
     }
   }
 
@@ -215,26 +172,9 @@
       }
     }
   }
-
-  h1 {
-    text-align: center;
-
-    // Shadow.
-    background: linear-gradient(var(--brand-light), var(--color-white));
-    background-repeat: no-repeat;
-    background-size: 100% 12px;
-    background-position: bottom;
-    padding: 0;
-    padding-block-end: var(--v-space-2xs);
-    margin-block-end: var(--v-separation);
-  }
 }
 
 .digital-heritage__community-record {
-  h1 {
-    text-align: center;
-    margin-block-end: var(--v-space-2xs);
-  }
 
   .horizontal-tabs-list {
     display: flex;
@@ -243,6 +183,9 @@
 
     li {
       list-style: none;
+      width: fit-content;
+      max-width: 275px;
+
 
       &:last-of-type {
         border-right: none;
@@ -264,6 +207,12 @@
           z-index: -1;
         }
       }
+
+      .div-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
 
     .horizontal-tab-button.selected {
@@ -274,7 +223,8 @@
       a {
         color: var(--light-text-color);
 
-        &:hover {
+        &:hover,
+        &:active {
           color: var(--light-text-color);
           background-color: var(--brand-primary-dark);
         }
@@ -306,7 +256,7 @@
     background-position: top;
     padding: 0;
 
-    details {
+    .horizontal-tabs-pane {
       padding: 0;
       padding-block-start: var(--v-separation);
     }

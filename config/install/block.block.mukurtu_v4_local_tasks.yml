@@ -6,7 +6,7 @@ dependencies:
 id: mukurtu_v4_local_tasks
 theme: mukurtu_v4
 region: content
-weight: 7
+weight: 4
 provider: null
 plugin: local_tasks_block
 settings:

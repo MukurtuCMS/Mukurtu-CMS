@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to display local tasks block.
+ * Theme override to display page title block.
  *
  * Available variables:
  * - plugin_id: The ID of the block implementation.
@@ -26,7 +26,7 @@
  * @see template_preprocess_block()
  */
 #}
-<div{{ attributes.addClass("local-tasks") }}>
+<div{{ attributes.addClass("page__title") }}>
   {{ title_prefix }}
   {{ title_suffix }}
   {% block content %}
