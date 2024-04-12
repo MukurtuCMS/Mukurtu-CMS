@@ -67,32 +67,6 @@
  *
  */
 #}
-
-{# <article{{ attributes }}>
-
-  <div class="digital-heritage__browse">
-    <div class="digital-heritage__content">
-   
-      <div class="digital-heritage__content__text">
-        <div class="digital-heritage__content__title">
-          {{ title_prefix }}
-          {% if label %}
-            <h2{{title_attributes}}>
-              <a href="{{ url }}" rel="bookmark">{{ label }}</a>
-            </h2>
-          {% endif %}
-          {{ title_suffix }}
-  
-        </div>
-        <div class="digital-heritage__content__block">
-
-        </div>
-      </div>
-    </div>
-  </div>
-</article> #}
-
-
 <article{{ attributes.addClass("horizontal-card") }}>
   <div class="horizontal-card__media">
     {{ content.field_representative_media }}
