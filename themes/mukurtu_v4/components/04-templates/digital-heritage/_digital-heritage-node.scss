@@ -23,10 +23,6 @@
   &__content {
     grid-column: 1 / span 6;
 
-    @include media('>=md') {
-      grid-column: 1 / span 4;
-    }
-
     @include media('>=lg') {
       grid-column: 1 / span 8;
     }
@@ -69,10 +65,6 @@
   &__list {
     grid-column: 1 / span 6;
 
-    @include media('>=md') {
-      grid-column: 5 / span 2;
-    }
-
     @include media('>=lg') {
       grid-column: 9 / span 4;
     }
@@ -110,76 +102,76 @@
     }
   }
 
-  // &__related-content {
-  //   grid-column: 1 / -1;
-  //   position: relative;
+  &__related-content {
+    grid-column: 1 / -1;
+    position: relative;
 
-  //   display: grid;
-  //   grid-template-columns: var(--grid-6col);
-  //   margin-block: var(--v-separation);
+    display: grid;
+    grid-template-columns: var(--grid-6col);
+    margin-block: var(--v-separation);
 
-  //   @include media('>=lg') {
-  //     grid-template-columns: var(--grid-12col);
-  //   }
+    @include media('>=lg') {
+      grid-template-columns: var(--grid-12col);
+    }
 
-  //   // Create shadow.
-  //   background: linear-gradient(var(--brand-light), var(--color-white));
-  //   background-repeat: no-repeat;
-  //   background-size: 100% 12px;
-  //   background-position: top;
-  //   padding-block-start: var(--v-space-s);
+    // Create shadow.
+    background: linear-gradient(var(--brand-light), var(--color-white));
+    background-repeat: no-repeat;
+    background-size: 100% 12px;
+    background-position: top;
+    padding-block-start: var(--v-space-s);
 
-  //   // With the way the grid is working on this page, the shadow can't
-  //   // extend naturally, so this extends that.
-  //   &::before {
-  //     position: absolute;
-  //     content: '';
-  //     background: linear-gradient(var(--brand-light), var(--color-white));
-  //     background-repeat: no-repeat;
-  //     background-size: 100% 12px;
-  //     background-position: top;
-  //     padding-block-start: var(--v-space-s);
-  //     height: 12px;
-  //     width: 100%;
-  //     left: -75px;
-  //   }
+    // With the way the grid is working on this page, the shadow can't
+    // extend naturally, so this extends that.
+    &::before {
+      position: absolute;
+      content: '';
+      background: linear-gradient(var(--brand-light), var(--color-white));
+      background-repeat: no-repeat;
+      background-size: 100% 12px;
+      background-position: top;
+      padding-block-start: var(--v-space-s);
+      height: 12px;
+      width: 100%;
+      left: -75px;
+    }
 
-  //   &::after {
-  //     content: '';
-  //     position: absolute;
-  //     background: linear-gradient(var(--brand-light), var(--color-white));
-  //     background-repeat: no-repeat;
-  //     background-size: 100% 12px;
-  //     background-position: top;
-  //     padding-block-start: var(--v-space-s);
-  //     height: 12px;
-  //     width: 100%;
-  //     right: -75px;
-  //   }
+    &::after {
+      content: '';
+      position: absolute;
+      background: linear-gradient(var(--brand-light), var(--color-white));
+      background-repeat: no-repeat;
+      background-size: 100% 12px;
+      background-position: top;
+      padding-block-start: var(--v-space-s);
+      height: 12px;
+      width: 100%;
+      right: -75px;
+    }
 
-  //   .related-content {
-  //     grid-column: 1 / -1;
+    .related-content {
+      grid-column: 1 / -1;
 
-  //     @include media('>=2xl') {
-  //       grid-column: 2 / -2;
-  //     }
+      @include media('>=2xl') {
+        grid-column: 2 / -2;
+      }
 
-  //     ul {
-  //       padding: 0;
+      ul {
+        padding: 0;
 
-  //       li {
-  //         font-size: var(--font-size-m);
-  //         list-style: none;
-  //         padding-block-end: var(--v-space-2xs);
-  //         border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+        li {
+          font-size: var(--font-size-m);
+          list-style: none;
+          padding-block-end: var(--v-space-2xs);
+          border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
 
-  //         &:not(:last-of-type) {
-  //           margin-block-end: var(--v-space-2xs);
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+          &:not(:last-of-type) {
+            margin-block-end: var(--v-space-2xs);
+          }
+        }
+      }
+    }
+  }
 }
 
 .digital-heritage__community-record {
