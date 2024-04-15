@@ -6,7 +6,6 @@
   ul {
     grid-column: 1 / -1;
     padding-inline-start: 0;
-    text-transform: uppercase;
 
     @include media('>=2xl') {
       grid-column: 2 / -2;

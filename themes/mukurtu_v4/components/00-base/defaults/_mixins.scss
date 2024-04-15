@@ -11,7 +11,6 @@
 
 @mixin divider {
   padding-block-start: var(--v-space-3xs);
-  padding-block-end: var(--v-space-3xs);
   margin-block-start: var(--v-space-3xs);
   border-top: 5px solid var(--mukurtu-view-row-divider-color);
 }

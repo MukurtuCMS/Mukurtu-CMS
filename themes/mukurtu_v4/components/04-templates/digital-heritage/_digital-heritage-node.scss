@@ -31,18 +31,6 @@
     @include media('>=2xl') {
       grid-column: 2 / span 8;
     }
-
-    .field__label {
-      color: var(--brand-text-color);
-      font-weight: var(--text-bold);
-      font-size: var(--font-size-s);
-      letter-spacing: var(--letter-spacing-label);
-      margin-block-end: var(--v-space-2xs);
-
-      @include media('>=lg') {
-        font-size: var(--font-size-m);
-      }
-    }
   }
 
   &__content {
@@ -82,17 +70,32 @@
     padding-block-end: var(--v-space-s);
 
     .field {
-      padding-block-end: var(--v-space-4xxs);
+      padding-block: var(--v-space-4xxs);
       border-bottom: 1px solid var(--brand-light);
 
       &__label {
-        font-weight: var(--text-bold);
-        letter-spacing: var(--letter-spacing-label);
-        padding-block-start: var(--v-space-5xs);
+        font-size: var(--font-size-s);
       }
 
       &__item {
         line-height: var(--line-height-s);
+      }
+
+      // If multiple items. 
+      &__items {
+        .field__item {
+          display: inline;
+
+          &::after {
+            content: ', ';
+          }
+
+          &:last-of-type {
+            &::after {
+              content: '';
+            }
+          }
+        }
       }
     }
 

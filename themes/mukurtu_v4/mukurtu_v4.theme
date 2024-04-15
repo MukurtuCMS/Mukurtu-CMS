@@ -48,3 +48,10 @@ function mukurtu_v4_preprocess_block(&$variables) {
   // block.html.twig, and our footer would not display.
   $variables['plugin_id'] = 'mukurtu_footer';
 }
+
+/**
+ * Implements template_preprocess_media().
+ */
+function mukurtu_v4_preprocess_media(array &$variables) {
+  $variables['bundle'] = $variables['media']->bundle();
+}
