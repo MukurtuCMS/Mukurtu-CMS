@@ -1,4 +1,3 @@
-uuid: d8097967-2d24-4c1e-8a8e-ff18003b5953
 langcode: en
 status: true
 dependencies:
@@ -10,8 +9,6 @@ dependencies:
     - editor
     - media
     - slick
-_core:
-  default_config_hash: TdFbmFHCAVUwyAnG-v4eIGTrQjz61DxyBXm03WRNV1Y
 name: 'Basic HTML'
 format: basic_html
 weight: 0
