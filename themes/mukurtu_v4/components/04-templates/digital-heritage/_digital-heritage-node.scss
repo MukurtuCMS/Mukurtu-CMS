@@ -15,7 +15,9 @@
 }
 
 .digital-heritage-node {
-  &__media-image {
+  .media--image,
+  .media-document,
+  .media-audio {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -34,11 +36,15 @@
   }
 
   &__content {
-    .field:not(.field--name-field-media-assets, .field--name-field-media-assets .field) {
+    // Ensure border is not duplicated on fields inside fields, fields inside media.
+    .field:not(.field--name-field-media-assets, .field--name-field-media-assets .field, .media .field) {
       @include divider;
+    }
 
-      @include media('>md') {
-        padding-block-end: var(--v-space-m);
+    .field--name-field-people ,
+    .field--name-field-location {
+      .field__items {
+        @include inline-list;
       }
     }
   }
@@ -81,21 +87,9 @@
         line-height: var(--line-height-s);
       }
 
-      // If multiple items. 
+      // If multiple items, show as comma-separated list.
       &__items {
-        .field__item {
-          display: inline;
-
-          &::after {
-            content: ', ';
-          }
-
-          &:last-of-type {
-            &::after {
-              content: '';
-            }
-          }
-        }
+        @include inline-list;
       }
     }
 

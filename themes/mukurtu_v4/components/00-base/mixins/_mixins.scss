@@ -1,0 +1,34 @@
+/*! Drupal visually-hidden CSS class that hides content from visual users and
+   shows content to screen reader users. */
+@mixin visually-hidden {
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  width: 0.063rem;
+  height: 0.063rem;
+  word-wrap: normal;
+}
+
+// Handles thick border above fields in main DH content.
+@mixin divider {
+  padding-block-start: var(--v-space-2xs);
+  margin-block-start: var(--v-space-2xs);
+  border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
+}
+
+// Comma-separated list for taxonomy fields with multiple values.
+@mixin inline-list {
+  .field__item {
+    display: inline;
+
+    &::after {
+      content: ', ';
+    }
+
+    &:last-of-type {
+      &::after {
+        content: '';
+      }
+    }
+  }
+}

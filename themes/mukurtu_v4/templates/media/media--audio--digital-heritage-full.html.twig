@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to present a document on DH page.
+ * Theme override to present an audio media item on DH page.
  *
  * Available variables:
  * - media: The media item, with limited access to object properties and
@@ -29,7 +29,17 @@
  * @see template_preprocess_media()
  */
 #}
-<div{{ attributes.addClass(bundle) }}>
+{% 
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ] 
+%}
+
+<div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
   {{ content }}
+
+  <a href="{{ media_url }}" class="button">Access audio</a>
+
 </div>

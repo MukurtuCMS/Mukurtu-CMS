@@ -29,7 +29,14 @@
  * @see template_preprocess_media()
  */
 #}
-<div{{ attributes.addClass("digital-heritage-node__media-image") }}>
+{% 
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ] 
+%}
+
+<div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
   {{ content.field_media_image }}
 

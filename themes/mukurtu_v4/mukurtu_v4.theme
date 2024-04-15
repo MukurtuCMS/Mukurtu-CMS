@@ -1,5 +1,8 @@
 <?php
 
+use Drupal\file\Entity\File;
+use Drupal\Core\Url;
+
 /**
  * Implements hook_preprocess_breadcrumb().
  */
@@ -53,5 +56,16 @@ function mukurtu_v4_preprocess_block(&$variables) {
  * Implements template_preprocess_media().
  */
 function mukurtu_v4_preprocess_media(array &$variables) {
-  $variables['bundle'] = $variables['media']->bundle();
+  $media = $variables['media'];
+ 
+  $variables['bundle'] = $media->bundle();
+
+  $fid = $media->getSource()->getSourceFieldValue($media);
+
+  $file = File::load($fid);
+
+  if (!empty($file)) {
+    $url = $file->createFileUrl();
+    $variables['media_url'] = $url;
+  }
 }

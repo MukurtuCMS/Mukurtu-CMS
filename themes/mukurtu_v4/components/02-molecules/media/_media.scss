@@ -1,3 +1,11 @@
 // Styles for individual media items as they appear on various nodes. 
 
 // Digital Heritage content type, Main.
+.media {
+  &--audio {
+    .b-lazy {
+      height: revert;
+      min-height: max-content;
+    }
+  }
+}

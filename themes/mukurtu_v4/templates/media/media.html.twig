@@ -29,8 +29,14 @@
  * @see template_preprocess_media()
  */
 #}
+{% 
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ] 
+%}
 
-<div{{ attributes.addClass(bundle) }}>
+<div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
   {{ content }}
 </div>
