@@ -1,7 +1,8 @@
 {#
 /**
  * @file
- * Theme override to display a node.
+ * Theme override to display a horizontal card display
+ * of a digital heritage item.
  *
  * Available variables:
  * - node: The node entity with limited access to object properties and methods.
@@ -67,28 +68,25 @@
  *
  */
 #}
+<article{{ attributes.addClass("horizontal-card") }}>
+  <div class="horizontal-card__media">
+    {{ content.field_representative_media }}
+  </div>
 
-<article{{ attributes }}>
+  <div{{ content_attributes }} class="horizontal-card__content">
+    <div class="horizontal-card__content-header">
+      {{ title_prefix }}
+      <h2{{ title_attributes }}>
+        <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+      </h2>
+      {{ title_suffix }}
+      
+      {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
+    </div>
 
-  <div class="digital-heritage__browse">
-    <div class="digital-heritage__content">
-      {{ content.field_representative_media }}
-      <div class="digital-heritage__content__text">
-        <div class="digital-heritage__content__title">
-          {{ title_prefix }}
-          {% if label %}
-            <h2{{title_attributes}}>
-              <a href="{{ url }}" rel="bookmark">{{ label }}</a>
-            </h2>
-          {% endif %}
-          {{ title_suffix }}
-          {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
-        </div>
-        <div class="digital-heritage__content__block">
-          {{ content.field_communities }}
-          {{ content.field_category }}
-        </div>
-      </div>
+    <div class="horizontal-card__content-body">
+      {{ content.field_communities }}
+      {{ content.field_category }}
     </div>
   </div>
 </article>

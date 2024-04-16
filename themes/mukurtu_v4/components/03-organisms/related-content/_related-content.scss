@@ -1,13 +1,14 @@
-.related-content {
-  &__label {
-    color: var(--brand-text-color);
-    font-weight: var(--text-bold);
-    font-size: var(--font-size-s);
-    letter-spacing: var(--letter-spacing-label);
-    margin-block-end: var(--v-space-xs);
+//@TODO: explore where this gets applied.
+// .related-content {
+//   &__label {
+//     color: var(--brand-text-color);
+//     font-weight: var(--text-bold);
+//     font-size: var(--font-size-s);
+//     letter-spacing: var(--letter-spacing-label);
+//     margin-block-end: var(--v-space-xs);
 
-    @include media('>=lg') {
-      font-size: var(--font-size-m);
-    }
-  }
-}
+//     @include media('>=lg') {
+//       font-size: var(--font-size-m);
+//     }
+//   }
+// }

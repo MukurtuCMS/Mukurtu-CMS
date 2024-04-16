@@ -25,11 +25,18 @@
  * - attributes: HTML attributes for the containing element.
  * - title_attributes: Same as attributes, except applied to the main title
  *   tag that appears in the template.
- *
+ * - bundle: machine name of media type.
  * @see template_preprocess_media()
  */
 #}
-<div{{ attributes }}>
+{% 
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ] 
+%}
+
+<div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
   {{ content }}
 </div>

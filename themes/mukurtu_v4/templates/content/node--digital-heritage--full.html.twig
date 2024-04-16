@@ -67,28 +67,30 @@
  *
  */
 #}
-
-{{ dump(content) }}
 <article{{ attributes }}>
   <div{{ content_attributes }} class="digital-heritage-node">
     {{ title_prefix }}
     {{ title_suffix }}
 
     <div class="digital-heritage-node__grid">
+      
+      <div class="digital-heritage-node__main">
         <div class="digital-heritage-node__content">
           {{ content.group_primary_fields|without('field_all_related_content') }}
-          <div class="digital-heritage-node__related-content">
-            {{ content.group_primary_fields.field_all_related_content }}
-          </div>
         </div>
 
-        {% if content.group_metadata is not empty %}
-          <div class="digital-heritage-node__list">
-            <aside class="digital-heritage-node__sidebar">
-              {{ content.group_metadata }}
-            </aside>
-          </div>
-        {% endif %}
+        <div class="digital-heritage-node__related-content">
+          {{ content.group_primary_fields.field_all_related_content }}
+        </div>
+      </div>
+
+      {% if content.group_metadata is not empty %}
+        <div class="digital-heritage-node__list">
+          <aside class="digital-heritage-node__sidebar">
+            {{ content.group_metadata }}
+          </aside>
+        </div>
+      {% endif %}
 
     </div> {# __grid #}
 

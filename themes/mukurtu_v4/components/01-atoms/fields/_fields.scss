@@ -1,0 +1,13 @@
+// Lots of fields with labels shown on the site. Let's coordinate label styles here. 
+
+.field {
+  &__label {
+    color: var(--brand-text-color);
+    font-weight: var(--text-bold);
+    font-size: var(--font-size-s);
+
+    @include media('>=lg') {
+      font-size: var(--font-size-m);
+    }
+  }
+}

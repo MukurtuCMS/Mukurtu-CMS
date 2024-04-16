@@ -2,14 +2,20 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.media.digital_heritage_full
     - media.type.audio
   module:
     - blazy
     - file
-id: media.audio.default
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: media.audio.digital_heritage_full
 targetEntityType: media
 bundle: audio
-mode: default
+mode: digital_heritage_full
 content:
   field_media_audio_file:
     type: file_audio
