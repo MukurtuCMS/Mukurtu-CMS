@@ -31,11 +31,11 @@ function mukurtu_install() {
   node_access_rebuild();
 
   // Install and default to our testing themes for now.
-  \Drupal::service('theme_installer')->install(['mukurtu_bartik', 'mukurtu_seven']);
+  \Drupal::service('theme_installer')->install(['mukurtu_v4', 'claro']);
   \Drupal::configFactory()
     ->getEditable('system.theme')
-    ->set('default', 'mukurtu_bartik')
-    ->set('admin', 'mukurtu_seven')
+    ->set('default', 'mukurtu_v4')
+    ->set('admin', 'claro')
     ->save();
 
   // Add default blocks.
@@ -45,7 +45,7 @@ function mukurtu_install() {
     'info' => t('Hero Image and Site Description'),
     'region' => 'content',
     'weight' => 2,
-    'theme' => 'mukurtu_bartik',
+    'theme' => 'mukurtu_v4',
   ]);
   $block_content->save();
   $block = Block::create([
@@ -59,7 +59,7 @@ function mukurtu_install() {
     ],
     'region' => 'content',
     'plugin' => 'block_content:' . $block_content->uuid(),
-    'theme' => 'mukurtu_bartik',
+    'theme' => 'mukurtu_v4',
   ]);
   $block->save();
   $block = Block::load('hero_image_and_site_description');
@@ -78,7 +78,7 @@ function mukurtu_install() {
     'info' => t('Front Page Featured Content'),
     'region' => 'content',
     'weight' => 3,
-    'theme' => 'mukurtu_bartik',
+    'theme' => 'mukurtu_v4',
   ]);
   $block_content->save();
   $block = Block::create([
@@ -92,7 +92,7 @@ function mukurtu_install() {
     ],
     'region' => 'content',
     'plugin' => 'block_content:' . $block_content->uuid(),
-    'theme' => 'mukurtu_bartik',
+    'theme' => 'mukurtu_v4',
   ]);
   $block->save();
   $block = Block::load('front_page_featured_content');
@@ -121,7 +121,7 @@ function mukurtu_install() {
       'info' => t('Hero Image and Site Description'),
       'region' => 'content',
       'weight' => 2,
-      'theme' => 'mukurtu_bartik',
+      'theme' => 'mukurtu_v4',
     ]);
     $block_content->save();
     $block = Block::create([
@@ -135,7 +135,7 @@ function mukurtu_install() {
       ],
       'region' => 'content',
       'plugin' => 'block_content:' . $block_content->uuid(),
-      'theme' => 'mukurtu_bartik',
+      'theme' => 'mukurtu_v4',
       'weight' => 4,
     ]);
     $block->setRegion('content');
