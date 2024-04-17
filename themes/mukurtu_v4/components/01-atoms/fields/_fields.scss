@@ -5,6 +5,7 @@
     color: var(--brand-text-color);
     font-weight: var(--text-bold);
     font-size: var(--font-size-s);
+    line-height: var(--line-height-xs);
 
     @include media('>=lg') {
       font-size: var(--font-size-m);

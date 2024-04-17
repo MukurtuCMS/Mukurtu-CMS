@@ -93,6 +93,29 @@
       }
     }
 
+    .field--name-field-creative-commons {
+      a {
+        display: inline-block;
+      }
+
+      span {
+        display: flex;
+        gap: var(--v-space-6xs);
+        margin-block: var(--v-space-4xxs);
+      }
+
+      img {
+        max-width: var(--v-space-2xs);
+      }
+    }
+
+    .field--name-field-rights-statements {
+      img {
+        display: inline-block;
+        vertical-align: middle;
+      }
+    }
+
     .field:last-of-type {
       padding-block-end: 0;
       border-bottom: none;
