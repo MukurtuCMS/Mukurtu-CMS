@@ -66,9 +66,12 @@ class IndigenousKnowledgeKeepers extends Paragraph implements IndigenousKnowledg
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_teaching'] = BaseFieldDefinition::create('text_long')
+    $definitions['field_teaching'] = BaseFieldDefinition::create('string')
       ->setLabel(t('A Brief Description or Title of the Teaching'))
       ->setDescription('')
+      ->setSettings([
+        'max_length' => 255,
+      ])
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

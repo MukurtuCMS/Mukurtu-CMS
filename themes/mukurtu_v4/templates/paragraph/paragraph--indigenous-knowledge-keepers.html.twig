@@ -50,27 +50,39 @@
 {% block paragraph %}
   <div{{ attributes.addClass(classes) }}>
     {% block content %}
+      {% apply spaceless %}
 
-    {# Name of the Elder or Knowledge Keeper. #}
-      {{ content.field_name.0 }}
+        {# Name of the Elder or Knowledge Keeper. #}
+        {% if content.field_name.0 %}
+          {{ content.field_name.0 }}{% if content.field_nation.0 %},{% else %}.{% endif %}
+        {% endif %}
 
-      {# Nation or Community. #}
-      {{ content.field_nation.0 }}
+        {# Nation or Community. #}
+        {% if content.field_nation.0 %}
+         {{ content.field_nation.0 }}.
+        {% endif %}
 
-      {# Treaty Territory. #}
-      {{ content.field_treaty_territory.0 }}
+        {# Treaty Territory. #}
+        {% if content.field_treaty_territory.0 %}
+          {{ content.field_treaty_territory.0 }}.
+        {% endif %}
 
-      {# City or Community They Live in. #}
-      {{ content.field_living_place.0 }}
+        {# City or Community They Live in. #}
+        {% if content.field_living_place.0 %}
+          {{ content.field_living_place.0 }}.
+        {% endif %}
 
-      {# Teaching. #}
-      {{ content.field_teaching }}
+        {# Teaching. #}
+        {% if content.field_teaching.0 %}
+          {{ content.field_teaching.0 }}.
+        {% endif %}
 
-      {# Date. #}
-      {% if paragraph.field_original_date.date is not null %}
-        {{ paragraph.field_original_date.date|date("j F Y") }}
-      {% endif %}
-
+        {# Date. #}
+        {% if paragraph.field_original_date.date is not null %}
+          {{ paragraph.field_original_date.date|date("j F Y") }}.
+        {% endif %}
+      
+        {% endapply %}
     {% endblock %}
   </div>
 {% endblock paragraph %}
