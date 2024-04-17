@@ -93,9 +93,16 @@
       }
     }
 
+    .field--name-field-external-links {
+      a {
+        word-break: normal;
+        overflow-wrap: anywhere;
+      }
+    }
+
     .field--name-field-creative-commons {
       a {
-        display: inline-block;
+        display: block;
       }
 
       span {
