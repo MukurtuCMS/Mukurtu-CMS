@@ -16,8 +16,8 @@
 
 .digital-heritage-node {
   .media--image,
-  .media-document,
-  .media-audio {
+  .media--document,
+  .media--audio {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -81,6 +81,7 @@
 
       &__label {
         font-size: var(--font-size-s);
+        line-height: var(--line-height-xs);
       }
 
       &__item {
@@ -90,6 +91,36 @@
       // If multiple items, show as comma-separated list.
       &__items {
         @include inline-list;
+      }
+    }
+
+    .field--name-field-external-links {
+      a {
+        word-break: normal;
+        overflow-wrap: anywhere;
+      }
+    }
+
+    .field--name-field-creative-commons {
+      a {
+        display: block;
+      }
+
+      span {
+        display: flex;
+        gap: var(--v-space-6xs);
+        margin-block: var(--v-space-4xxs);
+      }
+
+      img {
+        max-width: var(--v-space-2xs);
+      }
+    }
+
+    .field--name-field-rights-statements {
+      img {
+        display: inline-block;
+        vertical-align: middle;
       }
     }
 

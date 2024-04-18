@@ -42,7 +42,12 @@
 
     .field--type-entity-reference {
       display: flex;
+      flex-direction: column;
       gap: var(--v-space-5xs);
+
+      @include media('>=lg') {
+        flex-direction: row;
+      }
 
       &:first-of-type {
         margin-block-end: var(--v-space-5xs);
