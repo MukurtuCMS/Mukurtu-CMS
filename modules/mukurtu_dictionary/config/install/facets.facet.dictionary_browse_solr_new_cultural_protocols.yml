@@ -1,0 +1,72 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.index.mukurtu_dictionary_solr_index
+    - views.view.dictionary_browse_solr_new_index
+  module:
+    - search_api
+id: dictionary_browse_solr_new_cultural_protocols
+name: 'Cultural Protocols'
+weight: 0
+min_count: 1
+missing: false
+missing_label: others
+url_alias: dictionary_browse_solr_new_cultural_protocols
+facet_source_id: 'search_api:views_block__dictionary_browse_solr_new_index__mukurtu_dictionary_solr_separate_index_block'
+field_identifier: field_cultural_protocols
+query_operator: or
+hard_limit: 0
+exclude: false
+use_hierarchy: false
+keep_hierarchy_parents_active: false
+hierarchy:
+  type: taxonomy
+  config: {  }
+expand_hierarchy: false
+enable_parent_when_child_gets_disabled: true
+widget:
+  type: dropdown
+  config:
+    show_numbers: false
+    default_option_label: 'Cultural Protocols'
+empty_behavior:
+  behavior: none
+only_visible_when_facet_source_is_visible: false
+show_only_one_result: true
+show_title: false
+processor_configs:
+  active_widget_order:
+    processor_id: active_widget_order
+    weights:
+      sort: 20
+    settings:
+      sort: DESC
+  count_widget_order:
+    processor_id: count_widget_order
+    weights:
+      sort: 30
+    settings:
+      sort: DESC
+  cultural_protocol_facet_label_processor:
+    processor_id: cultural_protocol_facet_label_processor
+    weights:
+      build: 50
+    settings: {  }
+  display_value_widget_order:
+    processor_id: display_value_widget_order
+    weights:
+      sort: 40
+    settings:
+      sort: ASC
+  hierarchy_processor:
+    processor_id: hierarchy_processor
+    weights:
+      build: 100
+    settings: {  }
+  url_processor_handler:
+    processor_id: url_processor_handler
+    weights:
+      pre_query: 50
+      build: 15
+    settings: {  }

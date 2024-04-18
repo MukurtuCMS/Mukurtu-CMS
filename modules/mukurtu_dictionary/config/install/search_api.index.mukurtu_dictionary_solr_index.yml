@@ -1,0 +1,201 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.server.mukurtu_solr_server
+  module:
+    - search_api_solr
+    - node
+    - mukurtu_protocol
+    - taxonomy
+    - paragraphs
+    - mukurtu_dictionary
+    - search_api
+third_party_settings:
+  search_api_solr:
+    finalize: false
+    commit_before_finalize: false
+    commit_after_finalize: false
+    debug_finalize: false
+    highlighter:
+      maxAnalyzedChars: 51200
+      fragmenter: gap
+      usePhraseHighlighter: true
+      highlightMultiTerm: true
+      preserveMulti: false
+      regex:
+        slop: 0.5
+        pattern: blank
+        maxAnalyzedChars: 10000
+      highlight:
+        mergeContiguous: false
+        requireFieldMatch: false
+        snippets: 3
+        fragsize: 0
+    mlt:
+      mintf: 1
+      mindf: 1
+      maxdf: 0
+      maxdfpct: 0
+      minwl: 0
+      maxwl: 0
+      maxqt: 100
+      maxntp: 2000
+      boost: false
+      interestingTerms: none
+    term_modifiers:
+      slop: 3
+      fuzzy: 1
+    advanced:
+      index_prefix: ''
+      collection: ''
+      timezone: ''
+    multilingual:
+      limit_to_content_language: false
+      include_language_independent: true
+      use_language_undefined_as_fallback_language: false
+      specific_languages:
+        en: '0'
+      use_universal_collation: false
+id: mukurtu_dictionary_solr_index
+name: 'Mukurtu Dictionary Solr Index'
+description: 'Solr search index for dictionary browse Solr.'
+read_only: false
+field_settings:
+  changed:
+    label: Changed
+    datasource_id: 'entity:node'
+    property_path: changed
+    type: date
+    dependencies:
+      module:
+        - node
+  dictionary_browse_solr_community:
+    label: Community
+    datasource_id: 'entity:node'
+    property_path: 'field_communities:entity:name'
+    type: string
+    dependencies:
+      module:
+        - mukurtu_protocol
+  dictionary_browse_solr_content_type:
+    label: 'Content type'
+    datasource_id: 'entity:node'
+    property_path: type
+    type: string
+    dependencies:
+      module:
+        - node
+  dictionary_browse_solr_field_glossary_entry:
+    label: 'Glossary Entry'
+    datasource_id: 'entity:node'
+    property_path: field_glossary_entry
+    type: string
+    dependencies:
+      module:
+        - node
+  dictionary_browse_solr_field_translation:
+    label: Translation
+    datasource_id: 'entity:node'
+    property_path: 'field_word_entry:entity:field_translation'
+    type: string
+    dependencies:
+      module:
+        - node
+        - paragraphs
+  dictionary_browse_solr_keywords:
+    label: Keywords
+    datasource_id: 'entity:node'
+    property_path: 'field_keywords:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  dictionary_browse_solr_language:
+    label: Language
+    datasource_id: 'entity:node'
+    property_path: 'field_dictionary_word_language:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  dictionary_browse_solr_title:
+    label: Title
+    datasource_id: 'entity:node'
+    property_path: title
+    type: text
+    dependencies:
+      module:
+        - node
+  dictionary_browse_solr_word_lists:
+    label: 'Word Lists'
+    datasource_id: 'entity:node'
+    property_path: 'field_in_word_list:entity:title'
+    type: string
+    dependencies:
+      module:
+        - mukurtu_dictionary
+        - node
+  dictionary_browse_solr_word_type:
+    label: 'Word Type'
+    datasource_id: 'entity:node'
+    property_path: 'field_word_entry:entity:field_word_type:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - paragraphs
+        - taxonomy
+  field_cultural_protocols:
+    label: 'Cultural Protocols'
+    datasource_id: 'entity:node'
+    property_path: field_cultural_protocols
+    type: string
+    dependencies:
+      module:
+        - node
+  status:
+    label: status
+    datasource_id: 'entity:node'
+    property_path: status
+    type: boolean
+    dependencies:
+      module:
+        - node
+  uid:
+    label: uid
+    datasource_id: 'entity:node'
+    property_path: uid
+    type: integer
+    dependencies:
+      module:
+        - node
+datasource_settings:
+  'entity:node':
+    bundles:
+      default: false
+      selected:
+        - dictionary_word
+        - word_list
+    languages:
+      default: true
+      selected: {  }
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  auto_aggregated_fulltext_field: {  }
+  custom_value: {  }
+  entity_type: {  }
+  language_with_fallback: {  }
+  rendered_item: {  }
+  solr_date_range: {  }
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  cron_limit: 50
+  index_directly: true
+  track_changes_in_references: true
+server: mukurtu_solr_server
