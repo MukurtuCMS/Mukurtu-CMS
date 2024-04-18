@@ -14,8 +14,6 @@ dependencies:
   - mukurtu_drafts
   - path
   - search_api
-  - slick
-  - slick_entityreference
   - text
 
 version: '8.x-1.x-dev'
