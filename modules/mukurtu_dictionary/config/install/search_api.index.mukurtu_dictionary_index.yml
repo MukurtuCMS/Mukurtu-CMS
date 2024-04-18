@@ -33,6 +33,14 @@ field_settings:
     dependencies:
       module:
         - mukurtu_protocol
+  field_cultural_protocols:
+    label: 'Cultural Protocols'
+    datasource_id: 'entity:node'
+    property_path: field_cultural_protocols
+    type: string
+    dependencies:
+      module:
+        - node
   field_glossary_entry:
     label: 'Glossary Entry'
     datasource_id: 'entity:node'
@@ -210,6 +218,7 @@ processor_settings:
     all_fields: true
     fields:
       - community_title
+      - field_cultural_protocols
       - field_glossary_entry
       - field_translation
       - glossaryaz_title
