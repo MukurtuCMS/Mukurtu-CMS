@@ -30,7 +30,7 @@ function mukurtu_install() {
   // Rebuild node access permissions.
   node_access_rebuild();
 
-  // Install and default to our testing themes for now.
+  // Install default themes.
   \Drupal::service('theme_installer')->install(['mukurtu_v4', 'claro']);
   \Drupal::configFactory()
     ->getEditable('system.theme')
@@ -42,17 +42,17 @@ function mukurtu_install() {
   // Hero Image for the front page.
   $block_content = BlockContent::create([
     'type' => 'image_with_description',
-    'info' => t('Hero Image and Site Description'),
+    'info' => t('Mukurtu v4 Hero Image and Site Description'),
     'region' => 'content',
     'weight' => 2,
     'theme' => 'mukurtu_v4',
   ]);
   $block_content->save();
   $block = Block::create([
-    'id' => 'hero_image_and_site_description',
+    'id' => 'mukurtu_v4_hero_image_and_site_description',
     'settings' => [
       'id' => 'block_content:' . $block_content->uuid(),
-      'label' => t('Hero Image and Site Description'),
+      'label' => t('Mukurtu v4 Hero Image and Site Description'),
       'label_display' => 0,
       'provider' => 'block_content',
       'status' => 1,
@@ -62,7 +62,7 @@ function mukurtu_install() {
     'theme' => 'mukurtu_v4',
   ]);
   $block->save();
-  $block = Block::load('hero_image_and_site_description');
+  $block = Block::load('mukurtu_v4_hero_image_and_site_description');
   $block->setRegion('content');
   $visibility = $block->getVisibility();
   $visibility['request_path']['pages'] = '<front>';
@@ -75,17 +75,17 @@ function mukurtu_install() {
   // Featured Content for the front page.
   $block_content = BlockContent::create([
     'type' => 'featured_content',
-    'info' => t('Front Page Featured Content'),
+    'info' => t('Mukurtu v4 Front Page Featured Content'),
     'region' => 'content',
     'weight' => 3,
     'theme' => 'mukurtu_v4',
   ]);
   $block_content->save();
   $block = Block::create([
-    'id' => 'front_page_featured_content',
+    'id' => 'mukurtu_v4_front_page_featured_content',
     'settings' => [
       'id' => 'block_content:' . $block_content->uuid(),
-      'label' => t('Featured Content'),
+      'label' => t('Mukurtu v4 Featured Content'),
       'label_display' => 1,
       'provider' => 'block_content',
       'status' => 1,
@@ -95,7 +95,7 @@ function mukurtu_install() {
     'theme' => 'mukurtu_v4',
   ]);
   $block->save();
-  $block = Block::load('front_page_featured_content');
+  $block = Block::load('mukurtu_v4_front_page_featured_content');
   $block->setRegion('content');
   $visibility = $block->getVisibility();
   $visibility['request_path']['pages'] = '<front>';
@@ -115,38 +115,38 @@ function mukurtu_install() {
     }
   }
 
-  function mukurtu_create_default_blocks() {
-    $block_content = BlockContent::create([
-      'type' => 'image_with_description',
-      'info' => t('Hero Image and Site Description'),
-      'region' => 'content',
-      'weight' => 2,
-      'theme' => 'mukurtu_v4',
-    ]);
-    $block_content->save();
-    $block = Block::create([
-      'id' => 'heroimageandsitedescription',
-      'settings' => [
-        'id' => 'block_content:' . $block_content->uuid(),
-        'label' => t('Hero Image and Site Description'),
-        'label_display' => 0,
-        'provider' => 'block_content',
-        'status' => 1,
-      ],
-      'region' => 'content',
-      'plugin' => 'block_content:' . $block_content->uuid(),
-      'theme' => 'mukurtu_v4',
-      'weight' => 4,
-    ]);
-    $block->setRegion('content');
-    $visibility = $block->getVisibility();
-    $visibility['request_path']['pages'] = '<front>';
-    $block->setVisibilityConfig('request_path', $visibility['request_path']);
-    $block = Block::load('heroimageandsitedescription');
-    $block->setRegion('content');
-    $block->setStatus(TRUE);
-    $block->setWeight(4);
-    $block->save();
-  }
+  // function mukurtu_create_default_blocks() {
+  //   $block_content = BlockContent::create([
+  //     'type' => 'image_with_description',
+  //     'info' => t('Hero Image and Site Description'),
+  //     'region' => 'content',
+  //     'weight' => 2,
+  //     'theme' => 'mukurtu_v4',
+  //   ]);
+  //   $block_content->save();
+  //   $block = Block::create([
+  //     'id' => 'heroimageandsitedescription',
+  //     'settings' => [
+  //       'id' => 'block_content:' . $block_content->uuid(),
+  //       'label' => t('Hero Image and Site Description'),
+  //       'label_display' => 0,
+  //       'provider' => 'block_content',
+  //       'status' => 1,
+  //     ],
+  //     'region' => 'content',
+  //     'plugin' => 'block_content:' . $block_content->uuid(),
+  //     'theme' => 'mukurtu_v4',
+  //     'weight' => 4,
+  //   ]);
+  //   $block->setRegion('content');
+  //   $visibility = $block->getVisibility();
+  //   $visibility['request_path']['pages'] = '<front>';
+  //   $block->setVisibilityConfig('request_path', $visibility['request_path']);
+  //   $block = Block::load('heroimageandsitedescription');
+  //   $block->setRegion('content');
+  //   $block->setStatus(TRUE);
+  //   $block->setWeight(4);
+  //   $block->save();
+  // }
 
 }
