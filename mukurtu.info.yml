@@ -8,6 +8,7 @@ distribution:
   name: Mukurtu
 
 install:
+  - blazy
   - node
   - history
   - block
@@ -51,7 +52,6 @@ install:
   - twig_tweak
 
 dependencies:
-  - blazy
   - comment
   - content_browser
   - ctools

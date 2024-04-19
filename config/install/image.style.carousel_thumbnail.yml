@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: carousel_thumbnail
+label: 'Carousel Thumbnail'
+effects:
+  a8888e76-dde4-47b5-8b87-46d9299d8f61:
+    uuid: a8888e76-dde4-47b5-8b87-46d9299d8f61
+    id: image_scale
+    weight: 1
+    data:
+      width: 400
+      height: null
+      upscale: false

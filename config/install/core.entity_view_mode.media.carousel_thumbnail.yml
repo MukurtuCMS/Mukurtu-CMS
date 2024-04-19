@@ -1,0 +1,10 @@
+uuid: 177fd808-1e82-48a4-90b2-c7631b2661a4
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+id: media.carousel_thumbnail
+label: 'Carousel Thumbnail'
+targetEntityType: media
+cache: true
