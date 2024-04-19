@@ -51,6 +51,7 @@ install:
   - twig_tweak
 
 dependencies:
+  - blazy
   - comment
   - content_browser
   - ctools
