@@ -32,6 +32,7 @@ third_party_settings:
         - field_pc_privacy
         - field_description
         - field_media_assets
+        - field_summary
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -70,6 +71,14 @@ content:
     region: content
     settings:
       rows: 9
+      placeholder: ''
+    third_party_settings: {  }
+  field_summary:
+    type: string_textfield
+    weight: 4
+    region: content
+    settings:
+      size: 60
       placeholder: ''
     third_party_settings: {  }
   field_items_in_collection:
