@@ -4,11 +4,11 @@ dependencies: {  }
 name: carousel_thumbnail
 label: 'Carousel Thumbnail'
 effects:
-  a8888e76-dde4-47b5-8b87-46d9299d8f61:
-    uuid: a8888e76-dde4-47b5-8b87-46d9299d8f61
+  4dd07b56-f122-43e0-828b-d608a637dd0a:
+    uuid: 4dd07b56-f122-43e0-828b-d608a637dd0a
     id: image_scale
     weight: 1
     data:
-      width: 400
-      height: null
+      width: null
+      height: 200
       upscale: false
