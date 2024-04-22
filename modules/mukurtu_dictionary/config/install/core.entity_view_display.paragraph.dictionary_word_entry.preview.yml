@@ -5,8 +5,8 @@ dependencies:
     - core.entity_view_mode.paragraph.preview
     - paragraphs.paragraphs_type.dictionary_word_entry
   module:
+    - blazy
     - layout_builder
-    - media
 third_party_settings:
   layout_builder:
     enabled: false
@@ -16,6 +16,14 @@ targetEntityType: paragraph
 bundle: dictionary_word_entry
 mode: preview
 content:
+  field_contributor:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_part_of_speech:
     type: entity_reference_label
     label: above
@@ -25,13 +33,42 @@ content:
     weight: 2
     region: content
   field_recording:
-    type: media_thumbnail
+    type: blazy_media
     label: above
     settings:
-      image_link: ''
+      caption: {  }
+      class: ''
+      image: ''
+      link: ''
+      overlay: ''
+      title: ''
+      vanilla: false
+      layout: ''
+      view_mode: ''
+      cache: 0
+      background: false
+      box_caption: ''
+      box_caption_custom: ''
+      box_media_style: ''
+      loading: lazy
+      preload: false
+      responsive_image_style: ''
+      use_theme_field: false
+      box_style: ''
       image_style: ''
-      image_loading:
-        attribute: lazy
+      media_switch: ''
+      ratio: ''
+      thumbnail_style: ''
+      grid: ''
+      grid_medium: ''
+      grid_small: ''
+      style: ''
+      svg_inline: false
+      svg_fill: false
+      svg_sanitize: true
+      svg_sanitize_remote: false
+      svg_hide_caption: false
+      svg_attributes: ''
     third_party_settings: {  }
     weight: 1
     region: content
@@ -45,7 +82,6 @@ content:
     region: content
 hidden:
   field_alternate_spelling: true
-  field_contributor: true
   field_definition: true
   field_pronunciation: true
   field_sample_sentences: true
