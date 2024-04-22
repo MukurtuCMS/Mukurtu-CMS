@@ -22,3 +22,11 @@ mobile-nav:
   dependencies:
     - core/drupal
     - core/once
+
+media-carousel:
+  js:
+    js/media-asset-carousel.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    
