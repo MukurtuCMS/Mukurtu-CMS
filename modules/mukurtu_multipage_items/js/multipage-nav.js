@@ -30,9 +30,13 @@
           Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider = new Splide('.splide', {
             perPage: 3,
             isNavigation: true,
-            pagination: true,
+            pagination: false,
             updateOnMove: false,
-            trimSpace: false,
+            trimSpace: true,
+            autoWidth: true,
+            autoHeight: true,
+            gap: '16px',
+            padding: { left: '2rem', right: '2rem', top: '1rem', bottom: '1rem' },
             start: document.getElementById('multipage-item-table-of-contents').selectedIndex,
           }).mount();
 
