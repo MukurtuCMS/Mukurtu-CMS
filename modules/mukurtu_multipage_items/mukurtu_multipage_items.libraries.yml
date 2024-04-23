@@ -3,6 +3,7 @@ multipage-view-nav:
   js:
     js/multipage-nav.js: {}
   dependencies:
+    - core/drupal.ajax
     - core/jquery
     - core/jquery.once
 splide:

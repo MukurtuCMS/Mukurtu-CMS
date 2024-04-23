@@ -3,15 +3,9 @@
     attach: function (context, settings) {
       $(document).ready(function () {
         function loadPage(pageId) {
-          console.log("LOAD PAGE!");
-
           try {
-            console.log("after try");
-
             Drupal.ajax({ url: `/multipageitem/${pageId}/ajax` }).execute();
-            console.log("after ajax exe");
             let nodeUrl = $('.splide__slide.is-active > article').attr('about');
-            console.log(nodeUrl);
             let newUrl = "/node/" + pageId;
             if (nodeUrl != undefined) {
               newUrl = nodeUrl;
