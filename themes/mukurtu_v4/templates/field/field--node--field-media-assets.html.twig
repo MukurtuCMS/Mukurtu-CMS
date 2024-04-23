@@ -53,16 +53,25 @@
   ]
 %}
 
-  {% if multiple %}
-    {{ attach_library('mukurtu_v4/mobile-nav') }}
+{{ attach_library('mukurtu_v4/splide') }}
+{{ attach_library('mukurtu_v4/media-carousel') }}
 
-    <div{{ attributes.addClass(classes, 'field__items', 'media-splide') }}>
-      {% for item in items %}
-        <div{{ item.attributes.addClass('field__item') }}>{{ item.content }}</div>
-      {% endfor %}
+{% if multiple %}
+
+  <section{{ attributes.addClass(classes, 'field__items splide media-splide') }} aria-label="Media Assets Carousel">
+    <div class="splide__track">
+      <ul class="splide__list">  
+        {% for item in items %}
+          <li{{ item.attributes.addClass('field__item splide__slide') }}>{{ item.content }}</li>
+        {% endfor %}
+      </ul>
     </div>
-  {% else %}
-    {% for item in items %}
-      <div{{ attributes.addClass(classes, 'field__item') }}>{{ item.content }}</div>
-    {% endfor %}
-  {% endif %}
+  </section>
+
+{% else %}
+
+  {% for item in items %}
+    <div{{ attributes.addClass(classes, 'field__item') }}>{{ item.content }}</div>
+  {% endfor %}
+
+{% endif %}

@@ -2,12 +2,6 @@ global-styling:
   css:
     theme:
       css/style.css: {}
-  # js:
-    # Any JS necessary for the theme should be added below in the same format.
-  #   js/toggle-dh-view.js: {}
-  # dependencies:
-  #   - core/drupal
-  #   - core/once
 
 toggle-dh-view:
   js:
@@ -29,4 +23,11 @@ media-carousel:
   dependencies:
     - core/drupal
     - core/once
-    
+
+splide:
+  version: 4.1.2
+  js:
+    libraries/splide/splide.min.js: {}
+  css:
+    theme:
+      libraries/splide/splide.min.css: {}
