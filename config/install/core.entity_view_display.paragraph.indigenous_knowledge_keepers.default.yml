@@ -36,7 +36,7 @@ content:
     weight: 1
     region: content
   field_original_date:
-    type: original_date_formatter
+    type: year_month_day_original_date_formatter
     label: hidden
     settings: {  }
     third_party_settings: {  }

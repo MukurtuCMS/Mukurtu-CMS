@@ -6,18 +6,20 @@ use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
 
 /**
- * Plugin implementation of the 'original_date_formatter' formatter.
+ * Plugin implementation of the 'year_month_day_original_date_formatter'
+ * formatter.
  *
  * @FieldFormatter(
- *   id = "original_date_formatter",
+ *   id = "year_month_day_original_date_formatter",
  *   module = "original_date",
- *   label = @Translation("Original Date Formatter"),
+ *   description = "Displays original date in YYYY-MM-DD format.",
+ *   label = @Translation("YYYY-MM-DD Original Date Formatter"),
  *   field_types = {
  *     "original_date"
  *   }
  * )
  */
-class OriginalDateFormatter extends FormatterBase
+class OriginalDateFormatterYearMonthDay extends FormatterBase
 {
   /**
    * {@inheritdoc}
@@ -25,7 +27,7 @@ class OriginalDateFormatter extends FormatterBase
   public function settingsSummary()
   {
     $summary = [];
-    $summary[] = $this->t('Displays the original date.');
+    $summary[] = $this->t('Displays the original date in YYYY-MM-DD format (e.g. 2015-08-20).');
     return $summary;
   }
 
