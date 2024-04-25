@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: medium_480px_w_
+label: 'Medium (480px w)'
+effects:
+  2c53ab24-ee4a-430a-9217-e036da04513c:
+    uuid: 2c53ab24-ee4a-430a-9217-e036da04513c
+    id: image_scale
+    weight: 1
+    data:
+      width: 480
+      height: null
+      upscale: false

@@ -4,6 +4,7 @@ dependencies:
   config:
     - core.entity_view_mode.media.digital_heritage_full
     - core.entity_view_mode.media.digital_heritage_sidebar
+    - core.entity_view_mode.media.small_250px_
   module:
     - blazy
     - editor
@@ -51,11 +52,11 @@ filters:
     status: true
     weight: 100
     settings:
-      default_view_mode: default
+      default_view_mode: digital_heritage_full
       allowed_view_modes:
-        default: default
         digital_heritage_full: digital_heritage_full
         digital_heritage_sidebar: digital_heritage_sidebar
+        small_250px_: small_250px_
       allowed_media_types:
         audio: audio
         document: document

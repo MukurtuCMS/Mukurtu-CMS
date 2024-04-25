@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: small_250px_w_
+label: 'Small (250px w)'
+effects:
+  4f63fd85-69c8-4bef-8268-ea465962749b:
+    uuid: 4f63fd85-69c8-4bef-8268-ea465962749b
+    id: image_scale
+    weight: 1
+    data:
+      width: 250
+      height: null
+      upscale: false

@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies: {  }
 name: carousel_thumbnail
-label: 'Carousel Thumbnail'
+label: 'Carousel Thumbnail (200px h)'
 effects:
   4dd07b56-f122-43e0-828b-d608a637dd0a:
     uuid: 4dd07b56-f122-43e0-828b-d608a637dd0a

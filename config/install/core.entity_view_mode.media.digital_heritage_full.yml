@@ -4,6 +4,6 @@ dependencies:
   module:
     - media
 id: media.digital_heritage_full
-label: 'Digital Heritage Full'
+label: 'Large (900 px)'
 targetEntityType: media
 cache: true

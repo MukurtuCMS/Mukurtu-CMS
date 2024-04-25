@@ -3,7 +3,7 @@ status: true
 dependencies:
   module:
     - media
-id: media.digital_heritage_sidebar
-label: 'Medium (480px)'
+id: media.small_250px_
+label: 'Small (250px)'
 targetEntityType: media
 cache: true

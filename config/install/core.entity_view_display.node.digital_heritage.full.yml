@@ -54,6 +54,7 @@ third_party_settings:
         - field_format
         - field_rights_and_usage
         - field_rights_statements
+        - field_knowledge_keepers
       label: Metadata
       parent_name: ''
       region: content
@@ -80,10 +81,9 @@ third_party_settings:
         - field_transcription
         - field_people
         - field_coverage
-        - field_coverage_description
         - field_location
+        - field_coverage_description
         - field_citation
-        - field_knowledge_keepers
         - field_all_related_content
       label: 'Primary Fields'
       parent_name: ''
@@ -130,7 +130,7 @@ content:
       view_mode: browse
       link: false
     third_party_settings: {  }
-    weight: 45
+    weight: 44
     region: content
   field_category:
     type: entity_reference_label
@@ -138,7 +138,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 26
+    weight: 25
     region: content
   field_citation:
     type: text_default
@@ -161,7 +161,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 32
+    weight: 31
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -239,14 +239,14 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 41
+    weight: 42
     region: content
   field_creative_commons:
     type: mukurtu_creative_commons_formatter
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 34
+    weight: 33
     region: content
   field_creator:
     type: entity_reference_label
@@ -254,7 +254,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 31
+    weight: 30
     region: content
   field_cultural_narrative:
     type: text_default
@@ -268,7 +268,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 25
+    weight: 24
     region: content
   field_date_description:
     type: string
@@ -276,7 +276,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 30
+    weight: 29
     region: content
   field_description:
     type: text_default
@@ -295,7 +295,7 @@ content:
       rel: ''
       target: ''
     third_party_settings: {  }
-    weight: 38
+    weight: 37
     region: content
   field_format:
     type: entity_reference_label
@@ -303,7 +303,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 43
+    weight: 42
     region: content
   field_identifier:
     type: string
@@ -311,7 +311,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 40
+    weight: 39
     region: content
   field_in_collection:
     type: entity_reference_label
@@ -319,7 +319,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 28
+    weight: 27
     region: content
   field_keywords:
     type: entity_reference_label
@@ -327,7 +327,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 27
+    weight: 26
     region: content
   field_knowledge_keepers:
     type: entity_reference_revisions_entity_view
@@ -336,7 +336,7 @@ content:
       view_mode: default
       link: ''
     third_party_settings: {  }
-    weight: 44
+    weight: 45
     region: content
   field_language:
     type: entity_reference_label
@@ -344,21 +344,21 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 33
+    weight: 32
     region: content
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 36
+    weight: 35
     region: content
   field_local_contexts_projects:
     type: local_contexts_project
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 35
+    weight: 34
     region: content
   field_location:
     type: entity_reference_label
@@ -366,13 +366,13 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 42
+    weight: 41
     region: content
   field_media_assets:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: digital_heritage_full
+      view_mode: media_assets
       link: false
     third_party_settings: {  }
     weight: 33
@@ -382,7 +382,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 29
+    weight: 28
     region: content
   field_people:
     type: entity_reference_label
@@ -398,7 +398,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 39
+    weight: 38
     region: content
   field_related_content:
     type: entity_reference_entity_view
@@ -421,14 +421,14 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 44
+    weight: 43
     region: content
   field_rights_statements:
     type: list_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 45
+    weight: 44
     region: content
   field_source:
     type: string
@@ -436,7 +436,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 37
+    weight: 36
     region: content
   field_subject:
     type: entity_reference_label
@@ -444,7 +444,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 41
+    weight: 40
     region: content
   field_summary:
     type: string
@@ -479,7 +479,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 42
+    weight: 41
     region: content
   flag_export_content:
     settings: {  }
