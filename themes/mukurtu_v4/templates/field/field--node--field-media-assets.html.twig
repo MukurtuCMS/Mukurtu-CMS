@@ -56,9 +56,10 @@
 {{ attach_library('mukurtu_v4/splide') }}
 {{ attach_library('mukurtu_v4/media-carousel') }}
 
-{% if multiple %}
+{% if items|length > 1 %}
 
-  <section{{ attributes.addClass(classes, 'field__items splide media-splide') }} aria-label="Media Assets Carousel">
+{# a carousel needs to appear #}
+  <section{{ attributes.addClass(classes, 'field__items splide media-carousel') }} aria-label="Media Assets Carousel">
     <div class="splide__track">
       <ul class="splide__list">  
         {% for item in items %}
@@ -68,10 +69,14 @@
     </div>
   </section>
 
-{% else %}
+  {% else %}
 
-  {% for item in items %}
-    <div{{ attributes.addClass(classes, 'field__item') }}>{{ item.content }}</div>
-  {% endfor %}
+  <div{{ attributes }}>
+    <div class="field-item__container">
+    {% for item in items %}
+      <div class="field-item" {{ item.attributes }}>{{ item.content }}</div>
+    {% endfor %}
+    </div>
+  </div>
 
 {% endif %}

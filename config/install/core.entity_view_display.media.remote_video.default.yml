@@ -4,30 +4,18 @@ dependencies:
   config:
     - media.type.remote_video
   module:
-    - blazy
+    - media
 id: media.remote_video.default
 targetEntityType: media
 bundle: remote_video
 mode: default
 content:
   field_media_oembed_video:
-    type: blazy_oembed
+    type: oembed
     label: hidden
     settings:
-      caption: {  }
-      background: false
-      box_caption: ''
-      box_caption_custom: ''
-      box_media_style: ''
-      loading: ''
-      preload: false
-      responsive_image_style: ''
-      use_theme_field: false
-      box_style: ''
-      image_style: ''
-      media_switch: ''
-      ratio: '16:9'
-      thumbnail_style: ''
+      max_width: 480
+      max_height: 480
     third_party_settings: {  }
     weight: 0
     region: content

@@ -12,6 +12,7 @@
             }
             window.history.replaceState({}, '', newUrl);
           } catch (error) {
+            console.log(error);
             return false;
           }
           return true;
@@ -26,7 +27,7 @@
         $('#multipage-item-table-of-contents').once().change(jumpToPage);
 
         if (Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider == undefined) {
-          Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider = new Splide('.splide', {
+          Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider = new Splide('.splide.multipage-carousel', {
             perPage: 3,
             isNavigation: true,
             pagination: false,

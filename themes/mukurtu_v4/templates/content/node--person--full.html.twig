@@ -67,32 +67,4 @@
  *
  */
 #}
-<article{{ attributes }}>
-  <div{{ content_attributes }} class="full-node">
-    {{ title_prefix }}
-    {{ title_suffix }}
-
-    <div class="full-node__grid">
-      
-      <div class="full-node__main">
-        <div class="full-node__content">
-          {{ content.group_primary_fields|without('field_all_related_content') }}
-        </div>
-
-        <div class="full-node__related-content">
-          {{ content.group_primary_fields.field_all_related_content }}
-        </div>
-      </div>
-
-      {% if content.group_metadata is not empty %}
-        <div class="full-node__list">
-          <aside class="full-node__sidebar">
-            {{ content.group_metadata }}
-          </aside>
-        </div>
-      {% endif %}
-
-    </div> {# __grid #}
-
-  </div>
-</article>
+{% extends "@mukurtu_v4/templates/content/node--digital-heritage--full.html.twig" %}
