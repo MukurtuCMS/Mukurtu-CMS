@@ -11,7 +11,8 @@
 .full-node {
   .media--image,
   .media--document,
-  .media--audio {
+  .media--audio,
+  .media--remote_video {
     display: flex;
     flex-direction: column;
     align-items: center;

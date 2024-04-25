@@ -1,0 +1,8 @@
+// Images embedded with ckeditor from media library have a caption option. 
+figure {
+  width: fit-content;
+
+  figcaption {
+    font-style: italic;
+  }
+}
