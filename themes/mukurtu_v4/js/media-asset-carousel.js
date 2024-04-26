@@ -9,8 +9,6 @@
      */
     function init(el) {
       splide.refresh();
-
-      console.log("YEP");
     }
   
     Drupal.behaviors.mediaAssetCarousel = {
@@ -18,7 +16,6 @@
         once("mediaAssets", ".field--name-field-media-assets", context).forEach(init);
 
         if (Drupal.behaviors.mediaAssetCarousel.mediaAssetSlider == undefined) {
-         console.log("media asset slider undefined");
 
           Drupal.behaviors.mediaAssetCarousel.mediaAssetSlider = new Splide('.splide.media-carousel', {
             perPage: 3,
