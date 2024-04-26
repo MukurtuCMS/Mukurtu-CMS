@@ -2,14 +2,20 @@ langcode: en
 status: true
 dependencies:
   config:
-    - image.style.large
+    - core.entity_view_mode.media.media_library
+    - image.style.media_library
     - media.type.remote_video
   module:
     - blazy
-id: media.remote_video.default
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: media.remote_video.media_library
 targetEntityType: media
 bundle: remote_video
-mode: default
+mode: media_library
 content:
   field_media_oembed_video:
     type: blazy_oembed
@@ -25,9 +31,9 @@ content:
       responsive_image_style: ''
       use_theme_field: false
       box_style: ''
-      image_style: large
+      image_style: media_library
       media_switch: ''
-      ratio: '16:9'
+      ratio: fluid
       thumbnail_style: ''
     third_party_settings: {  }
     weight: 0

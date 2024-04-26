@@ -17,6 +17,12 @@
     flex-direction: column;
     align-items: center;
   }
+  .media--remote_video {
+    .field[data-blazy] {
+      min-width: min-content;
+      width: 100%;
+    }
+  }
 
   &__main {
     grid-column: 1 / span 6;
@@ -116,6 +122,23 @@
       img {
         display: inline-block;
         vertical-align: middle;
+      }
+    }
+
+    .local-contexts-project .tk-label,
+    .local-contexts-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--v-space-4xxs);
+      margin-block-start: var(--v-space-4xxs);
+
+      img {
+        width: 50%;
+      }
+      
+      .text {
+        display: none;
       }
     }
 
