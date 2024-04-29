@@ -4,18 +4,42 @@
  */
 
   ((Drupal, once) => { 
+    let main, thumbnails;
     /**
      * Initialize the carousel.
      */
     function init(el) {
-      splide.refresh();
+      // main.sync( thumbnails );
+      // main.mount();
+      // thumbnails.mount();
     }
   
     Drupal.behaviors.mediaAssetCarousel = {
       attach(context) {
         once("mediaAssets", ".field--name-field-media-assets", context).forEach(init);
 
-        if (Drupal.behaviors.mediaAssetCarousel.mediaAssetSlider == undefined) {
+        // main = new Splide( '#main-carousel', {
+        //   type      : 'fade',
+        //   rewind    : true,
+        //   pagination: false,
+        //   arrows    : false,
+        // } );
+      
+        // thumbnails = new Splide( '.splide.media-carousel', {
+        //   fixedWidth  : 100,
+        //   fixedHeight : 60,
+        //   gap         : 10,
+        //   rewind      : true,
+        //   pagination  : false,
+        //   isNavigation: true,
+        //   breakpoints : {
+        //     600: {
+        //       fixedWidth : 60,
+        //       fixedHeight: 44,
+        //     },
+        //   },
+        // } );
+
 
           Drupal.behaviors.mediaAssetCarousel.mediaAssetSlider = new Splide('.splide.media-carousel', {
             perPage: 3,
@@ -28,7 +52,7 @@
             gap: '16px',
             start: 0,
           }).mount();
-        }
+
       }
     };
   })(Drupal, once);

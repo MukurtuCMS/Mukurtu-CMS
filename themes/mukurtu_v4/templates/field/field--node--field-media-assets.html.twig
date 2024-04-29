@@ -53,12 +53,12 @@
   ]
 %}
 
-{{ attach_library('mukurtu_v4/splide') }}
-{{ attach_library('mukurtu_v4/media-carousel') }}
+ {{ attach_library('mukurtu_v4/splide') }}
+ {{ attach_library('mukurtu_v4/media-carousel') }} 
 
 {% if items|length > 1 %}
 
-{# a carousel needs to appear #}
+{# The large size media carousel. #}
   <section{{ attributes.addClass(classes, 'field__items splide media-carousel') }} aria-label="Media Assets Carousel">
     <div class="splide__track">
       <ul class="splide__list">  
@@ -68,6 +68,8 @@
       </ul>
     </div>
   </section>
+
+  {# The thumbnail carousel. #}
 
   {% else %}
 
