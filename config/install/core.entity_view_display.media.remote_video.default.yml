@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - image.style.large
     - media.type.remote_video
   module:
     - blazy
@@ -24,7 +25,7 @@ content:
       responsive_image_style: ''
       use_theme_field: false
       box_style: ''
-      image_style: ''
+      image_style: large
       media_switch: ''
       ratio: '16:9'
       thumbnail_style: ''

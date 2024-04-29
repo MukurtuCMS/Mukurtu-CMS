@@ -1,0 +1,70 @@
+// Shared styles across carousels.
+.splide {
+  &__arrow--prev {
+    left: -2em;
+  }
+
+  &__arrow--next {
+    right: -2em;
+  }
+
+  // Vertically center images inside slides if they are <200px in height.
+  &__slide {
+    display: flex;
+    align-items: center;
+  }
+
+  .splide__track--nav>.splide__list>.splide__slide.is-active {
+    border: 3px solid var(--brand-primary);
+  }
+}
+
+// Multi-page carousel styles. This appears with multi-page DH items. 
+.splide__wrapper {
+  @include layout--full-width-grid;
+  margin-block: var(--v-space-4xxs);
+
+  .splide.is-initialized {
+    grid-column: 1 / -1;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+  }
+}
+
+.multipage-carousel__navigation {
+  width: fit-content;
+  margin: 0 auto var(--v-space-2xs);
+
+  .js-form-type-select {
+    position: relative;
+
+    &::after {
+      content: '';
+      display: inline-block;
+      position: absolute;
+      right: 15px;
+      margin: auto;
+      top: 20px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: var(--v-space-5xs)var(--v-space-5xs) 0 var(--v-space-5xs);
+      border-color: var(--brand-primary-accent) transparent transparent transparent;
+    }
+  }
+
+  .form-select {
+    appearance: none;
+    border: none;
+    background: var(--brand-light-accent);
+    padding: var(--v-space-4xxs) var(--v-space-2xs) var(--v-space-4xxs) var(--v-space-5xs);
+    margin-inline-start: var(--v-space-6xs);
+    width: 250px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: var(--text-bold);
+  }
+}

@@ -68,25 +68,27 @@
  */
 #}
 <article{{ attributes }}>
-  <div{{ content_attributes }} class="digital-heritage-node">
+  <div{{ content_attributes }} class="full-node">
     {{ title_prefix }}
     {{ title_suffix }}
 
-    <div class="digital-heritage-node__grid">
+    <div class="full-node__grid">
       
-      <div class="digital-heritage-node__main">
-        <div class="digital-heritage-node__content">
+      <div class="full-node__main">
+        <div class="full-node__content">
+          {# <h1>HERE BE THE TEST</h1>
+          {{ node.field_media_assets|view('carousel_thumbnail') }} #}
           {{ content.group_primary_fields|without('field_all_related_content') }}
         </div>
 
-        <div class="digital-heritage-node__related-content">
+        <div class="full-node__related-content">
           {{ content.group_primary_fields.field_all_related_content }}
         </div>
       </div>
 
       {% if content.group_metadata is not empty %}
-        <div class="digital-heritage-node__list">
-          <aside class="digital-heritage-node__sidebar">
+        <div class="full-node__list">
+          <aside class="full-node__sidebar">
             {{ content.group_metadata }}
           </aside>
         </div>

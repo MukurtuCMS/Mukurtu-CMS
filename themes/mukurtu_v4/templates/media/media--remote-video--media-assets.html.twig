@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to present a document on DH page.
+ * Theme override to present a remote video in the media assets field.
  *
  * Available variables:
  * - media: The media item, with limited access to object properties and
@@ -38,7 +38,8 @@
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  {{ content.thumbnail }}
+  {{ content }}
 
-  <a href="{{ content.field_media_document.0 }}" class="button">Access document</a>
+  <a href="{{ media.field_media_oembed_video.value }}" class="button">Access video</a>
+
 </div>

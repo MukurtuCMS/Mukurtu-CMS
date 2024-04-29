@@ -257,7 +257,6 @@ class MultipageItemPageController extends ControllerBase {
       '#attached' => [
         'library' => [
           'mukurtu_multipage_items/multipage-view-nav',
-          'mukurtu_multipage_items/splide',
         ],
       ],
     ];

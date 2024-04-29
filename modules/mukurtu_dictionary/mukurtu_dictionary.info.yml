@@ -5,6 +5,7 @@ core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'
 dependencies:
+  - blazy
   - facets
   - mukurtu_collection
   - mukurtu_core

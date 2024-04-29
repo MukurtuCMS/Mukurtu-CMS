@@ -4,6 +4,6 @@ dependencies:
   module:
     - media
 id: media.digital_heritage_sidebar
-label: 'Digital Heritage Sidebar'
+label: 'Medium (480px)'
 targetEntityType: media
 cache: true

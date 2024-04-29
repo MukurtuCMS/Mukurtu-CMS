@@ -39,6 +39,8 @@
  */
 #}
 
+{% set dot = "." %}
+
 {%
   set classes = [
     'paragraph',
@@ -79,9 +81,27 @@
 
         {# Date. #}
         {% if paragraph.field_original_date.date is not null %}
-          {{ paragraph.field_original_date.date|date("j F Y") }}.
+          {% set date = paragraph.field_original_date.date|split("-") %}
+          
+          {% apply spaceless %}
+            {%- if date[2] -%}
+            {% set day = "2024-" ~ "01-" ~ date[2] %}
+              {{- day|date("j") -}}&nbsp;
+            {%- endif -%}
+
+            {%- if date[1] -%}
+            {% set month = "2024-" ~ date[1] ~ "-01" %}
+              {{- month|date("F") -}}&nbsp;
+            {%- endif -%}
+
+            {%- if date[0] -%}
+              {{- date[0] -}}
+            {%- endif -%}
+            {{- dot -}}
+          {% endapply %}
+
         {% endif %}
-      
+
         {% endapply %}
     {% endblock %}
   </div>

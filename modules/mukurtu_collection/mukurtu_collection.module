@@ -161,26 +161,27 @@ function mukurtu_collection_entity_bundle_field_info_alter(&$fields, EntityTypeI
 
 /**
  * Implements hook_slick_settings_alter().
+ * Commented for now until we know for sure we don't need this.
  */
-function mukurtu_collection_slick_settings_alter(array &$build, $items) {
-  $id = \Drupal::routeMatch()->getRawParameter('node');
+// function mukurtu_collection_slick_settings_alter(array &$build, $items) {
+//   $id = \Drupal::routeMatch()->getRawParameter('node');
 
-  $options = &$build['optionset'];
+//   $options = &$build['optionset'];
 
-  $page = 0;
+//   $page = 0;
 
   // Select the current node in the slick slider.
-  if ($id) {
-    $refs = $items->referencedEntities();
-    foreach ($refs as $ref) {
-      if ($id == $ref->id()) {
-        $options->setSetting('initialSlide', $page);
-        continue;
-      }
-      $page++;
-    }
-  }
-}
+//   if ($id) {
+//     $refs = $items->referencedEntities();
+//     foreach ($refs as $ref) {
+//       if ($id == $ref->id()) {
+//         $options->setSetting('initialSlide', $page);
+//         continue;
+//       }
+//       $page++;
+//     }
+//   }
+// }
 
 
 /**

@@ -4,11 +4,11 @@ dependencies:
   config:
     - core.entity_view_mode.media.digital_heritage_full
     - core.entity_view_mode.media.digital_heritage_sidebar
+    - core.entity_view_mode.media.small_250px_
   module:
     - blazy
     - editor
     - media
-    - slick
 name: 'Basic HTML'
 format: basic_html
 weight: 0
@@ -19,7 +19,7 @@ filters:
     status: true
     weight: -10
     settings:
-      allowed_html: '<a href hreflang> <em> <strong> <cite> <blockquote cite> <code> <ul type> <ol start type> <li> <dl> <dt> <dd> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <p> <br> <span> <img src alt height width data-entity-type data-entity-uuid data-align data-caption> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title> <drupal-media data-entity-type data-entity-uuid data-view-mode data-align data-caption alt title>'
+      allowed_html: '<a href hreflang> <em> <strong> <cite> <blockquote cite> <code> <ul type> <ol start type> <li> <dl> <dt> <dd> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <p> <br> <span> <img src alt height width data-entity-type data-entity-uuid data-align data-caption> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title> <drupal-media data-entity-type data-entity-uuid data-view-mode data-align data-caption alt title><iframe src width height frameborder allowfullscreen>'
       filter_html_help: false
       filter_html_nofollow: false
   filter_align:
@@ -52,11 +52,11 @@ filters:
     status: true
     weight: 100
     settings:
-      default_view_mode: default
+      default_view_mode: digital_heritage_full
       allowed_view_modes:
-        default: default
         digital_heritage_full: digital_heritage_full
         digital_heritage_sidebar: digital_heritage_sidebar
+        small_250px_: small_250px_
       allowed_media_types:
         audio: audio
         document: document
@@ -84,46 +84,3 @@ filters:
         img: img
         iframe: iframe
       use_data_uri: '0'
-  slick_filter:
-    id: slick_filter
-    provider: slick
-    status: false
-    weight: 4
-    settings:
-      caption:
-        alt: '0'
-        title: '0'
-      optionset: default
-      layout: ''
-      background: false
-      box_caption: ''
-      box_caption_custom: ''
-      box_media_style: ''
-      loading: ''
-      box_style: ''
-      image_style: ''
-      media_switch: ''
-      ratio: ''
-      thumbnail_style: ''
-      grid: ''
-      grid_medium: ''
-      grid_small: ''
-      style: ''
-      skin: ''
-      overridables:
-        arrows: '0'
-        autoplay: '0'
-        dots: '0'
-        draggable: '0'
-        infinite: '0'
-        mouseWheel: '0'
-        randomize: '0'
-        variableWidth: '0'
-      optionset_thumbnail: ''
-      skin_thumbnail: ''
-      thumbnail_caption: ''
-      thumbnail_effect: ''
-      thumbnail_position: ''
-      override: false
-      preserve_keys: false
-      visible_items: null
