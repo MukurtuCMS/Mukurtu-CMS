@@ -1,8 +1,31 @@
 // Images embedded with ckeditor from media library have a caption option. 
-figure {
+figure,
+figure.align-center {
+  display: table;
   width: fit-content;
+  margin: 0;
+  padding: 0;
 
   figcaption {
+    display: table-caption;
+    caption-side: bottom;
+    margin-block-start: var(--v-space-5xs);
     font-style: italic;
+    line-height: var(--line-height-xs);
   }
+}
+
+figure.align-center,
+.media.align-center {
+  margin: var(--v-space-3xs) auto;
+}
+
+figure.align-left, 
+.media.align-left {
+  margin: var(--v-space-4xxs) var(--v-space-3xs) var(--v-space-4xxs) 0;
+}
+
+figure.align-right, 
+.media.align-right {
+  margin: var(--v-space-4xxs) 0 var(--v-space-4xxs) var(--v-space-3xs);
 }
