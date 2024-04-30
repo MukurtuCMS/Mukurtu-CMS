@@ -27,9 +27,20 @@ function mukurtu_v4_preprocess_breadcrumb(&$variables) {
  * Implements hook_preprocess_node().
  */
 function mukurtu_v4_preprocess_node(&$variables) {
-  if ($variables['node'] instanceof \Drupal\mukurtu_collection\Entity\Collection) {
-    $variables['collection_count'] = $variables['node']->getCount();
+  $node = $variables['node'];
+
+  if ($node instanceof \Drupal\mukurtu_collection\Entity\Collection) {
+    $variables['collection_count'] = $node->getCount();
   }
+
+  /*  */
+  $variables['thumbnail_display'] = $node->field_media_assets->view([
+    'type' => 'entity_reference_entity_view',
+    'label' => 'hidden',
+    'settings' => [
+      'view_mode' => 'carousel_thumbnail',
+    ],
+  ]);
 }
 
 /**

@@ -58,18 +58,14 @@
 
 {% if items|length > 1 %}
 
-{# The large size media carousel. #}
-  <section{{ attributes.addClass(classes, 'field__items splide media-carousel') }} aria-label="Media Assets Carousel">
-    <div class="splide__track">
-      <ul class="splide__list">  
+    {# The media carousel. #}
+    <div{{ attributes.addClass(classes, 'splide__track') }}>
+      <ul class="splide__list field__items">  
         {% for item in items %}
           <li{{ item.attributes.addClass('field__item splide__slide') }}>{{ item.content }}</li>
         {% endfor %}
       </ul>
     </div>
-  </section>
-
-  {# The thumbnail carousel. #}
 
   {% else %}
 
