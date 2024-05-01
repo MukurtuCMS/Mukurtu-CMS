@@ -6,24 +6,24 @@
   ((Drupal, once) => { 
     let main, thumbnails;
     /**
-     * Initialize the carousel.
+     * Initialize the carousels.
      */
     function init(el) {
       main = new Splide( '.splide.media-carousel', {
-        type      : 'fade',
-        rewind    : true,
+        type: 'fade',
+        rewind: true,
         pagination: false,
-        arrows    : false,
+        arrows: false,
       } );
     
       thumbnails = new Splide( '.splide.thumbnail-carousel', {
-        fixedWidth  : 100,
-        fixedHeight : 60,
-        gap         : 10,
-        rewind      : true,
-        pagination  : false,
+        autoWidth: true,
+        fixedHeight: '106px',
+        gap: '10px',
+        rewind: true,
+        pagination: false,
         isNavigation: true,
-        breakpoints : {
+        breakpoints: {
           600: {
             fixedWidth : 60,
             fixedHeight: 44,
@@ -39,9 +39,6 @@
     Drupal.behaviors.mediaAssetCarousel = {
       attach(context) {
         once("mediaAssets", ".media-carousels", context).forEach(init);
-
-       
-
 
           // Drupal.behaviors.mediaAssetCarousel.mediaAssetSlider = new Splide('.splide.media-carousel', {
           //   perPage: 3,

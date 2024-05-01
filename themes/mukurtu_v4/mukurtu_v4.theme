@@ -33,7 +33,9 @@ function mukurtu_v4_preprocess_node(&$variables) {
     $variables['collection_count'] = $node->getCount();
   }
 
-  /*  */
+  /** This creates a twig variable that can be used in node templates to 
+   * render the media assets field (a second time) with thumbnail display. 
+   */
   $variables['thumbnail_display'] = $node->field_media_assets->view([
     'type' => 'entity_reference_entity_view',
     'label' => 'hidden',

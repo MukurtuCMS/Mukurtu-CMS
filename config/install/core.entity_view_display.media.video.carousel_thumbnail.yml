@@ -2,21 +2,27 @@ langcode: en
 status: true
 dependencies:
   config:
-    - image.style.thumbnail
+    - core.entity_view_mode.media.carousel_thumbnail
+    - image.style.carousel_thumbnail
     - media.type.video
   module:
     - image
-id: media.video.default
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: media.video.carousel_thumbnail
 targetEntityType: media
 bundle: video
-mode: default
+mode: carousel_thumbnail
 content:
   thumbnail:
     type: image
     label: hidden
     settings:
       image_link: ''
-      image_style: thumbnail
+      image_style: carousel_thumbnail
       image_loading:
         attribute: lazy
     third_party_settings: {  }

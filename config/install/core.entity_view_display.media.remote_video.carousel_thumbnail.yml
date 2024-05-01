@@ -2,21 +2,27 @@ langcode: en
 status: true
 dependencies:
   config:
-    - image.style.thumbnail
-    - media.type.video
+    - core.entity_view_mode.media.carousel_thumbnail
+    - image.style.carousel_thumbnail
+    - media.type.remote_video
   module:
     - image
-id: media.video.default
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: media.remote_video.carousel_thumbnail
 targetEntityType: media
-bundle: video
-mode: default
+bundle: remote_video
+mode: carousel_thumbnail
 content:
   thumbnail:
     type: image
     label: hidden
     settings:
       image_link: ''
-      image_style: thumbnail
+      image_style: carousel_thumbnail
       image_loading:
         attribute: lazy
     third_party_settings: {  }
@@ -27,8 +33,8 @@ hidden:
   field_communities: true
   field_cultural_protocols: true
   field_identifier: true
+  field_media_oembed_video: true
   field_media_tags: true
-  field_media_video_file: true
   field_people: true
   field_thumbnail: true
   flag_export_media: true
