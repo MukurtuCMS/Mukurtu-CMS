@@ -67,6 +67,18 @@
  *
  */
 #}
+
+{# If there's more than 1 media asset, render code for carousels. #}
+{% if content.group_primary_fields.field_media_assets['#items']|length > 1 %}
+  {% set carousels = true %}
+{# If there's exactly one media asset, render the field without carousel code. #}
+{% elseif content.group_primary_fields.field_media_assets['#items']|length == 1 %} 
+  {% set carousels = false %}
+{% else %}
+{# If there are no media assets, don't render the field at all. #}
+  {% set carousels = null %}
+{% endif %}
+
 <article{{ attributes }}>
   <div{{ content_attributes }} class="full-node">
     {{ title_prefix }}
@@ -77,18 +89,20 @@
       <div class="full-node__main">
         <div class="full-node__content">
 
-          {# if media assets has more than one value #}
-          <div class="media-carousels">
-            <section class="splide media-carousel" aria-label="Media Assets Carousel">
-              {{ content.group_primary_fields.field_media_assets }}
-            </section>
+          {% if carousels %}
+            <div class="media-carousels">
+              <section class="splide media-carousel" aria-label="Media Assets Carousel">
+                {{ content.group_primary_fields.field_media_assets }}
+              </section>
 
-            <section class="splide thumbnail-carousel" aria-label="Thumbnail Carousel">
-              {{ thumbnail_display }}
-            </section>
-          </div>
+              <section class="splide thumbnail-carousel" aria-label="Thumbnail Carousel">
+                {{ thumbnail_display }}
+              </section>
+            </div>
 
-          {# else {{content.group_primary_fields.field_media_assets}} #}
+          {% elseif carousels == false  %}
+            {{ content.group_primary_fields.field_media_assets }}
+          {% endif %}
 
           {{ content.group_primary_fields|without('field_all_related_content', 'field_media_assets') }}
         </div>
