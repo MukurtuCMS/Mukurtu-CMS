@@ -39,19 +39,6 @@
     Drupal.behaviors.mediaAssetCarousel = {
       attach(context) {
         once("mediaAssets", ".media-carousels", context).forEach(init);
-
-          // Drupal.behaviors.mediaAssetCarousel.mediaAssetSlider = new Splide('.splide.media-carousel', {
-          //   perPage: 3,
-          //   isNavigation: true,
-          //   pagination: false,
-          //   updateOnMove: false,
-          //   trimSpace: true,
-          //   autoWidth: true,
-          //   autoHeight: true,
-          //   gap: '16px',
-          //   start: 0,
-          // }).mount();
-
       }
     };
   })(Drupal, once);

@@ -36,13 +36,18 @@ function mukurtu_v4_preprocess_node(&$variables) {
   /** This creates a twig variable that can be used in node templates to 
    * render the media assets field (a second time) with thumbnail display. 
    */
-  $variables['thumbnail_display'] = $node->field_media_assets->view([
-    'type' => 'entity_reference_entity_view',
-    'label' => 'hidden',
-    'settings' => [
-      'view_mode' => 'carousel_thumbnail',
-    ],
-  ]);
+
+  if ($node->hasField('field_media_assets')) {
+    if (!$node->field_media_assets->isEmpty()) {
+      $variables['thumbnail_display'] = $node->field_media_assets->view([
+        'type' => 'entity_reference_entity_view',
+        'label' => 'hidden',
+        'settings' => [
+          'view_mode' => 'carousel_thumbnail',
+        ],
+      ]);
+    }
+  }
 }
 
 /**
