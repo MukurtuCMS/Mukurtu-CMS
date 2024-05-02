@@ -56,23 +56,20 @@
  {{ attach_library('mukurtu_v4/splide') }}
  {{ attach_library('mukurtu_v4/media-carousel') }} 
 
+{# If there's more than 1 item in the media assets field, 
+render the rest of the code for the carousel. #}
 {% if items|length > 1 %}
-
-{# The large size media carousel. #}
-  <section{{ attributes.addClass(classes, 'field__items splide media-carousel') }} aria-label="Media Assets Carousel">
-    <div class="splide__track">
-      <ul class="splide__list">  
-        {% for item in items %}
-          <li{{ item.attributes.addClass('field__item splide__slide') }}>{{ item.content }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </section>
-
-  {# The thumbnail carousel. #}
-
-  {% else %}
-
+  {# The media carousel. #}
+  <div{{ attributes.addClass(classes, 'splide__track') }}>
+    <ul class="splide__list field__items">  
+      {% for item in items %}
+        <li{{ item.attributes.addClass('field__item splide__slide') }}>{{ item.content }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% else %}
+{# If there's only 1 item in the media assets field, 
+do not render carousel code. #}
   <div{{ attributes }}>
     <div class="field-item__container">
     {% for item in items %}
@@ -80,5 +77,4 @@
     {% endfor %}
     </div>
   </div>
-
 {% endif %}

@@ -2,29 +2,31 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.carousel_thumbnail
-    - image.style.carousel_thumbnail
-    - media.type.external_embed
+    - core.entity_view_mode.media.digital_heritage_sidebar
+    - media.type.video
   module:
-    - image
+    - file
     - layout_builder
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: media.external_embed.carousel_thumbnail
+id: media.video.digital_heritage_sidebar
 targetEntityType: media
-bundle: external_embed
-mode: carousel_thumbnail
+bundle: video
+mode: digital_heritage_sidebar
 content:
-  thumbnail:
-    type: image
+  field_media_video_file:
+    type: file_video
     label: hidden
     settings:
-      image_link: ''
-      image_style: carousel_thumbnail
-      image_loading:
-        attribute: lazy
+      controls: true
+      autoplay: false
+      loop: false
+      multiple_file_display_type: tags
+      muted: false
+      width: 640
+      height: 480
     third_party_settings: {  }
     weight: 0
     region: content
@@ -33,7 +35,6 @@ hidden:
   field_communities: true
   field_cultural_protocols: true
   field_identifier: true
-  field_media_external_embed: true
   field_media_tags: true
   field_people: true
   field_thumbnail: true
@@ -41,4 +42,5 @@ hidden:
   langcode: true
   name: true
   search_api_excerpt: true
+  thumbnail: true
   uid: true

@@ -68,3 +68,17 @@
     font-weight: var(--text-bold);
   }
 }
+
+// Media Asset Carousels.
+.media-carousel {
+  .media {
+    margin: var(--v-space-xs) auto var(--v-space-s);
+  }
+}
+
+.thumbnail-carousel {
+  img {
+    max-height: 100px;
+    width: auto;
+  }
+}

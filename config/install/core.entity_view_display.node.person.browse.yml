@@ -2,34 +2,46 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.content_browser
+    - core.entity_view_mode.node.browse
     - field.field.node.person.comment
     - field.field.node.person.field_mukurtu_cluster_lat
     - field.field.node.person.field_mukurtu_cluster_long
     - field.field.node.person.field_mukurtu_geojson
-    - image.style.media_library
     - node.type.person
   module:
     - layout_builder
-    - media
     - user
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: node.person.content_browser
+id: node.person.browse
 targetEntityType: node
 bundle: person
-mode: content_browser
+mode: browse
 content:
-  field_representative_media:
-    type: media_thumbnail
+  field_communities:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_content_type:
+    type: string
     label: hidden
     settings:
-      image_link: ''
-      image_style: media_library
-      image_loading:
-        attribute: lazy
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_representative_media:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: browse
+      link: false
     third_party_settings: {  }
     weight: 0
     region: content
@@ -38,8 +50,6 @@ hidden:
   draft: true
   field_all_related_content: true
   field_citation: true
-  field_communities: true
-  field_content_type: true
   field_cultural_protocols: true
   field_date_born: true
   field_date_died: true
@@ -56,7 +66,6 @@ hidden:
   field_related_people: true
   field_representative_terms: true
   field_sections: true
-  field_sequence_collection: true
   field_title: true
   flag_email_node: true
   flag_email_og: true

@@ -2,43 +2,47 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.carousel_thumbnail
-    - image.style.carousel_thumbnail
-    - media.type.external_embed
+    - core.entity_view_mode.media.browse
+    - media.type.audio
   module:
-    - image
+    - blazy
+    - file
     - layout_builder
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: media.external_embed.carousel_thumbnail
+id: media.audio.browse
 targetEntityType: media
-bundle: external_embed
-mode: carousel_thumbnail
+bundle: audio
+mode: browse
 content:
-  thumbnail:
-    type: image
+  field_media_audio_file:
+    type: file_audio
     label: hidden
     settings:
-      image_link: ''
-      image_style: carousel_thumbnail
-      image_loading:
-        attribute: lazy
-    third_party_settings: {  }
+      controls: true
+      autoplay: false
+      loop: false
+      multiple_file_display_type: tags
+    third_party_settings:
+      blazy:
+        blazy: true
     weight: 0
     region: content
 hidden:
   created: true
   field_communities: true
+  field_contributor: true
   field_cultural_protocols: true
   field_identifier: true
-  field_media_external_embed: true
   field_media_tags: true
   field_people: true
   field_thumbnail: true
+  field_transcription: true
   flag_export_media: true
   langcode: true
   name: true
   search_api_excerpt: true
+  thumbnail: true
   uid: true

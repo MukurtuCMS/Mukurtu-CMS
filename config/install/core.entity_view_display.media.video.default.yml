@@ -11,11 +11,6 @@ targetEntityType: media
 bundle: video
 mode: default
 content:
-  flag_export_media:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 1
-    region: content
   thumbnail:
     type: image
     label: hidden
@@ -36,6 +31,7 @@ hidden:
   field_media_video_file: true
   field_people: true
   field_thumbnail: true
+  flag_export_media: true
   langcode: true
   name: true
   search_api_excerpt: true
