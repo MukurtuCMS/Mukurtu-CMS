@@ -2,34 +2,30 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.browse_collections
+    - core.entity_view_mode.node.teaser
     - field.field.node.collection.comment
     - field.field.node.collection.field_mukurtu_cluster_lat
     - field.field.node.collection.field_mukurtu_cluster_long
     - field.field.node.collection.field_mukurtu_geojson
-    - image.style.media_library
     - node.type.collection
   module:
     - layout_builder
-    - media
     - user
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: node.collection.browse_collections
+id: node.collection.teaser
 targetEntityType: node
 bundle: collection
-mode: browse_collections
+mode: teaser
 content:
   field_representative_media:
-    type: media_thumbnail
+    type: entity_reference_entity_view
     label: hidden
     settings:
-      image_link: ''
-      image_style: media_library
-      image_loading:
-        attribute: lazy
+      view_mode: digital_heritage_sidebar
+      link: false
     third_party_settings: {  }
     weight: 0
     region: content
