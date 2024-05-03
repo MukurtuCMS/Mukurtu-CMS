@@ -32,9 +32,10 @@
             isNavigation: true,
             pagination: false,
             updateOnMove: false,
-            trimSpace: true,
+            trimSpace: false,
             autoWidth: true,
             autoHeight: true,
+            focus: 1,
             gap: '16px',
             start: document.getElementById('multipage-item-table-of-contents').selectedIndex,
           }).mount();

@@ -8,7 +8,7 @@ dependencies:
     - field.field.node.digital_heritage.field_mukurtu_cluster_lat
     - field.field.node.digital_heritage.field_mukurtu_cluster_long
     - field.field.node.digital_heritage.field_mukurtu_geojson
-    - image.style.media_library
+    - image.style.carousel_thumbnail
     - node.type.digital_heritage
   module:
     - layout_builder
@@ -36,7 +36,7 @@ content:
     label: hidden
     settings:
       image_link: ''
-      image_style: media_library
+      image_style: carousel_thumbnail
       image_loading:
         attribute: lazy
     third_party_settings: {  }

@@ -38,6 +38,11 @@
     justify-content: center;
   }
 
+  .splide__track {
+    width: 90%;
+    margin: 0 auto;
+  }
+
   &__navigation {
     width: fit-content;
     margin: 0 auto var(--v-space-2xs);
@@ -80,13 +85,18 @@
 // Media Asset Carousels.
 .media-carousel {
   .media {
-    margin: var(--v-space-xs) auto var(--v-space-s);
+    margin: 0 auto var(--v-space-s);
   }
 }
 
 .thumbnail-carousel {
   .splide__list {
     justify-content: center;
+  }
+
+  .splide__track {
+    width: 85%;
+    margin: 0 auto;
   }
 
   img {
