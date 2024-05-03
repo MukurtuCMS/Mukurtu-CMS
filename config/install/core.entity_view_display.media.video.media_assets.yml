@@ -26,8 +26,8 @@ content:
       loop: false
       multiple_file_display_type: tags
       muted: false
-      width: 480
-      height: 270
+      width: 900
+      height: 506
     third_party_settings:
       blazy:
         blazy: false
