@@ -11,7 +11,7 @@
      */
     function tabRefresh(e) {
       // console.log("tab has been CLICKED");
-ß
+
       main.refresh();
       thumbnails.refresh();
     }
@@ -20,14 +20,18 @@
      * Initialize the carousels.
      */
     function init(el) {
-      main = new Splide( '.splide.media-carousel', {
+      const id = el.dataset.id;
+      const mediaSelector =`[data-id="${id}"] .splide.media-carousel`;
+      const thumbSelector =`[data-id="${id}"] .splide.thumbnail-carousel`;
+
+      main = new Splide(mediaSelector, {
         type: 'fade',
         rewind: true,
         pagination: false,
         arrows: false,
       } );
-    
-      thumbnails = new Splide( '.splide.thumbnail-carousel', {
+
+      thumbnails = new Splide(thumbSelector, {
         autoWidth: true,
         fixedHeight: '106px',
         gap: '10px',
@@ -53,6 +57,7 @@
     Drupal.behaviors.mediaAssetCarousel = {
       attach(context) {
         once("mediaAssets", ".media-carousels", context).forEach(init);
+        console.log("I AM ATTACHED");
       }
     };
   })(Drupal, once);
