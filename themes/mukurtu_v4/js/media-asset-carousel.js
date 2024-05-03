@@ -3,7 +3,7 @@
  * Initialize Splide carousel for DH nodes that have multiple media assets.
  */
 
-  ((Drupal) => { 
+  ((Drupal, once) => { 
     let main, thumbnails, tabs;
 
     /**
@@ -11,9 +11,7 @@
      */
     function tabRefresh(e) {
       // console.log("tab has been CLICKED");
-      // main.sync( thumbnails );
-      // main.mount();
-      // thumbnails.mount();
+ß
       main.refresh();
       thumbnails.refresh();
     }
@@ -57,4 +55,4 @@
         once("mediaAssets", ".media-carousels", context).forEach(init);
       }
     };
-  })(Drupal);
+  })(Drupal, once);
