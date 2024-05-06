@@ -4,18 +4,8 @@
  */
 
   ((Drupal, once) => { 
-    let main, thumbnails, tabs;
+    let main, thumbnails;
 
-    /**
-     * Refresh carousels on click of tab, if tabs exist.
-     */
-    // function tabRefresh(e) {
-      // console.log("tab has been CLICKED");
-
-    //   main.refresh();
-    //   thumbnails.refresh();
-    // }
-    
     /**
      * Initialize the carousels.
      */
@@ -49,9 +39,6 @@
       main.sync( thumbnails );
       main.mount();
       thumbnails.mount();
-
-      // tabs = document.querySelector('.horizontal-tabs-list');
-      // tabs.addEventListener("click", tabRefresh);
     }
   
     Drupal.behaviors.mediaAssetCarousel = {
