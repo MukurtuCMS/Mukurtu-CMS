@@ -12,7 +12,6 @@
             }
             window.history.replaceState({}, '', newUrl);
           } catch (error) {
-            // console.log(error);
             return false;
           }
           return true;
@@ -32,10 +31,9 @@
             isNavigation: true,
             pagination: false,
             updateOnMove: false,
-            trimSpace: false,
+            trimSpace: true,
             autoWidth: true,
             autoHeight: true,
-            focus: 1,
             gap: '16px',
             start: document.getElementById('multipage-item-table-of-contents').selectedIndex,
           }).mount();

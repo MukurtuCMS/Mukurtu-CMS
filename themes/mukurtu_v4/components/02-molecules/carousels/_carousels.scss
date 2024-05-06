@@ -34,7 +34,7 @@
 }
 
 .multipage-carousel {
-  .splide__list {
+  &.splide:not(.is-overflow) .splide__list {
     justify-content: center;
   }
 

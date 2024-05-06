@@ -9,12 +9,12 @@
     /**
      * Refresh carousels on click of tab, if tabs exist.
      */
-    function tabRefresh(e) {
+    // function tabRefresh(e) {
       // console.log("tab has been CLICKED");
 
-      main.refresh();
-      thumbnails.refresh();
-    }
+    //   main.refresh();
+    //   thumbnails.refresh();
+    // }
     
     /**
      * Initialize the carousels.
@@ -50,14 +50,13 @@
       main.mount();
       thumbnails.mount();
 
-      tabs = document.querySelector('.horizontal-tabs-list');
-      tabs.addEventListener("click", tabRefresh);
+      // tabs = document.querySelector('.horizontal-tabs-list');
+      // tabs.addEventListener("click", tabRefresh);
     }
   
     Drupal.behaviors.mediaAssetCarousel = {
       attach(context) {
         once("mediaAssets", ".media-carousels", context).forEach(init);
-        console.log("I AM ATTACHED");
       }
     };
   })(Drupal, once);
