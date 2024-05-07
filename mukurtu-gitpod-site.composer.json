@@ -28,12 +28,25 @@
                 },
                 "type": "drupal-library"
             }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "mukurtu/colorbox",
+                "version": "1.6.4",
+                "dist": {
+                    "url": "https://github.com/jackmoore/colorbox/archive/master.zip",
+                    "type": "zip"
+                },
+                "type": "drupal-library"
+            }
         }
     ],
     "require": {
         "composer/installers": "^1.9",
         "cweagans/composer-patches": "^1.7",
         "drupal/blazy": "^2.24",
+        "drupal/colorbox": "^2.0",
         "drupal/config_pages": "^2.15",
         "drupal/console": "~1.0",
         "drupal/content_browser": "*",
