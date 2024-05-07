@@ -24,6 +24,18 @@
         },
         "type": "drupal-library"
       }
+    },
+    {
+      "type": "package",
+      "package": {
+          "name": "mukurtu/colorbox",
+          "version": "1.6.4",
+          "dist": {
+              "url": "https://github.com/jackmoore/colorbox/archive/master.zip",
+              "type": "zip"
+          },
+          "type": "drupal-library"
+      }
     }
   ],
   "require": {
