@@ -104,3 +104,39 @@
     width: auto;
   }
 }
+
+// Images inside the media assets library have colorbox on.
+// Colorbox CSS uses IDs. Thus an ID must be used here for override. 
+#cboxClose {
+  color: var(--light-text-color);
+  background: var(--brand-primary-dark);
+  font-size: var(--font-size-base);
+  font-weight: var(--text-bold);
+  letter-spacing: var(--letter-spacing-label);
+  border: none;
+  padding: var(--v-space-5xs) var(--v-space-2xs);
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: var(--light-text-color);
+    background: var(--brand-primary-accent);
+  }
+
+  &:focus {
+    outline: 2px solid var(--focus-color);
+  }
+
+  &:disabled {
+    color: var(--light-text-color);
+    background: var(--brand-text-color);
+  }
+}
+
+#cboxTitle {
+  color: var(--color-black);
+}
+
+.cboxPhoto {
+  margin: var(--v-space-2xs);
+}
