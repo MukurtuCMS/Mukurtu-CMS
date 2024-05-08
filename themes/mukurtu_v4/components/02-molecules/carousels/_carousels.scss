@@ -87,6 +87,14 @@
   .media {
     margin: 0 auto var(--v-space-s);
   }
+
+  .splide__list {
+    align-items: flex-start;
+  }
+
+  .splide__slide:not(.is-active) {
+    height: 0;    // or 100vh, or something what fits your case
+  }
 }
 
 .thumbnail-carousel {
