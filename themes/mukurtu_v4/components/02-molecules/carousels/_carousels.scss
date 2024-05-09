@@ -115,6 +115,10 @@
 
 // Images inside the media assets library have colorbox on.
 // Colorbox CSS uses IDs. Thus an ID must be used here for override. 
+#colorbox {
+  top: 0 !important;
+}
+
 #cboxClose {
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
@@ -122,7 +126,9 @@
   font-weight: var(--text-bold);
   letter-spacing: var(--letter-spacing-label);
   border: none;
-  padding: var(--v-space-5xs) var(--v-space-2xs);
+  padding: var(--v-space-5xs);
+  top: 0;
+  bottom: unset;
 
   &:hover,
   &:active,

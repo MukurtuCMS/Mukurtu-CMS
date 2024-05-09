@@ -1,7 +1,7 @@
 dompurify_hide_warning: false
 custom:
   style: example4
-  activate: 0
+  activate: 1
   transition_type: elastic
   transition_speed: 350
   opacity: 0.85
@@ -9,13 +9,13 @@ custom:
   text_previous: '« Prev'
   text_next: 'Next »'
   text_close: Close
-  maxwidth: 98%
-  maxheight: 98%
-  initialwidth: '300'
-  initialheight: '250'
+  maxwidth: 2000px
+  maxheight: 2000px
+  initialwidth: 200px
+  initialheight: 200px
   overlayclose: true
   returnfocus: true
-  fixed: true
+  fixed: false
   scrolling: true
   slideshow:
     slideshow: 0
