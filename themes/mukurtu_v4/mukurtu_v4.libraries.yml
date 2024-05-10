@@ -23,6 +23,7 @@ media-carousel:
   dependencies:
     - core/drupal
     - core/once
+    - core/jquery
 
 splide:
   version: 4.1.2

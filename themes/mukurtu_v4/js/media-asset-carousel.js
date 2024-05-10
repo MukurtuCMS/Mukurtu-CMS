@@ -5,18 +5,23 @@
 
   ((Drupal, once) => { 
     let main, thumbnails;
+
     /**
      * Initialize the carousels.
      */
     function init(el) {
-      main = new Splide( '.splide.media-carousel', {
+      const id = el.dataset.id;
+      const mediaSelector =`[data-id="${id}"] .splide.media-carousel`;
+      const thumbSelector =`[data-id="${id}"] .splide.thumbnail-carousel`;
+
+      main = new Splide(mediaSelector, {
         type: 'fade',
         rewind: true,
         pagination: false,
         arrows: false,
       } );
-    
-      thumbnails = new Splide( '.splide.thumbnail-carousel', {
+
+      thumbnails = new Splide(thumbSelector, {
         autoWidth: true,
         fixedHeight: '106px',
         gap: '10px',
@@ -30,7 +35,7 @@
           },
         },
       } );
-      
+
       main.sync( thumbnails );
       main.mount();
       thumbnails.mount();

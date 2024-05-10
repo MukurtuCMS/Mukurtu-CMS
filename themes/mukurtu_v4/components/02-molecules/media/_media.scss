@@ -3,10 +3,17 @@
 // Digital Heritage content type, Main.
 .media {
   &--audio {
+    width: 100%;
+
     .b-lazy {
       height: revert;
       min-height: max-content;
+      width: 100%;
     }
+  }
+
+  .field--name-field-media-audio-file {
+    width: 100%;
   }
 }
 
@@ -17,6 +24,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+
+  .button {
+    margin-block-start: var(--v-space-5xs);
+  }
 }
 
 .media--remote_video {

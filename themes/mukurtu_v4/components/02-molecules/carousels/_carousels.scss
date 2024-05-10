@@ -33,52 +33,124 @@
   }
 }
 
-.multipage-carousel__navigation {
-  width: fit-content;
-  margin: 0 auto var(--v-space-2xs);
+.multipage-carousel {
+  &.splide:not(.is-overflow) .splide__list {
+    justify-content: center;
+  }
 
-  .js-form-type-select {
-    position: relative;
+  .splide__track {
+    width: 90%;
+    margin: 0 auto;
+  }
 
-    &::after {
-      content: '';
-      display: inline-block;
-      position: absolute;
-      right: 15px;
-      margin: auto;
-      top: 20px;
-      width: 0;
-      height: 0;
-      border-style: solid;
-      border-width: var(--v-space-5xs)var(--v-space-5xs) 0 var(--v-space-5xs);
-      border-color: var(--brand-primary-accent) transparent transparent transparent;
+  &__navigation {
+    width: fit-content;
+    margin: 0 auto var(--v-space-2xs);
+
+    // Navigation/jump to drop down.
+    .js-form-type-select {
+      position: relative;
+
+      &::after {
+        content: '';
+        display: inline-block;
+        position: absolute;
+        right: 15px;
+        margin: auto;
+        top: 20px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: var(--v-space-5xs)var(--v-space-5xs) 0 var(--v-space-5xs);
+        border-color: var(--brand-primary-accent) transparent transparent transparent;
+      }
+    }
+
+    .form-select {
+      appearance: none;
+      border: none;
+      background: var(--brand-light-accent);
+      padding: var(--v-space-4xxs) var(--v-space-2xs) var(--v-space-4xxs) var(--v-space-5xs);
+      margin-inline-start: var(--v-space-6xs);
+      width: 250px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      font-weight: var(--text-bold);
     }
   }
-
-  .form-select {
-    appearance: none;
-    border: none;
-    background: var(--brand-light-accent);
-    padding: var(--v-space-4xxs) var(--v-space-2xs) var(--v-space-4xxs) var(--v-space-5xs);
-    margin-inline-start: var(--v-space-6xs);
-    width: 250px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    font-weight: var(--text-bold);
-  }
 }
+
 
 // Media Asset Carousels.
 .media-carousel {
   .media {
-    margin: var(--v-space-xs) auto var(--v-space-s);
+    margin: 0 auto var(--v-space-s);
+  }
+
+  .splide__list {
+    align-items: flex-start;
+  }
+
+  .splide__slide:not(.is-active) {
+    height: 0;    // or 100vh, or something what fits your case
   }
 }
 
 .thumbnail-carousel {
+  &.splide:not(.is-overflow) .splide__list {
+    justify-content: center;
+  }
+
+  .splide__track {
+    width: 85%;
+    margin: 0 auto;
+  }
+
   img {
     max-height: 100px;
     width: auto;
   }
+}
+
+// Images inside the media assets library have colorbox on.
+// Colorbox CSS uses IDs. Thus an ID must be used here for override. 
+#colorbox {
+  top: 0 !important;
+}
+
+#cboxClose {
+  color: var(--light-text-color);
+  background: var(--brand-primary-dark);
+  font-size: var(--font-size-base);
+  font-weight: var(--text-bold);
+  letter-spacing: var(--letter-spacing-label);
+  border: none;
+  padding: var(--v-space-5xs);
+  top: 0;
+  bottom: unset;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: var(--light-text-color);
+    background: var(--brand-primary-accent);
+  }
+
+  &:focus {
+    outline: 2px solid var(--focus-color);
+  }
+
+  &:disabled {
+    color: var(--light-text-color);
+    background: var(--brand-text-color);
+  }
+}
+
+#cboxTitle {
+  color: var(--color-black);
+}
+
+.cboxPhoto {
+  margin: var(--v-space-2xs);
 }

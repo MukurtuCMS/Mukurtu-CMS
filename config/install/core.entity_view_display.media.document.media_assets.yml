@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.media.media_assets
-    - image.style.medium_480px_w_
+    - image.style.large
     - media.type.document
   module:
     - file
@@ -30,7 +30,7 @@ content:
     label: hidden
     settings:
       image_link: ''
-      image_style: medium_480px_w_
+      image_style: large
       image_loading:
         attribute: lazy
     third_party_settings: {  }
