@@ -43,19 +43,19 @@ class MukurtuFooterBlock extends BlockBase {
       '#logos' => $config['logo_upload'],
       '#email_us_text' => $config['email_us_text'],
       '#contact_email_address' => $config['contact_email_address'],
-      '#twitter_message_text' => $config['social_media']['twitter']['message_text'],
+      '#twitter' => $config['social_media']['twitter']['message_text'],
       '#twitter_accounts' => [
         $config['social_media']['twitter']['account_1'],
         $config['social_media']['twitter']['account_2'],
         $config['social_media']['twitter']['account_3'],
       ],
-      '#facebook_message_text' => $config['social_media']['facebook']['message_text'],
+      '#facebook' => $config['social_media']['facebook']['message_text'],
       '#facebook_accounts' => [
         $config['social_media']['facebook']['account_1'],
         $config['social_media']['facebook']['account_2'],
         $config['social_media']['facebook']['account_3'],
       ],
-      '#instagram_message_text' => $config['social_media']['instagram']['message_text'],
+      '#instagram' => $config['social_media']['instagram']['message_text'],
       '#instagram_accounts' => [
         $config['social_media']['instagram']['account_1'],
         $config['social_media']['instagram']['account_2'],
