@@ -1,3 +1,4 @@
+{# {{dump()}} #}
 <div class="mukurtu-footer">
   {% if logos %}
     <div class="logos">
@@ -10,12 +11,19 @@
       {% endfor %}
     </div>
   {% endif %}
+
+  {# Email. #}
+  <div class="email">
   {% if email_us_text %}
     <div class="email-us-text">{{ email_us_text }}</div>
   {% endif %}
   {% if contact_email_address %}
 	  <div class="contact-email-address">{{ contact_email_address }}</div>
   {% endif %}
+  </div>
+
+  {# Socials. #}
+  <div class="socials">
   {% if twitter_message_text %}
 	  <div class="twitter-message-text">{{ twitter_message_text }}</div>
   {% endif %}
@@ -28,10 +36,11 @@
       {% endfor %}
     </div>
   {% endif %}
+
   {% if facebook_message_text %}
 	  <div class="facebook-message-text">{{ facebook_message_text }}</div>
   {% endif %}
-  {% if facebook_accounts %}
+  {% if facebook_accounts is not empty %}
     <div class="facebook-accounts">
       {% for account in facebook_accounts %}
         {% if account %}
@@ -40,6 +49,7 @@
       {% endfor %}
     </div>
   {% endif %}
+
   {% if instagram_message_text %}
 	  <div class="instagram-message-text">{{ instagram_message_text }}</div>
   {% endif %}
@@ -52,6 +62,8 @@
       {% endfor %}
     </div>
   {% endif %}
+  </div>
+
   {% if copyright_message %}
     <div class="copyright-message">{{ copyright_message }}</div>
   {% endif %}

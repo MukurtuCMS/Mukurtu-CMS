@@ -1,0 +1,77 @@
+// Mukurtu Footer.
+
+.footer {
+  @include layout--full-width-grid;
+
+  background-color: var(--footer-bg-color);
+  color: var(--footer-text-color);
+
+  .region {
+    grid-column: 1 / -1;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+  }
+
+  .logos {
+    display: flex;
+    flex-direction: row;
+    gap: var(--v-space-2xs);
+    align-items: baseline;
+    justify-content: center;
+  }
+
+  .logo {
+    flex: 0 1 33%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      width: auto;
+      max-height: 150px;
+    }
+  }
+
+  .twitter-message-text {
+    position: relative;
+
+    &::before {
+      content: url("../images/twitter.svg");
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
+
+  .facebook-message-text {
+    position: relative;
+
+    &::before {
+      content: url("../images/facebook.svg");
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
+
+  .instagram-message-text {
+    position: relative;
+
+    &::before {
+      content: url("../images/instagram.svg");
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
+}
+
+.socials {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.email {
+  display: flex;
+  flex-direction: row;
+}
