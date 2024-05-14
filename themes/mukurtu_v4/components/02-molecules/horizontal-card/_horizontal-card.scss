@@ -37,6 +37,10 @@
     }
   }
 
+  a {
+    display: inline-block;
+  }
+
   &__content-body {
     margin-block-start: var(--v-space-3xs);
 

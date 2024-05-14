@@ -271,6 +271,7 @@ display:
     display_plugin: block
     position: 1
     display_options:
+      exposed_block: true
       display_extenders: {  }
     cache_metadata:
       max-age: -1
