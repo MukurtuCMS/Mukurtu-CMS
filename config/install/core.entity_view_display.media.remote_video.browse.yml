@@ -1,13 +1,13 @@
+uuid: f2d8db67-91a8-4922-9f5d-cc62aee3b732
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.media.browse
-    - image.style.medium_480px_w_
     - media.type.remote_video
   module:
-    - image
     - layout_builder
+    - media
 third_party_settings:
   layout_builder:
     enabled: false
@@ -17,14 +17,12 @@ targetEntityType: media
 bundle: remote_video
 mode: browse
 content:
-  thumbnail:
-    type: image
+  field_media_oembed_video:
+    type: oembed
     label: hidden
     settings:
-      image_link: ''
-      image_style: medium_480px_w_
-      image_loading:
-        attribute: lazy
+      max_width: 500
+      max_height: 0
     third_party_settings: {  }
     weight: 0
     region: content
@@ -33,7 +31,6 @@ hidden:
   field_communities: true
   field_cultural_protocols: true
   field_identifier: true
-  field_media_oembed_video: true
   field_media_tags: true
   field_people: true
   field_thumbnail: true
@@ -41,4 +38,5 @@ hidden:
   langcode: true
   name: true
   search_api_excerpt: true
+  thumbnail: true
   uid: true
