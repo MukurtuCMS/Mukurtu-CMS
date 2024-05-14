@@ -1,4 +1,6 @@
-.digital-heritage {
+// Digital Heritage Browse and General Browse.
+
+.browse {
   // Default view mode is used in the Realted Content field on Collections.
   &__default {
     &__header {
@@ -324,6 +326,7 @@
           ul {
             padding-inline: var(--v-space-4xxs);
             padding-block-end: var(--v-space-4xs);
+            text-transform: capitalize;
 
             li {
               list-style: none;
@@ -340,6 +343,7 @@
       display: flex;
       gap: var(--v-space-4xxs);
       padding: 0;
+      justify-content: center;
     }
 
     // List item.

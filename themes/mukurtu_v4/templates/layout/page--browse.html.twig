@@ -47,15 +47,15 @@
 {% block page_content %}
 {{ attach_library('mukurtu_v4/toggle-dh-view') }}
 
-  <div class="digital-heritage">
+  <div class="browse">
     {# link is in html.html.twig #}
     {% if page.sidebar_first %}
-      <aside class="digital-heritage__layout-sidebar-first" role="complementary">
+      <aside class="browse__layout-sidebar-first" role="complementary">
         {{ page.sidebar_first }}
       </aside>
     {% endif %}
 
-    <div class="digital-heritage__main-content">
+    <div class="browse__main-content">
       {{ page.content }}
     </div>
     {# /.layout-content #}

@@ -84,9 +84,9 @@
       }
 
       .field__items {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--v-space-6xs);
+        .field__item {
+          display: inline-block;
+        }
 
         .field__item:not(:last-of-type) {
           &::after {
