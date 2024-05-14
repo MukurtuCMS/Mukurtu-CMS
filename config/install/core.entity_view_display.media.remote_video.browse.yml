@@ -1,4 +1,3 @@
-uuid: f2d8db67-91a8-4922-9f5d-cc62aee3b732
 langcode: en
 status: true
 dependencies:
@@ -21,7 +20,7 @@ content:
     type: oembed
     label: hidden
     settings:
-      max_width: 500
+      max_width: 800
       max_height: 0
     third_party_settings: {  }
     weight: 0

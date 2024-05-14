@@ -3,21 +3,38 @@
 .horizontal-card {
   padding-block: var(--v-space-2xs);
   display: grid;
-  grid-template-columns: var(--grid-9col);
-  grid-gap: var(--v-space-2xs);
+  grid-template-columns: 1fr;
+  gap: var(--v-space-2xs);
+
+
+  @include media('>=md') {
+    grid-template-columns: var(--grid-9col);
+  }
 
   // Media container.
   &__media {
-    grid-column: 1 / span 3;
+    grid-column: 1 / span 1;
+
+    @include media('>=md') {
+      grid-column: 1 / span 3;
+    }
 
     // Ensure embedded videos don't get weird height.
     .media iframe {
-      height: auto;
+      height: revert-layer;
+
+      @include media('>=md') {
+        height: auto;
+      }
     }
   }
 
   &__content {
-    grid-column: 4 / span 6;
+    grid-column: 1 / span 1;
+
+    @include media('>=md') {
+      grid-column: 4 / span 6;
+    }
   }
 
   &__content-header {
@@ -40,10 +57,6 @@
     svg {
       fill: var(--brand-secondary);
     }
-  }
-
-  a {
-    display: inline-block;
   }
 
   &__content-body {
