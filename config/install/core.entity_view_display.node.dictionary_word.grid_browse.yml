@@ -1,4 +1,3 @@
-uuid: dfaba0f4-723d-4eb7-88e6-00d72c13e02b
 langcode: en
 status: true
 dependencies:
@@ -16,8 +15,6 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-_core:
-  default_config_hash: nW292J2jJ8LNwLs34gg6fl7ZMGCrLDiO9g5gHqmd_hE
 id: node.dictionary_word.grid_browse
 targetEntityType: node
 bundle: dictionary_word

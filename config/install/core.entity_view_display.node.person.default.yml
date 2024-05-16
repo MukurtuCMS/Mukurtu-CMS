@@ -1,4 +1,3 @@
-uuid: cbba6a64-1261-4f91-b51a-554645888e1b
 langcode: en
 status: true
 dependencies:
@@ -11,8 +10,6 @@ dependencies:
   module:
     - datetime
     - user
-_core:
-  default_config_hash: tor5Kf-MaogUV2QTmBSLJTYLASVYpJkgEgbck5NNXuI
 id: node.person.default
 targetEntityType: node
 bundle: person
