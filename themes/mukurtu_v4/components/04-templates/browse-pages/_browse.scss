@@ -326,7 +326,6 @@
           ul {
             padding-inline: var(--v-space-4xxs);
             padding-block-end: var(--v-space-4xs);
-            text-transform: capitalize;
 
             li {
               list-style: none;
@@ -350,6 +349,10 @@
     &__item {
       list-style: none;
       font-weight: var(--text-bold);
+
+      a {
+        padding: var(--v-space-5xs);
+      }
     }
 
     .is-active {
@@ -357,8 +360,6 @@
         color: var(--brand-text-color);
         text-decoration: none;
         border-bottom: 5px solid var(--brand-secondary);
-        padding-block-end: var(--v-space-6xs);
-        padding-inline: var(--v-space-6xs);
       }
     }
   }

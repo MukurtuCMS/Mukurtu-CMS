@@ -76,7 +76,7 @@
     {% if media_bundle is same as 'image' %}
     <a href="{{ url }}" aria-hidden="true" tabindex="-1">
     {% endif %}
-      {{ content.field_representative_media }}
+      {{ content.field_collection_image }}
     {% if media_bundle is same as 'image' %}
     </a>
     {% endif %}
@@ -92,8 +92,8 @@
     </div>
 
     <div class="horizontal-card__content-body">
-      {{ content.field_communities }}
-      {{ content.field_category }}
+      <span class="tag">{{ node.type.entity.label }}</span>
+      {{ content|without('field_collection_image') }}
     </div>
   </div>
 </article>
