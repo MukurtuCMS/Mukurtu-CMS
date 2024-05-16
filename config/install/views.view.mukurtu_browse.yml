@@ -1,3 +1,4 @@
+uuid: d6d7fa00-6331-431d-bab8-c31bd5294157
 langcode: en
 status: true
 dependencies:
@@ -5,6 +6,8 @@ dependencies:
     - search_api.index.mukurtu_default_content_index
   module:
     - search_api
+_core:
+  default_config_hash: 51VqWP67DWv9dNeIz6LUBI7cF6gFmwtU0H3bHyM0kMY
 id: mukurtu_browse
 label: 'Mukurtu Browse'
 module: views

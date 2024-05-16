@@ -1,0 +1,12 @@
+uuid: 19abe038-3d47-457b-ba48-930758af277d
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: ZUlJTEBe-Xw0pVb272kcupZ0vubwEAY2OLdElLI4SaQ
+id: node.browse
+label: 'List Browse'
+targetEntityType: node
+cache: true

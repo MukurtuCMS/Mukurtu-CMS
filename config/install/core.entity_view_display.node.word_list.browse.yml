@@ -1,26 +1,37 @@
+uuid: eb760b72-203e-4c16-bee9-b35ab796bc03
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.node.browse
-    - field.field.node.collection.comment
-    - field.field.node.collection.field_mukurtu_cluster_lat
-    - field.field.node.collection.field_mukurtu_cluster_long
-    - field.field.node.collection.field_mukurtu_geojson
-    - node.type.collection
+    - field.field.node.word_list.comment
+    - field.field.node.word_list.field_mukurtu_cluster_lat
+    - field.field.node.word_list.field_mukurtu_cluster_long
+    - field.field.node.word_list.field_mukurtu_geojson
+    - node.type.word_list
   module:
     - layout_builder
+    - text
     - user
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: node.collection.browse
+_core:
+  default_config_hash: fhwumd5r9dOwkO0LqQgsyZivmOS77UHwKoeKTNjQUeo
+id: node.word_list.browse
 targetEntityType: node
-bundle: collection
+bundle: word_list
 mode: browse
 content:
-  field_collection_image:
+  field_citation:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_representative_media:
     type: entity_reference_entity_view
     label: hidden
     settings:
@@ -29,11 +40,11 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
-  field_summary:
-    type: string
-    label: hidden
+  field_words:
+    type: entity_reference_label
+    label: above
     settings:
-      link_to_entity: false
+      link: true
     third_party_settings: {  }
     weight: 1
     region: content
@@ -41,29 +52,25 @@ hidden:
   comment: true
   draft: true
   field_all_related_content: true
-  field_child_collections: true
-  field_citation: true
   field_communities: true
   field_cultural_protocols: true
   field_description: true
   field_in_collection: true
-  field_items_in_collection: true
   field_keywords: true
+  field_media_assets: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
   field_multipage_page_of: true
-  field_parent_collection: true
   field_related_content: true
-  field_representative_media: true
+  field_sequence_collection: true
   field_source: true
+  field_summary: true
   field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true
-  flag_mukurtu_email_collection: true
   flag_mukurtu_email_og: true
-  flag_mukurtu_follow_collection: true
   flag_subscribe_node: true
   flag_subscribe_og: true
   langcode: true

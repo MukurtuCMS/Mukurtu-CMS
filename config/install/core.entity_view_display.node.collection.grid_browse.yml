@@ -1,8 +1,9 @@
+uuid: 5b10216c-2f41-4f26-b30b-9e81206e5f60
 langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.browse
+    - core.entity_view_mode.node.grid_browse
     - field.field.node.collection.comment
     - field.field.node.collection.field_mukurtu_cluster_lat
     - field.field.node.collection.field_mukurtu_cluster_long
@@ -15,10 +16,12 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: node.collection.browse
+_core:
+  default_config_hash: m2UqL9tAvBY1ovdPk6sMhrWZ3-V53XRPf5Mipz9P-Os
+id: node.collection.grid_browse
 targetEntityType: node
 bundle: collection
-mode: browse
+mode: grid_browse
 content:
   field_collection_image:
     type: entity_reference_entity_view

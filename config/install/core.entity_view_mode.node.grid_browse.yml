@@ -1,0 +1,10 @@
+uuid: 68901f93-e7b4-407e-854b-206f99ad429c
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.grid_browse
+label: 'Grid Browse'
+targetEntityType: node
+cache: true
