@@ -31,9 +31,7 @@ mukurtu-browse-view-switch:
   version: 1.x
   js:
     js/mukurtu-browse-view-switch.js: {}
-  dependencies:
-    - core/jquery
-    - core/jquery.once
+
 map-browse-bounding-box-query:
   version: 1.x
   js:

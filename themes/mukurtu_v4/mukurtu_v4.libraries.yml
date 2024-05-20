@@ -3,9 +3,9 @@ global-styling:
     theme:
       css/style.css: {}
 
-toggle-dh-view:
+toggle-browse-view:
   js:
-    js/toggle-dh-view.js: {}
+    js/toggle-browse-view.js: {}
   dependencies:
     - core/drupal
     - core/once

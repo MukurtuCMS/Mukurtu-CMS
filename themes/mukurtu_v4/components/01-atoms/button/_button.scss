@@ -11,6 +11,7 @@ input[type=reset],
   letter-spacing: var(--letter-spacing-label);
   border: none;
   padding: var(--v-space-5xs) var(--v-space-2xs);
+  cursor: pointer;
 
   &:hover,
   &:active,

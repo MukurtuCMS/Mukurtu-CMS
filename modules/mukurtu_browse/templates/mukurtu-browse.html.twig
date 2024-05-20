@@ -1,11 +1,8 @@
 <div class="browse-container">
   <div class="browse-results">
     <div class="browse-links">
-      {# @todo: these search parameter need to be cleared once the page is
-      switched, but I wasn't able to complete this task in time for hand-off.
-      It doesn't change behavior, but isn't a nice bug.  #}
-      <a href="?active=grid" id="mukurtu-browse-grid-switch-link" aria-label="Switch to grid view">Grid</a>
-      <a href="?active=list" class="active-toggle" id="mukurtu-browse-list-switch-link" aria-label="Switch to list view">List</a>
+      <button id="mukurtu-browse-grid" aria-label="Switch to grid view">Grid</button>
+      <button id="mukurtu-browse-list" aria-label="Switch to list view" class="active-toggle">List</button>
       {% if maplink %}
         {{ maplink }}
       {% endif %}

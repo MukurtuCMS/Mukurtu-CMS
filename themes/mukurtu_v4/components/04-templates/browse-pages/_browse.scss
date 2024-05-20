@@ -134,8 +134,9 @@
           text-align: start;
         }
 
-        // Style the 'Switch to Grid' button.
-        a {
+        // Style switcher buttons.
+        a,
+        button {
           background-color: var(--color-white);
           border: 1px solid var(--brand-primary-dark);
           color: var(--brand-primary-dark);
@@ -144,6 +145,7 @@
           text-decoration: none;
           padding-block: var(--v-space-6xs);
           padding-inline: var(--v-space-5xs);
+          letter-spacing: normal;
 
           &:hover {
             background-color: var(--brand-primary-dark);
@@ -155,7 +157,7 @@
           }
         }
 
-        a.active-toggle {
+        .active-toggle {
           background-color: var(--brand-primary-dark);
           color: var(--color-white);
 
@@ -193,7 +195,7 @@
 
         // When the Grid button is selected on the Browse Digital Heritage page,
         // a masonry grid layout is applied.
-        .browse-dh-grid {
+        .browse-content.grid {
           column-count: 1;
 
           @include media('>=lg') {

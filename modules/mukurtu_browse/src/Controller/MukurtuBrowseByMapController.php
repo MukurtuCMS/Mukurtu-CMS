@@ -69,7 +69,7 @@ class MukurtuBrowseByMapController extends ControllerBase {
   public function content() {
     // Browse link.
     $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link']];
-    $map_browse_link = Link::createFromRoute(t('Switch to List View'), 'mukurtu_browse.browse_page', [], $options);
+    $map_browse_link = Link::createFromRoute(t('List'), 'mukurtu_browse.browse_page', [], $options);
 
     // Render the map browse view block.
     $map_browse_view_block = [
