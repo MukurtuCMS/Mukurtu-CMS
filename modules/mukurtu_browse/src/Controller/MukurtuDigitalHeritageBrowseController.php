@@ -57,11 +57,27 @@ class MukurtuDigitalHeritageBrowseController extends ControllerBase {
       $map_browse_link = Link::createFromRoute(t('Map'), 'mukurtu_browse.map_browse_digital_heritage_page', [], $options);
     }
 
-    // Render the browse view block.
-    $browse_view_block = [
+    // Render the browse view block. This is the list display.
+    $list_view_block = [
       '#type' => 'view',
       '#name' => $this->getViewName(),
       '#display_id' => 'mukurtu_digital_heritage_browse_block',
+      '#embed' => TRUE,
+    ];
+
+    // Render the browse view block. This is the grid display.
+    $grid_view_block = [
+      '#type' => 'view',
+      '#name' => $this->getViewName(),
+      '#display_id' => 'mukurtu_digital_heritage_browse_block_grid',
+      '#embed' => TRUE,
+    ];
+
+    // Render the browse view block. This is the map display.
+    $map_view_block = [
+      '#type' => 'view',
+      '#name' => $this->getViewName(),
+      '#display_id' => 'mukurtu_digital_heritage_browse_block_map',
       '#embed' => TRUE,
     ];
 
@@ -89,7 +105,9 @@ class MukurtuDigitalHeritageBrowseController extends ControllerBase {
     return [
       '#theme' => 'mukurtu_browse',
       '#maplink' => $map_browse_link,
-      '#results' => $browse_view_block,
+      '#list_results' => $list_view_block,
+      '#grid_results' => $grid_view_block,
+      '#map_results' => $map_view_block,
       '#facets' => $facets,
       '#attached' => [
         'library' => [

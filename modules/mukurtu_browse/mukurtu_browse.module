@@ -18,7 +18,9 @@ function mukurtu_browse_theme($existing, $type, $theme, $path) {
     'mukurtu_browse' => [
       'variables' => [
         'maplink' => NULL,
-        'results' => NULL,
+        'list_results' => NULL,
+        'grid_results' => NULL,
+        'map_results' => NULL,
         'facets' => [],
       ],
     ],
