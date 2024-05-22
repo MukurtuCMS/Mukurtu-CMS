@@ -1,0 +1,79 @@
+uuid: 2418c0ee-5c23-4687-873a-ac9ac5ef1ef1
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.dictionary_word.comment
+    - field.field.node.dictionary_word.field_mukurtu_cluster_lat
+    - field.field.node.dictionary_word.field_mukurtu_cluster_long
+    - field.field.node.dictionary_word.field_mukurtu_geojson
+    - node.type.dictionary_word
+  module:
+    - layout_builder
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: oKIFXf60IxbpT8S0Ow20TQUvVOmeiDNPcqKkKPgynn8
+id: node.dictionary_word.teaser
+targetEntityType: node
+bundle: dictionary_word
+mode: teaser
+content:
+  field_dictionary_word_language:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_glossary_entry:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  comment: true
+  draft: true
+  field_all_related_content: true
+  field_citation: true
+  field_communities: true
+  field_content_type: true
+  field_coverage: true
+  field_coverage_description: true
+  field_cultural_protocols: true
+  field_in_collection: true
+  field_in_word_list: true
+  field_keywords: true
+  field_location: true
+  field_media_assets: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_multipage_page_of: true
+  field_protocol_control: true
+  field_related_content: true
+  field_representative_media: true
+  field_sequence_collection: true
+  field_thumbnail: true
+  field_title: true
+  field_word_entry: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_email_node: true
+  flag_mukurtu_email_og: true
+  flag_mukurtu_follow_content: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  links: true
+  search_api_excerpt: true
