@@ -1,4 +1,4 @@
-{% if glossary %}
+{# {% if glossary %}
   {{ glossary }}
 {% endif %}
 {% if facets %}
@@ -6,4 +6,20 @@
     {{ facet }}
   {% endfor %}
 {% endif %}
-{{ results }}
+{{ results }} #}
+
+
+<div class="browse-container">
+  <div class="browse-results">
+
+    {{ results }}
+  </div>
+  <aside class="browse-facets">
+    {{ glossary }}
+    {% if facets %}
+      {% for facet in facets %}
+        {{ facet }}
+      {% endfor %}
+    {% endif %}
+  </aside>
+</div>
