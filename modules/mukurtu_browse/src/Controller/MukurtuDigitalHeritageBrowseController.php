@@ -48,14 +48,15 @@ class MukurtuDigitalHeritageBrowseController extends ControllerBase {
 
   public function content() {
     // Map browse link.
-    $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link'],
-                'query' => ['active' => 'map']];
-
-    $map_browse_link = NULL;
-    $access_manager = \Drupal::accessManager();
-    if ($access_manager->checkNamedRoute('mukurtu_browse.map_browse_digital_heritage_page')) {
-      $map_browse_link = Link::createFromRoute(t('Map'), 'mukurtu_browse.map_browse_digital_heritage_page', [], $options);
-    }
+    $map_browse_link = [
+      '#type' => 'html_tag',
+      '#tag' => 'button',
+      '#value' => $this->t('Map'),
+      '#attributes' => [
+        'id' => 'mukurtu-browse-map',
+        'aria-label' => t('Switch to Map'),
+      ], 
+    ];
 
     // Render the browse view block. This is the list display.
     $list_view_block = [

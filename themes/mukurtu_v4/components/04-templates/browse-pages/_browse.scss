@@ -186,11 +186,11 @@
         // Space between the rows.
         .views-row {
           &:first-of-type {
-            border-top: 5px solid var(--mukurtu-view-row-divider-color);
+            border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
             margin-block-start: var(--v-space-3xs);
           }
 
-          border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+          border-block-end: 5px solid var(--mukurtu-view-row-divider-color);
         }
 
         // When the Grid button is selected on the Browse Digital Heritage page,
@@ -213,15 +213,16 @@
 
           .views-row {
             break-inside: avoid;
+            border-block-start: 0;
 
-            .digital-heritage__content {
-              display: flex;
-              flex-direction: column;
-            }
+            // .browse__content {
+            //   display: flex;
+            //   flex-direction: column;
+            // }
 
-            .digital-heritage__content__block {
-              display: none;
-            }
+            // .browse__content__block {
+            //   display: none;
+            // }
           }
         }
       }

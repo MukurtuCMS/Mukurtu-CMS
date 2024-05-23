@@ -1,39 +1,66 @@
-// This carries over the search parameters in the url 
-// when browse is switched from grid/list to map.
-// @TODO: make sure this also works in reverse 
-//(carry over search terms in url from map to list/grid.)
-// (function ($, Drupal) {
-//   Drupal.behaviors.mukurtu_browse_view_switch = {
-//     attach: function (context, settings) {
-//       $('#mukurtu-browse-map', context).once('mukurtu-browse-view-switch').each(function () {
-//         $('#mukurtu-browse-map').on('click', function () {
-//           this.href = this.href + window.location.search;
-//         });
-//       });
-//     }
-//   };
-// })(jQuery, Drupal);
+// JS functionality to toggle active class on map/grid/list buttons
+// and toggle visibility of map/list/grid contents. 
 
 ((Drupal, once) => {
   "use strict";
-   let mapLink;
+   let gridLink, listLink, mapLink, mapContent, listContent, gridContent;
+   
+   function switchToMap() {
+    mapLink.classList.add("active-toggle");
+    listLink.classList.remove("active-toggle");
+    gridLink.classList.remove("active-toggle");
 
-   function switchToMap(event) {
-    // console.log("you've switched to map!!!!!!!!");
-    this.href = this.href + window.location.search;
-   }
+    mapContent.hidden = false;
+    listContent.hidden = true;
+    gridContent.hidden = true;
+  }
+
+  function switchToList() {
+    listLink.classList.add("active-toggle");
+    gridLink.classList.remove("active-toggle");
+    mapLink.classList.remove("active-toggle");
+
+    listContent.hidden = false;
+    mapContent.hidden = true;
+    gridContent.hidden = true;
+  }
+
+  function switchToGrid() {
+    gridLink.classList.add("active-toggle");
+    listLink.classList.remove("active-toggle");
+    mapLink.classList.remove("active-toggle");
+
+    gridContent.hidden = false;
+    mapContent.hidden = true;
+    listContent.hidden = true;
+  }
+
 
   function init() {
-    console.log("you made it to INITTTTT");
+    listContent = document.querySelector(".list");
+    listContent.hidden = false;
+    mapContent = document.querySelector(".map");
+    mapContent.hidden = true;
+    gridContent = document.querySelector(".grid");
+    gridContent.hidden = true;
 
+    gridLink = document.getElementById("mukurtu-browse-grid");
+    listLink = document.getElementById("mukurtu-browse-list");
     mapLink = document.getElementById("mukurtu-browse-map");
+    mapContent = document.querySelector(".browse-content.map");
+    listContent = document.querySelector(".browse-content.list");
+    gridContent = document.querySelector(".browse-content.grid");
+
+    listLink.addEventListener("click", switchToList);
+    gridLink.addEventListener("click", switchToGrid);
     mapLink.addEventListener("click", switchToMap);
   }
 
-  Drupal.behaviors.mukurtuMapBrowseSwitch = {
+
+  Drupal.behaviors.mukurtuBrowseSwitch = {
     attach(context) {
-      once("mapView", "#mukurtu-browse-map", context).forEach(init);
+      once("browseLinks", ".browse-links", context).forEach(init);
     },
   };
-
+  
 })(Drupal, once);

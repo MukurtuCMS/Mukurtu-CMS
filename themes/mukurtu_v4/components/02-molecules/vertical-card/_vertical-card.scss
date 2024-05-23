@@ -1,1 +1,10 @@
 // As seen in Grid Browse display.
+
+.vertical-card {
+  &__content-header {
+    h2 {
+      font-size: var(--font-size-s);
+      font-weight:  var(--text-bold);
+    }
+  }
+}
