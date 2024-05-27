@@ -46,13 +46,7 @@
 
 {% block page_content %}
 
-  <div class="browse">
-    {# link is in html.html.twig #}
-    {% if page.sidebar_first %}
-      <aside class="browse__layout-sidebar-first" role="complementary">
-        {{ page.sidebar_first }}
-      </aside>
-    {% endif %}
+  <div class="dictionary browse">
 
     <div class="browse__main-content">
       {{ page.content }}

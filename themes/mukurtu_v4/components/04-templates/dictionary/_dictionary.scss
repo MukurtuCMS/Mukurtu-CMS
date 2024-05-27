@@ -1,0 +1,8 @@
+// Main /dictionary page layout.
+.dictionary {
+  .view-main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--v-space-2xs);
+  }
+}

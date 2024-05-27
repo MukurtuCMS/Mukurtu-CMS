@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to display a digital heritage node.
+ * Theme override to display a dictionary word node.
  *
  * Available variables:
  * - node: The node entity with limited access to object properties and methods.
@@ -68,16 +68,7 @@
  */
 #}
 
-{# If there's more than 1 media asset, render code for carousels. #}
-{% if content.group_primary_fields.field_media_assets['#items']|length > 1 %}
-  {% set carousels = true %}
-{# If there's exactly one media asset, render the field without carousel code. #}
-{% elseif content.group_primary_fields.field_media_assets['#items']|length == 1 %} 
-  {% set carousels = false %}
-{% else %}
-{# If there are no media assets, don't render the field at all. #}
-  {% set carousels = null %}
-{% endif %}
+{{ dump(content) }}
 
 <article{{ attributes }}>
   <div{{ content_attributes }} class="full-node">
@@ -87,23 +78,7 @@
     <div class="full-node__grid">
       <div class="full-node__main">
         <div class="full-node__content">
-
-          {% if carousels %}
-            <div class="media-carousels" data-id="{{ node.id }}">
-              <section class="splide media-carousel" aria-label="Media Assets Carousel">
-                {{ content.group_primary_fields.field_media_assets }}
-              </section>
-
-              <section class="splide thumbnail-carousel" aria-label="Thumbnail Carousel">
-                {{ thumbnail_display }}
-              </section>
-            </div>
-
-          {% elseif carousels == false  %}
-            {{ content.group_primary_fields.field_media_assets }}
-          {% endif %}
-
-          {{ content.group_primary_fields|without('field_all_related_content', 'field_media_assets') }}
+            {{ content.group_primary_fields|without('group_primary_fields.field_all_related_content') }}
         </div>
 
         <div class="full-node__related-content">
