@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.media_type_map
+  module:
+    - facets
+    - system
+  theme:
+    - mukurtu_v4
+id: mediatypemap
+theme: mukurtu_v4
+region: content
+weight: 7
+provider: null
+plugin: 'facet_block:media_type_map'
+settings:
+  id: 'facet_block:media_type_map'
+  label: 'Media type Map'
+  label_display: visible
+  provider: facets
+  context_mapping: {  }
+  block_id: mediatypemap
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: "/digital-heritage\r\n/browse"

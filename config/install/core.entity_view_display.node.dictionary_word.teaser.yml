@@ -1,4 +1,3 @@
-uuid: 2418c0ee-5c23-4687-873a-ac9ac5ef1ef1
 langcode: en
 status: true
 dependencies:
@@ -10,32 +9,24 @@ dependencies:
     - field.field.node.dictionary_word.field_mukurtu_geojson
     - node.type.dictionary_word
   module:
+    - entity_reference_revisions
     - layout_builder
     - user
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-_core:
-  default_config_hash: oKIFXf60IxbpT8S0Ow20TQUvVOmeiDNPcqKkKPgynn8
 id: node.dictionary_word.teaser
 targetEntityType: node
 bundle: dictionary_word
 mode: teaser
 content:
-  field_dictionary_word_language:
-    type: entity_reference_label
+  field_word_entry:
+    type: entity_reference_revisions_entity_view
     label: hidden
     settings:
-      link: true
-    third_party_settings: {  }
-    weight: 1
-    region: content
-  field_glossary_entry:
-    type: string
-    label: hidden
-    settings:
-      link_to_entity: true
+      view_mode: teaser
+      link: ''
     third_party_settings: {  }
     weight: 0
     region: content
@@ -49,6 +40,8 @@ hidden:
   field_coverage: true
   field_coverage_description: true
   field_cultural_protocols: true
+  field_dictionary_word_language: true
+  field_glossary_entry: true
   field_in_collection: true
   field_in_word_list: true
   field_keywords: true
@@ -64,7 +57,6 @@ hidden:
   field_sequence_collection: true
   field_thumbnail: true
   field_title: true
-  field_word_entry: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true

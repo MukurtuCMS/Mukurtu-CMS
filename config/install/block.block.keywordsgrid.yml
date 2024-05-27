@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.keywords_grid
+  module:
+    - facets
+    - system
+  theme:
+    - mukurtu_v4
+id: keywordsgrid
+theme: mukurtu_v4
+region: content
+weight: 2
+provider: null
+plugin: 'facet_block:keywords_grid'
+settings:
+  id: 'facet_block:keywords_grid'
+  label: 'Keywords Grid'
+  label_display: visible
+  provider: facets
+  context_mapping: {  }
+  block_id: keywordsgrid
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: "/digital-heritage\r\n/browse"
