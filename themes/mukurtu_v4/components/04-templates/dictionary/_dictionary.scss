@@ -1,5 +1,167 @@
 // Main /dictionary page layout.
 .dictionary {
+
+  .browse__main-content {
+    display: block;
+
+    .region {
+      display: block;
+    }
+  }
+
+  // Dictionary search and filter area.
+  .browse-facets__wrapper {
+    margin-inline-start: calc(50% - 50vw);
+    margin-inline-end: calc(50% - 50vw);
+
+    @include layout--full-width-grid;
+
+    background-color: var(--brand-secondary);
+    padding-block-start: var(--v-space-3xs);
+    padding-block-end: var(--v-space-2xs);
+  }
+
+  .browse-facets {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    color: var(--color-white);
+    gap: var(--gutter);
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+    
+    // Each dropdown facet.
+    .facets-widget-dropdown {
+      grid-row: 1;
+    }
+
+    // The search/sort/apply area.
+    .views-exposed-form {
+      grid-row: 2;
+      grid-column: 1 / span 3;
+
+      form {
+        display: flex;
+        flex-direction: row;
+        gap: var(--gutter);
+
+        > div {
+          flex: 1;
+        }
+      }
+
+      // Search input field.
+      .js-form-type-textfield {
+
+        input {
+          appearance: none;
+          border: none;
+          background: var(--brand-light-accent);
+          padding: var(--v-space-4xxs) var(--v-space-2xs) var(--v-space-4xxs) var(--v-space-5xs);
+          width: 100%;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          font-weight: var(--text-bold);
+        }
+      }
+
+      // Apply button.
+      .form-actions {
+        display: flex;
+        align-items: flex-end;
+
+        input {
+          height: 45px;
+        }
+      }
+    }
+
+    h2,
+    label {
+      color: var(--text-color);
+      font-size: var(--font-size-m);
+      font-weight: var(--text-bold);
+      margin-block-end: var(--v-space-5xs);
+    }
+
+    // Select elements.
+    .select-wrapper {
+      position: relative;
+
+      &::after {
+        content: '';
+        display: inline-block;
+        position: absolute;
+        right: 15px;
+        margin: auto;
+        top: 20px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: var(--v-space-5xs)var(--v-space-5xs) 0 var(--v-space-5xs);
+        border-color: var(--brand-primary-accent) transparent transparent transparent;
+      }
+    }
+
+    select {
+      appearance: none;
+      border: none;
+      background: var(--brand-light-accent);
+      padding: var(--v-space-4xxs) var(--v-space-2xs) var(--v-space-4xxs) var(--v-space-5xs);
+      width: 100%;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      font-weight: var(--text-bold);
+    }
+  }
+
+  .browse-content__wrapper {
+    @include layout--full-width-grid;
+  }
+
+  .browse-content {
+    grid-column: 1 / -1;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+    // ADD RESPONSIVE
+  }
+
+  .glossary {
+    @include layout--full-width-grid;
+    padding: var(--v-space-2xs) 0;
+
+    .facets-widget-links {
+      grid-column: 1 / -1;
+
+      @include media('>=2xl') {
+        grid-column: 2 / -2;
+      }
+
+      a {
+        padding: var(--v-space-2xs);
+      }
+    }
+
+    ul {
+      display: flex;
+      justify-content: space-evenly;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      list-style-type: none;
+    }
+  }
+
+  // Dictionary results grid.
   .view-main-content {
     display: grid;
     grid-template-columns: 1fr 1fr;

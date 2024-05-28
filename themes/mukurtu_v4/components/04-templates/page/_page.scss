@@ -85,7 +85,7 @@
 
     &__breadcrumbs {
       // Style this here for full bleed of color.
-      background: linear-gradient(180deg, var(--mukurtu-breadcrumb-gradient-color) 0%, var(--brand-secondary) 20%);
+      box-shadow: inset 0 41px 18px -37px var(--mukurtu-breadcrumb-gradient-color);
 
       @include layout--full-width-grid;
 
@@ -121,11 +121,8 @@
       grid-column: 1 / -1;
       text-align: center;
       padding-block: var(--v-space-2xs);
-      background: linear-gradient(var(--brand-light), var(--color-white));
-      background-repeat: no-repeat;
-      background-size: 100% 12px;
-      background-position: bottom;
       margin-block-end: var(--v-separation);
+      box-shadow: -1px 8px 15px var(--brand-light);
 
       h1 {
         margin-block: 0;

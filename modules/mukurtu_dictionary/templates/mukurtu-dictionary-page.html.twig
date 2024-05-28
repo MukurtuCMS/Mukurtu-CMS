@@ -1,14 +1,23 @@
-<div class="browse-facets">
-  {{ glossary }}
-  {% if facets %}
-    {% for facet in facets %}
-      {{ facet }}
-    {% endfor %}
-  {% endif %}
+<div class="browse-facets__wrapper">
+  <div class="browse-facets">
+    {% if facets %}
+      {% for facet in facets %}
+        {{ facet }}
+      {% endfor %}
+    {% endif %}
+
+    {{ drupal_block('views_exposed_filter_block:mukurtu_dictionary-mukurtu_dictionary_block') }}
+  </div>
 </div>
 
-<div class="browse-content">
-  <div class="browse-results">
+{% if glossary %}
+<div class="glossary">
+  {{ glossary }}
+</div>
+{% endif %}
+
+<div class="browse-content__wrapper">
+  <div class="browse-content">
     {{ results }}
   </div>
 </div>
