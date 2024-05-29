@@ -48,11 +48,6 @@ processor_configs:
       sort: 20
     settings:
       sort: DESC
-  capitalize_facet_label_processor:
-    processor_id: capitalize_facet_label_processor
-    weights:
-      build: 50
-    settings: {  }
   count_widget_order:
     processor_id: count_widget_order
     weights:
