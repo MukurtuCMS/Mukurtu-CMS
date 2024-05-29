@@ -68,8 +68,15 @@
  *
  */
 #}
-<article{{ attributes.addClass('dictionary-word__teaser') }}>
 
+{% if (node.field_thumbnail.value is not empty or 
+  content.field_word_entry.0['#paragraph'].field_translation is not empty or 
+  content.field_word_entry.0['#paragraph'].field_recording is not empty) %}
+  {% set teaser_content = true %}
+{% endif %}
+
+
+<article{{ attributes.addClass('dictionary-word__teaser') }}>
   {{ title_prefix }}
     <div{{ title_attributes.addClass('dictionary-word__teaser-heading') }}>
       <a class="dictionary-word__teaser-word" href="{{ url }}" rel="bookmark">
@@ -79,8 +86,17 @@
     </div>
   {{ title_suffix }}
 
+  {% if teaser_content %}
   <div{{ content_attributes.addClass('dictionary-word__teaser-content') }}>
-    {{ content }}
+    {{ content.field_word_entry.0['#paragraph']|view('teaser_translation') }}
+
+    <div class="dictionary-word__media">
+      {{ content.field_thumbnail }}
+      {# Recording. #}
+      {{ content.field_word_entry.0['#paragraph']|view('teaser') }}
+      
+    </div>
   </div>
+  {% endif %}
 
 </article>

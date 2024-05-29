@@ -87,3 +87,36 @@ function mukurtu_v4_preprocess_media(array &$variables) {
     $variables['media_url'] = $url;
   }
 }
+
+/**
+ * Implements template_preprocess_paragraph().
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An array of elements to display in view mode.
+ *   - paragraph: The paragraph object.
+ *   - view_mode: View mode; e.g., 'full', 'teaser'...
+ */
+
+ function mukurtu_v4_preprocess_paragraph(&$variables) {
+  /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph */
+  // Get the parent bundle.
+  // $parentBundle = $paragraph->getParentEntity()->bundle();
+
+  // dump($variables);
+  $paragraph = $variables['content'];
+  // $translation = $paragraph->field_translation;
+  // dump($translation);
+
+  // !$product_entity->field_status->isEmpty()
+  // if (!$paragraph->field_translation->isEmpty()) {
+  //   $variables['translation'] = $paragraph->field_translation;
+  // }
+
+
+  // if ($paragraph->hasField('field_translation')) {
+  //   if (!$paragraph->field_translation->isEmpty()) {
+  //     $variables['translation'] = $paragraph->field_translation;
+  //   }
+  // }
+}

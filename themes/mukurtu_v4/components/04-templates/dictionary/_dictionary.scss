@@ -22,17 +22,22 @@
   }
 
   .browse-facets {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    display: block;
     color: var(--color-white);
-    gap: var(--gutter);
+    grid-column: 1 / -1;
+
+    @include media('>=md') {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      grid-column: 1 / -1;
+      gap: var(--gutter);
+    }
 
     @include media('>=2xl') {
       grid-column: 2 / -2;
     }
-    
+
     // Each dropdown facet.
     .facets-widget-dropdown {
       grid-row: 1;
@@ -42,6 +47,11 @@
     .views-exposed-form {
       grid-row: 2;
       grid-column: 1 / span 3;
+      margin-block-start: var(--gutter);
+      
+      @include media('>=md') {
+        margin-block-start: 0;
+      }
 
       form {
         display: flex;
@@ -130,7 +140,6 @@
     @include media('>=2xl') {
       grid-column: 2 / -2;
     }
-    // ADD RESPONSIVE
   }
 
   .glossary {
@@ -164,7 +173,11 @@
   // Dictionary results grid.
   .view-main-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: var(--v-space-2xs);
+
+    @include media('>=lg') {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 }
