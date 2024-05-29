@@ -5,11 +5,12 @@ dependencies:
     - search_api.server.mukurtu_database_server
   module:
     - node
-    - mukurtu_protocol
     - taxonomy
+    - mukurtu_protocol
     - media
     - search_api
     - search_api_glossary
+    - search_api_solr
 id: mukurtu_default_content_index
 name: 'Mukurtu Default content index'
 description: 'Default Mukurtu content index'
@@ -71,6 +72,14 @@ field_settings:
     datasource_id: 'entity:node'
     property_path: field_cultural_narrative
     type: text
+    dependencies:
+      module:
+        - node
+  field_cultural_protocols:
+    label: 'Cultural Protocols'
+    datasource_id: 'entity:node'
+    property_path: field_cultural_protocols
+    type: string
     dependencies:
       module:
         - node
@@ -254,9 +263,11 @@ datasource_settings:
 processor_settings:
   add_url: {  }
   aggregated_field: {  }
+  auto_aggregated_fulltext_field: {  }
   content_access:
     weights:
       preprocess_query: -30
+  custom_value: {  }
   entity_status: {  }
   entity_type: {  }
   glossary:
@@ -280,6 +291,7 @@ processor_settings:
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
+      - field_cultural_protocols
       - field_date_description
       - field_description
       - field_identifier
@@ -317,6 +329,7 @@ processor_settings:
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
+      - field_cultural_protocols
       - field_date_description
       - field_description
       - field_identifier
@@ -336,6 +349,7 @@ processor_settings:
       - type
   language_with_fallback: {  }
   rendered_item: {  }
+  solr_date_range: {  }
   tokenizer:
     weights:
       preprocess_index: -6
@@ -373,6 +387,7 @@ processor_settings:
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
+      - field_cultural_protocols
       - field_date_description
       - field_description
       - field_identifier
