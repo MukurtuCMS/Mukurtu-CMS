@@ -21,6 +21,15 @@ targetEntityType: node
 bundle: dictionary_word
 mode: teaser
 content:
+  field_thumbnail:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: browse
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
   field_word_entry:
     type: entity_reference_revisions_entity_view
     label: hidden
@@ -28,7 +37,7 @@ content:
       view_mode: teaser
       link: ''
     third_party_settings: {  }
-    weight: 0
+    weight: 1
     region: content
 hidden:
   comment: true
@@ -55,7 +64,6 @@ hidden:
   field_related_content: true
   field_representative_media: true
   field_sequence_collection: true
-  field_thumbnail: true
   field_title: true
   flag_email_node: true
   flag_email_og: true

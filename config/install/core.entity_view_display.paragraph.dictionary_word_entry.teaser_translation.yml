@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.paragraph.teaser
+    - core.entity_view_mode.paragraph.teaser_translation
     - paragraphs.paragraphs_type.dictionary_word_entry
   module:
     - layout_builder
@@ -10,10 +10,10 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: paragraph.dictionary_word_entry.teaser
+id: paragraph.dictionary_word_entry.teaser_translation
 targetEntityType: paragraph
 bundle: dictionary_word_entry
-mode: teaser
+mode: teaser_translation
 content:
   field_part_of_speech:
     type: entity_reference_label
@@ -23,12 +23,11 @@ content:
     third_party_settings: {  }
     weight: 2
     region: content
-  field_recording:
-    type: entity_reference_entity_view
+  field_translation:
+    type: string
     label: hidden
     settings:
-      view_mode: audio_for_dictionary_teaser
-      link: false
+      link_to_entity: false
     third_party_settings: {  }
     weight: 0
     region: content
@@ -37,9 +36,9 @@ hidden:
   field_contributor: true
   field_definition: true
   field_pronunciation: true
+  field_recording: true
   field_sample_sentences: true
   field_source: true
-  field_translation: true
   field_word_origin: true
   field_word_type: true
   search_api_excerpt: true
