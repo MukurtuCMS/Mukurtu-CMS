@@ -1,0 +1,32 @@
+.js-form-type-select,
+.select-wrapper {
+  position: relative;
+
+  &::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    right: 15px;
+    margin: auto;
+    top: 20px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: var(--v-space-5xs)var(--v-space-5xs) 0 var(--v-space-5xs);
+    border-color: var(--brand-primary-accent) transparent transparent transparent;
+  }
+
+  select,
+  .form-select {
+    appearance: none;
+    border: none;
+    background: var(--brand-light-accent);
+    padding: var(--v-space-4xxs) var(--v-space-2xs) var(--v-space-4xxs) var(--v-space-5xs);
+    margin-inline-start: var(--v-space-6xs);
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: var(--text-bold);
+  }
+}

@@ -75,48 +75,19 @@ function mukurtu_v4_preprocess_block(&$variables) {
  */
 function mukurtu_v4_preprocess_media(array &$variables) {
   $media = $variables['media'];
- 
+
+ // Put media type in variable to use in twig.
   $variables['bundle'] = $media->bundle();
 
+  // Get the media url in variable to use in twig.
   $fid = $media->getSource()->getSourceFieldValue($media);
 
-  $file = File::load($fid);
+  if (!empty($fid)) {
+    $file = File::load($fid);
+  }
 
   if (!empty($file)) {
     $url = $file->createFileUrl();
     $variables['media_url'] = $url;
   }
-}
-
-/**
- * Implements template_preprocess_paragraph().
- *
- * @param array $variables
- *   An associative array containing:
- *   - elements: An array of elements to display in view mode.
- *   - paragraph: The paragraph object.
- *   - view_mode: View mode; e.g., 'full', 'teaser'...
- */
-
- function mukurtu_v4_preprocess_paragraph(&$variables) {
-  /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph */
-  // Get the parent bundle.
-  // $parentBundle = $paragraph->getParentEntity()->bundle();
-
-  // dump($variables);
-  $paragraph = $variables['content'];
-  // $translation = $paragraph->field_translation;
-  // dump($translation);
-
-  // !$product_entity->field_status->isEmpty()
-  // if (!$paragraph->field_translation->isEmpty()) {
-  //   $variables['translation'] = $paragraph->field_translation;
-  // }
-
-
-  // if ($paragraph->hasField('field_translation')) {
-  //   if (!$paragraph->field_translation->isEmpty()) {
-  //     $variables['translation'] = $paragraph->field_translation;
-  //   }
-  // }
 }

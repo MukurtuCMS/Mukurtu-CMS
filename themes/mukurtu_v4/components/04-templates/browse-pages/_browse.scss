@@ -279,25 +279,6 @@
             }
           }
 
-          // The Sort By dropdown.
-          .js-form-type-select {
-            display: flex;
-            flex-direction: column;
-            margin-block: var(--v-space-3xs);
-
-            label {
-              margin-block-end: 0;
-            }
-
-            select {
-              border-color: var(--mukurtu-text-box-background-color);
-              padding: var(--v-space-4xxs) var(--v-space-2xs);
-              color: var(--brand-text-color);
-              font-size: var(--font-size-base);
-              width: 100%;
-            }
-          }
-
           // Align button to the right.
           .form-actions {
             text-align: right;
