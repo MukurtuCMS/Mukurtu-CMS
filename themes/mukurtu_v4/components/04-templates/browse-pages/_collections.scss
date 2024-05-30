@@ -1,5 +1,20 @@
 .collections {
 
+  @include layout--full-width-grid;
+  grid-column: 1 / -1;
+
+  @include media('>=2xl') {
+    grid-column: 2 / -2;
+  }
+
+  &__main-content {
+    grid-column: 1 / -1;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+  }
+
   &__collection-list {
     // Search form.
     .views-exposed-form {

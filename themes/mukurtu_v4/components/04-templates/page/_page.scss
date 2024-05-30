@@ -30,41 +30,6 @@
         }
       }
     }
-
-    .collections {
-      @include layout--full-width-grid;
-
-      &__main-content {
-        grid-column: 1 / -1;
-
-        @include media('>=2xl') {
-          grid-column: 2 / -2;
-        }
-      }
-    }
-
-    .collection__wrapper {
-      @include layout--full-width-grid-no-padding;
-
-      .collection__header {
-        grid-column: 1 / -1;
-      }
-
-      .collection__content {
-        grid-column: 1 / -1;
-      }
-
-      // Add containers to the grid here.
-      // @todo: move these to their respective scss files.
-      .dashboard,
-      .collections {
-        grid-column: 1 / -1;
-
-        @include media('>=2xl') {
-          grid-column: 2 / -2;
-        }
-      }
-    }
   }
 
   .page {
@@ -79,40 +44,6 @@
 
         @include media('>=2xl') {
           grid-column: 2 / -2;
-        }
-      }
-    }
-
-    &__breadcrumbs {
-      // Style this here for full bleed of color.
-      box-shadow: inset 0 41px 18px -37px var(--mukurtu-breadcrumb-gradient-color);
-
-      @include layout--full-width-grid;
-
-      div:first-of-type {
-        grid-column: 1 / -1;
-
-        @include media('>=2xl') {
-          grid-column: 2 / -2;
-        }
-      }
-
-      ol {
-        padding: 0;
-
-        li {
-          list-style-type: none;
-        }
-      }
-
-      a {
-        color: var(--brand-text-color);
-        text-decoration: underline solid 2px var(--brand-text-color);
-        transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
-
-        &:hover {
-          text-decoration-color: var(--color-transparent);
-          transition: text-decoration-color 0.12s ease-in;
         }
       }
     }
