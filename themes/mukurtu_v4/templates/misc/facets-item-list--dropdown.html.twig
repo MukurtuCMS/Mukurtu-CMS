@@ -39,14 +39,11 @@
   {%- endif %}
   -->
 {%- endif %}
+
 <div class="facets-widget- {{- facet.widget.type -}} ">
   {% if facet.widget.type %}
     {%- set attributes = attributes.addClass('item-list__' ~ facet.widget.type) %}
   {% endif %}
-  {% if items or empty %}
-    {%- if title is not empty -%}
-      <h2>{{ title }}</h2>
-    {%- endif -%}
 
     {%- if items -%}
     <div class="select-wrapper">
@@ -55,11 +52,9 @@
           <li{{ item.attributes }}>{{ item.value }}</li>
         {%- endfor -%}
       </{{ list_type }}>
-    {%- else -%}
-      {{- empty -}}
-    {%- endif -%}
     </div>
-  {%- endif %}
+    {%- endif -%}
+
 
 {% if facet.widget.type == "dropdown" %}
   <label id="facet_{{ facet.id }}_label">{{ 'Facet'|t }} {{ facet.label }}</label>

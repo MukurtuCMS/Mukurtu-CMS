@@ -28,8 +28,8 @@ enable_parent_when_child_gets_disabled: true
 widget:
   type: dropdown
   config:
-    show_numbers: true
-    default_option_label: Choose
+    show_numbers: false
+    default_option_label: 'Content Type'
 empty_behavior:
   behavior: none
 only_visible_when_facet_source_is_visible: false

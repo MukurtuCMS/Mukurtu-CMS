@@ -28,13 +28,13 @@ enable_parent_when_child_gets_disabled: true
 widget:
   type: dropdown
   config:
-    show_numbers: true
+    show_numbers: false
     default_option_label: Community
 empty_behavior:
   behavior: none
 only_visible_when_facet_source_is_visible: false
 show_only_one_result: true
-show_title: false
+show_title: true
 processor_configs:
   active_widget_order:
     processor_id: active_widget_order
@@ -54,6 +54,11 @@ processor_configs:
       sort: 40
     settings:
       sort: ASC
+  hide_1_result_facet:
+    processor_id: hide_1_result_facet
+    weights:
+      build: 50
+    settings: {  }
   hierarchy_processor:
     processor_id: hierarchy_processor
     weights:
