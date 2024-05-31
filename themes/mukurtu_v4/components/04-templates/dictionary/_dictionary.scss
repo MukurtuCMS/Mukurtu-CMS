@@ -132,7 +132,7 @@
   // Dictionary results grid.
   .view-main-content {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: min-content;
     gap: var(--v-space-2xs);
 
     @include media('>=lg') {
