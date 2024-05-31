@@ -29,7 +29,7 @@ widget:
   type: dropdown
   config:
     show_numbers: true
-    default_option_label: Community/Protocol
+    default_option_label: Community
 empty_behavior:
   behavior: none
 only_visible_when_facet_source_is_visible: false
