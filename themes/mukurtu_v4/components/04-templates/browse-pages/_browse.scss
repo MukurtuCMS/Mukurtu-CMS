@@ -328,13 +328,6 @@
 // each display type gets its facets working properly
 // are hidden here. 
 
-.js-facet-block-id-categorygrid, 
-.js-facet-block-id-communitygrid, 
-.js-facet-block-id-keywordsgrid, 
-.js-facet-block-id-mediatypegrid,
-.js-facet-block-id-categorymap, 
-.js-facet-block-id-communitymap, 
-.js-facet-block-id-keywordsmap, 
-.js-facet-block-id-mediatypemap {  
+.other-facets {  
   display: none;
 }

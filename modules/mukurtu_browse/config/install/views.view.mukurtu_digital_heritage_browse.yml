@@ -11,7 +11,7 @@ dependencies:
 id: mukurtu_digital_heritage_browse
 label: 'Mukurtu Digital Heritage Browse'
 module: views
-description: ''
+description: 'This is the one being used at /digital-heritage 2024'
 tag: ''
 base_table: search_api_index_mukurtu_default_content_index
 base_field: search_api_id
@@ -120,7 +120,7 @@ display:
         type: basic
         options:
           submit_button: Apply
-          reset_button: false
+          reset_button: true
           reset_button_label: Reset
           exposed_sorts_label: 'Sort by'
           expose_sort_order: false
@@ -298,8 +298,8 @@ display:
           skip_access: false
           preserve_facet_query_args: false
       relationships: {  }
-      css_class: browse-list
-      use_ajax: true
+      css_class: 'browse-content list'
+      use_ajax: false
       header: {  }
       footer: {  }
       display_extenders: {  }
@@ -369,7 +369,7 @@ display:
         css_class: false
         style: false
         row: false
-      css_class: browse-grid
+      css_class: 'browse-content grid'
       display_description: ''
       exposed_block: true
       display_extenders: {  }
@@ -774,7 +774,7 @@ display:
         style: false
         row: false
         fields: false
-      css_class: browse-map
+      css_class: 'browse-content map'
       display_description: ''
       exposed_block: true
       display_extenders: {  }

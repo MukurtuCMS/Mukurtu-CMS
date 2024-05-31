@@ -13,8 +13,11 @@
   </div>
 
   <aside class="browse-facets">
+    {# This template is shared by /browse and /digital-heritage.
+      The `is_dh` boolean is true on /digital-heritage. #}
     {% if is_dh %}
       {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') }}
+      {# These are the other exposed filter blocks for the grid and map displays, that don't appear to be necessary right now. #}
       {# {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block_grid') }}
       {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block_map') }} #}
     {% else %}
@@ -28,5 +31,41 @@
         {{ facet }}
       {% endfor %}
     {% endif %}
+
+    {# Each display of the views (List, Grid, Map) has its own unique facets. 
+      They all must be present on the page in order for facets to work, 
+      but they do not all need to be visible. The List (default) facets display,
+      and trigger a click on all corresponding facets so they will work in each 
+      display (List, Grid, Map). #}
+
+    <div class="other-facets">
+      {% if is_dh %}
+        {# Browse DH grid facets. #}
+        {{ drupal_block('facet_block:category_grid') }}
+        {{ drupal_block('facet_block:community_grid') }}
+        {{ drupal_block('facet_block:keywords_grid') }}
+        {{ drupal_block('facet_block:media_type_grid') }}
+    
+        {# Browse DH map facets. #}
+        {{ drupal_block('facet_block:category_map') }}
+        {{ drupal_block('facet_block:community_map') }}
+        {{ drupal_block('facet_block:keywords_map') }}
+        {{ drupal_block('facet_block:media_type_map') }}
+      {% else %}
+        {# Browse grid facets. #}
+        {{ drupal_block('facet_block:category_grid_0') }}
+        {{ drupal_block('facet_block:community_grid_0') }}
+        {{ drupal_block('facet_block:content_type_grid') }}
+        {{ drupal_block('facet_block:keywords_grid_0') }}
+        {{ drupal_block('facet_block:media_type_grid_0') }}
+
+        {# Browse map facets. #}
+        {{ drupal_block('facet_block:category_map_0') }}
+        {{ drupal_block('facet_block:community_map_0') }}
+        {{ drupal_block('facet_block:content_type_map') }}
+        {{ drupal_block('facet_block:keywords_map_0') }}
+        {{ drupal_block('facet_block:media_type_map_0') }}
+      {% endif %}
+    </div>
   </aside>
 </div>
