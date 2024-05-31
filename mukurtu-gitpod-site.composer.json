@@ -56,7 +56,7 @@
         "drupal/core-recommended": "^9.5.3",
         "drupal/csv_serialization": "*",
         "drupal/ctools": "*",
-        "drupal/diff": "3.x-dev@dev",
+        "drupal/diff": "^1.0",
         "drupal/embed": "*",
         "drupal/entity_browser": "*",
         "drupal/entity_embed": "*",
