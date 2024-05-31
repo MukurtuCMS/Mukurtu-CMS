@@ -10,12 +10,19 @@
     {{ list_results }}
     {{ grid_results }}
     {{ map_results }}
-
   </div>
+
   <aside class="browse-facets">
-    {% if drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') %}
+    {% if is_dh %}
       {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') }}
+      {# {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block_grid') }}
+      {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block_map') }} #}
+    {% else %}
+      {{ drupal_block('views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block') }}
+      {# {{ drupal_block('views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block_grid') }}
+      {{ drupal_block('views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block_map') }} #}
     {% endif %}
+
     {% if facets %}
       {% for facet in facets %}
         {{ facet }}

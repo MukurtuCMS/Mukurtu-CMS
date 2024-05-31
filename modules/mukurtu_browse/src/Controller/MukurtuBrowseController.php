@@ -48,19 +48,37 @@ class MukurtuBrowseController extends ControllerBase {
 
   public function content() {
     // Map browse link.
-    $options = ['attributes' => ['id' => 'mukurtu-browse-mode-switch-link']];
+    $map_browse_link = [
+      '#type' => 'html_tag',
+      '#tag' => 'button',
+      '#value' => $this->t('Map'),
+      '#attributes' => [
+        'id' => 'mukurtu-browse-map',
+        'aria-label' => t('Switch to Map'),
+      ], 
+    ];
 
-    $map_browse_link = NULL;
-    $access_manager = \Drupal::accessManager();
-    if ($access_manager->checkNamedRoute('mukurtu_browse.map_browse_page')) {
-      $map_browse_link = Link::createFromRoute(t('Map'), 'mukurtu_browse.map_browse_page', [], $options);
-    }
-
-    // Render the browse view block.
-    $browse_view_block = [
+    // Render the browse view block. This is the list display.
+    $list_view_block = [
       '#type' => 'view',
       '#name' => $this->getViewName(),
       '#display_id' => 'mukurtu_browse_block',
+      '#embed' => TRUE,
+    ];
+
+    // Render the browse view block. This is the grid display.
+    $grid_view_block = [
+      '#type' => 'view',
+      '#name' => $this->getViewName(),
+      '#display_id' => 'mukurtu_browse_block_grid',
+      '#embed' => TRUE,
+    ];
+
+    // Render the browse view block. This is the map display.
+    $map_view_block = [
+      '#type' => 'view',
+      '#name' => $this->getViewName(),
+      '#display_id' => 'mukurtu_browse_block_map',
       '#embed' => TRUE,
     ];
 
@@ -87,8 +105,11 @@ class MukurtuBrowseController extends ControllerBase {
 
     return [
       '#theme' => 'mukurtu_browse',
+      '#is_dh' => false,
       '#maplink' => $map_browse_link,
-      '#results' => $browse_view_block,
+      '#list_results' => $list_view_block,
+      '#grid_results' => $grid_view_block,
+      '#map_results' => $map_view_block,
       '#facets' => $facets,
       '#attached' => [
         'library' => [

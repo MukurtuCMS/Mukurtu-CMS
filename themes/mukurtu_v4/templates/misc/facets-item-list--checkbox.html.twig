@@ -2,8 +2,7 @@
 /**
  * @file
  * Default theme implementation for a facets item list.
- * Select style facets at top of /dictionary.
- *
+ * Sidebar facets on /digital-heritage and /browse
  * Available variables:
  * - items: A list of items. Each item contains:
  *   - attributes: HTML attributes to be applied to each list item.
@@ -39,17 +38,18 @@
   {%- endif %}
   -->
 {%- endif %}
-<div class="facets-widget- {{- facet.widget.type -}} ">
+
+{% if items %}
+<details class="facets-widget- {{- facet.widget.type -}} " open>
   {% if facet.widget.type %}
     {%- set attributes = attributes.addClass('item-list__' ~ facet.widget.type) %}
   {% endif %}
   {% if items or empty %}
     {%- if title is not empty -%}
-      <h2>{{ title }}</h2>
+      <summary>{{ title }}</summary>
     {%- endif -%}
 
     {%- if items -%}
-    <div class="select-wrapper">
       <{{ list_type }}{{ attributes }}>
         {%- for item in items -%}
           <li{{ item.attributes }}>{{ item.value }}</li>
@@ -58,10 +58,6 @@
     {%- else -%}
       {{- empty -}}
     {%- endif -%}
-    </div>
   {%- endif %}
-
-{% if facet.widget.type == "dropdown" %}
-  <label id="facet_{{ facet.id }}_label">{{ 'Facet'|t }} {{ facet.label }}</label>
-{%- endif %}
-</div>
+</details>
+{% endif %}

@@ -4,7 +4,6 @@ namespace Drupal\mukurtu_browse\Controller;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Link;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\views\Views;
@@ -105,6 +104,7 @@ class MukurtuDigitalHeritageBrowseController extends ControllerBase {
 
     return [
       '#theme' => 'mukurtu_browse',
+      '#is_dh' => true,
       '#maplink' => $map_browse_link,
       '#list_results' => $list_view_block,
       '#grid_results' => $grid_view_block,

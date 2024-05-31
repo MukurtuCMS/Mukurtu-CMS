@@ -230,11 +230,27 @@
           grid-column: 10 / span 3;
         }
 
+        // Search textfield.
+        .js-form-type-textfield {
+          margin-block-end: var(--v-space-4xs);
+        }
+
+        // Sort dropdown.
+        .js-form-type-select {
+          &::after {
+            top: unset;
+            bottom: 20px;
+          }
+
+          select {
+            margin-inline-start: 0;
+          }
+        }
+
         // Search box at the top of the sidebar.
         .views-exposed-form {
           margin-block-end: var(--v-space-3xs);
 
-          // Labels for Search and Sort By
           label {
             display: block;
             background-color: var(--brand-primary-dark);
@@ -242,65 +258,33 @@
             font-size: var(--font-size-m);
             font-weight: var(--text-bold);
             margin-block-start: 0;
-            margin-block-end: var(--v-space-5xs);
             padding-inline: var(--v-space-4xxs);
-            padding-block: var(--v-space-4xs);
-          }
-
-          .search-form {
-            display: flex;
-            flex-direction: column;
-
-            input[type='text'] {
-              padding: var(--v-space-4xxs) var(--v-space-2xs);
-              border: none;
-              background-color: var(--mukurtu-text-box-background-color);
-              box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-              color: var(--brand-text-color);
-              font-size: var(--font-size-base);
-              width: 100%;
-            }
-          }
-
-          // The Apply button.
-          input[type='submit'] {
-            background-color: var(--brand-secondary);
-            color: var(--brand-text-color);
-            border-radius: 5px;
-            width: 100%;
-
-            &:hover {
-              background-color: var(--brand-secondary-accent);
-            }
-
-            &:focus {
-              outline: var(--focus-color) solid 2px;
-              outline-offset: 2px;
-            }
-          }
-
-          // Align button to the right.
-          .form-actions {
-            text-align: right;
+            padding-block: var(--v-space-5xs);
           }
         }
 
+        // Details/summary elements in sidebar; facets.
         .facets-widget-checkbox {
           background-color: var(--mukurtu-panel-pane-content-background-color);
+          margin-block-end: var(--v-space-4xs);
 
-          h3 {
+          summary {
             background-color: var(--brand-primary-dark);
             color: var(--light-text-color);
             font-size: var(--font-size-m);
             font-weight: var(--text-bold);
             margin-block-start: 0;
             padding-inline: var(--v-space-4xxs);
-            padding-block: var(--v-space-4xs);
+            padding-block: var(--v-space-5xs);
+            cursor: pointer;
+
+            &::marker {
+              content: '';
+            }
           }
 
           ul {
-            padding-inline: var(--v-space-4xxs);
-            padding-block-end: var(--v-space-4xs);
+            padding: 0 var(--v-space-4xxs) var(--v-space-4xxs);
 
             li {
               list-style: none;

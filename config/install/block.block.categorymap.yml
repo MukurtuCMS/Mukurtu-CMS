@@ -1,0 +1,28 @@
+langcode: en
+status: false
+dependencies:
+  config:
+    - facets.facet.category_map
+  module:
+    - facets
+    - system
+  theme:
+    - mukurtu_v4
+id: categorymap
+theme: mukurtu_v4
+region: content
+weight: 4
+provider: null
+plugin: 'facet_block:category_map'
+settings:
+  id: 'facet_block:category_map'
+  label: 'Category Map'
+  label_display: visible
+  provider: facets
+  context_mapping: {  }
+  block_id: categorymap
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: "/digital-heritage\r\n/browse"

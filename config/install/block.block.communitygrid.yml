@@ -1,0 +1,28 @@
+langcode: en
+status: false
+dependencies:
+  config:
+    - facets.facet.community_grid
+  module:
+    - facets
+    - system
+  theme:
+    - mukurtu_v4
+id: communitygrid
+theme: mukurtu_v4
+region: content
+weight: 1
+provider: null
+plugin: 'facet_block:community_grid'
+settings:
+  id: 'facet_block:community_grid'
+  label: 'Community Grid'
+  label_display: visible
+  provider: facets
+  context_mapping: {  }
+  block_id: communitygrid
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: "/digital-heritage\r\n/browse"
