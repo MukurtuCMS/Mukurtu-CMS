@@ -1,8 +1,6 @@
 // Some full displays look very similar with main content 
 // and a right sidebar. These styles cover them all. 
-// As of 04/25/24, this encompasses Digital Heritage and Person.
-
-
+// As of 05/31/24, this encompasses Digital Heritage, Dictionary Word and Person.
 
 .full-node__grid {
   @include layout--full-width-grid;
@@ -23,15 +21,36 @@
   }
 
   &__content {
-    // Ensure border is not duplicated on fields inside fields, fields inside media.
-    .field:not(.field--name-field-media-assets, .field--name-field-media-assets .field, .media .field) {
+    // Ensure border is not duplicated on fields inside fields, fields inside media,
+    // and nested paragraph.
+    .field:not(.field--name-field-media-assets, 
+    .field--name-field-media-assets .field, 
+    .media .field, 
+    .field.field.field--name-field-word-entry,
+    .field--name-field-sentence-recording,
+    .field--name-field-sentence) {
       @include divider;
     }
 
-    .field--name-field-people ,
-    .field--name-field-location {
+    .field--name-field-people,
+    .field--name-field-location,
+    .field--name-field-word-type,
+    .field--name-field-contributor {
       .field__items {
         @include inline-list;
+      }
+    }
+
+    .field--name-field-recording {
+      .field__item {
+        margin: var(--v-space-4xxs) 0; 
+      }
+    }
+    
+    .paragraph--type--sample-sentence {
+      margin: var(--v-space-2xs) 0;
+      > div {
+        margin: var(--v-space-4xxs) 0; 
       }
     }
   }
