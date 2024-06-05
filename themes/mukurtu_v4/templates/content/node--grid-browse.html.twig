@@ -1,7 +1,8 @@
 {#
 /**
  * @file
- * Theme override to display a node.
+ * Theme override to display a the "Grid Browse" view mode for any content.
+ * This is the vertical card layout.
  *
  * Available variables:
  * - node: The node entity with limited access to object properties and methods.
@@ -67,39 +68,30 @@
  *
  */
 #}
-<article{{ attributes }}>
 
-  <div{{ content_attributes }} class="digital-heritage__default__wrapper">
-    <div class="digital-heritage__default__header">
-      {% if content.field_representative_media is not empty %}
-        <div class="digital-heritage__default__header__image">
-          {{ content.field_representative_media }}
-        </div>
-      {% endif %}
-      <div class="digital-heritage__default__header__text">
-        {{ title_prefix }}
-        {% if label %}
-          <h2{{title_attributes}}>
-            <a href="{{ url }}" rel="bookmark">{{ label }}</a>
-          </h2>
-        {% endif %}
-        {{ title_suffix }}
-        {% if content.field_content_type is not empty %}
-          <div class="digital-heritage__default__header__text__content-type">
-            {{ content.field_content_type }}
-          </div>
-        {% endif %}
-        {% if content.field_communities is not empty %}
-          <div class="digital-heritage__default__header__text__communities">
-            {{ content.field_communities }}
-          </div>
-        {% endif %}
-        {% if content.field_category is not empty %}
-          <div class="digital-heritage__default__header__text__category">
-            {{ content.field_category }}
-          </div>
-        {% endif %}
-      </div>
+{% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
+
+<article{{ attributes.addClass("vertical-card") }}>
+  <div class="vertical-card__media">
+    {% if media_bundle is same as 'image' %}
+    <a href="{{ url }}" aria-hidden="true" tabindex="-1">
+    {% endif %}
+      {{ content.field_representative_media }}
+    {% if media_bundle is same as 'image' %}
+    </a>
+    {% endif %}
+  </div>
+
+  <div{{ content_attributes }} class="vertical-card__content">
+    <div class="vertical-card__content-header">
+      {{ title_prefix }}
+      <h2{{ title_attributes }}>
+        <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+      </h2>
+      {{ title_suffix }}
+    </div>
+    <div class="horizontal-card__content-body">
+      <span class="tag">{{ node.type.entity.label }}</span>
     </div>
   </div>
 </article>

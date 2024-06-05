@@ -3,13 +3,6 @@ global-styling:
     theme:
       css/style.css: {}
 
-toggle-dh-view:
-  js:
-    js/toggle-dh-view.js: {}
-  dependencies:
-    - core/drupal
-    - core/once
-
 mobile-nav:
   js:
     js/mobile-nav.js: { attributes: { type: module } }

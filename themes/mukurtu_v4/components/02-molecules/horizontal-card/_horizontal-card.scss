@@ -1,34 +1,53 @@
-// The horizontal card component can be seen on the list view of the digital heritage browse page,
-// as well as the related content section at the bottom of the main content area on a DH node. 
+// The horizontal card component can be seen on the List Browse display,
+// as well as the related content section at the bottom of the main content 
+// area on a DH node. 
 .horizontal-card {
   padding-block: var(--v-space-2xs);
   display: grid;
-  grid-template-columns: var(--grid-9col);
-  grid-gap: var(--v-space-2xs);
+  grid-template-columns: 1fr;
+  gap: var(--v-space-2xs);
 
-  // Image container.
+
+  @include media('>=md') {
+    grid-template-columns: var(--grid-9col);
+  }
+
+  // Media container.
   &__media {
-    grid-column: 1 / span 2;
+    grid-column: 1 / span 1;
+
+    @include media('>=md') {
+      grid-column: 1 / span 3;
+    }
+
+    // Ensure embedded videos don't get weird height.
+    .media iframe {
+      height: revert-layer;
+
+      @include media('>=md') {
+        height: auto;
+      }
+    }
   }
 
   &__content {
-    grid-column: 3 / span 7;
+    grid-column: 1 / span 1;
+
+    @include media('>=md') {
+      grid-column: 4 / span 6;
+    }
   }
 
   &__content-header {
-    // Control the text and the right arrow icon.
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    column-gap: var(--v-space-4xxs);
 
     h2 {
       max-width: 90%;
       font-size: var(--font-size-xl);
       margin-block-start: 0;
+      line-height: var(--line-height-xl);
 
       @include media('>=lg') {
-        font-size: var(--font-size-2xxl);
+        font-size: var(--font-size-2xl);
       }
     }
 
@@ -39,11 +58,23 @@
 
   &__content-body {
     margin-block-start: var(--v-space-3xs);
+    line-height: var(--line-height-m);
+
+    .tag {
+      border: 3px solid var(--mukurtu-view-row-divider-color);
+      padding: 0 var(--v-space-6xs);
+      border-radius: 2px;
+      font-size: var(--font-size-xs);
+      display: inline-block;
+      margin-bottom: var(--v-space-4xs);
+      line-height: var(--line-height-s);
+    }
 
     .field--type-entity-reference {
       display: flex;
       flex-direction: column;
       gap: var(--v-space-5xs);
+      align-items: first baseline;
 
       @include media('>=lg') {
         flex-direction: row;
@@ -62,9 +93,9 @@
       }
 
       .field__items {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--v-space-6xs);
+        .field__item {
+          display: inline-block;
+        }
 
         .field__item:not(:last-of-type) {
           &::after {

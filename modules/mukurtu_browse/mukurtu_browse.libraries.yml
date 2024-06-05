@@ -6,6 +6,7 @@ mukurtu-leaflet-preview:
     - core/jquery
     - core/jquery.once
     - leaflet/leaflet
+
 mukurtu-leaflet-markercluster:
   version: 1.4.1
   js:
@@ -19,6 +20,7 @@ mukurtu-leaflet-markercluster:
     - core/jquery
     - core/jquery.once
     - leaflet/leaflet
+
 mukurtu-leaflet-custom-markercluster:
   version: 1.x
   js:
@@ -27,13 +29,15 @@ mukurtu-leaflet-custom-markercluster:
     - core/jquery
     - core/jquery.once
     - leaflet/leaflet
+
 mukurtu-browse-view-switch:
   version: 1.x
   js:
     js/mukurtu-browse-view-switch.js: {}
   dependencies:
-    - core/jquery
-    - core/jquery.once
+    - core/drupal
+    - core/once
+
 map-browse-bounding-box-query:
   version: 1.x
   js:
@@ -41,6 +45,7 @@ map-browse-bounding-box-query:
   dependencies:
     - core/jquery
     - core/jquery.once
+
 map-browse-teasers:
   version: 1.x
   js:

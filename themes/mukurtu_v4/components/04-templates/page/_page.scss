@@ -30,41 +30,6 @@
         }
       }
     }
-
-    .collections {
-      @include layout--full-width-grid;
-
-      &__main-content {
-        grid-column: 1 / -1;
-
-        @include media('>=2xl') {
-          grid-column: 2 / -2;
-        }
-      }
-    }
-
-    .collection__wrapper {
-      @include layout--full-width-grid-no-padding;
-
-      .collection__header {
-        grid-column: 1 / -1;
-      }
-
-      .collection__content {
-        grid-column: 1 / -1;
-      }
-
-      // Add containers to the grid here.
-      // @todo: move these to their respective scss files.
-      .dashboard,
-      .collections {
-        grid-column: 1 / -1;
-
-        @include media('>=2xl') {
-          grid-column: 2 / -2;
-        }
-      }
-    }
   }
 
   .page {
@@ -83,49 +48,12 @@
       }
     }
 
-    &__breadcrumbs {
-      // Style this here for full bleed of color.
-      background: linear-gradient(180deg, var(--mukurtu-breadcrumb-gradient-color) 0%, var(--brand-secondary) 20%);
-
-      @include layout--full-width-grid;
-
-      div:first-of-type {
-        grid-column: 1 / -1;
-
-        @include media('>=2xl') {
-          grid-column: 2 / -2;
-        }
-      }
-
-      ol {
-        padding: 0;
-
-        li {
-          list-style-type: none;
-        }
-      }
-
-      a {
-        color: var(--brand-text-color);
-        text-decoration: underline solid 2px var(--brand-text-color);
-        transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
-
-        &:hover {
-          text-decoration-color: var(--color-transparent);
-          transition: text-decoration-color 0.12s ease-in;
-        }
-      }
-    }
-
     &__title {
       grid-column: 1 / -1;
       text-align: center;
       padding-block: var(--v-space-2xs);
-      background: linear-gradient(var(--brand-light), var(--color-white));
-      background-repeat: no-repeat;
-      background-size: 100% 12px;
-      background-position: bottom;
       margin-block-end: var(--v-separation);
+      box-shadow: -1px 8px 15px var(--brand-light);
 
       h1 {
         margin-block: 0;

@@ -1,4 +1,6 @@
-.digital-heritage {
+// Digital Heritage Browse and General Browse.
+
+.browse {
   // Default view mode is used in the Realted Content field on Collections.
   &__default {
     &__header {
@@ -132,8 +134,9 @@
           text-align: start;
         }
 
-        // Style the 'Switch to Grid' button.
-        a {
+        // Style switcher buttons.
+        a,
+        button {
           background-color: var(--color-white);
           border: 1px solid var(--brand-primary-dark);
           color: var(--brand-primary-dark);
@@ -142,6 +145,7 @@
           text-decoration: none;
           padding-block: var(--v-space-6xs);
           padding-inline: var(--v-space-5xs);
+          letter-spacing: normal;
 
           &:hover {
             background-color: var(--brand-primary-dark);
@@ -153,7 +157,7 @@
           }
         }
 
-        a.active-toggle {
+        .active-toggle {
           background-color: var(--brand-primary-dark);
           color: var(--color-white);
 
@@ -182,16 +186,16 @@
         // Space between the rows.
         .views-row {
           &:first-of-type {
-            border-top: 5px solid var(--mukurtu-view-row-divider-color);
+            border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
             margin-block-start: var(--v-space-3xs);
           }
 
-          border-bottom: 5px solid var(--mukurtu-view-row-divider-color);
+          border-block-end: 5px solid var(--mukurtu-view-row-divider-color);
         }
 
         // When the Grid button is selected on the Browse Digital Heritage page,
         // a masonry grid layout is applied.
-        .browse-dh-grid {
+        .browse-content.grid {
           column-count: 1;
 
           @include media('>=lg') {
@@ -209,15 +213,7 @@
 
           .views-row {
             break-inside: avoid;
-
-            .digital-heritage__content {
-              display: flex;
-              flex-direction: column;
-            }
-
-            .digital-heritage__content__block {
-              display: none;
-            }
+            border-block-start: 0;
           }
         }
       }
@@ -234,11 +230,27 @@
           grid-column: 10 / span 3;
         }
 
+        // Search textfield.
+        .js-form-type-textfield {
+          margin-block-end: var(--v-space-4xs);
+        }
+
+        // Sort dropdown.
+        .js-form-type-select {
+          &::after {
+            top: unset;
+            bottom: 20px;
+          }
+
+          select {
+            margin-inline-start: 0;
+          }
+        }
+
         // Search box at the top of the sidebar.
         .views-exposed-form {
           margin-block-end: var(--v-space-3xs);
 
-          // Labels for Search and Sort By
           label {
             display: block;
             background-color: var(--brand-primary-dark);
@@ -246,84 +258,33 @@
             font-size: var(--font-size-m);
             font-weight: var(--text-bold);
             margin-block-start: 0;
-            margin-block-end: var(--v-space-5xs);
             padding-inline: var(--v-space-4xxs);
-            padding-block: var(--v-space-4xs);
-          }
-
-          .search-form {
-            display: flex;
-            flex-direction: column;
-
-            input[type='text'] {
-              padding: var(--v-space-4xxs) var(--v-space-2xs);
-              border: none;
-              background-color: var(--mukurtu-text-box-background-color);
-              box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-              color: var(--brand-text-color);
-              font-size: var(--font-size-base);
-              width: 100%;
-            }
-          }
-
-          // The Apply button.
-          input[type='submit'] {
-            background-color: var(--brand-secondary);
-            color: var(--brand-text-color);
-            border-radius: 5px;
-            width: 100%;
-
-            &:hover {
-              background-color: var(--brand-secondary-accent);
-            }
-
-            &:focus {
-              outline: var(--focus-color) solid 2px;
-              outline-offset: 2px;
-            }
-          }
-
-          // The Sort By dropdown.
-          .js-form-type-select {
-            display: flex;
-            flex-direction: column;
-            margin-block: var(--v-space-3xs);
-
-            label {
-              margin-block-end: 0;
-            }
-
-            select {
-              border-color: var(--mukurtu-text-box-background-color);
-              padding: var(--v-space-4xxs) var(--v-space-2xs);
-              color: var(--brand-text-color);
-              font-size: var(--font-size-base);
-              width: 100%;
-            }
-          }
-
-          // Align button to the right.
-          .form-actions {
-            text-align: right;
+            padding-block: var(--v-space-5xs);
           }
         }
 
+        // Details/summary elements in sidebar; facets.
         .facets-widget-checkbox {
           background-color: var(--mukurtu-panel-pane-content-background-color);
+          margin-block-end: var(--v-space-4xs);
 
-          h3 {
+          summary {
             background-color: var(--brand-primary-dark);
             color: var(--light-text-color);
             font-size: var(--font-size-m);
             font-weight: var(--text-bold);
             margin-block-start: 0;
             padding-inline: var(--v-space-4xxs);
-            padding-block: var(--v-space-4xs);
+            padding-block: var(--v-space-5xs);
+            cursor: pointer;
+
+            &::marker {
+              content: '';
+            }
           }
 
           ul {
-            padding-inline: var(--v-space-4xxs);
-            padding-block-end: var(--v-space-4xs);
+            padding: 0 var(--v-space-4xxs) var(--v-space-4xxs);
 
             li {
               list-style: none;
@@ -340,12 +301,17 @@
       display: flex;
       gap: var(--v-space-4xxs);
       padding: 0;
+      justify-content: center;
     }
 
     // List item.
     &__item {
       list-style: none;
       font-weight: var(--text-bold);
+
+      a {
+        padding: var(--v-space-5xs);
+      }
     }
 
     .is-active {
@@ -353,9 +319,15 @@
         color: var(--brand-text-color);
         text-decoration: none;
         border-bottom: 5px solid var(--brand-secondary);
-        padding-block-end: var(--v-space-6xs);
-        padding-inline: var(--v-space-6xs);
       }
     }
   }
+}
+
+// All the extra facets blocks that are placed to ensure
+// each display type gets its facets working properly
+// are hidden here. 
+
+.other-facets {  
+  display: none;
 }

@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- *  * Theme override to display content on a Browse page
+ * Theme override to display content on a Browse page
    or at the bottom of main content under Related Content.
  *
  * Available variables:
@@ -69,21 +69,32 @@
  */
 #}
 
-<article{{ attributes }}>
+{% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
 
-  <div class={{ content_attributes }}>
-    <div class="dictionary-word__content">
-      {{ content }}
-      <div class="dictionary-word__content__text">
-        {{ title_prefix }}
-        {% if label %}
-          <h2{{title_attributes}}>
-            <a href="{{ url }}" rel="bookmark">{{ label }}</a>
-          </h2>
-        {% endif %}
-        {{ title_suffix }}
-        {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
-      </div>
+<article{{ attributes.addClass("horizontal-card") }}>
+  <div class="horizontal-card__media">
+    {% if media_bundle is same as 'image' %}
+    <a href="{{ url }}" aria-hidden="true" tabindex="-1">
+    {% endif %}
+      {{ content.field_representative_media }}
+    {% if media_bundle is same as 'image' %}
+    </a>
+    {% endif %}
+  </div>
+
+  <div{{ content_attributes }} class="horizontal-card__content">
+    <div class="horizontal-card__content-header">
+      {{ title_prefix }}
+      <h2{{ title_attributes }}>
+        <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+      </h2>
+      {{ title_suffix }}
+    </div>
+
+    <div class="horizontal-card__content-body">
+      <span class="tag">{{ node.type.entity.label }}</span>
+      {{ content.field_communities }}
+      {{ content.field_category }}
     </div>
   </div>
 </article>

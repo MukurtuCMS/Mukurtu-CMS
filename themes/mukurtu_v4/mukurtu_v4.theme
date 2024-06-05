@@ -75,12 +75,16 @@ function mukurtu_v4_preprocess_block(&$variables) {
  */
 function mukurtu_v4_preprocess_media(array &$variables) {
   $media = $variables['media'];
- 
+
+ // Put media type in variable to use in twig.
   $variables['bundle'] = $media->bundle();
 
+  // Get the media url in variable to use in twig.
   $fid = $media->getSource()->getSourceFieldValue($media);
 
-  $file = File::load($fid);
+  if (!empty($fid)) {
+    $file = File::load($fid);
+  }
 
   if (!empty($file)) {
     $url = $file->createFileUrl();

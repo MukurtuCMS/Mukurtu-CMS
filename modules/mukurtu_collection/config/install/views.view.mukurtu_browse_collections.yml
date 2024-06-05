@@ -251,7 +251,7 @@ display:
         options:
           view_modes:
             'entity:node':
-              collection: browse
+              collection: browse_collections
       query:
         type: search_api_query
         options:

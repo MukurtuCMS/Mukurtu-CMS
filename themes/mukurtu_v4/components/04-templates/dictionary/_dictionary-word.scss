@@ -1,0 +1,82 @@
+// .dictionary-word {
+
+// }
+
+// The individual word teaser display used on /dictionary.
+.dictionary-word__teaser {
+  &-heading {
+    background-color: var(--brand-primary-dark);
+    padding: var(--v-space-4xxs) var(--v-space-2xs);
+
+    a {
+      color: var(--color-white);
+      font-size: var(--font-size-xl);
+    }
+  }
+
+  // This is the word heading, also a link.
+  &-word {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  svg {
+    fill: var(--color-white);
+    height: var(--line-height-m);
+    width: var(--line-height-2xs);
+  }
+
+  &-content {
+    background-color: var(--brand-light-accent);
+    padding: var(--v-space-4xxs) var(--v-space-2xs);
+  }
+
+  .field--name-field-translation,
+  .field--name-field-recording  {
+    .field__label {
+      display: none;
+    }
+  }
+
+  .field--name-field-translation  {
+    font-weight: var(--text-bold);
+    line-height: var(--line-height-xs);
+    margin: var(--v-space-5xs) 0 var(--v-space-2xs);
+  }
+
+  .field--name-field-media-audio-file {
+    margin: 0 0 var(--v-space-4xxs);
+  }
+
+  .field--name-field-contributor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v-space-6xs);
+    width: 100%;
+
+    .field__label {
+      display: inline-block;
+      font-size: var(--font-size-s);
+      font-weight: var(--text-normal);
+
+      &::after {
+        content: ':';
+        margin-inline-end: var(--v-space-5xs);
+      }
+    }
+  }
+
+  .dictionary-word__media {
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-5xs);
+
+    > div {
+      flex: 1;
+    }
+
+    @include media('>=xl') {
+      flex-direction: row;
+    }
+  }
+}

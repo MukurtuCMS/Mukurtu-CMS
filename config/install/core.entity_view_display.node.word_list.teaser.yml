@@ -1,0 +1,76 @@
+uuid: b2216e6c-409b-4b94-9de5-c0e824b5f7cd
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.word_list.comment
+    - field.field.node.word_list.field_mukurtu_cluster_lat
+    - field.field.node.word_list.field_mukurtu_cluster_long
+    - field.field.node.word_list.field_mukurtu_geojson
+    - image.style.small_250px_w_
+    - node.type.word_list
+  module:
+    - layout_builder
+    - media
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: XkAe1xtvA1U8S2tDjb3pFutX1v_DbrU6IX1bNouBfsw
+id: node.word_list.teaser
+targetEntityType: node
+bundle: word_list
+mode: teaser
+content:
+  field_communities:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_representative_media:
+    type: media_thumbnail
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: small_250px_w_
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  comment: true
+  draft: true
+  field_all_related_content: true
+  field_citation: true
+  field_cultural_protocols: true
+  field_description: true
+  field_in_collection: true
+  field_keywords: true
+  field_media_assets: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_multipage_page_of: true
+  field_protocol_control: true
+  field_related_content: true
+  field_sequence_collection: true
+  field_source: true
+  field_summary: true
+  field_title: true
+  field_words: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_og: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

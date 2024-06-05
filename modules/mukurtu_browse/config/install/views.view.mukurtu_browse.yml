@@ -8,7 +8,7 @@ dependencies:
 id: mukurtu_browse
 label: 'Mukurtu Browse'
 module: views
-description: ''
+description: 'This is the one being used at /browse 2024'
 tag: ''
 base_table: search_api_index_mukurtu_default_content_index
 base_field: search_api_id
@@ -230,6 +230,51 @@ display:
           parse_mode: terms
           min_length: null
           fields: {  }
+        type:
+          id: type
+          table: search_api_index_mukurtu_default_content_index
+          field: type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_options
+          operator: or
+          value:
+            collection: collection
+            dictionary_word: dictionary_word
+            digital_heritage: digital_heritage
+            person: person
+            word_list: word_list
+          group: 1
+          exposed: false
+          expose:
+            operator_id: ''
+            label: ''
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: ''
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
       style:
         type: default
       row:
@@ -251,6 +296,7 @@ display:
           skip_access: false
           preserve_facet_query_args: false
       relationships: {  }
+      css_class: 'browse-content list'
       header: {  }
       footer: {  }
       display_extenders: {  }
@@ -267,10 +313,76 @@ display:
         - 'search_api_list:mukurtu_default_content_index'
   mukurtu_browse_block:
     id: mukurtu_browse_block
-    display_title: Block
+    display_title: 'List View Block'
     display_plugin: block
     position: 1
     display_options:
+      display_description: ''
+      exposed_block: true
+      display_extenders: {  }
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+        - 'url.query_args:sort_by'
+        - 'user.node_grants:view'
+      tags:
+        - 'config:search_api.index.mukurtu_default_content_index'
+        - 'search_api_list:mukurtu_default_content_index'
+  mukurtu_browse_block_grid:
+    id: mukurtu_browse_block_grid
+    display_title: 'Grid View Block'
+    display_plugin: block
+    position: 1
+    display_options:
+      style:
+        type: default
+        options: {  }
+      row:
+        type: search_api
+        options:
+          view_modes:
+            'entity:node':
+              article: grid_browse
+              collection: grid_browse
+              dictionary_word: grid_browse
+              digital_heritage: grid_browse
+              homepage: grid_browse
+              page: grid_browse
+              person: grid_browse
+              word_list: grid_browse
+      defaults:
+        css_class: false
+        style: false
+        row: false
+      css_class: 'browse-content grid'
+      display_description: ''
+      exposed_block: true
+      display_extenders: {  }
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+        - 'url.query_args:sort_by'
+        - 'user.node_grants:view'
+      tags:
+        - 'config:search_api.index.mukurtu_default_content_index'
+        - 'search_api_list:mukurtu_default_content_index'
+  mukurtu_browse_block_map:
+    id: mukurtu_browse_block_map
+    display_title: 'Map View Block'
+    display_plugin: block
+    position: 1
+    display_options:
+      defaults:
+        css_class: false
+      css_class: 'browse-content map'
+      display_description: ''
+      exposed_block: true
       display_extenders: {  }
     cache_metadata:
       max-age: -1

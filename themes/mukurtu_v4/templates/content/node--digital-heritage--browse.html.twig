@@ -68,9 +68,18 @@
  *
  */
 #}
+
+{% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
+
 <article{{ attributes.addClass("horizontal-card") }}>
   <div class="horizontal-card__media">
-    {{ content.field_representative_media }}
+    {% if media_bundle is same as 'image' %}
+    <a href="{{ url }}" aria-hidden="true" tabindex="-1">
+    {% endif %}
+      {{ content.field_representative_media }}
+    {% if media_bundle is same as 'image' %}
+    </a>
+    {% endif %}
   </div>
 
   <div{{ content_attributes }} class="horizontal-card__content">
@@ -80,11 +89,10 @@
         <a href="{{ url }}" rel="bookmark">{{ label }}</a>
       </h2>
       {{ title_suffix }}
-      
-      {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
     </div>
 
     <div class="horizontal-card__content-body">
+      <span class="tag">{{ node.type.entity.label }}</span>
       {{ content.field_communities }}
       {{ content.field_category }}
     </div>

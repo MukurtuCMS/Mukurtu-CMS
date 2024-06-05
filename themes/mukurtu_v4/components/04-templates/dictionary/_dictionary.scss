@@ -1,0 +1,147 @@
+// Main /dictionary page layout.
+.dictionary {
+
+  .browse__main-content {
+    display: block;
+
+    .region {
+      display: block;
+    }
+  }
+
+  // Dictionary search and filter area.
+  .browse-facets__wrapper {
+    margin-inline-start: calc(50% - 50vw);
+    margin-inline-end: calc(50% - 50vw);
+
+    @include layout--full-width-grid;
+
+    background-color: var(--brand-secondary);
+    padding-block-start: var(--v-space-3xs);
+    padding-block-end: var(--v-space-2xs);
+  }
+
+  .browse-facets {
+    display: block;
+    color: var(--color-white);
+    grid-column: 1 / -1;
+
+    @include media('>=md') {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      grid-column: 1 / -1;
+      gap: var(--gutter);
+    }
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+
+    // Each dropdown facet.
+    .facets-widget-dropdown {
+      grid-row: 1;
+      margin-block-end: var(--v-space-3xs);
+
+      @include media('>=md') {
+        margin-block-end: 0;
+      }
+    }
+
+    // The search/sort/apply area.
+    .views-exposed-form {
+      grid-row: 2;
+      grid-column: 1 / span 4;
+      margin-block-start: var(--gutter);
+      
+      @include media('>=md') {
+        margin-block-start: 0;
+      }
+
+      form {
+        display: flex;
+        flex-direction: row;
+        gap: var(--gutter);
+
+        > div {
+          flex: 1;
+        }
+
+        .js-form-type-select {
+          &::after {
+            top: 52px;
+          }
+        }
+      }
+
+      // Apply button.
+      .form-actions {
+        display: flex;
+        align-items: flex-end;
+
+        input {
+          height: 45px;
+        }
+      }
+    }
+
+    h2,
+    label {
+      color: var(--text-color);
+      font-size: var(--font-size-m);
+      font-weight: var(--text-bold);
+      margin-block-end: var(--v-space-5xs);
+    }
+  }
+
+  .browse-content__wrapper {
+    @include layout--full-width-grid;
+  }
+
+  .browse-content {
+    grid-column: 1 / -1;
+
+    @include media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+  }
+
+  .glossary {
+    @include layout--full-width-grid;
+    padding: var(--v-space-2xs) 0;
+
+    .facets-widget-links {
+      grid-column: 1 / -1;
+
+      @include media('>=2xl') {
+        grid-column: 2 / -2;
+      }
+
+      a {
+        padding: var(--v-space-2xs);
+      }
+    }
+
+    ul {
+      display: flex;
+      justify-content: space-evenly;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      list-style-type: none;
+    }
+  }
+
+  // Dictionary results grid.
+  .view-main-content {
+    display: grid;
+    grid-template-columns: auto;
+    gap: var(--v-space-2xs);
+
+    @include media('>=lg') {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}

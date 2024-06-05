@@ -1,3 +1,4 @@
+// Individual collection pages.
 .collection {
   &__header {
     display: flex;
@@ -72,26 +73,26 @@
     }
   }
 
-  &__content {
-    &__body {
-      margin-block-end: var(--v-space-xs);
-      padding-inline: var(--layout-padding-full-width);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+  // &__content {
+  //   &__body {
+  //     margin-block-end: var(--v-space-xs);
+  //     padding-inline: var(--layout-padding-full-width);
+  //     display: flex;
+  //     flex-direction: column;
+  //     align-items: center;
 
-      // Create the 'shadow' look.
-      background: linear-gradient(var(--brand-light), var(--color-white));
-      background-repeat: no-repeat;
-      background-size: 100% 12px;
-      background-position: bottom;
-      padding-block-end: var(--v-space-2xs);
+  //     // Create the 'shadow' look.
+  //     background: linear-gradient(var(--brand-light), var(--color-white));
+  //     background-repeat: no-repeat;
+  //     background-size: 100% 12px;
+  //     background-position: bottom;
+  //     padding-block-end: var(--v-space-2xs);
 
-      p {
-        font-size: var(--font-size-m);
-      }
-    }
-  }
+  //     p {
+  //       font-size: var(--font-size-m);
+  //     }
+  //   }
+  // }
 
   &__items {
     > div {
@@ -122,22 +123,22 @@
     }
 
     // Style the right arrow and title.
-    .digital-hertiage__content__text,
-    .collection__content__text,
-    .dictionary-word__content__text,
-    .person__content__text,
-    .word-list__content__text {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--v-space-4xxs);
+    // .digital-hertiage__content__text,
+    // .collection__content__text,
+    // .dictionary-word__content__text,
+    // .person__content__text,
+    // .word-list__content__text {
+    //   display: flex;
+    //   justify-content: space-between;
+    //   align-items: center;
+    //   gap: var(--v-space-4xxs);
 
-      svg {
-        width: 13px;
-        height: 20px;
-        fill: var(--brand-secondary);
-      }
-    }
+    //   svg {
+    //     width: 13px;
+    //     height: 20px;
+    //     fill: var(--brand-secondary);
+    //   }
+    // }
 
     &__label {
       color: var(--brand-text-color);
