@@ -61,7 +61,7 @@
         "drupal/entity_embed": "*",
         "drupal/entity_reference_revisions": "*",
         "drupal/facets": "^2.0.6",
-        "drupal/field_group": "3.x-dev",
+        "drupal/field_group": "^3.4",
         "drupal/flag": "*",
         "drupal/geofield": "^1.32",
         "drupal/geolocation": "*",
