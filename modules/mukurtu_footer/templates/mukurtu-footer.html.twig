@@ -10,16 +10,20 @@
       {% endfor %}
     </div>
   {% endif %}
+
+  {# Email. #}
+  <div class="email">
   {% if email_us_text %}
-    <div class="email-us-text">{{ email_us_text }}</div>
+    <div class="email-us-text"><a href="mailto:{{ contact_email_address }}">{{ email_us_text }}</a></div>
   {% endif %}
-  {% if contact_email_address %}
-	  <div class="contact-email-address">{{ contact_email_address }}</div>
+  </div>
+
+  {# Socials. #}
+  <div class="socials">
+  {% if twitter %}
+	  <div class="twitter icon">{{ twitter }}</div>
   {% endif %}
-  {% if twitter_message_text %}
-	  <div class="twitter-message-text">{{ twitter_message_text }}</div>
-  {% endif %}
-  {% if twitter_accounts %}
+  {# {% if twitter_accounts %}
     <div class="twitter-accounts">
       {% for account in twitter_accounts %}
         {% if account %}
@@ -27,23 +31,25 @@
         {% endif %}
       {% endfor %}
     </div>
+  {% endif %} #}
+
+  {% if facebook %}
+	  <div class="facebook icon">{{ facebook }}</div>
   {% endif %}
-  {% if facebook_message_text %}
-	  <div class="facebook-message-text">{{ facebook_message_text }}</div>
-  {% endif %}
-  {% if facebook_accounts %}
+  {# {% if facebook_accounts is not empty %}
     <div class="facebook-accounts">
       {% for account in facebook_accounts %}
         {% if account %}
           <div class="account">{{ account }}</div>
         {% endif %}
       {% endfor %}
-    </div>
+    </div> #}
+  {# {% endif %} #}
+
+  {% if instagram %}
+	  <div class="instagram icon">{{ instagram }}</div>
   {% endif %}
-  {% if instagram_message_text %}
-	  <div class="instagram-message-text">{{ instagram_message_text }}</div>
-  {% endif %}
-  {% if instagram_accounts %}
+  {# {% if instagram_accounts %}
     <div class="instagram-accounts">
       {% for account in instagram_accounts %}
         {% if account %}
@@ -51,7 +57,9 @@
         {% endif %}
       {% endfor %}
     </div>
-  {% endif %}
+  {% endif %} #}
+  </div>
+
   {% if copyright_message %}
     <div class="copyright-message">{{ copyright_message }}</div>
   {% endif %}
