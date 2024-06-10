@@ -346,7 +346,7 @@ content:
     weight: 33
     region: content
   field_original_date:
-    type: year_month_day_original_date_formatter
+    type: yyyy_mm_dd_original_date_formatter
     label: above
     settings: {  }
     third_party_settings: {  }

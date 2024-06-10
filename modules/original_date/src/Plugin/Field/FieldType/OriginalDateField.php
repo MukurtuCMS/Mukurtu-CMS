@@ -16,7 +16,7 @@ use InvalidArgumentException;
  * module = "original_date",
  * description = @Translation("Date the item was originally published."),
  * default_widget = "original_date_text",
- * default_formatter = "year_month_day_original_date_formatter"
+ * default_formatter = "yyyy_mm_dd_original_date_formatter"
  * )
  */
 class OriginalDateField extends FieldItemBase {
