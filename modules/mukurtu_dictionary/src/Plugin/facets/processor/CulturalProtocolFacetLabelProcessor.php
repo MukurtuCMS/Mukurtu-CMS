@@ -29,7 +29,9 @@ class CulturalProtocolFacetLabelProcessor extends ProcessorPluginBase implements
     foreach ($results as $result) {
       $protocolId = trim($result->getDisplayValue(), '|');
       $protocolEntity = \Drupal::entityTypeManager()->getStorage('protocol')->load($protocolId);
-      $result->setDisplayValue($protocolEntity->getName());
+      if ($protocolEntity) {
+        $result->setDisplayValue($protocolEntity->getName());
+      }
     }
 
     return $results;
