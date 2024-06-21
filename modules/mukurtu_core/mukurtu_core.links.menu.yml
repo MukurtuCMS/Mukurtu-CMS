@@ -5,13 +5,13 @@ mukurtu_core.dashboard:
   menu_name: mukurtu
   route_name: mukurtu_core.dashboard
   weight: -1000
-mukurtu_core.dashboard_main:
-  title: 'Dashboard'
-  description: 'Dashboard'
-  parent: main
-  menu_name: main
-  route_name: mukurtu_core.dashboard
-  weight: 1000
+#mukurtu_core.dashboard_main:
+#  title: 'Dashboard'
+#  description: 'Dashboard'
+#  parent: main
+#  menu_name: main
+#  route_name: mukurtu_core.dashboard
+#  weight: 1000
 mukurtu_core.dashboard_admin:
   title: 'Mukurtu Dashboard'
   description: 'Mukurtu Dashboard'
