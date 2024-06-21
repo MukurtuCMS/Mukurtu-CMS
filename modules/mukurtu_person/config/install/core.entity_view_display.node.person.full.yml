@@ -2,23 +2,81 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_display.comment.comment.default
     - core.entity_view_mode.node.full
     - field.field.node.person.comment
     - node.type.person
   module:
-    - original_date
-    - entity_reference_revisions
+    - comment
+    - field_group
     - layout_builder
+    - original_date
     - user
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
+  field_group:
+    group_primary_fields:
+      children:
+        - field_media_assets
+        - comment
+        - field_all_related_content
+        - flag_export_content
+      label: 'Primary Fields'
+      parent_name: ''
+      region: content
+      weight: 0
+      format_type: html_element
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+        label_as_html: false
+    group_metadata:
+      children:
+        - field_communities
+        - field_keywords
+        - field_date_born
+        - field_date_died
+      label: Metadata
+      parent_name: ''
+      region: content
+      weight: 1
+      format_type: html_element
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+        label_as_html: false
 id: node.person.full
 targetEntityType: node
 bundle: person
 mode: full
 content:
+  comment:
+    type: comment_default
+    label: above
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_all_related_content:
     type: entity_reference_entity_view
     label: above
@@ -26,25 +84,37 @@ content:
       view_mode: teaser
       link: false
     third_party_settings: {  }
-    weight: 6
+    weight: 3
+    region: content
+  field_communities:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
     region: content
   field_date_born:
-    type: yyyy_mm_dd_original_date_formatter
+    type: month_day_year_original_date_formatter
     label: above
-    settings:
-      timezone_override: ''
-      format_type: medium
+    settings: {  }
     third_party_settings: {  }
-    weight: 0
+    weight: 4
     region: content
   field_date_died:
-    type: yyyy_mm_dd_original_date_formatter
+    type: month_day_year_original_date_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_keywords:
+    type: entity_reference_label
     label: above
     settings:
-      timezone_override: ''
-      format_type: medium
+      link: true
     third_party_settings: {  }
-    weight: 1
+    weight: 3
     region: content
   field_media_assets:
     type: entity_reference_entity_view
@@ -53,56 +123,30 @@ content:
       view_mode: full
       link: false
     third_party_settings: {  }
-    weight: 2
-    region: content
-  field_related_people:
-    type: entity_reference_revisions_entity_view
-    label: above
-    settings:
-      view_mode: preview
-      link: ''
-    third_party_settings: {  }
-    weight: 3
-    region: content
-  field_representative_terms:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 4
-    region: content
-  field_sections:
-    type: entity_reference_revisions_entity_view
-    label: above
-    settings:
-      view_mode: default
-      link: ''
-    third_party_settings: {  }
-    weight: 5
+    weight: 1
     region: content
   flag_export_content:
     settings: {  }
     third_party_settings: {  }
-    weight: 7
+    weight: 5
     region: content
 hidden:
-  comment: true
   draft: true
   field_citation: true
-  field_communities: true
   field_content_type: true
   field_cultural_protocols: true
   field_deceased: true
   field_in_collection: true
-  field_keywords: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
   field_multipage_page_of: true
   field_protocol_control: true
   field_related_content: true
+  field_related_people: true
   field_representative_media: true
+  field_representative_terms: true
+  field_sections: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true

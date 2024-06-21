@@ -5,12 +5,27 @@ dependencies:
     - field.field.node.person.comment
     - node.type.person
   module:
+    - original_date
     - user
 id: node.person.default
 targetEntityType: node
 bundle: person
 mode: default
 content:
+  field_date_born:
+    type: month_day_year_original_date_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 11
+    region: content
+  field_date_died:
+    type: month_day_year_original_date_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 12
+    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
@@ -20,21 +35,32 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
+  flag_export_content:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
 hidden:
   comment: true
+  draft: true
   field_all_related_content: true
   field_citation: true
   field_communities: true
   field_content_type: true
+  field_cultural_protocols: true
+  field_deceased: true
   field_in_collection: true
   field_keywords: true
   field_media_assets: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
+  field_multipage_page_of: true
   field_protocol_control: true
   field_related_content: true
+  field_related_people: true
   field_representative_terms: true
+  field_sections: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true
@@ -45,5 +71,6 @@ hidden:
   flag_mukurtu_follow_content: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

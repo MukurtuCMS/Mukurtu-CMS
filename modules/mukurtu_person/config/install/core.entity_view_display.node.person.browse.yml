@@ -35,7 +35,7 @@ content:
     weight: 1
     region: content
   field_date_born:
-    type: yyyy_mm_dd_original_date_formatter
+    type: month_day_year_original_date_formatter
     label: inline
     settings:
       timezone_override: ''
@@ -44,7 +44,7 @@ content:
     weight: 3
     region: content
   field_date_died:
-    type: yyyy_mm_dd_original_date_formatter
+    type: month_day_year_original_date_formatter
     label: inline
     settings:
       timezone_override: ''
