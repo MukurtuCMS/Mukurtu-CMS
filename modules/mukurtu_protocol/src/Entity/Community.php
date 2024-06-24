@@ -612,7 +612,8 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Sharing Protocol'))
-      ->setDescription(t('TODO'))
+      ->setDescription(t('Open - Your community page is visible to all visitors of your site. Any items under open protocols are also accessible.<br>
+Strict - Your community page is invisible to all site users who are not members or your community. All protocols created within this community are inaccessible to users outside of this community.'))
       ->setSettings([
         'allowed_values' => [
           'strict' => 'Strict',
