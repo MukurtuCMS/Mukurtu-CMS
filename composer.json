@@ -59,7 +59,7 @@
     "drupal/facets": "^2.0.6",
     "drupal/field_group": "^3.4",
     "drupal/flag": "*",
-    "drupal/geofield": "^1.32",
+    "drupal/geofield": "^1.59",
     "drupal/geolocation": "*",
     "drupal/leaflet": "^2.1",
     "drupal/message": "^1.4",
