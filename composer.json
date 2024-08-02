@@ -84,7 +84,6 @@
     "drupal/twig_tweak": "^3.2",
     "drupal/views_bulk_operations": "*",
     "mukurtu/colorbox": "*",
-    "drush/drush": "^10",
     "mukurtu/masonry": "*",
     "sibyx/phpgpx": "@RC"
   },
