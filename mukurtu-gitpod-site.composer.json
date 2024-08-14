@@ -46,7 +46,7 @@
         "composer/installers": "^1.9",
         "cweagans/composer-patches": "^1.7",
         "drupal/blazy": "^2.24",
-        "drupal/colorbox": "^2.0",
+        "drupal/colorbox": "2.0.2",
         "drupal/config_pages": "^2.15",
         "drupal/console": "~1.0",
         "drupal/content_browser": "*",
