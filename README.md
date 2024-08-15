@@ -58,6 +58,4 @@ ddev launch
 ### Gitpod
 Mukurtu CMS is configured to work with [Gitpod](https://www.gitpod.io/), a cloud based development environment.
 
-.
-
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/MukurtuCMS/Mukurtu-CMS)
