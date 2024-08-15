@@ -43,7 +43,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
-      ->setDescription(t('A text description of the location.'))
+      ->setDescription(t('Location Description adds additional context to a Geocode address, and can be used instead of a Geocode Address if the location should be identified, but not precisely located on a map.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
