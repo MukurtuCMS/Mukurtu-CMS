@@ -52,7 +52,8 @@ process:
               - mukurtu_cms_v3_media_audio
             source: sid
   status: status
-  field_word_origin:
+
+  field_word_type:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_word_type
     source: field_part_of_speech
