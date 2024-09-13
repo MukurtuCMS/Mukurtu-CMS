@@ -14,24 +14,24 @@ use Drupal\Core\Ajax\AlertCommand;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
  */
-class MukurtuManageContentWarningsController extends ControllerBase {
+// class MukurtuManageContentWarningsController extends ControllerBase {
 
-  public function access(AccountInterface $account, NodeInterface $node) {
-    return AccessResult::forbidden();
-/*     if ($node->bundle() != 'community') {
-      return AccessResult::forbidden();
-    }
+//   public function access(AccountInterface $account, NodeInterface $node) {
+//     return AccessResult::forbidden();
+// /*     if ($node->bundle() != 'community') {
+//       return AccessResult::forbidden();
+//     }
 
-    if ($node->access('update', $account)) {
-      return AccessResult::allowed();
-    }
+//     if ($node->access('update', $account)) {
+//       return AccessResult::allowed();
+//     }
 
-    return AccessResult::forbidden(); */
-  }
+//     return AccessResult::forbidden(); */
+//   }
 
-  public function content(NodeInterface $node) {
-    $build = [];
-    return $build;
-  }
+//   public function content(NodeInterface $node) {
+//     $build = [];
+//     return $build;
+//   }
 
-}
+// }

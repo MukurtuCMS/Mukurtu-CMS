@@ -1,7 +1,16 @@
+# todo modualize this to refactor out of global styling/scripts
 global-styling:
   css:
     theme:
       css/style.css: {}
+      css/content-warnings.css: {}
+
+global-scripts:
+  js:
+    js/content-warnings.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
 
 mobile-nav:
   js:

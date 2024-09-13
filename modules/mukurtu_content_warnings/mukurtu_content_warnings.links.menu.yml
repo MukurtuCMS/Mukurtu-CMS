@@ -1,0 +1,6 @@
+mukurtu_content_warnings.mukurtu_content_warnings_settings_dashboard:
+  title: "Content Warnings Settings"
+  menu_name: mukurtu
+  description: "Change settings related to Mukurtu content warnings."
+  route_name: mukurtu_content_warnings.settings
+  parent: mukurtu_core.site_configuration

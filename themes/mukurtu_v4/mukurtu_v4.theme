@@ -2,12 +2,14 @@
 
 use Drupal\file\Entity\File;
 use Drupal\Core\Url;
+use Drupal\media\MediaInterface;
 
 /**
  * Implements hook_preprocess_breadcrumb().
  */
 // @todo: adjust this so that it works on admin pages
-function mukurtu_v4_preprocess_breadcrumb(&$variables) {
+function mukurtu_v4_preprocess_breadcrumb(&$variables)
+{
   $request = \Drupal::request();
   $route = \Drupal::routeMatch()->getRouteObject();
   $page_title = \Drupal::service('title_resolver')->getTitle($request, $route);
@@ -26,15 +28,16 @@ function mukurtu_v4_preprocess_breadcrumb(&$variables) {
 /**
  * Implements hook_preprocess_node().
  */
-function mukurtu_v4_preprocess_node(&$variables) {
+function mukurtu_v4_preprocess_node(&$variables)
+{
   $node = $variables['node'];
 
   if ($node instanceof \Drupal\mukurtu_collection\Entity\Collection) {
     $variables['collection_count'] = $node->getCount();
   }
 
-  /** This creates a twig variable that can be used in node templates to 
-   * render the media assets field (a second time) with thumbnail display. 
+  /** This creates a twig variable that can be used in node templates to
+   * render the media assets field (a second time) with thumbnail display.
    */
 
   if ($node->hasField('field_media_assets')) {
@@ -53,7 +56,8 @@ function mukurtu_v4_preprocess_node(&$variables) {
 /**
  * Implements hook_theme_suggestions_input_alter().
  */
-function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variables) {
+function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variables)
+{
   $element = $variables['element'];
   if ($element['#type'] == 'submit' && strpos($element['#id'], 'edit-submit-mukurtu-browse-collections--2') === 0) {
     $suggestions[] = 'input__collection__search';
@@ -63,7 +67,8 @@ function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variable
 /**
  * Implements template_preprocess_block().
  */
-function mukurtu_v4_preprocess_block(&$variables) {
+function mukurtu_v4_preprocess_block(&$variables)
+{
   // Directs the theme to use the block template for the Mukurtu footer,
   // mukurtu-footer.html.twig. Otherwise, it would use the default template,
   // block.html.twig, and our footer would not display.
@@ -71,12 +76,93 @@ function mukurtu_v4_preprocess_block(&$variables) {
 }
 
 /**
+ * Implements template_preprocess_field().
+ */
+function mukurtu_v4_preprocess_field(&$variables)
+{
+  // TODO move all this to template_preprocess_node() instead?
+  if ($variables['field_name'] == 'field_media_assets') {
+    if (
+      isset($variables['element'])              &&
+      isset($variables['element'][0])           &&
+      isset($variables['element'][0]['#media']) &&
+      ($variables['element'][0]['#media'] instanceof MediaInterface)
+    ) {
+      $variables['media'] = $variables['element'][0]['#media'];
+      $media = $variables['media'];
+      $config = \Drupal::service('config.factory')->getEditable('mukurtu_content_warnings.settings');
+
+      if ($config->get('people_warnings.enabled')) {
+        $names = [];
+        $peopleTerms = [];
+        // Look at the People taxonomy field on the media.
+        $peopleTerms = $media->get('field_people')->referencedEntities();
+        if ($peopleTerms) {
+          // Next, check the list of the media's field_people terms against the
+          // field_representative_terms of Person entities.
+          // For every people term that matches a representative term, add that
+          // term name to the list of names of deceased people for the warning.
+          foreach ($peopleTerms as $term) {
+            $query = \Drupal::entityQuery('node')
+              ->condition('type', 'person')
+              ->condition('field_deceased', TRUE, '=')
+              ->condition('field_representative_terms.entity:taxonomy_term.tid', $term->id(), '=')
+              ->accessCheck(FALSE);
+            $ids = $query->execute();
+            if ($ids) {
+              // If that query yields any results, that means the dead person's name needs to
+              // be added to the list of names in the content warning.
+              array_push($names, $term->getName());
+            }
+          }
+          if ($names) {
+            $warningTemplate = '';
+            $warningText = '';
+            // todo: this can be improved with ternary operator.
+            if (count($names) > 1) {
+              $warningTemplate = $config->get('people_warnings.warning_multiple');
+              $warningText = str_replace("[names]", implode(' ', $names), $warningTemplate);
+            }
+            else {
+              $warningTemplate = $config->get('people_warnings.warning_single');
+              $warningText = str_replace("[name]", implode(' ', $names), $warningTemplate);
+            }
+            $variables['hasContentWarning'] = TRUE;
+            $variables['warnings'][] = $warningText;
+            $variables['media-id'] = $media->id();
+          }
+        }
+      }
+      $taxonomyWarnings = $config->get('taxonomy_warnings');
+      if ($taxonomyWarnings) {
+        // If we have taxonomy warnings in config, we need to iterate through
+        // them all and see if the media item's media tags field matches any of
+        // the terms we see here.
+        $mediaTags = $media->get('field_media_tags')->referencedEntities();
+        $tids = [];
+        foreach ($mediaTags as $tag) {
+          // Make a quick list of tids that the media tags field has.
+          array_push($tids, $tag->id());
+        }
+        foreach ($taxonomyWarnings as $warning) {
+          if (in_array($warning['term'], $tids)) {
+            $variables['hasContentWarning'] = TRUE;
+            $variables['warnings'][] = $warning['warning'];
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
  * Implements template_preprocess_media().
  */
-function mukurtu_v4_preprocess_media(array &$variables) {
+function mukurtu_v4_preprocess_media(array &$variables)
+{
   $media = $variables['media'];
 
- // Put media type in variable to use in twig.
+  // Put media type in variable to use in twig.
   $variables['bundle'] = $media->bundle();
 
   // Get the media url in variable to use in twig.

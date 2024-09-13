@@ -24,6 +24,7 @@ install:
   - devel_generate
   - devel_php
   - menu_link_content
+  - mukurtu_content_warnings
   - datetime
   - block_content
   - quickedit
