@@ -28,11 +28,11 @@ process:
   'field_pronunciation/value':
     -
       plugin: get
-      source: field_pronunciation/value
+      source: field_pronunciation/0/value
   'field_pronunciation/format':
     -
       plugin: static_map
-      source: field_pronunciation/format
+      source: field_pronunciation/0/format
       map:
         'filtered_html': 'basic_html'
         'plain_text': 'plain_text'
