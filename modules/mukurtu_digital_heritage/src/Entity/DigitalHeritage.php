@@ -23,7 +23,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_cultural_narrative'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Cultural Narrative')
-      ->setDescription(t('!!!!!The Cultural Narrative field is used to add historical or social context, expert community knowledge, community stories, and other relevant context to the Digital Heritage Item. This is generally information that is community specific. For example, if the item is a basket, this field may contain a narrative from the basket­maker about their technique, or it may tell a story about how the baskets were used by previous generations and how they are used today.'))
+      ->setDescription(t('The Cultural Narrative field is used to add historical or social context, expert community knowledge, community stories, and other relevant context to the Digital Heritage Item. This is generally information that is community specific. For example, if the item is a basket, this field may contain a narrative from the basket­maker about their technique, or it may tell a story about how the baskets were used by previous generations and how they are used today.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
