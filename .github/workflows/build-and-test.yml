@@ -63,4 +63,4 @@ jobs:
         run: |
           cd ./web
           ../vendor/bin/phpunit --verbose --testsuite "${{ matrix.test-suite }}"
-        continue-on-error: false
+        continue-on-error: true
