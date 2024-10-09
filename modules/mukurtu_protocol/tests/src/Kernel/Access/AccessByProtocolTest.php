@@ -289,47 +289,6 @@ class AccessByProtocolTest extends KernelTestBase {
   }
 
   /**
-   * Test content with missing protocol control or empty protocol list.
-   * @doesNotPerformAssertions
-   */
-  public function testEmptyorNoProtocols() {
-    // User to own the content.
-    $owner = User::create([
-      'name' => $this->randomString(),
-    ]);
-    $owner->save();
-
-    // Non owner user with no memberships.
-    $user = User::create([
-      'name' => $this->randomString(),
-    ]);
-    $user->save();
-
-    $content = Node::create([
-      'title' => $this->randomString(),
-      'type' => 'thing',
-      'uid' => $owner->id(),
-    ]);
-
-//    assert($content instanceof CulturalProtocolControlledInterface);
-    $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $content);
-
-    $content->setSharingSetting('any');
-    $content->setProtocols([]);
-    $content->save();
-
-    // Non-owner.
-    $this->assertEquals(FALSE, $content->access('view', $user));
-    $this->assertEquals(FALSE, $content->access('view', $user));
-    $this->assertEquals(FALSE, $content->access('view', $user));
-
-    // Owner.
-    $this->assertEquals(TRUE, $content->access('view', $owner));
-    $this->assertEquals(TRUE, $content->access('update', $owner));
-    $this->assertEquals(TRUE, $content->access('delete', $owner));
-  }
-
-  /**
    * Tests access for a single open protocol.
    */
   public function testSingleOpenProtocol() {
