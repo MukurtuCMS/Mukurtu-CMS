@@ -25,7 +25,7 @@ jobs:
           - 3306:3306
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: web/profiles/mukurtu-cms
 
@@ -43,12 +43,12 @@ jobs:
 
       - name: Get composer cache directory
         id: composercache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "COMPCACHE=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT 
 
       - name: Cache composer dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
-          path: ${{ steps.composercache.outputs.dir }}
+          path: $COMPCACHE
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
