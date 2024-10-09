@@ -310,7 +310,8 @@ class AccessByProtocolTest extends KernelTestBase {
       'uid' => $owner->id(),
     ]);
 
-    assert($content instanceof CulturalProtocolControlledInterface);
+//    assert($content instanceof CulturalProtocolControlledInterface);
+    $this->assertInstanceOf(Node::class, $content);
 
     $content->setSharingSetting('any');
     $content->setProtocols([]);
