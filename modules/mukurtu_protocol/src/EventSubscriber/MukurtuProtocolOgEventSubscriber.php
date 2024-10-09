@@ -73,7 +73,7 @@ class MukurtuProtocolOgEventSubscriber extends OgEventSubscriber {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents() : array {
     return [
       PermissionEventInterface::EVENT_NAME => [
         ['provideDefaultProtocolsPermission'],
