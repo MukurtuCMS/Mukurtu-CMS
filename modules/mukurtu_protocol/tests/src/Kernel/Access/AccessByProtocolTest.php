@@ -290,6 +290,7 @@ class AccessByProtocolTest extends KernelTestBase {
 
   /**
    * Test content with missing protocol control or empty protocol list.
+   * @doesNotPerformAssertions
    */
   public function testEmptyorNoProtocols() {
     // User to own the content.
@@ -311,8 +312,7 @@ class AccessByProtocolTest extends KernelTestBase {
     ]);
 
 //    assert($content instanceof CulturalProtocolControlledInterface);
-//    $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $content);
-    $this->assertInstanceOf(CulturalProtocolControlledInterface, $content);
+    $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $content);
 
     $content->setSharingSetting('any');
     $content->setProtocols([]);
