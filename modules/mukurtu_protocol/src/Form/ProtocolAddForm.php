@@ -9,6 +9,8 @@ use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\entity_browser\Element\EntityBrowserElement;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 
 /**
  * Form controller for Protocol creation forms.
