@@ -33,13 +33,27 @@ class ManageProtocolProjectsDirectory extends FormBase
     $this->protocolId = $protocol;
     $element = 'protocol-projects-directory-' . $protocol;
 
-    $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_protocol_' . $protocol . '_projects_directory_description') ?? '';
+    $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_protocol_' . $protocol . '_projects_directory_description') ?? NULL;
+    $format = 'basic_html';
+    $value = '';
+
+    if ($description) {
+      if (isset($description['format']) && $description['format'] != '') {
+        $format = $description['format'];
+      }
+      if (isset($description['value']) && $description['value'] != '') {
+        $value = $description['value'];
+      }
+    }
+    $allowedFormats = ['basic_html', 'full_html'];
     $protocolName = \Drupal::entityTypeManager()->getStorage('protocol')->load(intval($protocol))->getName();
     $form['description'] = [
       '#title' => $this->t('Description'),
       '#description' => $this->t("Enter the description for @protocolName's Local Contexts project directory page.", ['@protocolName' => $protocolName]),
-      '#default_value' => $description,
-      '#type' => 'textarea',
+      '#default_value' => $value,
+      '#type' => 'text_format',
+      '#format' => $format,
+      '#allowed_formats' => $allowedFormats,
     ];
 
     $form[$element . '-submit'] = [
