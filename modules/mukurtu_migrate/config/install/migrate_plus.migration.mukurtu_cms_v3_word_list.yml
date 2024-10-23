@@ -37,6 +37,23 @@ process:
   created: created
   status: status
   title: title
+  'field_cultural_protocols/sharing_setting':
+    -
+      plugin: get
+      source: field_item_privacy_setting/0/value
+  'field_cultural_protocols/protocols':
+    -
+      plugin: mukurtu_migrate_lookup_og_group
+      source: nid
+    -
+      plugin: sub_process
+      process:
+        plugin: migration_lookup
+        migration: mukurtu_cms_v3_cultural_protocols
+        source: target_id
+    -
+      plugin: mukurtu_migrate_set_protocols
+
   # TODO: field_collection_summary
   field_source: field_collection_credit/0/value
   'field_description/value':
