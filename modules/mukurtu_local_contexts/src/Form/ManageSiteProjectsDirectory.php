@@ -22,12 +22,26 @@ class ManageSiteProjectsDirectory extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_site_projects_directory_description') ?? '';
+    $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_site_projects_directory_description') ?? NULL;
+    $format = 'basic_html';
+    $value = '';
+
+    if ($description) {
+      if (isset($description['format']) && $description['format'] != '') {
+        $format = $description['format'];
+      }
+      if (isset($description['value']) && $description['value'] != '') {
+        $value = $description['value'];
+      }
+    }
+    $allowedFormats = ['basic_html', 'full_html'];
     $form['description'] = [
       '#title' => $this->t('Description'),
       '#description' => $this->t("Enter the description for the site local contexts project directory page."),
-      '#default_value' => $description,
-      '#type' => 'textarea',
+      '#default_value' => $value,
+      '#type' => 'text_format',
+      '#format' => $format,
+      '#allowed_formats' => $allowedFormats,
     ];
 
     $form['actions'] = [
@@ -45,7 +59,7 @@ class ManageSiteProjectsDirectory extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-
+    // do we need to sanitize the description html formatted text content?
   }
 
   /**
