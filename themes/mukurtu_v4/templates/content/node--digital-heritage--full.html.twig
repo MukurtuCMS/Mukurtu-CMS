@@ -118,7 +118,9 @@
       {% if content.group_metadata is not empty %}
         <div class="full-node__list">
           <aside class="full-node__sidebar">
-            {{ content.group_metadata }}
+            {{ content.group_metadata.group_sidebar_mukurtu_fields }}
+            {{ content.group_metadata.group_additional_metadata }}
+            {{ content.group_metadata.group_rights }}
           </aside>
         </div>
       {% endif %}
