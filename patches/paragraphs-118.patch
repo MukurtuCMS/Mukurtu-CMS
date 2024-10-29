@@ -1,0 +1,231 @@
+diff --git a/config/schema/paragraphs_type.schema.yml b/config/schema/paragraphs_type.schema.yml
+index fbed06457a62ba0978b2f750acca805ab08afc99..b6c832050f9780ebbaa3da2717530ff433fb2c73 100644
+--- a/config/schema/paragraphs_type.schema.yml
++++ b/config/schema/paragraphs_type.schema.yml
+@@ -17,6 +17,9 @@ paragraphs.paragraphs_type.*:
+     description:
+       type: text
+       label: 'Description'
++    save_empty:
++      type: boolean
++      label: 'Save when empty'
+     behavior_plugins:
+       type: sequence
+       label: 'Plugins'
+diff --git a/paragraphs.post_update.php b/paragraphs.post_update.php
+index e0ce29a102aa061c71a49ba401217840e515abe8..7494b1a833b1caaf11e244e04a0e3bf7e400f482 100644
+--- a/paragraphs.post_update.php
++++ b/paragraphs.post_update.php
+@@ -5,6 +5,7 @@
+  * Post update functions for Paragraphs.
+  */
+ 
++use Drupal\Core\Config\Entity\ConfigEntityUpdater;
+ use Drupal\Core\Database\Database;
+ use Drupal\Core\Database\Query\Condition;
+ use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
+@@ -12,6 +13,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
+ use Drupal\Core\Field\FieldStorageDefinitionInterface;
+ use Drupal\Core\Site\Settings;
+ use Drupal\field\Entity\FieldStorageConfig;
++use Drupal\paragraphs\ParagraphsTypeInterface;
+ 
+ /**
+  * Set the parent id, type and field name to the already created paragraphs.
+@@ -271,3 +273,16 @@ function paragraphs_post_update_rebuild_parent_fields(array &$sandbox) {
+   // Update finished key if the whole update has finished.
+   $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['current_index'] / $sandbox['max']);
+ }
++
++/**
++ * Add support for configuring whether to save empty paragraph types.
++ */
++function paragraphs_post_update_add_support_for_save_empty_paragraphs(array &$sandbox) {
++  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'paragraphs_type', function (ParagraphsTypeInterface $paragraphs_type) {
++    if ($paragraphs_type->get('save_empty') === NULL) {
++      $paragraphs_type->set('save_empty', TRUE);
++      return TRUE;
++    }
++    return FALSE;
++  });
++}
+diff --git a/src/Entity/Paragraph.php b/src/Entity/Paragraph.php
+index 759bd6fe7236a2ccc22e4024edead9649f18c46b..5f98ae9ac9d57b1bd2b86359f422e0a0bb89154c 100644
+--- a/src/Entity/Paragraph.php
++++ b/src/Entity/Paragraph.php
+@@ -355,6 +355,37 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
+     return $this;
+   }
+ 
++  /**
++   * {@inheritdoc}
++   */
++  public function shouldSaveIfEmpty(): bool {
++    $paragraph_type = $this->getParagraphType();
++    if ($paragraph_type->saveIfEmpty()) {
++      // Always save if the entity type supports empty saves.
++      return TRUE;
++    }
++    // Save only if the paragraph is not empty.
++    return !$this->isParagraphEmpty();
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function isParagraphEmpty(): bool {
++    // Check if all the paragraph fields are empty.
++    foreach ($this->getFields() as $field) {
++      // Skip base fields and check if any non-base field is not empty.
++      if (!$field->getFieldDefinition()->getFieldStorageDefinition()->isBaseField()) {
++        // Filter out empty items before checking.
++        $field->filterEmptyItems();
++        if (!$field->isEmpty()) {
++          return FALSE;
++        }
++      }
++    }
++    return TRUE;
++  }
++
+   /**
+    * {@inheritdoc}
+    */
+diff --git a/src/Entity/ParagraphsType.php b/src/Entity/ParagraphsType.php
+index 51ac1998ee79ad849c2352361c6306882d6a9d12..22fc35dadd85cbd96cfa6fbbcbbc7fcd51956e45 100644
+--- a/src/Entity/ParagraphsType.php
++++ b/src/Entity/ParagraphsType.php
+@@ -45,6 +45,7 @@ use Drupal\Core\File\FileSystemInterface;
+  *     "icon_uuid",
+  *     "icon_default",
+  *     "description",
++ *     "save_empty",
+  *     "behavior_plugins",
+  *   },
+  *   bundle_of = "paragraph",
+@@ -92,6 +93,13 @@ class ParagraphsType extends ConfigEntityBundleBase implements ParagraphsTypeInt
+    */
+   protected $icon_default;
+ 
++  /**
++   * Whether to save paragraph types whose configurable fields are empty.
++   *
++   * @var bool
++   */
++  protected bool $save_empty = TRUE;
++
+   /**
+    * The Paragraphs type behavior plugins configuration keyed by their id.
+    *
+@@ -270,6 +278,13 @@ class ParagraphsType extends ConfigEntityBundleBase implements ParagraphsTypeInt
+     return FALSE;
+   }
+ 
++  /**
++   * {@inheritdoc}
++   */
++  public function saveIfEmpty(): bool {
++    return $this->save_empty;
++  }
++
+   /**
+    * {@inheritdoc}
+    */
+diff --git a/src/Form/ParagraphsTypeForm.php b/src/Form/ParagraphsTypeForm.php
+index dee8c7a691d6cf19c7ff10180e0cb4b11267d2aa..dd3787a07af52f2c84f399418820ed5b681facd2 100644
+--- a/src/Form/ParagraphsTypeForm.php
++++ b/src/Form/ParagraphsTypeForm.php
+@@ -113,6 +113,13 @@ class ParagraphsTypeForm extends EntityForm {
+       '#description' => $this->t('This text will be displayed on the <em>Add new paragraph</em> page.'),
+     ];
+ 
++    $form['save_empty'] = [
++      '#title' => $this->t('Save paragraph instances, even when fields are empty.'),
++      '#type' => 'checkbox',
++      '#default_value' => $paragraphs_type->saveIfEmpty(),
++      '#description' => $this->t('Enabled by default to accommodate paragraph types with no fields.'),
++    ];
++
+     // Loop over the plugins that can be applied to this paragraph type.
+     if ($behavior_plugin_definitions = $this->paragraphsBehaviorManager->getApplicableDefinitions($paragraphs_type)) {
+       $form['message'] = [
+diff --git a/src/ParagraphInterface.php b/src/ParagraphInterface.php
+index 4cd6f10e36f254627467717d81a16bef9d21ba0a..f53474510d7f4cd6d465cecb5f2b34dc5482601c 100644
+--- a/src/ParagraphInterface.php
++++ b/src/ParagraphInterface.php
+@@ -153,4 +153,28 @@ interface ParagraphInterface extends ContentEntityInterface, EntityOwnerInterfac
+    */
+   public function setBehaviorSettings($plugin_id, array $settings);
+ 
++  /**
++   * Returns whether this paragraph should be saved when empty.
++   *
++   * If the paragraph type supports skipping the saving of empty paragraphs,
++   * then it'll always return TRUE.
++   *
++   * @see \Drupal\paragraphs\ParagraphsTypeInterface::saveIfEmpty()
++   *
++   * @return bool
++   *   Returns TRUE if the paragraph type's "save_empty" property is TRUE, or
++   *   the paragraph is not empty {@see isParagraphEmpty()}. Returns FALSE
++   *   otherwise.
++   */
++  public function shouldSaveIfEmpty(): bool;
++
++  /**
++   * Returns whether all the configurable fields in this paragraph are empty.
++   *
++   * @return bool
++   *   Returns TRUE if all the non-base/configurable fields are empty. Returns
++   *   FALSE otherwise.
++   */
++  public function isParagraphEmpty(): bool;
++
+ }
+diff --git a/src/ParagraphsTypeInterface.php b/src/ParagraphsTypeInterface.php
+index c08b263846fb4d9b79bb9a4d019a05835fa37571..b97d79cee850d653bef827d38029a099842c6b8b 100644
+--- a/src/ParagraphsTypeInterface.php
++++ b/src/ParagraphsTypeInterface.php
+@@ -78,4 +78,14 @@ interface ParagraphsTypeInterface extends ConfigEntityInterface {
+    */
+   public function hasEnabledBehaviorPlugin($plugin_id);
+ 
++  /**
++   * Returns TRUE if the paragraph type permits saving empty paragraph items.
++   *   This is the default behaviour.
++   *
++   * @return bool
++   *   TRUE if the paragraph type permits saving if all the fields are empty,
++   *   FALSE otherwise.
++   */
++  public function saveIfEmpty(): bool;
++
+ }
+diff --git a/src/Plugin/Field/FieldWidget/InlineParagraphsWidget.php b/src/Plugin/Field/FieldWidget/InlineParagraphsWidget.php
+index aa2b7070c2c215733c5e465463d35af0b1fb2ba2..96f9af6d963d0ca54dab5ad39476848d4875a9db 100644
+--- a/src/Plugin/Field/FieldWidget/InlineParagraphsWidget.php
++++ b/src/Plugin/Field/FieldWidget/InlineParagraphsWidget.php
+@@ -1358,6 +1358,9 @@ class InlineParagraphsWidget extends WidgetBase {
+         $item['target_id'] = NULL;
+         $item['target_revision_id'] = NULL;
+       }
++      if (!empty($item['entity']) && !$item['entity']->shouldSaveIfEmpty()) {
++        $item = [];
++      }
+     }
+     return $values;
+   }
+diff --git a/src/Plugin/Field/FieldWidget/ParagraphsWidget.php b/src/Plugin/Field/FieldWidget/ParagraphsWidget.php
+index efd9c4452391e3c9008d2d342a97b3cb77d5d47b..8f88da35ee4fbab2713fb8f45a6114a93896c73e 100644
+--- a/src/Plugin/Field/FieldWidget/ParagraphsWidget.php
++++ b/src/Plugin/Field/FieldWidget/ParagraphsWidget.php
+@@ -2669,6 +2669,9 @@ class ParagraphsWidget extends WidgetBase {
+         $item['target_id'] = NULL;
+         $item['target_revision_id'] = NULL;
+       }
++      if (!empty($item['entity']) && !$item['entity']->shouldSaveIfEmpty()) {
++        $item = [];
++      }
+     }
+     return $values;
+   }
