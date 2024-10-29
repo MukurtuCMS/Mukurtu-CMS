@@ -1,3 +1,4 @@
+uuid: 74f9cab8-74dd-4006-81ff-5ad9a6fcd93d
 langcode: en
 status: true
 dependencies:
@@ -73,6 +74,8 @@ third_party_settings:
         attributes: ''
         effect: none
         speed: fast
+_core:
+  default_config_hash: WFz06AtmPlhrO90R1y3YSKVDZau2_JmqMkw2C0pin_Q
 id: node.dictionary_word.full
 targetEntityType: node
 bundle: dictionary_word
