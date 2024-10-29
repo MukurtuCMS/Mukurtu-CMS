@@ -154,6 +154,9 @@
         "patches": {
             "drupal/message_ui": {
                 "Fix installation": "https://git.drupalcode.org/project/message_ui/-/merge_requests/2.diff"
+            },
+            "drupal/paragraphs": {
+                "Ensure empty paragraphs register as empty": "web/profiles/contrib/mukurtu-cms/patches/paragraphs-118.patch"
             }
         },
         "drupal-core-project-message": {
