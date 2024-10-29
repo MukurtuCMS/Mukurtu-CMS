@@ -33,13 +33,26 @@ class ManageCommunityProjectsDirectory extends FormBase {
     $this->communityId = $community;
     $element = 'community-projects-directory-' . $community;
 
-    $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_community_' . $community . '_projects_directory_description') ?? '';
+    $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_community_' . $community . '_projects_directory_description') ?? NULL;
+    $format = 'basic_html';
+    $value = '';
+
+    if ($description) {
+      if (isset($description['format']) && $description['format'] != '') {
+        $format = $description['format'];
+      }
+      if (isset($description['value']) && $description['value'] != '') {
+        $value = $description['value'];
+      }
+    }
     $communityName = \Drupal::entityTypeManager()->getStorage('community')->load(intval($community))->getName();
     $form['description'] = [
       '#title' => $this->t('Description'),
       '#description' => $this->t("Enter the description for @communityName's Local Contexts project directory page.", ['@communityName' => $communityName]),
-      '#default_value' => $description,
-      '#type' => 'textarea',
+      '#default_value' => $value,
+      '#type' => 'text_format',
+      '#format' => $format,
+      '#allowed_formats' => [ 'basic_html', 'full_html'],
     ];
 
     $form[$element . '-submit'] = [
