@@ -41,6 +41,13 @@
       }
     }
 
+    // Visually hide the map label.
+    .field--name-field-coverage {
+      .field__label {
+        @include visually-hidden;
+      }
+    }
+
     .field--name-field-recording {
       .field__item {
         margin: var(--v-space-4xxs) 0; 
@@ -63,6 +70,12 @@
     }
   }
 
+  &__citation {
+    .field--name-field-citation {
+      @include divider;
+    }
+  }
+
   // Sidebar.
   &__list {
     grid-column: 1 / span 6;
@@ -76,12 +89,13 @@
     }
   }
 
-  &__sidebar {
+  &__sidebar .sidebar-section {
     background-color: var(--brand-light-accent);
     border-top: 5px solid var(--brand-secondary);
     padding-inline: var(--v-space-4xs);
     padding-block-start: var(--v-space-4xxs);
     padding-block-end: var(--v-space-s);
+    margin-block-end: var(--v-space-4xs);
 
     .field {
       padding-block: var(--v-space-4xxs);
