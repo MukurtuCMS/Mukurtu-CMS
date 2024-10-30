@@ -153,7 +153,7 @@
         },
         "patches": {
             "drupal/paragraphs": {
-                "Ensure empty paragraphs register as empty": "patches/paragraphs/paragraphs-118.patch"
+                "Ensure empty paragraphs register as empty": "web/profiles/contrib/mukurtu-cms/patches/paragraphs/paragraphs-118.patch"
             }
         },
         "drupal-core-project-message": {
