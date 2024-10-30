@@ -151,6 +151,11 @@
                 "type:drupal-custom-theme"
             ]
         },
+        "patches": {
+            "drupal/paragraphs": {
+                "Ensure empty paragraphs register as empty": "patches/paragraphs/paragraphs-118.patch"
+            }
+        },
         "drupal-core-project-message": {
             "include-keys": [
                 "homepage",
