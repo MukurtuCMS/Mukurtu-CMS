@@ -24,11 +24,11 @@
     // Ensure border is not duplicated on fields inside fields, fields inside media,
     // and nested paragraph.
     .field:not(.field--name-field-media-assets, 
-    .field--name-field-media-assets .field, 
-    .media .field, 
-    .field.field.field--name-field-word-entry,
-    .field--name-field-sentence-recording,
-    .field--name-field-sentence) {
+      .field--name-field-media-assets .field, 
+      .media .field, 
+      .field.field.field--name-field-word-entry,
+      .field--name-field-sentence-recording,
+      .field--name-field-sentence) {
       @include divider;
     }
 
@@ -53,9 +53,11 @@
         margin: var(--v-space-4xxs) 0; 
       }
     }
-    
+
     .paragraph--type--sample-sentence {
+
       margin: var(--v-space-2xs) 0;
+
       > div {
         margin: var(--v-space-4xxs) 0; 
       }
@@ -144,7 +146,20 @@
       }
     }
 
+    .tk-labels,
+    .bc-labels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--v-space-4xxs);
+    }
+
+    .name {
+      line-height: var(--line-height-xs);
+    }
+
+    // Local Contexts Projects
     .local-contexts-project .tk-label,
+    .local-contexts-project .bc-label,
     .local-contexts-label {
       display: flex;
       flex-direction: column;
@@ -152,12 +167,17 @@
       gap: var(--v-space-4xxs);
       margin-block-start: var(--v-space-4xxs);
 
-      img {
-        width: 50%;
-      }
-
       .text {
         display: none;
+      }
+    }
+
+    // Local Contexts Labels and Notices.
+    .field--name-field-local-contexts-labels-and-notices {
+      .field__items {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--v-space-4xxs);
       }
     }
 
