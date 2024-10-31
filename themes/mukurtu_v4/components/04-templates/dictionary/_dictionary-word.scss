@@ -1,6 +1,38 @@
-// .dictionary-word {
+// Full content display for dictionary word nodes.
+.page-node-type-dictionary-word {
+  .metadata {
+    background-color: var(--brand-light-accent);
+    border-top: 5px solid var(--brand-secondary);
+    padding-inline: var(--v-space-4xs);
+    padding-block-start: var(--v-space-4xxs);
+    padding-block-end: var(--v-space-s);
+    margin-block-end: var(--v-space-4xs);
 
-// }
+    .field {
+      padding-block: var(--v-space-4xxs);
+      border-bottom: 1px solid var(--brand-light);
+
+      &__label {
+        font-size: var(--font-size-s);
+        line-height: var(--line-height-xs);
+      }
+
+      &__item {
+        line-height: var(--line-height-s);
+      }
+
+      // If multiple items, show as comma-separated list.
+      &__items {
+        @include inline-list;
+      }
+    }
+
+    .field:last-of-type {
+      padding-block-end: 0;
+      border-bottom: none;
+    }
+  }
+}
 
 // The individual word teaser display used on /dictionary.
 .dictionary-word__teaser {
