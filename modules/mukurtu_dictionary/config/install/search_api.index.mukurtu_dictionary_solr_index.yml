@@ -8,7 +8,6 @@ dependencies:
     - node
     - mukurtu_protocol
     - taxonomy
-    - paragraphs
     - mukurtu_dictionary
     - search_api
 third_party_settings:
@@ -94,15 +93,6 @@ field_settings:
     dependencies:
       module:
         - node
-  dictionary_browse_solr_field_translation:
-    label: Translation
-    datasource_id: 'entity:node'
-    property_path: 'field_word_entry:entity:field_translation'
-    type: string
-    dependencies:
-      module:
-        - node
-        - paragraphs
   dictionary_browse_solr_keywords:
     label: Keywords
     datasource_id: 'entity:node'
@@ -138,16 +128,6 @@ field_settings:
       module:
         - mukurtu_dictionary
         - node
-  dictionary_browse_solr_word_type:
-    label: 'Word Type'
-    datasource_id: 'entity:node'
-    property_path: 'field_word_entry:entity:field_word_type:entity:name'
-    type: string
-    dependencies:
-      module:
-        - node
-        - paragraphs
-        - taxonomy
   field_cultural_protocols:
     label: 'Cultural Protocols'
     datasource_id: 'entity:node'
