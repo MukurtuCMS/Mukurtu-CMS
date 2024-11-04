@@ -23,12 +23,16 @@
   &__content {
     // Ensure border is not duplicated on fields inside fields, fields inside media,
     // and nested paragraph.
+
+    // Last two are fields on Dictionary Word nodes.
     .field:not(.field--name-field-media-assets, 
     .field--name-field-media-assets .field, 
     .media .field, 
     .field.field.field--name-field-word-entry,
     .field--name-field-sentence-recording,
-    .field--name-field-sentence) {
+    .field--name-field-sentence,
+    .field--name-field-alternate-spelling,
+    .field--name-field-alternate-spelling + div.field) {
       @include divider;
     }
 

@@ -1,4 +1,3 @@
-uuid: b2216e6c-409b-4b94-9de5-c0e824b5f7cd
 langcode: en
 status: true
 dependencies:
@@ -18,8 +17,6 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-_core:
-  default_config_hash: XkAe1xtvA1U8S2tDjb3pFutX1v_DbrU6IX1bNouBfsw
 id: node.word_list.teaser
 targetEntityType: node
 bundle: word_list

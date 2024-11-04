@@ -1,37 +1,42 @@
 // Full content display for dictionary word nodes.
 .page-node-type-dictionary-word {
-  .metadata {
-    background-color: var(--brand-light-accent);
-    border-top: 5px solid var(--brand-secondary);
-    padding-inline: var(--v-space-4xs);
-    padding-block-start: var(--v-space-4xxs);
-    padding-block-end: var(--v-space-s);
-    margin-block-end: var(--v-space-4xs);
+  .full-node__content {
+    .field--name-field-word-entry > .field__item:not(first-child) {
+      margin-block-start: var(--v-space-s);
+    }
 
-    .field {
-      padding-block: var(--v-space-4xxs);
-      border-bottom: 1px solid var(--brand-light);
+    .field--name-field-alternate-spelling {
+      background-color: var(--brand-primary-dark);
+      position: relative;
+      font-size: var(--font-size-heading-lg);
+      color: var(--color-white);
+      border-block-start: 0;
+      padding-block: var(--v-space-2xs);
+      padding-inline: var(--v-space-xs) var(--v-space-2xs);
+      margin-block-end: var(--v-space-2xs);
 
-      &__label {
-        font-size: var(--font-size-s);
-        line-height: var(--line-height-xs);
-      }
-
-      &__item {
-        line-height: var(--line-height-s);
-      }
-
-      // If multiple items, show as comma-separated list.
-      &__items {
-        @include inline-list;
+      &::after {
+        content: "";
+        display: inline-block;
+        position: absolute;
+        top: 71px;
+        left: var(--v-space-xs);
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: var(--v-space-3xs) 0 var(--v-space-3xs) var(--v-space-2xs);
+        border-color: transparent transparent transparent var(--brand-primary-dark);
+        z-index: -1;
       }
     }
 
-    .field:last-of-type {
-      padding-block-end: 0;
-      border-bottom: none;
+    .field--name-field-translation {
+      .field__label {
+        @include visually-hidden;
+      }
     }
   }
+
 }
 
 // The individual word teaser display used on /dictionary.

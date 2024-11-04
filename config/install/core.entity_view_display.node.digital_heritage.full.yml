@@ -1,4 +1,3 @@
-uuid: 51271742-0f9c-43c6-8e62-220ba36fcf81
 langcode: en
 status: true
 dependencies:
@@ -161,8 +160,6 @@ third_party_settings:
         attributes: ''
         effect: none
         speed: fast
-_core:
-  default_config_hash: oBKF4HCOR8T6RQCi9ezxH2mfp4NMmGoymmd6-IMilVo
 id: node.digital_heritage.full
 targetEntityType: node
 bundle: digital_heritage
