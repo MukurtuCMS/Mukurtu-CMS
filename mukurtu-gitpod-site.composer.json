@@ -153,7 +153,7 @@
         },
         "patches": {
             "drupal/paragraphs": {
-                "Ensure empty paragraphs register as empty": "./patches/paragraphs/paragraphs-118.patch"
+                "Ensure empty paragraphs register as empty": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/refs/heads/main/patches/paragraphs-118.patch"
             }
         },
         "drupal-core-project-message": {
