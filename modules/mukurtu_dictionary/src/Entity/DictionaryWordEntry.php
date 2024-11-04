@@ -12,9 +12,9 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = [];
 
-    $definitions['field_alternate_spelling'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Alternate Spelling'))
-      ->setDescription(t('If the spelling of an entry differs from the term, enter it here. Leave blank otherwise.'))
+    $definitions['field_word_entry_term'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Word Entry Term'))
+      ->setDescription(t(''))
       ->setSettings([
         'max_length' => 255,
       ])

@@ -26,6 +26,20 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     // Add the drafts field.
     $definitions += static::draftBaseFieldDefinitions($entity_type);
 
+    $definitions['field_alternate_spelling'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Alternate Spelling'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'max_length' => 255,
+      ])
+      ->setDefaultValue('')
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_glossary_entry'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Glossary Entry'))
       ->setDescription(t(''))
@@ -163,8 +177,34 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_word_entry'] = BaseFieldDefinition::create('entity_reference_revisions')
-      ->setLabel(t('Word Entry'))
+    $definitions['field_base_word_entry'] = BaseFieldDefinition::create('entity_reference_revisions')
+      ->setLabel(t('Base Word Entry'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'target_type' => 'paragraph',
+        'handler' => 'default:paragraph',
+        'handler_settings' => [
+          'negate' => FALSE,
+          'target_bundles' => [
+            'dictionary_word_entry' => 'dictionary_word_entry'
+          ],
+          'target_bundles_drag_drop' => [
+            'dictionary_word_entry' => [
+              'enabled' => TRUE,
+              'weight' => 2,
+            ],
+          ],
+        ]
+      ])
+      ->setCardinality(1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_additional_word_entries'] = BaseFieldDefinition::create('entity_reference_revisions')
+      ->setLabel(t('Additional Word Entries'))
       ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'paragraph',
@@ -183,7 +223,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
         ]
       ])
       ->setCardinality(-1)
-      ->setRequired(TRUE)
+      ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
