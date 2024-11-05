@@ -1,3 +1,4 @@
+uuid: 103b13f3-8203-4542-892d-83588b11da8f
 langcode: en
 status: true
 dependencies:
@@ -8,6 +9,8 @@ dependencies:
     - leaflet_views
     - search_api
     - user
+_core:
+  default_config_hash: kOaLk2xLGAXh4qzbn-rYTjbg06rEVqoiuAeetTTdiZM
 id: mukurtu_digital_heritage_browse
 label: 'Mukurtu Digital Heritage Browse'
 module: views
@@ -299,7 +302,7 @@ display:
           preserve_facet_query_args: false
       relationships: {  }
       css_class: 'browse-content list'
-      use_ajax: true
+      use_ajax: false
       header: {  }
       footer: {  }
       display_extenders: {  }
