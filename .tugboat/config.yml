@@ -1,0 +1,53 @@
+services:
+  php:
+    # See: https://github.com/TugboatQA/dockerfiles/blob/main/php/TAGS.md
+    image: tugboatqa/php:8.3-apache
+    default: true
+    depends: mariadb
+    commands:
+      init:
+        # Install PHP 'zip' extension to allow installing Backdrop modules.
+        - apt update && apt install -y libzip-dev
+        - docker-php-ext-install zip
+        # Add JPEG support for the GD library.
+        - apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
+        - docker-php-ext-configure gd --with-jpeg --with-freetype && docker-php-ext-install gd
+        # Enable Apache 'rewrite' module for clean URLs.
+        - a2enmod rewrite
+        # Adjust a few php settings.
+        - echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/tugboat.ini
+        - echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/tugboat.ini
+        - echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/tugboat.ini
+        # Link the document root to the expected path.
+        - ln -snf $TUGBOAT_ROOT $DOCROOT
+        # Install composer.
+        # See https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
+        - wget https://raw.githubusercontent.com/composer/getcomposer.org/main/web/installer -O - -q | php -- --quiet
+        - mv composer.phar /usr/local/bin/composer
+        # Run initial composer install.
+        - composer install --no-ansi --no-interaction --optimize-autoloader --no-progress
+
+      update:
+        # Set appropriate file permissions/ownership for installer/self-updater.
+        - cd $TUGBOAT_ROOT && mkdir -p sites/default/files
+        - cd $TUGBOAT_ROOT && chown -R www-data:www-data sites/default/files
+        - cd $TUGBOAT_ROOT && find sites/default/files -type d -exec chmod 2775 {} \;
+        - cd $TUGBOAT_ROOT && find sites/default/files -type f -exec chmod 0664 {} \;
+      build:
+        # Copy in the settings.php file to set the database connection.
+        - cp .tugboat/settings.tugboat.php sites/default/settings.php
+        # Update composer dependencies.
+        - composer install --no-ansi --no-interaction --optimize-autoloader --no-progress
+        # Install Drupal.
+        - ./vendor/bin/drush site-install mukurtu -y --account-pass="admin" --site-name="Mukurtu CMS"
+  mariadb:
+    image: tugboatqa/mariadb:lts
+    commands:
+      init:
+        # Increase the allowed packet size to 512MB.
+        - mariadb -e "SET GLOBAL max_allowed_packet=536870912;"
+        # Ensure this packet size persists even if MySQL restarts.
+        - echo "max_allowed_packet=536870912" >> /etc/mysql/conf.d/tugboat.cnf
+      build:
+        # Drop and re-create the database (needed when rebuilding/reinstalling).
+        - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
