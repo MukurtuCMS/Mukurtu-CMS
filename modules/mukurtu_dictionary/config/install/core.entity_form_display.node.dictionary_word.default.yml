@@ -20,8 +20,8 @@ third_party_settings:
     group_main_tab:
       children:
         - group_mukurtu_essentials
-        - group_base_word_entry
-        - group_additional_word_entries
+        - group_additional_fields
+        - group_entries
         - group_relations
       label: 'Main Tab'
       region: content
@@ -35,16 +35,19 @@ third_party_settings:
     group_mukurtu_essentials:
       children:
         - title
-        - field_alternate_spelling
         - field_cultural_protocols
         - field_dictionary_word_language
         - field_glossary_entry
-        - field_thumbnail
-        - field_media_assets
-        - field_keywords
-        - field_coverage
-        - field_coverage_description
-        - field_location
+        - field_alternate_spelling
+        - field_translation
+        - field_recording
+        - field_definition
+        - field_sample_sentences
+        - field_word_type
+        - field_pronunciation
+        - field_source
+        - field_word_origin
+        - field_contributor
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -57,39 +60,12 @@ third_party_settings:
         description: ''
         required_fields: true
     group_entries:
-      children: {  }
-      label: Entries
-      region: hidden
-      parent_name: ''
-      weight: 11
-      format_type: tab
-      format_settings:
-        classes: ''
-        id: ''
-        formatter: closed
-        description: ''
-        required_fields: true
-    group_relations:
       children:
-        - field_related_content
-      label: Relations
+        - field_additional_word_entries
+      label: 'Word Entries'
       region: content
       parent_name: group_main_tab
-      weight: 14
-      format_type: tab
-      format_settings:
-        classes: ''
-        id: ''
-        formatter: closed
-        description: ''
-        required_fields: true
-    group_base_word_entry:
-      children:
-        - field_base_word_entry
-      label: 'Base Word Entry'
-      region: content
-      parent_name: group_main_tab
-      weight: 11
+      weight: 12
       format_type: tab
       format_settings:
         classes: ''
@@ -99,13 +75,32 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_additional_word_entries:
+    group_relations:
       children:
-        - field_additional_word_entries
-      label: 'Additional Word Entries'
+        - field_related_content
+      label: Relations
       region: content
       parent_name: group_main_tab
-      weight: 12
+      weight: 13
+      format_type: tab
+      format_settings:
+        classes: ''
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_additional_fields:
+      children:
+        - field_thumbnail
+        - field_media_assets
+        - field_keywords
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Additional Fields'
+      region: content
+      parent_name: group_main_tab
+      weight: 11
       format_type: tab
       format_settings:
         classes: ''
@@ -122,19 +117,19 @@ mode: default
 content:
   comment:
     type: comment_default
-    weight: 10
+    weight: 9
     region: content
     settings: {  }
     third_party_settings: {  }
   created:
     type: datetime_timestamp
-    weight: 3
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
   draft:
     type: boolean_checkbox
-    weight: 7
+    weight: 6
     region: content
     settings:
       display_label: true
@@ -153,7 +148,7 @@ content:
     third_party_settings: {  }
   field_alternate_spelling:
     type: string_textfield
-    weight: -6
+    weight: -3
     region: content
     settings:
       size: 60
@@ -161,7 +156,7 @@ content:
     third_party_settings: {  }
   field_base_word_entry:
     type: entity_reference_paragraphs
-    weight: 13
+    weight: -2
     region: content
     settings:
       title: Paragraph
@@ -170,6 +165,16 @@ content:
       add_mode: dropdown
       form_display_mode: default
       default_paragraph_type: ''
+    third_party_settings: {  }
+  field_contributor:
+    type: entity_reference_autocomplete
+    weight: 6
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   field_coverage:
     type: geofield_mukurtu
@@ -237,13 +242,21 @@ content:
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: -5
+    weight: -6
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_definition:
+    type: string_textarea
+    weight: 0
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
   field_dictionary_word_language:
     type: entity_reference_autocomplete
-    weight: -4
+    weight: -5
     region: content
     settings:
       match_operator: CONTAINS
@@ -253,7 +266,7 @@ content:
     third_party_settings: {  }
   field_glossary_entry:
     type: string_textfield
-    weight: -3
+    weight: -4
     region: content
     settings:
       size: 60
@@ -325,11 +338,29 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_pronunciation:
+    type: text_textarea
+    weight: 3
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget
     weight: -6
     region: content
     settings: {  }
+    third_party_settings: {  }
+  field_recording:
+    type: entity_reference_autocomplete
+    weight: -1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   field_related_content:
     type: entity_browser_entity_reference
@@ -346,12 +377,40 @@ content:
         view_mode: content_browser
       selection_mode: selection_append
     third_party_settings: {  }
+  field_sample_sentences:
+    type: entity_reference_paragraphs
+    weight: 1
+    region: content
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: open
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: ''
+    third_party_settings: {  }
+  field_source:
+    type: string_textfield
+    weight: 4
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   field_thumbnail:
     type: media_library_widget
     weight: -2
     region: content
     settings:
       media_types: {  }
+    third_party_settings: {  }
+  field_translation:
+    type: string_textfield
+    weight: -2
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   field_word_entry:
     type: paragraphs
@@ -373,12 +432,23 @@ content:
         convert: '0'
         duplicate: duplicate
     third_party_settings: {  }
-  langcode:
-    type: language_select
+  field_word_origin:
+    type: string_textfield
+    weight: 5
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_word_type:
+    type: entity_reference_autocomplete
     weight: 2
     region: content
     settings:
-      include_locked: true
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   name:
     weight: -8
@@ -397,27 +467,27 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 6
+    weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
   promote:
     type: boolean_checkbox
-    weight: 4
+    weight: 3
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 8
+    weight: 7
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
-    weight: 5
+    weight: 4
     region: content
     settings:
       display_label: true
@@ -441,7 +511,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   url_redirects:
-    weight: 9
+    weight: 8
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -452,3 +522,4 @@ hidden:
   field_mukurtu_community: true
   field_mukurtu_geojson: true
   field_sequence_collection: true
+  langcode: true

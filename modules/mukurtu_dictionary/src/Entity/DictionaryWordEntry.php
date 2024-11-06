@@ -8,12 +8,25 @@ use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordEntryInterface;
 
 class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterface {
-
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = [];
 
     $definitions['field_word_entry_term'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Word Entry Term'))
+      ->setLabel(t('Term'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'max_length' => 255,
+      ])
+      ->setDefaultValue('')
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_alternate_spelling'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Alternate Spelling'))
       ->setDescription(t(''))
       ->setSettings([
         'max_length' => 255,
@@ -178,7 +191,6 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    return $definitions;
+      return $definitions;
   }
-
 }
