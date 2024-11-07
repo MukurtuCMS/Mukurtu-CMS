@@ -1,6 +1,6 @@
 // Some full displays look very similar with main content 
 // and a right sidebar. These styles cover them all. 
-// As of 05/31/24, this encompasses Digital Heritage, Dictionary Word and Person.
+// As of 11/04/24, this encompasses Digital Heritage and Person.
 
 .full-node__grid {
   @include layout--full-width-grid;
@@ -23,12 +23,16 @@
   &__content {
     // Ensure border is not duplicated on fields inside fields, fields inside media,
     // and nested paragraph.
+
+    // Last two are fields on Dictionary Word nodes.
     .field:not(.field--name-field-media-assets, 
-      .field--name-field-media-assets .field, 
-      .media .field, 
-      .field.field.field--name-field-word-entry,
-      .field--name-field-sentence-recording,
-      .field--name-field-sentence) {
+    .field--name-field-media-assets .field, 
+    .media .field, 
+    .field.field.field--name-field-word-entry,
+    .field--name-field-sentence-recording,
+    .field--name-field-sentence,
+    .field--name-field-alternate-spelling,
+    .field--name-field-alternate-spelling + div.field) {
       @include divider;
     }
 
