@@ -1,108 +1,121 @@
 {
-  "name": "mukurtu/mukurtu-cms",
-  "description": "Mukurtu CMS Drupal Installation Profile",
-  "type": "drupal-profile",
-  "minimum-stability": "dev",
-  "prefer-stable": true,
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "https://packages.drupal.org/8"
-    },
-    {
-      "type": "composer",
-      "url": "https://asset-packagist.org"
-    },
-    {
-      "type": "package",
-      "package": {
-        "name": "mukurtu/masonry",
-        "version": "4.2.2",
-        "dist": {
-          "url": "https://github.com/desandro/masonry/archive/v4.2.2.zip",
-          "type": "zip"
+    "name": "mukurtu/mukurtu-cms",
+    "description": "Mukurtu CMS Drupal Installation Profile",
+    "type": "drupal-profile",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
         },
-        "type": "drupal-library"
-      }
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "mukurtu/masonry",
+                "version": "4.2.2",
+                "dist": {
+                    "url": "https://github.com/desandro/masonry/archive/v4.2.2.zip",
+                    "type": "zip"
+                },
+                "type": "drupal-library"
+            }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "mukurtu/colorbox",
+                "version": "1.6.4",
+                "dist": {
+                    "url": "https://github.com/jackmoore/colorbox/archive/master.zip",
+                    "type": "zip"
+                },
+                "type": "drupal-library"
+            }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "mukurtu/og",
+                "version": "1.0.0",
+                "type": "drupal-module",
+                "source": {
+                    "url": "https://github.com/zerolab/og.git",
+                    "type": "git",
+                    "reference": "196-redux"
+                }
+            }
+        }
+    ],
+    "require": {
+        "composer/installers": "^1.9",
+        "cweagans/composer-patches": "^1.7",
+        "drupal/blazy": "^2.24",
+        "drupal/colorbox": "2.0.2",
+        "drupal/config_pages": "^2.15",
+        "drupal/console": "~1.0",
+        "drupal/content_browser": "*",
+        "drupal/core": "^9.5.3",
+        "drupal/core-composer-scaffold": "^9.5.3",
+        "drupal/core-project-message": "^9.5.3",
+        "drupal/core-recommended": "^9.5.3",
+        "drupal/csv_serialization": "*",
+        "drupal/ctools": "*",
+        "drupal/embed": "*",
+        "drupal/entity_browser": "*",
+        "drupal/entity_embed": "*",
+        "drupal/entity_reference_revisions": "*",
+        "drupal/facets": "^2.0.6",
+        "drupal/field_group": "^3.4",
+        "drupal/flag": "*",
+        "drupal/geofield": "^1.59",
+        "drupal/geolocation": "*",
+        "drupal/leaflet": "^2.1",
+        "drupal/message": "^1.5",
+        "drupal/message_digest": "^1.3",
+        "drupal/message_digest_ui": "*",
+        "drupal/message_notify": "^1.3",
+        "drupal/message_subscribe": "^1.2",
+        "drupal/message_ui": "^1.0@beta",
+        "drupal/migrate_plus": "^6.0",
+        "drupal/migrate_source_csv": "^3.5",
+        "drupal/migrate_tools": "^6.0",
+        "drupal/google_analytics": "*",
+        "drupal/og": "^1.x-dev",
+        "drupal/paragraphs": "*",
+        "drupal/pathauto": "*",
+        "drupal/redirect": "*",
+        "drupal/restui": "*",
+        "drupal/search_api": "*",
+        "drupal/search_api_glossary": "*",
+        "drupal/search_api_solr": "^4.3",
+        "drupal/token": "*",
+        "drupal/twig_tweak": "^3.2",
+        "drupal/views_bulk_operations": "*",
+        "mukurtu/colorbox": "*",
+        "drush/drush": "^10",
+        "mukurtu/masonry": "*",
+        "sibyx/phpgpx": "@RC"
     },
-    {
-      "type": "package",
-      "package": {
-          "name": "mukurtu/colorbox",
-          "version": "1.6.4",
-          "dist": {
-              "url": "https://github.com/jackmoore/colorbox/archive/master.zip",
-              "type": "zip"
-          },
-          "type": "drupal-library"
-      }
+    "require-dev": {
+        "drupal/devel": "*",
+        "drupal/devel_php": "*",
+        "drupal/core-dev": "*",
+        "drupal/coder": "^8.3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "cweagans/composer-patches": true,
+            "composer/installers": true,
+            "drupal/core-composer-scaffold": true,
+            "drupal/core-project-message": true,
+            "drupal/console-extend-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
-  ],
-  "require": {
-    "composer/installers": "^1.9",
-    "cweagans/composer-patches": "^1.7",
-    "drupal/blazy": "^2.24",
-    "drupal/colorbox": "2.0.2",
-    "drupal/config_pages": "^2.15",
-    "drupal/console": "~1.0",
-    "drupal/content_browser": "*",
-    "drupal/core": "^9.5.3",
-    "drupal/core-composer-scaffold": "^9.5.3",
-    "drupal/core-project-message": "^9.5.3",
-    "drupal/core-recommended": "^9.5.3",
-    "drupal/csv_serialization": "*",
-    "drupal/ctools": "*",
-    "drupal/embed": "*",
-    "drupal/entity_browser": "*",
-    "drupal/entity_embed": "*",
-    "drupal/entity_reference_revisions": "*",
-    "drupal/facets": "^2.0.6",
-    "drupal/field_group": "^3.4",
-    "drupal/flag": "*",
-    "drupal/geofield": "^1.59",
-    "drupal/geolocation": "*",
-    "drupal/leaflet": "^2.1",
-    "drupal/message": "^1.5",
-    "drupal/message_digest": "^1.3",
-    "drupal/message_digest_ui": "*",
-    "drupal/message_notify": "^1.3",
-    "drupal/message_subscribe": "^1.2",
-    "drupal/message_ui": "^1.0@beta",
-    "drupal/migrate_plus": "^6.0",
-    "drupal/migrate_source_csv": "^3.5",
-    "drupal/migrate_tools": "^6.0",
-    "drupal/google_analytics": "*",
-    "drupal/og": "^1.x-dev",
-    "drupal/paragraphs": "*",
-    "drupal/pathauto": "*",
-    "drupal/redirect": "*",
-    "drupal/restui": "*",
-    "drupal/search_api": "*",
-    "drupal/search_api_glossary": "*",
-    "drupal/search_api_solr": "^4.3",
-    "drupal/token": "*",
-    "drupal/twig_tweak": "^3.2",
-    "drupal/views_bulk_operations": "*",
-    "mukurtu/colorbox": "*",
-    "drush/drush": "^10",
-    "mukurtu/masonry": "*",
-    "sibyx/phpgpx": "@RC"
-  },
-  "require-dev": {
-    "drupal/devel": "*",
-    "drupal/devel_php": "*",
-    "drupal/core-dev": "*",
-    "drupal/coder": "^8.3",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0"
-  },
-  "config": {
-    "allow-plugins": {
-      "cweagans/composer-patches": true,
-      "composer/installers": true,
-      "drupal/core-composer-scaffold": true,
-      "drupal/core-project-message": true,
-      "drupal/console-extend-plugin": true,
-      "dealerdirect/phpcodesniffer-composer-installer": true
-    }
-  }
 }
