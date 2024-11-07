@@ -4,6 +4,8 @@ on:
     branches:
       - main
       - develop
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
   testing:
     name: Mukurtu v4 - PHP ${{ matrix.php-versions }}
@@ -43,7 +45,7 @@ jobs:
 
       - name: Get composer cache directory
         id: composercache
-        run: echo "COMPCACHE=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT 
+        run: echo "COMPCACHE=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache composer dependencies
         uses: actions/cache@v4
