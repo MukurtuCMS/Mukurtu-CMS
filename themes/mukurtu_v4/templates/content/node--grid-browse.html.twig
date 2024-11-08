@@ -76,7 +76,14 @@
     {% if media_bundle is same as 'image' %}
     <a href="{{ url }}" aria-hidden="true" tabindex="-1">
     {% endif %}
+
+    {# {% if media_bundle is same as 'external_embed' %}
+      {{dump(content.field_representative_media.0.entity)}}
+      {{ content.field_representative_media.0['#media'].field_thumbnail }}
+    {% else %} #}
       {{ content.field_representative_media }}
+    {# {% endif %} #}
+    
     {% if media_bundle is same as 'image' %}
     </a>
     {% endif %}

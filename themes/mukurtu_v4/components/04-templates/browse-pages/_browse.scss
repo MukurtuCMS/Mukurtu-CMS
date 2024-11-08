@@ -214,6 +214,8 @@
           .views-row {
             break-inside: avoid;
             border-block-start: 0;
+            padding-block-end: var(--v-space-3xs);
+            margin-block-start: var(--v-space-3xs);
           }
         }
       }

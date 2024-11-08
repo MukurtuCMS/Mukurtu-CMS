@@ -3,11 +3,11 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.media.digital_heritage_sidebar
+    - image.style.medium_480px_w_
     - media.type.external_embed
   module:
     - image
     - layout_builder
-    - text
 third_party_settings:
   layout_builder:
     enabled: false
@@ -17,29 +17,23 @@ targetEntityType: media
 bundle: external_embed
 mode: digital_heritage_sidebar
 content:
-  field_media_external_embed:
-    type: text_default
-    label: hidden
-    settings: {  }
-    third_party_settings: {  }
-    weight: 0
-    region: content
   field_thumbnail:
     type: image
-    label: above
+    label: hidden
     settings:
       image_link: ''
-      image_style: ''
+      image_style: medium_480px_w_
       image_loading:
         attribute: lazy
     third_party_settings: {  }
-    weight: 1
+    weight: 0
     region: content
 hidden:
   created: true
   field_communities: true
   field_cultural_protocols: true
   field_identifier: true
+  field_media_external_embed: true
   field_media_tags: true
   field_people: true
   flag_export_media: true
