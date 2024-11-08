@@ -51,6 +51,7 @@ install:
   - automated_cron
   - google_analytics
   - twig_tweak
+  - facets_reset_button
 
 dependencies:
   - comment

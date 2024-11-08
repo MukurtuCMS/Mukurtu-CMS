@@ -1,7 +1,7 @@
 // Digital Heritage Browse and General Browse.
 
 .browse {
-  // Default view mode is used in the Realted Content field on Collections.
+  // Default view mode is used in the Related Content field on Collections.
   &__default {
     &__header {
       display: flex;
@@ -220,6 +220,7 @@
         }
       }
 
+      // Sidebar.
       .browse-facets {
         grid-row: 1;
         grid-column: 1 / -1;
@@ -263,6 +264,11 @@
             padding-inline: var(--v-space-4xxs);
             padding-block: var(--v-space-5xs);
           }
+        }
+
+        // Apply/reset buttons for search and relevance.
+        .form-actions {
+          margin-block-start: var(--v-space-4xs);
         }
 
         // Details/summary elements in sidebar; facets.

@@ -30,6 +30,8 @@
       {% for facet in facets %}
         {{ facet }}
       {% endfor %}
+
+      {{ drupal_block('facets_reset_button')}}
     {% endif %}
 
     {# Each display of the views (List, Grid, Map) has its own unique facets. 
