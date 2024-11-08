@@ -11,6 +11,7 @@ dependencies:
     - field_group
     - media_library
     - mukurtu_core
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - paragraphs
     - path
@@ -97,6 +98,8 @@ third_party_settings:
         - field_coverage
         - field_coverage_description
         - field_location
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
@@ -282,6 +285,18 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_location:
     type: entity_reference_autocomplete
     weight: 3
@@ -353,14 +368,11 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_recording:
-    type: entity_reference_autocomplete
+    type: media_library_widget
     weight: -1
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      media_types: {  }
     third_party_settings: {  }
   field_related_content:
     type: entity_browser_entity_reference
