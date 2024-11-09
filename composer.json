@@ -99,8 +99,7 @@
         "mukurtu/colorbox": "*",
         "drush/drush": "^10",
         "mukurtu/masonry": "*",
-        "sibyx/phpgpx": "@RC",
-        "drupal/disable_html5_validation": "^2.0"
+        "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
         "drupal/devel": "*",
