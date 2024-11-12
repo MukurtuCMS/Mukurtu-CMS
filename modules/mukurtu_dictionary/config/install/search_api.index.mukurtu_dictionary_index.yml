@@ -7,7 +7,6 @@ dependencies:
     - node
     - mukurtu_protocol
     - taxonomy
-    - paragraphs
     - mukurtu_dictionary
     - search_api
     - search_api_glossary
@@ -49,15 +48,6 @@ field_settings:
     dependencies:
       module:
         - node
-  field_translation:
-    label: 'Word Entry » Paragraph » Translation'
-    datasource_id: 'entity:node'
-    property_path: 'field_word_entry:entity:field_translation'
-    type: string
-    dependencies:
-      module:
-        - node
-        - paragraphs
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
@@ -136,16 +126,6 @@ field_settings:
       module:
         - mukurtu_dictionary
         - node
-  word_type:
-    label: 'Word Type'
-    datasource_id: 'entity:node'
-    property_path: 'field_word_entry:entity:field_word_type:entity:name'
-    type: string
-    dependencies:
-      module:
-        - node
-        - paragraphs
-        - taxonomy
 datasource_settings:
   'entity:node':
     bundles:
@@ -220,14 +200,12 @@ processor_settings:
       - community_title
       - field_cultural_protocols
       - field_glossary_entry
-      - field_translation
       - glossaryaz_title
       - keyword
       - language
       - title
       - type
       - word_lists
-      - word_type
 tracker_settings:
   default:
     indexing_order: fifo

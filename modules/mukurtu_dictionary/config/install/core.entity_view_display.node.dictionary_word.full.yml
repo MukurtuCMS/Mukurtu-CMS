@@ -22,7 +22,6 @@ third_party_settings:
   field_group:
     group_metadata:
       children:
-        - field_all_related_content
         - field_dictionary_word_language
         - field_communities
         - field_cultural_protocols
@@ -31,7 +30,7 @@ third_party_settings:
       label: Metadata
       parent_name: ''
       region: content
-      weight: 1
+      weight: 2
       format_type: html_element
       format_settings:
         classes: metadata
@@ -47,12 +46,13 @@ third_party_settings:
         speed: fast
     group_primary_fields:
       children:
+        - field_title
+        - field_alternate_spelling
+        - field_media_assets
         - field_thumbnail
-        - field_word_entry
         - field_coverage
         - field_coverage_description
         - field_location
-        - field_media_assets
         - flag_export_content
       label: 'Primary Fields'
       parent_name: ''
@@ -71,19 +71,66 @@ third_party_settings:
         attributes: ''
         effect: none
         speed: fast
+    group_base_word_entry:
+      children:
+        - field_base_word_entry
+      label: 'Base Word Entry'
+      parent_name: ''
+      region: content
+      weight: 1
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        formatter: open
+        description: ''
+    group_additional_word_entries:
+      children:
+        - field_additional_word_entries
+      label: 'Additional Word Entries'
+      parent_name: ''
+      region: content
+      weight: 3
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        formatter: closed
+        description: ''
 id: node.dictionary_word.full
 targetEntityType: node
 bundle: dictionary_word
 mode: full
 content:
-  field_all_related_content:
-    type: entity_reference_entity_view
+  field_additional_word_entries:
+    type: entity_reference_revisions_entity_view
     label: above
     settings:
-      view_mode: teaser
-      link: false
+      view_mode: default
+      link: ''
     third_party_settings: {  }
-    weight: 5
+    weight: 12
+    region: content
+  field_alternate_spelling:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 28
+    region: content
+  field_base_word_entry:
+    type: entity_reference_revisions_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 11
     region: content
   field_communities:
     type: entity_reference_label
@@ -162,14 +209,14 @@ content:
           options: ''
       weight: null
     third_party_settings: {  }
-    weight: 3
+    weight: 31
     region: content
   field_coverage_description:
     type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 4
+    weight: 32
     region: content
   field_cultural_protocols:
     type: cultural_protocol_formatter
@@ -208,18 +255,16 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 5
+    weight: 33
     region: content
   field_media_assets:
-    type: media_thumbnail
-    label: above
+    type: entity_reference_entity_view
+    label: hidden
     settings:
-      image_link: ''
-      image_style: ''
-      image_loading:
-        attribute: lazy
+      view_mode: media_assets
+      link: false
     third_party_settings: {  }
-    weight: 6
+    weight: 29
     region: content
   field_thumbnail:
     type: media_thumbnail
@@ -230,7 +275,12 @@ content:
       image_loading:
         attribute: lazy
     third_party_settings: {  }
-    weight: 1
+    weight: 30
+    region: content
+  field_title:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 27
     region: content
   field_word_entry:
     type: entity_reference_revisions_entity_view
@@ -239,16 +289,17 @@ content:
       view_mode: default
       link: ''
     third_party_settings: {  }
-    weight: 2
+    weight: 8
     region: content
   flag_export_content:
     settings: {  }
     third_party_settings: {  }
-    weight: 7
+    weight: 34
     region: content
 hidden:
   comment: true
   draft: true
+  field_all_related_content: true
   field_citation: true
   field_content_type: true
   field_glossary_entry: true
@@ -261,7 +312,6 @@ hidden:
   field_related_content: true
   field_representative_media: true
   field_sequence_collection: true
-  field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_mukurtu_email_content: true
