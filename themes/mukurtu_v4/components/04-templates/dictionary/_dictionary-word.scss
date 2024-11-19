@@ -5,7 +5,12 @@
       margin-block-start: var(--v-space-s);
     }
 
-    .field--name-field-alternate-spelling {
+    .field--name-title,
+    .field--name-field-word-entry-term {
+      .field__label {
+        @include visually-hidden;
+      }
+
       background-color: var(--brand-primary-dark);
       position: relative;
       font-size: var(--font-size-heading-lg);
@@ -31,10 +36,18 @@
     }
 
     .field--name-field-translation {
-      .field__label {
-        @include visually-hidden;
-      }
+      border-block-start: 0;
+      padding-block-start: 0;
     }
+  }
+
+  .additional-word-entries,
+  .additional-fields {
+    @include divider;
+
+    border-width: var(--v-space-4xs);
+    margin-block-start: var(--v-space-l);
+    padding-block-start: var(--v-space-l);
   }
 
 }
