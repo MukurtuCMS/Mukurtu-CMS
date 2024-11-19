@@ -12,43 +12,6 @@
         {
             "type": "composer",
             "url": "https://asset-packagist.org"
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "mukurtu/masonry",
-                "version": "4.2.2",
-                "dist": {
-                    "url": "https://github.com/desandro/masonry/archive/v4.2.2.zip",
-                    "type": "zip"
-                },
-                "type": "drupal-library"
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "mukurtu/colorbox",
-                "version": "1.6.4",
-                "dist": {
-                    "url": "https://github.com/jackmoore/colorbox/archive/master.zip",
-                    "type": "zip"
-                },
-                "type": "drupal-library"
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "mukurtu/og",
-                "version": "1.0.0",
-                "type": "drupal-module",
-                "source": {
-                    "url": "https://github.com/zerolab/og.git",
-                    "type": "git",
-                    "reference": "196-redux"
-                }
-            }
         }
     ],
     "require": {
@@ -110,13 +73,6 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0"
     },
     "config": {
-        "allow-plugins": {
-            "cweagans/composer-patches": true,
-            "composer/installers": true,
-            "drupal/core-composer-scaffold": true,
-            "drupal/core-project-message": true,
-            "drupal/console-extend-plugin": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+        "sort-packages": true
     }
 }
