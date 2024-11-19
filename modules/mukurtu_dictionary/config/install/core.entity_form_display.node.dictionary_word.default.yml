@@ -1,4 +1,3 @@
-uuid: 9f884e38-db15-4eeb-a9ee-5e1ada542a0c
 langcode: en
 status: true
 dependencies:
@@ -117,8 +116,6 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-_core:
-  default_config_hash: uwNJM1y4J7na2Sf6sbDlo7v6ae7ZDu3wPbw43Kd8MEU
 id: node.dictionary_word.default
 targetEntityType: node
 bundle: dictionary_word
