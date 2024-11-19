@@ -1,3 +1,4 @@
+uuid: 474eb3b4-d137-4b1f-b982-8adaad0e402b
 langcode: en
 status: true
 dependencies:
@@ -7,6 +8,8 @@ dependencies:
     - media_library
     - paragraphs
     - text
+_core:
+  default_config_hash: D8TJAMfKhEIGx6U345HZ2gXvOUfzEVZCX3H8SPuht7I
 id: paragraph.dictionary_word_entry.default
 targetEntityType: paragraph
 bundle: dictionary_word_entry

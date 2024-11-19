@@ -1,9 +1,13 @@
+uuid: 9f884e38-db15-4eeb-a9ee-5e1ada542a0c
 langcode: en
 status: true
 dependencies:
   config:
     - entity_browser.browser.browse_content
     - field.field.node.dictionary_word.comment
+    - field.field.node.dictionary_word.field_mukurtu_cluster_lat
+    - field.field.node.dictionary_word.field_mukurtu_cluster_long
+    - field.field.node.dictionary_word.field_mukurtu_geojson
     - node.type.dictionary_word
   module:
     - comment
@@ -113,6 +117,8 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
+_core:
+  default_config_hash: uwNJM1y4J7na2Sf6sbDlo7v6ae7ZDu3wPbw43Kd8MEU
 id: node.dictionary_word.default
 targetEntityType: node
 bundle: dictionary_word
