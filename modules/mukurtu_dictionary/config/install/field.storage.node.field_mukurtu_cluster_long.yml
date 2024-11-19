@@ -1,0 +1,20 @@
+uuid: e8244aeb-ecce-47f7-9999-de3d66a88d38
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: xTnX-TXyXTQn6RzoIZfvquxLspikBy_nDu2zawbHc2w
+id: node.field_mukurtu_cluster_long
+field_name: field_mukurtu_cluster_long
+entity_type: node
+type: float
+settings: {  }
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
