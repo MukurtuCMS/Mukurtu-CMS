@@ -1,11 +1,8 @@
-uuid: 7e7d6e33-aada-4c0a-a727-a520382a777c
 langcode: en
 status: true
 dependencies:
   module:
     - node
-_core:
-  default_config_hash: JDiTKPdEdyENEeM_9kTJRxOAXCKJw4rJxBP_U9lYg2k
 id: node.field_mukurtu_cluster_lat
 field_name: field_mukurtu_cluster_lat
 entity_type: node
