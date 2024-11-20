@@ -34,13 +34,10 @@ services:
           chmod 755 ~
           mkdir ~/mukurtu
           cd ~/mukurtu
-          # @todo Replace with composer create-project. See #610.
-          wget https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS-v4-Project-Template/main/composer.json
-          # Remove the VCS-based repository.
-          composer config --unset repositories.5
+          composer create mukurtu/mukurtu-template:dev-main .
           # Add our own local checkout repository instead. This will use the
           # local directory as the source, copying it into the final location.
-          composer config repositories.local-mukurtu path $TUGBOAT_ROOT
+          composer config repositories.local-dev path $TUGBOAT_ROOT
           composer install --no-ansi --no-interaction --optimize-autoloader --no-progress
 
         # Symlink the web root and grant read access to the home directory.
@@ -60,6 +57,7 @@ services:
           # Copy in the settings.php file to set the database connection.
           cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
           # Update composer dependencies.
+          rm composer.lock
           composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
           # Install Drupal with the Mukurtu installation profile.
           ./vendor/bin/drush site-install mukurtu -y --account-pass="admin" --site-name="Mukurtu CMS"
