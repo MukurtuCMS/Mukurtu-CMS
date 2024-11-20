@@ -1,0 +1,27 @@
+uuid: 97b4ad50-fce5-4a2e-87bc-794210e911a9
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.account
+  module:
+    - system
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: bY4b4WMhwjS9XMXYtFgZY15gPc63NnLwx1LyjwUxcCk
+id: mukurtu_bartik_account_menu
+theme: mukurtu_bartik
+region: secondary_menu
+weight: 0
+provider: null
+plugin: 'system_menu_block:account'
+settings:
+  id: 'system_menu_block:account'
+  label: 'User account menu'
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 1
+  expand_all_items: false
+visibility: {  }

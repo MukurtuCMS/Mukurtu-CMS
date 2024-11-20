@@ -1,0 +1,12 @@
+uuid: 647d7d80-e3d9-4164-a407-d15834727108
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: 'og_membership_remove_single_role_action.language steward'
+label: 'Remove the language steward role from the selected members'
+type: og_membership
+plugin: og_membership_remove_single_role_action
+configuration:
+  role_name: 'language steward'

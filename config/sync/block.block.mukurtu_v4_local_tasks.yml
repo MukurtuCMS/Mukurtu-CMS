@@ -1,0 +1,22 @@
+uuid: eb825591-86a1-4352-ae6b-a4117f919cf2
+langcode: en
+status: true
+dependencies:
+  theme:
+    - mukurtu_v4
+_core:
+  default_config_hash: RHFQ3CSx2Hs4okXTA3RQiQC6g-pQp84RkLIKcNM2xHA
+id: mukurtu_v4_local_tasks
+theme: mukurtu_v4
+region: content
+weight: 12
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: Tabs
+  label_display: '0'
+  provider: core
+  primary: true
+  secondary: true
+visibility: {  }

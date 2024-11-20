@@ -1,0 +1,16 @@
+uuid: c3762f0b-0f89-4d3a-b870-ef7cac32f533
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_dictionary
+id: language_community-language_community-non-member
+label: Non-member
+weight: 18
+group_id: null
+group_type: language_community
+group_bundle: language_community
+is_admin: null
+permissions:
+  - subscribe
+role_type: required

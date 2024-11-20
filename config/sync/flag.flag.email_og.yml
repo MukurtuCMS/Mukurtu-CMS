@@ -1,0 +1,32 @@
+uuid: 3c1c8ae0-d14c-452d-a911-5149059f4e0a
+langcode: en
+status: false
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: GUUxZCxQFoHf7D24-6xkZQZjctCZyeypfN6pXbcrUqI
+id: email_og
+label: 'Email groups'
+bundles: {  }
+entity_type: node
+global: false
+weight: -9
+flag_short: 'Send email'
+flag_long: ''
+flag_message: ''
+unflag_short: 'Don''t send email'
+unflag_long: ''
+unflag_message: ''
+unflag_denied_text: ''
+flag_type: 'entity:node'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links:
+    - full
+    - teaser
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  extra_permissions: {  }
+linkTypeConfig: {  }

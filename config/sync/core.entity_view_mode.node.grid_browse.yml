@@ -1,0 +1,12 @@
+uuid: bdc9dd47-8ff5-43e9-8e55-ffda65a3dd91
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: TztGswMtUSZayNcS8Bu8OGKw1hPsXzOmWnkNglN660A
+id: node.grid_browse
+label: 'Grid Browse'
+targetEntityType: node
+cache: true

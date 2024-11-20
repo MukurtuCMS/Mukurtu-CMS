@@ -1,0 +1,15 @@
+uuid: 715e3b63-7f93-4c6d-b794-aed0b3ee6bfd
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_dictionary
+id: language_community-language_community-administrator
+label: Administrator
+weight: 20
+group_id: null
+group_type: language_community
+group_bundle: language_community
+is_admin: true
+permissions: {  }
+role_type: null

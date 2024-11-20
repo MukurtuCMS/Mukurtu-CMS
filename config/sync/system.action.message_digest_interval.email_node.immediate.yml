@@ -1,0 +1,15 @@
+uuid: b1127cd9-21b8-46fa-97ad-188938604b55
+langcode: en
+status: true
+dependencies:
+  module:
+    - message_digest_ui
+_core:
+  default_config_hash: PvgIuJV539KC6XSSYTAy-JojOAsZeJ3Z0V48_QammZc
+id: message_digest_interval.email_node.immediate
+label: 'Send notifications immediately'
+type: node
+plugin: 'message_digest_interval:email_node:immediate'
+configuration:
+  flag_id: email_node
+  value: '0'

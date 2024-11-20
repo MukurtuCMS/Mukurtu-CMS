@@ -1,0 +1,21 @@
+uuid: b14bf4df-1f1e-4a86-ac0e-7b5437f7bda8
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+_core:
+  default_config_hash: FmLdqEXIbelH33zg9ar48x797JFpRbTOUM9eGbwe8Fw
+template: mukurtu_new_user_registration
+label: 'Mukurtu New User Registration'
+description: 'A new user has registered with the site and needs approval.'
+text:
+  -
+    value: "<p>New user registration: <a href=\"[message:field_user:entity:url]\">[message:field_user:entity:field_display_name] ([message:field_user:entity:account-name])</a> has requested an account and requires action.</p>\r\n"
+    format: full_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

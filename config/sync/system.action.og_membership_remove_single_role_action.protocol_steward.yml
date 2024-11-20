@@ -1,0 +1,12 @@
+uuid: e7c412e8-4e16-46f1-bbed-45f6b82f3bd3
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_remove_single_role_action.protocol_steward
+label: 'Remove the protocol_steward role from the selected members'
+type: og_membership
+plugin: og_membership_remove_single_role_action
+configuration:
+  role_name: protocol_steward

@@ -1,0 +1,15 @@
+uuid: 56492bab-481e-4b30-a6e6-5f3360a4140f
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_email_community
+  module:
+    - flag
+id: flag_action.mukurtu_email_community_flag
+label: 'Flag this item'
+type: node
+plugin: 'flag_action:mukurtu_email_community_flag'
+configuration:
+  flag_id: mukurtu_email_community
+  flag_action: flag

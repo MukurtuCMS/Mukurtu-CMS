@@ -1,0 +1,12 @@
+uuid: a9fb6b7d-7fa2-4351-b0c2-fa64120a4e13
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: 'og_membership_remove_single_role_action.language contributor'
+label: 'Remove the language contributor role from the selected members'
+type: og_membership
+plugin: og_membership_remove_single_role_action
+configuration:
+  role_name: 'language contributor'

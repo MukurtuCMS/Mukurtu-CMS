@@ -1,0 +1,15 @@
+uuid: c33f8def-a046-4e78-a757-d94b9451a257
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.subscribe_og
+  module:
+    - flag
+id: flag_action.subscribe_og_flag
+label: Subscribe
+type: node
+plugin: 'flag_action:subscribe_og_flag'
+configuration:
+  flag_id: subscribe_og
+  flag_action: flag

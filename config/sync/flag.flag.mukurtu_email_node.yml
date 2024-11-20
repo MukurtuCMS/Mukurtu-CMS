@@ -1,0 +1,36 @@
+uuid: 1306bede-3392-4e0c-ba10-e73a1445c84e
+langcode: en
+status: false
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: ygNswfSLWGjbdbR4hZZKgCfbswNZ0p8S156Vb6wYCtI
+id: mukurtu_email_node
+label: 'Mukurtu Email Node'
+bundles:
+  - article
+  - dictionary_word
+  - digital_heritage
+  - page
+  - person
+entity_type: node
+global: false
+weight: 1
+flag_short: 'Flag this item'
+flag_long: ''
+flag_message: ''
+unflag_short: 'Unflag this item'
+unflag_long: ''
+unflag_message: ''
+unflag_denied_text: ''
+flag_type: 'entity:node'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links: {  }
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  extra_permissions:
+    owner: '0'
+linkTypeConfig: {  }

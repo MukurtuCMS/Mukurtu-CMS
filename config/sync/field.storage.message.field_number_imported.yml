@@ -1,0 +1,22 @@
+uuid: 72f46e76-e2b5-473e-b4a8-e49d908cfa68
+langcode: en
+status: true
+dependencies:
+  module:
+    - message
+_core:
+  default_config_hash: XFXUhfbFOmR-1uPkuNU5DlRd3zOCc5g8z0fmCFJ1SwA
+id: message.field_number_imported
+field_name: field_number_imported
+entity_type: message
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

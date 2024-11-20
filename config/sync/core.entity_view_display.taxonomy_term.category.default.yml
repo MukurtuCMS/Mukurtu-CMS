@@ -1,0 +1,53 @@
+uuid: d3bbcae3-ccb1-489b-9543-a9973d92f37d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.category.field_thumbnail_image
+    - taxonomy.vocabulary.category
+  module:
+    - media
+    - text
+_core:
+  default_config_hash: wRokgS0OFTesohc6hcFfLn8zlYZgQNPPBJgn4Kku6HQ
+id: taxonomy_term.category.default
+targetEntityType: taxonomy_term
+bundle: category
+mode: default
+content:
+  description:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_thumbnail_image:
+    type: media_thumbnail
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: ''
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  flag_email_term:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  flag_mukurtu_email_term:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  flag_subscribe_term:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
+hidden:
+  langcode: true
+  search_api_excerpt: true

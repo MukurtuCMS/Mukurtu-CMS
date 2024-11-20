@@ -1,0 +1,17 @@
+uuid: d6e39e6a-4040-4540-8ecc-7facd7c25317
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+_core:
+  default_config_hash: mgj4SdFJaNW42llt5UrK35ffMCtkrob31-savITNITo
+id: protocol-protocol-protocol_member
+label: 'Protocol Member'
+weight: 12
+is_admin: null
+group_type: protocol
+group_bundle: protocol
+group_id: null
+permissions: {  }
+role_type: standard

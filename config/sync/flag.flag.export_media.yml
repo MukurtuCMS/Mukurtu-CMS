@@ -1,0 +1,31 @@
+uuid: c80d6b8f-9171-4721-a347-2f6d69607555
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+_core:
+  default_config_hash: 8RPBSMwqjbOCLAbK6lCCxn4v34CHbYPx3sfmZHRBSh8
+id: export_media
+label: 'Export Media'
+bundles: {  }
+entity_type: media
+global: false
+weight: 0
+flag_short: 'Add to export list'
+flag_long: 'Add this media to the export list'
+flag_message: 'Added to export list'
+unflag_short: 'Remove from export list'
+unflag_long: 'Remove the media from the export list'
+unflag_message: 'Removed from export list'
+unflag_denied_text: ''
+flag_type: 'entity:media'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links: {  }
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  extra_permissions:
+    owner: '0'
+linkTypeConfig: {  }

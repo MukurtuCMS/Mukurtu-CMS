@@ -1,0 +1,33 @@
+uuid: 7ecaeb78-f555-4023-b521-9127beea29e1
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
+_core:
+  default_config_hash: t6FVxQXUXbPkludoHL3gTAIMWMYdI8qJ3BtjbIXaaj8
+id: mukurtu_cms_v3_paragraphs_related_person
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: 'Paragraphs - Related Person'
+source:
+  plugin: d7_paragraphs_item
+  bundle: person_relationship_bundle
+process:
+  field_related_person: field_related_person
+  field_relationship_type: field_relationship_type
+  status: status
+destination:
+  plugin: 'entity_reference_revisions:paragraph'
+  default_bundle: related_person
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_media_audio
+  optional:
+    - d7_field_instance

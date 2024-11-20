@@ -1,0 +1,9 @@
+_core:
+  default_config_hash: SpSPc8akVbupbsuA-qo9NnGyFuM4a1xp-brlx6GRqJc
+use_queue: false
+notify_own_actions: false
+flag_prefix: subscribe
+debug_mode: false
+default_notifiers:
+  - email
+range: 100

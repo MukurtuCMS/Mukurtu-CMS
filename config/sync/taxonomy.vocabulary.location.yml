@@ -1,0 +1,10 @@
+uuid: 75ee1ae3-e261-41fe-8573-771e93e03c72
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: I1oNHLx9rkbz8fDyCr9SukgL5bFLE-_x2lx8EAgSLdU
+name: Location
+vid: location
+description: ''
+weight: 0

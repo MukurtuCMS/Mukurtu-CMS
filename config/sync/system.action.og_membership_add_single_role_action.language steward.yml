@@ -1,0 +1,12 @@
+uuid: a8cc740a-0b6a-4f01-810f-5f95e77eeb73
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: 'og_membership_add_single_role_action.language steward'
+label: 'Add the language steward role to the selected members'
+type: og_membership
+plugin: og_membership_add_single_role_action
+configuration:
+  role_name: 'language steward'

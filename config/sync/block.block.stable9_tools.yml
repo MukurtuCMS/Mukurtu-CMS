@@ -1,0 +1,27 @@
+uuid: ed4064e2-8b3b-484b-b263-d6909b03f398
+langcode: en
+status: false
+dependencies:
+  config:
+    - system.menu.tools
+  module:
+    - system
+  theme:
+    - stable9
+_core:
+  default_config_hash: mtUAlUk-Oq12X2yTCX9ozmluZuhDn92C5T0cFjNWz5I
+id: stable9_tools
+theme: stable9
+region: sidebar_first
+weight: 0
+provider: null
+plugin: 'system_menu_block:tools'
+settings:
+  id: 'system_menu_block:tools'
+  label: Tools
+  label_display: visible
+  provider: system
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility: {  }

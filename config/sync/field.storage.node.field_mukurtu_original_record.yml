@@ -1,0 +1,21 @@
+uuid: 6262a9e3-ebe1-4dd0-aa70-5aad225cf56e
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: q-xwobg072fG-3m9dMJ0D_o93Gx1RtpDgwzfleL1gKY
+id: node.field_mukurtu_original_record
+field_name: field_mukurtu_original_record
+entity_type: node
+type: entity_reference
+settings:
+  target_type: node
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

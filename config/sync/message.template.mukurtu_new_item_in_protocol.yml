@@ -1,0 +1,21 @@
+uuid: 057b1a1c-5831-403b-baa7-882c3e887d7f
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+_core:
+  default_config_hash: zLg3dQAplbJOn1yq0rB3MSqkpaS-ZgE9GmZwHZjHDMc
+template: mukurtu_new_item_in_protocol
+label: 'Mukurtu New Item in Protocol'
+description: 'A new item has been added to a protocol.'
+text:
+  -
+    value: "<p>[message:field_item:entity:field_content_type] item&nbsp;<a href=\"[message:field_item:entity:url]\">[message:field_item:entity:title]</a>&nbsp;is now available in protocol <a href=\"[message:field_protocol:entity:url]\">[message:field_protocol:entity:title]</a>.</p>\r\n\r\n"
+    format: full_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

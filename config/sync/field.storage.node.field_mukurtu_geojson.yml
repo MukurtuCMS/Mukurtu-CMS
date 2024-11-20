@@ -1,0 +1,21 @@
+uuid: 7c159bbc-d14c-4a3e-b080-09bc05a3a7a9
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: R6LqBwEfY0rEJMknbiPuiwm9nJz5D8GW7ocCjrDXDKI
+id: node.field_mukurtu_geojson
+field_name: field_mukurtu_geojson
+entity_type: node
+type: string_long
+settings:
+  case_sensitive: false
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

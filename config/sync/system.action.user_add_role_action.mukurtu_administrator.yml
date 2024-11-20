@@ -1,0 +1,14 @@
+uuid: b08ee124-8d6a-4d1f-ad68-9c0bd35018ee
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.mukurtu_administrator
+  module:
+    - user
+id: user_add_role_action.mukurtu_administrator
+label: 'Add the Mukurtu Administrator role to the selected user(s)'
+type: user
+plugin: user_add_role_action
+configuration:
+  rid: mukurtu_administrator

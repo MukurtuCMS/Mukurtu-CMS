@@ -1,0 +1,22 @@
+uuid: 13ec0242-5112-42d7-aa83-efffe883c24d
+langcode: en
+status: true
+dependencies:
+  module:
+    - help
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: viQ4WSC430Z6S-F2TqQZo3skh2WZ0r81Emr9wp8EeJg
+id: mukurtu_bartik_help
+theme: mukurtu_bartik
+region: content
+weight: -30
+provider: null
+plugin: help_block
+settings:
+  id: help_block
+  label: Help
+  label_display: '0'
+  provider: help
+visibility: {  }

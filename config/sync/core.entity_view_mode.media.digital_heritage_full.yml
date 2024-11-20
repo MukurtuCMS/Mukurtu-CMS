@@ -1,0 +1,12 @@
+uuid: ac89d440-c2b8-4d6b-9047-2a0e059179eb
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+_core:
+  default_config_hash: SG6oDI91sPlJmRBDZxfuFKFf54_-XjWfiC5dq6u51fQ
+id: media.digital_heritage_full
+label: 'Large (900 px)'
+targetEntityType: media
+cache: true

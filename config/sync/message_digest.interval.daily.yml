@@ -1,0 +1,10 @@
+uuid: 043b3b50-8c25-4cf3-9863-6b46ae12001e
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: SjbZEtcWAgxY9h5uopG2z4XLeNJ0ldv7HaRxc5rgjCg
+id: daily
+label: Daily
+interval: '1 day'
+description: 'Sends messages in 1 day intervals.'

@@ -1,0 +1,48 @@
+uuid: bd0e39d8-98ee-4a46-ac1b-ce76b9db5393
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.browse
+    - image.style.medium_480px_w_
+    - media.type.document
+  module:
+    - image
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: m5zF8XnfzsJtvqEtvO9pl_Mh1Rz65cqnTzPg8tgBY0s
+id: media.document.browse
+targetEntityType: media
+bundle: document
+mode: browse
+content:
+  thumbnail:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: medium_480px_w_
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_communities: true
+  field_cultural_protocols: true
+  field_extracted_text: true
+  field_identifier: true
+  field_media_document: true
+  field_media_tags: true
+  field_people: true
+  field_thumbnail: true
+  flag_export_media: true
+  langcode: true
+  name: true
+  search_api_excerpt: true
+  uid: true

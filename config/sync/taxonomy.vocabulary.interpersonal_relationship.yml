@@ -1,0 +1,10 @@
+uuid: 48590ace-5f7b-4415-b0df-ef143407a4fe
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: 3tdOQpdeGqcPsRE8nMAmXBzZUfDQrTOsUL0Wk4qFoqY
+name: 'Interpersonal Relationship'
+vid: interpersonal_relationship
+description: ''
+weight: 0

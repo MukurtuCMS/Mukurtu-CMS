@@ -1,0 +1,15 @@
+uuid: b9e2ffb7-a1e1-48b9-bd03-0a6f6a491d8b
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.subscribe_node
+  module:
+    - flag
+id: flag_action.subscribe_node_unflag
+label: Unsubscribe
+type: node
+plugin: 'flag_action:subscribe_node_unflag'
+configuration:
+  flag_id: subscribe_node
+  flag_action: unflag

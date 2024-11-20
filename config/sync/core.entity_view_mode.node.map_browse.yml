@@ -1,0 +1,12 @@
+uuid: 8d8ba988-7fe5-4b3e-96d7-34fa10a06952
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: 7yRWKt4nMpJ5Y6SpYcqlco6_XOue2Kje7Nenhkd5-NA
+id: node.map_browse
+label: 'Map Browse'
+targetEntityType: node
+cache: true

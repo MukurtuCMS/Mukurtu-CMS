@@ -1,0 +1,31 @@
+uuid: d7e7cb59-45fd-487a-b607-084a6ce89498
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.related_person
+_core:
+  default_config_hash: 7OI-TmasCVmkeHOcaEQiTEsANSg2NzL9EjzJVmIp-Do
+id: paragraph.related_person.default
+targetEntityType: paragraph
+bundle: related_person
+mode: default
+content:
+  field_related_person:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_relationship_type:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+hidden:
+  search_api_excerpt: true

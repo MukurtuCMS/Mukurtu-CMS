@@ -1,0 +1,21 @@
+uuid: 9b7283e3-64a1-485c-bdf1-059b08989783
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.basic_html
+_core:
+  default_config_hash: L9dbn2VW-Ibbuvdqet_KMMp4N74satj8WAj4ASMCSzY
+template: mukurtu_single_node_delete
+label: 'Mukurtu Single Node Delete'
+description: 'The standard message for the deletion of a single node.'
+text:
+  -
+    value: "<p>[message:field_content_type] item&nbsp;<em>[message:field_title]</em> was deleted.</p>\r\n"
+    format: basic_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

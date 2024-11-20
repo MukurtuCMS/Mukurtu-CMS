@@ -1,0 +1,31 @@
+uuid: 3a9a1f02-633b-4531-b78c-e6be5ae566d1
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_article_keywords
+    - node.type.article
+    - taxonomy.vocabulary.keywords
+_core:
+  default_config_hash: LmcNoRU5hk7QrpiXeexarIrcyg7M5_LifECziJBmu7o
+id: node.article.field_article_keywords
+field_name: field_article_keywords
+entity_type: node
+bundle: article
+label: Keywords
+description: 'Keywords provide added ways to group your content. They make it easier for users to search and retrieve content.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      keywords: keywords
+    sort:
+      field: name
+      direction: asc
+    auto_create: true
+    auto_create_bundle: ''
+field_type: entity_reference

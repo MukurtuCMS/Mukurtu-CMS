@@ -1,0 +1,15 @@
+uuid: 72f143f8-12bb-4b7f-896d-0310c8a5a9c9
+langcode: en
+status: true
+dependencies:
+  module:
+    - message_digest_ui
+_core:
+  default_config_hash: '-yzTK5tRj_iIpUr0BcEIcSpxKVJV0rxhpMScjnzmJ5M'
+id: message_digest_interval.email_term.daily
+label: 'Send notifications daily'
+type: taxonomy_term
+plugin: 'message_digest_interval:email_term:daily'
+configuration:
+  flag_id: email_term
+  value: 'message_digest:daily'

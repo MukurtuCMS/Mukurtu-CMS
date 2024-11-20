@@ -1,0 +1,15 @@
+uuid: 727cb412-aa4c-4cab-a33c-f901b4bf03de
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_follow_community
+  module:
+    - flag
+id: flag_action.mukurtu_follow_community_unflag
+label: 'Stop Following this Community'
+type: node
+plugin: 'flag_action:mukurtu_follow_community_unflag'
+configuration:
+  flag_id: mukurtu_follow_community
+  flag_action: unflag

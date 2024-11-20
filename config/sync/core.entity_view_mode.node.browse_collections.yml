@@ -1,0 +1,12 @@
+uuid: 04cac1ab-f599-4e28-ac79-84c8b5d5cccc
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: B2i9vHSa6z5QYfwDUhddY5Oq7VPQyIRVEdmvEN1iBic
+id: node.browse_collections
+label: 'Browse Collections'
+targetEntityType: node
+cache: true

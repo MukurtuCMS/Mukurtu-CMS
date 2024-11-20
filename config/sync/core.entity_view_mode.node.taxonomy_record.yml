@@ -1,0 +1,12 @@
+uuid: aed86044-f5cf-4df1-822a-3ecccf7228c2
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: gww9tWftoTyItu5FHOEBR42bQkEAfWeTPU1Qm2naKDM
+id: node.taxonomy_record
+label: 'Taxonomy Record'
+targetEntityType: node
+cache: true

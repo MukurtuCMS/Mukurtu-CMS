@@ -1,0 +1,27 @@
+uuid: e2a8699b-49fa-41b7-bf96-d333f4858cc3
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.main
+  module:
+    - system
+  theme:
+    - stable9
+_core:
+  default_config_hash: e2idlSwotaifxyHsNU4jQ9p8cuJi_NZLgvUEx9Qm2EQ
+id: stable9_main_menu
+theme: stable9
+region: header
+weight: 2
+provider: null
+plugin: 'system_menu_block:main'
+settings:
+  id: 'system_menu_block:main'
+  label: 'Main navigation'
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 1
+  expand_all_items: false
+visibility: {  }

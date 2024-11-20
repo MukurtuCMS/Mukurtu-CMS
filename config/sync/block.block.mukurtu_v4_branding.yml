@@ -1,0 +1,25 @@
+uuid: 1dc28953-50be-4dc4-aa85-ffe846840919
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - mukurtu_v4
+_core:
+  default_config_hash: LxfjoBXN9m-dsUB4Hykqd9tjatAJ7yqvQVBmwkQQI7w
+id: mukurtu_v4_branding
+theme: mukurtu_v4
+region: header
+weight: 0
+provider: null
+plugin: system_branding_block
+settings:
+  id: system_branding_block
+  label: 'Site branding'
+  label_display: '0'
+  provider: system
+  use_site_logo: true
+  use_site_name: false
+  use_site_slogan: false
+visibility: {  }

@@ -1,0 +1,22 @@
+uuid: f3b70db2-3ec6-4bfd-9cd4-4165a013aa43
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: pO6HJ35WSdjFQCCWzkX1I_-VSDhe2irYTXaF9ICK984
+id: mukurtu_bartik_breadcrumbs
+theme: mukurtu_bartik
+region: breadcrumb
+weight: 0
+provider: null
+plugin: system_breadcrumb_block
+settings:
+  id: system_breadcrumb_block
+  label: Breadcrumbs
+  label_display: '0'
+  provider: system
+visibility: {  }

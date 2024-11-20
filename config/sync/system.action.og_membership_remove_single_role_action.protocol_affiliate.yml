@@ -1,0 +1,12 @@
+uuid: ed3c33b1-6952-474b-b4d1-c41fd4fddd94
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_remove_single_role_action.protocol_affiliate
+label: 'Remove the protocol_affiliate role from the selected members'
+type: og_membership
+plugin: og_membership_remove_single_role_action
+configuration:
+  role_name: protocol_affiliate

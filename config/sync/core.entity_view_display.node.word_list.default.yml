@@ -1,0 +1,57 @@
+uuid: ae01b272-4c7e-46e5-8d29-f187b2eefb99
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.word_list.comment
+    - field.field.node.word_list.field_mukurtu_cluster_lat
+    - field.field.node.word_list.field_mukurtu_cluster_long
+    - field.field.node.word_list.field_mukurtu_geojson
+    - node.type.word_list
+  module:
+    - user
+_core:
+  default_config_hash: WdSiEQa1zGeThT5QFkmbgcS5OBrYC3Mvjq9clQq2HDo
+id: node.word_list.default
+targetEntityType: node
+bundle: word_list
+mode: default
+content:
+  field_words:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  comment: true
+  draft: true
+  field_all_related_content: true
+  field_citation: true
+  field_communities: true
+  field_cultural_protocols: true
+  field_description: true
+  field_in_collection: true
+  field_keywords: true
+  field_media_assets: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_multipage_page_of: true
+  field_protocol_control: true
+  field_related_content: true
+  field_representative_media: true
+  field_sequence_collection: true
+  field_source: true
+  field_summary: true
+  field_title: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_mukurtu_email_og: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

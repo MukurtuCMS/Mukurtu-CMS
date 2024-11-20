@@ -1,0 +1,12 @@
+uuid: 633355a3-466c-4050-83af-7593b5472c05
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_collection
+_core:
+  default_config_hash: nNR4ohmtULSxPlk_dGZidStHSaGjV5aOj1JRyCQ296w
+id: personal_collection.teaser
+label: Teaser
+targetEntityType: personal_collection
+cache: true

@@ -1,0 +1,106 @@
+uuid: 481106ab-36b7-4d70-8e36-db35384d67c4
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: xtNJtQKuMKPIcQ4j4N7fSRYH6hqW_Am0jIe9L1Vq_XY
+id: mukurtu_cms_v3_word_list
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: 'Word List'
+source:
+  plugin: d7_node
+  node_type: word_list
+process:
+  nid: nid
+  uid:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
+    source: uid
+  langcode: language
+  changed: changed
+  created: created
+  status: status
+  title: title
+  field_cultural_protocols/sharing_setting:
+    -
+      plugin: get
+      source: field_item_privacy_setting/0/value
+  field_cultural_protocols/protocols:
+    -
+      plugin: mukurtu_migrate_lookup_og_group
+      source: nid
+    -
+      plugin: sub_process
+      process:
+        plugin: migration_lookup
+        migration: mukurtu_cms_v3_cultural_protocols
+        source: target_id
+    -
+      plugin: mukurtu_migrate_set_protocols
+  field_source: field_collection_credit/0/value
+  field_description/value:
+    -
+      plugin: get
+      source: field_description/value
+  field_description/format:
+    -
+      plugin: static_map
+      source: field_description/format
+      map:
+        filtered_html: basic_html
+        plain_text: plain_text
+        full_html: full_html
+        markdown: full_html
+        ds_code: full_html
+      default_value: full_html
+  field_media_assets/target_id:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_file_private
+      - mukurtu_cms_v3_file
+    source: field_collection_image/0/fid
+  field_media_assets/alt:
+    -
+      plugin: null_coalesce
+      source:
+        - field_collection_image/0/field_caption
+        - title
+        - field_collection_image/0/field_filename
+    -
+      plugin: default_value
+      default_value: 'Missing Alt Text'
+  field_keywords:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_keywords
+    source: field_tags
+  field_words:
+    plugin: sub_process
+    source: field_words
+    process:
+      target_id:
+        plugin: migration_lookup
+        migration:
+          - mukurtu_cms_v3_dictionary_word
+        source: target_id
+  field_related_content: field_related_content
+destination:
+  plugin: 'entity:node'
+  default_bundle: word_list
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_dictionary_word
+    - mukurtu_cms_v3_communities
+    - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
+    - mukurtu_cms_v3_terms_keywords
+    - mukurtu_cms_v3_terms_language
+  optional:
+    - d7_field_instance

@@ -1,0 +1,21 @@
+uuid: 0b2ed67f-1428-4a14-bfae-27d2bff518f3
+langcode: en
+status: true
+dependencies:
+  module:
+    - message
+    - text
+_core:
+  default_config_hash: pjwtfcbdTdr20mRK-FXglp-0-rJmqBYmu7sf8EdvB7U
+id: message.field_import_results
+field_name: field_import_results
+entity_type: message
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

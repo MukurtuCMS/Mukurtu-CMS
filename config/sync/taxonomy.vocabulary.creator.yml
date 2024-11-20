@@ -1,0 +1,10 @@
+uuid: c4149b08-10eb-473c-9da3-7978dc653e6d
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: 9N6dKyUN7DE0sjsj0d3y8GYsup4AzjIl7c-MH9AXn7I
+name: Creator
+vid: creator
+description: ''
+weight: 0

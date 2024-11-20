@@ -1,0 +1,21 @@
+uuid: 84519fac-e6a8-4e2f-a51c-373e7cb80ea7
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: EnyKiVZQGoLqUG-U0VZ0Nn6lHpT1I9X_-i8F_3SIemc
+id: node.field_mukurtu_protocol_inherit
+field_name: field_mukurtu_protocol_inherit
+entity_type: node
+type: entity_reference
+settings:
+  target_type: node
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,17 @@
+uuid: 33def732-ee44-4f66-a1a3-9ed51ae61dee
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: WkSUQBezfmxF-lez7dX5DAZ6sVvPuxN0eFau1DAB-_0
+name: large
+label: 'Large (900px w)'
+effects:
+  ddd73aa7-4bd6-4c85-b600-bdf2b1628d1d:
+    uuid: ddd73aa7-4bd6-4c85-b600-bdf2b1628d1d
+    id: image_scale
+    weight: 0
+    data:
+      width: 900
+      height: null
+      upscale: false

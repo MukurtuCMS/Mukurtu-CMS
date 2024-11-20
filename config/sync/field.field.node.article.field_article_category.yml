@@ -1,0 +1,33 @@
+uuid: f2f06aad-0dab-49a1-ae5d-d29a87ea4ccb
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_article_category
+    - node.type.article
+    - taxonomy.vocabulary.category
+_core:
+  default_config_hash: eG8ODmRgDjPMrS5iqMK0PbxjLY2OnT2gU1nAuxvt-3w
+id: node.article.field_article_category
+field_name: field_article_category
+entity_type: node
+bundle: article
+label: Category
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    target_uuid: 4209c7d8-574f-4b7b-99c8-1eb69bda5160
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      category: category
+    sort:
+      field: name
+      direction: asc
+    auto_create: true
+    auto_create_bundle: ''
+field_type: entity_reference

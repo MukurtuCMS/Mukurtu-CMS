@@ -1,0 +1,17 @@
+uuid: 32699e16-3b55-4ab1-8be3-d0ab710dd57e
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: aSDk8TOOc4eNb-sdXbuYYN2ItMsQ9-QcIDDvuKkR580
+name: carousel_thumbnail
+label: 'Carousel Thumbnail (200px h)'
+effects:
+  4dd07b56-f122-43e0-828b-d608a637dd0a:
+    uuid: 4dd07b56-f122-43e0-828b-d608a637dd0a
+    id: image_scale
+    weight: 1
+    data:
+      width: null
+      height: 200
+      upscale: false

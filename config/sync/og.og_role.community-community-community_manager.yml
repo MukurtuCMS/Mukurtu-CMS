@@ -1,0 +1,26 @@
+uuid: fb560f29-7b10-44b5-9b79-7b479ec43ea5
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+_core:
+  default_config_hash: rrQpFfM153gLgNF7hoVXUlnDiDOk7Uh7LWoimc-8tzU
+id: community-community-community_manager
+label: 'Community Manager'
+weight: 13
+is_admin: null
+group_type: community
+group_bundle: community
+group_id: null
+permissions:
+  - 'add user'
+  - 'approve and deny subscription'
+  - 'create protocol protocol'
+  - 'delete any protocol protocol'
+  - 'delete own protocol protocol'
+  - 'manage members'
+  - 'update any protocol protocol'
+  - 'update group'
+  - 'update own protocol protocol'
+role_type: standard

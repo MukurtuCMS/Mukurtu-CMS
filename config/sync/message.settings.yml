@@ -1,0 +1,8 @@
+_core:
+  default_config_hash: _QhkR_LYNacHU4oQybqcZgNge_q1SbQghAjqVBoognE
+purge_methods: {  }
+delete_on_entity_delete:
+  comment: comment
+  node: node
+  taxonomy_term: taxonomy_term
+  user: user

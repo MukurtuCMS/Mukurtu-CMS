@@ -1,0 +1,12 @@
+uuid: fe76bac9-b530-4577-bb4b-81e60c99a949
+langcode: en
+status: true
+dependencies:
+  module:
+    - paragraphs
+_core:
+  default_config_hash: xhcsnPzZCJEafB3DIQD3zbx0EHvJcYPc77GcbMcw75g
+id: paragraph.teaser
+label: 'Teaser - Recording'
+targetEntityType: paragraph
+cache: true

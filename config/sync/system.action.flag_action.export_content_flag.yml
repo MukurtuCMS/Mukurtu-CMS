@@ -1,0 +1,15 @@
+uuid: fb2795de-cd2e-461d-8f07-9110cc49a3d4
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.export_content
+  module:
+    - flag
+id: flag_action.export_content_flag
+label: 'Add to export list'
+type: node
+plugin: 'flag_action:export_content_flag'
+configuration:
+  flag_id: export_content
+  flag_action: flag

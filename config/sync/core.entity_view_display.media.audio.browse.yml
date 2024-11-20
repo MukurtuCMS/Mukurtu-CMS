@@ -1,0 +1,51 @@
+uuid: 70ee7fad-3bf1-4583-8b7f-c766919f5602
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.browse
+    - media.type.audio
+  module:
+    - blazy
+    - file
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: E9YJ5v0x-oRzDo_UHHIcYGoBGYPyhkWF8zRprfjWDbg
+id: media.audio.browse
+targetEntityType: media
+bundle: audio
+mode: browse
+content:
+  field_media_audio_file:
+    type: file_audio
+    label: hidden
+    settings:
+      controls: true
+      autoplay: false
+      loop: false
+      multiple_file_display_type: tags
+    third_party_settings:
+      blazy:
+        blazy: true
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_communities: true
+  field_contributor: true
+  field_cultural_protocols: true
+  field_identifier: true
+  field_media_tags: true
+  field_people: true
+  field_thumbnail: true
+  field_transcription: true
+  flag_export_media: true
+  langcode: true
+  name: true
+  search_api_excerpt: true
+  thumbnail: true
+  uid: true

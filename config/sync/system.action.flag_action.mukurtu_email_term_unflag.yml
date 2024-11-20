@@ -1,0 +1,15 @@
+uuid: 5a722813-87be-465a-98e2-6e58d3e77372
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_email_term
+  module:
+    - flag
+id: flag_action.mukurtu_email_term_unflag
+label: 'Don''t send email'
+type: taxonomy_term
+plugin: 'flag_action:mukurtu_email_term_unflag'
+configuration:
+  flag_id: mukurtu_email_term
+  flag_action: unflag

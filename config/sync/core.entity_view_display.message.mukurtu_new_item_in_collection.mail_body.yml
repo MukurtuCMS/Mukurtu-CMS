@@ -1,0 +1,23 @@
+uuid: 74c76633-9524-4e29-b232-5df529476cf3
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_body
+    - message.template.mukurtu_new_item_in_collection
+  module:
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: message.mukurtu_new_item_in_collection.mail_body
+targetEntityType: message
+bundle: mukurtu_new_item_in_collection
+mode: mail_body
+content:
+  partial_1:
+    weight: 0
+    region: content
+hidden:
+  partial_0: true

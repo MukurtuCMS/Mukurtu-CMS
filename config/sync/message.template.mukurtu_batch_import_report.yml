@@ -1,0 +1,21 @@
+uuid: 9aff7c0c-5801-42fe-8336-d5244b168088
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.basic_html
+_core:
+  default_config_hash: V1Qy0UhktIpflv48AWbXlOie6q66qkzjtYib96egZRQ
+template: mukurtu_batch_import_report
+label: 'Mukurtu Batch Import Report'
+description: 'A report containing the results of a batch import.'
+text:
+  -
+    value: 'Batch imported [message:field_number_imported] items on [message:created] (<a href="/import/report/[message:mid]">Details</a>).'
+    format: basic_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

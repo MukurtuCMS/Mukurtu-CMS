@@ -1,0 +1,10 @@
+uuid: 839867da-57a8-46d4-b854-202ce8ed05b4
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: nNOqYBIJ4O8EvzYdvfM4AAgtHPuwt-iLb8hlHOy8j34
+id: image_with_description
+label: 'Image with Description'
+revision: 0
+description: ''

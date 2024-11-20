@@ -1,0 +1,14 @@
+uuid: 132e87c6-8546-4278-921a-0d1712ccdfe5
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: 1bB4ZGSnNsj1xE7W83ad0Y01LDCm3IBdHugDKQaENpU
+id: mukurtu_community_pattern
+label: 'Mukurtu Community Pattern'
+type: 'canonical_entities:community'
+pattern: 'communities/[community:name]'
+selection_criteria: {  }
+selection_logic: and
+weight: 0
+relationships: {  }

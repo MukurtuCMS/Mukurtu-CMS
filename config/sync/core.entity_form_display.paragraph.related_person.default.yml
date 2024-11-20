@@ -1,0 +1,44 @@
+uuid: e619819b-77c8-493e-bb0a-6fb22fb5920a
+langcode: en
+status: true
+dependencies:
+  config:
+    - entity_browser.browser.browse_content
+    - paragraphs.paragraphs_type.related_person
+  module:
+    - entity_browser
+_core:
+  default_config_hash: bJ7ikRLz5347QXVWU_naXw-9PT4Xf2Ya2VqJSc_H8vM
+id: paragraph.related_person.default
+targetEntityType: paragraph
+bundle: related_person
+mode: default
+content:
+  field_related_person:
+    type: entity_browser_entity_reference
+    weight: 0
+    region: content
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: true
+      field_widget_display_settings:
+        view_mode: content_browser
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_relationship_type:
+    type: entity_reference_autocomplete
+    weight: 1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

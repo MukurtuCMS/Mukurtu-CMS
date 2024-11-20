@@ -1,0 +1,12 @@
+uuid: 76188c50-016b-483e-9fd4-791940a12955
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_remove_single_role_action.contributor
+label: 'Remove the contributor role from the selected members'
+type: og_membership
+plugin: og_membership_remove_single_role_action
+configuration:
+  role_name: contributor

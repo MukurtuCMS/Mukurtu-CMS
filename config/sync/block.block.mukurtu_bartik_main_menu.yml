@@ -1,0 +1,27 @@
+uuid: 8a26befc-1d87-443b-849f-fd9aa272cec4
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.main
+  module:
+    - system
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: MGd0li50E9ZmsxycDuNghF3lQubsIUOvc0-4Creh9k0
+id: mukurtu_bartik_main_menu
+theme: mukurtu_bartik
+region: primary_menu
+weight: 0
+provider: null
+plugin: 'system_menu_block:main'
+settings:
+  id: 'system_menu_block:main'
+  label: 'Main navigation'
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 1
+  expand_all_items: false
+visibility: {  }

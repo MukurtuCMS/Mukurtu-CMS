@@ -1,0 +1,30 @@
+uuid: 21630c25-8207-47f0-a121-19b9146e278f
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:featured_content:1c388b60-c949-4ad6-8356-719669865425'
+  module:
+    - block_content
+    - system
+  theme:
+    - stable9
+id: stable9_front_page_featured_content
+theme: stable9
+region: content
+weight: -3
+provider: null
+plugin: 'block_content:1c388b60-c949-4ad6-8356-719669865425'
+settings:
+  id: 'block_content:1c388b60-c949-4ad6-8356-719669865425'
+  label: 'Mukurtu v4 Featured Content'
+  label_display: '1'
+  provider: block_content
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: '<front>'

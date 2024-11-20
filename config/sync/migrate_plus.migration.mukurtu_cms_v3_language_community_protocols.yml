@@ -1,0 +1,50 @@
+uuid: 71af44db-9305-4cf4-9f9c-3949bcc4cde2
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
+_core:
+  default_config_hash: QuCW5xegn1bzBHMxv4LjVNUVpWBfPIVkl8TBEZ3Yvic
+id: mukurtu_cms_v3_language_community_protocols
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: 'Language Community Protocols'
+source:
+  plugin: d7_node
+  node_type: language_community
+process:
+  id: nid
+  langcode: language
+  name: title
+  field_description: body
+  field_communities:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_language_communities
+    source: nid
+  field_access_mode:
+    -
+      plugin: static_map
+      source: group_access
+      map:
+        0: open
+        2: strict
+      default_value: open
+  status: status
+  mukurtu_migrate:
+    plugin: default_value
+    default_value: true
+destination:
+  plugin: 'entity:protocol'
+  default_bundle: protocol
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_language_communities
+  optional:
+    - d7_field_instance

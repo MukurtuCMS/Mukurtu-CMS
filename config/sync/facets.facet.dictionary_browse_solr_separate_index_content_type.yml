@@ -1,0 +1,70 @@
+uuid: 5cbc0f51-a060-4772-b006-0d72f27ddde8
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.index.mukurtu_dictionary_solr_index
+    - views.view.dictionary_browse_solr_new_index
+  module:
+    - search_api
+_core:
+  default_config_hash: Jbpqf1ekOUVUYHnKXMmIv6Gw28wAliDrrdazPxPPNYw
+id: dictionary_browse_solr_separate_index_content_type
+name: 'Content type'
+url_alias: dictionary_browse_solr_separate_index_content_type
+weight: 0
+min_count: 1
+missing: false
+missing_label: others
+show_only_one_result: true
+field_identifier: dictionary_browse_solr_content_type
+facet_source_id: 'search_api:views_block__dictionary_browse_solr_new_index__mukurtu_dictionary_solr_separate_index_block'
+widget:
+  type: dropdown
+  config:
+    show_numbers: false
+    default_option_label: 'Content Type'
+query_operator: or
+use_hierarchy: false
+keep_hierarchy_parents_active: false
+hierarchy:
+  type: taxonomy
+  config: {  }
+expand_hierarchy: false
+enable_parent_when_child_gets_disabled: true
+hard_limit: 0
+exclude: false
+only_visible_when_facet_source_is_visible: false
+processor_configs:
+  active_widget_order:
+    processor_id: active_widget_order
+    weights:
+      sort: 20
+    settings:
+      sort: DESC
+  count_widget_order:
+    processor_id: count_widget_order
+    weights:
+      sort: 30
+    settings:
+      sort: DESC
+  display_value_widget_order:
+    processor_id: display_value_widget_order
+    weights:
+      sort: 40
+    settings:
+      sort: ASC
+  hierarchy_processor:
+    processor_id: hierarchy_processor
+    weights:
+      build: 100
+    settings: {  }
+  url_processor_handler:
+    processor_id: url_processor_handler
+    weights:
+      pre_query: 50
+      build: 15
+    settings: {  }
+empty_behavior:
+  behavior: none
+show_title: false

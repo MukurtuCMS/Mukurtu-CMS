@@ -1,0 +1,66 @@
+uuid: 1ffd8214-7849-4e46-b1aa-95e9524ff6c8
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+_core:
+  default_config_hash: BsVALl8AjsBo4LvyhFmU_7MQJZG2-NLu0L-k3J3OyEw
+id: protocol-protocol-protocol_steward
+label: 'Protocol Steward'
+weight: 7
+is_admin: null
+group_type: protocol
+group_bundle: protocol
+group_id: null
+permissions:
+  - 'add user'
+  - 'administer comments'
+  - 'administer community records'
+  - 'administer permissions'
+  - 'apply protocol'
+  - 'approve and deny subscription'
+  - 'create audio media'
+  - 'create collection content'
+  - 'create digital_heritage content'
+  - 'create document media'
+  - 'create external_embed media'
+  - 'create image media'
+  - 'create remote_video media'
+  - 'create video media'
+  - 'delete any audio media'
+  - 'delete any collection content'
+  - 'delete any digital_heritage content'
+  - 'delete any document media'
+  - 'delete any external_embed media'
+  - 'delete any image media'
+  - 'delete any remote_video media'
+  - 'delete any video media'
+  - 'delete own audio media'
+  - 'delete own collection content'
+  - 'delete own digital_heritage content'
+  - 'delete own document media'
+  - 'delete own external_embed media'
+  - 'delete own image media'
+  - 'delete own remote_video media'
+  - 'delete own video media'
+  - 'edit any collection content'
+  - 'edit any digital_heritage content'
+  - 'edit own collection content'
+  - 'edit own digital_heritage content'
+  - 'manage members'
+  - 'skip comment approval'
+  - 'update any audio media'
+  - 'update any document media'
+  - 'update any external_embed media'
+  - 'update any image media'
+  - 'update any remote_video media'
+  - 'update any video media'
+  - 'update group'
+  - 'update own audio media'
+  - 'update own document media'
+  - 'update own external_embed media'
+  - 'update own image media'
+  - 'update own remote_video media'
+  - 'update own video media'
+role_type: standard

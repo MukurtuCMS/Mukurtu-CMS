@@ -1,0 +1,15 @@
+uuid: 070779c0-8c2b-4120-8e5b-a424ece2847c
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.export_content
+  module:
+    - flag
+id: flag_action.export_content_unflag
+label: 'Remove from export list'
+type: node
+plugin: 'flag_action:export_content_unflag'
+configuration:
+  flag_id: export_content
+  flag_action: unflag

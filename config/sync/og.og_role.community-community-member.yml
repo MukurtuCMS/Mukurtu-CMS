@@ -1,0 +1,17 @@
+uuid: 441f6b8d-64d2-466d-84ab-f9dc49331b85
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+_core:
+  default_config_hash: eAhQlkgTYsFh3CfQBgCvuroJ97eKGlDqm4BxWwLl1Ac
+id: community-community-member
+label: Member
+weight: 15
+is_admin: null
+group_type: community
+group_bundle: community
+group_id: null
+permissions: {  }
+role_type: required

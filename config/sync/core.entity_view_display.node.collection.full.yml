@@ -1,0 +1,115 @@
+uuid: 804377b1-ff40-4de8-aac7-f5e779d4bd93
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.full
+    - field.field.node.collection.comment
+    - field.field.node.collection.field_mukurtu_cluster_lat
+    - field.field.node.collection.field_mukurtu_cluster_long
+    - field.field.node.collection.field_mukurtu_geojson
+    - node.type.collection
+  module:
+    - layout_builder
+    - text
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: 7-Hp7-xxHEMmTDuIpPh7HgleewXoIQufImecdQN9Or8
+id: node.collection.full
+targetEntityType: node
+bundle: collection
+mode: full
+content:
+  field_all_related_content:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: false
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_collection_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: browse
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_communities:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_credit:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_description:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_items_in_collection:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: browse
+      link: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_summary:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+hidden:
+  comment: true
+  draft: true
+  field_child_collections: true
+  field_citation: true
+  field_collection_type: true
+  field_content_type: true
+  field_cultural_protocols: true
+  field_in_collection: true
+  field_keywords: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_multipage_page_of: true
+  field_parent_collection: true
+  field_protocol_control: true
+  field_related_content: true
+  field_representative_media: true
+  field_source: true
+  field_title: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_collection: true
+  flag_mukurtu_email_og: true
+  flag_mukurtu_follow_collection: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

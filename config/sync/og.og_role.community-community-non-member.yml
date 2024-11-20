@@ -1,0 +1,18 @@
+uuid: 91c6d960-d514-4be6-ad81-06d7a4ab6463
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+_core:
+  default_config_hash: z_m4omSP8wCsucZ-4GzVFSsXNXiSe035XQaGkbE_1hs
+id: community-community-non-member
+label: Non-member
+weight: 14
+is_admin: null
+group_type: community
+group_bundle: community
+group_id: null
+permissions:
+  - subscribe
+role_type: required

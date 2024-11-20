@@ -1,0 +1,15 @@
+uuid: eb8d250e-43a0-4523-946d-a70649fb4df7
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_email_content
+  module:
+    - flag
+id: flag_action.mukurtu_email_content_unflag
+label: 'Unflag this item'
+type: node
+plugin: 'flag_action:mukurtu_email_content_unflag'
+configuration:
+  flag_id: mukurtu_email_content
+  flag_action: unflag

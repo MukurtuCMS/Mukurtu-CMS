@@ -1,0 +1,21 @@
+uuid: a2349302-a097-4dbb-a39b-b4dc6e4846d0
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+_core:
+  default_config_hash: eWVDejPYuEAVz52z32dJ-A-wohGItnGhYOrfTh-zsp0
+template: mukurtu_new_item_in_collection
+label: 'Mukurtu New Item in Collection'
+description: 'A new item has been added to a collection.'
+text:
+  -
+    value: "<p>[message:field_item:entity:field_content_type] item&nbsp;<a href=\"[message:field_item:entity:url]\">[message:field_item:entity:title]</a> has been added to <a href=\"[message:field_collection:entity:url]\">[message:field_collection:entity:title]</a>.</p>\r\n"
+    format: full_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

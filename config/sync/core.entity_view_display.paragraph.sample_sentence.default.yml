@@ -1,0 +1,31 @@
+uuid: 0fa8b919-db9c-4aaf-9883-ef2a94c6d35f
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.sample_sentence
+_core:
+  default_config_hash: igp1jKEhRR4d4gd8kzjP6VbjJDSuViuhhQcvScrFioY
+id: paragraph.sample_sentence.default
+targetEntityType: paragraph
+bundle: sample_sentence
+mode: default
+content:
+  field_sentence:
+    type: basic_string
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_sentence_recording:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+hidden:
+  search_api_excerpt: true

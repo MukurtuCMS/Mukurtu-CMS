@@ -1,0 +1,12 @@
+uuid: 7be139af-3c71-49b5-a6ea-dba2ea077d6a
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_collection
+_core:
+  default_config_hash: 9PxyyPfS4Igs_arGPPL0wTG6EzjIKfH7NX0B6mg5kBY
+id: personal_collection.full
+label: 'Full content'
+targetEntityType: personal_collection
+cache: true

@@ -1,0 +1,23 @@
+uuid: 5efdcddb-563c-41b2-b4d3-de719f210202
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_mukurtu_cluster_long
+    - node.type.page
+id: node.page.field_mukurtu_cluster_long
+field_name: field_mukurtu_cluster_long
+entity_type: node
+bundle: page
+label: 'Mukurtu Coverage - Cluster Longitude'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float

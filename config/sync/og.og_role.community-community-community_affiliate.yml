@@ -1,0 +1,17 @@
+uuid: 21b7d3fd-f2a3-4e47-bf11-8166558d4f44
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+_core:
+  default_config_hash: QKVV7f1MHUCGav0eJYRsji-QerEYSyHzplx_j3yyP3Y
+id: community-community-community_affiliate
+label: 'Community Affiliate'
+weight: 17
+is_admin: null
+group_type: community
+group_bundle: community
+group_id: null
+permissions: {  }
+role_type: standard

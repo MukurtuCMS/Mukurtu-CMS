@@ -1,0 +1,31 @@
+uuid: 9d3340bc-a029-4921-ad38-5f5e963c441d
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.mukurtu_categories
+  module:
+    - system
+    - views
+  theme:
+    - stable9
+_core:
+  default_config_hash: OAfTF5ajroUfciL72hMU7z8LAG_9GehKsIYMRu9DS78
+id: stable9_views_block__mukurtu_categories_browse_by_category_block
+theme: stable9
+region: content
+weight: 11
+provider: null
+plugin: 'views_block:mukurtu_categories-browse_by_category_block'
+settings:
+  id: 'views_block:mukurtu_categories-browse_by_category_block'
+  label: ''
+  label_display: visible
+  provider: views
+  views_label: ''
+  items_per_page: '20'
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: '<front>'

@@ -1,0 +1,24 @@
+uuid: fe38d9c2-3d1b-425e-9d53-7a8556c4ecf1
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.design_settings
+    - field.field.config_pages.design_settings.field_design_settings__palette
+  module:
+    - mukurtu_design
+_core:
+  default_config_hash: RGRpJ5Psjn4q6VM7SExGSyPKNm6as8MTbSXDPWzNdu8
+id: config_pages.design_settings.default
+targetEntityType: config_pages
+bundle: design_settings
+mode: default
+content:
+  field_design_settings__palette:
+    type: mukurtu_palette_select
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  label: true

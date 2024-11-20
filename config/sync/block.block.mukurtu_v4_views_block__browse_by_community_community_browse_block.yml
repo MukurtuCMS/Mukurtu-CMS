@@ -1,0 +1,31 @@
+uuid: d1880c91-dc37-4c54-abdb-9a79ac4d2b9f
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.browse_by_community
+  module:
+    - system
+    - views
+  theme:
+    - mukurtu_v4
+_core:
+  default_config_hash: TFUtOjLhjM2YQbA612C1pcd-WbkghyQiXLv9c8Rdj_g
+id: mukurtu_v4_views_block__browse_by_community_community_browse_block
+theme: mukurtu_v4
+region: content
+weight: 10
+provider: null
+plugin: 'views_block:browse_by_community-community_browse_block'
+settings:
+  id: 'views_block:browse_by_community-community_browse_block'
+  label: ''
+  label_display: visible
+  provider: views
+  views_label: ''
+  items_per_page: none
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: '<front>'

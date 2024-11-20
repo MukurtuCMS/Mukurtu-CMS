@@ -1,0 +1,18 @@
+uuid: e8b61892-06ba-4dee-beb6-3e44aca74391
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_core
+_core:
+  default_config_hash: Vw98S7h5QaYQA0FxluxtpYNBP8FiwGq8raEko2tzkAo
+id: external_embed
+label: 'External Embed'
+description: 'An embed code from a remote website.'
+source: external_embed
+queue_thumbnail_downloads: false
+new_revision: true
+source_configuration:
+  source_field: field_media_external_embed
+field_map:
+  name: name

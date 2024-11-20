@@ -1,0 +1,12 @@
+uuid: 62ce395e-731a-47ff-8b8a-7d6041906496
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+_core:
+  default_config_hash: VKmN6nJQXtGIhWvE4vYmV4Mb-TggjAuMCegbBsDalwo
+id: media.digital_heritage_sidebar
+label: 'Medium (480px)'
+targetEntityType: media
+cache: true
