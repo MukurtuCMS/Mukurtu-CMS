@@ -1,4 +1,0 @@
-text:
-  -
-    value: "<p>New user registration: <a href=\"[message:field_user:entity:url]\">[message:field_user:entity:field_display_name] ([message:field_user:entity:account-name])</a> has requested an account and requires action.</p>\r\n"
-    format: full_html

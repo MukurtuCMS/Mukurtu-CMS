@@ -1,4 +1,0 @@
-text:
-  -
-    value: "<p>[message:field_content_type] item&nbsp;<em>[message:field_title]</em> was deleted.</p>\r\n"
-    format: basic_html
