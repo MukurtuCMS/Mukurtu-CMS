@@ -63,6 +63,8 @@ mukurtu_protocol.community_add_protocol:
     _title_callback: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::getTitle'
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::access'
+  options:
+    _admin_route: 'TRUE'
 
 
 mukurtu_protocol.manage_community:
