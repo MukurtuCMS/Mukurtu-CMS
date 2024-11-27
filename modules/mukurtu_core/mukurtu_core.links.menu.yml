@@ -77,5 +77,5 @@ mukurtu_core.account_create_content:
   menu_name: account
   description: 'Create content'
   route_name: mukurtu_core.add_page
-  weight: 0
+  weight: 10
   expanded: TRUE
