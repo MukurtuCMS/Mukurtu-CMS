@@ -7,7 +7,8 @@ services:
     commands:
       init:
         # Install dependencies for PHP extensions.
-        - apt update && apt install -y libzip-dev libpng-dev libjpeg-dev libfreetype6-dev
+        # Add poppler-utils for the pdftotext executable.
+        - apt update && apt install -y libzip-dev libpng-dev libjpeg-dev libfreetype6-dev poppler-utils
 
         # Add JPEG and FreeType support to GD.
         - docker-php-ext-configure gd --with-jpeg --with-freetype
@@ -51,6 +52,11 @@ services:
           chown -R www-data:www-data sites/default/files
           find sites/default/files -type d -exec chmod 2775 {} \;
           find sites/default/files -type f -exec chmod 0664 {} \;
+          cd ~/mukurtu
+          mkdir -p private_files
+          chown -R www-data:www-data private_files
+          find private_files -type d -exec chmod 2775 {} \;
+          find private_files -type f -exec chmod 0664 {} \;
       build:
         - |
           cd ~/mukurtu
