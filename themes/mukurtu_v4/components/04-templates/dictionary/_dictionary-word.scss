@@ -55,6 +55,23 @@
     padding-block-start: var(--v-space-l);
   }
 
+  .additional-fields {
+    &::before {
+      content: "Additional Information";
+      display: block;
+      font-size: var(--font-size-m);
+      font-weight: var(--text-bold);
+      color: var(--brand-text-color);
+      margin-block-end: var(--v-space-xs);
+    }
+  }
+
+  .field--name-field-recording {
+    .media--audio {
+      align-items: flex-start;
+    }
+  }
+
 }
 
 // The individual word teaser display used on /dictionary.
