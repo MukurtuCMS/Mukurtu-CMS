@@ -19,7 +19,7 @@
       padding-block: var(--v-space-2xs);
       padding-inline: var(--v-space-xs) var(--v-space-2xs);
       margin-block-start: 0;
-      margin-block-end: var(--v-space-2xs);
+      margin-block-end: var(--v-space-s);
 
       &::after {
         content: "";
@@ -36,13 +36,17 @@
       }
     }
 
+    .field--name-field-word-entry-term {
+      margin-block-start: var(--v-space-xs);
+    }
+
     .field--name-title + div.field {
       border-block-start: 0;
       padding-block-start: 0;
     }
   }
 
-  .additional-word-entries,
+  .field--name-field-additional-word-entries > .field__item,
   .additional-fields {
     @include divider;
 
