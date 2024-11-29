@@ -15,8 +15,10 @@
 
   }
 
-  .category-card { //views-row
-
+  // Individual cards layout.
+  .category-card .category-teaser a { //views-row
+    display: flex;
+    flex-direction: column;
   }
 }
 
