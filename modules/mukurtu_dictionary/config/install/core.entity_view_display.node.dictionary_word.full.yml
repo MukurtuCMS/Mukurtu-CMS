@@ -127,7 +127,7 @@ third_party_settings:
         - field_location
         - field_coverage_description
         - field_citation
-      label: 'Additional Fields'
+      label: 'Additional Information'
       parent_name: group_primary_fields
       region: content
       weight: 34
@@ -139,8 +139,8 @@ third_party_settings:
         label_as_html: false
         element: div
         show_label: false
-        label_element: h3
-        label_element_classes: ''
+        label_element: div
+        label_element_classes: field__label
         attributes: ''
         effect: none
         speed: fast
@@ -151,7 +151,7 @@ mode: full
 content:
   field_additional_word_entries:
     type: entity_reference_revisions_entity_view
-    label: above
+    label: hidden
     settings:
       view_mode: default
       link: ''
@@ -361,10 +361,11 @@ content:
     weight: 7
     region: content
   field_recording:
-    type: entity_reference_label
+    type: entity_reference_entity_view
     label: above
     settings:
-      link: true
+      view_mode: audio_for_dictionary_teaser
+      link: false
     third_party_settings: {  }
     weight: 3
     region: content

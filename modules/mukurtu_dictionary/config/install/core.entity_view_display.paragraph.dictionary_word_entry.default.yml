@@ -1,3 +1,4 @@
+uuid: c7949f3b-c6ff-4eae-9f0d-a9b95e8bb79c
 langcode: en
 status: true
 dependencies:
@@ -6,6 +7,8 @@ dependencies:
   module:
     - entity_reference_revisions
     - text
+_core:
+  default_config_hash: zTSx2aHkemfL-FXshQRKEo9fVAzLNsBr0RKnC4ZT_VY
 id: paragraph.dictionary_word_entry.default
 targetEntityType: paragraph
 bundle: dictionary_word_entry
@@ -17,7 +20,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 2
+    weight: 1
     region: content
   field_contributor:
     type: entity_reference_label
@@ -81,11 +84,11 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 1
+    weight: 2
     region: content
   field_word_entry_term:
     type: string
-    label: visually_hidden
+    label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }
