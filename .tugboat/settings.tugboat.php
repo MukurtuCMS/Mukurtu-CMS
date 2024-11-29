@@ -29,3 +29,9 @@ $settings['trusted_host_patterns'] = [
 
 // Prevent Drupal from setting read-only permissions on sites/default.
 $settings['skip_permissions_hardening'] = TRUE;
+
+// Specify a private files path.
+$settings['file_private_path'] = '../private_files';
+
+// Specify a config directory.
+$settings['config_sync_directory'] = 'sites/default/files/sync';

@@ -6,15 +6,15 @@
  or your current system user. See core/tests/README.md and
  https://www.drupal.org/node/2116263 for details.
 -->
-<phpunit bootstrap="core/tests/bootstrap.php" colors="true"
+<phpunit bootstrap="web/core/tests/bootstrap.php" colors="true"
          beStrictAboutTestsThatDoNotTestAnything="true"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutChangesToGlobalState="true"
          failOnWarning="true"
          printerClass="\Drupal\Tests\Listeners\HtmlOutputPrinter"
-	cacheResult="false"
-	verbose="true"
-	>
+         cacheResult="false"
+         verbose="true"
+>
   <php>
     <!-- Set error reporting to E_ALL. -->
     <ini name="error_reporting" value="32767"/>
@@ -42,22 +42,25 @@
   </php>
   <testsuites>
     <testsuite name="kernel">
-      <directory>./profiles/mukurtu-cms/modules/mukurtu_protocol/tests/src/Kernel</directory>
+      <directory>web/profiles/contrib/mukurtu-cms/modules/mukurtu_protocol/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>./profiles/mukurtu-cms/modules/mukurtu_collection/tests/src/Kernel</directory>
+      <directory>web/profiles/contrib/mukurtu-cms/modules/mukurtu_collection/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>./profiles/mukurtu-cms/modules/mukurtu_import/tests/src/Kernel</directory>
+      <directory>web/profiles/contrib/mukurtu-cms/modules/mukurtu_import/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>./profiles/mukurtu-cms/modules/mukurtu_export/tests/src/Kernel</directory>
+      <directory>web/profiles/contrib/mukurtu-cms/modules/mukurtu_export/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>./profiles/mukurtu-cms/modules/mukurtu_drafts/tests/src/Kernel</directory>
+      <directory>web/profiles/contrib/mukurtu-cms/modules/mukurtu_drafts/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
+      <directory>web/profiles/contrib/mukurtu-cms/modules/original_date/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="functional">
-      <directory>./profiles/mukurtu-cms/modules/mukurtu_protocol/tests/src/Functional</directory>
+      <directory>web/profiles/contrib/mukurtu-cms/modules/mukurtu_protocol/tests/src/Functional</directory>
     </testsuite>
   </testsuites>
   <listeners>
@@ -83,6 +86,6 @@
         <directory>../modules/*/*/tests</directory>
       </exclude>
       <directory>../sites</directory>
-     </whitelist>
+    </whitelist>
   </filter>
 </phpunit>

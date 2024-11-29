@@ -26,11 +26,6 @@ jobs:
         ports:
           - 3306:3306
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          path: web/profiles/mukurtu-cms
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -54,15 +49,27 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
+      # Install the mukurtu-template into the root, then remove the packaged
+      # version of mukurtu-cms, which will be replaced by the git checkout.
+      - name: Install Mukurtu Template
+        run: |
+          composer create mukurtu/mukurtu-template:dev-main . --no-install --no-interaction
+          rm web/profiles/contrib/mukurtu-cms -rf
+
+      # Usually checkout is the first action, but we set up the mukurtu-template
+      # first, then put the checkout inside of it.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: web/profiles/contrib/mukurtu-cms
+
       - name: Install Mukurtu
         run: |
-          cp ./web/profiles/mukurtu-cms/phpunit.xml ./web/phpunit.xml
-          cp ./web/profiles/mukurtu-cms/mukurtu-gitpod-site.composer.json composer.json
-          composer require --dev phpspec/prophecy-phpunit:^2
-          composer --no-interaction --no-progress --prefer-dist --optimize-autoloader install
+          composer config repositories.local-dev path web/profiles/contrib/mukurtu-cms
+          composer install --no-interaction --optimize-autoloader
+          cp ./web/profiles/contrib/mukurtu-cms/phpunit.xml ./phpunit.xml
 
       - name: Mukurtu Tests
         run: |
-          cd ./web
-          ../vendor/bin/phpunit --verbose --testsuite "${{ matrix.test-suite }}"
+          ./vendor/bin/phpunit --verbose --testsuite "${{ matrix.test-suite }}"
         continue-on-error: false
