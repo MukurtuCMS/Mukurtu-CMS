@@ -62,6 +62,7 @@ services:
           cd ~/mukurtu
           # Copy in the settings.php file to set the database connection.
           cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
+          chown www-data:www-data web/sites/default/settings.php
           # Update composer dependencies.
           rm composer.lock
           composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
