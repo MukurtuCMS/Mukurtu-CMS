@@ -45,10 +45,10 @@ mukurtu_collection.new_subcollection:
     _title: 'New Subcollection'
     _controller: '\Drupal\mukurtu_collection\Controller\CollectionAddSubcollectionController::newSubcollection'
   options:
+    _admin_route: 'TRUE'
     parameters:
       node:
         type: entity:node
-    _admin_route: 'TRUE'
   requirements:
     _custom_access: '\Drupal\mukurtu_collection\Controller\CollectionAddSubcollectionController::access'
 
