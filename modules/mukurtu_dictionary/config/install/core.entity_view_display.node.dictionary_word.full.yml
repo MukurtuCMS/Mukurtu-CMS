@@ -26,7 +26,6 @@ third_party_settings:
         - field_dictionary_word_language
         - field_glossary_entry
         - field_keywords
-        - field_thumbnail
         - field_in_word_list
         - field_related_content
         - field_local_contexts_projects
@@ -394,14 +393,6 @@ content:
     third_party_settings: {  }
     weight: 8
     region: content
-  field_thumbnail:
-    type: entity_reference_label
-    label: hidden
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 29
-    region: content
   field_title:
     settings: {  }
     third_party_settings: {  }
@@ -450,6 +441,7 @@ hidden:
   field_protocol_control: true
   field_representative_media: true
   field_sequence_collection: true
+  field_thumbnail: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true
