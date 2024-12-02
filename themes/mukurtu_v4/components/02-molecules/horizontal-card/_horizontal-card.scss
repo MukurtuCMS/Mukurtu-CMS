@@ -6,7 +6,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--v-space-2xs);
-
+  border-block-end: 5px solid var(--mukurtu-view-row-divider-color);
 
   @include media('>=md') {
     grid-template-columns: var(--grid-9col);
@@ -59,16 +59,6 @@
   &__content-body {
     margin-block-start: var(--v-space-3xs);
     line-height: var(--line-height-m);
-
-    .tag {
-      border: 3px solid var(--mukurtu-view-row-divider-color);
-      padding: 0 var(--v-space-6xs);
-      border-radius: 2px;
-      font-size: var(--font-size-xs);
-      display: inline-block;
-      margin-bottom: var(--v-space-4xs);
-      line-height: var(--line-height-s);
-    }
 
     .field--type-entity-reference {
       display: flex;

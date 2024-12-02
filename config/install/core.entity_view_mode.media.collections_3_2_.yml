@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+id: media.collections_3_2_
+label: 'Collections (3:2)'
+targetEntityType: media
+cache: true
