@@ -1,9 +1,13 @@
+uuid: 876fb5f8-4e44-47aa-b941-8b3fe3ef73ca
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.node.full
     - field.field.node.dictionary_word.comment
+    - field.field.node.dictionary_word.field_mukurtu_cluster_lat
+    - field.field.node.dictionary_word.field_mukurtu_cluster_long
+    - field.field.node.dictionary_word.field_mukurtu_geojson
     - node.type.dictionary_word
   module:
     - entity_reference_revisions
@@ -27,7 +31,6 @@ third_party_settings:
         - field_glossary_entry
         - field_keywords
         - field_in_word_list
-        - field_related_content
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
       label: Metadata
@@ -126,6 +129,7 @@ third_party_settings:
         - field_location
         - field_coverage_description
         - field_citation
+        - field_related_content
       label: 'Additional Information'
       parent_name: group_primary_fields
       region: content
@@ -143,6 +147,8 @@ third_party_settings:
         attributes: ''
         effect: none
         speed: fast
+_core:
+  default_config_hash: UTDifEyIUoG-wrdYcCjk65DWOO9jgKLZt8N9u3LSzVY
 id: node.dictionary_word.full
 targetEntityType: node
 bundle: dictionary_word
@@ -187,7 +193,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 23
+    weight: 32
     region: content
   field_contributor:
     type: entity_reference_label
@@ -280,7 +286,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 24
+    weight: 33
     region: content
   field_definition:
     type: basic_string
@@ -295,7 +301,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 25
+    weight: 34
     region: content
   field_glossary_entry:
     type: string
@@ -303,7 +309,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 27
+    weight: 35
     region: content
   field_in_word_list:
     type: entity_reference_label
@@ -311,7 +317,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 30
+    weight: 37
     region: content
   field_keywords:
     type: entity_reference_label
@@ -319,21 +325,21 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 28
+    weight: 36
     region: content
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 33
+    weight: 39
     region: content
   field_local_contexts_projects:
     type: local_contexts_project
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 32
+    weight: 38
     region: content
   field_location:
     type: entity_reference_label
@@ -369,12 +375,13 @@ content:
     weight: 3
     region: content
   field_related_content:
-    type: entity_reference_label
+    type: entity_reference_entity_view
     label: above
     settings:
-      link: true
+      view_mode: browse
+      link: false
     third_party_settings: {  }
-    weight: 31
+    weight: 39
     region: content
   field_sample_sentences:
     type: entity_reference_revisions_entity_view
@@ -437,6 +444,9 @@ hidden:
   field_all_related_content: true
   field_content_type: true
   field_in_collection: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
   field_multipage_page_of: true
   field_protocol_control: true
   field_representative_media: true

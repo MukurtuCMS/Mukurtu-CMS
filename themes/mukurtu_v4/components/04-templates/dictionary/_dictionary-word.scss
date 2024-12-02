@@ -66,6 +66,12 @@
     }
   }
 
+  .field--name-field-related-content {
+    padding-block-start: var(--v-space-2xs);
+    margin-block-start: var(--v-space-2xs);
+    border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
+  }
+
   .field--name-field-recording {
     .media--audio {
       align-items: flex-start;
