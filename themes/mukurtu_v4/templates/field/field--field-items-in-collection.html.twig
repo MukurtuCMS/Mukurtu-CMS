@@ -36,24 +36,18 @@
  * @see template_preprocess_field()
  */
 #}
-{%
-  set title_classes = [
-    label_display == 'visually_hidden' ? 'visually-hidden',
-  ]
-%}
 
 {% set attributes = attributes
-  .addClass(classes, 'collection__items')
+  .addClass('grid')
 %}
 
-{% if label %}
-  <div class="collection__items__label">{{ label }}</div>
-{% endif %}
+<div class="collection__items__label">
+  {{ 'Content in Collection'|t }}
+</div>
+
 <div{{ attributes }}>
   {% for item in items %}
-    <div class="masonry-grid-item">
-      {{ item.content }}
-    </div>
+    {{ item.content }}
   {% endfor %}
 </div>
 
