@@ -1,0 +1,15 @@
+uuid: 91300bdc-2165-44c5-90c1-d2c56633b805
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.export_media
+  module:
+    - flag
+id: flag_action.export_media_flag
+label: 'Add to export list'
+type: media
+plugin: 'flag_action:export_media_flag'
+configuration:
+  flag_id: export_media
+  flag_action: flag

@@ -1,0 +1,51 @@
+uuid: 55caf20a-f92b-4838-8228-8d246b3ef45b
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
+_core:
+  default_config_hash: jwQs2gDVzmMcRLOyaqBlDbIHy6i2Ug8IBH6-jrOuGt4
+id: mukurtu_cms_v3_multipage_item
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: 'Multipage Item'
+source:
+  plugin: d7_multipage_item
+process:
+  uid:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
+    source: uid
+  title: title
+  field_pages:
+    plugin: sub_process
+    source: field_pages
+    process:
+      target_id:
+        plugin: migration_lookup
+        migration:
+          - mukurtu_cms_v3_digital_heritage
+        source: target_id
+  status: status
+  created: created
+  changed: changed
+destination:
+  plugin: 'entity:multipage_item'
+  default_bundle: multipage_item
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
+    - mukurtu_cms_v3_communities
+    - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_digital_heritage
+  optional:
+    - d7_field_instance

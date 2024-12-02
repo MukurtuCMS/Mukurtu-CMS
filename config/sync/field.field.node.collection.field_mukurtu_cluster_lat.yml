@@ -1,0 +1,23 @@
+uuid: 8bbb7c5f-1369-4147-80b0-0858a41909d8
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_mukurtu_cluster_lat
+    - node.type.collection
+id: node.collection.field_mukurtu_cluster_lat
+field_name: field_mukurtu_cluster_lat
+entity_type: node
+bundle: collection
+label: 'Mukurtu Coverage - Cluster Latitude'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float

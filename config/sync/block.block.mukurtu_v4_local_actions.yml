@@ -1,0 +1,26 @@
+uuid: d7cc81f3-1269-431c-a8db-1a8fa08af3ac
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - mukurtu_v4
+_core:
+  default_config_hash: pphqTIKvUHDns6KVm70WCeu6LzAMz7Jwkl8M4ybex3g
+id: mukurtu_v4_local_actions
+theme: mukurtu_v4
+region: content
+weight: 13
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Primary admin actions'
+  label_display: '0'
+  provider: core
+visibility:
+  request_path:
+    id: request_path
+    negate: true
+    pages: /collections

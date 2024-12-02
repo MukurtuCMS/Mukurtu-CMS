@@ -1,0 +1,12 @@
+uuid: f6dcfd00-c8c5-4c1e-8d62-1d7009395f46
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: UUj3_FRR5MBz2G9pVbRy0mi9koayi_RAYUooOqJT-AQ
+id: formatted_text_with_title
+label: 'Formatted Text with Title'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

@@ -1,0 +1,41 @@
+uuid: 42db3df5-7727-46c3-8ebb-a0f224125bec
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+_core:
+  default_config_hash: pCggE5lhzex5Z2Jv32R0qlAjt957NHHTie-FeXpO8eA
+id: protocol-protocol-contributor
+label: Contributor
+weight: 8
+is_admin: null
+group_type: protocol
+group_bundle: protocol
+group_id: null
+permissions:
+  - 'create audio media'
+  - 'create digital_heritage content'
+  - 'create document media'
+  - 'create external_embed media'
+  - 'create image media'
+  - 'create person content'
+  - 'create remote_video media'
+  - 'create video media'
+  - 'delete own audio media'
+  - 'delete own digital_heritage content'
+  - 'delete own document media'
+  - 'delete own external_embed media'
+  - 'delete own image media'
+  - 'delete own person content'
+  - 'delete own remote_video media'
+  - 'delete own video media'
+  - 'edit own digital_heritage content'
+  - 'edit own person content'
+  - 'update own audio media'
+  - 'update own document media'
+  - 'update own external_embed media'
+  - 'update own image media'
+  - 'update own remote_video media'
+  - 'update own video media'
+role_type: standard

@@ -1,0 +1,104 @@
+uuid: 06871381-eed4-4cb0-b42a-effaa86c451b
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.content_browser
+    - field.field.node.dictionary_word.comment
+    - field.field.node.dictionary_word.field_mukurtu_cluster_lat
+    - field.field.node.dictionary_word.field_mukurtu_cluster_long
+    - field.field.node.dictionary_word.field_mukurtu_geojson
+    - image.style.media_library
+    - node.type.dictionary_word
+  module:
+    - layout_builder
+    - media
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: _HI5QOBYWfOGEmmLBrnmMu-tGDl9zCvwZdhXMDW1xcc
+id: node.dictionary_word.content_browser
+targetEntityType: node
+bundle: dictionary_word
+mode: content_browser
+content:
+  field_content_type:
+    type: string
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_thumbnail:
+    type: media_thumbnail
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: media_library
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_word_entry:
+    type: entity_reference_revisions_label
+    label: visually_hidden
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+hidden:
+  comment: true
+  draft: true
+  field_additional_word_entries: true
+  field_all_related_content: true
+  field_alternate_spelling: true
+  field_citation: true
+  field_communities: true
+  field_contributor: true
+  field_coverage: true
+  field_coverage_description: true
+  field_cultural_protocols: true
+  field_definition: true
+  field_dictionary_word_language: true
+  field_glossary_entry: true
+  field_in_collection: true
+  field_in_word_list: true
+  field_keywords: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
+  field_location: true
+  field_media_assets: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_multipage_page_of: true
+  field_pronunciation: true
+  field_protocol_control: true
+  field_recording: true
+  field_related_content: true
+  field_representative_media: true
+  field_sample_sentences: true
+  field_sequence_collection: true
+  field_source: true
+  field_title: true
+  field_translation: true
+  field_word_origin: true
+  field_word_type: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_email_node: true
+  flag_mukurtu_email_og: true
+  flag_mukurtu_follow_content: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

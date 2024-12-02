@@ -1,0 +1,16 @@
+uuid: 6a4d0206-5cd5-48df-970a-1aef5a48aa5e
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
+_core:
+  default_config_hash: FX-TDrYfrbpaROtDvjCtOm1kHc7tzdxaPpTu0Zxn41I
+id: mukurtu_cms_v3
+label: 'Mukurtu CMS v3'
+description: 'Migrate site data from Mukurtu CMS version 3 to version 4.'
+source_type: 'Mukurtu CMS version 3 (Drupal 7)'
+module: null
+shared_configuration:
+  source: null

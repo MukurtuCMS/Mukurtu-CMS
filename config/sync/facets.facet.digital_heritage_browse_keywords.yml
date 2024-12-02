@@ -1,0 +1,66 @@
+uuid: 7ecb44db-a217-429e-b1e7-a6bee4de0ee5
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: MEjtk5vkqTtj8ksO8mYg-fy9wuadvPQ3Nd2s-dFZ-vM
+id: digital_heritage_browse_keywords
+name: Keywords
+url_alias: keywords_taxonomy_term_name
+weight: 0
+min_count: 1
+missing: false
+missing_label: others
+show_only_one_result: false
+field_identifier: name_1
+facet_source_id: 'search_api:views_block__mukurtu_digital_heritage_browse__mukurtu_digital_heritage_browse_block'
+widget:
+  type: checkbox
+  config:
+    show_numbers: true
+    soft_limit: 0
+    show_reset_link: false
+    reset_text: 'Show all'
+    hide_reset_when_no_selection: false
+    soft_limit_settings:
+      show_less_label: 'Show less'
+      show_more_label: 'Show more'
+query_operator: or
+use_hierarchy: false
+keep_hierarchy_parents_active: false
+hierarchy:
+  type: taxonomy
+  config: {  }
+expand_hierarchy: false
+enable_parent_when_child_gets_disabled: true
+hard_limit: 0
+exclude: false
+only_visible_when_facet_source_is_visible: false
+processor_configs:
+  active_widget_order:
+    processor_id: active_widget_order
+    weights:
+      sort: 20
+    settings:
+      sort: DESC
+  count_widget_order:
+    processor_id: count_widget_order
+    weights:
+      sort: 30
+    settings:
+      sort: DESC
+  display_value_widget_order:
+    processor_id: display_value_widget_order
+    weights:
+      sort: 40
+    settings:
+      sort: ASC
+  url_processor_handler:
+    processor_id: url_processor_handler
+    weights:
+      pre_query: 50
+      build: 15
+    settings: {  }
+empty_behavior:
+  behavior: none
+show_title: true

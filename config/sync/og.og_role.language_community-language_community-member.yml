@@ -1,0 +1,15 @@
+uuid: bb1835e1-7243-4082-8274-5d9a9d75b279
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_dictionary
+id: language_community-language_community-member
+label: Member
+weight: 19
+group_id: null
+group_type: language_community
+group_bundle: language_community
+is_admin: null
+permissions: {  }
+role_type: required

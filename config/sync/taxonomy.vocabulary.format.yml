@@ -1,0 +1,10 @@
+uuid: eb11782b-06aa-4e01-950e-e631c1a3e8ae
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: ATQw-po_m0PrOR575KQyoz63FMnr_fA9pSCZ8NG8Nn0
+name: Format
+vid: format
+description: ''
+weight: 0

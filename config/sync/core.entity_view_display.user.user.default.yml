@@ -1,0 +1,56 @@
+uuid: 87aa9f6f-472e-478f-9fde-ce001e7b3c1f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.user.user.field_display_name
+    - field.field.user.user.message_digest
+    - field.field.user.user.message_subscribe_email
+    - field.field.user.user.user_picture
+    - image.style.media_library
+  module:
+    - image
+    - user
+_core:
+  default_config_hash: 0jTpSecPJA-vOBT7vhph7IHg-yL5bFt1fmojM_BTgX4
+id: user.user.default
+targetEntityType: user
+bundle: user
+mode: default
+content:
+  field_display_name:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  flag_email_user:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_user:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  user_picture:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: media_library
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  field_communities: true
+  langcode: true
+  member_for: true
+  message_digest: true
+  message_subscribe_email: true
+  search_api_excerpt: true

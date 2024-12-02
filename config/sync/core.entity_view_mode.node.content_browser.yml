@@ -1,0 +1,12 @@
+uuid: a23a2b00-6686-48f5-b978-affccbc629cd
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: _Kx2WbtfwyU-1aUI5S1Xx_KyL3mOPvkE3VEzn85aIpU
+id: node.content_browser
+label: 'Content Browser'
+targetEntityType: node
+cache: true

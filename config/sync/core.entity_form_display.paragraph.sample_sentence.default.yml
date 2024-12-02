@@ -1,0 +1,33 @@
+uuid: 069323cd-ea42-488a-84d2-3615fe48c250
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.sample_sentence
+  module:
+    - media_library
+_core:
+  default_config_hash: IRLXF-Q3be7cW7whUmiNXYVzruksWzXc74oXJjPVYyk
+id: paragraph.sample_sentence.default
+targetEntityType: paragraph
+bundle: sample_sentence
+mode: default
+content:
+  field_sentence:
+    type: string_textarea
+    weight: 0
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_sentence_recording:
+    type: media_library_widget
+    weight: 1
+    region: content
+    settings:
+      media_types: {  }
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

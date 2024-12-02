@@ -1,0 +1,20 @@
+uuid: a9337759-e6f2-4664-91b8-731b5b9d78bc
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+_core:
+  default_config_hash: 6ibvrLhTU052JiRNnByIIGdjQPJWGZVTFHJtPRjrgps
+name: Person
+type: person
+description: 'Add detailed information about a specific person.'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: false

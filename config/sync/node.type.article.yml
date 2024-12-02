@@ -1,0 +1,20 @@
+uuid: 5efcf56d-819d-44f2-a7f8-4a6dc59191c5
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+_core:
+  default_config_hash: puk8OHJikuC43Dvmywy91GTFECbtmXfw82LPugTB9Yc
+name: Article
+type: article
+description: 'Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: false

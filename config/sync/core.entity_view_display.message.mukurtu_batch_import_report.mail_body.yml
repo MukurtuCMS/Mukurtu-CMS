@@ -1,0 +1,23 @@
+uuid: b7cdbcc0-f939-4304-bf28-a2fd948264e8
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_body
+    - message.template.mukurtu_batch_import_report
+  module:
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: message.mukurtu_batch_import_report.mail_body
+targetEntityType: message
+bundle: mukurtu_batch_import_report
+mode: mail_body
+content:
+  partial_1:
+    weight: 0
+    region: content
+hidden:
+  partial_0: true

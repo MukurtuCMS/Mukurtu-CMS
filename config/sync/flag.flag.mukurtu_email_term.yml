@@ -1,0 +1,31 @@
+uuid: bd855f83-8f0b-4040-84fb-867f35aabb52
+langcode: en
+status: false
+dependencies:
+  module:
+    - taxonomy
+_core:
+  default_config_hash: DVmMUnQMUtplaMAN2g2-rh7ttZb8AwJCev3GsR_5uIA
+id: mukurtu_email_term
+label: 'Mukurtu Email terms'
+bundles: {  }
+entity_type: taxonomy_term
+global: false
+weight: -1
+flag_short: 'Send email'
+flag_long: ''
+flag_message: ''
+unflag_short: 'Don''t send email'
+unflag_long: ''
+unflag_message: ''
+unflag_denied_text: ''
+flag_type: 'entity:taxonomy_term'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links:
+    full: full
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  extra_permissions: {  }
+linkTypeConfig: {  }

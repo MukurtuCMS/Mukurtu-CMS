@@ -1,0 +1,22 @@
+uuid: 6da156af-b0b5-41d4-a60e-169e6a690f8c
+langcode: en
+status: true
+dependencies:
+  module:
+    - comment
+    - contact
+    - media
+    - mukurtu_protocol
+    - system
+_core:
+  default_config_hash: _3l-jBbnoScgnEG1mFT2mG2s6pBgNbowY60NidewWbM
+id: anonymous
+label: 'Anonymous user'
+weight: 0
+is_admin: false
+permissions:
+  - 'access comments'
+  - 'access content'
+  - 'access site-wide contact form'
+  - 'view media'
+  - 'view published community entities'

@@ -1,0 +1,12 @@
+uuid: 75420cbc-da31-4bdc-87e3-56b54dfbacb9
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: 3TnlS3XLG6-nuba1TbjX9GwekECS5PN_q86cNj7e6aA
+id: node.search_preview
+label: 'Search preview'
+targetEntityType: node
+cache: true

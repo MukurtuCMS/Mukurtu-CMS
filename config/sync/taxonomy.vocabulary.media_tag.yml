@@ -1,0 +1,10 @@
+uuid: 141268df-617d-4ded-bde7-7f0f42e7205d
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: ApwtPdlmOZMh3ITkUYlBeQsb_pTlK3VmWJJJ5FNlbck
+name: 'Media Tag'
+vid: media_tag
+description: 'Media tag vocabulary'
+weight: 0

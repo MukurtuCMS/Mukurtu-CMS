@@ -1,0 +1,4 @@
+text:
+  -
+    value: "<p>[message:field_item:entity:field_content_type] item&nbsp;<a href=\"[message:field_item:entity:url]\">[message:field_item:entity:title]</a> has been added to <a href=\"[message:field_community:entity:url]\">[message:field_community:entity:title]</a>.</p>\r\n"
+    format: full_html

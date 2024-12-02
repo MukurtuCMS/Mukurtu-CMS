@@ -1,0 +1,20 @@
+uuid: 3a555980-fc29-4511-bee3-68741e1b2318
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: JDiTKPdEdyENEeM_9kTJRxOAXCKJw4rJxBP_U9lYg2k
+id: node.field_mukurtu_cluster_lat
+field_name: field_mukurtu_cluster_lat
+entity_type: node
+type: float
+settings: {  }
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

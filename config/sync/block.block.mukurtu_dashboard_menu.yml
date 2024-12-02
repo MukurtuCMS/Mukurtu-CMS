@@ -1,0 +1,31 @@
+uuid: 15a4eaf2-b872-4904-bb0f-bb6ccb50632e
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.mukurtu
+  module:
+    - system
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: mWRuLMnTOogeOTP6r3BsJxVZUgtscX3ilTmiI78EdAE
+id: mukurtu_dashboard_menu
+theme: mukurtu_bartik
+region: sidebar_first
+weight: 0
+provider: null
+plugin: 'system_menu_block:mukurtu'
+settings:
+  id: 'system_menu_block:mukurtu'
+  label: Mukurtu
+  label_display: visible
+  provider: system
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: "/dashboard\r\n/dashboard/*"

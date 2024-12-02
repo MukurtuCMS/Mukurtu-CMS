@@ -1,0 +1,20 @@
+uuid: fd614ec1-6c60-4416-82ac-00c10d6994d9
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.collection
+_core:
+  default_config_hash: 1plbyClaTvfogE-4NQ5CicKbpXRojwym7PEpfPJWkl0
+id: node.collection.title
+field_name: title
+entity_type: node
+bundle: collection
+label: 'Collection name'
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

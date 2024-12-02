@@ -1,0 +1,25 @@
+uuid: 9bb100fd-7030-4664-b9a5-b1a14a15d2e3
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.design_settings
+    - field.storage.config_pages.field_design_settings__palette
+  module:
+    - options
+_core:
+  default_config_hash: rZ38-O5WpD_qVq-00XGR3zRMKSAYRlJMEIGNZzWCPbw
+id: config_pages.design_settings.field_design_settings__palette
+field_name: field_design_settings__palette
+entity_type: config_pages
+bundle: design_settings
+label: 'Design Settings Palette'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: blue-gold
+default_value_callback: ''
+settings: {  }
+field_type: list_string

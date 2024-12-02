@@ -1,0 +1,34 @@
+uuid: fa96ddb0-605f-45c2-a568-1660f32c043a
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.formatted_text_with_title
+  module:
+    - text
+_core:
+  default_config_hash: DdKwteggh1d-wHlTAHXJR6WpEIkikR0iGdlYvlaYlI0
+id: paragraph.formatted_text_with_title.default
+targetEntityType: paragraph
+bundle: formatted_text_with_title
+mode: default
+content:
+  field_body:
+    type: text_textarea
+    weight: 1
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

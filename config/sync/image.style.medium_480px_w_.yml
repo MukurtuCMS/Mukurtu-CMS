@@ -1,0 +1,17 @@
+uuid: ec815396-3beb-4e1c-8418-b2bc495e2a44
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: 7joQmiol62BRpUhqbSxj6OjwUxqJhKQKgQjfP1z2GPM
+name: medium_480px_w_
+label: 'Medium (480px w)'
+effects:
+  2c53ab24-ee4a-430a-9217-e036da04513c:
+    uuid: 2c53ab24-ee4a-430a-9217-e036da04513c
+    id: image_scale
+    weight: 1
+    data:
+      width: 480
+      height: null
+      upscale: false

@@ -1,0 +1,49 @@
+uuid: 20202f44-18b3-4d04-b637-6cde041f486e
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.digital_heritage_sidebar
+    - media.type.video
+  module:
+    - file
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: I0fMjJIM434hqhnii0Q27Gqo48gh_S6vTKrlHZQrBUc
+id: media.video.digital_heritage_sidebar
+targetEntityType: media
+bundle: video
+mode: digital_heritage_sidebar
+content:
+  field_media_video_file:
+    type: file_video
+    label: hidden
+    settings:
+      controls: true
+      autoplay: false
+      loop: false
+      multiple_file_display_type: tags
+      muted: false
+      width: 640
+      height: 480
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_communities: true
+  field_cultural_protocols: true
+  field_identifier: true
+  field_media_tags: true
+  field_people: true
+  field_thumbnail: true
+  flag_export_media: true
+  langcode: true
+  name: true
+  search_api_excerpt: true
+  thumbnail: true
+  uid: true

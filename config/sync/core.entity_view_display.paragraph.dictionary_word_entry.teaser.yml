@@ -1,0 +1,49 @@
+uuid: 9942fb15-9640-42a4-b278-422dffaa8572
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.paragraph.teaser
+    - paragraphs.paragraphs_type.dictionary_word_entry
+  module:
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: VzNMOHV2FwW0GLRMZGEy2wqcq55fr8DPzEuvSS2xV-k
+id: paragraph.dictionary_word_entry.teaser
+targetEntityType: paragraph
+bundle: dictionary_word_entry
+mode: teaser
+content:
+  field_part_of_speech:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_recording:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: audio_for_dictionary_teaser
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  field_alternate_spelling: true
+  field_contributor: true
+  field_definition: true
+  field_pronunciation: true
+  field_sample_sentences: true
+  field_source: true
+  field_translation: true
+  field_word_entry_term: true
+  field_word_origin: true
+  field_word_type: true
+  search_api_excerpt: true

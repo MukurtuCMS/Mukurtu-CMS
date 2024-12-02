@@ -1,0 +1,14 @@
+uuid: 4553cdcb-2e98-436a-9c22-0661ae733fee
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: DUsgvB6xfeXecTN8EnnaMVuXf3K8EjMQfSyeDO0KC7E
+id: mukurtu_cultural_protocol_pattern
+label: 'Mukurtu Cultural Protocol Pattern'
+type: 'canonical_entities:protocol'
+pattern: 'protocols/[protocol:name]'
+selection_criteria: {  }
+selection_logic: and
+weight: 0
+relationships: {  }

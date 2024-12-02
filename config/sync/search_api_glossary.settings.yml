@@ -1,0 +1,6 @@
+_core:
+  default_config_hash: L18BPOHORloC3d-5-48DvAqyE2VOBv5SJ3apWhdifeE
+group_prefix:
+  alpha: A-Z
+  numeric: 0-9
+  special: '#'

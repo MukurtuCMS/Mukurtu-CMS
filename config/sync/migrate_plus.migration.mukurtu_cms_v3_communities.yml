@@ -1,0 +1,43 @@
+uuid: 6ed3d8ad-bbdd-4306-8d7c-2061f2063244
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
+_core:
+  default_config_hash: rsuw-EFXJ5XsjttJGtkUw0Qe14cNKxgvgctxIQZ-WT4
+id: mukurtu_cms_v3_communities
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: Communities
+source:
+  plugin: d7_node
+  node_type: community
+process:
+  id: nid
+  langcode: language
+  name: title
+  field_description: body
+  field_access_mode:
+    -
+      plugin: static_map
+      source: group_access
+      map:
+        0: open
+        2: strict
+      default_value: strict
+  status: status
+  mukurtu_migrate:
+    plugin: default_value
+    default_value: true
+destination:
+  plugin: 'entity:community'
+  default_bundle: community
+migration_dependencies:
+  optional:
+    - d7_field_instance

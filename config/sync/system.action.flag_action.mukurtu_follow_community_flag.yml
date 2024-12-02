@@ -1,0 +1,15 @@
+uuid: b9e360d5-9638-491f-ab57-54d2aaaa1e62
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_follow_community
+  module:
+    - flag
+id: flag_action.mukurtu_follow_community_flag
+label: 'Follow this Community'
+type: node
+plugin: 'flag_action:mukurtu_follow_community_flag'
+configuration:
+  flag_id: mukurtu_follow_community
+  flag_action: flag

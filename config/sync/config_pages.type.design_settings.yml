@@ -1,0 +1,19 @@
+uuid: db5a5af6-25c7-4a22-b248-45adacb77303
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: dAXC6beAgXh70qgzls0TQ2XKyHi7Y85q_67b6JCOOOY
+id: design_settings
+label: 'Design Settings'
+context:
+  show_warning: true
+  group:
+    language: false
+  fallback:
+    language: ''
+menu:
+  path: /admin/config/designsettings
+  weight: 0
+  description: 'Switch the color palette of your Mukurtu installation.'
+token: false

@@ -1,0 +1,36 @@
+_core:
+  default_config_hash: aOFgqOw6OGVnuIH52oS59kB6OrFS5krxr7_GnwUGxRw
+admin_css: true
+nojs:
+  lazy: '0'
+  classlist: '0'
+  polyfill: '0'
+  promise: '0'
+  raf: '0'
+fx: ''
+blur_client: false
+blur_storage: false
+blur_minwidth: 0
+noscript: false
+responsive_image: false
+one_pixel: true
+visible_class: false
+wrapper_class: false
+deprecated_class: false
+placeholder: ''
+unstyled_extensions: ''
+use_encodedbox: false
+use_oembed: false
+use_theme_blazy: false
+extras: {  }
+blazy:
+  loadInvisible: false
+  offset: 100
+  saveViewportOffsetDelay: 50
+  validateDelay: 25
+  container: ''
+io:
+  unblazy: false
+  rootMargin: 0px
+  threshold: '0'
+  disconnect: false

@@ -1,0 +1,10 @@
+uuid: 2a055da6-1aea-4c43-a2a9-db03c7da259e
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: PI92LeGRkElROaR7KwbtvKm7I32Q-uI7PDTMRulilac
+name: Subject
+vid: subject
+description: ''
+weight: 0

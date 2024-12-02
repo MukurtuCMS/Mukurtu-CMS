@@ -1,0 +1,23 @@
+uuid: ee7f6f85-ae03-44c2-8471-ecb232940490
+langcode: en
+status: true
+dependencies:
+  module:
+    - message
+_core:
+  default_config_hash: W09Vcz1x4Di8rGCp9B7O6vdVpG1FWKFCruF4oIrt910
+id: message.field_title
+field_name: field_title
+entity_type: message
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

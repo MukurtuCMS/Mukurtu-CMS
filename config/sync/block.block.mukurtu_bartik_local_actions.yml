@@ -1,0 +1,20 @@
+uuid: 89aa0895-fce4-43b8-bf70-ef221a2c976a
+langcode: en
+status: true
+dependencies:
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: USr4IAI1ec8B8hMxUmMH6YFY5lr9Wto7MRfxm3iESZs
+id: mukurtu_bartik_local_actions
+theme: mukurtu_bartik
+region: content
+weight: -20
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Primary admin actions'
+  label_display: '0'
+  provider: core
+visibility: {  }

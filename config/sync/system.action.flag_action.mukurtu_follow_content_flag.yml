@@ -1,0 +1,15 @@
+uuid: dda38a31-6551-4f27-b6e6-40a8d9818e23
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_follow_content
+  module:
+    - flag
+id: flag_action.mukurtu_follow_content_flag
+label: Follow
+type: node
+plugin: 'flag_action:mukurtu_follow_content_flag'
+configuration:
+  flag_id: mukurtu_follow_content
+  flag_action: flag

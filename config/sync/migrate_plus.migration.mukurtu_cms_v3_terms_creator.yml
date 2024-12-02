@@ -1,0 +1,50 @@
+uuid: 6695978f-f72d-4d89-aff0-96e1311c243f
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
+_core:
+  default_config_hash: YxrmY6Cd9qnpea0JkbPVvLFVhbtvtfkNXAS6GzCKlM8
+id: mukurtu_cms_v3_terms_creator
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: 'Taxonomy Terms - Creator'
+source:
+  plugin: d7_taxonomy_term
+  bundle: creator
+process:
+  tid: tid
+  langcode: language
+  vid:
+    plugin: default_value
+    default_value: creator
+  name: name
+  description/value: description
+  description/format:
+    plugin: default_value
+    default_value: basic_html
+  weight: weight
+  parent_id:
+    -
+      plugin: skip_on_empty
+      method: process
+      source: parent
+    -
+      plugin: migration_lookup
+      migration: d7_taxonomy_term
+  parent:
+    plugin: default_value
+    default_value: 0
+    source: '@parent_id'
+  changed: timestamp
+destination:
+  plugin: 'entity:taxonomy_term'
+migration_dependencies:
+  optional:
+    - d7_field_instance

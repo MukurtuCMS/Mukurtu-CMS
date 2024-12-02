@@ -1,0 +1,12 @@
+uuid: a88f36e6-2fd6-41e9-a7f4-c156c08e76e3
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_add_single_role_action.language_contributor
+label: 'Add the language_contributor role to the selected members'
+type: og_membership
+plugin: og_membership_add_single_role_action
+configuration:
+  role_name: language_contributor

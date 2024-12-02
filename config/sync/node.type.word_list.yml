@@ -1,0 +1,20 @@
+uuid: df3ccb97-23ba-40b3-bb6b-58a0c983a9c2
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+_core:
+  default_config_hash: mS0sqqnFd2Tl-j1bKJ752kdHQZp4uYjn_SkA9YgbyLA
+name: 'Word List'
+type: word_list
+description: 'A collection of dictionary words.'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: false

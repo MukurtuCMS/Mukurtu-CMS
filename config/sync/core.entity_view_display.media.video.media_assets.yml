@@ -1,0 +1,52 @@
+uuid: 48d2e9b7-d36b-4f73-a1a0-f06ef97eb77c
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.media_assets
+    - media.type.video
+  module:
+    - blazy
+    - file
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: 5FGiFKH27r-I3AOhDDjxjelyOMs2XwuufaSr2f00EGQ
+id: media.video.media_assets
+targetEntityType: media
+bundle: video
+mode: media_assets
+content:
+  field_media_video_file:
+    type: file_video
+    label: hidden
+    settings:
+      controls: true
+      autoplay: false
+      loop: false
+      multiple_file_display_type: tags
+      muted: false
+      width: 900
+      height: 506
+    third_party_settings:
+      blazy:
+        blazy: false
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_communities: true
+  field_cultural_protocols: true
+  field_identifier: true
+  field_media_tags: true
+  field_people: true
+  field_thumbnail: true
+  flag_export_media: true
+  langcode: true
+  name: true
+  search_api_excerpt: true
+  thumbnail: true
+  uid: true

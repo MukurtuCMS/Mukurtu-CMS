@@ -1,0 +1,12 @@
+uuid: f524faaf-ad22-469c-a0cb-5d12bac61206
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_remove_single_role_action.community_record_steward
+label: 'Remove the community_record_steward role from the selected members'
+type: og_membership
+plugin: og_membership_remove_single_role_action
+configuration:
+  role_name: community_record_steward

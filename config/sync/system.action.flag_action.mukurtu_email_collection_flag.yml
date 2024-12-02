@@ -1,0 +1,15 @@
+uuid: ab9d4320-4484-4d7b-adee-3a6840184c4e
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_email_collection
+  module:
+    - flag
+id: flag_action.mukurtu_email_collection_flag
+label: 'Flag this item'
+type: node
+plugin: 'flag_action:mukurtu_email_collection_flag'
+configuration:
+  flag_id: mukurtu_email_collection
+  flag_action: flag

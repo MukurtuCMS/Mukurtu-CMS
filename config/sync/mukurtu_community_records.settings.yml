@@ -1,0 +1,5 @@
+_core:
+  default_config_hash: u6HMoP7G3NqzYwLe-rCCk9ONbIKTO2zO_mW0Tur5FTo
+allowed_community_record_bundles:
+  - digital_heritage
+  - person

@@ -1,0 +1,19 @@
+uuid: 4d4d7ff7-a7ea-4814-92ee-4b99e3821d00
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_mukurtu_geojson
+    - node.type.person
+id: node.person.field_mukurtu_geojson
+field_name: field_mukurtu_geojson
+entity_type: node
+bundle: person
+label: 'Mukurtu GeoJSON'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

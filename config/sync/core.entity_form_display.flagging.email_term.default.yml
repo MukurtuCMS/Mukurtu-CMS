@@ -1,0 +1,19 @@
+uuid: 05b7bb74-4952-4404-9dff-076568f4cf1d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.flagging.email_term.message_digest
+    - flag.flag.email_term
+id: flagging.email_term.default
+targetEntityType: flagging
+bundle: email_term
+mode: default
+content:
+  message_digest:
+    type: options_select
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

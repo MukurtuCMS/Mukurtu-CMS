@@ -1,0 +1,34 @@
+uuid: 7af514f6-b43e-4f6a-a16f-42ee6046bc50
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_taxonomy
+_core:
+  default_config_hash: y7mCu_68ofnskxFBnsUOXkqKxDCMjnlleMDglsxsizY
+name: mukurtu_taxonomy_record_term_browser
+label: 'Select Taxonomy Record Terms'
+display: modal
+display_configuration:
+  width: '650'
+  height: '500'
+  link_text: 'Select Terms'
+  auto_open: false
+selection_display: multi_step_display
+selection_display_configuration:
+  entity_type: taxonomy_term
+  display: rendered_entity
+  display_settings:
+    view_mode: default
+  select_text: Finished
+  selection_hidden: false
+widget_selector: single
+widget_selector_configuration: {  }
+widgets:
+  7154fb62-3e71-4769-9121-b328e601b8f4:
+    settings:
+      submit_text: 'Add Terms'
+    uuid: 7154fb62-3e71-4769-9121-b328e601b8f4
+    weight: 1
+    label: 'Select Taxonomy Terms'
+    id: mukurtu_taxonomy_record_term_selection

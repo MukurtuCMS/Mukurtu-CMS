@@ -1,0 +1,27 @@
+uuid: 45915dd8-69fc-4c7c-a888-cf167a63043e
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.account
+  module:
+    - system
+  theme:
+    - mukurtu_v4
+_core:
+  default_config_hash: Nn_QoauG6QPxzqjn-e8QKe4hUN5BdeiNG15mU_foEzk
+id: mukurtu_v4_account_menu
+theme: mukurtu_v4
+region: user_menu
+weight: 0
+provider: null
+plugin: 'system_menu_block:account'
+settings:
+  id: 'system_menu_block:account'
+  label: 'User account menu'
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 1
+  expand_all_items: false
+visibility: {  }

@@ -1,0 +1,25 @@
+uuid: 21b2c5c8-bd65-46bc-bdf6-07cccbf20d2d
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.design_settings
+    - field.field.config_pages.design_settings.field_design_settings__palette
+  module:
+    - options
+_core:
+  default_config_hash: ph0x3VdhIWTYUG1s3gnRQBFxa4kaZ1laAIDZFoEqLLA
+id: config_pages.design_settings.default
+targetEntityType: config_pages
+bundle: design_settings
+mode: default
+content:
+  field_design_settings__palette:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  search_api_excerpt: true

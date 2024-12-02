@@ -1,0 +1,20 @@
+uuid: 466969cc-b04f-44ef-b89e-3daa4e85ae39
+langcode: en
+status: true
+dependencies:
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: Uo85HhWw1nQwd9BU8UhS0FL8o5InUEM2-iSdzV_MTjM
+id: mukurtu_bartik_page_title
+theme: mukurtu_bartik
+region: content
+weight: -50
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  label_display: '0'
+  provider: core
+visibility: {  }

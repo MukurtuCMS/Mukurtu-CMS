@@ -34,9 +34,7 @@
     .field--name-field-sentence,
     .field--name-field-additional-word-entries,
     .field--name-field-word-entry-term + div.field,
-    .field--name-title,
-    .field--name-field-alternate-spelling,
-    .field--name-field-alternate-spelling + div.field)) {
+    .field--name-title)) {
       @include divider;
     }
 

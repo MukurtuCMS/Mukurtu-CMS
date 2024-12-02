@@ -1,0 +1,17 @@
+uuid: 63d9bd32-fd5d-4373-a19f-a819d891cb03
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+_core:
+  default_config_hash: IEJxLjYgF5zyOrXTJ79-1aECYjH7OQ5pkdgtKQPFS4o
+id: protocol-protocol-protocol_affiliate
+label: 'Protocol Affiliate'
+weight: 14
+is_admin: null
+group_type: protocol
+group_bundle: protocol
+group_id: null
+permissions: {  }
+role_type: standard

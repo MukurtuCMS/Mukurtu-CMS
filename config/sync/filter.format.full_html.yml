@@ -1,0 +1,66 @@
+uuid: 22875a10-a436-46da-84dd-97bf471c1bdd
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.full
+    - core.entity_view_mode.media.media_library
+  module:
+    - editor
+    - media
+_core:
+  default_config_hash: xpA59n2dS5u_fmAB1HDbeAyKbqDgAWjiUA4acKlXacA
+name: 'Full HTML'
+format: full_html
+weight: 2
+filters:
+  filter_align:
+    id: filter_align
+    provider: filter
+    status: true
+    weight: 8
+    settings: {  }
+  filter_caption:
+    id: filter_caption
+    provider: filter
+    status: true
+    weight: 9
+    settings: {  }
+  filter_htmlcorrector:
+    id: filter_htmlcorrector
+    provider: filter
+    status: true
+    weight: 10
+    settings: {  }
+  editor_file_reference:
+    id: editor_file_reference
+    provider: editor
+    status: true
+    weight: 11
+    settings: {  }
+  filter_html:
+    id: filter_html
+    provider: filter
+    status: true
+    weight: -10
+    settings:
+      allowed_html: '<a href hreflang> <em> <strong> <cite> <blockquote cite> <code> <ul type> <ol start type> <li> <dl> <dt> <dd> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <s> <sup> <sub> <img src alt data-entity-type data-entity-uuid data-align data-caption> <table> <caption> <tbody> <thead> <tfoot> <th> <td> <tr> <hr> <p> <h1> <pre> <drupal-media data-entity-type data-entity-uuid data-view-mode data-align data-caption alt title> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title> <iframe width height frameborder scrolling marginheight marginwidth title src> <small> <b> <i> <span> <div> <embed type src height width> <object data form height name type usemap width> <video autoplay controls height loop muted poster preload src width>'
+      filter_html_help: true
+      filter_html_nofollow: false
+  media_embed:
+    id: media_embed
+    provider: media
+    status: true
+    weight: 100
+    settings:
+      default_view_mode: default
+      allowed_view_modes:
+        default: default
+        full: full
+        media_library: media_library
+      allowed_media_types:
+        audio: audio
+        document: document
+        image: image
+        remote_video: remote_video
+        video: video

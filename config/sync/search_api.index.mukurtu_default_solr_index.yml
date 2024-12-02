@@ -1,0 +1,1071 @@
+uuid: 4827ac92-198b-4265-ad7b-27338709b5be
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.body
+    - field.storage.node.field_article_category
+    - field.storage.node.field_article_keywords
+    - field.storage.node.field_content_type
+    - field.storage.node.field_mukurtu_geojson
+    - field.storage.node.field_page_media_assets
+    - search_api.server.mukurtu_solr_server
+  module:
+    - search_api_solr
+    - node
+    - mukurtu_core
+    - taxonomy
+    - media
+    - mukurtu_protocol
+    - mukurtu_collection
+    - mukurtu_dictionary
+    - mukurtu_multipage_items
+    - menu_link_content
+    - token
+    - search_api
+third_party_settings:
+  search_api_solr:
+    finalize: false
+    commit_before_finalize: false
+    commit_after_finalize: false
+    debug_finalize: false
+    highlighter:
+      maxAnalyzedChars: 51200
+      fragmenter: gap
+      usePhraseHighlighter: true
+      highlightMultiTerm: true
+      preserveMulti: false
+      regex:
+        slop: 0.5
+        pattern: blank
+        maxAnalyzedChars: 10000
+      highlight:
+        mergeContiguous: false
+        requireFieldMatch: false
+        snippets: 3
+        fragsize: 0
+    mlt:
+      mintf: 1
+      mindf: 1
+      maxdf: 0
+      maxdfpct: 0
+      minwl: 0
+      maxwl: 0
+      maxqt: 100
+      maxntp: 2000
+      boost: false
+      interestingTerms: none
+    term_modifiers:
+      slop: 3
+      fuzzy: 1
+    advanced:
+      index_prefix: ''
+      collection: ''
+      timezone: ''
+    multilingual:
+      limit_to_content_language: false
+      include_language_independent: true
+      use_language_undefined_as_fallback_language: false
+      specific_languages:
+        en: '0'
+      use_universal_collation: false
+_core:
+  default_config_hash: TatXqapIfg_F02ozILlMztHEaKe773C8UaDJYlTo4iQ
+id: mukurtu_default_solr_index
+name: 'Mukurtu Default Solr Content Index'
+description: 'The default Mukurtu Solr search index that provides search for most "browse" pages.'
+read_only: false
+field_settings:
+  node__body:
+    label: Body
+    datasource_id: 'entity:node'
+    property_path: body
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.body
+  node__changed:
+    label: Changed
+    datasource_id: 'entity:node'
+    property_path: changed
+    type: date
+    dependencies:
+      module:
+        - node
+  node__created:
+    label: 'Authored on'
+    datasource_id: 'entity:node'
+    property_path: created
+    type: date
+    dependencies:
+      module:
+        - node
+  node__field_all_related_content__title:
+    label: 'Related Content'
+    datasource_id: 'entity:node'
+    property_path: 'field_all_related_content:entity:title'
+    type: text
+    dependencies:
+      module:
+        - mukurtu_core
+        - node
+  node__field_alternate_spelling:
+    label: 'Alternate Spelling'
+    datasource_id: 'entity:node'
+    property_path: field_alternate_spelling
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_article_category__name:
+    label: Category
+    datasource_id: 'entity:node'
+    property_path: 'field_article_category:entity:name'
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_article_category
+      module:
+        - taxonomy
+  node__field_article_category__name__facet:
+    label: 'Category Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_article_category:entity:name'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_article_category
+      module:
+        - taxonomy
+  node__field_article_category__uuid:
+    label: 'Category » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_article_category:entity:uuid'
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_article_category
+      module:
+        - taxonomy
+  node__field_article_keywords__name:
+    label: Keywords
+    datasource_id: 'entity:node'
+    property_path: 'field_article_keywords:entity:name'
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_article_keywords
+      module:
+        - taxonomy
+  node__field_article_keywords__name__facet:
+    label: 'Keywords Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_article_keywords:entity:name'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_article_keywords
+      module:
+        - taxonomy
+  node__field_article_keywords__uuid:
+    label: 'Keywords » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_article_keywords:entity:uuid'
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_article_keywords
+      module:
+        - taxonomy
+  node__field_category__name:
+    label: Category
+    datasource_id: 'entity:node'
+    property_path: 'field_category:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_category__name__facet:
+    label: 'Category Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_category:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_category__uuid:
+    label: 'Category » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_category:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_child_collections__title:
+    label: Sub-Collections
+    datasource_id: 'entity:node'
+    property_path: 'field_child_collections:entity:title'
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_citation:
+    label: Citation
+    datasource_id: 'entity:node'
+    property_path: field_citation
+    type: text
+    dependencies:
+      module:
+        - mukurtu_core
+  node__field_collection_image__name:
+    label: Image
+    datasource_id: 'entity:node'
+    property_path: 'field_collection_image:entity:name'
+    type: text
+    dependencies:
+      module:
+        - media
+        - node
+  node__field_communities:
+    label: Communities
+    datasource_id: 'entity:node'
+    property_path: 'field_communities:entity:name'
+    type: string
+    dependencies:
+      module:
+        - mukurtu_protocol
+  node__field_communities__name:
+    label: Communities
+    datasource_id: 'entity:node'
+    property_path: 'field_communities:entity:name'
+    type: text
+    dependencies:
+      module:
+        - mukurtu_protocol
+  node__field_content_type:
+    label: 'Content Type'
+    datasource_id: 'entity:node'
+    property_path: field_content_type
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_content_type
+  node__field_contributor__name:
+    label: Contributor
+    datasource_id: 'entity:node'
+    property_path: 'field_contributor:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_contributor__name__facet:
+    label: 'Contributor Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_contributor:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_contributor__uuid:
+    label: 'Contributor » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_contributor:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_coverage:
+    label: Location
+    datasource_id: 'entity:node'
+    property_path: field_coverage
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_coverage_description:
+    label: 'Location Description'
+    datasource_id: 'entity:node'
+    property_path: field_coverage_description
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_creator__name:
+    label: Creator
+    datasource_id: 'entity:node'
+    property_path: 'field_creator:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_creator__name__facet:
+    label: 'Creator Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_creator:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_creator__uuid:
+    label: 'Creator » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_creator:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_cultural_narrative:
+    label: 'Cultural Narrative'
+    datasource_id: 'entity:node'
+    property_path: field_cultural_narrative
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_date_description:
+    label: 'Date Description'
+    datasource_id: 'entity:node'
+    property_path: field_date_description
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_definition:
+    label: Definition
+    datasource_id: 'entity:node'
+    property_path: field_definition
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_description:
+    label: Description
+    datasource_id: 'entity:node'
+    property_path: field_description
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_dictionary_word_language__name:
+    label: Language
+    datasource_id: 'entity:node'
+    property_path: 'field_dictionary_word_language:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_dictionary_word_language__name__facet:
+    label: 'Language Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_dictionary_word_language:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_dictionary_word_language__uuid:
+    label: 'Language » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_dictionary_word_language:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_format__name:
+    label: Format
+    datasource_id: 'entity:node'
+    property_path: 'field_format:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_format__name__facet:
+    label: 'Format Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_format:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_format__uuid:
+    label: 'Format » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_format:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_glossary_entry:
+    label: 'Glossary Entry'
+    datasource_id: 'entity:node'
+    property_path: field_glossary_entry
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_identifier:
+    label: Identifier
+    datasource_id: 'entity:node'
+    property_path: field_identifier
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_in_collection__title:
+    label: Collections
+    datasource_id: 'entity:node'
+    property_path: 'field_in_collection:entity:title'
+    type: text
+    dependencies:
+      module:
+        - mukurtu_collection
+        - node
+  node__field_in_word_list__title:
+    label: 'Word Lists'
+    datasource_id: 'entity:node'
+    property_path: 'field_in_word_list:entity:title'
+    type: text
+    dependencies:
+      module:
+        - mukurtu_dictionary
+        - node
+  node__field_items_in_collection__title:
+    label: 'Items in Collection'
+    datasource_id: 'entity:node'
+    property_path: 'field_items_in_collection:entity:title'
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_keywords__name:
+    label: Keywords
+    datasource_id: 'entity:node'
+    property_path: 'field_keywords:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_keywords__name__facet:
+    label: 'Keywords Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_keywords:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_keywords__uuid:
+    label: 'Keywords » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_keywords:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_language__name:
+    label: Language
+    datasource_id: 'entity:node'
+    property_path: 'field_language:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_language__name__facet:
+    label: 'Language Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_language:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_language__uuid:
+    label: 'Language » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_language:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_location__name:
+    label: Location
+    datasource_id: 'entity:node'
+    property_path: 'field_location:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_location__name__facet:
+    label: 'Location Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_location:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_location__uuid:
+    label: 'Location » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_location:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_media_assets__bundle:
+    label: 'Media Type Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_media_assets:entity:bundle'
+    type: string
+    dependencies:
+      module:
+        - media
+        - node
+  node__field_media_assets__name:
+    label: 'Media Assets'
+    datasource_id: 'entity:node'
+    property_path: 'field_media_assets:entity:name'
+    type: text
+    dependencies:
+      module:
+        - media
+        - node
+  node__field_mukurtu_geojson:
+    label: 'Mukurtu GeoJSON'
+    datasource_id: 'entity:node'
+    property_path: field_mukurtu_geojson
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_mukurtu_geojson
+  node__field_mukurtu_original_record__title:
+    label: 'Original Record'
+    datasource_id: 'entity:node'
+    property_path: 'field_mukurtu_original_record:entity:title'
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_multipage_page_of__title:
+    label: 'Page of'
+    datasource_id: 'entity:node'
+    property_path: 'field_multipage_page_of:entity:title'
+    type: text
+    dependencies:
+      module:
+        - mukurtu_multipage_items
+  node__field_page_media_assets__name:
+    label: 'Media Assets'
+    datasource_id: 'entity:node'
+    property_path: 'field_page_media_assets:entity:name'
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_page_media_assets
+      module:
+        - media
+  node__field_parent_collection__title:
+    label: 'Parent Collection'
+    datasource_id: 'entity:node'
+    property_path: 'field_parent_collection:entity:title'
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_people__name:
+    label: People
+    datasource_id: 'entity:node'
+    property_path: 'field_people:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_people__name__facet:
+    label: 'People Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_people:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_people__uuid:
+    label: 'People » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_people:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_pronunciation:
+    label: Pronunciation
+    datasource_id: 'entity:node'
+    property_path: field_pronunciation
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_publisher__name:
+    label: Publisher
+    datasource_id: 'entity:node'
+    property_path: 'field_publisher:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_publisher__name__facet:
+    label: 'Publisher Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_publisher:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_publisher__uuid:
+    label: 'Publisher » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_publisher:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_recording__name:
+    label: Recording
+    datasource_id: 'entity:node'
+    property_path: 'field_recording:entity:name'
+    type: text
+    dependencies:
+      module:
+        - media
+        - node
+  node__field_related_content__title:
+    label: 'Related Content'
+    datasource_id: 'entity:node'
+    property_path: 'field_related_content:entity:title'
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_representative_media__name:
+    label: 'Representative Media'
+    datasource_id: 'entity:node'
+    property_path: 'field_representative_media:entity:name'
+    type: text
+    dependencies:
+      module:
+        - media
+        - mukurtu_core
+  node__field_representative_terms__name:
+    label: 'Representative Terms'
+    datasource_id: 'entity:node'
+    property_path: 'field_representative_terms:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_representative_terms__name__facet:
+    label: 'Representative Terms Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_representative_terms:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_representative_terms__uuid:
+    label: 'Representative Terms » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_representative_terms:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_rights_and_usage:
+    label: 'Rights and Usage'
+    datasource_id: 'entity:node'
+    property_path: field_rights_and_usage
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_source:
+    label: Source
+    datasource_id: 'entity:node'
+    property_path: field_source
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_subject__name:
+    label: Subject
+    datasource_id: 'entity:node'
+    property_path: 'field_subject:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_subject__name__facet:
+    label: 'Subject Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_subject:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_subject__uuid:
+    label: 'Subject » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_subject:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_summary:
+    label: Summary
+    datasource_id: 'entity:node'
+    property_path: field_summary
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_thumbnail__name:
+    label: Thumbnail
+    datasource_id: 'entity:node'
+    property_path: 'field_thumbnail:entity:name'
+    type: text
+    dependencies:
+      module:
+        - media
+        - node
+  node__field_traditional_knowledge:
+    label: 'Traditional Knowledge'
+    datasource_id: 'entity:node'
+    property_path: field_traditional_knowledge
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_transcription:
+    label: Transcription
+    datasource_id: 'entity:node'
+    property_path: field_transcription
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_translation:
+    label: Translation
+    datasource_id: 'entity:node'
+    property_path: field_translation
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_type__name:
+    label: Type
+    datasource_id: 'entity:node'
+    property_path: 'field_type:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_type__name__facet:
+    label: 'Type Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_type:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_type__uuid:
+    label: 'Type » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_type:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_word_origin:
+    label: 'Word Origin'
+    datasource_id: 'entity:node'
+    property_path: field_word_origin
+    type: text
+    dependencies:
+      module:
+        - node
+  node__field_word_type__name:
+    label: 'Word Type'
+    datasource_id: 'entity:node'
+    property_path: 'field_word_type:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_word_type__name__facet:
+    label: 'Word Type Facet'
+    datasource_id: 'entity:node'
+    property_path: 'field_word_type:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_word_type__uuid:
+    label: 'Word Type » Taxonomy term » UUID'
+    datasource_id: 'entity:node'
+    property_path: 'field_word_type:entity:uuid'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  node__field_words__title:
+    label: Words
+    datasource_id: 'entity:node'
+    property_path: 'field_words:entity:title'
+    type: text
+    dependencies:
+      module:
+        - node
+  node__menu_link__title:
+    label: 'Menu link'
+    datasource_id: 'entity:node'
+    property_path: 'menu_link:entity:title'
+    type: text
+    dependencies:
+      module:
+        - menu_link_content
+        - token
+  node__revision_log:
+    label: 'Revision log message'
+    datasource_id: 'entity:node'
+    property_path: revision_log
+    type: text
+    dependencies:
+      module:
+        - node
+  node__revision_timestamp:
+    label: 'Revision create time'
+    datasource_id: 'entity:node'
+    property_path: revision_timestamp
+    type: date
+    dependencies:
+      module:
+        - node
+  node__title:
+    label: Title
+    datasource_id: 'entity:node'
+    property_path: title
+    type: text
+    boost: !!float 4
+    dependencies:
+      module:
+        - node
+  node_grants:
+    label: 'Node access information'
+    property_path: search_api_node_grants
+    type: string
+    indexed_locked: true
+    type_locked: true
+    hidden: true
+  status:
+    label: Published
+    datasource_id: 'entity:node'
+    property_path: status
+    type: boolean
+    indexed_locked: true
+    type_locked: true
+    dependencies:
+      module:
+        - node
+  type:
+    label: 'Content type'
+    datasource_id: 'entity:node'
+    property_path: type
+    type: string
+    dependencies:
+      module:
+        - node
+  uid:
+    label: uid
+    datasource_id: 'entity:node'
+    property_path: uid
+    type: integer
+    indexed_locked: true
+    type_locked: true
+    dependencies:
+      module:
+        - node
+datasource_settings:
+  'entity:node':
+    bundles:
+      default: true
+      selected: {  }
+    languages:
+      default: true
+      selected: {  }
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  auto_aggregated_fulltext_field: {  }
+  content_access:
+    weights:
+      preprocess_query: -30
+  custom_value: {  }
+  entity_status: {  }
+  entity_type: {  }
+  html_filter:
+    weights:
+      preprocess_index: -15
+      preprocess_query: -15
+    all_fields: true
+    fields:
+      - node__body
+      - node__field_all_related_content__title
+      - node__field_alternate_spelling
+      - node__field_article_category__name
+      - node__field_article_category__name__facet
+      - node__field_article_category__uuid
+      - node__field_article_keywords__name
+      - node__field_article_keywords__name__facet
+      - node__field_article_keywords__uuid
+      - node__field_category__name
+      - node__field_category__name__facet
+      - node__field_category__uuid
+      - node__field_child_collections__title
+      - node__field_citation
+      - node__field_collection_image__name
+      - node__field_communities
+      - node__field_communities__name
+      - node__field_content_type
+      - node__field_contributor__name
+      - node__field_contributor__name__facet
+      - node__field_contributor__uuid
+      - node__field_coverage
+      - node__field_coverage_description
+      - node__field_creator__name
+      - node__field_creator__name__facet
+      - node__field_creator__uuid
+      - node__field_cultural_narrative
+      - node__field_date_description
+      - node__field_definition
+      - node__field_description
+      - node__field_dictionary_word_language__name
+      - node__field_dictionary_word_language__name__facet
+      - node__field_dictionary_word_language__uuid
+      - node__field_format__name
+      - node__field_format__name__facet
+      - node__field_format__uuid
+      - node__field_glossary_entry
+      - node__field_identifier
+      - node__field_in_collection__title
+      - node__field_in_word_list__title
+      - node__field_items_in_collection__title
+      - node__field_keywords__name
+      - node__field_keywords__name__facet
+      - node__field_keywords__uuid
+      - node__field_language__name
+      - node__field_language__name__facet
+      - node__field_language__uuid
+      - node__field_location__name
+      - node__field_location__name__facet
+      - node__field_location__uuid
+      - node__field_media_assets__bundle
+      - node__field_media_assets__name
+      - node__field_mukurtu_geojson
+      - node__field_mukurtu_original_record__title
+      - node__field_multipage_page_of__title
+      - node__field_page_media_assets__name
+      - node__field_parent_collection__title
+      - node__field_people__name
+      - node__field_people__name__facet
+      - node__field_people__uuid
+      - node__field_pronunciation
+      - node__field_publisher__name
+      - node__field_publisher__name__facet
+      - node__field_publisher__uuid
+      - node__field_recording__name
+      - node__field_related_content__title
+      - node__field_representative_media__name
+      - node__field_representative_terms__name
+      - node__field_representative_terms__name__facet
+      - node__field_representative_terms__uuid
+      - node__field_rights_and_usage
+      - node__field_source
+      - node__field_subject__name
+      - node__field_subject__name__facet
+      - node__field_subject__uuid
+      - node__field_summary
+      - node__field_thumbnail__name
+      - node__field_traditional_knowledge
+      - node__field_transcription
+      - node__field_translation
+      - node__field_type__name
+      - node__field_type__name__facet
+      - node__field_type__uuid
+      - node__field_word_origin
+      - node__field_word_type__name
+      - node__field_word_type__name__facet
+      - node__field_word_type__uuid
+      - node__field_words__title
+      - node__menu_link__title
+      - node__revision_log
+      - node__title
+      - type
+    title: true
+    alt: true
+    tags:
+      b: 2
+      em: 1
+      h1: 5
+      h2: 3
+      h3: 2
+      strong: 2
+      u: 1
+  language_with_fallback: {  }
+  rendered_item: {  }
+  solr_date_range:
+    weights:
+      preprocess_index: 0
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  cron_limit: 50
+  index_directly: true
+  track_changes_in_references: true
+server: mukurtu_solr_server

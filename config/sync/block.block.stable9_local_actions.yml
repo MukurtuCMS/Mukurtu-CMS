@@ -1,0 +1,26 @@
+uuid: babe3544-1d57-42db-8206-c56cd8847045
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - stable9
+_core:
+  default_config_hash: pphqTIKvUHDns6KVm70WCeu6LzAMz7Jwkl8M4ybex3g
+id: stable9_local_actions
+theme: stable9
+region: content
+weight: 13
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Primary admin actions'
+  label_display: '0'
+  provider: core
+visibility:
+  request_path:
+    id: request_path
+    negate: true
+    pages: /collections

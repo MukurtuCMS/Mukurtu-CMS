@@ -1,0 +1,10 @@
+uuid: af2334f1-a437-4b62-af82-51b20b006619
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: PlnXybvk81UyiyZItP6g6o6339H-R4jlL8FCaR6Rf-I
+name: Category
+vid: category
+description: 'The cultural categories to which digital content refers. Associating content with one or more categories facilitates browsing.'
+weight: 0

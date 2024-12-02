@@ -1,0 +1,16 @@
+uuid: 4461301d-35c7-4216-a69d-376f0dacd8fa
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: mPunAzZItXu5iecXkz1qAvWaPwOEJyFNQtHtm688abQ
+id: mukurtu_default_content_pattern
+label: 'Mukurtu Default Content Pattern'
+type: 'canonical_entities:node'
+pattern: '[node:content-type]/[node:title]'
+selection_criteria: {  }
+selection_logic: and
+weight: 0
+relationships: {  }

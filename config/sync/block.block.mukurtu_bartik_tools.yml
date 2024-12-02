@@ -1,0 +1,27 @@
+uuid: 29988f3b-2bea-456f-a20d-357a9e408dbf
+langcode: en
+status: false
+dependencies:
+  config:
+    - system.menu.tools
+  module:
+    - system
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: wsSBFOwbhsNPp3KSCCxGRtCC8uiARGH8utWEYu0oLvc
+id: mukurtu_bartik_tools
+theme: mukurtu_bartik
+region: sidebar_first
+weight: 0
+provider: null
+plugin: 'system_menu_block:tools'
+settings:
+  id: 'system_menu_block:tools'
+  label: Tools
+  label_display: visible
+  provider: system
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility: {  }

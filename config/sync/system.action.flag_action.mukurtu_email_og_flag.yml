@@ -1,0 +1,15 @@
+uuid: ea768cff-dfe6-4c1b-957b-f71594cb9b51
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_email_og
+  module:
+    - flag
+id: flag_action.mukurtu_email_og_flag
+label: 'Send email'
+type: node
+plugin: 'flag_action:mukurtu_email_og_flag'
+configuration:
+  flag_id: mukurtu_email_og
+  flag_action: flag

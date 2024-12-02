@@ -1,0 +1,18 @@
+uuid: b342b0eb-cb85-42c8-8a79-a0370487681e
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+_core:
+  default_config_hash: UPlq3RcEOnyBh-Zxi_SibSe7RamLrWIPmny_EHz61Lo
+id: protocol-protocol-community_record_steward
+label: 'Community Record Steward'
+weight: 9
+is_admin: null
+group_type: protocol
+group_bundle: protocol
+group_id: null
+permissions:
+  - 'administer community records'
+role_type: standard

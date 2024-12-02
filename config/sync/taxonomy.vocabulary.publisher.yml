@@ -1,0 +1,10 @@
+uuid: 8c389b5f-4f3f-48ec-9cad-a6cfdbd9978e
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: TgZFfZS4OBovr2G4sDXyXZbpiopUjOiX5k1c8mKHT-s
+name: Publisher
+vid: publisher
+description: ''
+weight: 0

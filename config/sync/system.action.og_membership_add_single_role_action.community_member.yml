@@ -1,0 +1,12 @@
+uuid: 8ddb9fd2-cbba-4f7b-9cac-7efebe14aa4d
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_add_single_role_action.community_member
+label: 'Add the community_member role to the selected members'
+type: og_membership
+plugin: og_membership_add_single_role_action
+configuration:
+  role_name: community_member

@@ -1,0 +1,20 @@
+uuid: 1c545698-38ab-4dd7-bbfb-12cc752d938b
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+_core:
+  default_config_hash: WFlUhmMJSt-G-hI663mjBNthH5jXEynkV1-aHv1Wz7Q
+id: node.dictionary_word.title
+field_name: title
+entity_type: node
+bundle: dictionary_word
+label: Term
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,11 @@
+_core:
+  default_config_hash: EyyLGE4VsXOxEQfq1E5n0wHb5pqwCAfAxb5tliTM3YQ
+page:
+  403: ''
+  404: ''
+  front: /home
+uuid: d0bd1c3f-f093-4e7d-8d64-10cb6cb7ef5b
+name: 'Drush Site-Install'
+langcode: en
+default_langcode: en
+mail: admin@example.com

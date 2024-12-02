@@ -1,0 +1,12 @@
+uuid: cd9265ea-692f-4d10-b081-838530868d70
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_remove_single_role_action.community_affiliate
+label: 'Remove the community_affiliate role from the selected members'
+type: og_membership
+plugin: og_membership_remove_single_role_action
+configuration:
+  role_name: community_affiliate

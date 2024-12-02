@@ -1,0 +1,103 @@
+uuid: fc35117e-75a7-4f90-af85-43964c7e86e3
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: dUD49wB4lqDqWTAYKT3y0EPwu6lA7rJ6PWG755Yjafs
+id: mukurtu_cms_v3_media_document
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: 'Media - Documents'
+source:
+  plugin: d7_scald_atom
+  atom_type: file
+process:
+  id: sid
+  langcode: language
+  name: title
+  field_people:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_people
+    source: field_people
+  field_cultural_protocols/sharing_setting:
+    -
+      plugin: default_value
+      default_value: any
+  field_cultural_protocols/protocols:
+    -
+      plugin: sub_process
+      source: field_scald_protocol
+      process:
+        target_id:
+          plugin: migration_lookup
+          migration: mukurtu_cms_v3_cultural_protocols
+          source: target_id
+    -
+      plugin: mukurtu_migrate_set_protocols
+  field_media_document:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_file_private
+      - mukurtu_cms_v3_file
+    source: scald_file/0/fid
+  thumbnail/target_id:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_file_private
+      - mukurtu_cms_v3_file
+    source: scald_thumbnail/0/fid
+  thumbnail/alt:
+    -
+      plugin: null_coalesce
+      source:
+        - scald_thumbnail/0/field_caption
+        - title
+        - scald_thumbnail/0/field_filename
+    -
+      plugin: default_value
+      default_value: 'Missing Alt Text'
+  field_thumbnail/target_id:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_file_private
+      - mukurtu_cms_v3_file
+    source: scald_thumbnail/0/fid
+  field_thumbnail/alt:
+    -
+      plugin: null_coalesce
+      source:
+        - scald_thumbnail/0/field_caption
+        - title
+        - scald_thumbnail/0/field_filename
+    -
+      plugin: default_value
+      default_value: 'Missing Alt Text'
+  field_media_tags:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_media_tags
+    source: scald_tags
+destination:
+  plugin: 'entity:media'
+  default_bundle: document
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_communities
+    - mukurtu_cms_v3_cultural_protocols
+    - mukurtu_cms_v3_terms_category
+    - mukurtu_cms_v3_terms_contributor
+    - mukurtu_cms_v3_terms_creator
+    - mukurtu_cms_v3_terms_format
+    - mukurtu_cms_v3_terms_media_tags
+    - mukurtu_cms_v3_terms_language
+    - mukurtu_cms_v3_terms_people
+    - mukurtu_cms_v3_terms_publisher
+    - mukurtu_cms_v3_terms_subject
+    - mukurtu_cms_v3_terms_type
+    - mukurtu_cms_v3_file_private
+    - mukurtu_cms_v3_file
+  optional:
+    - d7_field_instance

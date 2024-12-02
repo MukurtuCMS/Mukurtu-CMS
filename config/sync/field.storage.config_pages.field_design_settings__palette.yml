@@ -1,0 +1,29 @@
+uuid: 986085e5-e603-4209-965b-83ce9cb69a16
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+    - options
+_core:
+  default_config_hash: 4qqu9CH2qxrxnohtCe6k9o2Kg608vdG26qWw_rN_0KM
+id: config_pages.field_design_settings__palette
+field_name: field_design_settings__palette
+entity_type: config_pages
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: blue-gold
+      label: 'Blue Gold'
+    -
+      value: red-bone
+      label: 'Red Bone'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

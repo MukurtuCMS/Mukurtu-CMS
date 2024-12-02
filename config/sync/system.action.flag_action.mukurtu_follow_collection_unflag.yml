@@ -1,0 +1,15 @@
+uuid: 0d024531-146e-4c26-8fa9-c5451d0d0c13
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_follow_collection
+  module:
+    - flag
+id: flag_action.mukurtu_follow_collection_unflag
+label: 'Stop Following this Collection'
+type: node
+plugin: 'flag_action:mukurtu_follow_collection_unflag'
+configuration:
+  flag_id: mukurtu_follow_collection
+  flag_action: unflag

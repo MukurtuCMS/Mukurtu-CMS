@@ -1,0 +1,12 @@
+uuid: c4b429e0-d0ce-443d-87ca-22726cf0c01e
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_add_single_role_action.protocol_member
+label: 'Add the protocol_member role to the selected members'
+type: og_membership
+plugin: og_membership_add_single_role_action
+configuration:
+  role_name: protocol_member

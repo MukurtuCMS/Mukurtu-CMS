@@ -1,0 +1,22 @@
+uuid: db2df137-898d-4436-a652-9245c67678cb
+langcode: en
+status: true
+dependencies:
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: 5IRpKxMmj9eac19cRyLR5LuvxcVeDrhbre1ql9Uc4qU
+id: mukurtu_bartik_local_tasks
+theme: mukurtu_bartik
+region: content
+weight: -40
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: Tabs
+  label_display: '0'
+  provider: core
+  primary: true
+  secondary: true
+visibility: {  }

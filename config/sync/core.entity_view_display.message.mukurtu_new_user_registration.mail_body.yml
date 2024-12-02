@@ -1,0 +1,23 @@
+uuid: 9097168b-defa-421e-917f-91deda92273f
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_body
+    - message.template.mukurtu_new_user_registration
+  module:
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: message.mukurtu_new_user_registration.mail_body
+targetEntityType: message
+bundle: mukurtu_new_user_registration
+mode: mail_body
+content:
+  partial_1:
+    weight: 0
+    region: content
+hidden:
+  partial_0: true

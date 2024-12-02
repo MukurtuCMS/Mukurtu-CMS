@@ -1,0 +1,66 @@
+uuid: eb453dc2-a277-43ea-8634-0932f8fd138b
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
+_core:
+  default_config_hash: k41DhTJeFNh1fubBfjg_CvlzTGnSs-82sNjBErnejWo
+id: mukurtu_cms_v3_legacy_tk_community_labels
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: 'Legacy TK Community Labels'
+source:
+  plugin: mukurtu_v3_legacy_tk_community_labels
+process:
+  id: id
+  project_id: project_id
+  name: label_name
+  locale: locale
+  language: language
+  img_url: img_url
+  svg_url: svg_url
+  audio_url: audio_url
+  community: community
+  type:
+    plugin: default_value
+    default_value: Legacy
+  display:
+    plugin: default_value
+    default_value: label
+  tk_or_bc:
+    plugin: default_value
+    default_value: tk
+  default_text: label_text
+  updated: updated
+destination:
+  plugin: table
+  table_name: mukurtu_local_contexts_labels
+  id_fields:
+    id:
+      type: string_long
+    project_id:
+      type: string
+  fields:
+    id: id
+    project_id: project_id
+    name: name
+    locale: locale
+    language: language
+    img_url: img_url
+    svg_url: svg_url
+    audio_url: audio_url
+    community: community
+    type: type
+    display: display
+    tk_or_bc: tk_or_bc
+    default_text: default_text
+    updated: updated
+migration_dependencies:
+  optional:
+    - d7_field_instance

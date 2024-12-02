@@ -1,0 +1,12 @@
+uuid: 5428bdc1-0e38-489c-bc05-1f278cc8714d
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_add_single_role_action.protocol_affiliate
+label: 'Add the protocol_affiliate role to the selected members'
+type: og_membership
+plugin: og_membership_add_single_role_action
+configuration:
+  role_name: protocol_affiliate

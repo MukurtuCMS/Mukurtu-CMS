@@ -1,0 +1,22 @@
+uuid: ee5ed9a4-f3b8-4d99-b4b6-488b9c887ef7
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: PKc2HRyS3t9seOAli972yWRT2Qr7ZBaarPcN7ogvVrU
+id: mukurtu_bartik_content
+theme: mukurtu_bartik
+region: content
+weight: 0
+provider: null
+plugin: system_main_block
+settings:
+  id: system_main_block
+  label: 'Main page content'
+  label_display: '0'
+  provider: system
+visibility: {  }

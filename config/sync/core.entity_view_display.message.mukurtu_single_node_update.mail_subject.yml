@@ -1,0 +1,23 @@
+uuid: 4be37074-ce91-4233-9eb5-78f4f2dc4858
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_subject
+    - message.template.mukurtu_single_node_update
+  module:
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: message.mukurtu_single_node_update.mail_subject
+targetEntityType: message
+bundle: mukurtu_single_node_update
+mode: mail_subject
+content:
+  partial_0:
+    weight: 0
+    region: content
+hidden:
+  partial_1: true

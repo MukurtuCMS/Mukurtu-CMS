@@ -1,0 +1,12 @@
+uuid: feebb9e0-8f5b-4799-ae6e-f28f332905cb
+langcode: en
+status: true
+dependencies:
+  module:
+    - paragraphs
+_core:
+  default_config_hash: 4MlIxLxccQhAz5IqoeaQWANFWXHGiDNcz_Gwr3DkzWg
+id: paragraph.teaser_translation
+label: 'Teaser - Translation'
+targetEntityType: paragraph
+cache: true

@@ -1,0 +1,42 @@
+uuid: 6385a8d4-16b0-4e2d-a573-8f0d0aca4e5f
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: qfBO1lYweMUcQ4DJkoZCUjn4NMtQH1_O3o-Bw_4yL4E
+id: mukurtu_cms_v3_file_private
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: null
+label: 'Files - Private'
+source:
+  plugin: d7_file
+  scheme: private
+  constants:
+    source_base_path: ''
+process:
+  fid: fid
+  filename: filename
+  source_full_path:
+    -
+      plugin: concat
+      delimiter: /
+      source:
+        - constants/source_base_path
+        - filepath
+  uri:
+    plugin: file_copy
+    source:
+      - '@source_full_path'
+      - uri
+  filemime: filemime
+  status: status
+  created: timestamp
+  changed: timestamp
+  uid: uid
+destination:
+  plugin: 'entity:file'
+migration_dependencies: null

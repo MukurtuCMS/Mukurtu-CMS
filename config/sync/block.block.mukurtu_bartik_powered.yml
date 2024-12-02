@@ -1,0 +1,22 @@
+uuid: aa551b8e-1c4a-475a-b1b9-eb1608913001
+langcode: en
+status: false
+dependencies:
+  module:
+    - system
+  theme:
+    - mukurtu_bartik
+_core:
+  default_config_hash: tnd9vq4028kynh8e_8N5qoZCPB7iblpcQ0vGt1aqVWs
+id: mukurtu_bartik_powered
+theme: mukurtu_bartik
+region: sidebar_first
+weight: 10
+provider: null
+plugin: system_powered_by_block
+settings:
+  id: system_powered_by_block
+  label: 'Powered by Drupal'
+  label_display: '0'
+  provider: system
+visibility: {  }

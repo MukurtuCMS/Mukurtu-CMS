@@ -1,0 +1,22 @@
+uuid: 60381534-c033-4b44-a489-41da853f72d2
+langcode: en
+status: true
+dependencies:
+  module:
+    - help
+  theme:
+    - mukurtu_v4
+_core:
+  default_config_hash: oCQDAq1ci7mcswZUl6z10sccNGoN5F4XfjLOBAQEzvs
+id: mukurtu_v4_help
+theme: mukurtu_v4
+region: help
+weight: 1
+provider: null
+plugin: help_block
+settings:
+  id: help_block
+  label: Help
+  label_display: '0'
+  provider: help
+visibility: {  }

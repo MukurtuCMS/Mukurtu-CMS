@@ -1,0 +1,32 @@
+uuid: a941ffdb-1680-449c-bed2-adc24135e2ef
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.formatted_text_with_title
+  module:
+    - text
+_core:
+  default_config_hash: JMcN6v15O2lGJ8u2Tsjf14enlOLw1PylmcAub3NaNv8
+id: paragraph.formatted_text_with_title.default
+targetEntityType: paragraph
+bundle: formatted_text_with_title
+mode: default
+content:
+  field_body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_title:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  search_api_excerpt: true

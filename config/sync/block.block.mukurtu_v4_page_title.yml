@@ -1,0 +1,20 @@
+uuid: bd46660d-64b5-4be3-ad60-c6429634fd0a
+langcode: en
+status: true
+dependencies:
+  theme:
+    - mukurtu_v4
+_core:
+  default_config_hash: 6b3v6nazKGZaJufdP6bhN7H_XDCAbKPvTI5YApjQzNs
+id: mukurtu_v4_page_title
+theme: mukurtu_v4
+region: page_title
+weight: 0
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  label_display: '0'
+  provider: core
+visibility: {  }

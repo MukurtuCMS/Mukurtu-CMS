@@ -1,0 +1,21 @@
+uuid: af3d8e77-2370-45c2-8cb7-7e5bc29e4ba0
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+_core:
+  default_config_hash: beVagXxgO2szkoOe50eI9RbQ1-08UDg0B2OhctwZLo4
+template: mukurtu_single_node_update
+label: 'Mukurtu Single Node Update'
+description: 'Standard template for a single node being updated.'
+text:
+  -
+    value: "<p>[message:field_item:entity:field_content_type] item&nbsp;<a href=\"[message:field_item:entity:url]\">[message:field_item:entity:title]</a> has been updated.</p>\r\n"
+    format: full_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

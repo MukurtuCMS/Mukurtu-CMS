@@ -1,0 +1,42 @@
+uuid: 1962230f-96e2-4e20-8d56-3cdcde0125fe
+langcode: en
+status: true
+dependencies:
+  module:
+    - message_subscribe_ui
+    - node
+third_party_settings:
+  message_subscribe_ui:
+    view_name: 'archive:default'
+_core:
+  default_config_hash: HmRs6SWQ5jgy8g6Rj3FoL_zIUUnN-JwlA6DuI2umpsk
+id: mukurtu_follow_content
+label: 'Mukurtu Follow Content'
+bundles:
+  - article
+  - dictionary_word
+  - digital_heritage
+  - page
+  - person
+entity_type: node
+global: false
+weight: 0
+flag_short: Follow
+flag_long: 'Start receiving notifications for changes to this content.'
+flag_message: ''
+unflag_short: 'Stop Following'
+unflag_long: 'Stop receiving notifications for changes to this content.'
+unflag_message: ''
+unflag_denied_text: ''
+flag_type: 'entity:node'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links:
+    full: full
+    multipage_full: multipage_full
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  extra_permissions:
+    owner: '0'
+linkTypeConfig: {  }

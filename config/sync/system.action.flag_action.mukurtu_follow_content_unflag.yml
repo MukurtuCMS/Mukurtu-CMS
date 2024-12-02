@@ -1,0 +1,15 @@
+uuid: 050a021d-ebfa-49ad-a822-b67d022be02b
+langcode: en
+status: true
+dependencies:
+  config:
+    - flag.flag.mukurtu_follow_content
+  module:
+    - flag
+id: flag_action.mukurtu_follow_content_unflag
+label: 'Stop Following'
+type: node
+plugin: 'flag_action:mukurtu_follow_content_unflag'
+configuration:
+  flag_id: mukurtu_follow_content
+  flag_action: unflag

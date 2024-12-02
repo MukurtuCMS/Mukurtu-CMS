@@ -1,0 +1,19 @@
+uuid: 9c16b7c1-1c26-4153-9445-7f1d0cfbb146
+langcode: en
+status: true
+dependencies:
+  module:
+    - search_api_db
+_core:
+  default_config_hash: RvgzJabmPcqYAQ52_-Na1ru8iAbvQcY6DhAykZD2qtw
+id: mukurtu_database_server
+name: 'Mukurtu Database Server'
+description: 'Mukurtu default database server'
+backend: search_api_db
+backend_config:
+  database: 'default:default'
+  min_chars: 3
+  matching: words
+  autocomplete:
+    suggest_suffix: true
+    suggest_words: true

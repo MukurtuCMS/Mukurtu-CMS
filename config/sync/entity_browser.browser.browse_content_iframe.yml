@@ -1,0 +1,36 @@
+uuid: 50caa47e-5e92-44bc-a5dd-965045dccf7e
+langcode: und
+status: true
+dependencies:
+  config:
+    - views.view.content_browser
+  module:
+    - views
+  enforced:
+    module:
+      - content_browser
+_core:
+  default_config_hash: Of8o-0Iny4Sz9HhfSf9rbcyHPyEBYob7yTUJa-mDs48
+name: browse_content_iframe
+label: 'Browser for Content (iFrame)'
+display: iframe
+display_configuration:
+  width: '1100'
+  height: '650'
+  link_text: 'Select content'
+  auto_open: true
+selection_display: no_display
+selection_display_configuration: {  }
+widget_selector: tabs
+widget_selector_configuration: {  }
+widgets:
+  57387ece-c090-4d22-9c00-eaaad74d642b:
+    settings:
+      submit_text: 'Select entities'
+      auto_select: false
+      view: content_browser
+      view_display: entity_browser
+    uuid: 57387ece-c090-4d22-9c00-eaaad74d642b
+    weight: 0
+    label: 'Content listing'
+    id: view

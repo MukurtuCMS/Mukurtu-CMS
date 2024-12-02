@@ -1,0 +1,70 @@
+uuid: 81296d11-1a46-4982-80cb-537f8311ec5a
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: kQ6yThC5CtTQyka7tNbjcz3SsOOJWaGr1ELbT55MVrA
+id: keywords
+name: Keywords
+url_alias: keywords
+weight: 0
+min_count: 1
+missing: false
+missing_label: others
+show_only_one_result: false
+field_identifier: keyword
+facet_source_id: 'search_api:views_block__mukurtu_dictionary__mukurtu_dictionary_block'
+widget:
+  type: dropdown
+  config:
+    show_numbers: false
+    default_option_label: Keywords
+query_operator: or
+use_hierarchy: false
+keep_hierarchy_parents_active: false
+hierarchy:
+  type: taxonomy
+  config: {  }
+expand_hierarchy: false
+enable_parent_when_child_gets_disabled: true
+hard_limit: 0
+exclude: false
+only_visible_when_facet_source_is_visible: false
+processor_configs:
+  active_widget_order:
+    processor_id: active_widget_order
+    weights:
+      sort: 20
+    settings:
+      sort: DESC
+  count_widget_order:
+    processor_id: count_widget_order
+    weights:
+      sort: 30
+    settings:
+      sort: DESC
+  display_value_widget_order:
+    processor_id: display_value_widget_order
+    weights:
+      sort: 40
+    settings:
+      sort: ASC
+  hide_1_result_facet:
+    processor_id: hide_1_result_facet
+    weights:
+      build: 50
+    settings: {  }
+  hierarchy_processor:
+    processor_id: hierarchy_processor
+    weights:
+      build: 100
+    settings: {  }
+  url_processor_handler:
+    processor_id: url_processor_handler
+    weights:
+      pre_query: 50
+      build: 15
+    settings: {  }
+empty_behavior:
+  behavior: none
+show_title: true

@@ -1,0 +1,12 @@
+uuid: 053bada2-e0fb-449f-b79d-2e4674c3121f
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+_core:
+  default_config_hash: o8rEiYd7XARCM9F2X7ufTaxUwjKAyMLxcwAZFKgmWF8
+id: media.audio_for_dictionary_teaser
+label: 'Audio Player with Contributor'
+targetEntityType: media
+cache: true

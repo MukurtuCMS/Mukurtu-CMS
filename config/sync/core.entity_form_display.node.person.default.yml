@@ -1,0 +1,296 @@
+uuid: 19d29d87-7089-42bc-98c9-9aff11f48fc0
+langcode: en
+status: true
+dependencies:
+  config:
+    - entity_browser.browser.mukurtu_taxonomy_record_term_browser
+    - field.field.node.person.comment
+    - field.field.node.person.field_mukurtu_cluster_lat
+    - field.field.node.person.field_mukurtu_cluster_long
+    - field.field.node.person.field_mukurtu_geojson
+    - node.type.person
+  module:
+    - comment
+    - entity_browser
+    - field_group
+    - media_library
+    - mukurtu_protocol
+    - original_date
+    - paragraphs
+    - path
+third_party_settings:
+  field_group:
+    group_main_tab:
+      children:
+        - group_mukurtu_essentials
+        - group_text_sections
+        - group_relations
+      label: 'Main Tab'
+      region: content
+      parent_name: ''
+      weight: 0
+      format_type: tabs
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        direction: horizontal
+        width_breakpoint: 640
+    group_mukurtu_essentials:
+      children:
+        - title
+        - field_media_assets
+        - field_cultural_protocols
+        - field_date_born
+        - field_date_died
+        - field_deceased
+        - field_keywords
+      label: 'Mukurtu Essentials'
+      region: content
+      parent_name: group_main_tab
+      weight: 20
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_relations:
+      children:
+        - field_related_people
+        - field_related_content
+        - field_representative_terms
+      label: Relations
+      region: content
+      parent_name: group_main_tab
+      weight: 22
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_text_sections:
+      children:
+        - field_sections
+      label: 'Text Sections'
+      region: content
+      parent_name: group_main_tab
+      weight: 21
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+_core:
+  default_config_hash: xWcwGNm8AU1Pr1IS2Wee4CnOAft-mAhwR_HAAymP7qQ
+id: node.person.default
+targetEntityType: node
+bundle: person
+mode: default
+content:
+  comment:
+    type: comment_default
+    weight: 9
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  created:
+    type: datetime_timestamp
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  draft:
+    type: boolean_checkbox
+    weight: 7
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_date_born:
+    type: original_date_text
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_date_died:
+    type: original_date_text
+    weight: 7
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_deceased:
+    type: boolean_checkbox
+    weight: 8
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  field_keywords:
+    type: entity_reference_autocomplete
+    weight: 9
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_media_assets:
+    type: media_library_widget
+    weight: 4
+    region: content
+    settings:
+      media_types: {  }
+    third_party_settings: {  }
+  field_protocol_control:
+    type: mukurtu_protocol_control_widget
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_related_content:
+    type: entity_browser_entity_reference
+    weight: 1
+    region: content
+    settings:
+      entity_browser: browse_content
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: false
+      field_widget_display_settings:
+        view_mode: content_browser
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_related_people:
+    type: paragraphs
+    weight: 0
+    region: content
+    settings:
+      title: 'Related People'
+      title_plural: 'Related People'
+      edit_mode: open
+      closed_mode: summary
+      autocollapse: none
+      closed_mode_threshold: 0
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: _none
+      features:
+        add_above: '0'
+        collapse_edit_all: collapse_edit_all
+        duplicate: duplicate
+    third_party_settings: {  }
+  field_representative_terms:
+    type: entity_browser_entity_reference
+    weight: 2
+    region: content
+    settings:
+      entity_browser: mukurtu_taxonomy_record_term_browser
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: false
+      field_widget_display_settings:
+        view_mode: default
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_sections:
+    type: paragraphs
+    weight: 1
+    region: content
+    settings:
+      title: Section
+      title_plural: Sections
+      edit_mode: open
+      closed_mode: summary
+      autocollapse: none
+      closed_mode_threshold: 0
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: formatted_text_with_title
+      features:
+        add_above: '0'
+        collapse_edit_all: collapse_edit_all
+        duplicate: duplicate
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  promote:
+    type: boolean_checkbox
+    weight: 3
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    weight: 8
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  sticky:
+    type: boolean_checkbox
+    weight: 4
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: 3
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: 1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  url_redirects:
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_content_type: true
+  field_mukurtu_cluster_lat: true
+  field_mukurtu_cluster_long: true
+  field_mukurtu_geojson: true
+  field_sequence_collection: true

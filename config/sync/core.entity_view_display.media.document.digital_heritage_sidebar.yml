@@ -1,0 +1,56 @@
+uuid: 325829bd-20ff-4c62-8772-5eebfce5bcfd
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.digital_heritage_sidebar
+    - image.style.large
+    - media.type.document
+  module:
+    - file
+    - image
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: YrS4F7dZqmvo6vtMEcLvHoC_2iInfmtbL6AH5WNQZRo
+id: media.document.digital_heritage_sidebar
+targetEntityType: media
+bundle: document
+mode: digital_heritage_sidebar
+content:
+  field_media_document:
+    type: file_default
+    label: above
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  thumbnail:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: large
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_communities: true
+  field_cultural_protocols: true
+  field_extracted_text: true
+  field_identifier: true
+  field_media_tags: true
+  field_people: true
+  field_thumbnail: true
+  flag_export_media: true
+  langcode: true
+  name: true
+  search_api_excerpt: true
+  uid: true

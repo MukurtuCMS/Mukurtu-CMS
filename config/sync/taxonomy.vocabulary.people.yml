@@ -1,0 +1,10 @@
+uuid: d8633735-164d-4089-9843-b6e085bf766f
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: ld3ySRZW_HXBikHgRUiGCRinUkRIHZtdiixr7G9c4ro
+name: People
+vid: people
+description: ''
+weight: 0
