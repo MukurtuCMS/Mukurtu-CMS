@@ -22,9 +22,10 @@
   }
 
   .browse-facets {
+    @include layout--full-width-grid-item;
     display: block;
     color: var(--color-white);
-    grid-column: 1 / -1;
+
 
     @include media('>=md') {
       display: grid;
@@ -32,10 +33,6 @@
       grid-template-rows: 1fr 1fr;
       grid-column: 1 / -1;
       gap: var(--gutter);
-    }
-
-    @include media('>=2xl') {
-      grid-column: 2 / -2;
     }
 
     // Each dropdown facet.
@@ -99,11 +96,7 @@
   }
 
   .browse-content {
-    grid-column: 1 / -1;
-
-    @include media('>=2xl') {
-      grid-column: 2 / -2;
-    }
+    @include layout--full-width-grid-item;
   }
 
   .glossary {

@@ -4,6 +4,9 @@ dependencies:
   config:
     - core.entity_view_mode.node.full
     - field.field.node.collection.comment
+    - field.field.node.collection.field_mukurtu_cluster_lat
+    - field.field.node.collection.field_mukurtu_cluster_long
+    - field.field.node.collection.field_mukurtu_geojson
     - node.type.collection
   module:
     - layout_builder
@@ -61,9 +64,9 @@ content:
     region: content
   field_items_in_collection:
     type: entity_reference_entity_view
-    label: above
+    label: hidden
     settings:
-      view_mode: browse
+      view_mode: grid_browse
       link: false
     third_party_settings: {  }
     weight: 3
