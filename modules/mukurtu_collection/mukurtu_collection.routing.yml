@@ -48,6 +48,7 @@ mukurtu_collection.new_subcollection:
     parameters:
       node:
         type: entity:node
+    _admin_route: 'TRUE'
   requirements:
     _custom_access: '\Drupal\mukurtu_collection\Controller\CollectionAddSubcollectionController::access'
 
