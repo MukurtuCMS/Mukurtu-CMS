@@ -1,4 +1,3 @@
-uuid: c7949f3b-c6ff-4eae-9f0d-a9b95e8bb79c
 langcode: en
 status: true
 dependencies:
@@ -7,8 +6,6 @@ dependencies:
   module:
     - entity_reference_revisions
     - text
-_core:
-  default_config_hash: zTSx2aHkemfL-FXshQRKEo9fVAzLNsBr0RKnC4ZT_VY
 id: paragraph.dictionary_word_entry.default
 targetEntityType: paragraph
 bundle: dictionary_word_entry
