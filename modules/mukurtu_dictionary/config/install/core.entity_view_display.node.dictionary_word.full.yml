@@ -5,9 +5,6 @@ dependencies:
   config:
     - core.entity_view_mode.node.full
     - field.field.node.dictionary_word.comment
-    - field.field.node.dictionary_word.field_mukurtu_cluster_lat
-    - field.field.node.dictionary_word.field_mukurtu_cluster_long
-    - field.field.node.dictionary_word.field_mukurtu_geojson
     - node.type.dictionary_word
   module:
     - entity_reference_revisions
@@ -444,9 +441,6 @@ hidden:
   field_all_related_content: true
   field_content_type: true
   field_in_collection: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
   field_multipage_page_of: true
   field_protocol_control: true
   field_representative_media: true
