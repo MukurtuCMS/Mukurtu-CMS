@@ -60,11 +60,14 @@
     margin-block-start: var(--v-space-3xs);
     line-height: var(--line-height-m);
 
-    .field--type-entity-reference {
+    .field.field--type-entity-reference {
       display: flex;
       flex-direction: column;
       gap: var(--v-space-5xs);
       align-items: first baseline;
+      border: 0;
+      padding-block-start: 0;
+      margin-block-start: 0;
 
       @include media('>=lg') {
         flex-direction: row;
