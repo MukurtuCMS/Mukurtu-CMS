@@ -2,8 +2,9 @@ langcode: en
 status: true
 dependencies: {  }
 id: dictionary_word_entry
-label: 'Dictionary Word Entry'
+label: 'Word Entry'
 icon_uuid: null
 icon_default: null
-description: ''
+description: 'A paragraph type that appears on the Dictionary Word content type. '
+save_empty: false
 behavior_plugins: {  }

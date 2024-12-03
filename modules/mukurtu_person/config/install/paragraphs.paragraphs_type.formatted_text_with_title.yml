@@ -1,9 +1,13 @@
+uuid: 5963a234-3e98-4f33-a922-c1ce2c75c8e8
 langcode: en
 status: true
 dependencies: {  }
+_core:
+  default_config_hash: UUj3_FRR5MBz2G9pVbRy0mi9koayi_RAYUooOqJT-AQ
 id: formatted_text_with_title
 label: 'Formatted Text with Title'
 icon_uuid: null
 icon_default: null
 description: ''
+save_empty: false
 behavior_plugins: {  }
