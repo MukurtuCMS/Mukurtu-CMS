@@ -1,0 +1,47 @@
+// Grid setup for /categories.
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  padding-inline: var(--layout-padding);
+  gap: var(--v-space-3xs);
+
+  @include media('>=sm') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include media('>=lg') {
+    grid-template-columns: repeat(4, 1fr);
+    padding-inline: var(--layout-padding-m);
+
+  }
+
+  // Individual cards layout.
+  .category-card .category-teaser a { //views-row
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+// Teaser displays for Categories taxonomy terms on /categories.
+.category-teaser {
+  a {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  h2 {
+    margin-block-start: 0;
+    color: var(--brand-primary-dark);
+  }
+
+  .field--name-name {
+    background-color: var(--brand-secondary);
+    font-size: var(--font-size-m);
+    font-weight: var(--text-bold);
+    text-align: center;
+    padding: var(--v-space-4xxs);
+  }
+}

@@ -131,19 +131,6 @@ display:
         options: {  }
       empty: {  }
       sorts:
-        search_api_relevance:
-          id: search_api_relevance
-          table: search_api_index_mukurtu_collection_index
-          field: search_api_relevance
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: DESC
-          expose:
-            label: 'Search Relevance'
-            field_identifier: search_api_relevance
-          exposed: true
         title:
           id: title
           table: search_api_index_mukurtu_collection_index
@@ -197,53 +184,10 @@ display:
             field_identifier: ''
           exposed: false
       arguments: {  }
-      filters:
-        search_api_fulltext:
-          id: search_api_fulltext
-          table: search_api_index_mukurtu_collection_index
-          field: search_api_fulltext
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api_fulltext
-          operator: or
-          value: ''
-          group: 1
-          exposed: true
-          expose:
-            operator_id: search_api_fulltext_op
-            label: ''
-            description: ''
-            use_operator: false
-            operator: search_api_fulltext_op
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: search_api_fulltext
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-              anonymous: '0'
-              mukurtu_administrator: '0'
-            expose_fields: false
-            placeholder: 'Type here'
-            searched_fields_id: search_api_fulltext_searched_fields
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          parse_mode: terms
-          min_length: null
-          fields: {  }
+      filters: {  }
+      filter_groups:
+        operator: AND
+        groups: {  }
       style:
         type: default
       row:
@@ -268,7 +212,6 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
-        - url
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
@@ -288,7 +231,6 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
-        - url
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'

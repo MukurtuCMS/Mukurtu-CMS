@@ -1,9 +1,5 @@
 .dashboard {
-  grid-column: 1 / -1;
-
-  @include media('>=2xl') {
-    grid-column: 2 / -2;
-  }
+  @include layout--full-width-grid-item;
 
   display: flex;
   gap: var(--gutter);

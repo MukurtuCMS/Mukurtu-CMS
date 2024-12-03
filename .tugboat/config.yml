@@ -7,7 +7,8 @@ services:
     commands:
       init:
         # Install dependencies for PHP extensions.
-        - apt update && apt install -y libzip-dev libpng-dev libjpeg-dev libfreetype6-dev
+        # Add poppler-utils for the pdftotext executable.
+        - apt update && apt install -y libzip-dev libpng-dev libjpeg-dev libfreetype6-dev poppler-utils
 
         # Add JPEG and FreeType support to GD.
         - docker-php-ext-configure gd --with-jpeg --with-freetype
@@ -61,11 +62,14 @@ services:
           cd ~/mukurtu
           # Copy in the settings.php file to set the database connection.
           cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
+          chown www-data:www-data web/sites/default/settings.php
           # Update composer dependencies.
           rm composer.lock
           composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
-          # Install Drupal with the Mukurtu installation profile.
-          ./vendor/bin/drush site-install mukurtu -y --account-pass="admin" --site-name="Mukurtu CMS"
+          # Install Drupal with the Mukurtu installation profile. Run as web
+          # user to create files with the right permissions. Pass in the
+          # environment variables from Tugboat using the -E option.
+          sudo -E -u www-data ./vendor/bin/drush site-install mukurtu -y --account-pass="admin" --site-name="Mukurtu CMS"
   mariadb:
     image: tugboatqa/mariadb:lts
     commands:

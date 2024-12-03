@@ -1,0 +1,19 @@
+// When the Grid button is selected on the Browse Digital Heritage page,
+// a masonry grid layout is applied. Also seen on collections pages for
+// collection items.
+.grid {
+  column-count: 1;
+
+  @include media('>=lg') {
+    column-count: 2;
+    column-gap: var(--v-space-3xs);
+  }
+
+  @include media('>=xl') {
+    column-gap: var(--v-space-2xs);
+  }
+
+  @include media('>=2xl') {
+    column-count: 3;
+  }
+}

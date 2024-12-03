@@ -105,11 +105,7 @@
     }
 
     #block-mukurtu-v4-content {
-      grid-column: 1 / -1;
-
-      @include media('>=2xl') {
-        grid-column: 2 / -2;
-      }
+      @include layout--full-width-grid-item;
     }
 
     // This is bound by the grid containing it, but also needs
@@ -189,35 +185,15 @@
             border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
             margin-block-start: var(--v-space-3xs);
           }
-
-          border-block-end: 5px solid var(--mukurtu-view-row-divider-color);
         }
 
-        // When the Grid button is selected on the Browse Digital Heritage page,
-        // a masonry grid layout is applied.
-        .browse-content.grid {
-          column-count: 1;
-
-          @include media('>=lg') {
-            column-count: 2;
-            column-gap: var(--v-space-3xs);
-          }
-
-          @include media('>=xl') {
-            column-gap: var(--v-space-2xs);
-          }
-
-          @include media('>=2xl') {
-            column-count: 3;
-          }
-
-          .views-row {
-            break-inside: avoid;
-            border-block-start: 0;
-            padding-block-end: var(--v-space-3xs);
-            margin-block-start: var(--v-space-3xs);
+        .grid .views-row {
+          &:first-of-type {
+            border-block-start: none;
+            margin-block-start: 0;
           }
         }
+
       }
 
       // Sidebar.
