@@ -1,21 +1,42 @@
-mukurtu_core.dashboard:
+#Account menu
+mukurtu_core.account_create_content:
+  title: 'Add Content'
+  parent: account
+  menu_name: account
+  description: 'Create content'
+  route_name: mukurtu_core.add_page
+  weight: -100
+  expanded: TRUE
+mukurtu_core.account_dashboard:
   title: 'Dashboard'
   description: 'Dashboard'
-  parent: mukurtu
-  menu_name: mukurtu
+  parent: account
+  menu_name: account
   route_name: mukurtu_core.dashboard
   weight: -1000
+
+#Main menu
+mukurtu_core.categories:
+  title: "Categories"
+  menu_name: main
+  description: "Browse the site categories"
+  route_name: view.mukurtu_categories.categories_page
+  weight: -10
+
+#System admin menu
 mukurtu_core.dashboard_admin:
   title: 'Mukurtu Dashboard'
   description: 'Mukurtu Dashboard'
   parent: system.admin
   route_name: mukurtu_core.dashboard
   weight: -1000
-mukurtu_core.account_dashboard:
+
+#Dashboard links
+mukurtu_core.dashboard:
   title: 'Dashboard'
   description: 'Dashboard'
-  parent: account
-  menu_name: account
+  parent: mukurtu
+  menu_name: mukurtu
   route_name: mukurtu_core.dashboard
   weight: -1000
 mukurtu_core.manage_content:
@@ -57,12 +78,6 @@ mukurtu_core.site_configuration:
 #  parent: mukurtu
 #  menu_name: mukurtu
 #  route_name: view.mukurtu_manage_all_users.manage_users_page
-mukurtu_core.categories:
-  title: "Categories"
-  menu_name: main
-  description: "Browse the site categories"
-  route_name: view.mukurtu_categories.categories_page
-  weight: -10
 mukurtu_core.settings:
   title: "Mukurtu Settings"
   parent: mukurtu_core.site_configuration
@@ -71,4 +86,3 @@ mukurtu_core.settings:
   route_name: mukurtu_core.settings
   expanded: TRUE
   weight: 0
-

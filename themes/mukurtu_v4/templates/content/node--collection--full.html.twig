@@ -69,42 +69,57 @@
 #}
 <article{{ attributes }}>
 
-  <div{{ content_attributes }} class="collection__wrapper">
+  <div{{ content_attributes }} class="full-node collection">
+
     <div class="collection__header">
       <div class="collection__header__image">
         {{ content.field_collection_image }}
       </div>
+
       <div class="collection__header__text">
         {{ title_prefix }}
+        {{ title_suffix }}
+
         {% if label %}
-          <h2{{title_attributes}}>
-            <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+          <h2{{ title_attributes }}>
+          {{ label }}
           </h2>
         {% endif %}
-        {{ title_suffix }}
+
         {{ content.field_summary }}
       </div>
-    </div>
-    <div class="collection__content">
-      {{ content.field_description }}
-    </div>
+    </div> {# /header #}
 
-    {# What is added here must match what's added to the aside below. #}
-    {% if content.field_communities is not empty %}
-      <div class="collection__list">
-    {% else %}
-      <div class="collection__list__full">
-    {% endif %}
-        {{ content.field_items_in_collection }}
-        {# As more content is made available to the sidebar, add it below. #}
-        {% if content.field_communities is not empty %}
-          <aside class="collection__sidebar">
-            {{ content.field_communities }}
-          </aside>
-        {% endif %}
+
+    {# Main content + sidebar. #}
+    <div class="full-node__grid">
+      {# Full width collection description. #}
+      {{ content.field_description }}
+
+        {# Main content -- collection items grid. #}
+        <div class="full-node__main">
+          <div class="full-node__content">
+            {{ content.field_items_in_collection }}
+          </div>
+        </div>
+
+        {# Sidebar. #}
+        <div class="full-node__list">
+          {# As more content is made available to the sidebar, add it below. #}
+          {% if content.field_communities is not empty %}
+            <aside class="full-node__sidebar">
+              <div class="sidebar-section">
+              {{ content.field_communities }}
+              </div>
+            </aside>
+          {% endif %}
+
+          <div class="full-node__related-content">
+            {{ content.field_all_related_content }}
+          </div>
+        </div>
+
       </div>
-    <div class="collection__related-content">
-      {{ content.field_all_related_content }}
-    </div>
-  </div>
+
+  </div> {# /full-node. #}
 </article>

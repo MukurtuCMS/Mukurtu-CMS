@@ -5,7 +5,12 @@
       margin-block-start: var(--v-space-s);
     }
 
-    .field--name-field-alternate-spelling {
+    .field--name-title,
+    .field--name-field-word-entry-term {
+      .field__label {
+        @include visually-hidden;
+      }
+
       background-color: var(--brand-primary-dark);
       position: relative;
       font-size: var(--font-size-heading-lg);
@@ -13,7 +18,8 @@
       border-block-start: 0;
       padding-block: var(--v-space-2xs);
       padding-inline: var(--v-space-xs) var(--v-space-2xs);
-      margin-block-end: var(--v-space-2xs);
+      margin-block-start: 0;
+      margin-block-end: var(--v-space-s);
 
       &::after {
         content: "";
@@ -30,10 +36,39 @@
       }
     }
 
-    .field--name-field-translation {
-      .field__label {
-        @include visually-hidden;
-      }
+    .field--name-field-word-entry-term {
+      margin-block-start: var(--v-space-xs);
+    }
+
+    .field--name-title + div.field {
+      border-block-start: 0;
+      padding-block-start: 0;
+    }
+  }
+
+  .field--name-field-additional-word-entries > .field__item,
+  .additional-fields {
+    @include divider;
+
+    border-width: var(--v-space-4xs);
+    margin-block-start: var(--v-space-l);
+    padding-block-start: var(--v-space-l);
+  }
+
+  .additional-fields {
+    &::before {
+      content: "Additional Information";
+      display: block;
+      font-size: var(--font-size-m);
+      font-weight: var(--text-bold);
+      color: var(--brand-text-color);
+      margin-block-end: var(--v-space-xs);
+    }
+  }
+
+  .field--name-field-recording {
+    .media--audio {
+      align-items: flex-start;
     }
   }
 

@@ -24,15 +24,19 @@
     // Ensure border is not duplicated on fields inside fields, fields inside media,
     // and nested paragraph.
 
-    // Last two are fields on Dictionary Word nodes.
-    .field:not(.field--name-field-media-assets, 
+    // :where() reduces specificity to 0 so these are more 
+    // easily overridden elsewhere if needed.
+    .field:where(:not(.field--name-field-media-assets, 
     .field--name-field-media-assets .field, 
     .media .field, 
     .field.field.field--name-field-word-entry,
     .field--name-field-sentence-recording,
     .field--name-field-sentence,
+    .field--name-field-additional-word-entries,
+    .field--name-field-word-entry-term + div.field,
+    .field--name-title,
     .field--name-field-alternate-spelling,
-    .field--name-field-alternate-spelling + div.field) {
+    .field--name-field-alternate-spelling + div.field)) {
       @include divider;
     }
 
@@ -59,11 +63,10 @@
     }
 
     .paragraph--type--sample-sentence {
-
-      margin: var(--v-space-2xs) 0;
+      margin-block-end: var(--v-space-2xs); 
 
       > div {
-        margin: var(--v-space-4xxs) 0; 
+        margin-block-end: var(--v-space-4xxs); 
       }
     }
   }
