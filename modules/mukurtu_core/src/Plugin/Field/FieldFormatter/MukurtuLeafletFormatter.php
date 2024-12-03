@@ -232,7 +232,7 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
   /**
    * Sets possibly existing previous settings for the Zoom Form Element.
    */
-  private function setExistingZoomSettings() {
+  protected function setExistingZoomSettings() {
     $settings = $this->getSettings();
     if (isset($settings['zoom'])) {
       $settings['map_position']['zoom'] = (int) $settings['zoom'];
