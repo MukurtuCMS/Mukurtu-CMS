@@ -66,9 +66,12 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_transcription'] = BaseFieldDefinition::create('text_long')
+    $definitions['field_transcription'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Transcription'))
       ->setDescription(t(''))
+      ->setSettings([
+        'max_length' => 255,
+      ])
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
