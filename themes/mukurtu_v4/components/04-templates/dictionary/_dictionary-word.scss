@@ -74,7 +74,27 @@
 
   .field--name-field-recording {
     .media--audio {
-      align-items: flex-start;
+      flex-direction: column;
+      gap: var(--v-space-4xxs);
+      align-items: center;
+      justify-content: center;
+
+      @include media('>=md') {
+        flex-direction: row;
+      }
+
+      .field--name-field-media-audio-file, 
+      .field--name-field-contributor {
+        flex:1;
+      }
+
+      .field--name-field-contributor {
+        display: flex;
+        flex-direction: row;
+        gap: var(--v-space-4xxs);
+        justify-content: center;
+        align-items: center;
+      }
     }
   }
 
