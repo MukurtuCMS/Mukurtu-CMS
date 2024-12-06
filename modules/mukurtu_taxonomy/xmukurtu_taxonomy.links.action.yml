@@ -1,5 +1,0 @@
-mukurtu_taxonomy.add_category:
-  route_name: mukurtu_taxonomy.manage_categories
-  title: 'Add Category'
-  appears_on:
-    - view.mukurtu_categories.categories_page
