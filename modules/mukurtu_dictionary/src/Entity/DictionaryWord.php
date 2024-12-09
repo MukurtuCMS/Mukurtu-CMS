@@ -274,7 +274,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
         ]
       ])
       ->setCardinality(-1)
-      ->setRequired(TRUE)
+      ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)

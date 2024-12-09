@@ -6,4 +6,5 @@ label: 'Formatted Text with Title'
 icon_uuid: null
 icon_default: null
 description: ''
+save_empty: false
 behavior_plugins: {  }
