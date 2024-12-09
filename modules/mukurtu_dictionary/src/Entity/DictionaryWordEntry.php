@@ -123,7 +123,7 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
         ]
       ])
       ->setCardinality(-1)
-      ->setRequired(TRUE)
+      ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
