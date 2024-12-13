@@ -7,7 +7,7 @@ dependencies:
     - node.type.person
   module:
     - comment
-    - datetime
+    - original_date
     - entity_browser
     - field_group
     - media_library
@@ -117,13 +117,13 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_date_born:
-    type: datetime_default
+    type: original_date_text
     weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
   field_date_died:
-    type: datetime_default
+    type: original_date_text
     weight: 7
     region: content
     settings: {  }

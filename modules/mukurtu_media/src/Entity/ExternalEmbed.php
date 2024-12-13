@@ -59,7 +59,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
         'target_type' => 'file'
       ])
       ->setCardinality(1)
-      ->setRequired(FALSE)
+      ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)

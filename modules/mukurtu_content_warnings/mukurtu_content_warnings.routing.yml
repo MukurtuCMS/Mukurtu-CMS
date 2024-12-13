@@ -1,11 +1,19 @@
-mukurtu_content_warnings.manage_community_content_warnings:
-  path: '/node/{node}/content-warnings'
+# mukurtu_content_warnings.manage_community_content_warnings:
+#   path: '/node/{node}/content-warnings'
+#   defaults:
+#     _title: 'Content Warnings'
+#     _controller: '\Drupal\mukurtu_content_warnings\Controller\MukurtuManageContentWarningsController::content'
+#   options:
+#     parameters:
+#       node:
+#         type: entity:node
+#   requirements:
+#     _custom_access: '\Drupal\mukurtu_content_warnings\Controller\MukurtuManageContentWarningsController::access'
+
+mukurtu_content_warnings.settings:
+  path: '/admin/config/mukurtu/content-warnings'
   defaults:
-    _title: 'Content Warnings'
-    _controller: '\Drupal\mukurtu_content_warnings\Controller\MukurtuManageContentWarningsController::content'
-  options:
-    parameters:
-      node:
-        type: entity:node
+    _form: '\Drupal\mukurtu_content_warnings\Form\MukurtuContentWarningsSettingsForm'
+    _title: 'Mukurtu Content Warnings Settings'
   requirements:
-    _custom_access: '\Drupal\mukurtu_content_warnings\Controller\MukurtuManageContentWarningsController::access'
+    _permission: 'administer site configuration'

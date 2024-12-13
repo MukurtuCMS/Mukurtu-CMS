@@ -33,6 +33,7 @@
 - Multi-page Items
 - Taxonomy Record Relationships
 - [Local Contexts Legacy TK Labels](#local-contexts-legacy-tk-labels)
+- [Media Content Warnings](#media-content-warnings)
 
 ### Users
 User accounts are migrated in two different migrations. Both should be used in migration_lookup plugins when dealing with users.
@@ -122,6 +123,16 @@ Mukurtu CMS version 4 uses Drupal media entities in lieu of Scald atoms. The tab
 |Image|image|media|image|`mukurtu_cms_v3_media_image`|
 |Video|video|media|video|`mukurtu_cms_v3_media_video`|
 |Video|video|media|remote_video||
+
+### Media Content Warnings
+In v3, Media content warnings are stored in three database variables (found in the `variable` table):
+- `mukurtu_content_warning_people`
+- `mukurtu_content_warning_taxonomy`
+- `mukurtu_content_warning_scald_contexts`
+
+After migration, these settings are stored in config as `mukurtu_content_warnings.settings`.
+
+> Note: v4 currently doesn't have a way to translate scald contexts into media contexts, so the settings at `mukurtu_content_warning_scald_contexts` will just sit in config for now.
 
 ### Formatted Text Formats
 The following table shows the formatted text format mapping between version 3 and version 4.

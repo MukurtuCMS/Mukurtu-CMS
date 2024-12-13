@@ -76,49 +76,25 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_date_born'] = BaseFieldDefinition::create('datetime')
+    $definitions['field_date_born'] = BaseFieldDefinition::create('original_date')
       ->setLabel(t('Date Born'))
-      ->setDescription('')
+      ->setDescription(t(''))
+      ->setCardinality(1)
+      ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setSettings([
-        'datetime_type' => 'date',
-      ])
-      ->setDefaultValue('')
-      ->setDisplayOptions('view', [
-        'label' => 'above',
-        'type' => 'datetime_default',
-        'settings' => [
-          'format_type' => 'medium',
-        ],
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'datetime_default',
-        'weight' => -9,
-      ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_date_died'] = BaseFieldDefinition::create('datetime')
+    $definitions['field_date_died'] = BaseFieldDefinition::create('original_date')
       ->setLabel(t('Date Died'))
       ->setDescription('')
+      ->setCardinality(1)
+      ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setSettings([
-        'datetime_type' => 'date',
-      ])
-      ->setDefaultValue('')
-      ->setDisplayOptions('view', [
-        'label' => 'above',
-        'type' => 'datetime_default',
-        'settings' => [
-          'format_type' => 'medium',
-        ],
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'datetime_default',
-        'weight' => -9,
-      ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_deceased'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Deceased'))

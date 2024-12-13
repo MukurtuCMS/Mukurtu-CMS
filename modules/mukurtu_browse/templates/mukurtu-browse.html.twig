@@ -1,25 +1,73 @@
 <div class="browse-container">
   <div class="browse-results">
     <div class="browse-links">
-      {# @todo: these search parameter need to be cleared once the page is
-      switched, but I wasn't able to complete this task in time for hand-off.
-      It doesn't change behavior, but isn't a nice bug.  #}
-      <a href="?active=grid" id="mukurtu-browse-grid-switch-link" aria-label="Switch to grid view">Grid</a>
-      <a href="?active=list" class="active-toggle" id="mukurtu-browse-list-switch-link" aria-label="Switch to list view">List</a>
+      <button id="mukurtu-browse-grid" aria-label="Switch to grid view">Grid</button>
+      <button id="mukurtu-browse-list" aria-label="Switch to list view" class="active-toggle">List</button>
       {% if maplink %}
         {{ maplink }}
       {% endif %}
     </div>
-    {{ results }}
+    {{ list_results }}
+    {{ grid_results }}
+    {{ map_results }}
   </div>
+
   <aside class="browse-facets">
-    {% if drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') %}
+    {# This template is shared by /browse and /digital-heritage.
+      The `is_dh` boolean is true on /digital-heritage. #}
+    {% if is_dh %}
       {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') }}
+      {# These are the other exposed filter blocks for the grid and map displays, that don't appear to be necessary right now. #}
+      {# {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block_grid') }}
+      {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block_map') }} #}
+    {% else %}
+      {{ drupal_block('views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block') }}
+      {# {{ drupal_block('views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block_grid') }}
+      {{ drupal_block('views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block_map') }} #}
     {% endif %}
+
     {% if facets %}
       {% for facet in facets %}
         {{ facet }}
       {% endfor %}
+
+      {{ drupal_block('facets_reset_button')}}
     {% endif %}
+
+    {# Each display of the views (List, Grid, Map) has its own unique facets. 
+      They all must be present on the page in order for facets to work, 
+      but they do not all need to be visible. The List (default) facets display,
+      and trigger a click on all corresponding facets so they will work in each 
+      display (List, Grid, Map). #}
+
+    <div class="other-facets">
+      {% if is_dh %}
+        {# Browse DH grid facets. #}
+        {{ drupal_block('facet_block:category_grid') }}
+        {{ drupal_block('facet_block:community_grid') }}
+        {{ drupal_block('facet_block:keywords_grid') }}
+        {{ drupal_block('facet_block:media_type_grid') }}
+    
+        {# Browse DH map facets. #}
+        {{ drupal_block('facet_block:category_map') }}
+        {{ drupal_block('facet_block:community_map') }}
+        {{ drupal_block('facet_block:keywords_map') }}
+        {{ drupal_block('facet_block:media_type_map') }}
+      {% else %}
+        {# Browse grid facets. #}
+        {{ drupal_block('facet_block:category_grid_0') }}
+        {{ drupal_block('facet_block:community_grid_0') }}
+        {{ drupal_block('facet_block:content_type_grid') }}
+        {{ drupal_block('facet_block:keywords_grid_0') }}
+        {{ drupal_block('facet_block:media_type_grid_0') }}
+
+        {# Browse map facets. #}
+        {{ drupal_block('facet_block:category_map_0') }}
+        {{ drupal_block('facet_block:community_map_0') }}
+        {{ drupal_block('facet_block:content_type_map') }}
+        {{ drupal_block('facet_block:keywords_map_0') }}
+        {{ drupal_block('facet_block:media_type_map_0') }}
+      {% endif %}
+    </div>
   </aside>
 </div>

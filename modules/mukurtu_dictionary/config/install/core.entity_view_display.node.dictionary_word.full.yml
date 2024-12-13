@@ -1,17 +1,17 @@
+uuid: 876fb5f8-4e44-47aa-b941-8b3fe3ef73ca
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.node.full
     - field.field.node.dictionary_word.comment
-    - image.style.medium
     - node.type.dictionary_word
   module:
     - entity_reference_revisions
     - field_group
     - layout_builder
-    - media
     - mukurtu_core
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - text
     - user
@@ -22,12 +22,14 @@ third_party_settings:
   field_group:
     group_metadata:
       children:
-        - field_all_related_content
-        - field_dictionary_word_language
         - field_communities
         - field_cultural_protocols
+        - field_dictionary_word_language
+        - field_glossary_entry
         - field_keywords
         - field_in_word_list
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
       label: Metadata
       parent_name: ''
       region: content
@@ -47,13 +49,9 @@ third_party_settings:
         speed: fast
     group_primary_fields:
       children:
-        - field_thumbnail
-        - field_word_entry
-        - field_coverage
-        - field_coverage_description
-        - field_location
-        - field_media_assets
-        - flag_export_content
+        - group_base_word_entry
+        - group_additional_word_entries
+        - group_additional_fields
       label: 'Primary Fields'
       parent_name: ''
       region: content
@@ -71,19 +69,120 @@ third_party_settings:
         attributes: ''
         effect: none
         speed: fast
+    group_base_word_entry:
+      children:
+        - field_title
+        - field_translation
+        - field_alternate_spelling
+        - field_recording
+        - field_definition
+        - field_sample_sentences
+        - field_word_type
+        - field_pronunciation
+        - field_source
+        - field_word_origin
+        - field_contributor
+      label: 'Base Word Entry'
+      parent_name: group_primary_fields
+      region: content
+      weight: 32
+      format_type: html_element
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_additional_word_entries:
+      children:
+        - field_additional_word_entries
+      label: 'Additional Word Entries'
+      parent_name: group_primary_fields
+      region: content
+      weight: 33
+      format_type: html_element
+      format_settings:
+        classes: additional-word-entries
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_additional_fields:
+      children:
+        - field_media_assets
+        - field_coverage
+        - field_location
+        - field_coverage_description
+        - field_citation
+        - field_related_content
+      label: 'Additional Information'
+      parent_name: group_primary_fields
+      region: content
+      weight: 34
+      format_type: html_element
+      format_settings:
+        classes: additional-fields
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: div
+        label_element_classes: field__label
+        attributes: ''
+        effect: none
+        speed: fast
+_core:
+  default_config_hash: UTDifEyIUoG-wrdYcCjk65DWOO9jgKLZt8N9u3LSzVY
 id: node.dictionary_word.full
 targetEntityType: node
 bundle: dictionary_word
 mode: full
 content:
-  field_all_related_content:
-    type: entity_reference_entity_view
+  field_additional_word_entries:
+    type: entity_reference_revisions_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 12
+    region: content
+  field_alternate_spelling:
+    type: string
     label: above
     settings:
-      view_mode: teaser
-      link: false
+      link_to_entity: false
     third_party_settings: {  }
-    weight: 5
+    weight: 2
+    region: content
+  field_base_word_entry:
+    type: entity_reference_revisions_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 11
+    region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
     region: content
   field_communities:
     type: entity_reference_label
@@ -91,11 +190,19 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 7
+    weight: 32
+    region: content
+  field_contributor:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 10
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
-    label: above
+    label: visually_hidden
     settings:
       multiple_map: false
       leaflet_map: 'OSM Mapnik'
@@ -162,21 +269,28 @@ content:
           options: ''
       weight: null
     third_party_settings: {  }
-    weight: 3
+    weight: 35
     region: content
   field_coverage_description:
     type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 4
+    weight: 37
     region: content
   field_cultural_protocols:
     type: cultural_protocol_formatter
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 8
+    weight: 33
+    region: content
+  field_definition:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
     region: content
   field_dictionary_word_language:
     type: entity_reference_label
@@ -184,7 +298,15 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 6
+    weight: 34
+    region: content
+  field_glossary_entry:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 35
     region: content
   field_in_word_list:
     type: entity_reference_label
@@ -192,7 +314,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 10
+    weight: 37
     region: content
   field_keywords:
     type: entity_reference_label
@@ -200,7 +322,21 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 9
+    weight: 36
+    region: content
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 39
+    region: content
+  field_local_contexts_projects:
+    type: local_contexts_project
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
     region: content
   field_location:
     type: entity_reference_label
@@ -208,27 +344,69 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 5
+    weight: 36
     region: content
   field_media_assets:
-    type: media_thumbnail
-    label: above
-    settings:
-      image_link: ''
-      image_style: ''
-      image_loading:
-        attribute: lazy
-    third_party_settings: {  }
-    weight: 6
-    region: content
-  field_thumbnail:
-    type: media_thumbnail
+    type: entity_reference_entity_view
     label: hidden
     settings:
-      image_link: ''
-      image_style: medium
-      image_loading:
-        attribute: lazy
+      view_mode: media_assets
+      link: false
+    third_party_settings: {  }
+    weight: 34
+    region: content
+  field_pronunciation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  field_recording:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: audio_for_dictionary_teaser
+      link: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_related_content:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: browse
+      link: false
+    third_party_settings: {  }
+    weight: 39
+    region: content
+  field_sample_sentences:
+    type: entity_reference_revisions_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_source:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  field_title:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_translation:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
     third_party_settings: {  }
     weight: 1
     region: content
@@ -239,31 +417,38 @@ content:
       view_mode: default
       link: ''
     third_party_settings: {  }
-    weight: 2
+    weight: 8
     region: content
-  flag_export_content:
-    settings: {  }
+  field_word_origin:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
     third_party_settings: {  }
-    weight: 7
+    weight: 9
+    region: content
+  field_word_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 6
     region: content
 hidden:
   comment: true
   draft: true
-  field_citation: true
+  field_all_related_content: true
   field_content_type: true
-  field_glossary_entry: true
   field_in_collection: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
   field_multipage_page_of: true
   field_protocol_control: true
-  field_related_content: true
   field_representative_media: true
   field_sequence_collection: true
-  field_title: true
+  field_thumbnail: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_content: true
   flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true

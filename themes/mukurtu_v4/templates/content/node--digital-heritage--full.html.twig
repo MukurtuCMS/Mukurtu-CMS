@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to display a node.
+ * Theme override to display a digital heritage node.
  *
  * Available variables:
  * - node: The node entity with limited access to object properties and methods.
@@ -85,7 +85,6 @@
     {{ title_suffix }}
 
     <div class="full-node__grid">
-      
       <div class="full-node__main">
         <div class="full-node__content">
 
@@ -104,18 +103,24 @@
             {{ content.group_primary_fields.field_media_assets }}
           {% endif %}
 
-          {{ content.group_primary_fields|without('field_all_related_content', 'field_media_assets') }}
+          {{ content.group_primary_fields|without('field_all_related_content', 'field_media_assets', 'field_citation') }}
         </div>
 
         <div class="full-node__related-content">
           {{ content.group_primary_fields.field_all_related_content }}
+        </div>
+
+        <div class="full-node__citation">
+          {{ content.group_primary_fields.field_citation }}
         </div>
       </div>
 
       {% if content.group_metadata is not empty %}
         <div class="full-node__list">
           <aside class="full-node__sidebar">
-            {{ content.group_metadata }}
+            {{ content.group_metadata.group_sidebar_mukurtu_fields }}
+            {{ content.group_metadata.group_additional_metadata }}
+            {{ content.group_metadata.group_rights }}
           </aside>
         </div>
       {% endif %}

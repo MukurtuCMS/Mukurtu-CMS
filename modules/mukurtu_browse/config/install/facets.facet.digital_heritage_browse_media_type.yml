@@ -10,6 +10,8 @@ id: digital_heritage_browse_media_type
 name: 'Media type'
 weight: 0
 min_count: 1
+missing: false
+missing_label: others
 url_alias: media_assets_media_media_type
 facet_source_id: 'search_api:views_block__mukurtu_digital_heritage_browse__mukurtu_digital_heritage_browse_block'
 field_identifier: media_type
@@ -18,6 +20,9 @@ hard_limit: 0
 exclude: false
 use_hierarchy: false
 keep_hierarchy_parents_active: false
+hierarchy:
+  type: taxonomy
+  config: {  }
 expand_hierarchy: false
 enable_parent_when_child_gets_disabled: true
 widget:
@@ -55,6 +60,17 @@ processor_configs:
       sort: 40
     settings:
       sort: ASC
+  hierarchy_processor:
+    processor_id: hierarchy_processor
+    weights:
+      build: 100
+    settings: {  }
+  replace:
+    processor_id: replace
+    weights:
+      post_query: 50
+    settings:
+      replacements: "external_embed|external embed\r\nremote_video|remote video"
   url_processor_handler:
     processor_id: url_processor_handler
     weights:

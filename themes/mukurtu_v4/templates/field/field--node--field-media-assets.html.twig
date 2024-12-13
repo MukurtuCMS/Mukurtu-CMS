@@ -53,27 +53,54 @@
   ]
 %}
 
- {{ attach_library('mukurtu_v4/splide') }}
- {{ attach_library('mukurtu_v4/media-carousel') }} 
+{%
+  set contentWarningsClasses = [
+    'mukurtu-content-warning',
+    'mukurtu-content-warning-' ~ media.id,
+  ]
+%}
 
-{# If there's more than 1 item in the media assets field, 
+{%
+  set overlaySubClasses = [
+    'mukurtu-content-warning-overlay-text',
+    'mukurtu-content-warning-instance-' ~ media.id,
+  ]
+%}
+
+ {{ attach_library('mukurtu_v4/splide') }}
+ {{ attach_library('mukurtu_v4/media-carousel') }}
+
+{# If there's more than 1 item in the media assets field,
 render the rest of the code for the carousel. #}
 {% if items|length > 1 %}
   {# The media carousel. #}
   <div{{ attributes.addClass(classes, 'splide__track') }}>
-    <ul class="splide__list field__items">  
+    <ul class="splide__list field__items">
       {% for item in items %}
+      {# todo: add content warnings for multiple media assets #}
         <li{{ item.attributes.addClass('field__item splide__slide') }}>{{ item.content }}</li>
       {% endfor %}
     </ul>
   </div>
 {% else %}
-{# If there's only 1 item in the media assets field, 
+{# If there's only 1 item in the media assets field,
 do not render carousel code. #}
   <div{{ attributes }}>
     <div class="field-item__container">
     {% for item in items %}
-      <div class="field-item" {{ item.attributes }}>{{ item.content }}</div>
+      {% if hasContentWarning %}
+      <div{{ item.attributes.addClass(contentWarningsClasses) }}>
+        <div class="field-item" {{ item.attributes }}>{{ item.content }}</div>
+        <div{{ item.attributes.addClass(overlaySubClasses).removeClass(contentWarningsClasses) }}>
+          {% for warning in warnings %}
+            <div>{{ warning }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+        <div class="field-item" {{ item.attributes }}>{{ item.content }}</div>
+      {% endif %}
+
     {% endfor %}
     </div>
   </div>

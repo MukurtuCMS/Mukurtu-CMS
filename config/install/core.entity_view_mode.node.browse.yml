@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.browse
+label: 'List Browse'
+targetEntityType: node
+cache: true

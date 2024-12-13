@@ -1,16 +1,11 @@
 .dashboard {
-  //  Set up grid-like layout for Dashboard.
+  @include layout--full-width-grid-item;
+
   display: flex;
   gap: var(--gutter);
   flex-direction: row;
   flex-wrap: wrap;
   width: 100%;
-
-  grid-column: 1 / -1;
-
-  @include media('>=2xl') {
-    grid-column: 2 / -2;
-  }
 
   // Add elements to grid.
   &__layout-sidebar-first,

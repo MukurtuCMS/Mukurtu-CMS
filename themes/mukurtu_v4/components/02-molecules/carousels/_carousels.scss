@@ -25,11 +25,7 @@
   margin-block: var(--v-space-4xxs);
 
   .splide.is-initialized {
-    grid-column: 1 / -1;
-
-    @include media('>=2xl') {
-      grid-column: 2 / -2;
-    }
+    @include layout--full-width-grid-item;
   }
 }
 
@@ -47,40 +43,21 @@
     width: fit-content;
     margin: 0 auto var(--v-space-2xs);
 
-    // Navigation/jump to drop down.
     .js-form-type-select {
-      position: relative;
+      display: flex;
+      align-items: baseline;
 
-      &::after {
-        content: '';
-        display: inline-block;
-        position: absolute;
-        right: 15px;
-        margin: auto;
-        top: 20px;
-        width: 0;
-        height: 0;
-        border-style: solid;
-        border-width: var(--v-space-5xs)var(--v-space-5xs) 0 var(--v-space-5xs);
-        border-color: var(--brand-primary-accent) transparent transparent transparent;
+      select {
+        width: 250px;
       }
     }
 
-    .form-select {
-      appearance: none;
-      border: none;
-      background: var(--brand-light-accent);
-      padding: var(--v-space-4xxs) var(--v-space-2xs) var(--v-space-4xxs) var(--v-space-5xs);
-      margin-inline-start: var(--v-space-6xs);
-      width: 250px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      font-weight: var(--text-bold);
+    label {
+      margin-inline-end: var(--v-space-5xs);
+      flex: 1 0 auto;
     }
   }
 }
-
 
 // Media Asset Carousels.
 .media-carousel {

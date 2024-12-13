@@ -7,55 +7,80 @@ To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu
 
 **Note: This version of Mukurtu CMS is currently under active development and is subject to daily change. Only use for testing and feedback purposes.**
 
+## Requirements
 
-## Usage
-Beginning with version 4, Mukurtu CMS has been implemented as a [Drupal](https://www.drupal.org/) installation profile. Drupal should be [installed](https://www.drupal.org/docs/installing-drupal) as normal, with the Mukurtu CMS installation profile added to your `composer.json` file.
+* The necessary database server, web server, and PHP installed that meet [modern Drupal requirements](https://www.drupal.org/docs/system-requirements)
+* [Composer](https://getcomposer.org/)
+* For local development, we encourage using [Docker](https://ddev.readthedocs.io/en/stable/users/install/docker-installation/) and [DDEV](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/) (which includes composer)
 
-There is an available [Mukurtu CMS project template](https://github.com/MukurtuCMS/Mukurtu-CMS-v4-Project-Template) with a `composer.json` preconfigured to download the Mukurtu CMS installation profile.
+## Install Mukurtu with DDEV
 
-> :warning: Access control in Mukurtu depends on the Drupal private file system. You must configure the 'file_private_path' setting in settings.php.
+Using DDEV is the easiest way to get up and running with Mukurtu locally.
 
-## External Dependencies
-* Requires `pdftotext` to be installed on the hosting system for PDF text extraction to function.
-
-## Contributing
-Mukurtu CMS v4 is extremely unstable and under active development. If you wish to contribute, please first discuss it with us by starting an issue or discussion on the [Mukurtu CMS GitHub page](https://github.com/MukurtuCMS/Mukurtu-CMS) or contact us via [mukurtu.org](https://mukurtu.org/). Unsolicited pull requests will likely not receive attention at this point in development.
-
-## Quick start for Personal Testing & Evaluation
-There are two easy methods to create a local installation of Mukurtu CMS:
-### DDEV
-Mukurtu CMS can be installed locally using [DDEV](https://ddev.com/).
-* Download and install [DDEV](https://github.com/drud/ddev)
-* Create and navigate to a new folder (e.g., 'mukurtu'):
+* Download and install [DDEV](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/)
+* Make a new folder in which to work and initialize a DDEV project inside it. Run the following commands to download and install Mukurtu.
 ```
-mkdir mukurtu && cd mukurtu
-```
-* Download the composer.json file from our [Mukurtu CMS project template](https://github.com/MukurtuCMS/Mukurtu-CMS-v4-Project-Template):
-```
-wget https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS-v4-Project-Template/main/composer.json
-```
-* Initialize the ddev project for Drupal 9:
-```
-ddev config --project-type=drupal9 --docroot=web --create-docroot
-```
-* Configure Drupal's `file_private_path` setting by creating a folder (outside of `/web`) and editing `sites/default/settings.php` and setting it to the absolute path of your new private folder.
-* Start ddev:
-```
+mkdir mukurtu
+cd mukurtu
+ddev config --project-type=drupal9 --docroot=web
+# Optional but recommended: install pdftotext inside the DDEV container:
+echo "RUN sudo apt -qq update; sudo apt install poppler-utils -y;" > .ddev/web-build/Dockerfile.pdftotext
 ddev start
-```
-* Run composer install:
-```
-ddev composer install
-```
-* You may be prompted to add your GitHub token. Follow the on-screen instructions for public repositories.
-* Launch your new ddev project:
-```
+ddev composer create mukurtu/mukurtu-template:dev-main
+ddev drush si --site-name=Mukurtu --account-name=admin --account-pass=admin
 ddev launch
 ```
-* You should now see the standard Drupal 9 installer, configured to use the Mukurtu installation profile
-* Default admin credentials are admin/admin
+* If planning to develop on the Mukurtu CMS installation profile, follow the [additional installation steps to connect a Git checkout to the new project](https://github.com/MukurtuCMS/Mukurtu-CMS/wiki).
 
-### Gitpod
-Mukurtu CMS is configured to work with [Gitpod](https://www.gitpod.io/), a cloud based development environment.
+## Installing Mukurtu CMS with Composer
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/MukurtuCMS/Mukurtu-CMS)
+If installing directly on a web host that has a command line interface, you can install Mukurtu via composer.
+
+* First, [install composer](https://getcomposer.org/download/). If you do not have it already, it can be downloaded into a directory with the following:
+```
+wget https://raw.githubusercontent.com/composer/getcomposer.org/main/web/installer -O - -q | php -- --quiet
+# Ideally, move composer into an executable path such as /usr/local/bin/composer.
+# But for use only within the current directory, just rename it.
+mv composer.phar composer
+```
+* Install Mukurtu through composer with the following commands:
+```
+mkdir mukurtu
+cd mukurtu
+composer create-project mukurtu/mukurtu-template:dev-main .
+```
+* Set your web server to serve the "web" folder (e.g. `mukurtu4/web`)
+* Install Drupal as normal by opening the site in your web browser, the Mukurtu profile distribution will automatically be used.
+
+## Post-installation Steps
+
+### Set up private files
+
+Access control in Mukurtu depends on the Drupal private file system. You must configure the `file_private_path` setting in settings.php.
+
+* Create a folder outside the `web` directory, such as `private_files`.
+* Open `sites/default/settings.php` and modify the `$settings['file_private_path']` line, such as the following:
+```php
+// Specify a private files path.
+$settings['file_private_path'] = '../private_files';
+```
+* Clear your site cache by visiting `admin/config/development/performance` within your Mukurtu site and clicking "Clear all caches".
+* Confirm the private files directory is found by visiting `admin/config/media/file-system` within your Mukurtu site.
+
+### Install pdftotext
+
+The ability to parse PDFs is dependent on the `pdftotext` command line tool. This can be installed in ddev with:
+```bash
+echo "RUN sudo apt -qq update; sudo apt install poppler-utils -y;" > .ddev/web-build/Dockerfile.pdftotext
+ddev restart
+```
+
+Or, if hosting your own server with:
+```bash
+sudo apt install poppler-utils
+```
+
+## Contributing
+Mukurtu CMS v4 is extremely unstable and under active development. If you wish to contribute, please first discuss it with us by starting an issue or discussion on the [Mukurtu CMS issue tracker](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or contact us via [mukurtu.org](https://mukurtu.org/).
+
+For more information on developing and contributing to Mukurtu CMS, [visit the GitHub wiki for developer documentation](https://github.com/MukurtuCMS/Mukurtu-CMS/wiki).

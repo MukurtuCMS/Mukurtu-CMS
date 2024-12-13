@@ -3,9 +3,6 @@ status: true
 dependencies:
   config:
     - field.field.node.collection.comment
-    - field.field.node.collection.field_mukurtu_cluster_lat
-    - field.field.node.collection.field_mukurtu_cluster_long
-    - field.field.node.collection.field_mukurtu_geojson
     - node.type.collection
   module:
     - user
@@ -43,9 +40,6 @@ hidden:
   field_in_collection: true
   field_items_in_collection: true
   field_keywords: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
   field_multipage_page_of: true
   field_parent_collection: true
   field_related_content: true

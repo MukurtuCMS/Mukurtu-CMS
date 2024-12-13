@@ -6,7 +6,7 @@ dependencies:
     - field.field.node.person.comment
     - node.type.person
   module:
-    - datetime
+    - original_date
     - layout_builder
     - user
 third_party_settings:
@@ -35,7 +35,7 @@ content:
     weight: 1
     region: content
   field_date_born:
-    type: datetime_default
+    type: month_day_year_original_date_formatter
     label: inline
     settings:
       timezone_override: ''
@@ -44,7 +44,7 @@ content:
     weight: 3
     region: content
   field_date_died:
-    type: datetime_default
+    type: month_day_year_original_date_formatter
     label: inline
     settings:
       timezone_override: ''

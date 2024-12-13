@@ -5,13 +5,10 @@ dependencies:
     - core.entity_view_display.comment.comment.default
     - core.entity_view_mode.node.full
     - field.field.node.person.comment
-    - field.field.node.person.field_mukurtu_cluster_lat
-    - field.field.node.person.field_mukurtu_cluster_long
-    - field.field.node.person.field_mukurtu_geojson
     - node.type.person
   module:
     - comment
-    - datetime
+    - original_date
     - field_group
     - layout_builder
     - user
@@ -98,20 +95,16 @@ content:
     weight: 2
     region: content
   field_date_born:
-    type: datetime_default
+    type: month_day_year_original_date_formatter
     label: above
-    settings:
-      timezone_override: ''
-      format_type: medium
+    settings: {  }
     third_party_settings: {  }
     weight: 4
     region: content
   field_date_died:
-    type: datetime_default
+    type: month_day_year_original_date_formatter
     label: above
-    settings:
-      timezone_override: ''
-      format_type: medium
+    settings: {  }
     third_party_settings: {  }
     weight: 5
     region: content

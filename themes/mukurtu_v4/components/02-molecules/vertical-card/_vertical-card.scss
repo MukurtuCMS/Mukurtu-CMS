@@ -1,0 +1,18 @@
+// As seen in Grid Browse display.
+
+.vertical-card {
+  break-inside: avoid;
+  border-block-start: 0;
+  border-block-end: 5px solid var(--mukurtu-view-row-divider-color);
+
+  padding-block-end: var(--v-space-3xs);
+  margin-block-end: var(--v-space-3xs);
+  margin-block-start: 0;
+
+  &__content-header {
+    h2 {
+      font-size: var(--font-size-s);
+      font-weight:  var(--text-bold);
+    }
+  }
+}

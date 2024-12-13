@@ -1,6 +1,6 @@
 name: 'Mukurtu Content Warnings'
 type: module
-description: 'Provides content warnings'
+description: 'Provides click-through media content warnings'
 core_version_requirement: ^8 || ^9
 core: 8.x
 package: 'Mukurtu'

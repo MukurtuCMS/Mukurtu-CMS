@@ -1,0 +1,32 @@
+id: mukurtu_cms_v3_content_warnings
+label: Mukurtu Content Warnings
+migration_group: mukurtu_cms_v3
+migration_tags:
+  - Mukurtu 3
+
+source:
+  plugin: variable
+  variables:
+    - mukurtu_content_warning_people
+    - mukurtu_content_warning_taxonomy
+    - mukurtu_content_warning_scald_contexts
+
+process:
+  people_warnings: mukurtu_content_warning_people
+  taxonomy_warnings: mukurtu_content_warning_taxonomy
+  scald_contexts: mukurtu_content_warning_scald_contexts
+
+destination:
+  plugin: config
+  config_name: mukurtu_content_warnings.settings
+
+migration_dependencies:
+  required:
+    - mukurtu_v3_content_warnings
+  optional:
+    - d7_field_instance
+
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate

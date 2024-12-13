@@ -9,6 +9,7 @@ libraries:
 dependencies:
   - node
   - media
+  - block
   - paragraphs
   - leaflet_views
   - mukurtu_core

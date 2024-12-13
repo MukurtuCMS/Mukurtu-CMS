@@ -104,7 +104,6 @@
 }
 
 @mixin layout--full-width-grid-item {
-  display: grid;
   grid-column: 1 / -1;
 
   @include media('>=2xl') {
