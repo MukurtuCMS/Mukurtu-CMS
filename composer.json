@@ -1,5 +1,5 @@
 {
-    "name": "mukurtu/mukurtu-cms",
+    "name": "mukurtu/mukurtu",
     "description": "Mukurtu CMS Drupal Installation Profile",
     "type": "drupal-profile",
     "minimum-stability": "dev",
