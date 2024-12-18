@@ -39,6 +39,7 @@ services:
           # Add our own local checkout repository instead. This will use the
           # local directory as the source, copying it into the final location.
           composer config repositories.local-dev path $TUGBOAT_ROOT
+          composer update --no-install
           composer install --no-ansi --no-interaction --optimize-autoloader --no-progress
 
         # Symlink the web root and grant read access to the home directory.
