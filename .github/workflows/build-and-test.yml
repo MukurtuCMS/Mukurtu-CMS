@@ -54,20 +54,20 @@ jobs:
       - name: Install Mukurtu Template
         run: |
           composer create mukurtu/mukurtu-template:dev-main . --no-install --no-interaction
-          rm web/profiles/contrib/mukurtu-cms -rf
+          rm web/profiles/mukurtu -rf
 
       # Usually checkout is the first action, but we set up the mukurtu-template
       # first, then put the checkout inside of it.
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          path: web/profiles/contrib/mukurtu-cms
+          path: web/profiles/mukurtu
 
       - name: Install Mukurtu
         run: |
-          composer config repositories.local-dev path web/profiles/contrib/mukurtu-cms
+          composer config repositories.local-dev path web/profiles/mukurtu
           composer install --no-interaction --optimize-autoloader
-          cp ./web/profiles/contrib/mukurtu-cms/phpunit.xml ./phpunit.xml
+          cp ./web/profiles/mukurtu/phpunit.xml ./phpunit.xml
 
       - name: Mukurtu Tests
         run: |

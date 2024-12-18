@@ -42,25 +42,25 @@
   </php>
   <testsuites>
     <testsuite name="kernel">
-      <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/mukurtu_protocol/tests/src/Kernel</directory>
+      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/mukurtu_collection/tests/src/Kernel</directory>
+      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_collection/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/mukurtu_import/tests/src/Kernel</directory>
+      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_import/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/mukurtu_export/tests/src/Kernel</directory>
+      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_export/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/mukurtu_drafts/tests/src/Kernel</directory>
+      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_drafts/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/original_date/tests/src/Kernel</directory>
+      <directory>/var/www/html/web/profiles/mukurtu/modules/original_date/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="functional">
-      <directory>/var/www/html/web/profiles/contrib/mukurtu-cms/modules/mukurtu_protocol/tests/src/Functional</directory>
+      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
     </testsuite>
   </testsuites>
   <listeners>
