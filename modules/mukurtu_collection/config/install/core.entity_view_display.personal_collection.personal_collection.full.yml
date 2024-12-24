@@ -25,13 +25,6 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
-  field_summary:
-    type: string
-    label: above
-    settings: { }
-    third_party_settings: {  }
-    weight: -1
-    region: content
   field_items_in_collection:
     type: entity_reference_entity_view
     label: above
@@ -57,6 +50,13 @@ content:
     third_party_settings: {  }
     weight: -9
     region: content
+  field_summary:
+    type: string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: -1
+    region: content
   name:
     type: string
     label: above
@@ -73,4 +73,5 @@ content:
     weight: 10
     region: content
 hidden:
+  langcode: true
   search_api_excerpt: true

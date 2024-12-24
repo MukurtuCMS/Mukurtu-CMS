@@ -6,6 +6,7 @@ dependencies:
   module:
     - node
     - search_api
+    - search_api_solr
 id: mukurtu_collection_index
 name: 'Mukurtu Collection Index'
 description: 'Index for Mukurtu Collections.'
