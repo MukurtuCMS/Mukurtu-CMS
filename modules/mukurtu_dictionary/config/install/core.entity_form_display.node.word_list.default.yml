@@ -4,9 +4,6 @@ dependencies:
   config:
     - entity_browser.browser.browse_content
     - field.field.node.word_list.comment
-    - field.field.node.word_list.field_mukurtu_cluster_lat
-    - field.field.node.word_list.field_mukurtu_cluster_long
-    - field.field.node.word_list.field_mukurtu_geojson
     - node.type.word_list
   module:
     - entity_browser
@@ -279,10 +276,7 @@ content:
 hidden:
   comment: true
   field_content_type: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
   field_mukurtu_community: true
-  field_mukurtu_geojson: true
   field_mukurtu_original_record: true
   field_mukurtu_protocol_inherit: true
   field_sequence_collection: true

@@ -1,7 +1,7 @@
 langcode: en
 status: true
 dependencies: {  }
-name: large
+name: large_900px
 label: 'Large (900px w)'
 effects:
   ddd73aa7-4bd6-4c85-b600-bdf2b1628d1d:

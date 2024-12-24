@@ -4,9 +4,6 @@ dependencies:
   config:
     - entity_browser.browser.browse_content
     - field.field.node.dictionary_word.comment
-    - field.field.node.dictionary_word.field_mukurtu_cluster_lat
-    - field.field.node.dictionary_word.field_mukurtu_cluster_long
-    - field.field.node.dictionary_word.field_mukurtu_geojson
     - node.type.dictionary_word
   module:
     - comment
@@ -532,9 +529,6 @@ content:
     third_party_settings: {  }
 hidden:
   field_content_type: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
   field_mukurtu_community: true
-  field_mukurtu_geojson: true
   field_sequence_collection: true
   langcode: true

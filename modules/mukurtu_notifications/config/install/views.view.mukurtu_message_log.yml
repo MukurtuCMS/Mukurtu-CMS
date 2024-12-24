@@ -6,7 +6,6 @@ dependencies:
     - message.template.mukurtu_batch_import_report
     - message.template.mukurtu_new_item_in_collection
     - message.template.mukurtu_new_item_in_community
-    - message.template.mukurtu_new_item_in_protocol
     - message.template.mukurtu_new_user_registration
     - message.template.mukurtu_single_node_delete
     - message.template.mukurtu_single_node_insert

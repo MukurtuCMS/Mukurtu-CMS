@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.media.media_assets
-    - image.style.large
+    - image.style.large_900px
     - media.type.image
   module:
     - colorbox
@@ -22,8 +22,8 @@ content:
     type: colorbox
     label: hidden
     settings:
-      colorbox_node_style: large
-      colorbox_node_style_first: large
+      colorbox_node_style: large_900px
+      colorbox_node_style_first: large_900px
       colorbox_image_style: ''
       colorbox_gallery: none
       colorbox_gallery_custom: ''
