@@ -5,11 +5,13 @@ dependencies:
     - core.entity_view_mode.node.taxonomy_record
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
+    - field.field.node.digital_heritage.field_mukurtu_cluster_lat
+    - field.field.node.digital_heritage.field_mukurtu_cluster_long
+    - field.field.node.digital_heritage.field_mukurtu_geojson
     - node.type.digital_heritage
   module:
     - field_group
     - layout_builder
-    - leaflet
     - link
     - mukurtu_core
     - original_date
@@ -374,15 +376,25 @@ content:
     region: content
 hidden:
   comment: true
-  field_content_type: true
+  draft: true
   field_citation: true
+  field_content_type: true
+  field_coverage_description: true
+  field_cultural_protocols: true
+  field_knowledge_keepers: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
+  field_location: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
   field_mukurtu_original_record: true
+  field_multipage_page_of: true
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
+  field_rights_and_usage: true
+  field_rights_statements: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true
@@ -393,5 +405,6 @@ hidden:
   flag_mukurtu_follow_content: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

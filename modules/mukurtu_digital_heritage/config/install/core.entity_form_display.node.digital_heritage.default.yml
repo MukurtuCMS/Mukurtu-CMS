@@ -5,6 +5,9 @@ dependencies:
     - entity_browser.browser.browse_content
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
+    - field.field.node.digital_heritage.field_mukurtu_cluster_lat
+    - field.field.node.digital_heritage.field_mukurtu_cluster_long
+    - field.field.node.digital_heritage.field_mukurtu_geojson
     - node.type.digital_heritage
   module:
     - comment
@@ -594,6 +597,13 @@ content:
       match_limit: 10
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
     third_party_settings: {  }
   name:
     weight: -8
