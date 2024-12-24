@@ -2,7 +2,7 @@ name: 'Mukurtu Browse'
 type: module
 description: 'Provides the default Mukurtu browse page.'
 core_version_requirement: '^9.4 || ^10'
-package: Mukurtu
+package: 'Mukurtu CMS'
 libraries:
   - mukurtu_browse/mukurtu-leaflet-preview
 dependencies:
@@ -20,6 +20,7 @@ dependencies:
   - 'facets:facets'
   - 'geofield:geofield'
   - 'leaflet:leaflet_views'
+  - 'mukurtu_collection:mukurtu_collection'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_dictionary:mukurtu_dictionary'
   - 'mukurtu_digital_heritage:mukurtu_digital_heritage'

@@ -1,11 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - search_api.index.mukurtu_default_content_index
-    - views.view.mukurtu_browse
-  module:
-    - search_api
+dependencies: {  }
 id: community_map_0
 name: 'Community Map'
 url_alias: community_content_title

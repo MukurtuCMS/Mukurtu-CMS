@@ -1,11 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - search_api.index.mukurtu_default_content_index
-    - views.view.mukurtu_browse_map
-  module:
-    - search_api
+dependencies: {  }
 id: map_category
 name: Category
 url_alias: category

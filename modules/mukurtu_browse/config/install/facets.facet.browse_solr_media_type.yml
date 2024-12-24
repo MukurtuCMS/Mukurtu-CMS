@@ -1,11 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - search_api.index.mukurtu_default_solr_index
-    - views.view.mukurtu_browse_solr
-  module:
-    - search_api
+dependencies: {  }
 id: browse_solr_media_type
 name: 'Media Type'
 url_alias: browse_solr_media_type

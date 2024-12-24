@@ -1,11 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - search_api.index.mukurtu_default_content_index
-    - views.view.mukurtu_browse
-  module:
-    - search_api
+dependencies: {  }
 id: media_assets_media_media_type
 name: 'Media type'
 url_alias: media_assets_media_media_type
