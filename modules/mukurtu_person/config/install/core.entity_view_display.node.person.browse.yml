@@ -4,9 +4,11 @@ dependencies:
   config:
     - core.entity_view_mode.node.browse
     - field.field.node.person.comment
+    - field.field.node.person.field_mukurtu_cluster_lat
+    - field.field.node.person.field_mukurtu_cluster_long
+    - field.field.node.person.field_mukurtu_geojson
     - node.type.person
   module:
-    - original_date
     - layout_builder
     - user
 third_party_settings:
@@ -34,46 +36,23 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
-  field_date_born:
-    type: month_day_year_original_date_formatter
-    label: inline
-    settings:
-      timezone_override: ''
-      format_type: medium
-    third_party_settings: {  }
-    weight: 3
-    region: content
-  field_date_died:
-    type: month_day_year_original_date_formatter
-    label: inline
-    settings:
-      timezone_override: ''
-      format_type: medium
-    third_party_settings: {  }
-    weight: 4
-    region: content
-  field_multipage_page_of:
-    type: entity_reference_label
-    label: inline
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 2
-    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: full
+      view_mode: browse
       link: false
     third_party_settings: {  }
     weight: 0
     region: content
 hidden:
   comment: true
+  draft: true
   field_all_related_content: true
   field_citation: true
   field_cultural_protocols: true
+  field_date_born: true
+  field_date_died: true
   field_deceased: true
   field_in_collection: true
   field_keywords: true
@@ -81,6 +60,7 @@ hidden:
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
+  field_multipage_page_of: true
   field_protocol_control: true
   field_related_content: true
   field_related_people: true
@@ -89,11 +69,13 @@ hidden:
   field_title: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_content: true
   flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true
   flag_mukurtu_follow_content: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true
