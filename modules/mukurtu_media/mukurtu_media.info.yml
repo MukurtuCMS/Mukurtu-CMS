@@ -1,14 +1,17 @@
 name: 'Mukurtu Media'
 type: module
 description: 'Provides Mukurtu media types and customizations.'
-core_version_requirement: ^8 || ^9
-core: 8.x
-package: 'Mukurtu'
+core_version_requirement: '^9.4 || ^10'
+package: Mukurtu
 dependencies:
-  - drupal:media
-  - file
-  - path
-  - mukurtu_core
-  - mukurtu_protocol
-
-version: '8.x-1.x-dev'
+  - 'drupal:file'
+  - 'drupal:image'
+  - 'drupal:media'
+  - 'drupal:path'
+  - 'drupal:system'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'flag:flag'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_protocol:mukurtu_protocol'
+version: 4.x-dev
