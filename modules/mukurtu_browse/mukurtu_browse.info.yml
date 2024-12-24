@@ -30,4 +30,4 @@ dependencies:
   - 'search_api:search_api_db'
   - 'search_api_glossary:search_api_glossary'
   - 'search_api_solr:search_api_solr'
-version: 8.x-1.x-dev
+version: 4.x-dev
