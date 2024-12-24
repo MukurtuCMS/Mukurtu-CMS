@@ -1,11 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - search_api.index.mukurtu_dictionary_solr_index
-    - views.view.dictionary_browse_solr_new_index
-  module:
-    - search_api
+dependencies: {  }
 id: dictionary_browse_solr_new_glossary_entry
 name: 'Glossary Entry'
 url_alias: dictionary_browse_solr_new_glossary_entry

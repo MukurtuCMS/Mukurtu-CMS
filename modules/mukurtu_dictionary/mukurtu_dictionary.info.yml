@@ -2,7 +2,7 @@ name: 'Mukurtu Dictionary'
 type: module
 description: 'Provides the default Mukurtu dictionary pages.'
 core_version_requirement: '^9.4 || ^10'
-package: Mukurtu
+package: 'Mukurtu CMS'
 dependencies:
   - 'blazy:blazy'
   - 'drupal:comment'
