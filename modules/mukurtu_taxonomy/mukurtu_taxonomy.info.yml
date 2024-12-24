@@ -1,17 +1,21 @@
 name: 'Mukurtu Taxonomy'
 type: module
 description: 'Provides the base Mukurtu taxonomies.'
-core_version_requirement: ^8 || ^9
-core: 8.x
-package: 'Mukurtu'
+core_version_requirement: '^9.4 || ^10'
+package: Mukurtu
 dependencies:
-  - mukurtu_core
-  - mukurtu_protocol
-  - mukurtu_media
-  - mukurtu_search
-  - search_api
-  - node
-  - media
-  - paragraphs
-
-version: '8.x-1.x-dev'
+  - 'drupal:media'
+  - 'drupal:node'
+  - 'drupal:taxonomy'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'entity_browser:entity_browser'
+  - 'facets:facets'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_media:mukurtu_media'
+  - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_search:mukurtu_search'
+  - 'paragraphs:paragraphs'
+  - 'search_api:search_api'
+version: 4.x-dev

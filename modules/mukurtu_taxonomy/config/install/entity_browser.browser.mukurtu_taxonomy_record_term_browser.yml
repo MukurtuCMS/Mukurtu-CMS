@@ -23,10 +23,9 @@ widget_selector: single
 widget_selector_configuration: {  }
 widgets:
   7154fb62-3e71-4769-9121-b328e601b8f4:
-    id: mukurtu_taxonomy_record_term_selection
-    uuid: 7154fb62-3e71-4769-9121-b328e601b8f4
-    label: 'Select Taxonomy Terms'
-    weight: 1
     settings:
       submit_text: 'Add Terms'
-
+    uuid: 7154fb62-3e71-4769-9121-b328e601b8f4
+    weight: 1
+    label: 'Select Taxonomy Terms'
+    id: mukurtu_taxonomy_record_term_selection
