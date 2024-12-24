@@ -2,7 +2,7 @@ name: 'Mukurtu Notifications'
 type: module
 description: 'Provides messaging and notifications to the Mukurtu platform.'
 core_version_requirement: '^9.4 || ^10'
-package: Mukurtu
+package: 'Mukurtu CMS'
 dependencies:
   - 'drupal:field'
   - 'drupal:node'

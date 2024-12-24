@@ -1,5 +1,5 @@
 bundle: mukurtu
-required: true
 excluded:
   - core.entity_form_display.flagging.email_term.default
   - core.entity_form_display.flagging.email_node.default
+required: true
