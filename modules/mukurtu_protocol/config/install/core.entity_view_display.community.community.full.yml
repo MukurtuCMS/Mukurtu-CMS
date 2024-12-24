@@ -92,6 +92,7 @@ content:
 hidden:
   field_parent_community: true
   field_thumbnail_image: true
+  langcode: true
   og_group: true
   search_api_excerpt: true
   user_id: true

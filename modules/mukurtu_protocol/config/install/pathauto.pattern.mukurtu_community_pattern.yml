@@ -1,8 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  module:
-    - mukurtu_protocol
+dependencies: {  }
 id: mukurtu_community_pattern
 label: 'Mukurtu Community Pattern'
 type: 'canonical_entities:community'

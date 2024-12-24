@@ -1,18 +1,29 @@
 name: 'Mukurtu Protocols'
 type: module
 description: 'Provides access control that is fundamental to the Mukurtu platform.'
-core_version_requirement: ^8 || ^9
-package: 'Mukurtu'
+core_version_requirement: '^9.4 || ^10'
+package: Mukurtu
 dependencies:
-  - comment
-  - content_moderation
-  - entity_browser
-  - og
-  - og_ui
-  - media
-  - media_library
-  - message
-  - mukurtu_core
-  - mukurtu_drafts
-
-version: '8.x-1.x-dev'
+  - 'drupal:comment'
+  - 'drupal:content_moderation'
+  - 'drupal:field'
+  - 'drupal:layout_builder'
+  - 'drupal:media'
+  - 'drupal:media_library'
+  - 'drupal:node'
+  - 'drupal:options'
+  - 'drupal:system'
+  - 'drupal:taxonomy'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'entity_browser:entity_browser'
+  - 'message:message'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_drafts:mukurtu_drafts'
+  - 'mukurtu_notifications:mukurtu_notifications'
+  - 'og:og'
+  - 'og_ui:og_ui'
+  - 'pathauto:pathauto'
+  - 'views_bulk_operations:views_bulk_operations'
+version: 4.x-dev
