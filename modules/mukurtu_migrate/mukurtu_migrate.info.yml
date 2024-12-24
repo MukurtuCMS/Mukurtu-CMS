@@ -1,11 +1,14 @@
 name: 'Mukurtu Migrate'
 type: module
 description: 'Provides the functionality needed to live migrate from Mukurtu 2.x/3.x to 4.x.'
-core_version_requirement: ^8 || ^9
-core: 8.x
-package: 'Mukurtu'
+core_version_requirement: '^9.4 || ^10'
+package: Mukurtu
 dependencies:
-  - drupal:migrate
-  - migrate_drupal
-  - migrate_drupal_ui
-version: '8.x-1.x-dev'
+  - 'drupal:dblog'
+  - 'drupal:migrate'
+  - 'drupal:migrate_drupal'
+  - 'drupal:migrate_drupal_ui'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'migrate_plus:migrate_plus'
+version: 4.x-dev
