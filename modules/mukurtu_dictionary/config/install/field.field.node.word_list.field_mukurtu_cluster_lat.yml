@@ -1,15 +1,15 @@
-uuid: 7a3fcc8a-108a-495d-9cea-5012aca20029
+uuid: 80bf965e-5696-45f1-aa6f-8a7758c8b875
 langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_mukurtu_cluster_long
+    - field.storage.node.field_mukurtu_cluster_lat
     - node.type.word_list
-id: node.word_list.field_mukurtu_cluster_long
-field_name: field_mukurtu_cluster_long
+id: node.word_list.field_mukurtu_cluster_lat
+field_name: field_mukurtu_cluster_lat
 entity_type: node
 bundle: word_list
-label: 'Mukurtu Coverage - Cluster Longitude'
+label: 'Mukurtu Coverage - Cluster Latitude'
 description: ''
 required: false
 translatable: true

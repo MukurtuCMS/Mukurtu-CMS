@@ -1,19 +1,23 @@
-uuid: 0a3d303a-59a3-4ba9-ac08-a54b7c1aea41
+uuid: 7a3fcc8a-108a-495d-9cea-5012aca20029
 langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_mukurtu_geojson
+    - field.storage.node.field_mukurtu_cluster_long
     - node.type.word_list
-id: node.word_list.field_mukurtu_geojson
-field_name: field_mukurtu_geojson
+id: node.word_list.field_mukurtu_cluster_long
+field_name: field_mukurtu_cluster_long
 entity_type: node
 bundle: word_list
-label: 'Mukurtu GeoJSON'
+label: 'Mukurtu Coverage - Cluster Longitude'
 description: ''
 required: false
 translatable: true
 default_value: {  }
 default_value_callback: ''
-settings: {  }
-field_type: string_long
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float
