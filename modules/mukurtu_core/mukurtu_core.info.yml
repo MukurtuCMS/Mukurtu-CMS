@@ -1,24 +1,37 @@
 name: 'Mukurtu Core'
 type: module
 description: 'Provides the base level functionality needed by more specific Mukurtu modules.'
-core_version_requirement: ^8 || ^9
-package: 'Mukurtu'
-version: '8.x-1.x-dev'
+core_version_requirement: '^9.4 || ^10'
+package: 'Mukurtu CMS'
+version: 4.x-dev
 libraries:
   - mukurtu_core/mukurtu-leaflet-widget
 dependencies:
-  - comment
-  - original_date
-  - content_browser
-  - entity_browser
-  - geofield
-  - media
-  - media_library
-  - node
-  - pathauto
-  - search_api
-  - search_api_db
-  - search_api_glossary
-  - search_api_solr
-  - taxonomy
-  - views_bulk_operations
+  - 'blazy:blazy'
+  - 'content_browser:content_browser'
+  - 'drupal:comment'
+  - 'drupal:editor'
+  - 'drupal:field'
+  - 'drupal:file'
+  - 'drupal:filter'
+  - 'drupal:image'
+  - 'drupal:media'
+  - 'drupal:media_library'
+  - 'drupal:menu_ui'
+  - 'drupal:node'
+  - 'drupal:path'
+  - 'drupal:system'
+  - 'drupal:taxonomy'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'entity_browser:entity_browser'
+  - 'flag:flag'
+  - 'geofield:geofield'
+  - 'original_date:original_date'
+  - 'pathauto:pathauto'
+  - 'search_api:search_api'
+  - 'search_api:search_api_db'
+  - 'search_api_glossary:search_api_glossary'
+  - 'search_api_solr:search_api_solr'
+  - 'views_bulk_operations:views_bulk_operations'

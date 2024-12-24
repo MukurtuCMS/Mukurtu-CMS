@@ -1,2 +1,5 @@
 bundle: mukurtu
 required: true
+excluded:
+  - node.settings
+  - site.settings

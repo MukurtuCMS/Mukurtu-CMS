@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.taxonomy_term.teaser
     - taxonomy.vocabulary.category
   module:
     - taxonomy
@@ -183,8 +184,15 @@ display:
             group_items: {  }
       style:
         type: default
+        options:
+          row_class: category-card
+          default_row_class: true
+          uses_fields: false
       row:
         type: 'entity:taxonomy_term'
+        options:
+          relationship: none
+          view_mode: teaser
       query:
         type: views_query
         options:
@@ -194,6 +202,7 @@ display:
           replica: false
           query_tags: {  }
       relationships: {  }
+      css_class: category-grid
       header: {  }
       footer: {  }
       display_extenders: {  }

@@ -4,6 +4,6 @@ dependencies:
   module:
     - node
 id: node.browse
-label: Browse
+label: 'List Browse'
 targetEntityType: node
 cache: true

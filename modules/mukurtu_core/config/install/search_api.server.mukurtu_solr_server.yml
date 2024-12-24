@@ -1,7 +1,27 @@
 langcode: en
 status: true
 dependencies:
-  # Mukurtu devs, remember to delete config dependencies if you re-export.
+  config:
+    - search_api_solr.solr_cache.cache_document_default_7_0_0
+    - search_api_solr.solr_cache.cache_fieldvalue_default_7_0_0
+    - search_api_solr.solr_cache.cache_filter_default_7_0_0
+    - search_api_solr.solr_cache.cache_persegfilter_default_7_0_0
+    - search_api_solr.solr_cache.cache_queryresult_default_7_0_0
+    - search_api_solr.solr_field_type.text_edge_und_6_0_0
+    - search_api_solr.solr_field_type.text_edgestring_und_6_0_0
+    - search_api_solr.solr_field_type.text_ngram_und_6_0_0
+    - search_api_solr.solr_field_type.text_ngramstring_und_6_0_0
+    - search_api_solr.solr_field_type.text_phonetic_und_7_0_0
+    - search_api_solr.solr_field_type.text_string_und_6_0_0
+    - search_api_solr.solr_field_type.text_und_6_0_0
+    - search_api_solr.solr_request_dispatcher.request_dispatcher_httpcachingnever_default_7_0_0
+    - search_api_solr.solr_request_handler.request_handler_autocomplete_default_7_0_0
+    - search_api_solr.solr_request_handler.request_handler_extract_default_7_0_0
+    - search_api_solr.solr_request_handler.request_handler_mlt_default_7_0_0
+    - search_api_solr.solr_request_handler.request_handler_select_default_7_0_0
+    - search_api_solr.solr_request_handler.request_handler_spell_default_7_0_0
+    - search_api_solr.solr_request_handler.request_handler_suggest_default_7_0_0
+    - search_api_solr.solr_request_handler.request_handler_tvrh_default_7_0_0
   module:
     - search_api_solr
 id: mukurtu_solr_server
@@ -47,4 +67,3 @@ backend_config:
   index_single_documents_fallback_count: 10
   index_empty_text_fields: false
   suppress_missing_languages: false
-

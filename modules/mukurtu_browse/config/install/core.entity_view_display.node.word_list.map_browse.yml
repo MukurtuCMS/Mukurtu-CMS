@@ -4,6 +4,9 @@ dependencies:
   config:
     - core.entity_view_mode.node.map_browse
     - field.field.node.word_list.comment
+    - field.field.node.word_list.field_mukurtu_cluster_lat
+    - field.field.node.word_list.field_mukurtu_cluster_long
+    - field.field.node.word_list.field_mukurtu_geojson
     - node.type.word_list
   module:
     - layout_builder

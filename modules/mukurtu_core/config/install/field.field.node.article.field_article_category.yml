@@ -5,8 +5,6 @@ dependencies:
     - field.storage.node.field_article_category
     - node.type.article
     - taxonomy.vocabulary.category
-  content:
-    - 'taxonomy_term:category:4209c7d8-574f-4b7b-99c8-1eb69bda5160'
 id: node.article.field_article_category
 field_name: field_article_category
 entity_type: node

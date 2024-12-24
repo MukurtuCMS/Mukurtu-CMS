@@ -73,6 +73,13 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {  }
   path:
     type: path
     weight: 10
@@ -123,7 +130,4 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-hidden:
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
+hidden: {  }
