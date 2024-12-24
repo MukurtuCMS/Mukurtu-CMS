@@ -1,20 +1,26 @@
 name: 'Mukurtu Notifications'
 type: module
 description: 'Provides messaging and notifications to the Mukurtu platform.'
-core_version_requirement: ^8 || ^9
-core: 8.x
-package: 'Mukurtu'
+core_version_requirement: '^9.4 || ^10'
+package: Mukurtu
 dependencies:
-  - flag
-  - message
-  - message_digest
-  - message_notify
-  - message_notify_ui
-  - message_subscribe
-  - message_subscribe_email
-  - message_ui
-  - mukurtu_core
-  - mukurtu_protocol
-  - mukurtu_collection
-
-version: '8.x-1.x-dev'
+  - 'drupal:field'
+  - 'drupal:node'
+  - 'drupal:options'
+  - 'drupal:taxonomy'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'flag:flag'
+  - 'message:message'
+  - 'message_digest:message_digest'
+  - 'message_notify:message_notify'
+  - 'message_subscribe:message_subscribe'
+  - 'message_subscribe:message_subscribe_email'
+  - 'message_subscribe:message_subscribe_ui'
+  - 'message_ui:message_notify_ui'
+  - 'message_ui:message_ui'
+  - 'mukurtu_collection:mukurtu_collection'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_protocol:mukurtu_protocol'
+version: 4.x-dev

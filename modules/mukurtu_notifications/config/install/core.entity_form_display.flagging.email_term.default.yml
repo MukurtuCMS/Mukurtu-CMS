@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.flagging.email_term.message_digest
+    - flag.flag.email_term
+id: flagging.email_term.default
+targetEntityType: flagging
+bundle: email_term
+mode: default
+content:
+  message_digest:
+    type: options_select
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }
