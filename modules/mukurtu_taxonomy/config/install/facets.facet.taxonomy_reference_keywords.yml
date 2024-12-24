@@ -1,11 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - search_api.index.mukurtu_browse_auto_index
-    - views.view.mukurtu_taxonomy_references
-  module:
-    - search_api
+dependencies: {  }
 id: taxonomy_reference_keywords
 name: Keywords
 url_alias: taxonomy_reference_keywords

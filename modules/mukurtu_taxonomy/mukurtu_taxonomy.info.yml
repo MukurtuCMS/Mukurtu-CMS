@@ -2,7 +2,7 @@ name: 'Mukurtu Taxonomy'
 type: module
 description: 'Provides the base Mukurtu taxonomies.'
 core_version_requirement: '^9.4 || ^10'
-package: Mukurtu
+package: 'Mukurtu CMS'
 dependencies:
   - 'drupal:media'
   - 'drupal:node'
