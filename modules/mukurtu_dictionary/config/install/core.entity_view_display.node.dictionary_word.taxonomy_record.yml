@@ -4,10 +4,12 @@ dependencies:
   config:
     - core.entity_view_mode.node.taxonomy_record
     - field.field.node.dictionary_word.comment
+    - field.field.node.dictionary_word.field_mukurtu_cluster_lat
+    - field.field.node.dictionary_word.field_mukurtu_cluster_long
+    - field.field.node.dictionary_word.field_mukurtu_geojson
     - node.type.dictionary_word
   module:
     - blazy
-    - entity_reference_revisions
     - layout_builder
     - user
 third_party_settings:
@@ -27,6 +29,14 @@ content:
     third_party_settings: {  }
     weight: 6
     region: content
+  field_dictionary_word_language:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 4
+    region: content
   field_glossary_entry:
     type: string
     label: above
@@ -43,14 +53,6 @@ content:
     third_party_settings: {  }
     weight: 7
     region: content
-  field_dictionary_word_language:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 4
-    region: content
   field_representative_media:
     type: entity_reference_label
     label: above
@@ -65,7 +67,6 @@ content:
     settings:
       caption: {  }
       class: ''
-      id: ''
       image: ''
       link: ''
       overlay: ''
@@ -74,9 +75,6 @@ content:
       layout: ''
       view_mode: ''
       cache: 0
-      skin: ''
-      lazy: ''
-      style: ''
       background: false
       box_caption: ''
       box_caption_custom: ''
@@ -92,6 +90,10 @@ content:
       grid: ''
       grid_medium: ''
       grid_small: ''
+      style: ''
+      id: ''
+      lazy: ''
+      skin: ''
     third_party_settings: {  }
     weight: 2
     region: content
@@ -111,18 +113,37 @@ content:
     region: content
 hidden:
   comment: true
+  draft: true
+  field_additional_word_entries: true
+  field_alternate_spelling: true
   field_citation: true
   field_communities: true
   field_content_type: true
+  field_contributor: true
+  field_coverage: true
+  field_coverage_description: true
+  field_cultural_protocols: true
+  field_definition: true
   field_in_collection: true
   field_keywords: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
+  field_location: true
   field_media_assets: true
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
+  field_multipage_page_of: true
+  field_pronunciation: true
   field_protocol_control: true
+  field_recording: true
   field_related_content: true
+  field_sample_sentences: true
   field_sequence_collection: true
+  field_source: true
+  field_translation: true
+  field_word_origin: true
+  field_word_type: true
   flag_email_node: true
   flag_email_og: true
   flag_mukurtu_email_content: true
@@ -131,5 +152,6 @@ hidden:
   flag_mukurtu_follow_content: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

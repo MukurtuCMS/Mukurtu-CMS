@@ -4,6 +4,9 @@ dependencies:
   config:
     - core.entity_view_mode.node.taxonomy_record
     - field.field.node.word_list.comment
+    - field.field.node.word_list.field_mukurtu_cluster_lat
+    - field.field.node.word_list.field_mukurtu_cluster_long
+    - field.field.node.word_list.field_mukurtu_geojson
     - node.type.word_list
   module:
     - layout_builder
@@ -27,9 +30,11 @@ content:
     region: content
 hidden:
   comment: true
+  draft: true
   field_all_related_content: true
   field_citation: true
   field_communities: true
+  field_cultural_protocols: true
   field_description: true
   field_in_collection: true
   field_keywords: true
@@ -37,14 +42,19 @@ hidden:
   field_mukurtu_cluster_lat: true
   field_mukurtu_cluster_long: true
   field_mukurtu_geojson: true
+  field_multipage_page_of: true
   field_protocol_control: true
+  field_related_content: true
   field_representative_media: true
   field_sequence_collection: true
+  field_source: true
+  field_summary: true
   field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_mukurtu_email_og: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true
