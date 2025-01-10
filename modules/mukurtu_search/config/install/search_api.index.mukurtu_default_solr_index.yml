@@ -538,14 +538,6 @@ field_settings:
       module:
         - media
         - node
-  node__field_mukurtu_geojson:
-    label: 'Mukurtu GeoJSON'
-    datasource_id: 'entity:node'
-    property_path: field_mukurtu_geojson
-    type: text
-    dependencies:
-      config:
-        - field.storage.node.field_mukurtu_geojson
   node__field_mukurtu_original_record__title:
     label: 'Original Record'
     datasource_id: 'entity:node'
@@ -932,7 +924,6 @@ processor_settings:
       - node__field_location__uuid
       - node__field_media_assets__bundle
       - node__field_media_assets__name
-      - node__field_mukurtu_geojson
       - node__field_mukurtu_original_record__title
       - node__field_multipage_page_of__title
       - node__field_page_media_assets__name

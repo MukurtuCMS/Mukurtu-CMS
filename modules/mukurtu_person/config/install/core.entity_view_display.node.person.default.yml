@@ -52,9 +52,6 @@ hidden:
   field_in_collection: true
   field_keywords: true
   field_media_assets: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
   field_multipage_page_of: true
   field_protocol_control: true
   field_related_content: true

@@ -110,8 +110,5 @@ content:
 hidden:
   field_communities: true
   field_in_collection: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
   field_multipage_page_of: true
   search_api_excerpt: true
