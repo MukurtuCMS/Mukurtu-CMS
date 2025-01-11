@@ -19,7 +19,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_child_collections: Sub-Collections
     field_collection_image: Image
@@ -35,7 +35,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_glossary_entry: 'Glossary Entry'
     field_keywords: Keywords
@@ -51,7 +51,7 @@ entity_fields_export_list:
     uid: 'Authored by'
     title: Title
     default_langcode: 'Default translation'
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_cultural_narrative: 'Cultural Narrative'
     field_description: Description
@@ -96,7 +96,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_keywords: Keywords
     field_media_assets: 'Media Assets'
@@ -113,7 +113,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_description: Description
     field_keywords: Keywords
@@ -125,7 +125,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_media_audio_file: 'Audio file'
     field_transcription: Transcription
@@ -139,7 +139,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_extracted_text: 'Extracted Text'
     field_media_document: Document
@@ -152,7 +152,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_media_image: Image
     field_keywords: Keywords
@@ -163,7 +163,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_media_oembed_video: 'Video URL'
     field_keywords: Keywords
@@ -175,7 +175,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: 'Protocols'
+    field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_media_video_file: 'Video file'
     field_keywords: Keywords
@@ -338,9 +338,9 @@ enclosure: '"'
 escape: \
 eol: \n
 multivalue_delimiter: '||'
+field_id: id
 field_file: id
 field_image: id
-field_id: id
 entity_reference_node: id
 entity_reference_media: id
 entity_reference_taxonomy_term: name

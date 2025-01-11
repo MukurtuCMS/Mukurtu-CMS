@@ -1,11 +1,18 @@
-name: Mukurtu Export
+name: 'Mukurtu Export'
 type: module
-description: Export functionality for Mukurtu CMS.
-package: Mukurtu
-core: 8.x
-core_version_requirement: ^8 || ^9
+description: 'Export functionality for Mukurtu CMS.'
+package: 'Mukurtu CMS'
+core_version_requirement: '^9.4 || ^10'
 dependencies:
-  - flag
-  - mukurtu_core
-  - mukurtu_protocol
-  - mukurtu_taxonomy
+  - 'drupal:media'
+  - 'drupal:node'
+  - 'drupal:system'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'flag:flag'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_taxonomy:mukurtu_taxonomy'
+  - 'search_api:search_api'
+  - 'search_api_solr:search_api_solr'
+  - 'views_bulk_operations:views_bulk_operations'
