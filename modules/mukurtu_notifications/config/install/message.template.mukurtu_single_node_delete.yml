@@ -2,14 +2,14 @@ langcode: en
 status: true
 dependencies:
   config:
-    - filter.format.basic_html
+    - filter.format.mukurtu_html
 template: mukurtu_single_node_delete
 label: 'Mukurtu Single Node Delete'
 description: 'The standard message for the deletion of a single node.'
 text:
   -
     value: "<p>[message:field_content_type] item&nbsp;<em>[message:field_title]</em> was deleted.</p>\r\n"
-    format: basic_html
+    format: mukurtu_html
 settings:
   'token options':
     clear: false
