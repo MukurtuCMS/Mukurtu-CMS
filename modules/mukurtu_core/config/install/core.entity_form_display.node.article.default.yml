@@ -123,7 +123,4 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-hidden:
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
+hidden: {  }

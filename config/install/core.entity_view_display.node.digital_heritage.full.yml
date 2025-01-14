@@ -6,9 +6,6 @@ dependencies:
     - core.entity_view_mode.node.full
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
-    - field.field.node.digital_heritage.field_mukurtu_cluster_lat
-    - field.field.node.digital_heritage.field_mukurtu_cluster_long
-    - field.field.node.digital_heritage.field_mukurtu_geojson
     - node.type.digital_heritage
   module:
     - comment
@@ -539,9 +536,6 @@ content:
 hidden:
   draft: true
   field_content_type: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
   field_mukurtu_original_record: true
   field_multipage_page_of: true
   field_protocol_control: true

@@ -78,9 +78,6 @@ hidden:
   field_local_contexts_projects: true
   field_location: true
   field_media_assets: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
   field_mukurtu_original_record: true
   field_multipage_page_of: true
   field_original_date: true

@@ -89,9 +89,6 @@ hidden:
   field_in_collection: true
   field_keywords: true
   field_language: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
   field_mukurtu_original_record: true
   field_original_date: true
   field_people: true

@@ -278,7 +278,4 @@ content:
     third_party_settings: {  }
 hidden:
   field_content_type: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
   field_sequence_collection: true

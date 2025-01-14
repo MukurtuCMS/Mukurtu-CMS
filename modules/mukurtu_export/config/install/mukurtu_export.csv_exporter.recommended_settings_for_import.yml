@@ -12,7 +12,6 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__collection:
     nid: ID
     uuid: UUID
@@ -29,7 +28,6 @@ entity_fields_export_list:
     field_keywords: Keywords
     field_related_content: 'Related Content'
     field_summary: Summary
-    field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__dictionary_word:
     nid: ID
     langcode: Locale
@@ -44,7 +42,6 @@ entity_fields_export_list:
     field_word_entry: 'Word Entry'
     field_related_content: 'Related Content'
     field_thumbnail: Thumbnail
-    field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__digital_heritage:
     nid: ID
     langcode: Locale
@@ -83,13 +80,11 @@ entity_fields_export_list:
     field_subject: Subject
     field_type: Type
     field_content_type: 'Content Type'
-    field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__page:
     nid: ID
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__person:
     nid: ID
     uuid: UUID
@@ -107,7 +102,6 @@ entity_fields_export_list:
     field_related_people: 'Related People'
     field_related_content: 'Related Content'
     field_representative_terms: 'Representative Terms'
-    field_mukurtu_geojson: 'Mukurtu GeoJSON'
   node__word_list:
     nid: ID
     langcode: Locale
@@ -119,7 +113,6 @@ entity_fields_export_list:
     field_keywords: Keywords
     field_media_assets: 'Media Assets'
     field_words: Words
-    field_mukurtu_geojson: 'Mukurtu GeoJSON'
   media__audio:
     mid: ID
     langcode: Locale
