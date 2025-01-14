@@ -313,8 +313,6 @@ content:
 hidden:
   field_collection_type: true
   field_content_type: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
   field_mukurtu_community: true
   field_mukurtu_geojson: true
   field_mukurtu_original_record: true

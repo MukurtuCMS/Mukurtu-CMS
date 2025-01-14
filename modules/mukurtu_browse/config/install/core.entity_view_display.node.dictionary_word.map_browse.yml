@@ -4,9 +4,6 @@ dependencies:
   config:
     - core.entity_view_mode.node.map_browse
     - field.field.node.dictionary_word.comment
-    - field.field.node.dictionary_word.field_mukurtu_cluster_lat
-    - field.field.node.dictionary_word.field_mukurtu_cluster_long
-    - field.field.node.dictionary_word.field_mukurtu_geojson
     - image.style.thumbnail
     - node.type.dictionary_word
   module:
@@ -112,15 +109,6 @@ hidden:
   field_in_collection: true
   field_in_word_list: true
   field_keywords: true
-  field_local_contexts_labels_and_notices: true
-  field_local_contexts_projects: true
-  field_location: true
-  field_mukurtu_cluster_lat: true
-  field_mukurtu_cluster_long: true
-  field_mukurtu_geojson: true
-  field_multipage_page_of: true
-  field_pronunciation: true
-  field_recording: true
   field_related_content: true
   field_representative_media: true
   field_sample_sentences: true
