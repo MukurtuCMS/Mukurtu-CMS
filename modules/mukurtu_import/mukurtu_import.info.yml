@@ -5,6 +5,7 @@ package: 'Mukurtu CMS'
 core_version_requirement: '^9.4 || ^10'
 dependencies:
   - 'drupal:history'
+  - 'drupal:layout_builder'
   - 'drupal:media'
   - 'drupal:migrate'
   - 'drupal:node'
@@ -14,5 +15,6 @@ dependencies:
   - 'migrate_source_csv:migrate_source_csv'
   - 'migrate_tools:migrate_tools'
   - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_protocol:mukurtu_protocol'
 version: 4.x-dev

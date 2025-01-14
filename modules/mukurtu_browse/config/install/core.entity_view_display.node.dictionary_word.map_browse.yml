@@ -109,6 +109,12 @@ hidden:
   field_in_collection: true
   field_in_word_list: true
   field_keywords: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
+  field_location: true
+  field_multipage_page_of: true
+  field_pronunciation: true
+  field_recording: true
   field_related_content: true
   field_representative_media: true
   field_sample_sentences: true

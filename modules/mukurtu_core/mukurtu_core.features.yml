@@ -1,5 +1,7 @@
 bundle: mukurtu
 excluded:
+  - system.site
+  - node.settings
   - field.storage.block_content.body
   - field.storage.block_content.field_featured_content
   - field.storage.block_content.field_image

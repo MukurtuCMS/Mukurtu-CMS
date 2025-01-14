@@ -100,6 +100,9 @@ hidden:
   field_keywords: true
   field_knowledge_keepers: true
   field_language: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
+  field_location: true
   field_mukurtu_original_record: true
   field_multipage_page_of: true
   field_original_date: true

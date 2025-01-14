@@ -4,9 +4,6 @@ dependencies:
   config:
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
-    - field.field.node.digital_heritage.field_mukurtu_cluster_lat
-    - field.field.node.digital_heritage.field_mukurtu_cluster_long
-    - field.field.node.digital_heritage.field_mukurtu_geojson
     - node.type.digital_heritage
   module:
     - user

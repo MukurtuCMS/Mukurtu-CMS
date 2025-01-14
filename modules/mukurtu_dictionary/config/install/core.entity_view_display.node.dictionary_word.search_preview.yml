@@ -4,9 +4,6 @@ dependencies:
   config:
     - core.entity_view_mode.node.search_preview
     - field.field.node.dictionary_word.comment
-    - field.field.node.dictionary_word.field_mukurtu_cluster_lat
-    - field.field.node.dictionary_word.field_mukurtu_cluster_long
-    - field.field.node.dictionary_word.field_mukurtu_geojson
     - node.type.dictionary_word
   module:
     - layout_builder

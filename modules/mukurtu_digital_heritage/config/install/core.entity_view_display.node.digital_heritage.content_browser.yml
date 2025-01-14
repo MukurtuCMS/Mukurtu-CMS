@@ -5,9 +5,6 @@ dependencies:
     - core.entity_view_mode.node.content_browser
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
-    - field.field.node.digital_heritage.field_mukurtu_cluster_lat
-    - field.field.node.digital_heritage.field_mukurtu_cluster_long
-    - field.field.node.digital_heritage.field_mukurtu_geojson
     - image.style.carousel_thumbnail
     - node.type.digital_heritage
   module:
