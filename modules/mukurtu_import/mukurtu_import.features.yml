@@ -1,2 +1,5 @@
 bundle: mukurtu
 required: true
+excluded:
+  - core.entity_view_display.message.mukurtu_batch_import_report.mail_body
+  - core.entity_view_display.message.mukurtu_batch_import_report.mail_subject
