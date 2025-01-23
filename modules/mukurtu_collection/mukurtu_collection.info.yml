@@ -2,7 +2,7 @@ name: 'Mukurtu Collections'
 type: module
 description: 'Provides the collection content type.'
 core_version_requirement: '^9.4 || ^10'
-package: Mukurtu
+package: 'Mukurtu CMS'
 dependencies:
   - 'drupal:comment'
   - 'drupal:field'

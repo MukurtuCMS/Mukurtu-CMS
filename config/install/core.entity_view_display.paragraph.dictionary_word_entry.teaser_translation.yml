@@ -39,6 +39,7 @@ hidden:
   field_recording: true
   field_sample_sentences: true
   field_source: true
+  field_word_entry_term: true
   field_word_origin: true
   field_word_type: true
   search_api_excerpt: true

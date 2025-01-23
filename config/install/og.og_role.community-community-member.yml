@@ -6,9 +6,9 @@ dependencies:
 id: community-community-member
 label: Member
 weight: 15
-group_id: null
+is_admin: null
 group_type: community
 group_bundle: community
-is_admin: null
+group_id: null
 permissions: {  }
 role_type: required

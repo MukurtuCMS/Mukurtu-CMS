@@ -1,31 +1,20 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - media.type.audio
-    - media.type.document
-    - media.type.external_embed
-    - media.type.image
-    - media.type.remote_video
-    - media.type.video
-    - node.type.digital_heritage
-    - node.type.person
   module:
-    - content_moderation
-    - media
     - mukurtu_protocol
-    - node
 id: protocol-protocol-contributor
 label: Contributor
 weight: 8
-group_id: null
+is_admin: null
 group_type: protocol
 group_bundle: protocol
-is_admin: null
+group_id: null
 permissions:
   - 'create audio media'
   - 'create digital_heritage content'
   - 'create document media'
+  - 'create external_embed media'
   - 'create image media'
   - 'create person content'
   - 'create remote_video media'
@@ -33,6 +22,7 @@ permissions:
   - 'delete own audio media'
   - 'delete own digital_heritage content'
   - 'delete own document media'
+  - 'delete own external_embed media'
   - 'delete own image media'
   - 'delete own person content'
   - 'delete own remote_video media'
@@ -41,10 +31,8 @@ permissions:
   - 'edit own person content'
   - 'update own audio media'
   - 'update own document media'
+  - 'update own external_embed media'
   - 'update own image media'
   - 'update own remote_video media'
   - 'update own video media'
-  - 'create external_embed media'
-  - 'update own external_embed media'
-  - 'delete own external_embed media'
 role_type: standard

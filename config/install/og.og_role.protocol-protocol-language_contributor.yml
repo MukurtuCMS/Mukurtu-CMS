@@ -1,30 +1,20 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - media.type.audio
-    - media.type.document
-    - media.type.external_embed
-    - media.type.image
-    - media.type.remote_video
-    - media.type.video
-    - node.type.dictionary_word
-    - node.type.word_list
   module:
-    - media
     - mukurtu_protocol
-    - node
 id: protocol-protocol-language_contributor
 label: 'Language Contributor'
 weight: 8
-group_id: null
+is_admin: null
 group_type: protocol
 group_bundle: protocol
-is_admin: null
+group_id: null
 permissions:
   - 'create audio media'
   - 'create dictionary_word content'
   - 'create document media'
+  - 'create external_embed media'
   - 'create image media'
   - 'create remote_video media'
   - 'create video media'
@@ -34,6 +24,7 @@ permissions:
   - 'delete own audio media'
   - 'delete own dictionary_word content'
   - 'delete own document media'
+  - 'delete own external_embed media'
   - 'delete own image media'
   - 'delete own remote_video media'
   - 'delete own video media'
@@ -44,10 +35,8 @@ permissions:
   - 'edit own word_list content'
   - 'update own audio media'
   - 'update own document media'
+  - 'update own external_embed media'
   - 'update own image media'
   - 'update own remote_video media'
   - 'update own video media'
-  - 'create external_embed media'
-  - 'update own external_embed media'
-  - 'delete own external_embed media'
 role_type: standard

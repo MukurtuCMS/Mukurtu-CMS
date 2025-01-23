@@ -38,11 +38,7 @@ settings:
             - Source
             - SpecialChar
             - Maximize
-  plugins:
-    stylescombo:
-      styles: ''
-    language:
-      language_list: un
+  plugins: {  }
 image_upload:
   status: false
   scheme: public

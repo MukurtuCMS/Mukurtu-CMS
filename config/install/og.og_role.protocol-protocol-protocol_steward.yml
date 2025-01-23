@@ -1,29 +1,15 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - media.type.audio
-    - media.type.document
-    - media.type.external_embed
-    - media.type.image
-    - media.type.remote_video
-    - media.type.video
-    - node.type.collection
-    - node.type.digital_heritage
   module:
-    - comment
-    - content_moderation
-    - media
     - mukurtu_protocol
-    - node
-    - user
 id: protocol-protocol-protocol_steward
 label: 'Protocol Steward'
 weight: 7
-group_id: null
+is_admin: null
 group_type: protocol
 group_bundle: protocol
-is_admin: null
+group_id: null
 permissions:
   - 'add user'
   - 'administer comments'
@@ -35,6 +21,7 @@ permissions:
   - 'create collection content'
   - 'create digital_heritage content'
   - 'create document media'
+  - 'create external_embed media'
   - 'create image media'
   - 'create remote_video media'
   - 'create video media'
@@ -42,6 +29,7 @@ permissions:
   - 'delete any collection content'
   - 'delete any digital_heritage content'
   - 'delete any document media'
+  - 'delete any external_embed media'
   - 'delete any image media'
   - 'delete any remote_video media'
   - 'delete any video media'
@@ -49,6 +37,7 @@ permissions:
   - 'delete own collection content'
   - 'delete own digital_heritage content'
   - 'delete own document media'
+  - 'delete own external_embed media'
   - 'delete own image media'
   - 'delete own remote_video media'
   - 'delete own video media'
@@ -60,18 +49,15 @@ permissions:
   - 'skip comment approval'
   - 'update any audio media'
   - 'update any document media'
+  - 'update any external_embed media'
   - 'update any image media'
   - 'update any remote_video media'
   - 'update any video media'
   - 'update group'
   - 'update own audio media'
   - 'update own document media'
+  - 'update own external_embed media'
   - 'update own image media'
   - 'update own remote_video media'
   - 'update own video media'
-  - 'create external_embed media'
-  - 'update own external_embed media'
-  - 'update any external_embed media'
-  - 'delete own external_embed media'
-  - 'delete any external_embed media'
 role_type: standard

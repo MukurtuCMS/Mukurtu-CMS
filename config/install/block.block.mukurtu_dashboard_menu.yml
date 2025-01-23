@@ -6,9 +6,9 @@ dependencies:
   module:
     - system
   theme:
-    - bartik
-id: mukurtu
-theme: bartik
+    - mukurtu_bartik
+id: mukurtu_dashboard_menu
+theme: mukurtu_bartik
 region: sidebar_first
 weight: 0
 provider: null
@@ -24,6 +24,5 @@ settings:
 visibility:
   request_path:
     id: request_path
-    pages: "/dashboard\r\n/dashboard/*"
     negate: false
-    context_mapping: {  }
+    pages: "/dashboard\r\n/dashboard/*"

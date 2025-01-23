@@ -1,7 +1,5 @@
 bundle: mukurtu
 excluded:
-  - system.site
-  - node.settings
   - field.storage.block_content.body
   - field.storage.block_content.field_featured_content
   - field.storage.block_content.field_image
@@ -22,6 +20,6 @@ excluded:
   - core.entity_view_mode.flagging.token
   - core.entity_view_mode.media.token
   - core.entity_view_mode.taxonomy_term.token
-  # Excluded for now so that the generated config dependencies don't get exported.
-  - search_api.server.mukurtu_solr_server.yml
+  - core.entity_view_mode.node.browse
+  - core.entity_view_mode.node.search_preview
 required: true

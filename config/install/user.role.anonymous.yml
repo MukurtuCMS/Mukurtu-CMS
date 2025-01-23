@@ -4,15 +4,10 @@ dependencies:
   module:
     - comment
     - contact
+    - media
     - mukurtu_protocol
     - system
 id: anonymous
 label: 'Anonymous user'
 weight: 0
 is_admin: false
-permissions:
-  - 'access comments'
-  - 'access content'
-  - 'access site-wide contact form'
-  - 'view media'
-  - 'view published community entities'

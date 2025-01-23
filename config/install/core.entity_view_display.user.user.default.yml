@@ -23,17 +23,30 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  flag_email_user:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  flag_subscribe_user:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   user_picture:
     type: image
     label: hidden
     settings:
       image_link: ''
       image_style: media_library
+      image_loading:
+        attribute: lazy
     third_party_settings: {  }
     weight: 0
     region: content
 hidden:
   field_communities: true
+  langcode: true
   member_for: true
   message_digest: true
   message_subscribe_email: true
