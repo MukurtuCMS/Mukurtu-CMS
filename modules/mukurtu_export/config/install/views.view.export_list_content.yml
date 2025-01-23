@@ -496,7 +496,7 @@ display:
           empty: false
           content:
             value: '<a href="/dashboard/export/content">View Content Export List</a>'
-            format: basic_html
+            format: mukurtu_html
           tokenize: false
       display_extenders: {  }
     cache_metadata:

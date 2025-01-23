@@ -8,6 +8,7 @@ dependencies:
     - flag
     - node
     - search_api
+    - search_api_solr
 id: export_list_content
 name: 'Export List: Content'
 description: 'Search index for the content export list.'

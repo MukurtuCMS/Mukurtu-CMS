@@ -1,12 +1,11 @@
-name: Mukurtu CMS
+name: 'Mukurtu CMS'
 type: profile
 description: 'Mukurtu CMS Installation Profile'
-core: 8.x
-core_version_requirement: ^8 || ^9
-
+core_version_requirement: '^9.4 || ^10'
+version: 4.x-dev
+package: 'Mukurtu CMS'
 distribution:
-  name: Mukurtu
-
+  name: 'Mukurtu CMS'
 install:
   - blazy
   - colorbox
@@ -20,9 +19,6 @@ install:
   - comment
   - contextual
   - contact
-  - devel
-  - devel_generate
-  - devel_php
   - menu_link_content
   - mukurtu_content_warnings
   - datetime
@@ -52,7 +48,6 @@ install:
   - google_analytics
   - twig_tweak
   - facets_reset_button
-
 dependencies:
   - comment
   - content_browser
@@ -100,12 +95,10 @@ dependencies:
   - mukurtu_design
   - mukurtu_site_settings
   - mukurtu_footer
+  - mukurtu_dev
 
 themes:
   - bartik
-  - seven
   - mukurtu_bartik
   - mukurtu_v4
-
-
-version: '8.x-1.x-dev'
+  - seven

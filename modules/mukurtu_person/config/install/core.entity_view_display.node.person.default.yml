@@ -5,7 +5,7 @@ dependencies:
     - field.field.node.person.comment
     - node.type.person
   module:
-    - original_date
+    - datetime
     - user
 id: node.person.default
 targetEntityType: node
@@ -13,16 +13,20 @@ bundle: person
 mode: default
 content:
   field_date_born:
-    type: month_day_year_original_date_formatter
+    type: datetime_default
     label: above
-    settings: {  }
+    settings:
+      timezone_override: ''
+      format_type: medium
     third_party_settings: {  }
     weight: 11
     region: content
   field_date_died:
-    type: month_day_year_original_date_formatter
+    type: datetime_default
     label: above
-    settings: {  }
+    settings:
+      timezone_override: ''
+      format_type: medium
     third_party_settings: {  }
     weight: 12
     region: content

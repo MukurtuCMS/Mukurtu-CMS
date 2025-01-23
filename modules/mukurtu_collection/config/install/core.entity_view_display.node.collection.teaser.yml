@@ -7,7 +7,6 @@ dependencies:
     - node.type.collection
   module:
     - layout_builder
-    - media
     - user
 third_party_settings:
   layout_builder:
@@ -18,22 +17,12 @@ targetEntityType: node
 bundle: collection
 mode: teaser
 content:
-  field_communities:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: false
-    third_party_settings: {  }
-    weight: 1
-    region: content
   field_representative_media:
-    type: media_thumbnail
+    type: entity_reference_entity_view
     label: hidden
     settings:
-      image_link: ''
-      image_style: ''
-      image_loading:
-        attribute: lazy
+      view_mode: digital_heritage_sidebar
+      link: false
     third_party_settings: {  }
     weight: 0
     region: content
@@ -44,6 +33,7 @@ hidden:
   field_child_collections: true
   field_citation: true
   field_collection_image: true
+  field_communities: true
   field_cultural_protocols: true
   field_description: true
   field_in_collection: true

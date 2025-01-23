@@ -46,7 +46,7 @@ content:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: full
+      view_mode: browse
       link: false
     third_party_settings: {  }
     weight: 0
@@ -104,5 +104,6 @@ hidden:
   flag_mukurtu_follow_content: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

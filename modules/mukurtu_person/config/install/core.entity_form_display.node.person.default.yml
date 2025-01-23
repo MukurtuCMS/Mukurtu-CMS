@@ -7,12 +7,11 @@ dependencies:
     - node.type.person
   module:
     - comment
-    - original_date
     - entity_browser
     - field_group
     - media_library
     - mukurtu_protocol
-    - mukurtu_drafts
+    - original_date
     - paragraphs
     - path
 third_party_settings:
@@ -225,6 +224,13 @@ content:
         add_above: '0'
         collapse_edit_all: collapse_edit_all
         duplicate: duplicate
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
     third_party_settings: {  }
   path:
     type: path

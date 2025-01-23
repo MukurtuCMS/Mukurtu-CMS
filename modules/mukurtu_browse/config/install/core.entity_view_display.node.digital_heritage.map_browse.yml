@@ -27,6 +27,13 @@ content:
     third_party_settings: {  }
     weight: 2
     region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
   field_communities:
     type: entity_reference_label
     label: above
@@ -75,27 +82,37 @@ content:
     region: content
 hidden:
   comment: true
+  draft: true
   field_all_related_content: true
   field_category: true
   field_content_type: true
   field_contributor: true
   field_coverage: true
+  field_coverage_description: true
   field_creative_commons: true
   field_creator: true
+  field_cultural_protocols: true
   field_date_description: true
   field_external_links: true
   field_format: true
   field_identifier: true
   field_in_collection: true
   field_keywords: true
+  field_knowledge_keepers: true
   field_language: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
+  field_location: true
   field_mukurtu_original_record: true
+  field_multipage_page_of: true
   field_original_date: true
   field_people: true
   field_publisher: true
   field_related_content: true
   field_representative_media: true
   field_rights: true
+  field_rights_and_usage: true
+  field_rights_statements: true
   field_sequence_collection: true
   field_source: true
   field_subject: true
@@ -110,5 +127,6 @@ hidden:
   flag_mukurtu_follow_content: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

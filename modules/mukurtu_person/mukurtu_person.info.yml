@@ -1,13 +1,27 @@
 name: 'Mukurtu Person'
 type: module
 description: 'Provides the person content type.'
-core_version_requirement: ^8 || ^9
-core: 8.x
-package: 'Mukurtu'
+core_version_requirement: '^9.4 || ^10'
+package: 'Mukurtu CMS'
 dependencies:
-  - mukurtu_core
-  - mukurtu_protocol
-  - mukurtu_taxonomy
-  - mukurtu_drafts
-
-version: '8.x-1.x-dev'
+  - 'drupal:comment'
+  - 'drupal:datetime'
+  - 'drupal:field'
+  - 'drupal:layout_builder'
+  - 'drupal:media'
+  - 'drupal:media_library'
+  - 'drupal:menu_ui'
+  - 'drupal:node'
+  - 'drupal:path'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'entity_browser:entity_browser'
+  - 'field_group:field_group'
+  - 'mukurtu_browse:mukurtu_browse'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_drafts:mukurtu_drafts'
+  - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_taxonomy:mukurtu_taxonomy'
+  - 'original_date:original_date'
+  - 'paragraphs:paragraphs'
+version: 4.x-dev

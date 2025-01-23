@@ -1,23 +1,22 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - search_api.index.mukurtu_dictionary_solr_index
-    - views.view.dictionary_browse_solr_new_index
-  module:
-    - search_api
+dependencies: {  }
 id: dictionary_browse_solr_new_word_type
 name: 'Word Type'
+url_alias: dictionary_browse_solr_new_word_type
 weight: 0
 min_count: 1
 missing: false
 missing_label: others
-url_alias: dictionary_browse_solr_new_word_type
-facet_source_id: 'search_api:views_block__dictionary_browse_solr_new_index__mukurtu_dictionary_solr_separate_index_block'
+show_only_one_result: true
 field_identifier: dictionary_browse_solr_word_type
+facet_source_id: 'search_api:views_block__dictionary_browse_solr_new_index__mukurtu_dictionary_solr_separate_index_block'
+widget:
+  type: dropdown
+  config:
+    show_numbers: false
+    default_option_label: 'Word Type'
 query_operator: or
-hard_limit: 0
-exclude: false
 use_hierarchy: false
 keep_hierarchy_parents_active: false
 hierarchy:
@@ -25,16 +24,9 @@ hierarchy:
   config: {  }
 expand_hierarchy: false
 enable_parent_when_child_gets_disabled: true
-widget:
-  type: dropdown
-  config:
-    show_numbers: false
-    default_option_label: 'Word Type'
-empty_behavior:
-  behavior: none
+hard_limit: 0
+exclude: false
 only_visible_when_facet_source_is_visible: false
-show_only_one_result: true
-show_title: false
 processor_configs:
   active_widget_order:
     processor_id: active_widget_order
@@ -65,3 +57,6 @@ processor_configs:
       pre_query: 50
       build: 15
     settings: {  }
+empty_behavior:
+  behavior: none
+show_title: false

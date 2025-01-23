@@ -11,7 +11,6 @@ dependencies:
     - field_group
     - media_library
     - mukurtu_protocol
-    - mukurtu_drafts
     - path
     - text
 third_party_settings:
@@ -236,6 +235,13 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {  }
   name:
     weight: -8
     region: content
@@ -305,6 +311,7 @@ hidden:
   field_collection_type: true
   field_content_type: true
   field_mukurtu_community: true
+  field_mukurtu_geojson: true
   field_mukurtu_original_record: true
   field_parent_collection: true
   field_sequence_collection: true

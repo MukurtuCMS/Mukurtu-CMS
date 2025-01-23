@@ -1,8 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  module:
-    - mukurtu_protocol
+dependencies: {  }
 id: mukurtu_cultural_protocol_pattern
 label: 'Mukurtu Cultural Protocol Pattern'
 type: 'canonical_entities:protocol'

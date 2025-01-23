@@ -23,6 +23,14 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_summary:
+    label: above
+    type: string
+    region: content
+    weight: 2
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
   name:
     type: string
     label: hidden
@@ -35,5 +43,6 @@ hidden:
   field_items_in_collection: true
   field_media_assets: true
   field_pc_privacy: true
+  langcode: true
   search_api_excerpt: true
   user_id: true

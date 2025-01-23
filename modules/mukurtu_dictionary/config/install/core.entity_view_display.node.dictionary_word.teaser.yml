@@ -4,12 +4,9 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.dictionary_word.comment
-    - image.style.thumbnail
     - node.type.dictionary_word
   module:
-    - blazy
     - layout_builder
-    - media
     - user
 third_party_settings:
   layout_builder:
@@ -20,63 +17,69 @@ targetEntityType: node
 bundle: dictionary_word
 mode: teaser
 content:
-  field_communities:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 3
-    region: content
-  field_dictionary_word_language:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 1
-    region: content
-  field_glossary_entry:
-    type: string
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    weight: 2
-    region: content
   field_thumbnail:
-    type: media_thumbnail
-    label: above
+    type: entity_reference_entity_view
+    label: hidden
     settings:
-      image_link: ''
-      image_style: thumbnail
-      image_loading:
-        attribute: lazy
+      view_mode: browse
+      link: false
     third_party_settings: {  }
     weight: 0
     region: content
+  field_word_entry:
+    type: entity_reference_revisions_entity_view
+    label: hidden
+    settings:
+      view_mode: teaser
+      link: ''
+    third_party_settings: {  }
+    weight: 1
+    region: content
 hidden:
   comment: true
+  draft: true
+  field_additional_word_entries: true
   field_all_related_content: true
+  field_alternate_spelling: true
   field_citation: true
+  field_communities: true
   field_content_type: true
+  field_contributor: true
+  field_coverage: true
+  field_coverage_description: true
+  field_cultural_protocols: true
+  field_definition: true
+  field_dictionary_word_language: true
+  field_glossary_entry: true
   field_in_collection: true
   field_in_word_list: true
   field_keywords: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
+  field_location: true
   field_media_assets: true
+  field_multipage_page_of: true
+  field_pronunciation: true
   field_protocol_control: true
+  field_recording: true
   field_related_content: true
   field_representative_media: true
+  field_sample_sentences: true
   field_sequence_collection: true
+  field_source: true
   field_title: true
-  field_word_entry: true
+  field_translation: true
+  field_word_origin: true
+  field_word_type: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_content: true
   flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true
   flag_mukurtu_follow_content: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

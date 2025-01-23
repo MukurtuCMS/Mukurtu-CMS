@@ -2,14 +2,14 @@ langcode: en
 status: true
 dependencies:
   config:
-    - filter.format.basic_html
+    - filter.format.mukurtu_html
 template: mukurtu_batch_import_report
 label: 'Mukurtu Batch Import Report'
 description: 'A report containing the results of a batch import.'
 text:
   -
     value: 'Batch imported [message:field_number_imported] items on [message:created] (<a href="/import/report/[message:mid]">Details</a>).'
-    format: basic_html
+    format: mukurtu_html
 settings:
   'token options':
     clear: false

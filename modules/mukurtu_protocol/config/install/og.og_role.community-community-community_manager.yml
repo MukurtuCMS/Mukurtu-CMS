@@ -6,10 +6,10 @@ dependencies:
 id: community-community-community_manager
 label: 'Community Manager'
 weight: 13
-group_id: null
+is_admin: null
 group_type: community
 group_bundle: community
-is_admin: null
+group_id: null
 permissions:
   - 'add user'
   - 'approve and deny subscription'

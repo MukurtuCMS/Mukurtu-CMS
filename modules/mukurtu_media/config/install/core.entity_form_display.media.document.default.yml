@@ -34,6 +34,13 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_media_document:
+    type: file_generic
+    weight: 0
+    region: content
+    settings:
+      progress_indicator: throbber
+    third_party_settings: {  }
   field_media_tags:
     type: entity_reference_autocomplete
     weight: 6
@@ -43,13 +50,6 @@ content:
       match_limit: 10
       size: 60
       placeholder: ''
-    third_party_settings: {  }
-  field_media_document:
-    type: file_generic
-    weight: 0
-    region: content
-    settings:
-      progress_indicator: throbber
     third_party_settings: {  }
   field_people:
     type: entity_reference_autocomplete
@@ -68,6 +68,13 @@ content:
     settings:
       progress_indicator: throbber
       preview_image_style: thumbnail
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
     third_party_settings: {  }
   name:
     type: string_textfield

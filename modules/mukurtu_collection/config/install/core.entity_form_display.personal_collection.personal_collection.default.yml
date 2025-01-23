@@ -73,14 +73,6 @@ content:
       rows: 9
       placeholder: ''
     third_party_settings: {  }
-  field_summary:
-    type: string_textfield
-    weight: 4
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
   field_items_in_collection:
     type: entity_browser_entity_reference
     weight: 2
@@ -109,6 +101,21 @@ content:
     weight: 3
     region: content
     settings: {  }
+    third_party_settings: {  }
+  field_summary:
+    type: string_textfield
+    weight: 4
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
     third_party_settings: {  }
   name:
     type: string_textfield

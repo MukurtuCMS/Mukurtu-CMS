@@ -7,7 +7,6 @@ dependencies:
     - entity_browser
     - media_library
     - mukurtu_protocol
-    - path
     - text
 id: community.community.default
 targetEntityType: community
@@ -84,6 +83,13 @@ content:
     region: content
     settings:
       media_types: {  }
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
     third_party_settings: {  }
   name:
     type: string_textfield

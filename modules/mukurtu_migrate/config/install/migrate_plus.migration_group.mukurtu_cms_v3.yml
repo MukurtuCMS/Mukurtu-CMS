@@ -1,11 +1,13 @@
-id: mukurtu_cms_v3
-label: Mukurtu CMS v3
-description: Migrate site data from Mukurtu CMS version 3 to version 4.
-source_type: Mukurtu CMS version 3 (Drupal 7)
-shared_configuration:
-  source:
-    #key: migrate
+langcode: en
+status: true
 dependencies:
   enforced:
     module:
       - mukurtu_migrate
+id: mukurtu_cms_v3
+label: 'Mukurtu CMS v3'
+description: 'Migrate site data from Mukurtu CMS version 3 to version 4.'
+source_type: 'Mukurtu CMS version 3 (Drupal 7)'
+module: null
+shared_configuration:
+  source: null

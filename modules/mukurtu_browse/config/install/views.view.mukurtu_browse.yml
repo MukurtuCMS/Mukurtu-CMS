@@ -1,4 +1,3 @@
-uuid: 951a87af-c4ee-4276-b977-dcdd7047c8ab
 langcode: en
 status: true
 dependencies:
@@ -8,8 +7,6 @@ dependencies:
     - geofield
     - leaflet_views
     - search_api
-_core:
-  default_config_hash: cruyIZZztZuxCCIbO3eQOySS07TT3vovR2WS8JCAnbU
 id: mukurtu_browse
 label: 'Mukurtu Browse'
 module: views

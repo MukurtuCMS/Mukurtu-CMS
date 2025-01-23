@@ -1,7 +1,11 @@
 name: 'Mukurtu Drafts'
 type: module
 description: 'Provides capability for drafts.'
-core_version_requirement: ^8 || ^9
-core: 8.x
-package: 'Mukurtu'
-version: '8.x-1.x-dev'
+core_version_requirement: '^9.4 || ^10'
+package: Mukurtu
+version: 4.x-dev
+dependencies:
+  - 'drupal:node'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'mukurtu_core:mukurtu_core'

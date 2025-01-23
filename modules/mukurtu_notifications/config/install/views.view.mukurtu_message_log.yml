@@ -23,61 +23,12 @@ base_table: message_field_data
 base_field: mid
 display:
   default:
-    display_plugin: default
     id: default
     display_title: Master
+    display_plugin: default
     position: 0
     display_options:
-      access:
-        type: perm
-        options:
-          perm: 'access content'
-      cache:
-        type: tag
-        options: {  }
-      query:
-        type: views_query
-        options:
-          disable_sql_rewrite: false
-          distinct: false
-          replica: false
-          query_comment: ''
-          query_tags: {  }
-      exposed_form:
-        type: basic
-        options:
-          submit_button: Apply
-          reset_button: false
-          reset_button_label: Reset
-          exposed_sorts_label: 'Sort by'
-          expose_sort_order: true
-          sort_asc_label: Asc
-          sort_desc_label: Desc
-      pager:
-        type: mini
-        options:
-          items_per_page: 10
-          offset: 0
-          id: 0
-          total_pages: null
-          tags:
-            previous: ‹‹
-            next: ››
-          expose:
-            items_per_page: false
-            items_per_page_label: 'Items per page'
-            items_per_page_options: '5, 10, 25, 50'
-            items_per_page_options_all: false
-            items_per_page_options_all_label: '- All -'
-            offset: false
-            offset_label: Offset
-      style:
-        type: default
-      row:
-        type: 'entity:message'
-        options:
-          relationship: none
-          view_mode: mail_subject
+      title: 'Mukurtu Message Log'
       fields:
         created:
           id: created
@@ -86,6 +37,9 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          entity_type: message
+          entity_field: created
+          plugin_id: field
           label: ''
           exclude: false
           alter:
@@ -143,9 +97,6 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-          entity_type: message
-          entity_field: created
-          plugin_id: field
         get_text:
           id: get_text
           table: message
@@ -153,6 +104,8 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          entity_type: message
+          plugin_id: get_text
           label: ''
           exclude: false
           alter:
@@ -195,8 +148,73 @@ display:
           empty_zero: false
           hide_alter_empty: true
           delta: null
+      pager:
+        type: mini
+        options:
+          offset: 0
+          items_per_page: 10
+          total_pages: null
+          id: 0
+          tags:
+            next: ››
+            previous: ‹‹
+          expose:
+            items_per_page: false
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 25, 50'
+            items_per_page_options_all: false
+            items_per_page_options_all_label: '- All -'
+            offset: false
+            offset_label: Offset
+      exposed_form:
+        type: basic
+        options:
+          submit_button: Apply
+          reset_button: false
+          reset_button_label: Reset
+          exposed_sorts_label: 'Sort by'
+          expose_sort_order: true
+          sort_asc_label: Asc
+          sort_desc_label: Desc
+      access:
+        type: perm
+        options:
+          perm: 'access content'
+      cache:
+        type: tag
+        options: {  }
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: text
+          empty: true
+          content:
+            value: 'No recent activity.'
+            format: basic_html
+          tokenize: false
+      sorts:
+        created:
+          id: created
+          table: message_field_data
+          field: created
+          relationship: none
+          group_type: group
+          admin_label: ''
           entity_type: message
-          plugin_id: get_text
+          entity_field: created
+          plugin_id: date
+          order: DESC
+          expose:
+            label: ''
+            field_identifier: created
+          exposed: false
+          granularity: second
+      arguments: {  }
       filters:
         template:
           id: template
@@ -205,6 +223,9 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          entity_type: message
+          entity_field: template
+          plugin_id: bundle
           operator: in
           value:
             mukurtu_batch_import_report: mukurtu_batch_import_report
@@ -244,46 +265,26 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
-          entity_type: message
-          entity_field: template
-          plugin_id: bundle
-      sorts:
-        created:
-          id: created
-          table: message_field_data
-          field: created
+      style:
+        type: default
+      row:
+        type: 'entity:message'
+        options:
           relationship: none
-          group_type: group
-          admin_label: ''
-          order: DESC
-          exposed: false
-          expose:
-            label: ''
-          granularity: second
-          entity_type: message
-          entity_field: created
-          plugin_id: date
-      title: 'Mukurtu Message Log'
+          view_mode: mail_subject
+      query:
+        type: views_query
+        options:
+          query_comment: ''
+          disable_sql_rewrite: false
+          distinct: false
+          replica: false
+          query_tags: {  }
+      relationships: {  }
+      use_ajax: true
       header: {  }
       footer: {  }
-      empty:
-        area:
-          id: area
-          table: views
-          field: area
-          relationship: none
-          group_type: group
-          admin_label: ''
-          empty: true
-          tokenize: false
-          content:
-            value: 'No recent activity.'
-            format: basic_html
-          plugin_id: text
-      relationships: {  }
-      arguments: {  }
       display_extenders: {  }
-      use_ajax: true
     cache_metadata:
       max-age: -1
       contexts:
@@ -293,9 +294,9 @@ display:
         - user.permissions
       tags: {  }
   mukurtu_message_log_block:
-    display_plugin: block
     id: mukurtu_message_log_block
     display_title: Block
+    display_plugin: block
     position: 1
     display_options:
       display_extenders: {  }

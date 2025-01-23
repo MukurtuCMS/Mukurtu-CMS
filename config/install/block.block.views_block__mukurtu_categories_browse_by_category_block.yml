@@ -7,9 +7,9 @@ dependencies:
     - system
     - views
   theme:
-    - mukurtu_bartik
+    - mukurtu_v4
 id: views_block__mukurtu_categories_browse_by_category_block
-theme: mukurtu_bartik
+theme: mukurtu_v4
 region: content
 weight: -1
 provider: null

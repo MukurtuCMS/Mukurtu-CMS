@@ -9,6 +9,7 @@ dependencies:
     - node.type.digital_heritage
   module:
     - comment
+    - entity_reference_revisions
     - field_group
     - layout_builder
     - link
@@ -26,29 +27,9 @@ third_party_settings:
   field_group:
     group_metadata:
       children:
-        - field_related_content
-        - field_communities
-        - field_cultural_protocols
-        - field_category
-        - field_keywords
-        - field_in_collection
-        - field_original_date
-        - field_date_description
-        - field_creator
-        - field_contributor
-        - field_language
-        - field_creative_commons
-        - field_local_contexts_projects
-        - field_local_contexts_labels_and_notices
-        - field_source
-        - field_external_links
-        - field_publisher
-        - field_identifier
-        - field_subject
-        - field_type
-        - field_format
-        - field_rights_and_usage
-        - field_rights_statements
+        - group_sidebar_mukurtu_fields
+        - group_additional_metadata
+        - group_rights
       label: Metadata
       parent_name: ''
       region: content
@@ -72,11 +53,12 @@ third_party_settings:
         - field_description
         - field_cultural_narrative
         - field_traditional_knowledge
-        - field_transcription
-        - field_people
         - field_coverage
+        - field_location
         - field_coverage_description
+        - field_transcription
         - field_all_related_content
+        - field_citation
       label: 'Primary Fields'
       parent_name: ''
       region: content
@@ -86,6 +68,88 @@ third_party_settings:
         classes: item-content
         show_empty_fields: false
         id: ''
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_sidebar_mukurtu_fields:
+      children:
+        - field_title
+        - field_communities
+        - field_cultural_protocols
+        - field_category
+        - field_keywords
+        - field_creator
+        - field_contributor
+        - field_people
+      label: 'Sidebar - Mukurtu fields'
+      parent_name: group_metadata
+      region: content
+      weight: 37
+      format_type: html_element
+      format_settings:
+        classes: sidebar-section
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_additional_metadata:
+      children:
+        - field_original_date
+        - field_date_description
+        - field_language
+        - field_source
+        - field_identifier
+        - field_in_collection
+        - field_publisher
+        - field_subject
+        - field_type
+        - field_format
+        - field_external_links
+      label: 'Additional Metadata'
+      parent_name: group_metadata
+      region: content
+      weight: 38
+      format_type: html_element
+      format_settings:
+        classes: sidebar-section
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_rights:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+        - field_knowledge_keepers
+        - field_rights_and_usage
+        - field_creative_commons
+        - field_rights_statements
+      label: Rights
+      parent_name: group_metadata
+      region: content
+      weight: 39
+      format_type: html_element
+      format_settings:
+        classes: sidebar-section
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
         element: div
         show_label: false
         label_element: h3
@@ -105,7 +169,7 @@ content:
       view_mode: default
       pager_id: 0
     third_party_settings: {  }
-    weight: 3
+    weight: 2
     region: content
   field_all_community_records:
     type: entity_reference_label
@@ -119,10 +183,10 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: teaser
+      view_mode: browse
       link: false
     third_party_settings: {  }
-    weight: 43
+    weight: 42
     region: content
   field_category:
     type: entity_reference_label
@@ -130,7 +194,14 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 23
+    weight: 26
+    region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 43
     region: content
   field_communities:
     type: entity_reference_label
@@ -138,7 +209,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 21
+    weight: 24
     region: content
   field_contributor:
     type: entity_reference_label
@@ -217,21 +288,21 @@ content:
           options: ''
       weight: null
     third_party_settings: {  }
-    weight: 41
+    weight: 38
     region: content
   field_coverage_description:
     type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 42
+    weight: 40
     region: content
   field_creative_commons:
     type: mukurtu_creative_commons_formatter
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 31
+    weight: 44
     region: content
   field_creator:
     type: entity_reference_label
@@ -253,7 +324,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 22
+    weight: 25
     region: content
   field_date_description:
     type: string
@@ -261,7 +332,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 27
+    weight: 32
     region: content
   field_description:
     type: text_default
@@ -280,7 +351,7 @@ content:
       rel: ''
       target: ''
     third_party_settings: {  }
-    weight: 35
+    weight: 42
     region: content
   field_format:
     type: entity_reference_label
@@ -288,7 +359,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 40
+    weight: 41
     region: content
   field_identifier:
     type: string
@@ -296,7 +367,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 37
+    weight: 35
     region: content
   field_in_collection:
     type: entity_reference_label
@@ -304,7 +375,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 25
+    weight: 36
     region: content
   field_keywords:
     type: entity_reference_label
@@ -312,7 +383,16 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 24
+    weight: 27
+    region: content
+  field_knowledge_keepers:
+    type: entity_reference_revisions_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 42
     region: content
   field_language:
     type: entity_reference_label
@@ -320,37 +400,45 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 30
+    weight: 33
     region: content
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 33
+    weight: 41
     region: content
   field_local_contexts_projects:
     type: local_contexts_project
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 32
+    weight: 40
+    region: content
+  field_location:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 39
     region: content
   field_media_assets:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: full
+      view_mode: media_assets
       link: false
     third_party_settings: {  }
     weight: 33
     region: content
   field_original_date:
-    type: yyyy_mm_dd_original_date_formatter
+    type: month_day_year_original_date_formatter
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 26
+    weight: 31
     region: content
   field_people:
     type: entity_reference_label
@@ -358,7 +446,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 40
+    weight: 30
     region: content
   field_publisher:
     type: entity_reference_label
@@ -366,16 +454,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 36
-    region: content
-  field_related_content:
-    type: entity_reference_entity_view
-    label: above
-    settings:
-      view_mode: teaser
-      link: false
-    third_party_settings: {  }
-    weight: 20
+    weight: 38
     region: content
   field_rights:
     type: basic_string
@@ -389,14 +468,14 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 41
+    weight: 43
     region: content
   field_rights_statements:
     type: list_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 42
+    weight: 45
     region: content
   field_source:
     type: string
@@ -412,7 +491,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 38
+    weight: 39
     region: content
   field_summary:
     type: string
@@ -421,6 +500,11 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     weight: 34
+    region: content
+  field_title:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 23
     region: content
   field_traditional_knowledge:
     type: text_default
@@ -434,7 +518,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 38
+    weight: 41
     region: content
   field_type:
     type: entity_reference_label
@@ -442,7 +526,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 39
+    weight: 40
     region: content
   flag_export_content:
     settings: {  }
@@ -451,15 +535,14 @@ content:
     region: content
 hidden:
   draft: true
-  field_citation: true
   field_content_type: true
   field_knowledge_keepers: true
   field_mukurtu_original_record: true
   field_multipage_page_of: true
   field_protocol_control: true
+  field_related_content: true
   field_representative_media: true
   field_sequence_collection: true
-  field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_mukurtu_email_content: true
@@ -468,5 +551,6 @@ hidden:
   flag_mukurtu_follow_content: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

@@ -1,2 +1,7 @@
 bundle: mukurtu
 required: true
+excluded:
+  - core.entity_view_display.message.mukurtu_new_item_in_protocol.mail_body
+  - core.entity_view_display.message.mukurtu_new_item_in_protocol.mail_subject
+  - og.og_role.protocol-protocol-non-member
+  - og.og_role.protocol-protocol-member

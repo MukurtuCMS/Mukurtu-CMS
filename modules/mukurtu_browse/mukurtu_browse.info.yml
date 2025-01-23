@@ -1,23 +1,34 @@
 name: 'Mukurtu Browse'
 type: module
 description: 'Provides the default Mukurtu browse page.'
-core_version_requirement: ^8 || ^9
-core: 8.x
-package: 'Mukurtu'
+core_version_requirement: '^9.4 || ^10'
+package: 'Mukurtu CMS'
 libraries:
   - mukurtu_browse/mukurtu-leaflet-preview
 dependencies:
-  - node
-  - media
-  - block
-  - paragraphs
-  - leaflet_views
-  - mukurtu_core
-  - mukurtu_protocol
-  - mukurtu_digital_heritage
-  - mukurtu_dictionary
-  - mukurtu_search
-  - search_api
-  - search_api_db
-
-version: '8.x-1.x-dev'
+  - 'blazy:blazy'
+  - 'drupal:block'
+  - 'drupal:field'
+  - 'drupal:layout_builder'
+  - 'drupal:media'
+  - 'drupal:node'
+  - 'drupal:system'
+  - 'drupal:taxonomy'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'facets:facets'
+  - 'geofield:geofield'
+  - 'leaflet:leaflet_views'
+  - 'mukurtu_collection:mukurtu_collection'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_dictionary:mukurtu_dictionary'
+  - 'mukurtu_digital_heritage:mukurtu_digital_heritage'
+  - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_search:mukurtu_search'
+  - 'paragraphs:paragraphs'
+  - 'search_api:search_api'
+  - 'search_api:search_api_db'
+  - 'search_api_glossary:search_api_glossary'
+  - 'search_api_solr:search_api_solr'
+version: 4.x-dev

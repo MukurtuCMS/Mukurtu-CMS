@@ -1,13 +1,11 @@
 bundle: mukurtu
 excluded:
+  - system.site
+  - node.settings
   - field.storage.block_content.body
   - field.storage.block_content.field_featured_content
   - field.storage.block_content.field_image
   - field.storage.node.field_content_type
-  - image.style.carousel_thumbnail
-  - image.style.large
-  - image.style.medium_480px_w_
-  - image.style.small_250px_w_
   - user.role.anonymous
   - core.entity_view_mode.block.token
   - core.entity_view_mode.block_content.token
@@ -18,8 +16,12 @@ excluded:
   - core.entity_view_mode.file.token
   - core.entity_view_mode.menu_link_content.token
   - core.entity_view_mode.node.token
-  - core.entity_view_mode.paragraph.token
   - core.entity_view_mode.path_alias.token
   - core.entity_view_mode.shortcut.token
   - core.entity_view_mode.tour.token
+  - core.entity_view_mode.flagging.token
+  - core.entity_view_mode.media.token
+  - core.entity_view_mode.taxonomy_term.token
+  # Excluded for now so that the generated config dependencies don't get exported.
+  - search_api.server.mukurtu_solr_server.yml
 required: true

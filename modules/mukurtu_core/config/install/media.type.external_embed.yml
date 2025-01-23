@@ -1,10 +1,12 @@
 langcode: en
 status: true
-dependencies: {  }
+dependencies:
+  module:
+    - mukurtu_core
 id: external_embed
-label: External Embed
+label: 'External Embed'
 description: 'An embed code from a remote website.'
-source: 'external_embed'
+source: external_embed
 queue_thumbnail_downloads: false
 new_revision: true
 source_configuration:

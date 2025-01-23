@@ -536,6 +536,7 @@ content:
 hidden:
   draft: true
   field_content_type: true
+  field_knowledge_keepers: true
   field_mukurtu_original_record: true
   field_multipage_page_of: true
   field_protocol_control: true

@@ -1,30 +1,16 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - search_api.index.mukurtu_browse_auto_index
-    - views.view.mukurtu_taxonomy_references
-  module:
-    - search_api
+dependencies: {  }
 id: taxonomy_reference_keywords
 name: Keywords
+url_alias: taxonomy_reference_keywords
 weight: 0
 min_count: 1
 missing: false
 missing_label: others
-url_alias: taxonomy_reference_keywords
-facet_source_id: 'search_api:views_block__mukurtu_taxonomy_references__content_block'
+show_only_one_result: false
 field_identifier: node__field_keywords__name
-query_operator: or
-hard_limit: 0
-exclude: false
-use_hierarchy: false
-keep_hierarchy_parents_active: false
-hierarchy:
-  type: taxonomy
-  config: {  }
-expand_hierarchy: false
-enable_parent_when_child_gets_disabled: true
+facet_source_id: 'search_api:views_block__mukurtu_taxonomy_references__content_block'
 widget:
   type: checkbox
   config:
@@ -36,11 +22,17 @@ widget:
     soft_limit_settings:
       show_less_label: 'Show less'
       show_more_label: 'Show more'
-empty_behavior:
-  behavior: none
+query_operator: or
+use_hierarchy: false
+keep_hierarchy_parents_active: false
+hierarchy:
+  type: taxonomy
+  config: {  }
+expand_hierarchy: false
+enable_parent_when_child_gets_disabled: true
+hard_limit: 0
+exclude: false
 only_visible_when_facet_source_is_visible: false
-show_only_one_result: false
-show_title: true
 processor_configs:
   active_widget_order:
     processor_id: active_widget_order
@@ -76,3 +68,6 @@ processor_configs:
       pre_query: 50
       build: 15
     settings: {  }
+empty_behavior:
+  behavior: none
+show_title: true

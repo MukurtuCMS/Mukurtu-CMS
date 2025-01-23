@@ -1,5 +1,8 @@
 langcode: en
 status: true
+dependencies:
+  module:
+    - mukurtu_dictionary
 id: language_community-language_community-language_steward
 label: 'Language Steward'
 weight: 7

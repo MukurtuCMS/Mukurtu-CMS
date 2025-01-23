@@ -1,13 +1,20 @@
-name: Mukurtu Import
+name: 'Mukurtu Import'
 type: module
-description: Provides import functionality for Mukurtu.
-package: Mukurtu
-core: 8.x
-core_version_requirement: ^8 || ^9
+description: 'Provides import functionality for Mukurtu.'
+package: 'Mukurtu CMS'
+core_version_requirement: '^9.4 || ^10'
 dependencies:
-  - mukurtu_core
-  - mukurtu_protocol
-  - migrate
-  - migrate_source_csv
-  - migrate_plus
-  - migrate_tools
+  - 'drupal:history'
+  - 'drupal:layout_builder'
+  - 'drupal:media'
+  - 'drupal:migrate'
+  - 'drupal:node'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'migrate_plus:migrate_plus'
+  - 'migrate_source_csv:migrate_source_csv'
+  - 'migrate_tools:migrate_tools'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_notifications:mukurtu_notifications'
+  - 'mukurtu_protocol:mukurtu_protocol'
+version: 4.x-dev

@@ -9,9 +9,9 @@ dependencies:
     - entity_browser
     - field_group
     - media_library
-    - mukurtu_media
     - mukurtu_protocol
     - path
+    - text
 third_party_settings:
   field_group:
     group_main_tab:
@@ -200,6 +200,13 @@ content:
       field_widget_display_settings:
         view_mode: content_browser
       selection_mode: selection_append
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
     third_party_settings: {  }
   name:
     weight: -8

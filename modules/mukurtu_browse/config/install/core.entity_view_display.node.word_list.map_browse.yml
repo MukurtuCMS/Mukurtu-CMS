@@ -7,6 +7,7 @@ dependencies:
     - node.type.word_list
   module:
     - layout_builder
+    - text
     - user
 third_party_settings:
   layout_builder:
@@ -17,6 +18,13 @@ targetEntityType: node
 bundle: word_list
 mode: map_browse
 content:
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
   field_words:
     type: entity_reference_label
     label: above
@@ -27,19 +35,26 @@ content:
     region: content
 hidden:
   comment: true
+  draft: true
   field_all_related_content: true
   field_communities: true
+  field_cultural_protocols: true
   field_description: true
   field_in_collection: true
   field_keywords: true
   field_media_assets: true
+  field_multipage_page_of: true
+  field_related_content: true
   field_representative_media: true
   field_sequence_collection: true
+  field_source: true
+  field_summary: true
   field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_mukurtu_email_og: true
   flag_subscribe_node: true
   flag_subscribe_og: true
+  langcode: true
   links: true
   search_api_excerpt: true

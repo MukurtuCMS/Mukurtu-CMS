@@ -5,6 +5,7 @@ dependencies:
     - paragraphs.paragraphs_type.indigenous_knowledge_keepers
   module:
     - original_date
+    - search_api_solr
 id: paragraph.indigenous_knowledge_keepers.default
 targetEntityType: paragraph
 bundle: indigenous_knowledge_keepers
@@ -12,7 +13,7 @@ mode: default
 content:
   field_living_place:
     type: string
-    label: above
+    label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -20,7 +21,7 @@ content:
     region: content
   field_name:
     type: string
-    label: above
+    label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -28,7 +29,7 @@ content:
     region: content
   field_nation:
     type: string
-    label: above
+    label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -36,21 +37,24 @@ content:
     region: content
   field_original_date:
     type: yyyy_mm_dd_original_date_formatter
-    label: above
+    label: hidden
     settings: {  }
     third_party_settings: {  }
     weight: 5
     region: content
   field_teaching:
-    type: basic_string
-    label: above
-    settings: {  }
+    type: solr_highlighted_text_default
+    label: hidden
+    settings:
+      prefix: '<strong>'
+      suffix: '</strong>'
+      strict: false
     third_party_settings: {  }
     weight: 4
     region: content
   field_treaty_territory:
     type: string
-    label: above
+    label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }

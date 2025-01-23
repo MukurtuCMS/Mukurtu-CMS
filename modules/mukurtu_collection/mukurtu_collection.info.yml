@@ -1,19 +1,30 @@
 name: 'Mukurtu Collections'
 type: module
 description: 'Provides the collection content type.'
-core_version_requirement: ^8 || ^9
-core: 8.x
-package: 'Mukurtu'
+core_version_requirement: '^9.4 || ^10'
+package: Mukurtu
 dependencies:
-  - entity_browser
-  - field_group
-  - media
-  - media_library
-  - mukurtu_core
-  - mukurtu_protocol
-  - mukurtu_drafts
-  - path
-  - search_api
-  - text
-
-version: '8.x-1.x-dev'
+  - 'drupal:comment'
+  - 'drupal:field'
+  - 'drupal:layout_builder'
+  - 'drupal:media'
+  - 'drupal:media_library'
+  - 'drupal:menu_ui'
+  - 'drupal:node'
+  - 'drupal:options'
+  - 'drupal:path'
+  - 'drupal:system'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'entity_browser:entity_browser'
+  - 'field_group:field_group'
+  - 'flag:flag'
+  - 'mukurtu_browse:mukurtu_browse'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_drafts:mukurtu_drafts'
+  - 'mukurtu_notifications:mukurtu_notifications'
+  - 'mukurtu_protocol:mukurtu_protocol'
+  - 'search_api:search_api'
+  - 'search_api_solr:search_api_solr'
+version: 4.x-dev

@@ -8,6 +8,7 @@ label: 'Export Media'
 bundles: {  }
 entity_type: media
 global: false
+weight: 0
 flag_short: 'Add to export list'
 flag_long: 'Add this media to the export list'
 flag_message: 'Added to export list'
@@ -15,7 +16,6 @@ unflag_short: 'Remove from export list'
 unflag_long: 'Remove the media from the export list'
 unflag_message: 'Removed from export list'
 unflag_denied_text: ''
-weight: 0
 flag_type: 'entity:media'
 link_type: ajax_link
 flagTypeConfig:
