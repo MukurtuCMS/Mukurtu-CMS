@@ -7,7 +7,6 @@ dependencies:
     - flag
     - media
     - search_api
-    - search_api_solr
 id: export_list_media
 name: 'Export List: Media'
 description: 'Search index for the media export list.'

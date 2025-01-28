@@ -5,7 +5,6 @@ dependencies:
     - paragraphs.paragraphs_type.indigenous_knowledge_keepers
   module:
     - original_date
-    - search_api_solr
 id: paragraph.indigenous_knowledge_keepers.default
 targetEntityType: paragraph
 bundle: indigenous_knowledge_keepers
@@ -43,12 +42,10 @@ content:
     weight: 5
     region: content
   field_teaching:
-    type: solr_highlighted_text_default
+    type: string
     label: hidden
     settings:
-      prefix: '<strong>'
-      suffix: '</strong>'
-      strict: false
+      link_to_entity: false
     third_party_settings: {  }
     weight: 4
     region: content

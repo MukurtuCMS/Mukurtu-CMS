@@ -10,7 +10,6 @@ dependencies:
     - media
     - search_api
     - search_api_glossary
-    - search_api_solr
 id: mukurtu_default_content_index
 name: 'Mukurtu Default content index'
 description: 'Default Mukurtu content index'
@@ -342,9 +341,6 @@ processor_settings:
       - title
   language_with_fallback: {  }
   rendered_item: {  }
-  solr_date_range:
-    weights:
-      preprocess_index: 0
   tokenizer:
     weights:
       preprocess_index: -6

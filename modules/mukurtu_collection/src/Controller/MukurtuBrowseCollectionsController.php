@@ -3,17 +3,27 @@
 namespace Drupal\mukurtu_collection\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\views\Views;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class MukurtuBrowseCollectionsController extends ControllerBase {
 
   protected $backend;
+  protected $moduleHandler;
 
-  public function __construct() {
+  public function __construct(ModuleHandlerInterface $moduleHandler) {
     $this->backend = $this->config('mukurtu_search.settings')->get('backend') ?? 'db';
+    $this->moduleHandler = $moduleHandler;
+  }
+
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('module_handler')
+    );
   }
 
   /**
@@ -25,8 +35,10 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
   protected function getViewName() {
     $views = [
       'db' => 'mukurtu_browse_collections',
-      'solr' => 'mukurtu_browse_collections_solr',
     ];
+    if ($this->moduleHandler->moduleExists('mukurtu_solr')) {
+      $views['solr'] = 'mukurtu_browse_collections_solr';
+    }
 
     return $views[$this->backend];
   }

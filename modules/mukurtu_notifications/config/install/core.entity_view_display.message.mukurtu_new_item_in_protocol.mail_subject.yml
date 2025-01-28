@@ -2,8 +2,8 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.message.mail_body
-    - message.template.mukurtu_new_user_registration
+    - core.entity_view_mode.message.mail_subject
+    - message.template.mukurtu_new_item_in_protocol
   module:
     - layout_builder
     - user
@@ -11,14 +11,14 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: message.mukurtu_new_user_registration.mail_body
+id: message.mukurtu_new_item_in_protocol.mail_subject
 targetEntityType: message
-bundle: mukurtu_new_user_registration
-mode: mail_body
+bundle: mukurtu_new_item_in_protocol
+mode: mail_subject
 content:
-  partial_1:
+  partial_0:
     weight: 0
     region: content
 hidden:
-  partial_0: true
+  partial_1: true
   search_api_excerpt: true

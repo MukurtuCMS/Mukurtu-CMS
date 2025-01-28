@@ -1,18 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - filter.format.basic_html
-  module:
-    - comment
-    - entity_browser
-    - filter
-    - flag
-    - google_analytics
-    - media
-    - mukurtu_collection
-    - mukurtu_protocol
-    - system
+dependencies: {  }
 id: authenticated
 label: 'Authenticated user'
 weight: 1

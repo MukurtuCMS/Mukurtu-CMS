@@ -1,66 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  config:
-    - filter.format.full_html
-    - taxonomy.vocabulary.authors
-    - taxonomy.vocabulary.category
-    - taxonomy.vocabulary.community_type
-    - taxonomy.vocabulary.contributor
-    - taxonomy.vocabulary.creator
-    - taxonomy.vocabulary.format
-    - taxonomy.vocabulary.interpersonal_relationship
-    - taxonomy.vocabulary.keywords
-    - taxonomy.vocabulary.language
-    - taxonomy.vocabulary.people
-    - taxonomy.vocabulary.publisher
-    - taxonomy.vocabulary.subject
-    - taxonomy.vocabulary.tags
-    - taxonomy.vocabulary.type
-    - taxonomy.vocabulary.word_type
-  module:
-    - block
-    - block_content
-    - comment
-    - contact
-    - contextual
-    - devel
-    - embed
-    - entity_reference_revisions
-    - facets
-    - field_ui
-    - file
-    - filter
-    - flag
-    - google_analytics
-    - image
-    - leaflet
-    - media
-    - message
-    - message_digest
-    - message_notify_ui
-    - message_subscribe_ui
-    - message_ui
-    - mukurtu_collection
-    - mukurtu_dictionary
-    - mukurtu_export
-    - mukurtu_import
-    - mukurtu_multipage_items
-    - mukurtu_protocol
-    - node
-    - og
-    - paragraphs
-    - path
-    - pathauto
-    - quickedit
-    - redirect
-    - rest
-    - search_api
-    - shortcut
-    - system
-    - taxonomy
-    - toolbar
-    - tour
+dependencies: {  }
 id: mukurtu_administrator
 label: 'Mukurtu Administrator'
 weight: 2

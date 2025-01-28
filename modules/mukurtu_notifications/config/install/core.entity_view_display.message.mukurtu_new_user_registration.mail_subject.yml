@@ -6,6 +6,7 @@ dependencies:
     - message.template.mukurtu_new_user_registration
   module:
     - layout_builder
+    - user
 third_party_settings:
   layout_builder:
     enabled: false
@@ -20,3 +21,4 @@ content:
     region: content
 hidden:
   partial_1: true
+  search_api_excerpt: true

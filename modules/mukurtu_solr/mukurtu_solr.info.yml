@@ -1,6 +1,6 @@
-name: 'Mukurtu Search'
+name: 'Mukurtu Solr'
 type: module
-description: 'Handles search indexes.'
+description: 'Enables support for search provided by Solr.'
 core_version_requirement: '^9.4 || ^10'
 package: 'Mukurtu CMS'
 version: 4.x-dev
@@ -9,6 +9,12 @@ dependencies:
   - 'drupal:menu_link_content'
   - 'drupal:node'
   - 'drupal:taxonomy'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'facets:facets'
+  - 'geofield:geofield'
+  - 'leaflet:leaflet_views'
   - 'mukurtu_collection:mukurtu_collection'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_dictionary:mukurtu_dictionary'
@@ -17,4 +23,5 @@ dependencies:
   - 'paragraphs:paragraphs'
   - 'search_api:search_api'
   - 'search_api_glossary:search_api_glossary'
+  - 'search_api_solr:search_api_solr'
   - 'token:token'

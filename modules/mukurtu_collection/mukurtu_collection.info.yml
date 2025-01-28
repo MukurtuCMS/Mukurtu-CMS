@@ -26,5 +26,4 @@ dependencies:
   - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_protocol:mukurtu_protocol'
   - 'search_api:search_api'
-  - 'search_api_solr:search_api_solr'
 version: 4.x-dev

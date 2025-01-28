@@ -2,18 +2,16 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.body
-    - search_api.index.mukurtu_default_solr_index
+    - search_api.index.mukurtu_dictionary_solr_index
   module:
     - search_api
-    - text
     - user
 id: mukurtu_dictionary_solr
 label: 'Mukurtu Dictionary Solr'
 module: views
 description: ''
 tag: ''
-base_table: search_api_index_mukurtu_default_solr_index
+base_table: search_api_index_mukurtu_dictionary_solr_index
 base_field: search_api_id
 display:
   default:
@@ -26,7 +24,7 @@ display:
       fields:
         node_body:
           id: node_body
-          table: search_api_index_mukurtu_default_solr_index
+          table: search_api_index_mukurtu_dictionary_solr_index
           field: node_body
           relationship: none
           group_type: group
@@ -137,7 +135,7 @@ display:
       sorts:
         search_api_relevance:
           id: search_api_relevance
-          table: search_api_index_mukurtu_default_solr_index
+          table: search_api_index_mukurtu_dictionary_solr_index
           field: search_api_relevance
           relationship: none
           group_type: group
@@ -150,7 +148,7 @@ display:
           exposed: true
         node_title:
           id: node_title
-          table: search_api_index_mukurtu_default_solr_index
+          table: search_api_index_mukurtu_dictionary_solr_index
           field: node_title
           relationship: none
           group_type: group
@@ -163,7 +161,7 @@ display:
           exposed: true
         node_changed:
           id: node_changed
-          table: search_api_index_mukurtu_default_solr_index
+          table: search_api_index_mukurtu_dictionary_solr_index
           field: node_changed
           relationship: none
           group_type: group
@@ -176,7 +174,7 @@ display:
           exposed: true
         node_changed_1:
           id: node_changed_1
-          table: search_api_index_mukurtu_default_solr_index
+          table: search_api_index_mukurtu_dictionary_solr_index
           field: node_changed
           relationship: none
           group_type: group
@@ -191,7 +189,7 @@ display:
       filters:
         type:
           id: type
-          table: search_api_index_mukurtu_default_solr_index
+          table: search_api_index_mukurtu_dictionary_solr_index
           field: type
           relationship: none
           group_type: group
@@ -233,7 +231,7 @@ display:
           reduce_duplicates: false
         search_api_fulltext:
           id: search_api_fulltext
-          table: search_api_index_mukurtu_default_solr_index
+          table: search_api_index_mukurtu_dictionary_solr_index
           field: search_api_fulltext
           relationship: none
           group_type: group
@@ -314,8 +312,8 @@ display:
         - user.permissions
       tags:
         - 'config:field.storage.node.body'
-        - 'config:search_api.index.mukurtu_default_solr_index'
-        - 'search_api_list:mukurtu_default_solr_index'
+        - 'config:search_api.index.mukurtu_dictionary_solr_index'
+        - 'search_api_list:mukurtu_dictionary_solr_index'
   mukurtu_dictionary_block:
     id: mukurtu_dictionary_block
     display_title: Block
@@ -335,5 +333,5 @@ display:
         - user.permissions
       tags:
         - 'config:field.storage.node.body'
-        - 'config:search_api.index.mukurtu_default_solr_index'
-        - 'search_api_list:mukurtu_default_solr_index'
+        - 'config:search_api.index.mukurtu_dictionary_solr_index'
+        - 'search_api_list:mukurtu_dictionary_solr_index'

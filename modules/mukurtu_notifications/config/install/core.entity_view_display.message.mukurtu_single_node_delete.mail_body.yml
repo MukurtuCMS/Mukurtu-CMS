@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.message.mail_body
-    - message.template.mukurtu_new_user_registration
+    - message.template.mukurtu_single_node_delete
   module:
     - layout_builder
     - user
@@ -11,9 +11,9 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: message.mukurtu_new_user_registration.mail_body
+id: message.mukurtu_single_node_delete.mail_body
 targetEntityType: message
-bundle: mukurtu_new_user_registration
+bundle: mukurtu_single_node_delete
 mode: mail_body
 content:
   partial_1:
