@@ -45,7 +45,13 @@ function mukurtu_install() {
   // Set the homepage (system.site.yml is not owned by Mukurtu).
   \Drupal::configFactory()
     ->getEditable('system.site')
-    ->set('front', '/home')
+    ->set('page.front', '/home')
+    ->save();
+
+  // Set the homepage (system.site.yml is not owned by Mukurtu).
+  \Drupal::configFactory()
+    ->getEditable('node.settings')
+    ->set('use_admin_theme', TRUE)
     ->save();
 
   // Add default blocks.

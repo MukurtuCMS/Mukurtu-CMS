@@ -1,6 +1,5 @@
 langcode: en
 status: true
-dependencies: {  }
 id: mukurtu_administrator
 label: 'Mukurtu Administrator'
 weight: 2

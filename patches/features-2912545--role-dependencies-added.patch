@@ -1,0 +1,44 @@
+From b2190cc1427a3d2671f25485867bfe7bf27fb9aa Mon Sep 17 00:00:00 2001
+From: Nedjo Rogers <code@chocolatelilyweb.ca>
+Date: Thu, 16 Sep 2021 10:38:51 -0700
+Subject: [PATCH] Issue #2912545: strip dependencies from roles when
+ permissions stripped
+
+---
+ src/Plugin/FeaturesAssignment/FeaturesAssignmentAlter.php | 6 ++++--
+ tests/src/Kernel/FeaturesAssignTest.php                   | 1 +
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/Plugin/FeaturesAssignment/FeaturesAssignmentAlter.php b/src/Plugin/FeaturesAssignment/FeaturesAssignmentAlter.php
+index 91cbf12f..3ef47154 100644
+--- a/src/Plugin/FeaturesAssignment/FeaturesAssignmentAlter.php
++++ b/src/Plugin/FeaturesAssignment/FeaturesAssignmentAlter.php
+@@ -45,9 +45,11 @@ class FeaturesAssignmentAlter extends FeaturesAssignmentMethodBase {
+         // Unset permissions for user roles. Doing so facilitates packaging
+         // roles that may have permissions that relate to multiple packages.
+         if ($settings['user_permissions'] && $config->getType() == 'user_role') {
+-          // Unset and not empty permissions data to prevent loss of configured
+-          // role permissions in the event of a feature revert.
++          // Unset and not empty permissions and dependencies data to prevent
++          // loss of data in the event of a feature revert.
+           unset($data['permissions']);
++          // A role with no permissions has no dependencies.
++          unset($data['dependencies']);
+         }
+         $config->setData($data);
+       }
+diff --git a/tests/src/Kernel/FeaturesAssignTest.php b/tests/src/Kernel/FeaturesAssignTest.php
+index 948432f6..50889221 100644
+--- a/tests/src/Kernel/FeaturesAssignTest.php
++++ b/tests/src/Kernel/FeaturesAssignTest.php
+@@ -182,6 +182,7 @@ class FeaturesAssignTest extends KernelTestBase {
+     $this->assertFalse(isset($user_role_data['_core']), 'Unexpected _core value present.');
+     $this->assertFalse(isset($user_role_data['uuid']), 'Unexpected uuid value present.');
+     $this->assertFalse(isset($user_role_data['permissions']), 'Unexpected permissions value present.');
++    $this->assertFalse(isset($user_role_data['dependencies']), 'Unexpected dependencies value present.');
+ 
+   }
+ 
+-- 
+GitLab
+
