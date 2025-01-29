@@ -258,7 +258,10 @@ class LocalContextsSupportedProjectManager {
 
     $memberships = Og::getMemberships($account);
     foreach ($memberships as $membership) {
-      $projects += $this->getGroupSupportedProjects($membership->getGroup());
+      $group = $membership->getGroup();
+      if ($group) {
+        $projects += $this->getGroupSupportedProjects($group);
+      }
     }
 
     return $projects;
