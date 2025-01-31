@@ -3,14 +3,13 @@ status: true
 dependencies:
   module:
     - mukurtu_protocol
-    - mukurtu_community_records
 id: protocol-protocol-community_record_steward
 label: 'Community Record Steward'
 weight: 9
-group_id: null
+is_admin: null
 group_type: protocol
 group_bundle: protocol
-is_admin: null
+group_id: null
 permissions:
   - 'administer community records'
 role_type: standard

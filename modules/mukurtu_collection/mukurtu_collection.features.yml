@@ -1,5 +1,4 @@
 bundle: mukurtu
-required: true
 excluded:
   - system.action.flag_action.mukurtu_email_collection_flag
   - system.action.flag_action.mukurtu_email_collection_unflag
@@ -7,3 +6,4 @@ excluded:
   - system.action.flag_action.mukurtu_follow_collection_unflag
   - core.entity_view_display.message.mukurtu_new_item_in_collection.mail_body
   - core.entity_view_display.message.mukurtu_new_item_in_collection.mail_subject
+required: true

@@ -75,12 +75,12 @@ filters:
     status: false
     weight: 3
     settings:
-      media_switch: ''
-      hybrid_style: ''
-      box_style: ''
-      box_media_style: ''
-      box_caption: ''
       filter_tags:
         img: img
         iframe: iframe
+      media_switch: ''
+      box_style: ''
+      box_media_style: ''
+      hybrid_style: ''
       use_data_uri: '0'
+      box_caption: ''

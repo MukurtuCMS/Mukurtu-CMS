@@ -1,5 +1,40 @@
 bundle: mukurtu
-required: true
 excluded:
-  - node.settings
-  - site.settings
+  - system.action.flag_action.mukurtu_email_collection_flag
+  - system.action.flag_action.mukurtu_email_collection_unflag
+  - system.action.flag_action.mukurtu_email_community_flag
+  - system.action.flag_action.mukurtu_email_community_unflag
+  - system.action.flag_action.mukurtu_email_content_flag
+  - system.action.flag_action.mukurtu_email_content_unflag
+  - system.action.flag_action.mukurtu_email_node_flag
+  - system.action.flag_action.mukurtu_email_node_unflag
+  - system.action.flag_action.mukurtu_email_og_flag
+  - system.action.flag_action.mukurtu_email_og_unflag
+  - system.action.flag_action.mukurtu_email_term_flag
+  - system.action.flag_action.mukurtu_email_term_unflag
+  - system.action.flag_action.mukurtu_follow_collection_flag
+  - system.action.flag_action.mukurtu_follow_collection_unflag
+  - system.action.flag_action.mukurtu_follow_community_flag
+  - system.action.flag_action.mukurtu_follow_community_unflag
+  - system.action.flag_action.mukurtu_follow_content_flag
+  - system.action.flag_action.mukurtu_follow_content_unflag
+  - system.theme
+  - block.block.mukurtu_v4_front_page_featured_content
+  - block.block.mukurtu_v4_hero_image_and_site_description
+  - core.entity_view_display.message.mukurtu_batch_import_report.mail_body
+  - core.entity_view_display.message.mukurtu_batch_import_report.mail_subject
+  - core.entity_view_display.message.mukurtu_new_item_in_collection.mail_body
+  - core.entity_view_display.message.mukurtu_new_item_in_collection.mail_subject
+  - core.entity_view_display.message.mukurtu_new_item_in_community.mail_body
+  - core.entity_view_display.message.mukurtu_new_item_in_community.mail_subject
+  - core.entity_view_display.message.mukurtu_new_item_in_protocol.mail_body
+  - core.entity_view_display.message.mukurtu_new_item_in_protocol.mail_subject
+  - core.entity_view_display.message.mukurtu_new_user_registration.mail_body
+  - core.entity_view_display.message.mukurtu_new_user_registration.mail_subject
+  - core.entity_view_display.message.mukurtu_single_node_delete.mail_body
+  - core.entity_view_display.message.mukurtu_single_node_delete.mail_subject
+  - core.entity_view_display.message.mukurtu_single_node_insert.mail_body
+  - core.entity_view_display.message.mukurtu_single_node_insert.mail_subject
+  - core.entity_view_display.message.mukurtu_single_node_update.mail_body
+  - core.entity_view_display.message.mukurtu_single_node_update.mail_subject
+required: true

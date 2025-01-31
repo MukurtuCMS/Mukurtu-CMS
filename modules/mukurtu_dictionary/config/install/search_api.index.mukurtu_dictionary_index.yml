@@ -10,7 +10,6 @@ dependencies:
     - mukurtu_dictionary
     - search_api
     - search_api_glossary
-    - search_api_solr
 id: mukurtu_dictionary_index
 name: 'Mukurtu Dictionary Index'
 description: 'Index for the Mukurtu dictionary.'
@@ -179,7 +178,6 @@ processor_settings:
       - title
   language_with_fallback: {  }
   rendered_item: {  }
-  solr_date_range: {  }
   tokenizer:
     weights:
       preprocess_index: -6

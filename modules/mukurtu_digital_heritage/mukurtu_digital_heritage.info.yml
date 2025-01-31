@@ -31,5 +31,4 @@ dependencies:
   - 'mukurtu_taxonomy:mukurtu_taxonomy'
   - 'original_date:original_date'
   - 'paragraphs:paragraphs'
-  - 'search_api_solr:search_api_solr'
 version: 4.x-dev

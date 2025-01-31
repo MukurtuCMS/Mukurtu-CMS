@@ -4,11 +4,11 @@ dependencies:
   module:
     - mukurtu_protocol
 id: protocol-protocol-protocol_affiliate
-label: Protocol Affiliate
+label: 'Protocol Affiliate'
 weight: 14
-group_id: null
+is_admin: null
 group_type: protocol
 group_bundle: protocol
-is_admin: null
+group_id: null
 permissions: {  }
 role_type: standard

@@ -1,16 +1,20 @@
-name: Mukurtu Search
+name: 'Mukurtu Search'
 type: module
-description: Handles search indexes.
-package: Mukurtu
-core: 8.x
-core_version_requirement: ^8 || ^9
+description: 'Handles search indexes.'
+core_version_requirement: '^9.4 || ^10'
+package: 'Mukurtu CMS'
+version: 4.x-dev
 dependencies:
-  - mukurtu_core
-  - mukurtu_collection
-  - mukurtu_protocol
-  - mukurtu_multipage_items
-  - search_api
-  - search_api_solr
-  - node
-  - media
-  - paragraphs
+  - 'drupal:media'
+  - 'drupal:menu_link_content'
+  - 'drupal:node'
+  - 'drupal:taxonomy'
+  - 'mukurtu_collection:mukurtu_collection'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_dictionary:mukurtu_dictionary'
+  - 'mukurtu_multipage_items:mukurtu_multipage_items'
+  - 'mukurtu_protocol:mukurtu_protocol'
+  - 'paragraphs:paragraphs'
+  - 'search_api:search_api'
+  - 'search_api_glossary:search_api_glossary'
+  - 'token:token'

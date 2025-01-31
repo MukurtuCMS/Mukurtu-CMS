@@ -8,4 +8,4 @@ dependencies:
   - 'drupal:node'
   - 'drupal:user'
   - 'drupal:views'
-  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_core'

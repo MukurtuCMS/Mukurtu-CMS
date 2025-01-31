@@ -1,0 +1,15 @@
+diff --git a/src/FeaturesManager.php b/src/FeaturesManager.php
+index 4a8f83d..830de20 100644
+--- a/src/FeaturesManager.php
++++ b/src/FeaturesManager.php
+@@ -198,8 +198,8 @@ class FeaturesManager implements FeaturesManagerInterface {
+    */
+   public function getConfigType($fullname) {
+     $result = [
+-      'type' => '',
+-      'name_short' => '',
++      'type' => FeaturesManagerInterface::SYSTEM_SIMPLE_CONFIG,
++      'name_short' => $fullname,
+     ];
+     $prefix = FeaturesManagerInterface::SYSTEM_SIMPLE_CONFIG . '.';
+     if (strpos($fullname, $prefix) !== FALSE) {
