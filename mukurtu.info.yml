@@ -132,7 +132,4 @@ dependencies:
   - 'token:token'
   - 'views_bulk_operations:views_bulk_operations'
 themes:
-  - bartik
-  - mukurtu_bartik
   - mukurtu_v4
-  - seven
