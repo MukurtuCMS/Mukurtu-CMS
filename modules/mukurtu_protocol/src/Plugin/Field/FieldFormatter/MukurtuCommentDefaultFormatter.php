@@ -15,9 +15,6 @@ use Drupal\mukurtu_protocol\CulturalProtocols;
  *   label = @Translation("Comment list for Mukurtu"),
  *   field_types = {
  *     "comment"
- *   },
- *   quickedit = {
- *     "editor" = "disabled"
  *   }
  * )
  */

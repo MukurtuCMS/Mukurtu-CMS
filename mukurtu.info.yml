@@ -14,7 +14,6 @@ install:
   - block
   - breakpoint
   - ckeditor
-  - color
   - config
   - comment
   - contextual
@@ -23,7 +22,6 @@ install:
   - mukurtu_content_warnings
   - datetime
   - block_content
-  - quickedit
   - editor
   - help
   - image
@@ -41,7 +39,6 @@ install:
   - toolbar
   - field_ui
   - file
-  - rdf
   - views
   - views_ui
   - tour
@@ -75,7 +72,6 @@ dependencies:
   - 'drupal:media_library'
   - 'drupal:node'
   - 'drupal:path'
-  - 'drupal:quickedit'
   - 'drupal:rest'
   - 'drupal:shortcut'
   - 'drupal:system'
