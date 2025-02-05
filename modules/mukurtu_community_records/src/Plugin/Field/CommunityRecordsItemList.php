@@ -52,6 +52,7 @@ class CommunityRecordsItemList extends EntityReferenceFieldItemList {
       // Find all the community records for the original record.
       $query = \Drupal::entityQuery('node')
         ->condition(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, $original_record->id())
+        ->accessCheck(FALSE)
         ->sort('created', 'DESC');
       $results = $query->execute();
 

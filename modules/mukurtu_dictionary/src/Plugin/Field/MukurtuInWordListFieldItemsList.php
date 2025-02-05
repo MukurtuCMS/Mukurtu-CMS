@@ -23,7 +23,8 @@ class MukurtuInWordListFieldItemsList extends EntityReferenceFieldItemList {
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'word_list')
       ->condition(WordList::WORDS_FIELD, $entity->id())
-      ->condition('status', TRUE);
+      ->condition('status', TRUE)
+      ->accessCheck(TRUE);
     $results = $query->execute();
 
     if (!empty($results)) {

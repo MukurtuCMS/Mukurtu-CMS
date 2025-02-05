@@ -96,6 +96,7 @@ function mukurtu_core_page_attachments(array &$attachments) {
   // want to bother them with the message.
   if (\Drupal::currentUser()->id() == 1) {
     $query = \Drupal::entityQuery('node');
+    $query->accessCheck(FALSE);
     $contentCount = $query->count()->execute();
     if ($contentCount) {
       \Drupal::messenger()->addError(t('You are logged in as the super admin (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. Consider logging into a different account.'));

@@ -190,7 +190,8 @@ function mukurtu_notifications_remove_notifications($template, $entity, $field =
   // Find notifications for the given template that reference the entity.
   $query = \Drupal::entityQuery('message')
     ->condition('template', $template)
-    ->condition($field, $entity->id());
+    ->condition($field, $entity->id())
+    ->accessCheck(FALSE);
   $results = $query->execute();
 
   $messages = Message::loadMultiple($results);
