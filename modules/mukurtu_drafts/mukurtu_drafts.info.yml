@@ -2,7 +2,7 @@ name: 'Mukurtu Drafts'
 type: module
 description: 'Provides capability for drafts.'
 core_version_requirement: '^9.4 || ^10'
-package: Mukurtu
+package: 'Mukurtu CMS'
 version: 4.x-dev
 dependencies:
   - 'drupal:node'
