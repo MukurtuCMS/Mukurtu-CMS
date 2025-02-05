@@ -84,9 +84,9 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
    * in here with all the other CulturalProtocolItem tests.
    */
   public function testUnformatProtocols() {
-    $this->assertEqual([17, 2133, 42], CulturalProtocolItem::unformatProtocols("|17|,|2133|,|42|"));
-    $this->assertEqual([42], CulturalProtocolItem::unformatProtocols("|42|"));
-    $this->assertEqual([], CulturalProtocolItem::unformatProtocols(""));
+    $this->assertEquals([17, 2133, 42], CulturalProtocolItem::unformatProtocols("|17|,|2133|,|42|"));
+    $this->assertEquals([42], CulturalProtocolItem::unformatProtocols("|42|"));
+    $this->assertEquals([], CulturalProtocolItem::unformatProtocols(""));
   }
 
   /**
@@ -94,9 +94,9 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
    * in here with all the other CulturalProtocolItem tests.
    */
   public function testFormatProtocols() {
-    $this->assertEqual("|17|,|42|,|2133|", CulturalProtocolItem::formatProtocols([17, 2133, 42]));
-    $this->assertEqual("|42|", CulturalProtocolItem::formatProtocols([42]));
-    $this->assertEqual("", CulturalProtocolItem::formatProtocols([]));
+    $this->assertEquals("|17|,|42|,|2133|", CulturalProtocolItem::formatProtocols([17, 2133, 42]));
+    $this->assertEquals("|42|", CulturalProtocolItem::formatProtocols([42]));
+    $this->assertEquals("", CulturalProtocolItem::formatProtocols([]));
   }
 
   /**
@@ -114,7 +114,7 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity->setSharingSetting('any');
     $entity->setProtocols($protocol_ids);
     $entity->save();
-    $this->assertEqual($protocol_ids, $entity->getProtocols());
+    $this->assertEquals($protocol_ids, $entity->getProtocols());
   }
 
   /**
@@ -133,7 +133,7 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity->setSharingSetting('any');
     $entity->setProtocols($protocol_ids);
     $entity->save();
-    $this->assertEqual($valid_ids, $entity->getProtocols());
+    $this->assertEquals($valid_ids, $entity->getProtocols());
   }
 
   /**
@@ -149,7 +149,7 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity->save();
 
     // Should result in no protocols on the items.
-    $this->assertEqual([], $entity->getProtocols());
+    $this->assertEquals([], $entity->getProtocols());
   }
 
   /**
@@ -168,7 +168,7 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity->setSharingSetting('any');
     $entity->setProtocols($original_protocol_ids);
     $entity->save();
-    $this->assertEqual($original_protocol_ids, $entity->getProtocols());
+    $this->assertEquals($original_protocol_ids, $entity->getProtocols());
 
     // Set three valid protocols.
     $new_protocol_ids = [$this->protocols[0]->id(), $this->protocols[1]->id(), $this->protocols[2]->id()];
@@ -176,29 +176,29 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $node = $this->entityTypeManager->getStorage('node')->load($entity->id());
     $node->set('field_cultural_protocols', ['protocols' => $new_protocol_ids]);
     $node->save();
-    $this->assertEqual('any', $node->getSharingSetting());
-    $this->assertEqual($new_protocol_ids, $node->getProtocols());
+    $this->assertEquals('any', $node->getSharingSetting());
+    $this->assertEquals($new_protocol_ids, $node->getProtocols());
 
     // Test the string format.
     $node->set('field_cultural_protocols', "all({$this->protocols[1]->id()},{$this->protocols[2]->id()})");
-    $this->assertEqual('all', $node->getSharingSetting());
-    $this->assertEqual([$this->protocols[1]->id(), $this->protocols[2]->id()], $node->getProtocols());
+    $this->assertEquals('all', $node->getSharingSetting());
+    $this->assertEquals([$this->protocols[1]->id(), $this->protocols[2]->id()], $node->getProtocols());
 
     // Test the string format with mixed case/spacing.
     $node->set('field_cultural_protocols', "ANy   ({$this->protocols[2]->id()},   {$this->protocols[0]->id()})    ");
-    $this->assertEqual('any', $node->getSharingSetting());
+    $this->assertEquals('any', $node->getSharingSetting());
     // Protocols get sorted, order is not maintained.
-    $this->assertEqual([$this->protocols[0]->id(), $this->protocols[2]->id()], $node->getProtocols());
+    $this->assertEquals([$this->protocols[0]->id(), $this->protocols[2]->id()], $node->getProtocols());
 
     // Test setting sharing setting only.
     $node->set('field_cultural_protocols', ['sharing_setting' => 'all']);
-    $this->assertEqual('all', $node->getSharingSetting());
-    $this->assertEqual([$this->protocols[0]->id(), $this->protocols[2]->id()], $node->getProtocols());
+    $this->assertEquals('all', $node->getSharingSetting());
+    $this->assertEquals([$this->protocols[0]->id(), $this->protocols[2]->id()], $node->getProtocols());
 
     // Test setting both properties.
     $node->set('field_cultural_protocols', ['sharing_setting' => 'any', 'protocols' => $new_protocol_ids]);
-    $this->assertEqual('any', $node->getSharingSetting());
-    $this->assertEqual($new_protocol_ids, $node->getProtocols());
+    $this->assertEquals('any', $node->getSharingSetting());
+    $this->assertEquals($new_protocol_ids, $node->getProtocols());
   }
 
   /**
@@ -217,13 +217,13 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity->setSharingSetting('any');
     $entity->setProtocols($original_protocol_ids);
     $entity->save();
-    $this->assertEqual($original_protocol_ids, $entity->getProtocols());
+    $this->assertEquals($original_protocol_ids, $entity->getProtocols());
 
     // Set three valid protocols.
     $new_protocol_ids = [$this->protocols[0]->id(), $this->protocols[1]->id(), $this->protocols[2]->id()];
     $entity->setProtocols($new_protocol_ids);
     $entity->save();
-    $this->assertEqual($new_protocol_ids, $entity->getProtocols());
+    $this->assertEquals($new_protocol_ids, $entity->getProtocols());
   }
 
   /**
@@ -244,14 +244,14 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity->setSharingSetting('any');
     $entity->setProtocols($original_protocol_ids);
     $entity->save();
-    $this->assertEqual($original_protocol_ids, $entity->getProtocols());
+    $this->assertEquals($original_protocol_ids, $entity->getProtocols());
 
     // Other user tries to unset a protocol they can't apply.
     $this->setCurrentUser($this->otherUser);
     $new_protocol_ids = [$this->protocols[0]->id(), $this->protocols[1]->id()];
     $entity->setProtocols($new_protocol_ids);
     $entity->save();
-    $this->assertEqual($original_protocol_ids, $entity->getProtocols());
+    $this->assertEquals($original_protocol_ids, $entity->getProtocols());
   }
 
   /**
@@ -271,14 +271,14 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
     $entity->setSharingSetting('any');
     $entity->setProtocols($original_protocol_ids);
     $entity->save();
-    $this->assertEqual($original_protocol_ids, $entity->getProtocols());
+    $this->assertEquals($original_protocol_ids, $entity->getProtocols());
 
     // Current user tries to unset and set protocols they can't apply.
     $this->setCurrentUser($this->otherUser);
     $new_protocol_ids = [$this->protocols[2]->id()];
     $entity->setProtocols($new_protocol_ids);
     $entity->save();
-    $this->assertEqual([$this->protocols[1]->id()], $entity->getProtocols());
+    $this->assertEquals([$this->protocols[1]->id()], $entity->getProtocols());
   }
 
 }

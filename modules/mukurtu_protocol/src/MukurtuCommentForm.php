@@ -228,7 +228,7 @@ class MukurtuCommentForm extends CommentForm {
       $comment->setCreatedTime($form_state->getValue('date')->getTimestamp());
     }
     else {
-      $comment->setCreatedTime(REQUEST_TIME);
+      $comment->setCreatedTime(\Drupal::time()->getRequestTime());
     }
     // Empty author ID should revert to anonymous.
     $author_id = $form_state->getValue('uid');

@@ -196,7 +196,11 @@ function mukurtu_protocol_entity_insert($entity) {
     // Right now it makes no attempt to do anything sensible, it simply attaches
     // random protocols to the entity.
     if (isset($entity->devel_generate)) {
-      $protocols = \Drupal::entityTypeManager()->getStorage('protocol')->getQuery()->execute();
+      $protocols = \Drupal::entityTypeManager()
+        ->getStorage('protocol')
+        ->getQuery()
+        ->accessCheck(TRUE)
+        ->execute();
       $max = count($protocols);
       $pkeys = array_rand($protocols, mt_rand(1, $max));
       if (!is_array($pkeys)) {
