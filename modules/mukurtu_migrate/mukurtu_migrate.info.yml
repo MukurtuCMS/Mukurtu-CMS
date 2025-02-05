@@ -2,7 +2,7 @@ name: 'Mukurtu Migrate'
 type: module
 description: 'Provides the functionality needed to live migrate from Mukurtu 2.x/3.x to 4.x.'
 core_version_requirement: '^9.4 || ^10'
-package: Mukurtu
+package: 'Mukurtu CMS'
 dependencies:
   - 'drupal:dblog'
   - 'drupal:migrate'

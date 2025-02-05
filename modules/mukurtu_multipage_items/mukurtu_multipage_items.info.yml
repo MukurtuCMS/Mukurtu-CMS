@@ -1,9 +1,8 @@
 name: Mukurtu Multipage Items
 type: module
 description: 'Provides a multipage item entity.'
-package: Mukurtu
-core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: '^9.4 || ^10'
+package: 'Mukurtu CMS'
 dependencies:
   - mukurtu_protocol
   - mukurtu_collection

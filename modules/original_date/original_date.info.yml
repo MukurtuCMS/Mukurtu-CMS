@@ -1,5 +1,5 @@
 name: 'Original Date'
 type: module
 description: Provides a field type for partial or incomplete dates.
-core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: '^9.4 || ^10'
+package: 'Mukurtu CMS'

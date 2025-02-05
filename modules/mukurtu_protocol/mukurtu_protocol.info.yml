@@ -2,7 +2,7 @@ name: 'Mukurtu Protocols'
 type: module
 description: 'Provides access control that is fundamental to the Mukurtu platform.'
 core_version_requirement: '^9.4 || ^10'
-package: Mukurtu
+package: 'Mukurtu CMS'
 dependencies:
   - 'drupal:comment'
   - 'drupal:content_moderation'
