@@ -1,5 +1,0 @@
-global-styling:
-  version: 1.x
-  css:
-    theme:
-      dist/tailwind.css: {}
