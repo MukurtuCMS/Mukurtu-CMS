@@ -13,8 +13,7 @@ install:
   - history
   - block
   - breakpoint
-  - ckeditor
-  - color
+  - ckeditor5
   - config
   - comment
   - contextual
@@ -23,7 +22,6 @@ install:
   - mukurtu_content_warnings
   - datetime
   - block_content
-  - quickedit
   - editor
   - help
   - image
@@ -41,7 +39,6 @@ install:
   - toolbar
   - field_ui
   - file
-  - rdf
   - views
   - views_ui
   - tour
@@ -58,7 +55,7 @@ dependencies:
   - 'drupal:automated_cron'
   - 'drupal:block'
   - 'drupal:block_content'
-  - 'drupal:ckeditor'
+  - 'drupal:ckeditor5'
   - 'drupal:comment'
   - 'drupal:contact'
   - 'drupal:contextual'
@@ -75,7 +72,6 @@ dependencies:
   - 'drupal:media_library'
   - 'drupal:node'
   - 'drupal:path'
-  - 'drupal:quickedit'
   - 'drupal:rest'
   - 'drupal:shortcut'
   - 'drupal:system'
@@ -132,7 +128,4 @@ dependencies:
   - 'token:token'
   - 'views_bulk_operations:views_bulk_operations'
 themes:
-  - bartik
-  - mukurtu_bartik
   - mukurtu_v4
-  - seven

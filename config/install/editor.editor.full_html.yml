@@ -4,42 +4,70 @@ dependencies:
   config:
     - filter.format.full_html
   module:
-    - ckeditor
+    - ckeditor5
 format: full_html
-editor: ckeditor
+editor: ckeditor5
 settings:
   toolbar:
-    rows:
-      -
-        -
-          name: Formatting
-          items:
-            - Format
-            - Bold
-            - Italic
-        -
-          name: Links
-          items:
-            - DrupalLink
-            - DrupalUnlink
-        -
-          name: Lists
-          items:
-            - BulletedList
-            - NumberedList
-        -
-          name: Media
-          items:
-            - Blockquote
-            - DrupalMediaLibrary
-            - content_browser
-        -
-          name: Tools
-          items:
-            - Source
-            - SpecialChar
-            - Maximize
-  plugins: {  }
+    items:
+      - heading
+      - bold
+      - italic
+      - strikethrough
+      - code
+      - '|'
+      - bulletedList
+      - numberedList
+      - '|'
+      - link
+      - blockQuote
+      - codeBlock
+      - drupalMedia
+      - insertTable
+      - '|'
+      - specialCharacters
+      - sourceEditing
+  plugins:
+    ckeditor5_heading:
+      enabled_headings:
+        - heading1
+        - heading2
+        - heading3
+        - heading4
+        - heading5
+        - heading6
+    ckeditor5_sourceEditing:
+      allowed_tags:
+        - '<cite>'
+        - '<dl>'
+        - '<dt>'
+        - '<dd>'
+        - '<small>'
+        - '<b>'
+        - '<i>'
+        - '<span>'
+        - '<div>'
+        - '<img src alt data-entity-type data-entity-uuid data-align data-caption>'
+        - '<drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title>'
+        - '<iframe width height frameborder scrolling marginheight marginwidth title src>'
+        - '<embed type src height width>'
+        - '<object data form height name type usemap width>'
+        - '<video autoplay controls height loop muted poster preload src width>'
+        - '<a hreflang>'
+        - '<blockquote cite>'
+        - '<ul type>'
+        - '<ol type>'
+        - '<h2 id>'
+        - '<h3 id>'
+        - '<h4 id>'
+        - '<h5 id>'
+        - '<h6 id>'
+        - '<drupal-media title>'
+    ckeditor5_list:
+      reversed: false
+      startIndex: true
+    media_media:
+      allow_view_mode_override: true
 image_upload:
   status: false
   scheme: public

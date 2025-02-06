@@ -186,7 +186,6 @@ function mukurtu_install() {
     'access contextual links',
     'access devel information',
     'access files overview',
-    'access in-place editing',
     'access mukurtu export',
     'access mukurtu import',
     'access shortcuts',
