@@ -53,7 +53,7 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create the collection bundle.
