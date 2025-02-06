@@ -31,11 +31,13 @@ class PersonalCollectionAddItemController extends ControllerBase {
     $query = \Drupal::entityQuery('personal_collection')
       ->condition('field_items_in_collection', $node->id(), '=')
       ->condition('user_id', $this->currentUser()->id(), '=')
+      ->accessCheck(TRUE)
       ->sort('changed', 'DESC');
     $collectionsThatContainItem = $query->execute();
 
     $query = \Drupal::entityQuery('personal_collection')
       ->condition('user_id', $this->currentUser()->id(), '=')
+      ->accessCheck(TRUE)
       ->sort('changed', 'DESC');
     $allCollections = $query->execute();
 

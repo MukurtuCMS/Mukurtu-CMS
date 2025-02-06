@@ -42,6 +42,7 @@ class MediaFoundInController extends ControllerBase {
     foreach ($refFields as $refField) {
       $contentQuery->condition($refField, $media->id())->accessCheck(TRUE);
     }
+    $contentQuery->accessCheck(TRUE);
     $contentQuery->pager(10);
     $results = $contentQuery->execute();
 
@@ -73,6 +74,7 @@ class MediaFoundInController extends ControllerBase {
     foreach ($refFields as $refField) {
       $contentQuery->condition($refField, $media->uuid(), 'CONTAINS')->accessCheck(TRUE);
     }
+    $contentQuery->accessCheck(TRUE);
     $contentQuery->pager();
     $results = $contentQuery->execute();
 

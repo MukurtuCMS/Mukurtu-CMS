@@ -82,11 +82,12 @@ class MukurtuDigitalHeritageBrowseByMapController extends ControllerBase
 
         // Do we have at least one published content item with location data?
         $query = $this->entityTypeManager()->getStorage('node')->getQuery();
-        $query->condition('field_coverage', "Feature", 'CONTAINS')
-            ->condition('type', 'digital_heritage')
-            ->condition('status', 1)
-            ->range(0, 1)
-            ->accessCheck(true);
+        $query
+          ->condition('field_coverage', "Feature", 'CONTAINS')
+          ->condition('type', 'digital_heritage')
+          ->condition('status', 1)
+          ->accessCheck(TRUE)
+          ->range(0, 1);
 
         $results = $query->execute();
 

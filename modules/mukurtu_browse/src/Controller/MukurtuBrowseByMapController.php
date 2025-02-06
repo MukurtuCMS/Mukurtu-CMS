@@ -56,10 +56,11 @@ class MukurtuBrowseByMapController extends ControllerBase {
 
     // Do we have at least one published content item with location data?
     $query = $this->entityTypeManager()->getStorage('node')->getQuery();
-    $query->condition('field_coverage', "Feature", 'CONTAINS')
+    $query
+      ->condition('field_coverage', "Feature", 'CONTAINS')
       ->condition('status', 1)
-      ->range(0, 1)
-      ->accessCheck(TRUE);
+      ->accessCheck(TRUE)
+      ->range(0, 1);
 
     $results = $query->execute();
 

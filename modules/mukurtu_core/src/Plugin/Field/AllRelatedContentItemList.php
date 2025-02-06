@@ -55,7 +55,8 @@ class AllRelatedContentItemList extends EntityReferenceFieldItemList {
     $event->relatedContentConditionGroup->condition('field_related_content', $entity->id());
     $query->condition($event->relatedContentConditionGroup)
       ->condition('nid', $entity->id(), '!=')
-      ->condition('status', TRUE);
+      ->condition('status', TRUE)
+      ->accessCheck(TRUE);
     $results = $query->execute();
 
     foreach ($results as $relatedId) {

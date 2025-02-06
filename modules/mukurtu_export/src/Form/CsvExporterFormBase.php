@@ -342,6 +342,7 @@ class CsvExporterFormBase extends EntityForm {
 
     $result = $query
       ->condition('id', $element['#field_prefix'] . $entity_id)
+      ->accessCheck(FALSE)
       ->execute();
 
     return (bool) $result;

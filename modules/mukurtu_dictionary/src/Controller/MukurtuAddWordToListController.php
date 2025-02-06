@@ -55,11 +55,13 @@ class MukurtuAddWordToListController extends ControllerBase {
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'word_list')
       ->condition(WordList::WORDS_FIELD, $node->id(), '=')
+      ->accessCheck(TRUE)
       ->sort('changed', 'DESC');
     $listsThatContainWord = $query->execute();
 
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'word_list')
+      ->accessCheck(TRUE)
       ->sort('changed', 'DESC');
     $allLists = $query->execute();
 

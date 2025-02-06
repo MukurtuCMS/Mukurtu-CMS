@@ -331,7 +331,8 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
     // Using entity query to do quick access checking.
     if ($accessCheck) {
       $query = $this->entityTypeManager()->getStorage('node')->getQuery();
-      $query->condition('nid', $page_ids, 'IN')
+      $query
+        ->condition('nid', $page_ids, 'IN')
         ->condition('status', 1)
         ->accessCheck(TRUE);
       $allowed_page_ids = $query->execute();

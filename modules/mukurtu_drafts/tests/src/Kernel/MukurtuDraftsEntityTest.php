@@ -11,12 +11,11 @@ use Drupal\drafts_entity_test\Entity\TestDraftEntity;
  *
  * @group mukurtu_drafts
  */
-class MukurtuDraftsEntityTest extends KernelTestBase
-{
+class MukurtuDraftsEntityTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'entity_test', 'drafts_entity_test', 'user', 'mukurtu_drafts'];
+  protected static $modules = ['system', 'entity_test', 'drafts_entity_test', 'user', 'mukurtu_drafts'];
 
   /**
    * A user who will serve as owner of the test entities.
@@ -28,8 +27,7 @@ class MukurtuDraftsEntityTest extends KernelTestBase
   /**
    * {@inheritdoc}
    */
-  protected function setUp()
-  {
+  protected function setUp() {
     parent::setUp();
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('drafts_entity_test');
@@ -45,8 +43,7 @@ class MukurtuDraftsEntityTest extends KernelTestBase
   /**
    * Test access operations for a draft entity.
    */
-  public function testAccessDraftEntity()
-  {
+  public function testAccessDraftEntity() {
     $entity = TestDraftEntity::create(['name' => 'draftEntity']);
     $entity->setDraft();
     $entity->setOwner($this->owner);
@@ -72,8 +69,7 @@ class MukurtuDraftsEntityTest extends KernelTestBase
   /**
    * Test access operations for a non-draft entity.
    */
-  public function testAccessNonDraftEntity()
-  {
+  public function testAccessNonDraftEntity() {
     $entity = TestDraftEntity::create(['name' => 'nonDraftEntity']);
     $entity->unsetDraft();
     $entity->setOwner($this->owner);
