@@ -13,7 +13,7 @@ install:
   - history
   - block
   - breakpoint
-  - ckeditor
+  - ckeditor5
   - config
   - comment
   - contextual
@@ -55,7 +55,7 @@ dependencies:
   - 'drupal:automated_cron'
   - 'drupal:block'
   - 'drupal:block_content'
-  - 'drupal:ckeditor'
+  - 'drupal:ckeditor5'
   - 'drupal:comment'
   - 'drupal:contact'
   - 'drupal:contextual'
