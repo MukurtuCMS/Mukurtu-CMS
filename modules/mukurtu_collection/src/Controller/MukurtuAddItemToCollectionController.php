@@ -83,11 +83,13 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'collection')
       ->condition(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, $node->id(), '=')
+      ->accessCheck(TRUE)
       ->sort('changed', 'DESC');
     $collectionsThatContainItem = $query->execute();
 
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'collection')
+      ->accessCheck(TRUE)
       ->sort('changed', 'DESC');
     $allCollections = $query->execute();
 

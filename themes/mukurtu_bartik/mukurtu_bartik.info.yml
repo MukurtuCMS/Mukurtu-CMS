@@ -1,7 +1,0 @@
-name: Bartik - Mukurtu
-type: theme
-description: Bartik with Mukurtu templates.
-core_version_requirement: ^8 || ^9 || ^10
-base theme: bartik
-libraries:
-  - mukurtu_bartik/global-styling

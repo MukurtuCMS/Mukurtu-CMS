@@ -77,6 +77,7 @@ class MukurtuOgRoleListBuilder extends DraggableListBuilder {
     $query = $this->getStorage()->getQuery()
       ->condition('group_type', $this->groupType, '=')
       ->condition('group_bundle', $this->groupBundle, '=')
+      ->accessCheck(TRUE)
       ->sort($this->entityType->getKey('weight'));
 
     // Only add the pager if a limit is specified.

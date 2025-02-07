@@ -22,28 +22,6 @@ use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
  * Provide Mukurtu Protocols (access control).
  */
 
-
-/**
- * Implements hook_theme_registry_alter().
- */
-function mukurtu_protocol_theme_registry_alter(&$theme_registry) {
-  /** @var \Drupal\Core\Extension\ExtensionList $module_list */
-  $module_list = \Drupal::service('extension.list.module');
-
-  $entity_browser_iframe = &$theme_registry['html__entity_browser__iframe'];
-  if ($entity_browser_iframe['path'] === $module_list->getPath('entity_browser') . '/templates') {
-    $entity_browser_iframe['template'] = 'html--entity-browser--iframe-bartik';
-    $entity_browser_iframe['theme path'] = $module_list->getPath('mukurtu_protocol');
-    $entity_browser_iframe['path'] = $entity_browser_iframe['theme path'] . '/templates';
-  }
-  $entity_browser_iframe = &$theme_registry['html__entity_browser__modal'];
-  if ($entity_browser_iframe['path'] === $module_list->getPath('entity_browser') . '/templates') {
-    $entity_browser_iframe['template'] = 'html--entity-browser--iframe-bartik';
-    $entity_browser_iframe['theme path'] = $module_list->getPath('mukurtu_protocol');
-    $entity_browser_iframe['path'] = $entity_browser_iframe['theme path'] . '/templates';
-  }
-}
-
 /**
  * Implements hook_field_info_alter().
  */
@@ -196,7 +174,11 @@ function mukurtu_protocol_entity_insert($entity) {
     // Right now it makes no attempt to do anything sensible, it simply attaches
     // random protocols to the entity.
     if (isset($entity->devel_generate)) {
-      $protocols = \Drupal::entityTypeManager()->getStorage('protocol')->getQuery()->execute();
+      $protocols = \Drupal::entityTypeManager()
+        ->getStorage('protocol')
+        ->getQuery()
+        ->accessCheck(TRUE)
+        ->execute();
       $max = count($protocols);
       $pkeys = array_rand($protocols, mt_rand(1, $max));
       if (!is_array($pkeys)) {

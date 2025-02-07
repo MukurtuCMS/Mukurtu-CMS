@@ -96,6 +96,7 @@ function mukurtu_core_page_attachments(array &$attachments) {
   // want to bother them with the message.
   if (\Drupal::currentUser()->id() == 1) {
     $query = \Drupal::entityQuery('node');
+    $query->accessCheck(FALSE);
     $contentCount = $query->count()->execute();
     if ($contentCount) {
       \Drupal::messenger()->addError(t('You are logged in as the super admin (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. Consider logging into a different account.'));
@@ -380,7 +381,7 @@ function mukurtu_core_entity_batch_operation($fn, $target_entity_ids, $args = []
           ],
         ],
       ],
-      'file' => drupal_get_path('module', 'mukurtu_core') . '/mukurtu_core.entity_batch_operation.inc',
+      'file' => \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/mukurtu_core.entity_batch_operation.inc',
     ];
 
     batch_set($batch);

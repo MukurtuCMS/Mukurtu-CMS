@@ -24,6 +24,7 @@ class MukurtuCommunityManageController extends ControllerBase {
     $query = \Drupal::entityQuery('community')
       //->condition('type', 'community')
       ->condition('field_parent_community', $parent, $op)
+      ->accessCheck(TRUE)
       ->sort('name');
     $entity_ids = $query->execute();
 /*     dpm($entity_ids);
@@ -58,6 +59,7 @@ class MukurtuCommunityManageController extends ControllerBase {
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'protocol')
       ->condition(mukurtu_protocol_FIELD_NAME_COMMUNITY, $community->id(), '=')
+      ->accessCheck(TRUE)
       ->sort('title');
     $entity_ids = $query->execute();
     if (empty($entity_ids)) {

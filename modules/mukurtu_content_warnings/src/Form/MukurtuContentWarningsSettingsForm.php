@@ -35,8 +35,9 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
 
   // Method to get all media tag taxonomy terms.
   protected function getTerms() {
-    $query = \Drupal::entityQuery('taxonomy_term');
-    $query->condition('vid', 'media_tag');
+    $query = \Drupal::entityQuery('taxonomy_term')
+      ->condition('vid', 'media_tag')
+      ->accessCheck(FALSE);
     $tids = $query->execute();
 
     $terms = [];

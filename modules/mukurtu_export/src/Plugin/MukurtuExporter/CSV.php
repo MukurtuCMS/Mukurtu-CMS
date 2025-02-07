@@ -47,7 +47,11 @@ class CSV extends ExporterBase {
   protected function addSiteWideConfigOptions(&$element) {
     $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
     $query = $storage->getQuery();
-    $result = $query->condition('site_wide', TRUE)->sort('label')->execute();
+    $result = $query
+      ->condition('site_wide', TRUE)
+      ->accessCheck(FALSE)
+      ->sort('label')
+      ->execute();
     if (!empty($result)) {
       $entities = $storage->loadMultiple($result);
       foreach ($entities as $id => $entity) {
@@ -64,7 +68,11 @@ class CSV extends ExporterBase {
     $uid = \Drupal::currentUser()->id();
     $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
     $query = $storage->getQuery();
-    $result = $query->condition('uid', $uid)->sort('label')->execute();
+    $result = $query
+      ->condition('uid', $uid)
+      ->accessCheck(FALSE)
+      ->sort('label')
+      ->execute();
     if (!empty($result)) {
       $entities = $storage->loadMultiple($result);
       foreach($entities as $id => $entity) {

@@ -73,7 +73,8 @@ class MukurtuDashboardController extends ControllerBase {
     $build = [];
 
     $query = \Drupal::entityQuery('community')
-      ->condition('status', TRUE);
+      ->condition('status', TRUE)
+      ->accessCheck(TRUE);
     $results = $query->execute();
 
     if (count($results) == 0) {

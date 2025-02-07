@@ -22,6 +22,7 @@ class MukurtuInCollectionFieldItemsList extends EntityReferenceFieldItemList {
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'collection')
       ->condition(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, $entity->id())
+      ->accessCheck(TRUE)
       ->condition('status', TRUE);
     $results = $query->execute();
 

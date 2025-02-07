@@ -26,7 +26,6 @@
         "drupal/core-composer-scaffold": "^9.5.3",
         "drupal/core-project-message": "^9.5.3",
         "drupal/core-recommended": "^9.5.3",
-        "drupal/csv_serialization": "*",
         "drupal/ctools": "*",
         "drupal/embed": "*",
         "drupal/entity_browser": "*",

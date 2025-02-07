@@ -156,6 +156,7 @@ class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase impleme
   protected function getCollections() {
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
       ->condition('type', 'collection')
+      ->accessCheck(TRUE)
       ->sort('changed', 'DESC');
     $allCollections = $query->execute();
 

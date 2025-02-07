@@ -126,7 +126,8 @@ function mukurtu_community_records_is_original_record(EntityInterface $entity) {
   }
 
   $query = \Drupal::entityQuery('node')
-    ->condition(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, $entity->id());
+    ->condition(MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD, $entity->id())
+    ->accessCheck(FALSE);
   $results = $query->execute();
 
   if (!empty($results)) {
