@@ -35,7 +35,7 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
    */
   protected $otherUser;
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Created in parent.
