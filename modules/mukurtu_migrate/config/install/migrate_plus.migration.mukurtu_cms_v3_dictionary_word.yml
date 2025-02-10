@@ -45,11 +45,12 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_language
     source: field_dictionary_word_language
-  field_word_entry:
+  field_additional_word_entries:
     -
       plugin: sub_process
       source: field_word_entry
       process:
+        # $destination['field_word_entry']['target_id'] = $source['value'][0]
         target_id:
           -
             plugin: migration_lookup
@@ -60,6 +61,7 @@ process:
             plugin: extract
             index:
               - 0
+        # $destination['field_word_entry']['target_revision_id'] = $source['value'][1]
         target_revision_id:
           -
             plugin: migration_lookup
