@@ -84,3 +84,14 @@ sudo apt install poppler-utils
 Mukurtu CMS v4 is extremely unstable and under active development. If you wish to contribute, please first discuss it with us by starting an issue or discussion on the [Mukurtu CMS issue tracker](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or contact us via [mukurtu.org](https://mukurtu.org/).
 
 For more information on developing and contributing to Mukurtu CMS, [visit the GitHub wiki for developer documentation](https://github.com/MukurtuCMS/Mukurtu-CMS/wiki).
+
+## Open in an Online IDE of your choice
+Skip cloning locally, and start developing in the cloud
+
+[![Open in GitHub Codespace](https://github.com/codespaces/badge.svg)](https://codespaces.new/MukurtuCMS/Mukurtu-CMS)
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/MukurtuCMS/Mukurtu-CMS)
+
+[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/MukurtuCMS/Mukurtu-CMS)
+
+[![Open in Codeanywhere](https://codeanywhere.com/img/open-in-codeanywhere-btn.svg)](https://app.codeanywhere.com/#https://github.com/MukurtuCMS/Mukurtu-CMS)
