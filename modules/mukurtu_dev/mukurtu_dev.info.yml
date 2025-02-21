@@ -1,7 +1,7 @@
 name: 'Mukurtu Dev'
 description: 'Provides functionality to assist with development of Mukurtu CMS.'
 type: module
-core_version_requirement: '^9.4 || ^10'
+core_version_requirement: '^9.4 || ^10 || ^11'
 dependencies:
   - 'devel:devel'
   - 'devel:devel_generate'

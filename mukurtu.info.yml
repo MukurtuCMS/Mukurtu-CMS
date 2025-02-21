@@ -1,7 +1,7 @@
 name: 'Mukurtu CMS'
 type: profile
 description: 'Mukurtu CMS Installation Profile'
-core_version_requirement: '^9.4 || ^10'
+core_version_requirement: '^9.4 || ^10 || ^11'
 version: 4.x-dev
 package: 'Mukurtu CMS'
 distribution:
@@ -40,7 +40,6 @@ install:
   - file
   - views
   - views_ui
-  - tour
   - automated_cron
   - google_analytics
   - twig_tweak
@@ -77,7 +76,6 @@ dependencies:
   - 'drupal:taxonomy'
   - 'drupal:text'
   - 'drupal:toolbar'
-  - 'drupal:tour'
   - 'drupal:user'
   - 'drupal:views'
   - 'embed:embed'

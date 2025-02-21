@@ -193,7 +193,6 @@ function mukurtu_install() {
     'access site-wide contact form',
     'access taxonomy overview',
     'access toolbar',
-    'access tour',
     'access user contact forms',
     'access user profiles',
     'add JS snippets for google analytics',
