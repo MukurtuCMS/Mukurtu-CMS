@@ -11,7 +11,7 @@ third_party_settings:
 name: Collection
 type: collection
 description: 'A collection of digital heritage items.'
-help: ''
+help: null
 new_revision: true
 preview_mode: 1
 display_submitted: false

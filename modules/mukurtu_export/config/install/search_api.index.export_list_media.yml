@@ -6,7 +6,6 @@ dependencies:
   module:
     - flag
     - media
-    - search_api
 id: export_list_media
 name: 'Export List: Media'
 description: 'Search index for the media export list.'
@@ -56,6 +55,7 @@ datasource_settings:
 processor_settings:
   add_url: {  }
   aggregated_field: {  }
+  custom_value: {  }
   entity_type: {  }
   html_filter:
     weights:
@@ -109,6 +109,7 @@ tracker_settings:
     indexing_order: fifo
 options:
   cron_limit: 50
+  delete_on_fail: true
   index_directly: true
   track_changes_in_references: true
 server: mukurtu_database_server

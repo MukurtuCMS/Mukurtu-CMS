@@ -13,8 +13,8 @@
     </div>
   </div>
   <aside class="browse-facets">
-    {% if drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') %}
-      {{ drupal_block('views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') }}
+    {% if drupal_entity('block', 'views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') %}
+      {{ drupal_entity('block', 'views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block') }}
     {% endif %}
     {% if facets %}
       {% for facet in facets %}

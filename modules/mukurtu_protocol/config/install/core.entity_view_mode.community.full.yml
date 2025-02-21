@@ -5,5 +5,6 @@ dependencies:
     - mukurtu_protocol
 id: community.full
 label: Full
+description: ''
 targetEntityType: community
 cache: true

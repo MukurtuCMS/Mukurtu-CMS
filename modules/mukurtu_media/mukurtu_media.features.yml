@@ -1,4 +1,4 @@
 bundle: mukurtu
-required: true
 excluded:
   - core.entity_view_mode.media.token
+required: true

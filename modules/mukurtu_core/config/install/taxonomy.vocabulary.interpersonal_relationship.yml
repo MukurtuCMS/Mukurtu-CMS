@@ -3,5 +3,6 @@ status: true
 dependencies: {  }
 name: 'Interpersonal Relationship'
 vid: interpersonal_relationship
-description: ''
+description: null
 weight: 0
+new_revision: false

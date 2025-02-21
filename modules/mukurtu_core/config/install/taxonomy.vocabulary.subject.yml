@@ -3,5 +3,6 @@ status: true
 dependencies: {  }
 name: Subject
 vid: subject
-description: ''
+description: null
 weight: 0
+new_revision: false

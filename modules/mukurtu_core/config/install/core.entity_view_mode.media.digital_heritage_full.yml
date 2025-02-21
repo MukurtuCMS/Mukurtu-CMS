@@ -5,5 +5,6 @@ dependencies:
     - media
 id: media.digital_heritage_full
 label: 'Large (900 px)'
+description: ''
 targetEntityType: media
 cache: true

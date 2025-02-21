@@ -3,5 +3,6 @@ status: true
 dependencies: {  }
 name: Publisher
 vid: publisher
-description: ''
+description: null
 weight: 0
+new_revision: false

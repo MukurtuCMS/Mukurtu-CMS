@@ -11,7 +11,7 @@ third_party_settings:
 name: 'Word List'
 type: word_list
 description: 'A collection of dictionary words.'
-help: ''
+help: null
 new_revision: true
 preview_mode: 1
 display_submitted: false
