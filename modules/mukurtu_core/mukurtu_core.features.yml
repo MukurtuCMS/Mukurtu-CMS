@@ -16,7 +16,6 @@ excluded:
   - core.entity_view_mode.node.token
   - core.entity_view_mode.path_alias.token
   - core.entity_view_mode.shortcut.token
-  - core.entity_view_mode.tour.token
   - core.entity_view_mode.flagging.token
   - core.entity_view_mode.media.token
   - core.entity_view_mode.taxonomy_term.token
