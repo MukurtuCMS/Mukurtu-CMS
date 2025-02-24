@@ -1,0 +1,24 @@
+From 880a8bae8d3cb8945d537d78e4c38ef69c5fd3a5 Mon Sep 17 00:00:00 2001
+From: Project-Update-bot <updatebot@assosiation.drupal.org>
+Date: Sun, 17 Mar 2024 12:46:16 +0000
+Subject: [PATCH] Automated Project Update Bot fixes from run 11-121090.
+
+---
+ facets_reset_button.info.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/facets_reset_button.info.yml b/facets_reset_button.info.yml
+index c7d485f..650b8b2 100755
+--- a/facets_reset_button.info.yml
++++ b/facets_reset_button.info.yml
+@@ -1,6 +1,6 @@
+ name: Facets Reset Button
+ description: Create new block to shown button for clean all facets filters.
+ type: module
+-core_version_requirement: ^9 || ^10
++core_version_requirement: ^9 || ^10 || ^11
+ dependencies:
+   - facets:facets
+-- 
+GitLab
+
