@@ -75,6 +75,9 @@
     },
     "extra": {
         "patches": {
+            "drupal/content_browser": {
+                "Issue #3503979: Drupal 11 compatibility": "web/profiles/mukurtu/patches/content_browser--3503979--d11-support.patch"
+            },
             "drupal/features": {
                 "Issue #2981655: Simple configuration list is incomplete": "https://www.drupal.org/files/issues/2020-05-14/2981655-3.features.Simple-configuration-list-is-incomplete.patch",
                 "Issue #3447460: Drupal 11 compatibility": "web/profiles/mukurtu/patches/features-3447460--d11-support.patch"
