@@ -3,5 +3,6 @@ status: true
 dependencies: {  }
 name: Contributor
 vid: contributor
-description: ''
+description: null
 weight: 0
+new_revision: false

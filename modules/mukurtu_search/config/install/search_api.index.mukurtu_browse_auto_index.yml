@@ -6,10 +6,9 @@ dependencies:
     - field.storage.node.field_article_keywords
     - search_api.server.mukurtu_database_server
   module:
+    - mukurtu_protocol
     - node
     - taxonomy
-    - mukurtu_protocol
-    - search_api
 id: mukurtu_browse_auto_index
 name: 'Mukurtu Browse Auto Content Index'
 description: ''
@@ -261,7 +260,6 @@ datasource_settings:
 processor_settings:
   add_url: {  }
   aggregated_field: {  }
-  auto_aggregated_fulltext_field: {  }
   content_access:
     weights:
       preprocess_query: -30
@@ -389,6 +387,7 @@ tracker_settings:
     indexing_order: fifo
 options:
   cron_limit: 50
+  delete_on_fail: true
   index_directly: true
   track_changes_in_references: true
 server: mukurtu_database_server

@@ -5,3 +5,4 @@ name: Category
 vid: category
 description: 'The cultural categories to which digital content refers. Associating content with one or more categories facilitates browsing.'
 weight: 0
+new_revision: false

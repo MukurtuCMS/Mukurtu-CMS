@@ -5,5 +5,6 @@ dependencies:
     - paragraphs
 id: paragraph.teaser_translation
 label: 'Teaser - Translation'
+description: ''
 targetEntityType: paragraph
 cache: true

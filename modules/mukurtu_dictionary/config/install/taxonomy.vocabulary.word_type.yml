@@ -3,5 +3,6 @@ status: true
 dependencies: {  }
 name: 'Word Type'
 vid: word_type
-description: ''
+description: null
 weight: 0
+new_revision: false

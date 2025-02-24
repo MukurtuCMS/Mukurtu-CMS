@@ -163,7 +163,9 @@ class OriginalDateField extends FieldItemBase {
       // Handle values coming from the original date widget.
 
       // Strip leading zeros on year, if present.
-      $values['year'] = ltrim($values['year'], "0");
+      if (!empty($values['year'])) {
+        $values['year'] = ltrim($values['year'], '0');
+      }
 
       $year = $values['year'] ?? '';
       $month = $values['month'] ?? '';

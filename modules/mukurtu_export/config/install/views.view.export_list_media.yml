@@ -262,7 +262,7 @@ display:
         options:
           perm: 'access mukurtu export'
       cache:
-        type: none
+        type: search_api_none
         options: {  }
       empty: {  }
       sorts: {  }
@@ -713,6 +713,7 @@ display:
             offset: false
             offset_label: Offset
           quantity: 9
+          pagination_heading_level: h4
       sorts:
         search_api_relevance:
           id: search_api_relevance
