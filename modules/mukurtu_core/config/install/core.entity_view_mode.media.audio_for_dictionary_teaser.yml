@@ -5,5 +5,6 @@ dependencies:
     - media
 id: media.audio_for_dictionary_teaser
 label: 'Audio Player with Contributor'
+description: ''
 targetEntityType: media
 cache: true

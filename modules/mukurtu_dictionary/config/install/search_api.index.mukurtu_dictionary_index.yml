@@ -4,12 +4,12 @@ dependencies:
   config:
     - search_api.server.mukurtu_database_server
   module:
-    - node
-    - mukurtu_protocol
-    - taxonomy
     - mukurtu_dictionary
-    - search_api
+    - mukurtu_protocol
+    - node
     - search_api_glossary
+    - search_api_solr
+    - taxonomy
 id: mukurtu_dictionary_index
 name: 'Mukurtu Dictionary Index'
 description: 'Index for the Mukurtu dictionary.'
@@ -94,7 +94,7 @@ field_settings:
     datasource_id: 'entity:node'
     property_path: title
     type: text
-    boost: !!float 8
+    boost: 8.0
     dependencies:
       module:
         - node
@@ -120,6 +120,15 @@ field_settings:
     label: 'Word Lists'
     datasource_id: 'entity:node'
     property_path: 'field_in_word_list:entity:title'
+    type: string
+    dependencies:
+      module:
+        - mukurtu_dictionary
+        - node
+  word_type:
+    label: 'Word Type'
+    datasource_id: 'entity:node'
+    property_path: 'field_word_type:entity:name'
     type: string
     dependencies:
       module:
@@ -178,6 +187,7 @@ processor_settings:
       - title
   language_with_fallback: {  }
   rendered_item: {  }
+  solr_date_range: {  }
   tokenizer:
     weights:
       preprocess_index: -6
@@ -198,6 +208,7 @@ processor_settings:
       - community_title
       - field_cultural_protocols
       - field_glossary_entry
+      - field_word_type
       - glossaryaz_title
       - keyword
       - language
@@ -209,6 +220,7 @@ tracker_settings:
     indexing_order: fifo
 options:
   cron_limit: 50
+  delete_on_fail: true
   index_directly: true
   track_changes_in_references: true
 server: mukurtu_database_server

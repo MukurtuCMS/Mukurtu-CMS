@@ -339,7 +339,7 @@ display:
         options:
           perm: 'access content'
       cache:
-        type: none
+        type: search_api_none
         options: {  }
       empty: {  }
       sorts: {  }
@@ -494,8 +494,8 @@ display:
           map_position:
             force: false
             center:
-              lat: !!float 0
-              lon: !!float 0
+              lat: 0.0
+              lon: 0.0
             zoom: 12
             minZoom: 1
             maxZoom: 18
@@ -594,6 +594,7 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
+          pagination_heading_level: h4
       style:
         type: default
         options:

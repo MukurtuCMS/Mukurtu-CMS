@@ -25,6 +25,11 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
+  flag_export_content:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    region: content
 hidden:
   comment: true
   draft: true

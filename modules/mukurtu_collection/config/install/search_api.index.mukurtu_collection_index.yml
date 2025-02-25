@@ -5,7 +5,6 @@ dependencies:
     - search_api.server.mukurtu_database_server
   module:
     - node
-    - search_api
 id: mukurtu_collection_index
 name: 'Mukurtu Collection Index'
 description: 'Index for Mukurtu Collections.'
@@ -57,7 +56,7 @@ field_settings:
     datasource_id: 'entity:node'
     property_path: title
     type: text
-    boost: !!float 8
+    boost: 8.0
     dependencies:
       module:
         - node
@@ -86,6 +85,7 @@ processor_settings:
   content_access:
     weights:
       preprocess_query: -30
+  custom_value: {  }
   entity_status: {  }
   entity_type: {  }
   html_filter:
@@ -139,6 +139,7 @@ tracker_settings:
     indexing_order: fifo
 options:
   cron_limit: 50
+  delete_on_fail: true
   index_directly: true
   track_changes_in_references: true
 server: mukurtu_database_server

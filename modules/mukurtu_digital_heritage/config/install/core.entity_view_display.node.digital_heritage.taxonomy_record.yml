@@ -146,8 +146,8 @@ content:
       map_position:
         force: false
         center:
-          lat: !!float 0
-          lon: !!float 0
+          lat: 0.0
+          lon: 0.0
         zoom: 12
         minZoom: 1
         maxZoom: 18
@@ -370,6 +370,11 @@ content:
       link: true
     third_party_settings: {  }
     weight: 33
+    region: content
+  flag_export_content:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
     region: content
 hidden:
   comment: true

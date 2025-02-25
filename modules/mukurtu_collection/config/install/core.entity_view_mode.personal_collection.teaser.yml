@@ -5,5 +5,6 @@ dependencies:
     - mukurtu_collection
 id: personal_collection.teaser
 label: Teaser
+description: ''
 targetEntityType: personal_collection
 cache: true

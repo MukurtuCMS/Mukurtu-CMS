@@ -5,3 +5,4 @@ name: 'Media Tag'
 vid: media_tag
 description: 'Media tag vocabulary'
 weight: 0
+new_revision: false

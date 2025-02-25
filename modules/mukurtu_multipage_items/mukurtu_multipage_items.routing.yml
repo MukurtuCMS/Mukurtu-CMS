@@ -71,7 +71,7 @@ mukurtu_multipage_items.add:
     _entity_form: 'node.default'
     _title_callback: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::addNewPageTitle'
   requirements:
-    _node_add_access: 'node:{node_type}'
+    _entity_create_access: 'node:{node_type}'
   options:
     _node_operation_route: TRUE
     parameters:

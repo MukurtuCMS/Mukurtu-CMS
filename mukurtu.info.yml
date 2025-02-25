@@ -31,7 +31,6 @@ install:
   - path
   - page_cache
   - dynamic_page_cache
-  - big_pipe
   - taxonomy
   - dblog
   - search
@@ -41,7 +40,6 @@ install:
   - file
   - views
   - views_ui
-  - tour
   - automated_cron
   - google_analytics
   - twig_tweak
@@ -78,7 +76,6 @@ dependencies:
   - 'drupal:taxonomy'
   - 'drupal:text'
   - 'drupal:toolbar'
-  - 'drupal:tour'
   - 'drupal:user'
   - 'drupal:views'
   - 'embed:embed'

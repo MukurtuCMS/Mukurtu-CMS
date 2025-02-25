@@ -11,7 +11,7 @@ third_party_settings:
 name: 'Digital Heritage'
 type: digital_heritage
 description: 'Content & media items: images, movies, audio, documents'
-help: ''
+help: null
 new_revision: true
 preview_mode: 1
 display_submitted: false

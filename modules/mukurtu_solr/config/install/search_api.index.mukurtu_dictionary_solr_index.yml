@@ -4,12 +4,11 @@ dependencies:
   config:
     - search_api.server.mukurtu_solr_server
   module:
-    - search_api_solr
-    - node
-    - mukurtu_protocol
-    - taxonomy
     - mukurtu_dictionary
-    - search_api
+    - mukurtu_protocol
+    - node
+    - search_api_solr
+    - taxonomy
 third_party_settings:
   search_api_solr:
     finalize: false
@@ -128,6 +127,15 @@ field_settings:
       module:
         - mukurtu_dictionary
         - node
+  dictionary_browse_solr_word_type:
+    label: 'Word Type'
+    datasource_id: 'entity:node'
+    property_path: 'field_word_type:entity:name'
+    type: string
+    dependencies:
+      module:
+        - mukurtu_dictionary
+        - node
   field_cultural_protocols:
     label: 'Cultural Protocols'
     datasource_id: 'entity:node'
@@ -178,4 +186,5 @@ options:
   cron_limit: 50
   index_directly: true
   track_changes_in_references: true
+  delete_on_fail: true
 server: mukurtu_solr_server

@@ -5,5 +5,6 @@ dependencies:
     - node
 id: node.map_browse
 label: 'Map Browse'
+description: ''
 targetEntityType: node
 cache: true

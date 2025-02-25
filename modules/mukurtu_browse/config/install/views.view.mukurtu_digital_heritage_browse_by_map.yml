@@ -338,6 +338,7 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
+          pagination_heading_level: h4
       exposed_form:
         type: basic
         options:
@@ -353,7 +354,7 @@ display:
         options:
           perm: 'access content'
       cache:
-        type: none
+        type: search_api_none
         options: {  }
       empty: {  }
       sorts: {  }
@@ -570,7 +571,7 @@ display:
           offset: 0
           items_per_page: 200
       cache:
-        type: none
+        type: search_api_none
       style:
         type: leaflet_map
         options:
@@ -597,8 +598,8 @@ display:
           map_position:
             force: false
             center:
-              lat: !!float 0
-              lon: !!float 0
+              lat: 0.0
+              lon: 0.0
             zoom: 12
             minZoom: 1
             maxZoom: 18
@@ -682,6 +683,7 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
+          pagination_heading_level: h4
       defaults:
         pager: false
       display_description: ''

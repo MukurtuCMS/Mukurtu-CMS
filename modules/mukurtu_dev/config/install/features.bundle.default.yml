@@ -77,7 +77,6 @@ assignments:
         configurable_language: configurable_language
         migration: migration
         shortcut_set: shortcut_set
-        tour: tour
     enabled: true
     weight: 10
   site:
