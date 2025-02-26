@@ -41,6 +41,7 @@ class MukurtuFooterBlock extends BlockBase {
     return [
       '#theme' => 'mukurtu_footer',
       '#logos' => $config['logo_upload'],
+      '#logo_alt' => $config['logo_alt'],
       '#email_us_text' => $config['email_us_text'],
       '#contact_email_address' => $config['contact_email_address'],
       '#twitter' => $config['social_media']['twitter']['message_text'],
@@ -75,13 +76,20 @@ class MukurtuFooterBlock extends BlockBase {
       '#type' => 'managed_file',
       '#title' => $this->t('Logo(s)'),
       '#description' => $this->t('Supports multiple images.'),
-      '#upload_location' => $this->t("private://"),
+      '#upload_location' => $this->t("public://"),
       '#upload_validators' => [
         'file_validate_extensions' => ['png gif jpg jpeg'],
       ],
       '#multiple' => TRUE,
       '#default_value' => $config['logo_upload'] ?? '',
     ];
+    $form['logo_alt'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Image Alternative'),
+     '#description' => $this->t('Add alternative text for accessiblity'),
+     '#default_value' => $config['logo_alt'] ?? '',
+      '#maxlength' => '255',
+   ];
 
     $form['email_us_text'] = [
       '#type' => 'textfield',
@@ -214,6 +222,7 @@ class MukurtuFooterBlock extends BlockBase {
     parent::blockSubmit($form, $form_state);
 
     $this->configuration['logo_upload'] = $form_state->getValue('logo_upload');
+    $this->configuration['logo_alt'] = $form_state->getValue('logo_alt');
 
     // Email us at text
     $this->configuration['email_us_text'] = $form_state->getValue('email_us_text');
@@ -224,6 +233,7 @@ class MukurtuFooterBlock extends BlockBase {
     // Twitter message text
     $this->configuration['social_media']['twitter']['message_text'] = $form_state->getValue(['social_media', 'twitter', 'message_text']);
 
+   
     // Twitter accounts
     for ($i = 1; $i <= 3; $i++) {
       $this->configuration['social_media']['twitter']['account_' . $i] = $form_state->getValue(['social_media', 'twitter', 'account_' . $i]);

@@ -9,6 +9,7 @@ function mukurtu_footer_theme($existing, $type, $theme, $path) {
       'template' => 'mukurtu-footer',
       'variables' => [
         'logos' => [],
+        'logo_alt' => [],
         'email_us_text' => [],
         'contact_email_address' => [],
         'twitter' => [],
