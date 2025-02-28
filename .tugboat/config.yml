@@ -79,10 +79,6 @@ services:
         - mariadb -e "SET GLOBAL max_allowed_packet = 536870912;"
         # Ensure this packet size persists even if MySQL restarts.
         - echo "max_allowed_packet = 536870912" >> /etc/mysql/conf.d/tugboat.cnf
-        # Disable strict mode to allow for longer table indexes needed by
-        # Search API.
-        - mariadb -e "SET GLOBAL innodb_strict_mode = 0;"
-        - echo "innodb_strict_mode = 0" >> /etc/mysql/conf.d/tugboat.cnf
       build:
         # Drop and re-create the database (needed when rebuilding/reinstalling).
         - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
