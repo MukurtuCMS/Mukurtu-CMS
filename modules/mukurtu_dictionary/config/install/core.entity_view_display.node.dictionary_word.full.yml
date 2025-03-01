@@ -198,7 +198,7 @@ content:
     weight: 10
     region: content
   field_coverage:
-    type: mukurtu_leaflet_formatter
+    type: leaflet_formatter_default
     label: visually_hidden
     settings:
       multiple_map: false
