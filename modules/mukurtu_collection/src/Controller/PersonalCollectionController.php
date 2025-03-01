@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_collection\Controller;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Url;
 use Drupal\mukurtu_collection\Entity\PersonalCollectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -50,6 +51,7 @@ class PersonalCollectionController extends ControllerBase implements ContainerIn
    *   An array suitable for drupal_render().
    */
   public function revisionShow($personal_collection_revision) {
+    /** @var EntityStorageInterface $personal_collection */
     $personal_collection = $this->entityTypeManager()->getStorage('personal_collection')
       ->loadRevision($personal_collection_revision);
     $view_builder = $this->entityTypeManager()->getViewBuilder('personal_collection');
@@ -67,6 +69,7 @@ class PersonalCollectionController extends ControllerBase implements ContainerIn
    *   The page title.
    */
   public function revisionPageTitle($personal_collection_revision) {
+    /** @var EntityStorageInterface $personal_collection */
     $personal_collection = $this->entityTypeManager()->getStorage('personal_collection')
       ->loadRevision($personal_collection_revision);
     return $this->t('Revision of %title from %date', [
@@ -105,7 +108,7 @@ class PersonalCollectionController extends ControllerBase implements ContainerIn
     $latest_revision = TRUE;
 
     foreach (array_reverse($vids) as $vid) {
-      /** @var \Drupal\mukurtu_collection\PersonalCollectionInterface $revision */
+      /** @var PersonalCollectionInterface $revision */
       $revision = $personal_collection_storage->loadRevision($vid);
       // Only show revisions that are affected by the language that is being
       // displayed.

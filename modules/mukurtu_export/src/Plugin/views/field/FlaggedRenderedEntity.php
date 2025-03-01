@@ -135,7 +135,7 @@ class FlaggedRenderedEntity extends FieldPluginBase implements CacheableDependen
       return [];
     }
 
-    $entity = $this->getEntityTranslation($flagging->getFlaggable(), $values);
+    $entity = $this->getEntityTranslationByRelationship($flagging->getFlaggable(), $values);
     $build = [];
     if (isset($entity)) {
       $access = $entity->access('view', NULL, TRUE);

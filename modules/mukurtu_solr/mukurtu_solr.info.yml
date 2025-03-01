@@ -1,7 +1,7 @@
 name: 'Mukurtu Solr'
 type: module
 description: 'Enables support for search provided by Solr.'
-core_version_requirement: '^9.4 || ^10'
+core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 version: 4.x-dev
 dependencies:

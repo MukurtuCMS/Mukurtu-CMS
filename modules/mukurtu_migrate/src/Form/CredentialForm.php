@@ -394,7 +394,11 @@ class CredentialForm extends MukurtuMigrateFormBase {
   protected function getDatabaseTypes() {
     // Make sure the install API is available.
     include_once DRUPAL_ROOT . '/core/includes/install.inc';
-    return drupal_get_database_types();
+    $database_types = [];
+    foreach (Database::getDriverList()->getInstallableList() as $name => $driver) {
+      $database_types[$name] = $driver->getInstallTasks();
+    }
+    return $database_types;
   }
 
   /**

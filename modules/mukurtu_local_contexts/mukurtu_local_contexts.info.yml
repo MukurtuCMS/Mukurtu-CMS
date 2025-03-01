@@ -1,7 +1,7 @@
 name: Local Contexts
 type: module
 description: Provides integration with the Local Contexts Hub.
-core_version_requirement: '^9.4 || ^10'
+core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 dependencies:
   - mukurtu_protocol
