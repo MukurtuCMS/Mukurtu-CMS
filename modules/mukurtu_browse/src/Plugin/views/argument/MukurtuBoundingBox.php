@@ -37,12 +37,6 @@ class MukurtuBoundingBox extends SearchApiStandard {
     // Parse argument into bottom/top/left/right.
     $bbox = $this->parseBoundingBox();
 
-    // Make sure our location fields exist.
-    $fields = $this->query->getIndex()->getFields();
-    if (isset($fields['field_coverage'])) {
-      //dpm($fields['field_mukurtu_geojson']);
-    }
-
     // Alter the query to restrict to our bounding box.
     if (!empty($bbox)) {
       $this->query->addCondition('centroid_lat', $bbox['bottom'], '>=');
