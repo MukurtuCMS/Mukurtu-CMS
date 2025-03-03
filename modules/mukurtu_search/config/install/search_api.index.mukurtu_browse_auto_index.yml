@@ -38,7 +38,7 @@ field_settings:
     label: 'Category » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_article_category:entity:uuid'
-    type: text
+    type: string
     dependencies:
       config:
         - field.storage.node.field_article_category
@@ -48,7 +48,7 @@ field_settings:
     label: 'Keywords » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_article_keywords:entity:uuid'
-    type: text
+    type: string
     dependencies:
       config:
         - field.storage.node.field_article_keywords
@@ -58,7 +58,7 @@ field_settings:
     label: Category
     datasource_id: 'entity:node'
     property_path: 'field_category:entity:name'
-    type: string
+    type: text
     dependencies:
       module:
         - node
@@ -67,7 +67,7 @@ field_settings:
     label: 'Category » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_category:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -84,7 +84,7 @@ field_settings:
     label: 'Contributor » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_contributor:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -93,7 +93,7 @@ field_settings:
     label: 'Creator » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_creator:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -102,7 +102,7 @@ field_settings:
     label: 'Language » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_dictionary_word_language:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -111,7 +111,7 @@ field_settings:
     label: 'Format » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_format:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -129,7 +129,7 @@ field_settings:
     label: 'Keywords » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_keywords:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -138,7 +138,7 @@ field_settings:
     label: 'Language » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_language:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -147,7 +147,7 @@ field_settings:
     label: 'Location » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_location:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -156,7 +156,7 @@ field_settings:
     label: 'People » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_people:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -165,7 +165,7 @@ field_settings:
     label: 'Publisher » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_publisher:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -174,7 +174,7 @@ field_settings:
     label: 'Representative Terms » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_representative_terms:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -183,7 +183,7 @@ field_settings:
     label: 'Subject » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_subject:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -192,7 +192,7 @@ field_settings:
     label: 'Type » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_type:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -201,7 +201,7 @@ field_settings:
     label: 'Word Type » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_word_type:entity:uuid'
-    type: text
+    type: string
     dependencies:
       module:
         - node
@@ -230,7 +230,7 @@ field_settings:
     type_locked: true
     hidden: true
   status:
-    label: null
+    label: Status
     datasource_id: 'entity:node'
     property_path: status
     type: boolean
@@ -240,7 +240,7 @@ field_settings:
       module:
         - node
   uid:
-    label: null
+    label: UID
     datasource_id: 'entity:node'
     property_path: uid
     type: integer
@@ -260,6 +260,7 @@ datasource_settings:
 processor_settings:
   add_url: {  }
   aggregated_field: {  }
+  auto_aggregated_fulltext_field: {  }
   content_access:
     weights:
       preprocess_query: -30
@@ -334,22 +335,7 @@ processor_settings:
       preprocess_query: -6
     all_fields: true
     fields:
-      - node__field_article_category__uuid
-      - node__field_article_keywords__uuid
-      - node__field_category__uuid
-      - node__field_contributor__uuid
-      - node__field_creator__uuid
-      - node__field_dictionary_word_language__uuid
-      - node__field_format__uuid
-      - node__field_keywords__uuid
-      - node__field_language__uuid
-      - node__field_location__uuid
-      - node__field_people__uuid
-      - node__field_publisher__uuid
-      - node__field_representative_terms__uuid
-      - node__field_subject__uuid
-      - node__field_type__uuid
-      - node__field_word_type__uuid
+      - node__field_category__name
       - node__title
     spaces: ''
     ignored: ._-
