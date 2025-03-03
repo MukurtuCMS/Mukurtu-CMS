@@ -3,92 +3,40 @@
 namespace Drupal\mukurtu_migrate\Plugin\migrate\source;
 
 use Drupal\migrate\Row;
-use Drupal\migrate_drupal\Plugin\migrate\source\d7\FieldableEntity;
+use Drupal\node\Plugin\migrate\source\d7\Node;
 
 /**
  * Provide Dictionary Words as a source for migrate.
  *
- * Dictionary word migration needs custom handling. For each dictionary word:
- *  - Set the first word entry paragraph as the base dictionary word entry:
- *    - i.e., take all the fields from the first word entry paragraph and shove em into v4 dictionary word fields
- *  - For all subsequent dictionary word entries, migrate them to the Additional Entries field
+ * The dictionary word data structure has changed from v3 to v4.
+ * In v3, dictionary words are made up of base metadata fields and at least one
+ * word entry paragraph. These word entry paragraphs allow the same dictionary
+ * word to have multiple instances (such as for alternate uses of the same word)
+ * without needing to duplicate the entire dictionary word entity.
  *
- * Why can't we use a process plugin for this, you ask? Because we need to touch the database to restructure the source data from it.
- * It looks like process plugins are more for transforming objects on a 1:1 basis,
- * meant as more of a downstream operation. I.e., it's expected you'll have gathered your data from the database and now you just want to tweak it.
- * Listen, there are hacky ways to get a database connection in a process plugin--just look at the process plugins for the TK labels.
- * But that's probably not best practice and I'd like to avoid that if possible, even if some redundant code is created as a result.
+ * However in v4, we factored out one set of word entry fields outside their
+ * paragraph context and copied them to the base dictionary word fields. Word
+ * entry paragraphs are still supported, just under a new name of 'Additional
+ * Word Entries.'
+ *
+ * Thus, this source plugin sets the first word entry paragraph as the base word
+ * entry, i.e., it takes all the fields from the first word entry paragraph and
+ * migrates them into v4 dictionary word base fields. All subsequent dictionary
+ * word entries are migrated to the Additional Entries field.
  *
  * @MigrateSource(
- *   id = "dictionary_word_migration"
+ *   id = "dictionary_word"
  * )
  */
 
-class DictionaryWord extends FieldableEntity
+class DictionaryWord extends Node
 {
   /**
    * {@inheritdoc}
    */
-  public function query()
-  {
-    // Tables we need to query and which columns on it are relevant:
-
-    // Node table (where node_type == 'dictionary_word')
-
-    // Word Entry Paragraph db tables:
-    // - field_data_field_word_entry: entity_type, entity_id, paragraph bundle name (machine name: bundle), field_word_entry_value (paragraph item id), revisions (revisit later)
-    // - paragraphs_item: used as a go-between table more or less between field_data_field_word_entry and all your word entry field tables (i.e. field_data_field_alternate_spelling, field_data_field_<word entry field title here>)
-    // - field_data_field_alternate_spelling: the actual meat of the fields to be migrated
-
-    $fields = array_keys($this->fields());
-    $query = $this->select('node', 'n')->fields('n', $fields);
-    $query->condition('n.type', 'dictionary_word')->distinct();
-
-    // Here's what's the hecks goin on:
-    // We are querying the node table for dictionary words and doing an inner join on field_data_field_word_entry table.
-    // Non-tech translation: get all dictionary word entities AND each one's word entries.
-
-    // fields from node table that we need:
-    //  - nid
-    //  - vid
-    //  - type (dictionary_word in this case)
-    //  - language
-    //  - title
-    //  - uid
-    //  - status
-    //  - created
-    //  - changed
-
-    // fields from field_data_field_word_entry table that we need:
-    //  - entity_type (needed for validation, node in this case)
-    //  - bundle (also needed for validation, dictionary_word in this case)
-    //  - entity_id
-    //  - revision_id
-    //  - language
-    //  - delta (used to differentiate multiple word entries. The first one will be at delta == 0. Then for any rows that have delta > 0, that represents a word entry to friggin shove into the paragraphs array)
-    //  - field_word_entry_value (paragraph item id)
-    //  - field_word_entry_revision_value (paragraph item revision id)
-
-    // ASIDE: For context, this paragraph item id links to the paragraphs_item table. The columns here are:
-      // - item_id
-      // - revision_id
-      // - paragraph item bundle (dictionary_word_bundle here)
-      // - field name of host entity (field_word_entry here),
-      // - archived status
-    //  We do not need to query this table (I think?) since we already have the info inside it.
-    //  Remember, we are migrating this db data to a dictionary word's field_additional_entries field,
-    // which is an *entity reference* field, meaning it only needs to store the node id of the referenced entity.
-    // That makes it easier on us to migrate this data.
-
-    // END ASIDE: Anyway, we query the node table for all nodes that are dictionary words.
-    // Then we do an inner join on the field_data_field_word_entry table, join on nid == entity_id.
-
-    // THEN, filter the results even more and only pick the 1st word entry referenced in the field.
-    // Naturally this is at delta = 0.
-    // We will use this word entry as the base word entry.
-    // Question: do we need to enforce distinct() here? Are we guaranteed to get unique results? Just gotta test I guess.
-    $query->condition('w.delta', 0);
-    $query->innerJoin('field_data_field_word_entry', 'w', 'w.entity_id = n.nid');
+  public function query() {
+    $query = parent::query();
+    $query->condition('n.type', 'dictionary_word');
     return $query;
   }
 
@@ -99,65 +47,103 @@ class DictionaryWord extends FieldableEntity
   {
     // Each row will have one dictionary word in there to begin with.
     // Here's where we add the word entries.
-    // TODO: we may not need to gather dictionary word fields like this, since we
-    // already queried for those inside of query(), but there might be some other admin field info
-    // that we might have overlooked. I just want to be sure.
-    // If we don't need it, great!
-    $fields = array_keys($this->getFields('node', 'dictionary_word'));
-    /**
-     * // foreach ($fields as $field) {
-     * //   $nid = $row->getSourceProperty('nid');
-     * //   $row->setSourceProperty($field, $this->getFieldValues('scald_atom', $field, $sid));
-     * // }
+    $fieldData = NULL;
 
-     * // But then we will need to run another query to get the paragraphs that are at deltas > 0.
+    $nid = $row->getSourceProperty('nid');
+    $q = $this->getDatabase()->select('field_data_field_word_entry', 'w');
+    $q->addField('w', 'field_word_entry_value', 'id');
 
-     * // We can probably use that method $this->getDatabase()->select() inside of prepareRow().
-     * // My thinking is, for each dictionary word, query for the rest of the word entry paragraphs that have delta <> 0.
-     * // Then we package these into an array that v4 expects:
-     * // field_additional_word_entries => [
-     * //     0 => [
-     * //       "target_id" => 4,
-     * //       "target_revision_id" => 4
-     * //     ],
-     * //     1 => [
-     * //       "target_id" => 5,
-     * //       "target_revision_id" => 5
-     * //     ]
-     * //   ]
-     */
+    // Okay, technically the revision info for the base word entry is not preserved here.
+    // Should we do something about it? I don't really know. Hopefully when people do migrations,
+    // they make a backup of their entire site, so if they needed any revision info for this paragraph,
+    // hopefully they can get it that way.
+    $q->addField('w', 'field_word_entry_revision_id', 'revision_id');
+    $q->condition('w.entity_id', $nid);
+    $q->condition('w.delta', 0);
+    $result = $q->execute()->fetchAssoc();
+    if ($result) {
+      $baseWordEntryId = isset($result['id']) ? $result['id'] : NULL;
+      $wordEntryRevisionId = isset($result['revision_id']) ? $result['revision_id'] : NULL;
+      // Using the $baseWordEntryId, do a query on all the word entry field data
+      // tables and add those to the source row.
+      $wordEntryFields = array_keys($this->getFields('paragraphs_item', 'dictionary_word_bundle'));
+      // Query the database for these fields' data.
+      foreach ($wordEntryFields as $fieldName) {
+        $tableName = 'field_data_' . $fieldName;
+        $fieldQuery = $this->getDatabase()->select($tableName, 't');
+        $fieldQuery->condition('t.entity_id', $baseWordEntryId);
+        // We have to modify the query columns depending on the field so the query syntax is correct.
+        switch ($fieldName) {
+          case 'field_dictionary_word_recording':
+            // MULTIVALUE FIELD!!
+            $fieldQuery->addField('t', $fieldName . '_sid', 'target_id');
+            // Not sure what the options portion was used for, but it's currently not in v4.
+            //$fieldQuery->addField('t', $fieldName . '_options');
+            break;
+          case 'field_part_of_speech':
+            $fieldQuery->addField('t', $fieldName . '_tid', 'target_id');
+            break;
+          # TODO case 'field_sample_sentence':
+          # Sample sentence is a paragraph, so it is an entity reference field.
+          case 'field_pronunciation':
+            $fieldQuery->addField('t', $fieldName . '_value', 'value');
+            $fieldQuery->addField('t', $fieldName . '_format', 'format');
+            break;
+          default:
+            $fieldQuery->addField('t', $fieldName . '_value', 'value');
+            break;
+          }
+
+        $fieldData = $fieldQuery->execute();
+
+        // Set the source row with the data.
+        if ($fieldData) {
+          switch ($fieldName) {
+              // Multivalue fields
+            case 'field_dictionary_word_recording':
+            case 'field_sample_sentence':
+              $sourceData = [];
+              while ($resultRow = $fieldData->fetchAssoc()) {
+                $sourceData[] = $resultRow;
+              }
+              break;
+              // Single value fields
+            case 'field_part_of_speech':
+              $sourceData = NULL;
+              $fetched = $fieldData->fetchAssoc() ?? NULL;
+              if ($fetched && isset($fetched['target_id'])) {
+                $sourceData = $fetched['target_id'];
+              }
+              break;
+            case 'field_pronunciation':
+              $sourceData = NULL;
+              $fetched = $fieldData->fetchAssoc() ?? NULL;
+              $sourceData = isset($fetched) ? $fetched : NULL;
+              break;
+            default:
+              $sourceData = NULL;
+              $fetched = $fieldData->fetchAssoc() ?? NULL;
+              if ($fetched && isset($fetched['value'])) {
+                $sourceData = $fetched['value'];
+              }
+              break;
+          }
+          $row->setSourceProperty($fieldName, $sourceData);
+        }
+      }
+    }
+    // Now get the additional word entries.
+    $additionalQuery = $this->getDatabase()->select('field_data_field_word_entry', 'w');
+    $additionalQuery->addField('w', 'field_word_entry_value', 'value');
+    $additionalQuery->addField('w', 'field_word_entry_revision_id', 'revision_id');
+    $additionalQuery->condition('w.entity_id', $nid);
+    // Get all the word entries that aren't the 1st one.
+    $additionalQuery->condition('w.delta', 0, '>');
+    $result = $additionalQuery->execute();
+    while ($resultRow = $result->fetchAssoc()) {
+      $additionalWordEntries[] = $resultRow;
+    }
+    $row->setSourceProperty('field_additional_word_entries', $additionalWordEntries);
     return parent::prepareRow($row);
-  }
-
-  protected function v3WordEntryBaseFields() {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function fields()
-  {
-    $fields = [
-      'nid' => $this->t('NID'),
-      'vid' => $this->t('VID'),
-      'language' => $this->t('Language'),
-      'title' => $this->t('Title'),
-      'uid' => $this->t('UID'),
-      'status' => $this->t('Status'),
-      'created' => $this->t('Created'),
-      'changed' => $this->t('Changed'),
-    ];
-    return $fields;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getIds()
-  {
-    $ids['nid']['type'] = 'integer';
-    $ids['nid']['alias'] = 'n';
-    return $ids;
   }
 }

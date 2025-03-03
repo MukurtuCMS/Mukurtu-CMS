@@ -13,8 +13,7 @@ migration_tags:
 migration_group: mukurtu_cms_v3
 label: 'Paragraphs - Dictionary Word Entry'
 source:
-  plugin: d7_paragraphs_item
-  bundle: dictionary_word_bundle
+  plugin: additional_word_entries
 process:
   field_alternate_spelling: field_alternate_spelling
   field_source: field_source
@@ -51,8 +50,8 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_word_type
     source: field_part_of_speech
-  # TODO: field_sample_sentence
-  # TODO: language
+  # TODO field_sample_sentence
+  # TODO language: language
 
 destination:
   plugin: 'entity_reference_revisions:paragraph'
