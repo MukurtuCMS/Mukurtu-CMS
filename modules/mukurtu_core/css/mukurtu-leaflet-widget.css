@@ -1,0 +1,7 @@
+/**
+ * CSS additions for the Mukurtu Leaflet input widget.
+ */
+.mukurtu-leaflet-description-field {
+  max-width: 100%;
+  margin: 1em auto;
+}
