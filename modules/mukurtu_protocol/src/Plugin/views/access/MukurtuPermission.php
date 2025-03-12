@@ -136,6 +136,18 @@ class MukurtuPermission extends AccessPluginBase implements CacheableDependencyI
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function defineOptions() {
+    $options = parent::defineOptions();
+    $options['site'] = ['default' => []];
+    $options['community'] = ['default' => []];
+    $options['protocol'] = ['default' => []];
+    $options['conjunction'] = ['default' => 'or'];
+    return $options;
+  }
+
   protected function getPermissions() {
     $site = array_map(fn ($p) => 'site:' . $p, $this->options['site']);
     $community = array_map(fn ($p) => 'community:' . $p, $this->options['community']);

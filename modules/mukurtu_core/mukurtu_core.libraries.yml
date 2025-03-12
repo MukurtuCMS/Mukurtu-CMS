@@ -1,5 +1,8 @@
 mukurtu-leaflet-widget:
   version: 1.x
+  css:
+    component:
+      css/mukurtu-leaflet-widget.css: {}
   js:
     js/mukurtu-leaflet-widget.js: {}
   dependencies:

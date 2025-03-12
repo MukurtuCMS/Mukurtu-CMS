@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_protocol\Plugin\views\access;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\Role;
 use Drupal\user\RoleStorageInterface;
 use Drupal\views\Plugin\views\access\AccessPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -160,11 +161,15 @@ class SiteAndMukurtuRole extends AccessPluginBase implements CacheableDependency
 
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
+    $roles = Role::loadMultiple();
+    $role_names = array_map(function ($item) {
+      return $item->label();
+    }, $roles);
     $form['site-role'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Site Role'),
       '#default_value' => $this->options['site-role'],
-      '#options' => array_map('\Drupal\Component\Utility\Html::escape', user_role_names()),
+      '#options' => $role_names,
       '#description' => $this->t('Only the checked roles will be able to access this display.'),
     ];
 

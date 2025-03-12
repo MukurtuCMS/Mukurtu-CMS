@@ -1,7 +1,7 @@
 name: 'Mukurtu Person'
 type: module
 description: 'Provides the person content type.'
-core_version_requirement: '^9.4 || ^10'
+core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 dependencies:
   - 'drupal:comment'

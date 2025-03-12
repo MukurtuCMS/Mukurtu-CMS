@@ -10,16 +10,10 @@ migration_tags:
 migration_group: mukurtu_cms_v3
 label: 'Dictionary Word'
 source:
-  plugin: d7_node
-  node_type: dictionary_word
+  plugin: dictionary_word
 process:
   nid: nid
-  uid:
-    plugin: migration_lookup
-    migration:
-      - mukurtu_cms_v3_users
-      - mukurtu_cms_v3_users_uid1
-    source: uid
+  uid: uid
   langcode: language
   title: title
   field_cultural_protocols/sharing_setting:
@@ -45,10 +39,10 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_language
     source: field_dictionary_word_language
-  field_word_entry:
+  field_additional_word_entries:
     -
       plugin: sub_process
-      source: field_word_entry
+      source: field_additional_word_entries
       process:
         target_id:
           -
@@ -81,6 +75,27 @@ process:
   # TODO: field_word_list
   # TODO: field_collection
   # TODO: field_personal_collections
+  field_alternate_spelling: field_alternate_spelling
+  field_source: field_source
+  field_translation: field_translation
+  field_definition: field_definition
+  field_pronunciation: field_pronunciation
+  field_recording: field_dictionary_word_recording
+  field_word_type: field_part_of_speech
+  field_pronunciation/value: field_pronunciation/value
+  field_pronunciation/format:
+    -
+      plugin: static_map
+      source: field_pronunciation/format
+      map:
+        filtered_html: basic_html
+        plain_text: plain_text
+        full_html: full_html
+        markdown: full_html
+        ds_code: full_html
+      default_value: full_html
+  # TODO field_sample_sentence
+
 destination:
   plugin: 'entity:node'
   default_bundle: dictionary_word
