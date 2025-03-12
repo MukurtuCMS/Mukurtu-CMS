@@ -56,6 +56,7 @@ The layout has been created with CSS Grid. The initialization can be found in `c
 To use the grid, apply one of the grid mixins to your container class, then add each element within your container (your grid items) to the grid as needed.
 
 There are two main grid mixins used in the theme currently:
+
 - `layout--full-width-grid`
 - `layout--full-width-grid-no-padding`
 
@@ -71,15 +72,21 @@ This theme uses the [`include-media` library](https://eduardoboucas.github.io/in
 
 To use `include-media`, you can use the following syntax to wrap your styles:
 
-`@include media('<breakpoint>') {<styles go here>}`
+```scss
+@include media('<breakpoint>') {<styles go here>}
+```
 
 Example:
 
-`@include media('>=md') {color: var(--brand-text-color);}`
+```scss
+@include media('>=md') {color: var(--brand-text-color);}
+```
 
 This theme adheres to a specific set of breakpoints, which can be used in these media queries to control your styles. To find the available breakpoints, you can find the following file from the root of the theme:
 
-`components/00-base/breakpoints/_breakpoints.scss`
+```
+components/00-base/breakpoints/_breakpoints.scss
+```
 
 ## Icons
 
@@ -87,7 +94,9 @@ The icons used on the site can be found in the `images` folder of the theme. The
 
 When adding an icon, it's important to do it directly in the template file using the following format:
 
-`{% include active_theme_path() ~ '/images/name_of_icon.svg' %}`
+```twig
+{% include active_theme_path() ~ '/images/name_of_icon.svg' %}
+```
 
 This ensures that the color palette controls found in the Configuration page of the site can update the color of the icons when a new palette is switched.
 
@@ -97,7 +106,7 @@ While you should have all of the icons necessary for theme development in the `i
 
 ## Font
 
-The main font on the site is [BC Sans](https://developer.gov.bc.ca/Typography), which was selected for its wide support of Indigenous languages. If newer versions of the font become available and you'd like to add them to the theme, simply download the appropriate font files (WOFF and WOFF2 generally) to the `fonts` folder in the theme, and update the relative path in `components/00-base/typography/_fonts.scss` as needed.
+The main font on the site is [BC Sans](https://www2.gov.bc.ca/gov/content/governments/services-for-government/policies-procedures/bc-visual-identity/bc-sans), which was selected for its wide support of Indigenous languages. If newer versions of the font become available and you'd like to add them to the theme, simply download the appropriate font files (WOFF and WOFF2 generally) to the `fonts` folder in the theme, and update the relative path in `components/00-base/typography/_fonts.scss` as needed.
 
 If a serif font is ever required, I would recommend checking out [First Nations Unicode Font](https://fnel.arts.ubc.ca/resources/font/#:~:text=The%20First%20Nations%20Unicode%20Font,First%20Nations%20Unicode%20Font%20%5BFNuni_v2.), which seems similar to BC Sans in its support of Indigenous languages.
 
@@ -107,7 +116,9 @@ You can use these variables like any of the others, by wrapping the `var()` func
 
 Example:
 
-`p { font-size: var(--font-size-base); }`
+```css
+p { font-size: var(--font-size-base); }
+```
 
 ## Spacing
 
