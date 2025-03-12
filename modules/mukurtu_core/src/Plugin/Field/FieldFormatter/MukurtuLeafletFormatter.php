@@ -119,6 +119,24 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
           }
         }
 
+        // Define the Popup Control and Popup Content with backward
+        // compatibility with Leaflet release < 2.x.
+        $popup_control = !empty($settings['popup']) ? $settings['popup'] : ($settings['leaflet_popup']['control'] ?? NULL);
+        $popup_content = !empty($settings['popup_content']) ? $settings['popup_content'] : ($settings['leaflet_popup']['content'] ?? NULL);
+
+        // Eventually set the popup content.
+        if ($popup_control) {
+          $feature['popup'] = $settings['leaflet_popup'];
+          // Generate the Popup Content render array transforming the
+          // 'popup_content' text area through replacements tokens.
+          $feature['popup']['value'] = $this->tokenResolvedContent($entity, $popup_content, $tokens, $results);
+
+          // Associate dynamic popup options (token based).
+          if (!empty($settings['leaflet_popup']['options'])) {
+            $feature['popup']['options'] = $this->tokenResolvedContent($entity, $settings['leaflet_popup']['options'], $tokens, $results);
+          }
+        }
+
         // Add/merge eventual map icon definition from hook_leaflet_map_info.
         if (!empty($map['icon'])) {
           $settings['icon'] = $settings['icon'] ?: [];
@@ -132,7 +150,7 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
           $settings['icon'] = array_replace($map['icon'], $settings['icon']);
         }
 
-        $icon_type = isset($settings['icon']['iconType']) ? $settings['icon']['iconType'] : 'marker';
+        $icon_type = $settings['icon']['iconType'] ?? 'marker';
 
         // Eventually set the custom Marker icon (DivIcon, Icon Url or
         // Circle Marker).
@@ -143,43 +161,56 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
 
           // Transforms Icon Options that support Replacement Patterns/Tokens.
           if (!empty($settings["icon"]["iconSize"]["x"])) {
-            $feature['icon']["iconSize"]["x"] = $this->token->replace($settings["icon"]["iconSize"]["x"], $tokens);
+            $feature['icon']["iconSize"]["x"] = intval($this->token->replace($settings["icon"]["iconSize"]["x"], $tokens));
           }
           if (!empty($settings["icon"]["iconSize"]["y"])) {
-            $feature['icon']["iconSize"]["y"] = $this->token->replace($settings["icon"]["iconSize"]["y"], $tokens);
+            $feature['icon']["iconSize"]["y"] = intval($this->token->replace($settings["icon"]["iconSize"]["y"], $tokens));
+          }
+          if (!empty($settings["icon"]["iconAnchor"]["x"])) {
+            $feature['icon']["iconAnchor"]["x"] = $this->token->replace($settings["icon"]["iconAnchor"]["x"], $tokens);
+          }
+          if (!empty($settings["icon"]["iconAnchor"]["y"])) {
+            $feature['icon']["iconAnchor"]["y"] = $this->token->replace($settings["icon"]["iconAnchor"]["y"], $tokens);
+          }
+          if (!empty($settings["icon"]["popupAnchor"]["x"])) {
+            $feature['icon']["popupAnchor"]["x"] = $this->token->replace($settings["icon"]["popupAnchor"]["x"], $tokens);
+          }
+          if (!empty($settings["icon"]["popupAnchor"]["y"])) {
+            $feature['icon']["popupAnchor"]["y"] = $this->token->replace($settings["icon"]["popupAnchor"]["y"], $tokens);
           }
           if (!empty($settings["icon"]["shadowSize"]["x"])) {
-            $feature['icon']["shadowSize"]["x"] = $this->token->replace($settings["icon"]["shadowSize"]["x"], $tokens);
+            $feature['icon']["shadowSize"]["x"] = intval($this->token->replace($settings["icon"]["shadowSize"]["x"], $tokens));
           }
           if (!empty($settings["icon"]["shadowSize"]["y"])) {
-            $feature['icon']["shadowSize"]["y"] = $this->token->replace($settings["icon"]["shadowSize"]["y"], $tokens);
+            $feature['icon']["shadowSize"]["y"] = intval($this->token->replace($settings["icon"]["shadowSize"]["y"], $tokens));
           }
 
           switch ($icon_type) {
             case 'html':
-              $feature['icon']['html'] = $this->token->replace($settings['icon']['html'], $tokens);
-              $feature['icon']['html_class'] = isset($settings['icon']['html_class']) ? $settings['icon']['html_class'] : '';
+              $feature['icon']['html'] = $this->token->replace($settings['icon']['html'], $tokens, ['clear' => TRUE]);
+              $feature['icon']['html_class'] = $settings['icon']['html_class'] ?? '';
               break;
 
             case 'circle_marker':
-              $feature['icon']['options'] = $this->token->replace($settings['icon']['circle_marker_options'], $tokens);
+              $feature['icon']['circle_marker_options'] = $this->token->replace($settings['icon']['circle_marker_options'], $tokens);
               break;
 
             default:
+              // Apply Token Replacements to iconUrl & shadowUrl.
               if (!empty($settings['icon']['iconUrl'])) {
                 $feature['icon']['iconUrl'] = str_replace(["\n", "\r"], "", $this->token->replace($settings['icon']['iconUrl'], $tokens));
+                // Generate correct Absolute iconUrl,
+                // if not external.
                 if (!empty($feature['icon']['iconUrl'])) {
-                  // Generate Absolute iconUrl , if not external.
-                  $feature['icon']['iconUrl'] = $this->leafletService->pathToAbsolute($feature['icon']['iconUrl']);
-                  // Set the Feature IconSize to the IconUrl Image sizes
-                  // (if empty).
+                  $feature['icon']['iconUrl'] = $this->leafletService->generateAbsoluteString($feature['icon']['iconUrl']);
                 }
               }
               if (!empty($settings['icon']['shadowUrl'])) {
                 $feature['icon']['shadowUrl'] = str_replace(["\n", "\r"], "", $this->token->replace($settings['icon']['shadowUrl'], $tokens));
+                // Generate correct Absolute shadowUrl,
+                // if not external.
                 if (!empty($feature['icon']['shadowUrl'])) {
-                  // Generate Absolute shadowUrl, if not external.
-                  $feature['icon']['shadowUrl'] = $this->leafletService->pathToAbsolute($feature['icon']['shadowUrl']);
+                  $feature['icon']['shadowUrl'] = $this->leafletService->generateAbsoluteString($feature['icon']['shadowUrl']);
                 }
               }
               // Set the Feature IconSize and ShadowSize to the IconUrl or
@@ -196,7 +227,16 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
         }
 
         // Associate dynamic className property (token based) to icon.
-        $feature['className'] = !empty($settings['className']) ? str_replace(["\n", "\r"], "", $this->token->replace($settings['className'], $tokens)) : '';
+        $feature['className'] = !empty($settings['className']) ?
+          str_replace(["\n", "\r"], "", $this->token->replace($settings['className'], $tokens)) : '';
+
+        // Add Feature additional Properties (if present).
+        if (!empty($settings['feature_properties']['values'])) {
+          $feature['properties'] = str_replace([
+            "\n",
+            "\r",
+          ], "", $this->token->replace($settings['feature_properties']['values'], $tokens));
+        }
 
         // Allow modules to adjust the marker.
         $this->moduleHandler->alter('leaflet_formatter_feature', $feature, $item, $entity);
@@ -227,19 +267,6 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
     }
 
     return $results;
-  }
-
-  /**
-   * Sets possibly existing previous settings for the Zoom Form Element.
-   */
-  protected function setExistingZoomSettings() {
-    $settings = $this->getSettings();
-    if (isset($settings['zoom'])) {
-      $settings['map_position']['zoom'] = (int) $settings['zoom'];
-      $settings['map_position']['minZoom'] = (int) $settings['minZoom'];
-      $settings['map_position']['maxZoom'] = (int) $settings['maxZoom'];
-      $this->setSettings($settings);
-    }
   }
 
 }
