@@ -77,7 +77,7 @@
     // Mukurtu Location Description.
     const containerId = $(layer._map._container).attr('id');
     const popupId = "location-popup-" + layer._leaflet_id;
-    layer.bindPopup('<label for="' + popupId + '">' + Drupal.t('Location Description') + '</label><input type="text" size="60" maxlength="255" id="' + popupId + '"></input><button type="button" onclick="Drupal.mukurtuSetLocationDescription(\'' + containerId + '\',' + layer._leaflet_id + ')">' + Drupal.t('Save') + '</button>');
+    layer.bindPopup('<label for="' + popupId + '">' + Drupal.t('Location Description') + '</label><input class="mukurtu-leaflet-description-field" type="text" size="60" maxlength="255" id="' + popupId + '" onblur="Drupal.mukurtuSetLocationDescription(\'' + containerId + '\',' + layer._leaflet_id + ')"></input>');
     layer.on('popupclose', function (event) {
       this.update_text();
     }, this);
