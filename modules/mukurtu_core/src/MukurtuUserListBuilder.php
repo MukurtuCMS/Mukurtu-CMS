@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_core;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\user\RoleInterface;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\user\Entity\Role;
 use Drupal\og\Og;
 
 class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
@@ -65,14 +66,10 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     $row['field_display_name']['data']['#markup'] = $entity->get('field_display_name')->value;
     $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('blocked');
 
-    $roles = user_role_names(TRUE);
+    $roles = Role::loadMultiple($entity->getRoles());
+    unset($roles[RoleInterface::ANONYMOUS_ID]);
     unset($roles[RoleInterface::AUTHENTICATED_ID]);
-    $users_roles = [];
-    foreach ($entity->getRoles() as $role) {
-      if (isset($roles[$role])) {
-        $users_roles[] = $roles[$role];
-      }
-    }
+    $users_roles = array_map(fn(RoleInterface $role) => $role->label(), $roles);
     asort($users_roles);
     $row['roles']['data'] = [
       '#theme' => 'item_list',
