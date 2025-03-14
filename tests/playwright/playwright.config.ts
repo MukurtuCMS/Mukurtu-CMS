@@ -14,15 +14,16 @@ require('dotenv').config({
  */
 export default defineConfig({
   testDir: './tests',
-  /* Maximum time one test can run for. */
-  // This is bumped to 140s to give tests time to install and clean up after.
-  // Take into account that safari automation is slow too.
-  timeout: 60_000,
+  // Maximum time one test can run for, in ms. 60,000ms == 1 minute.
+  // Note that individual tests can extend this by setting test.slow() at the
+  // top of their test() functions.
+  // See https://playwright.dev/docs/test-timeouts#set-timeout-for-a-single-test
+  timeout: 60000,
+  // Maximum time for all tests, in ms. 600,000ms == 10 minutes.
+  globalTimeout: 600000,
   expect: {
-    /**
-     * Maximum time expect() should wait for the condition to be met.
-     * For example in `await expect(locator).toHaveText();`
-     */
+    // Maximum time expect() should wait for the condition to be met.
+    // For example in `await expect(locator).toHaveText();
     timeout: 5000,
     // Allow a small number of pixels to change. By not using a ratio, we
     // ensure that large screenshots don't accidentally pass tests. This number
@@ -49,13 +50,13 @@ export default defineConfig({
       threshold: 0.3,
     },
   },
-  /* Run tests in files in parallel */
+  // Run tests in files in parallel.
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  // Fail the build on CI if you accidentally left test.only in the source code.
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
+  // Retry on CI only.
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
+  // Adjust parallelization on when running on CI.
   workers: (() => {
     if (process.env.CI) {
       // Playwright maintainers recommend 2 CPUs per worker.
@@ -65,11 +66,11 @@ export default defineConfig({
 
     return Math.max(1, os.cpus().length - 2);
   })(),
-  /* Stop early on a failure to save CI time. */
-  /* Retries that then pass still count as failures.
-  /* https://github.com/microsoft/playwright/discussions/20320 */
+  // Stop early on a failure to save CI time.
+  // Retries that then pass still count as failures.
+  // See https://github.com/microsoft/playwright/discussions/20320
   maxFailures: process.env.CI ? 10 : 0,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  // Reporter to use. See https://playwright.dev/docs/test-reporters
   reporter: (() => {
     // The default dot reporter on CI only renders dots when tailing GitHub
     // actions logs when a new line is rendered. This makes it hard to tell if
@@ -80,30 +81,50 @@ export default defineConfig({
       [
         'html', {
         // open: 'never',
-        host: '0.0.0.0',
+        host: '127.0.0.1',
         port: 9323,
       }
       ],
       ['list'],
     ];
   })(),
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  // Shared settings for all the projects below.
+  // See https://playwright.dev/docs/api/class-testoptions
   use: {
     ignoreHTTPSErrors: true,
-    /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
-    actionTimeout: 0,
+    // Maximum time each action such as `click()` can take, in ms.
+    // Defaults to 0 (no limit).
+    actionTimeout: 5000,
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'https://mukurtu4.ddev.site',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    // Collect trace when retrying the failed test. Because traces are only show
+    // See https://playwright.dev/docs/trace-viewer
+    trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
+
+    // Use Drupal's custom data selector attribute instead of the ID tag.
+    // This avoids duplicate IDs when using the codegen tool.
+    // See https://github.com/microsoft/playwright/issues/34722
+    // See https://playwright.dev/docs/api/class-testoptions#test-options-test-id-attribute
+    testIdAttribute: 'data-drupal-selector',
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
+      name: 'default-content',
+      testMatch: 'default-content.spec.ts',
+      // Default content needs to be created sequentially.
+      fullyParallel: false,
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      // Have all tests wait for the default-content test to run before
+      // executing, but do not re-run the default-content test if that test is
+      // specifically requested, as that would cause it to run twice.
+      dependencies: ['default-content'],
+      testIgnore: ['default-content.spec.ts'],
     },
   ],
 
