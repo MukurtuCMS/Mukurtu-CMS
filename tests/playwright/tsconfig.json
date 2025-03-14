@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "~": [ "./src" ],
+      "~*": [ "./src/*" ]
+    },
+    "baseUrl": ".",
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ],
+}
