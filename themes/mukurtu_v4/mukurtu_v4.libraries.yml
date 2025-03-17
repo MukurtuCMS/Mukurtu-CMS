@@ -34,3 +34,11 @@ splide:
   css:
     theme:
       libraries/splide/splide.min.css: {}
+
+leaflet_overrides:
+  version: VERSION
+  css:
+    theme:
+      css/leaflet-overrides.css: {}
+  dependencies:
+    - drupal/leaflet

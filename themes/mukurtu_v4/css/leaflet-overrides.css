@@ -1,0 +1,23 @@
+.leaflet-popup-content {
+  margin-block-start: var(--v-space-3xs);
+
+  & .vertical-card {
+    margin-block-end: 0px;
+  }
+
+  & .field--name-field-media-video-file {
+    display: flex;
+    justify-content: center;
+  }
+
+  & video,
+  & .media-oembed-content {
+    max-block-size: 6.25rem;
+    inline-size: auto;
+  }
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  top: 0.125rem;
+  right: 0.125rem;
+}
