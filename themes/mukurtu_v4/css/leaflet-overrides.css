@@ -22,3 +22,8 @@
   top: 0.125rem;
   right: 0.125rem;
 }
+
+.leaflet-control-layers {
+  /* TODO remove when this can be disabled in Drupal. */
+  display: none;
+}
