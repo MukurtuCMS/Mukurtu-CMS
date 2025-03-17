@@ -12,8 +12,8 @@
 
   & video,
   & .media-oembed-content {
-    max-block-size: 6.25rem;
-    inline-size: auto;
+    inline-size: 100%;
+    block-size: 100%;
   }
 }
 
