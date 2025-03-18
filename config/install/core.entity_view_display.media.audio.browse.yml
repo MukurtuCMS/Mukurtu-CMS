@@ -27,7 +27,7 @@ content:
       multiple_file_display_type: tags
     third_party_settings:
       blazy:
-        blazy: true
+        blazy: false
     weight: 0
     region: content
 hidden:
