@@ -23,6 +23,8 @@ process:
     -
       plugin: get
       source: field_pronunciation/0/value
+    -
+      plugin: media_embed
   field_pronunciation/format:
     -
       plugin: static_map
