@@ -2,8 +2,9 @@ name: "Tugboat Playwright Tests"
 
 on:
   # Run on pull requests against the main branch, to match Tugboat builds.
-  branches:
-    - main
+  push:
+    branches:
+      - main
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -51,15 +52,15 @@ jobs:
         with:
           node-version: 20
 
-#      - name: Install Dependencies
-#        run: cd tests/playwright && npm ci
-#
-#      - name: Install Playwright Browsers
-#        run: cd tests/playwright && npx playwright install --with-deps
-#
-#      - name: Run Playwright Tests
-#        # Note this needs process.env.PLAYWRIGHT_BASE_URL to be evaluated in
-#        # as the baseURL in playwright.config.ts.
-#        run: |
-#          cd tests/playwright
-#          PLAYWRIGHT_BASE_URL="${{ needs.wait-for-tugboat.outputs.preview_url }}" npx playwright test
+      - name: Install Dependencies
+        run: cd tests/playwright && npm ci
+
+      - name: Install Playwright Browsers
+        run: cd tests/playwright && npx playwright install --with-deps
+
+      - name: Run Playwright Tests
+        # Note this needs process.env.PLAYWRIGHT_BASE_URL to be evaluated in
+        # as the baseURL in playwright.config.ts.
+        run: |
+          cd tests/playwright
+          PLAYWRIGHT_BASE_URL="${{ needs.wait-for-tugboat.outputs.preview_url }}" npx playwright test
