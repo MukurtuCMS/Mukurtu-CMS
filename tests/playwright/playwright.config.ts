@@ -96,7 +96,7 @@ export default defineConfig({
     // Defaults to 0 (no limit).
     actionTimeout: 5000,
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'https://mukurtu4.ddev.site',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'https://mukurtu4.ddev.site',
 
     // Collect trace when retrying the failed test. Because traces are only show
     // See https://playwright.dev/docs/trace-viewer
