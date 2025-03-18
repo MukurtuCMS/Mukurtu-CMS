@@ -24,7 +24,7 @@ export class Ckeditor5 {
    *   Text fill into ckeditor.
    */
   public async fill(text: string) {
-    const contentCK =  this.page.locator(this.selector)
+    const contentCK = this.page.locator(this.selector)
       .locator('.ck-editor__editable');
 
     await contentCK.click();

@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 import { Login } from '~components/login';
+import { Ckeditor5 } from "~components/ckeditor5";
 import { LogMessage } from '~components/log-message';
-import { communityContent, CommunityForm } from '~pages/community-form';
 import waitForAjax from '~helpers/ajax';
 
 const defaultContentSpec = {
@@ -9,8 +9,12 @@ const defaultContentSpec = {
   community: [],
   // Protocol entities. Note can be created as part of the community items.
   protocol: [],
+  // Category taxonomy terms.
+  category: [],
   // Language taxonomy terms.
   language: [],
+  // Person nodes.
+  person: [],
   // Digital heritage nodes.
   dh: [],
 };
@@ -32,7 +36,6 @@ defaultContentSpec.community.push({
     },
   ],
 });
-
 defaultContentSpec.community.push({
   name: 'Second community',
   field_access_mode: 'strict',
@@ -57,6 +60,18 @@ defaultContentSpec.protocol.push({
   field_communities: ['First community', 'Second community'],
 });
 
+/* Default default Category terms. */
+defaultContentSpec.category.push({
+  name: 'First category',
+  description__value: '<p>This is a description for the first category.</p>',
+  description__format: 'basic_html',
+});
+defaultContentSpec.category.push({
+  name: 'Second category',
+  description__value: '<p>This is a description for the second category.</p>',
+  description__format: 'basic_html',
+});
+
 /* Default default Language terms. */
 defaultContentSpec.language.push({
   name: 'First language',
@@ -67,12 +82,45 @@ defaultContentSpec.language.push({
   name: 'Second language',
 });
 
+/* Default Person nodes. */
+defaultContentSpec.person.push({
+  name: 'Person A',
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['First community protocol 1', 'Second community protocol 1'],
+  field_date_born__year: '1982',
+  field_date_born__month: '9',
+  field_date_born__day: '30',
+});
+defaultContentSpec.person.push({
+  name: 'Person B',
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['First community protocol 1', 'Second community protocol 1'],
+  field_date_born__year: '1979',
+  field_date_born__month: '2',
+  field_date_born__day: '19',
+});
+
+/**
+ * Global to store if any test content exists yet.
+ *
+ * This value is set on the first test, and then checked on all subsequent ones.
+ */
+let testContentExists = null;
+
 /**
  * Setup tasks run before each test.
  */
 test.beforeEach(async ({ page }) => {
   const login = new Login(page);
   await login.login('admin', 'admin');
+
+  // Check if default content already exists, and if so, skip recreation.
+  if (testContentExists === null) {
+    await page.goto('/dashboard');
+    const getStartedVisible = await page.locator('.mukurtu-getting-started-communities').isVisible();
+    testContentExists = (getStartedVisible === false);
+  }
+  //test.skip(testContentExists === true, 'Content already exists within the database, skipping the default content creation. To create default content, empty all existing content by running delete-content.spec.ts.');
 });
 
 /**
@@ -97,7 +145,7 @@ test('Default Content: Community', async ({ page, browserName }) => {
     if (!communityIdMatch) {
       throw new Error('Could not extract created community ID from URL.');
     }
-    const communityId = communityIdMatch[1];
+    // const communityId = communityIdMatch[1];
 
     // Loop through all protocols to be created directly against this community.
     for (const protocol of community.protocols) {
@@ -109,6 +157,87 @@ test('Default Content: Community', async ({ page, browserName }) => {
       await page.getByRole('button', { name: 'Save and Create Another Protocol' }).click();
       await expect(page.locator('.messages--status')).toContainText(`Created ${protocol.name}.`);
     }
+  }
+});
+
+/**
+ * Initialize default category content.
+ */
+test('Default Content: Category', async ({ page, browserName }) => {
+  // Loop through all Digital Heritage items and create each one.
+  for (const category of defaultContentSpec.category) {
+    // Create through the custom dashboard URL.
+    await page.goto('/dashboard/categories');
+
+    // Expand the Details element to populate a new category value.
+    await page.getByRole('button', { name: 'Add a new category' }).click();
+
+    await page.getByRole('textbox', { name: 'Category name' }).fill(category.name);
+
+    // Fill summary and body using CKEditor 5
+    const summary = new Ckeditor5(page, '[data-drupal-selector="edit-description-wrapper"]');
+    await summary.fill(category.description__value);
+    await page.getByLabel('Text format').selectOption(category.description__format);
+
+    await page
+      // There are two Save buttons on this page, make sure to get just the
+      // edit term form and not the term order form.
+      .locator('[data-drupal-selector="taxonomy-term-category-form"]')
+      .getByRole('button', { name: 'Save', exact: true }).click();
+  }
+});
+
+/**
+ * Initialize default person content.
+ */
+test('Default Content: Person', async ({ page, browserName }) => {
+  // Loop through all Person items and create each one.
+  for (const person of defaultContentSpec.person) {
+    // Create through the custom dashboard URL.
+    await page.goto('/dashboard/node/add/person');
+    await page.getByRole('textbox', { name: 'Name' }).fill(person.name);
+    await page
+      .getByRole('group', { name: 'Sharing Setting' })
+      .getByRole('radio', { name: person.field_cultural_protocols__sharing })
+      .check();
+
+    // Loop through the cultural protocols to be added to this Person item.
+    for (const protocol of person.field_cultural_protocols__value) {
+      await page
+        .getByRole('group', { name: 'Cultural Protocols' })
+        .getByRole('checkbox', { name: protocol})
+        .check();
+    }
+
+    if (person.field_date_born__year) {
+      await page
+        .getByRole('group', { name: 'Date Born' })
+        .getByLabel('Year').fill(person.field_date_born__year);
+      await page
+        .getByRole('group', { name: 'Date Born' })
+        .getByLabel('Month').selectOption(person.field_date_born__month);
+      await page
+        .getByRole('group', { name: 'Date Born' })
+        .getByLabel('Day').selectOption(person.field_date_born__day);
+    }
+
+    if (person.field_date_died__year) {
+      await page
+        .getByRole('group', { name: 'Date Died' })
+        .getByLabel('Year').fill(person.field_date_died__year);
+      await page
+        .getByRole('group', { name: 'Date Died' })
+        .getByLabel('Month').selectOption(person.field_date_died__month);
+      await page
+        .getByRole('group', { name: 'Date Died' })
+        .getByLabel('Day').selectOption(person.field_date_died__day);
+    }
+
+    if (person.field_deceased) {
+      await page.getByRole('checkbox', { name: 'Deceased' }).check();
+    }
+
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
   }
 });
 
