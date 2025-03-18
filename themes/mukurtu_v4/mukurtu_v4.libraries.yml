@@ -4,6 +4,7 @@ global-styling:
     theme:
       css/style.css: {}
       css/content-warnings.css: {}
+      css/leaflet-overrides.css: {}
 
 global-scripts:
   js:
@@ -34,11 +35,3 @@ splide:
   css:
     theme:
       libraries/splide/splide.min.css: {}
-
-leaflet_overrides:
-  version: VERSION
-  css:
-    theme:
-      css/leaflet-overrides.css: {}
-  dependencies:
-    - drupal/leaflet

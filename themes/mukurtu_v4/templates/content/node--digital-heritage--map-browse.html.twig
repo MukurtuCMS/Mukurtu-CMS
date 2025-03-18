@@ -69,8 +69,6 @@
  */
 #}
 
-{{ attach_library('mukurtu_v4/leaflet-overrides') }}
-
 {% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
 
 <article{{ attributes.addClass(["vertical-card", "vertical-card--no-border", "vertical-card--large-font"]) }}>
