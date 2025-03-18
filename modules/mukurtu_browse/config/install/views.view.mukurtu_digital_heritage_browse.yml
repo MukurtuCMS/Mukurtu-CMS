@@ -714,7 +714,7 @@ display:
             options: '{"permanent":false,"direction":"center"}'
           leaflet_popup:
             value: '#rendered_view_fields'
-            options: '{"maxWidth":"300","minWidth":"200","autoPan":true}'
+            options: '{"maxWidth":"400","minWidth":"300","autoPan":true}'
             view_mode: full
           leaflet_map: 'OSM Mapnik'
           height: '600'
