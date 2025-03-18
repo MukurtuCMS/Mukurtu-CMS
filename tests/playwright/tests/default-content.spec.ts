@@ -60,7 +60,7 @@ defaultContentSpec.protocol.push({
   field_communities: ['First community', 'Second community'],
 });
 
-/* Default default Category terms. */
+/* Define default Category terms. */
 defaultContentSpec.category.push({
   name: 'First category',
   description__value: '<p>This is a description for the first category.</p>',
@@ -72,7 +72,7 @@ defaultContentSpec.category.push({
   description__format: 'basic_html',
 });
 
-/* Default default Language terms. */
+/* Define default Language terms. */
 defaultContentSpec.language.push({
   name: 'First language',
   field_cultural_protocols__sharing: 'any',
@@ -82,7 +82,7 @@ defaultContentSpec.language.push({
   name: 'Second language',
 });
 
-/* Default Person nodes. */
+/* Define default Person nodes. */
 defaultContentSpec.person.push({
   name: 'Person A',
   field_cultural_protocols__sharing: 'any',
@@ -95,9 +95,13 @@ defaultContentSpec.person.push({
   name: 'Person B',
   field_cultural_protocols__sharing: 'any',
   field_cultural_protocols__value: ['First community protocol 1', 'Second community protocol 1'],
-  field_date_born__year: '1979',
+  field_date_born__year: '1920',
   field_date_born__month: '2',
   field_date_born__day: '19',
+  field_date_died__year: '2001',
+  field_date_died__month: '9',
+  field_date_died__day: '30',
+  field_deceased: true,
 });
 
 /**

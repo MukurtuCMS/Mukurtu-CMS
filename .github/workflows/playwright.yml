@@ -25,7 +25,7 @@ jobs:
           INTERVAL=30
           ELAPSED=0
           while [ $ELAPSED -lt $MAX_WAIT ]; do
-            PREVIEW_URL=$(gh pr view --json comments | jq -r '.comments[].body' | grep -o 'https://[a-zA-Z0-9.-]*\.tugboatqa.com' | head -n 1 || true)
+            PREVIEW_URL=$(gh pr view --json comments | jq -r '.comments[].body' | grep -Po 'https://(?!www\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | head -n 1 || true)
             if [[ ! -z "$PREVIEW_URL" ]]; then
               echo "Preview is ready: $PREVIEW_URL"
               echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
