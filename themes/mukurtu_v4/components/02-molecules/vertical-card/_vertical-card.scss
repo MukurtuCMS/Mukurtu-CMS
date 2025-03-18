@@ -1,6 +1,8 @@
 // As seen in Grid Browse display.
 
 .vertical-card {
+  --card-font-size: var(--font-size-s);
+
   break-inside: avoid;
   border-block-start: 0;
   border-block-end: 5px solid var(--mukurtu-view-row-divider-color);
@@ -11,8 +13,18 @@
 
   &__content-header {
     h2 {
-      font-size: var(--font-size-s);
+      font-size: var(--card-font-size);
       font-weight:  var(--text-bold);
     }
+  }
+
+  &--no-border {
+    padding-block-end: 0px;
+    margin-block-end: 0px;
+    border-block-end: none;
+  }
+
+  &--large-font {
+    --card-font-size: var(--font-size-xl);
   }
 }

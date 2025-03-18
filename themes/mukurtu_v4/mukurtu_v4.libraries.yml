@@ -4,6 +4,7 @@ global-styling:
     theme:
       css/style.css: {}
       css/content-warnings.css: {}
+      css/leaflet-overrides.css: {}
 
 global-scripts:
   js:

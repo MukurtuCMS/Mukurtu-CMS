@@ -1,0 +1,29 @@
+.leaflet-popup-content {
+  margin-block-start: var(--v-space-3xs);
+
+  & .vertical-card {
+    margin-block-end: 0px;
+  }
+
+  & .field--name-field-media-video-file {
+    display: flex;
+    justify-content: center;
+  }
+
+  & video,
+  & .media-oembed-content {
+    inline-size: 100%;
+    block-size: 100%;
+    background-color: black;
+  }
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  top: 0.125rem;
+  right: 0.125rem;
+}
+
+.leaflet-control-layers {
+  /* TODO remove when this can be disabled in Drupal. */
+  display: none;
+}
