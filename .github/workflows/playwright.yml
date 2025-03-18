@@ -38,7 +38,8 @@ jobs:
           echo "Tugboat preview did not become ready in time."
           exit 1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Secret configured on the Mukurtu-CMS repository.
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   playwright-tests:
     needs: wait-for-tugboat
