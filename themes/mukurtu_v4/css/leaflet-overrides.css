@@ -1,5 +1,9 @@
 .leaflet-popup-content {
-  margin-block-start: var(--v-space-3xs);
+  font-weight: 500;
+
+  &:has(.vertical-card) {
+    margin-block-start: var(--v-space-3xs);
+  }
 
   & .vertical-card {
     margin-block-end: 0px;
