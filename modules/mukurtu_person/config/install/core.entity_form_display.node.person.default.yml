@@ -45,6 +45,7 @@ third_party_settings:
         - field_keywords
         - field_coverage
         - field_coverage_description
+        - field_location
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -65,7 +66,7 @@ third_party_settings:
       label: Relations
       region: content
       parent_name: group_main_tab
-      weight: 22
+      weight: 23
       format_type: tab
       format_settings:
         classes: ''
@@ -80,7 +81,7 @@ third_party_settings:
       label: 'Text Sections'
       region: content
       parent_name: group_main_tab
-      weight: 21
+      weight: 22
       format_type: tab
       format_settings:
         classes: ''
@@ -96,26 +97,26 @@ mode: default
 content:
   comment:
     type: comment_default
-    weight: 9
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
   created:
     type: datetime_timestamp
-    weight: 2
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
   draft:
     type: boolean_checkbox
-    weight: 7
+    weight: 8
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   field_coverage:
     type: geofield_mukurtu
-    weight: 31
+    weight: 10
     region: content
     settings:
       geometry_validation: 0
@@ -168,10 +169,19 @@ content:
           zoom: 16
           popup: false
           options: ''
+      map_scale:
+        control: false
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+      feature_properties:
+        values: ''
+      locate:
+        control: false
+        options: '{"position": "topright", "setView": "untilPanOrZoom", "returnToPrevBounds":true, "keepCurrentZoomLevel": true, "strings": {"title": "Locate my position"}}'
+        automatic: false
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea
-    weight: 32
+    weight: 11
     region: content
     settings:
       rows: 5
@@ -205,6 +215,16 @@ content:
   field_keywords:
     type: entity_reference_autocomplete
     weight: 9
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_location:
+    type: entity_reference_autocomplete
+    weight: 12
     region: content
     settings:
       match_operator: CONTAINS
@@ -302,27 +322,27 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 5
+    weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
   promote:
     type: boolean_checkbox
-    weight: 3
+    weight: 4
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 8
+    weight: 9
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
-    weight: 4
+    weight: 5
     region: content
     settings:
       display_label: true
@@ -346,7 +366,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   url_redirects:
-    weight: 6
+    weight: 7
     region: content
     settings: {  }
     third_party_settings: {  }
