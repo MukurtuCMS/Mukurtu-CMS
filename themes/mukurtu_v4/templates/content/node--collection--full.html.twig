@@ -96,30 +96,33 @@
       {# Full width collection description. #}
       {{ content.field_description }}
 
-        {# Main content -- collection items grid. #}
-        <div class="full-node__main">
-          <div class="full-node__content">
-            {{ content.field_items_in_collection }}
-          </div>
+      {# Main content -- collection items grid. #}
+      <div class="full-node__main">
+        {{ content.field_coverage }}
+        {{ content.field_coverage_description }}
+
+        <div class="full-node__content">
+          {{ content.field_items_in_collection }}
         </div>
-
-        {# Sidebar. #}
-        <div class="full-node__list">
-          {# As more content is made available to the sidebar, add it below. #}
-          {% if content.field_communities is not empty %}
-            <aside class="full-node__sidebar">
-              <div class="sidebar-section">
-              {{ content.field_communities }}
-              </div>
-            </aside>
-          {% endif %}
-
-          <div class="full-node__related-content">
-            {{ content.field_all_related_content }}
-          </div>
-        </div>
-
       </div>
+
+      {# Sidebar. #}
+      <div class="full-node__list">
+        {# As more content is made available to the sidebar, add it below. #}
+        {% if content.field_communities is not empty %}
+          <aside class="full-node__sidebar">
+            <div class="sidebar-section">
+            {{ content.field_communities }}
+            </div>
+          </aside>
+        {% endif %}
+
+        <div class="full-node__related-content">
+          {{ content.field_all_related_content }}
+        </div>
+      </div>
+
+    </div>
 
   </div> {# /full-node. #}
 </article>
