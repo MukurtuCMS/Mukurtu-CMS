@@ -1,5 +1,5 @@
-// Some full displays look very similar with main content 
-// and a right sidebar. These styles cover them all. 
+// Some full displays look very similar with main content
+// and a right sidebar. These styles cover them all.
 // As of 11/04/24, this encompasses Digital Heritage and Person.
 
 .full-node__grid {
@@ -24,18 +24,18 @@
     // Ensure border is not duplicated on fields inside fields, fields inside media,
     // and nested paragraph.
 
-    // :where() reduces specificity to 0 so these are more 
+    // :where() reduces specificity to 0 so these are more
     // easily overridden elsewhere if needed.
-    .field:where(:not(.field--name-field-media-assets, 
-    .field--name-field-media-assets .field, 
-    .media .field, 
-    .field.field.field--name-field-word-entry,
-    .field--name-field-sentence-recording,
-    .field--name-field-sentence,
-    .field--name-field-additional-word-entries,
-    .field--name-field-word-entry-term + div.field,
-    .field--name-title,
-    .additional-fields > div.field)) {
+    .field:where(:not(.field--name-field-media-assets,
+        .field--name-field-media-assets .field,
+        .media .field,
+        .field.field.field--name-field-word-entry,
+        .field--name-field-sentence-recording,
+        .field--name-field-sentence,
+        .field--name-field-additional-word-entries,
+        .field--name-field-word-entry-term + div.field,
+        .field--name-title,
+        .additional-fields > div.field)) {
       @include divider;
     }
 
@@ -57,15 +57,15 @@
 
     .field--name-field-recording {
       .field__item {
-        margin: var(--v-space-4xxs) 0; 
+        margin: var(--v-space-4xxs) 0;
       }
     }
 
     .paragraph--type--sample-sentence {
-      margin-block-end: var(--v-space-2xs); 
+      margin-block-end: var(--v-space-2xs);
 
       > div {
-        margin-block-end: var(--v-space-4xxs); 
+        margin-block-end: var(--v-space-4xxs);
       }
     }
   }

@@ -22,7 +22,7 @@
       margin-block-end: var(--v-space-s);
 
       &::after {
-        content: "";
+        content: '';
         display: inline-block;
         position: absolute;
         top: 71px;
@@ -57,7 +57,7 @@
 
   .additional-fields {
     &::before {
-      content: "Additional Information";
+      content: 'Additional Information';
       display: block;
       font-size: var(--font-size-m);
       font-weight: var(--text-bold);
@@ -83,9 +83,9 @@
         flex-direction: row;
       }
 
-      .field--name-field-media-audio-file, 
+      .field--name-field-media-audio-file,
       .field--name-field-contributor {
-        flex:1;
+        flex: 1;
       }
 
       .field--name-field-contributor {
