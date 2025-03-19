@@ -1,6 +1,6 @@
 // The horizontal card component can be seen on the List Browse display,
-// as well as the related content section at the bottom of the main content 
-// area on a DH node. 
+// as well as the related content section at the bottom of the main content
+// area on a DH node.
 .horizontal-card {
   padding-block: var(--v-space-2xs);
   display: grid;
@@ -65,7 +65,7 @@
       flex-direction: column;
       gap: var(--v-space-5xs);
       align-items: first baseline;
-      border: 0;
+      border: 0px;
       padding-block-start: 0;
       margin-block-start: 0;
 
