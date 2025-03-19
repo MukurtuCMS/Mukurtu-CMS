@@ -178,6 +178,26 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Location'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => [
+            'location' => 'location'
+          ],
+          'auto_create' => TRUE,
+        ]
+      ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     return $definitions;
   }
 

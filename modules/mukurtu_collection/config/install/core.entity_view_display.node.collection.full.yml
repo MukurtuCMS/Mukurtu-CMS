@@ -26,7 +26,7 @@ content:
       view_mode: teaser
       link: false
     third_party_settings: {  }
-    weight: 7
+    weight: 8
     region: content
   field_collection_image:
     type: entity_reference_entity_view
@@ -56,11 +56,28 @@ content:
       hide_empty_map: false
       disable_wheel: false
       gesture_handling: false
+      fitbounds_options: '{"padding":[0,0]}'
       reset_map:
         control: false
         position: topright
+      map_scale:
+        control: false
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+      locate:
+        control: false
+        options: '{"position": "topright", "setView": "untilPanOrZoom", "returnToPrevBounds":true, "keepCurrentZoomLevel": true, "strings": {"title": "Locate my position"}}'
+        automatic: false
+      leaflet_tooltip:
+        value: ''
+        options: '{"permanent":false,"direction":"center"}'
       popup: false
       popup_content: ''
+      leaflet_popup:
+        control: ''
+        content: ''
+        options: '{"maxWidth":"300","minWidth":"50", "autoPan": true}'
+        value: ''
+        view_mode: full
       map_position:
         force: false
         center:
@@ -102,6 +119,8 @@ content:
         control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      feature_properties:
+        values: ''
       geocoder:
         control: false
         settings:
@@ -113,6 +132,8 @@ content:
           delay: 800
           zoom: 16
           options: ''
+      map_lazy_load:
+        lazy_load: false
     third_party_settings: {  }
     weight: 5
     region: content
@@ -146,6 +167,14 @@ content:
       link: false
     third_party_settings: {  }
     weight: 3
+    region: content
+  field_location:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 7
     region: content
   field_summary:
     type: string
