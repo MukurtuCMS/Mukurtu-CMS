@@ -9,6 +9,7 @@ dependencies:
     - entity_browser
     - field_group
     - media_library
+    - mukurtu_core
     - mukurtu_protocol
     - path
     - text
@@ -39,6 +40,9 @@ third_party_settings:
         - field_cultural_protocols
         - field_keywords
         - field_source
+        - field_coverage
+        - field_coverage_description
+        - field_location
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -57,7 +61,7 @@ third_party_settings:
       label: Words
       region: content
       parent_name: group_main_tab
-      weight: 21
+      weight: 22
       format_type: tab
       format_settings:
         classes: ''
@@ -88,7 +92,7 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 2
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -98,6 +102,79 @@ content:
     region: content
     settings:
       display_label: true
+    third_party_settings: {  }
+  field_coverage:
+    type: geofield_mukurtu
+    weight: 8
+    region: content
+    settings:
+      geometry_validation: 0
+      map:
+        leaflet_map: 'OSM Mapnik'
+        height: '400'
+        auto_center: '1'
+        scroll_zoom_enabled: '1'
+        map_position:
+          zoom: '12'
+          minZoom: '1'
+          maxZoom: '18'
+          zoomFiner: '0'
+          force: 0
+          center:
+            lat: '0'
+            lon: '0'
+          zoomControlPosition: topleft
+      toolbar:
+        position: topright
+        marker: defaultMarker
+        drawPolyline: '1'
+        drawRectangle: '1'
+        drawPolygon: '1'
+        editMode: '1'
+        dragMode: '1'
+        removalMode: '1'
+        drawCircle: false
+        drawText: false
+        cutPolygon: 0
+        rotateMode: 0
+      reset_map:
+        control: 0
+        options: '{"position":"topleft","title":"Reset View"}'
+      fullscreen:
+        options: '{"position":"topleft","pseudoFullscreen":false}'
+        control: 0
+      path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      input:
+        show: 0
+        readonly: 0
+      geocoder:
+        control: false
+        settings:
+          position: topright
+          input_size: 20
+          providers: {  }
+          min_terms: 4
+          delay: 800
+          zoom: 16
+          popup: false
+          options: ''
+      map_scale:
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+        control: 0
+      locate:
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        automatic: '1'
+        control: 0
+      feature_properties:
+        values: ''
+    third_party_settings: {  }
+  field_coverage_description:
+    type: text_textarea
+    weight: 9
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
@@ -116,6 +193,16 @@ content:
   field_keywords:
     type: entity_reference_autocomplete
     weight: 6
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_location:
+    type: entity_reference_autocomplete
+    weight: 10
     region: content
     settings:
       match_operator: CONTAINS
@@ -225,13 +312,13 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 5
+    weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
   promote:
     type: boolean_checkbox
-    weight: 3
+    weight: 4
     region: content
     settings:
       display_label: true
@@ -245,7 +332,7 @@ content:
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
-    weight: 4
+    weight: 5
     region: content
     settings:
       display_label: true

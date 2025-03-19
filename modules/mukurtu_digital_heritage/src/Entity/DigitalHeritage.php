@@ -361,18 +361,18 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
-    ->setLabel(t('Location'))
-    ->setDescription(t(''))
-    ->setSettings([
-      'target_type' => 'taxonomy_term',
-      'handler' => 'default:taxonomy_term',
-      'handler_settings' => [
-        'target_bundles' => [
-          'location' => 'location'
-        ],
-        'auto_create' => TRUE,
-      ]
-    ])
+      ->setLabel(t('Location'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => [
+            'location' => 'location'
+          ],
+          'auto_create' => TRUE,
+        ]
+      ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

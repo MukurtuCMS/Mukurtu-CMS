@@ -21,6 +21,7 @@ dependencies:
   - 'entity_reference_revisions:entity_reference_revisions'
   - 'facets:facets'
   - 'field_group:field_group'
+  - 'geofield:geofield'
   - 'mukurtu_browse:mukurtu_browse'
   - 'mukurtu_collection:mukurtu_collection'
   - 'mukurtu_core:mukurtu_core'

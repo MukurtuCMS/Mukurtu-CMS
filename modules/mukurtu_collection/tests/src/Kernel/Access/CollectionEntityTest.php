@@ -20,7 +20,8 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'mukurtu_collection'
+    'mukurtu_collection',
+    'geofield'
   ];
 
   /**

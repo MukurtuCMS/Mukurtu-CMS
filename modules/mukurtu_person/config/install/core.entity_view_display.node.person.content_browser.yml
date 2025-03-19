@@ -37,6 +37,8 @@ hidden:
   field_citation: true
   field_communities: true
   field_content_type: true
+  field_coverage: true
+  field_coverage_description: true
   field_cultural_protocols: true
   field_date_born: true
   field_date_died: true
