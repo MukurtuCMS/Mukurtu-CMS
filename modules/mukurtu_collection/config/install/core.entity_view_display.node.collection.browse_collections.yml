@@ -42,6 +42,8 @@ hidden:
   field_citation: true
   field_collection_image: true
   field_communities: true
+  field_coverage: true
+  field_coverage_description: true
   field_cultural_protocols: true
   field_description: true
   field_in_collection: true

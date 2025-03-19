@@ -7,6 +7,7 @@ dependencies:
     - node.type.word_list
   module:
     - layout_builder
+    - mukurtu_core
     - text
     - user
 third_party_settings:
@@ -18,6 +19,84 @@ targetEntityType: node
 bundle: word_list
 mode: full
 content:
+  field_coverage:
+    type: mukurtu_leaflet_formatter
+    label: above
+    settings:
+      multiple_map: false
+      leaflet_map: 'OSM Mapnik'
+      height: 400
+      height_unit: px
+      hide_empty_map: false
+      disable_wheel: false
+      gesture_handling: false
+      reset_map:
+        control: false
+        position: topright
+      popup: false
+      popup_content: ''
+      map_position:
+        force: false
+        center:
+          lat: 0.0
+          lon: 0.0
+        zoom: 12
+        minZoom: 1
+        maxZoom: 18
+        zoomFiner: 0
+      weight: null
+      icon:
+        iconType: marker
+        iconUrl: ''
+        shadowUrl: ''
+        className: ''
+        iconSize:
+          x: null
+          'y': null
+        iconAnchor:
+          x: null
+          'y': null
+        shadowSize:
+          x: null
+          'y': null
+        shadowAnchor:
+          x: null
+          'y': null
+        popupAnchor:
+          x: null
+          'y': null
+        html: '<div></div>'
+        html_class: leaflet-map-divicon
+        circle_marker_options: '{"radius": 100, "color": "red", "fillColor": "#f03", "fillOpacity": 0.5}'
+      leaflet_markercluster:
+        control: false
+        options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
+        include_path: false
+      fullscreen:
+        control: false
+        options: '{"position":"topleft","pseudoFullscreen":false}'
+      path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      geocoder:
+        control: false
+        settings:
+          popup: false
+          position: topright
+          input_size: 25
+          providers: {  }
+          min_terms: 4
+          delay: 800
+          zoom: 16
+          options: ''
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_coverage_description:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
   field_description:
     type: text_default
     label: hidden
@@ -62,7 +141,7 @@ content:
   flag_export_content:
     settings: {  }
     third_party_settings: {  }
-    weight: 5
+    weight: 7
     region: content
 hidden:
   comment: true
