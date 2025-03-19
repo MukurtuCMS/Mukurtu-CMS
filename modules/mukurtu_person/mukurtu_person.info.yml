@@ -17,6 +17,7 @@ dependencies:
   - 'drupal:user'
   - 'entity_browser:entity_browser'
   - 'field_group:field_group'
+  - 'geofield:geofield'
   - 'mukurtu_browse:mukurtu_browse'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_drafts:mukurtu_drafts'
