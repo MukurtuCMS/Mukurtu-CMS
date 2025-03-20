@@ -1,7 +1,10 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
 // Mukurtu Footer.
 
 .footer {
-  @include layout--full-width-grid;
+  @include layout.layout--full-width-grid;
 
   background-color: var(--footer-bg-color);
   color: var(--footer-text-color);
@@ -10,7 +13,7 @@
   .region {
     grid-column: 1 / -1;
 
-    @include media('>=2xl') {
+    @include include-media.media('>=2xl') {
       grid-column: 2 / -2;
     }
   }

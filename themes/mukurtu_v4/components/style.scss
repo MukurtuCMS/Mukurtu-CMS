@@ -2,9 +2,47 @@
 
 /*! See https://eduardoboucas.github.io/include-media/ for detailed
 documentation on how to use @include media(). */
-@import '../external/include-media';
-@import '00-base/**/*';
-@import '01-atoms/**/*';
-@import '02-molecules/**/*';
-@import '03-organisms/**/*';
-@import '04-templates/**/*';
+@use '../external/_include-media.scss';
+
+@use '00-base/base/base';
+@use '00-base/breakpoints/breakpoints';
+@use '00-base/colors/colors';
+@use '00-base/layout/layout';
+@use '00-base/mixins/mixins';
+@use '00-base/palettes/red-bone';
+@use '00-base/palettes/yellow-blue';
+@use '00-base/palettes-demo/palettes-demo';
+@use '00-base/spacing/spacing';
+@use '00-base/typography/fonts';
+@use '00-base/typography/type-settings';
+@use '00-base/typography/typography';
+@use '01-atoms/button/button';
+@use '01-atoms/fields/fields';
+@use '01-atoms/images/images';
+@use '01-atoms/images/logo';
+@use '01-atoms/link/link';
+@use '01-atoms/select/select';
+@use '01-atoms/textfield/textfield';
+@use '02-molecules/carousels/carousels';
+@use '02-molecules/form/form';
+@use '02-molecules/horizontal-card/horizontal-card';
+@use '02-molecules/horizontal-tabs/horizontal-tabs';
+@use '02-molecules/local-tasks/local-tasks';
+@use '02-molecules/media/media';
+@use '02-molecules/menus/menu';
+@use '02-molecules/vertical-card/vertical-card';
+@use '03-organisms/breadcrumbs/breadcrumbs';
+@use '03-organisms/footer/footer';
+@use '03-organisms/header/header';
+@use '03-organisms/masonry-grid/masonry-grid';
+@use '03-organisms/related-content/related-content';
+@use '04-templates/browse-pages/browse';
+@use '04-templates/browse-pages/collections';
+@use '04-templates/categories/categories';
+@use '04-templates/collection/collection';
+@use '04-templates/dashboard/dashboard';
+@use '04-templates/dictionary/dictionary-word';
+@use '04-templates/dictionary/dictionary';
+@use '04-templates/digital-heritage/digital-heritage-node';
+@use '04-templates/full-node/full-node';
+@use '04-templates/page/page';

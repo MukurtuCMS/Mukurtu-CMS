@@ -1,3 +1,5 @@
+@use "../../00-base/layout/layout";
+
 // Shared styles across carousels.
 .splide {
   &__arrow--prev {
@@ -21,12 +23,12 @@
 
 // Multi-page carousel styles. This appears with multi-page DH items.
 .splide__wrapper {
-  @include layout--full-width-grid;
+  @include layout.layout--full-width-grid;
 
   margin-block: var(--v-space-4xxs);
 
   .splide.is-initialized {
-    @include layout--full-width-grid-item;
+    @include layout.layout--full-width-grid-item;
   }
 }
 

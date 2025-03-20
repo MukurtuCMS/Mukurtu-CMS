@@ -1,12 +1,14 @@
+@use "../../00-base/layout/layout";
+
 .page__breadcrumbs {
   // Style this here for full bleed of color.
   box-shadow: inset 0 41px 18px -42px var(--mukurtu-breadcrumb-gradient-color);
   background-color: var(--mukurtu-breadcrumb-background-color);
 
-  @include layout--full-width-grid;
+  @include layout.layout--full-width-grid;
 
   div:first-of-type {
-    @include layout--full-width-grid-item;
+    @include layout.layout--full-width-grid-item;
   }
 
   ol {

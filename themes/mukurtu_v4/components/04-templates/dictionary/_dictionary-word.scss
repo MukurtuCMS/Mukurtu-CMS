@@ -1,3 +1,6 @@
+@use "../../../external/include-media";
+@use "../../00-base/mixins/mixins";
+
 // Full content display for dictionary word nodes.
 .page-node-type-dictionary-word {
   .full-node__content {
@@ -8,7 +11,7 @@
     .field--name-title,
     .field--name-field-word-entry-term {
       .field__label {
-        @include visually-hidden;
+        @include mixins.visually-hidden;
       }
 
       background-color: var(--brand-primary-dark);
@@ -48,7 +51,7 @@
   // stylelint-disable-next-line no-descending-specificity
   .field--name-field-additional-word-entries > .field__item,
   .additional-fields {
-    @include divider;
+    @include mixins.divider;
 
     border-width: var(--v-space-4xs);
     margin-block-start: var(--v-space-l);
@@ -79,7 +82,7 @@
       align-items: center;
       justify-content: center;
 
-      @include media('>=md') {
+      @include include-media.media('>=md') {
         flex-direction: row;
       }
 
@@ -179,7 +182,7 @@
       flex: 1;
     }
 
-    @include media('>=xl') {
+    @include include-media.media('>=xl') {
       flex-direction: row;
     }
   }

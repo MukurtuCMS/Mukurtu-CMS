@@ -1,3 +1,5 @@
+@use "../../../external/include-media";
+
 // All menu styling is here.
 // To find menu grid placement, see _page.scss.
 .menu {
@@ -84,7 +86,7 @@
 .main-navigation {
   display: none;
 
-  @include media('>=lg') {
+  @include include-media.media('>=lg') {
     display: block;
   }
 }
@@ -92,7 +94,7 @@
 .mobile-nav-button {
   display: block;
 
-  @include media('>=lg') {
+  @include include-media.media('>=lg') {
     display: none;
   }
 

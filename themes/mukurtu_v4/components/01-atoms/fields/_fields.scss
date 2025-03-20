@@ -1,3 +1,5 @@
+@use "../../../external/include-media";
+
 // Lots of fields with labels shown on the site. Let's coordinate label styles here. 
 
 .field {
@@ -6,7 +8,7 @@
     font-weight: var(--text-bold);
     font-size: var(--font-size-s);
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       font-size: var(--font-size-m);
     }
   }

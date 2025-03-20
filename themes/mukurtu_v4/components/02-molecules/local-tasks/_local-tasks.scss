@@ -1,10 +1,12 @@
+@use "../../00-base/layout/layout";
+
 // Styles for the local tasks tabs that logged in users see on node edit screens. /
 
 .local-tasks {
-  @include layout--full-width-grid;
+  @include layout.layout--full-width-grid;
 
   ul {
-    @include layout--full-width-grid-item;
+    @include layout.layout--full-width-grid-item;
 
     padding-inline-start: 0;
   }
@@ -51,10 +53,10 @@
 
 // Styles "add collection" button link.
 .local-actions {
-  @include layout--full-width-grid;
+  @include layout.layout--full-width-grid;
 
   ul {
-    @include layout--full-width-grid-item;
+    @include layout.layout--full-width-grid-item;
 
     padding: 0;
     margin: 0;

@@ -1,20 +1,24 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
+
 // Some full displays look very similar with main content
 // and a right sidebar. These styles cover them all.
 // As of 11/04/24, this encompasses Digital Heritage and Person.
 
 .full-node__grid {
-  @include layout--full-width-grid;
+  @include layout.layout--full-width-grid;
 }
 
 .full-node {
   &__main {
     grid-column: 1 / span 6;
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       grid-column: 1 / span 8;
     }
 
-    @include media('>=2xl') {
+    @include include-media.media('>=2xl') {
       grid-column: 2 / span 8;
     }
   }
@@ -35,7 +39,7 @@
         .field--name-field-word-entry-term + div.field,
         .field--name-title,
         .additional-fields > div.field)) {
-      @include divider;
+      @include mixins.divider;
     }
 
     .field--name-field-people,
@@ -43,14 +47,14 @@
     .field--name-field-word-type,
     .field--name-field-contributor {
       .field__items {
-        @include inline-list;
+        @include mixins.inline-list;
       }
     }
 
     // Visually hide the map label.
     .field--name-field-coverage {
       .field__label {
-        @include visually-hidden;
+        @include mixins.visually-hidden;
       }
     }
 
@@ -72,13 +76,13 @@
 
   &__related-content {
     .field--name-field-all-related-content {
-      @include divider;
+      @include mixins.divider;
     }
   }
 
   &__citation {
     .field--name-field-citation {
-      @include divider;
+      @include mixins.divider;
     }
   }
 
@@ -86,11 +90,11 @@
   &__list {
     grid-column: 1 / span 6;
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       grid-column: 9 / span 4;
     }
 
-    @include media('>=2xl') {
+    @include include-media.media('>=2xl') {
       grid-column: 10 / span 4;
     }
   }
@@ -117,7 +121,7 @@
 
       // If multiple items, show as comma-separated list.
       &__items {
-        @include inline-list;
+        @include mixins.inline-list;
       }
     }
 

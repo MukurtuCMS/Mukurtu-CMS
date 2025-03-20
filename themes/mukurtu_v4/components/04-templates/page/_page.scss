@@ -1,18 +1,21 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
 .layout-container {
   main {
     display: block;
 
     .dashboard {
-      @include layout--full-width-grid;
+      @include layout.layout--full-width-grid;
 
       &__layout-sidebar-first {
         grid-column: 1 / -1;
 
-        @include media('>=lg') {
+        @include include-media.media('>=lg') {
           grid-column: 1 / span 6;
         }
 
-        @include media('>=2xl') {
+        @include include-media.media('>=2xl') {
           grid-column: 2 / span 6;
         }
       }
@@ -20,11 +23,11 @@
       &__main-content {
         grid-column: 1 / -1;
 
-        @include media('>=lg') {
+        @include include-media.media('>=lg') {
           grid-column: 7 / span 6;
         }
 
-        @include media('>=2xl') {
+        @include include-media.media('>=2xl') {
           grid-column: 8 / span 6;
         }
       }
@@ -33,7 +36,7 @@
 
   .page {
     &__account-menu {
-      @include layout--full-width-grid;
+      @include layout.layout--full-width-grid;
 
       // Style this here for full bleed of color.
       background-color: var(--brand-primary-dark);
@@ -41,7 +44,7 @@
       div:first-of-type {
         grid-column: 1 / -1;
 
-        @include media('>=2xl') {
+        @include include-media.media('>=2xl') {
           grid-column: 2 / -2;
         }
       }
@@ -62,12 +65,12 @@
 
   // Make sure Drupal messages are within the grid.
   .region__highlighted {
-    @include layout--full-width-grid;
+    @include layout.layout--full-width-grid;
 
     .messages-list {
       grid-column: 1 / -1;
 
-      @include media('>=2xl') {
+      @include include-media.media('>=2xl') {
         grid-column: 2 / -2;
       }
 

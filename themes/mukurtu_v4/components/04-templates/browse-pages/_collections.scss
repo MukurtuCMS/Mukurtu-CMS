@@ -1,14 +1,17 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
 .collections {
-  @include layout--full-width-grid;
+  @include layout.layout--full-width-grid;
 
   grid-column: 1 / -1;
 
-  @include media('>=2xl') {
+  @include include-media.media('>=2xl') {
     grid-column: 2 / -2;
   }
 
   &__main-content {
-    @include layout--full-width-grid-item;
+    @include layout.layout--full-width-grid-item;
   }
 
   &__collection-list {
@@ -16,7 +19,7 @@
     .views-exposed-form {
       inline-size: 100%;
 
-      @include media('>=md') {
+      @include include-media.media('>=md') {
         inline-size: 25%;
       }
 
@@ -57,7 +60,7 @@
       flex-direction: column-reverse;
       justify-content: center;
 
-      @include media('>=lg') {
+      @include include-media.media('>=lg') {
         flex-direction: row;
       }
 
@@ -69,7 +72,7 @@
       &:nth-of-type(even) {
         flex-direction: column-reverse;
 
-        @include media('>=lg') {
+        @include include-media.media('>=lg') {
           flex-direction: row-reverse;
         }
       }
@@ -93,7 +96,7 @@
         margin-block-start: var(--v-space-s);
         font-size: var(--font-size-xl);
 
-        @include media('>=lg') {
+        @include include-media.media('>=lg') {
           font-size: var(--font-size-2xl);
         }
 
@@ -206,14 +209,14 @@
     -webkit-line-clamp: initial;
     display: block;
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       overflow: hidden;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
       display: -webkit-box;
     }
 
-    @include media('>=xl') {
+    @include include-media.media('>=xl') {
       -webkit-line-clamp: 3;
     }
   }

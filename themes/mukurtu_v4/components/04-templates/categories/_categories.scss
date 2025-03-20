@@ -1,3 +1,5 @@
+@use "../../../external/include-media";
+
 // Grid setup for /categories.
 .category-grid {
   display: grid;
@@ -5,11 +7,11 @@
   padding-inline: var(--layout-padding);
   gap: var(--v-space-3xs);
 
-  @include media('>=sm') {
+  @include include-media.media('>=sm') {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @include media('>=lg') {
+  @include include-media.media('>=lg') {
     grid-template-columns: repeat(4, 1fr);
     padding-inline: var(--layout-padding-m);
 

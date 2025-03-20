@@ -1,4 +1,4 @@
-@import '../mixins/mixins';
+@use '../mixins/mixins';
 
 // Base HTML elements.
 *,
@@ -119,7 +119,7 @@ label {
 }
 
 .visually-hidden {
-  @include visually-hidden;
+  @include mixins.visually-hidden;
 }
 
 // For Nodes whose bodies need a 'Show More'.

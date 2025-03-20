@@ -1,10 +1,13 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
 header {
   align-items: center;
   padding-block: var(--v-space-4xxs);
 }
 
 .header {
-  @include layout--full-width-grid;
+  @include layout.layout--full-width-grid;
 
   justify-content: center;
   align-items: center;
@@ -24,7 +27,7 @@ header {
       max-inline-size: none;
     }
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       grid-column: 1 / span 1;
 
       img {
@@ -32,7 +35,7 @@ header {
       }
     }
 
-    @include media('>=2xl') {
+    @include include-media.media('>=2xl') {
       grid-column: 2 / span 1;
 
       img {
@@ -45,11 +48,11 @@ header {
   &__main-nav {
     grid-column: 2 / span 5;
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       grid-column: 2 / span 12;
     }
 
-    @include media('>=2xl') {
+    @include include-media.media('>=2xl') {
       grid-column: 4 / span 12;
     }
   }

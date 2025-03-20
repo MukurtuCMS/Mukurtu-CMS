@@ -1,5 +1,7 @@
+@use "../../00-base/layout/layout";
+
 .dashboard {
-  @include layout--full-width-grid-item;
+  @include layout.layout--full-width-grid-item;
 
   display: flex;
   gap: var(--gutter);
