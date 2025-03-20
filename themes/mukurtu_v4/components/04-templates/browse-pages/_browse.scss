@@ -102,9 +102,9 @@
     // Add region to the main grid,
     // then create a grid in it to add items to.
     .region {
-      @include layout.layout--full-width-grid-no-padding;
-
       grid-column: 1 / -1;
+
+      @include layout.layout--full-width-grid-no-padding;
     }
 
     #block-mukurtu-v4-content {
@@ -170,6 +170,9 @@
         grid-row: 2;
         grid-column: 1 / -1;
 
+        // Space between main content and footer.
+        margin-block-end: var(--v-separation);
+
         @include include-media.media('>=lg') {
           grid-row: 1;
           grid-column: 1 / span 6;
@@ -178,9 +181,6 @@
         @include include-media.media('>=xl') {
           grid-column: 1 / span 9;
         }
-
-        // Space between main content and footer.
-        margin-block-end: var(--v-separation);
 
         // Space between the rows.
         .views-row {

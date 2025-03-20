@@ -6,38 +6,13 @@
   --gutter-m: var(--v-space-2xs); // 32px
   --gutter: var(--gutter-s); // Dynamic responsive value.
 
-  @include include-media.media('>=md') {
-    --gutter: var(--gutter-m);
-  }
-
   // Dynamic layout external padding.
   --layout-padding-xs: var(--v-space-3xs); // 24px
   --layout-padding-s: var(--v-space-s); // 48px
   --layout-padding-m: var(--v-space-xl); // 72px
   --layout-padding-l: var(--v-space-2xl); // 80px
   --layout-padding: var(--layout-padding-xs); // 24px (default)
-
-  @include include-media.media('>=md') {
-    --layout-padding: var(--layout-padding-s); // 48px
-  }
-
-  @include include-media.media('>=xl') {
-    --layout-padding: var(--layout-padding-m); // 72px
-  }
-
-  @include include-media.media('>=2xl') {
-    --layout-padding: 0;
-  }
-
   --layout-padding-full-width: var(--layout-padding-xs); // 24px (default)
-
-  @include include-media.media('>=md') {
-    --layout-padding-full-width: var(--layout-padding-s); // 48px
-  }
-
-  @include include-media.media('>=xl') {
-    --layout-padding-full-width: var(--layout-padding-m); // 72px
-  }
 
   // Basic reusable grid settings for grid-template-columns.
   --grid-1col: repeat(1, minmax(0, 1fr));
@@ -60,6 +35,30 @@
   // Col maxwidth calculation: 352px - 1280px (maxwidth) = 928px
   // Per col calculation: 928px (col maxwidth) / 12 (cols) = 77.33px (4.833rem)
   --grid-12col-max-width: repeat(12, minmax(0, 4.833rem));
+
+  @include include-media.media('>=md') {
+    --gutter: var(--gutter-m);
+  }
+
+  @include include-media.media('>=md') {
+    --layout-padding: var(--layout-padding-s); // 48px
+  }
+
+  @include include-media.media('>=xl') {
+    --layout-padding: var(--layout-padding-m); // 72px
+  }
+
+  @include include-media.media('>=2xl') {
+    --layout-padding: 0;
+  }
+
+  @include include-media.media('>=md') {
+    --layout-padding-full-width: var(--layout-padding-s); // 48px
+  }
+
+  @include include-media.media('>=xl') {
+    --layout-padding-full-width: var(--layout-padding-m); // 72px
+  }
 }
 
 // This layout fully uses grid i.e. no margin: auto either side.

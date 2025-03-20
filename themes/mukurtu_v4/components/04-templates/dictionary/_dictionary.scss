@@ -13,18 +13,18 @@
 
   // Dictionary search and filter area.
   .browse-facets__wrapper {
-    @include layout.layout--full-width-grid;
-
     margin-inline: calc(50% - 50vw);
     background-color: var(--brand-secondary);
     padding-block: var(--v-space-3xs) var(--v-space-2xs);
+
+    @include layout.layout--full-width-grid;
   }
 
   .browse-facets {
-    @include layout.layout--full-width-grid-item;
-
     display: block;
     color: var(--color-white);
+
+    @include layout.layout--full-width-grid-item;
 
     @include include-media.media('>=md') {
       display: grid;
@@ -99,10 +99,10 @@
   }
 
   .glossary {
-    @include layout.layout--full-width-grid;
-
     padding-block: var(--v-space-2xs);
     padding-inline: 0;
+
+    @include layout.layout--full-width-grid;
 
     .facets-widget-links {
       grid-column: 1 / -1;

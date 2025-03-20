@@ -36,10 +36,10 @@
 
   .page {
     &__account-menu {
-      @include layout.layout--full-width-grid;
-
       // Style this here for full bleed of color.
       background-color: var(--brand-primary-dark);
+
+      @include layout.layout--full-width-grid;
 
       div:first-of-type {
         grid-column: 1 / -1;

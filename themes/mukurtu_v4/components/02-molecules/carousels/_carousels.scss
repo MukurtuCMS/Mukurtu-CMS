@@ -23,9 +23,9 @@
 
 // Multi-page carousel styles. This appears with multi-page DH items.
 .splide__wrapper {
-  @include layout.layout--full-width-grid;
-
   margin-block: var(--v-space-4xxs);
+
+  @include layout.layout--full-width-grid;
 
   .splide.is-initialized {
     @include layout.layout--full-width-grid-item;

@@ -4,11 +4,11 @@
 // Mukurtu Footer.
 
 .footer {
-  @include layout.layout--full-width-grid;
-
   background-color: var(--footer-bg-color);
   color: var(--footer-text-color);
   padding-block-start: var(--v-space-xs);
+
+  @include layout.layout--full-width-grid;
 
   .region {
     grid-column: 1 / -1;

@@ -2,8 +2,7 @@
 
 /*! See https://eduardoboucas.github.io/include-media/ for detailed
 documentation on how to use @include media(). */
-@use '../external/_include-media.scss';
-
+@use '../external/include-media';
 @use '00-base/base/base';
 @use '00-base/breakpoints/breakpoints';
 @use '00-base/colors/colors';

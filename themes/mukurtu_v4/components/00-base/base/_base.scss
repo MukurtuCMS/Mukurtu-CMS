@@ -13,12 +13,12 @@ html {
   // Used for smoother scrolling by back-top.
   scroll-behavior: smooth;
 
+  // Disable horizontal scrolling.
+  overflow-x: hidden;
+
   @media screen and (prefers-reduced-motion: reduce) {
     scroll-behavior: initial;
   }
-
-  // Disable horizontal scrolling.
-  overflow-x: hidden;
 }
 
 body {

@@ -73,9 +73,9 @@
 
 
   .field--name-field-description {
-    @include layout.layout--full-width-grid-item;
-
     margin-block-end: var(--v-space-s);
+
+    @include layout.layout--full-width-grid-item;
   }
 
   .collection__items__label {

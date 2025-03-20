@@ -1,12 +1,12 @@
 @use "../../00-base/layout/layout";
 
 .dashboard {
-  @include layout.layout--full-width-grid-item;
-
   display: flex;
   gap: var(--gutter);
   flex-flow: row wrap;
   inline-size: 100%;
+
+  @include layout.layout--full-width-grid-item;
 
   // Add elements to grid.
   &__layout-sidebar-first,

@@ -765,13 +765,13 @@ figure.align-right,
 }
 
 .splide__wrapper {
+  margin-block: var(--v-space-4xxs);
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: var(--layout-padding) var(--layout-padding);
   -webkit-column-gap: var(--gutter);
      -moz-column-gap: var(--gutter);
           column-gap: var(--gutter);
-  margin-block: var(--v-space-4xxs);
 }
 @media (min-width: 60rem) {
   .splide__wrapper {
@@ -1149,9 +1149,9 @@ details.form-wrapper summary + div {
   }
 }
 .local-tasks ul {
-  grid-column: 1/-1;
   -webkit-padding-start: 0;
           padding-inline-start: 0;
+  grid-column: 1/-1;
 }
 @media (min-width: 90rem) {
   .local-tasks ul {
@@ -1209,9 +1209,9 @@ details.form-wrapper summary + div {
   }
 }
 .local-actions ul {
-  grid-column: 1/-1;
   padding: 0;
   margin: 0;
+  grid-column: 1/-1;
 }
 @media (min-width: 90rem) {
   .local-actions ul {
@@ -1520,16 +1520,16 @@ details.form-wrapper summary + div {
 }
 
 .footer {
+  background-color: var(--footer-bg-color);
+  color: var(--footer-text-color);
+  -webkit-padding-before: var(--v-space-xs);
+          padding-block-start: var(--v-space-xs);
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: var(--layout-padding) var(--layout-padding);
   -webkit-column-gap: var(--gutter);
      -moz-column-gap: var(--gutter);
           column-gap: var(--gutter);
-  background-color: var(--footer-bg-color);
-  color: var(--footer-text-color);
-  -webkit-padding-before: var(--v-space-xs);
-          padding-block-start: var(--v-space-xs);
 }
 @media (min-width: 60rem) {
   .footer {
@@ -1670,18 +1670,18 @@ header {
 }
 
 .header {
-  display: grid;
-  grid-template-columns: var(--grid-6col);
-  padding-inline: var(--layout-padding) var(--layout-padding);
-  -webkit-column-gap: var(--gutter);
-     -moz-column-gap: var(--gutter);
-          column-gap: var(--gutter);
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
+  display: grid;
+  grid-template-columns: var(--grid-6col);
+  padding-inline: var(--layout-padding) var(--layout-padding);
+  -webkit-column-gap: var(--gutter);
+     -moz-column-gap: var(--gutter);
+          column-gap: var(--gutter);
 }
 @media (min-width: 60rem) {
   .header {
@@ -1885,13 +1885,13 @@ header {
   }
 }
 .browse__main-content .region {
+  grid-column: 1/-1;
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: 0;
   -webkit-column-gap: var(--gutter);
      -moz-column-gap: var(--gutter);
           column-gap: var(--gutter);
-  grid-column: 1/-1;
 }
 @media (min-width: 60rem) {
   .browse__main-content .region {
@@ -2094,13 +2094,13 @@ header {
 }
 
 .collections {
+  grid-column: 1/-1;
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: var(--layout-padding) var(--layout-padding);
   -webkit-column-gap: var(--gutter);
      -moz-column-gap: var(--gutter);
           column-gap: var(--gutter);
-  grid-column: 1/-1;
 }
 @media (min-width: 60rem) {
   .collections {
@@ -2456,9 +2456,9 @@ header {
           margin-block-end: var(--v-space-2xl);
 }
 .collection .field--name-field-description {
-  grid-column: 1/-1;
   -webkit-margin-after: var(--v-space-s);
           margin-block-end: var(--v-space-s);
+  grid-column: 1/-1;
 }
 @media (min-width: 90rem) {
   .collection .field--name-field-description {
@@ -2569,7 +2569,6 @@ header {
 }
 
 .dashboard {
-  grid-column: 1/-1;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -2579,6 +2578,7 @@ header {
       -ms-flex-flow: row wrap;
           flex-flow: row wrap;
   inline-size: 100%;
+  grid-column: 1/-1;
 }
 @media (min-width: 90rem) {
   .dashboard {
@@ -2815,15 +2815,15 @@ header {
   display: block;
 }
 .dictionary .browse-facets__wrapper {
+  margin-inline: calc(50% - 50vw);
+  background-color: var(--brand-secondary);
+  padding-block: var(--v-space-3xs) var(--v-space-2xs);
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: var(--layout-padding) var(--layout-padding);
   -webkit-column-gap: var(--gutter);
      -moz-column-gap: var(--gutter);
           column-gap: var(--gutter);
-  margin-inline: calc(50% - 50vw);
-  background-color: var(--brand-secondary);
-  padding-block: var(--v-space-3xs) var(--v-space-2xs);
 }
 @media (min-width: 60rem) {
   .dictionary .browse-facets__wrapper {
@@ -2836,9 +2836,9 @@ header {
   }
 }
 .dictionary .browse-facets {
-  grid-column: 1/-1;
   display: block;
   color: var(--color-white);
+  grid-column: 1/-1;
 }
 @media (min-width: 90rem) {
   .dictionary .browse-facets {
@@ -2941,14 +2941,14 @@ header {
   }
 }
 .dictionary .glossary {
+  padding-block: var(--v-space-2xs);
+  padding-inline: 0;
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: var(--layout-padding) var(--layout-padding);
   -webkit-column-gap: var(--gutter);
      -moz-column-gap: var(--gutter);
           column-gap: var(--gutter);
-  padding-block: var(--v-space-2xs);
-  padding-inline: 0;
 }
 @media (min-width: 60rem) {
   .dictionary .glossary {
@@ -3259,13 +3259,13 @@ header {
   }
 }
 .layout-container .page__account-menu {
+  background-color: var(--brand-primary-dark);
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: var(--layout-padding) var(--layout-padding);
   -webkit-column-gap: var(--gutter);
      -moz-column-gap: var(--gutter);
           column-gap: var(--gutter);
-  background-color: var(--brand-primary-dark);
 }
 @media (min-width: 60rem) {
   .layout-container .page__account-menu {

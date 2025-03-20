@@ -7,10 +7,10 @@ header {
 }
 
 .header {
-  @include layout.layout--full-width-grid;
-
   justify-content: center;
   align-items: center;
+
+  @include layout.layout--full-width-grid;
 
   &__logo {
     grid-column: 1 / span 1;

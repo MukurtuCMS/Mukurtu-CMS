@@ -2,9 +2,9 @@
 @use "../../00-base/layout/layout";
 
 .collections {
-  @include layout.layout--full-width-grid;
-
   grid-column: 1 / -1;
+
+  @include layout.layout--full-width-grid;
 
   @include include-media.media('>=2xl') {
     grid-column: 2 / -2;
