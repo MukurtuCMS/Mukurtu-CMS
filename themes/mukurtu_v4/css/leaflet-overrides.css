@@ -6,7 +6,7 @@
   }
 
   & .vertical-card {
-    margin-block-end: 0px;
+    margin-block-end: 0;
   }
 
   & .vertical-card__media + :where(.vertical-card__content h2) {
@@ -31,8 +31,8 @@
 }
 
 .leaflet-container a.leaflet-popup-close-button {
-  top: 0.125rem;
-  right: 0.125rem;
+  inset-block-start: 0.125rem;
+  inset-inline-end: 0.125rem;
 }
 
 .leaflet-control-layers {

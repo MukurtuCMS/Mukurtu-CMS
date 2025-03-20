@@ -7,7 +7,6 @@
 }
 
 .full-node {
-
   &__main {
     grid-column: 1 / span 6;
 
@@ -57,7 +56,8 @@
 
     .field--name-field-recording {
       .field__item {
-        margin: var(--v-space-4xxs) 0;
+        margin-block: var(--v-space-4xxs);
+        margin-inline: 0;
       }
     }
 
@@ -97,15 +97,14 @@
 
   &__sidebar .sidebar-section {
     background-color: var(--brand-light-accent);
-    border-top: 5px solid var(--brand-secondary);
+    border-block-start: 5px solid var(--brand-secondary);
     padding-inline: var(--v-space-4xs);
-    padding-block-start: var(--v-space-4xxs);
-    padding-block-end: var(--v-space-s);
+    padding-block: var(--v-space-4xxs) var(--v-space-s);
     margin-block-end: var(--v-space-4xs);
 
     .field {
       padding-block: var(--v-space-4xxs);
-      border-bottom: 1px solid var(--brand-light);
+      border-block-end: 1px solid var(--brand-light);
 
       &__label {
         font-size: var(--font-size-s);
@@ -141,7 +140,7 @@
       }
 
       img {
-        max-width: var(--v-space-2xs);
+        max-inline-size: var(--v-space-2xs);
       }
     }
 
@@ -173,6 +172,7 @@
       gap: var(--v-space-4xxs);
       margin-block-start: var(--v-space-4xxs);
 
+      // stylelint-disable-next-line no-descending-specificity
       .text {
         display: none;
       }
@@ -189,7 +189,7 @@
 
     .field:last-of-type {
       padding-block-end: 0;
-      border-bottom: none;
+      border-block-end: none;
     }
   }
 }

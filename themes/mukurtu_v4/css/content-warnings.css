@@ -2,7 +2,7 @@
   border-style: solid;
   border-width: 1px;
   border-color: black;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(0 0 0 / 85%);
   text-align: center;
   vertical-align: middle;
 }
@@ -19,11 +19,8 @@
   visibility: visible;
   text-align: center;
   position: relative;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.85);
+  inset: 0;
+  background-color: rgba(0 0 0 / 85%);
   color: white;
 }
 
@@ -31,7 +28,8 @@
   visibility: visible;
   display: inline-block;
   vertical-align: middle;
-  padding: 10px 15px;
+  padding-block: 10px;
+  padding-inline: 15px;
   position: relative;
   font-weight: bold;
 }

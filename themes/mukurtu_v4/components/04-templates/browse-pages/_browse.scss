@@ -5,8 +5,7 @@
   &__default {
     &__header {
       display: flex;
-      flex-wrap: wrap;
-      flex-direction: column;
+      flex-flow: column wrap;
       column-gap: var(--v-space-xs);
 
       @include media('>=md') {
@@ -98,10 +97,11 @@
     @include layout--full-width-grid;
 
     // Add region to the main grid,
-    //then create a grid in it to add items to.
+    // then create a grid in it to add items to.
     .region {
-      grid-column: 1 / -1;
       @include layout--full-width-grid-no-padding;
+
+      grid-column: 1 / -1;
     }
 
     #block-mukurtu-v4-content {
@@ -217,8 +217,7 @@
         // Sort dropdown.
         .js-form-type-select {
           &::after {
-            top: unset;
-            bottom: 20px;
+            inset-block: unset 20px;
           }
 
           select {
@@ -268,7 +267,8 @@
           }
 
           ul {
-            padding: 0 var(--v-space-4xxs) var(--v-space-4xxs);
+            padding-block: 0 var(--v-space-4xxs);
+            padding-inline: var(--v-space-4xxs);
 
             li {
               list-style: none;
@@ -293,16 +293,18 @@
       list-style: none;
       font-weight: var(--text-bold);
 
+      // stylelint-disable-next-line no-descending-specificity
       a {
         padding: var(--v-space-5xs);
       }
     }
 
     .is-active {
+      // stylelint-disable-next-line no-descending-specificity
       a {
         color: var(--brand-text-color);
         text-decoration: none;
-        border-bottom: 5px solid var(--brand-secondary);
+        border-block-end: 5px solid var(--brand-secondary);
       }
     }
   }
@@ -310,8 +312,8 @@
 
 // All the extra facets blocks that are placed to ensure
 // each display type gets its facets working properly
-// are hidden here. 
+// are hidden here.
 
-.other-facets {  
+.other-facets {
   display: none;
 }

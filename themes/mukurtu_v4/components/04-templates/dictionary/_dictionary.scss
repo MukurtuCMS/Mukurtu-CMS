@@ -1,6 +1,5 @@
 // Main /dictionary page layout.
 .dictionary {
-
   .browse__main-content {
     display: block;
 
@@ -11,21 +10,18 @@
 
   // Dictionary search and filter area.
   .browse-facets__wrapper {
-    margin-inline-start: calc(50% - 50vw);
-    margin-inline-end: calc(50% - 50vw);
-
     @include layout--full-width-grid;
 
+    margin-inline: calc(50% - 50vw);
     background-color: var(--brand-secondary);
-    padding-block-start: var(--v-space-3xs);
-    padding-block-end: var(--v-space-2xs);
+    padding-block: var(--v-space-3xs) var(--v-space-2xs);
   }
 
   .browse-facets {
     @include layout--full-width-grid-item;
+
     display: block;
     color: var(--color-white);
-
 
     @include media('>=md') {
       display: grid;
@@ -50,7 +46,7 @@
       grid-row: 2;
       grid-column: 1 / span 4;
       margin-block-start: var(--gutter);
-      
+
       @include media('>=md') {
         margin-block-start: 0;
       }
@@ -66,7 +62,7 @@
 
         .js-form-type-select {
           &::after {
-            top: 52px;
+            inset-block-start: 52px;
           }
         }
       }
@@ -77,7 +73,7 @@
         align-items: flex-end;
 
         input {
-          height: 45px;
+          block-size: 45px;
         }
       }
     }
@@ -101,7 +97,9 @@
 
   .glossary {
     @include layout--full-width-grid;
-    padding: var(--v-space-2xs) 0;
+
+    padding-block: var(--v-space-2xs);
+    padding-inline: 0;
 
     .facets-widget-links {
       grid-column: 1 / -1;

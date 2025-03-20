@@ -6,10 +6,8 @@
   break-inside: avoid;
   border-block-start: 0;
   border-block-end: 5px solid var(--mukurtu-view-row-divider-color);
-
   padding-block-end: var(--v-space-3xs);
-  margin-block-end: var(--v-space-3xs);
-  margin-block-start: 0;
+  margin-block: 0 var(--v-space-3xs);
 
   &__content-header {
     h2 {
@@ -19,8 +17,8 @@
   }
 
   &--no-border {
-    padding-block-end: 0px;
-    margin-block-end: 0px;
+    padding-block-end: 0;
+    margin-block-end: 0;
     border-block-end: none;
   }
 

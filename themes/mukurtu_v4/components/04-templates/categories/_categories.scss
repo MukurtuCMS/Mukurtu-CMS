@@ -16,7 +16,7 @@
   }
 
   // Individual cards layout.
-  .category-card .category-teaser a { //views-row
+  .category-card .category-teaser a { // views-row
     display: flex;
     flex-direction: column;
   }
@@ -24,9 +24,11 @@
 
 // Teaser displays for Categories taxonomy terms on /categories.
 .category-teaser {
+  // stylelint-disable-next-line no-descending-specificity
   a {
     text-decoration: none;
 
+    // stylelint-disable-next-line no-descending-specificity
     &:hover {
       text-decoration: underline;
     }

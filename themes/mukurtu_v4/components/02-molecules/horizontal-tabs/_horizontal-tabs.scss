@@ -7,12 +7,12 @@
 
     li {
       list-style: none;
-      width: fit-content;
-      max-width: 275px;
+      inline-size: fit-content;
+      max-inline-size: 275px;
 
 
       &:last-of-type {
-        border-right: none;
+        border-inline-end: none;
       }
 
       &:has(.selected) {
@@ -21,12 +21,12 @@
         &::after {
           content: '';
           position: absolute;
-          bottom: -10px;
-          left: 50%;
-          width: 20px;
-          height: 20px;
+          inset-block-end: -10px;
+          inset-inline-start: 50%;
+          inline-size: 20px;
+          block-size: 20px;
           background: var(--color-white);
-          margin-left: -10px;
+          margin-inline-start: -10px;
           transform: rotate(45deg);
           z-index: -1;
         }
@@ -42,7 +42,7 @@
     .horizontal-tab-button.selected {
       position: relative;
       background-color: var(--brand-primary-dark);
-      border-bottom: none;
+      border-block-end: none;
 
       a {
         color: var(--light-text-color);
@@ -57,12 +57,12 @@
       &::after {
         content: '';
         position: absolute;
-        bottom: -10px;
-        left: 50%;
-        width: 20px;
-        height: 20px;
+        inset-block-end: -10px;
+        inset-inline-start: 50%;
+        inline-size: 20px;
+        block-size: 20px;
         background: var(--brand-primary-dark);
-        margin-left: -10px;
+        margin-inline-start: -10px;
         transform: rotate(45deg);
         z-index: 10;
       }

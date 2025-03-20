@@ -18,17 +18,16 @@
       border-block-start: 0;
       padding-block: var(--v-space-2xs);
       padding-inline: var(--v-space-xs) var(--v-space-2xs);
-      margin-block-start: 0;
-      margin-block-end: var(--v-space-s);
+      margin-block: 0 var(--v-space-s);
 
       &::after {
         content: '';
         display: inline-block;
         position: absolute;
-        top: 71px;
-        left: var(--v-space-xs);
-        width: 0;
-        height: 0;
+        inset-block-start: 71px;
+        inset-inline-start: var(--v-space-xs);
+        inline-size: 0;
+        block-size: 0;
         border-style: solid;
         border-width: var(--v-space-3xs) 0 var(--v-space-3xs) var(--v-space-2xs);
         border-color: transparent transparent transparent var(--brand-primary-dark);
@@ -46,6 +45,7 @@
     }
   }
 
+  // stylelint-disable-next-line no-descending-specificity
   .field--name-field-additional-word-entries > .field__item,
   .additional-fields {
     @include divider;
@@ -104,7 +104,8 @@
 .dictionary-word__teaser {
   &-heading {
     background-color: var(--brand-primary-dark);
-    padding: var(--v-space-4xxs) var(--v-space-2xs);
+    padding-block: var(--v-space-4xxs);
+    padding-inline: var(--v-space-2xs);
 
     a {
       color: var(--color-white);
@@ -120,13 +121,14 @@
 
   svg {
     fill: var(--color-white);
-    height: var(--line-height-m);
-    width: var(--line-height-2xs);
+    block-size: var(--line-height-m);
+    inline-size: var(--line-height-2xs);
   }
 
   &-content {
     background-color: var(--brand-light-accent);
-    padding: var(--v-space-4xxs) var(--v-space-2xs);
+    padding-block: var(--v-space-4xxs);
+    padding-inline: var(--v-space-2xs);
   }
 
   .field--name-field-translation,
@@ -139,18 +141,22 @@
   .field--name-field-translation  {
     font-weight: var(--text-bold);
     line-height: var(--line-height-xs);
-    margin: var(--v-space-5xs) 0 var(--v-space-2xs);
+    margin-block: var(--v-space-5xs);
+    margin-inline: 0 var(--v-space-2xs);
   }
 
+  // stylelint-disable-next-line no-descending-specificity
   .field--name-field-media-audio-file {
-    margin: 0 0 var(--v-space-4xxs);
+    margin-block: 0 var(--v-space-4xxs);
+    margin-inline: 0;
   }
 
+  // stylelint-disable-next-line no-descending-specificity
   .field--name-field-contributor {
     display: flex;
     flex-wrap: wrap;
     gap: var(--v-space-6xs);
-    width: 100%;
+    inline-size: 100%;
 
     .field__label {
       display: inline-block;

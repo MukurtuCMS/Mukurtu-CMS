@@ -5,6 +5,7 @@
 
   ul {
     @include layout--full-width-grid-item;
+
     padding-inline-start: 0;
   }
 

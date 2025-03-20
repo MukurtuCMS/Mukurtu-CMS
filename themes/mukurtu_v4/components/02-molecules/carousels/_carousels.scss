@@ -1,11 +1,11 @@
 // Shared styles across carousels.
 .splide {
   &__arrow--prev {
-    left: -2em;
+    inset-inline-start: -2em;
   }
 
   &__arrow--next {
-    right: -2em;
+    inset-inline-end: -2em;
   }
 
   // Vertically center images inside slides if they are <200px in height.
@@ -19,9 +19,10 @@
   }
 }
 
-// Multi-page carousel styles. This appears with multi-page DH items. 
+// Multi-page carousel styles. This appears with multi-page DH items.
 .splide__wrapper {
   @include layout--full-width-grid;
+
   margin-block: var(--v-space-4xxs);
 
   .splide.is-initialized {
@@ -35,20 +36,22 @@
   }
 
   .splide__track {
-    width: 90%;
-    margin: 0 auto;
+    inline-size: 90%;
+    margin-block: 0;
+    margin-inline: auto;
   }
 
   &__navigation {
-    width: fit-content;
-    margin: 0 auto var(--v-space-2xs);
+    inline-size: fit-content;
+    margin-block: 0 var(--v-space-2xs);
+    margin-inline: auto;
 
     .js-form-type-select {
       display: flex;
       align-items: baseline;
 
       select {
-        width: 250px;
+        inline-size: 250px;
       }
     }
 
@@ -62,15 +65,17 @@
 // Media Asset Carousels.
 .media-carousel {
   .media {
-    margin: 0 auto var(--v-space-s);
+    margin-block: 0 var(--v-space-s);
+    margin-inline: auto;
   }
 
+  // stylelint-disable-next-line no-descending-specificity
   .splide__list {
     align-items: flex-start;
   }
 
   .splide__slide:not(.is-active) {
-    height: 0;    // or 100vh, or something what fits your case
+    block-size: 0;    // or 100vh, or something what fits your case
   }
 }
 
@@ -80,22 +85,24 @@
   }
 
   .splide__track {
-    width: 85%;
-    margin: 0 auto;
+    inline-size: 85%;
+    margin-block: 0;
+    margin-inline: auto;
   }
 
   img {
-    max-height: 100px;
-    width: auto;
+    max-block-size: 100px;
+    inline-size: auto;
   }
 }
 
 // Images inside the media assets library have colorbox on.
-// Colorbox CSS uses IDs. Thus an ID must be used here for override. 
+// Colorbox CSS uses IDs. Thus an ID must be used here for override.
 #colorbox {
-  top: 0 !important;
+  inset-block-start: 0 !important;
 }
 
+// stylelint-disable-next-line
 #cboxClose {
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
@@ -104,8 +111,7 @@
   letter-spacing: var(--letter-spacing-label);
   border: none;
   padding: var(--v-space-5xs);
-  top: 0;
-  bottom: unset;
+  inset-block: 0 unset;
 
   &:hover,
   &:active,
@@ -124,6 +130,7 @@
   }
 }
 
+// stylelint-disable-next-line
 #cboxTitle {
   color: var(--color-black);
 }

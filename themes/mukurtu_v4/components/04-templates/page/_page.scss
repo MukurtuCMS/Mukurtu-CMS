@@ -1,5 +1,4 @@
 .layout-container {
-
   main {
     display: block;
 
@@ -74,7 +73,8 @@
 
       .messages {
         padding: var(--v-space-4xxs);
-        margin: var(--v-space-4xxs) 0;
+        margin-block: var(--v-space-4xxs);
+        margin-inline: 0;
         border-radius: 3px;
         line-height: var(--line-height-s);
         font-weight: 900;

@@ -8,10 +8,9 @@
      serif; */
   --font-display-face: 'BCSans',
   'Noto Sans',
-  Verdana,
-  Arial,
+  verdana,
+  arial,
   sans-serif;
-
   --font-size-base: var(--font-size-small);
 }
 
@@ -44,8 +43,7 @@ h2,
 .h2,
 h3,
 .h3 {
-  margin-top: var(--v-space-4xs);
-  margin-bottom: (var(--v-space-4xs) / 2);
+  margin-block: var(--v-space-4xs) (var(--v-space-4xs) / 2);
 }
 
 h4,
@@ -54,8 +52,7 @@ h5,
 .h5,
 h6,
 .h6 {
-  margin-top: (var(--v-space-4xs) / 2);
-  margin-bottom: (var(--v-space-4xs) / 2);
+  margin-block: (var(--v-space-4xs) / 2);
 }
 
 h1,

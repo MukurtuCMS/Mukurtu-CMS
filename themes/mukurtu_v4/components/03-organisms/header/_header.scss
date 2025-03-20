@@ -5,7 +5,7 @@ header {
 
 .header {
   @include layout--full-width-grid;
-  
+
   justify-content: center;
   align-items: center;
 
@@ -16,19 +16,19 @@ header {
       display: inline-block;
       padding: var(--v-space-5xs);
       margin: var(--v-space-5xs);
-      margin-left: -0.5rem;
+      margin-inline-start: -0.5rem;
     }
 
     img {
-      width: 100px;
-      max-width: none;
+      inline-size: 100px;
+      max-inline-size: none;
     }
 
     @include media('>=lg') {
       grid-column: 1 / span 1;
 
       img {
-        width: 70px;
+        inline-size: 70px;
       }
     }
 
@@ -36,7 +36,7 @@ header {
       grid-column: 2 / span 1;
 
       img {
-        width: 100px;
+        inline-size: 100px;
       }
     }
 

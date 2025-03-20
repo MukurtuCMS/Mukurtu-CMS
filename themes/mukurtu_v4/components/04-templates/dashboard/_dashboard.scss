@@ -3,18 +3,16 @@
 
   display: flex;
   gap: var(--gutter);
-  flex-direction: row;
-  flex-wrap: wrap;
-  width: 100%;
+  flex-flow: row wrap;
+  inline-size: 100%;
 
   // Add elements to grid.
   &__layout-sidebar-first,
   &__menu,
   &__main-content {
     display: flex;
-    flex-direction: column;
-    flex-basis: 100%;
-    flex: 1;
+    flex-flow: column nowrap;
+    flex: 1 1 100%;
     padding: var(--v-space-4xs);
     border: 1px solid var(--mukurtu-primary-field-divider-color);
   }

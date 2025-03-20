@@ -1,8 +1,8 @@
 // Defaults.
 button,
-input[type=button],
-input[type=submit],
-input[type=reset],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
 .button {
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
@@ -10,7 +10,8 @@ input[type=reset],
   font-weight: var(--text-bold);
   letter-spacing: var(--letter-spacing-label);
   border: none;
-  padding: var(--v-space-5xs) var(--v-space-2xs);
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-2xs);
   cursor: pointer;
 
   &:hover,
