@@ -24,7 +24,12 @@ process:
     plugin: default_value
     default_value: category
   name: name
-  description/value: description
+  description/value:
+    -
+      plugin: get
+      source: description
+    -
+      plugin: media_embed
   description/format:
     plugin: default_value
     default_value: basic_html

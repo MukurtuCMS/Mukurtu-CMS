@@ -82,7 +82,12 @@ process:
   field_pronunciation: field_pronunciation
   field_recording: field_dictionary_word_recording
   field_word_type: field_part_of_speech
-  field_pronunciation/value: field_pronunciation/value
+  field_pronunciation/value:
+    -
+      plugin: get
+      source: field_pronunciation/value
+    -
+      plugin: media_embed
   field_pronunciation/format:
     -
       plugin: static_map
