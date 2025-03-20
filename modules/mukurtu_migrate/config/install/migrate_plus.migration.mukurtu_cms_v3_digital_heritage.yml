@@ -228,6 +228,8 @@ process:
             migration:
               - mukurtu_cms_v3_media_image
               - mukurtu_cms_v3_media_document
+              - mukurtu_cms_v3_media_audio
+              - mukurtu_cms_v3_media_video
             source: sid
   status: status
 destination:
@@ -249,6 +251,8 @@ migration_dependencies:
     - mukurtu_cms_v3_terms_type
     - mukurtu_cms_v3_media_image
     - mukurtu_cms_v3_media_document
+    - mukurtu_cms_v3_media_audio
+    - mukurtu_cms_v3_media_video
     - mukurtu_cms_v3_users
     - mukurtu_cms_v3_users_uid1
   optional:
