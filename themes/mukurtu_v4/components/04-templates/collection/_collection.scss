@@ -1,12 +1,14 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
 // Individual collection pages.
 .collection {
   &__header {
     display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+    flex-flow: column wrap;
     margin-block-end: var(--v-space-xs);
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       flex-direction: row;
     }
 
@@ -23,11 +25,11 @@
         content: '';
         display: block;
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.25);
+        inset-block-start: 0;
+        inset-inline-start: 0;
+        inline-size: 100%;
+        block-size: 100%;
+        background-color: rgba(0 0 0 / 25%);
         z-index: 10;
       }
 
@@ -49,11 +51,11 @@
         &::after {
           content: '';
           display: block;
-          width: 136px;
-          height: 6px;
+          inline-size: 136px;
+          block-size: 6px;
           background-color: var(--brand-secondary);
           position: absolute;
-          bottom: -48px;
+          inset-block-end: -48px;
         }
       }
 
@@ -71,9 +73,9 @@
 
 
   .field--name-field-description {
-    @include layout--full-width-grid-item;
-
     margin-block-end: var(--v-space-s);
+
+    @include layout.layout--full-width-grid-item;
   }
 
   .collection__items__label {
@@ -84,11 +86,10 @@
   &__default {
     &__header {
       display: flex;
-      flex-wrap: wrap;
-      flex-direction: column;
+      flex-flow: column wrap;
       column-gap: var(--v-space-xs);
 
-      @include media('>=md') {
+      @include include-media.media('>=md') {
         flex-direction: row;
       }
 

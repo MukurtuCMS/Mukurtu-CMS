@@ -1,19 +1,19 @@
-// Styles for individual media items as they appear on various nodes. 
+// Styles for individual media items as they appear on various nodes.
 
 // Digital Heritage content type, Main.
 .media {
   &--audio {
-    width: 100%;
+    inline-size: 100%;
 
     .b-lazy {
-      height: revert;
-      min-height: max-content;
-      width: 100%;
+      block-size: revert;
+      min-block-size: max-content;
+      inline-size: 100%;
     }
   }
 
   .field--name-field-media-audio-file {
-    width: 100%;
+    inline-size: 100%;
   }
 }
 
@@ -33,7 +33,7 @@
 
 .media--remote_video {
   .field[data-blazy] {
-    min-width: min-content;
-    width: 100%;
+    min-inline-size: min-content;
+    inline-size: 100%;
   }
 }

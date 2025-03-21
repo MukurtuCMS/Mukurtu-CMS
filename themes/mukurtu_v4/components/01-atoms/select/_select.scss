@@ -6,14 +6,14 @@
     content: '';
     display: inline-block;
     position: absolute;
-    right: 15px;
+    inset-inline-end: 15px;
     margin: auto;
-    top: 50%;
+    inset-block-start: 50%;
     transform: translateY(-50%);
-    width: 0;
-    height: 0;
+    inline-size: 0;
+    block-size: 0;
     border-style: solid;
-    border-width: var(--v-space-5xs)var(--v-space-5xs) 0 var(--v-space-5xs);
+    border-width: var(--v-space-5xs) var(--v-space-5xs) 0 var(--v-space-5xs);
     border-color: var(--brand-primary-accent) transparent transparent transparent;
   }
 
@@ -22,9 +22,10 @@
     appearance: none;
     border: none;
     background: var(--brand-light-accent);
-    padding: var(--v-space-4xxs) var(--v-space-2xs) var(--v-space-4xxs) var(--v-space-5xs);
+    padding-block: var(--v-space-4xxs) var(--v-space-4xxs);
+    padding-inline: var(--v-space-5xs) var(--v-space-2xs);
     margin-inline-start: var(--v-space-6xs);
-    width: 100%;
+    inline-size: 100%;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;

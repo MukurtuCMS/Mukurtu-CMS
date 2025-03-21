@@ -5,8 +5,9 @@
     appearance: none;
     border: none;
     background: var(--brand-light-accent);
-    padding: var(--v-space-4xxs) var(--v-space-2xs) var(--v-space-4xxs) var(--v-space-5xs);
-    width: 100%;
+    padding-block: var(--v-space-4xxs) var(--v-space-4xxs);
+    padding-inline: var(--v-space-5xs) var(--v-space-2xs);
+    inline-size: 100%;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;

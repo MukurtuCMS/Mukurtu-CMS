@@ -1,14 +1,15 @@
+@use "../../../external/include-media";
+
 // All menu styling is here.
 // To find menu grid placement, see _page.scss.
 .menu {
   // Account menu.
   &__account-menu {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-flow: row wrap;
     justify-content: center;
     gap: var(--gutter);
-    width: 100%;
+    inline-size: 100%;
 
     li {
       list-style: none;
@@ -49,12 +50,14 @@
       list-style: none;
       position: relative;
       display: inline-block;
-      margin: var(--v-space-5xs) 0;
+      margin-block: var(--v-space-5xs);
+      margin-inline: 0;
 
       &:not(:last-of-type) {
         border-inline-end: 1.5px solid var(--main-nav-divider);
       }
 
+      // stylelint-disable-next-line no-descending-specificity
       a {
         color: var(--brand-text-color);
         font-size: var(--font-size-l);
@@ -83,7 +86,7 @@
 .main-navigation {
   display: none;
 
-  @include media('>=lg') {
+  @include include-media.media('>=lg') {
     display: block;
   }
 }
@@ -91,12 +94,12 @@
 .mobile-nav-button {
   display: block;
 
-  @include media('>=lg') {
+  @include include-media.media('>=lg') {
     display: none;
   }
 
   &__button {
-    float: right;
+    float: inline-end;
     background: none;
     position: relative;
     text-indent: -9999px;
@@ -108,7 +111,6 @@
   }
 
   &__icon {
-
     position: absolute;
     block-size: 0;
     inline-size: var(--v-space-2xs);

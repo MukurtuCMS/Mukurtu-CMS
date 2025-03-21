@@ -4,8 +4,8 @@
   position: absolute !important;
   overflow: hidden;
   clip: rect(1px, 1px, 1px, 1px);
-  width: 0.063rem;
-  height: 0.063rem;
+  inline-size: 0.063rem;
+  block-size: 0.063rem;
   word-wrap: normal;
 }
 
