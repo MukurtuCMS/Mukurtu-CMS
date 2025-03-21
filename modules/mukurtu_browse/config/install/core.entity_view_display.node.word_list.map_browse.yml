@@ -20,23 +20,18 @@ mode: map_browse
 content:
   field_citation:
     type: text_default
-    label: above
+    label: hidden
     settings: {  }
     third_party_settings: {  }
     weight: 1
     region: content
   field_words:
     type: entity_reference_label
-    label: above
+    label: hidden
     settings:
       link: true
     third_party_settings: {  }
     weight: 0
-    region: content
-  flag_export_content:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
     region: content
 hidden:
   comment: true
@@ -49,6 +44,7 @@ hidden:
   field_description: true
   field_in_collection: true
   field_keywords: true
+  field_location: true
   field_media_assets: true
   field_multipage_page_of: true
   field_related_content: true
@@ -59,6 +55,7 @@ hidden:
   field_title: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_og: true
   flag_subscribe_node: true
   flag_subscribe_og: true
