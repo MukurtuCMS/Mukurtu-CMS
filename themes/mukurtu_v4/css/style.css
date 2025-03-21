@@ -1450,6 +1450,9 @@ details.form-wrapper summary + div {
 .vertical-card--large-font {
   --card-font-size: var(--font-size-xl);
 }
+.vertical-card__eyebrow {
+  font-weight: var(--text-bold);
+}
 
 .page__breadcrumbs {
   -webkit-box-shadow: inset 0 41px 18px -42px var(--mukurtu-breadcrumb-gradient-color);
