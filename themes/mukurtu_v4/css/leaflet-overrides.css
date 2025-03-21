@@ -13,7 +13,7 @@
     margin-block-start: 0;
   }
 
-  & .vertical-card__media + .vertical-card__content h2 {
+  & .vertical-card__media + :where(.vertical-card__content h2) {
     margin-block-start: var(--v-space-4xs);
   }
 
@@ -28,6 +28,10 @@
     block-size: 100%;
     background-color: black;
   }
+
+  & .vertical-card__eyebrow {
+    display: none;
+  }
 }
 
 .leaflet-container a.leaflet-popup-close-button {
@@ -38,4 +42,13 @@
 .leaflet-control-layers {
   /* TODO remove when this can be disabled in Drupal. */
   display: none;
+}
+
+.path-browse .vertical-card__eyebrow {
+  display: block;
+  margin-block: var(--v-space-4xs) 0;
+}
+
+.path-browse .vertical-card__eyebrow + h2 {
+  margin-block-start: 0.25em;
 }

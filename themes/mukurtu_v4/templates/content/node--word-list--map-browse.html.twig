@@ -16,6 +16,9 @@
   <div{{ content_attributes }} class="vertical-card__content">
     <div class="vertical-card__content-header">
       {{ title_prefix }}
+      <p class="vertical-card__eyebrow">
+        {{ node.getType()|split('_')|join(' ')|capitalize }}
+      </p>
       <h2{{ title_attributes }}>
         <a href="{{ url }}" rel="bookmark">{{ label.0 }}</a>
       </h2>

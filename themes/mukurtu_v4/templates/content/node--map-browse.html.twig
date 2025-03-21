@@ -86,6 +86,9 @@
 
   <div{{ content_attributes }} class="vertical-card__content">
     <div class="vertical-card__content-header">
+      <p class="vertical-card__eyebrow">
+        {{ node.getType()|split('_')|join(' ')|capitalize }}
+      </p>
       {{ title_prefix }}
       <h2{{ title_attributes }}>
         <a href="{{ url }}" rel="bookmark">{{ label.0 }}</a>
