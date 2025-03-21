@@ -68,6 +68,8 @@ dependencies:
   - 'drupal:layout_builder'
   - 'drupal:media'
   - 'drupal:media_library'
+  - 'drupal:media_thumbnails'
+  - 'drupal:media_thumbnails_pdf'
   - 'drupal:node'
   - 'drupal:path'
   - 'drupal:rest'
