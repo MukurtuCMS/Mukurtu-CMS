@@ -9,10 +9,6 @@
     margin-block-end: 0px;
   }
 
-  & .vertical-card h2 {
-    margin-block-start: 0;
-  }
-
   & .vertical-card__media + :where(.vertical-card__content h2) {
     margin-block-start: var(--v-space-4xs);
   }
