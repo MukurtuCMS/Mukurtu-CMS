@@ -72,18 +72,23 @@
 {% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
 
 <article{{ attributes.addClass(["vertical-card", "vertical-card--no-border", "vertical-card--large-font"]) }}>
-  <div class="vertical-card__media">
-    {% if media_bundle is same as 'image' %}
-    <a href="{{ url }}" aria-hidden="true" tabindex="-1">
-    {% endif %}
-      {{ content.field_representative_media }}
-    {% if media_bundle is same as 'image' %}
-    </a>
-    {% endif %}
-  </div>
+  {% if media_bundle %}
+    <div class="vertical-card__media">
+      {% if media_bundle is same as 'image' %}
+      <a href="{{ url }}" aria-hidden="true" tabindex="-1">
+      {% endif %}
+        {{ content.field_representative_media }}
+      {% if media_bundle is same as 'image' %}
+      </a>
+      {% endif %}
+    </div>
+  {% endif %}
 
   <div{{ content_attributes }} class="vertical-card__content">
     <div class="vertical-card__content-header">
+      <p class="vertical-card__eyebrow">
+        {{ node.getType()|split('_')|join(' ')|capitalize }}
+      </p>
       {{ title_prefix }}
       <h2{{ title_attributes }}>
         <a href="{{ url }}" rel="bookmark">{{ label.0 }}</a>

@@ -47,7 +47,7 @@ content:
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
-    label: above
+    label: hidden
     settings:
       multiple_map: false
       leaflet_map: 'OSM Mapnik'
@@ -59,13 +59,13 @@ content:
       fitbounds_options: '{"padding":[0,0]}'
       reset_map:
         control: false
-        position: topright
+        options: '{"position":"topleft","title":"Reset View"}'
       map_scale:
         control: false
         options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
       locate:
         control: false
-        options: '{"position": "topright", "setView": "untilPanOrZoom", "returnToPrevBounds":true, "keepCurrentZoomLevel": true, "strings": {"title": "Locate my position"}}'
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
         automatic: false
       leaflet_tooltip:
         value: ''
@@ -73,9 +73,9 @@ content:
       popup: false
       popup_content: ''
       leaflet_popup:
-        control: ''
+        control: '1'
         content: ''
-        options: '{"maxWidth":"300","minWidth":"50", "autoPan": true}'
+        options: '{"maxWidth":"300","minWidth":"50","autoPan":true}'
         value: ''
         view_mode: full
       map_position:
@@ -83,37 +83,39 @@ content:
         center:
           lat: 0.0
           lon: 0.0
+        zoomControlPosition: topleft
         zoom: 12
         minZoom: 1
         maxZoom: 18
         zoomFiner: 0
-      weight: null
+      weight: '0'
       icon:
         iconType: marker
         iconUrl: ''
         shadowUrl: ''
         className: ''
         iconSize:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         iconAnchor:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         shadowSize:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         shadowAnchor:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         popupAnchor:
-          x: null
-          'y': null
+          x: ''
+          'y': ''
         html: '<div></div>'
         html_class: leaflet-map-divicon
-        circle_marker_options: '{"radius": 100, "color": "red", "fillColor": "#f03", "fillOpacity": 0.5}'
+        circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
         control: false
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
+        excluded: ''
         include_path: false
       fullscreen:
         control: false
@@ -125,13 +127,17 @@ content:
         control: false
         settings:
           popup: false
+          autocomplete:
+            placeholder: 'Search Address'
+            title: 'Search an Address on the Map'
           position: topright
-          input_size: 25
+          input_size: 20
           providers: {  }
           min_terms: 4
           delay: 800
           zoom: 16
           options: ''
+          set_marker: false
       map_lazy_load:
         lazy_load: false
     third_party_settings: {  }
@@ -139,7 +145,7 @@ content:
     region: content
   field_coverage_description:
     type: text_default
-    label: above
+    label: hidden
     settings: {  }
     third_party_settings: {  }
     weight: 6

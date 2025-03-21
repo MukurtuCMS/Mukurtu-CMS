@@ -27,4 +27,8 @@
   &--large-font {
     --card-font-size: var(--font-size-xl);
   }
+
+  &__eyebrow {
+    font-weight: var(--text-bold);
+  }
 }

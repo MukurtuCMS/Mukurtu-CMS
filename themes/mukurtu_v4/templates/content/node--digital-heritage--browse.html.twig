@@ -72,15 +72,17 @@
 {% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
 
 <article{{ attributes.addClass("horizontal-card") }}>
-  <div class="horizontal-card__media">
-    {% if media_bundle is same as 'image' %}
-    <a href="{{ url }}" aria-hidden="true" tabindex="-1">
-    {% endif %}
-      {{ content.field_representative_media }}
-    {% if media_bundle is same as 'image' %}
-    </a>
-    {% endif %}
-  </div>
+  {% if media_bundle %}
+    <div class="horizontal-card__media">
+      {% if media_bundle is same as 'image' %}
+      <a href="{{ url }}" aria-hidden="true" tabindex="-1">
+      {% endif %}
+        {{ content.field_representative_media }}
+      {% if media_bundle is same as 'image' %}
+      </a>
+      {% endif %}
+    </div>
+  {% endif %}
 
   <div{{ content_attributes }} class="horizontal-card__content">
     <div class="horizontal-card__content-header">
