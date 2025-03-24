@@ -8,13 +8,13 @@ services:
       init:
         # Install dependencies for PHP extensions.
         # Add poppler-utils for the pdftotext executable.
-        - apt update && apt install -y libzip-dev libpng-dev libjpeg-dev libwebp-dev libfreetype6-dev poppler-utils
+        - apt update && apt install -y libzip-dev libpng-dev libjpeg-dev libwebp-dev libfreetype6-dev poppler-utils php8.3-imagick
 
         # Add JPEG and FreeType support to GD.
         - docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype
 
         # Install the PHP extensions all at once to minimize rebuilding.
-        - docker-php-ext-install zip opcache gd
+        - docker-php-ext-install zip opcache gd imagick
 
         # Enable Apache 'rewrite' module for clean URLs.
         - a2enmod rewrite
