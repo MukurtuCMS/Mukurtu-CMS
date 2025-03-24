@@ -17,6 +17,8 @@ const defaultContentSpec = {
   person: [],
   // Digital heritage nodes.
   dh: [],
+  // Dictionary words.
+  word: [],
 };
 
 /* Define default Community content. */
@@ -104,6 +106,34 @@ defaultContentSpec.person.push({
   field_deceased: true,
 });
 
+/* Define default dictionary word taxonomy terms. */
+defaultContentSpec.word.push({
+  term: 'Word A',
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['First community protocol 1', 'Second community protocol 1'],
+  field_dictionary_word_language: 'First language',
+  field_alternate_spelling: 'woard A',
+  field_definition: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod eget dolor at gravida. Nulla luctus ultricies mi eget dapibus. Duis vitae luctus nunc, id tincidunt ante. Nulla enim quam, dignissim at velit ut, mollis mollis lorem. Aliquam erat volutpat. Vivamus dignissim arcu at risus gravida, et laoreet ex blandit.',
+  field_sample_sentences: [
+    {
+      field_sentence: 'Word A Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    }
+  ],
+});
+defaultContentSpec.person.push({
+  name: 'Word B',
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['First community protocol 1', 'Second community protocol 1'],
+  field_dictionary_word_language: 'Second language',
+  field_alternate_spelling: 'werd B',
+  field_definition: 'Aliquam erat volutpat. Aliquam erat volutpat. Phasellus vel elit at diam pulvinar tincidunt ac at mi. Mauris faucibus ultrices elit eget imperdiet. Sed sodales leo non ipsum porta blandit. Maecenas porta mauris ac lacinia tempor. Donec condimentum massa vel neque dapibus, id tristique metus consequat.',
+  field_sample_sentences: [
+    {
+      field_sentence: 'Word B Phasellus vel elit at diam pulvinar tincidunt ac at mi.',
+    }
+  ],
+});
+
 /**
  * Global to store if any test content exists yet.
  *
@@ -124,7 +154,7 @@ test.beforeEach(async ({ page }) => {
     const getStartedVisible = await page.locator('.mukurtu-getting-started-communities').isVisible();
     testContentExists = (getStartedVisible === false);
   }
-  //test.skip(testContentExists === true, 'Content already exists within the database, skipping the default content creation. To create default content, empty all existing content by running delete-content.spec.ts.');
+  test.skip(testContentExists === true, 'Content already exists within the database, skipping the default content creation. To create default content, empty all existing content by running delete-content.spec.ts.');
 });
 
 /**
@@ -251,6 +281,33 @@ test('Default Content: Person', async ({ page, browserName }) => {
 test('Default Content: Digital Heritage', async ({ page, browserName }) => {
   // Loop through all Digital Heritage items and create each one.
   for (const dh of defaultContentSpec.dh) {
+    // Create through the custom dashboard URL.
+    await page.goto('/dashboard/node/add/digital_heritage');
+    await page.getByRole('textbox', { name: 'Title' }).fill(dh.title);
+    await page.getByRole('textbox', { name: 'Summary' }).fill(dh.summary);
+    await page
+      .getByRole('group', { name: 'Sharing Setting' })
+      .getByRole('radio', { name: dh.field_cultural_protocols__sharing })
+      .check();
+
+    // Loop through the cultural protocols to be added to this DH item.
+    for (const protocol of dh.field_cultural_protocols__value) {
+      await page
+        .getByRole('group', { name: 'Select cultural protocols to apply to the item' })
+        .getByRole('checkbox', { name: protocol})
+        .check();
+    }
+
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+  }
+});
+
+/**
+ * Initialize default dictionary content.
+ */
+test('Default Content: Dictionary Word', async ({ page, browserName }) => {
+  // Loop through all Digital Heritage items and create each one.
+  for (const word of defaultContentSpec.word) {
     // Create through the custom dashboard URL.
     await page.goto('/dashboard/node/add/digital_heritage');
     await page.getByRole('textbox', { name: 'Title' }).fill(dh.title);
