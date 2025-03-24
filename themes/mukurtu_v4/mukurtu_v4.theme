@@ -177,3 +177,15 @@ function mukurtu_v4_preprocess_media(array &$variables)
     $variables['media_url'] = $url;
   }
 }
+
+/**
+ * Implements template_preprocess_media__audio__browse().
+ */
+function mukurtu_v4_preprocess_media__audio__browse(array &$variables)
+{
+  foreach ($variables['content']['field_media_audio_file'] as $key => $file) {
+    if (is_numeric($key)) {
+      $file['#attributes']['preload'] = 'none';
+    }
+  }
+}

@@ -37,6 +37,8 @@ process:
     -
       plugin: get
       source: field_description/0/value
+    -
+      plugin: media_embed
   field_description/format:
     plugin: default_value
     default_value: basic_html

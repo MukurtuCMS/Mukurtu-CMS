@@ -3,8 +3,7 @@
     // This content type page title does not have drop shadow.
     .page__title {
       background: none;
-      margin-block-start: var(--v-space-4xxs);
-      margin-block-end: var(--v-space-2xs);
+      margin-block: var(--v-space-4xxs) var(--v-space-2xs);
       margin-inline: 0;
     }
   }

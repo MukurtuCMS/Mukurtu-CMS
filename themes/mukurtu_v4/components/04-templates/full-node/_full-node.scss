@@ -1,21 +1,24 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
+
 // Some full displays look very similar with main content
 // and a right sidebar. These styles cover them all.
 // As of 11/04/24, this encompasses Digital Heritage and Person.
 
 .full-node__grid {
-  @include layout--full-width-grid;
+  @include layout.layout--full-width-grid;
 }
 
 .full-node {
-
   &__main {
     grid-column: 1 / span 6;
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       grid-column: 1 / span 8;
     }
 
-    @include media('>=2xl') {
+    @include include-media.media('>=2xl') {
       grid-column: 2 / span 8;
     }
   }
@@ -36,7 +39,7 @@
         .field--name-field-word-entry-term + div.field,
         .field--name-title,
         .additional-fields > div.field)) {
-      @include divider;
+      @include mixins.divider;
     }
 
     .field--name-field-people,
@@ -44,20 +47,21 @@
     .field--name-field-word-type,
     .field--name-field-contributor {
       .field__items {
-        @include inline-list;
+        @include mixins.inline-list;
       }
     }
 
     // Visually hide the map label.
     .field--name-field-coverage {
       .field__label {
-        @include visually-hidden;
+        @include mixins.visually-hidden;
       }
     }
 
     .field--name-field-recording {
       .field__item {
-        margin: var(--v-space-4xxs) 0;
+        margin-block: var(--v-space-4xxs);
+        margin-inline: 0;
       }
     }
 
@@ -72,13 +76,13 @@
 
   &__related-content {
     .field--name-field-all-related-content {
-      @include divider;
+      @include mixins.divider;
     }
   }
 
   &__citation {
     .field--name-field-citation {
-      @include divider;
+      @include mixins.divider;
     }
   }
 
@@ -86,26 +90,25 @@
   &__list {
     grid-column: 1 / span 6;
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       grid-column: 9 / span 4;
     }
 
-    @include media('>=2xl') {
+    @include include-media.media('>=2xl') {
       grid-column: 10 / span 4;
     }
   }
 
   &__sidebar .sidebar-section {
     background-color: var(--brand-light-accent);
-    border-top: 5px solid var(--brand-secondary);
+    border-block-start: 5px solid var(--brand-secondary);
     padding-inline: var(--v-space-4xs);
-    padding-block-start: var(--v-space-4xxs);
-    padding-block-end: var(--v-space-s);
+    padding-block: var(--v-space-4xxs) var(--v-space-s);
     margin-block-end: var(--v-space-4xs);
 
     .field {
       padding-block: var(--v-space-4xxs);
-      border-bottom: 1px solid var(--brand-light);
+      border-block-end: 1px solid var(--brand-light);
 
       &__label {
         font-size: var(--font-size-s);
@@ -118,7 +121,7 @@
 
       // If multiple items, show as comma-separated list.
       &__items {
-        @include inline-list;
+        @include mixins.inline-list;
       }
     }
 
@@ -141,7 +144,7 @@
       }
 
       img {
-        max-width: var(--v-space-2xs);
+        max-inline-size: var(--v-space-2xs);
       }
     }
 
@@ -173,6 +176,7 @@
       gap: var(--v-space-4xxs);
       margin-block-start: var(--v-space-4xxs);
 
+      // stylelint-disable-next-line no-descending-specificity
       .text {
         display: none;
       }
@@ -189,7 +193,7 @@
 
     .field:last-of-type {
       padding-block-end: 0;
-      border-bottom: none;
+      border-block-end: none;
     }
   }
 }

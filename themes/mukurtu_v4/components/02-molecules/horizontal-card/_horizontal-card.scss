@@ -1,3 +1,5 @@
+@use "../../../external/include-media";
+
 // The horizontal card component can be seen on the List Browse display,
 // as well as the related content section at the bottom of the main content
 // area on a DH node.
@@ -8,7 +10,7 @@
   gap: var(--v-space-2xs);
   border-block-end: 5px solid var(--mukurtu-view-row-divider-color);
 
-  @include media('>=md') {
+  @include include-media.media('>=md') {
     grid-template-columns: var(--grid-9col);
   }
 
@@ -16,16 +18,16 @@
   &__media {
     grid-column: 1 / span 1;
 
-    @include media('>=md') {
+    @include include-media.media('>=md') {
       grid-column: 1 / span 3;
     }
 
     // Ensure embedded videos don't get weird height.
     .media iframe {
-      height: revert-layer;
+      block-size: revert-layer;
 
-      @include media('>=md') {
-        height: auto;
+      @include include-media.media('>=md') {
+        block-size: auto;
       }
     }
   }
@@ -33,20 +35,19 @@
   &__content {
     grid-column: 1 / span 1;
 
-    @include media('>=md') {
+    @include include-media.media('>=md') {
       grid-column: 4 / span 6;
     }
   }
 
   &__content-header {
-
     h2 {
-      max-width: 90%;
+      max-inline-size: 90%;
       font-size: var(--font-size-xl);
       margin-block-start: 0;
       line-height: var(--line-height-xl);
 
-      @include media('>=lg') {
+      @include include-media.media('>=lg') {
         font-size: var(--font-size-2xl);
       }
     }
@@ -65,11 +66,11 @@
       flex-direction: column;
       gap: var(--v-space-5xs);
       align-items: first baseline;
-      border: 0px;
+      border: 0;
       padding-block-start: 0;
       margin-block-start: 0;
 
-      @include media('>=lg') {
+      @include include-media.media('>=lg') {
         flex-direction: row;
       }
 

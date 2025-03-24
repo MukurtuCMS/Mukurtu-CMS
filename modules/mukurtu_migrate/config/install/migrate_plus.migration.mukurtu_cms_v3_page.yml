@@ -29,6 +29,8 @@ process:
     -
       plugin: get
       source: body/0/value
+    -
+      plugin: media_embed
   body/format:
     plugin: default_value
     default_value: basic_html

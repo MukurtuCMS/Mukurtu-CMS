@@ -1,12 +1,10 @@
+@use "../../../external/include-media";
+
 :root {
   // Horizontal spacing.
   --gutter-s: var(--v-space-3xs); // 24px
   --gutter-m: var(--v-space-2xs); // 32px
   --gutter: var(--gutter-s); // Dynamic responsive value.
-
-  @include media('>=md') {
-    --gutter: var(--gutter-m);
-  }
 
   // Dynamic layout external padding.
   --layout-padding-xs: var(--v-space-3xs); // 24px
@@ -14,28 +12,7 @@
   --layout-padding-m: var(--v-space-xl); // 72px
   --layout-padding-l: var(--v-space-2xl); // 80px
   --layout-padding: var(--layout-padding-xs); // 24px (default)
-
-  @include media('>=md') {
-    --layout-padding: var(--layout-padding-s); // 48px
-  }
-
-  @include media('>=xl') {
-    --layout-padding: var(--layout-padding-m); // 72px
-  }
-
-  @include media('>=2xl') {
-    --layout-padding: 0;
-  }
-
   --layout-padding-full-width: var(--layout-padding-xs); // 24px (default)
-
-  @include media('>=md') {
-    --layout-padding-full-width: var(--layout-padding-s); // 48px
-  }
-
-  @include media('>=xl') {
-    --layout-padding-full-width: var(--layout-padding-m); // 72px
-  }
 
   // Basic reusable grid settings for grid-template-columns.
   --grid-1col: repeat(1, minmax(0, 1fr));
@@ -50,6 +27,7 @@
   --grid-10col: repeat(10, minmax(0, 1fr));
   --grid-11col: repeat(11, minmax(0, 1fr));
   --grid-12col: repeat(12, minmax(0, 1fr));
+
   // Layout variables.
   // 1280px maxwidth from the designs.
   // 4.833rem calculation comes from:
@@ -57,23 +35,47 @@
   // Col maxwidth calculation: 352px - 1280px (maxwidth) = 928px
   // Per col calculation: 928px (col maxwidth) / 12 (cols) = 77.33px (4.833rem)
   --grid-12col-max-width: repeat(12, minmax(0, 4.833rem));
+
+  @include include-media.media('>=md') {
+    --gutter: var(--gutter-m);
+  }
+
+  @include include-media.media('>=md') {
+    --layout-padding: var(--layout-padding-s); // 48px
+  }
+
+  @include include-media.media('>=xl') {
+    --layout-padding: var(--layout-padding-m); // 72px
+  }
+
+  @include include-media.media('>=2xl') {
+    --layout-padding: 0;
+  }
+
+  @include include-media.media('>=md') {
+    --layout-padding-full-width: var(--layout-padding-s); // 48px
+  }
+
+  @include include-media.media('>=xl') {
+    --layout-padding-full-width: var(--layout-padding-m); // 72px
+  }
 }
 
 // This layout fully uses grid i.e. no margin: auto either side.
 // Useful if you need to have a background image or horizontal border running
 // the full width of the page.
+// stylelint-disable-next-line
 @mixin layout--full-width-grid {
   display: grid;
   grid-template-columns: var(--grid-6col);
-  padding-inline-end: var(--layout-padding);
-  padding-inline-start: var(--layout-padding);
+  padding-inline: var(--layout-padding) var(--layout-padding);
   column-gap: var(--gutter);
 
-  @include media('>=lg') {
+  @include include-media.media('>=lg') {
     grid-template-columns: var(--grid-12col);
   }
 
-  @include media('>=2xl') {
+  @include include-media.media('>=2xl') {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }
 }
@@ -81,42 +83,46 @@
 // This layout fully uses grid i.e. no margin: no padding either size.
 // Useful if you need to have a background image or horizontal border running
 // the full width of the page with no padding.
+// stylelint-disable-next-line
 @mixin layout--full-width-grid-no-padding {
   display: grid;
   grid-template-columns: var(--grid-6col);
-  padding-inline-start: 0;
-  padding-inline-end: 0;
+  padding-inline: 0;
   column-gap: var(--gutter);
 
-  @include media('>=lg') {
+  @include include-media.media('>=lg') {
     grid-template-columns: var(--grid-12col);
   }
 
-  @include media('>=2xl') {
+  @include include-media.media('>=2xl') {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }
 }
 
+// stylelint-disable-next-line
 @mixin layout--full-width-grid-only2xl {
   display: grid;
   grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   column-gap: var(--gutter);
 }
 
+// stylelint-disable-next-line
 @mixin layout--full-width-grid-item {
   grid-column: 1 / -1;
 
-  @include media('>=2xl') {
+  @include include-media.media('>=2xl') {
     grid-column: 2 / -2;
   }
 }
 
+// stylelint-disable-next-line
 @mixin layout--twocol-grid {
   display: grid;
   grid-template-columns: var(--grid-2col);
   grid-gap: 10px var(--gutter);
 }
 
+// stylelint-disable-next-line
 @mixin layout--threecol-grid {
   display: grid;
   grid-template-columns: var(--grid-3col);
@@ -133,6 +139,5 @@
 
 // Add top/bottom padding to each component block.
 .layout__region--content>.block {
-  padding-block-start: var(--v-separation);
-  padding-block-end: var(--v-separation);
+  padding-block: var(--v-separation);
 }

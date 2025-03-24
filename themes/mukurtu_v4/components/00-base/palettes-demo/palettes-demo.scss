@@ -2,8 +2,8 @@ div.palette-demo {
   position: relative;
   display: flex;
   padding: 8px;
-  height: 72px;
-  width: calc(72px * 3);
+  block-size: 72px;
+  inline-size: calc(72px * 3);
 
   span {
     position: relative;
@@ -16,7 +16,7 @@ div.palette-demo {
     position: relative;
     flex: 1 1 0;
     flex-direction: row;
-    width: calc(72px / 2);
+    inline-size: calc(72px / 2);
   }
 }
 
@@ -35,7 +35,6 @@ $palettes: (
 
 
 @mixin palette-demo {
-
   @each $palette,
   $values in $palettes {
 

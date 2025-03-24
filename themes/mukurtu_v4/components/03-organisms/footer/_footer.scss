@@ -1,16 +1,19 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
 // Mukurtu Footer.
 
 .footer {
-  @include layout--full-width-grid;
-
   background-color: var(--footer-bg-color);
   color: var(--footer-text-color);
   padding-block-start: var(--v-space-xs);
 
+  @include layout.layout--full-width-grid;
+
   .region {
     grid-column: 1 / -1;
 
-    @include media('>=2xl') {
+    @include include-media.media('>=2xl') {
       grid-column: 2 / -2;
     }
   }
@@ -31,8 +34,8 @@
     align-items: center;
 
     img {
-      width: auto;
-      max-height: 150px;
+      inline-size: auto;
+      max-block-size: 150px;
     }
   }
 
@@ -68,9 +71,9 @@
     &::before {
       display: inline-block;
       vertical-align: middle;
-      height: var(--v-space-3xs);
-      width: var(--v-space-3xs);
-      margin-right: var(--v-space-6xs);
+      block-size: var(--v-space-3xs);
+      inline-size: var(--v-space-3xs);
+      margin-inline-end: var(--v-space-6xs);
     }
   }
 
@@ -95,7 +98,6 @@
     a {
       color: var(--footer-text-color);
       text-decoration-color: var(--footer-text-color);
-      // sass-lint:disable no-misspelled-properties
       text-decoration-thickness: 1px;
 
       &::before {

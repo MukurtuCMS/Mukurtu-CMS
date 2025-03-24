@@ -1,3 +1,5 @@
+@use "../../../external/include-media";
+
 // Grid setup for /categories.
 .category-grid {
   display: grid;
@@ -5,18 +7,18 @@
   padding-inline: var(--layout-padding);
   gap: var(--v-space-3xs);
 
-  @include media('>=sm') {
+  @include include-media.media('>=sm') {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @include media('>=lg') {
+  @include include-media.media('>=lg') {
     grid-template-columns: repeat(4, 1fr);
     padding-inline: var(--layout-padding-m);
 
   }
 
   // Individual cards layout.
-  .category-card .category-teaser a { //views-row
+  .category-card .category-teaser a { // views-row
     display: flex;
     flex-direction: column;
   }
@@ -24,9 +26,11 @@
 
 // Teaser displays for Categories taxonomy terms on /categories.
 .category-teaser {
+  // stylelint-disable-next-line no-descending-specificity
   a {
     text-decoration: none;
 
+    // stylelint-disable-next-line no-descending-specificity
     &:hover {
       text-decoration: underline;
     }

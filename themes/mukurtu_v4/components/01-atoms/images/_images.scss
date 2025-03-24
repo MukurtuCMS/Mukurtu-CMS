@@ -1,8 +1,8 @@
-// Images embedded with ckeditor from media library have a caption option. 
+// Images embedded with ckeditor from media library have a caption option.
 figure,
 figure.align-center {
   display: table;
-  width: fit-content;
+  inline-size: fit-content;
   margin: 0;
   padding: 0;
 
@@ -17,15 +17,18 @@ figure.align-center {
 
 figure.align-center,
 .media.align-center {
-  margin: var(--v-space-3xs) auto;
+  margin-block: var(--v-space-3xs);
+  margin-inline: auto;
 }
 
-figure.align-left, 
+figure.align-left,
 .media.align-left {
-  margin: var(--v-space-4xxs) var(--v-space-3xs) var(--v-space-4xxs) 0;
+  margin-block: var(--v-space-4xxs) var(--v-space-4xxs);
+  margin-inline: 0 var(--v-space-3xs);
 }
 
-figure.align-right, 
+figure.align-right,
 .media.align-right {
-  margin: var(--v-space-4xxs) 0 var(--v-space-4xxs) var(--v-space-3xs);
+  margin-block: var(--v-space-4xxs) var(--v-space-4xxs);
+  margin-inline: var(--v-space-3xs) 0;
 }

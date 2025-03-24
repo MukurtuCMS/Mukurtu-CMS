@@ -46,6 +46,8 @@ process:
     -
       plugin: get
       source: field_description/0/value
+    -
+      plugin: media_embed
   field_description/format:
     plugin: default_value
     default_value: basic_html
@@ -53,6 +55,8 @@ process:
     -
       plugin: get
       source: body/0/value
+    -
+      plugin: media_embed
   field_cultural_narrative/format:
     -
       plugin: static_map
@@ -67,11 +71,13 @@ process:
   field_traditional_knowledge/value:
     -
       plugin: get
-      source: field_tk_body/value
+      source: field_tk_body/0/value
+    -
+      plugin: media_embed
   field_traditional_knowledge/format:
     -
       plugin: static_map
-      source: field_tk_body/format
+      source: field_tk_body/0/format
       map:
         filtered_html: basic_html
         plain_text: plain_text
@@ -138,6 +144,7 @@ process:
     -
       plugin: get
       source: field_rights/value
+    - plugin: media_embed
   field_rights_and_usage/format:
     -
       plugin: static_map
@@ -153,6 +160,8 @@ process:
     -
       plugin: get
       source: field_coverage_description/0/value
+    -
+      plugin: media_embed
   field_coverage_description/format:
     -
       plugin: static_map
@@ -168,6 +177,8 @@ process:
     -
       plugin: geolocation
       source: field_coverage/0/geom
+    -
+      plugin: media_embed
   field_coverage/geo_type:
     -
       plugin: callback

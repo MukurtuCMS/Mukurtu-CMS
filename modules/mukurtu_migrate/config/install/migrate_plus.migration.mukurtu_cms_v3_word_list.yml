@@ -48,6 +48,8 @@ process:
     -
       plugin: get
       source: field_description/value
+    -
+      plugin: media_embed
   field_description/format:
     -
       plugin: static_map

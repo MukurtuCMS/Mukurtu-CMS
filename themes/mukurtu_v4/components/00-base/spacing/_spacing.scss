@@ -1,3 +1,5 @@
+@use "../../../external/include-media";
+
 :root {
   // Vertical spacing.
   // All vertical horizontal spacing is based on an 16px base unit system.
@@ -26,15 +28,15 @@
   --v-separation-xxl: var(--v-space-6xl); // 64px
   --v-separation: var(--v-separation-s); // Dynamic responsive value.
 
-  @include media('>=md') {
+  @include include-media.media('>=md') {
     --v-separation: var(--v-separation-m);
   }
 
-  @include media('>=lg') {
+  @include include-media.media('>=lg') {
     --v-separation: var(--v-separation-l);
   }
 
-  @include media('>=xl') {
+  @include include-media.media('>=xl') {
     --v-separation: var(--v-separation-xl);
   }
 }

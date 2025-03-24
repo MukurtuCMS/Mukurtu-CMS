@@ -2,8 +2,9 @@ name: "Tugboat Playwright Tests"
 
 on:
   # Run on pull requests against the main branch, to match Tugboat builds.
-  branches:
-    - main
+  push:
+    branches:
+      - main
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -11,7 +12,7 @@ jobs:
   wait-for-tugboat:
     runs-on: ubuntu-latest
     outputs:
-      preview_url: ${{ steps.get-preview-url.outputs.preview_url }}
+      preview_url: ${{ steps.wait-for-preview.outputs.preview_url }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -24,7 +25,7 @@ jobs:
           INTERVAL=30
           ELAPSED=0
           while [ $ELAPSED -lt $MAX_WAIT ]; do
-            PREVIEW_URL=$(gh pr view --json comments | jq -r '.comments[].body' | grep -o 'https://[a-zA-Z0-9.-]*\.tugboatqa.com' | head -n 1 || true)
+            PREVIEW_URL=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments | jq -r '.[].body' | grep -Po 'https://(?!www\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | head -n 1 || true)
             if [[ ! -z "$PREVIEW_URL" ]]; then
               echo "Preview is ready: $PREVIEW_URL"
               echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
@@ -37,7 +38,8 @@ jobs:
           echo "Tugboat preview did not become ready in time."
           exit 1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Secret configured on the Mukurtu-CMS repository.
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   playwright-tests:
     needs: wait-for-tugboat
@@ -51,15 +53,18 @@ jobs:
         with:
           node-version: 20
 
-#      - name: Install Dependencies
-#        run: cd tests/playwright && npm ci
-#
-#      - name: Install Playwright Browsers
-#        run: cd tests/playwright && npx playwright install --with-deps
-#
-#      - name: Run Playwright Tests
-#        # Note this needs process.env.PLAYWRIGHT_BASE_URL to be evaluated in
-#        # as the baseURL in playwright.config.ts.
-#        run: |
-#          cd tests/playwright
-#          PLAYWRIGHT_BASE_URL="${{ needs.wait-for-tugboat.outputs.preview_url }}" npx playwright test
+      - name: Install Dependencies
+        working-directory: tests/playwright
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        working-directory: tests/playwright
+        run: npx playwright install
+
+      - name: Run Playwright Tests
+        working-directory: tests/playwright
+        run: npx playwright test
+        # Note this needs process.env.PLAYWRIGHT_BASE_URL to be evaluated in
+        # as the baseURL in playwright.config.ts.
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ needs.wait-for-tugboat.outputs.preview_url }}

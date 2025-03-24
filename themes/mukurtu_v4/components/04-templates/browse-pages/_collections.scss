@@ -1,23 +1,26 @@
-.collections {
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
 
-  @include layout--full-width-grid;
+.collections {
   grid-column: 1 / -1;
 
-  @include media('>=2xl') {
+  @include layout.layout--full-width-grid;
+
+  @include include-media.media('>=2xl') {
     grid-column: 2 / -2;
   }
 
   &__main-content {
-    @include layout--full-width-grid-item;
+    @include layout.layout--full-width-grid-item;
   }
 
   &__collection-list {
     // Search form.
     .views-exposed-form {
-      width: 100%;
+      inline-size: 100%;
 
-      @include media('>=md') {
-        width: 25%;
+      @include include-media.media('>=md') {
+        inline-size: 25%;
       }
 
       .js-form-type-select {
@@ -26,14 +29,14 @@
         }
 
         &::after {
-          top: 68px;
+          inset-block-start: 68px;
         }
       }
 
       svg {
         fill: var(--brand-text-color);
-        width: var(--v-space-4xxs);
-        height: var(--v-space-4xxs);
+        inline-size: var(--v-space-4xxs);
+        block-size: var(--v-space-4xxs);
       }
 
       label {
@@ -57,7 +60,7 @@
       flex-direction: column-reverse;
       justify-content: center;
 
-      @include media('>=lg') {
+      @include include-media.media('>=lg') {
         flex-direction: row;
       }
 
@@ -68,7 +71,8 @@
 
       &:nth-of-type(even) {
         flex-direction: column-reverse;
-        @include media('>=lg') {
+
+        @include include-media.media('>=lg') {
           flex-direction: row-reverse;
         }
       }
@@ -84,7 +88,6 @@
   }
 
   &__content {
-
     &__container {
       background-color: var(--brand-secondary);
 
@@ -93,7 +96,7 @@
         margin-block-start: var(--v-space-s);
         font-size: var(--font-size-xl);
 
-        @include media('>=lg') {
+        @include include-media.media('>=lg') {
           font-size: var(--font-size-2xl);
         }
 
@@ -109,14 +112,15 @@
         &::after {
           content: '';
           display: block;
-          width: 136px;
-          height: 6px;
+          inline-size: 136px;
+          block-size: 6px;
           background-color: var(--brand-primary);
           position: absolute;
-          bottom: -48px;
+          inset-block-end: -48px;
         }
       }
 
+      // stylelint-disable-next-line no-descending-specificity
       > * {
         margin-inline: var(--v-space-xs);
         margin-block-end: var(--v-space-4xxs);
@@ -140,12 +144,14 @@
       column-gap: var(--v-space-5xs);
       align-items: center;
 
+      // stylelint-disable-next-line no-descending-specificity
       a {
         font-weight: var(--text-bold);
         letter-spacing: var(--letter-spacing-label);
         color: var(--brand-primary);
         text-decoration: underline solid 2px var(--brand-secondary);
 
+        // stylelint-disable-next-line no-descending-specificity
         &:hover {
           margin-inline-end: var(--v-space-6xs);
           text-decoration: underline solid 2px var(--brand-primary-dark);
@@ -153,10 +159,11 @@
         }
       }
 
+      // stylelint-disable-next-line no-descending-specificity
       svg {
         fill: var(--brand-primary);
-        width: 12px;
-        height: 18px;
+        inline-size: 12px;
+        block-size: 18px;
       }
     }
   }
@@ -172,25 +179,25 @@
         content: '';
         display: block;
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.25);
+        inset-block-start: 0;
+        inset-inline-start: 0;
+        inline-size: 100%;
+        block-size: 100%;
+        background-color: rgba(0 0 0 / 25%);
         z-index: 10;
       }
 
       .field-reference {
-        height: auto;
+        block-size: auto;
 
         div {
-          height: auto;
+          block-size: auto;
         }
 
         img {
           display: block;
-          max-width: 100%;
-          height: auto;
+          max-inline-size: 100%;
+          block-size: auto;
         }
       }
     }
@@ -202,14 +209,14 @@
     -webkit-line-clamp: initial;
     display: block;
 
-    @include media('>=lg') {
+    @include include-media.media('>=lg') {
       overflow: hidden;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
       display: -webkit-box;
     }
 
-    @include media('>=xl') {
+    @include include-media.media('>=xl') {
       -webkit-line-clamp: 3;
     }
   }
