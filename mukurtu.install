@@ -29,7 +29,7 @@ function mukurtu_install() {
   \Drupal::service('module_installer')->install(['message_digest_ui']);
 
   // @todo: Make an installation option to enable this module.
-  \Drupal::service('module_installer')->install(['mukurtu_solr']);
+  // \Drupal::service('module_installer')->install(['mukurtu_solr']);
 
   // Rebuild node access permissions.
   node_access_rebuild();

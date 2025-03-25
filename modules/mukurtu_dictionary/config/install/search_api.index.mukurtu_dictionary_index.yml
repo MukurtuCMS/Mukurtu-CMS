@@ -8,7 +8,6 @@ dependencies:
     - mukurtu_protocol
     - node
     - search_api_glossary
-    - search_api_solr
     - taxonomy
 id: mukurtu_dictionary_index
 name: 'Mukurtu Dictionary Index'
