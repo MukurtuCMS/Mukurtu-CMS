@@ -155,7 +155,7 @@ test.beforeEach(async ({ page }) => {
     const getStartedVisible = await page.locator('.mukurtu-getting-started-communities').isVisible();
     testContentExists = (getStartedVisible === false);
   }
-  //test.skip(testContentExists === true, 'Content already exists within the database, skipping the default content creation. To create default content, empty all existing content by running delete-content.spec.ts.');
+  test.skip(testContentExists === true, 'Content already exists within the database, skipping the default content creation. To create default content, empty all existing content by running delete-content.spec.ts.');
 });
 
 /**
