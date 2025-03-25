@@ -1,0 +1,31 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.media.media_library
+    - media.type.soundcloud
+id: media.soundcloud.media_library
+targetEntityType: media
+bundle: soundcloud
+mode: media_library
+content:
+  name:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  field_cultural_protocols: true
+  field_identifier: true
+  field_media_soundcloud: true
+  field_media_tags: true
+  field_people: true
+  field_thumbnail: true
+  langcode: true
+  path: true
+  status: true
+  uid: true
