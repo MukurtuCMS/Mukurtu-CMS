@@ -51,6 +51,6 @@
 
 /* Hide the Map on any page it appears if there are no location markers. */
 /* NOTE This is better handled in the View, however, clicking "Hide if empty" does not work for unknown reasons, as of this writing. */
-.browse-container:not(:has(.leaflet-marker-icon)) :is(#mukurtu-browse-map, .leaflet-container) {
+.browse-container:not(:has(.leaflet-marker-icon, .leaflet-interactive)) :is(#mukurtu-browse-map, .leaflet-container) {
   display: none;
 }
