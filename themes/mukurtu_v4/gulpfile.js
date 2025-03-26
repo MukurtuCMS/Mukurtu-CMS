@@ -90,16 +90,23 @@ function minifyImages() {
 }
 
 function watchFiles() {
-  return watch([
-    "./components/**/*.scss",
-    "./js/**/*.js",
-    "./css/**/*.css",
-    "./components/**/*.js"
-  ],
-    (cb) => {
-      series(minifyImages, lintScripts, lintStyles, buildStyles);
+  watch("./components/**/*.scss", function watchScss(cb) {
+    series(lintStyles, buildStyles)((err) => {
+      if (err) {
+        console.error(err);
+      }
       cb();
     });
+  });
+  watch([
+    "./js/**/*.js",
+    "./components/**/*.js",
+  ], lintScripts);
+  watch([
+    "./css/00-base/**/*.css",
+    "./css/content-warnings.css",
+    "./css/leaflet-overrides.css"
+  ], lintStyles)
 }
 
 exports.imagemin = minifyImages;
