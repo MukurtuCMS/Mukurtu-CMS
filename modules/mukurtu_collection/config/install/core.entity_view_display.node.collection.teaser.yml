@@ -41,6 +41,7 @@ hidden:
   field_in_collection: true
   field_items_in_collection: true
   field_keywords: true
+  field_location: true
   field_multipage_page_of: true
   field_parent_collection: true
   field_related_content: true
