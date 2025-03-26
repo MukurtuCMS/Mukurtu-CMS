@@ -42,6 +42,7 @@ hidden:
   field_description: true
   field_in_collection: true
   field_keywords: true
+  field_location: true
   field_media_assets: true
   field_multipage_page_of: true
   field_protocol_control: true
