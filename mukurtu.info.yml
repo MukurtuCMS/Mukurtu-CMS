@@ -19,6 +19,7 @@ install:
   - contextual
   - contact
   - menu_link_content
+  - pdf
   - mukurtu_content_warnings
   - datetime
   - block_content
