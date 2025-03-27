@@ -2591,12 +2591,23 @@ header {
 }
 
 .communities {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
   gap: 1.875rem;
   -webkit-padding-start: 0;
           padding-inline-start: 0;
   grid-column: 1/-1;
+}
+@media screen and (width >= 26rem) {
+  .communities {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(auto, 24rem));
+  }
 }
 @media (min-width: 90rem) {
   .communities {
@@ -2608,7 +2619,7 @@ header {
   position: relative;
   list-style-type: none;
   border: 1px solid var(--brand-light-accent);
-  block-size: 18.125rem;
+  block-size: 19rem;
   background-color: white;
 }
 .community .field--name-name a {
@@ -2662,7 +2673,7 @@ header {
 }
 .community .media--image img {
   inline-size: 100%;
-  block-size: calc(18.125rem - 2px);
+  block-size: 19rem;
   -o-object-fit: cover;
      object-fit: cover;
 }
