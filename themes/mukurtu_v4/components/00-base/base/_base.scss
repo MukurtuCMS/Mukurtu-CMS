@@ -66,10 +66,17 @@ address {
   font-style: normal;
 }
 
+video,
 img {
   max-inline-size: 100%;
   block-size: auto;
   display: block;
+}
+
+video {
+  inline-size: max-content;
+  max-block-size: 90vh;
+  background-color: black;
 }
 
 a {
