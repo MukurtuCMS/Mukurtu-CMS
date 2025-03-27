@@ -62,10 +62,19 @@ address {
   font-style: normal;
 }
 
+video,
 img {
   max-inline-size: 100%;
   block-size: auto;
   display: block;
+}
+
+video {
+  inline-size: -webkit-max-content;
+  inline-size: -moz-max-content;
+  inline-size: max-content;
+  max-block-size: 90vh;
+  background-color: black;
 }
 
 a {
@@ -976,6 +985,9 @@ details.form-wrapper summary + div {
   .horizontal-card__media .media iframe {
     block-size: auto;
   }
+}
+.horizontal-card__media video {
+  max-block-size: 18rem;
 }
 .horizontal-card__content {
   grid-column: 1/span 1;
