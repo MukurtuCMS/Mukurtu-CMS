@@ -176,7 +176,8 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
             'document' => 'document',
             'image' => 'image',
             'remote_video' => 'remote_video',
-            'video' => 'video'
+            'video' => 'video',
+            'soundcloud' => 'soundcloud'
           ],
           'sort' => [
             'field' => '_none'
