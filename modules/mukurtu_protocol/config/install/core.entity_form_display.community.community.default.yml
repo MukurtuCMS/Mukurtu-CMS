@@ -7,7 +7,6 @@ dependencies:
     - entity_browser
     - media_library
     - mukurtu_protocol
-    - path
     - text
 id: community.community.default
 targetEntityType: community

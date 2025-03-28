@@ -1,12 +1,10 @@
-uuid: a37667f9-04ed-4332-86ef-b3542119c90f
 langcode: en
 status: true
 dependencies:
   module:
+    - entity_browser
     - node
     - user
-_core:
-  default_config_hash: guOxq3F5NSDQG8_3nNN4_9zlXMZ_L-POzaw0cG6WniM
 id: mukurtu_content_browser
 label: 'Mukurtu Content Browser'
 module: views

@@ -19,12 +19,12 @@ widget_selector: single
 widget_selector_configuration: {  }
 widgets:
   78cb1c23-9032-4e2f-a76b-e759c06e830d:
-    id: view
-    uuid: 78cb1c23-9032-4e2f-a76b-e759c06e830d
-    label: 'Select Content'
-    weight: 1
     settings:
       submit_text: 'Add Content'
       auto_select: false
       view: mukurtu_content_browser
       view_display: entity_browser
+    uuid: 78cb1c23-9032-4e2f-a76b-e759c06e830d
+    weight: 1
+    label: 'Select Content'
+    id: view
