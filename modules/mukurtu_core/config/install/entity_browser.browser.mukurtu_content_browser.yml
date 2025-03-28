@@ -2,29 +2,29 @@ langcode: en
 status: true
 dependencies:
   config:
-    - views.view.multipage_item_browser
+    - views.view.mukurtu_content_browser
   module:
     - views
-name: multipage_item_entity_browser
-label: 'Multipage Item Entity Browser'
+name: mukurtu_content_browser
+label: 'Select Related Content'
 display: modal
 display_configuration:
   width: '1200'
   height: '800'
-  link_text: 'Select entities'
+  link_text: 'Select Content'
   auto_open: false
 selection_display: no_display
 selection_display_configuration: {  }
 widget_selector: single
 widget_selector_configuration: {  }
 widgets:
-  a8a43640-4429-40f1-90f8-9b54163d37c0:
+  78cb1c23-9032-4e2f-a76b-e759c06e830d:
     id: view
-    uuid: a8a43640-4429-40f1-90f8-9b54163d37c0
-    label: view
+    uuid: 78cb1c23-9032-4e2f-a76b-e759c06e830d
+    label: 'Select Content'
     weight: 1
     settings:
-      submit_text: 'Select entities'
+      submit_text: 'Add Content'
       auto_select: false
-      view: multipage_item_browser
+      view: mukurtu_content_browser
       view_display: entity_browser

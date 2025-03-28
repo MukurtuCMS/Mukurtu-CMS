@@ -3,11 +3,9 @@ status: true
 dependencies:
   config:
     - block_content.type.featured_content
-    - entity_browser.browser.browse_content
     - field.field.block_content.featured_content.body
     - field.field.block_content.featured_content.field_featured_content
   module:
-    - entity_browser
     - text
 id: block_content.featured_content.default
 targetEntityType: block_content
@@ -29,12 +27,12 @@ content:
     weight: 2
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
+      entity_browser: mukurtu_browse_content
+      field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
+      open: true
       field_widget_display_settings:
         view_mode: content_browser
       selection_mode: selection_append

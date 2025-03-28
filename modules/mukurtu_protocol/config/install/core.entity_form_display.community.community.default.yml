@@ -2,11 +2,12 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.browse_content
+    - entity_browser.browser.mukurtu_content_browser
   module:
     - entity_browser
     - media_library
     - mukurtu_protocol
+    - path
     - text
 id: community.community.default
 targetEntityType: community
@@ -67,14 +68,13 @@ content:
     weight: 6
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      open: true
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_thumbnail_image:

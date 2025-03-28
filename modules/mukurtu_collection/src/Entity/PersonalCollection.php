@@ -405,16 +405,14 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
         'type' => 'entity_browser_entity_reference',
         'weight' => 4,
         'settings' => [
-          'entity_browser' => 'browse_content',
-          'field_widget_display' => 'rendered_entity',
-          'field_widget_display_settings' => [
-            'view_mode' => 'content_browser',
-          ],
+          'entity_browser' => 'mukurtu_browse_content',
+          'field_widget_display' => 'label',
+          'field_widget_display_settings' => [],
           'field_widget_edit' => FALSE,
           'field_widget_remove' => TRUE,
           'field_widget_replace' => FALSE,
           'selection_mode' => 'selection_append',
-          'open' => FALSE,
+          'open' => TRUE,
         ],
       ])
       ->setDisplayConfigurable('view', TRUE)
