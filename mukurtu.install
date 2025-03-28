@@ -132,7 +132,7 @@ function mukurtu_install() {
   }
 
   // Configure user roles. These are not managed by Mukurtu because any change
-  // in permissions would cause an override. Instead these are provided as
+  // in permissions would cause an override. Instead, these are provided as
   // defaults that can be changed per-site.
   $roles = [];
   $roles['anonymous'] = [
@@ -178,8 +178,10 @@ function mukurtu_install() {
     'use text format basic_html',
     'view media',
     'view published community entities',
+    'view published language community entities',
     'view published personal collection entities',
     'view published protocol control entities',
+    'view published protocol entities',
   ];
   $roles['mukurtu_administrator'] = [
     'access administration pages',
