@@ -52,6 +52,7 @@
         "drupal/og": "^1.x-dev",
         "drupal/paragraphs": "*",
         "drupal/pathauto": "*",
+        "drupal/pdf": "^1.2",
         "drupal/redirect": "*",
         "drupal/restui": "*",
         "drupal/search_api": "*",
