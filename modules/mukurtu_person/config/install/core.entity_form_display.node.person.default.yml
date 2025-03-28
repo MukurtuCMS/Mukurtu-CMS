@@ -244,7 +244,7 @@ content:
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: true
+      open: false
       field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
@@ -277,7 +277,7 @@ content:
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: true
+      open: false
       field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }

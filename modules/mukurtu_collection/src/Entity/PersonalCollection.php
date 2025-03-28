@@ -412,7 +412,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
           'field_widget_remove' => TRUE,
           'field_widget_replace' => FALSE,
           'selection_mode' => 'selection_append',
-          'open' => TRUE,
+          'open' => FALSE,
         ],
       ])
       ->setDisplayConfigurable('view', TRUE)
