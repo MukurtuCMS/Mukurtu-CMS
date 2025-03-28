@@ -116,7 +116,7 @@ content:
         scroll_zoom_enabled: '1'
         map_position:
           zoom: '12'
-          minZoom: '1'
+          minZoom: '3'
           maxZoom: '18'
           zoomFiner: '0'
           force: 0
