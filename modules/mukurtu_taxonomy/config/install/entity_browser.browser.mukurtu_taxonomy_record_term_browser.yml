@@ -7,8 +7,8 @@ name: mukurtu_taxonomy_record_term_browser
 label: 'Select Taxonomy Record Terms'
 display: modal
 display_configuration:
-  width: '650'
-  height: '500'
+  width: '1200'
+  height: '800'
   link_text: 'Select Terms'
   auto_open: false
 selection_display: multi_step_display

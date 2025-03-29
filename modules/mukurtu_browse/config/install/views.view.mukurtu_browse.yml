@@ -862,7 +862,7 @@ display:
               lon: 0.0
             zoomControlPosition: topleft
             zoom: 12
-            minZoom: 1
+            minZoom: 2
             maxZoom: 18
             zoomFiner: 0
           weight: ''
@@ -902,14 +902,14 @@ display:
         options:
           view_modes:
             'entity:node':
-              ':default': default
-              article: map_browse
-              collection: map_browse
-              dictionary_word: map_browse
-              digital_heritage: map_browse
-              page: map_browse
-              person: map_browse
-              word_list: map_browse
+              ':default': map_browse
+              article: ':default'
+              collection: ':default'
+              dictionary_word: ':default'
+              digital_heritage: ':default'
+              page: ':default'
+              person: ':default'
+              word_list: ':default'
       defaults:
         css_class: false
         style: false

@@ -47,7 +47,6 @@ install:
 dependencies:
   - 'blazy:blazy'
   - 'colorbox:colorbox'
-  - 'content_browser:content_browser'
   - 'ctools:ctools'
   - 'devel:devel'
   - 'drupal:automated_cron'
@@ -105,6 +104,7 @@ dependencies:
   - 'mukurtu_export:mukurtu_export'
   - 'mukurtu_footer:mukurtu_footer'
   - 'mukurtu_import:mukurtu_import'
+  - 'mukurtu_local_contexts:mukurtu_local_contexts'
   - 'mukurtu_media:mukurtu_media'
   - 'mukurtu_migrate:mukurtu_migrate'
   - 'mukurtu_multipage_items:mukurtu_multipage_items'

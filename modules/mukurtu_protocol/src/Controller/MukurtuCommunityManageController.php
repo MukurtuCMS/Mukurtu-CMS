@@ -16,7 +16,7 @@ class MukurtuCommunityManageController extends ControllerBase {
     return $build;
   }
 
-  protected function displayCommunities($parent = NULL, $view_mode = 'content_browser') {
+  protected function displayCommunities($parent = NULL, $view_mode = 'teaser') {
     $build = [];
 
     $view_builder = \Drupal::entityTypeManager()->getViewBuilder('community');

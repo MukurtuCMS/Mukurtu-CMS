@@ -7,8 +7,8 @@ name: mukurtu_community_and_protocol_user_browser
 label: 'User Selection'
 display: modal
 display_configuration:
-  width: '650'
-  height: '500'
+  width: '1200'
+  height: '800'
   link_text: 'Select Members'
   auto_open: false
 selection_display: multi_step_display

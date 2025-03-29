@@ -8,7 +8,6 @@ libraries:
   - mukurtu_core/mukurtu-leaflet-widget
 dependencies:
   - 'blazy:blazy'
-  - 'content_browser:content_browser'
   - 'drupal:block'
   - 'drupal:comment'
   - 'drupal:editor'

@@ -488,13 +488,14 @@ display:
         options:
           view_modes:
             'entity:node':
-              article: content_browser
-              collection: content_browser
-              dictionary_word: content_browser
-              digital_heritage: content_browser
-              page: content_browser
-              person: content_browser
-              word_list: content_browser
+              ':default': map_browse
+              article: ':default'
+              collection: ':default'
+              dictionary_word: ':default'
+              digital_heritage: ':default'
+              page: ':default'
+              person: ':default'
+              word_list: ':default'
       query:
         type: search_api_query
         options:
@@ -544,7 +545,7 @@ display:
           entity_source: __base_table
           name_field: title
           description_field: '#rendered_view_fields'
-          view_mode: content_browser
+          view_mode: map_browse
           leaflet_map: 'OSM Mapnik'
           height: '600'
           height_unit: px

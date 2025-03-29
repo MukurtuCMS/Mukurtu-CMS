@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.browse_content
+    - entity_browser.browser.mukurtu_content_browser
     - field.field.node.word_list.comment
     - node.type.word_list
   module:
@@ -61,7 +61,7 @@ third_party_settings:
       label: Words
       region: content
       parent_name: group_main_tab
-      weight: 22
+      weight: 21
       format_type: tab
       format_settings:
         classes: ''
@@ -74,7 +74,7 @@ third_party_settings:
       children:
         - field_related_content
       label: Relations
-      region: hidden
+      region: content
       parent_name: group_main_tab
       weight: 22
       format_type: tab
@@ -92,13 +92,13 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 3
+    weight: 4
     region: content
     settings: {  }
     third_party_settings: {  }
   draft:
     type: boolean_checkbox
-    weight: 8
+    weight: 9
     region: content
     settings:
       display_label: true
@@ -248,14 +248,18 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_related_content:
-    type: entity_reference_autocomplete
+    type: entity_browser_entity_reference
     weight: 3
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: true
+      field_widget_display_settings: {  }
+      selection_mode: selection_append
     third_party_settings: {  }
   field_source:
     type: string_textfield
@@ -278,19 +282,18 @@ content:
     weight: 1
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
       field_widget_edit: false
-      field_widget_remove: false
+      field_widget_remove: true
       field_widget_replace: false
-      open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      open: true
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   langcode:
     type: language_select
-    weight: 2
+    weight: 3
     region: content
     settings:
       include_locked: true
@@ -312,27 +315,27 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 6
+    weight: 7
     region: content
     settings: {  }
     third_party_settings: {  }
   promote:
     type: boolean_checkbox
-    weight: 4
+    weight: 5
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 9
+    weight: 10
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
-    weight: 5
+    weight: 6
     region: content
     settings:
       display_label: true
@@ -347,7 +350,7 @@ content:
     third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete
-    weight: 1
+    weight: 2
     region: content
     settings:
       match_operator: CONTAINS
@@ -356,7 +359,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   url_redirects:
-    weight: 7
+    weight: 8
     region: content
     settings: {  }
     third_party_settings: {  }
