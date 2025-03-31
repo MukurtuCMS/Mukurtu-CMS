@@ -1,0 +1,51 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
+
+.path-communities {
+  :where(#block-mukurtu-v4-content) {
+    display: grid;
+    grid-template-columns: calc(var(--layout-padding-full-width) - var(--gutter)) 1fr 12rem calc(var(--layout-padding-full-width) - var(--gutter));
+    gap: var(--v-space-2xs) var(--gutter);
+  }
+
+  .field--name-field-banner-image {
+    grid-row: 1;
+    grid-column: 1 / -1;
+
+    .media--image {
+      align-items: stretch;
+
+      img {
+        inline-size: 100%;
+        block-size: 45rem;
+        object-fit: cover;
+      }
+    }
+  }
+
+  .field--name-field-description {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .field--name-field-featured-content {
+    grid-column: 2;
+    grid-row: 3;
+  }
+
+  .field--name-field-access-mode {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .field--name-field-community-type {
+    grid-column: 3;
+    grid-row: 3;
+  }
+
+  .field--name-field-protocols {
+    grid-column: 3;
+    grid-row: 4;
+  }
+}
