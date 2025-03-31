@@ -202,11 +202,19 @@ function mukurtu_v4_preprocess_media(array &$variables)
 /**
  * Implements template_preprocess_media__audio__browse().
  */
-function mukurtu_v4_preprocess_media__audio__browse(array &$variables)
+function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void
 {
   foreach ($variables['content']['field_media_audio_file'] as $key => $file) {
     if (is_numeric($key)) {
       $file['#attributes']['preload'] = 'none';
     }
   }
+}
+
+/**
+ * Implements hook_media_soundcloud_embed().
+ */
+function mukurtu_v4_preprocess_media_soundcloud_embed(array &$variables): void
+{
+  $variables['height'] = '200';
 }
