@@ -11,6 +11,7 @@ dependencies:
     - field_group
     - media_library
     - mukurtu_core
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - path
     - text
@@ -41,6 +42,8 @@ third_party_settings:
         - field_coverage
         - field_coverage_description
         - field_location
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -231,6 +234,18 @@ content:
       match_limit: 10
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 3
+    region: content
+    settings: {  }
     third_party_settings: {  }
   field_location:
     type: entity_reference_autocomplete
