@@ -212,9 +212,19 @@ function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void
 }
 
 /**
- * Implements hook_media_soundcloud_embed().
+ * Implements hook_preprocess_media_soundcloud_embed().
  */
 function mukurtu_v4_preprocess_media_soundcloud_embed(array &$variables): void
 {
   $variables['height'] = '200';
+}
+
+/**
+ * Implements hook_preprocess_field_group_html_element__group_community_sidebar().
+ */
+function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar(array &$variables): void
+{
+  $route_match = \Drupal::routeMatch();
+  $community = $route_match->getParameter('community');
+  $variables['community_name'] = $community->get('name')->value;
 }
