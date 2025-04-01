@@ -11,6 +11,7 @@ dependencies:
     - field_group
     - media_library
     - mukurtu_core
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - original_date
     - paragraphs
@@ -94,9 +95,9 @@ third_party_settings:
       children:
         - field_related_people
       label: 'Related People'
-      region: hidden
+      region: content
       parent_name: group_relations
-      weight: 5
+      weight: 6
       format_type: details
       format_settings:
         classes: ''
@@ -113,13 +114,13 @@ mode: default
 content:
   comment:
     type: comment_default
-    weight: 11
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
   created:
     type: datetime_timestamp
-    weight: 4
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -238,6 +239,18 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 12
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 11
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_location:
     type: entity_reference_autocomplete
     weight: 12
@@ -263,7 +276,7 @@ content:
     third_party_settings: {  }
   field_related_content:
     type: entity_browser_entity_reference
-    weight: 6
+    weight: 5
     region: content
     settings:
       entity_browser: mukurtu_content_browser
@@ -350,7 +363,7 @@ content:
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 9
+    weight: 8
     region: content
     settings:
       display_label: true
