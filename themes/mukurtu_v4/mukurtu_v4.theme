@@ -156,6 +156,27 @@ function mukurtu_v4_preprocess_field(&$variables)
 }
 
 /**
+ * Implements hook_preprocess_field__community__name__community().
+ */
+function mukurtu_v4_preprocess_field__community__name__community(array &$variables): void
+{
+  $path = \Drupal::service('path.current')->getPath();
+  if ($path != '/communities') {
+    return;
+  }
+  $truncate_length = 60;
+  foreach ($variables['items'] as &$item) {
+    if (!isset($item['content']['#title'])) {
+      continue;
+    }
+    $value = $item['content']['#title']['#context']['value'];
+    if (strlen($value) > $truncate_length) {
+      $item['content']['#title']['#context']['value'] = substr($value, 0, $truncate_length) . '…';
+    }
+  }
+}
+
+/**
  * Implements template_preprocess_media().
  */
 function mukurtu_v4_preprocess_media(array &$variables)
@@ -181,11 +202,19 @@ function mukurtu_v4_preprocess_media(array &$variables)
 /**
  * Implements template_preprocess_media__audio__browse().
  */
-function mukurtu_v4_preprocess_media__audio__browse(array &$variables)
+function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void
 {
   foreach ($variables['content']['field_media_audio_file'] as $key => $file) {
     if (is_numeric($key)) {
       $file['#attributes']['preload'] = 'none';
     }
   }
+}
+
+/**
+ * Implements hook_media_soundcloud_embed().
+ */
+function mukurtu_v4_preprocess_media_soundcloud_embed(array &$variables): void
+{
+  $variables['height'] = '200';
 }

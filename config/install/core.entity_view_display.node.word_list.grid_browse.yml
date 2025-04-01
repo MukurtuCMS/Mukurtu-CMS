@@ -32,10 +32,13 @@ hidden:
   field_all_related_content: true
   field_citation: true
   field_communities: true
+  field_coverage: true
+  field_coverage_description: true
   field_cultural_protocols: true
   field_description: true
   field_in_collection: true
   field_keywords: true
+  field_location: true
   field_media_assets: true
   field_multipage_page_of: true
   field_protocol_control: true

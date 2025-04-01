@@ -1,0 +1,66 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
+
+.community-page-browse {
+  @include layout.layout--full-width-grid;
+}
+
+.communities {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 1.875rem;
+  padding-inline-start: 0;
+
+  @media screen and (width >= 26rem) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(auto, 24rem));
+  }
+
+  @include layout.layout--full-width-grid-item;
+}
+
+.community {
+  position: relative;
+  list-style-type: none;
+  border: 1px solid var(--brand-light-accent);
+  block-size: 19rem;
+  background-color: white;
+
+  & .field--name-name a {
+    position: relative;
+    display: block;
+    inline-size: max-content;
+    max-inline-size: 75%;
+    z-index: 2;
+
+    @include mixins.button;
+
+    &::after {
+      content: '';
+      display: inline-block;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="20" height="30" viewBox="5 -5 20 30"><path fill="white" d="M25 10.01 9.72 25l-4.53-4.43L15.78 10.2 5-.37 9.72-5 25 10h-.01z"/></svg>');
+      background-repeat: no-repeat;
+      background-size: contain;
+      inline-size: 0.6em;
+      block-size: 1em;
+      vertical-align: middle;
+      margin-inline-start: 2ch;
+    }
+  }
+
+  .media--image {
+    display: block;
+    position: absolute;
+    inline-size: 100%;
+    block-size: 100%;
+    inset-inline-start: 0;
+    inset-block-start: 0;
+
+    img {
+      inline-size: 100%;
+      block-size: 19rem;
+      object-fit: cover;
+    }
+  }
+}

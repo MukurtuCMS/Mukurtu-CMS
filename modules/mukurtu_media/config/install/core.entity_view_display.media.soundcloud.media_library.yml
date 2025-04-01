@@ -2,28 +2,24 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.media_assets
-    - media.type.remote_video
+    - core.entity_view_mode.media.media_library
+    - image.style.medium
+    - media.type.soundcloud
   module:
-    - layout_builder
-    - media
-third_party_settings:
-  layout_builder:
-    enabled: false
-    allow_custom: false
-id: media.remote_video.media_assets
+    - image
+id: media.soundcloud.media_library
 targetEntityType: media
-bundle: remote_video
-mode: media_assets
+bundle: soundcloud
+mode: media_library
 content:
-  field_media_oembed_video:
-    type: oembed
+  thumbnail:
+    type: image
     label: hidden
     settings:
-      max_width: 900
-      max_height: 506
-      loading:
-        attribute: eager
+      image_link: ''
+      image_style: medium
+      image_loading:
+        attribute: lazy
     third_party_settings: {  }
     weight: 0
     region: content
@@ -32,6 +28,7 @@ hidden:
   field_communities: true
   field_cultural_protocols: true
   field_identifier: true
+  field_media_soundcloud: true
   field_media_tags: true
   field_people: true
   field_thumbnail: true
@@ -39,5 +36,4 @@ hidden:
   langcode: true
   name: true
   search_api_excerpt: true
-  thumbnail: true
   uid: true

@@ -572,13 +572,13 @@ display:
         options:
           view_modes:
             'entity:node':
-              article: content_browser
-              collection: content_browser
-              dictionary_word: content_browser
-              digital_heritage: content_browser
-              page: content_browser
-              person: content_browser
-              word_list: content_browser
+              article: grid_browse
+              collection: grid_browse
+              dictionary_word: grid_browse
+              digital_heritage: grid_browse
+              page: grid_browse
+              person: grid_browse
+              word_list: grid_browse
       defaults:
         pager: false
         style: false

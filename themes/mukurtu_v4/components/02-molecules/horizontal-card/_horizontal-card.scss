@@ -30,6 +30,10 @@
         block-size: auto;
       }
     }
+
+    video {
+      max-block-size: 18rem;
+    }
   }
 
   &__content {

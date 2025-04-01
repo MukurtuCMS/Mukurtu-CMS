@@ -2,18 +2,24 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.mukurtu_content_browser
+    - image.style.thumbnail
+    - media.type.soundcloud
   module:
-    - entity_browser
-    - media_library
+    - image
     - mukurtu_protocol
-    - text
-id: community.community.default
-targetEntityType: community
-bundle: community
+    - path
+id: media.soundcloud.default
+targetEntityType: media
+bundle: soundcloud
 mode: default
 content:
-  community_type:
+  created:
+    type: datetime_timestamp
+    weight: 11
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_contributor:
     type: entity_reference_autocomplete
     weight: 5
     region: content
@@ -23,20 +29,29 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_access_mode:
-    type: options_buttons
-    weight: 2
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_banner_image:
-    type: media_library_widget
+  field_identifier:
+    type: string_textfield
     weight: 4
     region: content
     settings:
-      media_types: {  }
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-  field_child_communities:
+  field_media_soundcloud:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_media_tags:
     type: entity_reference_autocomplete
     weight: 7
     region: content
@@ -46,42 +61,23 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_community_type:
-    type: options_select
-    weight: 3
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  field_description:
-    type: text_textarea_with_summary
-    weight: 1
-    region: content
-    settings:
-      rows: 9
-      summary_rows: 3
-      placeholder: ''
-      show_summary: false
-    third_party_settings: {  }
-  field_featured_content:
-    type: entity_browser_entity_reference
+  field_people:
+    type: entity_reference_autocomplete
     weight: 6
     region: content
     settings:
-      entity_browser: mukurtu_content_browser
-      field_widget_display: label
-      field_widget_edit: false
-      field_widget_remove: true
-      field_widget_replace: false
-      open: false
-      field_widget_display_settings: {  }
-      selection_mode: selection_append
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-  field_thumbnail_image:
-    type: media_library_widget
-    weight: 5
+  field_thumbnail:
+    type: image_image
+    weight: 8
     region: content
     settings:
-      media_types: {  }
+      progress_indicator: throbber
+      preview_image_style: thumbnail
     third_party_settings: {  }
   langcode:
     type: language_select
@@ -92,7 +88,7 @@ content:
     third_party_settings: {  }
   name:
     type: string_textfield
-    weight: 0
+    weight: 1
     region: content
     settings:
       size: 60
@@ -100,13 +96,20 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 8
+    weight: 9
     region: content
     settings: {  }
     third_party_settings: {  }
-  user_id:
+  status:
+    type: boolean_checkbox
+    weight: 10
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  uid:
     type: entity_reference_autocomplete
-    weight: 9
+    weight: 12
     region: content
     settings:
       match_operator: CONTAINS
@@ -114,5 +117,4 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden:
-  field_parent_community: true
+hidden: {  }

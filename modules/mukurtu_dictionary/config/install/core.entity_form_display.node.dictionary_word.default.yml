@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.browse_content
+    - entity_browser.browser.mukurtu_content_browser
     - field.field.node.dictionary_word.comment
     - node.type.dictionary_word
   module:
@@ -188,18 +188,18 @@ content:
       map:
         leaflet_map: 'OSM Mapnik'
         height: '400'
-        locate: '1'
         auto_center: '1'
         scroll_zoom_enabled: '1'
         map_position:
           zoom: '12'
-          minZoom: '1'
+          minZoom: '3'
           maxZoom: '18'
           zoomFiner: '0'
           force: 0
           center:
             lat: '0'
             lon: '0'
+          zoomControlPosition: topleft
       toolbar:
         position: topright
         marker: defaultMarker
@@ -214,8 +214,8 @@ content:
         cutPolygon: 0
         rotateMode: 0
       reset_map:
-        position: topright
         control: 0
+        options: '{"position":"topleft","title":"Reset View"}'
       fullscreen:
         options: '{"position":"topleft","pseudoFullscreen":false}'
         control: 0
@@ -227,13 +227,22 @@ content:
         control: false
         settings:
           position: topright
-          input_size: 25
+          input_size: 20
           providers: {  }
           min_terms: 4
           delay: 800
           zoom: 16
           popup: false
           options: ''
+      map_scale:
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+        control: 0
+      locate:
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        automatic: '1'
+        control: 0
+      feature_properties:
+        values: ''
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea
@@ -319,14 +328,13 @@ content:
     weight: -6
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true
-      field_widget_replace: true
+      field_widget_replace: false
       open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_mukurtu_protocol_r_scope:
@@ -379,14 +387,13 @@ content:
     weight: 3
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
-      field_widget_edit: true
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
+      field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      open: true
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_sample_sentences:
