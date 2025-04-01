@@ -2,7 +2,7 @@
 @use "../../00-base/layout/layout";
 @use "../../00-base/mixins/mixins";
 
-.path-communities {
+.community {
   :where(#block-mukurtu-v4-content) {
     display: grid;
     grid-template-columns: calc(var(--layout-padding-full-width) - var(--gutter)) 1fr 12rem calc(var(--layout-padding-full-width) - var(--gutter));
