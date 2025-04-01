@@ -107,7 +107,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
         ]
       ])
       ->setDefaultValue('')
-      ->setCardinality(-1)
+      ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
