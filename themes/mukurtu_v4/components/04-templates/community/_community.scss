@@ -20,6 +20,16 @@
 
 .field--name-field-banner-image {
   grid-area: banner;
+
+  .media--image {
+    align-items: stretch;
+
+    img {
+      inline-size: 100%;
+      block-size: 80vh;
+      object-fit: cover;
+    }
+  }
 }
 
 .community__content {
