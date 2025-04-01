@@ -755,6 +755,15 @@ figure.align-right,
   font-weight: var(--text-bold);
 }
 
+.community__sidebar > .field,
+.callout {
+  padding-inline: 1rem;
+  padding-block: 1rem;
+  background-color: var(--brand-light-accent);
+  -webkit-border-before: 5px solid var(--brand-secondary);
+          border-block-start: 5px solid var(--brand-secondary);
+}
+
 .splide__arrow--prev {
   inset-inline-start: -2em;
 }
@@ -2693,7 +2702,7 @@ header {
 .community--full {
   display: grid;
   grid-template-areas: "banner banner" "content content" "sidebar sidebar";
-  grid-template-columns: 1fr calc(12rem + var(--layout-padding-full-width));
+  grid-template-columns: 1fr calc(15rem + var(--layout-padding-full-width));
   gap: var(--v-space-l);
 }
 @media (min-width: 48rem) {

@@ -8,7 +8,7 @@
     "banner banner"
     "content content"
     "sidebar sidebar";
-  grid-template-columns: 1fr calc(12rem + var(--layout-padding-full-width));
+  grid-template-columns: 1fr calc(15rem + var(--layout-padding-full-width));
   gap: var(--v-space-l);
 
   @include include-media.media(">=md") {
