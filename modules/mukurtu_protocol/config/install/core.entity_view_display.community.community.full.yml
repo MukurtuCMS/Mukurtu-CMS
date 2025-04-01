@@ -4,6 +4,7 @@ dependencies:
   config:
     - core.entity_view_mode.community.full
   module:
+    - blazy
     - colorbox
     - field_group
     - layout_builder
@@ -28,7 +29,7 @@ third_party_settings:
         show_empty_fields: true
         id: ''
         label_as_html: false
-        element: section
+        element: div
         show_label: false
         label_element: h3
         label_element_classes: ''
@@ -37,8 +38,9 @@ third_party_settings:
         speed: fast
     group_community_sidebar:
       children:
-        - field_parent_community
         - field_protocols
+        - field_child_communities
+        - field_parent_community
       label: 'Community Sidebar'
       parent_name: ''
       region: content
@@ -49,7 +51,7 @@ third_party_settings:
         show_empty_fields: true
         id: ''
         label_as_html: false
-        element: aside
+        element: div
         show_label: false
         label_element: h3
         label_element_classes: ''
@@ -78,6 +80,14 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_child_communities:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 6
+    region: content
   field_description:
     type: text_default
     label: hidden
@@ -86,11 +96,14 @@ content:
     weight: 3
     region: content
   field_featured_content:
-    type: entity_reference_entity_view
+    type: blazy_entity
     label: above
     settings:
-      view_mode: browse
-      link: false
+      view_mode: teaser
+      grid: ''
+      grid_medium: ''
+      grid_small: ''
+      style: ''
     third_party_settings: {  }
     weight: 4
     region: content
@@ -103,13 +116,17 @@ content:
       colorbox_gallery: post
       colorbox_gallery_custom: ''
     third_party_settings: {  }
-    weight: 4
+    weight: 7
     region: content
   field_protocols:
-    type: entity_reference_label
+    type: blazy_entity
     label: above
     settings:
-      link: true
+      view_mode: ''
+      grid: ''
+      grid_medium: ''
+      grid_small: ''
+      style: ''
     third_party_settings: {  }
     weight: 5
     region: content
@@ -123,7 +140,6 @@ content:
     region: content
 hidden:
   field_access_mode: true
-  field_child_communities: true
   field_community_type: true
   field_thumbnail_image: true
   langcode: true
