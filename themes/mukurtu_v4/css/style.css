@@ -2627,14 +2627,14 @@ header {
   }
 }
 
-.community {
+.communities__item {
   position: relative;
   list-style-type: none;
   border: 1px solid var(--brand-light-accent);
   block-size: 19rem;
   background-color: white;
 }
-.community .field--name-name a {
+.communities__item .field--name-name a {
   position: relative;
   display: block;
   inline-size: -webkit-max-content;
@@ -2652,18 +2652,18 @@ header {
   padding-inline: var(--v-space-2xs);
   cursor: pointer;
 }
-.community .field--name-name a:hover, .community .field--name-name a:active, .community .field--name-name a:focus {
+.communities__item .field--name-name a:hover, .communities__item .field--name-name a:active, .communities__item .field--name-name a:focus {
   color: var(--light-text-color);
   background: var(--brand-primary-accent);
 }
-.community .field--name-name a:focus {
+.communities__item .field--name-name a:focus {
   outline: 2px solid var(--focus-color);
 }
-.community .field--name-name a:disabled {
+.communities__item .field--name-name a:disabled {
   color: var(--light-text-color);
   background: var(--brand-text-color);
 }
-.community .field--name-name a::after {
+.communities__item .field--name-name a::after {
   content: "";
   display: inline-block;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="20" height="30" viewBox="5 -5 20 30"><path fill="white" d="M25 10.01 9.72 25l-4.53-4.43L15.78 10.2 5-.37 9.72-5 25 10h-.01z"/></svg>');
@@ -2675,7 +2675,7 @@ header {
   -webkit-margin-start: 2ch;
           margin-inline-start: 2ch;
 }
-.community .media--image {
+.communities__item .media--image {
   display: block;
   position: absolute;
   inline-size: 100%;
@@ -2683,7 +2683,7 @@ header {
   inset-inline-start: 0;
   inset-block-start: 0;
 }
-.community .media--image img {
+.communities__item .media--image img {
   inline-size: 100%;
   block-size: 19rem;
   -o-object-fit: cover;
