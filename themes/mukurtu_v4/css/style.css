@@ -2705,6 +2705,17 @@ header {
 .field--name-field-banner-image {
   grid-area: banner;
 }
+.field--name-field-banner-image .media--image {
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+}
+.field--name-field-banner-image .media--image img {
+  inline-size: 100%;
+  block-size: 80vh;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
 
 .community__content {
   grid-area: content;
