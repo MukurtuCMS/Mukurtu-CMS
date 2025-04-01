@@ -4,6 +4,7 @@ description: 'Provides access control that is fundamental to the Mukurtu platfor
 core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 dependencies:
+  - 'blazy:blazy'
   - 'colorbox:colorbox'
   - 'drupal:comment'
   - 'drupal:content_moderation'
