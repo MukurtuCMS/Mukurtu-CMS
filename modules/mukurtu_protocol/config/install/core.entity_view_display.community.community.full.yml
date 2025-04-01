@@ -38,7 +38,6 @@ third_party_settings:
     group_community_sidebar:
       children:
         - og_group
-        - field_protocols
         - field_parent_community
         - field_child_communities
       label: 'Community Sidebar'
@@ -102,7 +101,7 @@ content:
       view_mode: browse
       link: false
     third_party_settings: {  }
-    weight: 4
+    weight: 5
     region: content
   field_parent_community:
     type: entity_reference_label
@@ -111,14 +110,6 @@ content:
       link: true
     third_party_settings: {  }
     weight: 6
-    region: content
-  field_protocols:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 5
     region: content
   name:
     type: string
@@ -142,3 +133,4 @@ hidden:
   langcode: true
   search_api_excerpt: true
   user_id: true
+  field_protocols: true
