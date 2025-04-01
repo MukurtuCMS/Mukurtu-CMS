@@ -105,20 +105,18 @@ content:
     weight: 4
     region: content
   field_parent_community:
-    type: entity_reference_entity_view
+    type: entity_reference_label
     label: above
     settings:
-      view_mode: default
-      link: false
+      link: true
     third_party_settings: {  }
     weight: 6
     region: content
   field_protocols:
-    type: entity_reference_entity_view
+    type: entity_reference_label
     label: above
     settings:
-      view_mode: default
-      link: false
+      link: true
     third_party_settings: {  }
     weight: 5
     region: content
