@@ -198,6 +198,26 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
+      ->setLabel(t('Local Contexts Projects'))
+      ->setDescription(t('Local Contexts projects from the Local Contexts Hub.'))
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
+      ->setLabel(t('Local Contexts Labels and Notices'))
+      ->setDescription(t('Local Contexts Labels and Notices from the Local Contexts Hub.'))
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     return $definitions;
   }
 
