@@ -38,6 +38,7 @@ third_party_settings:
     group_community_sidebar:
       children:
         - og_group
+        - field_protocols
         - field_parent_community
         - field_child_communities
       label: 'Community Sidebar'
@@ -111,6 +112,14 @@ content:
     third_party_settings: {  }
     weight: 6
     region: content
+  field_protocols:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 5
+    region: content
   name:
     type: string
     label: hidden
@@ -133,4 +142,3 @@ hidden:
   langcode: true
   search_api_excerpt: true
   user_id: true
-  field_protocols: true
