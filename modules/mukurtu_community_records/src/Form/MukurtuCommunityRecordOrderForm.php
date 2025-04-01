@@ -120,9 +120,10 @@ class MukurtuCommunityRecordOrderForm extends ConfigFormBase {
     ksort($weightedCommunities);
 
     // Build the table.
-    foreach ($weightedCommunities as $row) {
+    foreach ($weightedCommunities as $index => $row) {
+      $community_weight = $weights[$row->id()] ?? $index;
       $form['table-row'][$row->id()]['#attributes']['class'][] = 'draggable';
-      $form['table-row'][$row->id()]['#weight'] = $weights[$row->id()];
+      $form['table-row'][$row->id()]['#weight'] = $community_weight;
       $form['table-row'][$row->id()]['name'] = [
         '#markup' => $row->getName(),
       ];
@@ -133,7 +134,7 @@ class MukurtuCommunityRecordOrderForm extends ConfigFormBase {
             '@title' => $row->getName(),
           ]),
         '#title_display' => 'invisible',
-        '#default_value' => $weights[$row->id()],
+        '#default_value' => $community_weight,
         '#attributes' => [
           'class' => [
             'table-sort-weight',

@@ -35,7 +35,7 @@ use Exception;
  *   ),
  *   handlers = {
  *     "storage" = "Drupal\mukurtu_protocol\CommunityStorage",
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "view_builder" = "Drupal\mukurtu_protocol\CommunityViewBuilder",
  *     "list_builder" = "Drupal\mukurtu_protocol\CommunityListBuilder",
  *     "views_data" = "Drupal\mukurtu_protocol\Entity\CommunityViewsData",
  *     "translation" = "Drupal\mukurtu_protocol\CommunityTranslationHandler",

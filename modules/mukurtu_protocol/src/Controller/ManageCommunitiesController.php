@@ -137,7 +137,7 @@ class ManageCommunitiesController extends ControllerBase {
     }
 
     $build['template'] = [
-      '#theme' => 'manage-community',
+      '#theme' => 'manage_community',
       '#links' => $links,
       '#community' => $community,
       '#sharing' => $sharing,
