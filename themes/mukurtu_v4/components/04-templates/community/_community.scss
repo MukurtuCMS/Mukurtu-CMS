@@ -39,10 +39,17 @@
   @include include-media.media(">=md") {
     margin-inline-end: 0;
   }
+
+  .field--name-field-featured-content {
+    margin-block-start: var(--v-space-l);
+  }
 }
 
 .community__sidebar {
   grid-area: sidebar;
+  display: flex;
+  flex-flow: column nowrap;
+  gap: var(--v-space-2xs);
   margin-inline: var(--layout-padding-full-width);
 
   @include include-media.media(">=md") {

@@ -4,11 +4,10 @@ dependencies:
   config:
     - core.entity_view_mode.community.full
   module:
-    - blazy
-    - colorbox
     - field_group
     - layout_builder
     - mukurtu_protocol
+    - og
     - text
 third_party_settings:
   layout_builder:
@@ -38,9 +37,10 @@ third_party_settings:
         speed: fast
     group_community_sidebar:
       children:
+        - og_group
         - field_protocols
-        - field_child_communities
         - field_parent_community
+        - field_child_communities
       label: 'Community Sidebar'
       parent_name: ''
       region: content
@@ -86,7 +86,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 6
+    weight: 7
     region: content
   field_description:
     type: text_default
@@ -96,37 +96,29 @@ content:
     weight: 3
     region: content
   field_featured_content:
-    type: blazy_entity
+    type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: teaser
-      grid: ''
-      grid_medium: ''
-      grid_small: ''
-      style: ''
+      view_mode: browse
+      link: false
     third_party_settings: {  }
     weight: 4
     region: content
   field_parent_community:
-    type: colorbox_view_modes
+    type: entity_reference_entity_view
     label: above
     settings:
-      colorbox_view_mode: ''
-      colorbox_modal_view_mode: ''
-      colorbox_gallery: post
-      colorbox_gallery_custom: ''
+      view_mode: default
+      link: false
     third_party_settings: {  }
-    weight: 7
+    weight: 6
     region: content
   field_protocols:
-    type: blazy_entity
+    type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: ''
-      grid: ''
-      grid_medium: ''
-      grid_small: ''
-      style: ''
+      view_mode: default
+      link: false
     third_party_settings: {  }
     weight: 5
     region: content
@@ -138,11 +130,17 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
+  og_group:
+    type: og_group_subscribe
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
 hidden:
   field_access_mode: true
   field_community_type: true
   field_thumbnail_image: true
   langcode: true
-  og_group: true
   search_api_excerpt: true
   user_id: true
