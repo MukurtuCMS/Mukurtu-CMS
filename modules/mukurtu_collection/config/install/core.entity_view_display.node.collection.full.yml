@@ -8,6 +8,7 @@ dependencies:
   module:
     - layout_builder
     - mukurtu_core
+    - mukurtu_local_contexts
     - text
     - user
 third_party_settings:
@@ -173,6 +174,20 @@ content:
       link: false
     third_party_settings: {  }
     weight: 3
+    region: content
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  field_local_contexts_projects:
+    type: local_contexts_project
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 9
     region: content
   field_location:
     type: entity_reference_label
