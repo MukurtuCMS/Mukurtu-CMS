@@ -5,22 +5,22 @@
 .community--full {
   display: grid;
   grid-template-areas:
-    "banner banner banner banner"
-    "content content content content"
-    "sidebar sidebar sidebar sidebar";
-  grid-template-columns:
-    1fr
-    fit-content(calc(
-      80rem - 15rem - var(--layout-padding-full-width) - var(--v-space-l)
-    ))
-    calc(15rem + var(--layout-padding-full-width))
-    1fr;
+    "banner"
+    "content"
+    "sidebar";
   gap: var(--v-space-l);
 
-  @include include-media.media(">=md") {
+  @include include-media.media(">=lg") {
     grid-template-areas:
       "banner banner banner banner"
       ". content sidebar .";
+    grid-template-columns:
+      1fr
+      fit-content(calc(
+        80rem - 15rem - var(--layout-padding-full-width) - var(--v-space-l)
+      ))
+      calc(15rem + var(--layout-padding-full-width))
+      1fr;
   }
 }
 
@@ -42,12 +42,65 @@
   grid-area: content;
   margin-inline: var(--layout-padding-full-width);
 
-  @include include-media.media(">=md") {
+  @include include-media.media(">=lg") {
     margin-inline: 0;
   }
 
   .field--name-field-featured-content {
     margin-block-start: var(--v-space-l);
+
+    .field__items {
+      margin-block-start: var(--v-space-4xs);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(auto, 23rem));
+      gap: var(--gutter);
+    }
+
+    .field__item {
+      max-inline-size: calc(100vw - (var(--layout-padding-full-width) * 2));
+
+      & > article.contextual-region {
+        position: relative;
+        block-size: 19rem;
+      }
+
+      a {
+        display: block;
+        inline-size: max-content;
+        max-inline-size: 75%;
+        position: relative;
+        z-index: 2;
+
+        @include mixins.button;
+
+        &::after {
+          content: '';
+          display: inline-block;
+          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="20" height="30" viewBox="5 -5 20 30"><path fill="white" d="M25 10.01 9.72 25l-4.53-4.43L15.78 10.2 5-.37 9.72-5 25 10h-.01z"/></svg>');
+          background-repeat: no-repeat;
+          background-size: contain;
+          inline-size: 0.6em;
+          block-size: 1em;
+          vertical-align: middle;
+          margin-inline-start: 2ch;
+        }
+      }
+
+      .media--image,
+      img {
+        display: block;
+        position: absolute;
+        inline-size: 100%;
+        block-size: 100%;
+        inset-inline: 0;
+        inset-block: 0;
+      }
+
+      img {
+        block-size: 19rem;
+        object-fit: cover;
+      }
+    }
   }
 }
 
@@ -58,7 +111,7 @@
   gap: var(--v-space-2xs);
   margin-inline: var(--layout-padding-full-width);
 
-  @include include-media.media(">=md") {
+  @include include-media.media(">=lg") {
     margin-inline: 0;
   }
 }
