@@ -2733,6 +2733,7 @@ header {
 @media (min-width: 60rem) {
   .community__content {
     margin-inline: 0;
+    min-inline-size: calc(46.5vw + 1rem);
   }
 }
 .community__content .field--name-field-featured-content {
