@@ -2701,13 +2701,13 @@ header {
 
 .community--full {
   display: grid;
-  grid-template-areas: "banner banner banner banner" "content content content content" "sidebar sidebar sidebar sidebar";
-  grid-template-columns: 1fr fit-content(calc(65rem - var(--layout-padding-full-width) - var(--v-space-l))) calc(15rem + var(--layout-padding-full-width)) 1fr;
+  grid-template-areas: "banner" "content" "sidebar";
   gap: var(--v-space-l);
 }
-@media (min-width: 48rem) {
+@media (min-width: 60rem) {
   .community--full {
     grid-template-areas: "banner banner banner banner" ". content sidebar .";
+    grid-template-columns: 1fr fit-content(calc(65rem - var(--layout-padding-full-width) - var(--v-space-l))) calc(15rem + var(--layout-padding-full-width)) 1fr;
   }
 }
 
@@ -2730,7 +2730,7 @@ header {
   grid-area: content;
   margin-inline: var(--layout-padding-full-width);
 }
-@media (min-width: 48rem) {
+@media (min-width: 60rem) {
   .community__content {
     margin-inline: 0;
   }
@@ -2738,6 +2738,75 @@ header {
 .community__content .field--name-field-featured-content {
   -webkit-margin-before: var(--v-space-l);
           margin-block-start: var(--v-space-l);
+}
+.community__content .field--name-field-featured-content .field__items {
+  -webkit-margin-before: var(--v-space-4xs);
+          margin-block-start: var(--v-space-4xs);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(auto, 23rem));
+  gap: var(--gutter);
+}
+.community__content .field--name-field-featured-content .field__item {
+  max-inline-size: calc(100vw - var(--layout-padding-full-width) * 2);
+}
+.community__content .field--name-field-featured-content .field__item > article.contextual-region {
+  position: relative;
+  block-size: 19rem;
+}
+.community__content .field--name-field-featured-content .field__item a {
+  display: block;
+  inline-size: -webkit-max-content;
+  inline-size: -moz-max-content;
+  inline-size: max-content;
+  max-inline-size: 75%;
+  position: relative;
+  z-index: 2;
+  color: var(--light-text-color);
+  background: var(--brand-primary-dark);
+  font-size: var(--font-size-base);
+  font-weight: var(--text-bold);
+  letter-spacing: var(--letter-spacing-label);
+  border: none;
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-2xs);
+  cursor: pointer;
+}
+.community__content .field--name-field-featured-content .field__item a:hover, .community__content .field--name-field-featured-content .field__item a:active, .community__content .field--name-field-featured-content .field__item a:focus {
+  color: var(--light-text-color);
+  background: var(--brand-primary-accent);
+}
+.community__content .field--name-field-featured-content .field__item a:focus {
+  outline: 2px solid var(--focus-color);
+}
+.community__content .field--name-field-featured-content .field__item a:disabled {
+  color: var(--light-text-color);
+  background: var(--brand-text-color);
+}
+.community__content .field--name-field-featured-content .field__item a::after {
+  content: "";
+  display: inline-block;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="20" height="30" viewBox="5 -5 20 30"><path fill="white" d="M25 10.01 9.72 25l-4.53-4.43L15.78 10.2 5-.37 9.72-5 25 10h-.01z"/></svg>');
+  background-repeat: no-repeat;
+  background-size: contain;
+  inline-size: 0.6em;
+  block-size: 1em;
+  vertical-align: middle;
+  -webkit-margin-start: 2ch;
+          margin-inline-start: 2ch;
+}
+.community__content .field--name-field-featured-content .field__item .media--image,
+.community__content .field--name-field-featured-content .field__item img {
+  display: block;
+  position: absolute;
+  inline-size: 100%;
+  block-size: 100%;
+  inset-inline: 0;
+  inset-block: 0;
+}
+.community__content .field--name-field-featured-content .field__item img {
+  block-size: 19rem;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 
 .community__sidebar {
@@ -2752,7 +2821,7 @@ header {
   gap: var(--v-space-2xs);
   margin-inline: var(--layout-padding-full-width);
 }
-@media (min-width: 48rem) {
+@media (min-width: 60rem) {
   .community__sidebar {
     margin-inline: 0;
   }
