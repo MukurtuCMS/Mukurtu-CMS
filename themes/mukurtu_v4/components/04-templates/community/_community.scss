@@ -53,41 +53,23 @@
     .field__items {
       margin-block-start: var(--v-space-4xs);
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(auto, 23rem));
+      grid-template-columns: repeat(auto-fit, minmax(auto, calc(33% - var(--gutter))));
       gap: var(--gutter);
     }
 
     .field__item {
       max-inline-size: calc(100vw - (var(--layout-padding-full-width) * 2));
 
-      & > article.contextual-region {
-        position: relative;
-        block-size: 19rem;
-      }
-
       a {
         display: block;
-        inline-size: max-content;
-        max-inline-size: 75%;
-        position: relative;
-        z-index: 2;
 
         @include mixins.button;
       }
 
-      .media--image,
       img {
-        display: block;
-        position: absolute;
-        inline-size: 100%;
-        block-size: 100%;
-        inset-inline: 0;
-        inset-block: 0;
-      }
-
-      img {
-        block-size: 19rem;
+        aspect-ratio: 16/9;
         object-fit: cover;
+        object-position: right top;
       }
     }
   }
