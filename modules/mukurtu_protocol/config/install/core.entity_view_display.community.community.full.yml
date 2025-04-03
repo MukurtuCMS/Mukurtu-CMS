@@ -99,10 +99,10 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: browse
+      view_mode: teaser
       link: false
     third_party_settings: {  }
-    weight: 5
+    weight: 4
     region: content
   field_parent_community:
     type: entity_reference_label
