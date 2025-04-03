@@ -44,6 +44,7 @@
 
   @include include-media.media(">=lg") {
     margin-inline: 0;
+    min-inline-size: calc(46.5vw + 1rem);
   }
 
   .field--name-field-featured-content {
