@@ -5,16 +5,22 @@
 .community--full {
   display: grid;
   grid-template-areas:
-    "banner banner"
-    "content content"
-    "sidebar sidebar";
-  grid-template-columns: 1fr calc(15rem + var(--layout-padding-full-width));
+    "banner banner banner banner"
+    "content content content content"
+    "sidebar sidebar sidebar sidebar";
+  grid-template-columns:
+    1fr
+    fit-content(calc(
+      80rem - 15rem - var(--layout-padding-full-width) - var(--v-space-l)
+    ))
+    calc(15rem + var(--layout-padding-full-width))
+    1fr;
   gap: var(--v-space-l);
 
   @include include-media.media(">=md") {
     grid-template-areas:
-      "banner banner"
-      "content sidebar";
+      "banner banner banner banner"
+      ". content sidebar .";
   }
 }
 
@@ -37,7 +43,7 @@
   margin-inline: var(--layout-padding-full-width);
 
   @include include-media.media(">=md") {
-    margin-inline-end: 0;
+    margin-inline: 0;
   }
 
   .field--name-field-featured-content {
@@ -53,6 +59,6 @@
   margin-inline: var(--layout-padding-full-width);
 
   @include include-media.media(">=md") {
-    margin-inline-start: 0;
+    margin-inline: 0;
   }
 }
