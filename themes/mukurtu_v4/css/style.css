@@ -2624,15 +2624,15 @@ header {
           padding-inline-start: 0;
   grid-column: 1/-1;
 }
+@media (min-width: 90rem) {
+  .communities {
+    grid-column: 2/-2;
+  }
+}
 @media screen and (width >= 26rem) {
   .communities {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(auto, 24rem));
-  }
-}
-@media (min-width: 90rem) {
-  .communities {
-    grid-column: 2/-2;
   }
 }
 
