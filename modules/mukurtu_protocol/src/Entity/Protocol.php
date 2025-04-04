@@ -33,7 +33,7 @@ use Exception;
  *   ),
  *   handlers = {
  *     "storage" = "Drupal\mukurtu_protocol\ProtocolStorage",
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "view_builder" = "Drupal\mukurtu_protocol\Entity\ProtocolViewBuilder",
  *     "list_builder" = "Drupal\mukurtu_protocol\ProtocolListBuilder",
  *     "views_data" = "Drupal\mukurtu_protocol\Entity\ProtocolViewsData",
  *     "translation" = "Drupal\mukurtu_protocol\ProtocolTranslationHandler",
