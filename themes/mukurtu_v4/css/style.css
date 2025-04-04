@@ -2779,17 +2779,6 @@ header {
   color: var(--light-text-color);
   background: var(--brand-text-color);
 }
-.community__content .field--name-field-featured-content .field__item iframe,
-.community__content .field--name-field-featured-content .field__item img {
-  aspect-ratio: 16/9;
-  -o-object-fit: cover;
-     object-fit: cover;
-  -o-object-position: right top;
-     object-position: right top;
-}
-.community__content .field--name-field-featured-content .field__item iframe {
-  max-block-size: 7rem;
-}
 
 .community__sidebar {
   grid-area: sidebar;

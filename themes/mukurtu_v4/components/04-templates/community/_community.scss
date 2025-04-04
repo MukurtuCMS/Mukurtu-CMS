@@ -65,17 +65,6 @@
 
         @include mixins.button;
       }
-
-      iframe,
-      img {
-        aspect-ratio: 16/9;
-        object-fit: cover;
-        object-position: right top;
-      }
-
-      iframe {
-        max-block-size: 7rem;
-      }
     }
   }
 }
