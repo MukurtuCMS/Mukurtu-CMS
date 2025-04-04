@@ -1288,6 +1288,12 @@ details.form-wrapper summary + div {
       -ms-flex-pack: center;
           justify-content: center;
 }
+.media--image iframe,
+.media--document iframe,
+.media--audio iframe,
+.media--remote_video iframe {
+  background-color: black;
+}
 .media--image .button,
 .media--document .button,
 .media--audio .button,
@@ -2773,12 +2779,16 @@ header {
   color: var(--light-text-color);
   background: var(--brand-text-color);
 }
+.community__content .field--name-field-featured-content .field__item iframe,
 .community__content .field--name-field-featured-content .field__item img {
   aspect-ratio: 16/9;
   -o-object-fit: cover;
      object-fit: cover;
   -o-object-position: right top;
      object-position: right top;
+}
+.community__content .field--name-field-featured-content .field__item iframe {
+  max-block-size: 7rem;
 }
 
 .community__sidebar {
