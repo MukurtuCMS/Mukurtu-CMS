@@ -502,3 +502,16 @@ function mukurtu_protocol_field_widget_single_element_entity_browser_entity_refe
     }
   }
 }
+
+/**
+ * Implements hook_preprocess_field__community__og_group__community().
+ */
+function mukurtu_protocol_preprocess_field__community__og_group__community(array &$variables): void {
+  $variables['label'] = t('Community role');
+  $description = $variables['items'][0]['content']['#value'];
+  $variables['items'][0]['content']['#value'] = str_replace(
+    'the group',
+    'a community',
+    $description
+  ) . '.';
+}
