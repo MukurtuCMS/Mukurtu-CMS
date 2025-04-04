@@ -12,12 +12,12 @@
   gap: 1.875rem;
   padding-inline-start: 0;
 
+  @include layout.layout--full-width-grid-item;
+
   @media screen and (width >= 26rem) {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(auto, 24rem));
   }
-
-  @include layout.layout--full-width-grid-item;
 }
 
 .communities__item {
