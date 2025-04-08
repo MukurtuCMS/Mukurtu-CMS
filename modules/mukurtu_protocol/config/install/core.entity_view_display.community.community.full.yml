@@ -4,6 +4,7 @@ dependencies:
   config:
     - core.entity_view_mode.community.full
   module:
+    - colorbox
     - field_group
     - layout_builder
     - mukurtu_protocol
@@ -105,10 +106,13 @@ content:
     weight: 4
     region: content
   field_parent_community:
-    type: entity_reference_label
+    type: colorbox_view_modes
     label: above
     settings:
-      link: true
+      colorbox_view_mode: ''
+      colorbox_modal_view_mode: ''
+      colorbox_gallery: post
+      colorbox_gallery_custom: ''
     third_party_settings: {  }
     weight: 6
     region: content
