@@ -2746,17 +2746,17 @@ header {
   -webkit-margin-before: var(--v-space-l);
           margin-block-start: var(--v-space-l);
 }
-.community__content .field--name-field-featured-content .field__items {
+.community__content .field--name-field-featured-content > .field__items {
   -webkit-margin-before: var(--v-space-4xs);
           margin-block-start: var(--v-space-4xs);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(auto, calc(33% - var(--gutter))));
   gap: var(--gutter);
 }
-.community__content .field--name-field-featured-content .field__item {
+.community__content .field--name-field-featured-content > .field__items .field__item {
   max-inline-size: calc(100vw - var(--layout-padding-full-width) * 2);
 }
-.community__content .field--name-field-featured-content .field__item a {
+.community__content .field--name-field-featured-content > .field__items .field__item a {
   display: block;
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
@@ -2768,26 +2768,33 @@ header {
   padding-inline: var(--v-space-2xs);
   cursor: pointer;
 }
-.community__content .field--name-field-featured-content .field__item a.dictionary-word__teaser-word {
+.community__content .field--name-field-featured-content > .field__items .field__item a.dictionary-word__teaser-word {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
 }
-.community__content .field--name-field-featured-content .field__item a:hover, .community__content .field--name-field-featured-content .field__item a:active, .community__content .field--name-field-featured-content .field__item a:focus {
+.community__content .field--name-field-featured-content > .field__items .field__item a:hover, .community__content .field--name-field-featured-content > .field__items .field__item a:active, .community__content .field--name-field-featured-content > .field__items .field__item a:focus {
   color: var(--light-text-color);
   background: var(--brand-primary-accent);
 }
-.community__content .field--name-field-featured-content .field__item a:focus {
+.community__content .field--name-field-featured-content > .field__items .field__item a:focus {
   outline: 2px solid var(--focus-color);
 }
-.community__content .field--name-field-featured-content .field__item a:disabled {
+.community__content .field--name-field-featured-content > .field__items .field__item a:disabled {
   color: var(--light-text-color);
   background: var(--brand-text-color);
 }
+.community__content .field--name-field-featured-content .dictionary-word__teaser-content,
 .community__content .field--name-field-featured-content .dictionary-word__teaser-heading {
   padding-inline: 0;
   padding-block: 0;
   background-color: unset;
+}
+.community__content .field--name-field-featured-content .dictionary-word__media {
+  display: block;
+}
+.community__content .field--name-field-featured-content .dictionary-word__media audio {
+  max-inline-size: 100%;
 }
 
 .community__sidebar {
