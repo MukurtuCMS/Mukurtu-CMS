@@ -2768,6 +2768,11 @@ header {
   padding-inline: var(--v-space-2xs);
   cursor: pointer;
 }
+.community__content .field--name-field-featured-content .field__item a.dictionary-word__teaser-word {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
 .community__content .field--name-field-featured-content .field__item a:hover, .community__content .field--name-field-featured-content .field__item a:active, .community__content .field--name-field-featured-content .field__item a:focus {
   color: var(--light-text-color);
   background: var(--brand-primary-accent);
@@ -2778,6 +2783,11 @@ header {
 .community__content .field--name-field-featured-content .field__item a:disabled {
   color: var(--light-text-color);
   background: var(--brand-text-color);
+}
+.community__content .field--name-field-featured-content .dictionary-word__teaser-heading {
+  padding-inline: 0;
+  padding-block: 0;
+  background-color: unset;
 }
 
 .community__sidebar {

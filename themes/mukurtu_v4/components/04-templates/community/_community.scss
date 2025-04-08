@@ -63,8 +63,18 @@
       a {
         display: block;
 
+        &.dictionary-word__teaser-word {
+          display: flex;
+        }
+
         @include mixins.button;
       }
+    }
+
+    .dictionary-word__teaser-heading {
+      padding-inline: 0;
+      padding-block: 0;
+      background-color: unset;
     }
   }
 }
