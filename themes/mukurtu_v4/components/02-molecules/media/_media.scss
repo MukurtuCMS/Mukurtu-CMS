@@ -26,6 +26,10 @@
   align-items: center;
   justify-content: center;
 
+  iframe {
+    background-color: black;
+  }
+
   .button {
     margin-block-start: var(--v-space-5xs);
   }

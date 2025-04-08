@@ -123,7 +123,7 @@ class ManageProtocolsController extends ControllerBase {
     $communities = $protocol->getCommunities();
 
     $build['template'] = [
-      '#theme' => 'manage-protocol',
+      '#theme' => 'manage_protocol',
       '#links' => $links,
       '#protocol' => $protocol,
       '#sharing' => $sharing,

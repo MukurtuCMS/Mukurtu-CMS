@@ -4,14 +4,61 @@ dependencies:
   config:
     - core.entity_view_mode.community.full
   module:
+    - colorbox
+    - field_group
     - layout_builder
     - mukurtu_protocol
-    - options
+    - og
     - text
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
+  field_group:
+    group_community_content:
+      children:
+        - field_description
+        - field_featured_content
+      label: 'Community Content'
+      parent_name: ''
+      region: content
+      weight: 2
+      format_type: html_element
+      format_settings:
+        classes: community__content
+        show_empty_fields: true
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_community_sidebar:
+      children:
+        - og_group
+        - field_protocols
+        - field_parent_community
+        - field_child_communities
+      label: 'Community Sidebar'
+      parent_name: ''
+      region: content
+      weight: 3
+      format_type: html_element
+      format_settings:
+        classes: community__sidebar
+        show_empty_fields: true
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
 id: community.community.full
 targetEntityType: community
 bundle: community
@@ -24,13 +71,6 @@ content:
       link: true
     third_party_settings: {  }
     weight: 2
-    region: content
-  field_access_mode:
-    type: list_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 3
     region: content
   field_banner_image:
     type: entity_reference_entity_view
@@ -47,22 +87,14 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 4
-    region: content
-  field_community_type:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 5
+    weight: 7
     region: content
   field_description:
     type: text_default
     label: hidden
     settings: {  }
     third_party_settings: {  }
-    weight: 2
+    weight: 3
     region: content
   field_featured_content:
     type: entity_reference_entity_view
@@ -71,7 +103,18 @@ content:
       view_mode: teaser
       link: false
     third_party_settings: {  }
-    weight: 7
+    weight: 4
+    region: content
+  field_parent_community:
+    type: colorbox_view_modes
+    label: above
+    settings:
+      colorbox_view_mode: ''
+      colorbox_modal_view_mode: ''
+      colorbox_gallery: post
+      colorbox_gallery_custom: ''
+    third_party_settings: {  }
+    weight: 6
     region: content
   field_protocols:
     type: entity_reference_label
@@ -79,7 +122,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 6
+    weight: 5
     region: content
   name:
     type: string
@@ -89,10 +132,17 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
+  og_group:
+    type: og_group_subscribe
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
 hidden:
-  field_parent_community: true
+  field_access_mode: true
+  field_community_type: true
   field_thumbnail_image: true
   langcode: true
-  og_group: true
   search_api_excerpt: true
   user_id: true

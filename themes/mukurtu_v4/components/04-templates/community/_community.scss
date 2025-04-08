@@ -1,0 +1,101 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
+
+.community--full {
+  display: grid;
+  grid-template-areas:
+    "banner"
+    "content"
+    "sidebar";
+  gap: var(--v-space-l);
+
+  @include include-media.media(">=lg") {
+    grid-template-areas:
+      "banner banner banner banner"
+      ". content sidebar .";
+    grid-template-columns:
+      1fr
+      fit-content(calc(
+        80rem - 15rem - var(--layout-padding-full-width) - var(--v-space-l)
+      ))
+      calc(15rem + var(--layout-padding-full-width))
+      1fr;
+  }
+}
+
+.field--name-field-banner-image {
+  grid-area: banner;
+
+  .media--image {
+    align-items: stretch;
+
+    img {
+      inline-size: 100%;
+      block-size: 80vh;
+      object-fit: cover;
+    }
+  }
+}
+
+.community__content {
+  grid-area: content;
+  margin-inline: var(--layout-padding-full-width);
+
+  @include include-media.media(">=lg") {
+    margin-inline: 0;
+    min-inline-size: calc(46.5vw + 1rem);
+  }
+
+  .field--name-field-featured-content {
+    margin-block-start: var(--v-space-l);
+
+    & > .field__items {
+      margin-block-start: var(--v-space-4xs);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(auto, calc(33% - var(--gutter))));
+      gap: var(--gutter);
+
+      .field__item {
+        max-inline-size: calc(100vw - (var(--layout-padding-full-width) * 2));
+
+        a {
+          display: block;
+
+          &.dictionary-word__teaser-word {
+            display: flex;
+          }
+
+          @include mixins.button;
+        }
+      }
+    }
+
+    .dictionary-word__teaser-content,
+    .dictionary-word__teaser-heading {
+      padding-inline: 0;
+      padding-block: 0;
+      background-color: unset;
+    }
+
+    .dictionary-word__media {
+      display: block;
+
+      audio {
+        max-inline-size: 100%;
+      }
+    }
+  }
+}
+
+.community__sidebar {
+  grid-area: sidebar;
+  display: flex;
+  flex-flow: column nowrap;
+  gap: var(--v-space-2xs);
+  margin-inline: var(--layout-padding-full-width);
+
+  @include include-media.media(">=lg") {
+    margin-inline: 0;
+  }
+}
