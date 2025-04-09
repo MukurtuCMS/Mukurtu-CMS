@@ -237,4 +237,5 @@ function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(
   $route_match = \Drupal::routeMatch();
   $protocol = $route_match->getParameter('protocol');
   $variables['protocol_name'] = $protocol->get('name')->value;
+  $variables['protocol_id'] = $protocol->get('id')->value;
 }

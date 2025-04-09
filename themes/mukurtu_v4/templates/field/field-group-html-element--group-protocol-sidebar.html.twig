@@ -25,10 +25,10 @@
   {% endif %}
   {{ children }}
   <div class="callout">
-    <div class="field__label">{{ 'Protocols'|t }}</div>
+    <div class="field__label">{{ 'Digital heritage'|t }}</div>
     <div class="field__items">
       <div class="field__item">
-        <a href="/protocols?f[0]=protocol_content_title%3A{{ protocol_name }}">
+        <a href="/digital-heritage?f[0]=cultural_protocols_dh_browse%3A|{{ protocol_id }}|">
           {{ 'Browse by '|t ~ protocol_name }}
         </a>
       </div>
