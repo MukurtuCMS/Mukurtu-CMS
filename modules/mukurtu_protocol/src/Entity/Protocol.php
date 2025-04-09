@@ -527,6 +527,43 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $fields['field_featured_content'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Featured Content'))
+      ->setSetting('target_type', 'node')
+      ->setSetting('handler', 'default:node')
+      ->setSetting('handler_settings', [
+        'auto_create' => FALSE,
+      ])
+      ->setRequired(FALSE)
+      ->setCardinality(-1)
+      ->setTranslatable(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 20,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_banner_image'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Banner Image'))
+      ->setSetting('target_type', 'media')
+      ->setSetting('handler', 'default:media')
+      ->setSetting('handler_settings', [
+        'auto_create' => FALSE,
+        'target_bundles' => ['image' => 'image'],
+      ])
+      ->setRequired(FALSE)
+      ->setCardinality(-1)
+      ->setTranslatable(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 20,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Sharing Protocol'))
       ->setDescription('')
