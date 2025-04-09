@@ -34,6 +34,16 @@
       </div>
     </div>
   </div>
+  <div class="callout">
+    <div class="field__label">{{ 'Local context'|t }}</div>
+    <div class="field__items">
+      <div class="field__item">
+        <a href="/dashboard/protocols/{{ protocol_id }}/local-contexts/projects">
+          {{ 'Project directory for '|t ~ protocol_name }}
+        </a>
+      </div>
+    </div>
+  </div>
   {% if collapsible %}
 </div>
 {% endif %}
