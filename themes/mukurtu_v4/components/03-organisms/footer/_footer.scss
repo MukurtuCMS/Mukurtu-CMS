@@ -4,9 +4,10 @@
 // Mukurtu Footer.
 
 .footer {
+  margin-block-start: var(--v-space-l);
+  padding-block-start: var(--v-space-xs);
   background-color: var(--footer-bg-color);
   color: var(--footer-text-color);
-  padding-block-start: var(--v-space-xs);
 
   @include layout.layout--full-width-grid;
 
@@ -47,41 +48,33 @@
   .instagram {
     display: flex;
     align-items: center;
-  }
+    gap: 1ch;
 
-  .twitter {
-    &::before {
-      content: url('../images/twitter.svg');
-    }
-  }
-
-  .facebook {
-    &::before {
-      content: url('../images/facebook.svg');
-    }
-  }
-
-  .instagram {
-    &::before {
-      content: url('../images/instagram.svg');
-    }
-  }
-
-  .icon {
-    &::before {
-      display: inline-block;
-      vertical-align: middle;
-      block-size: var(--v-space-3xs);
-      inline-size: var(--v-space-3xs);
-      margin-inline-end: var(--v-space-6xs);
+    svg {
+      block-size: 1.5rem;
     }
   }
 
   .socials {
     display: flex;
-    flex-direction: row;
+    flex-flow: row wrap;
     justify-content: space-between;
+    gap: 2rem;
     margin-block-end: var(--v-space-2xs);
+
+    a {
+      color: var(--footer-text-color);
+      text-decoration-color: currentColor;
+      text-decoration-thickness: 1px;
+
+      &:hover {
+        text-decoration-color: var(--color-transparent);
+      }
+    }
+  }
+
+  .socials__accounts {
+    margin-block-start: var(--v-space-5xs);
   }
 
   .email,
@@ -93,19 +86,12 @@
   }
 
   .email {
-    margin-block-end: var(--v-space-3xs);
+    margin-block-end: var(--v-space-s);
 
     a {
       color: var(--footer-text-color);
       text-decoration-color: var(--footer-text-color);
       text-decoration-thickness: 1px;
-
-      &::before {
-        content: url('../images/email_icon.svg');
-        display: inline-block;
-        vertical-align: middle;
-        margin-inline-end: var(--v-space-6xs);
-      }
 
       &:hover {
         color: var(--footer-text-color);
