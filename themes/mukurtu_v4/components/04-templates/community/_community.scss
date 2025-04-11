@@ -2,7 +2,8 @@
 @use "../../00-base/layout/layout";
 @use "../../00-base/mixins/mixins";
 
-.community--full {
+.community--full,
+.protocol--full {
   display: grid;
   grid-template-areas:
     "banner"
@@ -22,23 +23,24 @@
       calc(15rem + var(--layout-padding-full-width))
       1fr;
   }
-}
 
-.field--name-field-banner-image {
-  grid-area: banner;
+  .field--name-field-banner-image {
+    grid-area: banner;
 
-  .media--image {
-    align-items: stretch;
+    .media--image {
+      align-items: stretch;
 
-    img {
-      inline-size: 100%;
-      block-size: 80vh;
-      object-fit: cover;
+      img {
+        inline-size: 100%;
+        block-size: 80vh;
+        object-fit: cover;
+      }
     }
   }
 }
 
-.community__content {
+.community__content,
+.protocol__content {
   grid-area: content;
   margin-inline: var(--layout-padding-full-width);
 
@@ -88,7 +90,8 @@
   }
 }
 
-.community__sidebar {
+.community__sidebar,
+.protocol__sidebar {
   grid-area: sidebar;
   display: flex;
   flex-flow: column nowrap;

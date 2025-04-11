@@ -756,6 +756,7 @@ figure.align-right,
 }
 
 .community__sidebar > .field,
+.protocol__sidebar > .field,
 .callout {
   padding-inline: 1rem;
   padding-block: 1rem;
@@ -2702,58 +2703,68 @@ header {
      object-fit: cover;
 }
 
-.community--full {
+.community--full,
+.protocol--full {
   display: grid;
   grid-template-areas: "banner" "content" "sidebar";
   gap: var(--v-space-l);
 }
 @media (min-width: 60rem) {
-  .community--full {
+  .community--full,
+  .protocol--full {
     grid-template-areas: "banner banner banner banner" ". content sidebar .";
     grid-template-columns: 1fr fit-content(calc(65rem - var(--layout-padding-full-width) - var(--v-space-l))) calc(15rem + var(--layout-padding-full-width)) 1fr;
   }
 }
-
-.field--name-field-banner-image {
+.community--full .field--name-field-banner-image,
+.protocol--full .field--name-field-banner-image {
   grid-area: banner;
 }
-.field--name-field-banner-image .media--image {
+.community--full .field--name-field-banner-image .media--image,
+.protocol--full .field--name-field-banner-image .media--image {
   -webkit-box-align: stretch;
       -ms-flex-align: stretch;
           align-items: stretch;
 }
-.field--name-field-banner-image .media--image img {
+.community--full .field--name-field-banner-image .media--image img,
+.protocol--full .field--name-field-banner-image .media--image img {
   inline-size: 100%;
   block-size: 80vh;
   -o-object-fit: cover;
      object-fit: cover;
 }
 
-.community__content {
+.community__content,
+.protocol__content {
   grid-area: content;
   margin-inline: var(--layout-padding-full-width);
 }
 @media (min-width: 60rem) {
-  .community__content {
+  .community__content,
+  .protocol__content {
     margin-inline: 0;
     min-inline-size: calc(46.5vw + 1rem);
   }
 }
-.community__content .field--name-field-featured-content {
+.community__content .field--name-field-featured-content,
+.protocol__content .field--name-field-featured-content {
   -webkit-margin-before: var(--v-space-l);
           margin-block-start: var(--v-space-l);
 }
-.community__content .field--name-field-featured-content > .field__items {
+.community__content .field--name-field-featured-content > .field__items,
+.protocol__content .field--name-field-featured-content > .field__items {
   -webkit-margin-before: var(--v-space-4xs);
           margin-block-start: var(--v-space-4xs);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(auto, calc(33% - var(--gutter))));
   gap: var(--gutter);
 }
-.community__content .field--name-field-featured-content > .field__items .field__item {
+.community__content .field--name-field-featured-content > .field__items .field__item,
+.protocol__content .field--name-field-featured-content > .field__items .field__item {
   max-inline-size: calc(100vw - var(--layout-padding-full-width) * 2);
 }
-.community__content .field--name-field-featured-content > .field__items .field__item a {
+.community__content .field--name-field-featured-content > .field__items .field__item a,
+.protocol__content .field--name-field-featured-content > .field__items .field__item a {
   display: block;
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
@@ -2765,36 +2776,47 @@ header {
   padding-inline: var(--v-space-2xs);
   cursor: pointer;
 }
-.community__content .field--name-field-featured-content > .field__items .field__item a.dictionary-word__teaser-word {
+.community__content .field--name-field-featured-content > .field__items .field__item a.dictionary-word__teaser-word,
+.protocol__content .field--name-field-featured-content > .field__items .field__item a.dictionary-word__teaser-word {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
 }
-.community__content .field--name-field-featured-content > .field__items .field__item a:hover, .community__content .field--name-field-featured-content > .field__items .field__item a:active, .community__content .field--name-field-featured-content > .field__items .field__item a:focus {
+.community__content .field--name-field-featured-content > .field__items .field__item a:hover, .community__content .field--name-field-featured-content > .field__items .field__item a:active, .community__content .field--name-field-featured-content > .field__items .field__item a:focus,
+.protocol__content .field--name-field-featured-content > .field__items .field__item a:hover,
+.protocol__content .field--name-field-featured-content > .field__items .field__item a:active,
+.protocol__content .field--name-field-featured-content > .field__items .field__item a:focus {
   color: var(--light-text-color);
   background: var(--brand-primary-accent);
 }
-.community__content .field--name-field-featured-content > .field__items .field__item a:focus {
+.community__content .field--name-field-featured-content > .field__items .field__item a:focus,
+.protocol__content .field--name-field-featured-content > .field__items .field__item a:focus {
   outline: 2px solid var(--focus-color);
 }
-.community__content .field--name-field-featured-content > .field__items .field__item a:disabled {
+.community__content .field--name-field-featured-content > .field__items .field__item a:disabled,
+.protocol__content .field--name-field-featured-content > .field__items .field__item a:disabled {
   color: var(--light-text-color);
   background: var(--brand-text-color);
 }
 .community__content .field--name-field-featured-content .dictionary-word__teaser-content,
-.community__content .field--name-field-featured-content .dictionary-word__teaser-heading {
+.community__content .field--name-field-featured-content .dictionary-word__teaser-heading,
+.protocol__content .field--name-field-featured-content .dictionary-word__teaser-content,
+.protocol__content .field--name-field-featured-content .dictionary-word__teaser-heading {
   padding-inline: 0;
   padding-block: 0;
   background-color: unset;
 }
-.community__content .field--name-field-featured-content .dictionary-word__media {
+.community__content .field--name-field-featured-content .dictionary-word__media,
+.protocol__content .field--name-field-featured-content .dictionary-word__media {
   display: block;
 }
-.community__content .field--name-field-featured-content .dictionary-word__media audio {
+.community__content .field--name-field-featured-content .dictionary-word__media audio,
+.protocol__content .field--name-field-featured-content .dictionary-word__media audio {
   max-inline-size: 100%;
 }
 
-.community__sidebar {
+.community__sidebar,
+.protocol__sidebar {
   grid-area: sidebar;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -2807,7 +2829,8 @@ header {
   margin-inline: var(--layout-padding-full-width);
 }
 @media (min-width: 60rem) {
-  .community__sidebar {
+  .community__sidebar,
+  .protocol__sidebar {
     margin-inline: 0;
   }
 }
