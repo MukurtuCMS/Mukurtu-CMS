@@ -14,6 +14,7 @@ dependencies:
   - 'drupal:media_library'
   - 'drupal:node'
   - 'drupal:options'
+  - 'drupal:path'
   - 'drupal:system'
   - 'drupal:taxonomy'
   - 'drupal:text'
