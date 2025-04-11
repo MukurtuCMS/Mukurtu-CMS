@@ -1176,7 +1176,8 @@ details.form-wrapper summary + div {
   -webkit-box-shadow: 2px 3px 4px var(--brand-light);
           box-shadow: 2px 3px 4px var(--brand-light);
   z-index: 100;
-  inset-inline-end: 0;
+  -webkit-transform: translateX(-85%);
+          transform: translateX(-85%);
 }
 .language-switcher .links li {
   list-style-type: none;

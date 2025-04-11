@@ -27,7 +27,7 @@
     margin: 0;
     box-shadow: 2px 3px 4px var(--brand-light);
     z-index: 100;
-    inset-inline-end: 0;
+    transform: translateX(-85%);
 
     li {
       list-style-type: none;
