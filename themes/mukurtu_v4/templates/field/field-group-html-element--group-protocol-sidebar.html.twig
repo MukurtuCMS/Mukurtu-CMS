@@ -28,8 +28,8 @@
     <div class="field__label">{{ 'Digital heritage'|t }}</div>
     <div class="field__items">
       <div class="field__item">
-        <a href="/digital-heritage?f[0]=community_content_title%3A{{ community_name }}">
-          {{ 'Browse by '|t ~ community_name }}
+        <a href="/digital-heritage?f[0]=cultural_protocols_dh_browse%3A|{{ protocol_id }}|">
+          {{ 'Browse by '|t ~ protocol_name }}
         </a>
       </div>
     </div>
@@ -38,8 +38,8 @@
     <div class="field__label">{{ 'Local context'|t }}</div>
     <div class="field__items">
       <div class="field__item">
-        <a href="/dashboard/communities/{{ community_id }}/local-contexts/projects">
-          {{ 'Project directory for '|t ~ community_name }}
+        <a href="/dashboard/protocols/{{ protocol_id }}/local-contexts/projects">
+          {{ 'Project directory for '|t ~ protocol_name }}
         </a>
       </div>
     </div>

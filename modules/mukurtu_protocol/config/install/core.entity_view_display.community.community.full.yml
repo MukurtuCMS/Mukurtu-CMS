@@ -8,7 +8,6 @@ dependencies:
     - field_group
     - layout_builder
     - mukurtu_protocol
-    - og
     - text
 third_party_settings:
   layout_builder:
@@ -25,7 +24,7 @@ third_party_settings:
       weight: 2
       format_type: html_element
       format_settings:
-        classes: community__content
+        classes: 'community__content layout-right-sidebar__content'
         show_empty_fields: true
         id: ''
         label_as_html: false
@@ -48,7 +47,7 @@ third_party_settings:
       weight: 3
       format_type: html_element
       format_settings:
-        classes: community__sidebar
+        classes: 'community__sidebar layout-right-sidebar__sidebar'
         show_empty_fields: true
         id: ''
         label_as_html: false
