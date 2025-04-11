@@ -60,3 +60,33 @@
     background: var(--brand-text-color);
   }
 }
+
+@mixin block-link {
+  background-color: var(--color-white);
+  border: 1px solid var(--brand-primary-dark);
+  color: var(--brand-primary-dark);
+  font-weight: var(--text-bold);
+  line-height: normal;
+  text-decoration: none;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  letter-spacing: normal;
+
+  &:hover {
+    background-color: var(--brand-primary-dark);
+    color: var(--color-white);
+  }
+
+  &:focus {
+    outline-offset: 1px;
+  }
+}
+
+@mixin block-link-active {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+
+  &:hover {
+    background-color: var(--brand-primary-accent);
+  }
+}

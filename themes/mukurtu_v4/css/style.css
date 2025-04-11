@@ -1169,7 +1169,7 @@ details.form-wrapper summary + div {
 
 .language-switcher .links {
   position: absolute;
-  background-color: white;
+  background-color: var(--color-white);
   padding-inline: 2em;
   padding-block: 1em;
   margin: 0;
@@ -1177,6 +1177,38 @@ details.form-wrapper summary + div {
           box-shadow: 2px 3px 4px var(--brand-light);
   z-index: 100;
   inset-inline-end: 0;
+}
+.language-switcher .links li {
+  list-style-type: none;
+}
+.language-switcher .links li + li {
+  -webkit-margin-before: 1em;
+          margin-block-start: 1em;
+}
+.language-switcher .links a {
+  background-color: var(--color-white);
+  border: 1px solid var(--brand-primary-dark);
+  color: var(--brand-primary-dark);
+  font-weight: var(--text-bold);
+  line-height: normal;
+  text-decoration: none;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  letter-spacing: normal;
+}
+.language-switcher .links a:hover {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.language-switcher .links a:focus {
+  outline-offset: 1px;
+}
+.language-switcher .links a.is-active {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.language-switcher .links a.is-active:hover {
+  background-color: var(--brand-primary-accent);
 }
 
 .local-tasks {
