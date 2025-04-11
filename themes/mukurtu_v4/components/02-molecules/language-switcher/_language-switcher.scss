@@ -1,0 +1,19 @@
+.language-switcher__summary {
+  cursor: pointer;
+  font-size: 1.5em;
+
+  &::marker {
+    content: none;
+  }
+}
+
+.language-switcher .links {
+  position: absolute;
+  background-color: white;
+  padding-inline: 2em;
+  padding-block: 1em;
+  margin: 0;
+  box-shadow: 2px 3px 4px var(--brand-light);
+  z-index: 100;
+  inset-inline-end: 0;
+}

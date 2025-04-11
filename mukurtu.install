@@ -121,6 +121,25 @@ function mukurtu_install() {
   $block->setWeight(-3);
   $block->save();
 
+  // Language switcher.
+  $block = Block::create([
+    'id' => 'mukurtu_v4_languageswitcher_1',
+    'settings' => [
+      'id' => 'language_block:language_interface',
+      'label' => t('Language Switcher'),
+      'label_display' => TRUE,
+      'provider' => 'language',
+    ],
+    'region' => 'header',
+    'plugin' => 'language_block:language_interface',
+    'theme' => 'mukurtu_v4',
+    'visibility' => [],
+  ]);
+  $block->save();
+  $block->setRegion('header');
+  $block->setStatus(TRUE);
+  $block->setWeight(3);
+  $block->save();
 
   // Delete unused user flags that crash user registration page.
   $flagStorage = \Drupal::entityTypeManager()->getStorage('flag');

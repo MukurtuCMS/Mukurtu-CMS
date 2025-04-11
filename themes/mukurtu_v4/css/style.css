@@ -1151,6 +1151,26 @@ details.form-wrapper summary + div {
           padding-block-start: var(--v-separation);
 }
 
+.language-switcher__summary {
+  cursor: pointer;
+  font-size: 1.5em;
+}
+.language-switcher__summary::marker {
+  content: none;
+}
+
+.language-switcher .links {
+  position: absolute;
+  background-color: white;
+  padding-inline: 2em;
+  padding-block: 1em;
+  margin: 0;
+  -webkit-box-shadow: 2px 3px 4px var(--brand-light);
+          box-shadow: 2px 3px 4px var(--brand-light);
+  z-index: 100;
+  inset-inline-end: 0;
+}
+
 .local-tasks {
   display: grid;
   grid-template-columns: var(--grid-6col);
@@ -1758,13 +1778,16 @@ header {
 }
 @media (min-width: 60rem) {
   .header__main-nav {
-    grid-column: 2/span 12;
+    grid-column: 2/span 11;
   }
 }
 @media (min-width: 90rem) {
   .header__main-nav {
-    grid-column: 4/span 12;
+    grid-column: 4/span 11;
   }
+}
+.header .language-switcher {
+  grid-column: -1/span 1;
 }
 
 .grid {
