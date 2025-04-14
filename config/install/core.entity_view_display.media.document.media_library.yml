@@ -20,7 +20,7 @@ mode: media_library
 content:
   field_media_document:
     type: file_default
-    label: hidden
+    label: above
     settings:
       use_description_as_link_text: true
     third_party_settings: {  }

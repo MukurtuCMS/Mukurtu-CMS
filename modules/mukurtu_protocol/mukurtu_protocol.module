@@ -83,12 +83,20 @@ function mukurtu_protocol_views_data_alter(array &$data) {
  */
 function mukurtu_protocol_theme($existing, $type, $theme, $path) {
   return [
-    'communities-page' => [
+    'community' => [
+      'render element' => 'elements',
+      'file' => 'community.page.inc',
+    ],
+    'protocol' => [
+      'render element' => 'elements',
+      'file' => 'protocol.page.inc',
+    ],
+    'communities_page' => [
       'variables' => [
         'communities' => NULL,
       ],
     ],
-    'manage-community' => [
+    'manage_community' => [
       'variables' => [
         'community' => NULL,
         'links' => NULL,
@@ -98,7 +106,7 @@ function mukurtu_protocol_theme($existing, $type, $theme, $path) {
         'notices' => NULL,
       ],
     ],
-    'manage-protocol' => [
+    'manage_protocol' => [
       'variables' => [
         'protocol' => NULL,
         'links' => NULL,
@@ -493,4 +501,30 @@ function mukurtu_protocol_field_widget_single_element_entity_browser_entity_refe
       ];
     }
   }
+}
+
+/**
+ * Implements hook_preprocess_field__community__og_group__community().
+ */
+function mukurtu_protocol_preprocess_field__community__og_group__community(array &$variables): void {
+  $variables['label'] = t('Community role');
+  $description = $variables['items'][0]['content']['#value'];
+  $variables['items'][0]['content']['#value'] = str_replace(
+    'the group',
+    'a community',
+    $description
+  ) . '.';
+}
+
+/**
+ * Implements hook_preprocess_field__protocol__og_group__protocol().
+ */
+function mukurtu_protocol_preprocess_field__protocol__og_group__protocol(array &$variables): void {
+  $variables['label'] = t('Protocol role');
+  $description = $variables['items'][0]['content']['#value'];
+  $variables['items'][0]['content']['#value'] = str_replace(
+    'the group',
+    'a protocol',
+    $description
+  ) . '.';
 }

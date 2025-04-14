@@ -33,7 +33,7 @@ use Exception;
  *   ),
  *   handlers = {
  *     "storage" = "Drupal\mukurtu_protocol\ProtocolStorage",
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "view_builder" = "Drupal\mukurtu_protocol\Entity\ProtocolViewBuilder",
  *     "list_builder" = "Drupal\mukurtu_protocol\ProtocolListBuilder",
  *     "views_data" = "Drupal\mukurtu_protocol\Entity\ProtocolViewsData",
  *     "translation" = "Drupal\mukurtu_protocol\ProtocolTranslationHandler",
@@ -523,6 +523,43 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
         'label' => 'visible',
         'type' => 'string',
         'weight' => 4,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_featured_content'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Featured Content'))
+      ->setSetting('target_type', 'node')
+      ->setSetting('handler', 'default:node')
+      ->setSetting('handler_settings', [
+        'auto_create' => FALSE,
+      ])
+      ->setRequired(FALSE)
+      ->setCardinality(-1)
+      ->setTranslatable(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 20,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_banner_image'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Banner Image'))
+      ->setSetting('target_type', 'media')
+      ->setSetting('handler', 'default:media')
+      ->setSetting('handler_settings', [
+        'auto_create' => FALSE,
+        'target_bundles' => ['image' => 'image'],
+      ])
+      ->setRequired(FALSE)
+      ->setCardinality(-1)
+      ->setTranslatable(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 20,
       ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);

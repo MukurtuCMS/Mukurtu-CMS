@@ -17,6 +17,15 @@ targetEntityType: node
 bundle: dictionary_word
 mode: teaser
 content:
+  field_recording:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: browse
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
   field_thumbnail:
     type: entity_reference_entity_view
     label: hidden
@@ -61,7 +70,6 @@ hidden:
   field_multipage_page_of: true
   field_pronunciation: true
   field_protocol_control: true
-  field_recording: true
   field_related_content: true
   field_representative_media: true
   field_sample_sentences: true

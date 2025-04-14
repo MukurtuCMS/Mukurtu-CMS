@@ -1,8 +1,8 @@
 {#
 /**
  * @file
- * Theme override to display a dictionary word teaser node,
- * as seen on /dictionary.
+ * Theme override to display a node as "Teaser", in the sidebar
+ * under related content.
  *
  * Available variables:
  * - node: The node entity with limited access to object properties and methods.
@@ -68,34 +68,18 @@
  *
  */
 #}
+<article{{ attributes }}>
 
-{% if (node.field_thumbnail.value is not empty or
-  content.field_word_entry.0['#paragraph'].field_translation is not empty or
-  content.field_word_entry.0['#paragraph'].field_recording is not empty) or
-  content.field_recording is not empty %}
-  {% set teaser_content = true %}
-{% endif %}
-
-<article{{ attributes.addClass('dictionary-word__teaser') }}>
   {{ title_prefix }}
-    <div{{ title_attributes.addClass('dictionary-word__teaser-heading') }}>
-      <a class="dictionary-word__teaser-word" href="{{ url }}" rel="bookmark">
-        {{ label }}
-        {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
-      </a>
+  {% if label and not page %}
+    <div{{ title_attributes }}>
+      <a href="{{ url }}" rel="bookmark">{{ label }}</a>
     </div>
+  {% endif %}
   {{ title_suffix }}
 
-  {% if teaser_content %}
-  <div{{ content_attributes.addClass('dictionary-word__teaser-content') }}>
-    {{ content.field_word_entry.0['#paragraph']|view('teaser_translation') }}
-
-    <div class="dictionary-word__media">
-      {{ content.field_thumbnail }}
-      {# Recording. #}
-      {{ content.field_word_entry.0['#paragraph']|view('teaser') }}
-      {{ content.field_recording }}
-    </div>
+  <div{{ content_attributes }}>
+    {{ content }}
   </div>
-  {% endif %}
+
 </article>

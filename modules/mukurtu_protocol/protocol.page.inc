@@ -19,10 +19,7 @@ use Drupal\Core\Render\Element;
  *   - elements: An associative array containing the user information and any
  *   - attributes: HTML attributes for the containing element.
  */
-function template_preprocess_protocol(array &$variables) {
-  // Fetch Protocol Entity Object.
-  $protocol = $variables['elements']['#protocol'];
-
+function template_preprocess_protocol(array &$variables): void {
   // Helpful $content variable for templates.
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
