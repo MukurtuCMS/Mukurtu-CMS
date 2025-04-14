@@ -1612,10 +1612,12 @@ details.form-wrapper summary + div {
 }
 
 .footer {
-  background-color: var(--footer-bg-color);
-  color: var(--footer-text-color);
+  -webkit-margin-before: var(--v-space-l);
+          margin-block-start: var(--v-space-l);
   -webkit-padding-before: var(--v-space-xs);
           padding-block-start: var(--v-space-xs);
+  background-color: var(--footer-bg-color);
+  color: var(--footer-text-color);
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: var(--layout-padding) var(--layout-padding);
@@ -1686,23 +1688,12 @@ details.form-wrapper summary + div {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
+  gap: 1ch;
 }
-.footer .twitter::before {
-  content: url("../images/twitter.svg");
-}
-.footer .facebook::before {
-  content: url("../images/facebook.svg");
-}
-.footer .instagram::before {
-  content: url("../images/instagram.svg");
-}
-.footer .icon::before {
-  display: inline-block;
-  vertical-align: middle;
-  block-size: var(--v-space-3xs);
-  inline-size: var(--v-space-3xs);
-  -webkit-margin-end: var(--v-space-6xs);
-          margin-inline-end: var(--v-space-6xs);
+.footer .twitter svg,
+.footer .facebook svg,
+.footer .instagram svg {
+  block-size: 1.5rem;
 }
 .footer .socials {
   display: -webkit-box;
@@ -1710,13 +1701,26 @@ details.form-wrapper summary + div {
   display: flex;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
+      -ms-flex-flow: row wrap;
+          flex-flow: row wrap;
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  gap: 2rem;
   -webkit-margin-after: var(--v-space-2xs);
           margin-block-end: var(--v-space-2xs);
+}
+.footer .socials a {
+  color: var(--footer-text-color);
+  text-decoration-color: currentcolor;
+  text-decoration-thickness: 1px;
+}
+.footer .socials a:hover {
+  text-decoration-color: var(--color-transparent);
+}
+.footer .socials__accounts {
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
 }
 .footer .email,
 .footer .copyright-message {
@@ -1734,20 +1738,13 @@ details.form-wrapper summary + div {
           margin-block-end: var(--v-space-2xs);
 }
 .footer .email {
-  -webkit-margin-after: var(--v-space-3xs);
-          margin-block-end: var(--v-space-3xs);
+  -webkit-margin-after: var(--v-space-s);
+          margin-block-end: var(--v-space-s);
 }
 .footer .email a {
   color: var(--footer-text-color);
   text-decoration-color: var(--footer-text-color);
   text-decoration-thickness: 1px;
-}
-.footer .email a::before {
-  content: url("../images/email_icon.svg");
-  display: inline-block;
-  vertical-align: middle;
-  -webkit-margin-end: var(--v-space-6xs);
-          margin-inline-end: var(--v-space-6xs);
 }
 .footer .email a:hover {
   color: var(--footer-text-color);
