@@ -121,45 +121,24 @@ function mukurtu_install() {
   $block->setWeight(-3);
   $block->save();
 
-  // Footer block.
-  $tokenService = \Drupal::service('token');
-  $langaugeManager = \Drupal::languageManager();
-  $siteSettings = \Drupal::config('system.site');
-  $options = [
-    'langcode' => $langaugeManager->getCurrentLanguage()->getId(),
-    'clear' => TRUE,
-  ];
+  // Language switcher.
   $block = Block::create([
-    'id' => 'mukurtu_footer_1',
+    'id' => 'mukurtu_v4_languageswitcher_1',
     'settings' => [
-      'id' => 'mukurtu_footer_1',
-      'label' => t('Mukurtu Footer'),
-      'label_display' => 1,
-      'status' => 1,
-      'logo_upload' => '',
-      'email_us_text' => 'Email us at ' . $siteSettings->get('mail'),
-      'contact_email_address' => $siteSettings->get('mail'),
-      'social_media' => [],
-      'twitter' => '',
-      'twitter_accounts' => [],
-      'facebook' => '',
-      'facebook_accounts' => [],
-      'instagram' => '',
-      'instagram_accounts' => [],
-      'copyright_message' => $tokenService->replace(
-        '© [current-date:html_year] [site:name]',
-        [],
-        $options,
-      ),
+      'id' => 'language_block:language_interface',
+      'label' => t('Language Switcher'),
+      'label_display' => TRUE,
+      'provider' => 'language',
     ],
-    'region' => 'footer',
-    'plugin' => 'mukurtu_footer',
+    'region' => 'header',
+    'plugin' => 'language_block:language_interface',
     'theme' => 'mukurtu_v4',
+    'visibility' => [],
   ]);
   $block->save();
-  $block->setRegion('footer');
+  $block->setRegion('header');
   $block->setStatus(TRUE);
-  $block->setWeight(0);
+  $block->setWeight(3);
   $block->save();
 
   // Delete unused user flags that crash user registration page.
