@@ -24,6 +24,7 @@ dependencies:
   - 'mukurtu_browse:mukurtu_browse'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_drafts:mukurtu_drafts'
+  - 'mukurtu_local_contexts:mukurtu_local_contexts'
   - 'mukurtu_media:mukurtu_media'
   - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_protocol:mukurtu_protocol'

@@ -11,6 +11,7 @@ dependencies:
     - field_group
     - media_library
     - mukurtu_core
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - original_date
     - paragraphs
@@ -45,6 +46,7 @@ third_party_settings:
         - field_keywords
         - field_coverage
         - field_coverage_description
+        - field_location
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -93,9 +95,9 @@ third_party_settings:
       children:
         - field_related_people
       label: 'Related People'
-      region: hidden
+      region: content
       parent_name: group_relations
-      weight: 5
+      weight: 6
       format_type: details
       format_settings:
         classes: ''
@@ -112,13 +114,13 @@ mode: default
 content:
   comment:
     type: comment_default
-    weight: 11
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
   created:
     type: datetime_timestamp
-    weight: 4
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -131,7 +133,7 @@ content:
     third_party_settings: {  }
   field_coverage:
     type: geofield_mukurtu
-    weight: 31
+    weight: 10
     region: content
     settings:
       geometry_validation: 0
@@ -196,7 +198,7 @@ content:
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea
-    weight: 32
+    weight: 11
     region: content
     settings:
       rows: 5
@@ -237,6 +239,28 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 12
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 11
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_location:
+    type: entity_reference_autocomplete
+    weight: 12
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
     weight: 4
@@ -252,7 +276,7 @@ content:
     third_party_settings: {  }
   field_related_content:
     type: entity_browser_entity_reference
-    weight: 6
+    weight: 5
     region: content
     settings:
       entity_browser: mukurtu_content_browser
@@ -326,27 +350,27 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 7
+    weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
   promote:
     type: boolean_checkbox
-    weight: 5
+    weight: 4
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 10
+    weight: 8
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
-    weight: 6
+    weight: 5
     region: content
     settings:
       display_label: true
@@ -370,11 +394,10 @@ content:
       placeholder: ''
     third_party_settings: {  }
   url_redirects:
-    weight: 8
+    weight: 7
     region: content
     settings: {  }
     third_party_settings: {  }
 hidden:
   field_content_type: true
-  field_location: true
   field_sequence_collection: true

@@ -67,7 +67,7 @@ entity_fields_export_list:
     field_external_links: 'External Links'
     field_creative_commons: 'Creative Commons Licenses'
     field_rights_statements: 'Rights Statements'
-    field_coverage: Location
+    field_coverage: 'Map Points'
     field_original_date: 'Original Date'
     field_category: Category
     field_contributor: Contributor
