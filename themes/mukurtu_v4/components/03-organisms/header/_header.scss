@@ -49,11 +49,15 @@ header {
     grid-column: 2 / span 5;
 
     @include include-media.media('>=lg') {
-      grid-column: 2 / span 12;
+      grid-column: 2 / span 11;
     }
 
     @include include-media.media('>=2xl') {
-      grid-column: 4 / span 12;
+      grid-column: 4 / span 11;
     }
+  }
+
+  .language-switcher {
+    grid-column: -1 / span 1;
   }
 }
