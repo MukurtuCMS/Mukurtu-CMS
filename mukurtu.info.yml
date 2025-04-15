@@ -46,6 +46,7 @@ install:
   - facets_reset_button
   - term_merge
   - term_merge_manager
+  - flat_taxonomy
 dependencies:
   - 'blazy:blazy'
   - 'colorbox:colorbox'
