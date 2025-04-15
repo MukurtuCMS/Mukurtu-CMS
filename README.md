@@ -59,7 +59,7 @@ composer create-project mukurtu/mukurtu-template:dev-main .
 Access control in Mukurtu depends on the Drupal private file system. You must configure the `file_private_path` setting in settings.php.
 
 * Create a folder outside the `web` directory, such as `private_files`.
-* Open `sites/default/settings.php` and modify the `$settings['file_private_path']` line, such as the following:
+* Open `web/sites/default/settings.php` and modify the `$settings['file_private_path']` line, such as the following:
 ```php
 // Specify a private files path.
 $settings['file_private_path'] = '../private_files';
