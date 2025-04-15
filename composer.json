@@ -62,7 +62,8 @@
         "drush/drush": "^13",
         "mukurtu/colorbox": "*",
         "mukurtu/masonry": "*",
-        "sibyx/phpgpx": "@RC"
+        "sibyx/phpgpx": "@RC",
+        "drupal/term_merge:^2.0@beta"
     },
     "require-dev": {
         "drupal/devel": "*",

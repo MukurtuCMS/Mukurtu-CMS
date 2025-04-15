@@ -44,6 +44,7 @@ install:
   - google_analytics
   - twig_tweak
   - facets_reset_button
+  - term_merge
 dependencies:
   - 'blazy:blazy'
   - 'colorbox:colorbox'
