@@ -54,6 +54,7 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
       'people',
       'publisher',
       'subject',
+      'tags',
       'type',
       'word_type',
     ];
