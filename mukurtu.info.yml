@@ -44,7 +44,6 @@ install:
   - google_analytics
   - twig_tweak
   - facets_reset_button
-  - flat_taxonomy
 dependencies:
   - 'blazy:blazy'
   - 'colorbox:colorbox'
