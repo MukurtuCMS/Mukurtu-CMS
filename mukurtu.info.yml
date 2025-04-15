@@ -45,6 +45,7 @@ install:
   - twig_tweak
   - facets_reset_button
   - term_merge
+  - term_merge_manager
 dependencies:
   - 'blazy:blazy'
   - 'colorbox:colorbox'
