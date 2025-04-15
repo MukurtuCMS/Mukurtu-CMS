@@ -404,6 +404,7 @@ function mukurtu_install() {
     'view unpublished community entities',
     'view unpublished paragraphs',
     'view user email addresses',
+    'merge taxonomy terms',
   ];
   foreach ($roles as $role_name => $permissions) {
     $role = Role::load($role_name);
