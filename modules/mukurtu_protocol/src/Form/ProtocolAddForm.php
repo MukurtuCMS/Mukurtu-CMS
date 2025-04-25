@@ -165,6 +165,19 @@ class ProtocolAddForm extends EntityForm {
       ],
     ];
 
+    // Membership list display setting.
+    $form['field_membership_display'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Membership Display'),
+      '#description' => $this->t('TODO: membership display helper text'),
+      '#options' => [
+        'none' => $this->t('Do not display'),
+        'stewards' => $this->t('Display protocol stewards'),
+        'all' => $this->t('Display all members'),
+      ],
+      '#default_value' => 'none',
+    ];
+
     return $form;
   }
 
@@ -251,6 +264,7 @@ class ProtocolAddForm extends EntityForm {
     $entity->setName($form_state->getValue('name'));
     $entity->setDescription($form_state->getValue('field_description'));
     $entity->setSharingSetting($form_state->getValue('field_access_mode'));
+    $entity->setMembershipDisplay($form_state->getValue('field_membership_display'));
 
     // Grab the memberships.
     foreach (['protocol_steward', 'protocol_member'] as $role) {

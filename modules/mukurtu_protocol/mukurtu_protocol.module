@@ -111,6 +111,8 @@ function mukurtu_protocol_theme($existing, $type, $theme, $path) {
         'protocol' => NULL,
         'links' => NULL,
         'sharing' => NULL,
+        'membership_display' => NULL,
+        'members' => NULL,
         'description' => NULL,
         'communities' => NULL,
         'comment_status' => NULL,
