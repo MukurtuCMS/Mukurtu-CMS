@@ -487,6 +487,69 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function getMembershipDisplay()
+  {
+    return $this->get('field_membership_display')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMembershipDisplay($membershipDisplay)
+  {
+    $this->set('field_membership_display', $membershipDisplay);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMembersList()
+  {
+    $members = [];
+    $memberIds = [];
+    $displaySetting = $this->getMembershipDisplay();
+    if (strcmp($displaySetting, 'none') !== 0) {
+      $query = \Drupal::entityQuery('og_membership')
+        ->condition('entity_type', 'community')
+        ->condition('entity_id', $this->id())
+        ->accessCheck(FALSE);
+      $communityOgMembershipIds = $query->execute();
+
+      // Ensure loadMultiple() never accepts NULL as argument. If it does, it'll
+      // load every single entity of the type specified in getStorage(), which
+      // would tank site performance.
+      if ($communityOgMembershipIds) {
+        $communityOgMemberships = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($communityOgMembershipIds);
+      }
+
+      switch ($displaySetting) {
+        case 'all':
+          foreach ($communityOgMemberships as $membership) {
+            array_push($memberIds, $membership->getOwnerId());
+          }
+          break;
+        case 'managers':
+          foreach ($communityOgMemberships as $membership) {
+            if ($membership->hasRole('community-community-community_manager')) {
+              array_push($memberIds, $membership->getOwnerId());
+            }
+          }
+          break;
+      }
+
+      // Ensure loadMultiple() never accepts NULL as argument.
+      if ($memberIds) {
+        $members = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($memberIds);
+      }
+    }
+
+    return $members;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -613,7 +676,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Sharing Protocol'))
       ->setDescription(t('Open - Your community page is visible to all visitors of your site. Any items under open protocols are also accessible.<br>
-Strict - Your community page is invisible to all site users who are not members or your community. All protocols created within this community are inaccessible to users outside of this community.'))
+        Strict - Your community page is invisible to all site users who are not members or your community. All protocols created within this community are inaccessible to users outside of this community.'))
       ->setSettings([
         'allowed_values' => [
           'strict' => 'Strict',
@@ -712,6 +775,33 @@ Strict - Your community page is invisible to all site users who are not members 
         'type' => 'string',
         'weight' => 20,
       ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_membership_display'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Membership Display'))
+      ->setDescription('TODO: Description')
+      ->setSettings([
+        'allowed_values' => [
+          'none' => 'Do not display member list',
+          'managers' => 'Display community managers',
+          'all' => 'Display all members',
+        ],
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'list_default',
+        'weight' => 10,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
+        'weight' => 10,
+      ])
+      ->setDefaultValue('none')
+      ->setCardinality(1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
