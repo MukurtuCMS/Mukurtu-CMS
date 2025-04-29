@@ -103,7 +103,7 @@ class ManageProtocolsController extends ControllerBase {
       '#markup' => $visibilityMarkup[$group->getSharingSetting()],
     ];
 
-    // Membership List title.
+    // Membership List.
     $visibilityMarkup['none'] = $this->t('None: Do not display member list.');
     $visibilityMarkup['stewards'] = $this->t('Protocol Stewards: Display protocol stewards.');
     $visibilityMarkup['all'] = $this->t('All: Display all members.');
@@ -113,7 +113,6 @@ class ManageProtocolsController extends ControllerBase {
       '#markup' => $visibilityMarkup[$group->getMembershipDisplay()],
     ];
 
-    // Build the members list based on the membership display setting.
     $members = $protocol->getMembersList();
 
     // Comment status.
