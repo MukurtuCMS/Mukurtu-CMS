@@ -126,6 +126,18 @@ class ManageCommunitiesController extends ControllerBase {
       '#markup' => $visibilityMarkup[$group->getSharingSetting()],
     ];
 
+    // Membership List.
+    $visibilityMarkup['none'] = $this->t('None: Do not display member list.');
+    $visibilityMarkup['managers'] = $this->t('Community Managers: Display community managers.');
+    $visibilityMarkup['all'] = $this->t('All: Display all members.');
+    $membershipDisplay = [
+      '#type' => 'item',
+      '#title' => $this->t('Membership Display'),
+      '#markup' => $visibilityMarkup[$group->getMembershipDisplay()],
+    ];
+
+    $members = $community->getMembersList();
+
     // Description.
     $description = $group->getDescription();
     if ($description) {
@@ -141,6 +153,8 @@ class ManageCommunitiesController extends ControllerBase {
       '#links' => $links,
       '#community' => $community,
       '#sharing' => $sharing,
+      '#membership_display' => $membershipDisplay,
+      '#members' => $members,
       '#description' => $description,
       '#protocols' => $protocols,
       '#notices' => $notices,
