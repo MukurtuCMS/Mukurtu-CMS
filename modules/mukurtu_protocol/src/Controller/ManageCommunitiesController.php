@@ -117,12 +117,12 @@ class ManageCommunitiesController extends ControllerBase {
       ];
     }
 
-    // Sharing Setting.
+    // Community page visibility.
     $visibilityMarkup['strict'] = $this->t('Strict: This community is visible to community members only.');
     $visibilityMarkup['open'] = $this->t('Open: This community is visible to all.');
     $sharing = [
       '#type' => 'item',
-      '#title' => $this->t('Sharing Protocol'),
+      '#title' => $this->t('Community page visibility'),
       '#markup' => $visibilityMarkup[$group->getSharingSetting()],
     ];
 
