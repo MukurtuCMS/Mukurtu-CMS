@@ -200,6 +200,59 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   /**
    * {@inheritdoc}
    */
+  public function getMembershipDisplay()
+  {
+    return $this->get('field_membership_display')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMembershipDisplay($membershipDisplay)
+  {
+    $this->set('field_membership_display', $membershipDisplay);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMembersList() {
+    $members = [];
+    $memberIds = [];
+    $displaySetting = $this->getMembershipDisplay();
+    if (strcmp($displaySetting, 'none') !== 0) {
+      $query = \Drupal::entityQuery('og_membership')
+        ->condition('entity_type', 'protocol')
+        ->condition('entity_id', $this->id())
+        ->accessCheck(FALSE);
+      $protocolOgMembershipIds = $query->execute();
+
+      $protocolOgMemberships = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($protocolOgMembershipIds);
+
+      switch ($displaySetting) {
+        case 'all':
+          foreach ($protocolOgMemberships as $membership) {
+            array_push($memberIds, $membership->getOwnerId());
+          }
+          break;
+        case 'stewards':
+          foreach ($protocolOgMemberships as $membership) {
+            if ($membership->hasRole('protocol-protocol-protocol_steward')) {
+              array_push($memberIds, $membership->getOwnerId());
+            }
+          }
+          break;
+      }
+      $members = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($memberIds);
+    }
+
+    return $members;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function isStrict(): bool {
     return $this->getSharingSetting() == 'strict';
   }
@@ -565,8 +618,8 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Sharing Protocol'))
-      ->setDescription('')
+      ->setLabel(t('Cultural Protocol Type'))
+      ->setDescription('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.')
       ->setSettings([
         'allowed_values' => [
           'strict' => 'Strict',
@@ -583,6 +636,52 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
         'weight' => 10,
       ])
       ->setDefaultValue('strict')
+      ->setCardinality(1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_thumbnail_image'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Thumbnail Image'))
+      ->setSetting('target_type', 'media')
+      ->setSetting('handler', 'default:media')
+      ->setSetting('handler_settings', [
+        'auto_create' => FALSE,
+        'target_bundles' => ['image' => 'image'],
+      ])
+      ->setRequired(FALSE)
+      ->setCardinality(-1)
+      ->setTranslatable(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 20,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_membership_display'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Membership Display'))
+      ->setDescription('')
+      ->setSettings([
+        'allowed_values' => [
+          'none' => 'Do not display',
+          'stewards' => 'Display protocol stewards',
+          'all' => 'Display all members',
+        ],
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'list_default',
+        'weight' => 10,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
+        'weight' => 10,
+      ])
+      ->setDefaultValue('none')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
