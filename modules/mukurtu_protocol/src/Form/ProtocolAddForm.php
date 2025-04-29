@@ -85,7 +85,7 @@ class ProtocolAddForm extends EntityForm {
     // Community name.
     $form['name'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Protocol Name'),
+      '#title' => $this->t('Cultural Protocol Name'),
       '#size' => 60,
       '#required' => TRUE,
     ];
@@ -94,8 +94,8 @@ class ProtocolAddForm extends EntityForm {
     // @todo Need to pull these options from field def.
     $form['field_access_mode'] = [
       '#type' => 'radios',
-      '#title' => $this->t('Sharing Protocol'),
-      '#description' => $this->t('TODO: Sharing protocol helper text'),
+      '#title' => $this->t('Cultural Protocol Type'),
+      '#description' => $this->t('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.'),
       '#options' => [
         'strict' => $this->t('Strict'),
         'open' => $this->t('Open'),
@@ -113,7 +113,7 @@ class ProtocolAddForm extends EntityForm {
     // Protocol Stewards.
     $form['protocol_steward_item'] = [
       '#type' => 'item',
-      '#title' => $this->t('Protocol Stewards'),
+      '#title' => $this->t('Cultural Protocol Stewards'),
       '#description' => $this->t('Helper text about protocol stewards.'),
     ];
     $defaultStatus = "<ul>";
@@ -142,7 +142,7 @@ class ProtocolAddForm extends EntityForm {
     // Protocol Members.
     $form['protocol_member_item'] = [
       '#type' => 'item',
-      '#title' => $this->t('Protocol Members'),
+      '#title' => $this->t('Cultural Protocol Members'),
       '#description' => $this->t('Helper text about protocol members.'),
     ];
     $form['protocol_member'] = [
@@ -163,6 +163,19 @@ class ProtocolAddForm extends EntityForm {
         ],
         [get_called_class(), 'processEntityBrowser'],
       ],
+    ];
+
+    // Membership list display setting.
+    $form['field_membership_display'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Membership Display'),
+      '#description' => $this->t('TODO: membership display helper text'),
+      '#options' => [
+        'none' => $this->t('Do not display'),
+        'stewards' => $this->t('Display cultural protocol stewards'),
+        'all' => $this->t('Display all members'),
+      ],
+      '#default_value' => 'none',
     ];
 
     return $form;
@@ -251,6 +264,7 @@ class ProtocolAddForm extends EntityForm {
     $entity->setName($form_state->getValue('name'));
     $entity->setDescription($form_state->getValue('field_description'));
     $entity->setSharingSetting($form_state->getValue('field_access_mode'));
+    $entity->setMembershipDisplay($form_state->getValue('field_membership_display'));
 
     // Grab the memberships.
     foreach (['protocol_steward', 'protocol_member'] as $role) {

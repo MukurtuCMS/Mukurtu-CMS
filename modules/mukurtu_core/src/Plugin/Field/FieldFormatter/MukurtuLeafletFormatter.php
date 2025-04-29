@@ -18,7 +18,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   }
  * )
  */
-
 class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements ContainerFactoryPluginInterface {
   /**
    * {@inheritdoc}
@@ -53,7 +52,7 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
    * This custom Mukurtu formatter renders the "location_description" from the
    * stored GeoJSON values within each Leaflet feature's popup.
    */
-  public function viewElements(FieldItemListInterface $items, $langcode) {
+  public function viewElements(FieldItemListInterface $items, $langcode): array {
     // Collect all descriptions from all Leaflet features and split up multiple
     // points from a single feature into separate features. This allows each
     // point to have a different popup description.
