@@ -14,19 +14,6 @@
   {% if sharing %}
     {{ sharing }}
   {% endif %}
-  {% if membership_display %}
-    {{ membership_display }}
-  {% endif %}
-  {% if members %}
-    <div class="members">
-      <label>{{ 'Membership List'|t }}</label>
-      <ul>
-      {% for member in members %}
-        <li><a href="{{ path('entity.user.canonical', {'user': member.id()}) }}">{{ member.label() }}</a></li>
-      {% endfor %}
-      </ul>
-    </div>
-  {% endif %}
   {% if description %}
     {{ description }}
   {% endif %}

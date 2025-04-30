@@ -64,34 +64,4 @@ interface MukurtuGroupInterface {
    *   available that matches the passed in $states.
    */
   public function getMembership(AccountInterface $account, array $states = [OgMembershipInterface::STATE_ACTIVE]): ?OgMembershipInterface;
-
-  /**
-   * Gets the membership list display setting.
-   *
-   * @return string
-   *   Membership list display setting machine name.
-   */
-  public function getMembershipDisplay();
-
-  /**
-   * Sets the membership display setting.
-   *
-   * @param string $membershipDisplay
-   *   The membership display setting machine name.
-   *
-   * @return \Drupal\mukurtu_protocol\Entity\MukurtuGroupInterface
-   *   The called community or protocol entity.
-   */
-  public function setMembershipDisplay($membershipDisplay);
-
-  /**
-   * Gets the list of members of this group. Uses the membership list
-   * display setting to see which users to return.
-   *
-   * @return \Drupal\mukurtu_protocol\Entity\MukurtuUser[]
-   *   The members of this community or protocol, as governed by the member
-   *   display setting. If this setting is set to 'none', this method returns an
-   *   empty array.
-   */
-  public function getMembersList();
 }

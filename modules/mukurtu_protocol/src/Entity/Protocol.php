@@ -228,12 +228,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
         ->accessCheck(FALSE);
       $protocolOgMembershipIds = $query->execute();
 
-      // Ensure loadMultiple() never accepts NULL as argument. If it does, it'll
-      // load every single entity of the type specified in getStorage(), which
-      // would tank site performance.
-      if ($protocolOgMembershipIds) {
-        $protocolOgMemberships = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($protocolOgMembershipIds);
-      }
+      $protocolOgMemberships = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($protocolOgMembershipIds);
 
       switch ($displaySetting) {
         case 'all':
@@ -249,10 +244,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
           }
           break;
       }
-      // Ensure loadMultiple() never accepts NULL as argument.
-      if ($memberIds) {
-        $members = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($memberIds);
-      }
+      $members = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($memberIds);
     }
 
     return $members;
