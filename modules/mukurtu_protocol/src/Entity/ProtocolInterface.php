@@ -86,38 +86,6 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   public function setSharingSetting($sharing);
 
   /**
-   * Gets the membership display setting.
-   *
-   * @return string
-   *   Membership display setting machine name.
-   */
-  public function getMembershipDisplay();
-
-  /**
-   * Sets the membership display setting.
-   *
-   * @param string $membershipDisplay
-   *   The membership display setting machine name.
-   *
-   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface
-   *   The called Protocol entity.
-   */
-  public function setMembershipDisplay($membershipDisplay);
-
-  /**
-   * Gets the list of members of this protocol. Uses the protocol membership
-   * display setting to see which users to return.
-   *
-   * There are three membership display options: all, protocol stewards only,
-   * or none.
-   *
-   * @return \Drupal\mukurtu_protocol\Entity\MukurtuUser[]
-   *   The members of this protocol, as governed by the member display setting.
-   *   If this setting is set to 'none', this method returns an empty array.
-   */
-  public function getMembersList();
-
-  /**
    * Check if this is a strict protocol.
    *
    * @return bool

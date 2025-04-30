@@ -168,7 +168,7 @@ test('Default Content: Community', async ({ page, browserName }) => {
     await page.goto('/communities/community/add');
     await page.getByRole('textbox', { name: 'Community name' }).fill(community.name);
     await page
-      .getByRole('group', { name: 'Sharing Protocol' })
+      .getByRole('group', { name: 'Community page visibility' })
       .getByRole('radio', { name: community.field_access_mode })
       .check();
     await page.getByRole('button', { name: 'Create Community' }).click();
