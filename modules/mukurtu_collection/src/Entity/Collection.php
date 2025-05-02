@@ -121,7 +121,12 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
         'target_type' => 'node',
         'handler' => 'default:node',
         'handler_settings' => [
-          'target_bundles' => NULL,
+          'target_bundles' => [
+            'digital_heritage' => 'digital_heritage',
+            'dictionary_word' => 'dictionary_word',
+            'word_list' => 'word_list',
+            'mukurtu_person' => 'mukurtu_person'
+          ],
           'sort' => [
             'field' => 'title',
             'direction' => 'ASC'
