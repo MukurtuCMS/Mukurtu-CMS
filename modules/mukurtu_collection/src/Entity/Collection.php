@@ -125,7 +125,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
             'digital_heritage' => 'digital_heritage',
             'dictionary_word' => 'dictionary_word',
             'word_list' => 'word_list',
-            'mukurtu_person' => 'mukurtu_person'
+            'person' => 'person'
           ],
           'sort' => [
             'field' => 'title',
