@@ -29,14 +29,14 @@ content:
     third_party_settings: {  }
   field_banner_image:
     type: media_library_widget
-    weight: 4
+    weight: 6
     region: content
     settings:
       media_types: {  }
     third_party_settings: {  }
   field_communities:
     type: entity_reference_autocomplete
-    weight: 6
+    weight: 2
     region: content
     settings:
       match_operator: CONTAINS
@@ -56,7 +56,7 @@ content:
     third_party_settings: {  }
   field_featured_content:
     type: entity_browser_entity_reference
-    weight: 5
+    weight: 7
     region: content
     settings:
       entity_browser: mukurtu_content_browser
@@ -70,7 +70,7 @@ content:
     third_party_settings: {  }
   langcode:
     type: language_select
-    weight: 2
+    weight: 8
     region: content
     settings:
       include_locked: true
@@ -85,13 +85,13 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 8
+    weight: 9
     region: content
     settings: {  }
     third_party_settings: {  }
   user_id:
     type: entity_reference_autocomplete
-    weight: 7
+    weight: 10
     region: content
     settings:
       match_operator: CONTAINS

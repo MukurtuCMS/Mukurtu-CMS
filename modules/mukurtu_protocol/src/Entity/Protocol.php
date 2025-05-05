@@ -483,7 +483,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
-        'weight' => 5,
         'settings' => [
           'match_operator' => 'CONTAINS',
           'size' => '60',
@@ -509,8 +508,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
         'weight' => -4,
       ])
       ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-        'weight' => -4,
+        'type' => 'string_textfield'
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
@@ -525,7 +523,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'text_textarea_with_summary',
-        'weight' => 0,
         'rows' => 6,
       ])
       ->setDisplayConfigurable('view', TRUE)
@@ -552,7 +549,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
     $fields['status']->setDescription(t('A boolean indicating whether the Protocol is published.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
-        'weight' => 100,
       ]);
 
     $fields['created'] = BaseFieldDefinition::create('created')
@@ -641,7 +637,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'options_buttons',
-        'weight' => 10,
       ])
       ->setDefaultValue('strict')
       ->setCardinality(1)
@@ -687,7 +682,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'options_buttons',
-        'weight' => 10,
+        'weight' => 4,
       ])
       ->setDefaultValue('none')
       ->setCardinality(1)
