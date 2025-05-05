@@ -81,7 +81,7 @@ function mukurtu_taxonomy_form_taxonomy_term_category_form_alter(&$form, \Drupal
  */
 
 function mukurtu_taxonomy_form_taxonomy_merge_terms_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
-  $form['description']['#markup'] = $this->t('PLACEHOLDER');
+  $form['description']['#markup'] = t('PLACEHOLDER');
   $form['terms']['#description'] = t('To merge multiple terms into a new target term, select all terms to merge here. The new target term will be created on the next page.<br/>To merge one or more terms into another existing target term, select them here. The target term will be selected on the next page, do not select it now.');
   $form['actions']['submit']['#value'] = t('Next');
 }
