@@ -16,7 +16,7 @@ trait CulturalProtocolControlledTrait {
     $definitions['field_cultural_protocols'] = BaseFieldDefinition::create('cultural_protocol')
       ->setLabel('Cultural Protocols')
       ->setCardinality(1)
-      ->setRequired(TRUE)
+      ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
