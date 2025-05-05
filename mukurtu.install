@@ -167,7 +167,7 @@ function mukurtu_install() {
       'instagram' => '',
       'instagram_accounts' => [],
       'copyright_message' => $tokenService->replace(
-        '© [current-date:html_year] [site:name]',
+        '© [current-date:html_year]',
         [],
         $options,
       ),
