@@ -118,8 +118,8 @@ class ManageCommunitiesController extends ControllerBase {
     }
 
     // Community page visibility.
-    $visibilityMarkup['strict'] = $this->t('Strict: This community is visible to community members only.');
-    $visibilityMarkup['open'] = $this->t('Open: This community is visible to all.');
+    $visibilityMarkup['community-only'] = $this->t('Community only - This community page is only visible to members of this community.');
+    $visibilityMarkup['public'] = $this->t('Public - This community page is visible to all site members and visitors, with no login required.');
     $sharing = [
       '#type' => 'item',
       '#title' => $this->t('Community page visibility'),
