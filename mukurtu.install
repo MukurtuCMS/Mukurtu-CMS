@@ -143,10 +143,10 @@ function mukurtu_install() {
 
   // Footer block.
   $tokenService = \Drupal::service('token');
-  $langaugeManager = \Drupal::languageManager();
+  $languageManager = \Drupal::languageManager();
   $siteSettings = \Drupal::config('system.site');
   $options = [
-    'langcode' => $langaugeManager->getCurrentLanguage()->getId(),
+    'langcode' => $languageManager->getCurrentLanguage()->getId(),
     'clear' => TRUE,
   ];
   $block = Block::create([
