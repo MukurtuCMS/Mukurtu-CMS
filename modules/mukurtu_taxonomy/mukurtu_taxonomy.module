@@ -83,6 +83,10 @@ function mukurtu_taxonomy_form_taxonomy_merge_terms_alter(&$form, \Drupal\Core\F
   $form['terms']['#description'] = t('To merge one or more terms into another existing target term, select them here. The target term will be selected on the next page, do not select it now. </br>To merge multiple terms into a new term, select all terms to merge here. The new term will be created on the next page.');
 }
 
+function mukurtu_taxonomy_form_taxonomy_merge_terms_target_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $form['description']['#markup'] = t('PLACEHOLDER');
+}
+
 /**
  * Prepares variables for list of available vocabulary templates.
  *
