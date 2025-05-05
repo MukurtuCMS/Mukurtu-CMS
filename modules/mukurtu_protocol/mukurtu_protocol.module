@@ -16,6 +16,8 @@ use Drupal\mukurtu_protocol\Entity\MukurtuUser;
 use Drupal\node\NodeInterface;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * @file
@@ -25,7 +27,8 @@ use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 /**
  * Implements hook_field_info_alter().
  */
-function mukurtu_protocol_field_info_alter(&$info) {
+function mukurtu_protocol_field_info_alter(&$info)
+{
   if (isset($info['comment']['default_formatter'])) {
     $info['comment']['default_formatter'] = 'mukurtu_comment_default';
   }
@@ -37,7 +40,8 @@ function mukurtu_protocol_field_info_alter(&$info) {
 /**
  * Implements hook_entity_bundle_info_alter().
  */
-function mukurtu_protocol_entity_bundle_info_alter(array &$bundles) {
+function mukurtu_protocol_entity_bundle_info_alter(array &$bundles)
+{
   if (isset($bundles['user']['user'])) {
     $bundles['user']['user']['class'] = MukurtuUser::class;
   }
@@ -45,7 +49,7 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles) {
   // For any node bundles missing a bundle class, give it our basic Mukurtu
   // class for protocol support.
   if (isset($bundles['node'])) {
-    foreach($bundles['node'] as $key => $bundle) {
+    foreach ($bundles['node'] as $key => $bundle) {
       if (!isset($bundle['class']) && !in_array($key, ['article', 'page'])) {
         $bundles['node'][$key]['class'] = MukurtuNode::class;
       }
@@ -66,7 +70,8 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles) {
 /**
  * Implements hook_views_data_alter().
  */
-function mukurtu_protocol_views_data_alter(array &$data) {
+function mukurtu_protocol_views_data_alter(array &$data)
+{
   if (isset($data['users'])) {
     // Add the communities field to Views.
     $data['users']['communities'] = [
@@ -81,7 +86,8 @@ function mukurtu_protocol_views_data_alter(array &$data) {
 /**
  * Implements hook_theme().
  */
-function mukurtu_protocol_theme($existing, $type, $theme, $path) {
+function mukurtu_protocol_theme($existing, $type, $theme, $path)
+{
   return [
     'community' => [
       'render element' => 'elements',
@@ -126,7 +132,8 @@ function mukurtu_protocol_theme($existing, $type, $theme, $path) {
 /**
  * Implements hook_entity_field_storage_info().
  */
-function mukurtu_protocol_entity_field_storage_info(EntityTypeInterface $entity_type) {
+function mukurtu_protocol_entity_field_storage_info(EntityTypeInterface $entity_type)
+{
   if ($entity_type->id() == 'node') {
     return MukurtuNode::bundleFieldDefinitions($entity_type, '', []);
   }
@@ -139,7 +146,8 @@ function mukurtu_protocol_entity_field_storage_info(EntityTypeInterface $entity_
  * Implements hook_system_breadcrumb_alter().
  *
  */
-function mukurtu_protocol_system_breadcrumb_alter(Breadcrumb &$breadcrumb, RouteMatchInterface $route_match, array $context) {
+function mukurtu_protocol_system_breadcrumb_alter(Breadcrumb &$breadcrumb, RouteMatchInterface $route_match, array $context)
+{
   // Build the community breadcrumbs.
   if ($route_match->getRouteName() === 'entity.community.canonical') {
     $community = $route_match->getParameter('community');
@@ -169,7 +177,8 @@ function mukurtu_protocol_system_breadcrumb_alter(Breadcrumb &$breadcrumb, Route
 /**
  * Implements hook_local_tasks_alter().
  */
-function mukurtu_protocol_local_tasks_alter(&$local_tasks) {
+function mukurtu_protocol_local_tasks_alter(&$local_tasks)
+{
   // Remove the default OG admin routes for our special group types.
   unset($local_tasks['og.og_admin_routes:community.og_admin_routes']);
   unset($local_tasks['og.og_admin_routes:protocol.og_admin_routes']);
@@ -178,7 +187,8 @@ function mukurtu_protocol_local_tasks_alter(&$local_tasks) {
 /**
  * Implements hook_entity_insert().
  */
-function mukurtu_protocol_entity_insert($entity) {
+function mukurtu_protocol_entity_insert($entity)
+{
   if ($entity instanceof CulturalProtocolControlledInterface) {
     $entity->buildAccessGrants();
 
@@ -210,7 +220,8 @@ function mukurtu_protocol_entity_insert($entity) {
 /**
  * Implements hook_entity_update().
  */
-function mukurtu_protocol_entity_update($entity) {
+function mukurtu_protocol_entity_update($entity)
+{
   if ($entity instanceof CulturalProtocolControlledInterface) {
     $entity->buildAccessGrants();
   }
@@ -219,7 +230,8 @@ function mukurtu_protocol_entity_update($entity) {
 /**
  * Implements hook_entity_delete().
  */
-function mukurtu_protocol_entity_delete($entity) {
+function mukurtu_protocol_entity_delete($entity)
+{
   // Delete config for community/protocol LC project directory description.
   if ($entity instanceof CommunityInterface) {
     Drupal::configFactory()->getEditable('mukurtu_local_contexts.settings')->clear('mukurtu_local_contexts_manage_community_' . $entity->id() . '_projects_directory_description')->save();
@@ -235,7 +247,8 @@ function mukurtu_protocol_entity_delete($entity) {
 /**
  * Implements hook_entity_type_build().
  */
-function mukurtu_protocol_entity_type_build(array &$entity_types) {
+function mukurtu_protocol_entity_type_build(array &$entity_types)
+{
   // This is where we attach the Mukurtu protocol access handlers.
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   if (isset($entity_types['node'])) {
@@ -263,7 +276,8 @@ function mukurtu_protocol_entity_type_build(array &$entity_types) {
 /**
  * Implements hook_entity_base_field_info().
  */
-function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_type) {
+function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_type)
+{
   $fields = [];
 
   if ($entity_type->id() == 'node' || $entity_type->id() == 'media') {
@@ -334,7 +348,8 @@ function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_typ
 /**
  * Implements hook_node_grants().
  */
-function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
+function mukurtu_protocol_node_grants(AccountInterface $account, $op)
+{
   $grants = [];
 
   if ($op == 'view') {
@@ -347,7 +362,8 @@ function mukurtu_protocol_node_grants(AccountInterface $account, $op) {
 /**
  * Implements hook_node_access_records().
  */
-function mukurtu_protocol_node_access_records(NodeInterface $node) {
+function mukurtu_protocol_node_access_records(NodeInterface $node)
+{
   if ($node instanceof CulturalProtocolControlledInterface) {
     return $node->getAccessGrants();
   }
@@ -361,7 +377,8 @@ function mukurtu_protocol_node_access_records(NodeInterface $node) {
  * scopes it to visibility. It does not handle specific access
  * considerations like update/delete.
  */
-function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
+function mukurtu_protocol_query_media_access_alter(AlterableInterface $query)
+{
   if (!$account = $query->getMetaData('account')) {
     $account = \Drupal::currentUser();
   }
@@ -402,7 +419,8 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query) {
  * scopes it to visibility. It does not handle specific access
  * considerations like update/delete.
  */
-function mukurtu_protocol_query_protocol_access_alter(AlterableInterface $query) {
+function mukurtu_protocol_query_protocol_access_alter(AlterableInterface $query)
+{
   if (!$account = $query->getMetaData('account')) {
     $account = \Drupal::currentUser();
   }
@@ -445,7 +463,8 @@ function mukurtu_protocol_query_protocol_access_alter(AlterableInterface $query)
  *
  * Filter a protocol query down to members only.
  */
-function mukurtu_protocol_query_protocol_members_alter(AlterableInterface $query) {
+function mukurtu_protocol_query_protocol_members_alter(AlterableInterface $query)
+{
   if (!$account = $query->getMetaData('account')) {
     $account = \Drupal::currentUser();
   }
@@ -473,7 +492,8 @@ function mukurtu_protocol_query_protocol_members_alter(AlterableInterface $query
 /**
  * Implements hook_field_widget_single_element_WIDGET_TYPE_form_alter().
  */
-function mukurtu_protocol_field_widget_single_element_entity_browser_entity_reference_form_alter(array &$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context) {
+function mukurtu_protocol_field_widget_single_element_entity_browser_entity_reference_form_alter(array &$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context)
+{
   $display_type = $context["widget"]->getSetting("field_widget_display");
 
   // Only supporting these two display modes for entity browser at the moment.
@@ -499,9 +519,11 @@ function mukurtu_protocol_field_widget_single_element_entity_browser_entity_refe
       $id += 1;
       $item['#attributes']['class'][] = 'inaccessible-reference';
 
-      $item['display'] = ['#markup' => "<div>" . Html::escape(t("#@id. This @entity_type_label is not available to you.", [
-        '@id' => $id, '@entity_type_label' => lcfirst($entity->getEntityType()->getLabel()),
-      ])) . "</div>"
+      $item['display'] = [
+        '#markup' => "<div>" . Html::escape(t("#@id. This @entity_type_label is not available to you.", [
+          '@id' => $id,
+          '@entity_type_label' => lcfirst($entity->getEntityType()->getLabel()),
+        ])) . "</div>"
       ];
     }
   }
@@ -510,7 +532,8 @@ function mukurtu_protocol_field_widget_single_element_entity_browser_entity_refe
 /**
  * Implements hook_preprocess_field__community__og_group__community().
  */
-function mukurtu_protocol_preprocess_field__community__og_group__community(array &$variables): void {
+function mukurtu_protocol_preprocess_field__community__og_group__community(array &$variables): void
+{
   $variables['label'] = t('Community role');
   $description = $variables['items'][0]['content']['#value'];
   $variables['items'][0]['content']['#value'] = str_replace(
@@ -523,7 +546,8 @@ function mukurtu_protocol_preprocess_field__community__og_group__community(array
 /**
  * Implements hook_preprocess_field__protocol__og_group__protocol().
  */
-function mukurtu_protocol_preprocess_field__protocol__og_group__protocol(array &$variables): void {
+function mukurtu_protocol_preprocess_field__protocol__og_group__protocol(array &$variables): void
+{
   $variables['label'] = t('Protocol role');
   $description = $variables['items'][0]['content']['#value'];
   $variables['items'][0]['content']['#value'] = str_replace(
@@ -531,4 +555,55 @@ function mukurtu_protocol_preprocess_field__protocol__og_group__protocol(array &
     'a protocol',
     $description
   ) . '.';
+}
+
+/**
+ * Implements hook_form_form_id_alter().
+ *
+ * Add validation handler to prevent users from being added to protocols without
+ * adding them first to the protocol owning communities.
+ */
+function mukurtu_protocol_form_og_membership_default_add_form_alter(&$form, FormStateInterface $form_state)
+{
+  // Only add the form validator if this form is in the protocol context.
+  $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
+  if ($group instanceof ProtocolInterface) {
+    $form['#validate'][] = 'add_protocol_member_form_validate';
+  }
+}
+
+function add_protocol_member_form_validate(&$form, FormStateInterface $form_state)
+{
+  $uid = isset($form_state->getValue('uid')[0]['target_id']) ? $form_state->getValue('uid')[0]['target_id'] : NULL;
+
+  if ($uid) {
+    $userToAdd = \Drupal::entityTypeManager()->getStorage('user')->load($uid) ?? NULL;
+    if ($userToAdd) {
+      $protocolId = isset($form['entity_id']['#value']) ? $form['entity_id']['#value'] : NULL;
+      if ($protocolId) {
+        $protocol = \Drupal::entityTypeManager()->getStorage('protocol')->load($protocolId);
+        if ($protocol) {
+          $protocolCommunities = $protocol->getCommunities();
+          $isMember = FALSE;
+          foreach ($protocolCommunities as $c) {
+            // Check user's membership within this protocol's communities.
+            if ($c->getMembership($userToAdd)) {
+              $isMember = TRUE;
+              continue;
+            }
+          }
+          // If the user to be added is not a member of ANY of the protocol's
+          // owning communities, throw an error.
+          if (!$isMember) {
+            $form_state->setErrorByName('uid', t('Cannot add <a href=@user-page>@userName</a>. User is not a member of any of <a href=@protocol-page>@protocolName</a>\'s communities.', [
+              '@user-page' => Url::fromRoute('entity.user.canonical', ['user' => $userToAdd->id()])->toString(),
+              '@userName' => $userToAdd->label(),
+              '@protocol-page' => Url::fromRoute('mukurtu_protocol.manage_protocol', ['group' => $protocol->id()])->toString(),
+              '@protocolName' => $protocol->getName(),
+            ]));
+          }
+        }
+      }
+    }
+  }
 }
