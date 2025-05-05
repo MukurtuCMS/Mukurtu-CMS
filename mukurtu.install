@@ -141,6 +141,26 @@ function mukurtu_install() {
   $block->setWeight(3);
   $block->save();
 
+  // Footer.
+  $block = Block::create([
+    'id' => 'mukurtu_v4_mukurtufooter',
+    'settings' => [
+      'id' => 'mukurtu_v4_mukurtufooter',
+      'label' => t('Mukurtu footer'),
+      'label_display' => 0,
+      'provider' => 'block_content',
+    ],
+    'region' => 'footer',
+    'plugin' => 'mukurtu_footer',
+    'theme' => 'mukurtu_v4',
+    'visibility' => [],
+  ]);
+  $block->save();
+  $block->setRegion('footer');
+  $block->setStatus(TRUE);
+  $block->setWeight(3);
+  $block->save();
+
   // Delete unused user flags that crash user registration page.
   $flagStorage = \Drupal::entityTypeManager()->getStorage('flag');
   foreach (['email_user', 'subscribe_user'] as $userFlagID) {
