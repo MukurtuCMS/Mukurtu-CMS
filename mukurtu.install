@@ -141,6 +141,47 @@ function mukurtu_install() {
   $block->setWeight(3);
   $block->save();
 
+  // Footer block.
+  $tokenService = \Drupal::service('token');
+  $languageManager = \Drupal::languageManager();
+  $siteSettings = \Drupal::config('system.site');
+  $options = [
+    'langcode' => $languageManager->getCurrentLanguage()->getId(),
+    'clear' => TRUE,
+  ];
+  $block = Block::create([
+    'id' => 'mukurtu_footer_1',
+    'settings' => [
+      'id' => 'mukurtu_footer_1',
+      'label' => t('Mukurtu Footer'),
+      'label_display' => 1,
+      'status' => 1,
+      'logo_upload' => '',
+      'email_us_text' => 'Email us at ' . $siteSettings->get('mail'),
+      'contact_email_address' => $siteSettings->get('mail'),
+      'social_media' => [],
+      'twitter' => '',
+      'twitter_accounts' => [],
+      'facebook' => '',
+      'facebook_accounts' => [],
+      'instagram' => '',
+      'instagram_accounts' => [],
+      'copyright_message' => $tokenService->replace(
+        '© [current-date:html_year] [site:name]',
+        [],
+        $options,
+      ),
+    ],
+    'region' => 'footer',
+    'plugin' => 'mukurtu_footer',
+    'theme' => 'mukurtu_v4',
+  ]);
+  $block->save();
+  $block->setRegion('footer');
+  $block->setStatus(TRUE);
+  $block->setWeight(0);
+  $block->save();
+
   // Delete unused user flags that crash user registration page.
   $flagStorage = \Drupal::entityTypeManager()->getStorage('flag');
   foreach (['email_user', 'subscribe_user'] as $userFlagID) {
