@@ -89,6 +89,8 @@ function mukurtu_taxonomy_form_taxonomy_merge_terms_alter(&$form, \Drupal\Core\F
 }
 
 function mukurtu_taxonomy_form_taxonomy_merge_terms_target_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  
+  
   $form['description']['#markup'] = t('To merge the selected terms into a new target term, enter it in the "New term" field.<br/>To merge the selected term(s) into an existing target term, select it from the "Existing term" list.');
   
   $form['actions']['submit']['#value'] = t('Merge terms');
