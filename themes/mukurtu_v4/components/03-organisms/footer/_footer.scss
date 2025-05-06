@@ -4,7 +4,7 @@
 // Mukurtu Footer.
 
 .footer {
-  margin-block-start: var(--v-space-l);
+  margin-block-start: var(--v-space-m);
   padding-block-start: var(--v-space-xs);
   background-color: var(--footer-bg-color);
   color: var(--footer-text-color);
@@ -25,7 +25,7 @@
     gap: var(--v-space-2xs);
     align-items: baseline;
     justify-content: center;
-    margin-block-end: var(--v-space-s);
+    margin-block-end: 0;
   }
 
   .logo {
@@ -60,7 +60,7 @@
     flex-flow: row wrap;
     justify-content: space-between;
     gap: 2rem;
-    margin-block-end: var(--v-space-2xs);
+    margin-bottom: 0;
 
     a {
       color: var(--footer-text-color);
@@ -82,11 +82,11 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
-    margin-block-end: var(--v-space-2xs);
+    margin-block-end: 0;
   }
 
   .email {
-    margin-block-end: var(--v-space-s);
+    margin-block-end: none !important;
 
     // stylelint-disable no-descending-specificity
     a {
