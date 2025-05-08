@@ -47,7 +47,7 @@ User accounts are migrated in two different migrations. Both should be used in m
 In Mukurtu CMS version 4, some taxonomy vocabularies have been renamed or no longer exist. The following table shows the mapping between the two versions and the corresponding migration ID.
 |Version 3|Version 4|Migration ID|
 |-|-|-|
-|Authors|Authors|`mukurtu_cms_v3_terms_authors`|
+|Authors|N/A||
 |Category|Category|`mukurtu_cms_v3_terms_category`|
 |Class Period Length|N/A||
 |Contributor|Contributor|`mukurtu_cms_v3_terms_contributor`|

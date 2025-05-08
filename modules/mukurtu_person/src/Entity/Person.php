@@ -183,7 +183,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
         'handler' => 'default:taxonomy_term',
         'handler_settings' => [
           'target_bundles' => [
-            'authors' => 'authors',
             'contributor' => 'contributor',
             'creator' => 'creator',
             'people' => 'people',

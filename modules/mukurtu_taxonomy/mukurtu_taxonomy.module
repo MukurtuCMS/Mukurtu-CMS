@@ -40,7 +40,6 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
 function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   if ($entity->getEntityTypeId() === 'taxonomy_vocabulary') {
     $vocabs = [
-      'authors',
       'category',
       'community_type',
       'contributor',
@@ -92,7 +91,7 @@ function mukurtu_taxonomy_form_taxonomy_merge_terms_target_alter(&$form, \Drupal
   $form ['#title'] = t('Select target term');
 
   $form['description']['#markup'] = t('To merge the selected terms into a new target term, enter it in the "New term" field.<br/>To merge the selected term(s) into an existing target term, select it from the "Existing term" list.');
-  
+
   $form['actions']['submit']['#value'] = t('Merge terms');
 }
 
