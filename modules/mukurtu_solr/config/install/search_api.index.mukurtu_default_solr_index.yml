@@ -276,7 +276,7 @@ field_settings:
         - node
         - taxonomy
   node__field_coverage:
-    label: Location
+    label: 'Map Points'
     datasource_id: 'entity:node'
     property_path: field_coverage
     type: text

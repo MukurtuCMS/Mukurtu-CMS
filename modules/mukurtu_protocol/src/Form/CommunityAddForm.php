@@ -191,6 +191,19 @@ class CommunityAddForm extends EntityForm {
       ],
     ];
 
+    // Membership list display setting.
+    $form['field_membership_display'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Membership Display'),
+      '#description' => $this->t('TODO: membership display helper text'),
+      '#options' => [
+        'none' => $this->t('None: Do not display'),
+        'managers' => $this->t('Managers: Display community managers'),
+        'all' => $this->t('All: Display all members'),
+      ],
+      '#default_value' => 'none',
+    ];
+
     $form['#process'][] = [$this, 'processForm'];
     return $form;
   }

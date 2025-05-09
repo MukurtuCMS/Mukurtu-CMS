@@ -6,7 +6,6 @@ dependencies:
     - image.style.large_900px
     - media.type.document
   module:
-    - file
     - image
     - layout_builder
 third_party_settings:
@@ -18,14 +17,6 @@ targetEntityType: media
 bundle: document
 mode: digital_heritage_sidebar
 content:
-  field_media_document:
-    type: file_default
-    label: above
-    settings:
-      use_description_as_link_text: true
-    third_party_settings: {  }
-    weight: 1
-    region: content
   thumbnail:
     type: image
     label: hidden
@@ -43,6 +34,7 @@ hidden:
   field_cultural_protocols: true
   field_extracted_text: true
   field_identifier: true
+  field_media_document: true
   field_media_tags: true
   field_people: true
   field_thumbnail: true

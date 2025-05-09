@@ -15,7 +15,8 @@
  * @ingroup themeable
  */
 #}
-<div{{ attributes.addClass('protocol') }}>
+{% set hook_class = theme_hook_original|replace({'_': '-'}) %}
+<div{{ attributes.addClass(['protocol', hook_class]) }}>
   {% if content %}
     {{- content -}}
   {% endif %}

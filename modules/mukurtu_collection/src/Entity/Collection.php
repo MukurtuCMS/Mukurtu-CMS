@@ -202,7 +202,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
-      ->setLabel(t('Location'))
+      ->setLabel(t('Map Points'))
       ->setDescription(t(''))
       ->setCardinality(1)
       ->setRequired(FALSE)
@@ -234,6 +234,26 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
           'auto_create' => TRUE,
         ]
       ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
+      ->setLabel(t('Local Contexts Projects'))
+      ->setDescription(t('Local Contexts projects from the Local Contexts Hub.'))
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
+      ->setLabel(t('Local Contexts Labels and Notices'))
+      ->setDescription(t('Local Contexts Labels and Notices from the Local Contexts Hub.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

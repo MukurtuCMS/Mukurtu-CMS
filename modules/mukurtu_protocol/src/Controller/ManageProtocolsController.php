@@ -103,6 +103,18 @@ class ManageProtocolsController extends ControllerBase {
       '#markup' => $visibilityMarkup[$group->getSharingSetting()],
     ];
 
+    // Membership List.
+    $visibilityMarkup['none'] = $this->t('None: Do not display member list.');
+    $visibilityMarkup['stewards'] = $this->t('Protocol Stewards: Display protocol stewards.');
+    $visibilityMarkup['all'] = $this->t('All: Display all members.');
+    $membershipDisplay = [
+      '#type' => 'item',
+      '#title' => $this->t('Membership Display'),
+      '#markup' => $visibilityMarkup[$group->getMembershipDisplay()],
+    ];
+
+    $members = $protocol->getMembersList();
+
     // Comment status.
     $commentStatus = [
       '#type' => 'item',
@@ -123,10 +135,12 @@ class ManageProtocolsController extends ControllerBase {
     $communities = $protocol->getCommunities();
 
     $build['template'] = [
-      '#theme' => 'manage-protocol',
+      '#theme' => 'manage_protocol',
       '#links' => $links,
       '#protocol' => $protocol,
       '#sharing' => $sharing,
+      '#membership_display' => $membershipDisplay,
+      '#members' => $members,
       '#comment_status' => $commentStatus,
       '#description' => $description,
       '#communities' => $communities,

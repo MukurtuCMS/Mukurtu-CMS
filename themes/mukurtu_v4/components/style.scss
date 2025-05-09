@@ -8,9 +8,9 @@ documentation on how to use @include media(). */
 @use '00-base/colors/colors';
 @use '00-base/layout/layout';
 @use '00-base/mixins/mixins';
+@use '00-base/palettes-demo/palettes-demo';
 @use '00-base/palettes/red-bone';
 @use '00-base/palettes/yellow-blue';
-@use '00-base/palettes-demo/palettes-demo';
 @use '00-base/spacing/spacing';
 @use '00-base/typography/fonts';
 @use '00-base/typography/type-settings';
@@ -22,10 +22,12 @@ documentation on how to use @include media(). */
 @use '01-atoms/link/link';
 @use '01-atoms/select/select';
 @use '01-atoms/textfield/textfield';
+@use '02-molecules/callout/callout';
 @use '02-molecules/carousels/carousels';
 @use '02-molecules/form/form';
 @use '02-molecules/horizontal-card/horizontal-card';
 @use '02-molecules/horizontal-tabs/horizontal-tabs';
+@use '02-molecules/language-switcher/language-switcher';
 @use '02-molecules/local-tasks/local-tasks';
 @use '02-molecules/media/media';
 @use '02-molecules/menus/menu';
@@ -40,9 +42,10 @@ documentation on how to use @include media(). */
 @use '04-templates/categories/categories';
 @use '04-templates/collection/collection';
 @use '04-templates/communities/communities';
+@use '04-templates/community/community';
 @use '04-templates/dashboard/dashboard';
-@use '04-templates/dictionary/dictionary-word';
 @use '04-templates/dictionary/dictionary';
+@use '04-templates/dictionary/dictionary-word';
 @use '04-templates/digital-heritage/digital-heritage-node';
 @use '04-templates/full-node/full-node';
 @use '04-templates/page/page';

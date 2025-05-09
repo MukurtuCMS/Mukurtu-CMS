@@ -34,7 +34,7 @@ class CommunitiesPageController extends ControllerBase {
     }
 
     $build['template'] = [
-      '#theme' => 'communities-page',
+      '#theme' => 'communities_page',
       '#communities' => $renderedCommunities,
     ];
 

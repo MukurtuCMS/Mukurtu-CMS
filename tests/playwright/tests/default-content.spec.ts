@@ -25,7 +25,7 @@ const defaultContentSpec = {
 /* Define default Community content. */
 defaultContentSpec.community.push({
   name: 'Tribal community',
-  field_access_mode: 'strict',
+  field_access_mode: 'community-only',
   // These protocols are created on the follow-up page after creating a
   // community. Always associated only with the newly created community.
   protocols: [
@@ -41,7 +41,7 @@ defaultContentSpec.community.push({
 });
 defaultContentSpec.community.push({
   name: 'Repository community',
-  field_access_mode: 'strict',
+  field_access_mode: 'community-only',
   protocols: [
     {
       name: 'Repository under review',
@@ -168,7 +168,7 @@ test('Default Content: Community', async ({ page, browserName }) => {
     await page.goto('/communities/community/add');
     await page.getByRole('textbox', { name: 'Community name' }).fill(community.name);
     await page
-      .getByRole('group', { name: 'Sharing Protocol' })
+      .getByRole('group', { name: 'Community page visibility' })
       .getByRole('radio', { name: community.field_access_mode })
       .check();
     await page.getByRole('button', { name: 'Create Community' }).click();
