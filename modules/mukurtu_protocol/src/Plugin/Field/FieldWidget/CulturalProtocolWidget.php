@@ -207,13 +207,13 @@ class CulturalProtocolWidget extends WidgetBase {
       '#type' => 'fieldset',
       '#field_title' => $this->fieldDefinition->getLabel(),
       '#open' => TRUE,
+      'protocol_selection' => $communities,
       'sharing_setting' => [
         '#type' => 'radios',
         '#title' => $this->t('Sharing Setting'),
         '#options' => $items[$delta]->getSettableSharingOptions(),
         '#default_value' => $sharing_setting ?? 'all',
       ],
-      'protocol_selection' => $communities,
       '#element_validate' => [
         [static::class, 'validate'],
       ],
