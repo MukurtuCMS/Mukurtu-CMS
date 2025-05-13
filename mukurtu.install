@@ -195,7 +195,7 @@ function mukurtu_install() {
   // in permissions would cause an override. Instead these are provided as
   // defaults that can be changed per-site.
   $roles = [];
-  $roles['anonymous'] = [
+  $roles['visitor'] = [
     'access comments',
     'access content',
     'access site-wide contact form',
@@ -239,6 +239,9 @@ function mukurtu_install() {
     'view published community entities',
     'view published personal collection entities',
     'view published protocol control entities',
+  ];
+  $roles['drupal_administrator'] = [
+
   ];
   $roles['mukurtu_administrator'] = [
     'access administration pages',
