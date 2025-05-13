@@ -9,7 +9,7 @@ dependencies:
     - mukurtu_v4
 id: mukurtu_v4_mukurtu_dashboard_menu
 theme: mukurtu_v4
-region: content
+region: sidebar_first
 weight: 0
 provider: null
 plugin: 'system_menu_block:mukurtu'

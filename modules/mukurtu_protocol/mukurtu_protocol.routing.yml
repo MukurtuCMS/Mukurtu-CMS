@@ -54,7 +54,7 @@ mukurtu_protocol.add_protocol_from_community:
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::access'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
 
 mukurtu_protocol.community_add_protocol:
   path: '/communities/community/{community}/add/protocol'
@@ -64,7 +64,7 @@ mukurtu_protocol.community_add_protocol:
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::access'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
 
 
 mukurtu_protocol.manage_community:
@@ -123,7 +123,7 @@ mukurtu_protocol.community_members_list:
   requirements:
     _og_membership_add_access: 'TRUE'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
     _og_entity_type_id: group
     parameters:
       group:
@@ -139,7 +139,7 @@ mukurtu_protocol.protocol_members_list:
   requirements:
     _og_membership_add_access: 'TRUE'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
     _og_entity_type_id: group
     parameters:
       group:
@@ -155,7 +155,7 @@ mukurtu_protocol.community_add_membership:
   requirements:
     _og_membership_add_access: 'TRUE'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
     parameters:
       group:
         type: entity:community
@@ -170,7 +170,7 @@ mukurtu_protocol.protocol_add_membership:
   requirements:
     _og_membership_add_access: 'TRUE'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
     parameters:
       group:
         type: entity:protocol
