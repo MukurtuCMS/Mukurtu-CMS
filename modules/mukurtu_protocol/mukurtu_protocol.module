@@ -560,6 +560,16 @@ function mukurtu_protocol_preprocess_field__protocol__og_group__protocol(array &
 /**
  * Implements hook_form_form_id_alter().
  *
+ * Hide the thumbnail, banner image, and featured content fields when creating a
+ * protocol from /protocols/protocol/add.
+ */
+function mukurtu_protocol_form_protocol_add_form_alter(&$form, FormStateInterface $form_state) {
+  unset($form['field_banner_image'], $form['field_featured_content'], $form['field_thumbnail_image']);
+}
+
+/**
+ * Implements hook_form_form_id_alter().
+ *
  * Add validation handler to prevent users from being added to protocols without
  * adding them first to the protocol owning communities.
  */

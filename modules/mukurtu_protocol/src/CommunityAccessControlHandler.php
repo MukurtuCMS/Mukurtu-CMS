@@ -28,18 +28,18 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
         if (!$entity->isPublished()) {
           return AccessResult::allowedIfHasPermission($account, 'view unpublished community entities');
         }
-
-        // If field_access_mode is open, anyone can view.
-        if ($entity->getSharingSetting() == 'open') {
+        
+        // If field_access_mode is "public", anyone can view.
+        if ($entity->getSharingSetting() == 'public') {
           return AccessResult::allowedIfHasPermission($account, 'view published community entities');
         }
 
-        // If field_access_mode is strict, only members can view.
-        if ($entity->getSharingSetting() == 'strict') {
+        // If field_access_mode is "community-only", only members can view.
+        if ($entity->getSharingSetting() == 'community-only') {
           // Get membership.
           $membership = Og::getMembership($entity, $account);
 
-          // Members can view strict communities.
+          // Members can view community-only communities.
           if ($membership) {
             return AccessResult::allowedIfHasPermission($account, 'view published community entities');
           }
