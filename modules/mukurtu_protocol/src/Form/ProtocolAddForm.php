@@ -105,9 +105,11 @@ class ProtocolAddForm extends EntityForm {
 
     // Description.
     $form['field_description'] = [
-      '#type' => 'textarea',
+      '#type' => 'text_format',
       '#title' => $this->t('Description'),
       '#required' => FALSE,
+      '#format' => 'basic_html',
+      '#allowed_formats' => ['basic_html', 'full_html', 'mukurtu_html'],
     ];
 
     // Protocol Stewards.
