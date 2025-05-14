@@ -118,7 +118,7 @@ third_party_settings:
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
-      weight: 0
+      weight: 23
       format_type: tab
       format_settings:
         classes: ''
@@ -163,7 +163,7 @@ content:
     third_party_settings: {  }
   draft:
     type: boolean_checkbox
-    weight: 9
+    weight: 30
     region: content
     settings:
       display_label: true
