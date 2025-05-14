@@ -13,8 +13,7 @@ mukurtu_core.dashboard:
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::content'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
-  options:
-    _admin_route: TRUE
+
 
 mukurtu_core.add_page:
   path: '/dashboard/node/add'
