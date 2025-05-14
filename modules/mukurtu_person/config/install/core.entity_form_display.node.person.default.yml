@@ -35,6 +35,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         direction: horizontal
+        width_breakpoint: 640
     group_mukurtu_essentials:
       children:
         - title
