@@ -135,7 +135,7 @@ third_party_settings:
       label: 'Labels and Notices'
       region: content
       parent_name: additional_fields
-      weight: 20
+      weight: 24
       format_type: tab
       format_settings:
         classes: ''
@@ -278,13 +278,13 @@ content:
     third_party_settings: {  }
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
-    weight: 14
+    weight: 26
     region: content
     settings: {  }
     third_party_settings: {  }
   field_local_contexts_projects:
     type: local_contexts_project
-    weight: 13
+    weight: 25
     region: content
     settings: {  }
     third_party_settings: {  }
