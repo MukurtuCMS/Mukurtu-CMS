@@ -23,6 +23,7 @@ third_party_settings:
       children:
         - group_mukurtu_essentials
         - group_text_sections
+        - group_additional_fields
         - group_relations
       label: 'Main Tab'
       region: content
@@ -105,6 +106,27 @@ third_party_settings:
         id: ''
         label_as_html: false
         open: true
+        description: ''
+        required_fields: true
+    group_additional_fields:
+      children:
+        - field_keywords
+        - field_coverage
+        - field_coverage_description
+        - field_location
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: 'Additional Fields'
+      region: content
+      parent_name: group_main_tab
+      weight: 11
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        formatter: closed
         description: ''
         required_fields: true
 id: node.person.default
