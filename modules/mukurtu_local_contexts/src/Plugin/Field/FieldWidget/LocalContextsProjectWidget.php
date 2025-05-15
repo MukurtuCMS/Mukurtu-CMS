@@ -3,7 +3,7 @@
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsSelectWidget;
+use Drupal\Core\Field\Plugin\Field\FieldWidget\BooleanCheckboxWidget;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   multiple_values = TRUE
  * )
  */
-class LocalContextsProjectWidget extends OptionsSelectWidget {
+class LocalContextsProjectWidget extends BooleanCheckboxWidget {
 
   /**
    * The current user.
