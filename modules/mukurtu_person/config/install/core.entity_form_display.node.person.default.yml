@@ -245,19 +245,19 @@ content:
     third_party_settings: {  }
   field_date_born:
     type: original_date_text
-    weight: 6
+    weight: 7
     region: content
     settings: {  }
     third_party_settings: {  }
   field_date_died:
     type: original_date_text
-    weight: 7
+    weight: 8
     region: content
     settings: {  }
     third_party_settings: {  }
   field_deceased:
     type: boolean_checkbox
-    weight: 8
+    weight: 9
     region: content
     settings:
       display_label: true
