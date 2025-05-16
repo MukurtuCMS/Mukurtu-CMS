@@ -19,7 +19,7 @@ class RelatedPerson extends Paragraph {
           'target_bundles' => [
             'person' => 'person',
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
         ]
       ])
       ->setCardinality(1)
