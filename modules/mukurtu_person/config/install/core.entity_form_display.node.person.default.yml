@@ -44,10 +44,7 @@ third_party_settings:
         - field_date_born
         - field_date_died
         - field_deceased
-        - field_keywords
-        - field_coverage
-        - field_coverage_description
-        - field_location
+        - field_representative_terms
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -62,7 +59,6 @@ third_party_settings:
         required_fields: true
     group_relations:
       children:
-        - field_representative_terms
         - group_related_people
         - field_related_content
       label: Relations
@@ -346,7 +342,7 @@ content:
     third_party_settings: {  }
   field_representative_terms:
     type: entity_browser_entity_reference
-    weight: 4
+    weight: 6
     region: content
     settings:
       entity_browser: mukurtu_taxonomy_record_term_browser
