@@ -80,7 +80,7 @@ third_party_settings:
     group_text_sections:
       children:
         - field_sections
-      label: 'Text Sections'
+      label: 'Biography'
       region: content
       parent_name: group_main_tab
       weight: 21
