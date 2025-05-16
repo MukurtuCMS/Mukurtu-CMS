@@ -146,7 +146,7 @@ content:
         editMode: '1'
         dragMode: '1'
         removalMode: '1'
-        drawCircle: false
+        drawCircle: '1'
         drawText: false
         cutPolygon: 0
         rotateMode: 0
@@ -157,6 +157,8 @@ content:
         options: '{"position":"topleft","pseudoFullscreen":false}'
         control: 0
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      polyline: 
+        path: '{"fill":"false"}'
       input:
         show: 0
         readonly: 0
