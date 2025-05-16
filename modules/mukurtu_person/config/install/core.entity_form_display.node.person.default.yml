@@ -63,8 +63,8 @@ third_party_settings:
     group_relations:
       children:
         - field_representative_terms
-        - field_related_content
         - group_related_people
+        - field_related_content
       label: Relations
       region: content
       parent_name: group_main_tab
@@ -98,7 +98,7 @@ third_party_settings:
       label: 'Related People'
       region: content
       parent_name: group_relations
-      weight: 6
+      weight: 5
       format_type: details
       format_settings:
         classes: ''
@@ -313,7 +313,7 @@ content:
     third_party_settings: {  }
   field_related_content:
     type: entity_browser_entity_reference
-    weight: 5
+    weight: 6
     region: content
     settings:
       entity_browser: mukurtu_content_browser
@@ -327,7 +327,7 @@ content:
     third_party_settings: {  }
   field_related_people:
     type: paragraphs
-    weight: 4
+    weight: 5
     region: content
     settings:
       title: 'Related People'
