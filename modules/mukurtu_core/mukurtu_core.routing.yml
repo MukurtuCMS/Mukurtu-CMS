@@ -14,6 +14,7 @@ mukurtu_core.dashboard:
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
 
+
 mukurtu_core.add_page:
   path: '/dashboard/node/add'
   defaults:

@@ -39,7 +39,7 @@ mukurtu_import.settings_form:
     _permission: 'administer mukurtu_import configuration'
 
 mukurtu_import.file_upload:
-  path: '/dashboard/import'
+  path: '/admin/import'
   defaults:
     _title: 'Import - Upload Files'
     _form: 'Drupal\mukurtu_import\Form\ImportFileUploadForm'
@@ -47,7 +47,7 @@ mukurtu_import.file_upload:
     _permission: 'access mukurtu import'
 
 mukurtu_import.bundles_list:
-  path: '/dashboard/import/format'
+  path: '/admin/import/format'
   defaults:
     _controller: '\Drupal\mukurtu_import\Controller\BundleListController::bundlesList'
     _title: 'Import - File Formats'
@@ -55,7 +55,7 @@ mukurtu_import.bundles_list:
     _permission: 'access mukurtu import'
 
 mukurtu_import.fields_list:
-  path: '/dashboard/import/format/{entity_type}/{bundle}'
+  path: '/admin/import/format/{entity_type}/{bundle}'
   defaults:
     _form: '\Drupal\mukurtu_import\Form\ImportFieldDescriptionListForm'
     _title_callback: '\Drupal\mukurtu_import\Controller\BundleListController::getFieldListTitle'
@@ -63,7 +63,7 @@ mukurtu_import.fields_list:
     _permission: 'access mukurtu import'
 
 mukurtu_import.import_files:
-  path: '/dashboard/import/files'
+  path: '/admin/import/files'
   defaults:
     _title: 'Import - File Configuration'
     _form: 'Drupal\mukurtu_import\Form\ImportFileSummaryForm'
@@ -71,7 +71,7 @@ mukurtu_import.import_files:
     _permission: 'access mukurtu import'
 
 mukurtu_import.import_results:
-  path: '/dashboard/import/results'
+  path: '/admin/import/results'
   defaults:
     _title: 'Import - Results'
     _form: 'Drupal\mukurtu_import\Form\ImportResultsForm'
@@ -79,7 +79,7 @@ mukurtu_import.import_results:
     _permission: 'access mukurtu import'
 
 mukurtu_import.custom_strategy_from_file_form:
-  path: '/dashboard/import/files/mapping/add/{file}'
+  path: '/admin/import/files/mapping/add/{file}'
   defaults:
     _form: '\Drupal\mukurtu_import\Form\CustomStrategyFromFileForm'
     _title: 'Customize Import Settings'
@@ -91,7 +91,7 @@ mukurtu_import.custom_strategy_from_file_form:
         type: entity:file
 
 mukurtu_import.execute_import:
-  path: '/dashboard/import/run'
+  path: '/admin/import/run'
   defaults:
     _title: 'Import - Review'
     _form: 'Drupal\mukurtu_import\Form\ExecuteImportForm'
