@@ -1,0 +1,34 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: protocol-protocol-curator
+label: 'Curator'
+weight: 9
+is_admin: null
+group_type: protocol
+group_bundle: protocol
+group_id: null
+permissions:
+  - 'apply protocol'
+  - 'create collection content'
+  - 'create media'
+  - 'edit any media'
+  - 'edit own media'
+  - 'delete any collection content'
+  - 'delete any media'
+  - 'delete own collection content'
+  - 'delete own media'
+  - 'edit any collection content'
+  - 'edit own collection content'
+  - 'view collection content'
+  - 'view community records'
+  - 'view dictionary_word content'
+  - 'view digital_heritage content'
+  - 'view media'
+  - 'view person content'
+  - 'view published personal collection entities'
+  - 'view word_list content'
+
+role_type: standard
