@@ -106,7 +106,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('view', TRUE);
 
     $definitions['field_sections'] = BaseFieldDefinition::create('entity_reference_revisions')
-      ->setLabel(t('Biographical Information Sections'))
+      ->setLabel(t('Biography sections'))
       ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'paragraph',
