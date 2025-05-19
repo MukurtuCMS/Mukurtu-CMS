@@ -3,7 +3,7 @@
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsWidgetBase;
+use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsButtonsWidget;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,7 +20,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   multiple_values = TRUE
  * )
  */
-class LocalContextsLabelWidget extends OptionsWidgetBase {
+class LocalContextsLabelWidget extends OptionsButtonsWidget {
 
   /**
    * The current user.
