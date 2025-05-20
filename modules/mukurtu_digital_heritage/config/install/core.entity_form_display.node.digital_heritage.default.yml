@@ -64,7 +64,6 @@ third_party_settings:
         - field_cultural_narrative
         - field_traditional_knowledge
         - field_description
-        - field_keywords
       label: 'Mukurtu Core'
       region: content
       parent_name: group_main_tab
@@ -96,6 +95,7 @@ third_party_settings:
         required_fields: true
     group_additional_fields:
       children:
+        - field_keywords
         - field_format
         - field_type
         - field_identifier
