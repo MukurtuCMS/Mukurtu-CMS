@@ -66,7 +66,7 @@ third_party_settings:
       label: 'Word Entries'
       region: content
       parent_name: group_main_tab
-      weight: 12
+      weight: 11
       format_type: tab
       format_settings:
         classes: ''
@@ -95,15 +95,12 @@ third_party_settings:
         - field_thumbnail
         - field_media_assets
         - field_keywords
-        - field_coverage
-        - field_coverage_description
-        - field_location
-        - field_local_contexts_projects
-        - field_local_contexts_labels_and_notices
+        - group_locations
+        - group_local_contexts
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
-      weight: 11
+      weight: 12
       format_type: tab
       format_settings:
         classes: ''
@@ -113,6 +110,39 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
+    group_local_contexts:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: 'Local Contexts'
+      region: content
+      parent_name: group_additional_fields
+      weight: 25
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Locations'
+      region: content
+      parent_name: group_additional_fields
+      weight: 24
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true      
 id: node.dictionary_word.default
 targetEntityType: node
 bundle: dictionary_word
