@@ -68,6 +68,7 @@ third_party_settings:
         required_fields: true
     group_additional_fields:
       children:
+        - field_keywords
         - group_locations
         - group_local_contexts
       label: 'Additional Fields'
