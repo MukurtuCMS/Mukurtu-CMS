@@ -108,7 +108,6 @@ third_party_settings:
       children:
         - field_keywords
         - group_locations
-        - field_location
         - group_local_contexts
       label: 'Additional Fields'
       region: content
@@ -143,6 +142,7 @@ third_party_settings:
       children:
         - field_coverage
         - field_coverage_description
+        - field_location
       label: 'Locations'
       region: content
       parent_name: group_additional_fields
