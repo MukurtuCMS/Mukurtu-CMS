@@ -19,8 +19,8 @@ third_party_settings:
     group_main_tab:
       children:
         - group_mukurtu_essentials
-        - group_words
         - group_relations
+        - group_additional_fields
       label: 'Main Tab'
       region: content
       parent_name: ''
@@ -39,13 +39,7 @@ third_party_settings:
         - field_description
         - field_media_assets
         - field_cultural_protocols
-        - field_keywords
         - field_source
-        - field_coverage
-        - field_coverage_description
-        - field_location
-        - field_local_contexts_projects
-        - field_local_contexts_labels_and_notices
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -58,23 +52,9 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
-    group_words:
-      children:
-        - field_words
-      label: Words
-      region: content
-      parent_name: group_main_tab
-      weight: 21
-      format_type: tab
-      format_settings:
-        classes: ''
-        show_empty_fields: false
-        id: ''
-        formatter: closed
-        description: ''
-        required_fields: true
     group_relations:
       children:
+        - field_words
         - field_related_content
       label: Relations
       region: content
@@ -88,6 +68,57 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
+    group_additional_fields:
+      children:
+        - field_keywords
+        - group_locations
+        - group_local_contexts
+      label: 'Additional Fields'
+      region: content
+      parent_name: group_main_tab
+      weight: 23
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_local_contexts:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: 'Local Contexts'
+      region: content
+      parent_name: group_additional_fields
+      weight: 25
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Locations'
+      region: content
+      parent_name: group_additional_fields
+      weight: 24
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true    
 id: node.word_list.default
 targetEntityType: node
 bundle: word_list
