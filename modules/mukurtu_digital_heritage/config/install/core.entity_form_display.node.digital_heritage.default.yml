@@ -26,7 +26,7 @@ third_party_settings:
         - group_mukurtu_essentials
         - group_mukurtu_core
         - group_rights_and_permissions
-        - group_additional_metadata
+        - group_additional_fields
         - group_relations
       label: 'Main Tab'
       region: content
@@ -78,7 +78,7 @@ third_party_settings:
         required_fields: true
     group_rights_and_permissions:
       children:
-        - group_labels_and_notices
+        - group_local_contexts
         - group_knowledge_keepers
         - group_rights
         - group_licensing_options
@@ -94,7 +94,7 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_additional_metadata:
+    group_additional_fields:
       children:
         - field_format
         - field_type
@@ -109,7 +109,7 @@ third_party_settings:
         - field_coverage
         - field_coverage_description
         - field_location
-      label: 'Additional Metadata'
+      label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
       weight: 23
@@ -134,11 +134,11 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_labels_and_notices:
+    group_local_contexts:
       children:
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
-      label: 'Labels and Notices'
+      label: 'Local Contexts'
       region: content
       parent_name: group_rights_and_permissions
       weight: 20

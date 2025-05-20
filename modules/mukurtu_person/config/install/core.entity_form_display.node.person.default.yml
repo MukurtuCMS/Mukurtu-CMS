@@ -107,10 +107,9 @@ third_party_settings:
     group_additional_fields:
       children:
         - field_keywords
-        - field_coverage
-        - field_coverage_description
+        - group_locations
         - field_location
-        - group_labels_and_notices
+        - group_local_contexts
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
@@ -124,11 +123,27 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_labels_and_notices:
+    group_local_contexts:
       children:
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
-      label: 'Labels and Notices'
+      label: 'Local Contexts'
+      region: content
+      parent_name: group_additional_fields
+      weight: 25
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+      label: 'Locations'
       region: content
       parent_name: group_additional_fields
       weight: 24
@@ -139,7 +154,7 @@ third_party_settings:
         id: ''
         formatter: open
         description: ''
-        required_fields: true    
+        required_fields: true       
 id: node.person.default
 targetEntityType: node
 bundle: person
