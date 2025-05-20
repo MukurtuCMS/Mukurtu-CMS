@@ -106,9 +106,7 @@ third_party_settings:
         - field_subject
         - field_transcription
         - field_people
-        - field_coverage
-        - field_coverage_description
-        - field_location
+        - group_locations
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
@@ -196,6 +194,23 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Locations'
+      region: content
+      parent_name: group_additional_fields
+      weight: 24
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true       
 id: node.digital_heritage.default
 targetEntityType: node
 bundle: digital_heritage
