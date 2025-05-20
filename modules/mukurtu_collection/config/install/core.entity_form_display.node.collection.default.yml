@@ -20,7 +20,7 @@ third_party_settings:
     group_main_tab:
       children:
         - group_mukurtu_essentials
-        - group_relations
+        - group_related_content
         - group_additional_fields
       label: 'Main Tab'
       region: content
@@ -39,6 +39,8 @@ third_party_settings:
         - field_description
         - field_collection_image
         - field_source
+        - field_items_in_collection
+        - field_child_collections
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -50,15 +52,13 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
-    group_relations:
+    group_related_content:
       children:
-        - field_items_in_collection
-        - field_child_collections
         - field_related_content
       label: Relations
       region: content
       parent_name: group_main_tab
-      weight: 21
+      weight: 22
       format_type: tab
       format_settings:
         classes: ''
@@ -74,7 +74,7 @@ third_party_settings:
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
-      weight: 22
+      weight: 21
       format_type: tab
       format_settings:
         classes: ''
@@ -232,7 +232,7 @@ content:
     weight: 1
     region: content
     settings:
-      rows: 5
+      rows: 31
       placeholder: ''
     third_party_settings: {  }
   field_credit:
