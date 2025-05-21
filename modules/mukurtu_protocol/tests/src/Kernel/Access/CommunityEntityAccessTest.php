@@ -119,10 +119,10 @@ class CommunityEntityAccessTest extends KernelTestBase {
   }
 
   /**
-   * Test access operations for a strict community.
+   * Test access operations for a "Community only" community.
    */
-  public function testStrictCommunity() {
-    $this->community->setSharingSetting('strict');
+  public function testCommunityOnlyCommunity() {
+    $this->community->setSharingSetting('community-only');
     $this->community->save();
 
     // Non-member.
@@ -150,10 +150,10 @@ class CommunityEntityAccessTest extends KernelTestBase {
   }
 
   /**
-   * Test access operations for an open community.
+   * Test access operations for a public community.
    */
-  public function testOpenCommunity() {
-    $this->community->setSharingSetting('open');
+  public function testPublicCommunity() {
+    $this->community->setSharingSetting('public');
     $this->community->save();
 
     // Non-member.
@@ -264,9 +264,9 @@ class CommunityEntityAccessTest extends KernelTestBase {
       'name' => $this->randomString(),
       'status' => TRUE,
       'uid' => $this->owner->id(),
-      'field_access_mode' => 'open',
+      'field_access_mode' => 'public',
     ]);
-    $this->assertEquals('open', $testCommunity->getSharingSetting());
+    $this->assertEquals('public', $testCommunity->getSharingSetting());
   }
 
   /**
@@ -280,8 +280,8 @@ class CommunityEntityAccessTest extends KernelTestBase {
       'uid' => $this->owner->id(),
     ]);
 
-    $testCommunity->setSharingSetting('strict');
-    $this->assertEquals('strict', $testCommunity->getSharingSetting());
+    $testCommunity->setSharingSetting('community-only');
+    $this->assertEquals('community-only', $testCommunity->getSharingSetting());
   }
 
   /**

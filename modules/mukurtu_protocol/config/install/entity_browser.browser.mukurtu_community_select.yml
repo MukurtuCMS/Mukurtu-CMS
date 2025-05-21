@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.mukurtu_community_select
+  module:
+    - views
+name: mukurtu_community_select
+label: 'Mukurtu Community Select'
+display: modal
+display_configuration:
+  width: '1200'
+  height: '800'
+  link_text: 'Select communities'
+  auto_open: false
+selection_display: no_display
+selection_display_configuration: {  }
+widget_selector: single
+widget_selector_configuration: {  }
+widgets:
+  71fef0fa-ad44-4fb7-a26a-b78186f51f5b:
+    id: view
+    uuid: 71fef0fa-ad44-4fb7-a26a-b78186f51f5b
+    label: 'Select Communities'
+    weight: 1
+    settings:
+      submit_text: 'Add communities'
+      auto_select: false
+      view: mukurtu_community_select
+      view_display: mukurtu_community_select
