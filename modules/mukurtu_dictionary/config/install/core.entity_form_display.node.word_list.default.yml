@@ -258,7 +258,7 @@ content:
     third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
-    weight: 4
+    weight: 5
     region: content
     settings:
       media_types: {  }

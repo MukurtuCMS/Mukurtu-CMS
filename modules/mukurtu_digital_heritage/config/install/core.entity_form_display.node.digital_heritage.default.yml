@@ -472,7 +472,7 @@ content:
     third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
-    weight: -5
+    weight: -2
     region: content
     settings:
       media_types:
@@ -586,7 +586,7 @@ content:
     third_party_settings: {  }
   field_summary:
     type: string_textfield
-    weight: -6
+    weight: -2
     region: content
     settings:
       size: 60

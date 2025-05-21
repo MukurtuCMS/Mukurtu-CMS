@@ -311,7 +311,7 @@ content:
     third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
-    weight: 5
+    weight: 6
     region: content
     settings:
       media_types: {  }
@@ -357,7 +357,7 @@ content:
     third_party_settings: {  }
   field_representative_terms:
     type: entity_browser_entity_reference
-    weight: 6
+    weight: 5
     region: content
     settings:
       entity_browser: mukurtu_taxonomy_record_term_browser
