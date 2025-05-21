@@ -111,7 +111,7 @@ third_party_settings:
         - field_related_people
       label: 'Related People'
       region: content
-      parent_name: group_relations
+      parent_name: group_biography
       weight: 1
       format_type: details
       format_settings:
