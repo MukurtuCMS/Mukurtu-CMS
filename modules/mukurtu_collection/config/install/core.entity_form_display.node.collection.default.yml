@@ -146,7 +146,7 @@ content:
         editMode: '1'
         dragMode: '1'
         removalMode: '1'
-        drawCircle: '1'
+        drawCircle: false
         drawText: false
         cutPolygon: 0
         rotateMode: 0
