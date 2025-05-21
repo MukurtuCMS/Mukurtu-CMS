@@ -57,21 +57,6 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
-    group_related_content:
-      children:
-        - field_related_content
-      label: 'Related Content'
-      region: content
-      parent_name: group_main_tab
-      weight: 23
-      format_type: tab
-      format_settings:
-        classes: ''
-        show_empty_fields: false
-        id: ''
-        formatter: closed
-        description: ''
-        required_fields: true
     group_biography:
       children:
         - group_related_people       
@@ -80,6 +65,39 @@ third_party_settings:
       region: content
       parent_name: group_main_tab
       weight: 21
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_additional_fields:
+      children:
+        - field_keywords
+        - group_locations
+        - group_local_contexts
+      label: 'Additional Fields'
+      region: content
+      parent_name: group_main_tab
+      weight: 22
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_related_content:
+      children:
+        - field_related_content
+      label: 'Related Content'
+      region: content
+      parent_name: group_main_tab
+      weight: 23
       format_type: tab
       format_settings:
         classes: ''
@@ -102,24 +120,6 @@ third_party_settings:
         id: ''
         label_as_html: false
         open: true
-        description: ''
-        required_fields: true
-    group_additional_fields:
-      children:
-        - field_keywords
-        - group_locations
-        - group_local_contexts
-      label: 'Additional Fields'
-      region: content
-      parent_name: group_main_tab
-      weight: 22
-      format_type: tab
-      format_settings:
-        classes: ''
-        show_empty_fields: false
-        id: ''
-        label_as_html: false
-        formatter: closed
         description: ''
         required_fields: true
     group_local_contexts:
