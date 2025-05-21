@@ -22,9 +22,9 @@ third_party_settings:
     group_main_tab:
       children:
         - group_mukurtu_essentials
-        - group_text_sections
+        - group_biography
         - group_additional_fields
-        - group_relations
+        - group_related_content
       label: 'Main Tab'
       region: content
       parent_name: ''
@@ -57,24 +57,9 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
-    group_relations:
+    group_biography:
       children:
-        - group_related_people
-        - field_related_content
-      label: Relations
-      region: content
-      parent_name: group_main_tab
-      weight: 22
-      format_type: tab
-      format_settings:
-        classes: ''
-        show_empty_fields: false
-        id: ''
-        formatter: closed
-        description: ''
-        required_fields: true
-    group_text_sections:
-      children:
+        - group_related_people       
         - field_sections
       label: 'Biography'
       region: content
@@ -88,33 +73,15 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_related_people:
-      children:
-        - field_related_people
-      label: 'Related People'
-      region: content
-      parent_name: group_relations
-      weight: 5
-      format_type: details
-      format_settings:
-        classes: ''
-        show_empty_fields: false
-        id: ''
-        label_as_html: false
-        open: true
-        description: ''
-        required_fields: true
     group_additional_fields:
       children:
         - field_keywords
-        - field_coverage
-        - field_coverage_description
-        - field_location
-        - group_labels_and_notices
+        - group_locations
+        - group_local_contexts
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
-      weight: 23
+      weight: 22
       format_type: tab
       format_settings:
         classes: ''
@@ -124,11 +91,59 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_labels_and_notices:
+    group_related_content:
+      children:
+        - field_related_content
+      label: 'Related Content'
+      region: content
+      parent_name: group_main_tab
+      weight: 23
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_related_people:
+      children:
+        - field_related_people
+      label: 'Related People'
+      region: content
+      parent_name: group_biography
+      weight: 1
+      format_type: details
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        open: true
+        description: ''
+        required_fields: true
+    group_local_contexts:
       children:
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
-      label: 'Labels and Notices'
+      label: 'Local Contexts'
+      region: content
+      parent_name: group_additional_fields
+      weight: 25
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Locations'
       region: content
       parent_name: group_additional_fields
       weight: 24
@@ -139,7 +154,7 @@ third_party_settings:
         id: ''
         formatter: open
         description: ''
-        required_fields: true    
+        required_fields: true       
 id: node.person.default
 targetEntityType: node
 bundle: person
@@ -239,7 +254,7 @@ content:
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: 5
+    weight: 4
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -296,7 +311,7 @@ content:
     third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
-    weight: 4
+    weight: 6
     region: content
     settings:
       media_types: {  }
@@ -317,7 +332,7 @@ content:
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
+      open: true
       field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
@@ -342,7 +357,7 @@ content:
     third_party_settings: {  }
   field_representative_terms:
     type: entity_browser_entity_reference
-    weight: 6
+    weight: 5
     region: content
     settings:
       entity_browser: mukurtu_taxonomy_record_term_browser
@@ -357,7 +372,7 @@ content:
     third_party_settings: {  }
   field_sections:
     type: paragraphs
-    weight: 1
+    weight: 2
     region: content
     settings:
       title: Section
