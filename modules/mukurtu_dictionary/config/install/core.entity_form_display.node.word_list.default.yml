@@ -59,7 +59,7 @@ third_party_settings:
       label: 'Related Content'
       region: content
       parent_name: group_main_tab
-      weight: 22
+      weight: 23
       format_type: tab
       format_settings:
         classes: ''
@@ -76,7 +76,7 @@ third_party_settings:
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
-      weight: 23
+      weight: 22
       format_type: tab
       format_settings:
         classes: ''
@@ -212,7 +212,7 @@ content:
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: 1
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
