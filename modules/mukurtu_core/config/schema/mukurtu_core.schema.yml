@@ -92,7 +92,7 @@ field.widget.settings.geofield_mukurtu:
         removalMode:
           type: string
         drawCircle:
-          type: boolean
+          type: string
         drawText:
           type: boolean
         cutPolygon:
