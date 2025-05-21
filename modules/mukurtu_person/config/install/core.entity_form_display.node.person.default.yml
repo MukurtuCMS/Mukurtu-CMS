@@ -94,7 +94,7 @@ third_party_settings:
       label: 'Related People'
       region: content
       parent_name: group_relations
-      weight: 22
+      weight: 1
       format_type: details
       format_settings:
         classes: ''
@@ -372,7 +372,7 @@ content:
     third_party_settings: {  }
   field_sections:
     type: paragraphs
-    weight: 1
+    weight: 2
     region: content
     settings:
       title: Section
