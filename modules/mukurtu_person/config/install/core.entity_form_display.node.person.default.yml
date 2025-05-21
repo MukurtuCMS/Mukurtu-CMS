@@ -22,9 +22,9 @@ third_party_settings:
     group_main_tab:
       children:
         - group_mukurtu_essentials
-        - group_text_sections
+        - group_biography
         - group_additional_fields
-        - group_relations
+        - group_related_content
       label: 'Main Tab'
       region: content
       parent_name: ''
@@ -57,11 +57,10 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
-    group_relations:
+    group_related_content:
       children:
-        - group_related_people
         - field_related_content
-      label: Relations
+      label: 'Related Content'
       region: content
       parent_name: group_main_tab
       weight: 22
@@ -73,8 +72,9 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_text_sections:
+    group_biography:
       children:
+        - group_related_people       
         - field_sections
       label: 'Biography'
       region: content
@@ -94,7 +94,7 @@ third_party_settings:
       label: 'Related People'
       region: content
       parent_name: group_relations
-      weight: 5
+      weight: 24
       format_type: details
       format_settings:
         classes: ''
@@ -254,7 +254,7 @@ content:
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: 5
+    weight: 4
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -311,7 +311,7 @@ content:
     third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
-    weight: 4
+    weight: 5
     region: content
     settings:
       media_types: {  }
