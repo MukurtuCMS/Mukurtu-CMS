@@ -350,7 +350,7 @@ content:
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: -6
+    weight: -4
     region: content
     settings: {  }
     third_party_settings: {  }
