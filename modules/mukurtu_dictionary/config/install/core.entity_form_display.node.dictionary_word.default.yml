@@ -73,7 +73,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         label_as_html: false
-        formatter: closed
+        formatter: open
         description: ''
         required_fields: true
     group_related_content:
