@@ -5,8 +5,6 @@ dependencies:
     - system.menu.mukurtu
   module:
     - system
-  theme:
-    - mukurtu_v4
 id: mukurtu_v4_mukurtu_dashboard_menu
 theme: mukurtu_v4
 region: sidebar_first
