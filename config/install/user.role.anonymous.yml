@@ -1,6 +1,6 @@
 langcode: en
 status: true
-id: visitor
+id: anonymous
 label: 'Visitor'
 weight: 0
 is_admin: false
