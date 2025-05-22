@@ -20,7 +20,7 @@ mukurtu_collection.add_item_to_collection:
     _custom_access: '\Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController::access'
 
 mukurtu_collection.my_personal_collections:
-  path: '/dashboard/personal-collections'
+  path: '/user/{user}/personal-collections'
   defaults:
     _controller: '\Drupal\mukurtu_collection\Controller\MyPersonalCollectionsController::content'
     _title: 'Personal Collections'
