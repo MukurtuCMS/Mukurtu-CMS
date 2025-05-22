@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - system.menu.mukurtu
+    - system.menu.dashboard.content
   module:
     - system
 id: mukurtu_dashboard_menu_content
