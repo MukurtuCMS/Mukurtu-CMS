@@ -42,8 +42,8 @@ mukurtu_core.dashboard:
 mukurtu_core.manage_content:
   title: 'Manage Content'
   description: 'Manage Content'
-  parent: mukurtu
-  menu_name: mukurtu
+  parent: dashboard_content
+  menu_name: dashboard_content
   route_name: view.mukurtu_manage_all_content.mukurtu_manage_content
 mukurtu_core.manage_media:
   title: 'Manage Media'
