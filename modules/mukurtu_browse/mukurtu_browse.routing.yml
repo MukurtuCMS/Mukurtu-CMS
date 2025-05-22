@@ -51,6 +51,7 @@ mukurtu_browse.map_browse_page_teasers:
     parameters:
       nodes:
         type: 'nodes'
+        
 mukurtu_browse.map_browse_single_teaser:
   path: '/browse/map/teaser/{node}'
   defaults:

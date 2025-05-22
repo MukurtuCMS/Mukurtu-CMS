@@ -1,5 +1,5 @@
 mukurtu_protocol.community_manager_create_user:
-  path: '/dashboard/communities/create-user'
+  path: '/admin/communities/create-user'
   defaults:
     _form: '\Drupal\mukurtu_protocol\Form\CommunityManagerUserCreationForm'
     _title: 'Add User'
@@ -15,7 +15,7 @@ mukurtu_protocol.communities_page:
     _permission: 'view published community entities'
 
 mukurtu_protocol.permissions_overview:
-  path: '/dashboard/group/permissions/{entity_type_id}/{bundle_id}'
+  path: '/admin/group/permissions/{entity_type_id}/{bundle_id}'
   defaults:
     _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgPermissionsForm'
     _title_callback: '\Drupal\mukurtu_protocol\Form\MukurtuOgPermissionsForm::titleCallback'
@@ -23,7 +23,7 @@ mukurtu_protocol.permissions_overview:
     _permission: 'administer organic groups'
 
 mukurtu_protocol.permissions_edit_form:
-  path: '/dashboard/group/permissions/{entity_type_id}/{bundle_id}/{role_name}'
+  path: '/admin/group/permissions/{entity_type_id}/{bundle_id}/{role_name}'
   defaults:
     _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgRolePermissionsForm'
     _title_callback: '\Drupal\mukurtu_protocol\Form\MukurtuOgRolePermissionsForm::rolePermissionTitleCallback'
@@ -31,7 +31,7 @@ mukurtu_protocol.permissions_edit_form:
     _permission: 'administer organic groups'
 
 mukurtu_protocol.community_roles:
-  path: '/dashboard/community/roles'
+  path: '/admin/community/roles'
   defaults:
     _entity_list: 'og_role'
     _title: 'Community Roles'
@@ -39,7 +39,7 @@ mukurtu_protocol.community_roles:
     _permission: 'administer organic groups'
 
 mukurtu_protocol.protocol_roles:
-  path: '/dashboard/protocol/roles'
+  path: '/admin/protocol/roles'
   defaults:
     _entity_list: 'og_role'
     _title: 'Protocol Roles'
@@ -54,7 +54,7 @@ mukurtu_protocol.add_protocol_from_community:
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::access'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
 
 mukurtu_protocol.community_add_protocol:
   path: '/communities/community/{community}/add/protocol'
@@ -64,11 +64,11 @@ mukurtu_protocol.community_add_protocol:
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\CreateProtocolFromCommunityController::access'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
 
 
 mukurtu_protocol.manage_community:
-  path: 'dashboard/communities/{group}'
+  path: 'admin/communities/{group}'
   defaults:
     _controller: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::manageCommunity'
     _title_callback: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::getManageCommunityTitle'
@@ -91,7 +91,7 @@ mukurtu_protocol.manage_community_canonical:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::manageCommunityRedirectAccess'
 
 mukurtu_protocol.manage_protocol:
-  path: 'dashboard/protocols/{group}'
+  path: 'admin/protocols/{group}'
   defaults:
     _controller: '\Drupal\mukurtu_protocol\Controller\ManageProtocolsController::manageProtocol'
     _title_callback: '\Drupal\mukurtu_protocol\Controller\ManageProtocolsController::getManageProtocolTitle'
@@ -114,7 +114,7 @@ mukurtu_protocol.manage_protocol_canonical:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\ManageProtocolsController::manageProtocolRedirectAccess'
 
 mukurtu_protocol.community_members_list:
-  path: 'dashboard/communities/{group}/members'
+  path: 'admin/communities/{group}/members'
   defaults:
     _controller: '\Drupal\og\Controller\OgAdminMembersController::membersList'
     _title: 'Members'
@@ -123,14 +123,14 @@ mukurtu_protocol.community_members_list:
   requirements:
     _og_membership_add_access: 'TRUE'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
     _og_entity_type_id: group
     parameters:
       group:
         type: entity:community
 
 mukurtu_protocol.protocol_members_list:
-  path: 'dashboard/protocols/{group}/members'
+  path: 'admin/protocols/{group}/members'
   defaults:
     _controller: '\Drupal\og\Controller\OgAdminMembersController::membersList'
     _title: 'Members'
@@ -139,14 +139,14 @@ mukurtu_protocol.protocol_members_list:
   requirements:
     _og_membership_add_access: 'TRUE'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
     _og_entity_type_id: group
     parameters:
       group:
         type: entity:protocol
 
 mukurtu_protocol.community_add_membership:
-  path: 'dashboard/communities/{group}/members/add/{og_membership_type}'
+  path: 'admin/communities/{group}/members/add/{og_membership_type}'
   defaults:
     _controller: '\Drupal\og\Controller\OgAdminMembersController::addForm'
     _title: 'Add member'
@@ -155,13 +155,13 @@ mukurtu_protocol.community_add_membership:
   requirements:
     _og_membership_add_access: 'TRUE'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
     parameters:
       group:
         type: entity:community
 
 mukurtu_protocol.protocol_add_membership:
-  path: 'dashboard/protocols/{group}/members/add/{og_membership_type}'
+  path: 'admin/protocols/{group}/members/add/{og_membership_type}'
   defaults:
     _controller: '\Drupal\og\Controller\OgAdminMembersController::addForm'
     _title: 'Add member'
@@ -170,7 +170,7 @@ mukurtu_protocol.protocol_add_membership:
   requirements:
     _og_membership_add_access: 'TRUE'
   options:
-    _admin_route: 'TRUE'
+    _admin_route: TRUE
     parameters:
       group:
         type: entity:protocol
@@ -184,7 +184,7 @@ mukurtu_protocol.comment_settings:
     _permission: 'administer site configuration,administer comments'
 
 mukurtu_protocol.manage_protocol_comment_settings:
-  path: 'dashboard/protocols/{group}/comment-settings'
+  path: 'admin/protocols/{group}/comment-settings'
   defaults:
     _controller: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::content'
     _title_callback: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::getTitle'
@@ -196,7 +196,7 @@ mukurtu_protocol.manage_protocol_comment_settings:
         type: entity:protocol
 
 mukurtu_protocol.community_organization:
-  path: '/dashboard/community-organization'
+  path: '/admin/community-organization'
   defaults:
     _form: '\Drupal\mukurtu_protocol\Form\CommunityOrganizationForm'
     _title: 'Community Organization'
