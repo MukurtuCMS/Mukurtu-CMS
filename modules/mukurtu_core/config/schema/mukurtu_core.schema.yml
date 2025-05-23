@@ -262,16 +262,16 @@ field.widget.settings.mukurtu_leaflet_formatter:
           label: 'Draw Text'
         editMode:
           type: boolean
-          label: 'Edit Mode'
+          label: 'Edit map points'
         dragMode:
           type: boolean
-          label: 'Drag Mode'
+          label: 'Move map points'
         cutPolygon:
           type: boolean
           label: 'Cut Polygon'
         removalMode:
           type: boolean
-          label: 'Removal Mode'
+          label: 'Delete map points'
         rotateMode:
           type: boolean
           label: 'Rotate Mode'
