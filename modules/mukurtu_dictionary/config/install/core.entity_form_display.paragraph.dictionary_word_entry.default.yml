@@ -61,7 +61,9 @@ content:
     weight: 3
     region: content
     settings:
-      media_types: {  }
+      media_types: 
+        - audio
+        - soundcloud
     third_party_settings: {  }
   field_sample_sentences:
     type: entity_reference_paragraphs
