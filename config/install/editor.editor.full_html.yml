@@ -70,6 +70,15 @@ settings:
       multiBlock: true
     media_media:
       allow_view_mode_override: true
+      settings:
+        media_types: 
+          - audio
+          - document
+          - external_embed
+          - image
+          - remote_video
+          - soundcloud
+          - video
     ckeditor5_codeBlock:
       languages:
         -
