@@ -221,7 +221,7 @@ content:
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
-    label: none
+    label: above
     settings:
       multiple_map: false
       leaflet_map: 'OSM Mapnik'
