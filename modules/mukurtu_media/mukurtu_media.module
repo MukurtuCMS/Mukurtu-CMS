@@ -63,13 +63,13 @@ function mukurtu_media_media_source_info_alter(array &$sources)
  */
 function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_type){
   if ($entity_type->id() == 'media') {
-    $fields = Document::bundleFieldDefinitions($entity_type, 'document', []);
-    $fields += Audio::bundleFieldDefinitions($entity_type, 'audio', []);
+    $fields = Audio::bundleFieldDefinitions($entity_type, 'audio', []);
+    $fields += Document::bundleFieldDefinitions($entity_type, 'document', []);
+    $fields += ExternalEmbed::bundleFieldDefinitions($entity_type, 'external_embed', []);
     $fields += Image::bundleFieldDefinitions($entity_type, 'image', []);
     $fields += RemoteVideo::bundleFieldDefinitions($entity_type, 'remote_video', []);
-    $fields += Video::bundleFieldDefinitions($entity_type, 'video', []);
-    $fields += ExternalEmbed::bundleFieldDefinitions($entity_type, 'external_embed', []);
     $fields += SoundCloud::bundleFieldDefinitions($entity_type, 'soundcloud', []);
+    $fields += Video::bundleFieldDefinitions($entity_type, 'video', []);
     return $fields;
   }
 }
