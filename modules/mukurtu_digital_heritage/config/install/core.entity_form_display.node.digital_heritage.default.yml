@@ -478,8 +478,10 @@ content:
       media_types:
         - audio
         - document
+        - external_embed
         - image
         - remote_video
+        - soundcloud
         - video
     third_party_settings: {  }
   field_mukurtu_community_records:

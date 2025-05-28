@@ -314,7 +314,14 @@ content:
     weight: 6
     region: content
     settings:
-      media_types: {  }
+      media_types: 
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
     third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget

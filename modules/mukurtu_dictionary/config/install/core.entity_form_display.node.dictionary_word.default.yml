@@ -351,7 +351,14 @@ content:
     weight: -1
     region: content
     settings:
-      media_types: {  }
+      media_types: 
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
     third_party_settings: {  }
   field_mukurtu_protocol_inherit:
     type: entity_browser_entity_reference
@@ -410,7 +417,9 @@ content:
     weight: -1
     region: content
     settings:
-      media_types: {  }
+      media_types: 
+        - audio
+        - soundcloud
     third_party_settings: {  }
   field_related_content:
     type: entity_browser_entity_reference
