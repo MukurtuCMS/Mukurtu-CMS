@@ -481,7 +481,7 @@ content:
         - external_embed
         - image
         - remote_video
-        - remote_audio
+        - soundcloud
         - video
     third_party_settings: {  }
   field_mukurtu_community_records:
