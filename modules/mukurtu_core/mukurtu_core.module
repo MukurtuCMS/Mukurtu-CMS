@@ -44,7 +44,7 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
  */
 function mukurtu_core_entity_type_build(array &$entity_types) {
   // Prefix media URLs with 'dashboard'.
-  $entity_types['media']->setLinkTemplate('add-page', '/dashboard/media/add');
+  $entity_types['media']->setLinkTemplate('add-page', '/admin/media/add');
   $entity_types['media']->setLinkTemplate('add-form', '/dashboard/media/add/{media_type}');
   $entity_types['media']->setLinkTemplate('canonical', '/dashboard/media/{media}/edit');
   $entity_types['media']->setLinkTemplate('delete-form', '/dashboard/media/{media}/delete');
