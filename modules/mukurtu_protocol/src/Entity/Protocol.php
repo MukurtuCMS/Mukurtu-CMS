@@ -79,7 +79,7 @@ use Exception;
  *     "revision_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert",
  *     "revision_delete" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/delete",
  *     "translation_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert/{langcode}",
- *     "collection" = "/dashboard/protocols",
+ *     "collection" = "/admin/protocols",
  *   },
  *   field_ui_base_route = "protocol.settings"
  * )

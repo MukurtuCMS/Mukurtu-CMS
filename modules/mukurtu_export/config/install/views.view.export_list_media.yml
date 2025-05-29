@@ -369,7 +369,7 @@ display:
           plugin_id: text
           empty: false
           content:
-            value: '<a href="/dashboard/export/media">{{ ''View the full media export list''|t }}</a>'
+            value: '<a href="/admin/export/media">{{ ''View the full media export list''|t }}</a>'
             format: basic_html
           tokenize: true
       display_extenders: {  }
@@ -798,7 +798,7 @@ display:
           plugin_id: text
           empty: false
           content:
-            value: '<a href="/dashboard/export">{{ ''Return to Export''|t }}</a>'
+            value: '<a href="/admin/export">{{ ''Return to Export''|t }}</a>'
             format: basic_html
           tokenize: true
       footer:
@@ -812,11 +812,11 @@ display:
           plugin_id: text
           empty: false
           content:
-            value: '<a href="/dashboard/export">{{ ''Return to Export''|t }}</a>'
+            value: '<a href="/admin/export">{{ ''Return to Export''|t }}</a>'
             format: basic_html
           tokenize: true
       display_extenders: {  }
-      path: dashboard/export/media
+      path: admin/export/media
     cache_metadata:
       max-age: 0
       contexts:

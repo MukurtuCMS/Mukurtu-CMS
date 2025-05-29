@@ -15,7 +15,7 @@ mukurtu_taxonomy.manage_taxonomy_vocabulary:
     _custom_access: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::access'
 
 mukurtu_taxonomy.add_page:
-  path: '/admin/structure/taxonomy/add'
+  path: '/admin/structure/taxonomy'
   defaults:
     _title: 'Manage Taxonomy Vocabularies'
     _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::addPage'

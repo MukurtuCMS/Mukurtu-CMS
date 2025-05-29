@@ -895,7 +895,7 @@ display:
     display_options:
       display_description: ''
       display_extenders: {  }
-      path: dashboard/media
+      path: admin/media
       menu:
         type: tab
         title: Media

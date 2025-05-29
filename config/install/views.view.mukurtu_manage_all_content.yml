@@ -938,7 +938,7 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: dashboard/content
+      path: admin/content
     cache_metadata:
       max-age: 0
       contexts:

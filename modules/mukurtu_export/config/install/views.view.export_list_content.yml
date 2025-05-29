@@ -495,7 +495,7 @@ display:
           plugin_id: text
           empty: false
           content:
-            value: '<a href="/dashboard/export/content">View Content Export List</a>'
+            value: '<a href="/admin/export/content">View Content Export List</a>'
             format: mukurtu_html
           tokenize: false
       display_extenders: {  }
@@ -776,7 +776,7 @@ display:
           plugin_id: text
           empty: false
           content:
-            value: '<a href="/dashboard/export/content">{{ ''View the full content export list''|t }}</a>'
+            value: '<a href="/admin/export/content">{{ ''View the full content export list''|t }}</a>'
             format: basic_html
           tokenize: true
       display_extenders: {  }
@@ -813,7 +813,7 @@ display:
           plugin_id: text
           empty: false
           content:
-            value: '<a href="/dashboard/export">{{ ''Return to Export''|t }}</a>'
+            value: '<a href="/admin/export">{{ ''Return to Export''|t }}</a>'
             format: basic_html
           tokenize: true
       footer:
@@ -827,11 +827,11 @@ display:
           plugin_id: text
           empty: false
           content:
-            value: '<a href="/dashboard/export">{{ ''Return to Export''|t }}</a>'
+            value: '<a href="/admin/export">{{ ''Return to Export''|t }}</a>'
             format: basic_html
           tokenize: true
       display_extenders: {  }
-      path: dashboard/export/content
+      path: admin/export/content
     cache_metadata:
       max-age: 0
       contexts:
