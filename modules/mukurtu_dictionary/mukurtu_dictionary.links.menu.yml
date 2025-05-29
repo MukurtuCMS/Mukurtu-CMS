@@ -1,6 +1,6 @@
 mukurtu_dictionary.dictionary:
   title: 'Dictionary'
-  description: 'Browse the Dictionary'
+  description: 'Browse the dictionary'
   menu_name: main
   route_name: mukurtu_dictionary.dictionary_page
 mukurtu_dictionary.create_dictionary_word:

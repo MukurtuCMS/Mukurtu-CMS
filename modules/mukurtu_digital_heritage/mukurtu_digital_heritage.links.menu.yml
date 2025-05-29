@@ -1,6 +1,6 @@
 mukurtu_digital_heritage.create_digital_heritage:
-  title: 'Digital Heritage'
-  description: 'Add Digital Heritage'
+  title: 'Digital heritage item'
+  description: 'Add a digital heritage item'
   parent: mukurtu_core.create_content
   menu_name: mukurtu
   route_name: mukurtu_core.add

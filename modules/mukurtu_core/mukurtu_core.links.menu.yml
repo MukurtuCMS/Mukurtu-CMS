@@ -7,13 +7,6 @@ mukurtu_core.account_create_content:
   route_name: mukurtu_core.add_page
   weight: -100
   expanded: TRUE
-mukurtu_digital_heritage.create_digital_heritage:
-  title: 'Digital Heritage'
-  description: 'Add Digital Heritage'
-  parent: mukurtu_core.create_content
-  route_name: mukurtu_core.add
-  route_parameters:
-    node_type: digital_heritage
 mukurtu_core.account_dashboard:
   title: 'Dashboard'
   description: 'Dashboard'
@@ -93,7 +86,7 @@ mukurtu_core.settings:
   route_name: mukurtu_core.settings
   expanded: TRUE
   weight: 0
-mukurtu_core.communities_and_protocols:
+mukurtu_protocol.communities_and_protocols:
   title: 'Communities and Protocols'
   description: 'Links to manage communities and protocols'
   parent: mukurtu

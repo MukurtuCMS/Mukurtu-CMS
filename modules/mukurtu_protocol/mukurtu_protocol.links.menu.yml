@@ -13,21 +13,6 @@ protocol.admin.structure.settings:
   route_name: protocol.settings
   parent: system.admin_structure
 
-mukurtu_protocol.manage_communities_and_protocols:
-  title: 'Communities and protocols '
-  description: 'Manage communities and protocols.'
-  parent: mukurtu
-  menu_name: mukurtu
-  expanded: TRUE
-
-mukurtu_protocol.manage_communities:
-  title: 'Communities'
-  description: 'Manage Communities and memberships.'
-  parent: mukurtu
-  menu_name: mukurtu
-  route_name: mukurtu_protocol.manage_communities_and_protocols
-  expanded: TRUE
-
 mukurtu_protocol.community_organization:
   title: 'Community Organization'
   description: 'Alter the ordering of communities on the site.'
