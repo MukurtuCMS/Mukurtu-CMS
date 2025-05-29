@@ -81,6 +81,8 @@ filters:
       allowed_media_types:
         audio: audio
         document: document
+        external_embed: external_embed
         image: image
         remote_video: remote_video
+        soundcloud: soundcloud
         video: video
