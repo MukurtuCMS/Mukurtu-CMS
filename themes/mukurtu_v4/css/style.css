@@ -732,6 +732,7 @@ figure.align-right,
   -webkit-margin-start: var(--v-space-6xs);
           margin-inline-start: var(--v-space-6xs);
   inline-size: 100%;
+  overflow: visible;
   white-space: nowrap;
   font-weight: var(--text-bold);
 }
