@@ -91,6 +91,7 @@ mukurtu_multipage_items.multipage_add_new_page:
     parameters:
       node:
         type: entity:node
+    _admin_route: TRUE
   requirements:
     _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::editAccess'
 
