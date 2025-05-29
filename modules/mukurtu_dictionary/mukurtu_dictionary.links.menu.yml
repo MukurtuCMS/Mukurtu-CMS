@@ -4,13 +4,21 @@ mukurtu_dictionary.dictionary:
   menu_name: main
   route_name: mukurtu_dictionary.dictionary_page
 mukurtu_dictionary.create_dictionary_word:
-  title: 'Dictionary Word'
-  description: 'Add a Dictionary Word'
+  title: 'Dictionary word'
+  description: 'Add a dictionary word'
   parent: mukurtu_core.create_content
   menu_name: mukurtu
   route_name: mukurtu_core.add
   route_parameters:
     node_type: dictionary_word
+mukurtu_dictionary.create_word_list:
+  title: 'Word list'
+  description: 'Add a word list'
+  parent: mukurtu_core.create_content
+  menu_name: mukurtu
+  route_name: mukurtu_core.add
+  route_parameters:
+    node_type: word_list
 
 # Language community menu items definition
 entity.language_community.collection:
