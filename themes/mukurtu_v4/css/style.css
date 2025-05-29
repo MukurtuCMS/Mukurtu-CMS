@@ -3678,3 +3678,9 @@ header {
   background-color: var(--color-error-light);
 }
 /*# sourceMappingURL=style.css.map */
+
+
+/* Michael add */
+.paragraph-type-title {
+  overflow: visible;
+}
