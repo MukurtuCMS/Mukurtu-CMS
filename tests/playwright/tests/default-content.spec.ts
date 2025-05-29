@@ -201,8 +201,8 @@ test('Default Content: Community', async ({ page, browserName }) => {
 test('Default Content: Category', async ({ page, browserName }) => {
   // Loop through all Digital Heritage items and create each one.
   for (const category of defaultContentSpec.category) {
-    // Create through the custom dashboard URL.
-    await page.goto('/dashboard/categories');
+    // Create through the custom admin URL.
+    await page.goto('/admin/categories');
 
     // Expand the Details element to populate a new category value.
     await page.getByRole('button', { name: 'Add a new category' }).click();
@@ -228,8 +228,8 @@ test('Default Content: Category', async ({ page, browserName }) => {
 test('Default Content: Person', async ({ page, browserName }) => {
   // Loop through all Person items and create each one.
   for (const person of defaultContentSpec.person) {
-    // Create through the custom dashboard URL.
-    await page.goto('/dashboard/node/add/person');
+    // Create through the custom admin URL.
+    await page.goto('/admin/node/add/person');
     await page.getByRole('textbox', { name: 'Name' }).fill(person.name);
     await page
       .getByRole('group', { name: 'Sharing Setting' })
@@ -282,8 +282,8 @@ test('Default Content: Person', async ({ page, browserName }) => {
 test('Default Content: Digital Heritage', async ({ page, browserName }) => {
   // Loop through all Digital Heritage items and create each one.
   for (const dh of defaultContentSpec.dh) {
-    // Create through the custom dashboard URL.
-    await page.goto('/dashboard/node/add/digital_heritage');
+    // Create through the custom admin URL.
+    await page.goto('/admin/node/add/digital_heritage');
     await page.getByRole('textbox', { name: 'Title' }).fill(dh.title);
     await page.getByRole('textbox', { name: 'Summary' }).fill(dh.summary);
     await page
@@ -321,8 +321,8 @@ test('Default Content: Language', async ({ page, browserName }) => {
 test('Default Content: Dictionary Word', async ({ page, browserName }) => {
   // Loop through all Dictionary word items and create each one.
   for (const word of defaultContentSpec.word) {
-    // Create through the custom dashboard URL.
-    await page.goto('/dashboard/node/add/dictionary_word');
+    // Create through the custom admin URL.
+    await page.goto('/admin/node/add/dictionary_word');
     await page.getByRole('textbox', { name: 'Term' }).fill(word.term);
     await page
       .getByRole('group', { name: 'Sharing Setting' })

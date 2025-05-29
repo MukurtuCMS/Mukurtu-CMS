@@ -325,7 +325,7 @@ display:
       defaults:
         empty: false
       display_extenders: {  }
-      path: dashboard/drafts
+      path: user/drafts
       menu:
         type: normal
         title: 'Your Drafts'

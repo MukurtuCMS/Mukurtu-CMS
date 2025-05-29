@@ -1,5 +1,5 @@
 mukurtu_taxonomy.manage_categories:
-  path: '/dashboard/categories'
+  path: '/admin/categories/manage'
   defaults:
     _title: 'Manage Categories'
     _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuCategoryManageController::content'
@@ -7,7 +7,7 @@ mukurtu_taxonomy.manage_categories:
     _permission: 'create terms in category,edit terms in category,delete terms in category'
 
 mukurtu_taxonomy.manage_taxonomy_vocabulary:
-  path: '/dashboard/taxonomy/{taxonomy_vocabulary}'
+  path: '/admin/taxonomy/{taxonomy_vocabulary}/manage'
   defaults:
     _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
   requirements:
@@ -15,7 +15,7 @@ mukurtu_taxonomy.manage_taxonomy_vocabulary:
     _custom_access: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::access'
 
 mukurtu_taxonomy.add_page:
-  path: '/dashboard/taxonomy'
+  path: '/admin/structure/taxonomy'
   defaults:
     _title: 'Manage Taxonomy Vocabularies'
     _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::addPage'

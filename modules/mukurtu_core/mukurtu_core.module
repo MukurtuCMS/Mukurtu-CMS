@@ -44,14 +44,14 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
  */
 function mukurtu_core_entity_type_build(array &$entity_types) {
   // Prefix media URLs with 'dashboard'.
-  $entity_types['media']->setLinkTemplate('add-page', '/dashboard/media/add');
-  $entity_types['media']->setLinkTemplate('add-form', '/dashboard/media/add/{media_type}');
-  $entity_types['media']->setLinkTemplate('canonical', '/dashboard/media/{media}/edit');
-  $entity_types['media']->setLinkTemplate('delete-form', '/dashboard/media/{media}/delete');
-  $entity_types['media']->setLinkTemplate('delete-multiple-form', '/dashboard/media/delete');
-  $entity_types['media']->setLinkTemplate('edit-form', '/dashboard/media/{media}/edit');
-  $entity_types['media']->setLinkTemplate('revision', '/dashboard/media/{media}/revisions/{media_revision}/view');
-  //$entity_types['media']->setLinkTemplate('collection', '/dashboard/admin/content/media');
+  $entity_types['media']->setLinkTemplate('add-page', '/admin/media/add');
+  $entity_types['media']->setLinkTemplate('add-form', '/admin/media/add/{media_type}');
+  $entity_types['media']->setLinkTemplate('canonical', '/admin/media/{media}/edit');
+  $entity_types['media']->setLinkTemplate('delete-form', '/admin/media/{media}/delete');
+  $entity_types['media']->setLinkTemplate('delete-multiple-form', '/admin/media/delete');
+  $entity_types['media']->setLinkTemplate('edit-form', '/admin/media/{media}/edit');
+  $entity_types['media']->setLinkTemplate('revision', '/admin/media/{media}/revisions/{media_revision}/view');
+  //$entity_types['media']->setLinkTemplate('collection', '/admin/content/media');
 
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   foreach (['media', 'paragraph', 'node'] as $entity_type_id) {
