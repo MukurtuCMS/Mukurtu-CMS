@@ -36,6 +36,7 @@ mukurtu_collection.add_item_to_personal_collection:
     parameters:
       node:
         type: entity:node
+    _admin_route: TRUE
   requirements:
     _custom_access: '\Drupal\mukurtu_collection\Controller\PersonalCollectionAddItemController::access'
 

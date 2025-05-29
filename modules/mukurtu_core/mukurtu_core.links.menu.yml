@@ -86,3 +86,9 @@ mukurtu_core.settings:
   route_name: mukurtu_core.settings
   expanded: TRUE
   weight: 0
+mukurtu_protocol.communities_and_protocols:
+  title: 'Communities and Protocols'
+  description: 'Links to manage communities and protocols'
+  parent: mukurtu
+  menu_name: mukurtu
+  expanded: TRUE
