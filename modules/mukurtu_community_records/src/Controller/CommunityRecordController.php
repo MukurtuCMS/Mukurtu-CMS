@@ -49,12 +49,6 @@ class CommunityRecordController extends ControllerBase {
       return AccessResult::forbidden();
     }
 
-    // Fail if the account doesn't have the ability to create content of any
-    // types configured to be used as community records.
-    if (!$this->checkCreateRecordTypes($originalRecord, $account)) {
-      return AccessResult::forbidden();
-    }
-
     // Check for the community record admin permission in one of the
     // owning protocols.
     if ($protocols = $originalRecord->getProtocolEntities()) {
