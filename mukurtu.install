@@ -338,6 +338,7 @@ function mukurtu_install() {
     'administer users',
     'configure leaflet',
     'create any message template',
+    'create media content warnings',
     'create mukurtu_batch_import_report message',
     'create mukurtu_new_item_in_collection message',
     'create mukurtu_new_item_in_community message',
