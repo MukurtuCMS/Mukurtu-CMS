@@ -88,7 +88,6 @@ dependencies:
   - 'field_group:field_group'
   - 'flag:flag'
   - 'geofield:geofield'
-  - 'google_analytics:google_analytics'
   - 'leaflet:leaflet'
   - 'leaflet:leaflet_views'
   - 'message:message'
