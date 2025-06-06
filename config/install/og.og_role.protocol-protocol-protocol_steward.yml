@@ -16,7 +16,7 @@ permissions:
   - 'administer community records'
   - 'administer permissions'
   - 'apply protocol'
-  - 'approve and deny subscription'
+  # 'approve and deny subscription'
   - 'create audio media'
   - 'create collection content'
   - 'create dictionary_word content'

@@ -11,5 +11,5 @@ group_type: community
 group_bundle: community
 group_id: null
 permissions:
-  - subscribe
+  #- subscribe
 role_type: required
