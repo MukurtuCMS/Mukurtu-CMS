@@ -22,6 +22,7 @@ mukurtu_core.add_page:
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuManageContentController::addPage'
   options:
     _node_operation_route: TRUE
+    _admin_route: TRUE
   requirements:
     _entity_create_any_access: 'node'
 
@@ -34,6 +35,7 @@ mukurtu_core.add:
     _entity_create_access: 'node:{node_type}'
   options:
     _node_operation_route: TRUE
+    _admin_route: TRUE
     parameters:
       node_type:
         type: entity:node_type

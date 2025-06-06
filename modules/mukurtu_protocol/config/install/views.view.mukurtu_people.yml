@@ -755,6 +755,8 @@ display:
         description: 'Manage user accounts, roles, and permissions.'
         weight: 0
         menu_name: admin
+      options:
+        _admin_route: TRUE  
     cache_metadata:
       max-age: 0
       contexts:
@@ -765,3 +767,4 @@ display:
         - user.permissions
       tags:
         - 'config:field.storage.user.field_display_name'
+    
