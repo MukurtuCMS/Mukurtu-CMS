@@ -4,7 +4,7 @@ dependencies: {  }
 id: mukurtu_cultural_protocol_pattern
 label: 'Mukurtu Cultural Protocol Pattern'
 type: 'canonical_entities:protocol'
-pattern: 'protocols/[protocol:name]'
+pattern: 'protocol/[protocol:name]'
 selection_criteria: {  }
 selection_logic: and
 weight: 0
