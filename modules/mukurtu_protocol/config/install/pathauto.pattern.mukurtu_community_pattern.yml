@@ -4,7 +4,7 @@ dependencies: {  }
 id: mukurtu_community_pattern
 label: 'Mukurtu Community Pattern'
 type: 'canonical_entities:community'
-pattern: 'communities/[community:name]'
+pattern: 'community/[community:name]'
 selection_criteria: {  }
 selection_logic: and
 weight: 0
