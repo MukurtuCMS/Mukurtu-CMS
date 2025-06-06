@@ -64,9 +64,7 @@
         "mukurtu/masonry": "*",
         "sibyx/phpgpx": "@RC",
         "drupal/term_merge": "^2.0@beta",
-        "drupal/term_merge_manager": "^2.0",
-        "drupal/statistics": "^1.0",
-        "drupal/analytics": "^1.0@alpha"
+        "drupal/term_merge_manager": "^2.0"
     },
     "require-dev": {
         "drupal/devel": "*",

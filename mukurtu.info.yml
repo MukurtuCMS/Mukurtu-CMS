@@ -46,8 +46,6 @@ install:
   - facets_reset_button
   - term_merge
   - term_merge_manager
-  - statistics
-  - analytics
 dependencies:
   - 'blazy:blazy'
   - 'colorbox:colorbox'
