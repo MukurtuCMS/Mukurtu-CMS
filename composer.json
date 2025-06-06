@@ -65,8 +65,7 @@
         "sibyx/phpgpx": "@RC",
         "drupal/term_merge": "^2.0@beta",
         "drupal/term_merge_manager": "^2.0",
-        "drupal/tour": "^2.0",
-        "drupal/tour_core": "*" 
+        "drupal/tour": "^2.0"
     },
     "require-dev": {
         "drupal/devel": "*",
