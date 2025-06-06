@@ -47,7 +47,6 @@ install:
   - term_merge
   - term_merge_manager
   - tour
-  - tour_core
 dependencies:
   - 'blazy:blazy'
   - 'colorbox:colorbox'
