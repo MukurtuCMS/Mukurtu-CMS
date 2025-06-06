@@ -36,7 +36,7 @@
         "drupal/flag": "*",
         "drupal/geofield": "^1.59",
         "drupal/geolocation": "*",
-        "drupal/google_analytics": "*",
+        "drupal/google_tag": "^2.0",
         "drupal/leaflet": "^10.2",
         "drupal/media_entity_soundcloud": "^3.2",
         "drupal/message": "^1.5",
@@ -64,7 +64,8 @@
         "mukurtu/masonry": "*",
         "sibyx/phpgpx": "@RC",
         "drupal/term_merge": "^2.0@beta",
-        "drupal/term_merge_manager": "^2.0"
+        "drupal/term_merge_manager": "^2.0",
+        "drupal/statistics": "^1.0"
     },
     "require-dev": {
         "drupal/devel": "*",

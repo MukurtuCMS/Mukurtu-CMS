@@ -41,11 +41,12 @@ install:
   - views
   - views_ui
   - automated_cron
-  - google_analytics
+  - google_tag
   - twig_tweak
   - facets_reset_button
   - term_merge
   - term_merge_manager
+  - statistics
 dependencies:
   - 'blazy:blazy'
   - 'colorbox:colorbox'
