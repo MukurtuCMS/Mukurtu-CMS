@@ -4,7 +4,7 @@ dependencies: {  }
 id: mukurtu_taxonomy_pattern
 label: 'Mukurtu Taxonomy Pattern'
 type: 'canonical_entities:taxonomy'
-pattern: '[taxonomy:name]/[term:name]'
+pattern: '[term:vocabulary]/[term:name]'
 selection_criteria: {  }
 selection_logic: and
 weight: 0
