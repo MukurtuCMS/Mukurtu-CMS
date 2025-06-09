@@ -41,7 +41,7 @@ install:
   - views
   - views_ui
   - automated_cron
-  - google_analytics
+  - google_tag
   - twig_tweak
   - facets_reset_button
   - term_merge
@@ -87,7 +87,6 @@ dependencies:
   - 'field_group:field_group'
   - 'flag:flag'
   - 'geofield:geofield'
-  - 'google_analytics:google_analytics'
   - 'leaflet:leaflet'
   - 'leaflet:leaflet_views'
   - 'message:message'
