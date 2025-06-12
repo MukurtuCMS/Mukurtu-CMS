@@ -575,9 +575,10 @@ function mukurtu_protocol_form_protocol_add_form_alter(&$form, FormStateInterfac
  */
 function mukurtu_protocol_form_og_membership_default_add_form_alter(&$form, FormStateInterface $form_state)
 {
-  // Only add the form validator if this form is in the protocol context.
+  $form['roles']['widget']['#required'] = TRUE;
   $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
   if ($group instanceof ProtocolInterface) {
+    // Only add the form validator if this form is in the protocol context.
     $form['#validate'][] = 'add_protocol_member_form_validate';
   }
 }
