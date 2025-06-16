@@ -43,6 +43,16 @@
 
       div:first-of-type {
         grid-column: 1 / -1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        column-gap: var(--v-space-2xs);
+
+        .language-switcher {
+          svg path {
+            fill: var(--color-white);
+          }
+        }
 
         @include include-media.media('>=2xl') {
           grid-column: 2 / -2;

@@ -26,6 +26,9 @@
  * @see template_preprocess_block()
  */
 #}
+
+{{ attach_library('mukurtu_v4/language-switcher') }}
+
 <details{{ attributes.addClass('language-switcher') }}>
   <summary class="language-switcher__summary">
     {{ source('@mukurtu_v4/images/language-icon.svg') }}
