@@ -18,6 +18,8 @@ use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\og\Og;
+use Drupal\Core\Access\AccessResult;
 
 /**
  * @file
@@ -615,6 +617,53 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
           }
         }
       }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_create_access().
+ *
+ * Handles access to OG management pages /admin/communities/{group} and
+ * /admin/protocols/{group}. Only community managers and protocol stewards can
+ * view these pages.
+ *
+ * Context:
+ * The issue was mukurtu admins had access to these pages even if they were
+ * removed from the community/protocol in question. This resulted in a scenario
+ * where a mukurtu admin created a community, added another user with the
+ * community manager role, removed themselves as a member, yet could still
+ * access the OG manage group page for that community.
+ *
+ * So why does overriding this hook solve that problem? After all, we aren't
+ * creating anything by viewing these pages. True, but looking at the relevant
+ * routes mukurtu_protocol.manage_community and mukurtu_protocol.manage_protocol,
+ * note the requirement "_og_membership_add_access: 'TRUE'". Meaning, a user
+ * must be able to add og memberships to view these pages. So that's why, when
+ * og decides whether to grant access here, it invokes all modules' entity
+ * create access hooks first (see OgMembershipAccessControlHandler::createAccess()).
+ * If the access result was NOT forbidden, og makes further access calculations
+ * at OgAccess::userAccess(). In our case, og was granting access when the
+ * group's author was the same as the current user, regardless of group
+ * membership or role. By overriding our own entity create access hook, we
+ * preempt this undesired handling to get the access result we truly want.
+ *
+ * There might be a way to streamline this access check system, but this
+ * workaround fixes our current problem (for now).
+ */
+function mukurtu_protocol_entity_create_access($account, array $context, $entity_bundle) {
+  // As far as our roles go, only community managers and protocol stewards have
+  // permission to view OG manage group pages.
+  if ($context['entity_type_id'] == 'og_membership') {
+    $group = isset($context['group']) ? $context['group'] : NULL;
+    if ($group) {
+      $membership = Og::getMembership($group, $account);
+      if ($membership && ($membership->hasRole("community-community-community_manager") ||
+          $membership->hasRole("protocol-protocol-protocol_steward")))
+      {
+        return AccessResult::allowed();
+      }
+      return AccessResult::forbidden();
     }
   }
 }
