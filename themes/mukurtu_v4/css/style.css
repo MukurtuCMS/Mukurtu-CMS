@@ -3607,14 +3607,10 @@ header {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }
 }
-.layout-container .page__account-menu div:first-of-type {
+.layout-container .page__account-menu .region {
   grid-column: 1/-1;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
@@ -3622,11 +3618,18 @@ header {
      -moz-column-gap: var(--v-space-2xs);
           column-gap: var(--v-space-2xs);
 }
-.layout-container .page__account-menu div:first-of-type .language-switcher svg path {
+.layout-container .page__account-menu .region > *:first-child {
+  grid-column: 2;
+}
+.layout-container .page__account-menu .region .language-switcher {
+  grid-column: 3;
+  justify-self: end;
+}
+.layout-container .page__account-menu .region .language-switcher svg path {
   fill: var(--color-white);
 }
 @media (min-width: 90rem) {
-  .layout-container .page__account-menu div:first-of-type {
+  .layout-container .page__account-menu .region {
     grid-column: 2/-2;
   }
 }
