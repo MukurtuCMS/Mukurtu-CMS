@@ -137,7 +137,7 @@ function mukurtu_install() {
     'visibility' => [],
   ]);
   $block->save();
-  $block->setRegion('header');
+  $block->setRegion('user_menu');
   $block->setStatus(TRUE);
   $block->setWeight(3);
   $block->save();
