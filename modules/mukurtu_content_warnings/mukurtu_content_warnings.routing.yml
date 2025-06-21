@@ -16,4 +16,4 @@ mukurtu_content_warnings.settings:
     _form: '\Drupal\mukurtu_content_warnings\Form\MukurtuContentWarningsSettingsForm'
     _title: 'Mukurtu Content Warnings Settings'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'create media content warnings'

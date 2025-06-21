@@ -47,8 +47,12 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::forbidden();
 
       case 'update':
-
-        return AccessResult::allowedIfHasPermission($account, 'edit community entities');
+        // Only community managers have permission to edit communities.
+        $membership = Og::getMembership($entity, $account);
+        if ($membership && $membership->hasRole("community-community-community_manager")) {
+          return AccessResult::allowed();
+        }
+        return AccessResult::forbidden();
 
       case 'delete':
         // Cannot delete a parent community.

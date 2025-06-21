@@ -1,0 +1,12 @@
+diff --git a/config/optional/views.view.og_members_overview.yml b/config/optional/views.view.og_members_overview.yml
+index 099d2468..75ae8a32 100644
+--- a/config/optional/views.view.og_members_overview.yml
++++ b/config/optional/views.view.og_members_overview.yml
+@@ -157,7 +157,6 @@ display:
+             - og_membership_approve_pending_action
+             - og_membership_block_action
+             - og_membership_delete_action
+-            - og_membership_remove_multiple_roles_action
+             - og_membership_unblock_action
+           entity_type: og_membership
+           plugin_id: og_membership_bulk_form
