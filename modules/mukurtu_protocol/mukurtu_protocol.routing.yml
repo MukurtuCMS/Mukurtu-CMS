@@ -5,6 +5,8 @@ mukurtu_protocol.community_manager_create_user:
     _title: 'Add User'
   requirements:
     _mukurtu_permission: 'community:manage members'
+  options:
+    _admin_route: TRUE
 
 mukurtu_protocol.communities_page:
   path: '/communities'
@@ -76,6 +78,7 @@ mukurtu_protocol.manage_community:
     parameters:
       group:
         type: entity:community
+    _admin_route: TRUE
   requirements:
     _og_membership_add_access: 'TRUE'
 
@@ -87,6 +90,7 @@ mukurtu_protocol.manage_community_canonical:
     parameters:
       group:
         type: entity:community
+    _admin_route: TRUE
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::manageCommunityRedirectAccess'
 
@@ -99,6 +103,7 @@ mukurtu_protocol.manage_protocol:
     parameters:
       group:
         type: entity:protocol
+    _admin_route: TRUE 
   requirements:
     _og_membership_add_access: 'TRUE'
 
@@ -194,6 +199,7 @@ mukurtu_protocol.manage_protocol_comment_settings:
     parameters:
       group:
         type: entity:protocol
+    _admin_route: TRUE
 
 mukurtu_protocol.community_organization:
   path: '/admin/community-organization'
