@@ -41,8 +41,27 @@
 
       @include layout.layout--full-width-grid;
 
-      div:first-of-type {
+      .region {
         grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        column-gap: var(--v-space-2xs);
+
+        // The first child is assumed to be the main navigation.
+        // It is placed in the center column of our 3-column grid.
+        & > *:first-child {
+          grid-column: 2;
+        }
+
+        .language-switcher {
+          grid-column: 3;
+          justify-self: end;
+
+          svg path {
+            fill: var(--color-white);
+          }
+        }
 
         @include include-media.media('>=2xl') {
           grid-column: 2 / -2;

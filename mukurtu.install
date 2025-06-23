@@ -130,13 +130,14 @@ function mukurtu_install() {
       'label_display' => TRUE,
       'provider' => 'language',
     ],
-    'region' => 'header',
+    'region' => 'user_menu',
+    'weight' => -8,
     'plugin' => 'language_block:language_interface',
     'theme' => 'mukurtu_v4',
     'visibility' => [],
   ]);
   $block->save();
-  $block->setRegion('header');
+  $block->setRegion('user_menu');
   $block->setStatus(TRUE);
   $block->setWeight(3);
   $block->save();
