@@ -1,0 +1,154 @@
+@use "../../../external/include-media";
+
+// All menu styling is here.
+// To find menu grid placement, see _page.scss.
+.menu {
+  // Account menu.
+  &__account-menu {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    gap: var(--gutter);
+    inline-size: 100%;
+
+    li {
+      list-style: none;
+
+      a {
+        color: var(--light-text-color);
+        font-weight: var(--text-bold);
+        text-decoration: underline solid 2px var(--light-text-color);
+        transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+
+        &:hover {
+          text-decoration-color: var(--color-transparent);
+          transition: text-decoration-color 0.12s ease-in;
+        }
+
+        &:hover,
+        &:focus,
+        &:focus-visible,
+        &:active {
+          color: var(--brand-light-accent);
+        }
+
+        &:focus,
+        &:focus-visible,
+        &:active {
+          outline-color: var(--color-white);
+        }
+      }
+    }
+  }
+}
+
+.header__main-nav {
+  ul {
+    padding: 0;
+
+    li {
+      list-style: none;
+      position: relative;
+      display: inline-block;
+      margin-block: var(--v-space-5xs);
+      margin-inline: 0;
+
+      &:not(:last-of-type) {
+        border-inline-end: 1.5px solid var(--main-nav-divider);
+      }
+
+      // stylelint-disable-next-line no-descending-specificity
+      a {
+        color: var(--brand-text-color);
+        font-size: var(--font-size-l);
+        text-decoration: none;
+        padding: var(--v-space-4xxs);
+        border-block-end: 4px solid;
+        border-block-end-color: var(--color-transparent);
+        transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+
+        &:hover {
+          border-block-end-color: var(--brand-secondary-dark);
+        }
+
+        &:hover,
+        &:focus,
+        &:focus-visible,
+        &:active {
+          color: var(--brand-secondary-dark);
+        }
+      }
+    }
+  }
+}
+
+// Mobile menu control.
+.main-navigation {
+  display: none;
+
+  @include include-media.media('>=lg') {
+    display: block;
+  }
+}
+
+.mobile-nav-button {
+  display: block;
+
+  @include include-media.media('>=lg') {
+    display: none;
+  }
+
+  &__button {
+    float: inline-end;
+    background: none;
+    position: relative;
+    text-indent: -9999px;
+    cursor: pointer;
+
+    &:hover {
+      background: none;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    block-size: 0;
+    inline-size: var(--v-space-2xs);
+    transform: translate(-50%, -50%);
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    border-block-start: solid 3px var(--mukurtu-navbar-collapse-link-color);
+
+    &::before,
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      inline-size: 100%;
+      transition: inset-block-start 0.1s, transform 0.1s;
+      border-block-start: solid 3px var(--mukurtu-navbar-collapse-link-color);
+    }
+
+    &::before {
+      inset-block-start: -11px;
+    }
+
+    &::after {
+      inset-block-start: 5px;
+    }
+
+    [aria-expanded='true'] & {
+      border-block-start: 0;
+
+      &::before {
+        inset-block-start: 0;
+        transform: rotate(45deg);
+      }
+
+      &::after {
+        inset-block-start: 0;
+        transform: rotate(-45deg);
+      }
+    }
+  }
+}

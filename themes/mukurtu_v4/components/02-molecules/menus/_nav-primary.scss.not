@@ -1,62 +1,9 @@
 /**
  * @file
  * Nav Primary.
- *
- * This is a refactored version of the primary navigation styles, inspired by
- * Drupal's Olivero theme. It incorporates modern CSS practices and integrates
- * with the Mukurtu V4 theme variables.
  */
 
-@use "../../../external/include-media";
-
-// All menu styling is here.
-// To find menu grid placement, see _page.scss.
-.menu {
-  // Account menu.
-  &__account-menu {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    gap: var(--gutter);
-    inline-size: 100%;
-
-    li {
-      list-style: none;
-
-      a {
-        color: var(--light-text-color);
-        font-weight: var(--text-bold);
-        text-decoration: underline solid 2px var(--light-text-color);
-        transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
-
-        &:hover {
-          text-decoration-color: var(--color-transparent);
-          transition: text-decoration-color 0.12s ease-in;
-        }
-
-        &:hover,
-        &:focus,
-        &:focus-visible,
-        &:active {
-          color: var(--brand-light-accent);
-        }
-
-        &:focus,
-        &:focus-visible,
-        &:active {
-          outline-color: var(--color-white);
-        }
-      }
-    }
-  }
-}
-
-.primary-nav__menu-link--nolink {
-  padding-block: var(--sp0-5);
-  padding-inline: 0;
-  color: var(--color-text-neutral-soft);
-  font-weight: normal;
-}
+@import "../../base/media-queries.pcss.css";
 
 .primary-nav__menu {
   flex-wrap: wrap;
@@ -64,15 +11,7 @@
 }
 
 .primary-nav__menu-item {
-  list-style: none;
-  position: relative;
-  display: inline-block;
-  margin-block: var(--v-space-5xs);
-  margin-inline: 0;
-
-  &:not(:last-of-type) {
-    border-inline-end: 1.5px solid var(--main-nav-divider);
-  }
+  margin-block-end: var(--sp0-5);
 
   &:last-child {
     margin-block-end: 0;
@@ -93,34 +32,35 @@
 
 .primary-nav__menu-link {
   flex-grow: 1;
-  color: var(--brand-text-color);
-  font-size: var(--font-size-l);
   text-decoration: none;
-  padding: var(--v-space-4xxs);
-  border-block-end: 4px solid;
-  border-block-end-color: var(--color-transparent);
-  transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+  color: var(--color-text-neutral-loud);
+  font-size: 28px;
+  font-weight: bold;
+  line-height: var(--sp2);
 
   &:hover {
-    border-block-end-color: var(--brand-secondary-dark);
-  }
-
-  &:hover,
-  &:active {
-    color: var(--brand-secondary-dark);
+    color: inherit;
   }
 
   &:focus {
-    outline: auto 2px var(--brand-secondary-dark);
+    outline: auto 2px var(--color--primary-50);
     outline-offset: 2px;
-    color: var(--brand-secondary-dark);
   }
+}
+
+.primary-nav__menu-link--nolink {
+  padding-block: var(--sp0-5);
+  padding-inline-start: 0;
+  padding-inline-end: 0;
+  color: var(--color-text-neutral-soft);
+  font-weight: normal;
 }
 
 .primary-nav__menu-link--button {
   position: relative;
   padding-block: 0;
-  padding-inline: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
   cursor: pointer;
   text-align: start;
   border: 0;
@@ -135,12 +75,11 @@
       position: absolute;
       inset-inline-end: 9px;
       inset-block-start: calc(var(--sp0-5) + 17px); /* Visually align button with menu link text. */
-      inline-size: 18px;
-      block-size: 0;
+      width: 18px;
+      height: 0;
       content: "";
-
       /* Intentionally not using CSS logical properties. */
-      border-block-start: solid 3px var(--brand-secondary-dark);
+      border-top: solid 3px var(--color--primary-50);
     }
 
     &::after {
@@ -159,30 +98,28 @@
   display: inline-flex;
   align-items: center;
   padding-block: var(--sp0-5);
-  padding-inline: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
 
   &::after {
     position: absolute;
     inset-block-end: 0;
     inset-inline-start: 0;
-    inline-size: 100%;
-    block-size: 0;
+    width: 100%;
+    height: 0;
     content: "";
     transition: transform 0.2s;
     transform: scaleX(0);
     transform-origin: left;
-
     /* Intentionally not using CSS logical properties. */
-    border-block-start: solid 5px var(--brand-secondary-dark);
+    border-top: solid 5px var(--color--primary-50);
   }
-}
 
-[dir="rtl"] .primary-nav__menu-link-inner::after {
-  transform-origin: right;
-}
-
-.primary-nav__menu-link:hover .primary-nav__menu-link-inner::after {
-  transform: scaleX(1);
+  &::after {
+    .primary-nav__menu-link:hover & {
+      transform: scaleX(1);
+    }
+  }
 }
 
 /*
@@ -190,9 +127,11 @@
 */
 .primary-nav__menu--level-1 {
   margin-block: 0;
-  margin-inline: 0;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
   padding-block: 0;
-  padding-inline: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
 }
 
 .primary-nav__menu-link--level-1 {
@@ -208,20 +147,20 @@
   visibility: hidden;
   overflow: hidden;
   flex-basis: 100%;
-  max-block-size: 0;
+  max-height: 0;
   margin-block: 0;
   margin-inline-start: calc(-1 * var(--sp));
   padding-inline-start: var(--sp2-5);
   transition:
     opacity 0.2s,
     visibility 0.2s,
-    max-block-size 0.2s;
+    max-height 0.2s;
   opacity: 0;
-  border-inline-start: solid var(--sp) var(--brand-secondary-dark);
+  border-inline-start: solid var(--sp) var(--color--primary-50);
 
   &.is-active-menu-parent {
     visibility: visible;
-    max-block-size: none;
+    max-height: none;
     margin-block-start: var(--sp1-5);
     opacity: 1;
   }
@@ -236,7 +175,7 @@
     }
   }
 
-  @include include-media.media('>=md') {
+  @media (--md) {
     margin-inline-start: calc(-1 * var(--sp3));
     padding-inline-start: var(--sp3);
   }
@@ -261,7 +200,15 @@
 html:not(.js) {
   & .primary-nav__menu--level-2 {
     visibility: visible;
-    max-block-size: none;
+    max-height: none;
     opacity: 1;
+  }
+}
+
+[dir="rtl"] {
+  & .primary-nav__menu-link-inner {
+    &::after {
+      transform-origin: right;
+    }
   }
 }

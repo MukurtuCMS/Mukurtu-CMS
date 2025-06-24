@@ -1371,6 +1371,14 @@ details.form-wrapper summary + div {
   inline-size: 100%;
 }
 
+/**
+ * @file
+ * Nav Primary.
+ *
+ * This is a refactored version of the primary navigation styles, inspired by
+ * Drupal's Olivero theme. It incorporates modern CSS practices and integrates
+ * with the Mukurtu V4 theme variables.
+ */
 .menu__account-menu {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1408,21 +1416,54 @@ details.form-wrapper summary + div {
   outline-color: var(--color-white);
 }
 
-.header__main-nav ul {
-  padding: 0;
+.primary-nav__menu-link--nolink {
+  padding-block: var(--sp0-5);
+  padding-inline: 0;
+  color: var(--color-text-neutral-soft);
+  font-weight: normal;
 }
-.header__main-nav ul li {
+
+.primary-nav__menu {
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  list-style: none;
+}
+
+.primary-nav__menu-item {
   list-style: none;
   position: relative;
   display: inline-block;
   margin-block: var(--v-space-5xs);
   margin-inline: 0;
 }
-.header__main-nav ul li:not(:last-of-type) {
+.primary-nav__menu-item:not(:last-of-type) {
   -webkit-border-end: 1.5px solid var(--main-nav-divider);
           border-inline-end: 1.5px solid var(--main-nav-divider);
 }
-.header__main-nav ul li a {
+.primary-nav__menu-item:last-child {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+.primary-nav__menu-item.primary-nav__menu-item--has-children {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
+.primary-nav__menu-item.primary-nav__menu-item--has-children .primary-nav__menu-link--link, .primary-nav__menu-item.primary-nav__menu-item--has-children .primary-nav__menu-link--nolink {
+  /* Ensure that long text doesn't make the mobile expand button wrap. */
+  -ms-flex-preferred-size: calc(100% - var(--sp3));
+      flex-basis: calc(100% - var(--sp3));
+}
+
+.primary-nav__menu-link {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
   color: var(--brand-text-color);
   font-size: var(--font-size-l);
   text-decoration: none;
@@ -1433,82 +1474,176 @@ details.form-wrapper summary + div {
   -webkit-transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
   transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
 }
-.header__main-nav ul li a:hover {
+.primary-nav__menu-link:hover {
   border-block-end-color: var(--brand-secondary-dark);
 }
-.header__main-nav ul li a:hover, .header__main-nav ul li a:focus, .header__main-nav ul li a:focus-visible, .header__main-nav ul li a:active {
+.primary-nav__menu-link:hover, .primary-nav__menu-link:active {
+  color: var(--brand-secondary-dark);
+}
+.primary-nav__menu-link:focus {
+  outline: auto 2px var(--brand-secondary-dark);
+  outline-offset: 2px;
   color: var(--brand-secondary-dark);
 }
 
-.main-navigation {
-  display: none;
+.primary-nav__menu-link--button {
+  position: relative;
+  padding-block: 0;
+  padding-inline: 0;
+  cursor: pointer;
+  text-align: start;
+  border: 0;
+  background: transparent;
+  /* Plus icon for mobile navigation. */
 }
-@media (min-width: 60rem) {
-  .main-navigation {
-    display: block;
+.primary-nav__menu-link--button.primary-nav__menu-link--has-children {
+  -webkit-padding-end: var(--sp3);
+          padding-inline-end: var(--sp3); /* Ensure text does not overlap icon. */
+}
+.primary-nav__menu-link--button.primary-nav__menu-link--has-children::before, .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
+  position: absolute;
+  inset-inline-end: 9px;
+  inset-block-start: calc(var(--sp0-5) + 17px); /* Visually align button with menu link text. */
+  inline-size: 18px;
+  block-size: 0;
+  content: "";
+  /* Intentionally not using CSS logical properties. */
+  -webkit-border-before: solid 3px var(--brand-secondary-dark);
+          border-block-start: solid 3px var(--brand-secondary-dark);
+}
+.primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
+  -webkit-transition: opacity 0.2s;
+  transition: opacity 0.2s;
+  -webkit-transform: rotate(90deg);
+          transform: rotate(90deg);
+}
+.primary-nav__menu-link--button.primary-nav__menu-link--has-children[aria-expanded=true]::after {
+  opacity: 0;
+}
+
+.primary-nav__menu-link-inner {
+  position: relative;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding-block: var(--sp0-5);
+  padding-inline: 0;
+}
+.primary-nav__menu-link-inner::after {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inline-size: 100%;
+  block-size: 0;
+  content: "";
+  -webkit-transition: -webkit-transform 0.2s;
+  transition: -webkit-transform 0.2s;
+  transition: transform 0.2s;
+  transition: transform 0.2s, -webkit-transform 0.2s;
+  -webkit-transform: scaleX(0);
+          transform: scaleX(0);
+  -webkit-transform-origin: left;
+          transform-origin: left;
+  /* Intentionally not using CSS logical properties. */
+  -webkit-border-before: solid 5px var(--brand-secondary-dark);
+          border-block-start: solid 5px var(--brand-secondary-dark);
+}
+
+[dir=rtl] .primary-nav__menu-link-inner::after {
+  -webkit-transform-origin: right;
+          transform-origin: right;
+}
+
+.primary-nav__menu-link:hover .primary-nav__menu-link-inner::after {
+  -webkit-transform: scaleX(1);
+          transform: scaleX(1);
+}
+
+/*
+  Top level specific styles.
+*/
+.primary-nav__menu--level-1 {
+  margin-block: 0;
+  margin-inline: 0;
+  padding-block: 0;
+  padding-inline: 0;
+}
+
+.primary-nav__menu-link--level-1 {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  letter-spacing: -1px;
+}
+
+/*
+  Secondary menu specific styles.
+*/
+.primary-nav__menu--level-2 {
+  visibility: hidden;
+  overflow: hidden;
+  -ms-flex-preferred-size: 100%;
+      flex-basis: 100%;
+  max-block-size: 0;
+  margin-block: 0;
+  -webkit-margin-start: calc(-1 * var(--sp));
+          margin-inline-start: calc(-1 * var(--sp));
+  -webkit-padding-start: var(--sp2-5);
+          padding-inline-start: var(--sp2-5);
+  -webkit-transition: opacity 0.2s, visibility 0.2s, max-block-size 0.2s;
+  transition: opacity 0.2s, visibility 0.2s, max-block-size 0.2s;
+  opacity: 0;
+  -webkit-border-start: solid var(--sp) var(--brand-secondary-dark);
+          border-inline-start: solid var(--sp) var(--brand-secondary-dark);
+}
+.primary-nav__menu--level-2.is-active-menu-parent {
+  visibility: visible;
+  max-block-size: none;
+  -webkit-margin-before: var(--sp1-5);
+          margin-block-start: var(--sp1-5);
+  opacity: 1;
+}
+.primary-nav__menu--level-2 .primary-nav__menu-item--level-2:first-child {
+  -webkit-padding-before: var(--sp0-25);
+          padding-block-start: var(--sp0-25);
+}
+.primary-nav__menu--level-2 .primary-nav__menu-item--level-2:last-child {
+  -webkit-padding-after: var(--sp0-25);
+          padding-block-end: var(--sp0-25);
+}
+@media (min-width: 48rem) {
+  .primary-nav__menu--level-2 {
+    -webkit-margin-start: calc(-1 * var(--sp3));
+            margin-inline-start: calc(-1 * var(--sp3));
+    -webkit-padding-start: var(--sp3);
+            padding-inline-start: var(--sp3);
   }
 }
 
-.mobile-nav-button {
+/*
+ * Olivero doesn't officially support nested tertiary submenus, but this
+ * ensures that it doesn't break all the way.
+ *
+ * @see https://www.drupal.org/project/drupal/issues/3221399
+ */
+.primary-nav__menu--level-2 .primary-nav__menu-item--has-children {
   display: block;
 }
-@media (min-width: 60rem) {
-  .mobile-nav-button {
-    display: none;
-  }
+
+.primary-nav__menu-link--level-2 {
+  font-size: 16px;
+  font-weight: normal;
+  line-height: var(--sp);
 }
-.mobile-nav-button__button {
-  float: inline-end;
-  background: none;
-  position: relative;
-  text-indent: -9999px;
-  cursor: pointer;
-}
-.mobile-nav-button__button:hover {
-  background: none;
-}
-.mobile-nav-button__icon {
-  position: absolute;
-  block-size: 0;
-  inline-size: var(--v-space-2xs);
-  -webkit-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
-  inset-block-start: 50%;
-  inset-inline-start: 50%;
-  -webkit-border-before: solid 3px var(--mukurtu-navbar-collapse-link-color);
-          border-block-start: solid 3px var(--mukurtu-navbar-collapse-link-color);
-}
-.mobile-nav-button__icon::before, .mobile-nav-button__icon::after {
-  content: "";
-  display: block;
-  position: absolute;
-  inline-size: 100%;
-  -webkit-transition: inset-block-start 0.1s, -webkit-transform 0.1s;
-  transition: inset-block-start 0.1s, -webkit-transform 0.1s;
-  transition: inset-block-start 0.1s, transform 0.1s;
-  transition: inset-block-start 0.1s, transform 0.1s, -webkit-transform 0.1s;
-  -webkit-border-before: solid 3px var(--mukurtu-navbar-collapse-link-color);
-          border-block-start: solid 3px var(--mukurtu-navbar-collapse-link-color);
-}
-.mobile-nav-button__icon::before {
-  inset-block-start: -11px;
-}
-.mobile-nav-button__icon::after {
-  inset-block-start: 5px;
-}
-[aria-expanded=true] .mobile-nav-button__icon {
-  -webkit-border-before: 0;
-          border-block-start: 0;
-}
-[aria-expanded=true] .mobile-nav-button__icon::before {
-  inset-block-start: 0;
-  -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
-}
-[aria-expanded=true] .mobile-nav-button__icon::after {
-  inset-block-start: 0;
-  -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
+
+html:not(.js) .primary-nav__menu--level-2 {
+  visibility: visible;
+  max-block-size: none;
+  opacity: 1;
 }
 
 .vertical-card {
@@ -1707,7 +1842,8 @@ details.form-wrapper summary + div {
       -ms-flex-pack: justify;
           justify-content: space-between;
   gap: 2rem;
-  margin-bottom: 0;
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
 }
 .footer .socials a {
   color: var(--footer-text-color);
