@@ -43,7 +43,7 @@
     props.navButton.setAttribute('aria-controls', props.navWrapperId);
     props.navButton.setAttribute('aria-expanded', 'false');
 
-    props.navButton.addEventListener('click', () => {
+    props.navButton.addEventListener('click', () => { console.log('click');
       toggleNav(props, !isNavOpen(props.navWrapper));
     });
 

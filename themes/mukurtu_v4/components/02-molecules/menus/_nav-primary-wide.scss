@@ -3,10 +3,20 @@
  * Nav Primary (wide widths).
  */
 
-@import "../../base/media-queries.pcss.css";
+@use "../../../external/include-media";
 
 body:not(.is-always-mobile-nav) {
-  @media (--nav) {
+  @include include-media.media('>=lg') {
+    & .primary-nav__menu-link-inner {
+      padding-block: var(--v-space-2xs);
+      padding-inline: 0;
+
+      &::after {
+        transform-origin: center;
+        border-block-start-width: var(--v-space-5xs);
+      }
+    }
+
     & .primary-nav__menu-item {
       flex-wrap: nowrap; /* Ensure that sub navigation toggle button doesn't wrap underneath link. */
 
@@ -26,7 +36,7 @@ body:not(.is-always-mobile-nav) {
     & .primary-nav__menu-link {
       letter-spacing: 0.02em;
       font-size: 16px;
-      line-height: var(--sp1-5);
+      line-height: var(--v-space-3xs);
 
       &:focus {
         position: relative;
@@ -34,13 +44,18 @@ body:not(.is-always-mobile-nav) {
 
         &::before {
           position: absolute;
-          top: 50%;
-          left: 50%;
-          width: calc(100% + var(--sp));
-          height: var(--sp3);
+          inset-block-start: 50%;
+          inset-inline-start: 50%;
+          inline-size: calc(100% + var(--v-space-4xxs));
+          block-size: var(--v-space-s);
           content: "";
           transform: translate(-50%, -50%);
-          border: solid 2px var(--color--primary-50);
+
+          /*
+           * Using --brand-primary as --color-primary-50 is not defined in the
+           * theme.
+           */
+          border: solid 2px var(--brand-primary);
           border-radius: 4px;
         }
       }
@@ -51,13 +66,13 @@ body:not(.is-always-mobile-nav) {
         overflow: visible; /* Necessary to view icon in IE11 */
         padding-inline-end: 9px;
 
-        &:focus::before {
-          width: calc(100% + var(--sp1-5));
-          content: "";
-        }
-
         &::before {
           content: none;
+        }
+
+        &:focus::before {
+          inline-size: calc(100% + var(--v-space-3xs));
+          content: "";
         }
 
         /* Chevron icon for desktop navigation. */
@@ -65,14 +80,13 @@ body:not(.is-always-mobile-nav) {
           position: absolute;
           inset-block-start: 50%;
           inset-inline-start: calc(100% - 3px);
-          width: 8px;
-          height: 8px;
+          inline-size: 8px;
+          block-size: 8px;
           margin-block-start: -2px;
           transform: translateY(-50%) rotate(45deg);
-          /* Intentionally not using CSS logical properties. */
-          border-top: 0;
-          border-right: solid 2px currentColor;
-          border-bottom: solid 2px currentColor;
+          border-block-start: 0;
+          border-inline-end: solid 2px currentcolor;
+          border-block-end: solid 2px currentcolor;
         }
 
         &[aria-expanded="true"]::after {
@@ -81,65 +95,59 @@ body:not(.is-always-mobile-nav) {
       }
     }
 
-    & .primary-nav__menu-link-inner {
-      padding-block: var(--sp2);
-      padding-inline-start: 0;
-      padding-inline-end: 0;
-
-      &::after {
-        transform-origin: center;
-        border-top-width: var(--sp0-5);
-      }
-    }
-
     & .primary-nav__menu--level-1 {
       display: flex;
       align-items: stretch;
-      margin-inline-end: var(--sp);
+      margin-inline-end: var(--v-space-4xxs);
     }
 
     & .primary-nav__menu-item--level-1 {
       position: relative; /* Anchor secondary menu */
       display: flex;
       align-items: center;
-      width: max-content;
-      max-width: 200px;
+      inline-size: max-content;
+      max-inline-size: 200px;
       margin-block: 0;
-      margin-inline-start: 0;
-      margin-inline-end: 0;
+      margin-inline: 0;
 
       &:not(:last-child) {
-        margin-inline-end: var(--sp2);
+        margin-inline-end: var(--v-space-2xs);
       }
     }
 
     & .primary-nav__menu--level-2 {
       position: absolute;
       z-index: 105; /* Appear above search container. */
-      top: calc(100% - var(--sp0-5));
-      left: 50%;
+      inset-block-start: calc(100% - var(--v-space-5xs));
+      inset-inline-start: 50%;
       visibility: hidden;
       overflow: auto;
-      width: 250px;
-      /* Ensure that long level-2 menus will never overflow viewport (focused
-       * elements should always be in viewport per accessibility guidelines). */
-      max-height: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--sp));
+      inline-size: 250px;
+
+      /*
+       * Ensure that long level-2 menus will never overflow viewport (focused
+       * elements should always be in viewport per accessibility guidelines).
+       */
+      max-block-size: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--v-space-4xxs));
       margin-block-start: 0;
       margin-inline-start: 0;
-      padding-block: var(--sp3);
-      padding-inline-start: var(--sp2);
-      padding-inline-end: var(--sp2);
+      padding-block: var(--v-space-s);
+      padding-inline: var(--v-space-2xs);
       transition: none;
       transform: translate(-50%, -20px);
       opacity: 0;
-      /* Intentionally not using CSS logical properties. */
-      border-top: solid var(--color--primary-50) var(--sp0-5);
-      border-right: solid 1px transparent; /* Transparent borders useful for Windows High Contrast mode. */
-      border-bottom: solid 1px transparent;
-      border-left: solid 1px transparent;
+
+      /*
+       * Using --brand-primary as --color-primary-50 is not defined in the
+       * theme.
+       */
+      border-block-start: solid var(--brand-primary) var(--v-space-5xs);
+      border-inline-end: solid 1px transparent; /* Transparent borders useful for Windows High Contrast mode. */
+      border-block-end: solid 1px transparent;
+      border-inline-start: solid 1px transparent;
       border-radius: 0 0 2px 2px;
-      background: var(--color--white);
-      box-shadow: 0 1px 36px rgb(0, 0, 0, 0.08);
+      background: var(--color-white);
+      box-shadow: 0 1px 36px rgb(0 0 0 / 8%);
 
       &.is-active-menu-parent {
         visibility: visible;
@@ -153,25 +161,26 @@ body:not(.is-always-mobile-nav) {
       display: block;
 
       &:focus::before {
-        top: 0;
-        left: calc(var(--sp0-5) * -1);
-        height: 100%;
+        inset-block-start: 0;
+        inset-inline-start: calc(var(--v-space-5xs) * -1);
+        block-size: 100%;
         transform: none;
       }
 
       & .primary-nav__menu-link-inner {
-        padding-block: var(--sp0-5);
-        padding-inline-start: 0;
-        padding-inline-end: 0;
+        padding-block: var(--v-space-5xs);
+        padding-inline: 0;
+      }
 
-        &::after {
-          transform-origin: left; /* LTR */
-          border-top-width: 3px;
+      // stylelint-disable-next-line no-descending-specificity
+      & .primary-nav__menu-link-inner::after {
+        transform-origin: left; /* LTR */
+        border-block-start-width: 3px;
+      }
 
-          &:dir(rtl) {
-            transform-origin: right;
-          }
-        }
+      // stylelint-disable-next-line no-descending-specificity
+      & .primary-nav__menu-link-inner:dir(rtl)::after {
+        transform-origin: right;
       }
     }
 
@@ -179,20 +188,24 @@ body:not(.is-always-mobile-nav) {
      * Arrow is placed outside of submenu because the submenu has the
      * `overflow: hidden` CSS rule applied.
      */
-    & .primary-nav__menu-🥕 {
+    & .primary-nav__menu-caret {
       position: absolute;
       z-index: 105; /* Match level 2 menus. */
-      top: calc(100% - var(--sp));
-      left: 50%;
+      inset-block-start: calc(100% - var(--v-space-4xxs));
+      inset-inline-start: 50%;
       visibility: hidden;
-      width: 0;
-      height: 0;
+      inline-size: 0;
+      block-size: 0;
       transform: translate(-50%, -20px);
       opacity: 0;
-      /* Intentionally not using CSS logical properties. */
-      border-right: solid 10px transparent;
-      border-bottom: solid 10px var(--color--primary-50);
-      border-left: solid 10px transparent;
+
+      /*
+       * Using --brand-primary as --color-primary-50 is not defined in the
+       * theme.
+       */
+      border-inline-end: solid 10px transparent;
+      border-block-end: solid 10px var(--brand-primary);
+      border-inline-start: solid 10px transparent;
 
       &.is-active-menu-parent {
         visibility: visible;
@@ -206,7 +219,7 @@ body:not(.is-always-mobile-nav) {
      * little extra room when the toolbar is fixed (and is shorter).
      */
     & .is-fixed .primary-nav__menu--level-2 {
-      max-height: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--sp) + var(--sp4));
+      max-block-size: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--v-space-4xxs) + var(--v-space-4xl));
     }
   }
 }
@@ -216,7 +229,7 @@ body:not(.is-always-mobile-nav) {
  * works around https://bugs.chromium.org/p/chromium/issues/detail?id=332189
  */
 html.js body:not(.is-always-mobile-nav) {
-  @media (--nav) {
+  @include include-media.media('>=lg') {
     & .primary-nav__menu--level-2,
     & .primary-nav__menu-🥕 {
       transition:

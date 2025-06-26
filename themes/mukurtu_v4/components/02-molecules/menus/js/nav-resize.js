@@ -4,6 +4,7 @@
  * wraps to two lines, it will automatically transition to a mobile navigation
  * and remember where it wrapped so it can transition back.
  */
+
 ((Drupal, once) => {
   /**
    * Handles the transition from mobile navigation to desktop navigation.
@@ -19,6 +20,7 @@
     // navigation items always causes the primary navigation to wrap, and the
     // page is loaded at a narrower viewport and then widened, the mobile nav
     // may not be enabled.
+    console.log(navWrapper.clientHeight, navItem.clientHeight);
     if (navWrapper.clientHeight > navItem.clientHeight) {
       document.body.classList.add('is-always-mobile-nav');
     }
@@ -31,6 +33,7 @@
    * @param {ResizeObserverEntry} entries - Object passed from ResizeObserver.
    */
   function checkIfDesktopNavigationWraps(entries) {
+
     const navItem = document.querySelector('.primary-nav__menu-item');
 
     if (
@@ -61,7 +64,7 @@
    *
    * @param {Element} primaryNav - The primary navigation's top-level <ul> element.
    */
-  function init(primaryNav) {
+  function init(primaryNav) { console.log('init');
     const resizeObserver = new ResizeObserver(checkIfDesktopNavigationWraps);
     resizeObserver.observe(primaryNav);
   }

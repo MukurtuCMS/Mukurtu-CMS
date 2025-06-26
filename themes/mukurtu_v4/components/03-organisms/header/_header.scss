@@ -45,7 +45,7 @@ header {
 
   }
 
-  &__main-nav {
+  &-nav {
     grid-column: 2 / span 5;
 
     @include include-media.media('>=lg') {

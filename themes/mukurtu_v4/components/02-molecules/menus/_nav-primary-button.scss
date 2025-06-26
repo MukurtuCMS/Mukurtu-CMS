@@ -3,36 +3,35 @@
  * Button that expands second level nav when clicked.
  */
 
-@import "../../base/media-queries.pcss.css";
+@use "../../../external/include-media";
 
 .primary-nav__button-toggle {
   position: relative;
   overflow: hidden;
-  width: var(--sp2);
-  height: var(--sp2);
-  margin-block-start: var(--sp0-5); /* Visually align button with menu link text. */
+  inline-size: var(--v-space-2xs);
+  block-size: var(--v-space-2xs);
+  margin-block-start: var(--v-space-5xs); /* Visually align button with menu link text. */
   padding-block: 0;
-  padding-inline-start: 0;
-  padding-inline-end: 0;
+  padding-inline: 0;
   cursor: pointer;
   text-indent: -999px;
   border: 0;
   background: transparent;
-  -webkit-appearance: none;
+  appearance: none;
 
   &:focus {
-    outline: auto 2px var(--color--primary-50);
+    outline: auto 2px var(--brand-primary);
     outline-offset: 2px;
   }
 
   & .icon--menu-toggle {
     position: absolute;
-    /* stylelint-disable csstools/use-logical */
+    /* stylelint-disable-next-line liberty/use-logical-spec */
     top: 50%;
+    /* stylelint-disable-next-line liberty/use-logical-spec */
     left: 50%;
-    /* stylelint-enable csstools/use-logical */
-    width: 16px;
-    height: 16px;
+    inline-size: 16px;
+    block-size: 16px;
     transition: background-color 0.2s;
     transform: translate(-50%, -50%);
     border-radius: 2px;
@@ -40,16 +39,18 @@
     &::before,
     &::after {
       position: absolute;
-      /* stylelint-disable csstools/use-logical */
+      /* stylelint-disable-next-line liberty/use-logical-spec */
       top: 50%;
+      /* stylelint-disable-next-line liberty/use-logical-spec */
       left: 50%;
-      /* stylelint-enable csstools/use-logical */
-      width: var(--sp);
-      height: 0;
+      inline-size: var(--v-space-4xxs);
+      block-size: 0;
       content: "";
       transform: translate(-50%, -50%);
+
       /* Intentionally not using CSS logical properties. */
-      border-top: solid 3px var(--color--primary-50);
+      /* stylelint-disable-next-line liberty/use-logical-spec */
+      border-top: solid 3px var(--brand-primary);
     }
 
     &::after {
@@ -75,54 +76,60 @@ body:not(.is-always-mobile-nav) {
     & .primary-nav__button-toggle {
       flex-shrink: 0;
       align-self: stretch;
-      width: calc(var(--sp2) + 8px);
-      height: auto;
+      inline-size: calc(var(--v-space-2xs) + 8px);
+      block-size: auto;
       margin-block-start: 0;
-      margin-inline-end: calc(-1 * var(--sp2));
+      margin-inline-end: calc(-1 * var(--v-space-2xs));
 
       &:focus {
         border: 0;
         outline: 0;
 
         & .icon--menu-toggle {
-          border: solid 2px var(--color--primary-40);
+          border: solid 2px var(--brand-primary-dark);
         }
       }
 
       &:active {
         /* Necessary for Safari. */
-        color: currentColor;
+        color: currentcolor;
       }
 
       &[aria-expanded="true"] .icon--menu-toggle::after {
         opacity: 0.8;
       }
 
+      /* stylelint-disable-next-line no-descending-specificity */
       & .icon--menu-toggle {
         inset-inline-start: 3px;
-        width: 18px;
+        inline-size: 18px;
         transform: translateY(-50%);
         border-radius: 4px;
-        background-color: var(--color--white);
+        background-color: var(--color-white);
 
         &::before {
           content: none;
         }
 
+        /* stylelint-disable-next-line no-descending-specificity */
         &::after {
-          /* stylelint-disable csstools/use-logical */
+          /* stylelint-disable-next-line liberty/use-logical-spec */
           top: calc(50% - 2px);
+          /* stylelint-disable-next-line liberty/use-logical-spec */
           left: 3px;
-          /* stylelint-enable csstools/use-logical */
-          width: 8px;
-          height: 8px;
+          inline-size: 8px;
+          block-size: 8px;
           content: "";
           transform: translateY(-50%) rotate(45deg);
           opacity: 0.8;
+
           /* Intentionally not using CSS logical properties. */
+          /* stylelint-disable-next-line liberty/use-logical-spec */
           border-top: none;
-          border-right: solid 2px currentColor;
-          border-bottom: solid 2px currentColor;
+          /* stylelint-disable-next-line liberty/use-logical-spec */
+          border-right: solid 2px currentcolor;
+          /* stylelint-disable-next-line liberty/use-logical-spec */
+          border-bottom: solid 2px currentcolor;
           background: transparent;
         }
       }

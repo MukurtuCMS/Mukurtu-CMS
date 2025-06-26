@@ -3,48 +3,53 @@
  * Button which expands the navigation at wide viewport widths.
  */
 
-@import "../../base/media-queries.pcss.css";
+@use "../../../external/include-media";
 
 .wide-nav-expand {
   display: none;
 
-  @media (--nav) {
+  @include include-media.media('>=lg') {
     display: flex;
     visibility: hidden;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: var(--content-left);
-    height: var(--sp6);
+    inline-size: var(--content-left);
+    block-size: var(--v-space-6xl);
     cursor: pointer;
     pointer-events: auto;
-    color: var(--color--white);
+    color: var(--color-white);
     border: 0;
-    background-color: var(--color--primary-50);
+
+    /*
+     * Using --brand-primary as --color--primary-50 is not defined in the
+     * theme.
+     */
+    background-color: var(--brand-primary);
 
     &:focus {
-      outline: solid 2px currentColor;
+      outline: solid 2px currentcolor;
       outline-offset: -4px;
     }
   }
 }
 
-body:not(.is-always-mobile-nav) .is-fixed .wide-nav-expand {
-  @media (--nav) {
-    visibility: visible;
+body.is-always-mobile-nav .wide-nav-expand {
+  @include include-media.media('>=lg') {
+    visibility: hidden;
   }
 }
 
-body.is-always-mobile-nav .wide-nav-expand {
-  @media (--nav) {
-    visibility: hidden;
+body:not(.is-always-mobile-nav) .is-fixed .wide-nav-expand {
+  @include include-media.media('>=lg') {
+    visibility: visible;
   }
 }
 
 .wide-nav-expand__icon {
   position: relative;
-  width: var(--sp2);
-  height: 21px;
+  inline-size: var(--v-space-2xs);
+  block-size: 21px;
   transition: opacity 0.2s;
   pointer-events: none;
   opacity: 0;
@@ -52,38 +57,39 @@ body.is-always-mobile-nav .wide-nav-expand {
 
   & > span {
     display: block;
-    height: 0;
+    block-size: 0;
+
     /* Intentionally not using CSS logical properties. */
-    border-top: solid 3px currentColor;
+    border-block-start: solid 3px currentcolor;
 
     &:nth-child(1) {
       position: absolute;
       inset-block-start: 0;
       inset-inline-start: 0;
-      width: 100%;
-      height: 0;
+      inline-size: 100%;
+      block-size: 0;
       transition: transform 0.2s;
-      background-color: currentColor;
+      background-color: currentcolor;
     }
 
     &:nth-child(2) {
       position: absolute;
       inset-block-start: 9px;
       inset-inline-start: 0;
-      width: 100%;
-      height: 0;
+      inline-size: 100%;
+      block-size: 0;
       transition: opacity 0.2s;
-      background-color: currentColor;
+      background-color: currentcolor;
     }
 
     &:nth-child(3) {
       position: absolute;
       inset-block: auto 0;
       inset-inline-start: 0;
-      width: 100%;
-      height: 0;
+      inline-size: 100%;
+      block-size: 0;
       transition: transform 0.2s;
-      background-color: currentColor;
+      background-color: currentcolor;
     }
   }
 }

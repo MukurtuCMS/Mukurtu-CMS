@@ -3,7 +3,7 @@
  * Nav Button Mobile.
  */
 
-@import "../../base/media-queries.pcss.css";
+@use "../../../external/include-media";
 
 .mobile-nav-button {
   position: relative;
@@ -11,30 +11,28 @@
   display: flex;
   align-items: center;
   align-self: center;
-  width: var(--sp2);
-  height: var(--sp2);
-  margin-inline-start: auto;
-  margin-inline-end: -6px;
+  inline-size: var(--v-space-2xs);
+  block-size: var(--v-space-2xs);
+  margin-inline: auto -6px;
   padding-block: 0;
-  padding-inline-start: 6px;
-  padding-inline-end: 6px;
+  padding-inline: 6px;
   cursor: pointer;
   border: none;
   background: transparent;
   appearance: none;
 
   &:focus {
-    outline: solid 2px var(--color--primary-40);
+    outline: solid 2px var(--brand-primary-dark);
   }
 
   &:active {
     color: inherit; /* Override Safari's default UA styles. */
   }
 
-  @media (--sm) {
+  @include include-media.media('>=sm') {
     display: inline-flex;
-    width: auto;
-    padding-inline-start: var(--sp);
+    inline-size: auto;
+    padding-inline-start: var(--v-space-4xxs);
   }
 }
 
@@ -44,16 +42,16 @@
   display: block;
   overflow: hidden;
   clip: rect(1px, 1px, 1px, 1px);
-  width: 1px;
-  height: 1px;
+  inline-size: 1px;
+  block-size: 1px;
   word-wrap: normal;
 
-  @media (--sm) {
+  @include include-media.media('>=sm') {
     position: static;
     overflow: visible;
     clip: auto;
-    width: auto;
-    height: auto;
+    inline-size: auto;
+    block-size: auto;
     margin-inline-end: 12px;
     letter-spacing: 0.05em;
     font-size: 14px;
@@ -64,20 +62,20 @@
 .mobile-nav-button__icon {
   position: relative;
   display: block;
-  width: var(--sp2);
-  height: 0;
-  border-top: solid 3px var(--color--primary-50);
+  inline-size: var(--v-space-2xs);
+  block-size: 0;
+  border-block-start: solid 3px var(--brand-primary);
 
   &::before,
   &::after {
     position: absolute;
     inset-block-start: 0;
     inset-inline-start: 0;
-    width: 100%;
-    height: 0;
+    inline-size: 100%;
+    block-size: 0;
     content: "";
     transition: transform 0.2s;
-    border-top: solid 3px var(--color--primary-50);
+    border-block-start: solid 3px var(--brand-primary);
   }
 
   &::before {
@@ -90,7 +88,7 @@
 }
 
 .mobile-nav-button[aria-expanded="true"] .mobile-nav-button__icon {
-  border-top-color: transparent;
+  border-block-start-color: transparent;
 
   &::before {
     transform: translateY(-3px) rotate(-45deg);

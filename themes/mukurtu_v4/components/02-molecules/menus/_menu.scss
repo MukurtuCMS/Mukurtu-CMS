@@ -8,6 +8,14 @@
  */
 
 @use "../../../external/include-media";
+@use "nav-primary";
+@use "nav-button-mobile";
+@use "nav-primary-button";
+@use "nav-primary-wide";
+@use "wide-nav-expand";
+@use "header-navigation";
+@use "header-buttons-mobile";
+
 
 // All menu styling is here.
 // To find menu grid placement, see _page.scss.
@@ -59,6 +67,7 @@
 }
 
 .primary-nav__menu {
+  display: flex;
   flex-wrap: wrap;
   list-style: none;
 }
@@ -66,7 +75,7 @@
 .primary-nav__menu-item {
   list-style: none;
   position: relative;
-  display: inline-block;
+  display: flex;
   margin-block: var(--v-space-5xs);
   margin-inline: 0;
 
@@ -204,7 +213,8 @@
 /*
   Secondary menu specific styles.
 */
-.primary-nav__menu--level-2 {
+
+/* .primary-nav__menu--level-2 {
   visibility: hidden;
   overflow: hidden;
   flex-basis: 100%;
@@ -240,7 +250,7 @@
     margin-inline-start: calc(-1 * var(--sp3));
     padding-inline-start: var(--sp3);
   }
-}
+} */
 
 /*
  * Olivero doesn't officially support nested tertiary submenus, but this

@@ -3,15 +3,17 @@
  * Nav Primary.
  */
 
-@import "../../base/media-queries.pcss.css";
+@use "../../../external/include-media";
 
 .primary-nav__menu {
   flex-wrap: wrap;
   list-style: none;
 }
 
+
+
 .primary-nav__menu-item {
-  margin-block-end: var(--sp0-5);
+  margin-block-end: var(--v-space-5xs);
 
   &:last-child {
     margin-block-end: 0;
@@ -25,7 +27,7 @@
     & .primary-nav__menu-link--link,
     & .primary-nav__menu-link--nolink {
       /* Ensure that long text doesn't make the mobile expand button wrap. */
-      flex-basis: calc(100% - var(--sp3));
+      flex-basis: calc(100% - var(--v-space-s));
     }
   }
 }
@@ -36,22 +38,26 @@
   color: var(--color-text-neutral-loud);
   font-size: 28px;
   font-weight: bold;
-  line-height: var(--sp2);
+  line-height: var(--v-space-2xs);
 
   &:hover {
     color: inherit;
   }
 
   &:focus {
-    outline: auto 2px var(--color--primary-50);
+    /*
+     * Using --brand-primary as --color--primary-50 is not defined in the
+     * theme.
+     */
+    outline: auto 2px var(--brand-primary);
     outline-offset: 2px;
   }
 }
 
+// stylelint-disable-next-line no-descending-specificity
 .primary-nav__menu-link--nolink {
-  padding-block: var(--sp0-5);
-  padding-inline-start: 0;
-  padding-inline-end: 0;
+  padding-block: var(--v-space-5xs);
+  padding-inline: 0;
   color: var(--color-text-neutral-soft);
   font-weight: normal;
 }
@@ -59,8 +65,7 @@
 .primary-nav__menu-link--button {
   position: relative;
   padding-block: 0;
-  padding-inline-start: 0;
-  padding-inline-end: 0;
+  padding-inline: 0;
   cursor: pointer;
   text-align: start;
   border: 0;
@@ -68,18 +73,24 @@
 
   /* Plus icon for mobile navigation. */
   &.primary-nav__menu-link--has-children {
-    padding-inline-end: var(--sp3); /* Ensure text does not overlap icon. */
+    padding-inline-end: var(--v-space-s); /* Ensure text does not overlap icon. */
 
     &::before,
     &::after {
       position: absolute;
       inset-inline-end: 9px;
-      inset-block-start: calc(var(--sp0-5) + 17px); /* Visually align button with menu link text. */
-      width: 18px;
-      height: 0;
+      inset-block-start: calc(var(--v-space-5xs) + 17px); /* Visually align button with menu link text. */
+      inline-size: 18px;
+      block-size: 0;
       content: "";
+
       /* Intentionally not using CSS logical properties. */
-      border-top: solid 3px var(--color--primary-50);
+
+      /*
+       * Using --brand-primary as --color--primary-50 is not defined in the
+       * theme.
+       */
+      border-block-start: solid 3px var(--brand-primary);
     }
 
     &::after {
@@ -97,29 +108,32 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding-block: var(--sp0-5);
-  padding-inline-start: 0;
-  padding-inline-end: 0;
+  padding-block: var(--v-space-5xs);
+  padding-inline: 0;
 
   &::after {
     position: absolute;
     inset-block-end: 0;
     inset-inline-start: 0;
-    width: 100%;
-    height: 0;
+    inline-size: 100%;
+    block-size: 0;
     content: "";
     transition: transform 0.2s;
     transform: scaleX(0);
     transform-origin: left;
-    /* Intentionally not using CSS logical properties. */
-    border-top: solid 5px var(--color--primary-50);
-  }
 
-  &::after {
-    .primary-nav__menu-link:hover & {
-      transform: scaleX(1);
-    }
+    /* Intentionally not using CSS logical properties. */
+
+    /*
+     * Using --brand-primary as --color--primary-50 is not defined in the
+     * theme.
+     */
+    border-block-start: solid 5px var(--brand-primary);
   }
+}
+
+.primary-nav__menu-link:hover .primary-nav__menu-link-inner::after {
+  transform: scaleX(1);
 }
 
 /*
@@ -127,11 +141,9 @@
 */
 .primary-nav__menu--level-1 {
   margin-block: 0;
-  margin-inline-start: 0;
-  margin-inline-end: 0;
+  margin-inline: 0;
   padding-block: 0;
-  padding-inline-start: 0;
-  padding-inline-end: 0;
+  padding-inline: 0;
 }
 
 .primary-nav__menu-link--level-1 {
@@ -147,37 +159,42 @@
   visibility: hidden;
   overflow: hidden;
   flex-basis: 100%;
-  max-height: 0;
+  max-block-size: 0;
   margin-block: 0;
-  margin-inline-start: calc(-1 * var(--sp));
-  padding-inline-start: var(--sp2-5);
+  margin-inline-start: calc(-1 * var(--v-space-4xxs));
+  padding-inline-start: var(--v-space-xs);
   transition:
     opacity 0.2s,
     visibility 0.2s,
-    max-height 0.2s;
+    max-block-size 0.2s;
   opacity: 0;
-  border-inline-start: solid var(--sp) var(--color--primary-50);
+
+  /*
+   * Using --brand-primary as --color--primary-50 is not defined in the
+   * theme.
+   */
+  border-inline-start: solid var(--v-space-4xxs) var(--brand-primary);
 
   &.is-active-menu-parent {
     visibility: visible;
-    max-height: none;
-    margin-block-start: var(--sp1-5);
+    max-block-size: none;
+    margin-block-start: var(--v-space-3xs);
     opacity: 1;
   }
 
   & .primary-nav__menu-item--level-2 {
     &:first-child {
-      padding-block-start: var(--sp0-25);
+      padding-block-start: var(--v-space-6xs);
     }
 
     &:last-child {
-      padding-block-end: var(--sp0-25);
+      padding-block-end: var(--v-space-6xs);
     }
   }
 
-  @media (--md) {
-    margin-inline-start: calc(-1 * var(--sp3));
-    padding-inline-start: var(--sp3);
+  @include include-media.media('>=md') {
+    margin-inline-start: calc(-1 * var(--v-space-s));
+    padding-inline-start: var(--v-space-s);
   }
 }
 
@@ -194,19 +211,20 @@
 .primary-nav__menu-link--level-2 {
   font-size: 16px;
   font-weight: normal;
-  line-height: var(--sp);
+  line-height: var(--v-space-4xxs);
 }
 
 html:not(.js) {
   & .primary-nav__menu--level-2 {
     visibility: visible;
-    max-height: none;
+    max-block-size: none;
     opacity: 1;
   }
 }
 
 [dir="rtl"] {
   & .primary-nav__menu-link-inner {
+    // stylelint-disable-next-line no-descending-specificity
     &::after {
       transform-origin: right;
     }

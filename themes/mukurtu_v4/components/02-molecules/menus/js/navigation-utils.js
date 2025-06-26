@@ -6,7 +6,7 @@
  * the functionality of the button that shows/hides the navigation.
  */
 
- 
+
 ((Drupal) => {
   /**
    * Olivero helper functions.
@@ -99,8 +99,8 @@
    */
   function toggleStickyHeaderState(pinnedState) {
     if (isDesktopNav()) {
-      siteHeaderFixable.classList.toggle('is-expanded', pinnedState);
-      stickyHeaderToggleButton.setAttribute('aria-checked', pinnedState);
+      //siteHeaderFixable.classList.toggle('is-expanded', pinnedState);
+      //stickyHeaderToggleButton.setAttribute('aria-checked', pinnedState);
     }
   }
 
