@@ -88,6 +88,9 @@
             },
             "drupal/media_entity_soundcloud": {
                 "Add support for secret URL embeds": "https://www.drupal.org/files/issues/2022-03-28/3272077-2.patch"
+            },
+            "drupal/og": {
+                "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
             }
         }
     }

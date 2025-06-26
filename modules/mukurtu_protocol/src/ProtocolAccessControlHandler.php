@@ -28,7 +28,7 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
     }
 
     if ($operation == 'view') {
-      // Anbody can view an open protocol.
+      // Anybody can view an open protocol.
       if ($entity->isOpen()) {
         return AccessResult::allowed();
       }
@@ -42,6 +42,15 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
       // Otherwise user must be a member of ALL owning communities
       // and have protocol update permission to view.
       return $this->checkAccess($entity, 'update', $account);
+    }
+
+    if ($operation == 'update') {
+      // Only protocol stewards have permission to edit protocols.
+      $membership = Og::getMembership($entity, $account);
+      if ($membership && $membership->hasRole("protocol-protocol-protocol_steward")) {
+        return AccessResult::allowed();
+      }
+      return AccessResult::forbidden();
     }
 
     // These are checks that happen regardless of OG specific permissions.
