@@ -1394,6 +1394,12 @@ details.form-wrapper summary + div {
   -webkit-margin-after: var(--v-space-5xs);
           margin-block-end: var(--v-space-5xs);
 }
+.primary-nav__menu-item:not(:last-of-type)::after {
+  content: "";
+  -webkit-border-end: 1.5px solid var(--main-nav-divider);
+          border-inline-end: 1.5px solid var(--main-nav-divider);
+  height: 45%;
+}
 .primary-nav__menu-item:last-child {
   -webkit-margin-after: 0;
           margin-block-end: 0;
@@ -1538,6 +1544,9 @@ details.form-wrapper summary + div {
   -webkit-margin-before: var(--v-space-3xs);
           margin-block-start: var(--v-space-3xs);
   opacity: 1;
+}
+.primary-nav__menu--level-2 .primary-nav__menu-item--level-2:not(:last-of-type)::after {
+  content: none;
 }
 .primary-nav__menu--level-2 .primary-nav__menu-item--level-2:first-child {
   -webkit-padding-before: var(--v-space-6xs);
@@ -2406,12 +2415,6 @@ html.js .header-nav {
   display: flex;
   margin-block: var(--v-space-5xs);
   margin-inline: 0;
-}
-.primary-nav__menu-item:not(:last-of-type)::after {
-  content: "";
-  -webkit-border-end: 1.5px solid var(--main-nav-divider);
-          border-inline-end: 1.5px solid var(--main-nav-divider);
-  height: 45%;
 }
 .primary-nav__menu-item:last-child {
   -webkit-margin-after: 0;
