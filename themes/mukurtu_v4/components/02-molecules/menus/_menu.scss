@@ -80,7 +80,11 @@
   margin-inline: 0;
 
   &:not(:last-of-type) {
-    border-inline-end: 1.5px solid var(--main-nav-divider);
+    &::after {
+      content: "";
+      border-inline-end: 1.5px solid var(--main-nav-divider);
+      height: 45%;
+    }
   }
 
   &:last-child {
@@ -112,6 +116,12 @@
 
   &:hover {
     border-block-end-color: var(--brand-secondary-dark);
+  }
+
+  &--has-children {
+    &:hover {
+      border-block-end-color: transparent;
+    }
   }
 
   &:hover,
@@ -169,29 +179,6 @@
   align-items: center;
   padding-block: var(--sp0-5);
   padding-inline: 0;
-
-  &::after {
-    position: absolute;
-    inset-block-end: 0;
-    inset-inline-start: 0;
-    inline-size: 100%;
-    block-size: 0;
-    content: "";
-    transition: transform 0.2s;
-    transform: scaleX(0);
-    transform-origin: left;
-
-    /* Intentionally not using CSS logical properties. */
-    border-block-start: solid 5px var(--brand-secondary-dark);
-  }
-}
-
-[dir="rtl"] .primary-nav__menu-link-inner::after {
-  transform-origin: right;
-}
-
-.primary-nav__menu-link:hover .primary-nav__menu-link-inner::after {
-  transform: scaleX(1);
 }
 
 /*

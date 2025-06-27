@@ -8,13 +8,7 @@
 body:not(.is-always-mobile-nav) {
   @include include-media.media('>=lg') {
     & .primary-nav__menu-link-inner {
-      padding-block: var(--v-space-2xs);
       padding-inline: 0;
-
-      &::after {
-        transform-origin: center;
-        border-block-start-width: var(--v-space-5xs);
-      }
     }
 
     & .primary-nav__menu-item {
@@ -25,19 +19,10 @@ body:not(.is-always-mobile-nav) {
         & .primary-nav__menu-link--nolink {
           flex-basis: auto;
         }
-
-        /* Remove hover state if submenu exists. */
-        & .primary-nav__menu-link--level-1 .primary-nav__menu-link-inner::after {
-          content: none;
-        }
       }
     }
 
     & .primary-nav__menu-link {
-      letter-spacing: 0.02em;
-      font-size: 16px;
-      line-height: var(--v-space-3xs);
-
       &:focus {
         position: relative;
         outline: 0;
@@ -106,13 +91,9 @@ body:not(.is-always-mobile-nav) {
       display: flex;
       align-items: center;
       inline-size: max-content;
-      max-inline-size: 200px;
+      max-inline-size: 250px;
       margin-block: 0;
       margin-inline: 0;
-
-      &:not(:last-child) {
-        margin-inline-end: var(--v-space-2xs);
-      }
     }
 
     & .primary-nav__menu--level-2 {
@@ -170,17 +151,6 @@ body:not(.is-always-mobile-nav) {
       & .primary-nav__menu-link-inner {
         padding-block: var(--v-space-5xs);
         padding-inline: 0;
-      }
-
-      // stylelint-disable-next-line no-descending-specificity
-      & .primary-nav__menu-link-inner::after {
-        transform-origin: left; /* LTR */
-        border-block-start-width: 3px;
-      }
-
-      // stylelint-disable-next-line no-descending-specificity
-      & .primary-nav__menu-link-inner:dir(rtl)::after {
-        transform-origin: right;
       }
     }
 

@@ -35,10 +35,6 @@
 .primary-nav__menu-link {
   flex-grow: 1;
   text-decoration: none;
-  color: var(--color-text-neutral-loud);
-  font-size: 28px;
-  font-weight: bold;
-  line-height: var(--v-space-2xs);
 
   &:hover {
     color: inherit;
@@ -110,30 +106,6 @@
   align-items: center;
   padding-block: var(--v-space-5xs);
   padding-inline: 0;
-
-  &::after {
-    position: absolute;
-    inset-block-end: 0;
-    inset-inline-start: 0;
-    inline-size: 100%;
-    block-size: 0;
-    content: "";
-    transition: transform 0.2s;
-    transform: scaleX(0);
-    transform-origin: left;
-
-    /* Intentionally not using CSS logical properties. */
-
-    /*
-     * Using --brand-primary as --color--primary-50 is not defined in the
-     * theme.
-     */
-    border-block-start: solid 5px var(--brand-primary);
-  }
-}
-
-.primary-nav__menu-link:hover .primary-nav__menu-link-inner::after {
-  transform: scaleX(1);
 }
 
 /*
@@ -222,11 +194,3 @@ html:not(.js) {
   }
 }
 
-[dir="rtl"] {
-  & .primary-nav__menu-link-inner {
-    // stylelint-disable-next-line no-descending-specificity
-    &::after {
-      transform-origin: right;
-    }
-  }
-}

@@ -19,10 +19,10 @@
   background: transparent;
   appearance: none;
 
-  &:focus {
-    outline: auto 2px var(--brand-primary);
-    outline-offset: 2px;
+  &:focus, &:hover {
+    background-color: transparent;
   }
+
 
   & .icon--menu-toggle {
     position: absolute;
@@ -35,6 +35,7 @@
     transition: background-color 0.2s;
     transform: translate(-50%, -50%);
     border-radius: 2px;
+    background-color: transparent;
 
     &::before,
     &::after {
@@ -72,21 +73,22 @@
 }
 
 body:not(.is-always-mobile-nav) {
-  @media (--nav) {
+  @include include-media.media('>=lg') {
     & .primary-nav__button-toggle {
       flex-shrink: 0;
       align-self: stretch;
       inline-size: calc(var(--v-space-2xs) + 8px);
       block-size: auto;
       margin-block-start: 0;
-      margin-inline-end: calc(-1 * var(--v-space-2xs));
+      margin-inline-end: calc(-1 * var(--v-space-4xs));
 
-      &:focus {
+      &:focus, &:hover {
         border: 0;
         outline: 0;
 
         & .icon--menu-toggle {
-          border: solid 2px var(--brand-primary-dark);
+          outline: auto 2px var(--brand-primary);
+          outline-offset: 2px;
         }
       }
 
@@ -105,7 +107,7 @@ body:not(.is-always-mobile-nav) {
         inline-size: 18px;
         transform: translateY(-50%);
         border-radius: 4px;
-        background-color: var(--color-white);
+        background-color: transparent;
 
         &::before {
           content: none;
@@ -127,9 +129,9 @@ body:not(.is-always-mobile-nav) {
           /* stylelint-disable-next-line liberty/use-logical-spec */
           border-top: none;
           /* stylelint-disable-next-line liberty/use-logical-spec */
-          border-right: solid 2px currentcolor;
+          border-right: solid 2px var(--brand-primary);
           /* stylelint-disable-next-line liberty/use-logical-spec */
-          border-bottom: solid 2px currentcolor;
+          border-bottom: solid 2px var(--brand-primary);
           background: transparent;
         }
       }
