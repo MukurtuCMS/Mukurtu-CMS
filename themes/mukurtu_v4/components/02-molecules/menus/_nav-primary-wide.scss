@@ -99,11 +99,12 @@ body:not(.is-always-mobile-nav) {
     & .primary-nav__menu--level-2 {
       position: absolute;
       z-index: 105; /* Appear above search container. */
-      inset-block-start: calc(100% - var(--v-space-5xs));
+      inset-block-start: 100%;
       inset-inline-start: 50%;
       visibility: hidden;
       overflow: auto;
       inline-size: 250px;
+      display: flex;
 
       /*
        * Ensure that long level-2 menus will never overflow viewport (focused
@@ -112,10 +113,10 @@ body:not(.is-always-mobile-nav) {
       max-block-size: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--v-space-4xxs));
       margin-block-start: 0;
       margin-inline-start: 0;
-      padding-block: var(--v-space-s);
-      padding-inline: var(--v-space-2xs);
+      padding-block: var(--v-space-3xs);
+      padding-inline: var(--v-space-5xs);
       transition: none;
-      transform: translate(-50%, -20px);
+      transform: translate(-50%, +20px);
       opacity: 0;
 
       /*
@@ -138,8 +139,14 @@ body:not(.is-always-mobile-nav) {
       }
     }
 
+    & .primary-nav__menu-item--level-2 {
+      inline-size: 100%;
+    }
+
     & .primary-nav__menu-link--level-2 {
       display: block;
+      padding-block: var(--v-space-6xs);
+      padding-inline: var(--v-space-5xs);
 
       &:focus::before {
         inset-block-start: 0;
@@ -161,12 +168,12 @@ body:not(.is-always-mobile-nav) {
     & .primary-nav__menu-caret {
       position: absolute;
       z-index: 105; /* Match level 2 menus. */
-      inset-block-start: calc(100% - var(--v-space-4xxs));
+      inset-block-start: calc(100% - 6px);
       inset-inline-start: 50%;
       visibility: hidden;
       inline-size: 0;
       block-size: 0;
-      transform: translate(-50%, -20px);
+      transform: translate(-50%, 20px);
       opacity: 0;
 
       /*
@@ -201,7 +208,7 @@ body:not(.is-always-mobile-nav) {
 html.js body:not(.is-always-mobile-nav) {
   @include include-media.media('>=lg') {
     & .primary-nav__menu--level-2,
-    & .primary-nav__menu-🥕 {
+    & .primary-nav__menu-caret {
       transition:
         visibility 0.2s,
         transform 0.2s,

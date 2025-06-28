@@ -25,7 +25,7 @@
     display: flex;
     flex-flow: row wrap;
     justify-content: center;
-    gap: var(--gutter);
+    gap: var(--v-space-2xs);
     inline-size: 100%;
 
     li {
@@ -60,16 +60,10 @@
 }
 
 .primary-nav__menu-link--nolink {
-  padding-block: var(--sp0-5);
+  padding-block: var(--v-space-6xs);
   padding-inline: 0;
   color: var(--color-text-neutral-soft);
   font-weight: normal;
-}
-
-.primary-nav__menu {
-  display: flex;
-  flex-wrap: wrap;
-  list-style: none;
 }
 
 .primary-nav__menu-item {
@@ -91,20 +85,25 @@
     & .primary-nav__menu-link--link,
     & .primary-nav__menu-link--nolink {
       /* Ensure that long text doesn't make the mobile expand button wrap. */
-      flex-basis: calc(100% - var(--sp3));
+      flex-basis: calc(100% - var(--v-space-6xxs));
     }
   }
 }
 
 .primary-nav__menu-link {
   flex-grow: 1;
-  color: var(--brand-text-color);
+  color: var(--color-text-neutral-loud);
   font-size: var(--font-size-l);
   text-decoration: none;
-  padding: var(--v-space-4xxs);
+  padding-inline: var(--v-space-3xs);
+  padding-block: var(--v-space-5xs);
   border-block-end: 4px solid;
   border-block-end-color: var(--color-transparent);
   transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+
+  &--has-children {
+    padding-inline-end: var(--v-space-6xs);
+  }
 
   &:hover {
     border-block-end-color: var(--brand-secondary-dark);
@@ -139,13 +138,13 @@
 
   /* Plus icon for mobile navigation. */
   &.primary-nav__menu-link--has-children {
-    padding-inline-end: var(--sp3); /* Ensure text does not overlap icon. */
+    padding-inline-end: var(--v-space-2xs); /* Ensure text does not overlap icon. */
 
     &::before,
     &::after {
       position: absolute;
       inset-inline-end: 9px;
-      inset-block-start: calc(var(--sp0-5) + 17px); /* Visually align button with menu link text. */
+      inset-block-start: calc(var(--v-space-6xs) + 17px); /* Visually align button with menu link text. */
       inline-size: 18px;
       block-size: 0;
       content: "";
@@ -169,7 +168,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding-block: var(--sp0-5);
+  padding-block: var(--v-space-6xs);
   padding-inline: 0;
 }
 
@@ -186,7 +185,6 @@
 .primary-nav__menu-link--level-1 {
   position: relative;
   display: flex;
-  letter-spacing: -1px;
 }
 
 /*
@@ -244,7 +242,7 @@
 .primary-nav__menu-link--level-2 {
   font-size: 16px;
   font-weight: normal;
-  line-height: var(--sp);
+  line-height: var(--v-space-6xs);
 }
 
 html:not(.js) {

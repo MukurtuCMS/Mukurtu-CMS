@@ -1,4 +1,3 @@
-@charset "UTF-8";
 /*! See https://eduardoboucas.github.io/include-media/ for detailed
 documentation on how to use @include media(). */
 /*! Drupal visually-hidden CSS class that hides content from visual users and
@@ -1775,12 +1774,11 @@ html:not(.js) .primary-nav__menu--level-2 {
         flex-shrink: 0;
     -ms-flex-item-align: stretch;
         align-self: stretch;
-    inline-size: calc(var(--v-space-2xs) + 8px);
+    inline-size: calc(var(--v-space-3xs));
     block-size: auto;
-    -webkit-margin-before: 0;
-            margin-block-start: 0;
-    -webkit-margin-end: calc(-1 * var(--v-space-4xs));
-            margin-inline-end: calc(-1 * var(--v-space-4xs));
+    margin: 0;
+    -webkit-margin-end: var(--v-space-4xxs);
+            margin-inline-end: var(--v-space-4xxs);
     /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle:focus, body:not(.is-always-mobile-nav) .primary-nav__button-toggle:hover {
@@ -1799,28 +1797,36 @@ html:not(.js) .primary-nav__menu--level-2 {
     opacity: 0.8;
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle {
-    inset-inline-start: 3px;
-    inline-size: 18px;
-    -webkit-transform: translateY(-50%);
-            transform: translateY(-50%);
+    size: 19px;
     border-radius: 4px;
     background-color: transparent;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+            align-items: flex-start;
+    -webkit-padding-before: 6px;
+            padding-block-start: 6px;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
     /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle::before {
     content: none;
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle::after {
-    /* stylelint-disable-next-line liberty/use-logical-spec */
-    top: calc(50% - 2px);
-    /* stylelint-disable-next-line liberty/use-logical-spec */
-    left: 3px;
     inline-size: 8px;
     block-size: 8px;
     content: "";
     -webkit-transform: translateY(-50%) rotate(45deg);
             transform: translateY(-50%) rotate(45deg);
     opacity: 0.8;
+    /* stylelint-disable-next-line liberty/use-logical-spec */
+    inset-block-start: auto;
+    /* stylelint-disable-next-line liberty/use-logical-spec */
+    inset-inline-start: auto;
     /* Intentionally not using CSS logical properties. */
     /* stylelint-disable-next-line liberty/use-logical-spec */
     border-top: none;
@@ -1939,11 +1945,14 @@ html:not(.js) .primary-nav__menu--level-2 {
   body:not(.is-always-mobile-nav) .primary-nav__menu--level-2 {
     position: absolute;
     z-index: 105; /* Appear above search container. */
-    inset-block-start: calc(100% - var(--v-space-5xs));
+    inset-block-start: 100%;
     inset-inline-start: 50%;
     visibility: hidden;
     overflow: auto;
     inline-size: 250px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
     /*
      * Ensure that long level-2 menus will never overflow viewport (focused
      * elements should always be in viewport per accessibility guidelines).
@@ -1953,12 +1962,12 @@ html:not(.js) .primary-nav__menu--level-2 {
             margin-block-start: 0;
     -webkit-margin-start: 0;
             margin-inline-start: 0;
-    padding-block: var(--v-space-s);
-    padding-inline: var(--v-space-2xs);
+    padding-block: var(--v-space-3xs);
+    padding-inline: var(--v-space-5xs);
     -webkit-transition: none;
     transition: none;
-    -webkit-transform: translate(-50%, -20px);
-            transform: translate(-50%, -20px);
+    -webkit-transform: translate(-50%, 20px);
+            transform: translate(-50%, 20px);
     opacity: 0;
     /*
      * Using --brand-primary as --color-primary-50 is not defined in the
@@ -1985,8 +1994,13 @@ html:not(.js) .primary-nav__menu--level-2 {
             transform: translate(-50%, 0);
     opacity: 1;
   }
+  body:not(.is-always-mobile-nav) .primary-nav__menu-item--level-2 {
+    inline-size: 100%;
+  }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--level-2 {
     display: block;
+    padding-block: var(--v-space-6xs);
+    padding-inline: var(--v-space-5xs);
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--level-2:focus::before {
     inset-block-start: 0;
@@ -2002,13 +2016,13 @@ html:not(.js) .primary-nav__menu--level-2 {
   body:not(.is-always-mobile-nav) .primary-nav__menu-caret {
     position: absolute;
     z-index: 105; /* Match level 2 menus. */
-    inset-block-start: calc(100% - var(--v-space-4xxs));
+    inset-block-start: calc(100% - 6px);
     inset-inline-start: 50%;
     visibility: hidden;
     inline-size: 0;
     block-size: 0;
-    -webkit-transform: translate(-50%, -20px);
-            transform: translate(-50%, -20px);
+    -webkit-transform: translate(-50%, 20px);
+            transform: translate(-50%, 20px);
     opacity: 0;
     /*
      * Using --brand-primary as --color-primary-50 is not defined in the
@@ -2037,7 +2051,7 @@ html:not(.js) .primary-nav__menu--level-2 {
  * works around https://bugs.chromium.org/p/chromium/issues/detail?id=332189
  */
 @media (min-width: 60rem) {
-  html.js body:not(.is-always-mobile-nav) .primary-nav__menu--level-2, html.js body:not(.is-always-mobile-nav) .primary-nav__menu-🥕 {
+  html.js body:not(.is-always-mobile-nav) .primary-nav__menu--level-2, html.js body:not(.is-always-mobile-nav) .primary-nav__menu-caret {
     -webkit-transition: visibility 0.2s, opacity 0.2s, -webkit-transform 0.2s;
     transition: visibility 0.2s, opacity 0.2s, -webkit-transform 0.2s;
     transition: visibility 0.2s, transform 0.2s, opacity 0.2s;
@@ -2365,7 +2379,7 @@ html.js .header-nav {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  gap: var(--gutter);
+  gap: var(--v-space-2xs);
   inline-size: 100%;
 }
 .menu__account-menu li {
@@ -2392,19 +2406,10 @@ html.js .header-nav {
 }
 
 .primary-nav__menu-link--nolink {
-  padding-block: var(--sp0-5);
+  padding-block: var(--v-space-6xs);
   padding-inline: 0;
   color: var(--color-text-neutral-soft);
   font-weight: normal;
-}
-
-.primary-nav__menu {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-  list-style: none;
 }
 
 .primary-nav__menu-item {
@@ -2432,23 +2437,28 @@ html.js .header-nav {
 }
 .primary-nav__menu-item.primary-nav__menu-item--has-children .primary-nav__menu-link--link, .primary-nav__menu-item.primary-nav__menu-item--has-children .primary-nav__menu-link--nolink {
   /* Ensure that long text doesn't make the mobile expand button wrap. */
-  -ms-flex-preferred-size: calc(100% - var(--sp3));
-      flex-basis: calc(100% - var(--sp3));
+  -ms-flex-preferred-size: calc(100% - var(--v-space-6xxs));
+      flex-basis: calc(100% - var(--v-space-6xxs));
 }
 
 .primary-nav__menu-link {
   -webkit-box-flex: 1;
       -ms-flex-positive: 1;
           flex-grow: 1;
-  color: var(--brand-text-color);
+  color: var(--color-text-neutral-loud);
   font-size: var(--font-size-l);
   text-decoration: none;
-  padding: var(--v-space-4xxs);
+  padding-inline: var(--v-space-3xs);
+  padding-block: var(--v-space-5xs);
   -webkit-border-after: 4px solid;
           border-block-end: 4px solid;
   border-block-end-color: var(--color-transparent);
   -webkit-transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
   transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+}
+.primary-nav__menu-link--has-children {
+  -webkit-padding-end: var(--v-space-6xs);
+          padding-inline-end: var(--v-space-6xs);
 }
 .primary-nav__menu-link:hover {
   border-block-end-color: var(--brand-secondary-dark);
@@ -2476,13 +2486,13 @@ html.js .header-nav {
   /* Plus icon for mobile navigation. */
 }
 .primary-nav__menu-link--button.primary-nav__menu-link--has-children {
-  -webkit-padding-end: var(--sp3);
-          padding-inline-end: var(--sp3); /* Ensure text does not overlap icon. */
+  -webkit-padding-end: var(--v-space-2xs);
+          padding-inline-end: var(--v-space-2xs); /* Ensure text does not overlap icon. */
 }
 .primary-nav__menu-link--button.primary-nav__menu-link--has-children::before, .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
   position: absolute;
   inset-inline-end: 9px;
-  inset-block-start: calc(var(--sp0-5) + 17px); /* Visually align button with menu link text. */
+  inset-block-start: calc(var(--v-space-6xs) + 17px); /* Visually align button with menu link text. */
   inline-size: 18px;
   block-size: 0;
   content: "";
@@ -2508,7 +2518,7 @@ html.js .header-nav {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  padding-block: var(--sp0-5);
+  padding-block: var(--v-space-6xs);
   padding-inline: 0;
 }
 
@@ -2527,7 +2537,6 @@ html.js .header-nav {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  letter-spacing: -1px;
 }
 
 /*
@@ -2583,7 +2592,7 @@ html.js .header-nav {
 .primary-nav__menu-link--level-2 {
   font-size: 16px;
   font-weight: normal;
-  line-height: var(--sp);
+  line-height: var(--v-space-6xs);
 }
 
 html:not(.js) .primary-nav__menu--level-2 {

@@ -77,10 +77,10 @@ body:not(.is-always-mobile-nav) {
     & .primary-nav__button-toggle {
       flex-shrink: 0;
       align-self: stretch;
-      inline-size: calc(var(--v-space-2xs) + 8px);
+      inline-size: calc(var(--v-space-3xs));
       block-size: auto;
-      margin-block-start: 0;
-      margin-inline-end: calc(-1 * var(--v-space-4xs));
+      margin: 0;
+      margin-inline-end: var(--v-space-4xxs);
 
       &:focus, &:hover {
         border: 0;
@@ -103,11 +103,13 @@ body:not(.is-always-mobile-nav) {
 
       /* stylelint-disable-next-line no-descending-specificity */
       & .icon--menu-toggle {
-        inset-inline-start: 3px;
-        inline-size: 18px;
-        transform: translateY(-50%);
+        size: 19px;
         border-radius: 4px;
         background-color: transparent;
+        display: flex;
+        align-items: flex-start;
+        padding-block-start: 6px;
+        justify-content: center;
 
         &::before {
           content: none;
@@ -115,15 +117,15 @@ body:not(.is-always-mobile-nav) {
 
         /* stylelint-disable-next-line no-descending-specificity */
         &::after {
-          /* stylelint-disable-next-line liberty/use-logical-spec */
-          top: calc(50% - 2px);
-          /* stylelint-disable-next-line liberty/use-logical-spec */
-          left: 3px;
           inline-size: 8px;
           block-size: 8px;
           content: "";
           transform: translateY(-50%) rotate(45deg);
           opacity: 0.8;
+          /* stylelint-disable-next-line liberty/use-logical-spec */
+          inset-block-start: auto;
+          /* stylelint-disable-next-line liberty/use-logical-spec */
+          inset-inline-start: auto;
 
           /* Intentionally not using CSS logical properties. */
           /* stylelint-disable-next-line liberty/use-logical-spec */
