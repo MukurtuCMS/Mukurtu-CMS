@@ -3,6 +3,8 @@
  * Customization of navigation.
  */
 
+/* global tabbable */
+
 ((Drupal, once, tabbable) => {
   /**
    * Checks if navWrapper contains "is-active" class.
@@ -43,7 +45,7 @@
     props.navButton.setAttribute('aria-controls', props.navWrapperId);
     props.navButton.setAttribute('aria-expanded', 'false');
 
-    props.navButton.addEventListener('click', () => { 
+    props.navButton.addEventListener('click', () => {
       toggleNav(props, !isNavOpen(props.navWrapper));
     });
 
