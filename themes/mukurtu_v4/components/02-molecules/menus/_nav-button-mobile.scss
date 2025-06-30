@@ -5,34 +5,17 @@
 
 @use "../../../external/include-media";
 
-.mobile-nav-button {
-  position: relative;
-  z-index: 505; /* Appear above mobile nav. */
-  display: flex;
-  align-items: center;
-  align-self: center;
-  inline-size: var(--v-space-2xs);
-  block-size: var(--v-space-2xs);
-  margin-inline: auto -6px;
-  padding-block: 0;
-  padding-inline: 6px;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  appearance: none;
+.mobile-buttons {
+  grid-column: -2 / -1;
 
-  &:focus {
-    outline: solid 2px var(--brand-primary-dark);
+  @include include-media.media('>=lg') {
+    body:not(.is-always-mobile-nav) & {
+      display: none;
+    }
   }
 
-  &:active {
-    color: inherit; /* Override Safari's default UA styles. */
-  }
-
-  @include include-media.media('>=sm') {
-    display: inline-flex;
-    inline-size: auto;
-    padding-inline-start: var(--v-space-4xxs);
+  .is-overlay-active & {
+    align-self: start;
   }
 }
 
@@ -56,6 +39,38 @@
     letter-spacing: 0.05em;
     font-size: 14px;
     font-weight: 600;
+    color: var(--brand-primary);
+  }
+}
+
+.mobile-nav-button {
+  position: relative;
+  z-index: 505; /* Appear above mobile nav. */
+  display: flex;
+  align-items: center;
+  align-self: center;
+  inline-size: var(--v-space-2xs);
+  block-size: var(--v-space-2xs);
+  margin-inline: auto -6px;
+  padding:0;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  appearance: none;
+
+  &:focus {
+    outline: solid 2px var(--brand-primary-dark);
+    outline-offset: 5px;
+    background-color: transparent;
+  }
+
+  &:active {
+    color: inherit; /* Override Safari's default UA styles. */
+  }
+
+  @include include-media.media('>=sm') {
+    display: inline-flex;
+    inline-size: auto;
   }
 }
 

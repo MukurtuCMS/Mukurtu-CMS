@@ -1590,44 +1590,17 @@ html:not(.js) .primary-nav__menu--level-2 {
  * @file
  * Nav Button Mobile.
  */
-.mobile-nav-button {
-  position: relative;
-  z-index: 505; /* Appear above mobile nav. */
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -ms-flex-item-align: center;
-      align-self: center;
-  inline-size: var(--v-space-2xs);
-  block-size: var(--v-space-2xs);
-  margin-inline: auto -6px;
-  padding-block: 0;
-  padding-inline: 6px;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+.mobile-buttons {
+  grid-column: -2/-1;
 }
-.mobile-nav-button:focus {
-  outline: solid 2px var(--brand-primary-dark);
-}
-.mobile-nav-button:active {
-  color: inherit; /* Override Safari's default UA styles. */
-}
-@media (min-width: 30rem) {
-  .mobile-nav-button {
-    display: -webkit-inline-box;
-    display: -ms-inline-flexbox;
-    display: inline-flex;
-    inline-size: auto;
-    -webkit-padding-start: var(--v-space-4xxs);
-            padding-inline-start: var(--v-space-4xxs);
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .mobile-buttons {
+    display: none;
   }
+}
+.is-overlay-active .mobile-buttons {
+  -ms-flex-item-align: start;
+      align-self: start;
 }
 
 /* Text that says "menu". */
@@ -1652,6 +1625,46 @@ html:not(.js) .primary-nav__menu--level-2 {
     letter-spacing: 0.05em;
     font-size: 14px;
     font-weight: 600;
+    color: var(--brand-primary);
+  }
+}
+
+.mobile-nav-button {
+  position: relative;
+  z-index: 505; /* Appear above mobile nav. */
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-item-align: center;
+      align-self: center;
+  inline-size: var(--v-space-2xs);
+  block-size: var(--v-space-2xs);
+  margin-inline: auto -6px;
+  padding: 0;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+}
+.mobile-nav-button:focus {
+  outline: solid 2px var(--brand-primary-dark);
+  outline-offset: 5px;
+  background-color: transparent;
+}
+.mobile-nav-button:active {
+  color: inherit; /* Override Safari's default UA styles. */
+}
+@media (min-width: 30rem) {
+  .mobile-nav-button {
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    inline-size: auto;
   }
 }
 
@@ -2225,7 +2238,7 @@ html:not(.js) .primary-nav__menu--level-2 {
 }
 @media (width >= 30rem) {
   .header-nav {
-    border-block-start-width: calc(var(--v-space-5xl) + var(--drupal-displace-offset-top, 0px));
+    border-block-start-width: calc(var(--v-space-3xs) + var(--drupal-displace-offset-top, 0px));
   }
 }
 @media (width >= 50rem) {
@@ -2293,24 +2306,22 @@ html.js .header-nav {
   }
 }
 
+body.is-always-mobile-nav .header-nav::before {
+  content: "";
+  position: sticky;
+  inset-block-start: 0;
+  inline-size: 100%;
+  -webkit-margin-before: var(--v-space-4xs);
+          margin-block-start: var(--v-space-4xs);
+  block-size: 4px;
+  background-color: var(--brand-secondary);
+  z-index: 100;
+  display: block;
+}
 @media (width >= 75rem) {
   body.is-always-mobile-nav .header-nav {
     overflow: auto;
-    max-inline-size: calc(7 * (var(--grid-col-width) + var(--grid-gap)));
-    -webkit-padding-end: var(--v-space-4xxs);
-            padding-inline-end: var(--v-space-4xxs);
-    -webkit-transition: visibility 0.2s, -webkit-transform 0.2s;
-    transition: visibility 0.2s, -webkit-transform 0.2s;
-    transition: transform 0.2s, visibility 0.2s;
-    transition: transform 0.2s, visibility 0.2s, -webkit-transform 0.2s;
     border-block-start-width: calc(var(--drupal-displace-offset-top, 0px) + var(--v-space-6xl));
-  }
-}
-@media (width >= 87.5rem) {
-  body.is-always-mobile-nav .header-nav {
-    max-inline-size: calc(100vw - (var(--max-width) + var(--content-left)) + 7 * (var(--grid-col-width) + var(--grid-gap)));
-    -webkit-padding-end: calc(100vw - (var(--max-width) + var(--content-left) - var(--v-space-4xxs)));
-            padding-inline-end: calc(100vw - (var(--max-width) + var(--content-left) - var(--v-space-4xxs)));
   }
 }
 
@@ -2334,40 +2345,24 @@ html.js .header-nav {
   display: block;
 }
 
-/**
- * @file
- * Header Mobile Buttons.
- */
-.mobile-buttons {
-  -webkit-margin-before: var(--v-space-5xs);
-          margin-block-start: var(--v-space-5xs);
-  -webkit-margin-start: auto;
-          margin-inline-start: auto;
-}
-@media (width >= 30rem) {
-  .mobile-buttons {
-    -webkit-margin-before: var(--v-space-2xs);
-            margin-block-start: var(--v-space-2xs);
-  }
-}
-@media (width >= 50rem) {
-  .mobile-buttons {
-    -webkit-margin-before: var(--v-space-4xl);
-            margin-block-start: var(--v-space-4xl);
-  }
-}
-@media (width >= 75rem) {
-  .mobile-buttons {
-    -webkit-margin-before: var(--v-space-6xl);
-            margin-block-start: var(--v-space-6xl);
-  }
+:root {
+  /* Width of slide out navigation */
+  --mobile-nav-width: 500px;
+  /* Header */
+  --header-height-wide-when-fixed: 50px;
+  /* Layout helpers. */
+  --max-width: 1350px;
+  --max-bg-color: 1570px; /* Width to which the background color extends to. */
+  --content-left: 0px;
+  --site-header-height-wide: 50px;
 }
 
-@media (width >= 75rem) {
-  body:not(.is-always-mobile-nav) .mobile-buttons {
-    display: none;
-  }
+body.is-fixed {
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
 }
+
 .menu__account-menu {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -2901,22 +2896,6 @@ header {
   .header__logo img {
     inline-size: 100px;
   }
-}
-.header-nav {
-  grid-column: 2/span 5;
-}
-@media (min-width: 60rem) {
-  .header-nav {
-    grid-column: 2/span 11;
-  }
-}
-@media (min-width: 90rem) {
-  .header-nav {
-    grid-column: 4/span 11;
-  }
-}
-.header .language-switcher {
-  grid-column: -1/span 1;
 }
 
 .grid {

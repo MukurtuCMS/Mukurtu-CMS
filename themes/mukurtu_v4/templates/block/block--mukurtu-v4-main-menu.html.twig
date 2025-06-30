@@ -36,6 +36,8 @@
 
 {% set attributes = attributes.addClass(classes).setAttribute('aria-labelledby', heading_id).setAttribute('role', 'navigation').addClass(['main-menu']) %}
 
+<div class="header-nav-overlay" data-drupal-selector="header-nav-overlay"></div>
+
 <div class="mobile-buttons" data-drupal-selector="mobile-buttons">
   <button class="mobile-nav-button" data-drupal-selector="mobile-nav-button" aria-label="{{ 'Main Menu'|t }}" aria-controls="header-nav" aria-expanded="false">
     <span class="mobile-nav-button__label">{{ 'Menu'|t }}</span>
@@ -63,8 +65,6 @@
         {% endblock %}
       </div>
     </nav>
-
-    <div class="header-nav-overlay" data-drupal-selector="header-nav-overlay"></div>
   </div>
 </div>
 

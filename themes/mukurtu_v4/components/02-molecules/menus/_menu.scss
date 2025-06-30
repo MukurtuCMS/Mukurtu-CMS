@@ -14,8 +14,26 @@
 @use "nav-primary-wide";
 @use "wide-nav-expand";
 @use "header-navigation";
-@use "header-buttons-mobile";
 
+:root {
+  /* Width of slide out navigation */
+  --mobile-nav-width: 500px;
+
+  /* Header */
+  --header-height-wide-when-fixed: 50px;
+
+    /* Layout helpers. */
+  --max-width: 1350px;
+  --max-bg-color: 1570px; /* Width to which the background color extends to. */
+  --content-left: 0px;
+  --site-header-height-wide: 50px;
+}
+
+body.is-fixed {
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+}
 
 // All menu styling is here.
 // To find menu grid placement, see _page.scss.
