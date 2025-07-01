@@ -35,3 +35,10 @@ splide:
   css:
     theme:
       libraries/splide/splide.min.css: {}
+
+language-switcher:
+  js:
+    components/02-molecules/language-switcher/language-switcher.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

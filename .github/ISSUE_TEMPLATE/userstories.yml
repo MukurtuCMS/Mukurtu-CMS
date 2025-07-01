@@ -1,0 +1,184 @@
+name: Mukurtu CMS User Stories Submission
+description: User stories are a plain English description of a software feature or function from the end-user perspective. All fields are required unless otherwise indicated.
+title: Mukurtu CMS User Stories Submission
+labels: ["user stories"]
+body:
+  - type: input
+    id: User_story
+    attributes:
+      label: User story name
+      description: Give your user story a descriptive name.
+    validations:
+      required: true
+
+  - type: input
+    id: Contact_information
+    attributes:
+      label: Email address
+      description: Please share your email.
+    validations:
+      required: true
+
+  - type: input
+    id: name
+    attributes:
+      label: First and last name
+      description: Please fill in your first and last name.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: story_type
+    attributes:
+      label: Type of user story
+      description: Select the type of user story.
+      options:
+        - label: New feature/tool
+        - label: Update to existing feature/tool
+        - label: Other
+    validations:
+       required: true
+
+  - type: input
+    id: story_type_other
+    attributes: 
+      label: Other
+      description: If you selected "Other", please briefly describe your story type.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: story_topic
+    attributes:
+      label: Topic of user story
+      description: From the [Mukurtu User Manual](https://mukurtu-user-manual.readthedocs.io/). Can select multiple topics. Specify other if existing topics do not apply.
+      options:
+        - label: Hosting, site setup, and administration
+        - label: Getting started
+        - label: Enriching digital heritage
+        - label: Managing media
+        - label: Managing site users
+        - label: Mukurtu dictionary
+        - label: Site look and feel
+        - label: Roundtrip (import/export)
+        - label: Other topics
+    validations:
+      required: true
+
+  - type: input
+    id: story_topic_other
+    attributes: 
+      label: Other topics
+      description: If you selected "Other topics", please briefly describe your story topic.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: user_type
+    attributes:
+      label: In this user role
+      description: Select each user type that this applies to. Can select multiple user types. 
+      options:
+        - label: Mukurtu administrator
+        - label: Community manager
+        - label: Community affiliate
+        - label: Protocol steward
+        - label: Protocol member
+        - label: Protocol affiliate
+        - label: Contributor
+        - label: Community record steward
+        - label: Curator
+        - label: Language steward
+        - label: Lanugage contributor
+        - label: Authenticated user
+        - label: Visitor
+    validations:
+      required: true
+
+  - type: input
+    id: Action
+    attributes:
+      label: I want to perform this action
+      description: Please describe the action you would like to take in this role.
+    validations:
+      required: true
+
+  - type: input
+    id: Benefit
+    attributes:
+      label: So that this benefit will occur. 
+      description: Please describe the benefit that taking this action would confer.
+    validations:
+      required: true
+
+  - type: input
+    id: Acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: A list of items or descriptions of what success looks like for the action or feature described. For a list, please number or bullet your points.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: Prioritization
+    attributes:
+      label: Prioritization
+      description: Please choose the priority level for this action using the MosCoW method of importance.
+      options:
+        - label: M(ust)
+        - label: S(hould)
+        - label: C(ould)
+        - label: W(ould)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: Submitting_org
+    attributes:
+      label: Submitting organization/hub
+      description: If you are not a member of the Mukurtu Hubs project, please select "Other organization", and identify your institution, organization, or community.
+      options:
+        - label: Alaska Hub
+        - label: California Hub
+        - label: Hawaii and Pacific Hub
+        - label: New South Wales, Australia Hub    
+        - label: US East Hub        
+        - label: US Midwest Hub
+        - label: US West Hub
+        - label: Other organization
+    validations:
+      required: true
+
+  - type: input
+    id: submitting_org_other
+    attributes: 
+      label: Other organization
+      description: If you selected "Other organization", please identify your institution, organization, or community.
+    validations:
+      required: false
+      
+  - type: checkboxes
+    id: origin_user_story
+    attributes:
+      label: Origination of user story
+      description: If you are not a member of the Mukurtu Hubs project, please skip this question.
+      options:
+        - label: Requested by Mukurtu Hubs staff
+        - label: Requested by Mukurtu Hubs community partner
+        - label: Other origin
+    validations:
+      required: false
+
+  - type: input
+    id: origin_other
+    attributes: 
+      label: Other origin
+      description: If you selected "Other origin", please identify the origin of your request.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        Support Tools: 
+        - [Mukurtu 4 User Manual](https://mukurtu-user-manual.readthedocs.io/)
