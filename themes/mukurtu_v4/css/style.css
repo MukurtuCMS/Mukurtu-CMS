@@ -1378,6 +1378,7 @@ details.form-wrapper summary + div {
  * This is a refactored version of the primary navigation styles, inspired by
  * Drupal's Olivero theme. It incorporates modern CSS practices and integrates
  * with the Mukurtu V4 theme variables.
+ * To find menu grid placement, see _page.scss.
  */
 /**
  * @file
@@ -1392,16 +1393,7 @@ details.form-wrapper summary + div {
 .primary-nav__menu-item {
   -webkit-margin-after: var(--v-space-5xs);
           margin-block-end: var(--v-space-5xs);
-}
-.primary-nav__menu-item:not(:last-of-type)::after {
-  content: "";
-  -webkit-border-end: 1.5px solid var(--main-nav-divider);
-          border-inline-end: 1.5px solid var(--main-nav-divider);
-  height: 45%;
-}
-.primary-nav__menu-item:last-child {
-  -webkit-margin-after: 0;
-          margin-block-end: 0;
+  list-style: none;
 }
 .primary-nav__menu-item.primary-nav__menu-item--has-children {
   display: -webkit-box;
@@ -1418,41 +1410,56 @@ details.form-wrapper summary + div {
   -ms-flex-preferred-size: calc(100% - var(--v-space-s));
       flex-basis: calc(100% - var(--v-space-s));
 }
+.primary-nav__menu-item.primary-nav__menu-item--has-children .primary-nav__menu-link--nolink {
+  line-height: 100%;
+}
 
 .primary-nav__menu-link {
   -webkit-box-flex: 1;
       -ms-flex-positive: 1;
           flex-grow: 1;
+  color: var(--color-text-neutral-loud);
+  font-size: var(--font-size-l);
   text-decoration: none;
+  padding-inline: var(--v-space-3xs);
+  padding-block: var(--v-space-5xs);
+  -webkit-border-after: 4px solid;
+          border-block-end: 4px solid;
+  border-block-end-color: var(--color-transparent);
+  -webkit-transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+  transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+}
+.primary-nav__menu-link--has-children {
+  -webkit-padding-end: var(--v-space-6xs);
+          padding-inline-end: var(--v-space-6xs);
 }
 .primary-nav__menu-link:hover {
+  border-block-end-color: var(--brand-secondary-dark);
   color: inherit;
 }
-.primary-nav__menu-link:focus {
-  /*
-   * Using --brand-primary as --color--primary-50 is not defined in the
-   * theme.
-   */
-  outline: auto 2px var(--brand-primary);
-  outline-offset: 2px;
+.primary-nav__menu-link:hover, .primary-nav__menu-link:active {
+  color: var(--brand-secondary-dark);
 }
-
-.primary-nav__menu-link--nolink {
-  padding-block: var(--v-space-5xs);
-  padding-inline: 0;
-  color: var(--color-text-neutral-soft);
-  font-weight: normal;
+.primary-nav__menu-link:focus {
+  outline: auto 2px var(--brand-secondary-dark);
+  outline-offset: 2px;
+  color: var(--brand-secondary-dark);
+}
+.primary-nav__menu-link--nolink:hover, .primary-nav__menu-link--button:hover, .primary-nav__menu-link--has-children:hover {
+  border-block-end-color: transparent;
 }
 
 .primary-nav__menu-link--button {
   position: relative;
-  padding-block: 0;
-  padding-inline: 0;
   cursor: pointer;
   text-align: start;
   border: 0;
   background: transparent;
+  font-weight: normal;
   /* Plus icon for mobile navigation. */
+}
+.primary-nav__menu-link--button:hover, .primary-nav__menu-link--button:focus, .primary-nav__menu-link--button:active {
+  background-color: transparent;
 }
 .primary-nav__menu-link--button.primary-nav__menu-link--has-children {
   -webkit-padding-end: var(--v-space-s);
@@ -1491,7 +1498,7 @@ details.form-wrapper summary + div {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  padding-block: var(--v-space-5xs);
+  padding-block: var(--v-space-6xs);
   padding-inline: 0;
 }
 
@@ -1530,18 +1537,14 @@ details.form-wrapper summary + div {
   -webkit-transition: opacity 0.2s, visibility 0.2s, max-block-size 0.2s;
   transition: opacity 0.2s, visibility 0.2s, max-block-size 0.2s;
   opacity: 0;
-  /*
-   * Using --brand-primary as --color--primary-50 is not defined in the
-   * theme.
-   */
-  -webkit-border-start: solid var(--v-space-4xxs) var(--brand-primary);
-          border-inline-start: solid var(--v-space-4xxs) var(--brand-primary);
+  -webkit-border-start: solid var(--v-space-4xs) var(--brand-primary);
+          border-inline-start: solid var(--v-space-4xs) var(--brand-primary);
 }
 .primary-nav__menu--level-2.is-active-menu-parent {
   visibility: visible;
   max-block-size: none;
-  -webkit-margin-before: var(--v-space-3xs);
-          margin-block-start: var(--v-space-3xs);
+  -webkit-margin-before: var(--v-space-6xs);
+          margin-block-start: var(--v-space-6xs);
   opacity: 1;
 }
 .primary-nav__menu--level-2 .primary-nav__menu-item--level-2:not(:last-of-type)::after {
@@ -1577,7 +1580,7 @@ details.form-wrapper summary + div {
 .primary-nav__menu-link--level-2 {
   font-size: 16px;
   font-weight: normal;
-  line-height: var(--v-space-4xxs);
+  line-height: var(--v-space-6xs);
 }
 
 html:not(.js) .primary-nav__menu--level-2 {
@@ -1599,8 +1602,9 @@ html:not(.js) .primary-nav__menu--level-2 {
   }
 }
 .is-overlay-active .mobile-buttons {
-  -ms-flex-item-align: start;
-      align-self: start;
+  position: absolute;
+  inset-block-start: calc(var(--v-space-2xs) + var(--drupal-displace-offset-top, 0px));
+  inset-inline-end: var(--v-space-xs);
 }
 
 /* Text that says "menu". */
@@ -1654,6 +1658,9 @@ html:not(.js) .primary-nav__menu--level-2 {
 .mobile-nav-button:focus {
   outline: solid 2px var(--brand-primary-dark);
   outline-offset: 5px;
+  background-color: transparent;
+}
+.mobile-nav-button:hover, .mobile-nav-button:focus, .mobile-nav-button:active, .mobile-nav-button:focus-visible {
   background-color: transparent;
 }
 .mobile-nav-button:active {
@@ -1899,8 +1906,10 @@ html:not(.js) .primary-nav__menu--level-2 {
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children {
     overflow: visible; /* Necessary to view icon in IE11 */
-    -webkit-padding-end: 9px;
-            padding-inline-end: 9px;
+    -webkit-padding-end: 1rem;
+            padding-inline-end: 1rem;
+    -webkit-margin-end: var(--v-space-3xs);
+            margin-inline-end: var(--v-space-3xs);
     /* Chevron icon for desktop navigation. */
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::before {
@@ -1909,6 +1918,10 @@ html:not(.js) .primary-nav__menu--level-2 {
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:focus::before {
     inline-size: calc(100% + var(--v-space-3xs));
     content: "";
+  }
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:focus, body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:hover {
+    border-block-end-color: transparent;
+    background-color: transparent;
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
     position: absolute;
@@ -1922,10 +1935,10 @@ html:not(.js) .primary-nav__menu--level-2 {
             transform: translateY(-50%) rotate(45deg);
     -webkit-border-before: 0;
             border-block-start: 0;
-    -webkit-border-end: solid 2px currentcolor;
-            border-inline-end: solid 2px currentcolor;
-    -webkit-border-after: solid 2px currentcolor;
-            border-block-end: solid 2px currentcolor;
+    -webkit-border-end: solid 2px var(--brand-primary);
+            border-inline-end: solid 2px var(--brand-primary);
+    -webkit-border-after: solid 2px var(--brand-primary);
+            border-block-end: solid 2px var(--brand-primary);
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children[aria-expanded=true]::after {
     opacity: 1;
@@ -1937,8 +1950,6 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-box-align: stretch;
         -ms-flex-align: stretch;
             align-items: stretch;
-    -webkit-margin-end: var(--v-space-4xxs);
-            margin-inline-end: var(--v-space-4xxs);
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-item--level-1 {
     position: relative; /* Anchor secondary menu */
@@ -1954,6 +1965,16 @@ html:not(.js) .primary-nav__menu--level-2 {
     max-inline-size: 250px;
     margin-block: 0;
     margin-inline: 0;
+  }
+  body:not(.is-always-mobile-nav) .primary-nav__menu-item--level-1:not(:last-of-type)::after {
+    content: "";
+    -webkit-border-end: 1.5px solid var(--main-nav-divider);
+            border-inline-end: 1.5px solid var(--main-nav-divider);
+    block-size: 45%;
+  }
+  body:not(.is-always-mobile-nav) .primary-nav__menu-item--level-1:last-child {
+    -webkit-margin-after: 0;
+            margin-block-end: 0;
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu--level-2 {
     position: absolute;
@@ -2074,128 +2095,6 @@ html:not(.js) .primary-nav__menu--level-2 {
 
 /**
  * @file
- * Button which expands the navigation at wide viewport widths.
- */
-.wide-nav-expand {
-  display: none;
-}
-@media (min-width: 60rem) {
-  .wide-nav-expand {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    visibility: hidden;
-    -ms-flex-negative: 0;
-        flex-shrink: 0;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-    -webkit-box-pack: center;
-        -ms-flex-pack: center;
-            justify-content: center;
-    inline-size: var(--content-left);
-    block-size: var(--v-space-6xl);
-    cursor: pointer;
-    pointer-events: auto;
-    color: var(--color-white);
-    border: 0;
-    /*
-     * Using --brand-primary as --color--primary-50 is not defined in the
-     * theme.
-     */
-    background-color: var(--brand-primary);
-  }
-  .wide-nav-expand:focus {
-    outline: solid 2px currentcolor;
-    outline-offset: -4px;
-  }
-}
-
-@media (min-width: 60rem) {
-  body.is-always-mobile-nav .wide-nav-expand {
-    visibility: hidden;
-  }
-}
-
-@media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) .is-fixed .wide-nav-expand {
-    visibility: visible;
-  }
-}
-
-.wide-nav-expand__icon {
-  position: relative;
-  inline-size: var(--v-space-2xs);
-  block-size: 21px;
-  -webkit-transition: opacity 0.2s;
-  transition: opacity 0.2s;
-  pointer-events: none;
-  opacity: 0;
-  -webkit-transform-style: preserve-3d;
-          transform-style: preserve-3d;
-}
-.wide-nav-expand__icon > span {
-  display: block;
-  block-size: 0;
-  /* Intentionally not using CSS logical properties. */
-  -webkit-border-before: solid 3px currentcolor;
-          border-block-start: solid 3px currentcolor;
-}
-.wide-nav-expand__icon > span:nth-child(1) {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  inline-size: 100%;
-  block-size: 0;
-  -webkit-transition: -webkit-transform 0.2s;
-  transition: -webkit-transform 0.2s;
-  transition: transform 0.2s;
-  transition: transform 0.2s, -webkit-transform 0.2s;
-  background-color: currentcolor;
-}
-.wide-nav-expand__icon > span:nth-child(2) {
-  position: absolute;
-  inset-block-start: 9px;
-  inset-inline-start: 0;
-  inline-size: 100%;
-  block-size: 0;
-  -webkit-transition: opacity 0.2s;
-  transition: opacity 0.2s;
-  background-color: currentcolor;
-}
-.wide-nav-expand__icon > span:nth-child(3) {
-  position: absolute;
-  inset-block: auto 0;
-  inset-inline-start: 0;
-  inline-size: 100%;
-  block-size: 0;
-  -webkit-transition: -webkit-transform 0.2s;
-  transition: -webkit-transform 0.2s;
-  transition: transform 0.2s;
-  transition: transform 0.2s, -webkit-transform 0.2s;
-  background-color: currentcolor;
-}
-
-.is-fixed .wide-nav-expand__icon {
-  opacity: 1;
-}
-
-[aria-expanded=true] .wide-nav-expand__icon > span:nth-child(1) {
-  inset-block-start: 9px;
-  -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-}
-[aria-expanded=true] .wide-nav-expand__icon > span:nth-child(2) {
-  opacity: 0;
-}
-[aria-expanded=true] .wide-nav-expand__icon > span:nth-child(3) {
-  inset-block-start: 9px;
-  -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
-}
-
-/**
- * @file
  * Navigation in header.
  */
 .header-nav {
@@ -2218,8 +2117,8 @@ html:not(.js) .primary-nav__menu--level-2 {
    * mobile navigation needs to slide beneath the button, but we also cannot
    * use padding because that would enable the button to scroll out of the
    * viewport on short screens. */
-  -webkit-border-before: solid var(--color-white) calc(var(--v-space-s) + var(--drupal-displace-offset-top, 0px));
-          border-block-start: solid var(--color-white) calc(var(--v-space-s) + var(--drupal-displace-offset-top, 0px));
+  -webkit-border-before: solid var(--color-white) calc(var(--drupal-displace-offset-top, 0px) + var(--v-space-2xl));
+          border-block-start: solid var(--color-white) calc(var(--drupal-displace-offset-top, 0px) + var(--v-space-2xl));
   background-color: var(--color-white);
   -webkit-box-shadow: 0 0 72px rgba(0, 0, 0, 0.1);
           box-shadow: 0 0 72px rgba(0, 0, 0, 0.1);
@@ -2236,18 +2135,12 @@ html:not(.js) .primary-nav__menu--level-2 {
   -webkit-transform: translateX(calc(100% + var(--drupal-displace-offset-left, 0px)));
           transform: translateX(calc(100% + var(--drupal-displace-offset-left, 0px)));
 }
-@media (width >= 30rem) {
-  .header-nav {
-    border-block-start-width: calc(var(--v-space-3xs) + var(--drupal-displace-offset-top, 0px));
-  }
-}
 @media (width >= 50rem) {
   .header-nav {
     -webkit-padding-after: var(--v-space-s);
             padding-block-end: var(--v-space-s);
     -webkit-padding-start: var(--v-space-s);
             padding-inline-start: var(--v-space-s);
-    border-block-start-width: calc(var(--v-space-6xl) + var(--drupal-displace-offset-top, 0px));
   }
 }
 @media (width >= 75rem) {
@@ -2311,18 +2204,12 @@ body.is-always-mobile-nav .header-nav::before {
   position: sticky;
   inset-block-start: 0;
   inline-size: 100%;
-  -webkit-margin-before: var(--v-space-4xs);
-          margin-block-start: var(--v-space-4xs);
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
   block-size: 4px;
   background-color: var(--brand-secondary);
   z-index: 100;
   display: block;
-}
-@media (width >= 75rem) {
-  body.is-always-mobile-nav .header-nav {
-    overflow: auto;
-    border-block-start-width: calc(var(--drupal-displace-offset-top, 0px) + var(--v-space-6xl));
-  }
 }
 
 .header-nav-overlay {
@@ -2343,24 +2230,6 @@ body.is-always-mobile-nav .header-nav::before {
 }
 .is-overlay-active .header-nav-overlay {
   display: block;
-}
-
-:root {
-  /* Width of slide out navigation */
-  --mobile-nav-width: 500px;
-  /* Header */
-  --header-height-wide-when-fixed: 50px;
-  /* Layout helpers. */
-  --max-width: 1350px;
-  --max-bg-color: 1570px; /* Width to which the background color extends to. */
-  --content-left: 0px;
-  --site-header-height-wide: 50px;
-}
-
-body.is-fixed {
-  position: fixed;
-  overflow: hidden;
-  width: 100%;
 }
 
 .menu__account-menu {
@@ -2400,200 +2269,22 @@ body.is-fixed {
   outline-color: var(--color-white);
 }
 
-.primary-nav__menu-link--nolink {
-  padding-block: var(--v-space-6xs);
-  padding-inline: 0;
-  color: var(--color-text-neutral-soft);
-  font-weight: normal;
+:root {
+  /* Width of slide out navigation */
+  --mobile-nav-width: 500px;
+  /* Header */
+  --header-height-wide-when-fixed: 50px;
+  /* Layout helpers. */
+  --max-width: 1350px;
+  --max-bg-color: 1570px; /* Width to which the background color extends to. */
+  --content-left: 0px;
+  --site-header-height-wide: 50px;
 }
 
-.primary-nav__menu-item {
-  list-style: none;
-  position: relative;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  margin-block: var(--v-space-5xs);
-  margin-inline: 0;
-}
-.primary-nav__menu-item:last-child {
-  -webkit-margin-after: 0;
-          margin-block-end: 0;
-}
-.primary-nav__menu-item.primary-nav__menu-item--has-children {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
-}
-.primary-nav__menu-item.primary-nav__menu-item--has-children .primary-nav__menu-link--link, .primary-nav__menu-item.primary-nav__menu-item--has-children .primary-nav__menu-link--nolink {
-  /* Ensure that long text doesn't make the mobile expand button wrap. */
-  -ms-flex-preferred-size: calc(100% - var(--v-space-6xxs));
-      flex-basis: calc(100% - var(--v-space-6xxs));
-}
-
-.primary-nav__menu-link {
-  -webkit-box-flex: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  color: var(--color-text-neutral-loud);
-  font-size: var(--font-size-l);
-  text-decoration: none;
-  padding-inline: var(--v-space-3xs);
-  padding-block: var(--v-space-5xs);
-  -webkit-border-after: 4px solid;
-          border-block-end: 4px solid;
-  border-block-end-color: var(--color-transparent);
-  -webkit-transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
-  transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
-}
-.primary-nav__menu-link--has-children {
-  -webkit-padding-end: var(--v-space-6xs);
-          padding-inline-end: var(--v-space-6xs);
-}
-.primary-nav__menu-link:hover {
-  border-block-end-color: var(--brand-secondary-dark);
-}
-.primary-nav__menu-link--has-children:hover {
-  border-block-end-color: transparent;
-}
-.primary-nav__menu-link:hover, .primary-nav__menu-link:active {
-  color: var(--brand-secondary-dark);
-}
-.primary-nav__menu-link:focus {
-  outline: auto 2px var(--brand-secondary-dark);
-  outline-offset: 2px;
-  color: var(--brand-secondary-dark);
-}
-
-.primary-nav__menu-link--button {
-  position: relative;
-  padding-block: 0;
-  padding-inline: 0;
-  cursor: pointer;
-  text-align: start;
-  border: 0;
-  background: transparent;
-  /* Plus icon for mobile navigation. */
-}
-.primary-nav__menu-link--button.primary-nav__menu-link--has-children {
-  -webkit-padding-end: var(--v-space-2xs);
-          padding-inline-end: var(--v-space-2xs); /* Ensure text does not overlap icon. */
-}
-.primary-nav__menu-link--button.primary-nav__menu-link--has-children::before, .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
-  position: absolute;
-  inset-inline-end: 9px;
-  inset-block-start: calc(var(--v-space-6xs) + 17px); /* Visually align button with menu link text. */
-  inline-size: 18px;
-  block-size: 0;
-  content: "";
-  /* Intentionally not using CSS logical properties. */
-  -webkit-border-before: solid 3px var(--brand-secondary-dark);
-          border-block-start: solid 3px var(--brand-secondary-dark);
-}
-.primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
-  -webkit-transition: opacity 0.2s;
-  transition: opacity 0.2s;
-  -webkit-transform: rotate(90deg);
-          transform: rotate(90deg);
-}
-.primary-nav__menu-link--button.primary-nav__menu-link--has-children[aria-expanded=true]::after {
-  opacity: 0;
-}
-
-.primary-nav__menu-link-inner {
-  position: relative;
-  display: -webkit-inline-box;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  padding-block: var(--v-space-6xs);
-  padding-inline: 0;
-}
-
-/*
-  Top level specific styles.
-*/
-.primary-nav__menu--level-1 {
-  margin-block: 0;
-  margin-inline: 0;
-  padding-block: 0;
-  padding-inline: 0;
-}
-
-.primary-nav__menu-link--level-1 {
-  position: relative;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-/*
-  Secondary menu specific styles.
-*/
-/* .primary-nav__menu--level-2 {
-  visibility: hidden;
+body.is-fixed {
+  position: fixed;
   overflow: hidden;
-  flex-basis: 100%;
-  max-block-size: 0;
-  margin-block: 0;
-  margin-inline-start: calc(-1 * var(--sp));
-  padding-inline-start: var(--sp2-5);
-  transition:
-    opacity 0.2s,
-    visibility 0.2s,
-    max-block-size 0.2s;
-  opacity: 0;
-  border-inline-start: solid var(--sp) var(--brand-secondary-dark);
-
-  &.is-active-menu-parent {
-    visibility: visible;
-    max-block-size: none;
-    margin-block-start: var(--sp1-5);
-    opacity: 1;
-  }
-
-  & .primary-nav__menu-item--level-2 {
-    &:first-child {
-      padding-block-start: var(--sp0-25);
-    }
-
-    &:last-child {
-      padding-block-end: var(--sp0-25);
-    }
-  }
-
-  @include include-media.media('>=md') {
-    margin-inline-start: calc(-1 * var(--sp3));
-    padding-inline-start: var(--sp3);
-  }
-} */
-/*
- * Olivero doesn't officially support nested tertiary submenus, but this
- * ensures that it doesn't break all the way.
- *
- * @see https://www.drupal.org/project/drupal/issues/3221399
- */
-.primary-nav__menu--level-2 .primary-nav__menu-item--has-children {
-  display: block;
-}
-
-.primary-nav__menu-link--level-2 {
-  font-size: 16px;
-  font-weight: normal;
-  line-height: var(--v-space-6xs);
-}
-
-html:not(.js) .primary-nav__menu--level-2 {
-  visibility: visible;
-  max-block-size: none;
-  opacity: 1;
+  inline-size: 100%;
 }
 
 .vertical-card {

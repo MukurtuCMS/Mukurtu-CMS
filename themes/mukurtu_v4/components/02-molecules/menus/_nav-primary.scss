@@ -14,18 +14,7 @@
 
 .primary-nav__menu-item {
   margin-block-end: var(--v-space-5xs);
-
-  &:not(:last-of-type) {
-    &::after {
-      content: "";
-      border-inline-end: 1.5px solid var(--main-nav-divider);
-      height: 45%;
-    }
-  }
-
-  &:last-child {
-    margin-block-end: 0;
-  }
+  list-style: none;
 
   &.primary-nav__menu-item--has-children {
     display: flex;
@@ -37,43 +26,65 @@
       /* Ensure that long text doesn't make the mobile expand button wrap. */
       flex-basis: calc(100% - var(--v-space-s));
     }
+
+    & .primary-nav__menu-link--nolink {
+      line-height: 100%;
+    }
   }
 }
 
 .primary-nav__menu-link {
   flex-grow: 1;
+  color: var(--color-text-neutral-loud);
+  font-size: var(--font-size-l);
   text-decoration: none;
+  padding-inline: var(--v-space-3xs);
+  padding-block: var(--v-space-5xs);
+  border-block-end: 4px solid;
+  border-block-end-color: var(--color-transparent);
+  transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+
+  &--has-children {
+    padding-inline-end: var(--v-space-6xs);
+  }
 
   &:hover {
+    border-block-end-color: var(--brand-secondary-dark);
     color: inherit;
   }
 
-  &:focus {
-    /*
-     * Using --brand-primary as --color--primary-50 is not defined in the
-     * theme.
-     */
-    outline: auto 2px var(--brand-primary);
-    outline-offset: 2px;
+  &:hover,
+  &:active {
+    color: var(--brand-secondary-dark);
   }
-}
 
-// stylelint-disable-next-line no-descending-specificity
-.primary-nav__menu-link--nolink {
-  padding-block: var(--v-space-5xs);
-  padding-inline: 0;
-  color: var(--color-text-neutral-soft);
-  font-weight: normal;
+  &:focus {
+    outline: auto 2px var(--brand-secondary-dark);
+    outline-offset: 2px;
+    color: var(--brand-secondary-dark);
+  }
+
+  &--nolink,
+  &--button,
+  &--has-children {
+    &:hover {
+      border-block-end-color: transparent;
+    }
+  }
+
 }
 
 .primary-nav__menu-link--button {
   position: relative;
-  padding-block: 0;
-  padding-inline: 0;
   cursor: pointer;
   text-align: start;
   border: 0;
   background: transparent;
+  font-weight: normal;
+
+  &:hover, &:focus, &:active {
+    background-color: transparent;
+  }
 
   /* Plus icon for mobile navigation. */
   &.primary-nav__menu-link--has-children {
@@ -112,7 +123,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding-block: var(--v-space-5xs);
+  padding-block: var(--v-space-6xs);
   padding-inline: 0;
 }
 
@@ -148,17 +159,12 @@
     visibility 0.2s,
     max-block-size 0.2s;
   opacity: 0;
-
-  /*
-   * Using --brand-primary as --color--primary-50 is not defined in the
-   * theme.
-   */
-  border-inline-start: solid var(--v-space-4xxs) var(--brand-primary);
+  border-inline-start: solid var(--v-space-4xs) var(--brand-primary);
 
   &.is-active-menu-parent {
     visibility: visible;
     max-block-size: none;
-    margin-block-start: var(--v-space-3xs);
+    margin-block-start: var(--v-space-6xs);
     opacity: 1;
   }
 
@@ -197,7 +203,7 @@
 .primary-nav__menu-link--level-2 {
   font-size: 16px;
   font-weight: normal;
-  line-height: var(--v-space-4xxs);
+  line-height: var(--v-space-6xs);
 }
 
 html:not(.js) {

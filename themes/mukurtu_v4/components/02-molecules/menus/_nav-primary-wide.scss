@@ -49,7 +49,8 @@ body:not(.is-always-mobile-nav) {
     & .primary-nav__menu-link--button {
       &.primary-nav__menu-link--has-children {
         overflow: visible; /* Necessary to view icon in IE11 */
-        padding-inline-end: 9px;
+        padding-inline-end: 1rem;
+        margin-inline-end: var(--v-space-3xs);
 
         &::before {
           content: none;
@@ -58,6 +59,11 @@ body:not(.is-always-mobile-nav) {
         &:focus::before {
           inline-size: calc(100% + var(--v-space-3xs));
           content: "";
+        }
+
+        &:focus, &:hover {
+          border-block-end-color: transparent;
+          background-color: transparent;
         }
 
         /* Chevron icon for desktop navigation. */
@@ -70,8 +76,8 @@ body:not(.is-always-mobile-nav) {
           margin-block-start: -2px;
           transform: translateY(-50%) rotate(45deg);
           border-block-start: 0;
-          border-inline-end: solid 2px currentcolor;
-          border-block-end: solid 2px currentcolor;
+          border-inline-end: solid 2px var(--brand-primary);;
+          border-block-end: solid 2px var(--brand-primary);;
         }
 
         &[aria-expanded="true"]::after {
@@ -83,7 +89,6 @@ body:not(.is-always-mobile-nav) {
     & .primary-nav__menu--level-1 {
       display: flex;
       align-items: stretch;
-      margin-inline-end: var(--v-space-4xxs);
     }
 
     & .primary-nav__menu-item--level-1 {
@@ -94,6 +99,18 @@ body:not(.is-always-mobile-nav) {
       max-inline-size: 250px;
       margin-block: 0;
       margin-inline: 0;
+
+      &:not(:last-of-type) {
+        &::after {
+          content: "";
+          border-inline-end: 1.5px solid var(--main-nav-divider);
+          block-size: 45%;
+        }
+      }
+
+      &:last-child {
+        margin-block-end: 0;
+      }
     }
 
     & .primary-nav__menu--level-2 {

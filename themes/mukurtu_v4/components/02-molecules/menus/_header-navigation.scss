@@ -24,7 +24,7 @@
    * mobile navigation needs to slide beneath the button, but we also cannot
    * use padding because that would enable the button to scroll out of the
    * viewport on short screens. */
-  border-block-start: solid var(--color-white) calc(var(--v-space-s) + var(--drupal-displace-offset-top, 0px));
+  border-block-start: solid var(--color-white) calc(var(--drupal-displace-offset-top, 0px) + var(--v-space-2xl));
   background-color: var(--color-white);
   box-shadow: 0 0 72px rgb(0 0 0 / 10%);
 
@@ -37,14 +37,10 @@
     }
   }
 
-  @media (width >= 30rem) {
-    border-block-start-width: calc(var(--v-space-3xs) + var(--drupal-displace-offset-top, 0px));
-  }
-
   @media (width >= 50rem) {
     padding-block-end: var(--v-space-s);
     padding-inline-start: var(--v-space-s);
-    border-block-start-width: calc(var(--v-space-6xl) + var(--drupal-displace-offset-top, 0px));
+
   }
 
   @media (width >= 75rem) {
@@ -97,16 +93,11 @@ body.is-always-mobile-nav {
       position: sticky;
       inset-block-start:0;
       inline-size: 100%;
-      margin-block-start: var(--v-space-4xs);
+      margin-block-start: 0;
       block-size: 4px;
       background-color: var(--brand-secondary);
       z-index: 100;
       display: block;
-    }
-
-    @media (width >= 75rem) {
-      overflow: auto;
-      border-block-start-width: calc(var(--drupal-displace-offset-top, 0px) + var(--v-space-6xl));
     }
   }
 }

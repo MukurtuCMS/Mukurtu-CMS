@@ -15,7 +15,9 @@
   }
 
   .is-overlay-active & {
-    align-self: start;
+    position: absolute;
+    inset-block-start: calc(var(--v-space-2xs) + var(--drupal-displace-offset-top, 0px));
+    inset-inline-end: var(--v-space-xs);
   }
 }
 
@@ -61,6 +63,10 @@
   &:focus {
     outline: solid 2px var(--brand-primary-dark);
     outline-offset: 5px;
+    background-color: transparent;
+  }
+
+  &:hover, &:focus, &:active, &:focus-visible {
     background-color: transparent;
   }
 
