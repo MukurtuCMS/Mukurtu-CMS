@@ -35,12 +35,14 @@ function mukurtu_install() {
   node_access_rebuild();
 
   // Install default themes (system.theme.yml is not owned by Mukurtu).
-  \Drupal::service('theme_installer')->install(['mukurtu_v4', 'claro']);
+  \Drupal::service('theme_installer')->install(['mukurtu_v4', 'gin']);
   \Drupal::configFactory()
     ->getEditable('system.theme')
     ->set('default', 'mukurtu_v4')
-    ->set('admin', 'claro')
+    ->set('admin', 'gin')
     ->save();
+
+  \Drupal::service('module_installer')->install(['gin_toolbar']);
 
   // Set the homepage (system.site.yml is not owned by Mukurtu).
   \Drupal::configFactory()
