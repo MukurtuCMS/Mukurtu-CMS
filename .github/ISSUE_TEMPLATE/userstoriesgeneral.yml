@@ -85,19 +85,6 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: report_a_problem
-    attributes: 
-      label: Report a Problem
-      description: Please describe the problem you are experiencing and how you trigger the problem step by step. 
-       
-  - type: textarea
-    id: screenshots
-    attributes:
-      label: Screenshots (optional)
-      description: Drag and drop your screenshots here or paste them directly into this field to provide visual context.
-      placeholder: Optionally attach screenshots here.
-
   - type: input
     id: Action
     attributes:
@@ -121,6 +108,13 @@ body:
       description: A list of items or descriptions of what success looks like for the action or feature described. For a list, please number or bullet your points.
     validations:
       required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Example screenshots
+      description: If you have an example of something similar from elsewhere, you can add screenshots here. 
+      placeholder: Optionally attach screenshots here.
 
   - type: input
     id: submitting_org
