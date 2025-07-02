@@ -86,7 +86,7 @@ body:
       required: true
 
   - type: textarea
-    id: Report a Problem
+    id: report_a_problem
     attributes: 
       label: Report a Problem
       description: Please describe the problem you are experiencing and how you trigger the problem step by step. 
