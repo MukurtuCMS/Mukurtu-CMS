@@ -55,6 +55,41 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: story_type
+    attributes:
+      - label: bug
+      - label: categories
+      - label: collections
+      - label: comments
+      - label: communities
+      - label: cultural protocols
+      - label: customization
+      - label: dictionary
+      - label: digital heritage
+      - label: integrations
+      - label: local contexts
+      - label: localization
+      - label: mapping and leaflet
+      - label: media
+      - label: migration
+      - label: notifications/events
+      - label: person records
+      - label: roundtrip
+      - label: search and discovery
+      - label: site configuration and administration
+      - label: taxonomies
+      - label: theme/look and feel
+      - label: user management
+    description: Select all topics related to your issue.
+    multiple: true
+    options:
+      - 1.0.2 (Default)
+      - 1.0.3 (Edge)
+    default: 0
+    validations:
+    required: true
+
   - type: input
     id: story_topic_other
     attributes: 
