@@ -659,10 +659,12 @@ function mukurtu_protocol_entity_create_access($account, array $context, $entity
   if ($context['entity_type_id'] == 'og_membership') {
     $group = isset($context['group']) ? $context['group'] : NULL;
     if ($group) {
+      // Allow uid 1 to view og membership pages no matter their roles.
+      if ($account->id() == 1) {
+        return AccessResult::allowed();
+      }
       $membership = Og::getMembership($group, $account);
-      if ($membership && ($membership->hasRole("community-community-community_manager") ||
-          $membership->hasRole("protocol-protocol-protocol_steward")))
-      {
+      if ($membership && ($membership->hasRole("community-community-community_manager") || $membership->hasRole("protocol-protocol-protocol_steward"))) {
         return AccessResult::allowed();
       }
       return AccessResult::forbidden();
