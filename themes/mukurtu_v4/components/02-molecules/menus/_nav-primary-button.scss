@@ -1,0 +1,142 @@
+/**
+ * @file
+ * Button that expands second level nav when clicked.
+ */
+
+@use "../../../external/include-media";
+
+.primary-nav__button-toggle {
+  position: relative;
+  overflow: hidden;
+  inline-size: var(--v-space-2xs);
+  block-size: var(--v-space-2xs);
+  margin-block-start: var(--v-space-5xs); /* Visually align button with menu link text. */
+  padding-block: 0;
+  padding-inline: 0;
+  cursor: pointer;
+  text-indent: -999px;
+  border: 0;
+  background: transparent;
+  appearance: none;
+
+  &:focus, &:hover {
+    background-color: transparent;
+  }
+
+
+  & .icon--menu-toggle {
+    position: absolute;
+    /* stylelint-disable-next-line liberty/use-logical-spec */
+    top: 50%;
+    /* stylelint-disable-next-line liberty/use-logical-spec */
+    left: 50%;
+    inline-size: 16px;
+    block-size: 16px;
+    transition: background-color 0.2s;
+    transform: translate(-50%, -50%);
+    border-radius: 2px;
+    background-color: transparent;
+
+    &::before,
+    &::after {
+      position: absolute;
+      /* stylelint-disable-next-line liberty/use-logical-spec */
+      top: 50%;
+      /* stylelint-disable-next-line liberty/use-logical-spec */
+      left: 50%;
+      inline-size: var(--v-space-4xxs);
+      block-size: 0;
+      content: "";
+      transform: translate(-50%, -50%);
+
+      /* Intentionally not using CSS logical properties. */
+      /* stylelint-disable-next-line liberty/use-logical-spec */
+      border-top: solid 3px var(--brand-primary);
+    }
+
+    &::after {
+      transition: opacity 0.2s;
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+  }
+
+  &[aria-expanded="true"] .icon--menu-toggle::after {
+    opacity: 0;
+  }
+
+  /* aria-hidden attribute is removed by JS. Button is non-functional
+     until JS is enabled.
+  */
+  &[aria-hidden="true"] {
+    pointer-events: none;
+  }
+}
+
+body:not(.is-always-mobile-nav) {
+  @include include-media.media('>=lg') {
+    & .primary-nav__button-toggle {
+      flex-shrink: 0;
+      align-self: stretch;
+      inline-size: calc(var(--v-space-3xs));
+      block-size: auto;
+      margin: 0;
+      margin-inline-end: var(--v-space-4xxs);
+
+      &:focus, &:hover {
+        border: 0;
+        outline: 0;
+
+        & .icon--menu-toggle {
+          outline: auto 2px var(--brand-primary);
+          outline-offset: 2px;
+        }
+      }
+
+      &:active {
+        /* Necessary for Safari. */
+        color: currentcolor;
+      }
+
+      &[aria-expanded="true"] .icon--menu-toggle::after {
+        opacity: 0.8;
+      }
+
+      /* stylelint-disable-next-line no-descending-specificity */
+      & .icon--menu-toggle {
+        size: 19px;
+        border-radius: 4px;
+        background-color: transparent;
+        display: flex;
+        align-items: flex-start;
+        padding-block-start: 6px;
+        justify-content: center;
+
+        &::before {
+          content: none;
+        }
+
+        /* stylelint-disable-next-line no-descending-specificity */
+        &::after {
+          inline-size: 8px;
+          block-size: 8px;
+          content: "";
+          transform: translateY(-50%) rotate(45deg);
+          opacity: 0.8;
+          /* stylelint-disable-next-line liberty/use-logical-spec */
+          inset-block-start: auto;
+          /* stylelint-disable-next-line liberty/use-logical-spec */
+          inset-inline-start: auto;
+
+          /* Intentionally not using CSS logical properties. */
+          /* stylelint-disable-next-line liberty/use-logical-spec */
+          border-top: none;
+          /* stylelint-disable-next-line liberty/use-logical-spec */
+          border-right: solid 2px var(--brand-primary);
+          /* stylelint-disable-next-line liberty/use-logical-spec */
+          border-bottom: solid 2px var(--brand-primary);
+          background: transparent;
+        }
+      }
+    }
+  }
+}
