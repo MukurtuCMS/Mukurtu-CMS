@@ -15,14 +15,6 @@ mukurtu_core.account_dashboard:
   route_name: mukurtu_core.dashboard
   weight: -1000
 
-#Main menu
-mukurtu_core.categories:
-  title: "Categories"
-  menu_name: main
-  description: "Browse the site categories"
-  route_name: view.mukurtu_categories.categories_page
-  weight: -10
-
 #System admin menu
 mukurtu_core.dashboard_admin:
   title: 'Mukurtu Dashboard'

@@ -8,6 +8,8 @@
 use Drupal\block\Entity\Block;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\user\Entity\Role;
+use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_install().
@@ -35,12 +37,14 @@ function mukurtu_install() {
   node_access_rebuild();
 
   // Install default themes (system.theme.yml is not owned by Mukurtu).
-  \Drupal::service('theme_installer')->install(['mukurtu_v4', 'claro']);
+  \Drupal::service('theme_installer')->install(['mukurtu_v4', 'gin']);
   \Drupal::configFactory()
     ->getEditable('system.theme')
     ->set('default', 'mukurtu_v4')
-    ->set('admin', 'claro')
+    ->set('admin', 'gin')
     ->save();
+
+  \Drupal::service('module_installer')->install(['gin_toolbar']);
 
   // Set the homepage (system.site.yml is not owned by Mukurtu).
   \Drupal::configFactory()
@@ -182,6 +186,66 @@ function mukurtu_install() {
   $block->setStatus(TRUE);
   $block->setWeight(0);
   $block->save();
+
+  // Create Communities menu item.
+  MenuLinkContent::create([
+    'title' => 'Communities',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_protocol.communities_page')->toString()],
+    'menu_name' => 'main',
+    'description' => 'Browse the site communities',
+    'expanded' => FALSE,
+    'weight' => 1,
+  ])->save();
+
+  // Create Categories menu item.
+  MenuLinkContent::create([
+    'title' => 'Categories',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('view.mukurtu_categories.categories_page')->toString()],
+    'menu_name' => 'main',
+    'description' => 'Browse the site categories',
+    'expanded' => FALSE,
+    'weight' => 2,
+  ])->save();
+
+  // Create Browse Digital Heritage menu item.
+  MenuLinkContent::create([
+    'title' => 'Browse Digital Heritage',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_browse.browse_digital_heritage_page')->toString()],
+    'menu_name' => 'main',
+    'description' => 'Browse Digital Heritage Content',
+    'expanded' => FALSE,
+    'weight' => 3,
+  ])->save();
+
+  // Create Browse menu item.
+  MenuLinkContent::create([
+    'title' => 'Browse',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_browse.browse_page')->toString()],
+    'menu_name' => 'main',
+    'description' => 'Browse Site Content',
+    'expanded' => FALSE,
+    'weight' => 4,
+  ])->save();
+
+  // Create Collections menu item.
+  MenuLinkContent::create([
+    'title' => 'Collections',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_collection.collection_browse_page')->toString()],
+    'menu_name' => 'main',
+    'description' => 'Browse Site Collections',
+    'expanded' => FALSE,
+    'weight' => 5,
+  ])->save();
+
+  // Create Dictionary menu item.
+  MenuLinkContent::create([
+    'title' => 'Dictionary',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_dictionary.dictionary_page')->toString()],
+    'menu_name' => 'main',
+    'description' => 'Browse the dictionary',
+    'expanded' => FALSE,
+    'weight' => 6,
+  ])->save();
 
   // Delete unused user flags that crash user registration page.
   $flagStorage = \Drupal::entityTypeManager()->getStorage('flag');

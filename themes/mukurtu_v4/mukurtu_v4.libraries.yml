@@ -13,13 +13,6 @@ global-scripts:
     - core/drupal
     - core/once
 
-mobile-nav:
-  js:
-    js/mobile-nav.js: { attributes: { type: module } }
-  dependencies:
-    - core/drupal
-    - core/once
-
 media-carousel:
   js:
     js/media-asset-carousel.js: {}
@@ -42,3 +35,15 @@ language-switcher:
   dependencies:
     - core/drupal
     - core/once
+
+olivero-navigation:
+  version: 10.1
+  js:
+    components/02-molecules/menus/js/navigation.js: {}
+    components/02-molecules/menus/js/navigation-utils.js: {}
+    components/02-molecules/menus/js/nav-resize.js: {}
+    components/02-molecules/menus/js/second-level-navigation.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/tabbable

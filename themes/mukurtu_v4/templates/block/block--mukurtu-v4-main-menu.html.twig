@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override for a menu block.
+ * Theme override for a Main menu block.
  *
  * Available variables:
  * - plugin_id: The ID of the block implementation.
@@ -11,7 +11,6 @@
  *   - label_display: The display settings for the label.
  *   - provider: The module or other provider that provided this block plugin.
  *   - Block plugin specific settings will also be stored here.
- * - in_preview: Whether the plugin is being rendered in preview mode.
  * - content: The content of this block.
  * - attributes: HTML attributes for the containing element.
  *   - id: A valid HTML ID and guaranteed unique.
@@ -32,28 +31,42 @@
  * http://www.w3.org/TR/WCAG-TECHS/H42.html for more information.
  */
 #}
-{% set heading_id = attributes.id ~ '-menu'|clean_id %}
+{{ attach_library('mukurtu_v4/olivero-navigation') }}
+{% set classes = ['block', 'block-menu', 'navigation', 'menu--' ~ (derivative_plugin_id|clean_class)] %}
 
-<div class="header__main-nav">
-  <nav role="navigation" aria-labelledby="{{ heading_id }}"{{ attributes|without('role', 'aria-labelledby').addClass("main-navigation") }}>
-    {# Label. If not displayed, we still provide it for screen readers. #}
-    {% if not configuration.label_display %}
-      {% set title_attributes = title_attributes.addClass('visually-hidden') %}
-    {% endif %}
-    {{ title_prefix }}
-    <h2{{ title_attributes.setAttribute('id', heading_id) }}>{{ configuration.label }}</h2>
-    {{ title_suffix }}
+{% set attributes = attributes.addClass(classes).setAttribute('aria-labelledby', heading_id).setAttribute('role', 'navigation').addClass(['main-menu']) %}
 
-    {# Menu. #}
-    {% block content %}
-      {{ content }}
-    {% endblock %}
-  </nav>
+<div class="header-nav-overlay" data-drupal-selector="header-nav-overlay"></div>
 
-  <div class="mobile-nav-button">
-    <button class="mobile-nav-button__button" type="button" aria-expanded="false" aria-controls="block-mukurtu-v4-main-menu">
-      <span class="mobile-nav-button__icon"></span>
-      {{ 'Main Menu'|t }}
-    </button>
+<div class="mobile-buttons" data-drupal-selector="mobile-buttons">
+  <button class="mobile-nav-button" data-drupal-selector="mobile-nav-button" aria-label="{{ 'Main Menu'|t }}" aria-controls="header-nav" aria-expanded="false">
+    <span class="mobile-nav-button__label">{{ 'Menu'|t }}</span>
+    <span class="mobile-nav-button__icon"></span>
+  </button>
+</div>
+
+<div id="header-nav" class="header-nav" data-drupal-selector="header-nav">
+  <div class="header__main-nav">
+
+    {% set heading_id = attributes.id ~ ('-menu'|clean_id) %}
+
+    <nav {{ attributes }}>
+      {# Label. If not displayed, we still provide it for screen readers. #}
+      {% if not configuration.label_display %}
+        {% set title_attributes = title_attributes.addClass('visually-hidden') %}
+      {% endif %}
+      {{ title_prefix }}
+      <h2 {{ title_attributes.addClass('block__title').setAttribute('id', heading_id) }}>{{ configuration.label }}</h2>
+      {{ title_suffix }}
+      {# Menu. #}
+      <div class="main-menu__inner" data-drupal-selector="main-menu__inner">
+        {% block content %}
+          {{ content }}
+        {% endblock %}
+      </div>
+    </nav>
   </div>
 </div>
+
+
+
