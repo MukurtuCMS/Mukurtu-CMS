@@ -1445,10 +1445,20 @@ details.form-wrapper summary + div {
   outline-offset: 2px;
   color: var(--brand-secondary-dark);
 }
+.primary-nav__menu-link--nolink, .primary-nav__menu-link--button, .primary-nav__menu-link--has-children {
+  /* stylelint-disable-next-line no-descending-specificity */
+}
 .primary-nav__menu-link--nolink:hover, .primary-nav__menu-link--button:hover, .primary-nav__menu-link--has-children:hover {
   border-block-end-color: transparent;
 }
+.primary-nav__menu-link.is-active {
+  border-block-end-color: var(--brand-secondary-accent);
+}
+.primary-nav__menu-link.is-active:hover {
+  border-block-end-color: var(--brand-secondary-dark);
+}
 
+/* stylelint-disable-next-line no-descending-specificity */
 .primary-nav__menu-link--button {
   position: relative;
   cursor: pointer;
@@ -1996,7 +2006,7 @@ html:not(.js) .primary-nav__menu--level-2 {
             margin-block-start: 0;
     -webkit-margin-start: 0;
             margin-inline-start: 0;
-    padding-block: var(--v-space-3xs);
+    padding-block: var(--v-space-5xs);
     padding-inline: var(--v-space-5xs);
     -webkit-transition: none;
     transition: none;
@@ -2016,7 +2026,7 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-border-start: solid 1px transparent;
             border-inline-start: solid 1px transparent;
     border-radius: 0 0 2px 2px;
-    background: var(--color-white);
+    background: var(--brand-light);
     -webkit-box-shadow: 0 1px 36px rgba(0, 0, 0, 0.08);
             box-shadow: 0 1px 36px rgba(0, 0, 0, 0.08);
   }

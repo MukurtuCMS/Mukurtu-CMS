@@ -130,7 +130,7 @@ body:not(.is-always-mobile-nav) {
       max-block-size: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--v-space-4xxs));
       margin-block-start: 0;
       margin-inline-start: 0;
-      padding-block: var(--v-space-3xs);
+      padding-block: var(--v-space-5xs);
       padding-inline: var(--v-space-5xs);
       transition: none;
       transform: translate(-50%, +20px);
@@ -145,7 +145,7 @@ body:not(.is-always-mobile-nav) {
       border-block-end: solid 1px transparent;
       border-inline-start: solid 1px transparent;
       border-radius: 0 0 2px 2px;
-      background: var(--color-white);
+      background: var(--brand-light);
       box-shadow: 0 1px 36px rgb(0 0 0 / 8%);
 
       &.is-active-menu-parent {

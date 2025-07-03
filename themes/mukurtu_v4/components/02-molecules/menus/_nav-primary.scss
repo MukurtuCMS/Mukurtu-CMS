@@ -67,13 +67,23 @@
   &--nolink,
   &--button,
   &--has-children {
+    /* stylelint-disable-next-line no-descending-specificity */
     &:hover {
       border-block-end-color: transparent;
     }
   }
 
+  &.is-active {
+    border-block-end-color: var(--brand-secondary-accent);
+
+    &:hover {
+      border-block-end-color: var(--brand-secondary-dark);;
+    }
+  }
+
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .primary-nav__menu-link--button {
   position: relative;
   cursor: pointer;
