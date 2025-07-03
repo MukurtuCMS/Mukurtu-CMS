@@ -30,6 +30,10 @@ function mukurtu_install() {
   // dependency, so we'll install it here.
   \Drupal::service('module_installer')->install(['message_digest_ui']);
 
+  // Install the layout builder module.
+  \Drupal::service('module_installer')->install(['layout_builder']);
+  \Drupal::service('module_installer')->install(['layout_builder_restrictions']);
+
   // @todo: Make an installation option to enable this module.
   // \Drupal::service('module_installer')->install(['mukurtu_solr']);
 
