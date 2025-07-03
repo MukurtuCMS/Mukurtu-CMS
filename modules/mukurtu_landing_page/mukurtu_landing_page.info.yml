@@ -1,0 +1,12 @@
+name: 'Mukurtu Landing Page'
+description: 'Landing page content type with Layout Builder support'
+type: module
+core_version_requirement: ^10
+package: 'Mukurtu CMS'
+dependencies:
+  - drupal:node
+  - drupal:field
+  - drupal:text
+  - drupal:layout_builder
+  - layout_builder_restrictions:layout_builder_restrictions
+  - features:features

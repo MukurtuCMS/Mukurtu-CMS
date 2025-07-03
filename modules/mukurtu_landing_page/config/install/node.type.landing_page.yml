@@ -1,0 +1,18 @@
+uuid: 788620e9-42b2-4ffe-aeba-3aaf783c79a2
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+name: 'Landing Page'
+type: landing_page
+description: 'Create custom <em>landing pages</em> with flexible layouts using drag-and-drop components and blocks.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: false
