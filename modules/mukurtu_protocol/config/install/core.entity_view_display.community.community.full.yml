@@ -132,7 +132,7 @@ content:
     weight: 0
     region: content
   og_group:
-    type: og_group_subscribe
+    type: mukurtu_og_group_subscribe
     label: above
     settings: {  }
     third_party_settings: {  }
