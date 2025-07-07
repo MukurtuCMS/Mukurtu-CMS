@@ -21,7 +21,6 @@ permissions:
   - 'create video media'
   - 'delete own audio media'
   - 'delete own collection content'
-  - 'delete own dictionary_word content'
   - 'delete own document media'
   - 'delete own soundcloud media'
   - 'delete own image media'
