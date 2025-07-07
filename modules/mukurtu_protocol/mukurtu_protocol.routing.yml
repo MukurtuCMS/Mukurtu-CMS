@@ -122,7 +122,7 @@ mukurtu_protocol.community_members_list:
     entity_type_id: community
   requirements:
     _og_membership_add_access: 'TRUE'
-    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuOgAdminMembersController::access'
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuOgMembersOverviewController::access'
   options:
     _admin_route: TRUE
     _og_entity_type_id: group
@@ -139,7 +139,7 @@ mukurtu_protocol.protocol_members_list:
     entity_type_id: protocol
   requirements:
     _og_membership_add_access: 'TRUE'
-    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuOgAdminMembersController::access'
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuOgMembersOverviewController::access'
   options:
     _admin_route: TRUE
     _og_entity_type_id: group
