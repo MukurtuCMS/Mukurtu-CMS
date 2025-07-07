@@ -583,8 +583,6 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
     // Only add the form validator if this form is in the protocol context.
     $form['#validate'][] = 'add_protocol_member_form_validate';
   }
-  // After changing a user's roles, flush the cache so pages reflect that.
-  drupal_flush_all_caches();
 }
 
 function add_protocol_member_form_validate(&$form, FormStateInterface $form_state)
