@@ -1,0 +1,162 @@
+name: Hubs and spokes user story
+description: Use this form if you are submitting a user story (feature update or request) as part of the Mukurtu Hubs and Spokes, or if otherwise requested by the Mukurtu development team.
+title: Provide a short descriptive title for your user story
+labels: ["user story"]
+body:
+
+  - type: markdown
+    attributes:
+      value: |
+        This form is only for user stories submitted by our Hubs, Spokes, and other partners as requested.  
+        Members of the broader community should use the *General Mukurtu CMS user story* form instead.
+
+  - type: dropdown
+    id: Submitting_org
+    attributes:
+      multiple: true
+      label: Submitting organization
+      description: If you represent a Hub, select your hub.  
+        If you represent a community spoke, Mukurtu Community Curation Specialist, or other partner, select "Other organization". If the submission is being made by a Hub on behalf of a spoke or community partner, select the Hub *and* "Other organization".
+      options:
+        - Alaska
+        - California
+        - Hawaii and Pacific
+        - New South Wales, Australia
+        - US East
+        - US Midwest
+        - US West
+        - Other organization (specify below)
+    validations:
+      required: true
+
+  - type: input
+    id: submitting_org_other
+    attributes: 
+      label: Other submitting organization
+      description: If you selected "Other organization", specify your institution, organization, or community.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: story_type
+    attributes:
+      label: Type of user story
+      multiple: false
+      description: Select the type of user story.
+      options:
+        - New feature or tool
+        - Update to an existing feature or tool
+        - Other user story type (specify below)
+    validations:
+      required: true
+
+  - type: input
+    id: story_type_other
+    attributes: 
+      label: Other user story type
+      description: If you selected "Other user story type", briefly describe your story type.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: story_topic
+    attributes:
+      label: User story topic
+      multiple: true
+      description: These topics correspond with the main features and tools in Mukurtu CMS. Select all that apply. 
+      options:
+        - bug
+        - categories
+        - collections
+        - comments
+        - communities
+        - cultural protocols
+        - customization
+        - dictionary
+        - digital heritage
+        - integrations
+        - local contexts
+        - localization
+        - mapping and leaflet
+        - media
+        - migration
+        - notifications and events
+        - person records
+        - publishing workflows
+        - roundtrip
+        - search and discovery
+        - site configuration and administration
+        - taxonomies
+        - theme/look and feel
+        - user management
+        - other topic
+    validations:
+      required: true
+
+  - type: input
+    id: story_topic_other
+    attributes: 
+      label: Other topic
+      description: If you selected "Other topic", specify the topic.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## User story format
+      
+        User stories use the following format: *As a* [type of user], *I want to* [perform an action], *so that* [I accomplish a specific outcome or benefit].
+
+        For example, As a *community manager*, I want to *create new user accounts*, so that *I don't have to ask the site administrator to do it*.
+
+        This short format is also accompanied by a more detailed description of acceptance criteria, as needed.
+        
+  - type: dropdown
+    id: user_type
+    attributes:
+      label: As a...
+      multiple: true
+      description: Select the user role(s) that should use this tool. Select all that apply.
+      options:
+        - Drupal administrator
+        - Mukurtu administrator
+        - Authenticated user
+        - Visitor
+        - Community manager
+        - Community member
+        - Community affiliate
+        - Protocol steward
+        - Protocol member
+        - Protocol affiliate
+        - Contributor
+        - Community record steward
+        - Curator
+        - Language steward
+        - Language contributor
+    validations:
+      required: true
+
+  - type: input
+    id: Action
+    attributes:
+      label: I want to...
+      description: Briefly describe the action that these user(s) should be able to take.
+    validations:
+      required: true
+
+  - type: input
+    id: Benefit
+    attributes:
+      label: So that...
+      description: Briefly describe the benefit or outcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: Acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Provide more detail about the specifics of the user story. This may include a list of items or descriptions of what success looks like for the action or feature described. For a list, please number or bullet your points. If you have an example of something similar from elsewhere, you can add screenshots here.
+    validations:
+      required: true
