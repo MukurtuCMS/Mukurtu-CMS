@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_display.comment.comment.default
     - core.entity_view_mode.node.full
     - field.field.node.word_list.comment
     - node.type.word_list
@@ -9,6 +10,7 @@ dependencies:
     - layout_builder
     - mukurtu_core
     - mukurtu_local_contexts
+    - mukurtu_protocol
     - text
     - user
 third_party_settings:
@@ -20,6 +22,15 @@ targetEntityType: node
 bundle: word_list
 mode: full
 content:
+  comment:
+    type: mukurtu_comment_default
+    label: above
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    weight: 11
+    region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
     label: hidden
@@ -194,7 +205,6 @@ content:
     weight: 8
     region: content
 hidden:
-  comment: true
   draft: true
   field_all_related_content: true
   field_citation: true
