@@ -1,154 +1,17 @@
-uuid: 332262e7-3c10-43e1-94c7-3f8a45a65498
 langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.landing_page.body
+    - field.field.node.landing_page.layout_builder__layout
     - node.type.landing_page
   module:
     - layout_builder
     - layout_builder_restrictions
-    - layout_discovery
-    - text
     - user
 third_party_settings:
   layout_builder:
     enabled: true
     allow_custom: true
-    sections:
-      -
-        layout_id: layout_onecol
-        layout_settings:
-          label: ''
-        components:
-          842a6443-f5f1-41ea-bcc4-d7b6ce89c5c9:
-            uuid: 842a6443-f5f1-41ea-bcc4-d7b6ce89c5c9
-            region: content
-            configuration:
-              id: 'extra_field_block:node:landing_page:field_title'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-            weight: 0
-            additional: {  }
-          5ef80853-6967-430a-9c14-d47cc75bd68b:
-            uuid: 5ef80853-6967-430a-9c14-d47cc75bd68b
-            region: content
-            configuration:
-              id: 'extra_field_block:node:landing_page:flag_email_node'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-            weight: 1
-            additional: {  }
-          ddcaa92c-ccf6-4b59-87f7-04329d106352:
-            uuid: ddcaa92c-ccf6-4b59-87f7-04329d106352
-            region: content
-            configuration:
-              id: 'extra_field_block:node:landing_page:flag_email_og'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-            weight: 2
-            additional: {  }
-          d02b5349-e33c-4022-83b6-8dd29911dc08:
-            uuid: d02b5349-e33c-4022-83b6-8dd29911dc08
-            region: content
-            configuration:
-              id: 'extra_field_block:node:landing_page:flag_export_content'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-            weight: 3
-            additional: {  }
-          64d5dacc-c6ef-4402-b78f-283df60a9633:
-            uuid: 64d5dacc-c6ef-4402-b78f-283df60a9633
-            region: content
-            configuration:
-              id: 'extra_field_block:node:landing_page:flag_mukurtu_email_og'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-            weight: 4
-            additional: {  }
-          80c683af-d821-4a9a-98dd-1250eb834396:
-            uuid: 80c683af-d821-4a9a-98dd-1250eb834396
-            region: content
-            configuration:
-              id: 'extra_field_block:node:landing_page:flag_subscribe_node'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-            weight: 5
-            additional: {  }
-          15aadc49-9509-4dfb-8acc-d27335170b4d:
-            uuid: 15aadc49-9509-4dfb-8acc-d27335170b4d
-            region: content
-            configuration:
-              id: 'extra_field_block:node:landing_page:flag_subscribe_og'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-            weight: 6
-            additional: {  }
-          6f1d4b68-0d87-4134-9f3f-ac2b1bf7dbe5:
-            uuid: 6f1d4b68-0d87-4134-9f3f-ac2b1bf7dbe5
-            region: content
-            configuration:
-              id: 'extra_field_block:node:landing_page:links'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-            weight: 7
-            additional: {  }
-          1623c53b-0b45-431e-8252-8e56c90647ca:
-            uuid: 1623c53b-0b45-431e-8252-8e56c90647ca
-            region: content
-            configuration:
-              id: 'field_block:node:landing_page:field_representative_media'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-              formatter:
-                type: entity_reference_label
-                label: hidden
-                settings:
-                  link: true
-                third_party_settings: {  }
-            weight: 8
-            additional: {  }
-          b86aed5b-a1c1-4790-a654-b67f123e1f32:
-            uuid: b86aed5b-a1c1-4790-a654-b67f123e1f32
-            region: content
-            configuration:
-              id: 'field_block:node:landing_page:field_all_related_content'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-              formatter:
-                type: entity_reference_label
-                label: hidden
-                settings:
-                  link: true
-                third_party_settings: {  }
-            weight: 9
-            additional: {  }
-          7def2ceb-9e2e-4190-a233-8d3b662f8920:
-            uuid: 7def2ceb-9e2e-4190-a233-8d3b662f8920
-            region: content
-            configuration:
-              id: 'field_block:node:landing_page:field_citation'
-              label_display: '0'
-              context_mapping:
-                entity: layout_builder.entity
-              formatter:
-                type: text_default
-                label: above
-                settings: {  }
-                third_party_settings: {  }
-            weight: 10
-            additional: {  }
-        third_party_settings: {  }
   layout_builder_restrictions:
     allowed_block_categories:
       - 'Chaos Tools'
@@ -173,34 +36,29 @@ third_party_settings:
     entity_view_mode_restriction:
       allowed_layouts:
         - layout_onecol
-      denylisted_blocks:
-        Devel: {  }
+      denylisted_blocks: {  }
       allowlisted_blocks:
+        'Custom block types':
+          - basic
+          - featured_content
+          - image_with_description
+        'Custom blocks':
+          - 'block_content:a421d06b-ab2b-4a8d-be75-87e1a20dfdec'
+          - 'block_content:86ca3b83-35d0-4aba-aa3f-40923a360c28'
         'Lists (Views)':
           - 'views_block:browse_by_community-community_browse_block'
-          - 'views_block:mukurtu_browse_map-mukurtu_browse_map_block'
-          - 'views_block:mukurtu_browse-mukurtu_browse_block_grid'
-          - 'views_block:mukurtu_browse-mukurtu_browse_block'
-          - 'views_block:mukurtu_browse-mukurtu_browse_block_map'
           - 'views_block:mukurtu_browse_by_map-map_block'
-          - 'views_block:mukurtu_browse_by_map-teaser_block'
-          - 'views_block:mukurtu_browse_collections-browse_collections_block'
           - 'views_block:mukurtu_categories-browse_by_category_block'
-          - 'views_block:mukurtu_dictionary-mukurtu_dictionary_block'
-          - 'views_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block_grid'
-          - 'views_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block'
-          - 'views_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block_map'
-          - 'views_block:mukurtu_recent_content-all_recent_content_block'
-          - 'views_block:comments_recent-block_1'
-          - 'views_block:content_recent-block_1'
       restricted_categories:
         - 'Chaos Tools'
         - 'Config Pages'
         - 'Content fields'
         - Custom
+        - Devel
         - Facets
         - Forms
         - Help
+        - 'Inline blocks'
         - Menus
         - 'Organic Groups'
         - Subscriptions
@@ -212,76 +70,24 @@ id: node.landing_page.default
 targetEntityType: node
 bundle: landing_page
 mode: default
-content:
-  field_all_related_content:
-    type: entity_reference_label
-    label: hidden
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 9
-    region: content
-  field_citation:
-    type: text_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 10
-    region: content
-  field_representative_media:
-    type: entity_reference_label
-    label: hidden
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 8
-    region: content
-  field_title:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 0
-    region: content
-  flag_email_node:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 1
-    region: content
-  flag_email_og:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 2
-    region: content
-  flag_export_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 3
-    region: content
-  flag_mukurtu_email_og:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 4
-    region: content
-  flag_subscribe_node:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 5
-    region: content
-  flag_subscribe_og:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 6
-    region: content
-  links:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 7
-    region: content
+content: {  }
 hidden:
-  body: true
   draft: true
+  field_all_related_content: true
+  field_citation: true
   field_communities: true
   field_cultural_protocols: true
   field_in_collection: true
   field_multipage_page_of: true
+  field_representative_media: true
+  field_title: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_og: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
   langcode: true
+  layout_builder__layout: true
+  links: true
   search_api_excerpt: true

@@ -37,6 +37,7 @@
         "drupal/geofield": "^1.59",
         "drupal/geolocation": "*",
         "drupal/gin": "^4.0",
+        "drupal/gin_lb": "^2.0@beta",
         "drupal/gin_toolbar": "^2.0",
         "drupal/google_tag": "^2.0",
         "drupal/layout_builder_restrictions": "^3.0",

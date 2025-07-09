@@ -1,4 +1,3 @@
-uuid: 788620e9-42b2-4ffe-aeba-3aaf783c79a2
 langcode: en
 status: true
 dependencies:
@@ -12,7 +11,7 @@ third_party_settings:
 name: 'Landing Page'
 type: landing_page
 description: 'Create custom <em>landing pages</em> with flexible layouts using drag-and-drop components and blocks.'
-help: null
+help: 'To create a landing page, start by adding your page title and saving it. After saving, click the "Layout" tab to build your page structure. In the Layout Builder, first add sections, then add content blocks like text, images, or lists inside each section. Drag and drop everything to arrange it how you want. When finished, click "Save Layout".'
 new_revision: true
-preview_mode: 1
+preview_mode: 0
 display_submitted: false

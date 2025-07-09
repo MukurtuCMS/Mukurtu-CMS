@@ -1,29 +1,16 @@
-uuid: 8d114496-8c5b-415c-b8da-bc1f816a4330
 langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.landing_page.body
     - field.field.node.landing_page.layout_builder__layout
     - node.type.landing_page
   module:
     - path
-    - text
 id: node.landing_page.default
 targetEntityType: node
 bundle: landing_page
 mode: default
 content:
-  body:
-    type: text_textarea_with_summary
-    weight: 121
-    region: content
-    settings:
-      rows: 9
-      summary_rows: 3
-      placeholder: ''
-      show_summary: false
-    third_party_settings: {  }
   created:
     type: datetime_timestamp
     weight: 10
