@@ -10,6 +10,7 @@ use Drupal\block_content\Entity\BlockContent;
 use Drupal\user\Entity\Role;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
 
 /**
  * Implements hook_install().
@@ -46,11 +47,7 @@ function mukurtu_install() {
 
   \Drupal::service('module_installer')->install(['gin_toolbar']);
 
-  // Set the homepage (system.site.yml is not owned by Mukurtu).
-  \Drupal::configFactory()
-    ->getEditable('system.site')
-    ->set('page.front', '/home')
-    ->save();
+  // Homepage will be set to the landing page node created below.
 
   // Set the homepage (system.site.yml is not owned by Mukurtu).
   \Drupal::configFactory()
@@ -186,6 +183,23 @@ function mukurtu_install() {
   $block->setStatus(TRUE);
   $block->setWeight(0);
   $block->save();
+
+  // Create default landing page and set it as homepage.
+  $homepage_node = Node::create([
+    'type' => 'landing_page',
+    'title' => 'Mukurtu Homepage',
+    'status' => 1,
+    'promote' => 0,
+    'sticky' => 0,
+    'uid' => 1,
+  ]);
+  $homepage_node->save();
+
+  // Set the homepage to the new landing page node (system.site.yml is not owned by Mukurtu).
+  \Drupal::configFactory()
+    ->getEditable('system.site')
+    ->set('page.front', '/node/' . $homepage_node->id())
+    ->save();
 
   // Create Communities menu item.
   MenuLinkContent::create([
