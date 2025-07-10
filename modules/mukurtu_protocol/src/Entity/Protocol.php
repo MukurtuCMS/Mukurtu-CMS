@@ -534,8 +534,8 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setRevisionable(FALSE)
       ->setDefaultValue(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', FALSE)
-      ->setDisplayConfigurable('form', FALSE);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['field_comment_require_approval'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Comments Require Approval'))
@@ -543,8 +543,8 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setRevisionable(FALSE)
       ->setDefaultValue(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', FALSE)
-      ->setDisplayConfigurable('form', FALSE);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['status']->setDescription(t('A boolean indicating whether the Protocol is published.'))
       ->setDisplayOptions('form', [
