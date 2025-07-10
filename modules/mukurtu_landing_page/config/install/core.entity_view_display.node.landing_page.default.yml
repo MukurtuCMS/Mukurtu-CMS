@@ -42,9 +42,6 @@ third_party_settings:
           - basic
           - featured_content
           - image_with_description
-        'Custom blocks':
-          - 'block_content:a421d06b-ab2b-4a8d-be75-87e1a20dfdec'
-          - 'block_content:86ca3b83-35d0-4aba-aa3f-40923a360c28'
         'Lists (Views)':
           - 'views_block:browse_by_community-community_browse_block'
           - 'views_block:mukurtu_browse_by_map-map_block'
