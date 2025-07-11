@@ -210,11 +210,25 @@ function mukurtu_install() {
   );
   $categories_component->setWeight(2); // Third block
 
+  $community_component = new SectionComponent(
+    $uuid_generator->generate(),
+    'content',
+    [
+      'id' => 'views_block:browse_by_community-community_browse_block',
+      'label' => 'Browse by Community',
+      'label_display' => 1,
+      'provider' => 'views',
+      'views_label' => '',
+      'items_per_page' => 'none',
+    ]
+  );
+  $community_component->setWeight(3); // Fourth block
+
   // Create a section using single column layout
   $section = new Section(
     'layout_onecol', // Layout plugin ID
     [], // Layout settings (empty for default)
-    [$hero_component, $featured_component, $categories_component] // Components array
+    [$hero_component, $featured_component, $categories_component, $community_component] // Components array
   );
 
   // Set the layout on the node
