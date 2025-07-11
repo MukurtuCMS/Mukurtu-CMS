@@ -6,9 +6,9 @@ dependencies:
     - media.type.audio
     - media.type.document
     - media.type.external_embed
-    - media.type.soundcloud
     - media.type.image
     - media.type.remote_video
+    - media.type.soundcloud
     - media.type.video
     - node.type.page
 id: node.page.field_page_media_assets
