@@ -12,8 +12,6 @@ use Drupal\Core\Url;
 class MukurtuUserController extends ControllerBase {
   use StringTranslationTrait;
 
-  const LINKCLASS = 'mukurtu-toggle-user-approval';
-
   /**
    * Check if user can administer users.
    * @return \Drupal\Core\Access\AccessResultInterface
@@ -28,14 +26,9 @@ class MukurtuUserController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
-  protected function getSelector() {
-    return '.' . self::LINKCLASS . ' > a';
-  }
-
   public function approveAjax($uid) {
     // This is the user we want to approve (unblock).
     $user = \Drupal\user\Entity\User::load($uid);
-    $class = self::LINKCLASS;
     $content = [];
 
     $response = new AjaxResponse();
@@ -54,7 +47,7 @@ class MukurtuUserController extends ControllerBase {
           'class' => ['use-ajax'],
         ],
       ];
-      $response->addCommand(new ReplaceCommand($this->getSelector(), $content));
+      $response->addCommand(new ReplaceCommand('.links a', $content));
     }
 
     return $response;
@@ -81,7 +74,7 @@ class MukurtuUserController extends ControllerBase {
           'class' => ['use-ajax'],
         ],
       ];
-      $response->addCommand(new ReplaceCommand($this->getSelector(), $content));
+      $response->addCommand(new ReplaceCommand('.links a', $content));
     }
 
     return $response;
