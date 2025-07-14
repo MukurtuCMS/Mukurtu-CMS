@@ -56,7 +56,7 @@ class MukurtuUserController extends ControllerBase {
   }
 
   public function blockAjax($uid) {
-    // This is the user we want to approve (unblock).
+    // This is the user we want to block.
     $user = \Drupal\user\Entity\User::load($uid);
     $content = [];
 
