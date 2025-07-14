@@ -8,6 +8,7 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
+use Drupal\Core\Ajax\MessageCommand;
 
 class MukurtuUserController extends ControllerBase {
   use StringTranslationTrait;
@@ -48,6 +49,7 @@ class MukurtuUserController extends ControllerBase {
         ],
       ];
       $response->addCommand(new ReplaceCommand('.links a', $content));
+      $response->addCommand(new MessageCommand('User approved successfully.'));
     }
 
     return $response;
@@ -75,6 +77,7 @@ class MukurtuUserController extends ControllerBase {
         ],
       ];
       $response->addCommand(new ReplaceCommand('.links a', $content));
+      $response->addCommand(new MessageCommand('User blocked successfully.'));
     }
 
     return $response;
