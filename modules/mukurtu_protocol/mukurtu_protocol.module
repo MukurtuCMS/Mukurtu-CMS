@@ -18,6 +18,8 @@ use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\og\Og;
+use Drupal\Core\Access\AccessResult;
 
 /**
  * @file
@@ -569,15 +571,16 @@ function mukurtu_protocol_form_protocol_add_form_alter(&$form, FormStateInterfac
 
 /**
  * Implements hook_form_form_id_alter().
- *
- * Add validation handler to prevent users from being added to protocols without
- * adding them first to the protocol owning communities.
  */
-function mukurtu_protocol_form_og_membership_default_add_form_alter(&$form, FormStateInterface $form_state)
-{
-  // Only add the form validator if this form is in the protocol context.
+function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterface $form_state) {
+  // Make roles field required on og forms.
+  $form['roles']['widget']['#required'] = TRUE;
+
+  // Add validation to prevent users from being added to protocols without
+  // adding them first to the protocol owning communities.
   $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
   if ($group instanceof ProtocolInterface) {
+    // Only add the form validator if this form is in the protocol context.
     $form['#validate'][] = 'add_protocol_member_form_validate';
   }
 }

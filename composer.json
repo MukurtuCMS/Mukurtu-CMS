@@ -38,8 +38,10 @@
         "drupal/geofield": "^1.59",
         "drupal/geolocation": "*",
         "drupal/gin": "^4.0",
+        "drupal/gin_lb": "^2.0@beta",
         "drupal/gin_toolbar": "^2.0",
         "drupal/google_tag": "^2.0",
+        "drupal/layout_builder_restrictions": "^3.0",
         "drupal/leaflet": "^10.2",
         "drupal/media_entity_soundcloud": "^3.2",
         "drupal/message": "^1.5",
@@ -101,6 +103,9 @@
             },
             "drupal/media_entity_soundcloud": {
                 "Add support for secret URL embeds": "https://www.drupal.org/files/issues/2022-03-28/3272077-2.patch"
+            },
+            "drupal/og": {
+                "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
             }
         }
     }

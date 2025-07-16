@@ -114,6 +114,9 @@ class ProtocolCommunitySelection extends DefaultSelection {
         }
       }
     }
+    // This function doesn't handle if $communities is null.
+    // It'll build the query anyway and pass a null value for communities, which
+    // causes the query to crash the site.
 
     // Build a normal entity query to handle the matching.
     $configuration = $this->getConfiguration();
@@ -124,7 +127,9 @@ class ProtocolCommunitySelection extends DefaultSelection {
     $query->accessCheck(TRUE);
 
     // Restrict our results to communities with the required memberships.
-    $query->condition('id', $communities, 'IN');
+    if ($communities) {
+      $query->condition('id', $communities, 'IN');
+    }
 
     // If 'target_bundles' is NULL, all bundles are referenceable, no further
     // conditions are needed.
