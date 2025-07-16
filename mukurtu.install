@@ -10,6 +10,10 @@ use Drupal\block_content\Entity\BlockContent;
 use Drupal\user\Entity\Role;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
+use Drupal\layout_builder\Section;
+use Drupal\layout_builder\SectionComponent;
+use Drupal\Component\Uuid\Php;
 
 /**
  * Implements hook_install().
@@ -46,11 +50,7 @@ function mukurtu_install() {
 
   \Drupal::service('module_installer')->install(['gin_toolbar']);
 
-  // Set the homepage (system.site.yml is not owned by Mukurtu).
-  \Drupal::configFactory()
-    ->getEditable('system.site')
-    ->set('page.front', '/home')
-    ->save();
+  // Homepage will be set to the landing page node created below.
 
   // Set the homepage (system.site.yml is not owned by Mukurtu).
   \Drupal::configFactory()
@@ -58,72 +58,42 @@ function mukurtu_install() {
     ->set('use_admin_theme', TRUE)
     ->save();
 
-  // Add default blocks.
-  // Hero Image for the front page.
-  $block_content = BlockContent::create([
+  // Create block content for Layout Builder (no theme placement).
+  // Hero Image block content.
+  $hero_block_content = BlockContent::create([
     'type' => 'image_with_description',
     'info' => t('Mukurtu v4 Hero Image and Site Description'),
+    'body' => [
+      'value' => '<p>Welcome to our Mukurtu digital heritage site.</p>',
+      'format' => 'basic_html',
+    ],
     'region' => 'content',
     'weight' => 2,
     'theme' => 'mukurtu_v4',
   ]);
-  $block_content->save();
-  $block = Block::create([
-    'id' => 'mukurtu_v4_hero_image_and_site_description',
-    'settings' => [
-      'id' => 'block_content:' . $block_content->uuid(),
-      'label' => t('Mukurtu v4 Hero Image and Site Description'),
-      'label_display' => 0,
-      'provider' => 'block_content',
-      'status' => 1,
-    ],
-    'region' => 'content',
-    'plugin' => 'block_content:' . $block_content->uuid(),
-    'theme' => 'mukurtu_v4',
-  ]);
-  $block->save();
-  $block = Block::load('mukurtu_v4_hero_image_and_site_description');
-  $block->setRegion('content');
-  $visibility = $block->getVisibility();
-  $visibility['request_path']['pages'] = '<front>';
-  $block->setVisibilityConfig('request_path', $visibility['request_path']);
-  $block->setRegion('content');
-  $block->setStatus(TRUE);
-  $block->setWeight(-4);
-  $block->save();
+  // Initialize the image field to avoid issues
+  $hero_block_content->set('field_image', []);
+  $hero_block_content->save();
+  // Store UUID for Layout Builder reference
+  $hero_block_uuid = $hero_block_content->uuid();
 
-  // Featured Content for the front page.
-  $block_content = BlockContent::create([
+  // Featured Content block content.
+  $featured_block_content = BlockContent::create([
     'type' => 'featured_content',
     'info' => t('Mukurtu v4 Front Page Featured Content'),
+    'body' => [
+      'value' => '<p>Featured content will appear here.</p>',
+      'format' => 'basic_html',
+    ],
     'region' => 'content',
     'weight' => 3,
     'theme' => 'mukurtu_v4',
   ]);
-  $block_content->save();
-  $block = Block::create([
-    'id' => 'mukurtu_v4_front_page_featured_content',
-    'settings' => [
-      'id' => 'block_content:' . $block_content->uuid(),
-      'label' => t('Mukurtu v4 Featured Content'),
-      'label_display' => 1,
-      'provider' => 'block_content',
-      'status' => 1,
-    ],
-    'region' => 'content',
-    'plugin' => 'block_content:' . $block_content->uuid(),
-    'theme' => 'mukurtu_v4',
-  ]);
-  $block->save();
-  $block = Block::load('mukurtu_v4_front_page_featured_content');
-  $block->setRegion('content');
-  $visibility = $block->getVisibility();
-  $visibility['request_path']['pages'] = '<front>';
-  $block->setVisibilityConfig('request_path', $visibility['request_path']);
-  $block->setRegion('content');
-  $block->setStatus(TRUE);
-  $block->setWeight(-3);
-  $block->save();
+  // Initialize the featured content field to avoid issues
+  $featured_block_content->set('field_featured_content', []);
+  $featured_block_content->save();
+  // Store UUID for Layout Builder reference
+  $featured_block_uuid = $featured_block_content->uuid();
 
   // Language switcher.
   $block = Block::create([
@@ -186,6 +156,90 @@ function mukurtu_install() {
   $block->setStatus(TRUE);
   $block->setWeight(0);
   $block->save();
+
+  // Create default landing page and set it as homepage.
+  $homepage_node = Node::create([
+    'type' => 'landing_page', // Use basic page temporarily to test access
+    'title' => 'Mukurtu Homepage',
+    'status' => TRUE, // Explicitly set as published
+    'promote' => FALSE,
+    'sticky' => FALSE,
+    'uid' => 1,
+  ]);
+  $homepage_node->save();
+
+  // Add existing blocks to Layout Builder.
+  $uuid_generator = new Php();
+
+  // Create section components for the existing blocks
+  $hero_component = new SectionComponent(
+    $uuid_generator->generate(), // UUID for this component
+    'content', // Region name (layout_onecol has 'content' region)
+    [
+      'id' => 'block_content:' . $hero_block_uuid, // Reference to the block content
+      'label' => 'Mukurtu v4 Hero Image and Site Description',
+      'label_display' => 1, // Display the title
+      'provider' => 'block_content',
+    ]
+  );
+  $hero_component->setWeight(0); // First block
+
+  $featured_component = new SectionComponent(
+    $uuid_generator->generate(),
+    'content',
+    [
+      'id' => 'block_content:' . $featured_block_uuid,
+      'label' => 'Mukurtu v4 Featured Content',
+      'label_display' => 1,
+      'provider' => 'block_content',
+    ]
+  );
+  $featured_component->setWeight(1); // Second block
+
+  $categories_component = new SectionComponent(
+    $uuid_generator->generate(),
+    'content',
+    [
+      'id' => 'views_block:mukurtu_categories-browse_by_category_block',
+      'label' => 'Browse by Category',
+      'label_display' => 1,
+      'provider' => 'views',
+      'views_label' => '',
+      'items_per_page' => 'none',
+    ]
+  );
+  $categories_component->setWeight(2); // Third block
+
+  $community_component = new SectionComponent(
+    $uuid_generator->generate(),
+    'content',
+    [
+      'id' => 'views_block:browse_by_community-community_browse_block',
+      'label' => 'Browse by Community',
+      'label_display' => 1,
+      'provider' => 'views',
+      'views_label' => '',
+      'items_per_page' => 'none',
+    ]
+  );
+  $community_component->setWeight(3); // Fourth block
+
+  // Create a section using single column layout
+  $section = new Section(
+    'layout_onecol', // Layout plugin ID
+    [], // Layout settings (empty for default)
+    [$hero_component, $featured_component, $categories_component, $community_component] // Components array
+  );
+
+  // Set the layout on the node
+  $homepage_node->set('layout_builder__layout', [$section]);
+  $homepage_node->save();
+
+  // Set the homepage to the new landing page node (system.site.yml is not owned by Mukurtu).
+  \Drupal::configFactory()
+    ->getEditable('system.site')
+    ->set('page.front', '/node/' . $homepage_node->id())
+    ->save();
 
   // Create Communities menu item.
   MenuLinkContent::create([

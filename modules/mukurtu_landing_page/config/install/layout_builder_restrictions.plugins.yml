@@ -1,0 +1,4 @@
+plugin_config:
+  entity_view_mode_restriction:
+    enabled: true
+    weight: 1
