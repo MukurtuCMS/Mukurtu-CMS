@@ -1,0 +1,90 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.landing_page.layout_builder__layout
+    - node.type.landing_page
+  module:
+    - layout_builder
+    - layout_builder_restrictions
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: true
+    allow_custom: true
+  layout_builder_restrictions:
+    allowed_block_categories:
+      - 'Chaos Tools'
+      - 'Config Pages'
+      - 'Content fields'
+      - Custom
+      - 'Custom block types'
+      - 'Custom blocks'
+      - Devel
+      - Facets
+      - Forms
+      - Help
+      - 'Inline blocks'
+      - 'Lists (Views)'
+      - Menus
+      - 'Organic Groups'
+      - Subscriptions
+      - System
+      - User
+      - Views
+      - core
+    entity_view_mode_restriction:
+      allowed_layouts:
+        - layout_onecol
+      denylisted_blocks: {  }
+      allowlisted_blocks:
+        'Custom block types':
+          - basic
+          - featured_content
+          - image_with_description
+        'Lists (Views)':
+          - 'views_block:browse_by_community-community_browse_block'
+          - 'views_block:mukurtu_browse_by_map-map_block'
+          - 'views_block:mukurtu_categories-browse_by_category_block'
+      restricted_categories:
+        - 'Chaos Tools'
+        - 'Config Pages'
+        - 'Content fields'
+        - Custom
+        - Devel
+        - Facets
+        - Forms
+        - Help
+        - 'Inline blocks'
+        - Menus
+        - 'Organic Groups'
+        - Subscriptions
+        - System
+        - User
+        - Views
+        - core
+id: node.landing_page.default
+targetEntityType: node
+bundle: landing_page
+mode: default
+content: {  }
+hidden:
+  draft: true
+  field_all_related_content: true
+  field_citation: true
+  field_communities: true
+  field_cultural_protocols: true
+  field_in_collection: true
+  field_multipage_page_of: true
+  field_representative_media: true
+  field_title: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_og: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  layout_builder__layout: true
+  links: true
+  search_api_excerpt: true
