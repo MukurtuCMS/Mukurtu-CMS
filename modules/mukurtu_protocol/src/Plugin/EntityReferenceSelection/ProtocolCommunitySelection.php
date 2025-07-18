@@ -114,9 +114,6 @@ class ProtocolCommunitySelection extends DefaultSelection {
         }
       }
     }
-    // This function doesn't handle if $communities is null.
-    // It'll build the query anyway and pass a null value for communities, which
-    // causes the query to crash the site.
 
     // Build a normal entity query to handle the matching.
     $configuration = $this->getConfiguration();

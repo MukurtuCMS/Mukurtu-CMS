@@ -124,7 +124,9 @@ class ProtocolSelection extends DefaultSelection {
     $query->accessCheck(TRUE);
 
     // Restrict our results to protocols with the required memberships.
-    $query->condition('id', $protocols, 'IN');
+    if ($protocols) {
+      $query->condition('id', $protocols, 'IN');
+    }
 
     // If 'target_bundles' is NULL, all bundles are referenceable, no further
     // conditions are needed.
