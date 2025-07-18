@@ -590,7 +590,7 @@ h6,
   font-size: var(--font-size-l);
 }
 
-button,
+button:not(.admin-toolbar *),
 input[type=button],
 input[type=submit],
 input[type=reset],
@@ -605,7 +605,7 @@ input[type=reset],
   padding-inline: var(--v-space-2xs);
   cursor: pointer;
 }
-button:hover, button:active, button:focus,
+button:not(.admin-toolbar *):hover, button:not(.admin-toolbar *):active, button:not(.admin-toolbar *):focus,
 input[type=button]:hover,
 input[type=button]:active,
 input[type=button]:focus,
@@ -621,14 +621,14 @@ input[type=reset]:focus,
   color: var(--light-text-color);
   background: var(--brand-primary-accent);
 }
-button:focus,
+button:not(.admin-toolbar *):focus,
 input[type=button]:focus,
 input[type=submit]:focus,
 input[type=reset]:focus,
 .button:focus {
   outline: 2px solid var(--focus-color);
 }
-button:disabled,
+button:not(.admin-toolbar *):disabled,
 input[type=button]:disabled,
 input[type=submit]:disabled,
 input[type=reset]:disabled,

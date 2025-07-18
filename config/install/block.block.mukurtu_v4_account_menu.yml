@@ -5,6 +5,7 @@ dependencies:
     - system.menu.account
   module:
     - system
+    - user
   theme:
     - mukurtu_v4
 id: mukurtu_v4_account_menu
@@ -21,4 +22,11 @@ settings:
   level: 1
   depth: 1
   expand_all_items: false
-visibility: {  }
+visibility:
+  user_role:
+    id: user_role
+    negate: false
+    context_mapping:
+      user: '@user.current_user_context:current_user'
+    roles:
+      anonymous: anonymous

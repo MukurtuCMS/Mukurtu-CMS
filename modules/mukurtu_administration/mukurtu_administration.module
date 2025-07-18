@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Mukurtu Administration module.
+ */
+
+/**
+ * Implements hook_page_attachments().
+ */
+function mukurtu_administration_page_attachments(array &$attachments) {
+  // Check if user is logged in.
+  if (\Drupal::currentUser()->isAuthenticated()) {
+    // Check if navigation module toolbar is present.
+    $moduleHandler = \Drupal::service('module_handler');
+    if ($moduleHandler->moduleExists('navigation')) {
+      // Attach the navigation library.
+      $attachments['#attached']['library'][] = 'mukurtu_administration/navigation';
+    }
+  }
+}

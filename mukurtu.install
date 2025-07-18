@@ -329,6 +329,7 @@ function mukurtu_install() {
     'access mukurtu_content_browser entity browser pages',
     'access mukurtu_taxonomy_record_term_browser entity browser pages',
     'access multipage_item_entity_browser entity browser pages',
+    'access navigation',
     'add personal collection entities',
     'add protocol control entities',
     'delete personal collection entities',

@@ -1,0 +1,9 @@
+[class*="toolbar-button--icon"]:not([class~="toolbar-button--icon--user"])::before {
+    background-image: url(../images/fallback-link.svg) !important;
+    background-size: contain !important;
+    color: transparent !important;
+}
+
+.admin-toolbar__logo {
+    border-radius: 0 !important;
+}
