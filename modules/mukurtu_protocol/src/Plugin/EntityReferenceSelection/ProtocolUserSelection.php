@@ -52,7 +52,9 @@ class ProtocolUserSelection extends OgUserSelection {
           }
 
           // Add to the OR condition.
-          $inCommunity->condition('uid', $communityMembers, 'IN');
+          if ($communityMembers) {
+            $inCommunity->condition('uid', $communityMembers, 'IN');
+          }
         }
 
         // Attach the entire OR condition.
