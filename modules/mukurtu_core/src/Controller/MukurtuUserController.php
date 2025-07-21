@@ -8,11 +8,10 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
+use Drupal\Core\Ajax\MessageCommand;
 
 class MukurtuUserController extends ControllerBase {
   use StringTranslationTrait;
-
-  const LINKCLASS = 'mukurtu-toggle-user-approval';
 
   /**
    * Check if user can administer users.
@@ -28,14 +27,9 @@ class MukurtuUserController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
-  protected function getSelector() {
-    return '.' . self::LINKCLASS . ' > a';
-  }
-
   public function approveAjax($uid) {
     // This is the user we want to approve (unblock).
     $user = \Drupal\user\Entity\User::load($uid);
-    $class = self::LINKCLASS;
     $content = [];
 
     $response = new AjaxResponse();
@@ -54,14 +48,15 @@ class MukurtuUserController extends ControllerBase {
           'class' => ['use-ajax'],
         ],
       ];
-      $response->addCommand(new ReplaceCommand($this->getSelector(), $content));
+      $response->addCommand(new ReplaceCommand('.links a', $content));
+      $response->addCommand(new MessageCommand('User approved successfully.'));
     }
 
     return $response;
   }
 
   public function blockAjax($uid) {
-    // This is the user we want to approve (unblock).
+    // This is the user we want to block.
     $user = \Drupal\user\Entity\User::load($uid);
     $content = [];
 
@@ -81,7 +76,8 @@ class MukurtuUserController extends ControllerBase {
           'class' => ['use-ajax'],
         ],
       ];
-      $response->addCommand(new ReplaceCommand($this->getSelector(), $content));
+      $response->addCommand(new ReplaceCommand('.links a', $content));
+      $response->addCommand(new MessageCommand('User blocked successfully.'));
     }
 
     return $response;

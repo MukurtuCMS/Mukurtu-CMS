@@ -41,7 +41,7 @@ install:
   - views
   - views_ui
   - automated_cron
-  - google_analytics
+  - google_tag
   - twig_tweak
   - facets_reset_button
   - term_merge
@@ -66,7 +66,6 @@ dependencies:
   - 'drupal:help'
   - 'drupal:image'
   - 'drupal:language'
-  - 'drupal:layout_builder'
   - 'drupal:media'
   - 'drupal:media_library'
   - 'drupal:node'
@@ -87,7 +86,6 @@ dependencies:
   - 'field_group:field_group'
   - 'flag:flag'
   - 'geofield:geofield'
-  - 'google_analytics:google_analytics'
   - 'leaflet:leaflet'
   - 'leaflet:leaflet_views'
   - 'message:message'
@@ -106,6 +104,7 @@ dependencies:
   - 'mukurtu_export:mukurtu_export'
   - 'mukurtu_footer:mukurtu_footer'
   - 'mukurtu_import:mukurtu_import'
+  - 'mukurtu_landing_page:mukurtu_landing_page'
   - 'mukurtu_local_contexts:mukurtu_local_contexts'
   - 'mukurtu_media:mukurtu_media'
   - 'mukurtu_migrate:mukurtu_migrate'

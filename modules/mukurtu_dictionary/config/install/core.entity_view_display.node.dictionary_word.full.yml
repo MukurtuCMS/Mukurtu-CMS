@@ -1,7 +1,9 @@
+uuid: cc80c814-a156-4537-822d-9d7753518653
 langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_display.comment.comment.default
     - core.entity_view_mode.node.full
     - field.field.node.dictionary_word.comment
     - node.type.dictionary_word
@@ -148,6 +150,15 @@ targetEntityType: node
 bundle: dictionary_word
 mode: full
 content:
+  comment:
+    type: mukurtu_comment_default
+    label: above
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_additional_word_entries:
     type: entity_reference_revisions_entity_view
     label: hidden
@@ -458,7 +469,6 @@ content:
     weight: 6
     region: content
 hidden:
-  comment: true
   draft: true
   field_all_related_content: true
   field_content_type: true
