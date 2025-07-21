@@ -312,11 +312,11 @@ class CommunityAddForm extends EntityForm {
       '#type' => 'submit',
       '#value' => $this
         ->t('Save community'),
-      '#description' => $this->t('After saving this community, you will be directed to create a protocol within this community.'),
       '#submit' => [
         '::submitForm',
         '::save',
       ],
+      '#description' => $this->t('After saving this community, you will be directed to create a protocol within this community.'),
     ];
     return $actions;
   }
