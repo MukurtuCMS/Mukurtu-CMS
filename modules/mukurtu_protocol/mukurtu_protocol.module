@@ -320,6 +320,18 @@ function mukurtu_protocol_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setDisplayConfigurable('view', TRUE);
   }
 
+  if ($entity_type->id() == 'protocol') {
+    $fields['field_members_list'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('field_members_list')
+      ->setLabel(t('Members'))
+      ->setDescription(t('Members of this cultural protocol.'))
+      ->setComputed(TRUE)
+      ->setClass('Drupal\mukurtu_protocol\Plugin\Field\MembersFieldItemsList')
+      ->setSetting('target_type', 'user')
+      ->setCardinality(-1)
+      ->setDisplayConfigurable('view', TRUE);
+  }
+
   /**
    * Override the default OG user handler with mukurtu_user_selection.
    */
