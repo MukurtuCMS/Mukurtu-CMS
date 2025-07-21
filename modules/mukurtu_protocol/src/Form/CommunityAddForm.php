@@ -311,7 +311,7 @@ class CommunityAddForm extends EntityForm {
     $actions['submit'] = [
       '#type' => 'submit',
       '#value' => $this
-        ->t('Create Community'),
+        ->t('Save community and create a cultural protocol'),
       '#submit' => [
         '::submitForm',
         '::save',
