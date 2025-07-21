@@ -108,7 +108,7 @@ class CommunityAddForm extends EntityForm {
     // Community Managers.
     $form['community_manager_item'] = [
       '#type' => 'item',
-      '#title' => $this->t('Community Managers'),
+      '#title' => $this->t('Community managers'),
       '#description' => $this->t('Helper text about community managers.'),
       '#weight' => 9000,
     ];
@@ -140,7 +140,7 @@ class CommunityAddForm extends EntityForm {
     // Community Members.
     $form['community_member_item'] = [
       '#type' => 'item',
-      '#title' => $this->t('Community Members'),
+      '#title' => $this->t('Community members'),
       '#description' => $this->t('Helper text about community members.'),
       '#weight' => 9002,
     ];
@@ -167,7 +167,7 @@ class CommunityAddForm extends EntityForm {
     // Community Affiliates.
     $form['community_affiliate_item'] = [
       '#type' => 'item',
-      '#title' => $this->t('Community Affiliates'),
+      '#title' => $this->t('Community affiliates'),
       '#description' => $this->t('Helper text about community affiliates.'),
       '#weight' => 9004,
     ];
@@ -194,7 +194,7 @@ class CommunityAddForm extends EntityForm {
     // Membership list display setting.
     $form['field_membership_display'] = [
       '#type' => 'radios',
-      '#title' => $this->t('Membership Display'),
+      '#title' => $this->t('Membership display'),
       '#description' => $this->t('TODO: membership display helper text'),
       '#options' => [
         'none' => $this->t('None: Do not display'),
@@ -311,7 +311,8 @@ class CommunityAddForm extends EntityForm {
     $actions['submit'] = [
       '#type' => 'submit',
       '#value' => $this
-        ->t('Save community and create a cultural protocol'),
+        ->t('Save community'),
+      '#description' => $this->t('After saving this community, you will be directed to create a protocol within this community.'),
       '#submit' => [
         '::submitForm',
         '::save',
