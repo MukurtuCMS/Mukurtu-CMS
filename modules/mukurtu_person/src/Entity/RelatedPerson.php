@@ -11,7 +11,7 @@ class RelatedPerson extends Paragraph {
     $definitions = [];
     $definitions['field_related_person'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Person'))
-      ->setDescription(t(''))
+      ->setDescription(t('Select a related person record.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',

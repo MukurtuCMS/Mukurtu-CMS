@@ -133,7 +133,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_related_people'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Related People'))
-      ->setDescription(t('Select a related person record.'))
+      ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
