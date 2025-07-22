@@ -1231,6 +1231,31 @@ details.form-wrapper summary + div {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }
 }
+.local-tasks:not(.glb-body .local-tasks) a {
+  color: var(--brand-primary);
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--text-bold);
+  text-decoration: none;
+  padding: var(--v-space-5xs);
+  border: 1px solid var(--brand-primary);
+  background-color: var(--color-white);
+  -webkit-transition: background-color 0.12s ease-in;
+  transition: background-color 0.12s ease-in;
+}
+.local-tasks:not(.glb-body .local-tasks) a:hover, .local-tasks:not(.glb-body .local-tasks) a:active, .local-tasks:not(.glb-body .local-tasks) a:focus {
+  background-color: var(--brand-primary);
+  color: var(--color-white);
+}
+.local-tasks:not(.glb-body .local-tasks) a.is-active {
+  background: var(--brand-light);
+  font-weight: var(--text-bold);
+  border: 1px solid var(--brand-light);
+}
+.local-tasks:not(.glb-body .local-tasks) a.is-active:hover, .local-tasks:not(.glb-body .local-tasks) a.is-active:active, .local-tasks:not(.glb-body .local-tasks) a.is-active:focus {
+  background-color: var(--brand-primary);
+  color: var(--color-white);
+}
 .local-tasks ul {
   -webkit-padding-start: 0;
           padding-inline-start: 0;
@@ -1246,31 +1271,6 @@ details.form-wrapper summary + div {
           margin-inline-end: var(--v-space-6xs);
   list-style-type: none;
   display: inline-block;
-}
-.local-tasks a {
-  color: var(--brand-primary);
-  font-family: var(--font-display-face);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--text-bold);
-  text-decoration: none;
-  padding: var(--v-space-5xs);
-  border: 1px solid var(--brand-primary);
-  background-color: var(--color-white);
-  -webkit-transition: background-color 0.12s ease-in;
-  transition: background-color 0.12s ease-in;
-}
-.local-tasks a:hover, .local-tasks a:active, .local-tasks a:focus {
-  background-color: var(--brand-primary);
-  color: var(--color-white);
-}
-.local-tasks a.is-active {
-  background: var(--brand-light);
-  font-weight: var(--text-bold);
-  border: 1px solid var(--brand-light);
-}
-.local-tasks a.is-active:hover, .local-tasks a.is-active:active, .local-tasks a.is-active:focus {
-  background-color: var(--brand-primary);
-  color: var(--color-white);
 }
 
 .local-actions {
@@ -4310,6 +4310,70 @@ header {
           padding-block-end: 0;
   -webkit-border-after: none;
           border-block-end: none;
+}
+
+/* @file
+ * Styles for the landing page template.
+ */
+/* Make layout builder look closer to Gin */
+.glb-body {
+  background-color: var(--gin-bg-app);
+}
+.glb-body .layout-builder {
+  background-color: var(--color-white);
+}
+.glb-body .layout-container .page__title {
+  text-align: start;
+  padding: 0;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+.glb-body h1 {
+  font-size: var(--gin-font-size-h1);
+  font-weight: var(--gin-font-weight-bold);
+  line-height: normal;
+  letter-spacing: -0.05em;
+  color: var(--gin-color-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-padding-end: 0.25em;
+          padding-inline-end: 0.25em;
+  max-inline-size: 90%;
+  -webkit-transition: font-size 0.25s ease;
+  transition: font-size 0.25s ease;
+}
+.glb-body h1__language {
+  display: block;
+  font-size: var(--gin-font-size-xs);
+  font-weight: var(--gin-font-weight-normal);
+  letter-spacing: normal;
+  color: var(--gin-color-text);
+}
+.glb-body h1--is-translation + .shortcut-action .shortcut-action__icon {
+  inset-block-start: -3px;
+}
+.glb-body .local-tasks li {
+  -webkit-margin-end: 0;
+          margin-inline-end: 0;
+}
+.glb-body .local-tasks a {
+  font-size: var(--gin-font-size);
+  padding-block: calc(var(--gin-spacing-xs) - 2px);
+  padding-inline: var(--gin-spacing-s);
+  -webkit-margin-end: 0.25em;
+          margin-inline-end: 0.25em;
+  min-block-size: 2rem;
+  border-radius: 2rem;
+  color: var(--gin-color-text);
+  text-decoration: none;
+  font-weight: var(--gin-font-weight-semibold);
+}
+.glb-body .local-tasks a:hover, .glb-body .local-tasks a:active, .glb-body .local-tasks a:focus, .glb-body .local-tasks a.is-active {
+  background: var(--gin-bg-item-hover);
+  color: var(--gin-color-primary-hover);
 }
 
 .layout-container main {
