@@ -67,7 +67,6 @@
         "drupal/views_bulk_operations": "*",
         "drush/drush": "^13",
         "mukurtu/colorbox": "*",
-        "mukurtu/masonry": "*",
         "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
