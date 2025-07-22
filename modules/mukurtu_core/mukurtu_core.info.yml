@@ -28,6 +28,7 @@ dependencies:
   - 'drupal:user'
   - 'drupal:views'
   - 'entity_browser:entity_browser'
+  - 'extlink:extlink'
   - 'flag:flag'
   - 'geofield:geofield'
   - 'media_entity_soundcloud:media_entity_soundcloud'

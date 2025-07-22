@@ -35,7 +35,7 @@ content:
     weight: 2
     region: content
     settings:
-      media_types: 
+      media_types:
         - audio
         - document
         - external_embed
