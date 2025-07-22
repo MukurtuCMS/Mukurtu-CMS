@@ -15,7 +15,7 @@
  * @ingroup themeable
  */
 #}
-
+{{ dump() }}
 <{{ wrapper_element }} {{ attributes }}>
 {% if title %}
   <{{ title_element }}{{ title_attributes }}>{{ title }}</{{ title_element }}>
@@ -34,16 +34,19 @@
       </div>
     </div>
   </div>
-  <div class="callout">
-    <div class="field__label">{{ 'Local context'|t }}</div>
-    <div class="field__items">
-      <div class="field__item">
-        <a href="/admin/protocols/{{ protocol_id }}/local-contexts/projects">
-          {{ 'Project directory for '|t ~ protocol_name }}
-        </a>
+  {% if has_lc_projects %}
+    <div class="callout">
+      <div class="field__label">{{ 'Local context'|t }}</div>
+      <div class="field__items">
+        <div class="field__item">
+          <a href="/admin/protocols/{{ protocol_id }}/local-contexts/projects">
+            {{ 'Project directory for '|t ~ protocol_name }}
+          </a>
+        </div>
       </div>
     </div>
-  </div>
+  {% endif %}
+
   {% if collapsible %}
 </div>
 {% endif %}
