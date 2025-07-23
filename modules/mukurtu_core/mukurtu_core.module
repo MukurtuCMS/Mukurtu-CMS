@@ -312,7 +312,9 @@ function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityVi
  */
 function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   // Build an "approve" link to block/unblock users.
-  if ($view_mode == 'full') {
+  // However, do not display link for users who view their own account page!
+  // We don't want users blocking or approving themselves.
+  if ($view_mode == 'full' && \Drupal::currentUser()->id() != $entity->id()) {
     $status = $entity->status->value;
     $title = $status ? t('Block User') : t('Approve User');
     $route = $status ? 'mukurtu_core.block_user' : 'mukurtu_core.approve_user';
