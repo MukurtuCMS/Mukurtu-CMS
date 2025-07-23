@@ -698,6 +698,26 @@ figure.align-right,
   background-color: var(--color-white);
 }
 
+svg.ext,
+svg.mailto,
+svg.tel {
+  inline-size: 1.25rem;
+  block-size: 1rem;
+  fill: var(--brand-primary-dark);
+}
+
+a:not(.primary-nav__menu-link) svg.ext path,
+a:not(.primary-nav__menu-link) svg.mailto path,
+a:not(.primary-nav__menu-link) svg.tel path {
+  stroke: var(--brand-primary-dark);
+}
+
+.mukurtu-footer a svg.ext path,
+.mukurtu-footer a svg.mailto path,
+.mukurtu-footer a svg.tel path {
+  stroke: var(--footer-text-color);
+}
+
 .js-form-type-select,
 .select-wrapper {
   position: relative;
@@ -4255,15 +4275,16 @@ header {
 .full-node__sidebar .sidebar-section .field--name-field-creative-commons a {
   display: block;
 }
-.full-node__sidebar .sidebar-section .field--name-field-creative-commons span {
+.full-node__sidebar .sidebar-section .field--name-field-creative-commons img {
+  max-inline-size: var(--v-space-2xs);
+}
+.full-node__sidebar .sidebar-section .field--name-field-creative-commons .license-logos {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   gap: var(--v-space-6xs);
-  margin-block: var(--v-space-4xxs);
-}
-.full-node__sidebar .sidebar-section .field--name-field-creative-commons img {
-  max-inline-size: var(--v-space-2xs);
+  -webkit-margin-before: var(--v-space-4xxs);
+          margin-block-start: var(--v-space-4xxs);
 }
 .full-node__sidebar .sidebar-section .field--name-field-rights-statements img {
   display: inline-block;

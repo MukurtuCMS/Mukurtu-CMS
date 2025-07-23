@@ -29,6 +29,7 @@
         "drupal/entity_browser": "*",
         "drupal/entity_embed": "*",
         "drupal/entity_reference_revisions": "*",
+        "drupal/extlink": "^2.0",
         "drupal/facets": "^3.0",
         "drupal/facets_reset_button": "^1.0",
         "drupal/features": "^3.14",
@@ -67,7 +68,6 @@
         "drupal/views_bulk_operations": "*",
         "drush/drush": "^13",
         "mukurtu/colorbox": "*",
-        "mukurtu/masonry": "*",
         "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
