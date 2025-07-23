@@ -789,21 +789,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
           'all' => 'Display all members',
         ],
       ])
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'list_default',
-        'weight' => 10,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'options_buttons',
-        'weight' => 10,
-      ])
       ->setDefaultValue('none')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('view', FALSE)
       ->setDisplayConfigurable('form', TRUE);
 
     return $fields;

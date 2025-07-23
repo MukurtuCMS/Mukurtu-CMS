@@ -32,6 +32,7 @@ third_party_settings:
       children:
         - og_group
         - field_communities
+        - field_members_list
       label: 'Protocol Sidebar'
       parent_name: ''
       region: content
@@ -87,6 +88,14 @@ content:
     third_party_settings: {  }
     weight: 4
     region: content
+  field_members_list:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 7
+    region: content
   name:
     type: string
     label: hidden
@@ -104,6 +113,8 @@ content:
     region: content
 hidden:
   field_access_mode: true
+  field_comment_require_approval: true
+  field_comment_status: true
   langcode: true
   search_api_excerpt: true
   user_id: true
