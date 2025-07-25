@@ -330,6 +330,7 @@ class CommunityAddForm extends EntityForm {
     $entity->setDescription($form_state->getValue('field_description'));
     $entity->setSharingSetting($form_state->getValue('field_access_mode'));
     $entity->setCommunityType($form_state->getValue('field_community_type'));
+    $entity->setMembershipDisplay($form_state->getValue('field_membership_display'));
 
     // Grab the memberships.
     foreach (['community_manager', 'community_member', 'community_affiliate'] as $role) {

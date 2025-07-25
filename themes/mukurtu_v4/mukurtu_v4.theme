@@ -229,6 +229,8 @@ function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar
   $community = $route_match->getParameter('community');
   $variables['community_name'] = $community->get('name')->value;
   $variables['community_id'] = $community->get('id')->value;
+  $localContextsProjectManager = new LocalContextsSupportedProjectManager();
+  $variables['has_lc_projects'] = $localContextsProjectManager->getGroupSupportedProjects($community) ? TRUE : FALSE;
 }
 
 /**

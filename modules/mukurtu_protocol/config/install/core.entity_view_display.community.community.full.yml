@@ -42,6 +42,7 @@ third_party_settings:
         - field_protocols
         - field_parent_community
         - field_child_communities
+        - field_community_type
       label: 'Community Sidebar'
       parent_name: ''
       region: content
@@ -88,6 +89,14 @@ content:
       link: true
     third_party_settings: {  }
     weight: 8
+    region: content
+  field_community_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 9
     region: content
   field_description:
     type: text_default
@@ -149,8 +158,6 @@ content:
     region: content
 hidden:
   field_access_mode: true
-  field_community_type: true
-  field_membership_display: true
   field_thumbnail_image: true
   langcode: true
   search_api_excerpt: true
