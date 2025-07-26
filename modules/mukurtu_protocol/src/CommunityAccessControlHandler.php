@@ -28,7 +28,7 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
         if (!$entity->isPublished()) {
           return AccessResult::allowedIfHasPermission($account, 'view unpublished community entities');
         }
-
+        
         // If field_access_mode is "public", anyone can view.
         if ($entity->getSharingSetting() == 'public') {
           return AccessResult::allowedIfHasPermission($account, 'view published community entities');
