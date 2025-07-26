@@ -18,6 +18,7 @@ use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\Og;
 
 /**
  * @file
@@ -171,6 +172,38 @@ function mukurtu_protocol_system_breadcrumb_alter(Breadcrumb &$breadcrumb, Route
         $breadcrumb->addLink(\Drupal\Core\Link::createFromRoute($sub->getName(), 'entity.community.canonical', ['community' => $sub->id()]));
       }
     }
+  }
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Core\Cache\RefinableCacheableDependencyInterface &$cacheability)
+{
+  // On community and protocol pages, only show devel and revisions local tasks
+  // buttons for uid 1.
+  if (\Drupal::currentUser()->id() != 1) {
+    unset($data['tabs'][0]['devel.entities:community.devel_tab']);
+    unset($data['tabs'][0]['devel.entities:protocol.devel_tab']);
+
+    // Right now, there are two Revisions local tasks showing up on all entity
+    // pages. Eventually, local task 'entity.node.version_history' will be
+    // replaced by 'entity.version_history:node.version_history' after
+    // https://www.drupal.org/project/drupal/issues/3153559, but that has been
+    // postponed as of 07-26-2024, hence why two Revisions buttons show up.
+
+    // @todo Remove calls to 'entity.node.version_history' once the Drupal issue
+    // mentioned above has been resolved.
+    unset($data['tabs'][0]['entity.community.version_history']);
+    unset($data['tabs'][0]['entity.version_history:community.version_history']);
+
+    unset($data['tabs'][0]['entity.protocol.version_history']);
+    unset($data['tabs'][0]['entity.version_history:protocol.version_history']);
+  }
+  else {
+    // Remove the duplicate Revisions local task on communities and protocols.
+    unset($data['tabs'][0]['entity.protocol.version_history']);
+    unset($data['tabs'][0]['entity.community.version_history']);
   }
 }
 
