@@ -18,7 +18,7 @@ use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\Og;
+use Drupal\og\Og;
 
 /**
  * @file
@@ -182,29 +182,79 @@ function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Co
 {
   // On community and protocol pages, only show devel and revisions local tasks
   // buttons for uid 1.
-  if (\Drupal::currentUser()->id() != 1) {
-    unset($data['tabs'][0]['devel.entities:community.devel_tab']);
-    unset($data['tabs'][0]['devel.entities:protocol.devel_tab']);
+  if ($route_name == 'entity.community.canonical' || $route_name == 'entity.protocol.canonical') {
+    if (\Drupal::currentUser()->id() != 1) {
+      unset($data['tabs'][0]['devel.entities:community.devel_tab']);
+      unset($data['tabs'][0]['devel.entities:protocol.devel_tab']);
 
-    // Right now, there are two Revisions local tasks showing up on all entity
-    // pages. Eventually, local task 'entity.node.version_history' will be
-    // replaced by 'entity.version_history:node.version_history' after
-    // https://www.drupal.org/project/drupal/issues/3153559, but that has been
-    // postponed as of 07-26-2024, hence why two Revisions buttons show up.
+      // Right now, there are two Revisions local task buttons showing up on
+      // community and protocol pages. Eventually, local task
+      // 'entity.node.version_history' will be replaced by
+      // 'entity.version_history:node.version_history' after
+      // https://www.drupal.org/project/drupal/issues/3153559, but that has been
+      // postponed as of 07-26-2024, hence why two Revisions buttons show up.
+      // (@see node.module)
 
-    // @todo Remove calls to 'entity.node.version_history' once the Drupal issue
-    // mentioned above has been resolved.
-    unset($data['tabs'][0]['entity.community.version_history']);
-    unset($data['tabs'][0]['entity.version_history:community.version_history']);
+      // @todo Remove calls to 'entity.node.version_history' once the Drupal
+      // issue mentioned above has been resolved.
+      unset($data['tabs'][0]['entity.community.version_history']);
+      unset($data['tabs'][0]['entity.version_history:community.version_history']);
 
-    unset($data['tabs'][0]['entity.protocol.version_history']);
-    unset($data['tabs'][0]['entity.version_history:protocol.version_history']);
+      unset($data['tabs'][0]['entity.protocol.version_history']);
+      unset($data['tabs'][0]['entity.version_history:protocol.version_history']);
+    } else {
+      // Remove the duplicate Revisions local task on communities and protocols.
+      unset($data['tabs'][0]['entity.protocol.version_history']);
+      unset($data['tabs'][0]['entity.community.version_history']);
+    }
   }
-  else {
-    // Remove the duplicate Revisions local task on communities and protocols.
-    unset($data['tabs'][0]['entity.protocol.version_history']);
-    unset($data['tabs'][0]['entity.community.version_history']);
+
+  if ($route_name == "entity.node.canonical") {
+    $route_match = \Drupal::routeMatch();
+    $currentUser = \Drupal::currentUser();
+    if ($currentUser->id() != 1) {
+      // Hide devel button for non uid 1.
+      unset($data['tabs'][0]['devel.entities:node.devel_tab']);
+
+      // Only show revisions button if current user has permission to edit the
+      // current node.
+
+      // By default, the revisions button is hidden. We perform checks on all
+      // the node's protocols to see if any of them grant the current user edit
+      // permissions on the node.
+
+      // If the current user is a member of at least one protocol granting edit
+      // access, the revisions button will show up for them.
+
+      // Save the contents of the revisions button just in case our calculations
+      // show that the current user has edit access.
+      $revisionsTab = $data['tabs'][0]['entity.node.version_history'];
+      unset($data['tabs'][0]['entity.node.version_history']);
+
+      $route_match = \Drupal::routeMatch();
+      $node = $route_match->getParameter('node');
+      $bundleType = $node->getType();
+      $editAny = 'edit any ' . $bundleType . ' content';
+      $editOwn = 'edit own ' . $bundleType . ' content';
+
+      /** @var \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $node */
+      $nodeProtocols = $node->getProtocolEntities();
+      $hasEditPermission = FALSE;
+      foreach ($nodeProtocols as $protocol) {
+        $membership = Og::getMembership($protocol, $currentUser);
+        if ($membership) {
+          if ($membership->hasPermission($editAny) || $membership->hasPermission($editOwn)) {
+            $hasEditPermission = TRUE;
+            break;
+          }
+        }
+      }
+      if ($hasEditPermission) {
+        $data['tabs'][0]['entity.node.version_history'] = $revisionsTab;
+      }
+    }
   }
+
 }
 
 /**
