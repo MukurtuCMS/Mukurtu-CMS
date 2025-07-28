@@ -355,6 +355,7 @@ function mukurtu_install() {
     'use text format basic_html',
     'view the administration theme',
     'view media',
+    'view all revisions',
     'view published community entities',
     'view published personal collection entities',
     'view published protocol control entities',
