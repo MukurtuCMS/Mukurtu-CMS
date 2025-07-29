@@ -5,31 +5,132 @@
   gap: var(--v-space-2xs);
   inline-size: 100%;
 
-  li {
-    list-style: none;
+  a svg.ext {
+    fill: var(--color-white);
 
-    a {
-      color: var(--light-text-color);
-      font-weight: var(--text-bold);
-      text-decoration: underline solid 2px var(--light-text-color);
-      transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+    path {
+      stroke: var(--color-white);
+    }
+  }
 
-      &:hover {
-        text-decoration-color: var(--color-transparent);
-        transition: text-decoration-color 0.12s ease-in;
+}
+
+.account-menu__menu-item {
+  position: relative;
+  list-style: none;
+
+  &.account-menu__menu-item--has-children {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-5xs);
+
+    .menu__account-submenu {
+      position: absolute;
+      inset-block-start: 100%;
+      inset-inline-start: 0;
+      min-inline-size: 200px;
+      background: var(--brand-primary-dark);
+      box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
+      visibility: hidden;
+      opacity: 0;
+      z-index: 1000;
+      padding: 0;
+      padding-inline-start: var(--v-space-3xs);
+
+      .account-menu__menu-item {
+        display: block;
       }
+    }
 
-      &:hover,
-      &:focus,
-      &:focus-visible,
-      &:active {
-        color: var(--brand-light-accent);
-      }
+    .account-menu__button-toggle[aria-expanded="true"] ~ .menu__account-submenu {
+      visibility: visible;
+      opacity: 1;
+    }
 
-      &:focus,
-      &:focus-visible,
-      &:active {
-        outline-color: var(--color-white);
+  }
+}
+
+.account-menu__button-toggle {
+  background: transparent;
+  padding: var(--v-space-6xs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 100%;
+  transition: all 0.12s ease-in;
+
+  &:hover,
+  &:focus {
+    background: transparent;
+  }
+
+  &:focus {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
+  }
+
+}
+
+.account-menu__toggle-icon {
+  inline-size: 12px;
+  block-size: 9px;
+  transition: transform 0.2s ease;
+  margin-block-start: 7px;
+
+  &::before {
+    content: '';
+    display: block;
+    inline-size: 0;
+    block-size: 0;
+    border-inline-start: 6px solid transparent;
+    border-inline-end: 6px solid transparent;
+    border-block-start: 6px solid currentcolor;
+  }
+}
+
+.account-menu__button-toggle[aria-expanded="true"] .account-menu__toggle-icon {
+  transform: rotate(180deg);
+}
+
+.account-menu__menu-link {
+  color: var(--light-text-color);
+  font-weight: var(--text-bold);
+  text-decoration: underline solid 2px var(--color-transparent);
+  text-underline-offset: 2px;
+  transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+
+  &:hover {
+    text-decoration-color: var(--light-text-color);
+    transition: text-decoration-color 0.12s ease-in;
+  }
+
+  &:hover,
+  &:focus,
+  &:focus-visible,
+  &:active {
+    color: var(--brand-light-accent);
+  }
+
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline-color: var(--color-white);
+  }
+
+  &.account-menu__menu-link--level-2 {
+    display: block;
+    padding-block: var(--v-space-6xs);
+
+    &::before {
+      content: '+';
+      margin-inline-end: var(--v-space-6xs);
+    }
+
+    &:hover,
+    &:focus {
+      &::before {
+        text-decoration: none;
       }
     }
   }

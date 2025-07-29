@@ -2276,27 +2276,133 @@ body.is-always-mobile-nav .header-nav::before {
   gap: var(--v-space-2xs);
   inline-size: 100%;
 }
-.menu__account-menu li {
+.menu__account-menu a svg.ext {
+  fill: var(--color-white);
+}
+.menu__account-menu a svg.ext path {
+  stroke: var(--color-white);
+}
+
+.account-menu__menu-item {
+  position: relative;
   list-style: none;
 }
-.menu__account-menu li a {
+.account-menu__menu-item.account-menu__menu-item--has-children {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-5xs);
+}
+.account-menu__menu-item.account-menu__menu-item--has-children .menu__account-submenu {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  min-inline-size: 200px;
+  background: var(--brand-primary-dark);
+  -webkit-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  visibility: hidden;
+  opacity: 0;
+  z-index: 1000;
+  padding: 0;
+  -webkit-padding-start: var(--v-space-3xs);
+          padding-inline-start: var(--v-space-3xs);
+}
+.account-menu__menu-item.account-menu__menu-item--has-children .menu__account-submenu .account-menu__menu-item {
+  display: block;
+}
+.account-menu__menu-item.account-menu__menu-item--has-children .account-menu__button-toggle[aria-expanded=true] ~ .menu__account-submenu {
+  visibility: visible;
+  opacity: 1;
+}
+
+.account-menu__button-toggle {
+  background: transparent;
+  padding: var(--v-space-6xs);
+  cursor: pointer;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  min-block-size: 100%;
+  -webkit-transition: all 0.12s ease-in;
+  transition: all 0.12s ease-in;
+}
+.account-menu__button-toggle:hover, .account-menu__button-toggle:focus {
+  background: transparent;
+}
+.account-menu__button-toggle:focus {
+  outline: 2px solid var(--color-white);
+  outline-offset: 2px;
+}
+
+.account-menu__toggle-icon {
+  inline-size: 12px;
+  block-size: 9px;
+  -webkit-transition: -webkit-transform 0.2s ease;
+  transition: -webkit-transform 0.2s ease;
+  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, -webkit-transform 0.2s ease;
+  -webkit-margin-before: 7px;
+          margin-block-start: 7px;
+}
+.account-menu__toggle-icon::before {
+  content: "";
+  display: block;
+  inline-size: 0;
+  block-size: 0;
+  -webkit-border-start: 6px solid transparent;
+          border-inline-start: 6px solid transparent;
+  -webkit-border-end: 6px solid transparent;
+          border-inline-end: 6px solid transparent;
+  -webkit-border-before: 6px solid currentcolor;
+          border-block-start: 6px solid currentcolor;
+}
+
+.account-menu__button-toggle[aria-expanded=true] .account-menu__toggle-icon {
+  -webkit-transform: rotate(180deg);
+          transform: rotate(180deg);
+}
+
+.account-menu__menu-link {
   color: var(--light-text-color);
   font-weight: var(--text-bold);
-  -webkit-text-decoration: underline solid 2px var(--light-text-color);
-          text-decoration: underline solid 2px var(--light-text-color);
+  -webkit-text-decoration: underline solid 2px var(--color-transparent);
+          text-decoration: underline solid 2px var(--color-transparent);
+  text-underline-offset: 2px;
   -webkit-transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
   transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
 }
-.menu__account-menu li a:hover {
-  text-decoration-color: var(--color-transparent);
+.account-menu__menu-link:hover {
+  text-decoration-color: var(--light-text-color);
   -webkit-transition: text-decoration-color 0.12s ease-in;
   transition: text-decoration-color 0.12s ease-in;
 }
-.menu__account-menu li a:hover, .menu__account-menu li a:focus, .menu__account-menu li a:focus-visible, .menu__account-menu li a:active {
+.account-menu__menu-link:hover, .account-menu__menu-link:focus, .account-menu__menu-link:focus-visible, .account-menu__menu-link:active {
   color: var(--brand-light-accent);
 }
-.menu__account-menu li a:focus, .menu__account-menu li a:focus-visible, .menu__account-menu li a:active {
+.account-menu__menu-link:focus, .account-menu__menu-link:focus-visible, .account-menu__menu-link:active {
   outline-color: var(--color-white);
+}
+.account-menu__menu-link.account-menu__menu-link--level-2 {
+  display: block;
+  padding-block: var(--v-space-6xs);
+}
+.account-menu__menu-link.account-menu__menu-link--level-2::before {
+  content: "+";
+  -webkit-margin-end: var(--v-space-6xs);
+          margin-inline-end: var(--v-space-6xs);
+}
+.account-menu__menu-link.account-menu__menu-link--level-2:hover::before, .account-menu__menu-link.account-menu__menu-link--level-2:focus::before {
+  text-decoration: none;
 }
 
 :root {
