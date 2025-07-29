@@ -18,7 +18,7 @@ third_party_settings:
       format_type: html_element
       format_settings:
         classes: 'protocol__content layout-right-sidebar__content'
-        show_empty_fields: false
+        show_empty_fields: true
         id: ''
         label_as_html: false
         element: div
