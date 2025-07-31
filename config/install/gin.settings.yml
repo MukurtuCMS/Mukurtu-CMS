@@ -2,7 +2,7 @@ _core:
   default_config_hash: c8aZhkIY8zHUo0_UOll4vVs_l48dHL_gBqbvfuAM0Rs
 favicon:
   mimetype: image/png
-  path: 'themes/mukurtu4/logo.png'
+  path: '/profiles/mukurtu/themes/mukurtu_v4/logo.png'
   use_default: false
 features:
   comment_user_picture: true
@@ -10,7 +10,7 @@ features:
   favicon: true
   node_user_picture: true
 logo:
-  path: 'themes/mukurtu4/logo.png'
+  path: '/profiles/mukurtu/themes/mukurtu_v4/logo.png'
   use_default: false
 third_party_settings:
   shortcut:
