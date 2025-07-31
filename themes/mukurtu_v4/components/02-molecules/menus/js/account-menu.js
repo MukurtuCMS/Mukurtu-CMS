@@ -18,6 +18,12 @@
    */
   function updateDropdownState(button, menuItem, isExpanded) {
     button.setAttribute('aria-expanded', isExpanded);
+
+    if (isExpanded) {
+      menuItem.classList.add('account-menu__menu-item--expanded');
+    } else {
+      menuItem.classList.remove('account-menu__menu-item--expanded');
+    }
   }
 
   /**
@@ -56,7 +62,7 @@
       return;
     }
 
-    // Set initial state
+    // Set initial state.
     updateDropdownState(toggleButton, menuItem, false);
 
     let wasOpenedByClick = false;
@@ -78,19 +84,22 @@
       updateDropdownState(toggleButton, menuItem, newState);
     });
 
-    // Handle hover on the entire menu item (like main nav)
-    menuItem.addEventListener('mouseover', () => {
-      if (!wasOpenedByClick) {
-        updateDropdownState(toggleButton, menuItem, true);
-      }
-    });
+    // Only add hover behavior on desktop (not mobile/touch devices)
+    if (!('ontouchstart' in window)) {
+      // Handle hover on the entire menu item (desktop only)
+      menuItem.addEventListener('mouseover', () => {
+        if (!wasOpenedByClick) {
+          updateDropdownState(toggleButton, menuItem, true);
+        }
+      });
 
-    // Handle mouse leave on the entire menu item
-    menuItem.addEventListener('mouseout', () => {
-      if (!wasOpenedByClick) {
-        updateDropdownState(toggleButton, menuItem, false);
-      }
-    });
+      // Handle mouse leave on the entire menu item (desktop only)
+      menuItem.addEventListener('mouseout', () => {
+        if (!wasOpenedByClick) {
+          updateDropdownState(toggleButton, menuItem, false);
+        }
+      });
+    }
   }
 
   /**

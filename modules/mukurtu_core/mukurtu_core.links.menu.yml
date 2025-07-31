@@ -12,7 +12,7 @@ mukurtu_core.account_add_component:
   parent: account
   menu_name: account
   description: 'Add component'
-  route_name: node.add_page
+  route_name: mukurtu_core.dashboard
   weight: -90
 mukurtu_core.account_add_community:
   title: 'Community'
