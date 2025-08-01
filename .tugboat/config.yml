@@ -16,7 +16,7 @@ services:
         # extension. Once a stable release is available, this should be able to
         # be removed.
         # See https://github.com/Imagick/imagick/issues/640
-        - pecl install imagick-3.8.0RC2 --force
+        - pecl install imagick-3.8.0
         - docker-php-ext-enable imagick
 
         # Add JPEG and FreeType support to GD.
