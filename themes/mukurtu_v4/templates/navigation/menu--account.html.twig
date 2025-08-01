@@ -1,0 +1,81 @@
+{#
+/**
+ * @file
+ * Theme override to display a menu.
+ *
+ * Available variables:
+ * - menu_name: The machine name of the menu.
+ * - items: A nested list of menu items. Each menu item contains:
+ *   - attributes: HTML attributes for the menu item.
+ *   - below: The menu item child items.
+ *   - title: The menu link title.
+ *   - url: The menu link url, instance of \Drupal\Core\Url
+ *   - localized_options: Menu link localized options.
+ *   - is_expanded: TRUE if the link has visible children within the current
+ *     menu tree.
+ *   - is_collapsed: TRUE if the link has children within the current menu tree
+ *     that are not currently visible.
+ *   - in_active_trail: TRUE if the link is in the active trail.
+ */
+#}
+{{ attach_library('mukurtu_v4/account-menu') }}
+
+{% import _self as menus %}
+
+{#
+  We call a macro which calls itself to render the full tree.
+  @see https://twig.symfony.com/doc/1.x/tags/macro.html
+#}
+{{ menus.menu_links(items, attributes, 0) }}
+
+{% macro menu_links(items, attributes, menu_level) %}
+  {% import _self as menus %}
+  {% if items %}
+    {% if menu_level == 0 %}
+      <ul class="menu__account-menu">
+    {% else %}
+      <ul class="menu__account-submenu">
+    {% endif %}
+    {% for item in items %}
+      {% set item_classes = [
+        'account-menu__menu-item',
+        'account-menu__menu-item--level-' ~ (menu_level + 1),
+        item.below ? 'account-menu__menu-item--has-children',
+      ] %}
+      
+      {% set link_classes = [
+        'account-menu__menu-link',
+        'account-menu__menu-link--level-' ~ (menu_level + 1),
+        item.below ? 'account-menu__menu-link--has-children',
+      ] %}
+      
+      {% set aria_id = ('account-menu-' ~ loop.index)|clean_id %}
+      
+      <li{{ item.attributes.addClass(item_classes) }}>
+        {% if item.below %}
+          {{ link(item.title, item.url, {'class': link_classes}) }}
+          
+          {% set toggle_button_attributes = create_attribute({
+            'class': 'account-menu__button-toggle',
+            'data-drupal-selector': 'account-menu-submenu-toggle-button',
+            'aria-controls': aria_id,
+            'aria-expanded': 'false',
+            'title': '@title sub-menu'|t({'@title': item.title}),
+            'type': 'button',
+          }) %}
+          
+          <button{{ toggle_button_attributes }}>
+            <span class="visually-hidden">{{ '@title sub-menu'|t({'@title': item.title}) }}</span>
+            <span class="account-menu__toggle-icon"></span>
+          </button>
+          
+          {% set attributes = attributes.setAttribute('id', aria_id) %}
+          {{ menus.menu_links(item.below, attributes, menu_level + 1) }}
+        {% else %}
+          {{ link(item.title, item.url, {'class': link_classes}) }}
+        {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}

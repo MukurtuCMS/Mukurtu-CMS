@@ -37,7 +37,7 @@
   .page {
     &__account-menu {
       // Style this here for full bleed of color.
-      background-color: var(--brand-primary-dark);
+      background-color: var(--brand-primary);
 
       @include layout.layout--full-width-grid;
 

@@ -301,6 +301,150 @@ function mukurtu_install() {
     'weight' => 6,
   ])->save();
 
+  // Create account menu items.
+  // These are created through MenuLinkContent so they can be edited on the UI.
+  // Dashboard
+  MenuLinkContent::create([
+    'title' => 'Dashboard',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_core.dashboard')->toString()],
+    'menu_name' => 'account',
+    'description' => 'Dashboard',
+    'expanded' => FALSE,
+    'weight' => -1000,
+  ])->save();
+
+  // Create Content (parent)
+  $create_content_menu = MenuLinkContent::create([
+    'title' => 'Create Content',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_core.add_page')->toString()],
+    'menu_name' => 'account',
+    'description' => 'Create content',
+    'expanded' => TRUE,
+    'weight' => -100,
+  ]);
+  $create_content_menu->save();
+
+  // Digital Heritage (under Create Content)
+  MenuLinkContent::create([
+    'title' => 'Digital Heritage',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'digital_heritage'])->toString()],
+    'menu_name' => 'account',
+    'description' => 'Create digital heritage item',
+    'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 0,
+  ])->save();
+
+  // Collection (under Create Content)
+  MenuLinkContent::create([
+    'title' => 'Collection',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'collection'])->toString()],
+    'menu_name' => 'account',
+    'description' => 'Create collection',
+    'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 10,
+  ])->save();
+
+  // Dictionary word (under Create Content)
+  MenuLinkContent::create([
+    'title' => 'Dictionary word',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'dictionary_word'])->toString()],
+    'menu_name' => 'account',
+    'description' => 'Create dictionary word',
+    'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 20,
+  ])->save();
+
+  // Word list (under Create Content)
+  MenuLinkContent::create([
+    'title' => 'Word list',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'word_list'])->toString()],
+    'menu_name' => 'account',
+    'description' => 'Create word list',
+    'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 30,
+  ])->save();
+
+  // Person record (under Create Content)
+  MenuLinkContent::create([
+    'title' => 'Person record',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'person'])->toString()],
+    'menu_name' => 'account',
+    'description' => 'Create person record',
+    'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 40,
+  ])->save();
+
+  // Media (under Create Content)
+  MenuLinkContent::create([
+    'title' => 'Media',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('entity.media.add_page')->toString()],
+    'menu_name' => 'account',
+    'description' => 'Add media',
+    'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 50,
+  ])->save();
+
+  // Add Component (parent)
+  $add_component_menu = MenuLinkContent::create([
+    'title' => 'Add Component',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_core.dashboard')->toString()],
+    'menu_name' => 'account',
+    'description' => 'Add component',
+    'expanded' => FALSE,
+    'weight' => -90,
+  ]);
+  $add_component_menu->save();
+
+  // Community (under Add Component)
+  MenuLinkContent::create([
+    'title' => 'Community',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('entity.community.add_form')->toString()],
+    'menu_name' => 'account',
+    'description' => 'Add community',
+    'parent' => 'menu_link_content:' . $add_component_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 0,
+  ])->save();
+
+  // Cultural protocol (under Add Component)
+  MenuLinkContent::create([
+    'title' => 'Cultural protocol',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('entity.protocol.add_form')->toString()],
+    'menu_name' => 'account',
+    'description' => 'Add cultural protocol',
+    'parent' => 'menu_link_content:' . $add_component_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 10,
+  ])->save();
+
+  // Category (under Add Component)
+  MenuLinkContent::create([
+    'title' => 'Category',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('entity.taxonomy_term.add_form', ['taxonomy_vocabulary' => 'category'])->toString()],
+    'menu_name' => 'account',
+    'description' => 'Add category',
+    'parent' => 'menu_link_content:' . $add_component_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 20,
+  ])->save();
+
+  // User (under Add Component)
+  MenuLinkContent::create([
+    'title' => 'User',
+    'link' => ['uri' => 'internal:' . Url::fromRoute('user.admin_create')->toString()],
+    'menu_name' => 'account',
+    'description' => 'Add user',
+    'parent' => 'menu_link_content:' . $add_component_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 30,
+  ])->save();
+
   // Delete unused user flags that crash user registration page.
   $flagStorage = \Drupal::entityTypeManager()->getStorage('flag');
   foreach (['email_user', 'subscribe_user'] as $userFlagID) {
