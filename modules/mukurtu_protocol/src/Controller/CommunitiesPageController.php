@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_protocol\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\og\Og;
 
 /**
  * Controller for communities page.
@@ -29,7 +30,13 @@ class CommunitiesPageController extends ControllerBase {
 
     $builder = $this->entityTypeManager()->getViewBuilder('community');
     $renderedCommunities = [];
+    $currentUser = \Drupal::currentUser();
     foreach ($communities as $community) {
+      // Only render private communities if the current user is a member.
+      /** @var \Drupal\mukurtu_protocol\Entity\CommunityInterface $community */
+      if ($community->getSharingSetting() == 'community-only' && !Og::isMember($community, $currentUser)) {
+        continue;
+      }
       $renderedCommunities[] = $builder->view($community, 'browse');
     }
 
