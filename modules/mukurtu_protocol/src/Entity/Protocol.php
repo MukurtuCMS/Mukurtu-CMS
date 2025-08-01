@@ -33,7 +33,7 @@ use Exception;
  *   ),
  *   handlers = {
  *     "storage" = "Drupal\mukurtu_protocol\ProtocolStorage",
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "view_builder" = "Drupal\mukurtu_protocol\Entity\ProtocolViewBuilder",
  *     "list_builder" = "Drupal\mukurtu_protocol\ProtocolListBuilder",
  *     "views_data" = "Drupal\mukurtu_protocol\Entity\ProtocolViewsData",
  *     "translation" = "Drupal\mukurtu_protocol\ProtocolTranslationHandler",
@@ -79,7 +79,7 @@ use Exception;
  *     "revision_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert",
  *     "revision_delete" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/delete",
  *     "translation_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert/{langcode}",
- *     "collection" = "/dashboard/protocols",
+ *     "collection" = "/admin/protocols",
  *   },
  *   field_ui_base_route = "protocol.settings"
  * )
@@ -195,6 +195,67 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   public function setSharingSetting($sharing) {
     $this->set('field_access_mode', $sharing);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMembershipDisplay()
+  {
+    return $this->get('field_membership_display')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMembershipDisplay($membershipDisplay)
+  {
+    $this->set('field_membership_display', $membershipDisplay);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMembersList() {
+    $members = [];
+    $memberIds = [];
+    $displaySetting = $this->getMembershipDisplay();
+    if (strcmp($displaySetting, 'none') !== 0) {
+      $query = \Drupal::entityQuery('og_membership')
+        ->condition('entity_type', 'protocol')
+        ->condition('entity_id', $this->id())
+        ->accessCheck(FALSE);
+      $protocolOgMembershipIds = $query->execute();
+
+      // Ensure loadMultiple() never accepts NULL as argument. If it does, it'll
+      // load every single entity of the type specified in getStorage(), which
+      // would tank site performance.
+      if ($protocolOgMembershipIds) {
+        $protocolOgMemberships = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($protocolOgMembershipIds);
+      }
+
+      switch ($displaySetting) {
+        case 'all':
+          foreach ($protocolOgMemberships as $membership) {
+            array_push($memberIds, $membership->getOwnerId());
+          }
+          break;
+        case 'stewards':
+          foreach ($protocolOgMemberships as $membership) {
+            if ($membership->hasRole('protocol-protocol-protocol_steward')) {
+              array_push($memberIds, $membership->getOwnerId());
+            }
+          }
+          break;
+      }
+      // Ensure loadMultiple() never accepts NULL as argument.
+      if ($memberIds) {
+        $members = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($memberIds);
+      }
+    }
+
+    return $members;
   }
 
   /**
@@ -422,7 +483,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
-        'weight' => 5,
         'settings' => [
           'match_operator' => 'CONTAINS',
           'size' => '60',
@@ -448,8 +508,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
         'weight' => -4,
       ])
       ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-        'weight' => -4,
+        'type' => 'string_textfield'
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
@@ -464,7 +523,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'text_textarea_with_summary',
-        'weight' => 0,
         'rows' => 6,
       ])
       ->setDisplayConfigurable('view', TRUE)
@@ -476,8 +534,8 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setRevisionable(FALSE)
       ->setDefaultValue(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', FALSE)
-      ->setDisplayConfigurable('form', FALSE);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['field_comment_require_approval'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Comments Require Approval'))
@@ -485,13 +543,12 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setRevisionable(FALSE)
       ->setDefaultValue(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', FALSE)
-      ->setDisplayConfigurable('form', FALSE);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['status']->setDescription(t('A boolean indicating whether the Protocol is published.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
-        'weight' => 100,
       ]);
 
     $fields['created'] = BaseFieldDefinition::create('created')
@@ -527,9 +584,47 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $fields['field_featured_content'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Featured Content'))
+      ->setSetting('target_type', 'node')
+      ->setSetting('handler', 'default:node')
+      ->setSetting('handler_settings', [
+        'auto_create' => FALSE,
+      ])
+      ->setRequired(FALSE)
+      ->setCardinality(-1)
+      ->setTranslatable(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 20,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_banner_image'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Banner Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
+      ->setSetting('target_type', 'media')
+      ->setSetting('handler', 'default:media')
+      ->setSetting('handler_settings', [
+        'auto_create' => FALSE,
+        'target_bundles' => ['image' => 'image'],
+      ])
+      ->setRequired(FALSE)
+      ->setCardinality(-1)
+      ->setTranslatable(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 20,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Sharing Protocol'))
-      ->setDescription('')
+      ->setLabel(t('Cultural Protocol Type'))
+      ->setDescription('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.')
       ->setSettings([
         'allowed_values' => [
           'strict' => 'Strict',
@@ -543,7 +638,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'options_buttons',
-        'weight' => 10,
       ])
       ->setDefaultValue('strict')
       ->setCardinality(1)
@@ -551,6 +645,44 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_thumbnail_image'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Thumbnail Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
+      ->setSetting('target_type', 'media')
+      ->setSetting('handler', 'default:media')
+      ->setSetting('handler_settings', [
+        'auto_create' => FALSE,
+        'target_bundles' => ['image' => 'image'],
+      ])
+      ->setRequired(FALSE)
+      ->setCardinality(-1)
+      ->setTranslatable(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'string',
+        'weight' => 20,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_membership_display'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Membership Display'))
+      ->setDescription('')
+      ->setSettings([
+        'allowed_values' => [
+          'none' => 'Do not display',
+          'stewards' => 'Display protocol stewards',
+          'all' => 'Display all members',
+        ],
+      ])
+      ->setDefaultValue('none')
+      ->setCardinality(1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
       ->setDisplayConfigurable('form', TRUE);
 
     return $fields;

@@ -1,0 +1,48 @@
+@use "../../00-base/mixins/mixins";
+
+.language-switcher__summary {
+  cursor: pointer;
+  font-size: 1.5em;
+  transition: color 0.12s ease-in;
+
+  &::marker {
+    content: none;
+  }
+
+  &:hover {
+    color: var(--brand-secondary-dark);
+  }
+
+  svg {
+    block-size: 1em;
+  }
+}
+
+.language-switcher {
+  .links {
+    position: absolute;
+    background-color: var(--color-white);
+    padding-inline: 2em;
+    padding-block: 1em;
+    margin: 0;
+    box-shadow: 2px 3px 4px var(--brand-light);
+    z-index: 100;
+    transform: translateX(-50%);
+
+    li {
+      list-style-type: none;
+    }
+
+    li + li {
+      margin-block-start: 1em;
+    }
+
+    a {
+      @include mixins.block-link;
+    }
+
+    a.is-active {
+      @include mixins.block-link-active;
+    }
+  }
+}

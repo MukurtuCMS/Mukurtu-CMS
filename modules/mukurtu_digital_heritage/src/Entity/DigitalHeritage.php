@@ -224,6 +224,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
             'remote_video' => 'remote_video',
             'video' => 'video',
             'external_embed' => 'external_embed',
+            'soundcloud' => 'soundcloud'
           ],
           'auto_create' => FALSE,
         ]
@@ -351,7 +352,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
-      ->setLabel(t('Location'))
+      ->setLabel(t('Map Points'))
       ->setDescription(t(''))
       ->setCardinality(1)
       ->setRequired(FALSE)

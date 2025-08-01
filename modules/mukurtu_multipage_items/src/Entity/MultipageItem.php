@@ -199,11 +199,9 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
         'type' => 'entity_browser_entity_reference',
         'weight' => 4,
         'settings' => [
-          'entity_browser' => 'browse_content',
-          'field_widget_display' => 'rendered_entity',
-          'field_widget_display_settings' => [
-            'view_mode' => 'content_browser',
-          ],
+          'entity_browser' => 'mukurtu_browse_content',
+          'field_widget_display' => 'label',
+          'field_widget_display_settings' => [],
           'field_widget_edit' => TRUE,
           'field_widget_remove' => TRUE,
           'field_widget_replace' => FALSE,

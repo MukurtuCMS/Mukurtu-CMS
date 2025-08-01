@@ -9,8 +9,8 @@ name: multipage_item_entity_browser
 label: 'Multipage Item Entity Browser'
 display: modal
 display_configuration:
-  width: '650'
-  height: '500'
+  width: '1200'
+  height: '800'
   link_text: 'Select entities'
   auto_open: false
 selection_display: no_display

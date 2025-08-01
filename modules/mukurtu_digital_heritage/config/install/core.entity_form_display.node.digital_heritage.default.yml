@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.browse_content
+    - entity_browser.browser.mukurtu_content_browser
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
     - node.type.digital_heritage
@@ -26,8 +26,8 @@ third_party_settings:
         - group_mukurtu_essentials
         - group_mukurtu_core
         - group_rights_and_permissions
-        - group_additional_metadata
-        - group_relations
+        - group_additional_fields
+        - group_related_content
       label: 'Main Tab'
       region: content
       parent_name: ''
@@ -64,7 +64,6 @@ third_party_settings:
         - field_cultural_narrative
         - field_traditional_knowledge
         - field_description
-        - field_keywords
       label: 'Mukurtu Core'
       region: content
       parent_name: group_main_tab
@@ -78,7 +77,7 @@ third_party_settings:
         required_fields: true
     group_rights_and_permissions:
       children:
-        - group_labels_and_notices
+        - group_local_contexts
         - group_knowledge_keepers
         - group_rights
         - group_licensing_options
@@ -94,8 +93,9 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_additional_metadata:
+    group_additional_fields:
       children:
+        - field_keywords
         - field_format
         - field_type
         - field_identifier
@@ -106,10 +106,8 @@ third_party_settings:
         - field_subject
         - field_transcription
         - field_people
-        - field_coverage
-        - field_coverage_description
-        - field_location
-      label: 'Additional Metadata'
+        - group_locations
+      label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
       weight: 23
@@ -120,10 +118,10 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_relations:
+    group_related_content:
       children:
         - field_related_content
-      label: Relations
+      label: 'Related Content'
       region: content
       parent_name: group_main_tab
       weight: 24
@@ -134,11 +132,11 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_labels_and_notices:
+    group_local_contexts:
       children:
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
-      label: 'Labels and Notices'
+      label: 'Local Contexts'
       region: content
       parent_name: group_rights_and_permissions
       weight: 20
@@ -196,6 +194,23 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Locations'
+      region: content
+      parent_name: group_additional_fields
+      weight: 24
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true       
 id: node.digital_heritage.default
 targetEntityType: node
 bundle: digital_heritage
@@ -228,7 +243,7 @@ content:
     third_party_settings: {  }
   field_contributor:
     type: entity_reference_autocomplete
-    weight: -1
+    weight: 1
     region: content
     settings:
       match_operator: CONTAINS
@@ -245,18 +260,18 @@ content:
       map:
         leaflet_map: 'OSM Mapnik'
         height: '400'
-        locate: '1'
         auto_center: '1'
         scroll_zoom_enabled: '1'
         map_position:
           zoom: '12'
-          minZoom: '1'
+          minZoom: '3'
           maxZoom: '18'
           zoomFiner: '0'
           force: 0
           center:
             lat: '0'
             lon: '0'
+          zoomControlPosition: topleft
       toolbar:
         position: topright
         marker: defaultMarker
@@ -271,8 +286,8 @@ content:
         cutPolygon: 0
         rotateMode: 0
       reset_map:
-        position: topright
         control: 0
+        options: '{"position":"topleft","title":"Reset View"}'
       fullscreen:
         options: '{"position":"topleft","pseudoFullscreen":false}'
         control: 0
@@ -284,13 +299,22 @@ content:
         control: false
         settings:
           position: topright
-          input_size: 25
+          input_size: 20
           providers: {  }
           min_terms: 4
           delay: 800
           zoom: 16
           popup: false
           options: ''
+      map_scale:
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+        control: 0
+      locate:
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        automatic: '1'
+        control: 0
+      feature_properties:
+        values: ''
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea
@@ -308,7 +332,7 @@ content:
     third_party_settings: {  }
   field_creator:
     type: entity_reference_autocomplete
-    weight: -2
+    weight: 0
     region: content
     settings:
       match_operator: CONTAINS
@@ -448,14 +472,16 @@ content:
     third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
-    weight: -5
+    weight: -2
     region: content
     settings:
       media_types:
         - audio
         - document
+        - external_embed
         - image
         - remote_video
+        - soundcloud
         - video
     third_party_settings: {  }
   field_mukurtu_community_records:
@@ -470,7 +496,7 @@ content:
     third_party_settings: {  }
   field_original_date:
     type: original_date_text
-    weight: 0
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -505,14 +531,13 @@ content:
     weight: 0
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      open: true
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_rights:
@@ -563,7 +588,7 @@ content:
     third_party_settings: {  }
   field_summary:
     type: string_textfield
-    weight: -6
+    weight: -1
     region: content
     settings:
       size: 60

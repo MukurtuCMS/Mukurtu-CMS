@@ -8,6 +8,7 @@ dependencies:
     - media.type.external_embed
     - media.type.image
     - media.type.remote_video
+    - media.type.soundcloud
     - media.type.video
     - node.type.page
 id: node.page.field_page_media_assets
@@ -27,6 +28,7 @@ settings:
       audio: audio
       document: document
       external_embed: external_embed
+      soundcloud: soundcloud
       image: image
       remote_video: remote_video
       video: video

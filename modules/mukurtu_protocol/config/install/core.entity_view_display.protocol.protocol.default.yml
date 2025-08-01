@@ -2,18 +2,65 @@ langcode: en
 status: true
 dependencies:
   module:
+    - field_group
     - mukurtu_protocol
-    - options
     - text
+third_party_settings:
+  field_group:
+    group_protocol_content:
+      children:
+        - field_description
+        - field_featured_content
+      label: 'Protocol Content'
+      parent_name: ''
+      region: content
+      weight: 2
+      format_type: html_element
+      format_settings:
+        classes: 'protocol__content layout-right-sidebar__content'
+        show_empty_fields: true
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_protocol_sidebar:
+      children:
+        - og_group
+        - field_communities
+        - field_members_list
+      label: 'Protocol Sidebar'
+      parent_name: ''
+      region: content
+      weight: 3
+      format_type: html_element
+      format_settings:
+        classes: 'protocol__sidebar layout-right-sidebar__sidebar'
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
 id: protocol.protocol.default
 targetEntityType: protocol
 bundle: protocol
 mode: default
 content:
-  field_access_mode:
-    type: list_default
-    label: above
-    settings: {  }
+  field_banner_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: full
+      link: false
     third_party_settings: {  }
     weight: 1
     region: content
@@ -23,14 +70,31 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 3
+    weight: 6
     region: content
   field_description:
     type: text_default
-    label: above
+    label: hidden
     settings: {  }
     third_party_settings: {  }
-    weight: 2
+    weight: 3
+    region: content
+  field_featured_content:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: false
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_members_list:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 7
     region: content
   name:
     type: string
@@ -40,8 +104,17 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
+  og_group:
+    type: mukurtu_og_group_subscribe
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 5
+    region: content
 hidden:
+  field_access_mode: true
+  field_comment_require_approval: true
+  field_comment_status: true
   langcode: true
-  og_group: true
   search_api_excerpt: true
   user_id: true

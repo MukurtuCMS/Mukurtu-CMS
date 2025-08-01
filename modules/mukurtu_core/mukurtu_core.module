@@ -44,14 +44,14 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
  */
 function mukurtu_core_entity_type_build(array &$entity_types) {
   // Prefix media URLs with 'dashboard'.
-  $entity_types['media']->setLinkTemplate('add-page', '/dashboard/media/add');
-  $entity_types['media']->setLinkTemplate('add-form', '/dashboard/media/add/{media_type}');
-  $entity_types['media']->setLinkTemplate('canonical', '/dashboard/media/{media}/edit');
-  $entity_types['media']->setLinkTemplate('delete-form', '/dashboard/media/{media}/delete');
-  $entity_types['media']->setLinkTemplate('delete-multiple-form', '/dashboard/media/delete');
-  $entity_types['media']->setLinkTemplate('edit-form', '/dashboard/media/{media}/edit');
-  $entity_types['media']->setLinkTemplate('revision', '/dashboard/media/{media}/revisions/{media_revision}/view');
-  //$entity_types['media']->setLinkTemplate('collection', '/dashboard/admin/content/media');
+  $entity_types['media']->setLinkTemplate('add-page', '/admin/media/add');
+  $entity_types['media']->setLinkTemplate('add-form', '/admin/media/add/{media_type}');
+  $entity_types['media']->setLinkTemplate('canonical', '/admin/media/{media}/edit');
+  $entity_types['media']->setLinkTemplate('delete-form', '/admin/media/{media}/delete');
+  $entity_types['media']->setLinkTemplate('delete-multiple-form', '/admin/media/delete');
+  $entity_types['media']->setLinkTemplate('edit-form', '/admin/media/{media}/edit');
+  $entity_types['media']->setLinkTemplate('revision', '/admin/media/{media}/revisions/{media_revision}/view');
+  //$entity_types['media']->setLinkTemplate('collection', '/admin/content/media');
 
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   foreach (['media', 'paragraph', 'node'] as $entity_type_id) {
@@ -95,16 +95,44 @@ function mukurtu_core_page_attachments(array &$attachments) {
   // no content on the site, we assume they are setting things up and we don't
   // want to bother them with the message.
   if (\Drupal::currentUser()->id() == 1) {
+    $show_admin_message = TRUE;
     $query = \Drupal::entityQuery('node');
     $query->accessCheck(FALSE);
-    $contentCount = $query->count()->execute();
-    if ($contentCount) {
+    $content_count = $query->count()->execute();
+    if ($content_count === 0) {
+      $show_admin_message = FALSE;
+    }
+    $uri = \Drupal::request()->getUri();
+    $ajax_uris = [
+      'ajax',
+      'modal',
+      'dialog',
+    ];
+    foreach ($ajax_uris as $ajax_uri) {
+      if (str_contains($uri, $ajax_uri)) {
+        $show_admin_message = FALSE;
+      }
+    }
+    if ($show_admin_message) {
       \Drupal::messenger()->addError(t('You are logged in as the super admin (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. Consider logging into a different account.'));
     }
   }
 
   // Add our leaflet JS. We could scope this better.
   $attachments['#attached']['library'][] = 'mukurtu_core/mukurtu-leaflet-widget';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Changes default form values at /admin/config/people/accounts:
+ *  - Disables "Enable the personal contact form by default for new users"
+ *  - Sets "Who can register accounts?" to "administrators only"
+ */
+function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  $form['contact']['contact_default_status']['#default_value'] = false;
+  $form['registration_cancellation']['user_register']['#default_value'] = 'admin_only';
 }
 
 /**
@@ -284,7 +312,9 @@ function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityVi
  */
 function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   // Build an "approve" link to block/unblock users.
-  if ($view_mode == 'full') {
+  // However, do not display link for users who view their own account page!
+  // We don't want users blocking or approving themselves.
+  if ($view_mode == 'full' && \Drupal::currentUser()->id() != $entity->id()) {
     $status = $entity->status->value;
     $title = $status ? t('Block User') : t('Approve User');
     $route = $status ? 'mukurtu_core.block_user' : 'mukurtu_core.approve_user';

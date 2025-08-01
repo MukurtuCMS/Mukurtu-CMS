@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.browse_content
+    - entity_browser.browser.mukurtu_content_browser
     - field.field.node.collection.comment
     - node.type.collection
   module:
@@ -11,6 +11,7 @@ dependencies:
     - field_group
     - media_library
     - mukurtu_core
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - path
     - text
@@ -19,7 +20,8 @@ third_party_settings:
     group_main_tab:
       children:
         - group_mukurtu_essentials
-        - group_relations
+        - group_related_content
+        - group_additional_fields
       label: 'Main Tab'
       region: content
       parent_name: ''
@@ -36,11 +38,9 @@ third_party_settings:
         - field_summary
         - field_description
         - field_collection_image
-        - field_keywords
         - field_source
-        - field_coverage
-        - field_coverage_description
-        - field_location
+        - field_items_in_collection
+        - field_child_collections
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -52,15 +52,13 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
-    group_relations:
+    group_related_content:
       children:
-        - field_items_in_collection
-        - field_child_collections
         - field_related_content
-      label: Relations
+      label: 'Related Content'
       region: content
       parent_name: group_main_tab
-      weight: 21
+      weight: 22
       format_type: tab
       format_settings:
         classes: ''
@@ -68,6 +66,57 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
+    group_additional_fields:
+      children:
+        - field_keywords
+        - group_locations
+        - group_local_contexts
+      label: 'Additional Fields'
+      region: content
+      parent_name: group_main_tab
+      weight: 21
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_local_contexts:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: 'Local Contexts'
+      region: content
+      parent_name: group_additional_fields
+      weight: 25
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Locations'
+      region: content
+      parent_name: group_additional_fields
+      weight: 24
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true      
 id: node.collection.default
 targetEntityType: node
 bundle: collection
@@ -97,14 +146,13 @@ content:
     weight: 8
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      open: true
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_collection_image:
@@ -127,7 +175,7 @@ content:
         scroll_zoom_enabled: '1'
         map_position:
           zoom: '12'
-          minZoom: '1'
+          minZoom: '3'
           maxZoom: '18'
           zoomFiner: '0'
           force: 0
@@ -184,7 +232,7 @@ content:
     weight: 1
     region: content
     settings:
-      rows: 5
+      rows: 31
       placeholder: ''
     third_party_settings: {  }
   field_credit:
@@ -214,14 +262,13 @@ content:
     weight: 7
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
-      field_widget_edit: true
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
+      field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      open: true
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_keywords:
@@ -233,6 +280,18 @@ content:
       match_limit: 10
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 3
+    region: content
+    settings: {  }
     third_party_settings: {  }
   field_location:
     type: entity_reference_autocomplete
@@ -249,14 +308,13 @@ content:
     weight: -6
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true
-      field_widget_replace: true
+      field_widget_replace: false
       open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_mukurtu_protocol_r_scope:
@@ -294,14 +352,13 @@ content:
     weight: 9
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
-      field_widget_edit: true
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
+      field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      open: true
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_source:

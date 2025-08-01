@@ -1,0 +1,226 @@
+/**
+ * @file
+ * Nav Primary.
+ */
+
+@use "../../../external/include-media";
+
+.primary-nav__menu {
+  flex-wrap: wrap;
+  list-style: none;
+}
+
+
+
+.primary-nav__menu-item {
+  margin-block-end: var(--v-space-5xs);
+  list-style: none;
+
+  &.primary-nav__menu-item--has-children {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    & .primary-nav__menu-link--link,
+    & .primary-nav__menu-link--nolink {
+      /* Ensure that long text doesn't make the mobile expand button wrap. */
+      flex-basis: calc(100% - var(--v-space-s));
+    }
+
+    & .primary-nav__menu-link--nolink {
+      line-height: 100%;
+    }
+  }
+}
+
+.primary-nav__menu-link {
+  flex-grow: 1;
+  color: var(--color-text-neutral-loud);
+  font-size: var(--font-size-l);
+  text-decoration: none;
+  padding-inline: var(--v-space-3xs);
+  padding-block: var(--v-space-5xs);
+  border-block-end: 4px solid;
+  border-block-end-color: var(--color-transparent);
+  transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+
+  &--has-children {
+    padding-inline-end: var(--v-space-6xs);
+  }
+
+  &:hover {
+    border-block-end-color: var(--brand-secondary-dark);
+    color: inherit;
+  }
+
+  &:hover,
+  &:active {
+    color: var(--brand-secondary-dark);
+  }
+
+  &:focus {
+    outline: auto 2px var(--brand-secondary-dark);
+    outline-offset: 2px;
+    color: var(--brand-secondary-dark);
+  }
+
+  &--nolink,
+  &--button,
+  &--has-children {
+    /* stylelint-disable-next-line no-descending-specificity */
+    &:hover {
+      border-block-end-color: transparent;
+    }
+  }
+
+  &.is-active {
+    border-block-end-color: var(--brand-secondary-accent);
+
+    &:hover {
+      border-block-end-color: var(--brand-secondary-dark);;
+    }
+  }
+
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.primary-nav__menu-link--button {
+  position: relative;
+  cursor: pointer;
+  text-align: start;
+  border: 0;
+  background: transparent;
+  font-weight: normal;
+
+  &:hover, &:focus, &:active {
+    background-color: transparent;
+  }
+
+  /* Plus icon for mobile navigation. */
+  &.primary-nav__menu-link--has-children {
+    padding-inline-end: var(--v-space-s); /* Ensure text does not overlap icon. */
+
+    &::before,
+    &::after {
+      position: absolute;
+      inset-inline-end: 9px;
+      inset-block-start: calc(var(--v-space-5xs) + 17px); /* Visually align button with menu link text. */
+      inline-size: 18px;
+      block-size: 0;
+      content: "";
+
+      /* Intentionally not using CSS logical properties. */
+
+      /*
+       * Using --brand-primary as --color--primary-50 is not defined in the
+       * theme.
+       */
+      border-block-start: solid 3px var(--brand-primary);
+    }
+
+    &::after {
+      transition: opacity 0.2s;
+      transform: rotate(90deg);
+    }
+
+    &[aria-expanded="true"]::after {
+      opacity: 0;
+    }
+  }
+}
+
+.primary-nav__menu-link-inner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding-block: var(--v-space-6xs);
+  padding-inline: 0;
+}
+
+/*
+  Top level specific styles.
+*/
+.primary-nav__menu--level-1 {
+  margin-block: 0;
+  margin-inline: 0;
+  padding-block: 0;
+  padding-inline: 0;
+}
+
+.primary-nav__menu-link--level-1 {
+  position: relative;
+  display: flex;
+  letter-spacing: -1px;
+}
+
+/*
+  Secondary menu specific styles.
+*/
+.primary-nav__menu--level-2 {
+  visibility: hidden;
+  overflow: hidden;
+  flex-basis: 100%;
+  max-block-size: 0;
+  margin-block: 0;
+  margin-inline-start: calc(-1 * var(--v-space-4xxs));
+  padding-inline-start: var(--v-space-xs);
+  transition:
+    opacity 0.2s,
+    visibility 0.2s,
+    max-block-size 0.2s;
+  opacity: 0;
+  border-inline-start: solid var(--v-space-4xs) var(--brand-primary);
+
+  &.is-active-menu-parent {
+    visibility: visible;
+    max-block-size: none;
+    margin-block-start: var(--v-space-6xs);
+    opacity: 1;
+  }
+
+  & .primary-nav__menu-item--level-2 {
+    &:not(:last-of-type) {
+      &::after {
+        content: none;
+      }
+    }
+
+    &:first-child {
+      padding-block-start: var(--v-space-6xs);
+    }
+
+    &:last-child {
+      padding-block-end: var(--v-space-6xs);
+    }
+  }
+
+  @include include-media.media('>=md') {
+    margin-inline-start: calc(-1 * var(--v-space-s));
+    padding-inline-start: var(--v-space-s);
+  }
+}
+
+/*
+ * Olivero doesn't officially support nested tertiary submenus, but this
+ * ensures that it doesn't break all the way.
+ *
+ * @see https://www.drupal.org/project/drupal/issues/3221399
+ */
+.primary-nav__menu--level-2 .primary-nav__menu-item--has-children {
+  display: block;
+}
+
+.primary-nav__menu-link--level-2 {
+  font-size: 16px;
+  font-weight: normal;
+  line-height: var(--v-space-6xs);
+}
+
+html:not(.js) {
+  & .primary-nav__menu--level-2 {
+    visibility: visible;
+    max-block-size: none;
+    opacity: 1;
+  }
+}
+

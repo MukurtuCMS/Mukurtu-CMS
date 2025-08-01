@@ -882,7 +882,7 @@ display:
       display_comment: ''
       exposed_block: false
       display_extenders: {  }
-      path: dashboard/comment
+      path: admin/comment
       menu:
         type: tab
         title: Comments
@@ -1594,7 +1594,7 @@ display:
         filter_groups: false
       display_description: 'The unapproved comments listing.'
       display_extenders: {  }
-      path: dashboard/unapproved-comments
+      path: admin/unapproved-comments
       menu:
         type: tab
         title: 'Unapproved comments'

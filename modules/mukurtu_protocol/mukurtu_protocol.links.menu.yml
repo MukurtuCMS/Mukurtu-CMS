@@ -43,13 +43,6 @@ mukurtu_protocol.manage_protocols:
   menu_name: mukurtu
   route_name: entity.protocol.collection
 
-mukurtu_protocol.communities_page:
-  title: "Communities"
-  menu_name: main
-  description: "Browse the site communities"
-  route_name: mukurtu_protocol.communities_page
-  weight: -20
-
 # Community menu items definition
 entity.community.collection:
   title: 'Community list'

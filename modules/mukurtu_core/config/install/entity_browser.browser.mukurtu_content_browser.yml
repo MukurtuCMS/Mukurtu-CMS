@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.mukurtu_content_browser
+  module:
+    - views
+name: mukurtu_content_browser
+label: 'Select Related Content'
+display: modal
+display_configuration:
+  width: '1200'
+  height: '800'
+  link_text: 'Select Content'
+  auto_open: false
+selection_display: no_display
+selection_display_configuration: {  }
+widget_selector: single
+widget_selector_configuration: {  }
+widgets:
+  78cb1c23-9032-4e2f-a76b-e759c06e830d:
+    settings:
+      submit_text: 'Add Content'
+      auto_select: false
+      view: mukurtu_content_browser
+      view_display: entity_browser
+    uuid: 78cb1c23-9032-4e2f-a76b-e759c06e830d
+    weight: 1
+    label: 'Select Content'
+    id: view

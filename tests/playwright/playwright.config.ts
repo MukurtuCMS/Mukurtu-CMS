@@ -119,7 +119,15 @@ export default defineConfig({
     },
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 },
+        // Allow Geolocation gathering without prompting.
+        // See https://playwright.dev/docs/emulation#geolocation
+        permissions: ['geolocation'],
+        // Set a default location (WSU main library).
+        geolocation: { longitude: -117.1636352, latitude: 46.730778 }
+      },
       // Have all tests wait for the default-content test to run before
       // executing, but do not re-run the default-content test if that test is
       // specifically requested, as that would cause it to run twice.

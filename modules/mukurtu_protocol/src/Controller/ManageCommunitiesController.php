@@ -117,14 +117,26 @@ class ManageCommunitiesController extends ControllerBase {
       ];
     }
 
-    // Sharing Setting.
-    $visibilityMarkup['strict'] = $this->t('Strict: This community is visible to community members only.');
-    $visibilityMarkup['open'] = $this->t('Open: This community is visible to all.');
+    // Community page visibility.
+    $visibilityMarkup['community-only'] = $this->t('Community only - This community page is only visible to members of this community.');
+    $visibilityMarkup['public'] = $this->t('Public - This community page is visible to all site members and visitors, with no login required.');
     $sharing = [
       '#type' => 'item',
-      '#title' => $this->t('Sharing Protocol'),
+      '#title' => $this->t('Community page visibility'),
       '#markup' => $visibilityMarkup[$group->getSharingSetting()],
     ];
+
+    // Membership List.
+    $visibilityMarkup['none'] = $this->t('None: Do not display member list.');
+    $visibilityMarkup['managers'] = $this->t('Community Managers: Display community managers.');
+    $visibilityMarkup['all'] = $this->t('All: Display all members.');
+    $membershipDisplay = [
+      '#type' => 'item',
+      '#title' => $this->t('Membership Display'),
+      '#markup' => $visibilityMarkup[$group->getMembershipDisplay()],
+    ];
+
+    $members = $community->getMembersList();
 
     // Description.
     $description = $group->getDescription();
@@ -137,10 +149,12 @@ class ManageCommunitiesController extends ControllerBase {
     }
 
     $build['template'] = [
-      '#theme' => 'manage-community',
+      '#theme' => 'manage_community',
       '#links' => $links,
       '#community' => $community,
       '#sharing' => $sharing,
+      '#membership_display' => $membershipDisplay,
+      '#members' => $members,
       '#description' => $description,
       '#protocols' => $protocols,
       '#notices' => $notices,

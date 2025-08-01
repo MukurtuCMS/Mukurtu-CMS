@@ -739,7 +739,7 @@ display:
       display_description: ''
       show_admin_links: false
       display_extenders: {  }
-      path: dashboard/people/list
+      path: admin/people/list
       menu:
         type: normal
         title: 'Manage Users'

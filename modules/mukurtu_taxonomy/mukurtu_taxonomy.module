@@ -40,7 +40,6 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
 function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   if ($entity->getEntityTypeId() === 'taxonomy_vocabulary') {
     $vocabs = [
-      'authors',
       'category',
       'community_type',
       'contributor',
@@ -54,7 +53,6 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
       'people',
       'publisher',
       'subject',
-      'tags',
       'type',
       'word_type',
     ];
@@ -71,6 +69,30 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
 function mukurtu_taxonomy_form_taxonomy_term_category_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
   // Change Category title field label.
   $form['name']['widget'][0]['value']['#title'] = t('Category name');
+}
+
+/**
+ * Implements hook_form_form_id_alter().
+ *
+ * Change the description of the 'Terms to merge' form element for the
+ * taxonomy_merge_terms form:
+ * (admin/structure/taxonomy/manage/{taxonomy_vocabulary}/merge).
+ */
+
+function mukurtu_taxonomy_form_taxonomy_merge_terms_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $form['#markup'] = t('To merge multiple terms into a new target term, select all terms to merge here. The new target term will be created on the next page.<br/>To merge one or more terms into another existing target term, select them here. The target term will be selected on the next page, do not select it now.');
+
+  $form['terms']['#description'] = t('');
+
+  $form['actions']['submit']['#value'] = t('Next');
+}
+
+function mukurtu_taxonomy_form_taxonomy_merge_terms_target_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $form ['#title'] = t('Select target term');
+
+  $form['description']['#markup'] = t('To merge the selected terms into a new target term, enter it in the "New term" field.<br/>To merge the selected term(s) into an existing target term, select it from the "Existing term" list.');
+
+  $form['actions']['submit']['#value'] = t('Merge terms');
 }
 
 /**

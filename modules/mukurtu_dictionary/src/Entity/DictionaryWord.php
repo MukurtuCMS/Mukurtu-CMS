@@ -95,7 +95,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
-      ->setLabel(t('Location'))
+      ->setLabel(t('Map Points'))
       ->setDescription(t(''))
       ->setCardinality(1)
       ->setRequired(FALSE)
@@ -176,7 +176,8 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
             'document' => 'document',
             'image' => 'image',
             'remote_video' => 'remote_video',
-            'video' => 'video'
+            'video' => 'video',
+            'soundcloud' => 'soundcloud'
           ],
           'sort' => [
             'field' => '_none'

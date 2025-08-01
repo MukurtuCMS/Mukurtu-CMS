@@ -2,12 +2,15 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_display.comment.comment.default
     - core.entity_view_mode.node.full
     - field.field.node.collection.comment
     - node.type.collection
   module:
     - layout_builder
     - mukurtu_core
+    - mukurtu_local_contexts
+    - mukurtu_protocol
     - text
     - user
 third_party_settings:
@@ -19,6 +22,15 @@ targetEntityType: node
 bundle: collection
 mode: full
 content:
+  comment:
+    type: mukurtu_comment_default
+    label: above
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    weight: 11
+    region: content
   field_all_related_content:
     type: entity_reference_entity_view
     label: above
@@ -174,6 +186,20 @@ content:
     third_party_settings: {  }
     weight: 3
     region: content
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  field_local_contexts_projects:
+    type: local_contexts_project
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 9
+    region: content
   field_location:
     type: entity_reference_label
     label: above
@@ -191,7 +217,6 @@ content:
     weight: 1
     region: content
 hidden:
-  comment: true
   draft: true
   field_child_collections: true
   field_citation: true

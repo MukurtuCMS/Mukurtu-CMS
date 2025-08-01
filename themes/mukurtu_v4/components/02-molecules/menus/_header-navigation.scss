@@ -1,0 +1,123 @@
+/**
+ * @file
+ * Navigation in header.
+ */
+
+.header-nav {
+  position: fixed;
+  z-index: 501; /* Appear above overlay and contextual links in header. */
+  inset-block-start: 0;
+  inset-inline-start: 100%;
+  visibility: hidden;
+  overflow: auto;
+
+  /* Ensure that header nav not use additional space and force system branding
+   * block text to unnecessarily wrap. */
+  flex-basis: max-content;
+  inline-size: 100%;
+  max-inline-size: var(--mobile-nav-width);
+  block-size: 100%;
+  padding-block: 0 var(--v-space-4xxs);
+  padding-inline: var(--v-space-4xxs);
+
+  /* Create room for the "close" button. We cannot use margin because the
+   * mobile navigation needs to slide beneath the button, but we also cannot
+   * use padding because that would enable the button to scroll out of the
+   * viewport on short screens. */
+  border-block-start: solid var(--color-white) calc(var(--drupal-displace-offset-top, 0px) + var(--v-space-2xl));
+  background-color: var(--color-white);
+  box-shadow: 0 0 72px rgb(0 0 0 / 10%);
+
+  &.is-active {
+    visibility: visible;
+    transform: translateX(calc(-100% - var(--drupal-displace-offset-right, 0px))); /* LTR */
+
+    &:dir(rtl) {
+      transform: translateX(calc(100% + var(--drupal-displace-offset-left, 0px)));
+    }
+  }
+
+  @media (width >= 50rem) {
+    padding-block-end: var(--v-space-s);
+    padding-inline-start: var(--v-space-s);
+
+  }
+
+  @media (width >= 75rem) {
+    grid-column: 5 / 14;
+  }
+
+  /*
+   * Ensure top border has the same color as the background when in forced colors.
+   */
+  @media (forced-colors: active) {
+    border-block-start-color: canvas;
+  }
+}
+
+/*
+ * Only apply transition styles when JS is loaded. This
+ * works around https://bugs.chromium.org/p/chromium/issues/detail?id=332189
+ */
+html.js .header-nav {
+  transition:
+    visibility 0.2s,
+    transform 0.2s;
+}
+
+body:not(.is-always-mobile-nav) .header-nav {
+  @media (width >= 75rem) {
+    position: static;
+    display: flex;
+    visibility: visible;
+    overflow: visible;
+    grid-column: 5 / 15;
+    align-items: center;
+    justify-content: flex-end;
+    max-inline-size: none;
+    block-size: var(--header-height-wide-when-fixed);
+    margin-block-start: auto;
+    padding-block: 0;
+    padding-inline: 0;
+    transition: transform 0.2s;
+    transform: none;
+    border-block-start: 0;
+    box-shadow: none;
+  }
+}
+
+body.is-always-mobile-nav {
+  & .header-nav {
+    &::before {
+      content: '';
+      position: sticky;
+      inset-block-start:0;
+      inline-size: 100%;
+      margin-block-start: 0;
+      block-size: 4px;
+      background-color: var(--brand-secondary);
+      z-index: 100;
+      display: block;
+    }
+  }
+}
+
+.header-nav-overlay {
+  position: fixed;
+  z-index: 101;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  display: none;
+  inline-size: 100%;
+  block-size: 100vh;
+  opacity: 0.2;
+  background: var(--color-gray);
+
+  @media (forced-colors: active) {
+    background: canvastext;
+  }
+
+  .is-overlay-active & {
+    display: block;
+  }
+}

@@ -8,7 +8,6 @@ libraries:
   - mukurtu_core/mukurtu-leaflet-widget
 dependencies:
   - 'blazy:blazy'
-  - 'content_browser:content_browser'
   - 'drupal:block'
   - 'drupal:comment'
   - 'drupal:editor'
@@ -29,8 +28,10 @@ dependencies:
   - 'drupal:user'
   - 'drupal:views'
   - 'entity_browser:entity_browser'
+  - 'extlink:extlink'
   - 'flag:flag'
   - 'geofield:geofield'
+  - 'media_entity_soundcloud:media_entity_soundcloud'
   - 'original_date:original_date'
   - 'paragraphs:paragraphs'
   - 'pathauto:pathauto'

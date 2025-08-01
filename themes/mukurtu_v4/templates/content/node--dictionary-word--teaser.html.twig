@@ -2,7 +2,7 @@
 /**
  * @file
  * Theme override to display a dictionary word teaser node,
- * as seen on /dictionary. 
+ * as seen on /dictionary.
  *
  * Available variables:
  * - node: The node entity with limited access to object properties and methods.
@@ -69,12 +69,12 @@
  */
 #}
 
-{% if (node.field_thumbnail.value is not empty or 
-  content.field_word_entry.0['#paragraph'].field_translation is not empty or 
-  content.field_word_entry.0['#paragraph'].field_recording is not empty) %}
+{% if (node.field_thumbnail.value is not empty or
+  content.field_word_entry.0['#paragraph'].field_translation is not empty or
+  content.field_word_entry.0['#paragraph'].field_recording is not empty) or
+  content.field_recording is not empty %}
   {% set teaser_content = true %}
 {% endif %}
-
 
 <article{{ attributes.addClass('dictionary-word__teaser') }}>
   {{ title_prefix }}
@@ -94,9 +94,8 @@
       {{ content.field_thumbnail }}
       {# Recording. #}
       {{ content.field_word_entry.0['#paragraph']|view('teaser') }}
-      
+      {{ content.field_recording }}
     </div>
   </div>
   {% endif %}
-
 </article>

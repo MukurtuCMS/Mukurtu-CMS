@@ -13,15 +13,27 @@ name: 'Basic HTML'
 format: basic_html
 weight: 0
 filters:
-  filter_html:
-    id: filter_html
-    provider: filter
-    status: true
-    weight: -10
+  blazy_filter:
+    id: blazy_filter
+    provider: blazy
+    status: false
+    weight: 3
     settings:
-      allowed_html: '<br> <p> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <span> <img src alt height width data-entity-type data-entity-uuid data-align data-caption> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title> <iframe src width height frameborder allowfullscreen> <a hreflang href> <blockquote cite> <ul type> <ol type start> <drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align> <strong> <em> <code> <li>'
-      filter_html_help: false
-      filter_html_nofollow: false
+      filter_tags:
+        img: img
+        iframe: iframe
+      media_switch: ''
+      box_style: ''
+      box_media_style: ''
+      hybrid_style: ''
+      use_data_uri: '0'
+      box_caption: ''
+  editor_file_reference:
+    id: editor_file_reference
+    provider: editor
+    status: true
+    weight: 11
+    settings: {  }
   filter_align:
     id: filter_align
     provider: filter
@@ -34,17 +46,26 @@ filters:
     status: true
     weight: 8
     settings: {  }
+  filter_html:
+    id: filter_html
+    provider: filter
+    status: true
+    weight: -10
+    settings:
+      allowed_html: '<br> <p> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <span> <img src alt height width data-entity-type data-entity-uuid data-align data-caption> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title> <iframe src width height frameborder allowfullscreen> <a hreflang href> <blockquote cite> <ul type> <ol type start> <drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align> <strong> <em> <code> <li>'
+      filter_html_help: false
+      filter_html_nofollow: false
   filter_html_image_secure:
     id: filter_html_image_secure
     provider: filter
     status: true
     weight: 9
     settings: {  }
-  editor_file_reference:
-    id: editor_file_reference
-    provider: editor
+  filter_htmlcorrector:
+    id: filter_htmlcorrector
+    provider: filter
     status: true
-    weight: 11
+    weight: 10
     settings: {  }
   media_embed:
     id: media_embed
@@ -60,27 +81,8 @@ filters:
       allowed_media_types:
         audio: audio
         document: document
+        external_embed: external_embed
         image: image
         remote_video: remote_video
+        soundcloud: soundcloud
         video: video
-  filter_htmlcorrector:
-    id: filter_htmlcorrector
-    provider: filter
-    status: true
-    weight: 10
-    settings: {  }
-  blazy_filter:
-    id: blazy_filter
-    provider: blazy
-    status: false
-    weight: 3
-    settings:
-      media_switch: ''
-      hybrid_style: ''
-      box_style: ''
-      box_media_style: ''
-      box_caption: ''
-      filter_tags:
-        img: img
-        iframe: iframe
-      use_data_uri: '0'

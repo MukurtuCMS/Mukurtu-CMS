@@ -11,6 +11,7 @@ dependencies:
     - field_group
     - media_library
     - mukurtu_core
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - original_date
     - paragraphs
@@ -21,8 +22,9 @@ third_party_settings:
     group_main_tab:
       children:
         - group_mukurtu_essentials
-        - group_text_sections
-        - group_relations
+        - group_biography
+        - group_additional_fields
+        - group_related_content
       label: 'Main Tab'
       region: content
       parent_name: ''
@@ -42,9 +44,7 @@ third_party_settings:
         - field_date_born
         - field_date_died
         - field_deceased
-        - field_keywords
-        - field_coverage
-        - field_coverage_description
+        - field_representative_terms
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -57,27 +57,11 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
-    group_relations:
+    group_biography:
       children:
-        - field_related_people
-        - field_related_content
-        - field_representative_terms
-      label: Relations
-      region: content
-      parent_name: group_main_tab
-      weight: 22
-      format_type: tab
-      format_settings:
-        classes: ''
-        show_empty_fields: false
-        id: ''
-        formatter: closed
-        description: ''
-        required_fields: true
-    group_text_sections:
-      children:
+        - group_related_people       
         - field_sections
-      label: 'Text Sections'
+      label: 'Biography'
       region: content
       parent_name: group_main_tab
       weight: 21
@@ -89,6 +73,88 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
+    group_additional_fields:
+      children:
+        - field_keywords
+        - group_locations
+        - group_local_contexts
+      label: 'Additional Fields'
+      region: content
+      parent_name: group_main_tab
+      weight: 22
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_related_content:
+      children:
+        - field_related_content
+      label: 'Related Content'
+      region: content
+      parent_name: group_main_tab
+      weight: 23
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_related_people:
+      children:
+        - field_related_people
+      label: 'Related People'
+      region: content
+      parent_name: group_biography
+      weight: 1
+      format_type: details
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        open: true
+        description: ''
+        required_fields: true
+    group_local_contexts:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: 'Local Contexts'
+      region: content
+      parent_name: group_additional_fields
+      weight: 25
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Locations'
+      region: content
+      parent_name: group_additional_fields
+      weight: 24
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true       
 id: node.person.default
 targetEntityType: node
 bundle: person
@@ -96,44 +162,44 @@ mode: default
 content:
   comment:
     type: comment_default
-    weight: 9
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
   created:
     type: datetime_timestamp
-    weight: 2
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
   draft:
     type: boolean_checkbox
-    weight: 7
+    weight: 30
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   field_coverage:
     type: geofield_mukurtu
-    weight: 31
+    weight: 10
     region: content
     settings:
       geometry_validation: 0
       map:
         leaflet_map: 'OSM Mapnik'
         height: '400'
-        locate: '1'
         auto_center: '1'
         scroll_zoom_enabled: '1'
         map_position:
           zoom: '12'
-          minZoom: '1'
+          minZoom: '3'
           maxZoom: '18'
           zoomFiner: '0'
           force: 0
           center:
             lat: '0'
             lon: '0'
+          zoomControlPosition: topleft
       toolbar:
         position: topright
         marker: defaultMarker
@@ -148,8 +214,8 @@ content:
         cutPolygon: 0
         rotateMode: 0
       reset_map:
-        position: topright
         control: 0
+        options: '{"position":"topleft","title":"Reset View"}'
       fullscreen:
         options: '{"position":"topleft","pseudoFullscreen":false}'
         control: 0
@@ -161,17 +227,26 @@ content:
         control: false
         settings:
           position: topright
-          input_size: 25
+          input_size: 20
           providers: {  }
           min_terms: 4
           delay: 800
           zoom: 16
           popup: false
           options: ''
+      map_scale:
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+        control: 0
+      locate:
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        automatic: '1'
+        control: 0
+      feature_properties:
+        values: ''
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea
-    weight: 32
+    weight: 11
     region: content
     settings:
       rows: 5
@@ -179,25 +254,25 @@ content:
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: 5
+    weight: 4
     region: content
     settings: {  }
     third_party_settings: {  }
   field_date_born:
     type: original_date_text
-    weight: 6
+    weight: 7
     region: content
     settings: {  }
     third_party_settings: {  }
   field_date_died:
     type: original_date_text
-    weight: 7
+    weight: 8
     region: content
     settings: {  }
     third_party_settings: {  }
   field_deceased:
     type: boolean_checkbox
-    weight: 8
+    weight: 9
     region: content
     settings:
       display_label: true
@@ -212,12 +287,41 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_media_assets:
-    type: media_library_widget
-    weight: 4
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 26
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 25
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_location:
+    type: entity_reference_autocomplete
+    weight: 12
     region: content
     settings:
-      media_types: {  }
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_media_assets:
+    type: media_library_widget
+    weight: 6
+    region: content
+    settings:
+      media_types: 
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
     third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget
@@ -227,22 +331,21 @@ content:
     third_party_settings: {  }
   field_related_content:
     type: entity_browser_entity_reference
-    weight: 1
+    weight: 6
     region: content
     settings:
-      entity_browser: browse_content
-      field_widget_display: rendered_entity
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
-      field_widget_display_settings:
-        view_mode: content_browser
+      open: true
+      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_related_people:
     type: paragraphs
-    weight: 0
+    weight: 5
     region: content
     settings:
       title: 'Related People'
@@ -261,7 +364,7 @@ content:
     third_party_settings: {  }
   field_representative_terms:
     type: entity_browser_entity_reference
-    weight: 2
+    weight: 5
     region: content
     settings:
       entity_browser: mukurtu_taxonomy_record_term_browser
@@ -269,14 +372,14 @@ content:
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
+      open: true
       field_widget_display_settings:
         view_mode: default
       selection_mode: selection_append
     third_party_settings: {  }
   field_sections:
     type: paragraphs
-    weight: 1
+    weight: 2
     region: content
     settings:
       title: Section
@@ -302,13 +405,13 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 5
+    weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
   promote:
     type: boolean_checkbox
-    weight: 3
+    weight: 4
     region: content
     settings:
       display_label: true
@@ -322,7 +425,7 @@ content:
     third_party_settings: {  }
   sticky:
     type: boolean_checkbox
-    weight: 4
+    weight: 5
     region: content
     settings:
       display_label: true
@@ -346,7 +449,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   url_redirects:
-    weight: 6
+    weight: 7
     region: content
     settings: {  }
     third_party_settings: {  }

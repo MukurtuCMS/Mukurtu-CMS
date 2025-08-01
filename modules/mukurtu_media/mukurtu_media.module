@@ -14,6 +14,7 @@ use Drupal\mukurtu_media\Entity\RemoteVideo;
 use Drupal\mukurtu_media\Entity\Video;
 use Drupal\mukurtu_media\Entity\ExternalEmbed;
 use Drupal\mukurtu_media\Form\ExternalEmbedForm;
+use Drupal\mukurtu_media\Entity\SoundCloud;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -39,6 +40,9 @@ function mukurtu_media_entity_bundle_info_alter(array &$bundles): void
   if (isset($bundles['media']['external_embed'])) {
     $bundles['media']['external_embed']['class'] = ExternalEmbed::class;
   }
+  if (isset($bundles['media']['soundcloud'])) {
+    $bundles['media']['soundcloud']['class'] = SoundCloud::class;
+  }
 }
 
 /**
@@ -49,6 +53,9 @@ function mukurtu_media_media_source_info_alter(array &$sources)
   if (empty($sources['external_embed']['forms']['media_library_add'])) {
     $sources['external_embed']['forms']['media_library_add'] = ExternalEmbedForm::class;
   }
+  if (empty($sources['soundcloud']['forms']['media_library_add'])) {
+    $sources['soundcloud']['forms']['media_library_add'] = SoundCloud::class;
+  }
 }
 
 /**
@@ -56,12 +63,13 @@ function mukurtu_media_media_source_info_alter(array &$sources)
  */
 function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_type){
   if ($entity_type->id() == 'media') {
-    $fields = Document::bundleFieldDefinitions($entity_type, 'document', []);
-    $fields += Audio::bundleFieldDefinitions($entity_type, 'audio', []);
+    $fields = Audio::bundleFieldDefinitions($entity_type, 'audio', []);
+    $fields += Document::bundleFieldDefinitions($entity_type, 'document', []);
+    $fields += ExternalEmbed::bundleFieldDefinitions($entity_type, 'external_embed', []);
     $fields += Image::bundleFieldDefinitions($entity_type, 'image', []);
     $fields += RemoteVideo::bundleFieldDefinitions($entity_type, 'remote_video', []);
+    $fields += SoundCloud::bundleFieldDefinitions($entity_type, 'soundcloud', []);
     $fields += Video::bundleFieldDefinitions($entity_type, 'video', []);
-    $fields += ExternalEmbed::bundleFieldDefinitions($entity_type, 'external_embed', []);
     return $fields;
   }
 }

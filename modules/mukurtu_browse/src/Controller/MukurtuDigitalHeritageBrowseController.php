@@ -53,8 +53,8 @@ class MukurtuDigitalHeritageBrowseController extends ControllerBase {
       '#value' => $this->t('Map'),
       '#attributes' => [
         'id' => 'mukurtu-browse-map',
-        'aria-label' => t('Switch to Map'),
-      ], 
+        'aria-label' => $this->t('Switch to Map'),
+      ],
     ];
 
     // Render the browse view block. This is the list display.

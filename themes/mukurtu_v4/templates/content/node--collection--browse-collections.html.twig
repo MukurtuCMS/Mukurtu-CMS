@@ -85,7 +85,9 @@
 </div>
 
   <div class="collections__content__view-collection">
-    <a href="{{ url }}" rel="bookmark">{{ 'View Collection'|t }}</a>
+    <a href="{{ url }}" rel="bookmark" aria-hidden="true" tabindex="-1">
+      {{ 'View Collection'|t }}
+    </a>
     {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
   </div>
 </div>

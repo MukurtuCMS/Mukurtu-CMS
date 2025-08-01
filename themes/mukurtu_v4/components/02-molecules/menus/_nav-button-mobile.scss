@@ -1,0 +1,121 @@
+/**
+ * @file
+ * Nav Button Mobile.
+ */
+
+@use "../../../external/include-media";
+
+.mobile-buttons {
+  grid-column: -2 / -1;
+
+  @include include-media.media('>=lg') {
+    body:not(.is-always-mobile-nav) & {
+      display: none;
+    }
+  }
+
+  .is-overlay-active & {
+    position: absolute;
+    inset-block-start: calc(var(--v-space-2xs) + var(--drupal-displace-offset-top, 0px));
+    inset-inline-end: var(--v-space-xs);
+  }
+}
+
+/* Text that says "menu". */
+.mobile-nav-button__label {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  inline-size: 1px;
+  block-size: 1px;
+  word-wrap: normal;
+
+  @include include-media.media('>=sm') {
+    position: static;
+    overflow: visible;
+    clip: auto;
+    inline-size: auto;
+    block-size: auto;
+    margin-inline-end: 12px;
+    letter-spacing: 0.05em;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-primary);
+  }
+}
+
+.mobile-nav-button {
+  position: relative;
+  z-index: 505; /* Appear above mobile nav. */
+  display: flex;
+  align-items: center;
+  align-self: center;
+  inline-size: var(--v-space-2xs);
+  block-size: var(--v-space-2xs);
+  margin-inline: auto -6px;
+  padding:0;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  appearance: none;
+
+  &:focus {
+    outline: solid 2px var(--brand-primary-dark);
+    outline-offset: 5px;
+    background-color: transparent;
+  }
+
+  &:hover, &:focus, &:active, &:focus-visible {
+    background-color: transparent;
+  }
+
+  &:active {
+    color: inherit; /* Override Safari's default UA styles. */
+  }
+
+  @include include-media.media('>=sm') {
+    display: inline-flex;
+    inline-size: auto;
+  }
+}
+
+.mobile-nav-button__icon {
+  position: relative;
+  display: block;
+  inline-size: var(--v-space-2xs);
+  block-size: 0;
+  border-block-start: solid 3px var(--brand-primary);
+
+  &::before,
+  &::after {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: 0;
+    content: "";
+    transition: transform 0.2s;
+    border-block-start: solid 3px var(--brand-primary);
+  }
+
+  &::before {
+    transform: translateY(-11px);
+  }
+
+  &::after {
+    transform: translateY(5px);
+  }
+}
+
+.mobile-nav-button[aria-expanded="true"] .mobile-nav-button__icon {
+  border-block-start-color: transparent;
+
+  &::before {
+    transform: translateY(-3px) rotate(-45deg);
+  }
+
+  &::after {
+    transform: translateY(-3px) rotate(45deg);
+  }
+}

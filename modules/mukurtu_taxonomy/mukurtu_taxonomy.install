@@ -4,17 +4,3 @@
  * @file
  * Install, update and uninstall functions for the mukurtu_taxonomy module.
  */
-
-use Drupal\taxonomy\Entity\Term;
-
-/**
- * Implements hook_install().
- */
-function mukurtu_taxonomy_install() {
-  // Create a default category.
-  $term = Term::create([
-    'vid' => 'category',
-    'name' => 'Default',
-  ]);
-  $term->save();
-}

@@ -35,7 +35,7 @@ use Exception;
  *   ),
  *   handlers = {
  *     "storage" = "Drupal\mukurtu_protocol\CommunityStorage",
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "view_builder" = "Drupal\mukurtu_protocol\Entity\CommunityViewBuilder",
  *     "list_builder" = "Drupal\mukurtu_protocol\CommunityListBuilder",
  *     "views_data" = "Drupal\mukurtu_protocol\Entity\CommunityViewsData",
  *     "translation" = "Drupal\mukurtu_protocol\CommunityTranslationHandler",
@@ -81,7 +81,7 @@ use Exception;
  *     "revision_revert" = "/communities/community/{community}/revisions/{community_revision}/revert",
  *     "revision_delete" = "/communities/community/{community}/revisions/{community_revision}/delete",
  *     "translation_revert" = "/communities/community/{community}/revisions/{community_revision}/revert/{langcode}",
- *     "collection" = "/dashboard/communities",
+ *     "collection" = "/admin/communities",
  *   },
  *   field_ui_base_route = "community.settings"
  * )
@@ -487,6 +487,69 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function getMembershipDisplay()
+  {
+    return $this->get('field_membership_display')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMembershipDisplay($membershipDisplay)
+  {
+    $this->set('field_membership_display', $membershipDisplay);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMembersList()
+  {
+    $members = [];
+    $memberIds = [];
+    $displaySetting = $this->getMembershipDisplay();
+    if (strcmp($displaySetting, 'none') !== 0) {
+      $query = \Drupal::entityQuery('og_membership')
+        ->condition('entity_type', 'community')
+        ->condition('entity_id', $this->id())
+        ->accessCheck(FALSE);
+      $communityOgMembershipIds = $query->execute();
+
+      // Ensure loadMultiple() never accepts NULL as argument. If it does, it'll
+      // load every single entity of the type specified in getStorage(), which
+      // would tank site performance.
+      if ($communityOgMembershipIds) {
+        $communityOgMemberships = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($communityOgMembershipIds);
+      }
+
+      switch ($displaySetting) {
+        case 'all':
+          foreach ($communityOgMemberships as $membership) {
+            array_push($memberIds, $membership->getOwnerId());
+          }
+          break;
+        case 'managers':
+          foreach ($communityOgMemberships as $membership) {
+            if ($membership->hasRole('community-community-community_manager')) {
+              array_push($memberIds, $membership->getOwnerId());
+            }
+          }
+          break;
+      }
+
+      // Ensure loadMultiple() never accepts NULL as argument.
+      if ($memberIds) {
+        $members = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($memberIds);
+      }
+    }
+
+    return $members;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -611,13 +674,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setTranslatable(TRUE);
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Sharing Protocol'))
-      ->setDescription(t('Open - Your community page is visible to all visitors of your site. Any items under open protocols are also accessible.<br>
-Strict - Your community page is invisible to all site users who are not members or your community. All protocols created within this community are inaccessible to users outside of this community.'))
+      ->setLabel(t('Community page visibility'))
+      ->setDescription(t('Community only - This community page is only visible to members of this community.<br>Public - This community page is visible to all site members and visitors, with no login required.'))
       ->setSettings([
         'allowed_values' => [
-          'strict' => 'Strict',
-          'open' => 'Open',
+          'community-only' => 'Community only',
+          'public' => 'Public',
         ],
       ])
       ->setDisplayOptions('view', [
@@ -629,7 +691,7 @@ Strict - Your community page is invisible to all site users who are not members 
         'type' => 'options_buttons',
         'weight' => 10,
       ])
-      ->setDefaultValue('strict')
+      ->setDefaultValue('community-only')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
@@ -679,6 +741,7 @@ Strict - Your community page is invisible to all site users who are not members 
 
     $fields['field_banner_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Banner Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -698,6 +761,7 @@ Strict - Your community page is invisible to all site users who are not members 
 
     $fields['field_thumbnail_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Thumbnail Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -713,6 +777,24 @@ Strict - Your community page is invisible to all site users who are not members 
         'weight' => 20,
       ])
       ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_membership_display'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Membership Display'))
+      ->setDescription('TODO: Description')
+      ->setSettings([
+        'allowed_values' => [
+          'none' => 'Do not display member list',
+          'managers' => 'Display community managers',
+          'all' => 'Display all members',
+        ],
+      ])
+      ->setDefaultValue('none')
+      ->setCardinality(1)
+      ->setRequired(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
       ->setDisplayConfigurable('form', TRUE);
 
     return $fields;

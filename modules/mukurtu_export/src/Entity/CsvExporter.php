@@ -53,11 +53,11 @@ use Drupal\user\UserInterface;
  *   },
  *   admin_permission = "administer site configuration",
  *   links = {
- *     "canonical" = "/dashboard/export/format/csv/manage/{csv_exporter}",
- *     "add-form" = "/dashboard/export/format/csv/add",
- *     "edit-form" = "/dashboard/export/format/csv/manage/{csv_exporter}",
- *     "delete-form" = "/dashboard/export/format/csv/manage/{csv_exporter}/delete",
- *     "collection" = "/dashboard/export/settings/csv",
+ *     "canonical" = "/admin/export/format/csv/manage/{csv_exporter}",
+ *     "add-form" = "/admin/export/format/csv/add",
+ *     "edit-form" = "/admin/export/format/csv/manage/{csv_exporter}",
+ *     "delete-form" = "/admin/export/format/csv/manage/{csv_exporter}/delete",
+ *     "collection" = "/admin/export/settings/csv",
  *   }
  * )
  */

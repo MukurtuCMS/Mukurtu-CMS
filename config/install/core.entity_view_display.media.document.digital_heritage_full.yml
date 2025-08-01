@@ -19,9 +19,10 @@ bundle: document
 mode: digital_heritage_full
 content:
   field_media_document:
-    type: file_url_plain
-    label: hidden
-    settings: {  }
+    type: file_default
+    label: above
+    settings:
+      use_description_as_link_text: true
     third_party_settings: {  }
     weight: 1
     region: content

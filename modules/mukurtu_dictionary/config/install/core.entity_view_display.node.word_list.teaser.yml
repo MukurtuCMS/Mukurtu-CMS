@@ -4,7 +4,7 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.word_list.comment
-    - image.style.small_250px_w_
+    - image.style.large
     - node.type.word_list
   module:
     - layout_builder
@@ -19,20 +19,12 @@ targetEntityType: node
 bundle: word_list
 mode: teaser
 content:
-  field_communities:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 1
-    region: content
   field_representative_media:
     type: media_thumbnail
     label: hidden
     settings:
       image_link: ''
-      image_style: small_250px_w_
+      image_style: large
       image_loading:
         attribute: lazy
     third_party_settings: {  }
@@ -43,12 +35,14 @@ hidden:
   draft: true
   field_all_related_content: true
   field_citation: true
+  field_communities: true
   field_coverage: true
   field_coverage_description: true
   field_cultural_protocols: true
   field_description: true
   field_in_collection: true
   field_keywords: true
+  field_location: true
   field_media_assets: true
   field_multipage_page_of: true
   field_protocol_control: true

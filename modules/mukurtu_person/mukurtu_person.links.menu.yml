@@ -1,6 +1,6 @@
 mukurtu_person.create_person:
-  title: 'Person'
-  description: 'Add Person'
+  title: 'Person record'
+  description: 'Add person record'
   parent: mukurtu_core.create_content
   menu_name: mukurtu
   route_name: mukurtu_core.add

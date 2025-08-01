@@ -59,7 +59,8 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
             'document' => 'document',
             'image' => 'image',
             'remote_video' => 'remote_video',
-            'video' => 'video'
+            'video' => 'video',
+            'soundcloud' => 'soundcloud'
           ],
           'sort' => [
             'field' => '_none'
@@ -105,7 +106,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('view', TRUE);
 
     $definitions['field_sections'] = BaseFieldDefinition::create('entity_reference_revisions')
-      ->setLabel(t('Biographical Information Sections'))
+      ->setLabel(t('Biography sections'))
       ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'paragraph',
@@ -182,7 +183,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
         'handler' => 'default:taxonomy_term',
         'handler_settings' => [
           'target_bundles' => [
-            'authors' => 'authors',
             'contributor' => 'contributor',
             'creator' => 'creator',
             'people' => 'people',
@@ -205,7 +205,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
-      ->setLabel(t('Location'))
+      ->setLabel(t('Map Points'))
       ->setDescription(t(''))
       ->setCardinality(1)
       ->setRequired(FALSE)
@@ -237,6 +237,26 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create' => TRUE,
         ]
       ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
+      ->setLabel(t('Local Contexts Projects'))
+      ->setDescription(t('Local Contexts projects from the Local Contexts Hub.'))
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
+      ->setLabel(t('Local Contexts Labels and Notices'))
+      ->setDescription(t('Local Contexts Labels and Notices from the Local Contexts Hub.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
