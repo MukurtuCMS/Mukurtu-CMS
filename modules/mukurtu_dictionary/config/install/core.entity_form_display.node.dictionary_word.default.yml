@@ -1,4 +1,4 @@
-langcode: en
+langcode: en 
 status: true
 dependencies:
   config:
@@ -23,7 +23,7 @@ third_party_settings:
         - group_mukurtu_essentials
         - group_additional_fields
         - group_entries
-        - group_relations
+        - group_related_content
       label: 'Main Tab'
       region: content
       parent_name: ''
@@ -66,7 +66,7 @@ third_party_settings:
       label: 'Word Entries'
       region: content
       parent_name: group_main_tab
-      weight: 12
+      weight: 11
       format_type: tab
       format_settings:
         classes: ''
@@ -76,10 +76,10 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_relations:
+    group_related_content:
       children:
         - field_related_content
-      label: Relations
+      label: 'Related Content'
       region: content
       parent_name: group_main_tab
       weight: 13
@@ -95,15 +95,12 @@ third_party_settings:
         - field_thumbnail
         - field_media_assets
         - field_keywords
-        - field_coverage
-        - field_coverage_description
-        - field_location
-        - field_local_contexts_projects
-        - field_local_contexts_labels_and_notices
+        - group_locations
+        - group_local_contexts
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
-      weight: 11
+      weight: 12
       format_type: tab
       format_settings:
         classes: ''
@@ -113,6 +110,39 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
+    group_local_contexts:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: 'Local Contexts'
+      region: content
+      parent_name: group_additional_fields
+      weight: 25
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Locations'
+      region: content
+      parent_name: group_additional_fields
+      weight: 24
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true      
 id: node.dictionary_word.default
 targetEntityType: node
 bundle: dictionary_word
@@ -138,7 +168,7 @@ content:
       display_label: true
     third_party_settings: {  }
   field_additional_word_entries:
-    type: entity_reference_paragraphs
+    type: paragraphs
     weight: 14
     region: content
     settings:
@@ -321,7 +351,14 @@ content:
     weight: -1
     region: content
     settings:
-      media_types: {  }
+      media_types: 
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
     third_party_settings: {  }
   field_mukurtu_protocol_inherit:
     type: entity_browser_entity_reference
@@ -380,7 +417,9 @@ content:
     weight: -1
     region: content
     settings:
-      media_types: {  }
+      media_types: 
+        - audio
+        - soundcloud
     third_party_settings: {  }
   field_related_content:
     type: entity_browser_entity_reference

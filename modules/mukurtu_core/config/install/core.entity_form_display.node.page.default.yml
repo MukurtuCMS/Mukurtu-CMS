@@ -35,7 +35,14 @@ content:
     weight: 2
     region: content
     settings:
-      media_types: {  }
+      media_types:
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
     third_party_settings: {  }
   langcode:
     type: language_select

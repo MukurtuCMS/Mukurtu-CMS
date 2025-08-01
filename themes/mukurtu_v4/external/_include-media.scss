@@ -194,11 +194,10 @@ $im-no-media-expressions: (
 
   @else {
     @warn $message;
-    $_: noop(
-  );
-}
+    $_: noop();
+  }
 
-@return $message;
+  @return $message;
 }
 
 ///

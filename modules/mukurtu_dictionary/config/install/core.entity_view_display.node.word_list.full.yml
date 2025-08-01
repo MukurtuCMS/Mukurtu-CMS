@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_display.comment.comment.default
     - core.entity_view_mode.node.full
     - field.field.node.word_list.comment
     - node.type.word_list
@@ -9,6 +10,7 @@ dependencies:
     - layout_builder
     - mukurtu_core
     - mukurtu_local_contexts
+    - mukurtu_protocol
     - text
     - user
 third_party_settings:
@@ -20,6 +22,15 @@ targetEntityType: node
 bundle: word_list
 mode: full
 content:
+  comment:
+    type: mukurtu_comment_default
+    label: above
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    weight: 11
+    region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
     label: hidden
@@ -28,7 +39,7 @@ content:
       leaflet_map: 'OSM Mapnik'
       height: 400
       height_unit: px
-      hide_empty_map: false
+      hide_empty_map: true
       disable_wheel: false
       gesture_handling: false
       fitbounds_options: '{"padding":[0,0]}'
@@ -51,8 +62,6 @@ content:
         control: '1'
         content: ''
         options: '{"maxWidth":"300","minWidth":"50","autoPan":true}'
-        value: ''
-        view_mode: full
       map_position:
         force: false
         center:
@@ -115,6 +124,12 @@ content:
           set_marker: false
       map_lazy_load:
         lazy_load: false
+      geojson_overlays:
+        sources:
+          fields: {  }
+        path: '{"color":"#f71ed3","opacity":"0.7","stroke":true,"weight":2,"fillColor":"#ffddfe","fillOpacity":"0.1","radius":3,"dashArray":"5, 5"}'
+        zoom_to_geojson: true
+        snapping: true
     third_party_settings: {  }
     weight: 5
     region: content

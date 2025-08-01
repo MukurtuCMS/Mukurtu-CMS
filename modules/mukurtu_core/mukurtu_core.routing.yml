@@ -14,8 +14,9 @@ mukurtu_core.dashboard:
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
 
+
 mukurtu_core.add_page:
-  path: '/dashboard/node/add'
+  path: '/admin/node/add'
   defaults:
     _title: 'Add content'
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuManageContentController::addPage'
@@ -25,7 +26,7 @@ mukurtu_core.add_page:
     _entity_create_any_access: 'node'
 
 mukurtu_core.add:
-  path: '/dashboard/node/add/{node_type}'
+  path: '/admin/node/add/{node_type}'
   defaults:
     _entity_form: 'node.default'
     _title_callback: '\Drupal\node\Controller\NodeController::addPageTitle'
@@ -39,7 +40,7 @@ mukurtu_core.add:
         with_config_overrides: TRUE
 
 mukurtu_core.people:
-  path: '/dashboard/admin/people'
+  path: '/admin/people'
   defaults:
     _entity_list: 'user'
     _title: 'People - All User Accounts'

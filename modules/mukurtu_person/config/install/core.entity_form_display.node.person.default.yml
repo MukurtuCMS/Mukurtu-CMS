@@ -22,8 +22,9 @@ third_party_settings:
     group_main_tab:
       children:
         - group_mukurtu_essentials
-        - group_text_sections
-        - group_relations
+        - group_biography
+        - group_additional_fields
+        - group_related_content
       label: 'Main Tab'
       region: content
       parent_name: ''
@@ -43,10 +44,7 @@ third_party_settings:
         - field_date_born
         - field_date_died
         - field_deceased
-        - field_keywords
-        - field_coverage
-        - field_coverage_description
-        - field_location
+        - field_representative_terms
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -59,15 +57,14 @@ third_party_settings:
         formatter: open
         description: ''
         required_fields: true
-    group_relations:
+    group_biography:
       children:
-        - field_representative_terms
-        - field_related_content
-        - group_related_people
-      label: Relations
+        - group_related_people       
+        - field_sections
+      label: 'Biography'
       region: content
       parent_name: group_main_tab
-      weight: 22
+      weight: 21
       format_type: tab
       format_settings:
         classes: ''
@@ -76,13 +73,31 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-    group_text_sections:
+    group_additional_fields:
       children:
-        - field_sections
-      label: 'Text Sections'
+        - field_keywords
+        - group_locations
+        - group_local_contexts
+      label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
-      weight: 21
+      weight: 22
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_related_content:
+      children:
+        - field_related_content
+      label: 'Related Content'
+      region: content
+      parent_name: group_main_tab
+      weight: 23
       format_type: tab
       format_settings:
         classes: ''
@@ -96,8 +111,8 @@ third_party_settings:
         - field_related_people
       label: 'Related People'
       region: content
-      parent_name: group_relations
-      weight: 6
+      parent_name: group_biography
+      weight: 1
       format_type: details
       format_settings:
         classes: ''
@@ -107,6 +122,39 @@ third_party_settings:
         open: true
         description: ''
         required_fields: true
+    group_local_contexts:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: 'Local Contexts'
+      region: content
+      parent_name: group_additional_fields
+      weight: 25
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: 'Locations'
+      region: content
+      parent_name: group_additional_fields
+      weight: 24
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true       
 id: node.person.default
 targetEntityType: node
 bundle: person
@@ -126,7 +174,7 @@ content:
     third_party_settings: {  }
   draft:
     type: boolean_checkbox
-    weight: 9
+    weight: 30
     region: content
     settings:
       display_label: true
@@ -206,25 +254,25 @@ content:
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: 5
+    weight: 4
     region: content
     settings: {  }
     third_party_settings: {  }
   field_date_born:
     type: original_date_text
-    weight: 6
+    weight: 7
     region: content
     settings: {  }
     third_party_settings: {  }
   field_date_died:
     type: original_date_text
-    weight: 7
+    weight: 8
     region: content
     settings: {  }
     third_party_settings: {  }
   field_deceased:
     type: boolean_checkbox
-    weight: 8
+    weight: 9
     region: content
     settings:
       display_label: true
@@ -241,13 +289,13 @@ content:
     third_party_settings: {  }
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
-    weight: 12
+    weight: 26
     region: content
     settings: {  }
     third_party_settings: {  }
   field_local_contexts_projects:
     type: local_contexts_project
-    weight: 11
+    weight: 25
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -263,10 +311,17 @@ content:
     third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
-    weight: 4
+    weight: 6
     region: content
     settings:
-      media_types: {  }
+      media_types: 
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
     third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget
@@ -276,7 +331,7 @@ content:
     third_party_settings: {  }
   field_related_content:
     type: entity_browser_entity_reference
-    weight: 5
+    weight: 6
     region: content
     settings:
       entity_browser: mukurtu_content_browser
@@ -284,13 +339,13 @@ content:
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
+      open: true
       field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_related_people:
     type: paragraphs
-    weight: 4
+    weight: 5
     region: content
     settings:
       title: 'Related People'
@@ -309,7 +364,7 @@ content:
     third_party_settings: {  }
   field_representative_terms:
     type: entity_browser_entity_reference
-    weight: 4
+    weight: 5
     region: content
     settings:
       entity_browser: mukurtu_taxonomy_record_term_browser
@@ -324,7 +379,7 @@ content:
     third_party_settings: {  }
   field_sections:
     type: paragraphs
-    weight: 1
+    weight: 2
     region: content
     settings:
       title: Section

@@ -23,5 +23,6 @@ mukurtu_community_records.add_new_record:
     parameters:
       node:
         type: entity:node
+    _admin_route: TRUE
   requirements:
     _custom_access: '\Drupal\mukurtu_community_records\Controller\CommunityRecordController::access'

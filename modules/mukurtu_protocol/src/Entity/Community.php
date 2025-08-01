@@ -81,7 +81,7 @@ use Exception;
  *     "revision_revert" = "/communities/community/{community}/revisions/{community_revision}/revert",
  *     "revision_delete" = "/communities/community/{community}/revisions/{community_revision}/delete",
  *     "translation_revert" = "/communities/community/{community}/revisions/{community_revision}/revert/{langcode}",
- *     "collection" = "/dashboard/communities",
+ *     "collection" = "/admin/communities",
  *   },
  *   field_ui_base_route = "community.settings"
  * )
@@ -675,11 +675,11 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Community page visibility'))
-      ->setDescription(t('Strict - This community page is only visible to members of this community.<br>Open - This community page is visible to all site members and visitors, with no login required.'))
+      ->setDescription(t('Community only - This community page is only visible to members of this community.<br>Public - This community page is visible to all site members and visitors, with no login required.'))
       ->setSettings([
         'allowed_values' => [
-          'strict' => 'Strict',
-          'open' => 'Open',
+          'community-only' => 'Community only',
+          'public' => 'Public',
         ],
       ])
       ->setDisplayOptions('view', [
@@ -691,7 +691,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
         'type' => 'options_buttons',
         'weight' => 10,
       ])
-      ->setDefaultValue('strict')
+      ->setDefaultValue('community-only')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
@@ -741,6 +741,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_banner_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Banner Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -760,6 +761,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_thumbnail_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Thumbnail Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -787,21 +789,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
           'all' => 'Display all members',
         ],
       ])
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'list_default',
-        'weight' => 10,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'options_buttons',
-        'weight' => 10,
-      ])
       ->setDefaultValue('none')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('view', FALSE)
       ->setDisplayConfigurable('form', TRUE);
 
     return $fields;

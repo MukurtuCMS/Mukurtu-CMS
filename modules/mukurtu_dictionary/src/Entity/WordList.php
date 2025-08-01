@@ -89,7 +89,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Media Assets'))
+      ->setLabel(t('Image'))
       ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'media',

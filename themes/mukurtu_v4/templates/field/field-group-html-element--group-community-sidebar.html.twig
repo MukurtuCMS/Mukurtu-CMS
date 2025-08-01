@@ -25,25 +25,27 @@
   {% endif %}
   {{ children }}
   <div class="callout">
-    <div class="field__label">{{ 'Digital heritage'|t }}</div>
+    <div class="field__label">{{ 'Browse content'|t }}</div>
     <div class="field__items">
       <div class="field__item">
-        <a href="/digital-heritage?f[0]=community_content_title%3A{{ community_name }}">
-          {{ 'Browse by '|t ~ community_name }}
+        <a href="/browse?f[0]=community_content_title%3A{{ community_name }}">
+          {{ 'Browse all content in '|t ~ community_name }}
         </a>
       </div>
     </div>
   </div>
+  {% if has_lc_projects %}
   <div class="callout">
-    <div class="field__label">{{ 'Local context'|t }}</div>
+    <div class="field__label">{{ 'Local Contexts'|t }}</div>
     <div class="field__items">
       <div class="field__item">
-        <a href="/dashboard/communities/{{ community_id }}/local-contexts/projects">
-          {{ 'Project directory for '|t ~ community_name }}
+        <a href="/admin/communities/{{ community_id }}/local-contexts/projects">
+          {{ 'View '|t ~ community_name ~ '\'s Local Contexts directory'|t}}
         </a>
       </div>
     </div>
   </div>
+  {% endif %}
   {% if collapsible %}
 </div>
 {% endif %}

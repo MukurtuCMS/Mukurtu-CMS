@@ -26,7 +26,7 @@ ddev config --project-type=drupal --docroot=web
 # Optional but recommended: install pdftotext inside the DDEV container:
 echo "RUN sudo apt -qq update; sudo apt install poppler-utils -y;" > .ddev/web-build/Dockerfile.pdftotext
 ddev start
-ddev composer create mukurtu/mukurtu-template:dev-main
+ddev composer create-project mukurtu/mukurtu-template:dev-main
 ddev drush si --site-name=Mukurtu --account-name=admin --account-pass=admin
 ddev launch
 ```

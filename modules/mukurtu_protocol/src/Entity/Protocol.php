@@ -79,7 +79,7 @@ use Exception;
  *     "revision_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert",
  *     "revision_delete" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/delete",
  *     "translation_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert/{langcode}",
- *     "collection" = "/dashboard/protocols",
+ *     "collection" = "/admin/protocols",
  *   },
  *   field_ui_base_route = "protocol.settings"
  * )
@@ -483,7 +483,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
-        'weight' => 5,
         'settings' => [
           'match_operator' => 'CONTAINS',
           'size' => '60',
@@ -509,8 +508,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
         'weight' => -4,
       ])
       ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-        'weight' => -4,
+        'type' => 'string_textfield'
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
@@ -525,7 +523,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'text_textarea_with_summary',
-        'weight' => 0,
         'rows' => 6,
       ])
       ->setDisplayConfigurable('view', TRUE)
@@ -537,8 +534,8 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setRevisionable(FALSE)
       ->setDefaultValue(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', FALSE)
-      ->setDisplayConfigurable('form', FALSE);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['field_comment_require_approval'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Comments Require Approval'))
@@ -546,13 +543,12 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setRevisionable(FALSE)
       ->setDefaultValue(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', FALSE)
-      ->setDisplayConfigurable('form', FALSE);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['status']->setDescription(t('A boolean indicating whether the Protocol is published.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
-        'weight' => 100,
       ]);
 
     $fields['created'] = BaseFieldDefinition::create('created')
@@ -608,6 +604,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_banner_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Banner Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -641,7 +638,6 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ])
       ->setDisplayOptions('form', [
         'type' => 'options_buttons',
-        'weight' => 10,
       ])
       ->setDefaultValue('strict')
       ->setCardinality(1)
@@ -653,6 +649,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_thumbnail_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Thumbnail Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -680,21 +677,12 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
           'all' => 'Display all members',
         ],
       ])
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'list_default',
-        'weight' => 10,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'options_buttons',
-        'weight' => 10,
-      ])
       ->setDefaultValue('none')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('view', FALSE)
       ->setDisplayConfigurable('form', TRUE);
 
     return $fields;

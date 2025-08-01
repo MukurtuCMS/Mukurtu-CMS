@@ -124,7 +124,9 @@ class ProtocolCommunitySelection extends DefaultSelection {
     $query->accessCheck(TRUE);
 
     // Restrict our results to communities with the required memberships.
-    $query->condition('id', $communities, 'IN');
+    if ($communities) {
+      $query->condition('id', $communities, 'IN');
+    }
 
     // If 'target_bundles' is NULL, all bundles are referenceable, no further
     // conditions are needed.

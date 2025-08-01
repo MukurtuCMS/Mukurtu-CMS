@@ -1,0 +1,235 @@
+/**
+ * @file
+ * Nav Primary (wide widths).
+ */
+
+@use "../../../external/include-media";
+
+body:not(.is-always-mobile-nav) {
+  @include include-media.media('>=lg') {
+    & .primary-nav__menu-link-inner {
+      padding-inline: 0;
+    }
+
+    & .primary-nav__menu-item {
+      flex-wrap: nowrap; /* Ensure that sub navigation toggle button doesn't wrap underneath link. */
+
+      &.primary-nav__menu-item--has-children {
+        & .primary-nav__menu-link--link,
+        & .primary-nav__menu-link--nolink {
+          flex-basis: auto;
+        }
+      }
+    }
+
+    & .primary-nav__menu-link {
+      &:focus {
+        position: relative;
+        outline: 0;
+
+        &::before {
+          position: absolute;
+          inset-block-start: 50%;
+          inset-inline-start: 50%;
+          inline-size: calc(100% + var(--v-space-4xxs));
+          block-size: var(--v-space-s);
+          content: "";
+          transform: translate(-50%, -50%);
+
+          /*
+           * Using --brand-primary as --color-primary-50 is not defined in the
+           * theme.
+           */
+          border: solid 2px var(--brand-primary);
+          border-radius: 4px;
+        }
+      }
+    }
+
+    & .primary-nav__menu-link--button {
+      &.primary-nav__menu-link--has-children {
+        overflow: visible; /* Necessary to view icon in IE11 */
+        padding-inline-end: 1rem;
+        margin-inline-end: var(--v-space-3xs);
+
+        &::before {
+          content: none;
+        }
+
+        &:focus::before {
+          inline-size: calc(100% + var(--v-space-3xs));
+          content: "";
+        }
+
+        &:focus, &:hover {
+          border-block-end-color: transparent;
+          background-color: transparent;
+        }
+
+        /* Chevron icon for desktop navigation. */
+        &::after {
+          position: absolute;
+          inset-block-start: 50%;
+          inset-inline-start: calc(100% - 3px);
+          inline-size: 8px;
+          block-size: 8px;
+          margin-block-start: -2px;
+          transform: translateY(-50%) rotate(45deg);
+          border-block-start: 0;
+          border-inline-end: solid 2px var(--brand-primary);;
+          border-block-end: solid 2px var(--brand-primary);;
+        }
+
+        &[aria-expanded="true"]::after {
+          opacity: 1;
+        }
+      }
+    }
+
+    & .primary-nav__menu--level-1 {
+      display: flex;
+      align-items: stretch;
+    }
+
+    & .primary-nav__menu-item--level-1 {
+      position: relative; /* Anchor secondary menu */
+      display: flex;
+      align-items: center;
+      inline-size: max-content;
+      max-inline-size: 250px;
+      margin-block: 0;
+      margin-inline: 0;
+
+      &:not(:last-of-type) {
+        &::after {
+          content: "";
+          border-inline-end: 1.5px solid var(--main-nav-divider);
+          block-size: 45%;
+        }
+      }
+
+      &:last-child {
+        margin-block-end: 0;
+      }
+    }
+
+    & .primary-nav__menu--level-2 {
+      position: absolute;
+      z-index: 105; /* Appear above search container. */
+      inset-block-start: 100%;
+      inset-inline-start: 50%;
+      visibility: hidden;
+      overflow: auto;
+      inline-size: 250px;
+      display: flex;
+
+      /*
+       * Ensure that long level-2 menus will never overflow viewport (focused
+       * elements should always be in viewport per accessibility guidelines).
+       */
+      max-block-size: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--v-space-4xxs));
+      margin-block-start: 0;
+      margin-inline-start: 0;
+      padding-block: var(--v-space-5xs);
+      padding-inline: var(--v-space-5xs);
+      transition: none;
+      transform: translate(-50%, +20px);
+      opacity: 0;
+
+      /*
+       * Using --brand-primary as --color-primary-50 is not defined in the
+       * theme.
+       */
+      border-block-start: solid var(--brand-primary) var(--v-space-5xs);
+      border-inline-end: solid 1px transparent; /* Transparent borders useful for Windows High Contrast mode. */
+      border-block-end: solid 1px transparent;
+      border-inline-start: solid 1px transparent;
+      border-radius: 0 0 2px 2px;
+      background: var(--brand-light);
+      box-shadow: 0 1px 36px rgb(0 0 0 / 8%);
+
+      &.is-active-menu-parent {
+        visibility: visible;
+        margin-block-start: 0;
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+    }
+
+    & .primary-nav__menu-item--level-2 {
+      inline-size: 100%;
+    }
+
+    & .primary-nav__menu-link--level-2 {
+      display: block;
+      padding-block: var(--v-space-6xs);
+      padding-inline: var(--v-space-5xs);
+
+      &:focus::before {
+        inset-block-start: 0;
+        inset-inline-start: calc(var(--v-space-5xs) * -1);
+        block-size: 100%;
+        transform: none;
+      }
+
+      & .primary-nav__menu-link-inner {
+        padding-block: var(--v-space-5xs);
+        padding-inline: 0;
+      }
+    }
+
+    /**
+     * Arrow is placed outside of submenu because the submenu has the
+     * `overflow: hidden` CSS rule applied.
+     */
+    & .primary-nav__menu-caret {
+      position: absolute;
+      z-index: 105; /* Match level 2 menus. */
+      inset-block-start: calc(100% - 6px);
+      inset-inline-start: 50%;
+      visibility: hidden;
+      inline-size: 0;
+      block-size: 0;
+      transform: translate(-50%, 20px);
+      opacity: 0;
+
+      /*
+       * Using --brand-primary as --color-primary-50 is not defined in the
+       * theme.
+       */
+      border-inline-end: solid 10px transparent;
+      border-block-end: solid 10px var(--brand-primary);
+      border-inline-start: solid 10px transparent;
+
+      &.is-active-menu-parent {
+        visibility: visible;
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+    }
+
+    /**
+     * When ensuring that long menus don't overflow viewport, we can give a
+     * little extra room when the toolbar is fixed (and is shorter).
+     */
+    & .is-fixed .primary-nav__menu--level-2 {
+      max-block-size: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--v-space-4xxs) + var(--v-space-4xl));
+    }
+  }
+}
+
+/*
+ * Only apply transition styles to menu when JS is loaded. This
+ * works around https://bugs.chromium.org/p/chromium/issues/detail?id=332189
+ */
+html.js body:not(.is-always-mobile-nav) {
+  @include include-media.media('>=lg') {
+    & .primary-nav__menu--level-2,
+    & .primary-nav__menu-caret {
+      transition:
+        visibility 0.2s,
+        transform 0.2s,
+        opacity 0.2s;
+    }
+  }
+}

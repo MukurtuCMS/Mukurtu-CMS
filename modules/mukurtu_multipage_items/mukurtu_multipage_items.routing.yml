@@ -50,6 +50,7 @@ mukurtu_multipage_items.new_multipage_from_node:
     parameters:
       node:
         type: entity:node
+    _admin_route: TRUE
   requirements:
     _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::newFromNodeAccess'
 
@@ -74,6 +75,7 @@ mukurtu_multipage_items.add:
     _entity_create_access: 'node:{node_type}'
   options:
     _node_operation_route: TRUE
+    _admin_route: TRUE
     parameters:
       node_type:
         type: entity:node_type
@@ -89,6 +91,7 @@ mukurtu_multipage_items.multipage_add_new_page:
     parameters:
       node:
         type: entity:node
+    _admin_route: TRUE
   requirements:
     _custom_access: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::editAccess'
 

@@ -59,6 +59,7 @@ third_party_settings:
         - field_transcription
         - field_all_related_content
         - field_citation
+        - comment
       label: 'Primary Fields'
       parent_name: ''
       region: content
@@ -169,7 +170,7 @@ content:
       view_mode: default
       pager_id: 0
     third_party_settings: {  }
-    weight: 2
+    weight: 44
     region: content
   field_all_community_records:
     type: entity_reference_label

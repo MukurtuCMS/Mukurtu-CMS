@@ -106,7 +106,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('view', TRUE);
 
     $definitions['field_sections'] = BaseFieldDefinition::create('entity_reference_revisions')
-      ->setLabel(t('Biographical Information Sections'))
+      ->setLabel(t('Biography sections'))
       ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'paragraph',
@@ -183,7 +183,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
         'handler' => 'default:taxonomy_term',
         'handler_settings' => [
           'target_bundles' => [
-            'authors' => 'authors',
             'contributor' => 'contributor',
             'creator' => 'creator',
             'people' => 'people',

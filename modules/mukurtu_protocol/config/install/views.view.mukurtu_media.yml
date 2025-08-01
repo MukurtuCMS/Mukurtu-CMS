@@ -6,7 +6,7 @@ dependencies:
   module:
     - image
     - media
-    - user
+    - mukurtu_protocol
 id: mukurtu_media
 label: 'Mukurtu Media'
 module: views
@@ -519,6 +519,7 @@ display:
         type: full
         options:
           offset: 0
+          pagination_heading_level: h4
           items_per_page: 50
           total_pages: null
           id: 0
@@ -536,7 +537,6 @@ display:
             offset: false
             offset_label: Offset
           quantity: 9
-          pagination_heading_level: h4
       exposed_form:
         type: basic
         options:
@@ -548,9 +548,17 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: perm
+        type: site_and_mukurtu_role
         options:
-          perm: 'access media overview'
+          site-role: {  }
+          community-role: {  }
+          protocol-role:
+            protocol-protocol-community_record_steward: protocol-protocol-community_record_steward
+            protocol-protocol-contributor: protocol-protocol-contributor
+            protocol-protocol-curator: protocol-protocol-curator
+            protocol-protocol-language_contributor: protocol-protocol-language_contributor
+            protocol-protocol-language_steward: protocol-protocol-language_steward
+            protocol-protocol-protocol_steward: protocol-protocol-protocol_steward
       cache:
         type: tag
         options: {  }
@@ -884,8 +892,7 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
-        - user
-        - user.permissions
+        - user.roles
       tags: {  }
   media_page_list:
     id: media_page_list
@@ -895,7 +902,7 @@ display:
     display_options:
       display_description: ''
       display_extenders: {  }
-      path: dashboard/media
+      path: admin/media
       menu:
         type: tab
         title: Media
@@ -912,6 +919,5 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
-        - user
-        - user.permissions
+        - user.roles
       tags: {  }

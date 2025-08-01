@@ -29,6 +29,7 @@
         "drupal/entity_browser": "*",
         "drupal/entity_embed": "*",
         "drupal/entity_reference_revisions": "*",
+        "drupal/extlink": "^2.0",
         "drupal/facets": "^3.0",
         "drupal/facets_reset_button": "^1.0",
         "drupal/features": "^3.14",
@@ -36,7 +37,11 @@
         "drupal/flag": "*",
         "drupal/geofield": "^1.59",
         "drupal/geolocation": "*",
-        "drupal/google_analytics": "*",
+        "drupal/gin": "^4.0",
+        "drupal/gin_lb": "^2.0@beta",
+        "drupal/gin_toolbar": "^2.0",
+        "drupal/google_tag": "^2.0",
+        "drupal/layout_builder_restrictions": "^3.0",
         "drupal/leaflet": "^10.2",
         "drupal/media_entity_soundcloud": "^3.2",
         "drupal/message": "^1.5",
@@ -56,15 +61,14 @@
         "drupal/search_api": "*",
         "drupal/search_api_glossary": "*",
         "drupal/search_api_solr": "^4.3",
+        "drupal/term_merge": "^2.0@beta",
+        "drupal/term_merge_manager": "^2.0",
         "drupal/token": "*",
         "drupal/twig_tweak": "^3.2",
         "drupal/views_bulk_operations": "*",
         "drush/drush": "^13",
         "mukurtu/colorbox": "*",
-        "mukurtu/masonry": "*",
-        "sibyx/phpgpx": "@RC",
-        "drupal/term_merge": "^2.0@beta",
-        "drupal/term_merge_manager": "^2.0"
+        "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
         "drupal/devel": "*",
@@ -73,7 +77,17 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/installers": true,
+            "cweagans/composer-patches": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "drupal/core-composer-scaffold": true,
+            "drupal/core-project-message": true,
+            "php-http/discovery": true,
+            "phpstan/extension-installer": true,
+            "tbachert/spi": true
+        }
     },
     "extra": {
         "patches": {
@@ -88,6 +102,9 @@
             },
             "drupal/media_entity_soundcloud": {
                 "Add support for secret URL embeds": "https://www.drupal.org/files/issues/2022-03-28/3272077-2.patch"
+            },
+            "drupal/og": {
+                "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
             }
         }
     }

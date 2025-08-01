@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+id: mukurtu_taxonomy_pattern
+label: 'Mukurtu Taxonomy Pattern'
+type: 'canonical_entities:taxonomy_term'
+pattern: '[term:vocabulary:name]/[term:name]'
+selection_criteria: {  }
+selection_logic: and
+weight: 0
+relationships: {  }
