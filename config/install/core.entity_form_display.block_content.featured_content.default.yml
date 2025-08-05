@@ -27,12 +27,12 @@ content:
     weight: 2
     region: content
     settings:
-      entity_browser: mukurtu_browse_content
+      entity_browser: mukurtu_content_browser
       field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
-      open: false
+      open: true
       field_widget_display_settings:
         view_mode: content_browser
       selection_mode: selection_append
