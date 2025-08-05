@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   module:
-    - node
     - system
   theme:
     - mukurtu_v4
@@ -18,12 +17,6 @@ settings:
   label_display: '0'
   provider: core
 visibility:
-  'entity_bundle:node':
-    id: 'entity_bundle:node'
-    negate: true
-    context_mapping:
-      node: '@node.node_route_context:node'
-    bundles: {  }
   request_path:
     id: request_path
     negate: true
