@@ -1172,6 +1172,25 @@ details.form-wrapper summary + div {
           padding-block-start: var(--v-separation);
 }
 
+.block--image-with-description {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--v-space-2xs);
+}
+@media (min-width: 48rem) {
+  .block--image-with-description {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.block--image-with-description h1, .block--image-with-description h2 {
+  color: var(--brand-primary-dark);
+}
+.block--image-with-description .block-wrapper__second {
+  background-color: var(--brand-secondary);
+  padding-block: var(--v-space-s);
+  padding-inline: var(--v-space-2xs);
+}
+
 .language-switcher__summary {
   cursor: pointer;
   font-size: 1.5em;
@@ -3424,6 +3443,17 @@ header {
   padding: var(--v-space-4xxs);
 }
 
+.category-teaser:not(:has(.media--image)) a::before {
+  content: "";
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 3/2;
+  background-image: url("../images/default.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 .collection__header {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -3711,6 +3741,68 @@ header {
   block-size: 19rem;
   -o-object-fit: cover;
      object-fit: cover;
+}
+
+.community--browse--wrapper .views-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--v-space-2xs);
+}
+@media (min-width: 60rem) {
+  .community--browse--wrapper .views-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.community--browse--wrapper .views-row .community--browse {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-margin-after: var(--v-space-2xs);
+          margin-block-end: var(--v-space-2xs);
+  padding-inline: var(--v-space-2xs);
+}
+@media (min-width: 60rem) {
+  .community--browse--wrapper .views-row .community--browse {
+    padding-inline: var(--layout-padding-m);
+  }
+}
+.community--browse--wrapper .views-row .community--browse .field--name-name {
+  -webkit-box-ordinal-group: 3;
+      -ms-flex-order: 2;
+          order: 2;
+  font-size: var(--font-size-m);
+  font-weight: var(--text-bold);
+  text-align: center;
+  padding: var(--v-space-4xxs);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  background-color: var(--brand-secondary);
+}
+.community--browse--wrapper .views-row .community--browse .field--name-name a {
+  text-decoration: none;
+}
+.community--browse--wrapper .views-row .community--browse .field--name-name a:hover {
+  text-decoration: underline;
+  color: var(--brand-primary-dark);
+}
+.community--browse--wrapper .views-row .community--browse .field--name-field-thumbnail-image {
+  -webkit-box-ordinal-group: 2;
+      -ms-flex-order: 1;
+          order: 1;
+  background-color: var(--color-white);
+}
+.community--browse--wrapper .views-row .community--browse .field--name-field-thumbnail-image img {
+  block-size: 150px;
+  inline-size: auto;
+  -o-object-fit: contain;
+     object-fit: contain;
 }
 
 .community--full,
@@ -4491,6 +4583,30 @@ header {
 
 /* @file
  * Styles for the landing page template.
+ */
+.layout--onecol .block-wrapper {
+  -webkit-box-shadow: 0 12px 12px 0 var(--brand-light);
+          box-shadow: 0 12px 12px 0 var(--brand-light);
+  -webkit-margin-after: var(--v-space-s);
+          margin-block-end: var(--v-space-s);
+}
+.layout--onecol .block-wrapper h2 {
+  text-align: center;
+  -webkit-margin-after: var(--v-space-2xs);
+          margin-block-end: var(--v-space-2xs);
+}
+.layout--onecol .map--browse--wrapper {
+  padding-inline: var(--layout-padding);
+  padding-block: var(--v-space-s);
+}
+@media (min-width: 60rem) {
+  .layout--onecol .map--browse--wrapper {
+    padding-inline: var(--layout-padding-m);
+  }
+}
+
+/* @file
+ * Styles for the layout builder.
  */
 /* Make layout builder look closer to Gin */
 .glb-body {

@@ -49,3 +49,16 @@
     padding: var(--v-space-4xxs);
   }
 }
+
+.category-teaser:not(:has(.media--image)) {
+  a::before {
+    content: '';
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 3/2;
+    background-image: url('../images/default.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+}

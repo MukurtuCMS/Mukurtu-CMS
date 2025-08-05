@@ -324,6 +324,7 @@ display:
         type: mini
         options:
           offset: 0
+          pagination_heading_level: h4
           items_per_page: 10
           total_pages: null
           id: 0
@@ -338,7 +339,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-          pagination_heading_level: h4
       exposed_form:
         type: basic
         options:
@@ -503,6 +503,7 @@ display:
           skip_access: false
           preserve_facet_query_args: false
       relationships: {  }
+      css_class: map--browse--wrapper
       use_ajax: true
       header: {  }
       footer: {  }
@@ -525,6 +526,7 @@ display:
     display_plugin: block
     position: 1
     display_options:
+      css_class: map--browse--wrapper
       pager:
         type: some
         options:
@@ -544,14 +546,12 @@ display:
             field_coverage: field_coverage
           entity_source: __base_table
           name_field: title
-          description_field: '#rendered_view_fields'
-          view_mode: map_browse
           leaflet_map: 'OSM Mapnik'
           height: '600'
           height_unit: px
           hide_empty_map: false
-          gesture_handling: false
           disable_wheel: false
+          gesture_handling: false
           reset_map:
             control: false
             position: topright
@@ -592,6 +592,8 @@ display:
             control: false
             options: '{"position":"topleft","pseudoFullscreen":false}'
           path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+          description_field: '#rendered_view_fields'
+          view_mode: map_browse
       row:
         type: fields
         options:
@@ -629,6 +631,7 @@ display:
         type: mini
         options:
           offset: 0
+          pagination_heading_level: h4
           items_per_page: 10
           total_pages: null
           id: 0
@@ -643,7 +646,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-          pagination_heading_level: h4
       defaults:
         pager: false
       display_description: ''

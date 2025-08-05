@@ -26,15 +26,15 @@
  * @see template_preprocess_block()
  */
 #}
+{% set block_entity = content['#block_content'] %}
+{% set title_tag = is_front ? 'h1' : 'h2' %}
+<div{{ attributes.addClass(['block-wrapper', 'block--image-with-description']) }}>
+  <div class="block-wrapper__first">
+    {{content.field_image}}
+  </div>
 
-<div{{ attributes.addClass('block-wrapper') }}>
-  {{ title_prefix }}
-  {% if label %}
-    <h2{{ title_attributes }}>{{ label }}</h2>
-    {# <a class="testing-links" href="https://example.com">Website for testing</a> #}
-  {% endif %}
-  {{ title_suffix }}
-  {% block content %}
-    {{ content }}
-  {% endblock %}
+  <div class="block-wrapper__second">
+    <{{title_tag}}{{ title_attributes }}>{{ block_entity.info.value }}</{{title_tag}}>
+    {{content.body}}
+  </div>
 </div>
