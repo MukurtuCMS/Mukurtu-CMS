@@ -115,12 +115,12 @@ class ProtocolAddForm extends EntityForm {
         // Membership list display setting.
     $form['field_membership_display'] = [
       '#type' => 'radios',
-      '#title' => $this->t('Membership Display'),
+      '#title' => $this->t('Membership display'),
       '#description' => $this->t('TODO: membership display helper text'),
       '#options' => [
-        'none' => $this->t('Do not display'),
-        'stewards' => $this->t('Display cultural protocol stewards'),
-        'all' => $this->t('Display all members'),
+        'none' => $this->t('Do not display any protocol members'),
+        'stewards' => $this->t('Only display cultural protocol stewards'),
+        'all' => $this->t('Display all protocol members'),
       ],
       '#default_value' => 'none',
     ];
