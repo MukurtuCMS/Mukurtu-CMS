@@ -125,7 +125,7 @@ class ProtocolAddForm extends EntityForm {
       '#default_value' => 'none',
     ];
 
-        // Protocol affiliates.
+    // Protocol affiliates.
     $form['protocol_affiliate_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Cultural protocol affiliates'),
@@ -335,9 +335,6 @@ class ProtocolAddForm extends EntityForm {
         [get_called_class(), 'processEntityBrowser'],
       ],
     ];
-
-
-
 
     return $form;
   }
