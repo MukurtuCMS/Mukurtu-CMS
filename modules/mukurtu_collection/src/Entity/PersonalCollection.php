@@ -405,7 +405,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
         'type' => 'entity_browser_entity_reference',
         'weight' => 4,
         'settings' => [
-          'entity_browser' => 'mukurtu_browse_content',
+          'entity_browser' => 'mukurtu_content_browser',
           'field_widget_display' => 'label',
           'field_widget_display_settings' => [],
           'field_widget_edit' => FALSE,
