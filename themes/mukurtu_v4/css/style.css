@@ -3743,66 +3743,9 @@ header {
      object-fit: cover;
 }
 
-.community--browse--wrapper .views-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--v-space-2xs);
-}
-@media (min-width: 60rem) {
-  .community--browse--wrapper .views-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-.community--browse--wrapper .views-row .community--browse {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-margin-after: var(--v-space-2xs);
-          margin-block-end: var(--v-space-2xs);
-  padding-inline: var(--v-space-2xs);
-}
-@media (min-width: 60rem) {
-  .community--browse--wrapper .views-row .community--browse {
-    padding-inline: var(--layout-padding-m);
-  }
-}
-.community--browse--wrapper .views-row .community--browse .field--name-name {
-  -webkit-box-ordinal-group: 3;
-      -ms-flex-order: 2;
-          order: 2;
-  font-size: var(--font-size-m);
-  font-weight: var(--text-bold);
-  text-align: center;
-  padding: var(--v-space-4xxs);
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  background-color: var(--brand-secondary);
-}
-.community--browse--wrapper .views-row .community--browse .field--name-name a {
-  text-decoration: none;
-}
-.community--browse--wrapper .views-row .community--browse .field--name-name a:hover {
-  text-decoration: underline;
-  color: var(--brand-primary-dark);
-}
-.community--browse--wrapper .views-row .community--browse .field--name-field-thumbnail-image {
-  -webkit-box-ordinal-group: 2;
-      -ms-flex-order: 1;
-          order: 1;
-  background-color: var(--color-white);
-}
-.community--browse--wrapper .views-row .community--browse .field--name-field-thumbnail-image img {
-  block-size: 150px;
-  inline-size: auto;
-  -o-object-fit: contain;
-     object-fit: contain;
+.community--browse--wrapper .community-page-browse {
+  -webkit-padding-after: var(--v-space-s);
+          padding-block-end: var(--v-space-s);
 }
 
 .community--full,
