@@ -27,6 +27,7 @@ documentation on how to use @include media(). */
 @use '02-molecules/form/form';
 @use '02-molecules/horizontal-card/horizontal-card';
 @use '02-molecules/horizontal-tabs/horizontal-tabs';
+@use '02-molecules/image-w-description/image-w-description';
 @use '02-molecules/language-switcher/language-switcher';
 @use '02-molecules/local-tasks/local-tasks';
 @use '02-molecules/media/media';
@@ -49,4 +50,5 @@ documentation on how to use @include media(). */
 @use '04-templates/digital-heritage/digital-heritage-node';
 @use '04-templates/full-node/full-node';
 @use '04-templates/landing-page/landing-page';
+@use '04-templates/layout/layout-builder';
 @use '04-templates/page/page';

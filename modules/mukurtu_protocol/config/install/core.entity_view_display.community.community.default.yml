@@ -83,6 +83,7 @@ content:
     weight: 0
     region: content
 hidden:
+  field_members_list: true
   field_parent_community: true
   field_thumbnail_image: true
   langcode: true

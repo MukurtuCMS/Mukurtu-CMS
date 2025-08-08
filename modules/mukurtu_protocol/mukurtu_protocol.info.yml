@@ -9,6 +9,7 @@ dependencies:
   - 'drupal:comment'
   - 'drupal:content_moderation'
   - 'drupal:field'
+  - 'drupal:image'
   - 'drupal:layout_builder'
   - 'drupal:media'
   - 'drupal:media_library'

@@ -47,7 +47,7 @@ hidden:
   field_community_type: true
   field_description: true
   field_featured_content: true
-  field_membership_display: true
+  field_members_list: true
   field_parent_community: true
   field_protocols: true
   langcode: true

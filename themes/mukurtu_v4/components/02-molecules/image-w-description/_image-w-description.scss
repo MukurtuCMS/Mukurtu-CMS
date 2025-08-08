@@ -1,0 +1,21 @@
+@use "../../../external/include-media";
+
+.block--image-with-description {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--v-space-2xs);
+
+  @include include-media.media('>=md') {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  h1, h2 {
+    color: var(--brand-primary-dark);
+  }
+
+  .block-wrapper__second {
+    background-color: var(--brand-secondary);
+    padding-block: var(--v-space-s);
+    padding-inline: var(--v-space-2xs);
+  }
+}

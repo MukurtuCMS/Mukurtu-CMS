@@ -74,6 +74,9 @@ function mukurtu_v4_preprocess_block(&$variables)
   // mukurtu-footer.html.twig. Otherwise, it would use the default template,
   // block.html.twig, and our footer would not display.
   $variables['plugin_id'] = 'mukurtu_footer';
+  
+  // Add is_front variable for block templates.
+  $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
 }
 
 /**
