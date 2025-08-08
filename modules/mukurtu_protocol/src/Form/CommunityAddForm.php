@@ -164,7 +164,7 @@ class CommunityAddForm extends EntityForm {
       '#type' => 'item',
       '#title' => $this->t('Community managers'),
       '#description' => $this->t('Helper text about community managers.'),
-      '#weight' => 9000,
+      '#weight' => 9004,
     ];
 
     $defaultStatus = "<ul>";
@@ -175,7 +175,7 @@ class CommunityAddForm extends EntityForm {
       '#type' => 'entity_browser',
       '#id' => 'community-manager',
       '#cardinality' => -1,
-      '#weight' => 9001,
+      '#weight' => 9005,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#default_value' => [$currentUser],
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
