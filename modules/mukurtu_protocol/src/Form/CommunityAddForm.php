@@ -105,19 +105,42 @@ class CommunityAddForm extends EntityForm {
       $form['field_community_type'] = $this->renderField('field_community_type', $form_state, $form);
     }
 
+    // Community Members.
+    $form['community_member_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Community members'),
+      '#description' => $this->t('Helper text about community members.'),
+    ];
+
+    $form['community_member'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'community-member',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#prefix' => '<div id="role-community-member">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
     // Community Affiliates.
     $form['community_affiliate_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Community affiliates'),
       '#description' => $this->t('Helper text about community affiliates.'),
-      '#weight' => 9000,
     ];
 
     $form['community_affiliate'] = [
       '#type' => 'entity_browser',
       '#id' => 'community-affiliate',
       '#cardinality' => -1,
-      '#weight' => 9001,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#prefix' => '<div id="role-community-affiliate">',
@@ -132,39 +155,11 @@ class CommunityAddForm extends EntityForm {
       ],
     ];
 
-    // Community Members.
-    $form['community_member_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Community members'),
-      '#description' => $this->t('Helper text about community members.'),
-      '#weight' => 9002,
-    ];
-
-    $form['community_member'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'community-member',
-      '#cardinality' => -1,
-      '#weight' => 9003,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#prefix' => '<div id="role-community-member">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
-    ];
- 
     // Community Managers.
     $form['community_manager_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Community managers'),
       '#description' => $this->t('Helper text about community managers.'),
-      '#weight' => 9004,
     ];
 
     $defaultStatus = "<ul>";
@@ -175,7 +170,6 @@ class CommunityAddForm extends EntityForm {
       '#type' => 'entity_browser',
       '#id' => 'community-manager',
       '#cardinality' => -1,
-      '#weight' => 9005,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#default_value' => [$currentUser],
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,

@@ -125,36 +125,10 @@ class ProtocolAddForm extends EntityForm {
       '#default_value' => 'none',
     ];
 
-    // Protocol affiliates.
-    $form['protocol_affiliate_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Cultural protocol affiliates'),
-      '#description' => $this->t('Helper text about protocol affiliates.'),
-    ];
-    $form['protocol_affiliate'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'protocol-affiliate',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-affiliate">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
-    ];
-
     // Protocol members.
     $form['protocol_member_item'] = [
       '#type' => 'item',
-      '#title' => $this->t('Cultural protocol members'),
+      '#title' => $this->t('Protocol members'),
       '#description' => $this->t('Helper text about protocol members.'),
     ];
     $form['protocol_member'] = [
@@ -166,6 +140,32 @@ class ProtocolAddForm extends EntityForm {
       '#widget_context' => ['group' => $this->entity],
       '#default_value' => [],
       '#prefix' => '<div id="role-protocol-member">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Protocol affiliates.
+    $form['protocol_affiliate_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Protocol affiliates'),
+      '#description' => $this->t('Helper text about protocol affiliates.'),
+    ];
+    $form['protocol_affiliate'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'protocol-affiliate',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
+      '#default_value' => [],
+      '#prefix' => '<div id="role-protocol-affiliate">',
       '#suffix' => '</div>',
       '#process' => [
         [get_called_class(), 'updateDefaultValues'],
@@ -310,7 +310,7 @@ class ProtocolAddForm extends EntityForm {
     // Protocol stewards.
     $form['protocol_steward_item'] = [
       '#type' => 'item',
-      '#title' => $this->t('Cultural protocol stewards'),
+      '#title' => $this->t('Protocol stewards'),
       '#description' => $this->t('Helper text about protocol stewards.'),
     ];
     $defaultStatus = "<ul>";
