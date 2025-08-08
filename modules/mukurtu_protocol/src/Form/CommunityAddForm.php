@@ -110,14 +110,14 @@ class CommunityAddForm extends EntityForm {
       '#type' => 'item',
       '#title' => $this->t('Community affiliates'),
       '#description' => $this->t('Helper text about community affiliates.'),
-      '#weight' => 9004,
+      '#weight' => 9000,
     ];
 
     $form['community_affiliate'] = [
       '#type' => 'entity_browser',
       '#id' => 'community-affiliate',
       '#cardinality' => -1,
-      '#weight' => 9005,
+      '#weight' => 9001,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#prefix' => '<div id="role-community-affiliate">',
