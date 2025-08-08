@@ -112,7 +112,7 @@ class ProtocolAddForm extends EntityForm {
       '#allowed_formats' => ['basic_html', 'full_html', 'mukurtu_html'],
     ];
 
-        // Membership list display setting.
+    // Membership list display setting.
     $form['field_membership_display'] = [
       '#type' => 'radios',
       '#title' => $this->t('Membership display'),
@@ -124,6 +124,10 @@ class ProtocolAddForm extends EntityForm {
       ],
       '#default_value' => 'none',
     ];
+
+    $defaultStatus = "<ul>";
+    $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
+    $defaultStatus .= "</ul>";
 
     // Protocol affiliates.
     $form['protocol_affiliate_item'] = [
@@ -313,9 +317,7 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Cultural protocol stewards'),
       '#description' => $this->t('Helper text about protocol stewards.'),
     ];
-    $defaultStatus = "<ul>";
-    $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
-    $defaultStatus .= "</ul>";
+
     $form['protocol_steward'] = [
       '#type' => 'entity_browser',
       '#id' => 'protocol-steward',
