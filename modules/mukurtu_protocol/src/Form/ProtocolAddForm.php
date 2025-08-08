@@ -241,6 +241,7 @@ class ProtocolAddForm extends EntityForm {
         '::submitForm',
         '::save',
       ],
+      '#gin_action_item' => TRUE,
     ];
 
     $actions['submit_done'] = [
@@ -252,6 +253,7 @@ class ProtocolAddForm extends EntityForm {
         '::save',
         '::redirectToCommunity',
       ],
+      '#gin_action_item' => TRUE,
     ];
 
     return $actions;
