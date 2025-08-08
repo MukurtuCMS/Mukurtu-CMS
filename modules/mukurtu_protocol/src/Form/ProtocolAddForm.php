@@ -157,9 +157,6 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Cultural protocol members'),
       '#description' => $this->t('Helper text about protocol members.'),
     ];
-    $defaultStatus = "<ul>";
-    $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
-    $defaultStatus .= "</ul>";
     $form['protocol_member'] = [
       '#type' => 'entity_browser',
       '#id' => 'protocol-member',
@@ -316,6 +313,9 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Cultural protocol stewards'),
       '#description' => $this->t('Helper text about protocol stewards.'),
     ];
+    $defaultStatus = "<ul>";
+    $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
+    $defaultStatus .= "</ul>";
     $form['protocol_steward'] = [
       '#type' => 'entity_browser',
       '#id' => 'protocol-steward',
