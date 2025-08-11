@@ -4533,6 +4533,10 @@ header {
   -webkit-margin-after: var(--v-space-s);
           margin-block-end: var(--v-space-s);
 }
+.layout--onecol .block-wrapper:last-of-type {
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
 .layout--onecol .block-wrapper h2 {
   text-align: center;
   -webkit-margin-after: var(--v-space-2xs);
@@ -4540,7 +4544,7 @@ header {
 }
 .layout--onecol .map--browse--wrapper {
   padding-inline: var(--layout-padding);
-  padding-block: var(--v-space-s);
+  padding-block: 0 var(--v-space-s);
 }
 @media (min-width: 60rem) {
   .layout--onecol .map--browse--wrapper {

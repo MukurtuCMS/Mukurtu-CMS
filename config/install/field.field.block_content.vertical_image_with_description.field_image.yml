@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.vertical_image_with_description
+    - field.storage.block_content.field_image
+    - media.type.image
+id: block_content.vertical_image_with_description.field_image
+field_name: field_image
+entity_type: block_content
+bundle: vertical_image_with_description
+label: Image
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      image: image
+    sort:
+      field: _none
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

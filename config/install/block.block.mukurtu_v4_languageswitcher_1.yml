@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - language
+  theme:
+    - mukurtu_v4
+id: mukurtu_v4_languageswitcher_1
+theme: mukurtu_v4
+region: user_menu
+weight: 3
+provider: null
+plugin: 'language_block:language_interface'
+settings:
+  id: 'language_block:language_interface'
+  label: 'Language Switcher'
+  label_display: '1'
+  provider: language
+visibility: {  }

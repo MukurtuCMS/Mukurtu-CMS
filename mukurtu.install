@@ -62,9 +62,9 @@ function mukurtu_install() {
   // Hero Image block content.
   $hero_block_content = BlockContent::create([
     'type' => 'image_with_description',
-    'info' => t('Mukurtu v4 Hero Image and Site Description'),
+    'info' => t('Welcome to Your Mukurtu CMS Site'),
     'body' => [
-      'value' => '<p>Welcome to our Mukurtu digital heritage site.</p>',
+      'value' => '<p>To start using your Mukurtu site, create a community, cultural protocol, and category.</p>',
       'format' => 'basic_html',
     ],
     'region' => 'content',
@@ -80,9 +80,9 @@ function mukurtu_install() {
   // Featured Content block content.
   $featured_block_content = BlockContent::create([
     'type' => 'featured_content',
-    'info' => t('Mukurtu v4 Front Page Featured Content'),
+    'info' => t('Featured Content'),
     'body' => [
-      'value' => '<p>Featured content will appear here.</p>',
+      'value' => '',
       'format' => 'basic_html',
     ],
     'region' => 'content',
@@ -177,7 +177,7 @@ function mukurtu_install() {
     'content', // Region name (layout_onecol has 'content' region)
     [
       'id' => 'block_content:' . $hero_block_uuid, // Reference to the block content
-      'label' => 'Mukurtu v4 Hero Image and Site Description',
+      'label' => 'Welcome to Your Mukurtu CMS Site',
       'label_display' => 1, // Display the title
       'provider' => 'block_content',
     ]
@@ -189,7 +189,7 @@ function mukurtu_install() {
     'content',
     [
       'id' => 'block_content:' . $featured_block_uuid,
-      'label' => 'Mukurtu v4 Featured Content',
+      'label' => 'Featured Content',
       'label_display' => 1,
       'provider' => 'block_content',
     ]

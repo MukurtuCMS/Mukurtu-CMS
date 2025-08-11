@@ -8,6 +8,10 @@
     box-shadow: 0 12px 12px 0 var(--brand-light);
     margin-block-end: var(--v-space-s);
 
+    &:last-of-type {
+      box-shadow: none;
+    }
+
     h2 {
       text-align: center;
       margin-block-end: var(--v-space-2xs);
@@ -16,7 +20,7 @@
 
   .map--browse--wrapper {
     padding-inline: var(--layout-padding);
-    padding-block: var(--v-space-s);
+    padding-block: 0 var(--v-space-s);
 
     @include include-media.media('>=lg') {
       padding-inline: var(--layout-padding-m);
