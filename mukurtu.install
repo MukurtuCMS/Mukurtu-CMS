@@ -111,6 +111,24 @@ function mukurtu_install() {
   // Store UUID for Layout Builder reference
   $featured_block_uuid = $featured_block_content->uuid();
 
+  // Full Image with Description block content.
+  $full_image_block_content = BlockContent::create([
+    'type' => 'full_image_with_description',
+    'info' => t('Welcome to Your Mukurtu CMS Site (Full Background)'),
+    'body' => [
+      'value' => '<p>To start using your Mukurtu site, create a community, cultural protocol, and category.</p>',
+      'format' => 'basic_html',
+    ],
+    'region' => 'content',
+    'weight' => 2,
+    'theme' => 'mukurtu_v4',
+  ]);
+  // Initialize the image field to avoid issues
+  $full_image_block_content->set('field_image', []);
+  // Initialize the text color field to avoid issues
+  $full_image_block_content->set('field_text_color', []);
+  $full_image_block_content->save();
+
   // Language switcher block is now managed by config/install/block.block.mukurtu_v4_languageswitcher_1.yml
 
   // Footer block is now managed by config/install/block.block.mukurtu_footer_1.yml

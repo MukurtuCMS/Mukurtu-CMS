@@ -1,0 +1,10 @@
+uuid: 7fccaaa9-f971-4101-8760-317829499b2e
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: S_Ly4YDnDtbyt5OmSgOK4y21PrZBM01pdSONB-TdCWs
+id: full_image_with_description
+label: 'Full Image With Description'
+revision: false
+description: 'Full-width background image block with overlaid title and description text.'

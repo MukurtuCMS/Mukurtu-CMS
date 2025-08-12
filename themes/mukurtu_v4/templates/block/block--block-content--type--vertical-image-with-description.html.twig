@@ -28,7 +28,7 @@
 #}
 {% set block_entity = content['#block_content'] %}
 {% set title_tag = is_front ? 'h1' : 'h2' %}
-<div{{ attributes.addClass(['block-wrapper', 'block--image-with-description--vertical']) }}>
+<div{{ attributes.addClass(['block-wrapper', 'block--image-with-description', 'block--image-with-description--vertical']) }}>
   <div class="block-wrapper__first">
     {{content.field_image}}
   </div>
