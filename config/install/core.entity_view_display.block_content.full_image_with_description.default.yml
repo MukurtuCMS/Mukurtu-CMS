@@ -1,4 +1,3 @@
-uuid: bb90ef8e-351a-4289-8f85-67567afff62a
 langcode: en
 status: true
 dependencies:
@@ -10,8 +9,6 @@ dependencies:
   module:
     - options
     - text
-_core:
-  default_config_hash: Tv6QfW45PfaOHbrNAGiHC5X4NiJ83KlBmratMKyqGqY
 id: block_content.full_image_with_description.default
 targetEntityType: block_content
 bundle: full_image_with_description

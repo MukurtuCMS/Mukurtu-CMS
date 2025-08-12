@@ -1,4 +1,3 @@
-uuid: f1e86c30-572e-450e-b918-95b8e6020351
 langcode: en
 status: true
 dependencies:
@@ -10,8 +9,6 @@ dependencies:
   module:
     - media_library
     - text
-_core:
-  default_config_hash: ykH_MvXbt2FaSsMZs8wYyI6m5lZoqTId6H5qpWihaTg
 id: block_content.full_image_with_description.default
 targetEntityType: block_content
 bundle: full_image_with_description
