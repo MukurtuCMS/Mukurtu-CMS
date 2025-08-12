@@ -110,7 +110,7 @@ class CommunityAddForm extends EntityForm {
       '#type' => 'item',
       '#title' => $this->t('Community members'),
       '#description' => $this->t('Helper text about community members.'),
-      'weight' => '1001',
+      '#weight' => '1001',
     ];
 
     $form['community_member'] = [
@@ -129,7 +129,7 @@ class CommunityAddForm extends EntityForm {
         ],
         [get_called_class(), 'processEntityBrowser'],
       ],
-      'weight' => '1002',
+      '#weight' => '1002',
     ];
 
     // Community Affiliates.
@@ -137,7 +137,7 @@ class CommunityAddForm extends EntityForm {
       '#type' => 'item',
       '#title' => $this->t('Community affiliates'),
       '#description' => $this->t('Helper text about community affiliates.'),
-      'weight' => '1003',
+      '#weight' => '1003',
     ];
 
     $form['community_affiliate'] = [
@@ -156,7 +156,7 @@ class CommunityAddForm extends EntityForm {
         ],
         [get_called_class(), 'processEntityBrowser'],
       ],
-      'weight' => '1004',
+      '#weight' => '1004',
     ];
 
     // Community Managers.
@@ -164,7 +164,7 @@ class CommunityAddForm extends EntityForm {
       '#type' => 'item',
       '#title' => $this->t('Community managers'),
       '#description' => $this->t('Helper text about community managers.'),
-      'weight' => '1005',
+      '#weight' => '1005',
     ];
 
     $defaultStatus = "<ul>";
@@ -188,7 +188,7 @@ class CommunityAddForm extends EntityForm {
         ],
         [get_called_class(), 'processEntityBrowser'],
       ],
-      'weight' => '1006',
+      '#weight' => '1006',
     ];
 
     // Membership list display setting.
