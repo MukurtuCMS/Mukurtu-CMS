@@ -1172,23 +1172,31 @@ details.form-wrapper summary + div {
           padding-block-start: var(--v-separation);
 }
 
-.block--image-with-description {
+.block--image-with-description,
+.block--image-with-description--vertical {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--v-space-2xs);
 }
-@media (min-width: 48rem) {
-  .block--image-with-description {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-.block--image-with-description h1, .block--image-with-description h2 {
+.block--image-with-description h1, .block--image-with-description h2,
+.block--image-with-description--vertical h1,
+.block--image-with-description--vertical h2 {
   color: var(--brand-primary-dark);
 }
-.block--image-with-description .block-wrapper__second {
-  background-color: var(--brand-secondary);
+.block--image-with-description .block-wrapper__second,
+.block--image-with-description--vertical .block-wrapper__second {
   padding-block: var(--v-space-s);
   padding-inline: var(--v-space-2xs);
+}
+.block--image-with-description:not(.block--image-with-description--vertical) .block-wrapper__second,
+.block--image-with-description--vertical:not(.block--image-with-description--vertical) .block-wrapper__second {
+  background-color: var(--brand-secondary);
+}
+@media (min-width: 48rem) {
+  .block--image-with-description:not(.block--image-with-description--vertical),
+  .block--image-with-description--vertical:not(.block--image-with-description--vertical) {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .language-switcher__summary {
