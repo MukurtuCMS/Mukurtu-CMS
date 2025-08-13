@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.full_image_with_description
+    - field.storage.block_content.field_text_color
+  module:
+    - options
+id: block_content.full_image_with_description.field_text_color
+field_name: field_text_color
+entity_type: block_content
+bundle: full_image_with_description
+label: 'Text Color'
+description: 'Choose text color based on background contrast. Light uses white text, Dark uses brand primary dark color. Always verify color contrast meets accessibility standards (WCAG AA minimum 4.5:1 ratio) using an accessibility tool before publishing.'
+required: true
+translatable: false
+default_value:
+  -
+    value: light
+default_value_callback: ''
+settings: {  }
+field_type: list_string
