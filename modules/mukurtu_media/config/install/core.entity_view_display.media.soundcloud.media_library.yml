@@ -26,6 +26,7 @@ content:
 hidden:
   created: true
   field_communities: true
+  field_contributor: true
   field_cultural_protocols: true
   field_identifier: true
   field_media_soundcloud: true

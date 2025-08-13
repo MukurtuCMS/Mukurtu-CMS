@@ -10,7 +10,7 @@ dependencies:
     - search_api
     - user
 id: mukurtu_browse_by_map
-label: 'Mukurtu Browse by Map'
+label: 'Browse by Map'
 module: views
 description: ''
 tag: ''
@@ -23,7 +23,7 @@ display:
     display_plugin: default
     position: 0
     display_options:
-      title: 'Mukurtu Browse by Map'
+      title: 'Browse by Map'
       fields:
         title:
           id: title

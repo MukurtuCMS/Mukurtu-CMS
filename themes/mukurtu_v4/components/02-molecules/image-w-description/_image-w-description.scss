@@ -15,12 +15,25 @@
   }
 
   &--horizontal {
+    gap: 0;
+
     .block-wrapper__second {
       background-color: var(--brand-secondary);
     }
 
     @include include-media.media('>=md') {
       grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  &--vertical {
+    .block-wrapper__second {
+      text-align: center;
+    }
+
+    .media--video video {
+      inline-size: 100% !important;
+      block-size: auto !important;
     }
   }
 
