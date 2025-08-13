@@ -8,32 +8,74 @@ use Drupal\taxonomy\Entity\Term;
 class MukurtuCategoryManageController extends ControllerBase {
 
   /**
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function access($taxonomy_vocabulary) {
+    $account = $this->currentUser();
+
+    if ($account->hasPermission("create terms in $taxonomy_vocabulary") && $account->hasPermission("edit terms in $taxonomy_vocabulary")) {
+      return AccessResult::allowed();
+    }
+
+    return AccessResult::forbidden();
+  }
+
+  /**
    * Display the manage categories page.
    */
-  public function content() {
+  public function content($taxonomy_vocabulary) {
     $build = [];
-    $vocabulary = $this->entityTypeManager()->getStorage('taxonomy_vocabulary')->load('category');
+    $vocabulary = $this->entityTypeManager()->getStorage('taxonomy_vocabulary')->load($taxonomy_vocabulary);
 
     if ($vocabulary) {
       // Render the taxonomy overview form.
       $build[] = $this->formBuilder()->getForm('Drupal\taxonomy\Form\OverviewTerms', $vocabulary);
 
-      // Render the form to add a new category.
-      $newCategoryTerm = Term::create([
+      // Render the form to add a new term.
+      $newTerm = Term::create([
         'vid' => $vocabulary->id(),
       ]);
 
       $form = $this->entityTypeManager()
         ->getFormObject('taxonomy_term', 'default')
-        ->setEntity($newCategoryTerm);
+        ->setEntity($newTerm);
 
-      $build['add_category'] = [
+      $build['add_term'] = [
         '#type' => 'details',
-        '#title' => $this->t('Add a new category'),
+        '#title' => $this->t('Add a new term in %vocabulary', ['%vocabulary' => $vocabulary->get('name')]),
       ];
-
-      $build['add_category']['form'] = $this->formBuilder()->getForm($form);
+      $build['add_term']['form'] = $this->formBuilder()->getForm($form);
     }
+
+    return $build;
+  }
+
+  public function addPage() {
+    $build = [
+      '#theme' => 'mukurtu_vocabulary_add_list',
+      '#cache' => [
+        'tags' => $this->entityTypeManager()->getDefinition('taxonomy_vocabulary')->getListCacheTags(),
+      ],
+    ];
+
+    $content = [];
+
+    // Only use node types the user has access to.
+    foreach ($this->entityTypeManager()->getStorage('taxonomy_vocabulary')->loadMultiple() as $type) {
+      $access = $this->entityTypeManager()->getAccessControlHandler('taxonomy_vocabulary')->createAccess($type->id(), NULL, [], TRUE);
+      if ($access->isAllowed()) {
+        $content[$type->id()] = $type;
+      }
+    }
+
+    // Bypass the node/add listing if only one content type is available.
+    if (count($content) == 1) {
+      $type = array_shift($content);
+      return $this->redirect('mukurtu_taxonomy.manage_taxonomy_vocabulary', ['taxonomy_vocabulary' => $type->id()]);
+    }
+
+    $build['#content'] = $content;
 
     return $build;
   }
