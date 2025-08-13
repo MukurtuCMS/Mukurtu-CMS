@@ -1216,6 +1216,13 @@ details.form-wrapper summary + div {
 .block--image-with-description--full.text-light svg.ext path {
   stroke: var(--color-white);
 }
+.block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2 {
+  font-size: var(--font-size-heading-2xl);
+  text-align: center;
+}
+.block--image-with-description--full.text-light p {
+  font-size: var(--font-size-l);
+}
 .block--image-with-description--full .block-wrapper__first {
   overflow: hidden;
   position: absolute;
@@ -1247,6 +1254,7 @@ details.form-wrapper summary + div {
       -ms-flex-pack: center;
           justify-content: center;
   padding: var(--v-space-s);
+  min-block-size: 600px;
 }
 
 .language-switcher__summary {

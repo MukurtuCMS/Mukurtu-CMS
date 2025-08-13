@@ -54,6 +54,15 @@
         }
       }
 
+      h1, h2 {
+        font-size: var(--font-size-heading-2xl);
+        text-align: center;
+      }
+
+      p {
+        font-size: var(--font-size-l);
+      }
+
     }
 
     .block-wrapper__first {
@@ -81,6 +90,7 @@
       align-items: center;
       justify-content: center;
       padding: var(--v-space-s);
+      min-block-size: 600px;
     }
   }
 }
