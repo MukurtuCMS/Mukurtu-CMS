@@ -1247,12 +1247,8 @@ details.form-wrapper summary + div {
   display: flex;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  place-content: center;
+  place-items: center;
   padding: var(--v-space-s);
   min-block-size: 600px;
 }
