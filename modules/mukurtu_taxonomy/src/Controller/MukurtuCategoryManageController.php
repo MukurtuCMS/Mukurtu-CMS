@@ -18,6 +18,21 @@ class MukurtuCategoryManageController extends ControllerBase {
       // Render the taxonomy overview form.
       $build[] = $this->formBuilder()->getForm('Drupal\taxonomy\Form\OverviewTerms', $vocabulary);
 
+      // Render the form to add a new category.
+      $newCategoryTerm = Term::create([
+        'vid' => $vocabulary->id(),
+      ]);
+
+      $form = $this->entityTypeManager()
+        ->getFormObject('taxonomy_term', 'default')
+        ->setEntity($newCategoryTerm);
+
+      $build['add_category'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Add a new category'),
+      ];
+
+      $build['add_category']['form'] = $this->formBuilder()->getForm($form);
     }
 
     return $build;
