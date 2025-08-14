@@ -953,8 +953,8 @@ a:not(.primary-nav__menu-link) svg.tel path {
   -webkit-transition: all 0.2s ease-in-out;
   transition: all 0.2s ease-in-out;
   position: absolute;
-  top: 0;
-  left: 0;
+  inset-block-start: 0;
+  inset-inline-start: 0;
   z-index: 5;
 }
 .field--name-field-featured-content .field__item .featured-item__link:hover {
@@ -965,18 +965,22 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .field--name-field-featured-content .field__item .featured-item__media {
   -webkit-margin-after: var(--v-space-2xs);
           margin-block-end: var(--v-space-2xs);
-  height: 280px;
+  block-size: 280px;
   background-color: var(--brand-light);
 }
 .field--name-field-featured-content .field__item .featured-item__media .media,
 .field--name-field-featured-content .field__item .featured-item__media .media .field {
-  height: 100%;
+  block-size: 100%;
 }
 .field--name-field-featured-content .field__item .featured-item__media img {
-  height: 100%;
+  block-size: 100%;
   -o-object-fit: contain;
      object-fit: contain;
-  width: auto;
+  inline-size: auto;
+}
+.field--name-field-featured-content .field__item .featured-item__media video {
+  inline-size: 100%;
+  block-size: 100%;
 }
 .field--name-field-featured-content .field__item .featured-item__type {
   font-size: var(--font-size-s);

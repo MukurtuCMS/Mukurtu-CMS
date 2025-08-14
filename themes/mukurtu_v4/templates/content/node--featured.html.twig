@@ -81,6 +81,8 @@
       {% set media = content.field_image.0 %}
     {% elseif content.field_article_image %}
       {% set media = content.field_article_image.0 %}
+    {% elseif content.field_page_media_assets %}
+      {% set media = content.field_page_media_assets.0 %}
     {% endif %}
 <article{{ attributes }}>
 

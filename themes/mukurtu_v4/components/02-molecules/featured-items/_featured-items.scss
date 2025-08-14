@@ -22,8 +22,8 @@
       text-decoration: none;
       transition: all 0.2s ease-in-out;
       position: absolute;
-      top: 0;
-      left: 0;
+      inset-block-start: 0;
+      inset-inline-start: 0;
       z-index: 5;
 
       &:hover {
@@ -35,18 +35,23 @@
 
     .featured-item__media {
       margin-block-end: var(--v-space-2xs);
-      height: 280px;
+      block-size: 280px;
       background-color: var(--brand-light);
 
       .media,
       .media .field {
-        height: 100%;
+        block-size: 100%;
       }
 
       img {
-        height: 100%;
+        block-size: 100%;
         object-fit: contain;
-        width: auto;
+        inline-size: auto;
+      }
+
+      video {
+        inline-size: 100%;
+        block-size: 100%;
       }
     }
 
