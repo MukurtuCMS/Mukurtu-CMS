@@ -1,4 +1,3 @@
-uuid: 337cf7cb-d03a-411d-91b8-4372c863c36e
 langcode: en
 status: true
 dependencies:
@@ -8,8 +7,6 @@ dependencies:
     - field.field.block_content.featured_content.field_featured_content
   module:
     - text
-_core:
-  default_config_hash: 4jjUwgnmiyXnuifmyx11wQrpAVycV-y_KZN75PK4WQI
 id: block_content.featured_content.default
 targetEntityType: block_content
 bundle: featured_content

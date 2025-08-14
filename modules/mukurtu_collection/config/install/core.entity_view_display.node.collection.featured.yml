@@ -1,4 +1,3 @@
-uuid: c2bb6de2-dd37-442d-a1cb-8c5d2cfc7f4d
 langcode: en
 status: true
 dependencies:
@@ -13,8 +12,6 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-_core:
-  default_config_hash: OCR6LuYgQyWbdxB1k9vYbd9XZaDo00WKsAGRwio9Nd8
 id: node.collection.featured
 targetEntityType: node
 bundle: collection
