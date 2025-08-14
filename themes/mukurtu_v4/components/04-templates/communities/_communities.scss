@@ -2,20 +2,31 @@
 @use "../../00-base/layout/layout";
 @use "../../00-base/mixins/mixins";
 
-.community-page-browse {
+// Community browse page
+.community-page-listing {
   @include layout.layout--full-width-grid;
 }
 
+// Communities block on landing pages.
+.view-browse-by-community .community-page-browse {
+  padding-inline: var(--layout-padding);
+
+  @include include-media.media('>=lg') {
+    padding-inline: var(--layout-padding-m);
+  }
+}
+
 .communities {
-  display: flex;
-  flex-flow: column nowrap;
-  gap: 1.875rem;
-  padding-inline-start: 0;
+  gap: var(--v-space-3xs);
+  display: grid;
+  grid-template-columns: 1fr;
 
-  @include layout.layout--full-width-grid-item;
+  @include include-media.media('>=sm') {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-  @media screen and (width >= 26rem) {
-     @include layout.layout--fourcol-grid;
+  @include include-media.media('>=lg') {
+    @include layout.layout--fourcol-grid;
   }
 }
 

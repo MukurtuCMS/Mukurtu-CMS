@@ -1,5 +1,14 @@
 @use "../../00-base/layout/layout";
 @use "../../00-base/mixins/mixins";
+@use "../../../external/include-media";
+
+.block-featured-content {
+  padding-inline: var(--layout-padding);
+
+  @include include-media.media('>=lg') {
+    padding-inline: var(--layout-padding-m);
+  }
+}
 
 .field--name-field-featured-content {
   margin-block: var(--v-space-4xxs);
