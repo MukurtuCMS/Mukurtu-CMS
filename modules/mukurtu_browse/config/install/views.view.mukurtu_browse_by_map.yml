@@ -10,7 +10,7 @@ dependencies:
     - search_api
     - user
 id: mukurtu_browse_by_map
-label: 'Mukurtu Browse by Map'
+label: 'Browse by Map'
 module: views
 description: ''
 tag: ''
@@ -23,7 +23,7 @@ display:
     display_plugin: default
     position: 0
     display_options:
-      title: 'Mukurtu Browse by Map'
+      title: 'Browse by Map'
       fields:
         title:
           id: title
@@ -324,6 +324,7 @@ display:
         type: mini
         options:
           offset: 0
+          pagination_heading_level: h4
           items_per_page: 10
           total_pages: null
           id: 0
@@ -338,7 +339,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-          pagination_heading_level: h4
       exposed_form:
         type: basic
         options:
@@ -503,6 +503,7 @@ display:
           skip_access: false
           preserve_facet_query_args: false
       relationships: {  }
+      css_class: map--browse--wrapper
       use_ajax: true
       header: {  }
       footer: {  }
@@ -539,27 +540,43 @@ display:
             -
               field: field_coverage
               rendered: true
-              rendered_strip: false
+              overlays_options:
+                disabled_overlays: {  }
+                hidden_overlays_controls: {  }
           data_source:
             field_coverage: field_coverage
           entity_source: __base_table
           name_field: title
-          description_field: '#rendered_view_fields'
-          view_mode: map_browse
+          leaflet_tooltip:
+            value: ''
+            options: '{"permanent":false,"direction":"center"}'
+          leaflet_popup:
+            value: '#rendered_entity'
+            view_mode: map_browse
+            options: '{"maxWidth":"300","minWidth":"50","autoPan":true}'
           leaflet_map: 'OSM Mapnik'
           height: '600'
           height_unit: px
           hide_empty_map: false
-          gesture_handling: false
           disable_wheel: false
+          gesture_handling: false
+          fitbounds_options: '{"padding":[0,0]}'
           reset_map:
             control: false
-            position: topright
+            options: '{"position":"topleft","title":"Reset View"}'
+          map_scale:
+            control: false
+            options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+          locate:
+            control: false
+            options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+            automatic: false
           map_position:
             force: false
             center:
               lat: 0.0
               lon: 0.0
+            zoomControlPosition: topleft
             zoom: 12
             minZoom: 1
             maxZoom: 18
@@ -592,6 +609,10 @@ display:
             control: false
             options: '{"position":"topleft","pseudoFullscreen":false}'
           path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+          feature_properties:
+            values: ''
+          map_lazy_load:
+            lazy_load: false
       row:
         type: fields
         options:
@@ -606,6 +627,7 @@ display:
         pager: false
         style: false
         row: false
+      css_class: map--browse--wrapper
       display_description: ''
       display_extenders: {  }
     cache_metadata:
@@ -629,6 +651,7 @@ display:
         type: mini
         options:
           offset: 0
+          pagination_heading_level: h4
           items_per_page: 10
           total_pages: null
           id: 0
@@ -643,7 +666,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-          pagination_heading_level: h4
       defaults:
         pager: false
       display_description: ''

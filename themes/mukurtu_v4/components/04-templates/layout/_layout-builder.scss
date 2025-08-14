@@ -1,0 +1,72 @@
+/* @file
+ * Styles for the layout builder.
+ */
+
+/* Make layout builder look closer to Gin */
+.glb-body {
+  background-color: var(--gin-bg-app);
+
+  .layout-builder {
+    background-color: var(--color-white);
+  }
+
+  .layout-container .page__title {
+    text-align: start;
+    padding: 0;
+    box-shadow: none;
+    margin-block-end: 0;
+  }
+
+  h1 {
+    font-size: var(--gin-font-size-h1);
+    font-weight: var(--gin-font-weight-bold);
+    line-height: normal;
+    letter-spacing: -.05em;
+    color: var(--gin-color-title);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-inline-end: .25em;
+    max-inline-size: 90%;
+    transition: font-size 0.25s ease;
+
+    &__language {
+      display: block;
+      font-size: var(--gin-font-size-xs);
+      font-weight: var(--gin-font-weight-normal);
+      letter-spacing: normal;
+      color: var(--gin-color-text);
+    }
+
+    &--is-translation + .shortcut-action .shortcut-action__icon {
+      inset-block-start: -3px;
+    }
+  }
+
+  .local-tasks {
+    li {
+      margin-inline-end: 0;
+    }
+
+    a {
+      font-size: var(--gin-font-size);
+      padding-block: calc(var(--gin-spacing-xs) - 2px);
+      padding-inline: var(--gin-spacing-s);
+      margin-inline-end: .25em;
+      min-block-size: 2rem;
+      border-radius: 2rem;
+      color: var(--gin-color-text);
+      text-decoration: none;
+      font-weight: var(--gin-font-weight-semibold);
+
+      &:hover,
+      &:active,
+      &:focus,
+      &.is-active {
+        background: var(--gin-bg-item-hover);
+        color: var(--gin-color-primary-hover);
+      }
+
+    }
+  }
+}

@@ -4,7 +4,7 @@ dependencies:
   module:
     - mukurtu_protocol
 id: protocol-protocol-curator
-label: 'Curator'
+label: Curator
 weight: 9
 is_admin: null
 group_type: protocol
@@ -15,25 +15,25 @@ permissions:
   - 'create audio media'
   - 'create collection content'
   - 'create document media'
-  - 'create soundcloud media'
   - 'create image media'
   - 'create remote_video media'
+  - 'create soundcloud media'
   - 'create video media'
   - 'delete any collection content'
   - 'delete own audio media'
   - 'delete own collection content'
   - 'delete own document media'
-  - 'delete own soundcloud media'
   - 'delete own image media'
   - 'delete own remote_video media'
+  - 'delete own soundcloud media'
   - 'delete own video media'
   - 'edit any collection content'
   - 'edit own collection content'
   - 'update own audio media'
   - 'update own document media'
-  - 'update own soundcloud media'
   - 'update own image media'
   - 'update own remote_video media'
+  - 'update own soundcloud media'
   - 'update own video media'
   - 'view collection content'
   - 'view community records'
@@ -43,5 +43,4 @@ permissions:
   - 'view person content'
   - 'view published personal collection entities'
   - 'view word_list content'
-
 role_type: standard

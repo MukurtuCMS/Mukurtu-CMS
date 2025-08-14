@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: full_image_with_description
+label: 'Full Image With Description'
+revision: false
+description: 'Full-width background image block with overlaid title and description text.'

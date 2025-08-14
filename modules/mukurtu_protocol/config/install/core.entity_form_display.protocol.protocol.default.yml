@@ -3,12 +3,10 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.mukurtu_content_browser
-    - entity_browser.browser.mukurtu_community_select
   module:
     - entity_browser
     - media_library
     - mukurtu_protocol
-    - path
     - text
 id: protocol.protocol.default
 targetEntityType: protocol

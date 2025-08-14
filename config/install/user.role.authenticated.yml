@@ -1,5 +1,22 @@
 langcode: en
 status: true
+dependencies:
+  config:
+    - entity_browser.browser.mukurtu_community_and_protocol_user_browser
+    - entity_browser.browser.mukurtu_content_browser
+    - entity_browser.browser.mukurtu_taxonomy_record_term_browser
+    - entity_browser.browser.multipage_item_entity_browser
+    - filter.format.basic_html
+  module:
+    - comment
+    - entity_browser
+    - filter
+    - flag
+    - media
+    - mukurtu_collection
+    - mukurtu_protocol
+    - node
+    - system
 id: authenticated
 label: 'Authenticated user'
 weight: 1

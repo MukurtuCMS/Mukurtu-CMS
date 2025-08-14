@@ -199,7 +199,7 @@ third_party_settings:
         - field_coverage
         - field_coverage_description
         - field_location
-      label: 'Locations'
+      label: Locations
       region: content
       parent_name: group_additional_fields
       weight: 24
@@ -210,7 +210,7 @@ third_party_settings:
         id: ''
         formatter: open
         description: ''
-        required_fields: true       
+        required_fields: true
 id: node.digital_heritage.default
 targetEntityType: node
 bundle: digital_heritage

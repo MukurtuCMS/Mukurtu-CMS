@@ -1,6 +1,13 @@
 langcode: en
 status: true
+dependencies:
+  module:
+    - comment
+    - contact
+    - media
+    - mukurtu_protocol
+    - system
 id: anonymous
-label: 'Visitor'
+label: Visitor
 weight: 0
 is_admin: false
