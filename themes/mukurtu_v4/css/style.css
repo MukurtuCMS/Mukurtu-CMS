@@ -939,28 +939,49 @@ a:not(.primary-nav__menu-link) svg.tel path {
   position: relative;
 }
 .field--name-field-featured-content .field__item .featured-item__link {
-  text-transform: uppercase;
-  font-size: var(--font-size-xs);
-  font-weight: 800;
-  color: var(--color-white);
-  background-color: var(--brand-primary-dark);
-  background-image: url(../images/triangle_arrow_right_small.svg);
-  background-position: 95% center;
-  background-repeat: no-repeat;
-  padding-inline: var(--v-space-4xs);
+  position: relative;
+  display: block;
+  inline-size: -webkit-max-content;
+  inline-size: -moz-max-content;
+  inline-size: max-content;
+  max-inline-size: 75%;
+  z-index: 2;
+  color: var(--light-text-color);
+  background: var(--brand-primary-dark);
+  font-size: var(--font-size-base);
+  font-weight: var(--text-bold);
+  letter-spacing: var(--letter-spacing-label);
+  border: none;
   padding-block: var(--v-space-5xs);
-  text-decoration: none;
-  -webkit-transition: all 0.2s ease-in-out;
-  transition: all 0.2s ease-in-out;
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  z-index: 5;
+  padding-inline: var(--v-space-2xs);
+  cursor: pointer;
+}
+.field--name-field-featured-content .field__item .featured-item__link:hover, .field--name-field-featured-content .field__item .featured-item__link:active, .field--name-field-featured-content .field__item .featured-item__link:focus {
+  color: var(--light-text-color);
+  background: var(--brand-primary-accent);
+}
+.field--name-field-featured-content .field__item .featured-item__link:focus {
+  outline: 2px solid var(--focus-color);
+}
+.field--name-field-featured-content .field__item .featured-item__link:disabled {
+  color: var(--light-text-color);
+  background: var(--brand-text-color);
+}
+.field--name-field-featured-content .field__item .featured-item__link::after {
+  content: "";
+  display: inline-block;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="20" height="30" viewBox="5 -5 20 30"><path fill="white" d="M25 10.01 9.72 25l-4.53-4.43L15.78 10.2 5-.37 9.72-5 25 10h-.01z"/></svg>');
+  background-repeat: no-repeat;
+  background-size: contain;
+  inline-size: 0.6em;
+  block-size: 1em;
+  vertical-align: middle;
+  -webkit-margin-start: 2ch;
+          margin-inline-start: 2ch;
 }
 .field--name-field-featured-content .field__item .featured-item__link:hover {
   background-color: var(--brand-primary);
   text-decoration: underline;
-  background-position: 98% center;
 }
 .field--name-field-featured-content .field__item .featured-item__media {
   -webkit-margin-after: var(--v-space-2xs);
@@ -990,10 +1011,24 @@ a:not(.primary-nav__menu-link) svg.tel path {
   inline-size: 100%;
   block-size: 100%;
 }
+.field--name-field-featured-content .field__item .featured-item__media .media--audio {
+  background: var(--brand-secondary-accent);
+}
+.field--name-field-featured-content .field__item .featured-item__media .media--audio .field {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding-inline: var(--v-space-2xs);
+}
 .field--name-field-featured-content .field__item .featured-item__type {
   font-size: var(--font-size-s);
   font-weight: 800;
-  text-transform: uppercase;
   text-align: center;
 }
 .field--name-field-featured-content .field__item h3 {
@@ -1284,6 +1319,19 @@ details.form-wrapper summary + div {
 .block--image-with-description--vertical .media--video video {
   inline-size: 100% !important;
   block-size: auto !important;
+}
+.block--image-with-description--vertical .media--image {
+  inline-size: 100%;
+}
+.block--image-with-description--vertical .media--image .field {
+  inline-size: 100%;
+}
+.block--image-with-description--vertical .media--image img {
+  inline-size: 100% !important;
+  block-size: auto !important;
+  -o-object-fit: cover;
+     object-fit: cover;
+  max-block-size: 600px;
 }
 .block--image-with-description--full {
   position: relative;
@@ -3882,6 +3930,10 @@ header {
   vertical-align: middle;
   -webkit-margin-start: 2ch;
           margin-inline-start: 2ch;
+}
+.communities__item .field--name-name a:hover {
+  background-color: var(--brand-primary);
+  text-decoration: underline;
 }
 .communities__item .media--image {
   display: block;

@@ -28,25 +28,7 @@
   background-color: white;
 
   & .field--name-name a {
-    position: relative;
-    display: block;
-    inline-size: max-content;
-    max-inline-size: 75%;
-    z-index: 2;
-
-    @include mixins.button;
-
-    &::after {
-      content: '';
-      display: inline-block;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="20" height="30" viewBox="5 -5 20 30"><path fill="white" d="M25 10.01 9.72 25l-4.53-4.43L15.78 10.2 5-.37 9.72-5 25 10h-.01z"/></svg>');
-      background-repeat: no-repeat;
-      background-size: contain;
-      inline-size: 0.6em;
-      block-size: 1em;
-      vertical-align: middle;
-      margin-inline-start: 2ch;
-    }
+    @include mixins.button-arrow;
   }
 
   .media--image {

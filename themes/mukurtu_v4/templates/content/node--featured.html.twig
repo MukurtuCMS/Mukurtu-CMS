@@ -83,6 +83,8 @@
       {% set media = content.field_article_image.0 %}
     {% elseif content.field_page_media_assets %}
       {% set media = content.field_page_media_assets.0 %}
+    {% elseif content.field_recording %}
+      {% set media = content.field_recording.0 %}
     {% endif %}
 <article{{ attributes }}>
 

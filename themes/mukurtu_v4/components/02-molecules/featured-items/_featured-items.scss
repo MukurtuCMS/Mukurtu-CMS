@@ -1,4 +1,5 @@
 @use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
 
 .field--name-field-featured-content {
   margin-block: var(--v-space-4xxs);
@@ -9,28 +10,7 @@
     position: relative;
 
     .featured-item__link {
-      text-transform: uppercase;
-      font-size: var(--font-size-xs);
-      font-weight: 800;
-      color: var(--color-white);
-      background-color: var(--brand-primary-dark);
-      background-image: url(../images/triangle_arrow_right_small.svg);
-      background-position: 95% center;
-      background-repeat: no-repeat;
-      padding-inline: var(--v-space-4xs);
-      padding-block: var(--v-space-5xs);
-      text-decoration: none;
-      transition: all 0.2s ease-in-out;
-      position: absolute;
-      inset-block-start: 0;
-      inset-inline-start: 0;
-      z-index: 5;
-
-      &:hover {
-        background-color: var(--brand-primary);
-        text-decoration: underline;
-        background-position: 98% center;
-      }
+      @include mixins.button-arrow;
     }
 
     .featured-item__media {
@@ -63,12 +43,22 @@
           block-size: 100%;
         }
       }
+
+      .media--audio {
+        background: var(--brand-secondary-accent);
+
+        .field {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding-inline: var(--v-space-2xs);
+        }
+      }
     }
 
     .featured-item__type {
       font-size: var(--font-size-s);
       font-weight: 800;
-      text-transform: uppercase;
       text-align: center;
     }
 

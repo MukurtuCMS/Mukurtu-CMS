@@ -35,6 +35,21 @@
       inline-size: 100% !important;
       block-size: auto !important;
     }
+
+    .media--image {
+      inline-size: 100%;
+
+      .field {
+        inline-size: 100%;
+      }
+
+      img {
+        inline-size: 100% !important;
+        block-size: auto !important;
+        object-fit: cover;
+        max-block-size: 600px;
+      }
+    }
   }
 
   &--full {
