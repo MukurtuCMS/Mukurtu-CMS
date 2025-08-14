@@ -1,6 +1,9 @@
+uuid: a887bde8-18b9-4c3d-b37e-868f4ccdaae1
 langcode: en
 status: true
 dependencies: {  }
+_core:
+  default_config_hash: BiK_Q-mGCjeGoNuflEgz5tiLcqeBZHDhT90IjLM5zGs
 id: featured_content
 label: 'Featured Content'
 revision: 0

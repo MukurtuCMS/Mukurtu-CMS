@@ -1,0 +1,11 @@
+uuid: 7a57aa5b-2ece-4f13-9c46-943f6526ceea
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.featured
+label: Featured
+description: 'Content cards for using as featured items'
+targetEntityType: node
+cache: true

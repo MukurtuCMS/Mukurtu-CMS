@@ -1,3 +1,4 @@
+uuid: 40330600-d187-4686-8832-e9def76ef238
 langcode: en
 status: true
 dependencies:
@@ -9,6 +10,8 @@ dependencies:
   module:
     - entity_browser
     - text
+_core:
+  default_config_hash: oGdPzCcyfoKGDhJuYxKx3388jVUJdTVGJRiYQAfPxK8
 id: block_content.featured_content.default
 targetEntityType: block_content
 bundle: featured_content

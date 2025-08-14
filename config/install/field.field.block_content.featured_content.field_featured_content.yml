@@ -1,3 +1,4 @@
+uuid: 448a7f7e-a1eb-42d7-a957-b0b89ddbf379
 langcode: en
 status: true
 dependencies:
@@ -11,6 +12,8 @@ dependencies:
     - node.type.page
     - node.type.person
     - node.type.word_list
+_core:
+  default_config_hash: iBtrZhJmdHBKP53_ocnK3GZcSTIB3kK2wQq-WQ7KOuo
 id: block_content.featured_content.field_featured_content
 field_name: field_featured_content
 entity_type: block_content
