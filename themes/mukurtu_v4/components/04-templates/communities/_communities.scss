@@ -5,6 +5,10 @@
 // Community browse page
 .community-page-listing {
   @include layout.layout--full-width-grid;
+
+  .communities {
+    @include layout.layout--full-width-grid-item;
+  }
 }
 
 // Communities block on landing pages.

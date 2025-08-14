@@ -3870,6 +3870,14 @@ header {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }
 }
+.community-page-listing .communities {
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .community-page-listing .communities {
+    grid-column: 2/-2;
+  }
+}
 
 .view-browse-by-community .community-page-browse {
   padding-inline: var(--layout-padding);
