@@ -53,6 +53,16 @@
         inline-size: 100%;
         block-size: 100%;
       }
+
+      .media--remote_video {
+        inline-size: 100%;
+        block-size: 100%;
+
+        .field, iframe {
+          inline-size: 100%;
+          block-size: 100%;
+        }
+      }
     }
 
     .featured-item__type {

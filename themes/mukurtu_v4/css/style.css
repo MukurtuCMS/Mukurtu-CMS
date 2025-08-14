@@ -982,6 +982,14 @@ a:not(.primary-nav__menu-link) svg.tel path {
   inline-size: 100%;
   block-size: 100%;
 }
+.field--name-field-featured-content .field__item .featured-item__media .media--remote_video {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.field--name-field-featured-content .field__item .featured-item__media .media--remote_video .field, .field--name-field-featured-content .field__item .featured-item__media .media--remote_video iframe {
+  inline-size: 100%;
+  block-size: 100%;
+}
 .field--name-field-featured-content .field__item .featured-item__type {
   font-size: var(--font-size-s);
   font-weight: 800;
