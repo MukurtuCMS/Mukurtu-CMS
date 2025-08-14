@@ -955,6 +955,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
   padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-2xs);
   cursor: pointer;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 5;
 }
 .field--name-field-featured-content .field__item .featured-item__link:hover, .field--name-field-featured-content .field__item .featured-item__link:active, .field--name-field-featured-content .field__item .featured-item__link:focus {
   color: var(--light-text-color);

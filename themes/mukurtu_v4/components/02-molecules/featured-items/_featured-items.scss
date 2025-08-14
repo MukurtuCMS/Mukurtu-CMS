@@ -11,6 +11,11 @@
 
     .featured-item__link {
       @include mixins.button-arrow;
+
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      z-index: 5;
     }
 
     .featured-item__media {
