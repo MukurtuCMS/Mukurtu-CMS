@@ -84,16 +84,16 @@
     {% endif %}
 <article{{ attributes }}>
 
-  <a href="{{ url }}" class="node-teaser__link">View Content</a>
+  <a href="{{ url }}" class="featured-item__link">View Content</a>
 
-  <div class="node-teaser__media">
+  <div class="featured-item__media">
     {{ media|add_suggestion('clean') }}
   </div>
 
-  <div class="node-teaser__type">{{ node.type.entity.label }}</div>
+  <div class="featured-item__type">{{ node.type.entity.label }}</div>
 
-  <h2{{ title_attributes }}>
+  <h3{{ title_attributes }}>
     <a href="{{ url }}" rel="bookmark">{{ label|add_suggestion('clean') }}</a>
-  </h2>
+  </h3>
 
 </article>

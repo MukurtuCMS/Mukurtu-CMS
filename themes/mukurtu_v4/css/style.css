@@ -929,6 +929,77 @@ a:not(.primary-nav__menu-link) svg.tel path {
   margin: var(--v-space-2xs);
 }
 
+.field--name-field-featured-content {
+  margin-block: var(--v-space-4xxs);
+  display: grid;
+  grid-template-columns: var(--grid-3col);
+  grid-gap: 10px var(--gutter);
+}
+.field--name-field-featured-content .field__item {
+  position: relative;
+}
+.field--name-field-featured-content .field__item .featured-item__link {
+  text-transform: uppercase;
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  color: var(--color-white);
+  background-color: var(--brand-primary-dark);
+  background-image: url(../images/triangle_arrow_right_small.svg);
+  background-position: 95% center;
+  background-repeat: no-repeat;
+  padding-inline: var(--v-space-4xs);
+  padding-block: var(--v-space-5xs);
+  text-decoration: none;
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+}
+.field--name-field-featured-content .field__item .featured-item__link:hover {
+  background-color: var(--brand-primary);
+  text-decoration: underline;
+  background-position: 98% center;
+}
+.field--name-field-featured-content .field__item .featured-item__media {
+  -webkit-margin-after: var(--v-space-2xs);
+          margin-block-end: var(--v-space-2xs);
+  height: 280px;
+  background-color: var(--brand-light);
+}
+.field--name-field-featured-content .field__item .featured-item__media .media,
+.field--name-field-featured-content .field__item .featured-item__media .media .field {
+  height: 100%;
+}
+.field--name-field-featured-content .field__item .featured-item__media img {
+  height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+  width: auto;
+}
+.field--name-field-featured-content .field__item .featured-item__type {
+  font-size: var(--font-size-s);
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: center;
+}
+.field--name-field-featured-content .field__item h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 400;
+  -webkit-margin-after: var(--v-space-2xs);
+          margin-block-end: var(--v-space-2xs);
+  text-align: center;
+}
+.field--name-field-featured-content .field__item h3 a {
+  text-decoration: none;
+}
+.field--name-field-featured-content .field__item h3 a:hover {
+  text-decoration: underline;
+  -webkit-filter: brightness(1.2);
+          filter: brightness(1.2);
+}
+
 .form-item + .form-item {
   -webkit-margin-before: 1rem;
           margin-block-start: 1rem;
