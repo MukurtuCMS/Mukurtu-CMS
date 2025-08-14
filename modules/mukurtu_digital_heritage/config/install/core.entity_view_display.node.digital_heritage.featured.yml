@@ -1,4 +1,3 @@
-uuid: 1a23866d-e985-4be7-b527-d2ee4092d7a2
 langcode: en
 status: true
 dependencies:
@@ -14,8 +13,6 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-_core:
-  default_config_hash: HHcXNxrFLyv4hpcFOOuq03xoN55OBnNWB2a2TMHfUbg
 id: node.digital_heritage.featured
 targetEntityType: node
 bundle: digital_heritage

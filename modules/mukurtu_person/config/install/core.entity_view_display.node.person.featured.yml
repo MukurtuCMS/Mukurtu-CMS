@@ -1,4 +1,3 @@
-uuid: d36e6c48-03d4-4e4f-a266-003208ed3fe6
 langcode: en
 status: true
 dependencies:
@@ -13,8 +12,6 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-_core:
-  default_config_hash: DXYWxYr8rUI6ORy36oAeZ8cSxCiB5IorwF4XuqxAkew
 id: node.person.featured
 targetEntityType: node
 bundle: person

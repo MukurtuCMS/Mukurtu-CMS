@@ -60,6 +60,8 @@ hidden:
   field_date_died: true
   field_deceased: true
   field_in_collection: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
   field_location: true
   field_multipage_page_of: true
   field_protocol_control: true
