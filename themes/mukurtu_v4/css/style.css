@@ -984,8 +984,6 @@ a:not(.primary-nav__menu-link) svg.tel path {
   text-decoration: underline;
 }
 .field--name-field-featured-content .field__item .featured-item__media {
-  -webkit-margin-after: var(--v-space-2xs);
-          margin-block-end: var(--v-space-2xs);
   block-size: 280px;
   background-color: var(--brand-light);
 }
@@ -3613,7 +3611,9 @@ header {
 }
 @media (min-width: 60rem) {
   .category-grid {
-    grid-template-columns: repeat(4, 1fr);
+    display: grid;
+    grid-template-columns: var(--grid-4col);
+    grid-gap: 10px var(--gutter);
     padding-inline: var(--layout-padding-m);
   }
 }
@@ -3879,7 +3879,8 @@ header {
 @media screen and (width >= 26rem) {
   .communities {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(auto, 24rem));
+    grid-template-columns: var(--grid-4col);
+    grid-gap: 10px var(--gutter);
   }
 }
 
