@@ -23,6 +23,8 @@ final class DesignPalette implements ContainerInjectionInterface {
 
   const CONFIG_PAGE_PALETTE_FIELD = 'field_design_settings__palette';
 
+  const CUSTOM_PALETTE_CSS_URI = 'public://mukurtu-design/custom-palette.css';
+
   /**
    * The config pages service.
    */
@@ -141,16 +143,43 @@ final class DesignPalette implements ContainerInjectionInterface {
       ],
     ];
     foreach (array_keys($palettes) as $palette) {
-      $libraries["palette.$palette"] = [
-        'css' => [
-          'theme' => [
-            "css/00-base/palettes/$palette.css" => [
-              'weight' => 1000000,
-              'preprocess' => FALSE,
+      if ($palette === 'custom') {
+        // Check if custom CSS file exists, if not generate it.
+        $file_system = \Drupal::service('file_system');
+        $css_real_path = $file_system->realpath(self::CUSTOM_PALETTE_CSS_URI);
+        
+        if (!$css_real_path || !file_exists($css_real_path)) {
+          // Load design_settings config page and generate CSS.
+          $configPage = $this->configPages->load(self::CONFIG_PAGE_NAME);
+          if ($configPage) {
+            _mukurtu_design_generate_custom_css($configPage);
+          }
+        }
+        
+        // Custom palette uses generated CSS file from custom public directory.
+        $libraries["palette.$palette"] = [
+          'css' => [
+            'theme' => [
+              \Drupal::service('file_url_generator')->generateAbsoluteString(self::CUSTOM_PALETTE_CSS_URI) => [
+                'weight' => 1000000,
+                'preprocess' => FALSE,
+              ],
             ],
           ],
-        ],
-      ];
+        ];
+      } else {
+        // Standard palettes use theme CSS files.
+        $libraries["palette.$palette"] = [
+          'css' => [
+            'theme' => [
+              "css/00-base/palettes/$palette.css" => [
+                'weight' => 1000000,
+                'preprocess' => FALSE,
+              ],
+            ],
+          ],
+        ];
+      }
     }
   }
 

@@ -16,6 +16,9 @@ settings:
     -
       value: red-bone
       label: 'Red Bone'
+    -
+      value: custom
+      label: Custom
   allowed_values_function: ''
 module: options
 locked: false
