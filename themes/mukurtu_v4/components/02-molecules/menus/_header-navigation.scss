@@ -2,10 +2,11 @@
  * @file
  * Navigation in header.
  */
+@use "../../../external/include-media";
 
 .header-nav {
   position: fixed;
-  z-index: 501; /* Appear above overlay and contextual links in header. */
+  z-index: 101; /* Appear above overlay and contextual links in header. */
   inset-block-start: 0;
   inset-inline-start: 100%;
   visibility: hidden;
@@ -66,12 +67,13 @@ html.js .header-nav {
 }
 
 body:not(.is-always-mobile-nav) .header-nav {
-  @media (width >= 75rem) {
+  grid-column: 2 / -1;
+
+  @include include-media.media('>=lg') {
     position: static;
     display: flex;
     visibility: visible;
     overflow: visible;
-    grid-column: 5 / 15;
     align-items: center;
     justify-content: flex-end;
     max-inline-size: none;
@@ -83,6 +85,10 @@ body:not(.is-always-mobile-nav) .header-nav {
     transform: none;
     border-block-start: 0;
     box-shadow: none;
+  }
+
+  @include include-media.media('>=2xl') {
+      grid-column: 3 / -1;
   }
 }
 

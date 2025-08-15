@@ -1672,15 +1672,21 @@ details.form-wrapper summary + div {
       -ms-flex-positive: 1;
           flex-grow: 1;
   color: var(--color-text-neutral-loud);
-  font-size: var(--font-size-l);
+  font-size: var(--font-size-m);
   text-decoration: none;
-  padding-inline: var(--v-space-3xs);
+  padding-inline: var(--v-space-4xs);
   padding-block: var(--v-space-5xs);
   -webkit-border-after: 4px solid;
           border-block-end: 4px solid;
   border-block-end-color: var(--color-transparent);
   -webkit-transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
   transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+}
+@media (min-width: 80rem) {
+  .primary-nav__menu-link {
+    padding-inline: var(--v-space-3xs);
+    font-size: var(--font-size-l);
+  }
 }
 .primary-nav__menu-link--has-children {
   -webkit-padding-end: var(--v-space-6xs);
@@ -2362,7 +2368,7 @@ html:not(.js) .primary-nav__menu--level-2 {
  */
 .header-nav {
   position: fixed;
-  z-index: 501; /* Appear above overlay and contextual links in header. */
+  z-index: 101; /* Appear above overlay and contextual links in header. */
   inset-block-start: 0;
   inset-inline-start: 100%;
   visibility: hidden;
@@ -2428,7 +2434,10 @@ html.js .header-nav {
   transition: visibility 0.2s, transform 0.2s, -webkit-transform 0.2s;
 }
 
-@media (width >= 75rem) {
+body:not(.is-always-mobile-nav) .header-nav {
+  grid-column: 2/-1;
+}
+@media (min-width: 60rem) {
   body:not(.is-always-mobile-nav) .header-nav {
     position: static;
     display: -webkit-box;
@@ -2436,7 +2445,6 @@ html.js .header-nav {
     display: flex;
     visibility: visible;
     overflow: visible;
-    grid-column: 5/15;
     -webkit-box-align: center;
         -ms-flex-align: center;
             align-items: center;
@@ -2459,6 +2467,11 @@ html.js .header-nav {
             border-block-start: 0;
     -webkit-box-shadow: none;
             box-shadow: none;
+  }
+}
+@media (min-width: 90rem) {
+  body:not(.is-always-mobile-nav) .header-nav {
+    grid-column: 3/-1;
   }
 }
 
@@ -2982,10 +2995,6 @@ header {
 }
 .header__logo a {
   display: inline-block;
-  padding: var(--v-space-5xs);
-  margin: var(--v-space-5xs);
-  -webkit-margin-start: -0.5rem;
-          margin-inline-start: -0.5rem;
 }
 .header__logo img {
   inline-size: 100px;
