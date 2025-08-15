@@ -933,6 +933,12 @@ a:not(.primary-nav__menu-link) svg.tel path {
   margin: var(--v-space-2xs);
 }
 
+#javali-popup {
+  inline-size: auto !important;
+  max-inline-size: 1000px !important;
+  border-radius: 5px;
+}
+
 .block-featured-content {
   padding-inline: var(--layout-padding);
 }

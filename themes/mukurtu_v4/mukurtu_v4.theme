@@ -70,11 +70,16 @@ function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variable
  */
 function mukurtu_v4_preprocess_block(&$variables)
 {
+  // Pass block title to consent popup content template.
+  if (isset($variables['plugin_id']) && $variables['plugin_id'] === 'consent_popup') {
+    $variables['content']['#items']['title'] = $variables['label'];
+  }
+
   // Directs the theme to use the block template for the Mukurtu footer,
   // mukurtu-footer.html.twig. Otherwise, it would use the default template,
   // block.html.twig, and our footer would not display.
   $variables['plugin_id'] = 'mukurtu_footer';
-  
+
   // Add is_front variable for block templates.
   $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
 }
