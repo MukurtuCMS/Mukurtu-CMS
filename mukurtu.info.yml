@@ -56,6 +56,7 @@ dependencies:
   - 'drupal:block_content'
   - 'drupal:ckeditor5'
   - 'drupal:comment'
+  - 'drupal:consent_popup'
   - 'drupal:contact'
   - 'drupal:contextual'
   - 'drupal:editor'
