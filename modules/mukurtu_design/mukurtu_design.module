@@ -65,3 +65,73 @@ function template_preprocess_mukurtu_palette_radios(array &$variables) {
 function template_preprocess_mukurtu_palette_radio(array &$variables) {
   template_preprocess_form_element($variables);
 }
+
+/**
+ * Implements hook_entity_presave().
+ */
+function mukurtu_design_entity_presave($entity) {
+  // Check if this is a design_settings config page being saved.
+  if ($entity->getEntityTypeId() === 'config_pages' && $entity->bundle() === 'design_settings') {
+    // Check if palette is set to "custom".
+    if ($entity->hasField('field_design_settings__palette')) {
+      $palette_value = $entity->get('field_design_settings__palette')->value;
+      if ($palette_value === 'custom') {
+        _mukurtu_design_generate_custom_css($entity);
+      }
+    }
+  }
+}
+
+/**
+ * Generate custom CSS file from palette fields.
+ */
+function _mukurtu_design_generate_custom_css($entity) {
+  $css_vars = [];
+
+  // Map field names to CSS variable names.
+  $field_mapping = [
+    'field_palette_brand_primary' => '--brand-primary',
+    'field_palette_brand_primary_dark' => '--brand-primary-dark',
+    'field_palette_brand_primary_acc' => '--brand-primary-accent',
+    'field_palette_brand_secondary' => '--brand-secondary',
+    'field_palette_brand_secondary_da' => '--brand-secondary-dark',
+    'field_palette_brand_secondary_ac' => '--brand-secondary-accent',
+  ];
+
+  // Extract color values from fields.
+  foreach ($field_mapping as $field_name => $css_var) {
+    if ($entity->hasField($field_name) && !$entity->get($field_name)->isEmpty()) {
+      // Color field stores hex value in 'color' property
+      $field_item = $entity->get($field_name)->first();
+      if ($field_item) {
+        $color_value = $field_item->get('color')->getValue();
+        if ($color_value) {
+          $css_vars[$css_var] = $color_value;
+        }
+      }
+    }
+  }
+
+  // Generate CSS content.
+  $css_content = ":root {\n";
+  if (!empty($css_vars)) {
+    foreach ($css_vars as $var_name => $color) {
+      $css_content .= "  $var_name: $color;\n";
+    }
+  } else {
+    // Fallback values if no colors are found
+    $css_content .= "  /* No custom colors defined */\n";
+  }
+  $css_content .= "}\n";
+
+  // Save CSS file.
+  $file_system = \Drupal::service('file_system');
+  $css_uri = \Drupal\mukurtu_design\DesignPalette::CUSTOM_PALETTE_CSS_URI;
+
+  // Ensure directory exists using stream wrapper.
+  $directory = dirname($css_uri);
+  $file_system->prepareDirectory($directory, $file_system::CREATE_DIRECTORY | $file_system::MODIFY_PERMISSIONS);
+
+  // Write CSS file using stream wrapper.
+  file_put_contents($css_uri, $css_content);
+}
