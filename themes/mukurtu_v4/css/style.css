@@ -328,6 +328,10 @@ div.palette-demo .accent span {
   inline-size: 36px;
 }
 
+div.palette-demo--custom {
+  display: none;
+}
+
 .palette-demo--blue-gold .brand-primary {
   background-color: #138aab;
 }
