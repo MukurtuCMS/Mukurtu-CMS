@@ -30,7 +30,7 @@ class MukurtuLocalContextsProjectReferenceUpdatedSubscriber implements EventSubs
 
   public function onProjectReferenceUpdated(LocalContextsProjectReferenceUpdatedEvent $event) {
     $project_id = $event->getProjectId();
-    // Check if project cache exists, in which case exit.
+    // Check if project exists in database, in which case exit.
 
     // Project does not exist. We need to request it from the hub outside of
     // the normal refresh cycle.
