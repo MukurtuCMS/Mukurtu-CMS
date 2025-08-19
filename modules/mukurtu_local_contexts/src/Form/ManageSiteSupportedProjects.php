@@ -43,7 +43,8 @@ class ManageSiteSupportedProjects extends FormBase {
         ),
       );
       foreach ($projects as $id => $project) {
-        if ($project = new LocalContextsProject($id)) {
+        $project = new LocalContextsProject($id);
+        if ($project->isValid()) {
           $in_use = $project->inUse();
           $form['projects'][$id]['selected'] = [
             '#type' => 'checkbox',

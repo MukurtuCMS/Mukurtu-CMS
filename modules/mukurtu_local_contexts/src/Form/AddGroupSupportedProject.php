@@ -62,7 +62,9 @@ class AddGroupSupportedProject extends FormBase {
     }
 
     $id = mb_strtolower($form_state->getValue('project_id'));
+    $api_key = $form_state->getValue('api_key');
     $project = new LocalContextsProject($id);
+    $project->fetchFromHub($api_key);
     if (!$project->isValid()) {
       $form_state->setErrorByName('name', $this->t('Could not find the project ID on the Local Contexts Hub.'));
     }

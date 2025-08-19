@@ -3,22 +3,38 @@
 namespace Drupal\mukurtu_local_contexts;
 
 class LocalContextsProject extends LocalContextsHubBase {
-  protected $title;
-  protected $privacy;
-  protected $valid;
+
+  /**
+   * @var string The 36 character Local Contexts project ID.
+   */
   protected $id;
+
+  /**
+   * @var mixed|null The title of the project.
+   */
+  protected $title;
+
+  /**
+   * @var mixed|null The privacy setting of the project.
+   */
+  protected $privacy;
+
+  /**
+   * @var bool Whether the project has been loaded from the API.
+   */
+  protected bool $valid;
 
   public function __construct($id) {
     parent::__construct();
     $this->id = $id;
-    $project = $this->load($id);
+    $project = $this->load();
     $this->valid = $project !== FALSE;
     $this->title = $project['title'] ?? NULL;
     $this->privacy = $project['privacy'] ?? NULL;
   }
 
   /**
-   * Loads a Local Contexts project from the API by its LC ID.
+   * Loads a Local Contexts project from the database by its LC ID.
    *
    * @param string $id
    *   The 36 character Local Contexts project ID.
@@ -26,50 +42,45 @@ class LocalContextsProject extends LocalContextsHubBase {
    * @return array|bool
    *   The title and privacy information if found. FALSE if not found.
    */
-  protected function load($id) {
-    if (!$id) {
-      return FALSE;
-    }
-
-    $query = $this->db->select('mukurtu_local_contexts_projects', 'project')
-      ->condition('project.id', $id)
+  protected function load() {
+    $query = $this->db
+      ->select('mukurtu_local_contexts_projects', 'project')
+      ->condition('project.id', $this->id)
       ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated']);
     $result = $query->execute();
     $project = $result->fetchAssoc();
-
-    if ($project === FALSE) {
-      if ($hubProject = $this->fetchProjectFromHub($id)) {
-        return [
-          'id' => $hubProject['unique_id'],
-          'provider_id' => $hubProject['providers_id'],
-          'title' => $hubProject['title'],
-          'privacy' => $hubProject['project_privacy'],
-          'updated' => $this->requestTime,
-        ];
-      }
-    }
 
     return $project;
   }
 
   /**
-   * @param $id
+   * Updates the local copy of a project from the hub and updates the object.
    *
-   * @return array|mixed
-   * @throws \Exception
+   * @param $api_key
+   *   The API key to use for the fetch request.
+   *
+   * @return bool
+   *   Whether the project was successfully fetched from the hub. Any errors
+   *   can be retrieved from the getErrorMessage() method.
    */
-  protected function fetchProjectFromHub($id) {
-    if ($project = $this->get("projects/{$id}")) {
+  public function fetchFromHub($api_key) {
+    $id = $this->id;
+    if ($project = $this->lcApi->makeRequest("projects/{$id}", $api_key)) {
       if (empty($project['unique_id'])) {
-        return $project;
+        $this->errorMessage = $project['detail'] ?? '';
+        return FALSE;
       }
+
+      // Update the object properties.
+      $this->title = $project['title'];
+      $this->privacy = $project['project_privacy'];
 
       // Update our local copy of this project.
       $projectFields = [
-        'id' => $project['unique_id'],
+        'id' => $id,
         'provider_id' => $project['providers_id'],
-        'title' => $project['title'],
-        'privacy' => $project['project_privacy'],
+        'title' => $this->title,
+        'privacy' => $this->privacy,
         'updated' => $this->requestTime,
       ];
 
@@ -84,7 +95,8 @@ class LocalContextsProject extends LocalContextsHubBase {
         $query->execute();
         $prior_saved_labels = [];
         $prior_saved_notices = [];
-      } else {
+      }
+      else {
         // Get any existing saved tk labels, bc labels, and notices so we can
         // compare to the response from the hub and delete any that are no
         // longer there.
@@ -113,7 +125,8 @@ class LocalContextsProject extends LocalContextsHubBase {
       $this->deleteSavedLabelsAndTranslations($prior_saved_labels, $project['unique_id']);
       $this->deleteSavedNoticesAndTranslations($prior_saved_notices, $project['unique_id']);
     }
-    return $project;
+
+    return isset($project['unique_id']);
   }
 
   public function getLabels($tk_or_bc) {
