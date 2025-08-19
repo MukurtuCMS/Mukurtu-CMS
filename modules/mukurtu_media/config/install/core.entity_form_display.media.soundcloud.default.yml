@@ -13,7 +13,7 @@ targetEntityType: media
 bundle: soundcloud
 mode: default
 content:
-  name:
+  field_media_soundcloud:
     type: string_textfield
     weight: 0
     region: content
@@ -21,7 +21,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_media_soundcloud:
+  name:
     type: string_textfield
     weight: 1
     region: content
