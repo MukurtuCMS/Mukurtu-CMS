@@ -5019,3 +5019,8 @@ header {
   background-color: var(--color-error-light);
 }
 /*# sourceMappingURL=style.css.map */
+
+/*# field description line length */
+.form-item__description, .fieldset__description, .filter-guidelines__item {
+    max-width: fit-content;
+}
