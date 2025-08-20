@@ -30,6 +30,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+    description: 'The system will automatically assign the filename as the audio name. We recommend using the filename, but you can provide a different name if needed.'
   field_cultural_protocols:
     type: cultural_protocol_widget
     weight: 2
