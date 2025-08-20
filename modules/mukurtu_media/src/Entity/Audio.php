@@ -46,7 +46,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_audio_file'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Audio file'))
-      ->setDescription(t(''))
+      ->setDescription(t('The system will automatically assign the filename as the audio name. We recommend using the filename, but you can provide a different name if needed.'))
       ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'file',
