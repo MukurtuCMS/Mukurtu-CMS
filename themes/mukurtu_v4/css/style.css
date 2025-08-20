@@ -5021,6 +5021,6 @@ header {
 /*# sourceMappingURL=style.css.map */
 
 /*# field description line length */
-.form-item__description, .fieldset__description, .filter-guidelines__item {
-    max-width: fit-content;
+.fieldset__description {
+    max-width: none;
 }
