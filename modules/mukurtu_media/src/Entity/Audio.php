@@ -46,7 +46,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_audio_file'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Audio file'))
-      ->setDescription(t('The system will automatically assign the filename as the audio name. We recommend using the filename, but you can provide a different name if needed.'))
+      ->setDescription(t(''))
       ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'file',
@@ -157,7 +157,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t(''))
+      ->setDescription(t('Mukurtu uses an interactive audio player or a generic thumbnail depending on the theme. You can provide your own image here if you want to use a specific thumbnail instead of the generic thumbnail for this audio file.'))
       ->setDefaultValue('')
       ->setSettings([
         'alt_field' => TRUE,
