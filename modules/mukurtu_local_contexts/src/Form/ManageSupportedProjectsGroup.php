@@ -31,13 +31,14 @@ class ManageSupportedProjectsGroup extends ManageSupportedProjectsBase {
 
     // Set the properties needed for the base form to function.
     $form_state->set('projects', $projects);
+    $form_state->set('group', $group);
 
     $form = parent::buildForm($form, $form_state);
 
     // Group-form specific changes.
-    $form['projects']['#caption'] = $this->t('The following Local Contexts Projects are available to members of %group. To delete an unused project, check the box next to it and click the "Remove Selected Projects" button.', ['%group' => $group->getName()]);
     $add_url = Url::fromRoute("mukurtu_local_contexts.add_{$group->getEntityTypeId()}_supported_project", ['group' => $group->id()]);
-    $form['empty']['#markup'] = $this->t('No Local Contexts projects have been added yet. <a href=":url">Add projects</a>.', [
+    $form['projects']['#caption'] = $projects ? $this->t('The following Local Contexts Projects are available to members of %group. To delete an unused project, check the box next to it and click the "Remove Selected Projects" button.', ['%group' => $group->getName()]) : NULL;
+    $form['projects']['#empty'] = $this->t('No Local Contexts projects have been added yet. <a href=":url">Add a project</a>.', [
       ':url' => $add_url->toString(),
     ]);
 
@@ -58,14 +59,13 @@ class ManageSupportedProjectsGroup extends ManageSupportedProjectsBase {
     if ($group = $form_state->get('group')) {
       $projects = $form_state->getValue('projects');
       $supportedProjectManager = new LocalContextsSupportedProjectManager();
-      foreach ($projects as $id => $project) {
-        if ($project['selected'] === "1") {
-          if ($projectToRemove = new LocalContextsProject($id)) {
-            if (!$projectToRemove->inUse()) {
-              $title = $projectToRemove->getTitle();
-              $supportedProjectManager->removeGroupProject($group, $id);
-              $this->messenger()->addStatus($this->t('Removed project %project', ['%project' => $title]));
-            }
+      $projects = array_filter($projects);
+      foreach ($projects as $id) {
+        if ($projectToRemove = new LocalContextsProject($id)) {
+          if (!$projectToRemove->inUse()) {
+            $title = $projectToRemove->getTitle();
+            $supportedProjectManager->removeGroupProject($group, $id);
+            $this->messenger()->addStatus($this->t('Removed project %project.', ['%project' => $title]));
           }
         }
       }

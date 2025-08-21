@@ -17,50 +17,46 @@ abstract class ManageSupportedProjectsBase extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $projects = $form_state->get('projects');
 
-    if (!empty($projects)) {
-      $form['projects'] = array(
-        '#type' => 'table',
-        '#caption' => NULL, // Set in child classes.
-        '#header' => array(
-          '',
-          $this->t('Title'),
-          $this->t('Project ID'),
-        ),
-      );
-      foreach ($projects as $id => $project) {
-        $project = new LocalContextsProject($id);
-        if ($project->isValid()) {
-          $in_use = $project->inUse();
-          $form['projects'][$id]['selected'] = [
-            '#type' => 'checkbox',
-            '#description' => $in_use ? $this->t('Project is in use and cannot be removed') : '',
-            '#disabled' => $in_use,
-          ];
-          $form['projects'][$id]['title'] = [
-            '#type' => 'processed_text',
-            '#text' => $project->getTitle(),
-          ];
-          $form['projects'][$id]['project_id'] = [
-            '#type' => 'processed_text',
-            '#text' => $project->id(),
-            '#value' => $project->id(),
-          ];
-        }
-      }
+    $form['projects'] = [
+      '#type' => 'tableselect',
+      '#header' => [
+        'title' => $this->t('Title'),
+        'project_id' => $this->t('Project ID'),
+      ],
+      '#caption' => NULL, // Set in child classes.
+      '#empty' => NULL, // Set in child classes.
+      '#js_select' => TRUE,
+    ];
 
-      $form['actions'] = [
-        '#type' => 'actions',
-      ];
-      $form['actions']['submit'] = [
-        '#type' => 'submit',
-        '#value' => $this->t('Remove Selected Projects'),
-      ];
+    $options = [];
+    foreach ($projects as $id => $project) {
+      $project = new LocalContextsProject($id);
+      if ($project->isValid()) {
+        $in_use = $project->inUse();
+        $options[$id] = [
+          'title' => $project->getTitle(),
+          'project_id' => $project->id(),
+        ];
+        // Normally we would not need to redefine the entire checkbox here,
+        // but it is needed to set the disabled and description properties.
+        $form['projects'][$id] = [
+          '#type' => 'checkbox',
+          '#disabled' => $in_use,
+          '#attributes' => $in_use ? ['title' => $this->t('Project is in use and cannot be removed')] : [],
+          '#return_value' => $id,
+        ];
+      }
     }
-    else {
-      $form['empty'] = [
-        '#markup' => NULL, // Set in child classes.
-      ];
-    }
+    $form['projects']['#options'] = $options;
+
+    $form['actions'] = [
+      '#type' => 'actions',
+    ];
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Remove Selected Projects'),
+      '#access' => !empty($projects),
+    ];
 
     return $form;
   }

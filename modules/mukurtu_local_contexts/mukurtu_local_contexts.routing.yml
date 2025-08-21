@@ -24,7 +24,7 @@ mukurtu_local_contexts.site_project_directory_settings:
   path: '/admin/local-contexts/projects/settings'
   defaults:
     _title: 'Site-wide Local Contexts projects directory settings'
-    _form: 'Drupal\mukurtu_local_contexts\Form\ManageSiteProjectsDirectory'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageProjectsDirectorySite'
   requirements:
     _permission: 'administer site configuration'
 
@@ -71,7 +71,7 @@ mukurtu_local_contexts.community_project_directory_settings:
   path: '/admin/communities/{group}/local-contexts/projects/settings'
   defaults:
     _title: 'Community-based Local Contexts projects directory settings'
-    _form: 'Drupal\mukurtu_local_contexts\Form\ManageCommunityProjectsDirectory'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageProjectsDirectoryCommunity'
   requirements:
     _permission: 'update group'
 
@@ -121,7 +121,7 @@ mukurtu_local_contexts.protocol_project_directory_settings:
   path: '/admin/protocols/{group}/local-contexts/projects/settings'
   defaults:
     _title: 'Configure settings for protocol-based Local Contexts projects directory'
-    _form: 'Drupal\mukurtu_local_contexts\Form\ManageProtocolProjectsDirectory'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageProjectsDirectoryProtocol'
   requirements:
     _permission: 'update group'
 

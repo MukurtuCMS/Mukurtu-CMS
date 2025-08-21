@@ -35,9 +35,9 @@ class ManageSupportedProjectsSite extends ManageSupportedProjectsBase {
     $form = parent::buildForm($form, $form_state);
 
     // Group-form specific changes.
-    $form['projects']['#caption'] = $this->t('The following Local Contexts Projects are available to all users. To delete an unused project, check the box next to it and click the "Remove Selected Projects" button.');
     $add_url = Url::fromRoute('mukurtu_local_contexts.add_site_supported_project');
-    $form['empty']['#markup'] = $this->t('No Local Contexts projects have been added yet. <a href=":url">Add projects</a>.', [
+    $form['projects']['#caption'] = $projects ? $this->t('The following Local Contexts Projects are available to all users. To delete an unused project, check the box next to it and click the "Remove Selected Projects" button.') : NULL;
+    $form['projects']['#empty'] = $this->t('No Local Contexts projects have been added yet. <a href=":url">Add a project</a>.', [
       ':url' => $add_url->toString(),
     ]);
 
@@ -57,14 +57,13 @@ class ManageSupportedProjectsSite extends ManageSupportedProjectsBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $projects = $form_state->getValue('projects');
     $supportedProjectManager = new LocalContextsSupportedProjectManager();
-    foreach ($projects as $id => $project) {
-      if ($project['selected'] === "1") {
-        if ($projectToRemove = new LocalContextsProject($id)) {
-          if (!$projectToRemove->inUse()) {
-            $title = $projectToRemove->getTitle();
-            $supportedProjectManager->removeSiteProject($id);
-            $this->messenger()->addStatus($this->t('Removed project %project', ['%project' => $title]));
-          }
+    $projects = array_filter($projects);
+    foreach ($projects as $id) {
+      if ($projectToRemove = new LocalContextsProject($id)) {
+        if (!$projectToRemove->inUse()) {
+          $title = $projectToRemove->getTitle();
+          $supportedProjectManager->removeSiteProject($id);
+          $this->messenger()->addStatus($this->t('Removed project %project.', ['%project' => $title]));
         }
       }
     }

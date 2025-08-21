@@ -85,17 +85,17 @@ abstract class AddSupportedProjectsBase extends FormBase {
         '#submit' => ['::resetApiKey'],
       ];
 
-      $form['projects'] = array(
+      $form['projects'] = [
         '#type' => 'tableselect',
-        '#caption' => NULL, // Set in sub-classes.
-        '#header' => array(
+        '#header' => [
           'title' => $this->t('Title'),
           'status' => $this->t('Status'),
           'project_id' => $this->t('Project ID'),
-        ),
+        ],
+        '#caption' => NULL, // Set in sub-classes.
         '#empty' => $this->t('No Local Context projects are available to the provided API key. Check that your account has access to at least one Local Contexts account, and that projects have been set up within that account.'),
         '#js_select' => TRUE,
-      );
+      ];
 
       $options = [];
       foreach ($all_projects as $project) {
