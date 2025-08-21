@@ -74,17 +74,19 @@ class LocalContextsApi {
    * @param string $api_key
    *   The API key.
    *
-   * @return mixed
+   * @return array
    *   The result of the API call.
    */
-  public function makeRequest($path, $api_key, $query_params = []) {
+  public function makeRequest($path, $api_key, ?array $query_params = []) {
     $options = [
       // The hub uses 301 redirects.
-      'allow_redirects' => TRUE, // Follows 301 redirects
+      'allow_redirects' => TRUE,
+      // Don't throw exceptions for non-200 responses.
+      'http_errors' => FALSE,
       'headers' => [
-        // Set authorization header.
+        // Set the authorization header.
         'X-Api-Key' => $api_key,
-        'Accept' => 'text/json',
+        'Accept' => 'application/json',
       ],
       'query' => $query_params,
     ];
@@ -94,10 +96,11 @@ class LocalContextsApi {
       $path = '/' . $path;
     }
     $url = $this->endpointUrl . $path;
+    $result = [];
 
     try {
       // Send the request.
-      $response = $request->get($url);
+      $response = $request->request('GET', $url);
       $http_code = $response->getStatusCode();
       $result = json_decode($response->getBody()->getContents(), TRUE);
       if ($http_code != 200) {
@@ -122,13 +125,15 @@ class LocalContextsApi {
    * @return array
    *   The result of all the combined API calls.
    */
-  public function makeMultipageRequest($path, $api_key) {
+  public function makeMultipageRequest($path, $api_key, ?array $query_params = []) {
     $results = [];
     $more_pages = TRUE;
     $max_pages = 20;
-    $page_number = 0;
+    // 1-indexed page numbers. A page number of 0 will return "Invalid page."
+    $page_number = 1;
     while ($more_pages) {
-      $response = $this->makeRequest($path, $api_key, $page_number);
+      $query_params['page'] = $page_number;
+      $response = $this->makeRequest($path, $api_key, $query_params);
       if (!isset($response['results'])) {
         break;
       }
@@ -140,6 +145,20 @@ class LocalContextsApi {
       }
     }
     return $results;
+  }
+
+  /**
+   * Validate an API key as valid.
+   *
+   * @param string $api_key
+   *   The API key.
+   *
+   * @return bool
+   */
+  public function validateApiKey($api_key) {
+    $this->errorMessage = '';
+    $this->makeRequest('/projects', $api_key);
+    return !$this->errorMessage;
   }
 
   /**

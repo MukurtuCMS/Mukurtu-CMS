@@ -78,7 +78,7 @@ class LocalContextsProject extends LocalContextsHubBase {
       // Update our local copy of this project.
       $projectFields = [
         'id' => $id,
-        'provider_id' => $project['providers_id'],
+        'provider_id' => $project['external_ids']['providers_id'],
         'title' => $this->title,
         'privacy' => $this->privacy,
         'updated' => $this->requestTime,
@@ -182,7 +182,7 @@ class LocalContextsProject extends LocalContextsHubBase {
         'img_url' => $label['img_url'],
         'svg_url' => $label['svg_url'],
         'audio_url' => $label['audiofile'] ?? NULL,
-        'community' => $label['community'],
+        'community' => $label['community']['name'],
         'default_text' => $label['label_text'],
         'display' => 'label',
         'tk_or_bc' => $tk_or_bc,
