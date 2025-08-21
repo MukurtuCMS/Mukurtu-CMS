@@ -5,7 +5,6 @@ namespace Drupal\mukurtu_local_contexts\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
-
 /**
  * Provides a form to manage the site level local contexts projects directory.
  */

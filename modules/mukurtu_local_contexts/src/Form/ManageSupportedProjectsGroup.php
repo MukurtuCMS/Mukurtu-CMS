@@ -9,7 +9,6 @@ use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Drupal\Core\Entity\ContentEntityInterface;
 
-
 /**
  * Provides a Local Contexts form.
  */

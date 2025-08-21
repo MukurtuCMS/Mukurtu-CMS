@@ -109,7 +109,7 @@ mukurtu_local_contexts.manage_protocol_supported_projects:
   path: '/admin/protocols/{group}/local-contexts/projects'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::title'
-    _form: 'Drupal\mukurtu_local_contexts\Form\ManageGroupSupportedProjects'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageSupportedProjectsGroup'
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::access'
   options:

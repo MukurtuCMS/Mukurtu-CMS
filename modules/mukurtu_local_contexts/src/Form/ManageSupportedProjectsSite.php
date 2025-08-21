@@ -2,13 +2,10 @@
 
 namespace Drupal\mukurtu_local_contexts\Form;
 
-use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
-
 
 /**
  * Provides a Local Contexts form.
