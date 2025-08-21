@@ -137,14 +137,14 @@
         display: block;
       }
 
-      span {
-        display: flex;
-        gap: var(--v-space-6xs);
-        margin-block: var(--v-space-4xxs);
-      }
-
       img {
         max-inline-size: var(--v-space-2xs);
+      }
+
+      .license-logos {
+        display: flex;
+        gap: var(--v-space-6xs);
+        margin-block-start: var(--v-space-4xxs);
       }
     }
 

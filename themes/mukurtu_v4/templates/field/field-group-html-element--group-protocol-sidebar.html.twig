@@ -15,7 +15,6 @@
  * @ingroup themeable
  */
 #}
-
 <{{ wrapper_element }} {{ attributes }}>
 {% if title %}
   <{{ title_element }}{{ title_attributes }}>{{ title }}</{{ title_element }}>
@@ -25,25 +24,28 @@
   {% endif %}
   {{ children }}
   <div class="callout">
-    <div class="field__label">{{ 'Digital heritage'|t }}</div>
+    <div class="field__label">{{ 'Browse content'|t }}</div>
     <div class="field__items">
       <div class="field__item">
-        <a href="/digital-heritage?f[0]=cultural_protocols_dh_browse%3A|{{ protocol_id }}|">
-          {{ 'Browse by '|t ~ protocol_name }}
+        <a href="/browse?f[0]=cultural_protocols_dh_browse%3A|{{ protocol_id }}|">
+          {{ 'Browse all content in '|t ~ protocol_name }}
         </a>
       </div>
     </div>
   </div>
-  <div class="callout">
-    <div class="field__label">{{ 'Local context'|t }}</div>
-    <div class="field__items">
-      <div class="field__item">
-        <a href="/admin/protocols/{{ protocol_id }}/local-contexts/projects">
-          {{ 'Project directory for '|t ~ protocol_name }}
-        </a>
+  {% if has_lc_projects %}
+    <div class="callout">
+      <div class="field__label">{{ 'Local Contexts'|t }}</div>
+      <div class="field__items">
+        <div class="field__item">
+          <a href="/admin/protocols/{{ protocol_id }}/local-contexts/projects">
+            {{ 'View '|t ~ protocol_name ~ '\'s Local Contexts directory'|t}}
+          </a>
+        </div>
       </div>
     </div>
-  </div>
+  {% endif %}
+
   {% if collapsible %}
 </div>
 {% endif %}

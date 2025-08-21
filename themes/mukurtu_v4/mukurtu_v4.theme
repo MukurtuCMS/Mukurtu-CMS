@@ -3,6 +3,7 @@
 use Drupal\file\Entity\File;
 use Drupal\Core\Url;
 use Drupal\media\MediaInterface;
+use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 
 /**
  * Implements hook_preprocess_breadcrumb().
@@ -69,10 +70,18 @@ function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variable
  */
 function mukurtu_v4_preprocess_block(&$variables)
 {
+  // Pass block title to consent popup content template.
+  if (isset($variables['plugin_id']) && $variables['plugin_id'] === 'consent_popup') {
+    $variables['content']['#items']['title'] = $variables['label'];
+  }
+
   // Directs the theme to use the block template for the Mukurtu footer,
   // mukurtu-footer.html.twig. Otherwise, it would use the default template,
   // block.html.twig, and our footer would not display.
   $variables['plugin_id'] = 'mukurtu_footer';
+
+  // Add is_front variable for block templates.
+  $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
 }
 
 /**
@@ -228,6 +237,8 @@ function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar
   $community = $route_match->getParameter('community');
   $variables['community_name'] = $community->get('name')->value;
   $variables['community_id'] = $community->get('id')->value;
+  $localContextsProjectManager = new LocalContextsSupportedProjectManager();
+  $variables['has_lc_projects'] = $localContextsProjectManager->getGroupSupportedProjects($community) ? TRUE : FALSE;
 }
 
 /**
@@ -239,4 +250,6 @@ function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(
   $protocol = $route_match->getParameter('protocol');
   $variables['protocol_name'] = $protocol->get('name')->value;
   $variables['protocol_id'] = $protocol->get('id')->value;
+  $localContextsProjectManager = new LocalContextsSupportedProjectManager();
+  $variables['has_lc_projects'] = $localContextsProjectManager->getGroupSupportedProjects($protocol) ? TRUE : FALSE;
 }

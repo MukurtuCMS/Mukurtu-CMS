@@ -25,20 +25,20 @@ content:
     third_party_settings: {  }
   field_access_mode:
     type: options_buttons
-    weight: 2
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
   field_banner_image:
     type: media_library_widget
-    weight: 4
+    weight: 6
     region: content
     settings:
       media_types: {  }
     third_party_settings: {  }
   field_child_communities:
     type: entity_reference_autocomplete
-    weight: 7
+    weight: 9
     region: content
     settings:
       match_operator: CONTAINS
@@ -48,7 +48,7 @@ content:
     third_party_settings: {  }
   field_community_type:
     type: options_select
-    weight: 3
+    weight: 4
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -64,7 +64,7 @@ content:
     third_party_settings: {  }
   field_featured_content:
     type: entity_browser_entity_reference
-    weight: 6
+    weight: 8
     region: content
     settings:
       entity_browser: mukurtu_content_browser
@@ -76,9 +76,15 @@ content:
       field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
+  field_membership_display:
+    type: options_buttons
+    weight: 5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_thumbnail_image:
     type: media_library_widget
-    weight: 5
+    weight: 7
     region: content
     settings:
       media_types: {  }
@@ -100,13 +106,13 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 8
+    weight: 10
     region: content
     settings: {  }
     third_party_settings: {  }
   user_id:
     type: entity_reference_autocomplete
-    weight: 9
+    weight: 11
     region: content
     settings:
       match_operator: CONTAINS

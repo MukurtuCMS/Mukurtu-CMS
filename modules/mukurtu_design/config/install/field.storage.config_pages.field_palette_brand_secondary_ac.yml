@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - color_field
+    - config_pages
+id: config_pages.field_palette_brand_secondary_ac
+field_name: field_palette_brand_secondary_ac
+entity_type: config_pages
+type: color_field_type
+settings:
+  format: '#HEXHEX'
+module: color_field
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

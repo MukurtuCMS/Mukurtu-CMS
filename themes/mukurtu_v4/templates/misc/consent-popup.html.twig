@@ -1,0 +1,9 @@
+<div id="javali-popup">
+  {% if items.title %}<h3>{{ items.title }}</h3>{% endif %}
+  <div class="consent-text">{{ items.text|raw }}</div>
+  <div class="consent-buttons">
+    <button class="accept">{{ items.accept }}</button>
+    <button class="decline">{{ items.decline }}</button>
+  </div>
+  <a class="visually-hidden" href="{{ items.url }}">{{ items.url_text }}</a>
+</div>

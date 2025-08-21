@@ -1,26 +1,27 @@
-_core:
-  default_config_hash: c8aZhkIY8zHUo0_UOll4vVs_l48dHL_gBqbvfuAM0Rs
 favicon:
-  use_default: true
+  mimetype: image/png
+  path: /profiles/mukurtu/themes/mukurtu_v4/logo.png
+  use_default: false
 features:
   comment_user_picture: true
   comment_user_verification: true
   favicon: true
   node_user_picture: true
 logo:
-  use_default: true
+  path: /profiles/mukurtu/themes/mukurtu_v4/logo.png
+  use_default: false
 third_party_settings:
   shortcut:
     module_link: true
-preset_accent_color: red
+preset_accent_color: teal
 preset_focus_color: gin
-enable_darkmode: '0'
+enable_darkmode: auto
 classic_toolbar: new
 secondary_toolbar_frontend: true
 high_contrast_mode: false
 accent_color: ''
 focus_color: ''
 layout_density: default
-show_description_toggle: false
-show_user_theme_settings: false
-sticky_action_buttons: false
+show_description_toggle: true
+show_user_theme_settings: true
+sticky_action_buttons: true

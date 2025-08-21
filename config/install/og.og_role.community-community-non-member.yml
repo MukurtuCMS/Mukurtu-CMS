@@ -10,5 +10,5 @@ is_admin: null
 group_type: community
 group_bundle: community
 group_id: null
-permissions: { }
+permissions: {  }
 role_type: required

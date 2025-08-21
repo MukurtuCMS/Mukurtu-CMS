@@ -13,27 +13,15 @@ targetEntityType: media
 bundle: remote_video
 mode: default
 content:
-  created:
-    type: datetime_timestamp
-    weight: 8
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  field_cultural_protocols:
-    type: cultural_protocol_widget
-    weight: 2
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  field_identifier:
+  field_media_oembed_video:
     type: string_textfield
-    weight: 3
+    weight: 0
     region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_media_oembed_video:
+  name:
     type: string_textfield
     weight: 1
     region: content
@@ -41,13 +29,25 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_media_tags:
-    type: entity_reference_autocomplete
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_thumbnail:
+    type: image_image
+    weight: 3
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+  field_identifier:
+    type: string_textfield
     weight: 4
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
@@ -61,28 +61,28 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_thumbnail:
-    type: image_image
+  field_media_tags:
+    type: entity_reference_autocomplete
     weight: 6
     region: content
     settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  created:
+    type: datetime_timestamp
+    weight: 7
+    region: content
+    settings: {  }
     third_party_settings: {  }
   langcode:
     type: language_select
-    weight: 2
+    weight: 8
     region: content
     settings:
       include_locked: true
-    third_party_settings: {  }
-  name:
-    type: string_textfield
-    weight: 0
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
     third_party_settings: {  }
   path:
     type: path
@@ -99,7 +99,7 @@ content:
     third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete
-    weight: 7
+    weight: 11
     region: content
     settings:
       match_operator: CONTAINS

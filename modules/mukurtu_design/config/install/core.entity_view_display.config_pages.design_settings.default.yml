@@ -4,7 +4,14 @@ dependencies:
   config:
     - config_pages.type.design_settings
     - field.field.config_pages.design_settings.field_design_settings__palette
+    - field.field.config_pages.design_settings.field_palette_brand_primary
+    - field.field.config_pages.design_settings.field_palette_brand_primary_acc
+    - field.field.config_pages.design_settings.field_palette_brand_primary_dark
+    - field.field.config_pages.design_settings.field_palette_brand_secondary
+    - field.field.config_pages.design_settings.field_palette_brand_secondary_ac
+    - field.field.config_pages.design_settings.field_palette_brand_secondary_da
   module:
+    - color_field
     - options
 id: config_pages.design_settings.default
 targetEntityType: config_pages
@@ -17,6 +24,60 @@ content:
     settings: {  }
     third_party_settings: {  }
     weight: 0
+    region: content
+  field_palette_brand_primary:
+    type: color_field_formatter_text
+    label: above
+    settings:
+      format: hex
+      opacity: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_palette_brand_primary_acc:
+    type: color_field_formatter_text
+    label: above
+    settings:
+      format: hex
+      opacity: true
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_palette_brand_primary_dark:
+    type: color_field_formatter_text
+    label: above
+    settings:
+      format: hex
+      opacity: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_palette_brand_secondary:
+    type: color_field_formatter_text
+    label: above
+    settings:
+      format: hex
+      opacity: true
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_palette_brand_secondary_ac:
+    type: color_field_formatter_text
+    label: above
+    settings:
+      format: hex
+      opacity: true
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_palette_brand_secondary_da:
+    type: color_field_formatter_text
+    label: above
+    settings:
+      format: hex
+      opacity: true
+    third_party_settings: {  }
+    weight: 5
     region: content
 hidden:
   search_api_excerpt: true

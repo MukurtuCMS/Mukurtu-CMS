@@ -741,6 +741,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_banner_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Banner Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -760,6 +761,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_thumbnail_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Thumbnail Image'))
+      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -787,21 +789,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
           'all' => 'Display all members',
         ],
       ])
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'list_default',
-        'weight' => 10,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'options_buttons',
-        'weight' => 10,
-      ])
       ->setDefaultValue('none')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('view', FALSE)
       ->setDisplayConfigurable('form', TRUE);
 
     return $fields;

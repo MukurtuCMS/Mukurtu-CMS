@@ -1,6 +1,8 @@
 langcode: en
 status: true
 dependencies:
+  module:
+    - system
   theme:
     - mukurtu_v4
 id: mukurtu_v4_page_title
@@ -14,4 +16,8 @@ settings:
   label: 'Page title'
   label_display: '0'
   provider: core
-visibility: {  }
+visibility:
+  request_path:
+    id: request_path
+    negate: true
+    pages: "<front>\r\n/landing/*"
