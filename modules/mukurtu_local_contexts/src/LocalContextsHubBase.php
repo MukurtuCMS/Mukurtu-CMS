@@ -2,6 +2,8 @@
 
 namespace Drupal\mukurtu_local_contexts;
 
+use Drupal\Core\Database\Connection;
+
 class LocalContextsHubBase {
   /**
    * The settings configuration key.
@@ -29,9 +31,21 @@ class LocalContextsHubBase {
    *
    * @var string
    */
-  protected $endpointUrl;
+  protected string $endpointUrl;
 
-  protected $db;
+  /**
+   * The Drupal database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected Connection $db;
+
+  /**
+   * The HTTP request timestamp.
+   *
+   * @var int
+   */
+  protected int $requestTime;
 
   /**
    * Constructs a LocalContextsHubManager object.
@@ -44,6 +58,7 @@ class LocalContextsHubBase {
   public function __construct() {
     $this->configFactory = \Drupal::service('config.factory');
     $this->db = \Drupal::database();
+    $this->requestTime = \Drupal::time()->getRequestTime();
     $endpointUrl = $this->configFactory->get(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? self::DEFAULT_HUB_URL;
 
     if (str_ends_with($endpointUrl, '/')) {

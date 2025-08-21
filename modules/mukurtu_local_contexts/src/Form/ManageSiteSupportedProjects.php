@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_local_contexts\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 
@@ -31,22 +32,14 @@ class ManageSiteSupportedProjects extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $projects = $this->supportedProjectManager->getSiteSupportedProjects();
 
-    $form['add_project_link'] = [
-      '#title' => $this->t('Add Project'),
-      '#type' => 'link',
-      '#url' => \Drupal\Core\Url::fromRoute('mukurtu_local_contexts.add_site_supported_project'),
-    ];
-
     if (!empty($projects)) {
       $form['projects'] = array(
         '#type' => 'table',
-        '#caption' => $this->t('Local Contexts Projects available for all users'),
+        '#caption' => $this->t('The following Local Contexts Projects are available to all users.'),
         '#header' => array(
           '',
-          $this
-            ->t('Title'),
-          $this
-            ->t('Project ID'),
+          $this->t('Title'),
+          $this->t('Project ID'),
         ),
       );
       foreach ($projects as $id => $project) {
@@ -75,6 +68,14 @@ class ManageSiteSupportedProjects extends FormBase {
       $form['actions']['submit'] = [
         '#type' => 'submit',
         '#value' => $this->t('Remove Selected Projects'),
+      ];
+    }
+    else {
+      $add_url = Url::fromRoute('mukurtu_local_contexts.add_site_supported_project');
+      $form['empty'] = [
+        '#markup' => $this->t('No site-wide Local Contexts projects have been added yet. <a href=":url">Add a project</a>.', [
+          ':url' => $add_url->toString(),
+        ]),
       ];
     }
 
