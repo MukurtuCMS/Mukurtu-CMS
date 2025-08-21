@@ -677,21 +677,12 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
           'all' => 'Display all members',
         ],
       ])
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'list_default',
-        'weight' => 10,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'options_buttons',
-        'weight' => 4,
-      ])
       ->setDefaultValue('none')
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('view', FALSE)
       ->setDisplayConfigurable('form', TRUE);
 
     return $fields;

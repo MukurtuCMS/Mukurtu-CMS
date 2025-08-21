@@ -12,7 +12,6 @@ use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\OgAccessInterface;
-use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -122,25 +121,10 @@ class MukurtuOgGroupSubscribeFormatter extends FormatterBase implements Containe
     $cache_meta = CacheableMetadata::createFromRenderArray($elements);
 
     $group = $items->getEntity();
-    $entity_type_id = $group->getEntityTypeId();
     $cache_meta->merge(CacheableMetadata::createFromObject($group));
     $cache_meta->applyTo($elements);
 
     $user = $this->entityTypeManager->getStorage('user')->load(($this->currentUser->id()));
-    if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $user->id())) {
-      // User is the group manager.
-      $elements[0] = [
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#attributes' => [
-          'title' => $this->t('You are the group manager'),
-          'class' => ['group', 'manager'],
-        ],
-        '#value' => $this->t('You are the group manager'),
-      ];
-
-      return $elements;
-    }
 
     $storage = $this->entityTypeManager->getStorage('og_membership');
     $props = [
@@ -161,20 +145,80 @@ class MukurtuOgGroupSubscribeFormatter extends FormatterBase implements Containe
         // membership.
         return $elements;
       }
+
+      $roles = $membership->getRoles();
+      $unwantedRoleIndex = $this->getUnwantedRoleIndex($roles);
+
+      if ($unwantedRoleIndex != -1) {
+        unset($roles[$unwantedRoleIndex]);
+        // Reindex the array after unset.
+        $roles = array_values($roles);
+      }
+      $rolesMessage = $this->createRolesMessage($roles);
       // Member is pending or active.
       $elements[0] = [
         '#type' => 'html_tag',
         '#tag' => 'span',
         '#attributes' => [
-          'title' => $this->t('You are a group member'),
+          'title' => $this->t($rolesMessage),
           'class' => ['group'],
         ],
-        '#value' => $this->t('You are a group member'),
+        '#value' => $this->t($rolesMessage),
       ];
 
       return $elements;
     }
 
     return $elements;
+  }
+
+
+  /**
+   * If the "Member" role is in the roles list, find the index it's located at.
+   * We don't want to show this role in the roles message, so we need to remove
+   * it before we can process the roles list.
+   */
+  protected function getUnwantedRoleIndex(array $rolesList) {
+    $unwantedRoleIndex = -1;
+    $i = 0;
+    foreach ($rolesList as $role) {
+      if ($role->label() == "Member") {
+        $unwantedRoleIndex = $i;
+        break;
+      }
+      $i++;
+    }
+    return $unwantedRoleIndex;
+  }
+
+  /**
+   * Generate a message which lists the current user's roles.
+   */
+  protected function createRolesMessage($rolesList) {
+    $rolesMessage = "You are a ";
+    $total = count($rolesList);
+    if ($total == 1) {
+      // User has single role, do not add "and" to the message.
+      $rolesMessage .= $rolesList[0]->label();
+    }
+    // User has two roles, no commas please.
+    else if ($total == 2) {
+      $rolesMessage .= $rolesList[0]->label() . ' and a ' . $rolesList[1]->label();
+    }
+    else {
+      // User has three or more roles, so the message needs list formatting.
+      $count = 1;
+      foreach ($rolesList as $role) {
+        if ($count < $total) {
+          $rolesMessage .= $role->label() . ', ';
+        }
+        else if ($count == $total) {
+          $rolesMessage .= "and a " . $role->label();
+        }
+        $count++;
+      }
+    }
+
+    return $rolesMessage;
   }
 }

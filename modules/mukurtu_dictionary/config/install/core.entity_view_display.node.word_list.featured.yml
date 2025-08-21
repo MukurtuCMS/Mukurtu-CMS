@@ -1,0 +1,68 @@
+uuid: 63f1092d-61eb-4740-8ad6-199606288017
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.featured
+    - field.field.node.word_list.comment
+    - node.type.word_list
+  module:
+    - layout_builder
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: lYPYqcymMiHY_GsAAdQlzj076S5WE9FtOZ36zK71yd8
+id: node.word_list.featured
+targetEntityType: node
+bundle: word_list
+mode: featured
+content:
+  field_representative_media:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: digital_heritage_sidebar
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_title:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  comment: true
+  draft: true
+  field_all_related_content: true
+  field_citation: true
+  field_communities: true
+  field_coverage: true
+  field_coverage_description: true
+  field_cultural_protocols: true
+  field_description: true
+  field_in_collection: true
+  field_keywords: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
+  field_location: true
+  field_media_assets: true
+  field_multipage_page_of: true
+  field_protocol_control: true
+  field_related_content: true
+  field_sequence_collection: true
+  field_source: true
+  field_summary: true
+  field_words: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_og: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

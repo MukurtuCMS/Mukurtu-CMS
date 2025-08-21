@@ -36,13 +36,18 @@
 .primary-nav__menu-link {
   flex-grow: 1;
   color: var(--color-text-neutral-loud);
-  font-size: var(--font-size-l);
+  font-size: var(--font-size-m);
   text-decoration: none;
-  padding-inline: var(--v-space-3xs);
+  padding-inline: var(--v-space-4xs);
   padding-block: var(--v-space-5xs);
   border-block-end: 4px solid;
   border-block-end-color: var(--color-transparent);
   transition: color 0.12s ease-in, border-block-end-color 0.12s ease-in;
+
+  @include include-media.media('>=xl') {
+      padding-inline: var(--v-space-3xs);
+      font-size: var(--font-size-l);
+  }
 
   &--has-children {
     padding-inline-end: var(--v-space-6xs);

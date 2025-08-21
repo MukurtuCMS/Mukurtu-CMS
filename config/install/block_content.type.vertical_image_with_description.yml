@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: vertical_image_with_description
+label: 'Vertical Image With Description'
+revision: false
+description: 'Single column block with image on top, followed by title and text below'

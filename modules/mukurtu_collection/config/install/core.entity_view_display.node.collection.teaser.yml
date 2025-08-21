@@ -17,12 +17,26 @@ targetEntityType: node
 bundle: collection
 mode: teaser
 content:
+  field_collection_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: digital_heritage_sidebar
+      link: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
     settings:
       view_mode: digital_heritage_sidebar
       link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_title:
+    settings: {  }
     third_party_settings: {  }
     weight: 0
     region: content
@@ -32,7 +46,6 @@ hidden:
   field_all_related_content: true
   field_child_collections: true
   field_citation: true
-  field_collection_image: true
   field_communities: true
   field_coverage: true
   field_coverage_description: true
@@ -41,13 +54,14 @@ hidden:
   field_in_collection: true
   field_items_in_collection: true
   field_keywords: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
   field_location: true
   field_multipage_page_of: true
   field_parent_collection: true
   field_related_content: true
   field_source: true
   field_summary: true
-  field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true

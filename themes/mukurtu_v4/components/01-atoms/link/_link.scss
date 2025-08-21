@@ -17,3 +17,27 @@
     }
   }
 }
+
+svg.ext,
+svg.mailto,
+svg.tel  {
+  inline-size: 1.25rem;
+  block-size: 1rem;
+  fill: var(--brand-primary-dark);
+}
+
+a:not(.primary-nav__menu-link) {
+  svg.ext path,
+  svg.mailto path,
+  svg.tel path {
+    stroke: var(--brand-primary-dark);
+  }
+}
+
+.mukurtu-footer a {
+  svg.ext path,
+  svg.mailto path,
+  svg.tel path {
+    stroke: var(--footer-text-color);
+  }
+}

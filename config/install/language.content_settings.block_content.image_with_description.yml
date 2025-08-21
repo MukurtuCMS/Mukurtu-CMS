@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.image_with_description
+id: block_content.image_with_description
+target_entity_type_id: block_content
+target_bundle: image_with_description
+default_langcode: site_default
+language_alterable: false

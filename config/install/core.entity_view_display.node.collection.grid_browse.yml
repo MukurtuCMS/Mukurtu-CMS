@@ -48,6 +48,8 @@ hidden:
   field_in_collection: true
   field_items_in_collection: true
   field_keywords: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
   field_location: true
   field_multipage_page_of: true
   field_parent_collection: true

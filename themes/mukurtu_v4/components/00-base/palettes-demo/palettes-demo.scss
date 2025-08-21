@@ -20,6 +20,10 @@ div.palette-demo {
   }
 }
 
+div.palette-demo--custom {
+  display: none;
+}
+
 $palettes: (
   'blue-gold': ('brand-primary': #138aab,
     'brand-secondary': #e6ab49,
