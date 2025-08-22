@@ -959,6 +959,28 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .media-asset--link .media-asset--expand:focus {
   outline-offset: 1px;
 }
+.media-asset--link .media-asset--content {
+  min-inline-size: 300px;
+  min-block-size: 300px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  place-content: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+.media-asset--link .media-asset--content > * {
+  -ms-flex-preferred-size: 100%;
+      flex-basis: 100%;
+}
+.media-asset--link .media-asset--content .field {
+  place-content: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
 
 #javali-popup {
   inline-size: auto !important;

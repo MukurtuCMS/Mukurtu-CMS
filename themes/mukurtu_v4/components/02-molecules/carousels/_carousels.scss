@@ -154,4 +154,22 @@
     inset-inline-start: 10px;
     inline-size: 100px;
   }
+
+  .media-asset--content {
+    min-inline-size: 300px;
+    min-block-size: 300px;
+    display: flex;
+    place-content: center;
+    flex-wrap: wrap;
+
+    & > * {
+      flex-basis: 100%;
+    }
+
+    .field {
+      place-content: center;
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
 }
