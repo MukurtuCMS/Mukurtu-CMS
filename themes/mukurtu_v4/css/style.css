@@ -5019,3 +5019,8 @@ header {
   background-color: var(--color-error-light);
 }
 /*# sourceMappingURL=style.css.map */
+
+/*# field description line length */
+.fieldset__description {
+    max-width: none;
+}
