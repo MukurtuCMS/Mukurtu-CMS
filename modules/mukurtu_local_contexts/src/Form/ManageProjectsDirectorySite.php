@@ -5,11 +5,10 @@ namespace Drupal\mukurtu_local_contexts\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
-
 /**
  * Provides a form to manage the site level local contexts projects directory.
  */
-class ManageSiteProjectsDirectory extends FormBase {
+class ManageProjectsDirectorySite extends FormBase {
 
   /**
    * {@inheritdoc}
@@ -59,7 +58,7 @@ class ManageSiteProjectsDirectory extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // do we need to sanitize the description html formatted text content?
+    // No operation needed.
   }
 
   /**

@@ -134,7 +134,7 @@ function mukurtu_local_contexts_schema() {
       ],
       'svg_url' => [
         'type' => 'text',
-        'not null' => TRUE,
+        'not null' => FALSE,
         'description' => 'SVG URL',
       ],
       'audio_url' => [
@@ -253,7 +253,7 @@ function mukurtu_local_contexts_schema() {
       ],
       'svg_url' => [
         'type' => 'text',
-        'not null' => TRUE,
+        'not null' => FALSE,
         'description' => 'SVG URL',
       ],
       'default_text' => [
@@ -328,4 +328,35 @@ function mukurtu_local_contexts_schema() {
   ];
 
   return $schema;
+}
+
+/**
+ * Make svg_url column optional in Local Context labels and notices.
+ */
+function mukurtu_local_contexts_update_10000() {
+  // Ensure the schema is defined properly.
+  $schema = \Drupal::database()->schema();
+
+  // Alter the 'svg_url' column to be nullable.
+  $schema->changeField(
+    'mukurtu_local_contexts_labels',
+    'svg_url',
+    'svg_url',
+    [
+      'type' => 'text',
+      'not null' => FALSE,
+      'description' => 'SVG URL',
+    ]
+  );
+  $schema->changeField(
+    'mukurtu_local_contexts_notices',
+    'svg_url',
+    'svg_url',
+    [
+      'type' => 'text',
+      'not null' => FALSE,
+      'description' => 'SVG URL',
+    ]
+  );
+
 }
