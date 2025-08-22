@@ -29,17 +29,21 @@
  * @see template_preprocess_media()
  */
 #}
-{% 
+{%
   set classes = [
     'media',
     'media--' ~ bundle
-  ] 
+  ]
 %}
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  {{ content }}
+  <a href="{{ file_url(media.field_media_video_file.entity.fileuri) }}" class="media-asset--link" aria-label="Expand {{ name }} video">
+    <span class="media-asset--expand">Expand +</span>
+    <span class="media-asset--content">
+     {{ content }}
+    </span>
+  </a>
 
   <a href="{{ file_url(media.field_media_video_file.entity.fileuri) }}" class="button">Access video</a>
-
 </div>

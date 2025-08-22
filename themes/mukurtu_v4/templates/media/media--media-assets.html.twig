@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to present an image in the media assets field.
+ * Theme override to present a media item.
  *
  * Available variables:
  * - media: The media item, with limited access to object properties and
@@ -38,12 +38,12 @@
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} image">
+  <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} media">
     <span class="media-asset--expand">Expand +</span>
     <span class="media-asset--content">
-     {{ content.field_media_image }}
+     {{ content }}
     </span>
   </a>
 
-  <a href="{{ media_url }}" class="button">Access image</a>
+  <a href="{{ media_url }}" class="button">Access media</a>
 </div>

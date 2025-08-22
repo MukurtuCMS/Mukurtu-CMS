@@ -1,4 +1,5 @@
 @use "../../00-base/layout/layout";
+@use '../../00-base/mixins/mixins';
 
 // Shared styles across carousels.
 .splide {
@@ -133,4 +134,24 @@
 
 .cboxPhoto {
   margin: var(--v-space-2xs);
+}
+
+.gslider {
+  audio {
+    inline-size: 100%;
+    block-size: 50px;
+  }
+}
+
+.media-asset--link {
+  position: relative;
+
+  .media-asset--expand {
+    @include mixins.block-link;
+
+    position: absolute;
+    inset-block-start: 10px;
+    inset-inline-start: 10px;
+    inline-size: 100px;
+  }
 }
