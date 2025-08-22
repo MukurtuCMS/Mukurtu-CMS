@@ -98,12 +98,6 @@
   }
 }
 
-// Images inside the media assets library have colorbox on.
-// Colorbox CSS uses IDs. Thus an ID must be used here for override.
-#colorbox {
-  inset-block-start: 0 !important;
-}
-
 // stylelint-disable-next-line
 #cboxClose {
   color: var(--light-text-color);

@@ -899,10 +899,6 @@ a:not(.primary-nav__menu-link) svg.tel path {
   inline-size: auto;
 }
 
-#colorbox {
-  inset-block-start: 0 !important;
-}
-
 #cboxClose {
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
