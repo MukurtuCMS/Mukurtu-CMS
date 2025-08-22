@@ -595,6 +595,52 @@ function mukurtu_protocol_query_protocol_members_alter(AlterableInterface $query
 }
 
 /**
+ * Implements hook_query_TAG_alter().
+ *
+ * Handle query access for community entities in Views.
+ * Only show public communities or communities where the user is a member.
+ */
+function mukurtu_protocol_query_community_access_alter(AlterableInterface $query) {
+  if (!$account = $query->getMetaData('account')) {
+    $account = \Drupal::currentUser();
+  }
+
+  // Get the community table alias from the query.
+  $tables = $query->getTables();
+  $community_table = '';
+  foreach ($tables as $alias => $table_info) {
+    if ($table_info['table'] === 'community_field_data' || $table_info['table'] === 'community') {
+      $community_table = $alias;
+      break;
+    }
+  }
+
+  if ($community_table) {
+    // Build conditions for public communities or communities where user is a member.
+    $conditions = $query->orConditionGroup();
+
+    // Condition 1: Public communities (field_access_mode = 'public').
+    // Since field_access_mode is a base field, it's stored in community_field_data
+    $conditions->condition("community_field_data.field_access_mode", 'public');
+
+    // Condition 2: Private communities where user is a member.
+    if ($account->isAuthenticated()) {
+      // Join with OG membership table for private communities.
+      $membership_alias = $query->leftJoin('og_membership', 'ogm_community',
+        "{$community_table}.id = ogm_community.entity_id AND ogm_community.entity_type = 'community' AND ogm_community.state = 'active'");
+
+      $private_member_conditions = $query->andConditionGroup()
+        ->condition("community_field_data.field_access_mode", 'community-only')
+        ->condition("{$membership_alias}.uid", $account->id());
+
+      $conditions->condition($private_member_conditions);
+    }
+
+    $query->condition($conditions);
+  }
+}
+
+/**
  * Implements hook_field_widget_single_element_WIDGET_TYPE_form_alter().
  */
 function mukurtu_protocol_field_widget_single_element_entity_browser_entity_reference_form_alter(array &$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context)
