@@ -44,7 +44,7 @@
     {% else %}
       <img alt="Document {{ name }}" src="/sites/default/files/media-icons/generic/generic.png" />
     {% endif %}
-    {{ content.field_media_document }}
+    {{ content.field_media_document|render|striptags }}
   </span>
 
   <a href="{{ media_url }}" class="button" download>Download document</a>
