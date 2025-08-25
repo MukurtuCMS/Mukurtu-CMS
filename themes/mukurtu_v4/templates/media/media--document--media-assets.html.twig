@@ -38,17 +38,14 @@
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} document">
-    <span class="media-asset--expand">Expand +</span>
-    <span class="media-asset--content">
-      {% if content.thumbnail['#items'] is not empty %}
-        {{ content.thumbnail }}
-      {% else %}
-        <img alt="Document {{ name }}" src="/sites/default/files/media-icons/generic/generic.png" />
-      {% endif %}
-      {{ content.field_media_document|render|striptags }}
-    </span>
-  </a>
+  <span class="media-asset--content">
+    {% if content.thumbnail['#items'] is not empty %}
+      {{ content.thumbnail }}
+    {% else %}
+      <img alt="Document {{ name }}" src="/sites/default/files/media-icons/generic/generic.png" />
+    {% endif %}
+    {{ content.field_media_document }}
+  </span>
 
   <a href="{{ media_url }}" class="button">Access document</a>
 

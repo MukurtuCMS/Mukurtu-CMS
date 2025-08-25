@@ -38,12 +38,11 @@
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} media">
-    <span class="media-asset--expand">Expand +</span>
-    <span class="media-asset--content">
-     {{ content }}
-    </span>
-  </a>
+
+  <span class="media-asset--content">
+    {{ content }}
+  </span>
+
 
   <a href="{{ media_url }}" class="button">Access media</a>
 </div>

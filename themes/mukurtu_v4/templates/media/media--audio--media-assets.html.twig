@@ -38,8 +38,6 @@
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} audio">
-    <span class="media-asset--expand">Expand +</span>
     <span class="media-asset--content">
       {% if content.field_thumbnail['#items'] is not empty %}
         {{ content.field_thumbnail }}
@@ -48,7 +46,6 @@
       {% endif %}
       {{ content.field_media_audio_file }}
     </span>
-  </a>
 
   <a href="{{ media_url }}" class="button">Access audio</a>
 
