@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to present an image in the media assets field.
+ * Theme override to present an audio file in carousel thumbnail view.
  *
  * Available variables:
  * - media: The media item, with limited access to object properties and
@@ -32,18 +32,15 @@
 {%
   set classes = [
     'media',
-    'media--' ~ bundle
+    'media--' ~ bundle,
+    'media--carousel-thumbnail'
   ]
 %}
 
 <div{{ attributes.addClass(classes) }}>
-  {{ title_suffix.contextual_links }}
-  <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} image">
-    <span class="media-asset--expand">Expand +</span>
-    <span class="media-asset--content">
-     {{ content.field_media_image }}
-    </span>
-  </a>
-
-  <a href="{{ media_url }}" class="button">Access image</a>
+  {% if content.field_thumbnail['#items'] is not empty %}
+    {{ content.field_thumbnail }}
+  {% else %}
+    <img alt="audio file {{ name }}" src="/sites/default/files/media-icons/generic/audio.png">
+  {% endif %}
 </div>

@@ -31,6 +31,10 @@ Once this is complete, you should be able to run the following two commands:
 
 _Note: if `gulp-watch` isn't tracking your changes, you may need to run `gulp-sass` once before running your `gulp-watch` command._
 
+## GLightbox Library
+
+The GLightbox library is used to replace Colorbox for media lightbox functionality. The library files are not included directly in the repository but must be copied to the `themes/mukurtu_v4/libraries/glightbox/` directory using the gulp build process. Run `gulp` or `gulp copyLibraries` to copy the GLightbox library files from node_modules to the libraries folder before the lightbox functionality will work properly.
+
 ## Configuration
 
 Theme-specific configuration - such as display modes for content types or custom

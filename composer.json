@@ -19,7 +19,6 @@
         "cweagans/composer-patches": "^1.7",
         "drupal/blazy": "^3.0",
         "drupal/color_field": "^3.0",
-        "drupal/colorbox": "^2.1",
         "drupal/config_pages": "^2.15",
         "drupal/consent_popup": "^1.0",
         "drupal/core": "^10.4.1",
@@ -69,7 +68,6 @@
         "drupal/twig_tweak": "^3.2",
         "drupal/views_bulk_operations": "*",
         "drush/drush": "^13",
-        "mukurtu/colorbox": "*",
         "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
