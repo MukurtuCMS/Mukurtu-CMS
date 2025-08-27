@@ -15,18 +15,19 @@ targetEntityType: media
 bundle: audio
 mode: default
 content:
-  field_media_audio_file:
-    type: file_generic
-    weight: 0
+  created:
+    type: datetime_timestamp
+    weight: 9
     region: content
-    settings:
-      progress_indicator: throbber
+    settings: {  }
     third_party_settings: {  }
-  name:
-    type: string_textfield
-    weight: 1
+  field_contributor:
+    type: entity_reference_autocomplete
+    weight: 7
     region: content
     settings:
+      match_operator: CONTAINS
+      match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
@@ -36,19 +37,28 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_thumbnail:
-    type: image_image
-    weight: 3
-    region: content
-    settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
-    third_party_settings: {  }
   field_identifier:
     type: string_textfield
     weight: 4
     region: content
     settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_media_audio_file:
+    type: file_generic
+    weight: 0
+    region: content
+    settings:
+      progress_indicator: throbber
+    third_party_settings: {  }
+  field_media_tags:
+    type: entity_reference_autocomplete
+    weight: 6
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
@@ -62,25 +72,13 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_media_tags:
-    type: entity_reference_autocomplete
-    weight: 6
+  field_thumbnail:
+    type: image_image
+    weight: 3
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  field_contributor:
-    type: entity_reference_autocomplete
-    weight: 7
-    region: content
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      progress_indicator: throbber
+      preview_image_style: thumbnail
     third_party_settings: {  }
   field_transcription:
     type: text_textarea
@@ -90,18 +88,20 @@ content:
       rows: 5
       placeholder: ''
     third_party_settings: {  }
-  created:
-    type: datetime_timestamp
-    weight: 9
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   langcode:
     type: language_select
     weight: 10
     region: content
     settings:
       include_locked: true
+    third_party_settings: {  }
+  name:
+    type: string_textfield
+    weight: 1
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   path:
     type: path

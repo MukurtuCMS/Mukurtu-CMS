@@ -1,34 +1,33 @@
+uuid: 89b85080-4120-405b-a8fc-e4bbee52687d
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.media.media_assets
-    - image.style.large_900px
+    - image.style.wide
     - media.type.image
   module:
-    - colorbox
     - image
     - layout_builder
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
+_core:
+  default_config_hash: c0MnfrSuOW3vPtEslBvvlFK_dX2hDtE2KzGz06QmOTY
 id: media.image.media_assets
 targetEntityType: media
 bundle: image
 mode: media_assets
 content:
   field_media_image:
-    type: colorbox
+    type: image
     label: hidden
     settings:
-      colorbox_node_style: large_900px
-      colorbox_node_style_first: large_900px
-      colorbox_image_style: ''
-      colorbox_gallery: none
-      colorbox_gallery_custom: ''
-      colorbox_caption: auto
-      colorbox_caption_custom: ''
+      image_link: ''
+      image_style: wide
+      image_loading:
+        attribute: lazy
     third_party_settings: {  }
     weight: 0
     region: content
@@ -53,3 +52,4 @@ hidden:
   name: true
   search_api_excerpt: true
   uid: true
+

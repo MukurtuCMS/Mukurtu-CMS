@@ -8,7 +8,6 @@ distribution:
   name: 'Mukurtu CMS'
 install:
   - blazy
-  - colorbox
   - node
   - history
   - block
@@ -48,7 +47,6 @@ install:
   - term_merge_manager
 dependencies:
   - 'blazy:blazy'
-  - 'colorbox:colorbox'
   - 'ctools:ctools'
   - 'devel:devel'
   - 'drupal:automated_cron'
