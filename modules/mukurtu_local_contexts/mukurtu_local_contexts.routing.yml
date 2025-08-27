@@ -1,19 +1,6 @@
-mukurtu_local_contexts.manage_site_supported_projects:
-  path: '/admin/local-contexts/projects/site/manage'
-  defaults:
-    _title: 'Manage site-wide Local Contexts projects'
-    _form: 'Drupal\mukurtu_local_contexts\Form\ManageSiteSupportedProjects'
-  requirements:
-    _permission: 'administer site configuration'
-
-mukurtu_local_contexts.add_site_supported_project:
-  path: '/admin/local-contexts/projects/site/add'
-  defaults:
-    _title: 'Add a site-wide Local Contexts project'
-    _form: 'Drupal\mukurtu_local_contexts\Form\AddSiteSupportedProject'
-  requirements:
-    _permission: 'administer site configuration'
-
+##
+# Site-wide LC projects (front-end):
+##
 mukurtu_local_contexts.site_project_directory:
   path: '/local-contexts/projects'
   defaults:
@@ -22,27 +9,36 @@ mukurtu_local_contexts.site_project_directory:
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::siteDirectoryAccess'
 
-mukurtu_local_contexts.manage_site_project_directory:
-  path: '/admin/local-contexts/projects/manage'
+##
+# Site-wide LC projects (admin pages):
+##
+mukurtu_local_contexts.manage_site_supported_projects:
+  path: '/admin/local-contexts/projects'
   defaults:
-    _title: 'Manage site-wide Local Contexts projects directory'
+    _title: 'Manage site-wide Local Contexts projects'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageSiteSupportedProjects'
+  requirements:
+    _permission: 'administer site configuration'
+
+mukurtu_local_contexts.site_project_directory_settings:
+  path: '/admin/local-contexts/projects/settings'
+  defaults:
+    _title: 'Site-wide Local Contexts projects directory settings'
     _form: 'Drupal\mukurtu_local_contexts\Form\ManageSiteProjectsDirectory'
   requirements:
     _permission: 'administer site configuration'
 
-mukurtu_local_contexts.manage_community_supported_projects:
-  path: '/communities/{group}/local-contexts-projects/manage'
+mukurtu_local_contexts.add_site_supported_project:
+  path: '/admin/local-contexts/projects/add'
   defaults:
-    _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::title'
-    _form: 'Drupal\mukurtu_local_contexts\Form\ManageGroupSupportedProjects'
+    _title: 'Add a site-wide Local Contexts project'
+    _form: 'Drupal\mukurtu_local_contexts\Form\AddSiteSupportedProject'
   requirements:
-    _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::access'
-  options:
-    _admin_route: TRUE
-    parameters:
-      group:
-        type: entity:community
+    _permission: 'administer site configuration'
 
+##
+# Community LC projects (front-end):
+##
 mukurtu_local_contexts.community_projects_directory:
   path: '/communities/{group}/local-contexts/projects'
   defaults:
@@ -55,18 +51,32 @@ mukurtu_local_contexts.community_projects_directory:
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
 
-mukurtu_local_contexts.manage_community_project_directory:
-  path: '/communities/{group}/local-contexts/projects/manage'
+
+##
+# Community LC projects (admin pages):
+##
+mukurtu_local_contexts.manage_community_supported_projects:
+  path: '/admin/communities/{group}/local-contexts/projects'
   defaults:
-    _title: 'Manage community-based Local Contexts projects directory'
+    _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::title'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageGroupSupportedProjects'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::access'
+  options:
+    parameters:
+      group:
+        type: entity:community
+
+mukurtu_local_contexts.community_project_directory_settings:
+  path: '/admin/communities/{group}/local-contexts/projects/settings'
+  defaults:
+    _title: 'Community-based Local Contexts projects directory settings'
     _form: 'Drupal\mukurtu_local_contexts\Form\ManageCommunityProjectsDirectory'
   requirements:
     _permission: 'update group'
-  options:
-    _admin_route: TRUE
 
 mukurtu_local_contexts.add_community_supported_project:
-  path: '/communities/{group}/local-contexts-projects/add'
+  path: '/admin/communities/{group}/local-contexts/projects/add'
   defaults:
     _title: 'Add a community-based Local Contexts project'
     _form: 'Drupal\mukurtu_local_contexts\Form\AddGroupSupportedProject'
@@ -76,18 +86,10 @@ mukurtu_local_contexts.add_community_supported_project:
     parameters:
       group:
         type: entity:community
-    _admin_route: TRUE
 
-mukurtu_local_contexts.manage_protocol_project_directory:
-  path: '/protocols/{group}/local-contexts/projects/manage'
-  defaults:
-    _title: 'Manage protocol-based Local Contexts projects directory'
-    _form: 'Drupal\mukurtu_local_contexts\Form\ManageProtocolProjectsDirectory'
-  requirements:
-    _permission: 'update group'
-  options:
-    _admin_route: TRUE
-
+##
+# Protocol LC projects (front-end):
+##
 mukurtu_local_contexts.protocol_projects_directory:
   path: '/protocols/{group}/local-contexts/projects'
   defaults:
@@ -100,8 +102,11 @@ mukurtu_local_contexts.protocol_projects_directory:
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
 
+##
+# Protocol LC projects (admin pages):
+##
 mukurtu_local_contexts.manage_protocol_supported_projects:
-  path: '/protocols/{group}/local-contexts-projects/manage'
+  path: '/admin/protocols/{group}/local-contexts/projects'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::title'
     _form: 'Drupal\mukurtu_local_contexts\Form\ManageGroupSupportedProjects'
@@ -111,10 +116,17 @@ mukurtu_local_contexts.manage_protocol_supported_projects:
     parameters:
       group:
         type: entity:protocol
-    _admin_route: TRUE
+
+mukurtu_local_contexts.protocol_project_directory_settings:
+  path: '/admin/protocols/{group}/local-contexts/projects/settings'
+  defaults:
+    _title: 'Configure settings for protocol-based Local Contexts projects directory'
+    _form: 'Drupal\mukurtu_local_contexts\Form\ManageProtocolProjectsDirectory'
+  requirements:
+    _permission: 'update group'
 
 mukurtu_local_contexts.add_protocol_supported_project:
-  path: '/protocols/{group}/local-contexts-projects/add'
+  path: '/admin/protocols/{group}/local-contexts/projects/add'
   defaults:
     _title: 'Add a protocol-based Local Contexts project'
     _form: 'Drupal\mukurtu_local_contexts\Form\AddGroupSupportedProject'
@@ -124,6 +136,5 @@ mukurtu_local_contexts.add_protocol_supported_project:
     parameters:
       group:
         type: entity:protocol
-    _admin_route: TRUE
 
 

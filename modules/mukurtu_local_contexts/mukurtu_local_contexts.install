@@ -321,7 +321,7 @@ function mukurtu_local_contexts_schema() {
         'default' => 0,
       ],
     ],
-    'primary key' => ['locale'],
+    'primary key' => ['project_id', 'type', 'locale'],
     'indexes' => [
       'updated' => ['updated'],
     ],
