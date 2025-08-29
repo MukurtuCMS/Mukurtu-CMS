@@ -693,6 +693,10 @@ function mukurtu_install() {
     'view unpublished paragraphs',
     'view user email addresses',
     'merge taxonomy terms',
+    'edit permissions configure all landing page node layout overrides',
+    'edit permissions configure editable landing page node layout overrides',
+    'edit permissions configure any layout',
+    'edit permissions create and edit custom blocks',
   ];
   foreach ($roles as $role_name => $permissions) {
     $role = Role::load($role_name);
