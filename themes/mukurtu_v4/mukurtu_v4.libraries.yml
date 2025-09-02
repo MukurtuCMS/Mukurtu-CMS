@@ -54,3 +54,24 @@ account-menu:
   dependencies:
     - core/drupal
     - core/once
+
+glightbox:
+  remote: https://github.com/biati-digital/glightbox
+  version: 3.3.1
+  license:
+    name: MIT
+    url: https://github.com/biati-digital/glightbox/blob/master/LICENSE
+    gpl-compatible: true
+  css:
+    theme:
+      libraries/glightbox/glightbox.min.css: {}
+  js:
+    libraries/glightbox/glightbox.min.js: {}
+
+media-glightbox:
+  js:
+    js/media-asset-glightbox.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - mukurtu_v4/glightbox

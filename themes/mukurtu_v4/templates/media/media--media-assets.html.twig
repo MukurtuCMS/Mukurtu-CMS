@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to present an audio file in the media assets field.
+ * Theme override to present a media item.
  *
  * Available variables:
  * - media: The media item, with limited access to object properties and
@@ -38,15 +38,11 @@
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-    <span class="media-asset--content">
-      {% if content.field_thumbnail['#items'] is not empty %}
-        {{ content.field_thumbnail }}
-      {% else %}
-        <img alt="audio file {{ name }}" src="/sites/default/files/media-icons/generic/audio.png">
-      {% endif %}
-      {{ content.field_media_audio_file }}
-    </span>
 
-  <a href="{{ media_url }}" class="button" download>Download audio</a>
+  <span class="media-asset--content">
+    {{ content }}
+  </span>
 
+
+  <a href="{{ media_url }}" class="button" download>Download media</a>
 </div>
