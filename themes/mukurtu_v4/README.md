@@ -31,9 +31,14 @@ Once this is complete, you should be able to run the following two commands:
 
 _Note: if `gulp-watch` isn't tracking your changes, you may need to run `gulp-sass` once before running your `gulp-watch` command._
 
-## GLightbox Library
+## Bundled Librararies
 
-The GLightbox library is used to replace Colorbox for media lightbox functionality. The library files are not included directly in the repository but must be copied to the `themes/mukurtu_v4/libraries/glightbox/` directory using the gulp build process. Run `gulp` or `gulp copyLibraries` to copy the GLightbox library files from node_modules to the libraries folder before the lightbox functionality will work properly.
+A few libraries are bundled with the theme. These are:
+
+- [GLightbox](https://github.com/biati-digital/glightbox): For lightbox functionality.
+- [splide](https://github.com/Splidejs/splide): For carousel functionality.
+
+The library files are bundled in the repository in `themes/mukurtu_v4/libraries`. These files are copied on every `gulp` run, but they can also be refreshed manually using `gulp copyLibraries` to copy the library files from node_modules to the libraries folder.
 
 ## Configuration
 

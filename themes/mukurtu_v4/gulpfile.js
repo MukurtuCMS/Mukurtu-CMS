@@ -91,18 +91,28 @@ function minifyImages() {
 }
 
 function copyLibraries() {
-  // Ensure libraries directory exists
+  // Ensure libraries directory exists.
   const librariesDir = "./libraries";
   if (!fs.existsSync(librariesDir)) {
     fs.mkdirSync(librariesDir, { recursive: true });
   }
 
-  // Copy GLightbox files
-  return src([
+  // Copy GLightbox files.
+  const result1 = src([
     "./node_modules/glightbox/dist/css/glightbox.min.css",
     "./node_modules/glightbox/dist/js/glightbox.min.js"
   ])
-    .pipe(dest("./libraries/glightbox"));
+  .pipe(dest("./libraries/glightbox"));
+
+  // Copy Splide files.
+  const result2 = src([
+    "./node_modules/@splidejs/splide/dist/css/splide.min.css",
+    "./node_modules/@splidejs/splide/dist/js/splide.min.js"
+  ])
+  .pipe(dest("./libraries/splide"));
+
+  // Return any non-zero exit codes.
+  return result1 || result2 || 0;
 }
 
 function watchFiles() {
