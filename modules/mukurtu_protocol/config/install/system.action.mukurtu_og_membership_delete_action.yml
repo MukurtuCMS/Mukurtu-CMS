@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: mukurtu_og_membership_delete_action
+label: 'Mukurtu - unenroll the selected members(s) from this group.'
+type: og_membership
+plugin: og_membership_delete_action
+configuration: {  }

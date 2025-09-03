@@ -19,6 +19,7 @@ use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\og\Og;
+use Drupal\views\ViewExecutable;
 
 /**
  * @file
@@ -81,6 +82,28 @@ function mukurtu_protocol_views_data_alter(array &$data)
         'id' => 'user_community',
       ],
     ];
+  }
+}
+
+/**
+ * Implements hook_views_pre_view().
+ *
+ * This hook is an incomplete attempt to change the selectable views bulk
+ * operations options at routes mukurtu_protocol.protocol_members_list and
+ * mukurtu_protocol.community_members_list. The pages at these routes are
+ * assembled using a view with id 'og_members_overview'. This hook changes the
+ * settings on that view to customize the views bulk operations options
+ * available to the user, specifically it is meant to add our custom delete
+ * action in place of OG's delete action. This hook is designed to work with
+ * MukurtuDeleteOgMembershipAction in customizing OG's handling of deleting
+ * og memberships.
+ *
+ * @see Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction
+ */
+function mukurtu_protocol_views_pre_view(ViewExecutable $view, $display_id, array &$args) {
+  if ($view->id() == 'og_members_overview') {
+    $selectedActions = ['mukurtu_og_membership_delete_action'];
+    $view->setHandlerOption('default', 'field', 'og_membership_bulk_form', 'selected_actions', $selectedActions);
   }
 }
 
@@ -769,3 +792,51 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
     }
   }
 }
+
+/**
+ * Implements hook_form_form_id_alter().
+ */
+// function mukurtu_protocol_form_og_membership_default_delete_form_alter(&$form, FormStateInterface $form_state) {
+//   dpm("now does the form delete hook work?");
+//   // Get the og membership to be deleted.
+//   $membership = $form['actions']['submit']['#submit'][0][0]['entity'] ?? NULL;
+//   // Check if we are deleting a community membership here
+//   if ($membership && $membership->getGroupEntityType() == 'community') {
+//     $user = $membership->getOwner();
+//     $community = $membership->getGroup();
+//     if ($community) {
+//       $hasProtocolMemberships = FALSE;
+//       /** @var \Drupal\mukurtu_protocol\Entity\CommunityInterface $community */
+//       $protocols = $community->getProtocols();
+//       foreach ($protocols as $protocol) {
+//         if ($protocol->getMembership($user)) {
+//           $hasProtocolMemberships = TRUE;
+//           continue;
+//         }
+//       }
+//       if ($hasProtocolMemberships) {
+//         // $form_state->setErrorByName('uid', t('Cannot add <a href=@user-page>@userName</a>. User is not a member of any of <a href=@protocol-page>@protocolName</a>\'s communities.', [
+//         //   '@user-page' => Url::fromRoute('entity.user.canonical', ['user' => $userToAdd->id()])->toString(),
+//         //   '@userName' => $userToAdd->label(),
+//         //   '@protocol-page' => Url::fromRoute('mukurtu_protocol.manage_protocol', ['group' => $protocol->id()])->toString(),
+//         //   '@protocolName' => $protocol->getName(),
+//         // ]));
+//         //$form_state->setErrorByName('uid', t('Nope.'));
+//       }
+//     }
+//   }
+//   // If so, get that community and their protocols
+//   // Go through each protocol and check if the user has any protocol memberships
+//   // within that community (there may be easier ways to check this)
+//   // If yes, do not allow deletion. Set an error message and do an empty return.
+
+//   // Ideally, we intercept the deletion before the OG module asks the user if
+//   // they are sure they wanna delete the membership... I wonder if I can do that.
+//   // I can check in the call stack to see if I can intervene before that message
+//   // pops up, since it could be confusing for the user to get a confirmation,
+//   // then still get prevented from deleting.
+// }
+
+// function remove_community_member_form_validate(&$form, FormStateInterface $form_state) {
+//   dpm("I'm a validator hook!");
+// }
