@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - user.role.mukurtu_administrator
+    - user.role.mukurtu_manager
   module:
     - mukurtu_protocol
     - node
@@ -581,7 +581,7 @@ display:
         type: site_and_mukurtu_role
         options:
           site-role:
-            mukurtu_administrator: mukurtu_administrator
+            mukurtu_manager: mukurtu_manager
           community-role: {  }
           protocol-role:
             protocol-protocol-contributor: protocol-protocol-contributor
