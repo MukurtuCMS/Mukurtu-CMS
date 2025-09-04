@@ -80,7 +80,8 @@ class LocalContextsSupportedProjectManager {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
     $query->fields('labels', ['id', 'name', 'type', 'display']);
-    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
     $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
@@ -96,8 +97,9 @@ class LocalContextsSupportedProjectManager {
   public function getAllNotices() {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
-    $query->fields('notices', ['type', 'name', 'default_text', 'display']);
-    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('notices', ['type', 'name', 'img_url', 'svg_url', 'default_text', 'display']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
     $notices = [];
@@ -105,10 +107,11 @@ class LocalContextsSupportedProjectManager {
       // We have to form the notices like this because they have compound ids.
       $noticeId = $notice['project_id'] . ':' . $notice['type'];
       $notices[$noticeId] = [
-        'p_id' => $notice['project_id'],
+        'project_id' => $notice['project_id'],
         'title' => $notice['title'],
         'type' => $notice['type'],
         'name' => $notice['name'],
+        'img_url' => $notice['img_url'],
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
         'display' => $notice['display'],
@@ -223,7 +226,9 @@ class LocalContextsSupportedProjectManager {
       ->condition('project_id', $project_id)
       ->condition('type', 'site')
       ->condition('group_id', 0);
-    return $query->execute();
+    $query->execute();
+    // If the group is no longer in use, remove it.
+    $this->removeProject($project_id);
   }
 
   /**
@@ -241,7 +246,66 @@ class LocalContextsSupportedProjectManager {
       ->condition('project_id', $project_id)
       ->condition('type', $group->getEntityTypeId())
       ->condition('group_id', $group->id());
-    return $query->execute();
+    $query->execute();
+    // If the group is no longer in use, remove it.
+    $this->removeProject($project_id);
+  }
+
+  /**
+   * Completely remove a project from the system.
+   *
+   * @param string $project_id
+   *   The project ID to remove.
+   * @param bool $force_delete
+   *   Whether to delete the project even if it is in use.
+   */
+  public function removeProject($project_id, $force_delete = FALSE) {
+    // Ensure the project is not in use before deleting.
+    if (!$force_delete) {
+      $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'projects')
+        ->condition('projects.project_id', $project_id)
+        ->fields('projects', ['project_id']);
+      $result = $query->execute();
+      if ($result->fetchAll()) {
+        return;
+      }
+    }
+
+    // Delete labels provided by the project.
+    $labels = $this->getAllLabels();
+    foreach ($labels as $label_id => $label) {
+      if ($label['project_id'] == $project_id) {
+        $query = $this->db->delete('mukurtu_local_contexts_labels')
+          ->condition('id', $label_id);
+        $query->execute();
+        $query = $this->db->delete('mukurtu_local_contexts_label_translations')
+          ->condition('label_id', $label_id);
+        $query->execute();
+      }
+    }
+
+    // Delete notices provided by the project.
+    $notices = $this->getAllNotices();
+    foreach ($notices as $notice_id => $notice) {
+      if ($notice['project_id'] == $project_id) {
+        $query = $this->db->delete('mukurtu_local_contexts_notices')
+          ->condition('id', $notice_id);
+        $query->execute();
+        $query = $this->db->delete('mukurtu_local_contexts_notice_translations')
+          ->condition('label_id', $notice_id);
+        $query->execute();
+      }
+    }
+
+    // Delete any project usage tracking.
+    $query = $this->db->delete('mukurtu_local_contexts_supported_projects')
+      ->condition('project_id', $project_id);
+    $query->execute();
+
+    // Delete the project itself.
+    $query = $this->db->delete('mukurtu_local_contexts_projects')
+      ->condition('id', $project_id);
+    $query->execute();
   }
 
   /**
@@ -281,7 +345,8 @@ class LocalContextsSupportedProjectManager {
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0);
     $query->fields('labels', ['id', 'name', 'type', 'display']);
-    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
     $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
@@ -303,7 +368,8 @@ class LocalContextsSupportedProjectManager {
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0);
     $query->fields('notices', ['type', 'name', 'default_text', 'display']);
-    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
     $notices = [];
@@ -311,7 +377,7 @@ class LocalContextsSupportedProjectManager {
       // We have to form the notices like this because they have compound ids.
       $noticeId = $notice['project_id'] . ':' . $notice['type'];
       $notices[$noticeId] = [
-        'p_id' => $notice['project_id'],
+        'project_id' => $notice['project_id'],
         'title' => $notice['title'],
         'type' => $notice['type'],
         'name' => $notice['name'],
@@ -344,7 +410,8 @@ class LocalContextsSupportedProjectManager {
     $query->condition('project_id', $project_ids, 'IN');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
     $query->fields('labels', ['id', 'name', 'type', 'display']);
-    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
 
@@ -381,7 +448,7 @@ class LocalContextsSupportedProjectManager {
       // We have to form the notices like this because they have compound ids.
       $noticeId = $notice['project_id'] . ':' . $notice['type'];
       $notices[$noticeId] = [
-        'p_id' => $notice['project_id'],
+        'project_id' => $notice['project_id'],
         'title' => $notice['title'],
         'type' => $notice['type'],
         'name' => $notice['name'],
