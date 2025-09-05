@@ -125,6 +125,9 @@ class ProtocolAddForm extends EntityForm {
       '#default_value' => 'none',
     ];
 
+    // I don't like that every role's form element is hardcoded, however,
+    // given that each one has unique helper text, I think it's inevitable.
+
     // Protocol members.
     $form['protocol_member_item'] = [
       '#type' => 'item',
@@ -183,15 +186,15 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Contributors'),
       '#description' => $this->t('Helper text about contributors.'),
     ];
-    $form['protocol_contributor'] = [
+    $form['contributor'] = [
       '#type' => 'entity_browser',
-      '#id' => 'protocol-contributor',
+      '#id' => 'contributor',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#widget_context' => ['group' => $this->entity],
       '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-contributor">',
+      '#prefix' => '<div id="role-contributor">',
       '#suffix' => '</div>',
       '#process' => [
         [get_called_class(), 'updateDefaultValues'],
@@ -209,15 +212,15 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Curators'),
       '#description' => $this->t('Helper text about curators.'),
     ];
-    $form['protocol_curator'] = [
+    $form['curator'] = [
       '#type' => 'entity_browser',
-      '#id' => 'protocol-curator',
+      '#id' => 'curator',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#widget_context' => ['group' => $this->entity],
       '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-curator">',
+      '#prefix' => '<div id="role-curator">',
       '#suffix' => '</div>',
       '#process' => [
         [get_called_class(), 'updateDefaultValues'],
@@ -235,15 +238,15 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Community record stewards'),
       '#description' => $this->t('Helper text about community record stewards'),
     ];
-    $form['protocol_community_record_steward'] = [
+    $form['community_record_steward'] = [
       '#type' => 'entity_browser',
-      '#id' => 'protocol-community-record-steward',
+      '#id' => 'community-record-steward',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#widget_context' => ['group' => $this->entity],
       '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-community-record-steward">',
+      '#prefix' => '<div id="role-community-record-steward">',
       '#suffix' => '</div>',
       '#process' => [
         [get_called_class(), 'updateDefaultValues'],
@@ -261,15 +264,15 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Language contributors'),
       '#description' => $this->t('Helper text about language contributors.'),
     ];
-    $form['protocol_language_contributor'] = [
+    $form['language_contributor'] = [
       '#type' => 'entity_browser',
-      '#id' => 'protocol-language-contributor',
+      '#id' => 'language-contributor',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#widget_context' => ['group' => $this->entity],
       '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-language-contributor">',
+      '#prefix' => '<div id="role-language-contributor">',
       '#suffix' => '</div>',
       '#process' => [
         [get_called_class(), 'updateDefaultValues'],
@@ -287,15 +290,15 @@ class ProtocolAddForm extends EntityForm {
       '#title' => $this->t('Language stewards'),
       '#description' => $this->t('Helper text about language stewards.'),
     ];
-    $form['protocol_language_steward'] = [
+    $form['language_steward'] = [
       '#type' => 'entity_browser',
-      '#id' => 'protocol-language-steward',
+      '#id' => 'language-steward',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#widget_context' => ['group' => $this->entity],
       '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-language-steward">',
+      '#prefix' => '<div id="role-language-steward">',
       '#suffix' => '</div>',
       '#process' => [
         [get_called_class(), 'updateDefaultValues'],
@@ -427,7 +430,8 @@ class ProtocolAddForm extends EntityForm {
     $entity->setMembershipDisplay($form_state->getValue('field_membership_display'));
 
     // Grab the memberships.
-    foreach (['protocol_steward', 'protocol_member'] as $role) {
+    $roles = ['protocol_steward', 'protocol_member', 'protocol_affiliate', 'curator', 'contributor', 'language_steward', 'language_contributor', 'community_record_steward'];
+    foreach ($roles as $role) {
       $members = $form_state->getValue($role);
       $users = !empty($members['entities']) ? $members['entities'] : [];
       foreach ($users as $user) {
