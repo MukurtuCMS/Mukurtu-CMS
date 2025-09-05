@@ -1,7 +1,7 @@
 @use '00-base/mixins/mixins';
 
 // Defaults.
-button,
+button:not(.admin-toolbar *),
 input[type="button"],
 input[type="submit"],
 input[type="reset"],
