@@ -685,6 +685,31 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setDisplayConfigurable('view', FALSE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $fields['field_local_contexts_api_key'] = BaseFieldDefinition::create('string')
+      ->setName('field_local_contexts_api_key')
+      ->setLabel(t('Local Contexts API key'))
+      ->setRequired(FALSE)
+      ->setTranslatable(FALSE)
+      ->setSettings([
+        'max_length' => 255,
+        'is_ascii' => TRUE,
+        'case_sensitive' => FALSE,
+      ])
+      ->setDefaultValue('')
+      // Keep this field out of Form/Display UIs entirely.
+      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('view', FALSE);
+
+    $fields['field_local_contexts_description'] = BaseFieldDefinition::create('text_long')
+      ->setName('field_local_contexts_description')
+      ->setLabel(t('Local Contexts Description'))
+      ->setRequired(FALSE)
+      ->setTranslatable(FALSE)
+      ->setDefaultValue([])
+      // Keep this field out of Form/Display UIs entirely.
+      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('view', FALSE);
+
     return $fields;
   }
 

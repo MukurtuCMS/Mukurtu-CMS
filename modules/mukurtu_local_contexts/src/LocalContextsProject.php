@@ -133,7 +133,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'l')
       ->condition('l.project_id', $this->id)
       ->condition('l.tk_or_bc', $tk_or_bc)
-      ->fields('l', ['id', 'name', 'svg_url', 'default_text']);
+      ->fields('l', ['id', 'name', 'img_url', 'svg_url', 'default_text']);
     $result = $query->execute();
 
     $labels = [];
@@ -141,6 +141,7 @@ class LocalContextsProject extends LocalContextsHubBase {
       $labels[$label['id']] = [
         'id' => $label['id'],
         'name' => $label['name'],
+        'img_url' => $label['img_url'],
         'svg_url' => $label['svg_url'],
         'text' => $label['default_text'],
       ];
@@ -152,7 +153,7 @@ class LocalContextsProject extends LocalContextsHubBase {
   public function getNotices() {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'n')
       ->condition('n.project_id', $this->id)
-      ->fields('n', ['project_id', 'type', 'name', 'svg_url', 'default_text']);
+      ->fields('n', ['project_id', 'type', 'name', 'img_url', 'svg_url', 'default_text']);
     $result = $query->execute();
 
     $notices = [];
@@ -162,6 +163,7 @@ class LocalContextsProject extends LocalContextsHubBase {
         'project_id' => $notice['project_id'],
         'notice_type' => $notice['type'],
         'name' => $notice['name'],
+        'img_url' => $notice['img_url'],
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
       ];

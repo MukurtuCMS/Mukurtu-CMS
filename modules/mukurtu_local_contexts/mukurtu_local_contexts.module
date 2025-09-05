@@ -20,7 +20,8 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'variables' => [
         'text' => [],
         'name' => [],
-        'svg_url' => [],
+        'svg_url' => NULL,
+        'img_url' => NULL,
         'translations' => [],
       ],
     ],
@@ -29,7 +30,8 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'variables' => [
         'text' => [],
         'name' => [],
-        'svg_url' => [],
+        'svg_url' => NULL,
+        'img_url' => NULL,
         'translations' => [],
       ],
     ],
