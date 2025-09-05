@@ -46,7 +46,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_audio_file'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Audio file'))
-      ->setDescription(t(''))
+      ->setDescription(t('Allowed file formats are mp3, wav, and aac.'))
       ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'file',
@@ -68,7 +68,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_transcription'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Transcription'))
-      ->setDescription(t(''))
+      ->setDescription(t('A short (255 character) transcription entered here will be displayed alongside the recording if it used as sample sentence in a dictionary word.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -82,7 +82,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
-      ->setDescription(t(''))
+      ->setDescription(t('Names entered here will be displayed alongside the recording in a dictionary word to indicate the speaker.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -107,7 +107,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t(''))
+      ->setDescription(t('Media tags entered here will be used to display media content warnings if those are used.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -132,7 +132,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t(''))
+      ->setDescription(t('Names entered here will be used to display media content warnings if those are used.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -157,7 +157,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t(''))
+      ->setDescription(t('Mukurtu uses an interactive audio player or a generic thumbnail depending on the theme. You can provide your own image here if you want to use a specific thumbnail instead of the generic thumbnail for this audio file.'))
       ->setDefaultValue('')
       ->setSettings([
         'alt_field' => TRUE,
@@ -191,7 +191,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_identifier'] = BaseFieldDefinition::create('string')
       ->setLabel('Identifier')
-      ->setDescription('')
+      ->setDescription('A unique reference to the recording. Examples include call numbers or accession numbers. This field is mostly used for internal reference and is not displayed to most users.')
       ->setSettings([
         'max_length' => 255,
       ])
