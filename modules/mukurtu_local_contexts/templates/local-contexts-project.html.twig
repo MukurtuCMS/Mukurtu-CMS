@@ -4,7 +4,7 @@
   <div class="tk-labels">
     {% for tk_label in tk_labels %}
     <div class="tk-label">
-      <img src="{{ tk_label.svg_url }}" alt="{{ tk_label.name }}">
+      <img src="{{ tk_label.svg_url ?? tk_label.img_url }}" alt="{{ tk_label.name }}">
       <div class="name">{{ tk_label.name }}</div>
       <div class="text">{{ tk_label.text }}</div>
     </div>
@@ -15,7 +15,7 @@
   <div class="bc-labels">
     {% for bc_label in bc_labels %}
     <div class="bc-label">
-      <img src="{{ bc_label.svg_url }}" alt="{{ bc_label.name }}">
+      <img src="{{ bc_label.svg_url ?? bc_label.img_url }}" alt="{{ bc_label.name }}">
       <div class="name">{{ bc_label.name }}</div>
       <div class="text">{{ bc_label.text }}</div>
     </div>
@@ -26,7 +26,7 @@
     <div class="notices">
       {% for notice in notices %}
         <div class="notice">
-          <img src="{{ notice.svg_url }}" alt="{{ notice.name }}">
+          <img src="{{ notice.svg_url ?? notice.img_url }}" alt="{{ notice.name }}">
           <div class="name">{{ notice.name }}</div>
           <div class="text">{{ notice.text }}</div>
         </div>

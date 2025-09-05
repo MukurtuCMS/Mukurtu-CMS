@@ -93,22 +93,19 @@ class ProjectDirectoryController extends ControllerBase {
    *
    * @return array
    */
-  function communityDirectory(CommunityInterface $group)
-  {
+  function communityDirectory(CommunityInterface $group) {
     $endpointUrl = $this->configFactory->get(LocalContextsHubBase::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsHubBase::DEFAULT_HUB_URL;
     $endpointParts = parse_url($endpointUrl);
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
 
     $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group);
     if ($projects) {
-      $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_community_' . $group->id() . '_projects_directory_description');
-      if ($description != NULL) {
-        $description = [
-          '#type' => 'processed_text',
-          '#text' => $description['value'],
-          '#format' => $description['format'],
-        ];
-      }
+      $group_description = $group->get('field_local_contexts_description');
+      $description = [
+        '#type' => 'processed_text',
+        '#text' => $group_description->value ?? '',
+        '#format' => $group_description->format ?? 'basic_html',
+      ];
     }
     else {
       $description = $this->t("There are currently no Local Contexts projects for this community.");
@@ -136,22 +133,19 @@ class ProjectDirectoryController extends ControllerBase {
    *
    * @return array
    */
-  function protocolDirectory(ProtocolInterface $group)
-  {
+  function protocolDirectory(ProtocolInterface $group) {
     $endpointUrl = $this->configFactory->get(LocalContextsHubBase::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsHubBase::DEFAULT_HUB_URL;
     $endpointParts = parse_url($endpointUrl);
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
 
     $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group);
     if ($projects) {
-      $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_protocol_' . $group->id() . '_projects_directory_description');
-      if ($description != NULL) {
-        $description = [
-          '#type' => 'processed_text',
-          '#text' => $description['value'],
-          '#format' => $description['format'],
-        ];
-      }
+      $group_description = $group->get('field_local_contexts_description');
+      $description = [
+        '#type' => 'processed_text',
+        '#text' => $group_description->value ?? '',
+        '#format' => $group_description->format ?? 'basic_html',
+      ];
     }
     else {
       $description = $this->t("There are currently no Local Contexts projects for this cultural protocol.");
@@ -186,8 +180,7 @@ class ProjectDirectoryController extends ControllerBase {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function groupDirectoryAccess(AccountInterface $account, ContentEntityInterface $group = NULL)
-  {
+  public function groupDirectoryAccess(AccountInterface $account, ContentEntityInterface $group = NULL) {
     // Only show the page if the group exists.
     if ($group) {
       return AccessResult::allowed();
@@ -195,8 +188,7 @@ class ProjectDirectoryController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
-  public function title(ContentEntityInterface $group = NULL)
-  {
+  public function title(ContentEntityInterface $group = NULL)  {
     return $this->t("Local Contexts Project Directory for %group", ['%group' => $group ? $group->getName() : 'Unknown Group']);
   }
 
