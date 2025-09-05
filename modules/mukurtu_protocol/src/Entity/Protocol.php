@@ -463,6 +463,17 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   /**
    * {@inheritdoc}
    */
+  public function hasProtocolSteward()
+  {
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $memberships = [];
+    $memberships = $membership_manager->getGroupMembershipsByRoleNames($this, ['protocol_steward']);
+    return !empty($memberships);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 

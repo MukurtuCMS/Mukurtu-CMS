@@ -19,6 +19,11 @@ class ManageCommunitiesController extends ControllerBase {
     $community = $group;
     $build = [];
     $notices = [];
+    $currentUser = \Drupal::currentUser();
+
+    if (!$community->hasCommunityManager()) {
+      $this->messenger()->addWarning(t("This community does not have a community manager."));
+    }
 
     // Protocols.
     $protocols = $community->getProtocols();
@@ -29,16 +34,20 @@ class ManageCommunitiesController extends ControllerBase {
 
     $editUrl = $group->toUrl('edit-form');
 
-    if ($editUrl->access() && !$banner && !$thumbnail) {
+    // If the current user is uid 1 and this community has no community manager,
+    // do not display the add banner/thumbnail image links.
+    if ($currentUser->id() != 1 || $community->hasCommunityManager()) {
+      if ($editUrl->access() && !$banner && !$thumbnail) {
       $notices[] = ['#markup' => $this->t('<div class="notice"><a href="@url">Add thumbnail and banner images for this community.</a></div>', ['@url' => $editUrl->toString()])];
-    }
-    else {
-      if (!$banner) {
-        $notices[] = ['#markup' => $this->t('<div class="notice"><a href="@url">Add a banner image for this community.</a></div>', ['@url' => $editUrl->toString()])];
       }
+      else {
+        if (!$banner) {
+          $notices[] = ['#markup' => $this->t('<div class="notice"><a href="@url">Add a banner image for this community.</a></div>', ['@url' => $editUrl->toString()])];
+        }
 
-      if (!$thumbnail) {
-        $notices[] = ['#markup' => $this->t('<div class="notice"><a href="@url">Add a thumbnail image for this community.</a></div>', ['@url' => $editUrl->toString()])];
+        if (!$thumbnail) {
+          $notices[] = ['#markup' => $this->t('<div class="notice"><a href="@url">Add a thumbnail image for this community.</a></div>', ['@url' => $editUrl->toString()])];
+        }
       }
     }
 
@@ -90,31 +99,35 @@ class ManageCommunitiesController extends ControllerBase {
       ];
     }
 
-    $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_community_supported_projects', ['group' => $community->id()]);
-    if ($manageProjectsUrl->access()) {
-      $links[] = [
-        '#title' => $this->t('Manage Local Contexts Projects'),
-        '#type' => 'link',
-        '#url' => $manageProjectsUrl,
-      ];
-    }
+    // If the current user is uid 1 and this community has no community manager,
+    // do not display the local contexts links.
+    if ($currentUser->id() != 1 || $community->hasCommunityManager()) {
+      $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_community_supported_projects', ['group' => $community->id()]);
+      if ($manageProjectsUrl->access()) {
+        $links[] = [
+          '#title' => $this->t('Manage Local Contexts Projects'),
+          '#type' => 'link',
+          '#url' => $manageProjectsUrl,
+        ];
+      }
 
-    $communityProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.community_projects_directory', ['group' => $community->id()]);
-    if ($communityProjectDirectoryUrl->access()) {
-      $links[] = [
-        '#title' => $this->t('Local Contexts Project Directory'),
-        '#type' => 'link',
-        '#url' => $communityProjectDirectoryUrl,
-      ];
-    }
+      $communityProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.community_projects_directory', ['group' => $community->id()]);
+      if ($communityProjectDirectoryUrl->access()) {
+        $links[] = [
+          '#title' => $this->t('Local Contexts Project Directory'),
+          '#type' => 'link',
+          '#url' => $communityProjectDirectoryUrl,
+        ];
+      }
 
-    $manageCommunityProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.manage_community_project_directory', ['group' => $community->id()]);
-    if ($manageCommunityProjectDirectoryUrl->access()) {
-      $links[] = [
-        '#title' => $this->t('Manage Local Contexts Project Directory'),
-        '#type' => 'link',
-        '#url' => $manageCommunityProjectDirectoryUrl,
-      ];
+      $manageCommunityProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.manage_community_project_directory', ['group' => $community->id()]);
+      if ($manageCommunityProjectDirectoryUrl->access()) {
+        $links[] = [
+          '#title' => $this->t('Manage Local Contexts Project Directory'),
+          '#type' => 'link',
+          '#url' => $manageCommunityProjectDirectoryUrl,
+        ];
+      }
     }
 
     // Community page visibility.

@@ -223,4 +223,11 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
    */
   public function setRevisionUserId($uid);
 
+  /**
+   * Check if this protocol has a protocol steward.
+   *
+   * @return bool
+   *   TRUE if the protocol has at least one protocol steward.
+   */
+  public function hasProtocolSteward();
 }
