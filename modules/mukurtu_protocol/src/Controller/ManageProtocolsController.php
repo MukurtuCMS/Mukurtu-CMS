@@ -18,6 +18,11 @@ class ManageProtocolsController extends ControllerBase {
   public function manageProtocol(ProtocolInterface $group) {
     $protocol = $group;
     $build = [];
+    $currentUser = \Drupal::currentUser();
+
+    if (!$protocol->hasProtocolSteward()) {
+      $this->messenger()->addWarning(t("This protocol does not have a protocol steward."));
+    }
 
     // Build management Links.
     $links = [];
@@ -67,31 +72,35 @@ class ManageProtocolsController extends ControllerBase {
       ];
     }
 
-    $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_protocol_supported_projects', ['group' => $protocol->id()]);
-    if ($manageProjectsUrl->access()) {
-      $links[] = [
-        '#title' => $this->t('Manage Local Contexts Projects'),
-        '#type' => 'link',
-        '#url' => $manageProjectsUrl,
-      ];
-    }
+    // If the current user is uid 1 and this protocol has no protocol steward,
+    // do not display the local contexts links.
+    if ($currentUser->id() != 1 || $protocol->hasProtocolSteward()) {
+      $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_protocol_supported_projects', ['group' => $protocol->id()]);
+      if ($manageProjectsUrl->access()) {
+        $links[] = [
+          '#title' => $this->t('Manage Local Contexts Projects'),
+          '#type' => 'link',
+          '#url' => $manageProjectsUrl,
+        ];
+      }
 
-    $protocolProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.protocol_projects_directory', ['group' => $protocol->id()]);
-    if ($protocolProjectDirectoryUrl->access()) {
-      $links[] = [
-        '#title' => $this->t('Local Contexts Project Directory'),
-        '#type' => 'link',
-        '#url' => $protocolProjectDirectoryUrl,
-      ];
-    }
+      $protocolProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.protocol_projects_directory', ['group' => $protocol->id()]);
+      if ($protocolProjectDirectoryUrl->access()) {
+        $links[] = [
+          '#title' => $this->t('Local Contexts Project Directory'),
+          '#type' => 'link',
+          '#url' => $protocolProjectDirectoryUrl,
+        ];
+      }
 
-    $manageProtocolProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.manage_protocol_project_directory', ['group' => $protocol->id()]);
-    if ($manageProtocolProjectDirectoryUrl->access()) {
-      $links[] = [
-        '#title' => $this->t('Manage Local Contexts Project Directory'),
-        '#type' => 'link',
-        '#url' => $manageProtocolProjectDirectoryUrl,
-      ];
+      $manageProtocolProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.manage_protocol_project_directory', ['group' => $protocol->id()]);
+      if ($manageProtocolProjectDirectoryUrl->access()) {
+        $links[] = [
+          '#title' => $this->t('Manage Local Contexts Project Directory'),
+          '#type' => 'link',
+          '#url' => $manageProtocolProjectDirectoryUrl,
+        ];
+      }
     }
 
     // Sharing Protocol.

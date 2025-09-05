@@ -231,4 +231,11 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
    */
   public function getProtocols();
 
+  /**
+   * Check if this community has a community manager.
+   *
+   * @return bool
+   *   TRUE if the community has at least one community manager.
+   */
+  public function hasCommunityManager();
 }

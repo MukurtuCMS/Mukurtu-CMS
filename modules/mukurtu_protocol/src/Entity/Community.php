@@ -550,6 +550,17 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function hasCommunityManager()
+  {
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $memberships = [];
+    $memberships = $membership_manager->getGroupMembershipsByRoleNames($this, ['community_manager']);
+    return !empty($memberships);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
