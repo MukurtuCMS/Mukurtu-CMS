@@ -1,4 +1,5 @@
 @use "../../00-base/layout/layout";
+@use '../../00-base/mixins/mixins';
 
 // Shared styles across carousels.
 .splide {
@@ -98,12 +99,6 @@
   }
 }
 
-// Images inside the media assets library have colorbox on.
-// Colorbox CSS uses IDs. Thus an ID must be used here for override.
-#colorbox {
-  inset-block-start: 0 !important;
-}
-
 // stylelint-disable-next-line
 #cboxClose {
   color: var(--light-text-color);
@@ -139,4 +134,42 @@
 
 .cboxPhoto {
   margin: var(--v-space-2xs);
+}
+
+.gslider {
+  audio {
+    inline-size: 100%;
+    block-size: 50px;
+  }
+}
+
+.media-asset--link {
+  position: relative;
+
+  .media-asset--expand {
+    @include mixins.block-link;
+
+    position: absolute;
+    inset-block-start: 10px;
+    inset-inline-start: 10px;
+    inline-size: 100px;
+  }
+
+  .media-asset--content {
+    min-inline-size: 300px;
+    min-block-size: 300px;
+    display: flex;
+    place-content: center;
+    flex-wrap: wrap;
+
+    & > * {
+      flex-basis: 100%;
+    }
+
+    .field {
+      place-content: center;
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
 }

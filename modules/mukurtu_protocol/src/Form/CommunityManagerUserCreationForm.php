@@ -40,7 +40,10 @@ class CommunityManagerUserCreationForm extends FormBase {
     $roles = [];
 
     foreach ($rolesRaw as $roleKey => $roleValue) {
-      if ($roleValue->getName() != "non-member") {
+      // Do not include the 'non-member' and generic 'member' roles as options.
+      // The correct 'member' role to include is the bundle-specific one,
+      // 'community-member'.
+      if ($roleValue->getName() != "non-member" && $roleValue->getName() != 'member') {
         $roles[$roleValue->getName()] = $this->t($roleValue->getLabel());
       }
     }

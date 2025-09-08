@@ -112,10 +112,208 @@ class ProtocolAddForm extends EntityForm {
       '#allowed_formats' => ['basic_html', 'full_html', 'mukurtu_html'],
     ];
 
-    // Protocol Stewards.
+    // Membership list display setting.
+    $form['field_membership_display'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Membership display'),
+      '#description' => $this->t('TODO: membership display helper text'),
+      '#options' => [
+        'none' => $this->t('Do not display any protocol members'),
+        'stewards' => $this->t('Only display cultural protocol stewards'),
+        'all' => $this->t('Display all protocol members'),
+      ],
+      '#default_value' => 'none',
+    ];
+
+    // I don't like that every role's form element is hardcoded, however,
+    // given that each one has unique helper text, I think it's inevitable.
+
+    // Protocol members.
+    $form['protocol_member_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Protocol members'),
+      '#description' => $this->t('Helper text about protocol members.'),
+    ];
+    $form['protocol_member'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'protocol-member',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
+      '#default_value' => [],
+      '#prefix' => '<div id="role-protocol-member">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Protocol affiliates.
+    $form['protocol_affiliate_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Protocol affiliates'),
+      '#description' => $this->t('Helper text about protocol affiliates.'),
+    ];
+    $form['protocol_affiliate'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'protocol-affiliate',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
+      '#default_value' => [],
+      '#prefix' => '<div id="role-protocol-affiliate">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Contributors.
+    $form['protocol_contributor_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Contributors'),
+      '#description' => $this->t('Helper text about contributors.'),
+    ];
+    $form['contributor'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'contributor',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
+      '#default_value' => [],
+      '#prefix' => '<div id="role-contributor">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Curators.
+    $form['protocol_curator_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Curators'),
+      '#description' => $this->t('Helper text about curators.'),
+    ];
+    $form['curator'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'curator',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
+      '#default_value' => [],
+      '#prefix' => '<div id="role-curator">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Community record stewards.
+    $form['protocol_community_record_steward_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Community record stewards'),
+      '#description' => $this->t('Helper text about community record stewards'),
+    ];
+    $form['community_record_steward'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'community-record-steward',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
+      '#default_value' => [],
+      '#prefix' => '<div id="role-community-record-steward">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Language contributors.
+    $form['protocol_language_contributor_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Language contributors'),
+      '#description' => $this->t('Helper text about language contributors.'),
+    ];
+    $form['language_contributor'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'language-contributor',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
+      '#default_value' => [],
+      '#prefix' => '<div id="role-language-contributor">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Language stewards.
+    $form['protocol_language_steward_item'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Language stewards'),
+      '#description' => $this->t('Helper text about language stewards.'),
+    ];
+    $form['language_steward'] = [
+      '#type' => 'entity_browser',
+      '#id' => 'language-steward',
+      '#cardinality' => -1,
+      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
+      '#widget_context' => ['group' => $this->entity],
+      '#default_value' => [],
+      '#prefix' => '<div id="role-language-steward">',
+      '#suffix' => '</div>',
+      '#process' => [
+        [get_called_class(), 'updateDefaultValues'],
+        [
+          '\Drupal\entity_browser\Element\EntityBrowserElement',
+          'processEntityBrowser',
+        ],
+        [get_called_class(), 'processEntityBrowser'],
+      ],
+    ];
+
+    // Protocol stewards.
     $form['protocol_steward_item'] = [
       '#type' => 'item',
-      '#title' => $this->t('Cultural Protocol Stewards'),
+      '#title' => $this->t('Protocol stewards'),
       '#description' => $this->t('Helper text about protocol stewards.'),
     ];
     $defaultStatus = "<ul>";
@@ -139,45 +337,6 @@ class ProtocolAddForm extends EntityForm {
         ],
         [get_called_class(), 'processEntityBrowser'],
       ],
-    ];
-
-    // Protocol Members.
-    $form['protocol_member_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Cultural Protocol Members'),
-      '#description' => $this->t('Helper text about protocol members.'),
-    ];
-    $form['protocol_member'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'protocol-member',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-member">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
-    ];
-
-    // Membership list display setting.
-    $form['field_membership_display'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Membership Display'),
-      '#description' => $this->t('TODO: membership display helper text'),
-      '#options' => [
-        'none' => $this->t('Do not display'),
-        'stewards' => $this->t('Display cultural protocol stewards'),
-        'all' => $this->t('Display all members'),
-      ],
-      '#default_value' => 'none',
     ];
 
     return $form;
@@ -236,11 +395,12 @@ class ProtocolAddForm extends EntityForm {
     $actions['submit_another'] = [
       '#type' => 'submit',
       '#value' => $this
-        ->t('Save and Create Another Protocol'),
+        ->t('Save and create another protocol'),
       '#submit' => [
         '::submitForm',
         '::save',
       ],
+      '#gin_action_item' => TRUE,
     ];
 
     $actions['submit_done'] = [
@@ -252,6 +412,7 @@ class ProtocolAddForm extends EntityForm {
         '::save',
         '::redirectToCommunity',
       ],
+      '#gin_action_item' => TRUE,
     ];
 
     return $actions;
@@ -269,7 +430,8 @@ class ProtocolAddForm extends EntityForm {
     $entity->setMembershipDisplay($form_state->getValue('field_membership_display'));
 
     // Grab the memberships.
-    foreach (['protocol_steward', 'protocol_member'] as $role) {
+    $roles = ['protocol_steward', 'protocol_member', 'protocol_affiliate', 'curator', 'contributor', 'language_steward', 'language_contributor', 'community_record_steward'];
+    foreach ($roles as $role) {
       $members = $form_state->getValue($role);
       $users = !empty($members['entities']) ? $members['entities'] : [];
       foreach ($users as $user) {

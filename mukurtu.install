@@ -62,9 +62,9 @@ function mukurtu_install() {
   // Hero Image block content.
   $hero_block_content = BlockContent::create([
     'type' => 'image_with_description',
-    'info' => t('Mukurtu v4 Hero Image and Site Description'),
+    'info' => t('Welcome to Your Mukurtu CMS Site'),
     'body' => [
-      'value' => '<p>Welcome to our Mukurtu digital heritage site.</p>',
+      'value' => '<p>To start using your Mukurtu site, create a community, cultural protocol, and category.</p>',
       'format' => 'basic_html',
     ],
     'region' => 'content',
@@ -77,12 +77,28 @@ function mukurtu_install() {
   // Store UUID for Layout Builder reference
   $hero_block_uuid = $hero_block_content->uuid();
 
+  // Vertical Image with Description block content.
+  $vertical_hero_block_content = BlockContent::create([
+    'type' => 'vertical_image_with_description',
+    'info' => t('Welcome to Your Mukurtu CMS Site (Vertical)'),
+    'body' => [
+      'value' => '<p>To start using your Mukurtu site, create a community, cultural protocol, and category.</p>',
+      'format' => 'basic_html',
+    ],
+    'region' => 'content',
+    'weight' => 2,
+    'theme' => 'mukurtu_v4',
+  ]);
+  // Initialize the image field to avoid issues
+  $vertical_hero_block_content->set('field_image', []);
+  $vertical_hero_block_content->save();
+
   // Featured Content block content.
   $featured_block_content = BlockContent::create([
     'type' => 'featured_content',
-    'info' => t('Mukurtu v4 Front Page Featured Content'),
+    'info' => t('Featured Content'),
     'body' => [
-      'value' => '<p>Featured content will appear here.</p>',
+      'value' => '',
       'format' => 'basic_html',
     ],
     'region' => 'content',
@@ -95,67 +111,27 @@ function mukurtu_install() {
   // Store UUID for Layout Builder reference
   $featured_block_uuid = $featured_block_content->uuid();
 
-  // Language switcher.
-  $block = Block::create([
-    'id' => 'mukurtu_v4_languageswitcher_1',
-    'settings' => [
-      'id' => 'language_block:language_interface',
-      'label' => t('Language Switcher'),
-      'label_display' => TRUE,
-      'provider' => 'language',
+  // Full Image with Description block content.
+  $full_image_block_content = BlockContent::create([
+    'type' => 'full_image_with_description',
+    'info' => t('Welcome to Your Mukurtu CMS Site (Full Background)'),
+    'body' => [
+      'value' => '<p>To start using your Mukurtu site, create a community, cultural protocol, and category.</p>',
+      'format' => 'basic_html',
     ],
-    'region' => 'user_menu',
-    'weight' => -8,
-    'plugin' => 'language_block:language_interface',
+    'region' => 'content',
+    'weight' => 2,
     'theme' => 'mukurtu_v4',
-    'visibility' => [],
   ]);
-  $block->save();
-  $block->setRegion('user_menu');
-  $block->setStatus(TRUE);
-  $block->setWeight(3);
-  $block->save();
+  // Initialize the image field to avoid issues
+  $full_image_block_content->set('field_image', []);
+  // Initialize the text color field to avoid issues
+  $full_image_block_content->set('field_text_color', []);
+  $full_image_block_content->save();
 
-  // Footer block.
-  $tokenService = \Drupal::service('token');
-  $languageManager = \Drupal::languageManager();
-  $siteSettings = \Drupal::config('system.site');
-  $options = [
-    'langcode' => $languageManager->getCurrentLanguage()->getId(),
-    'clear' => TRUE,
-  ];
-  $block = Block::create([
-    'id' => 'mukurtu_footer_1',
-    'settings' => [
-      'id' => 'mukurtu_footer_1',
-      'label' => t('Mukurtu Footer'),
-      'label_display' => 1,
-      'status' => 1,
-      'logo_upload' => '',
-      'email_us_text' => 'Email us at ' . $siteSettings->get('mail'),
-      'contact_email_address' => $siteSettings->get('mail'),
-      'social_media' => [],
-      'twitter' => '',
-      'twitter_accounts' => [],
-      'facebook' => '',
-      'facebook_accounts' => [],
-      'instagram' => '',
-      'instagram_accounts' => [],
-      'copyright_message' => $tokenService->replace(
-        '© [current-date:html_year] [site:name]',
-        [],
-        $options,
-      ),
-    ],
-    'region' => 'footer',
-    'plugin' => 'mukurtu_footer',
-    'theme' => 'mukurtu_v4',
-  ]);
-  $block->save();
-  $block->setRegion('footer');
-  $block->setStatus(TRUE);
-  $block->setWeight(0);
-  $block->save();
+  // Language switcher block is now managed by config/install/block.block.mukurtu_v4_languageswitcher_1.yml
+
+  // Footer block is now managed by config/install/block.block.mukurtu_footer_1.yml
 
   // Create default landing page and set it as homepage.
   $homepage_node = Node::create([
@@ -177,7 +153,7 @@ function mukurtu_install() {
     'content', // Region name (layout_onecol has 'content' region)
     [
       'id' => 'block_content:' . $hero_block_uuid, // Reference to the block content
-      'label' => 'Mukurtu v4 Hero Image and Site Description',
+      'label' => 'Welcome to Your Mukurtu CMS Site',
       'label_display' => 1, // Display the title
       'provider' => 'block_content',
     ]
@@ -189,7 +165,7 @@ function mukurtu_install() {
     'content',
     [
       'id' => 'block_content:' . $featured_block_uuid,
-      'label' => 'Mukurtu v4 Featured Content',
+      'label' => 'Featured Content',
       'label_display' => 1,
       'provider' => 'block_content',
     ]
@@ -224,11 +200,25 @@ function mukurtu_install() {
   );
   $community_component->setWeight(3); // Fourth block
 
+  $map_component = new SectionComponent(
+    $uuid_generator->generate(),
+    'content',
+    [
+      'id' => 'views_block:mukurtu_browse_by_map-map_block',
+      'label' => 'Browse by Map',
+      'label_display' => 1,
+      'provider' => 'views',
+      'views_label' => '',
+      'items_per_page' => 'none',
+    ]
+  );
+  $map_component->setWeight(4); // Fifth block
+
   // Create a section using single column layout
   $section = new Section(
     'layout_onecol', // Layout plugin ID
     [], // Layout settings (empty for default)
-    [$hero_component, $featured_component, $categories_component, $community_component] // Components array
+    [$hero_component, $featured_component, $categories_component, $community_component, $map_component] // Components array
   );
 
   // Set the layout on the node
@@ -504,11 +494,213 @@ function mukurtu_install() {
     'view published personal collection entities',
     'view published protocol control entities',
   ];
-  $roles['mukurtu_administrator'] = [
+  $roles['mukurtu_manager'] = [
     'access administration pages',
     'access contextual links',
     'access devel information',
     'access files overview',
+    'access media overview',
+    'access mukurtu export',
+    'access mukurtu import',
+    'access shortcuts',
+    'access site in maintenance mode',
+    'access site-wide contact form',
+    'access taxonomy overview',
+    'access toolbar',
+    'access user contact forms',
+    'access user profiles',
+    'add community entities',
+    'administer account settings',
+    'administer block_content display',
+    'administer block_content fields',
+    'administer block_content form display',
+    'administer blocks',
+    'administer comment display',
+    'administer comment fields',
+    'administer comment form display',
+    'administer comments',
+    'administer community display',
+    'administer community entities',
+    'administer community fields',
+    'administer community form display',
+    'administer contact forms',
+    'administer contact_message display',
+    'administer contact_message fields',
+    'administer contact_message form display',
+    'administer display modes',
+    'administer embed buttons',
+    'administer facets',
+    'administer filters',
+    'administer flagging display',
+    'administer flagging fields',
+    'administer flagging form display',
+    'administer flaggings',
+    'administer flags',
+    'administer image styles',
+    'administer language_community display',
+    'administer language_community fields',
+    'administer language_community form display',
+    'administer media display',
+    'administer media fields',
+    'administer media form display',
+    'administer menu',
+    'administer message digest',
+    'administer message display',
+    'administer message fields',
+    'administer message form display',
+    #'administer message subscribe',
+    'administer message templates',
+    'administer messages',
+    'administer modules',
+    'administer mukurtu_import_strategy',
+    'administer multipage item',
+    'administer node display',
+    'administer node fields',
+    'administer node form display',
+    'administer og_membership display',
+    'administer og_membership fields',
+    'administer og_membership form display',
+    'administer paragraph display',
+    'administer paragraph fields',
+    'administer paragraph form display',
+    'administer paragraphs settings',
+    'administer paragraphs types',
+    'administer pathauto',
+    'administer permissions',
+    'administer personal_collection display',
+    'administer personal_collection fields',
+    'administer personal_collection form display',
+    'administer protocol display',
+    'administer protocol fields',
+    'administer protocol form display',
+    'administer redirect settings',
+    'administer redirects',
+    'administer rest resources',
+    'administer search_api',
+    'administer shortcuts',
+    'administer site configuration',
+    'administer taxonomy',
+    'administer taxonomy_term display',
+    'administer taxonomy_term fields',
+    'administer taxonomy_term form display',
+    'administer themes',
+    'administer url aliases',
+    'administer user display',
+    'administer user fields',
+    'administer user form display',
+    'administer users',
+    'configure leaflet',
+    'create any message template',
+    'create media content warnings',
+    'create mukurtu_batch_import_report message',
+    'create mukurtu_new_item_in_collection message',
+    'create mukurtu_new_item_in_community message',
+    'create mukurtu_new_item_in_protocol message',
+    'create mukurtu_new_user_registration message',
+    'create mukurtu_single_node_delete message',
+    'create mukurtu_single_node_insert message',
+    'create mukurtu_single_node_update message',
+    'create terms in category',
+    'create terms in community_type',
+    'create terms in contributor',
+    'create terms in creator',
+    'create terms in format',
+    'create terms in interpersonal_relationship',
+    'create terms in keywords',
+    'create terms in language',
+    'create terms in people',
+    'create terms in publisher',
+    'create terms in subject',
+    'create terms in type',
+    'create terms in word_type',
+    'create url aliases',
+    'customize shortcut links',
+    'delete any message template',
+    'delete community entities',
+    'delete mukurtu_batch_import_report message',
+    'delete mukurtu_new_item_in_collection message',
+    'delete mukurtu_new_item_in_community message',
+    'delete mukurtu_new_item_in_protocol message',
+    'delete mukurtu_new_user_registration message',
+    'delete mukurtu_single_node_delete message',
+    'delete mukurtu_single_node_insert message',
+    'delete mukurtu_single_node_update message',
+    'delete multiple messages',
+    'delete orphan revisions',
+    'delete terms in category',
+    'delete terms in community_type',
+    'delete terms in contributor',
+    'delete terms in creator',
+    'delete terms in format',
+    'delete terms in interpersonal_relationship',
+    'delete terms in keywords',
+    'delete terms in language',
+    'delete terms in people',
+    'delete terms in publisher',
+    'delete terms in subject',
+    'delete terms in type',
+    'delete terms in word_type',
+    'edit any message template',
+    'edit behavior plugin settings',
+    'edit own comments',
+    'edit terms in category',
+    'edit terms in community_type',
+    'edit terms in contributor',
+    'edit terms in creator',
+    'edit terms in format',
+    'edit terms in interpersonal_relationship',
+    'edit terms in keywords',
+    'edit terms in language',
+    'edit terms in people',
+    'edit terms in publisher',
+    'edit terms in subject',
+    'edit terms in type',
+    'edit terms in word_type',
+    'flag export_content',
+    'flag export_media',
+    'notify of path changes',
+    'overview messages',
+    'post comments',
+    'revert all community revisions',
+    'send message through the ui',
+    'switch shortcut sets',
+    'unflag export_content',
+    'unflag export_media',
+    'update mukurtu_batch_import_report message',
+    'update mukurtu_new_item_in_collection message',
+    'update mukurtu_new_item_in_community message',
+    'update mukurtu_new_item_in_protocol message',
+    'update mukurtu_new_user_registration message',
+    'update mukurtu_single_node_delete message',
+    'update mukurtu_single_node_insert message',
+    'update mukurtu_single_node_update message',
+    'update tokens',
+    'use text format full_html',
+    'view all community revisions',
+    'view any message template',
+    'view mukurtu_batch_import_report message',
+    'view mukurtu_new_item_in_collection message',
+    'view mukurtu_new_item_in_community message',
+    'view mukurtu_new_item_in_protocol message',
+    'view mukurtu_new_user_registration message',
+    'view mukurtu_single_node_delete message',
+    'view mukurtu_single_node_insert message',
+    'view mukurtu_single_node_update message',
+    'view own unpublished content',
+    'view own unpublished media',
+    'view the administration theme',
+    'view unpublished community entities',
+    'view unpublished paragraphs',
+    'view user email addresses',
+    'merge taxonomy terms',
+  ];
+
+  $roles['administrator'] = [
+    'access administration pages',
+    'access contextual links',
+    'access devel information',
+    'access files overview',
+    'access media overview',
     'access mukurtu export',
     'access mukurtu import',
     'access shortcuts',

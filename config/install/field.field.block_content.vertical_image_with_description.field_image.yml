@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.vertical_image_with_description
+    - field.storage.block_content.field_image
+    - media.type.image
+    - media.type.remote_video
+    - media.type.video
+id: block_content.vertical_image_with_description.field_image
+field_name: field_image
+entity_type: block_content
+bundle: vertical_image_with_description
+label: Media
+description: 'Choose an image or video to display'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      image: image
+      remote_video: remote_video
+      video: video
+    sort:
+      field: _none
+      direction: ASC
+    auto_create: true
+    auto_create_bundle: image
+field_type: entity_reference

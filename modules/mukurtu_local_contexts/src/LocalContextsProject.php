@@ -2,59 +2,86 @@
 
 namespace Drupal\mukurtu_local_contexts;
 
-use PHPUnit\Framework\Error\Notice;
-
 class LocalContextsProject extends LocalContextsHubBase {
-  protected $title;
-  protected $privacy;
-  protected $valid;
+
+  /**
+   * @var string The 36 character Local Contexts project ID.
+   */
   protected $id;
+
+  /**
+   * @var mixed|null The title of the project.
+   */
+  protected $title;
+
+  /**
+   * @var mixed|null The privacy setting of the project.
+   */
+  protected $privacy;
+
+  /**
+   * @var bool Whether the project has been loaded from the API.
+   */
+  protected bool $valid;
 
   public function __construct($id) {
     parent::__construct();
     $this->id = $id;
-    $project = $this->fetch($id);
+    $project = $this->load();
     $this->valid = $project !== FALSE;
     $this->title = $project['title'] ?? NULL;
     $this->privacy = $project['privacy'] ?? NULL;
   }
 
-  protected function fetch($id) {
-    if (!$id) {
-      return NULL;
-    }
-
-    $query = $this->db->select('mukurtu_local_contexts_projects', 'project')
-      ->condition('project.id', $id)
+  /**
+   * Loads a Local Contexts project from the database by its LC ID.
+   *
+   * @param string $id
+   *   The 36 character Local Contexts project ID.
+   *
+   * @return array|bool
+   *   The title and privacy information if found. FALSE if not found.
+   */
+  protected function load() {
+    $query = $this->db
+      ->select('mukurtu_local_contexts_projects', 'project')
+      ->condition('project.id', $this->id)
       ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated']);
     $result = $query->execute();
     $project = $result->fetchAssoc();
 
-    if ($project === FALSE) {
-      if ($hubProject = $this->fetchProjectFromHub($id)) {
-        return [
-          'title' => $hubProject['title'],
-          'privacy' => $hubProject['project_privacy'],
-        ];
-      }
-    }
-
     return $project;
   }
 
-  protected function fetchProjectFromHub($id) {
-    if ($project = $this->get("projects/{$id}")) {
+  /**
+   * Updates the local copy of a project from the hub and updates the object.
+   *
+   * @param $api_key
+   *   The API key to use for the fetch request.
+   *
+   * @return bool
+   *   Whether the project was successfully fetched from the hub. Any errors
+   *   can be retrieved from the getErrorMessage() method.
+   */
+  public function fetchFromHub($api_key) {
+    $id = $this->id;
+    if ($project = $this->lcApi->makeRequest("projects/{$id}", $api_key)) {
       if (empty($project['unique_id'])) {
-        return $project;
+        $this->errorMessage = $project['detail'] ?? '';
+        return FALSE;
       }
 
-      // Update our local cache of this project.
+      // Update the object properties.
+      $this->title = $project['title'];
+      $this->privacy = $project['project_privacy'];
+
+      // Update our local copy of this project.
       $projectFields = [
-        'id' => $project['unique_id'],
-        'provider_id' => $project['providers_id'],
-        'title' => $project['title'],
-        'privacy' => $project['project_privacy'],
-        'updated' => time(),
+        'id' => $id,
+        'provider_id' => $project['external_ids']['providers_id'],
+        'title' => $this->title,
+        'privacy' => $this->privacy,
+        'updated' => $this->requestTime,
       ];
 
       $query = $this->db->update('mukurtu_local_contexts_projects')
@@ -62,42 +89,44 @@ class LocalContextsProject extends LocalContextsHubBase {
         ->fields($projectFields);
       $result = $query->execute();
 
-      // Project doesn't exist in our local cache, insert it.
+      // Project doesn't exist in our local copy, insert it.
       if (!$result) {
         $query = $this->db->insert('mukurtu_local_contexts_projects')->fields($projectFields);
-        $result = $query->execute();
-        $prior_cached_labels = [];
-        $prior_cached_notices = [];
-      } else {
-        // Get any existing cached tk labels, bc labels, and notices so we can
+        $query->execute();
+        $prior_saved_labels = [];
+        $prior_saved_notices = [];
+      }
+      else {
+        // Get any existing saved tk labels, bc labels, and notices so we can
         // compare to the response from the hub and delete any that are no
         // longer there.
-        $prior_cached_labels = array_merge($this->getLabels("tk"), $this->getLabels("bc"));
-        $prior_cached_notices = $this->getNotices();
+        $prior_saved_labels = array_merge($this->getLabels("tk"), $this->getLabels("bc"));
+        $prior_saved_notices = $this->getNotices();
       }
-      // Cache the tk labels and their translations.
+      // Save the tk labels and their translations.
       if (isset($project['tk_labels'])) {
-        $this->cacheLabels($project['tk_labels'], "tk", $project['unique_id'], $prior_cached_labels);
-        $this->cacheLabelTranslations($project['tk_labels']);
+        $this->saveLabels($project['tk_labels'], "tk", $project['unique_id'], $prior_saved_labels);
+        $this->saveLabelTranslations($project['tk_labels']);
       }
 
-      // Cache the bc labels and their translations.
+      // Save the bc labels and their translations.
       if (isset($project['bc_labels'])) {
-        $this->cacheLabels($project['bc_labels'], "bc", $project['unique_id'], $prior_cached_labels);
-        $this->cacheLabelTranslations($project['bc_labels']);
+        $this->saveLabels($project['bc_labels'], "bc", $project['unique_id'], $prior_saved_labels);
+        $this->saveLabelTranslations($project['bc_labels']);
       }
 
-      // Cache the notices and their translations.
+      // Save the notices and their translations.
       if (isset($project['notice'])) {
-        $this->cacheNoticesAndTranslations($project['notice'], $project['unique_id'], $prior_cached_notices);
+        $this->saveNoticesAndTranslations($project['notice'], $project['unique_id'], $prior_saved_notices);
       }
 
-      // Delete any cached tk, bc labels, notices, and their translations that
+      // Delete any saved tk, bc labels, notices, and their translations that
       // no longer exist.
-      $this->deleteCachedLabelsAndTranslations($prior_cached_labels, $project['unique_id']);
-      $this->deleteCachedNoticesAndTranslations($prior_cached_notices, $project['unique_id']);
+      $this->deleteSavedLabelsAndTranslations($prior_saved_labels, $project['unique_id']);
+      $this->deleteSavedNoticesAndTranslations($prior_saved_notices, $project['unique_id']);
     }
-    return $project;
+
+    return isset($project['unique_id']);
   }
 
   public function getLabels($tk_or_bc) {
@@ -141,7 +170,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $notices;
   }
 
-  protected function cacheLabels($labels, $tk_or_bc, $id, &$prior_cached_labels) {
+  protected function saveLabels($labels, $tk_or_bc, $id, &$prior_saved_labels) {
     foreach ($labels as $label) {
       $labelFields = [
         'id' => $label['unique_id'],
@@ -153,7 +182,7 @@ class LocalContextsProject extends LocalContextsHubBase {
         'img_url' => $label['img_url'],
         'svg_url' => $label['svg_url'],
         'audio_url' => $label['audiofile'] ?? NULL,
-        'community' => $label['community'],
+        'community' => $label['community']['name'],
         'default_text' => $label['label_text'],
         'display' => 'label',
         'tk_or_bc' => $tk_or_bc,
@@ -168,18 +197,18 @@ class LocalContextsProject extends LocalContextsHubBase {
 
       // Track labels we've updated so we can compare versus our last result
       // from the hub and determine if any have been deleted.
-      if (isset($prior_cached_labels[$label['unique_id']])) {
-        unset($prior_cached_labels[$label['unique_id']]);
+      if (isset($prior_saved_labels[$label['unique_id']])) {
+        unset($prior_saved_labels[$label['unique_id']]);
       }
 
       if (!$result) {
         $query = $this->db->insert('mukurtu_local_contexts_labels')->fields($labelFields);
-        $result = $query->execute();
+        $query->execute();
       }
     }
   }
 
-  protected function cacheLabelTranslations($labels) {
+  protected function saveLabelTranslations($labels) {
     foreach ($labels as $label) {
       $translations = $label['translations'] ?? [];
       foreach ($translations as $translation) {
@@ -205,7 +234,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
   }
 
-  protected function cacheNoticesAndTranslations($notices, $projectId, &$prior_cached_notices) {
+  protected function saveNoticesAndTranslations($notices, $projectId, &$prior_saved_notices) {
     // For our db storage, notice translations need notice_type and project_id,
     // so merging the caching of notices with translations makes more sense here.
     foreach ($notices as $notice) {
@@ -226,15 +255,15 @@ class LocalContextsProject extends LocalContextsHubBase {
         ->fields($noticeFields);
       $result = $query->execute();
 
-      // Cache any translations for this notice.
-      $this->cacheNoticeTranslations($notice, $projectId, $notice['notice_type']);
+      // Save any translations for this notice.
+      $this->saveNoticeTranslations($notice, $projectId, $notice['notice_type']);
 
       // Track notices we've updated so we can compare versus our last result
       // from the hub and determine if any have been deleted.
-      // The ids of prior cached notices are 'project_id:notice_type'.
+      // The ids of prior saved notices are 'project_id:notice_type'.
       $noticeId = $projectId . ':' . $notice['notice_type'];
-      if (isset($prior_cached_notices[$noticeId])) {
-        unset($prior_cached_notices[$noticeId]);
+      if (isset($prior_saved_notices[$noticeId])) {
+        unset($prior_saved_notices[$noticeId]);
       }
 
       if (!$result) {
@@ -244,7 +273,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
   }
 
-  protected function cacheNoticeTranslations($notice, $projectId, $noticeType) {
+  protected function saveNoticeTranslations($notice, $projectId, $noticeType) {
     $translations = $notice['translations'] ?? [];
     foreach ($translations as $translation) {
       $translationFields = [
@@ -272,8 +301,8 @@ class LocalContextsProject extends LocalContextsHubBase {
 
   }
 
-  protected function deleteCachedLabelsAndTranslations(&$prior_cached_labels, $id) {
-    foreach ($prior_cached_labels as $deleted_label_id => $deleted_label) {
+  protected function deleteSavedLabelsAndTranslations(&$prior_saved_labels, $id) {
+    foreach ($prior_saved_labels as $deleted_label_id => $deleted_label) {
       $query = $this->db->delete('mukurtu_local_contexts_label_translations')
         ->condition('label_id', $deleted_label_id);
       $query->execute();
@@ -285,12 +314,12 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
   }
 
-  protected function deleteCachedNoticesAndTranslations(&$prior_cached_notices, $id) {
+  protected function deleteSavedNoticesAndTranslations(&$prior_saved_notices, $id) {
     $id = '';
     $noticeType = '';
 
-    foreach ($prior_cached_notices as $deleted_notice_id => $deleted_notice) {
-      list($id, $noticeType) = explode(':', $deleted_notice_id);
+    foreach ($prior_saved_notices as $deleted_notice_id => $deleted_notice) {
+      [$id, $noticeType] = explode(':', $deleted_notice_id);
 
       // Delete all translations before deleting the corresponding notice.
       $query = $this->db->delete('mukurtu_local_contexts_notice_translations')

@@ -1,0 +1,17 @@
+mukurtu_local_contexts_add_site_supported_project_action:
+  route_name: mukurtu_local_contexts.add_site_supported_project
+  title: 'Add projects'
+  appears_on:
+    - mukurtu_local_contexts.manage_site_supported_projects
+
+mukurtu_local_contexts_add_community_supported_project_action:
+  route_name: mukurtu_local_contexts.add_community_supported_project
+  title: 'Add projects'
+  appears_on:
+    - mukurtu_local_contexts.manage_community_supported_projects
+
+mukurtu_local_contexts_add_protocol_supported_project_action:
+  route_name: mukurtu_local_contexts.add_site_supported_project
+  title: 'Add projects'
+  appears_on:
+    - mukurtu_local_contexts.manage_protocol_supported_projects

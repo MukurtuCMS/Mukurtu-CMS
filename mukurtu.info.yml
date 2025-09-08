@@ -1,14 +1,13 @@
 name: 'Mukurtu CMS'
 type: profile
 description: 'Mukurtu CMS Installation Profile'
-core_version_requirement: '^9.4 || ^10 || ^11'
+core_version_requirement: '^9.4 || ^10'
 version: 4.x-dev
 package: 'Mukurtu CMS'
 distribution:
   name: 'Mukurtu CMS'
 install:
   - blazy
-  - colorbox
   - node
   - history
   - block
@@ -48,7 +47,6 @@ install:
   - term_merge_manager
 dependencies:
   - 'blazy:blazy'
-  - 'colorbox:colorbox'
   - 'ctools:ctools'
   - 'devel:devel'
   - 'drupal:automated_cron'
@@ -56,6 +54,7 @@ dependencies:
   - 'drupal:block_content'
   - 'drupal:ckeditor5'
   - 'drupal:comment'
+  - 'drupal:consent_popup'
   - 'drupal:contact'
   - 'drupal:contextual'
   - 'drupal:editor'
@@ -66,9 +65,11 @@ dependencies:
   - 'drupal:help'
   - 'drupal:image'
   - 'drupal:language'
+  - 'drupal:layout_builder'
   - 'drupal:media'
   - 'drupal:media_library'
   - 'drupal:node'
+  - 'drupal:options'
   - 'drupal:path'
   - 'drupal:rest'
   - 'drupal:shortcut'
@@ -96,6 +97,7 @@ dependencies:
   - 'mukurtu_browse:mukurtu_browse'
   - 'mukurtu_collection:mukurtu_collection'
   - 'mukurtu_community_records:mukurtu_community_records'
+  - 'mukurtu_content_warnings:mukurtu_content_warnings'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_design:mukurtu_design'
   - 'mukurtu_dev:mukurtu_dev'
@@ -123,6 +125,7 @@ dependencies:
   - 'search_api:search_api'
   - 'search_api:search_api_db'
   - 'search_api_glossary:search_api_glossary'
+  - 'term_merge:term_merge'
   - 'token:token'
   - 'views_bulk_operations:views_bulk_operations'
 themes:

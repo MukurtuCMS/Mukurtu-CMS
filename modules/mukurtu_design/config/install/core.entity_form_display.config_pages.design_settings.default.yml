@@ -4,7 +4,14 @@ dependencies:
   config:
     - config_pages.type.design_settings
     - field.field.config_pages.design_settings.field_design_settings__palette
+    - field.field.config_pages.design_settings.field_palette_brand_primary
+    - field.field.config_pages.design_settings.field_palette_brand_primary_acc
+    - field.field.config_pages.design_settings.field_palette_brand_primary_dark
+    - field.field.config_pages.design_settings.field_palette_brand_secondary
+    - field.field.config_pages.design_settings.field_palette_brand_secondary_ac
+    - field.field.config_pages.design_settings.field_palette_brand_secondary_da
   module:
+    - color_field
     - mukurtu_design
 id: config_pages.design_settings.default
 targetEntityType: config_pages
@@ -16,6 +23,48 @@ content:
     weight: 0
     region: content
     settings: {  }
+    third_party_settings: {  }
+  field_palette_brand_primary:
+    type: color_field_widget_html5
+    weight: 1
+    region: content
+    settings:
+      show_extra: false
+    third_party_settings: {  }
+  field_palette_brand_primary_acc:
+    type: color_field_widget_html5
+    weight: 3
+    region: content
+    settings:
+      show_extra: false
+    third_party_settings: {  }
+  field_palette_brand_primary_dark:
+    type: color_field_widget_html5
+    weight: 2
+    region: content
+    settings:
+      show_extra: false
+    third_party_settings: {  }
+  field_palette_brand_secondary:
+    type: color_field_widget_html5
+    weight: 4
+    region: content
+    settings:
+      show_extra: false
+    third_party_settings: {  }
+  field_palette_brand_secondary_ac:
+    type: color_field_widget_html5
+    weight: 6
+    region: content
+    settings:
+      show_extra: false
+    third_party_settings: {  }
+  field_palette_brand_secondary_da:
+    type: color_field_widget_html5
+    weight: 5
+    region: content
+    settings:
+      show_extra: false
     third_party_settings: {  }
 hidden:
   label: true

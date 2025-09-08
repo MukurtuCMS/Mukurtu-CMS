@@ -8,23 +8,20 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Provides a form to manage the protocol level local contexts projects directory.
  */
-class ManageProtocolProjectsDirectory extends FormBase
-{
+class ManageProjectsDirectoryProtocol extends FormBase {
   protected $protocolId;
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId()
-  {
+  public function getFormId() {
     return 'mukurtu_local_contexts_manage_protocol_projects_directory';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $group = NULL)
-  {
+  public function buildForm(array $form, FormStateInterface $form_state, $group = NULL) {
     // In this context, group is the id of the group (in string form).
     $protocol = $group;
     if (!$protocol) {
@@ -67,15 +64,14 @@ class ManageProtocolProjectsDirectory extends FormBase
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state)
-  {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    // No operation needed.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state)
-  {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $description = $form_state->getValue('description');
     $this->configFactory->getEditable('mukurtu_local_contexts.settings')->set('mukurtu_local_contexts_manage_protocol_' . $this->protocolId . '_projects_directory_description', $description)->save();
   }

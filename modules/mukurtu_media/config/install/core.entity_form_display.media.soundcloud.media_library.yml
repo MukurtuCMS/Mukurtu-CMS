@@ -19,6 +19,7 @@ content:
     third_party_settings: {  }
 hidden:
   created: true
+  field_contributor: true
   field_cultural_protocols: true
   field_identifier: true
   field_media_soundcloud: true

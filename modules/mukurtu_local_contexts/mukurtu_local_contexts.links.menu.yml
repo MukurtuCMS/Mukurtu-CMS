@@ -10,10 +10,3 @@ mukurtu_local_contexts.site_projects_directory:
   description: 'View the directory of Local Contexts Projects specific to this site.'
   menu_name: mukurtu
   route_name: mukurtu_local_contexts.site_project_directory
-
-mukurtu_local_contexts.manage_site_projects_directory:
-  title: 'Manage Site Local Contexts Projects Directory'
-  description: 'Configure the site Local Contexts Projects Directory page.'
-  parent: mukurtu_core.site_configuration
-  menu_name: mukurtu
-  route_name: mukurtu_local_contexts.manage_site_project_directory
