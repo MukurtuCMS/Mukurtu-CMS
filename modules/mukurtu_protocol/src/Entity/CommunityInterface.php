@@ -238,4 +238,16 @@ interface CommunityInterface extends MukurtuGroupInterface, ContentEntityInterfa
    *   TRUE if the community has at least one community manager.
    */
   public function hasCommunityManager();
+
+  /**
+   * Check if a user in this community is a community manager.
+   *
+   * @param int $uid
+   *   The user ID.
+   * @return bool
+   *   TRUE if the user is a community manager of this community, FALSE if the
+   *   user is either not a member of this community or if the user does not
+   *   have the community manager role.
+   */
+  public function isCommunityManager($uid);
 }

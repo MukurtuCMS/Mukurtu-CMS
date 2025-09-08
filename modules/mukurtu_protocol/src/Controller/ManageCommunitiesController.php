@@ -34,9 +34,12 @@ class ManageCommunitiesController extends ControllerBase {
 
     $editUrl = $group->toUrl('edit-form');
 
-    // If the current user is uid 1 and this community has no community manager,
-    // do not display the add banner/thumbnail image links.
-    if ($currentUser->id() != 1 || $community->hasCommunityManager()) {
+    // Only display the add banner/thumbnail image links if the current user is
+    // not uid 1 OR if the current user is uid 1 AND is a community manager.
+    // Essentially, we want uid 1 to be able to manage members if the community
+    // has no community managers, but we don't want to allow them all the config
+    // options that a community manager has.
+    if ($currentUser->id() != 1 || ($currentUser->id() == 1 && $community->isCommunityManager(1))) {
       if ($editUrl->access() && !$banner && !$thumbnail) {
       $notices[] = ['#markup' => $this->t('<div class="notice"><a href="@url">Add thumbnail and banner images for this community.</a></div>', ['@url' => $editUrl->toString()])];
       }
@@ -99,9 +102,12 @@ class ManageCommunitiesController extends ControllerBase {
       ];
     }
 
-    // If the current user is uid 1 and this community has no community manager,
-    // do not display the local contexts links.
-    if ($currentUser->id() != 1 || $community->hasCommunityManager()) {
+    // Only display the local contexts links if the current user is not uid 1 OR
+    // if the current user is uid 1 AND is a community manager.
+    // Essentially, we want uid 1 to be able to manage members if the community
+    // has no community managers, but we don't want to allow them all the config
+    // options that a community manager has.
+    if ($currentUser->id() != 1 || ($currentUser->id() == 1 && $community->isCommunityManager(1))) {
       $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_community_supported_projects', ['group' => $community->id()]);
       if ($manageProjectsUrl->access()) {
         $links[] = [

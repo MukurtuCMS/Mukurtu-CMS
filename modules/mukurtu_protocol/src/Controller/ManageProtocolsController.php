@@ -72,9 +72,12 @@ class ManageProtocolsController extends ControllerBase {
       ];
     }
 
-    // If the current user is uid 1 and this protocol has no protocol steward,
-    // do not display the local contexts links.
-    if ($currentUser->id() != 1 || $protocol->hasProtocolSteward()) {
+    // Only display the local contexts links if the current user is not uid 1 OR
+    // if the current user is uid 1 AND is a protocol steward.
+    // Essentially, we want uid 1 to be able to manage members if the protocol
+    // has no protocol stewards, but we don't want to allow them all the config
+    // options that a protocol steward has.
+    if ($currentUser->id() != 1 || ($currentUser->id() == 1 && $protocol->isProtocolSteward(1))) {
       $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_protocol_supported_projects', ['group' => $protocol->id()]);
       if ($manageProjectsUrl->access()) {
         $links[] = [

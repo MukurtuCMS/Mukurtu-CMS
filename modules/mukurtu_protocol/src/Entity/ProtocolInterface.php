@@ -230,4 +230,16 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
    *   TRUE if the protocol has at least one protocol steward.
    */
   public function hasProtocolSteward();
+
+  /**
+   * Check if a user in this protocol is a protocol steward.
+   *
+   * @param int $uid
+   *   The user ID.
+   * @return bool
+   *   TRUE if the user is a protocol steward of this protocol, FALSE if the
+   *   user is either not a member of this protocol or if the user does not
+   *   have the protocol steward role.
+   */
+  public function isProtocolSteward($uid);
 }
