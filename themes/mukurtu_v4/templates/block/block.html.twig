@@ -26,7 +26,8 @@
  * @see template_preprocess_block()
  */
 #}
-<div{{ attributes }}>
+
+<div{{ attributes.addClass('block-wrapper')}}>
   {{ title_prefix }}
   {% if label %}
     <h2{{ title_attributes }}>{{ label }}</h2>

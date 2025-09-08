@@ -3,5 +3,5 @@ status: true
 dependencies: {  }
 id: image_with_description
 label: 'Image with Description'
-revision: 0
-description: ''
+revision: false
+description: "Two column block with image on the left side, followed by title and text on the right.\t"

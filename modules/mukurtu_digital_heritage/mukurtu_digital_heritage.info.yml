@@ -4,6 +4,7 @@ description: 'Provides the digital heritage content type.'
 core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 dependencies:
+  - 'blazy:blazy'
   - 'drupal:comment'
   - 'drupal:field'
   - 'drupal:layout_builder'

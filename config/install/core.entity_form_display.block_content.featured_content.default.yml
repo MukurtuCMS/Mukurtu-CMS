@@ -3,9 +3,11 @@ status: true
 dependencies:
   config:
     - block_content.type.featured_content
+    - entity_browser.browser.mukurtu_content_browser
     - field.field.block_content.featured_content.body
     - field.field.block_content.featured_content.field_featured_content
   module:
+    - entity_browser
     - text
 id: block_content.featured_content.default
 targetEntityType: block_content

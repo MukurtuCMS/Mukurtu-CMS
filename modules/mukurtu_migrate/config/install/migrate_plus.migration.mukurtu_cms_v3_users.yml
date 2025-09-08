@@ -41,8 +41,8 @@ process:
       source: roles
       map:
         2: authenticated
-        4: mukurtu_administrator
-        6: mukurtu_administrator
+        4: mukurtu_manager
+        6: mukurtu_manager
       default_value: authenticated
   user_picture:
     -

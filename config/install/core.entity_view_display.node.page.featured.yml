@@ -1,0 +1,57 @@
+uuid: 238db59a-678b-4e44-8a06-5cc187eb5f76
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.featured
+    - field.field.node.page.body
+    - field.field.node.page.field_page_media_assets
+    - node.type.page
+  module:
+    - layout_builder
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: UCAwaDgkUQKK7kt-zAzoX-liFh7LyYLPWL_H7qECM00
+id: node.page.featured
+targetEntityType: node
+bundle: page
+mode: featured
+content:
+  field_page_media_assets:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: digital_heritage_sidebar
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_title:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  body: true
+  field_all_related_content: true
+  field_citation: true
+  field_communities: true
+  field_in_collection: true
+  field_multipage_page_of: true
+  field_representative_media: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_email_node: true
+  flag_mukurtu_email_og: true
+  flag_mukurtu_follow_content: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

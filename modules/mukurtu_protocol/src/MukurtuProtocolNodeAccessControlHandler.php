@@ -50,14 +50,31 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
         $ogAccessService = \Drupal::service('og.access');
         $protocols = $entity->getMemberProtocols($account);
 
-        // Our initial result needs to be "allowed" for all, "neutral" for any.
-        // Check the truth tables on AccessResult orIf/andIf for why.
-        $result = ($entity->getSharingSetting() == 'all') ? AccessResult::allowed() : AccessResult::neutral();
-        $modeFn = ($entity->getSharingSetting() == 'any') ? 'orIf' : 'andIf';
+        // By this point, we have already taken the sharing setting into account
+        // with the call to isProtocolSetMember() above, which guarantees that
+        // if the sharing setting is 'any', the user is a member of at least one
+        // of the protocols, and if it is 'all', the user is a member of all the
+        // protocols.
 
-        // Check each protocol.
+        // Given this, the access result for each protocol must be combined
+        // using orIf. Previously, orIf was only used for entities under the
+        // 'any' sharing setting; andIf was used for 'all'. Using andIf for
+        // 'all' was denying legitimate access in the case where a user has a
+        // mix of highly privileged roles and lesser privileged roles, i.e., if
+        // the user was both a protocol steward of one protocol and a protocol
+        // member of another and both these protocols were applied to an entity
+        // under the 'all' setting. The access check on the protocol where the
+        // user was merely a protocol member returned neutral(), which, when
+        // andIfed with the protocol steward access of allowed(), returned
+        // neutral(). We don't grant access if the result is only neutral(), so
+        // access was denied in this case.
+
+        // The correct thing to do is to consider the user's most privileged
+        // permissions for access, hence the change to using orIf for 'all'.
+        $result = AccessResult::neutral();
+
         foreach ($protocols as $protocol) {
-          $result = $result->{$modeFn}($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
+          $result = $result->orIf($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
         }
 
         // Protocols are very opinionated, neutral is not good enough for

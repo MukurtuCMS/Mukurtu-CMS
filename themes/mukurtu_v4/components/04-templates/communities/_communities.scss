@@ -2,21 +2,35 @@
 @use "../../00-base/layout/layout";
 @use "../../00-base/mixins/mixins";
 
-.community-page-browse {
+// Community browse page
+.community-page-listing {
   @include layout.layout--full-width-grid;
+
+  .communities {
+    @include layout.layout--full-width-grid-item;
+  }
+}
+
+// Communities block on landing pages.
+.view-browse-by-community .community-page-browse {
+  padding-inline: var(--layout-padding);
+
+  @include include-media.media('>=lg') {
+    padding-inline: var(--layout-padding-m);
+  }
 }
 
 .communities {
-  display: flex;
-  flex-flow: column nowrap;
-  gap: 1.875rem;
-  padding-inline-start: 0;
+  gap: var(--v-space-3xs);
+  display: grid;
+  grid-template-columns: 1fr;
 
-  @include layout.layout--full-width-grid-item;
+  @include include-media.media('>=sm') {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-  @media screen and (width >= 26rem) {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(auto, 24rem));
+  @include include-media.media('>=lg') {
+    @include layout.layout--fourcol-grid;
   }
 }
 
@@ -28,25 +42,7 @@
   background-color: white;
 
   & .field--name-name a {
-    position: relative;
-    display: block;
-    inline-size: max-content;
-    max-inline-size: 75%;
-    z-index: 2;
-
-    @include mixins.button;
-
-    &::after {
-      content: '';
-      display: inline-block;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="20" height="30" viewBox="5 -5 20 30"><path fill="white" d="M25 10.01 9.72 25l-4.53-4.43L15.78 10.2 5-.37 9.72-5 25 10h-.01z"/></svg>');
-      background-repeat: no-repeat;
-      background-size: contain;
-      inline-size: 0.6em;
-      block-size: 1em;
-      vertical-align: middle;
-      margin-inline-start: 2ch;
-    }
+    @include mixins.button-arrow;
   }
 
   .media--image {
@@ -62,5 +58,12 @@
       block-size: 19rem;
       object-fit: cover;
     }
+  }
+}
+
+
+.community--browse--wrapper {
+  .community-page-browse {
+    padding-block-end: var(--v-space-s)
   }
 }

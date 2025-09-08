@@ -129,6 +129,13 @@
   grid-gap: 10px var(--gutter);
 }
 
+// stylelint-disable-next-line
+@mixin layout--fourcol-grid {
+  display: grid;
+  grid-template-columns: var(--grid-4col);
+  grid-gap: 10px var(--gutter);
+}
+
 .layout--full-width-grid {
   @include layout--full-width-grid;
 }

@@ -1,4 +1,5 @@
 @use "../../../external/include-media";
+@use "../../00-base/layout/layout";
 
 // Grid setup for /categories.
 .category-grid {
@@ -12,9 +13,9 @@
   }
 
   @include include-media.media('>=lg') {
-    grid-template-columns: repeat(4, 1fr);
-    padding-inline: var(--layout-padding-m);
+    @include layout.layout--fourcol-grid;
 
+    padding-inline: var(--layout-padding-m);
   }
 
   // Individual cards layout.
@@ -47,5 +48,18 @@
     font-weight: var(--text-bold);
     text-align: center;
     padding: var(--v-space-4xxs);
+  }
+}
+
+.category-teaser:not(:has(.media--image)) {
+  a::before {
+    content: '';
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 3/2;
+    background-image: url('../images/category.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
   }
 }

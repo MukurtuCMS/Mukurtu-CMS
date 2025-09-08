@@ -1,6 +1,0 @@
-langcode: en
-status: true
-id: mukurtu_administrator
-label: 'Mukurtu Administrator'
-weight: 2
-is_admin: null

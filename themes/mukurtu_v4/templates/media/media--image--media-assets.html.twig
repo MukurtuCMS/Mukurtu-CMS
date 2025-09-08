@@ -29,16 +29,21 @@
  * @see template_preprocess_media()
  */
 #}
-{% 
+{%
   set classes = [
     'media',
     'media--' ~ bundle
-  ] 
+  ]
 %}
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  {{ content.field_media_image }}
+  <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} image">
+    <span class="media-asset--expand">Expand +</span>
+    <span class="media-asset--content">
+     {{ content.field_media_image }}
+    </span>
+  </a>
 
-  <a href="{{ content.thumbnail.0 }}" class="button">Access image</a>
+  <a href="{{ media_url }}" class="button" download>Download image</a>
 </div>

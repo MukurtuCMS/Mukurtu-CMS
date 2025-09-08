@@ -38,10 +38,6 @@ third_party_settings:
         - layout_onecol
       denylisted_blocks: {  }
       allowlisted_blocks:
-        'Custom block types':
-          - basic
-          - featured_content
-          - image_with_description
         'Lists (Views)':
           - 'views_block:browse_by_community-community_browse_block'
           - 'views_block:mukurtu_browse_by_map-map_block'

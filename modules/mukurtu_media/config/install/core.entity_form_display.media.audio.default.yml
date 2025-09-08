@@ -17,13 +17,13 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 12
+    weight: 9
     region: content
     settings: {  }
     third_party_settings: {  }
   field_contributor:
     type: entity_reference_autocomplete
-    weight: 5
+    weight: 7
     region: content
     settings:
       match_operator: CONTAINS
@@ -33,7 +33,7 @@ content:
     third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: 3
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -54,7 +54,7 @@ content:
     third_party_settings: {  }
   field_media_tags:
     type: entity_reference_autocomplete
-    weight: 7
+    weight: 6
     region: content
     settings:
       match_operator: CONTAINS
@@ -64,7 +64,7 @@ content:
     third_party_settings: {  }
   field_people:
     type: entity_reference_autocomplete
-    weight: 6
+    weight: 5
     region: content
     settings:
       match_operator: CONTAINS
@@ -74,7 +74,7 @@ content:
     third_party_settings: {  }
   field_thumbnail:
     type: image_image
-    weight: 9
+    weight: 3
     region: content
     settings:
       progress_indicator: throbber
@@ -90,7 +90,7 @@ content:
     third_party_settings: {  }
   langcode:
     type: language_select
-    weight: 2
+    weight: 10
     region: content
     settings:
       include_locked: true
@@ -105,13 +105,13 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 10
+    weight: 11
     region: content
     settings: {  }
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 11
+    weight: 12
     region: content
     settings:
       display_label: true

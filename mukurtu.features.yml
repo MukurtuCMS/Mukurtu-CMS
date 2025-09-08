@@ -19,8 +19,6 @@ excluded:
   - system.action.flag_action.mukurtu_follow_content_flag
   - system.action.flag_action.mukurtu_follow_content_unflag
   - system.theme
-  - block.block.mukurtu_v4_front_page_featured_content
-  - block.block.mukurtu_v4_hero_image_and_site_description
   - core.entity_view_display.message.mukurtu_batch_import_report.mail_body
   - core.entity_view_display.message.mukurtu_batch_import_report.mail_subject
   - core.entity_view_display.message.mukurtu_new_item_in_collection.mail_body

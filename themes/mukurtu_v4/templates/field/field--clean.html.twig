@@ -1,0 +1,17 @@
+{#
+/**
+ * @file
+ * This template is used to display a field without any wrapping markup.
+ * It can be used by using this filter `|add_suggestion('clean')` on a field.
+ */
+#}
+
+{% if multiple %}
+  {% for item in items %}
+    <div{{ item.attributes.addClass('field__item') }}>{{ item.content }}</div>
+  {% endfor %}
+{% else %}
+  {% for item in items %}
+    {{ item.content }}
+  {% endfor %}
+{% endif %}
