@@ -54,10 +54,10 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
     $options = [];
     foreach ($values as $id => $value) {
       if ($value['display'] == 'notice') {
-        $options[$value['title']][$value['p_id'] . ':' . $value['type'] . ':' . $value['display']] = $value['name'] ?? $this->t('Unknown Notice');
+        $options[$value['title']][$value['project_id'] . ':' . $value['type'] . ':' . $value['display']] = $value['name'] ?? $this->t('Unknown Notice');
       }
       else if ($value['display'] == 'label') {
-        $options[$value['title']][$value['p_id'] . ':' . $value['id'] . ':' . $value['display']] = $value['name'] ?? $this->t('Unknown Label');
+        $options[$value['title']][$value['project_id'] . ':' . $value['id'] . ':' . $value['display']] = $value['name'] ?? $this->t('Unknown Label');
       }
     }
     return $options;
@@ -72,10 +72,10 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
     $notices = $this->localContextsProjectManager->getAllNotices();
 
     foreach ($labels as $label) {
-      $values[] = $label['p_id'] . ':' . $label['id'] . ':' . $label['display'];
+      $values[] = $label['project_id'] . ':' . $label['id'] . ':' . $label['display'];
     }
     foreach ($notices as $notice) {
-      $values[] = $notice['p_id'] . ':' . $notice['type'] . ':' . $notice['display'];
+      $values[] = $notice['project_id'] . ':' . $notice['type'] . ':' . $notice['display'];
     }
     return $values;
   }
@@ -98,10 +98,10 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
     $values = [];
 
     foreach ($labels as $label) {
-      $values[] = $label['p_id'] . ':' . $label['id'] . ':' . $label['display'];
+      $values[] = $label['project_id'] . ':' . $label['id'] . ':' . $label['display'];
     }
     foreach ($notices as $notice) {
-      $values[] = $notice['p_id'] . ':' . $notice['type'] . ':' . $notice['display'];
+      $values[] = $notice['project_id'] . ':' . $notice['type'] . ':' . $notice['display'];
     }
     return $values;
   }

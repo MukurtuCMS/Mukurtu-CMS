@@ -57,7 +57,7 @@ dependencies:
     - taxonomy
     - term_merge
     - toolbar
-id: mukurtu_administrator
-label: 'Mukurtu Administrator'
+id: mukurtu_manager
+label: 'Mukurtu Manager'
 weight: 2
 is_admin: null

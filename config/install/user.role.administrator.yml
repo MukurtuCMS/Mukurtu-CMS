@@ -1,0 +1,63 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+    - taxonomy.vocabulary.category
+    - taxonomy.vocabulary.community_type
+    - taxonomy.vocabulary.contributor
+    - taxonomy.vocabulary.creator
+    - taxonomy.vocabulary.format
+    - taxonomy.vocabulary.interpersonal_relationship
+    - taxonomy.vocabulary.keywords
+    - taxonomy.vocabulary.language
+    - taxonomy.vocabulary.people
+    - taxonomy.vocabulary.publisher
+    - taxonomy.vocabulary.subject
+    - taxonomy.vocabulary.type
+    - taxonomy.vocabulary.word_type
+  module:
+    - block
+    - block_content
+    - comment
+    - contact
+    - contextual
+    - devel
+    - embed
+    - entity_reference_revisions
+    - facets
+    - field_ui
+    - file
+    - filter
+    - flag
+    - image
+    - leaflet
+    - media
+    - message
+    - message_digest
+    - message_notify_ui
+    - message_ui
+    - mukurtu_collection
+    - mukurtu_content_warnings
+    - mukurtu_dictionary
+    - mukurtu_export
+    - mukurtu_import
+    - mukurtu_multipage_items
+    - mukurtu_protocol
+    - node
+    - og
+    - paragraphs
+    - path
+    - pathauto
+    - redirect
+    - rest
+    - search_api
+    - shortcut
+    - system
+    - taxonomy
+    - term_merge
+    - toolbar
+id: administrator
+label: 'Administrator'
+weight: 2
+is_admin: true
