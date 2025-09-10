@@ -41,12 +41,7 @@
   <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} document">
     <span class="media-asset--expand">Expand +</span>
     <span class="media-asset--content">
-      {% if content.thumbnail['#items'] is not empty %}
-        {{ content.thumbnail }}
-      {% else %}
-
-        <embed alt="Document {{ name }}" src="{{ medial_url }}" width="500" height="400" type='application/pdf'>
-      {% endif %}
+      <embed alt="Document {{ name }}" src="{{ medial_url }}" width="500" height="400" type='application/pdf'>
       {{ content.field_media_document|render|striptags }}
     </span>
   </a>
