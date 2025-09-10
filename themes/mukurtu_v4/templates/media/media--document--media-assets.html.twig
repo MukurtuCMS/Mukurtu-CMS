@@ -40,12 +40,11 @@
   {{ title_suffix.contextual_links }}
   <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} document">
     <span class="media-asset--expand">Expand +</span>
+    <span class="media-asset--content">
+      <object alt="Document {{ name }}" data="{{ media_url }}" width="900" height="800" class='pdf'>
+      {{ content.field_media_document|render|striptags }}
+    </span>
   </a>
-
-  <span class="media-asset--content">
-    <object alt="Document {{ name }}" data="{{ media_url }}" width="900" class='pdf'>
-    {{ content.field_media_document|render|striptags }}
-  </span>
 
   <a href="{{ media_url }}" class="button" download>Download document</a>
 
