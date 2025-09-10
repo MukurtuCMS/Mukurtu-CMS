@@ -84,3 +84,5 @@ sudo apt install poppler-utils
 Mukurtu CMS v4 is extremely unstable and under active development. If you wish to contribute, please first discuss it with us by starting an issue or discussion on the [Mukurtu CMS issue tracker](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or contact us via [mukurtu.org](https://mukurtu.org/).
 
 For more information on developing and contributing to Mukurtu CMS, [visit the GitHub wiki for developer documentation](https://github.com/MukurtuCMS/Mukurtu-CMS/wiki).
+
+
