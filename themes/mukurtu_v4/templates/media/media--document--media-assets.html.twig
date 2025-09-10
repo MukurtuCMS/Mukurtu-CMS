@@ -38,8 +38,7 @@
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} document">
-    <span class="media-asset--expand">Expand +</span>
+
     <span class="media-asset--content">
       {% if content.thumbnail['#items'] is not empty %}
         {{ content.thumbnail }}
@@ -47,8 +46,7 @@
         <img alt="Document {{ name }}" src="/profiles/mukurtu/themes/mukurtu_v4/images/document.png" />
       {% endif %}
       {{ content.field_media_document|render|striptags }}
-    </span>
-  </a>
+
 
   <a href="{{ media_url }}" class="button" download>Download document</a>
 
