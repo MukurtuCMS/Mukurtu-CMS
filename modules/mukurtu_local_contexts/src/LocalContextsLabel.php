@@ -10,6 +10,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
   protected $label_id;
   protected $display;
   public $name;
+  public $img_url;
   public $svg_url;
   public $default_text;
   public $translations;
@@ -24,7 +25,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'l')
       ->condition('l.project_id', $this->project_id)
       ->condition('l.id', $this->label_id)
-      ->fields('l', ['id', 'name', 'svg_url', 'default_text']);
+      ->fields('l', ['id', 'name', 'img_url', 'svg_url', 'default_text']);
     $result = $query->execute();
 
     $tQuery = $this->db->select('mukurtu_local_contexts_label_translations', 't')
@@ -34,6 +35,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
 
     $label = $result->fetchAssoc();
     $this->name = $label['name'] ?? '';
+    $this->img_url = $label['img_url'] ?? NULL;
     $this->svg_url = $label['svg_url'] ?? NULL;
     $this->default_text = $label['default_text'] ?? '';
 
