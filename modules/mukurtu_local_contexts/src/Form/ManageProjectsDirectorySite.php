@@ -3,6 +3,8 @@
 namespace Drupal\mukurtu_local_contexts\Form;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\mukurtu_local_contexts\LocalContextsApi;
 
 /**
  * Provides a form to manage the site level local contexts projects directory.
@@ -20,7 +22,8 @@ class ManageProjectsDirectorySite extends ManageProjectsDirectoryBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form_state->setTemporaryValue('config', $this->configFactory()->getEditable('mukurtu_local_contexts.settings'));
+    $config = $this->configFactory()->getEditable('mukurtu_local_contexts.settings');
+    $form_state->setTemporaryValue('config', $config);
     return parent::buildForm($form, $form_state);
   }
 
@@ -38,7 +41,7 @@ class ManageProjectsDirectorySite extends ManageProjectsDirectoryBase {
     $config = $form_state->getTemporaryValue('config');
     $this->messenger()->addMessage($this->t('The site-wide Local Contexts project directory page has been updated.'));
     $description = $form_state->getValue('description');
-    $config->set('mukurtu_local_contexts_manage_site_projects_directory_description', $description)->save();
+    $config->set('site_projects_directory_description', $description)->save();
   }
 
 }

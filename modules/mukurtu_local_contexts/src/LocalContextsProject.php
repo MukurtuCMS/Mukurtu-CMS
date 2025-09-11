@@ -48,9 +48,7 @@ class LocalContextsProject extends LocalContextsHubBase {
       ->condition('project.id', $this->id)
       ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated']);
     $result = $query->execute();
-    $project = $result->fetchAssoc();
-
-    return $project;
+    return $result->fetchAssoc();
   }
 
   /**

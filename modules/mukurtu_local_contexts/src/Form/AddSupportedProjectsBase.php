@@ -36,10 +36,16 @@ abstract class AddSupportedProjectsBase extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $api_key = $form_state->getValue('api_key');
+    $group = $form_state->get('group');
 
-    // Populate the API key from the session if available.
+    // Populate the API key from the group or site settings if available.
     if (empty($api_key)) {
-      $api_key = $this->requestStack->getCurrentRequest()->getSession()->get('mukurtu_local_contexts_api_key');
+      if ($group) {
+        $api_key = $group->get('field_local_contexts_api_key')->value;
+      }
+      else {
+        $api_key = $this->config('mukurtu_local_contexts.settings')->get('site_api_key');
+      }
     }
 
     // Populate the list of projects from the API.
@@ -71,7 +77,7 @@ abstract class AddSupportedProjectsBase extends FormBase {
         '#type' => 'fieldset',
         '#title' => $this->t('Current API Key'),
         '#attributes' => ['class' => ['inline-form-item']],
-        '#description' => $this->t('The API key is stored until you next log out. Clear the API key to remove it from your session.')
+        '#description' => $this->t('This API key is used to retrieve the list of projects shown below.'),
       ];
       $form['api_key_reset']['current'] = [
         '#type' => 'form_item',
@@ -114,23 +120,26 @@ abstract class AddSupportedProjectsBase extends FormBase {
       '#type' => 'actions',
     ];
 
-    $form['actions']['next'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Next'),
-      '#access' => !isset($all_projects),
-      '#validate' => ['::validateApiKey'],
-      '#submit' => ['::submitApiKey'],
-    ];
-
-    $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Import projects'),
-      '#access' => isset($all_projects),
-      // Disable the button if there are no projects to import.
-      '#disabled' => empty($all_projects),
-      '#validate' => ['::validateForm'],
-      '#submit' => ['::submitForm'],
-    ];
+    if (!isset($all_projects)) {
+      $form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Next'),
+        '#validate' => ['::validateApiKey'],
+        '#submit' => ['::submitApiKey'],
+      ];
+    }
+    else {
+      $form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Import projects'),
+        '#button_type' => 'primary',
+        '#access' => isset($all_projects),
+        // Disable the button if there are no projects to import.
+        '#disabled' => empty($all_projects),
+        '#validate' => ['::validateForm'],
+        '#submit' => ['::submitForm'],
+      ];
+    }
 
     return $form;
   }
@@ -152,9 +161,18 @@ abstract class AddSupportedProjectsBase extends FormBase {
    * Submit handler for the "Next" button that sets the API key.
    */
   public function submitApiKey(array &$form, FormStateInterface $form_state) {
-    // Set the API key in the session.
     $api_key = $form_state->getValue('api_key');
-    $this->requestStack->getCurrentRequest()->getSession()->set('mukurtu_local_contexts_api_key', $api_key);
+    $group = $form_state->get('group');
+
+    // Save the API key in the group.
+    if ($group) {
+      $group->set('field_local_contexts_api_key', $api_key);
+      $group->save();
+    }
+    else {
+      // Save the API key in the site-wide settings.
+      $this->configFactory()->getEditable('mukurtu_local_contexts.settings')->set('site_api_key', $api_key)->save();
+    }
 
     // Once the API key is set, we can rebuild the form to show the projects.
     $form_state->setRebuild();
@@ -166,6 +184,18 @@ abstract class AddSupportedProjectsBase extends FormBase {
   public function resetApiKey(array &$form, FormStateInterface $form_state) {
     $this->requestStack->getCurrentRequest()->getSession()->remove('mukurtu_local_contexts_api_key');
     $form_state->setValue('api_key', NULL);
+    $group = $form_state->get('group');
+
+    // Clear the API key in the group.
+    if ($group) {
+      $group->set('field_local_contexts_api_key', '');
+      $group->save();
+    }
+    else {
+      // Clear the API key in the site-wide settings.
+      $this->configFactory()->getEditable('mukurtu_local_contexts.settings')->set('site_api_key', '')->save();
+    }
+
     $form_state->setRebuild();
   }
 
