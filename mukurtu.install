@@ -234,7 +234,7 @@ function mukurtu_install() {
   // Create Communities menu item.
   MenuLinkContent::create([
     'title' => 'Communities',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_protocol.communities_page')->toString()],
+    'link' => ['uri' => 'internal:' . '/communities'],
     'menu_name' => 'main',
     'description' => 'Browse the site communities',
     'expanded' => FALSE,
@@ -244,7 +244,7 @@ function mukurtu_install() {
   // Create Categories menu item.
   MenuLinkContent::create([
     'title' => 'Categories',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('view.mukurtu_categories.categories_page')->toString()],
+    'link' => ['uri' => 'internal:' . '/categories'],
     'menu_name' => 'main',
     'description' => 'Browse the site categories',
     'expanded' => FALSE,
@@ -254,7 +254,7 @@ function mukurtu_install() {
   // Create Browse Digital Heritage menu item.
   MenuLinkContent::create([
     'title' => 'Browse Digital Heritage',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_browse.browse_digital_heritage_page')->toString()],
+    'link' => ['uri' => 'internal:' . '/digital-heritiage'],
     'menu_name' => 'main',
     'description' => 'Browse Digital Heritage Content',
     'expanded' => FALSE,
@@ -264,7 +264,7 @@ function mukurtu_install() {
   // Create Browse menu item.
   MenuLinkContent::create([
     'title' => 'Browse',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_browse.browse_page')->toString()],
+    'link' => ['uri' => 'internal:' . '/browse'],
     'menu_name' => 'main',
     'description' => 'Browse Site Content',
     'expanded' => FALSE,
@@ -274,7 +274,7 @@ function mukurtu_install() {
   // Create Collections menu item.
   MenuLinkContent::create([
     'title' => 'Collections',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_collection.collection_browse_page')->toString()],
+    'link' => ['uri' => 'internal:' . '/collections'],
     'menu_name' => 'main',
     'description' => 'Browse Site Collections',
     'expanded' => FALSE,
@@ -284,7 +284,7 @@ function mukurtu_install() {
   // Create Dictionary menu item.
   MenuLinkContent::create([
     'title' => 'Dictionary',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_dictionary.dictionary_page')->toString()],
+    'link' => ['uri' => 'internal:' . '/dictionary'],
     'menu_name' => 'main',
     'description' => 'Browse the dictionary',
     'expanded' => FALSE,
@@ -296,7 +296,7 @@ function mukurtu_install() {
   // Dashboard
   MenuLinkContent::create([
     'title' => 'Dashboard',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_core.dashboard')->toString()],
+    'link' => ['uri' => 'internal:' . "/dashboard"],
     'menu_name' => 'account',
     'description' => 'Dashboard',
     'expanded' => FALSE,
@@ -306,7 +306,7 @@ function mukurtu_install() {
   // Create Content (parent)
   $create_content_menu = MenuLinkContent::create([
     'title' => 'Create Content',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_core.add_page')->toString()],
+    'link' => ['uri' => 'internal:' . '/node/add'],
     'menu_name' => 'account',
     'description' => 'Create content',
     'expanded' => TRUE,
@@ -317,7 +317,7 @@ function mukurtu_install() {
   // Digital Heritage (under Create Content)
   MenuLinkContent::create([
     'title' => 'Digital Heritage',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'digital_heritage'])->toString()],
+    'link' => ['uri' => 'internal:' . '/node/add/digital_heritage'],
     'menu_name' => 'account',
     'description' => 'Create digital heritage item',
     'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
@@ -328,7 +328,7 @@ function mukurtu_install() {
   // Collection (under Create Content)
   MenuLinkContent::create([
     'title' => 'Collection',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'collection'])->toString()],
+    'link' => ['uri' => 'internal:' . '/node/add/collection'],
     'menu_name' => 'account',
     'description' => 'Create collection',
     'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
@@ -339,7 +339,7 @@ function mukurtu_install() {
   // Dictionary word (under Create Content)
   MenuLinkContent::create([
     'title' => 'Dictionary word',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'dictionary_word'])->toString()],
+    'link' => ['uri' => 'internal:' . '/node/add/dictionary_word'],
     'menu_name' => 'account',
     'description' => 'Create dictionary word',
     'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
@@ -350,7 +350,7 @@ function mukurtu_install() {
   // Word list (under Create Content)
   MenuLinkContent::create([
     'title' => 'Word list',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'word_list'])->toString()],
+    'link' => ['uri' => 'internal:' . '/node/add/word_list'],
     'menu_name' => 'account',
     'description' => 'Create word list',
     'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
@@ -361,7 +361,7 @@ function mukurtu_install() {
   // Person record (under Create Content)
   MenuLinkContent::create([
     'title' => 'Person record',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('node.add', ['node_type' => 'person'])->toString()],
+    'link' => ['uri' => 'internal:' . '/node/add/person'],
     'menu_name' => 'account',
     'description' => 'Create person record',
     'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
@@ -372,7 +372,7 @@ function mukurtu_install() {
   // Media (under Create Content)
   MenuLinkContent::create([
     'title' => 'Media',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('entity.media.add_page')->toString()],
+    'link' => ['uri' => 'internal:' . '/admin/media/add'],
     'menu_name' => 'account',
     'description' => 'Add media',
     'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
@@ -383,7 +383,7 @@ function mukurtu_install() {
   // Add Component (parent)
   $add_component_menu = MenuLinkContent::create([
     'title' => 'Add Component',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('mukurtu_core.dashboard')->toString()],
+    'link' => ['uri' => 'internal:' . '/dashboard'],
     'menu_name' => 'account',
     'description' => 'Add component',
     'expanded' => FALSE,
@@ -394,7 +394,7 @@ function mukurtu_install() {
   // Community (under Add Component)
   MenuLinkContent::create([
     'title' => 'Community',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('entity.community.add_form')->toString()],
+    'link' => ['uri' => 'internal:' . '/communities/community/add'],
     'menu_name' => 'account',
     'description' => 'Add community',
     'parent' => 'menu_link_content:' . $add_component_menu->uuid(),
@@ -405,7 +405,7 @@ function mukurtu_install() {
   // Cultural protocol (under Add Component)
   MenuLinkContent::create([
     'title' => 'Cultural protocol',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('entity.protocol.add_form')->toString()],
+    'link' => ['uri' => 'internal:' . '/protocols/protocol/add'],
     'menu_name' => 'account',
     'description' => 'Add cultural protocol',
     'parent' => 'menu_link_content:' . $add_component_menu->uuid(),
@@ -416,7 +416,7 @@ function mukurtu_install() {
   // Category (under Add Component)
   MenuLinkContent::create([
     'title' => 'Category',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('entity.taxonomy_term.add_form', ['taxonomy_vocabulary' => 'category'])->toString()],
+    'link' => ['uri' => 'internal:' . '/admin/structure/taxonomy/manage/category/add'],
     'menu_name' => 'account',
     'description' => 'Add category',
     'parent' => 'menu_link_content:' . $add_component_menu->uuid(),
@@ -427,7 +427,7 @@ function mukurtu_install() {
   // User (under Add Component)
   MenuLinkContent::create([
     'title' => 'User',
-    'link' => ['uri' => 'internal:' . Url::fromRoute('user.admin_create')->toString()],
+    'link' => ['uri' => 'internal:' . '/admin/people/create'],
     'menu_name' => 'account',
     'description' => 'Add user',
     'parent' => 'menu_link_content:' . $add_component_menu->uuid(),
