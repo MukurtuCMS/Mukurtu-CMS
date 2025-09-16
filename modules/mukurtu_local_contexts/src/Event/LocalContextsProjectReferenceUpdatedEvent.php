@@ -7,8 +7,7 @@ use Drupal\Component\EventDispatcher\Event;
 /**
  * Event when Local Contexts project is being updated in a field or other context.
  */
-class LocalContextsProjectReferenceUpdatedEvent extends Event
-{
+class LocalContextsProjectReferenceUpdatedEvent extends Event {
   const EVENT_NAME = 'mukurtu_local_contexts_project_refererence_updated';
 
   /**
@@ -18,13 +17,11 @@ class LocalContextsProjectReferenceUpdatedEvent extends Event
    */
   protected $project_id;
 
-  public function __construct($project_id)
-  {
+  public function __construct($project_id) {
     $this->project_id = $project_id;
   }
 
-  public function getProjectId()
-  {
+  public function getProjectId() {
     return $this->project_id;
   }
 

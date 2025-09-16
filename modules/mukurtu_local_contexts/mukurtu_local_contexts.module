@@ -1,5 +1,9 @@
 <?php
 
+use Drupal\Core\Url;
+use Drupal\mukurtu_local_contexts\LocalContextsProject;
+use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
+
 /**
  *  Implements hook_theme().
  */
@@ -20,7 +24,8 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'variables' => [
         'text' => [],
         'name' => [],
-        'svg_url' => [],
+        'svg_url' => NULL,
+        'img_url' => NULL,
         'translations' => [],
       ],
     ],
@@ -29,7 +34,8 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'variables' => [
         'text' => [],
         'name' => [],
-        'svg_url' => [],
+        'svg_url' => NULL,
+        'img_url' => NULL,
         'translations' => [],
       ],
     ],
@@ -41,4 +47,103 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       ],
     ],
   ];
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * Note that Drupal 11.x does not yet support cron implementations using
+ * classes/services. See https://www.drupal.org/project/drupal/issues/3383487.
+ */
+function mukurtu_local_contexts_cron() {
+  // Set up the required services.
+  $config = \Drupal::config('mukurtu_local_contexts.settings');
+  $logger = \Drupal::logger('cron');
+  $entityTypeManager = \Drupal::entityTypeManager();
+  $state = \Drupal::state();
+  $now = \Drupal::time()->getCurrentTime();
+
+  //$interval = (int) $config->get('hub_refresh_interval') ?: 86400;
+  $interval = 1;
+  $last_run = (int) $state->get('mukurtu_local_contexts.hub_last_refresh', 0);
+
+  // Only run if the configured interval has passed.
+  if ($now - $last_run < $interval) {
+    return;
+  }
+
+  // Update the last run timestamp.
+  $state->set('mukurtu_local_contexts.hub_last_refresh', $now);
+
+  $projects = [];
+  $project_count = 0;
+
+  try {
+    $supportedProjectManager = new LocalContextsSupportedProjectManager();
+    $projects = $supportedProjectManager->getAllProjects();
+
+    // If no Local Contexts projects are configured, skip the sync.
+    if (empty($projects)) {
+      return;
+    }
+
+    $protocol_storage = $entityTypeManager->getStorage('protocol');
+    $community_storage = $entityTypeManager->getStorage('community');
+    $group_id = FALSE;
+    $group = FALSE;
+    $api_key = FALSE;
+    foreach ($projects as $project_id => $project) {
+      // Projects are sorted by group ID. If the group ID changes, update the
+      // API key and group for the next set of projects.
+      if ($project['group_id'] !== $group_id) {
+        $group_id = $project['group_id'];
+        switch ($project['type']) {
+          case 'site':
+            $api_key = $config->get('site_api_key');
+            $group = NULL;
+            break;
+          case 'protocol':
+            $group = $protocol_storage->load($group_id);
+            break;
+          case 'community':
+            $group = $community_storage->load($group_id);
+            break;
+        }
+        if ($group) {
+          $api_key = $group->get('field_local_contexts_api_key')->value;
+        }
+
+        // If no API key is found in either the site or group, log an error.
+        if (!$api_key) {
+          $error_message = '';
+          if ($group) {
+            $error_message .= 'No Local Contexts API key found for the @type @title (ID @id). This prevented some Local Contexts data from syncing.<a href=":url">Edit the Local Contexts settings to add or update the API key for this @type</a>.';
+            $error_url = Url::fromRoute('mukurtu_local_contexts.manage_' . $project['type'] .  '_supported_projects', ['group' => $group_id])->toString();
+            $error_title = $group->label();
+          }
+          else {
+            $error_message .= 'No site-wide Local Contexts API key found. This prevented some Local Contexts data from syncing. <a href=":url">Configure the Local Contexts settings to add or update the site-wide API key</a>.';
+            $error_url = Url::fromRoute('mukurtu_local_contexts.manage_site_supported_projects')->toString();
+            $error_title = 'Site-wide Local Contexts projects';
+          }
+          $logger->error($error_message, ['@type' => $project['type'], '@title' =>  $error_title, '@id' => $group_id, ':url' => $error_url]);
+        }
+      }
+
+      // Skip over all projects within a group that don't have an API key.
+      if (!$api_key) {
+        continue;
+      }
+
+      $project = new LocalContextsProject($project_id);
+      if ($project->fetchFromHub($api_key)) {
+        $project_count++;
+      }
+    }
+  }
+  catch (\Exception $e) {
+    $logger->error('Mukurtu Local Contexts sync failed: @msg', ['@msg' => $e->getMessage()]);
+  }
+
+  $logger->info('Mukurtu Local Contexts synced @count of @total projects with Local Contexts hub.', ['@time' => date('c', $now), '@count' => $project_count, '@total' => count($projects)]);
 }

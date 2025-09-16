@@ -4,3 +4,12 @@ services:
     arguments: ['@messenger']
     tags:
       - { name: event_subscriber }
+  mukurtu_local_contexts.cron:
+    class: Drupal\mukurtu_local_contexts\Cron\MukurtuLocalContextsCron
+    arguments:
+      - '@config.factory'
+      - '@state'
+      - '@logger.channel.cron'
+      - '@entity_type.manager'
+    tags:
+      - { name: cron }

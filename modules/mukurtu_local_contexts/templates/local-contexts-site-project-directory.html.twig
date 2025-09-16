@@ -31,7 +31,7 @@ NOTICE_UUID:notice_type => [
         <h3>{{ 'TK Labels'|t }}</h3>
         {% for label in project.tk_labels %}
           <div class="tk-label">
-            <img src={{ label.svg_url }} alt="{{ label.name }}" title="{{ label.name }}">
+            <img src="{{ label.svg_url ?? label.img_url }}" alt="{{ label.name }}" title="{{ label.name }}">
             <div class="name">{{ label.name }}</div>
             <div class="text">{{ label.text }}</div>
           </div>
@@ -43,7 +43,7 @@ NOTICE_UUID:notice_type => [
         <h3>{{ 'BC Labels'|t }}</h3>
         {% for label in project.bc_labels %}
           <div class="bc-label">
-            <img src={{ label.svg_url }} alt="{{ label.name }}" title="{{ label.name }}">
+            <img src="{{ label.svg_url ?? label.img_url }}" alt="{{ label.name }}" title="{{ label.name }}">
             <div class="name">{{ label.name }}</div>
             <div class="text">{{ label.text }}</div>
           </div>
@@ -55,7 +55,7 @@ NOTICE_UUID:notice_type => [
         <h3>{{ 'Notices'|t }}</h3>
         {% for notice in project.notices %}
           <div class="notice">
-            <img src={{ notice.svg_url }} alt="{{ notice.name }}" title="{{ notice.name }}">
+            <img src="{{ notice.svg_url ?? notice.img_url }}" alt="{{ notice.name }}" title="{{ notice.name }}">
             <div class="name">{{ notice.name }}</div>
             <div class="text">{{ notice.text }}</div>
           </div>
