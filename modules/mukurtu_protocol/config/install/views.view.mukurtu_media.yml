@@ -902,7 +902,7 @@ display:
     display_options:
       display_description: ''
       display_extenders: {  }
-      path: admin/media
+      path: admin/content/media
       menu:
         type: tab
         title: Media

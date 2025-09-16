@@ -172,7 +172,7 @@ class MukurtuProtocolOgEventSubscriber extends OgEventSubscriber {
         new GroupPermission([
           'name' => 'administer comments',
           'title' => $this->t('Administer comments and comment settings'),
-          'description' => $this->t('Approve/unpublish commments and change comment settings at the protocol level.'),
+          'description' => $this->t('Approve/unpublish comments and change comment settings at the protocol level.'),
           'default roles' => [OgRoleInterface::ADMINISTRATOR],
           'restrict access' => FALSE,
         ]),

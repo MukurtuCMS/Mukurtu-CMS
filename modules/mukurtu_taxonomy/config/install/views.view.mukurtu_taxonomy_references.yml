@@ -272,7 +272,7 @@ display:
             remember_roles:
               authenticated: authenticated
               anonymous: '0'
-              mukurtu_administrator: '0'
+              mukurtu_manager: '0'
             expose_fields: false
             placeholder: ''
             searched_fields_id: search_api_fulltext_searched_fields
@@ -318,7 +318,7 @@ display:
             remember_roles:
               authenticated: authenticated
               anonymous: '0'
-              mukurtu_administrator: '0'
+              mukurtu_manager: '0'
             expose_fields: false
             placeholder: ''
             searched_fields_id: search_api_fulltext_1_searched_fields

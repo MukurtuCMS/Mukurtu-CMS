@@ -628,6 +628,9 @@ function mukurtu_protocol_query_community_access_alter(AlterableInterface $query
     // Build conditions for public communities or communities where user is a member.
     $conditions = $query->orConditionGroup();
 
+    // Join with the community field data table.
+    $query->leftJoin('community_field_data', 'cf', "{$community_table}.id = cf.id");
+
     // Condition 1: Public communities (field_access_mode = 'public').
     // Since field_access_mode is a base field, it's stored in community_field_data
     $conditions->condition("{$community_table}.field_access_mode", 'public');
