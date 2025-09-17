@@ -202,7 +202,7 @@ test('Default Content: Category', async ({ page, browserName }) => {
   // Loop through all Digital Heritage items and create each one.
   for (const category of defaultContentSpec.category) {
     // Create through the custom admin URL.
-    await page.goto('/admin/categories/manage');
+    await page.goto('/admin/structure/taxonomy/manage/category/overview');
 
     // Expand the Details element to populate a new category value.
     await page.getByRole('button', { name: 'Add a new category' }).click();
