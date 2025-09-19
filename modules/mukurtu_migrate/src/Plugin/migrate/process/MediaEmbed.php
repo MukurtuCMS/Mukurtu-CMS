@@ -102,7 +102,7 @@ class MediaEmbed extends MigrationLookup
    * Lifted from Drupal's migration lookup service (referenced in
    * MigrationLookup.php).
    *
-   * @param string $sid, i.e. "1"
+   * @param string $sid, e.g. "1"
    * @return string mediaIdArray (array_values), the corresponding v4 media id.
    */
   protected function mediaLookup($sid) {

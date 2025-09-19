@@ -99,7 +99,31 @@ process:
         markdown: full_html
         ds_code: full_html
       default_value: full_html
-  # TODO field_sample_sentence
+  field_sample_sentences:
+    -
+      plugin: sub_process
+      source: field_sample_sentence
+      process:
+        target_id:
+          -
+            plugin: migration_lookup
+            method: process
+            migration: mukurtu_cms_v3_base_sample_sentences
+            source: id
+          -
+            plugin: extract
+            index:
+              - 0
+        target_revision_id:
+          -
+            plugin: migration_lookup
+            method: process
+            migration: mukurtu_cms_v3_base_sample_sentences
+            source: id
+          -
+            plugin: extract
+            index:
+              - 1
 
 destination:
   plugin: 'entity:node'
@@ -107,6 +131,7 @@ destination:
 migration_dependencies:
   required:
     - mukurtu_cms_v3_paragraphs_dictionary_word_entry
+    - mukurtu_cms_v3_base_sample_sentences
     - mukurtu_cms_v3_communities
     - mukurtu_cms_v3_cultural_protocols
     - mukurtu_cms_v3_language_community_protocols

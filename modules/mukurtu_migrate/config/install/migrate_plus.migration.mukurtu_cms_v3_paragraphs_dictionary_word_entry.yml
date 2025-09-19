@@ -52,7 +52,31 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_word_type
     source: field_part_of_speech
-  # TODO field_sample_sentence
+  field_sample_sentence:
+    -
+      plugin: sub_process
+      source: field_sentence
+      process:
+        target_id:
+          -
+            plugin: migration_lookup
+            method: process
+            migration: mukurtu_cms_v3_additional_sample_sentences
+            source: id
+          -
+            plugin: extract
+            index:
+              - 0
+        target_revision_id:
+          -
+            plugin: migration_lookup
+            method: process
+            migration: mukurtu_cms_v3_additional_sample_sentences
+            source: id
+          -
+            plugin: extract
+            index:
+              - 1
   # TODO language: language
 
 destination:
@@ -63,5 +87,6 @@ migration_dependencies:
     - mukurtu_cms_v3_cultural_protocols
     - mukurtu_cms_v3_terms_word_type
     - mukurtu_cms_v3_media_audio
+    - mukurtu_cms_v3_additional_sample_sentences
   optional:
     - d7_field_instance

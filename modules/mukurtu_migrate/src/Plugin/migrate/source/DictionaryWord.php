@@ -83,8 +83,10 @@ class DictionaryWord extends Node
           case 'field_part_of_speech':
             $fieldQuery->addField('t', $fieldName . '_tid', 'target_id');
             break;
-          # TODO case 'field_sample_sentence':
-          # Sample sentence is a paragraph, so it is an entity reference field.
+          case 'field_sample_sentence':
+            $fieldQuery->addField('t', $fieldName . '_value', 'value');
+            $fieldQuery->addField('t', 'delta');
+            break;
           case 'field_pronunciation':
             $fieldQuery->addField('t', $fieldName . '_value', 'value');
             $fieldQuery->addField('t', $fieldName . '_format', 'format');
@@ -101,10 +103,18 @@ class DictionaryWord extends Node
           switch ($fieldName) {
               // Multivalue fields
             case 'field_dictionary_word_recording':
-            case 'field_sample_sentence':
               $sourceData = [];
               while ($resultRow = $fieldData->fetchAssoc()) {
                 $sourceData[] = $resultRow;
+              }
+              break;
+            case 'field_sample_sentence':
+              $sourceData = [];
+              while ($resultRow = $fieldData->fetchAssoc()) {
+                // Since sample sentences are migrated to paragraphs, add an id
+                // to each one so we can perform migration lookup on it.
+                $compoundId = $nid . ":" . $resultRow['delta'];
+                $sourceData[] = ['id' => $compoundId];
               }
               break;
               // Single value fields
