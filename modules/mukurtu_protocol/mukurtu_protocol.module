@@ -605,14 +605,23 @@ function mukurtu_protocol_query_community_access_alter(AlterableInterface $query
     $account = \Drupal::currentUser();
   }
 
-  // Get the community table alias from the query.
+  // Get the community_field_data table alias from the query.
   $tables = $query->getTables();
   $community_table = '';
+  $base_table = '';
   foreach ($tables as $alias => $table_info) {
-    if ($table_info['table'] === 'community_field_data' || $table_info['table'] === 'community') {
+    if ($table_info['table'] === 'community_field_data') {
       $community_table = $alias;
-      break;
     }
+    if ($table_info['table'] === 'community') {
+      $base_table = $alias;
+    }
+  }
+
+  // If the community_field_data table is not present, join from the base table.
+  if (!$community_table && $base_table) {
+    $query->leftJoin('community_field_data', 'cfd', "cfd.id = {$base_table}.id");
+    $community_table = 'cfd';
   }
 
   if ($community_table) {
@@ -624,7 +633,7 @@ function mukurtu_protocol_query_community_access_alter(AlterableInterface $query
 
     // Condition 1: Public communities (field_access_mode = 'public').
     // Since field_access_mode is a base field, it's stored in community_field_data
-    $conditions->condition("cf.field_access_mode", 'public');
+    $conditions->condition("{$community_table}.field_access_mode", 'public');
 
     // Condition 2: Private communities where user is a member.
     if ($account->isAuthenticated()) {
@@ -633,7 +642,7 @@ function mukurtu_protocol_query_community_access_alter(AlterableInterface $query
         "{$community_table}.id = ogm_community.entity_id AND ogm_community.entity_type = 'community' AND ogm_community.state = 'active'");
 
       $private_member_conditions = $query->andConditionGroup()
-        ->condition("cf.field_access_mode", 'community-only')
+        ->condition("{$community_table}.field_access_mode", 'community-only')
         ->condition("{$membership_alias}.uid", $account->id());
 
       $conditions->condition($private_member_conditions);

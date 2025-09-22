@@ -2,15 +2,13 @@
 
 namespace Drupal\mukurtu_local_contexts\Form;
 
-use Drupal\Core\Form\FormBase;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a form to manage the community level local contexts projects directory.
  */
-class ManageProjectsDirectoryCommunity extends FormBase {
-
-  protected $communityId;
+class ManageProjectsDirectoryCommunity extends ManageProjectsDirectoryBase {
 
   /**
    * {@inheritdoc}
@@ -22,43 +20,9 @@ class ManageProjectsDirectoryCommunity extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $group = NULL) {
-    // In this context, group is the id of the group (in string form).
-    $community = $group;
-    if (!$community) {
-      return $form;
-    }
-    $this->communityId = $community;
-    $element = 'community-projects-directory-' . $community;
-
-    $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_community_' . $community . '_projects_directory_description') ?? NULL;
-    $format = 'basic_html';
-    $value = '';
-
-    if ($description) {
-      if (isset($description['format']) && $description['format'] != '') {
-        $format = $description['format'];
-      }
-      if (isset($description['value']) && $description['value'] != '') {
-        $value = $description['value'];
-      }
-    }
-    $communityName = \Drupal::entityTypeManager()->getStorage('community')->load(intval($community))->getName();
-    $form['description'] = [
-      '#title' => $this->t('Description'),
-      '#description' => $this->t("Enter the description for @communityName's Local Contexts project directory page.", ['@communityName' => $communityName]),
-      '#default_value' => $value,
-      '#type' => 'text_format',
-      '#format' => $format,
-      '#allowed_formats' => [ 'basic_html', 'full_html'],
-    ];
-
-    $form[$element . '-submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Save'),
-    ];
-
-    return $form;
+  public function buildForm(array $form, FormStateInterface $form_state, ContentEntityInterface $group = NULL) {
+    $form_state->setTemporaryValue('group', $group);
+    return parent::buildForm($form, $form_state);
   }
 
   /**
@@ -72,7 +36,9 @@ class ManageProjectsDirectoryCommunity extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $description = $form_state->getValue('description');
-    $this->configFactory->getEditable('mukurtu_local_contexts.settings')->set('mukurtu_local_contexts_manage_community_' . $this->communityId . '_projects_directory_description', $description)->save();
+    $group = $form_state->getTemporaryValue('group');
+    $this->messenger()->addMessage($this->t('The Local Contexts project directory page for %group_name has been updated.', ['%group_name' => $group->getName()]));
+    $group->set('field_local_contexts_description', $form_state->getValue('description'));
+    $group->save();
   }
 }

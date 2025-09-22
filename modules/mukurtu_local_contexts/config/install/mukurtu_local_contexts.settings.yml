@@ -1,2 +1,6 @@
-api_key: ''
-cache_timeout: 86400
+site_api_key: ''
+site_projects_directory_description:
+  value: ''
+  format: null
+hub_refresh_interval: 86400
+hub_endpoint: 'https://sandbox.localcontextshub.org/api/v2/'

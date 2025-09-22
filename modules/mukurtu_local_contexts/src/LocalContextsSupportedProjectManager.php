@@ -57,17 +57,23 @@ class LocalContextsSupportedProjectManager {
   /**
    * Get all projects that have been added, regardless of scope.
    *
+   * Note that this returns the type and group ID of each project as well, and
+   * sorts items by type, group ID, and then title.
+   *
    * @return array
    *   The project information, keyed by project ID.
    */
   public function getAllProjects() {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
+    $query->fields('sp', ['type', 'group_id']);
     $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->orderBy('sp.type', 'DESC');
+    $query->orderBy('sp.group_id');
+    $query->orderBy('p.title');
 
     $result = $query->execute();
-    $projects = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
-    return $projects;
+    return $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
   }
 
   /**
@@ -133,6 +139,7 @@ class LocalContextsSupportedProjectManager {
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0)
       ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->orderBy('p.title');
 
     $result = $query->execute();
     $projects = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
@@ -163,10 +170,10 @@ class LocalContextsSupportedProjectManager {
       ->condition('sp.type', $group->getEntityTypeId())
       ->condition('sp.group_id', $group->id())
       ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->orderBy('p.title');
 
     $result = $query->execute();
-    $projects = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
-    return $projects;
+    return $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
   }
 
   /**
@@ -188,7 +195,7 @@ class LocalContextsSupportedProjectManager {
       ->fields('projects', ['project_id']);
     $result = $query->execute();
     $projects = $result->fetchAll();
-    return empty($projects) ? FALSE : TRUE;
+    return !empty($projects);
   }
 
   /**
