@@ -29,13 +29,34 @@ third_party_settings:
         - field_coverage_description
         - flag_export_content
         - comment
+        - field_sections
       label: 'Primary Fields'
       parent_name: ''
       region: content
       weight: 0
       format_type: html_element
       format_settings:
-        classes: ''
+        classes: 'item-content'
+        show_empty_fields: false
+        id: ''
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_metadata:
+      children:
+        - group_sidebar_mukurtu_fields
+        - group_rights
+      label: Metadata
+      parent_name: ''
+      region: content
+      weight: 1
+      format_type: html_element
+      format_settings:
+        classes: 'sidebar-section'
         show_empty_fields: false
         id: ''
         label_as_html: false
@@ -46,21 +67,42 @@ third_party_settings:
         attributes: ''
         effect: none
         speed: fast
-    group_metadata:
+    group_sidebar_mukurtu_fields:
       children:
         - field_communities
+        - field_cultural_protocols
         - field_keywords
         - field_date_born
         - field_date_died
-        - field_local_contexts_projects
-        - field_local_contexts_labels_and_notices
-      label: Metadata
-      parent_name: ''
+        - field_related_people
+      label: 'Sidebar - Mukurtu fields'
+      parent_name: group_metadata
       region: content
-      weight: 1
+      weight: 37
       format_type: html_element
       format_settings:
-        classes: ''
+        classes: 'sidebar-section'
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_rights:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: 'Rights'
+      parent_name: group_metadata
+      region: content
+      weight: 2
+      format_type: html_element
+      format_settings:
+        classes: sidebar-section
         show_empty_fields: false
         id: ''
         label_as_html: false
@@ -83,7 +125,7 @@ content:
       view_mode: default
       pager_id: 0
     third_party_settings: {  }
-    weight: 7
+    weight: 50
     region: content
   field_all_related_content:
     type: entity_reference_entity_view
@@ -91,6 +133,15 @@ content:
     settings:
       view_mode: teaser
       link: false
+    third_party_settings: {  }
+    weight: 40
+    region: content
+  field_related_people:
+    type: entity_reference_label
+    label: above
+    settings:
+      view_mode: list
+      link: true
     third_party_settings: {  }
     weight: 2
     region: content
@@ -101,6 +152,14 @@ content:
       link: true
     third_party_settings: {  }
     weight: 7
+    region: content
+  field_cultural_protocols:
+    type: cultural_protocol_formatter
+    label: above
+    settings: 
+      link: true
+    third_party_settings: {  }
+    weight: 8
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -249,6 +308,14 @@ content:
     third_party_settings: {  }
     weight: 4
     region: content
+  field_sections:
+    type: paragraph
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 4
+    region: content
   field_media_assets:
     type: entity_reference_entity_view
     label: hidden
@@ -267,16 +334,12 @@ hidden:
   draft: true
   field_citation: true
   field_content_type: true
-  field_cultural_protocols: true
   field_deceased: true
   field_in_collection: true
   field_multipage_page_of: true
   field_protocol_control: true
   field_related_content: true
-  field_related_people: true
   field_representative_media: true
-  field_representative_terms: true
-  field_sections: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true
