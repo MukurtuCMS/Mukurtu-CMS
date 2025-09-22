@@ -189,7 +189,7 @@ test('Default Content: Community', async ({ page, browserName }) => {
         .getByRole('group', { name: 'Cultural Protocol Type' })
         .getByRole('radio', { name: protocol.field_access_mode })
         .check();
-      await submitEntityForm(page, 'Save and Create Another Protocol');
+      await submitEntityForm(page, 'Save and create another protocol');
       await expect(page.locator('.messages--status')).toContainText(`Created ${protocol.name}.`);
     }
   }
