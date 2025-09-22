@@ -254,7 +254,7 @@ function mukurtu_install() {
   // Create Browse Digital Heritage menu item.
   MenuLinkContent::create([
     'title' => 'Browse Digital Heritage',
-    'link' => ['uri' => 'internal:' . '/digital-heritiage'],
+    'link' => ['uri' => 'internal:' . '/digital-heritage'],
     'menu_name' => 'main',
     'description' => 'Browse Digital Heritage Content',
     'expanded' => FALSE,
