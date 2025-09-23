@@ -47,15 +47,19 @@ class ProjectDirectoryController extends ControllerBase {
     $endpointUrl = $this->configFactory->get(LocalContextsHubBase::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsHubBase::DEFAULT_HUB_URL;
     $endpointParts = parse_url($endpointUrl);
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
+    $config = $this->config('mukurtu_local_contexts.settings');
 
     $projects = $this->localContextsProjectManager->getSiteSupportedProjects(TRUE);
     if ($projects) {
-      $description = $this->config('mukurtu_local_contexts.settings')->get('mukurtu_local_contexts_manage_site_projects_directory_description');
-      // Exception throws if translated string is null, so check for this.
-      $description = ($description == NULL ? '' : $this->t($description));
+      $site_description = $config->get('site_projects_directory_description');
+      $description = [
+        '#type' => 'processed_text',
+        '#text' => $site_description['value'] ?? '',
+        '#format' => $site_description['format'] ?? 'basic_html',
+      ];
     }
     else {
-      $description = $this->t("There are currently no sitewide Local Contexts projects.");
+      $description = '<p>' . $this->t("There are currently no sitewide Local Contexts projects.") . '</p>';
     }
     foreach ($projects as &$projectInfo) {
       $project = new LocalContextsProject($projectInfo['id']);
@@ -71,6 +75,7 @@ class ProjectDirectoryController extends ControllerBase {
       '#description'=> $description,
       '#cache' => [
         'max-age' => 0,
+        'tags' => ['config:mukurtu_local_contexts.settings'],
       ],
     ];
   }
@@ -108,7 +113,7 @@ class ProjectDirectoryController extends ControllerBase {
       ];
     }
     else {
-      $description = $this->t("There are currently no Local Contexts projects for this community.");
+      $description = '<p>' . $this->t("There are currently no Local Contexts projects for this community.") . '</p>';
     }
     foreach ($projects as &$projectInfo) {
       $project = new LocalContextsProject($projectInfo['id']);
@@ -148,7 +153,7 @@ class ProjectDirectoryController extends ControllerBase {
       ];
     }
     else {
-      $description = $this->t("There are currently no Local Contexts projects for this cultural protocol.");
+      $description = '<p>' . $this->t("There are currently no Local Contexts projects for this cultural protocol.") . '</p>';
     }
     foreach ($projects as &$projectInfo) {
       $project = new LocalContextsProject($projectInfo['id']);
