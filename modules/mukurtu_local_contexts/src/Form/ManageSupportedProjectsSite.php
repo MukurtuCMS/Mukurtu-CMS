@@ -3,12 +3,11 @@
 namespace Drupal\mukurtu_local_contexts\Form;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 
 /**
- * Provides a Local Contexts form.
+ * Provides a Local Contexts form for adding/removing projects to the site.
  */
 class ManageSupportedProjectsSite extends ManageSupportedProjectsBase {
 
@@ -16,54 +15,42 @@ class ManageSupportedProjectsSite extends ManageSupportedProjectsBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'mukurtu_local_contexts_manage_site_supported_projects';
+    return 'mukurtu_local_contexts_manage_site_projects';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state,) {
-    $supportedProjectManager = new LocalContextsSupportedProjectManager();
-    $projects = $supportedProjectManager->getSiteSupportedProjects();
-
-    // Set the properties needed for the base form to function.
-    $form_state->set('projects', $projects);
-
+  public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
-
-    // Group-form specific changes.
-    $add_url = Url::fromRoute('mukurtu_local_contexts.add_site_supported_project');
-    $form['projects']['#caption'] = $projects ? $this->t('The following Local Contexts Projects are available to all users. To delete an unused project, check the box next to it and click the "Remove Selected Projects" button.') : NULL;
-    $form['projects']['#empty'] = $this->t('No Local Contexts projects have been added yet. <a href=":url">Add a project</a>.', [
-      ':url' => $add_url->toString(),
-    ]);
-
+    $form['projects']['#caption'] = $this->t('Select the Local Contexts projects you would like to add to the site. Existing projects can be selected to update their content.');
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    // No operation needed.
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $projects = $form_state->getValue('projects');
+    $selected_projects = $form_state->getValue('projects');
+    $api_key = $form_state->getValue('api_key');
+
     $supportedProjectManager = new LocalContextsSupportedProjectManager();
-    $projects = array_filter($projects);
-    foreach ($projects as $id) {
-      if ($projectToRemove = new LocalContextsProject($id)) {
-        if (!$projectToRemove->inUse()) {
-          $title = $projectToRemove->getTitle();
-          $supportedProjectManager->removeSiteProject($id);
-          $this->messenger()->addStatus($this->t('Removed project %project.', ['%project' => $title]));
-        }
-      }
+    $project_count = 0;
+    $last_project_title = '';
+    $selected_projects = array_filter($selected_projects);
+    foreach ($selected_projects as $id) {
+      $project = new LocalContextsProject($id);
+      $project->fetchFromHub($api_key);
+      $supportedProjectManager->addSiteProject($id);
+      $project_count++;
+      $last_project_title = $project->getTitle();
     }
+
+    $message = $this->formatPlural($project_count, 'The project @title has been added.', '@count projects have been added.', [
+      '@title' => $last_project_title,
+    ]);
+    $this->messenger()->addStatus($message);
+    $form_state->setRedirect('mukurtu_local_contexts.manage_site_supported_projects');
   }
 
 }
