@@ -16,6 +16,11 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
    * {@inheritdoc}
    */
   public static function run($initial_ids, $config, &$context) {
+    // Turn off transliteration to preserve diacritics in urls.
+    \Drupal::service('config.factory')
+      ->getEditable('pathauto.settings')
+      ->set('transliterate', 0)
+      ->save();
     /**
      * We've basically copied MigrateUpgradeImportBatch::run completely here.
      * We need some Mukurtu specific logging that we couldn't easily inject
@@ -216,6 +221,11 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
         ->formatPlural($failures, '1 migration failed', '@count migrations failed'));
       \Drupal::messenger()->addError(t('Migration process not completed'));
     }
+    // Turn transliteration setting back on.
+    \Drupal::service('config.factory')
+      ->getEditable('pathauto.settings')
+      ->set('transliterate', 1)
+      ->save();
   }
 
 }
