@@ -11,6 +11,7 @@ class LocalContextsNotice extends LocalContextsHubBase
   protected $type;
   protected $display;
   public $name;
+  public $img_url;
   public $svg_url;
   public $default_text;
   public $translations;
@@ -32,6 +33,7 @@ class LocalContextsNotice extends LocalContextsHubBase
 
     $notice = $result->fetchAssoc();
     $this->name = $notice['name'] ?? '';
+    $this->img_url = $notice['img_url'] ?? NULL;
     $this->svg_url = $notice['svg_url'] ?? NULL;
     $this->default_text = $notice['default_text'] ?? '';
 

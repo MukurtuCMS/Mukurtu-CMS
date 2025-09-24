@@ -29,16 +29,17 @@
  * @see template_preprocess_media()
  */
 #}
-{% 
+{%
   set classes = [
     'media',
     'media--' ~ bundle
-  ] 
+  ]
 %}
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  {{ content.thumbnail }}
 
-  <a href="{{ content.field_media_document.0 }}" class="button">Access document</a>
+  <object alt="Document {{ name }}" data="{{ media_url }}" style="width: 840px; height: 500px; display: block;"></object>
+  <a href="{{ media_url }}" class="button" download>Download document</a>
+
 </div>

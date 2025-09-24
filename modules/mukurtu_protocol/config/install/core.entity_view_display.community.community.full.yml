@@ -1,10 +1,10 @@
+uuid: b770e8a6-183e-4772-85b1-93d6b6eaa507
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.community.full
   module:
-    - colorbox
     - field_group
     - layout_builder
     - mukurtu_protocol
@@ -60,6 +60,8 @@ third_party_settings:
         attributes: ''
         effect: none
         speed: fast
+_core:
+  default_config_hash: SmV8jSo6Q2eMIG2g6FJeDLo1P-ZPOwJMN4RPBo0ja8k
 id: community.community.full
 targetEntityType: community
 bundle: community
@@ -123,13 +125,10 @@ content:
     weight: 5
     region: content
   field_parent_community:
-    type: colorbox_view_modes
+    type: entity_reference_label
     label: above
     settings:
-      colorbox_view_mode: ''
-      colorbox_modal_view_mode: ''
-      colorbox_gallery: post
-      colorbox_gallery_custom: ''
+      link: true
     third_party_settings: {  }
     weight: 7
     region: content
@@ -162,3 +161,4 @@ hidden:
   langcode: true
   search_api_excerpt: true
   user_id: true
+

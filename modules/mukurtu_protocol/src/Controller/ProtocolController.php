@@ -118,13 +118,23 @@ class ProtocolController extends ControllerBase implements ContainerInjectionInt
         // Use revision link to link to revisions that are not active.
         $date = $this->dateFormatter->format($revision->getRevisionCreationTime(), 'short');
         if ($vid != $protocol->getRevisionId()) {
-          $link = $this->l($date, new Url('entity.protocol.revision', [
+          $url = Url::fromRoute('entity.protocol.revision', [
             'protocol' => $protocol->id(),
             'protocol_revision' => $vid,
-          ]));
+          ]);
+          $link = $this->t("<a href='@url'>@date</a>", [
+            '@url' => $url->toString(),
+            '@date' => $date,
+          ]);
         }
         else {
-          $link = $protocol->link($date);
+          $url = Url::fromRoute('entity.protocol.canonical', [
+            'protocol' => $protocol->id()
+          ]);
+          $link = $this->t("<a href='@url'>@date</a>", [
+            '@url' => $url->toString(),
+            '@date' => $date,
+          ]);
         }
 
         $row = [];

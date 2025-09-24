@@ -13,19 +13,19 @@ targetEntityType: media
 bundle: soundcloud
 mode: default
 content:
-  field_media_soundcloud:
-    type: string_textfield
-    weight: 0
+  created:
+    type: datetime_timestamp
+    weight: 8
     region: content
-    settings:
-      size: 60
-      placeholder: ''
+    settings: {  }
     third_party_settings: {  }
-  name:
-    type: string_textfield
-    weight: 1
+  field_contributor:
+    type: entity_reference_autocomplete
+    weight: 7
     region: content
     settings:
+      match_operator: CONTAINS
+      match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
@@ -35,14 +35,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_thumbnail:
-    type: image_image
-    weight: 3
-    region: content
-    settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
-    third_party_settings: {  }
   field_identifier:
     type: string_textfield
     weight: 4
@@ -51,13 +43,11 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_people:
-    type: entity_reference_autocomplete
-    weight: 5
+  field_media_soundcloud:
+    type: string_textfield
+    weight: 0
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
@@ -71,9 +61,9 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_contributor:
+  field_people:
     type: entity_reference_autocomplete
-    weight: 7
+    weight: 5
     region: content
     settings:
       match_operator: CONTAINS
@@ -81,11 +71,13 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  created:
-    type: datetime_timestamp
-    weight: 8
+  field_thumbnail:
+    type: image_image
+    weight: 3
     region: content
-    settings: {  }
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
     third_party_settings: {  }
   langcode:
     type: language_select
@@ -93,6 +85,14 @@ content:
     region: content
     settings:
       include_locked: true
+    third_party_settings: {  }
+  name:
+    type: string_textfield
+    weight: 1
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   path:
     type: path

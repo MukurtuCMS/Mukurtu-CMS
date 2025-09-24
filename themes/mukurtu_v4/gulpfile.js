@@ -9,6 +9,7 @@ const gulpSass = require("gulp-sass");
 const { ESLint } = require("eslint");
 const imagemin = require("gulp-imagemin");
 const pngquant = require("imagemin-pngquant");
+const fs = require("fs");
 
 const sassCompiler = gulpSass(dartSass);
 
@@ -89,6 +90,31 @@ function minifyImages() {
     .pipe(dest("./images"));
 }
 
+function copyLibraries() {
+  // Ensure libraries directory exists.
+  const librariesDir = "./libraries";
+  if (!fs.existsSync(librariesDir)) {
+    fs.mkdirSync(librariesDir, { recursive: true });
+  }
+
+  // Copy GLightbox files.
+  const result1 = src([
+    "./node_modules/glightbox/dist/css/glightbox.min.css",
+    "./node_modules/glightbox/dist/js/glightbox.min.js"
+  ])
+  .pipe(dest("./libraries/glightbox"));
+
+  // Copy Splide files.
+  const result2 = src([
+    "./node_modules/@splidejs/splide/dist/css/splide.min.css",
+    "./node_modules/@splidejs/splide/dist/js/splide.min.js"
+  ])
+  .pipe(dest("./libraries/splide"));
+
+  // Return any non-zero exit codes.
+  return result1 || result2 || 0;
+}
+
 function watchFiles() {
   watch("./components/**/*.scss", function watchScss(cb) {
     series(lintStyles, buildStyles)((err) => {
@@ -113,7 +139,8 @@ exports.imagemin = minifyImages;
 exports.eslint = lintScripts;
 exports.stylelint = lintStyles;
 exports.buildSass = buildStyles;
+exports.copyLibraries = copyLibraries;
 exports.sass = series(lintStyles, buildStyles);
 exports.watch = watchFiles;
 
-exports.default = parallel(minifyImages, lintScripts, series(lintStyles, buildStyles));
+exports.default = parallel(minifyImages, lintScripts, series(lintStyles, buildStyles), copyLibraries);

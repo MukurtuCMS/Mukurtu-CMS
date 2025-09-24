@@ -550,6 +550,29 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
   /**
    * {@inheritdoc}
    */
+  public function hasCommunityManager()
+  {
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $memberships = [];
+    $memberships = $membership_manager->getGroupMembershipsByRoleNames($this, ['community_manager']);
+    return !empty($memberships);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isCommunityManager($uid) {
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $membership = $membership_manager->getMembership($this, $uid);
+    if ($membership && $membership->hasRole('community-community-community_manager')) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -796,6 +819,31 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', FALSE)
       ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_local_contexts_api_key'] = BaseFieldDefinition::create('string')
+      ->setName('field_local_contexts_api_key')
+      ->setLabel(t('Local Contexts API key'))
+      ->setRequired(FALSE)
+      ->setTranslatable(FALSE)
+      ->setSettings([
+        'max_length' => 255,
+        'is_ascii' => TRUE,
+        'case_sensitive' => FALSE,
+      ])
+      ->setDefaultValue('')
+      // Keep this field out of Form/Display UIs entirely.
+      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('view', FALSE);
+
+    $fields['field_local_contexts_description'] = BaseFieldDefinition::create('text_long')
+      ->setName('field_local_contexts_description')
+      ->setLabel(t('Local Contexts Description'))
+      ->setRequired(FALSE)
+      ->setTranslatable(FALSE)
+      ->setDefaultValue([])
+      // Keep this field out of Form/Display UIs entirely.
+      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('view', FALSE);
 
     return $fields;
   }

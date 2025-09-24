@@ -171,7 +171,7 @@ test('Default Content: Community', async ({ page, browserName }) => {
       .getByRole('group', { name: 'Community page visibility' })
       .getByRole('radio', { name: community.field_access_mode })
       .check();
-    await page.getByRole('button', { name: 'Create Community' }).click();
+    await submitEntityForm(page, 'Create Community');
 
     // After creating the community, ensure we are redirected to create a
     // protocol associated with this community.
@@ -189,7 +189,7 @@ test('Default Content: Community', async ({ page, browserName }) => {
         .getByRole('group', { name: 'Cultural Protocol Type' })
         .getByRole('radio', { name: protocol.field_access_mode })
         .check();
-      await page.getByRole('button', { name: 'Save and Create Another Protocol' }).click();
+      await submitEntityForm(page, 'Save and create another protocol');
       await expect(page.locator('.messages--status')).toContainText(`Created ${protocol.name}.`);
     }
   }
@@ -214,11 +214,7 @@ test('Default Content: Category', async ({ page, browserName }) => {
     await summary.fill(category.description__value);
     await page.getByLabel('Text format').selectOption(category.description__format);
 
-    await page
-      // There are two Save buttons on this page, make sure to get just the
-      // edit term form and not the term order form.
-      .locator('[data-drupal-selector="taxonomy-term-category-form"]')
-      .getByRole('button', { name: 'Save', exact: true }).click();
+    await submitEntityForm(page);
   }
 });
 
@@ -311,7 +307,7 @@ test('Default Content: Language', async ({ page, browserName }) => {
   for (const language of defaultContentSpec.language) {
     await page.goto('/admin/structure/taxonomy/manage/language/add');
     await page.getByRole('textbox', { name: 'Name' }).fill(language.name);
-    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await submitEntityForm(page);
   }
 });
 

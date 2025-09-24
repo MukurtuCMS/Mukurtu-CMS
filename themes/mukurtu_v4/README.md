@@ -31,6 +31,15 @@ Once this is complete, you should be able to run the following two commands:
 
 _Note: if `gulp-watch` isn't tracking your changes, you may need to run `gulp-sass` once before running your `gulp-watch` command._
 
+## Bundled Librararies
+
+A few libraries are bundled with the theme. These are:
+
+- [GLightbox](https://github.com/biati-digital/glightbox): For lightbox functionality.
+- [splide](https://github.com/Splidejs/splide): For carousel functionality.
+
+The library files are bundled in the repository in `themes/mukurtu_v4/libraries`. These files are copied on every `gulp` run, but they can also be refreshed manually using `gulp copyLibraries` to copy the library files from node_modules to the libraries folder.
+
 ## Configuration
 
 Theme-specific configuration - such as display modes for content types or custom

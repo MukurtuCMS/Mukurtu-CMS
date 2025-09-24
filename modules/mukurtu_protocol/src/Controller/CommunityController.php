@@ -118,13 +118,23 @@ class CommunityController extends ControllerBase implements ContainerInjectionIn
         // Use revision link to link to revisions that are not active.
         $date = $this->dateFormatter->format($revision->getRevisionCreationTime(), 'short');
         if ($vid != $community->getRevisionId()) {
-          $link = $this->l($date, new Url('entity.community.revision', [
+          $url = Url::fromRoute('entity.community.revision', [
             'community' => $community->id(),
             'community_revision' => $vid,
-          ]));
+          ]);
+          $link = $this->t("<a href='@url'>@date</a>", [
+            '@url' => $url->toString(),
+            '@date' => $date,
+          ]);
         }
         else {
-          $link = $community->link($date);
+          $url = Url::fromRoute('entity.community.canonical', [
+            'community' => $community->id()
+          ]);
+          $link = $this->t("<a href='@url'>@date</a>", [
+            '@url' => $url->toString(),
+            '@date' => $date,
+          ]);
         }
 
         $row = [];
