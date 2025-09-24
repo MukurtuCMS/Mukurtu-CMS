@@ -292,6 +292,6 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
  */
 function mukurtu_media_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
   if ($entity_type->id() == 'media') {
-    $fields['name']->setDescription('Most media names will auto-fill from the filename or external source. This field is not usually shown to end users. While the media name change be changes, we generally recommend using the auto-filled names so that they match your other records and systems.');
+    $fields['name']->setDescription('Most media names will auto-fill from the filename or external source. This field is not usually shown to end users. While the media name can be changed, we generally recommend using the auto-filled names so that they match your other records and systems.');
   }
 }
