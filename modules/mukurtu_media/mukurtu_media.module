@@ -281,3 +281,17 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
   }
   return $element;
 }
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ *
+ * @param \Drupal\Core\Field\BaseFieldDefinition[] $fields
+ *   The base field definitions.
+ * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+ *   The entity type.
+ */
+function mukurtu_media_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  if ($entity_type->id() == 'media') {
+    $fields['name']->setDescription('Most media names will auto-fill from the filename or external source. This field is not usually shown to end users. While the media name change be changes, we generally recommend using the auto-filled names so that they match your other records and systems.');
+  }
+}
