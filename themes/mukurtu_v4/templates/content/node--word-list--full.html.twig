@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to display a digital heritage node.
+ * Theme override to display a node.
  *
  * Available variables:
  * - node: The node entity with limited access to object properties and methods.
@@ -67,70 +67,67 @@
  *
  */
 #}
-
-{# If there's more than 1 media asset, render code for carousels. #}
-{% if content.group_primary_fields.field_media_assets['#items']|length > 1 %}
-  {% set carousels = true %}
-{# If there's exactly one media asset, render the field without carousel code. #}
-{% elseif content.group_primary_fields.field_media_assets['#items']|length == 1 %}
-  {% set carousels = false %}
-{% else %}
-{# If there are no media assets, don't render the field at all. #}
-  {% set carousels = null %}
-{% endif %}
-
 <article{{ attributes }}>
-  <div{{ content_attributes }} class="full-node">
-    {{ title_prefix }}
-    {{ title_suffix }}
 
+  <div{{ content_attributes }} class="full-node word-list">
+
+    <div class="word-list__header">
+      <div class="word-list__header__image">
+        {{ content.field_word_list_image }}
+      </div>
+
+      <div class="word-list__header__text">
+        {{ title_prefix }}
+        {{ title_suffix }}
+
+        {% if label %}
+          <h2{{ title_attributes }}>
+          {{ label }}
+          </h2>
+        {% endif %}
+
+        {{ content.field_summary }}
+      </div>
+    </div> {# /header #}
+
+
+    {# Main content + sidebar. #}
     <div class="full-node__grid">
+      {# Full width collection description. #}
+      {{ content.field_description }}
+
+      {# Main content -- collection items grid. #}
       <div class="full-node__main">
+        {{ content.field_coverage }}
+        {{ content.field_coverage_description }}
+
         <div class="full-node__content">
-
-          {% if carousels %}
-            <div class="media-carousels" data-id="{{ node.id }}">
-              <section class="splide media-carousel" aria-label="Media Assets Carousel">
-                {{ content.group_primary_fields.field_media_assets }}
-              </section>
-
-              <section class="splide thumbnail-carousel" aria-label="Thumbnail Carousel">
-                {{ thumbnail_display }}
-              </section>
-            </div>
-
-          {% elseif carousels == false  %}
-            {{ content.group_primary_fields.field_media_assets }}
-          {% endif %}
-
-          {{ content.group_primary_fields|without('field_all_related_content', 'field_media_assets', 'field_citation', 'comment') }}
-        </div>
-
-        <div class="full-node__related-content">
-          {{ content.group_primary_fields.field_all_related_content }}
-        </div>
-
-        <div class="full-node__citation">
-          {{ content.group_primary_fields.field_citation }}
+          {{ content.field_items_in_collection }}
         </div>
 
         <div class="full-node__content">
           {{ content.comment }}
         </div>
-
+        
       </div>
 
-      {% if content.group_metadata is not empty %}
-        <div class="full-node__list">
+      {# Sidebar. #}
+      <div class="full-node__list">
+        {# As more content is made available to the sidebar, add it below. #}
+        {% if content.field_communities is not empty %}
           <aside class="full-node__sidebar">
-            {{ content.group_metadata.group_sidebar_mukurtu_fields }}
-            {{ content.group_metadata.group_additional_metadata }}
-            {{ content.group_metadata.group_rights }}
+            <div class="sidebar-section">
+            {{ content.field_communities }}
+            </div>
           </aside>
+        {% endif %}
+
+        <div class="full-node__related-content">
+          {{ content.field_all_related_content }}
         </div>
-      {% endif %}
+      </div>
 
-    </div> {# __grid #}
+    </div>
 
-  </div>
+  </div> {# /full-node. #}
 </article>
