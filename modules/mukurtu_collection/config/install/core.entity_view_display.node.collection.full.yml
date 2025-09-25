@@ -216,6 +216,11 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  flag_export_content:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
 hidden:
   draft: true
   field_child_collections: true
