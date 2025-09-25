@@ -54,6 +54,7 @@ third_party_settings:
         - field_date_born
         - field_date_died
         - field_related_people
+        - field_representative_terms
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
         - flag_export_content
@@ -290,6 +291,15 @@ content:
       link: true
     third_party_settings: {  }
     weight: 12
+    region: content
+  field_representative_terms:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: true
+    third_party_settings: {  }
+    weight: 13
     region: content
 hidden:
   draft: true
