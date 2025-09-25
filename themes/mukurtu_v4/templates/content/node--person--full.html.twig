@@ -103,11 +103,8 @@
             {{ content.group_primary_fields.field_media_assets }}
           {% endif %}
 
-          {{ content.group_primary_fields|without('field_media_assets', 'comment', 'sections') }}
+          {{ content.group_primary_fields|without('field_media_assets', 'comment') }}
           
-          {% if content.group_primary_fields.sections is not empty %}
-            {{ content.group_primary_fields.sections }}
-          {% endif %}
         </div>
 
         <div class="full-node__related-content">
