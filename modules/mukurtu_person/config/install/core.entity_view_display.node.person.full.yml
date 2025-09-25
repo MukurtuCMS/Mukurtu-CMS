@@ -27,7 +27,6 @@ third_party_settings:
         - field_coverage
         - field_location
         - field_coverage_description
-        - flag_export_content
         - field_sections
         - comment
       label: 'Primary Fields'
@@ -56,6 +55,7 @@ third_party_settings:
         - field_date_died
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
+        - flag_export_content
       label: Metadata
       parent_name: ''
       region: content
@@ -85,7 +85,7 @@ content:
       view_mode: default
       pager_id: 0
     third_party_settings: {  }
-    weight: 7
+    weight: 100
     region: content
   field_all_related_content:
     type: entity_reference_entity_view
@@ -94,7 +94,7 @@ content:
       view_mode: teaser
       link: false
     third_party_settings: {  }
-    weight: 2
+    weight: 90
     region: content
   field_communities:
     type: entity_reference_label
@@ -205,7 +205,7 @@ content:
       map_lazy_load:
         lazy_load: false
     third_party_settings: {  }
-    weight: 3
+    weight: 80
     region: content
   field_coverage_description:
     type: text_default
@@ -270,7 +270,7 @@ content:
   flag_export_content:
     settings: {  }
     third_party_settings: {  }
-    weight: 6
+    weight: 10
     region: content
   field_sections:
     type: entity_reference_revisions_entity_view
@@ -279,7 +279,7 @@ content:
       view_mode: default
       link: ''
     third_party_settings: {  }
-    weight: 42
+    weight: 10
     region: content
 hidden:
   draft: true
