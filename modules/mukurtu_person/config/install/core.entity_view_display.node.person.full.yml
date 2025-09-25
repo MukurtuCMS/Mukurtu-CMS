@@ -27,7 +27,7 @@ third_party_settings:
         - field_coverage
         - field_location
         - field_coverage_description
-        - flag_export_content
+        - field_sections
         - comment
       label: 'Primary Fields'
       parent_name: ''
@@ -49,11 +49,15 @@ third_party_settings:
     group_metadata:
       children:
         - field_communities
+        - field_cultural_protocols
         - field_keywords
         - field_date_born
         - field_date_died
+        - field_related_people
+        - field_representative_terms
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
+        - flag_export_content
       label: Metadata
       parent_name: ''
       region: content
@@ -83,7 +87,7 @@ content:
       view_mode: default
       pager_id: 0
     third_party_settings: {  }
-    weight: 7
+    weight: 100
     region: content
   field_all_related_content:
     type: entity_reference_entity_view
@@ -92,7 +96,7 @@ content:
       view_mode: teaser
       link: false
     third_party_settings: {  }
-    weight: 2
+    weight: 90
     region: content
   field_communities:
     type: entity_reference_label
@@ -101,6 +105,13 @@ content:
       link: true
     third_party_settings: {  }
     weight: 7
+    region: content
+  field_cultural_protocols:
+    type: cultural_protocol_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 8
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -196,14 +207,14 @@ content:
       map_lazy_load:
         lazy_load: false
     third_party_settings: {  }
-    weight: 3
+    weight: 80
     region: content
   field_coverage_description:
     type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 5
+    weight: 81
     region: content
   field_date_born:
     type: month_day_year_original_date_formatter
@@ -232,14 +243,14 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 12
+    weight: 16
     region: content
   field_local_contexts_projects:
     type: local_contexts_project
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 11
+    weight: 15
     region: content
   field_location:
     type: entity_reference_label
@@ -247,7 +258,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 4
+    weight: 82
     region: content
   field_media_assets:
     type: entity_reference_entity_view
@@ -261,7 +272,34 @@ content:
   flag_export_content:
     settings: {  }
     third_party_settings: {  }
-    weight: 6
+    weight: 20
+    region: content
+  field_sections:
+    type: entity_reference_revisions_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  field_related_people:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: true
+    third_party_settings: {  }
+    weight: 12
+    region: content
+  field_representative_terms:
+    type: entity_reference_label
+    label: above
+    settings:
+      view_mode: default
+      link: true
+    third_party_settings: {  }
+    weight: 13
     region: content
 hidden:
   draft: true
