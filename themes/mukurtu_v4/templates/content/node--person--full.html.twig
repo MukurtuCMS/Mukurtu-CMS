@@ -103,19 +103,7 @@
             {{ content.group_primary_fields.field_media_assets }}
           {% endif %}
 
-          {{ content.group_primary_fields|without('field_all_related_content', 'field_media_assets', 'field_citation', 'comment') }}
-        </div>
-
-        <div class="full-node__related-content">
-          {{ content.group_primary_fields.field_all_related_content }}
-        </div>
-
-        <div class="full-node__citation">
-          {{ content.group_primary_fields.field_citation }}
-        </div>
-
-        <div class="full-node__comment">
-         {{ content.group_primary_fields.comment }}        
+          {{ content.group_primary_fields }}
         </div>
 
       </div>

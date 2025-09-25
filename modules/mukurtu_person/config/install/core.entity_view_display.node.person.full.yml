@@ -49,6 +49,7 @@ third_party_settings:
     group_metadata:
       children:
         - field_communities
+        - field_cultural_protocols
         - field_keywords
         - field_date_born
         - field_date_died
@@ -101,6 +102,13 @@ content:
       link: true
     third_party_settings: {  }
     weight: 7
+    region: content
+  field_cultural_protocols:
+    type: cultural_protocol_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 8
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
