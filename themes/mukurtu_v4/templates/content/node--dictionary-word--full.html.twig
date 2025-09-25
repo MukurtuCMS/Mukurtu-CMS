@@ -114,6 +114,7 @@
           {% endif %}
 
         </div>
+
 {#
         <div class="full-node__related-content">
           {{ content.group_primary_fields.field_all_related_content }}
@@ -122,6 +123,11 @@
         <div class="full-node__citation">
           {{ content.group_primary_fields.field_citation }}
         </div> #}
+
+        <div class="full-node__content">
+          {{ content.group_primary_fields.comment }}
+        </div>
+
       </div>
 
       {% if content.group_metadata is not empty %}
@@ -135,7 +141,7 @@
       {% endif %}
 
     </div> {# __grid #}
-    {{ content.comment }}
+
   </div>
 </article>
 
