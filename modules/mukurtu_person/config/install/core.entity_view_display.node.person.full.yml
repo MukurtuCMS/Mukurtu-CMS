@@ -214,7 +214,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 5
+    weight: 81
     region: content
   field_date_born:
     type: month_day_year_original_date_formatter
@@ -258,7 +258,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 4
+    weight: 82
     region: content
   field_media_assets:
     type: entity_reference_entity_view
@@ -293,7 +293,7 @@ content:
     weight: 12
     region: content
   field_representative_terms:
-    type: entity_reference_entity_view
+    type: entity_reference_label
     label: above
     settings:
       view_mode: default
