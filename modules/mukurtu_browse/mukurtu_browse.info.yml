@@ -1,7 +1,7 @@
 name: 'Mukurtu Browse'
 type: module
 description: 'Provides the default Mukurtu browse page.'
-core_version_requirement: '^9.4 || ^10'
+core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 libraries:
   - mukurtu_browse/mukurtu-leaflet-preview
