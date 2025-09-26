@@ -113,14 +113,20 @@
 
       </div>
 
-      {% if content.group_metadata is not empty %}
-        <div class="full-node__list">
+      <div class="full-node__list">
+        {% if content.group_metadata is not empty %}
           <aside class="full-node__sidebar">
-            {{ content.group_metadata }}
+            <div class="sidebar-section">
+              {{ content.group_metadata }}
+            </div>
           </aside>
-        </div>
-      {% endif %}
+        {% endif %}
 
+        <div class="full-node__flag-export-content">
+          {{ content.flag_export_content}}
+        </div>
+        
+      </div>
     </div> {# __grid #}
 
   </div>
