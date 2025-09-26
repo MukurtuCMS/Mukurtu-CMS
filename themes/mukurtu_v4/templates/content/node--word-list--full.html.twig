@@ -93,20 +93,17 @@
 
     {# Main content + sidebar. #}
     <div class="full-node__grid">
-      {# Full width collection description. #}
-      {{ content.field_description }}
-
-      {# Main content -- collection items grid. #}
       <div class="full-node__main">
-        {{ content.field_words }}
-        {{ content.field_coverage }}
-        {{ content.field_coverage_description }}
-      </div>
+        {{ content.field_description }}
 
-      <div class="full-node__content">
-        {{ content.comment }}
+        <div class="full-node__content">
+          {{ content.field_words }}
+          {{ content.field_coverage }}
+          {{ content.field_coverage_description }}
+          {{ content.comment }}
+        </div>
+        
       </div>
-
       {# Sidebar. #}
       <div class="full-node__list">
         {# As more content is made available to the sidebar, add it below. #} 
@@ -127,8 +124,6 @@
         </div>
 
       </div>
-
     </div>
-
   </div> {# /full-node. #}
 </article>
