@@ -1,4 +1,4 @@
-langcode: en 
+langcode: en
 status: true
 dependencies:
   config:
@@ -131,7 +131,7 @@ third_party_settings:
         - field_coverage
         - field_coverage_description
         - field_location
-      label: 'Locations'
+      label: Locations
       region: content
       parent_name: group_additional_fields
       weight: 24
@@ -142,7 +142,7 @@ third_party_settings:
         id: ''
         formatter: open
         description: ''
-        required_fields: true      
+        required_fields: true
 id: node.dictionary_word.default
 targetEntityType: node
 bundle: dictionary_word
@@ -351,7 +351,7 @@ content:
     weight: -1
     region: content
     settings:
-      media_types: 
+      media_types:
         - audio
         - document
         - external_embed
@@ -417,7 +417,7 @@ content:
     weight: -1
     region: content
     settings:
-      media_types: 
+      media_types:
         - audio
         - soundcloud
     third_party_settings: {  }

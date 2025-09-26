@@ -6,6 +6,7 @@ dependencies:
       - mukurtu_migrate
 id: mukurtu_cms_v3_digital_heritage
 class: null
+idMap: {  }
 field_plugin_method: null
 cck_plugin_method: null
 migration_tags:
@@ -144,7 +145,8 @@ process:
     -
       plugin: get
       source: field_rights/value
-    - plugin: media_embed
+    -
+      plugin: media_embed
   field_rights_and_usage/format:
     -
       plugin: static_map
@@ -268,3 +270,4 @@ migration_dependencies:
     - mukurtu_cms_v3_users_uid1
   optional:
     - d7_field_instance
+include: null

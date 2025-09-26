@@ -3,6 +3,7 @@ status: true
 dependencies: {  }
 id: mukurtu_cms_v3_community_memberships
 class: null
+idMap: {  }
 field_plugin_method: null
 cck_plugin_method: null
 migration_tags:
@@ -56,3 +57,4 @@ migration_dependencies:
     - mukurtu_cms_v3_communities
     - mukurtu_cms_v3_users
     - mukurtu_cms_v3_users_uid1
+include: null

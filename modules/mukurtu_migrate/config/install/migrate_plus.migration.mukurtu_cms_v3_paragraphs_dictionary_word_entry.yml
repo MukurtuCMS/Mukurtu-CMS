@@ -6,6 +6,7 @@ dependencies:
       - mukurtu_migrate
 id: mukurtu_cms_v3_paragraphs_dictionary_word_entry
 class: null
+idMap: {  }
 field_plugin_method: null
 cck_plugin_method: null
 migration_tags:
@@ -65,3 +66,4 @@ migration_dependencies:
     - mukurtu_cms_v3_media_audio
   optional:
     - d7_field_instance
+include: null

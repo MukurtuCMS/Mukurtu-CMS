@@ -1,9 +1,11 @@
 extlink_use_external_js_file: false
 extlink_exclude_admin_routes: false
-extlink_target: true
+extlink_target: false
 extlink_target_no_override: false
+extlink_target_display_default_title: true
+extlink_target_default_title_text: '(opens in a new window)'
 extlink_title_no_override: false
-extlink_nofollow: true
+extlink_nofollow: false
 extlink_noreferrer: true
 extlink_follow_no_override: false
 extlink_subdomains: true
@@ -27,10 +29,7 @@ extlink_mailto_label: '(link sends email)'
 extlink_tel_class: tel
 extlink_tel_label: '(link is a phone number)'
 extlink_use_font_awesome: false
-extlink_font_awesome_classes:
-  links: 'fa fa-external-link'
-  mailto: 'fa fa-envelope-o'
-  tel: 'fa fa-phone'
+extlink_font_awesome_classes: {  }
 extlink_icon_placement: append
 extlink_prevent_orphan: true
-whitelisted_domains: {  }
+allowed_domains: {  }
