@@ -169,7 +169,7 @@ content:
     third_party_settings: {  }
     weight: 7
     region: content
-  field_representative_media:
+  field_word_list_image:
     type: entity_reference_entity_view
     label: hidden
     settings:
@@ -198,7 +198,7 @@ content:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: search_preview
+      view_mode: teaser
       link: false
     third_party_settings: {  }
     weight: 4

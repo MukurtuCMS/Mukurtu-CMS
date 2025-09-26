@@ -97,18 +97,14 @@
       {{ content.field_description }}
 
       {# Main content -- collection items grid. #}
-      <div class="full-node__content">
-        {{ content.field_words }}
-      </div>
-
       <div class="full-node__main">
+        {{ content.field_words }}
         {{ content.field_coverage }}
         {{ content.field_coverage_description }}
+      </div>
 
-        <div class="full-node__content">
-          {{ content.comment }}
-        </div>
-
+      <div class="full-node__content">
+        {{ content.comment }}
       </div>
 
       {# Sidebar. #}
