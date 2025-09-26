@@ -100,9 +100,10 @@
           {{ content.field_words }}
           {{ content.field_coverage }}
           {{ content.field_coverage_description }}
+          {{ content.field_location }}
           {{ content.comment }}
         </div>
-        
+
       </div>
       {# Sidebar. #}
       <div class="full-node__list">
@@ -111,13 +112,14 @@
           <aside class="full-node__sidebar">
             <div class="sidebar-section">
             {{ content.field_communities }}
+            {{ content.field_cultural_protocols }}
+            {{ content.field_keywords }}
+            {{ content.field_all_related_content }}
+            {{ content.local_contexts_project }}
+            {{ content.local_contexts_label_and_notice }}   
             </div>
           </aside>
         {% endif %}
-
-        <div class="full-node__related-content">
-          {{ content.field_all_related_content }}
-        </div>
 
         <div class="full-node__flag-export-content">
           {{ content.flag_export_content}}

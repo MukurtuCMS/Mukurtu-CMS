@@ -37,7 +37,7 @@ third_party_settings:
         - title
         - field_summary
         - field_description
-        - field_media_assets
+        - field_word_list_image
         - field_cultural_protocols
         - field_source
         - field_words
@@ -124,6 +124,12 @@ targetEntityType: node
 bundle: word_list
 mode: default
 content:
+  comment:
+    type: comment_default
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }  
   created:
     type: datetime_timestamp
     weight: 3
@@ -256,7 +262,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_media_assets:
+  field_word_list_image:
     type: media_library_widget
     weight: 5
     region: content
