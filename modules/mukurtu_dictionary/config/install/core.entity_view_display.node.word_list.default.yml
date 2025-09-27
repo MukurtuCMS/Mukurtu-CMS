@@ -20,9 +20,9 @@ content:
     weight: 0
     region: content
   flag_export_content:
-    weight: 10
     settings: {  }
     third_party_settings: {  }
+    weight: 10
     region: content
 hidden:
   comment: true
@@ -36,6 +36,8 @@ hidden:
   field_description: true
   field_in_collection: true
   field_keywords: true
+  field_local_contexts_labels_and_notices: true
+  field_local_contexts_projects: true
   field_location: true
   field_media_assets: true
   field_multipage_page_of: true

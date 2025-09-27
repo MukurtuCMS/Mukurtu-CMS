@@ -18,7 +18,10 @@ excluded:
   - core.entity_view_mode.shortcut.token
   - core.entity_view_mode.flagging.token
   - core.entity_view_mode.media.token
+  - core.entity_view_mode.message.token
+  - core.entity_view_mode.message_template.token
   - core.entity_view_mode.taxonomy_term.token
   - core.entity_view_mode.node.search_preview
+  - core.entity_view_mode.search_api_task.token
   - core.entity_view_mode.paragraph.token
 required: true

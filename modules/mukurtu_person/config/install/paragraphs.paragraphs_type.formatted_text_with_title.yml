@@ -6,5 +6,4 @@ label: 'Biography section'
 icon_uuid: null
 icon_default: null
 description: ''
-save_empty: true
 behavior_plugins: {  }
