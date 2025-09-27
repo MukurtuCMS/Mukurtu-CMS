@@ -1,4 +1,3 @@
-uuid: 238db59a-678b-4e44-8a06-5cc187eb5f76
 langcode: en
 status: true
 dependencies:
@@ -14,8 +13,6 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-_core:
-  default_config_hash: UCAwaDgkUQKK7kt-zAzoX-liFh7LyYLPWL_H7qECM00
 id: node.page.featured
 targetEntityType: node
 bundle: page

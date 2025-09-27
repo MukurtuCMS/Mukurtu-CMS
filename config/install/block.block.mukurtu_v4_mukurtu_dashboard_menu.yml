@@ -19,7 +19,7 @@ settings:
   label_display: visible
   provider: system
   level: 1
-  depth: 0
+  depth: null
   expand_all_items: false
 visibility:
   request_path:
