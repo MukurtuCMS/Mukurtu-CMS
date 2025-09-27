@@ -100,11 +100,15 @@
       <div class="full-node__main">
         {{ content.field_coverage }}
         {{ content.field_coverage_description }}
-        {{ content.comment }}
 
         <div class="full-node__content">
           {{ content.field_items_in_collection }}
         </div>
+
+        <div class="full-node__content">
+          {{ content.comment }}
+        </div>
+
       </div>
 
       {# Sidebar. #}
@@ -113,7 +117,9 @@
         {% if content.field_communities is not empty %}
           <aside class="full-node__sidebar">
             <div class="sidebar-section">
-            {{ content.field_communities }}
+              {{ content.field_communities }}
+              {{ content.field_cultural_protocols }}
+              {{ content.field_source}}
             </div>
           </aside>
         {% endif %}
@@ -121,6 +127,11 @@
         <div class="full-node__related-content">
           {{ content.field_all_related_content }}
         </div>
+
+        <div class="full-node__flag-export-content">
+          {{ content.flag_export_content }}
+        </div>
+
       </div>
 
     </div>

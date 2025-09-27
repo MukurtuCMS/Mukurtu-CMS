@@ -1,0 +1,175 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
+// Individual word list pages.
+.word-list {
+  &__header {
+    display: flex;
+    flex-flow: column wrap;
+    margin-block-end: var(--v-space-xs);
+
+    @include include-media.media('>=lg') {
+      flex-direction: row;
+    }
+
+    > * {
+      flex: 1;
+    }
+
+    &__image {
+      position: relative;
+      background-color: var(--brand-primary);
+
+      // Creates the 25% black effect over the image.
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-start: 0;
+        inline-size: 100%;
+        block-size: 100%;
+        background-color: rgba(0 0 0 / 25%);
+        z-index: 10;
+      }
+
+      img {
+        display: block;
+      }
+    }
+
+    &__text {
+      background-color: var(--brand-primary-dark);
+      color: var(--color-white);
+
+      h2 {
+        position: relative;
+        margin-block: var(--v-space-2xl);
+        color: var(--color-white);
+        font-size: var(--font-size-heading-2xl);
+
+        &::after {
+          content: '';
+          display: block;
+          inline-size: 136px;
+          block-size: 6px;
+          background-color: var(--brand-secondary);
+          position: absolute;
+          inset-block-end: -48px;
+        }
+      }
+
+      // Margin for left/right of text elements.
+      > * {
+        margin-inline: var(--v-space-xl);
+      }
+
+      .node-summary {
+        font-size: var(--font-size-l);
+        margin-block-end: var(--v-space-2xl);
+      }
+    }
+  }
+
+
+  .field--name-field-description {
+    margin-block-end: var(--v-space-s);
+
+    @include layout.layout--full-width-grid-item;
+  }
+
+  .word-list__items__label {
+    font-weight: var(--text-bold);
+  }
+
+  // The theming for the word list instances in the Related Content field.
+  &__default {
+    &__header {
+      display: flex;
+      flex-flow: column wrap;
+      column-gap: var(--v-space-xs);
+
+      @include include-media.media('>=md') {
+        flex-direction: row;
+      }
+
+      &__image {
+        flex: 1;
+      }
+
+      &__text {
+        flex: 2;
+
+        h2 {
+          font-size: var(--font-size-2xxl);
+          margin-block-start: 0;
+        }
+
+        >*:not(:last-child) {
+          padding-block-end: var(--v-space-5xs);
+        }
+
+        &__content-type {
+          font-size: var(--font-size-base);
+          font-weight: var(--text-bold);
+        }
+
+        &__communities {
+          .field-reference {
+            display: flex;
+            column-gap: var(--v-space-4xxs);
+
+            .field-title {
+              font-size: var(--font-size-base);
+              font-weight: var(--text-bold);
+
+              &::after {
+                content: ':';
+              }
+            }
+
+            .field-item {
+              &:not(:last-of-type)::after {
+                content: ',';
+              }
+
+              &__container {
+                display: flex;
+                flex-wrap: wrap;
+                column-gap: var(--v-space-5xs);
+              }
+            }
+          }
+        }
+
+        &__category {
+          .field-reference {
+            display: flex;
+            column-gap: var(--v-space-4xxs);
+
+            .field-title {
+              font-size: var(--font-size-base);
+              font-weight: var(--text-bold);
+
+              &::after {
+                content: ':';
+              }
+            }
+
+            .field-item {
+              &:not(:last-of-type)::after {
+                content: ',';
+              }
+
+              &__container {
+                display: flex;
+                flex-wrap: wrap;
+                column-gap: var(--v-space-5xs);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

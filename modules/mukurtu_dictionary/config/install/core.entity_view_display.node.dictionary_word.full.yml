@@ -30,6 +30,7 @@ third_party_settings:
         - field_in_word_list
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
+        - flag_export_content
       label: Metadata
       parent_name: ''
       region: content
@@ -466,6 +467,11 @@ content:
       link: true
     third_party_settings: {  }
     weight: 6
+    region: content
+  flag_export_content:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
     region: content
 hidden:
   draft: true
