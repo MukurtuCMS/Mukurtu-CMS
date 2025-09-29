@@ -6,6 +6,7 @@ dependencies:
       - mukurtu_migrate
 id: mukurtu_cms_v3_personal_collection
 class: null
+idMap: {  }
 field_plugin_method: null
 cck_plugin_method: null
 migration_tags:
@@ -69,3 +70,4 @@ migration_dependencies:
     - mukurtu_cms_v3_users_uid1
   optional:
     - d7_field_instance
+include: null

@@ -107,7 +107,7 @@ third_party_settings:
         - field_coverage
         - field_coverage_description
         - field_location
-      label: 'Locations'
+      label: Locations
       region: content
       parent_name: group_additional_fields
       weight: 24
@@ -118,7 +118,7 @@ third_party_settings:
         id: ''
         formatter: open
         description: ''
-        required_fields: true    
+        required_fields: true
 id: node.word_list.default
 targetEntityType: node
 bundle: word_list
@@ -267,7 +267,7 @@ content:
     weight: 5
     region: content
     settings:
-      media_types: 
+      media_types:
         - image
     third_party_settings: {  }
   field_mukurtu_protocol_r_scope:

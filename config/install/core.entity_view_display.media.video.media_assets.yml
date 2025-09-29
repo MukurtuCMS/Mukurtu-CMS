@@ -28,6 +28,7 @@ content:
       muted: false
       width: 900
       height: 506
+      playsinline: false
     third_party_settings:
       blazy:
         blazy: false

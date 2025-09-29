@@ -6,6 +6,7 @@ dependencies:
       - mukurtu_migrate
 id: mukurtu_cms_v3_multipage_item
 class: null
+idMap: {  }
 field_plugin_method: null
 cck_plugin_method: null
 migration_tags:
@@ -46,3 +47,4 @@ migration_dependencies:
     - mukurtu_cms_v3_digital_heritage
   optional:
     - d7_field_instance
+include: null
