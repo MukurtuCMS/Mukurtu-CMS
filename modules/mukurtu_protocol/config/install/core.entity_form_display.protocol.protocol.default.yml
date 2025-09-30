@@ -87,7 +87,7 @@ content:
   field_thumbnail_image:
     type: media_library_widget
     weight: 5
-    region: content
+    region: disabled
     settings:
       media_types: {  }
     third_party_settings: {  }
