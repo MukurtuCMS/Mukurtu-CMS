@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.person.comment
     - node.type.person
   module:
+    - entity_reference_revisions
     - field_group
     - layout_builder
     - mukurtu_core
@@ -105,13 +106,6 @@ content:
       link: true
     third_party_settings: {  }
     weight: 7
-    region: content
-  field_cultural_protocols:
-    type: cultural_protocol_formatter
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 8
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -216,6 +210,13 @@ content:
     third_party_settings: {  }
     weight: 81
     region: content
+  field_cultural_protocols:
+    type: cultural_protocol_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 8
+    region: content
   field_date_born:
     type: month_day_year_original_date_formatter
     label: above
@@ -269,20 +270,6 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
-  flag_export_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 20
-    region: content
-  field_sections:
-    type: entity_reference_revisions_entity_view
-    label: above
-    settings:
-      view_mode: default
-      link: ''
-    third_party_settings: {  }
-    weight: 10
-    region: content
   field_related_people:
     type: entity_reference_entity_view
     label: above
@@ -300,6 +287,20 @@ content:
       link: true
     third_party_settings: {  }
     weight: 13
+    region: content
+  field_sections:
+    type: entity_reference_revisions_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  flag_export_content:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 20
     region: content
 hidden:
   draft: true
