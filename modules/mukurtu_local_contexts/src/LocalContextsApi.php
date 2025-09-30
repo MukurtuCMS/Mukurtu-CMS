@@ -2,8 +2,8 @@
 
 namespace Drupal\mukurtu_local_contexts;
 
-use Drupal\Core\Database\Connection;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ConnectException;
 
 class LocalContextsApi {
   /**
@@ -89,6 +89,7 @@ class LocalContextsApi {
         'Accept' => 'application/json',
       ],
       'query' => $query_params,
+      'connect_timeout' => 5,
     ];
     $request = new $this->httpClient($options);
 
@@ -107,7 +108,7 @@ class LocalContextsApi {
         $this->errorMessage = $result['detail'] ?? 'Unknown error.';
       }
     }
-    catch (RequestException $e) {
+    catch (RequestException|ConnectException $e) {
       $this->errorMessage = $e->getMessage();
     }
 
