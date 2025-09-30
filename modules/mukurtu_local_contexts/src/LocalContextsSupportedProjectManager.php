@@ -63,7 +63,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The project information, keyed by project ID.
    */
-  public function getAllProjects() {
+  public function getAllProjects(): array {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
     $query->fields('sp', ['type', 'group_id']);
@@ -82,7 +82,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The label information, keyed by label ID.
    */
-  public function getAllLabels() {
+  public function getAllLabels(): array {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
     $query->fields('labels', ['id', 'name', 'type', 'display']);
@@ -100,7 +100,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The notice information, keyed by notice ID.
    */
-  public function getAllNotices() {
+  public function getAllNotices(): array {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
     $query->fields('notices', ['type', 'name', 'img_url', 'svg_url', 'default_text', 'display']);
@@ -132,7 +132,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The project information, keyed by project ID.
    */
-  public function getSiteSupportedProjects($exclude_legacy = FALSE) {
+  public function getSiteSupportedProjects($exclude_legacy = FALSE): array {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
     $query
@@ -163,7 +163,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The project information, keyed by project ID.
    */
-  public function getGroupSupportedProjects(ContentEntityInterface $group) {
+  public function getGroupSupportedProjects(ContentEntityInterface $group): array {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
     $query
@@ -187,7 +187,7 @@ class LocalContextsSupportedProjectManager {
    * @return bool
    *   True if the project is a group project.
    */
-  public function isGroupSupportedProject(ContentEntityInterface $group, $project_id) {
+  public function isGroupSupportedProject(ContentEntityInterface $group, string $project_id): bool {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'projects')
       ->condition('projects.project_id', $project_id)
       ->condition('projects.type', $group->getEntityTypeId())
@@ -208,7 +208,7 @@ class LocalContextsSupportedProjectManager {
    *
    * @return void
    */
-  public function addGroupProject(ContentEntityInterface $group, $project_id) {
+  public function addGroupProject(ContentEntityInterface $group, string $project_id) {
     if (!$this->isGroupSupportedProject($group, $project_id)) {
       $fields = [
         'project_id' => $project_id,
@@ -248,7 +248,7 @@ class LocalContextsSupportedProjectManager {
    *
    * @return void
    */
-  public function removeGroupProject(ContentEntityInterface $group, $project_id) {
+  public function removeGroupProject(ContentEntityInterface $group, string $project_id) {
     $query = $this->db->delete('mukurtu_local_contexts_supported_projects')
       ->condition('project_id', $project_id)
       ->condition('type', $group->getEntityTypeId())
@@ -266,7 +266,7 @@ class LocalContextsSupportedProjectManager {
    * @param bool $force_delete
    *   Whether to delete the project even if it is in use.
    */
-  public function removeProject($project_id, $force_delete = FALSE) {
+  public function removeProject(string $project_id, bool $force_delete = FALSE) {
     // Ensure the project is not in use before deleting.
     if (!$force_delete) {
       $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'projects')
@@ -344,7 +344,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The label information, keyed by label ID.
    */
-  public function getSiteLabels() {
+  public function getSiteLabels(): array {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'labels');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
     $query->join('mukurtu_local_contexts_supported_projects', 'sp', 'labels.project_id = sp.project_id');
@@ -356,9 +356,7 @@ class LocalContextsSupportedProjectManager {
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
-    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
-
-    return $labels;
+    return $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
   }
 
   /**
@@ -367,7 +365,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The notice information, keyed by notice ID.
    */
-  public function getSiteNotices() {
+  public function getSiteNotices(): array {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'notices');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
     $query->join('mukurtu_local_contexts_supported_projects', 'sp', 'notices.project_id = sp.project_id');
@@ -405,7 +403,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The label information, keyed by label ID.
    */
-  public function getUserLabels(AccountInterface $account) {
+  public function getUserLabels(AccountInterface $account): array {
     $projects = $this->getUserProjects($account);
 
     if (empty($projects)) {
@@ -435,7 +433,7 @@ class LocalContextsSupportedProjectManager {
    * @return array
    *   The notice information, keyed by notice ID.
    */
-  public function getUserNotices(AccountInterface $account) {
+  public function getUserNotices(AccountInterface $account): array {
     $projects = $this->getUserProjects($account);
 
     if (empty($projects)) {
