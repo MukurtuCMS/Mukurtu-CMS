@@ -65,6 +65,14 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         }
         unset($all_projects_response);
       }
+
+      // Check for API errors which may result in an empty project list.
+      $api_error = $lcApi->getErrorMessage();
+      if ($api_error) {
+        $this->messenger()->addError(t('Could not retrieve Local Contexts project information. Requesting the project list returned the following error: <code>@error</code>', [
+          '@error' => $api_error,
+        ]));
+      }
       $form_state->setTemporaryValue('all_projects', $all_projects);
     }
 
@@ -267,7 +275,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     /** @var ContentEntityInterface $group */
     $group = $form_state->get('group');
     $action = $form_state->getValue('action');
-    $all_projects = $form_state->getTemporaryValue('all_projects');
+    $all_projects = (array) $form_state->getTemporaryValue('all_projects');
 
     // If no items are selected, throw an error.
     if (!$selected_projects) {
@@ -366,7 +374,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         $is_group_project = $group && $supportedProjectManager->isGroupSupportedProject($group, $id);
         $is_site_project = !$group && $supportedProjectManager->isSiteSupportedProject($id);
         if (!$is_group_project && !$is_site_project) {
-          $title = $all_projects[$id]['title'];
+          $title = $all_projects[$id]['title'] ?? '';
           $this->messenger()->addWarning($this->t('The project %project was not added, so no delete action was taken on it.', ['%project' => $title]));
           continue;
         }
