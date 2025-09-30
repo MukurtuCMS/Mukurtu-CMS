@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_local_contexts\Form;
 
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -49,6 +50,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         $api_key = $this->config('mukurtu_local_contexts.settings')->get('site_api_key');
       }
     }
+    $form_state->set('api_key', $api_key);
 
     // Populate the list of projects from the API.
     if ($api_key) {
@@ -63,6 +65,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         }
         unset($all_projects_response);
       }
+      $form_state->setTemporaryValue('all_projects', $all_projects);
     }
 
     // Get the list of supported projects for this group or the entire site.
@@ -124,12 +127,13 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       $form['bulk_action_wrapper'] = [
         '#type' => 'container',
         '#attributes' => ['class' => ['bulk-action-wrapper', 'container-inline']],
+        '#tree' => FALSE,
       ];
       $form['bulk_action_wrapper']['action'] = [
         '#type' => 'select',
         '#title' => $this->t('With selected items'),
         '#options' => [
-          'import' => $this->t('Import'),
+          'add' => $this->t('Add / Sync'),
           'delete' => $this->t('Delete'),
         ],
         '#empty_option' => $this->t('- Select action -'),
@@ -139,7 +143,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         '#value' => $this->t('Apply action'),
         '#button_type' => 'primary',
         '#access' => isset($all_projects),
-        // Disable the button if there are no projects to import.
+        // Disable the button if there are no projects to add.
         '#disabled' => empty($all_projects),
         '#validate' => ['::validateForm'],
         '#submit' => ['::submitForm'],
@@ -163,8 +167,8 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         $id = $project['unique_id'];
         $options[$id] = [
           'title' => $project['title'],
-          'status' => $this->t('Not imported'),
-          'last_sync' => $this->t('Never'),
+          'status' => $this->t('Not added'),
+          'last_sync' => '',
           'project_id' => $id,
         ];
         if (isset($supported_projects[$id])) {
@@ -172,7 +176,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
             $supported_projects[$id]['updated'],
             'short'
           );
-          $options[$id]['status'] = $this->t('Existing');
+          $options[$id]['status'] = $this->t('Active');
         }
       }
 
@@ -185,7 +189,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
             'data' => [
               '#type' => 'html_tag',
               '#tag' => 'strong',
-              '#value' => $this->t('Deleted upstream'),
+              '#value' => $this->t('Not available'),
               '#attributes' => ['title' => $this->t('This project has been deleted from the Local Contexts Hub and can no longer be synced.')],
             ],
           ],
@@ -253,9 +257,136 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     $form_state->setRebuild();
   }
 
+
   /**
    * {@inheritdoc}
    */
-  abstract public function submitForm(array &$form, FormStateInterface $form_state);
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    $selected_projects = array_filter($form_state->getValue('projects'));
+    $api_key = $form_state->getValue('api_key');
+    /** @var ContentEntityInterface $group */
+    $group = $form_state->get('group');
+    $action = $form_state->getValue('action');
+    $all_projects = $form_state->getTemporaryValue('all_projects');
+
+    // If no items are selected, throw an error.
+    if (!$selected_projects) {
+      $this->messenger()->addError($this->t('Select at least one project to modify.'));
+      return;
+    }
+
+    switch ($action) {
+      case 'add':
+        $this->submitAdd($all_projects, $selected_projects, $group, $api_key);
+        break;
+      case 'delete':
+        $this->submitDelete($all_projects, $selected_projects, $group);
+        break;
+      default:
+        $form_state->setErrorByName('action', $this->t('Select an action to apply.'));
+    }
+  }
+
+  /**
+   * Add projects to the site or group.
+   *
+   * @param array $all_projects
+   *   All projects to which the Local Contexts API key has access.
+   * @param array $selected_projects
+   *   An array of IDs that were selected to be added.
+   * @param \Drupal\Core\Entity\ContentEntityInterface|null $group
+   *   If adding to a group, the entity object. If NULL, adding to the site-wide
+   *   projects.
+   * @param string $api_key
+   *   The API key used to interact with the Local Contexts Hub.
+   *
+   * @return void
+   */
+  protected function submitAdd(array $all_projects, array $selected_projects, ?ContentEntityInterface $group, string $api_key): void {
+    $supportedProjectManager = new LocalContextsSupportedProjectManager();
+    $added_count = 0;
+    $sync_count = 0;
+    $last_added_title = '';
+    $last_synced_title = '';
+    $selected_projects = array_filter($selected_projects);
+    foreach ($selected_projects as $id) {
+      $project = new LocalContextsProject($id);
+      // If never updated before, this is a new project.
+      $is_new = !$project->getUpdated();
+      $project->fetchFromHub($api_key);
+      if ($group) {
+        $supportedProjectManager->addGroupProject($group, $id);
+      }
+      else {
+        $supportedProjectManager->addSiteProject($id);
+      }
+      if ($is_new) {
+        $added_count++;
+        $last_added_title = $project->getTitle();
+      }
+      else {
+        $sync_count++;
+        $last_synced_title = $project->getTitle();
+      }
+    }
+
+    // Projects can be both added and synced in the same request.
+    if ($added_count) {
+      $message = $this->formatPlural($added_count, 'The project @title has been added.', '@count projects have been added.', [
+        '@title' => $last_added_title,
+      ]);
+      $this->messenger()->addStatus($message);
+    }
+    if ($sync_count) {
+      $message = $this->formatPlural($sync_count, 'The project @title has been synced.', '@count projects have been synced.', [
+        '@title' => $last_synced_title,
+      ]);
+      $this->messenger()->addStatus($message);
+    }
+  }
+
+  /**
+   * Remove projects from the site or group.
+   *
+   * @param array $all_projects
+   *   All projects to which the Local Contexts API key has access.
+   * @param array $selected_projects
+   *   An array of IDs that were selected to be added.
+   * @param \Drupal\Core\Entity\ContentEntityInterface|null $group
+   *   If removing from a group, the entity object. If NULL, removing from the
+   *   site-wide projects.
+   *
+   * @return void
+   */
+  protected function submitDelete(array $all_projects, array $selected_projects, ?ContentEntityInterface $group): void {
+    $supportedProjectManager = new LocalContextsSupportedProjectManager();
+    foreach ($selected_projects as $id) {
+      if ($projectToRemove = new LocalContextsProject($id)) {
+        // Ensure this project is added before trying to remove it.
+        $is_group_project = $group && $supportedProjectManager->isGroupSupportedProject($group, $id);
+        $is_site_project = !$group && $supportedProjectManager->isSiteSupportedProject($id);
+        if (!$is_group_project && !$is_site_project) {
+          $title = $all_projects[$id]['title'];
+          $this->messenger()->addWarning($this->t('The project %project was not added, so no delete action was taken on it.', ['%project' => $title]));
+          continue;
+        }
+
+        if (!$projectToRemove->inUse()) {
+          if ($group) {
+            $supportedProjectManager->removeGroupProject($group, $id);
+          }
+          else {
+            $supportedProjectManager->removeSiteProject($id);
+          }
+          $title = $projectToRemove->getTitle();
+          $this->messenger()->addStatus($this->t('Removed project %project.', ['%project' => $title]));
+        }
+        else {
+          $title = $projectToRemove->getTitle();
+          $this->messenger()->addError($this->t('The project %project cannot be removed because it is in use. Remove any uses of this project before deleting.', ['%project' => $title]));
+        }
+      }
+    }
+  }
 
 }

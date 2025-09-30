@@ -10,19 +10,29 @@ class LocalContextsProject extends LocalContextsHubBase {
   protected $id;
 
   /**
-   * @var mixed|null The title of the project.
+   * @var string|null The title of the project.
    */
-  protected $title;
+  protected ?string $title;
 
   /**
-   * @var mixed|null The privacy setting of the project.
+   * @var string|null The privacy setting of the project.
    */
-  protected $privacy;
+  protected ?string $privacy;
+
+  /**
+   * @var int|null Timestamp of the last updated time.
+   */
+  protected ?int $updated;
 
   /**
    * @var bool Whether the project has been loaded from the API.
    */
   protected bool $valid;
+
+  /**
+   * @var string|null Any error that occurs during the fetch process.
+   */
+  protected ?string $errorMessage;
 
   public function __construct($id) {
     parent::__construct();
@@ -31,13 +41,11 @@ class LocalContextsProject extends LocalContextsHubBase {
     $this->valid = $project !== FALSE;
     $this->title = $project['title'] ?? NULL;
     $this->privacy = $project['privacy'] ?? NULL;
+    $this->updated = $project['updated'] ?? NULL;
   }
 
   /**
-   * Loads a Local Contexts project from the database by its LC ID.
-   *
-   * @param string $id
-   *   The 36 character Local Contexts project ID.
+   * Loads this Local Contexts project from the database by its LC ID.
    *
    * @return array|bool
    *   The title and privacy information if found. FALSE if not found.
@@ -72,14 +80,18 @@ class LocalContextsProject extends LocalContextsHubBase {
       // Update the object properties.
       $this->title = $project['title'];
       $this->privacy = $project['project_privacy'];
+      $this->updated = $this->requestTime;
+
+      // Provider ID seems to sometimes be an array, sometimes a string.
+      $provider_id = is_array($project['external_ids']['providers_id']) ? reset($project['external_ids']['providers_id']) : $project['external_ids']['providers_id'];
 
       // Update our local copy of this project.
       $projectFields = [
         'id' => $id,
-        'provider_id' => $project['external_ids']['providers_id'],
+        'provider_id' => $provider_id,
         'title' => $this->title,
         'privacy' => $this->privacy,
-        'updated' => $this->requestTime,
+        'updated' => $this->updated,
       ];
 
       $query = $this->db->update('mukurtu_local_contexts_projects')
@@ -344,6 +356,10 @@ class LocalContextsProject extends LocalContextsHubBase {
 
   public function getPrivacy() {
     return $this->privacy;
+  }
+
+  public function getUpdated() {
+    return $this->updated;
   }
 
   public function isValid() {
