@@ -380,7 +380,7 @@ content:
     third_party_settings: {  }
   field_format:
     type: entity_reference_autocomplete
-    weight: 21
+    weight: 22
     region: content
     settings:
       match_operator: CONTAINS
@@ -612,7 +612,7 @@ content:
     third_party_settings: {  }
   field_type:
     type: entity_reference_autocomplete
-    weight: 22
+    weight: 21
     region: content
     settings:
       match_operator: CONTAINS
