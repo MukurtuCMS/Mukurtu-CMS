@@ -84,13 +84,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_thumbnail_image:
-    type: media_library_widget
-    weight: 5
-    region: content
-    settings:
-      media_types: {  }
-    third_party_settings: {  }
   langcode:
     type: language_select
     weight: 8

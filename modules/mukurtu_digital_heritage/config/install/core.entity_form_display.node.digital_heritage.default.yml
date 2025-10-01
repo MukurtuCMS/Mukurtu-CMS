@@ -356,7 +356,7 @@ content:
     third_party_settings: {  }
   field_date_description:
     type: string_textfield
-    weight: 1
+    weight: 3
     region: content
     settings:
       size: 60
@@ -380,7 +380,7 @@ content:
     third_party_settings: {  }
   field_format:
     type: entity_reference_autocomplete
-    weight: 21
+    weight: 22
     region: content
     settings:
       match_operator: CONTAINS
@@ -496,7 +496,7 @@ content:
     third_party_settings: {  }
   field_original_date:
     type: original_date_text
-    weight: 3
+    weight: 1
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -612,7 +612,7 @@ content:
     third_party_settings: {  }
   field_type:
     type: entity_reference_autocomplete
-    weight: 22
+    weight: 21
     region: content
     settings:
       match_operator: CONTAINS
