@@ -71,8 +71,21 @@ process:
     source: field_tags
   # This only works if we maintain nids. Self migration_lookup wasn't working for me...
   field_related_content: field_related_content
+  field_media_assets:
+    -
+      plugin: sub_process
+      source: field_additional_media_assets
+      process:
+        target_id:
+          -
+            plugin: migration_lookup
+            migration:
+              - mukurtu_cms_v3_media_image
+              - mukurtu_cms_v3_media_document
+              - mukurtu_cms_v3_media_audio
+              - mukurtu_cms_v3_media_video
+            source: sid
 
-  # TODO: field_additional_media
   # TODO: field_word_list
   # TODO: field_collection
   # TODO: field_personal_collections
