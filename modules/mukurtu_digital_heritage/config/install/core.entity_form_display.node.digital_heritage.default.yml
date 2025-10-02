@@ -239,8 +239,7 @@ content:
     type: options_buttons
     weight: -3
     region: content
-    settings: 
-      description: 'Categories are high-level descriptive terms that help users browse and discover digital heritage items. Each site defines their own set of categories to reflect the scope of their items. Each digital heritage item requires at least one category, but more can be selected as needed. </br>Select one or more categories. Categories must first be created by a Mukurtu Manager.'
+    settings: {  }
     third_party_settings: {  }
   field_contributor:
     type: entity_reference_autocomplete
@@ -677,7 +676,6 @@ content:
     settings:
       size: 60
       placeholder: ''
-      description: 'A short, descriptive name for the digital heritage item. The title should give users useful information about the item when browsing or searching. Titles do not have to be unique.'
     third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete
