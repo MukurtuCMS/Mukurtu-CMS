@@ -91,7 +91,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_summary'] = BaseFieldDefinition::create('string')
       ->setLabel('Summary')
-      ->setDescription(t('A short summary of the digital heritage item. The summary should supplement the title and help help distinguish between similar items. The summary is displayed as part of the item preview when browsing the site. </br>Maximum 255 characters.'))
+      ->setDescription(t('A short summary of the digital heritage item. The summary should supplement the title and help distinguish between similar items. The summary is displayed as part of the item preview when browsing the site. </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -119,7 +119,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_rights_and_usage'] = BaseFieldDefinition::create('string_long')
       ->setLabel('Rights and Usage')
-      ->setDescription(t('A statement about the approriate rights and usage regarding the digital heritage item, media asset, or presented knowledge. This may include identifying the legal or traditional rights holder. If the rights holder should be contacted for permission to use, reproduce, circulate, reference, or cite the item, provide their contact information. </br>Maximum 255 characters.'))
+      ->setDescription(t('A statement about the appropriate rights and usage regarding the digital heritage item, media asset, or presented knowledge. This may include identifying the legal or traditional rights holder. If the rights holder should be contacted for permission to use, reproduce, circulate, reference, or cite the item, provide their contact information. </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -354,6 +354,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Map Points'))
+      ->setDescription(t('A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

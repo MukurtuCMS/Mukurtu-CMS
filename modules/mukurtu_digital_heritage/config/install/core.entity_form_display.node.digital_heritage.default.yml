@@ -209,7 +209,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: open
-        description: ''
+        description: 'A set of location related fields that include mapping/geographic data for visually placing and displaying digital heritage items, as well as descriptive and taxonomic fields.'
         required_fields: true
 id: node.digital_heritage.default
 targetEntityType: node
@@ -353,6 +353,8 @@ content:
     weight: -4
     region: content
     settings: {  }
+    format_settings:
+      description: 'Cultural protocols determine which users can access the digital heritage item. Cultural protocols are managed by their parent community, which represents a group of contributors. All items must be assigned at least one cultural protocol. Most items only require one cultural protocol, but more granular access can be specified by selecting multiple protocols, or even protocols from multiple communities. </br>Select one or more cultural protocols. The relevant communities will be automatically applied.'
     third_party_settings: {  }
   field_date_description:
     type: string_textfield
