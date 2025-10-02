@@ -133,7 +133,7 @@ class LegacyTkSitewideLabels extends SqlBase
   /**
    * {@inheritdoc}
    */
-  public function count($refresh = FALSE)
+  public function count($refresh = FALSE): int
   {
     $count = $this->doCount();
     return $count;
@@ -142,7 +142,7 @@ class LegacyTkSitewideLabels extends SqlBase
   /**
    * {@inheritdoc}
    */
-  public function next()
+  public function next(): void
   {
     SourcePluginBase::next();
   }
