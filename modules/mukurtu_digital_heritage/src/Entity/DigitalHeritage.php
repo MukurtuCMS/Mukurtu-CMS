@@ -133,7 +133,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_knowledge_keepers'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel('Citing Indigenous Elders and Knowledge Keepers')
-      ->setDescription(t('For a complete definition of this citation method and its fields, see "<a href="https://doi.org/10.18357/kula.135">More Than Personal Communication: Templates For Citing Indigenous Elders and Knowledge Keepers</a>"  by Lorisia MacLeod.'))
+      ->setDescription(t(''))
       ->setSettings([
         'max_length' => 255,
         'target_type' => 'paragraph',
@@ -193,8 +193,8 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Digital heritage items can be related to any other site content when there is a connection between those items that is important to show. Examples include multiple photos of a place, objects discussed in an oral history, or dictionary words that appear in a digital heritage item. </br>Select "Select Content" to choose from existing site content.'))
-      ->setDescription(t(''))
+      ->setLabel(t('Related Content'))
+      ->setDescription(t('Digital heritage items can be related to any other site content when there is a connection between those items that is important to show. Examples include multiple photos of a place, objects discussed in an oral history, or dictionary words that appear in a digital heritage item. </br>Select "Select Content" to choose from existing site content.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -354,7 +354,6 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Map Points'))
-      ->setDescription(t('A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -434,7 +433,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_creator'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Creator'))
-      ->setDescription(t('A creator is the person or group primarily responsible for making  or providing the core media assets or knowledge represented in a digital heritage item. While a creator is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple creators. Examples include a basket designer or weaver, knowledge holders who provided information for a book, a book’s author or illustrator, singers, songwriters, dancers, or performers. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Note that this is not the user publishing the digital heritage item on the site - that information is recorded in the automated author field.As you type, names of existing creators will be displayed. Select an existing creator or enter a new name. To include additional creators, select "Add another item".'))
+      ->setDescription(t('A creator is the person or group primarily responsible for making  or providing the core media assets or knowledge represented in a digital heritage item. While a creator is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple creators. Examples include a basket designer or weaver, knowledge holders who provided information for a book, a book’s author or illustrator, singers, songwriters, dancers, or performers. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Note that this is not the user publishing the digital heritage item on the site - that information is recorded in the automated author field. </br>As you type, names of existing creators will be displayed. Select an existing creator or enter a new name. To include additional creators, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -534,7 +533,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_publisher'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Publisher'))
-      ->setDescription(t('The person, organization, or service responsible for publishing the digital heritage item or media asset.	As you type, existing publishers will be displayed. </br>Select an existing publisher or enter a new one. To include additional publishers, select "Add another item".'))
+      ->setDescription(t('The person, organization, or service responsible for publishing the digital heritage item or media asset.	</br>As you type, existing publishers will be displayed. Select an existing publisher or enter a new one. To include additional publishers, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -574,7 +573,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Type'))
-      ->setDescription(t('Type is the broad nature, genre, or function of the media asset(s) represented in the digital heritage item. Examples include Image, Text, Sound, Video, or Physical Object.	As you type, existing types will be displayed. Select an existing type or enter a new one. </br>To include additional types, select "Add another item".'))
+      ->setDescription(t('Type is the broad nature, genre, or function of the media asset(s) represented in the digital heritage item. Examples include Image, Text, Sound, Video, or Physical Object. </br>As you type, existing types will be displayed. Select an existing type or enter a new one. To include additional types, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
