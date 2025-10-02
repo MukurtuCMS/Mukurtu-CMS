@@ -23,7 +23,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_cultural_narrative'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Cultural Narrative')
-      ->setDescription(t('The Cultural Narrative field is used to add historical or social context, expert community knowledge, community stories, and other relevant context to the Digital Heritage Item. This is generally information that is community specific. For example, if the item is a basket, this field may contain a narrative from the basket­maker about their technique, or it may tell a story about how the baskets were used by previous generations and how they are used today.'))
+      ->setDescription(t('Cultural narratives include historical or social context, expert community knowledge, community stories, and other relevant cultural context for the digital heritage item. For example, if the item is a basket this field may contain a narrative from the basket­ maker about their technique, or it may tell a story contrasting how the baskets were used by previous generations and how they are used today. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -33,7 +33,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Description')
-      ->setDescription(t('Field for briefly describing the Media Asset within a Digital Heritage Item. This can include physical characteristics (i.e. photograph, manuscript, newspaper clipping), content information (i.e. what is depicted, content of text), and any other general relevant information. Audio or video are embedded by dragging Media Assets from the media library into this field. For the Media Asset to display correctly there must be a line break or text below where the Media Asset will be embedded. Note, certain media types (eg. audio, Youtube video) do not render fully within the edit box, but will display correctly when the Digital heritage Item is saved. Using the plain text editor setting provides better control over embedded media.'))
+      ->setDescription(t('Descriptions provide an account, explanation, or description of the digital heritage item or media asset. This may include physical characteristics, content information, an explanation of what is depicted, digitization and processing information, general notes, and any other relevant information that does not fit into a more structured field. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -43,7 +43,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
-      ->setDescription(t('Location Description adds additional context to a Geocode address, and can be used instead of a Geocode Address if the location should be identified, but not precisely located on a map.'))
+      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the digital heritage item. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -53,7 +53,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_traditional_knowledge'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Traditional Knowledge')
-      ->setDescription(t('The Traditional Knowledge field is used to add in-­depth community-specific knowledge about the Digital Heritage Item, and is often used to provide information of social, spiritual, or esoteric significance. For example, if the item is a basket, this field may contain community, tribe, or clan specific knowledge about the significance of design that is not more generally known.'))
+      ->setDescription(t('Traditional knowledge includes in-­depth community-specific knowledge about the digital heritage item. It is often used to provide information of social, spiritual, or esoteric significance. For example, if the item is a basket, this field may contain community, tribe, or clan-specific knowledge about the significance of design that is not widely known or that is specific that that community. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -63,7 +63,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_date_description'] = BaseFieldDefinition::create('string')
       ->setLabel('Date Description')
-      ->setDescription(t('Original Date Description refers to the date of creation of the Media Asset; i.e. when it was written, filmed, recorded, or made. This is an open text field, limited to 255 characters, and is intended for use when a strictly formatted date is not appropriate (eg: Summer 1950, date unknown).'))
+      ->setDescription(t('Used to supplement the original date field, or when a precise creation date of the media asset or information represented in the digital heritage item is not known. Examples include "Summer 1995" and "circa 1800s". </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -77,7 +77,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_source'] = BaseFieldDefinition::create('string')
       ->setLabel('Source')
-      ->setDescription(t('Source provides a reference to a resource, collection, or institution from where the Digital Heritage Item or Media Asset is contributed or originated. Examples include collections (e.g., “McWhorter Collection”), institutions (e.g.,: “Library of Congress, American Folklife Center), or donors (e.g.,: “Donated by John Smith”).'))
+      ->setDescription(t('Source provides a reference to the resource, collection, or institution where the digital heritage item is held, described, originated, or contributed. Examples include collections (e.g., “McWhorter Collection”), institutions (e.g.,: “Library of Congress, American Folklife Center), or donors (e.g.,: “Donated by John Smith”). </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -91,7 +91,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_summary'] = BaseFieldDefinition::create('string')
       ->setLabel('Summary')
-      ->setDescription(t('A brief description of the Digital Heritage Item, limited to 255 characters. The summary is displayed with the Digital Heritage Item teaser when browsing, and can help distinguish between items with similar or identical titles. Other fields allow for longer, more in depth description.'))
+      ->setDescription(t('A short summary of the digital heritage item. The summary should supplement the title and help distinguish between similar items. The summary is displayed as part of the item preview when browsing the site. </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -105,7 +105,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_identifier'] = BaseFieldDefinition::create('string')
       ->setLabel('Identifier')
-      ->setDescription(t('A unique, unambiguous reference to the Digital Heritage Item or Media Asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers.'))
+      ->setDescription(t('A unique, unambiguous reference to the digital heritage item or media asset Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -119,7 +119,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_rights_and_usage'] = BaseFieldDefinition::create('string_long')
       ->setLabel('Rights and Usage')
-      ->setDescription(t('A statement about who holds the legal rights to the Digital Heritage Item, Media Asset, or presented knowledge. Consider adding contact information if the rights holder should be contacted for permission to use, reproduce, circulate, reference, or cite the Digital Heritage Item.'))
+      ->setDescription(t('A statement about the appropriate rights and usage regarding the digital heritage item, media asset, or presented knowledge. This may include identifying the legal or traditional rights holder. If the rights holder should be contacted for permission to use, reproduce, circulate, reference, or cite the item, provide their contact information. </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -133,7 +133,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_knowledge_keepers'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel('Citing Indigenous Elders and Knowledge Keepers')
-      ->setDescription(t('A field to cite Indigenous elders and Knowledge Keepers.'))
+      ->setDescription(t(''))
       ->setSettings([
         'max_length' => 255,
         'target_type' => 'paragraph',
@@ -160,7 +160,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_transcription'] = BaseFieldDefinition::create('string_long')
       ->setLabel('Transcription')
-      ->setDescription(t('Transcription is a plain text field used to provide a text transcription of an audio or video recording, or of text in an image or document. Including a transcription allows the text to be discoverable when searching for Digital Heritage Items.'))
+      ->setDescription(t('A basic text transcription of an audio or video recording, or of text in an image or document. Including a transcription allows the text to be discoverable when searching for digital heritage items.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -194,7 +194,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
-      ->setDescription(t(''))
+      ->setDescription(t('Digital heritage items can be related to any other site content when there is a connection between those items that is important to show. Examples include multiple photos of a place, objects discussed in an oral history, or dictionary words that appear in a digital heritage item. </br>Select "Select Content" to choose from existing site content.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -212,7 +212,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Assets'))
-      ->setDescription(t('Media assets are the core element of Digital Heritage Items and can be images, documents, video, or audio files. Digital Heritage Item can include more than one media asset. Media assets are not required for Digital Heritage Items.'))
+      ->setDescription(t('Media assets are a key element of most digital heritage items, though they are not required. Supported media types are images, documents, video, audio, and embed code. Digital heritage items can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the digital heritage item to allow differential access to the media assets and metadata. </br>Select "Add media" to select or upload media assets.'))
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
@@ -238,6 +238,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_external_links'] = BaseFieldDefinition::create('link')
       ->setLabel(t('External Links'))
+      ->setDescription(t('Links to other records or websites where the digital heritage item is available online, or to other related websites. Examples include the online catalog of the holding repository, or the publisher\'s listing. </br>To include additional links, select "Add another item".'))
       ->setCardinality(-1)
       ->setSettings([
         'title' => 1,
@@ -251,7 +252,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_creative_commons'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Creative Commons Licenses'))
-      ->setDescription(t('Creative Commons licenses are an extension of Copyright that allow a copyright holder to specify the ways in which their work may be altered, shared, and used. For more information on Creative Commons licensing, visit <a href="http://creativecommons.org">creativecommons.org</a>'))
+      ->setDescription(t('Creative Commons licenses provide a standardized way for copyright holders to grant the public permission to use their creative work under copyright law, and to specify the ways in which their work may be altered, shared, and used. For more information, visit <a href="https://creativecommons.org/">creativecommons.org</a>. </br>Select a Creative Commons license from the dropdown menu.'))
       ->setSettings([
         'allowed_values' => [
           'http://creativecommons.org/licenses/by/4.0' => t('Attribution 4.0 International (CC BY 4.0)'),
@@ -271,7 +272,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
       ->setLabel(t('Local Contexts Projects'))
-      ->setDescription(t('Local Contexts projects from the Local Contexts Hub.'))
+      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the digital heritage item. </br>Select one or more Local Contexts Projects.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -281,7 +282,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
       ->setLabel(t('Local Contexts Labels and Notices'))
-      ->setDescription(t('Local Contexts Labels and Notices from the Local Contexts Hub.'))
+      ->setDescription(t('This field allows selective application of one or more Labels from any available Local Contexts Project to the digital heritage item. </br>Select one or more Labels from the appropriate Local Contexts Project. If a complete project has already been selected, do not also select individual Labels from the same project.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -291,7 +292,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_rights_statements'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Rights Statements'))
-      ->setDescription(t('For more information, visit <a href="https://rightsstatements.org/en/">rightsstatement.org</a>'))
+      ->setDescription(t('"RightsStatements.org provides standardized rights statements that can be used by cultural heritage institutions to indicate the copyright status of digital objects that they make available online, either on their own website or via aggregation platforms. These rights statements are high level summaries of the underlying rights status of the digital objects that they apply to. These rights statements are intended to be used in addition to (more detailed) rights information that institutions already have and not to replace existing information." For more information, visit <a href="https://rightsstatements.org/">rightsstatements.org</a>. </br>Select a Rights Statement from the dropdown menu. '))
       ->setSettings([
         'allowed_values' => [
           'http://rightsstatements.org/vocab/InC/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright"/>
@@ -353,7 +354,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Map Points'))
-      ->setDescription(t(''))
+      ->setDescription(t('A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -363,7 +364,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t(''))
+      ->setDescription(t('A named place, or places, that are closely connected to the digital heritage item. Examples include the location where a photo was taken, places named in a story, or the site where an object was created. </br>As you type, existing locations will be displayed. Select an existing location or enter a new one. To include additional locations, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -383,7 +384,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_original_date'] = BaseFieldDefinition::create('original_date')
       ->setLabel(t('Original Date'))
-      ->setDescription(t(''))
+      ->setDescription(t('The creation date of the media asset or information represented in the digital heritage item. The date should be as precise as possible, and either the year, year-month, or year-month-day can be entered. </br>Note that this is not the date the digital heritage item was published on the site - that is recorded with an automated date stamp. </br>Enter the year and, if known, select the month or month and day.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -393,7 +394,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_category'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Category'))
-      ->setDescription(t('Categories are high-level descriptive terms that group Digital Heritage Items together and help users browse and discover Digital Heritage Items. Categories are unique to each site and reflect the scope of the items included. One set of Categories is used to describe all Digital Heritage Items within the site. Each Digital Heritage Item must belong to at least one Category. Check the box beside each relevant Category.'))
+      ->setDescription(t('Categories are high-level descriptive terms that help users browse and discover digital heritage items. Each site defines their own set of categories to reflect the scope of their items. Each digital heritage item requires at least one category, but more can be selected as needed. </br>Select one or more categories. Categories must first be created by a Mukurtu Manager.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -413,7 +414,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
-      ->setDescription(t('A Contributor can be a person, people, clan, tribal nation, community group or, organization who aided in making the content of a Digital Heritage Item or Media Asset. This could be the person who wrote, compiled, or illustrated a book or recorded a song; the people who edited or produced a film, or collaborated or consulted on a project. Contributors with semicolons (John Smith; Jane Doe). Commas are valid (last name, first name), as are quotes (John “Nickname” Smith).'))
+      ->setDescription(t('A contributor is a person or group who aided in the making of a digital heritage item. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple contributors. Examples include someone who wrote, compiled, or illustrated a book or recorded a song, the people who edited or produced a film, or people collaborated or consulted on a project. </br>Names can be in any format that is appropriate for the content, eg: ""John Smith"" or ""Smith, John"". </br> As you type, names of existing contributors will be displayed. Select an existing contributor or enter a new name. To include additional contributors, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -433,7 +434,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_creator'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Creator'))
-      ->setDescription(t('A Creator can be a person or people; a clan, tribe, or cultural group; or an organization that is primarily responsible for providing the essential knowledge or labor that goes into making a Digital Heritage Item or Media Asset. For example, the Creator field could list who designed or made a basket; the knowledge holders who provided the information for a book or the book’s author or illustrator; the singers, songwriters, dancers, or performers who bring to life cultural materials. Separate multiple Creators with semicolons (John Smith; Jane Doe). Commas are valid (last name, first name), as are quotes (John "Nickname" Smith).'))
+      ->setDescription(t('A creator is the person or group primarily responsible for making  or providing the core media assets or knowledge represented in a digital heritage item. While a creator is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple creators. Examples include a basket designer or weaver, knowledge holders who provided information for a book, a book’s author or illustrator, singers, songwriters, dancers, or performers. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Note that this is not the user publishing the digital heritage item on the site - that information is recorded in the automated author field. </br>As you type, names of existing creators will be displayed. Select an existing creator or enter a new name. To include additional creators, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -453,7 +454,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_format'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Format'))
-      ->setDescription(t('Format is the specific physical or digital manifestation of the Media Asset or Digital Heritage Item. Include physical format (eg: pamphlet, glass slide, open reel), duration or extent (eg: 90 minutes, 20 pages), dimensions (eg: 4x6”, 12x6x8cm), digital filetype (eg: PDF, JPG, MP3, MP4), or other details as needed.'))
+      ->setDescription(t('Format is the specific physical and/or digital properties of the media asset(s) represented in the digital heritage item. This may include details about the physical format (eg: pamphlet, glass slide, open reel tape), duration (eg: 90 minutes), extent (eg: 20 pages, 11 sheets), dimensions (eg: 4x6", 12x6x8cm), file format (eg: PDF, JPG, MP3), or additional information as needed. </br>As you type, existing formats will be displayed. Select an existing format or enter a new one. To include additional formats, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -473,7 +474,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are terms used to describe a Digital Heritage Item to ensure that the item will be discoverable when searching or browsing. Keywords are more flexible and specific than Categories. Contributors can create new Keywords as needed when creating or editing a Digital Heritage Item. Consider adding 3-­5 Keywords that will help users discover the Digital Heritage Item through searching or browsing. Separate multiple Keywords with semicolons (eg: basket; weaving).'))
+      ->setDescription(t('Keywords are used to tag digital heritage items to ensure that the items are discoverable when searching or browsing. They are often used to supplement categories as they can be created on the fly and may be more specific. </br>As you type, existing keywords will be displayed. Select an existing keyword or enter a new one. To include additional keywords, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -493,7 +494,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_language'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Language'))
-      ->setDescription(t('The language or languages used in the Digital Heritage Item or Media Asset. This includes text, audio, video.'))
+      ->setDescription(t('Language(s) present in the digital heritage item. This includes the textual metadata and any media assets. </br>As you type, existing languages will be displayed. Select an existing language or enter a new one. To include additional languages, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -513,7 +514,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('The person or people represented or referenced in the Digital Heritage Item or Media Asset. This may be people identifiable in a photograph, people speaking in an audio recording, present in a video, or referenced in a document. The People field is a way to identify people that may have been left out of the record because they were not a Creator or Contributor.'))
+      ->setDescription(t('A person or people represented or referenced in the digital heritage item or media asset. This field complements the creator and contributor fields. Examples include people identifiable in a photograph, people speaking in an audio recording, present in a video, or referenced in a document. </br>Names can be in any format that is appropriate for the content, eg: ""John Smith"" or ""Smith, John"". </br>As you type, names of existing people will be displayed. Select an existing person or enter a new name. To include additional people, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -533,7 +534,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_publisher'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Publisher'))
-      ->setDescription(t('A Publisher can be a person, an organization, or a service responsible for publishing the media asset or Digital Heritage Item.'))
+      ->setDescription(t('The person, organization, or service responsible for publishing the digital heritage item or media asset.	</br>As you type, existing publishers will be displayed. Select an existing publisher or enter a new one. To include additional publishers, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -553,7 +554,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_subject'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Subject'))
-      ->setDescription(t('The main topic or topics presented in the Digital Heritage Item. Subjects may be derived from existing classification systems (for example, Library of Congress Classification Numbers or Dewey Decimal numbers), controlled vocabularies (such as Medical Subject Headings or Art and Architecture Thesaurus descriptors), or can be created as needed within the site.'))
+      ->setDescription(t('Subject reflects the main topic(s) of the digital heritage item. It is primarily used to reference existing controlled vocabularies (eg: Library of Congress Subject Headings or Getty Art and Architecture Thesaurus), but a site-specific subject list can be developed as well. </br>As you type, existing subjects will be displayed. Select an existing subject or enter a new one. To include additional subjects, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -573,7 +574,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Type'))
-      ->setDescription(t('Type is the nature, genre, or function of the Media Asset or Digital Heritage Item. Examples include Image, Text, Sound, Video.'))
+      ->setDescription(t('Type is the broad nature, genre, or function of the media asset(s) represented in the digital heritage item. Examples include Image, Text, Sound, Video, or Physical Object. </br>As you type, existing types will be displayed. Select an existing type or enter a new one. To include additional types, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
