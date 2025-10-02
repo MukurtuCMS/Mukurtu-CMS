@@ -267,7 +267,8 @@ content:
     weight: 5
     region: content
     settings:
-      media_types: {  }
+      media_types:
+        - image
     third_party_settings: {  }
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
