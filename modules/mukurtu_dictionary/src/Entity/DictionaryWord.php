@@ -369,7 +369,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t(''))
+      ->setDescription(t('The thumbnail image is a clear visual example or illustration of the dictionary word. It is included in previews along with the term, translation, and recording fields.	</br>Select "Add media" to select or upload an image.'))
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
@@ -394,7 +394,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
       ->setLabel(t('Local Contexts Projects'))
-      ->setDescription(t('Local Contexts projects from the Local Contexts Hub.'))
+      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the dictionary word.	</br>Select one or more Local Contexts Projects.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -404,7 +404,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
       ->setLabel(t('Local Contexts Labels and Notices'))
-      ->setDescription(t('Local Contexts Labels and Notices from the Local Contexts Hub.'))
+      ->setDescription(t('This field allows selective application of one or more Labels from any available Local Contexts Project to the dictionary word.	</br>Select one or more Labels from the appropriate Local Contexts Project. If a complete project has already been selected, do not also select individual Labels from the same project.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -416,7 +416,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     // Dictionary Word Additional Entries (paragraph)
     $definitions['field_additional_word_entries'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Word Entries'))
-      ->setDescription(t(''))
+      ->setDescription(t('A dictionary word can have multiple word entries within it. This allows for more granular presentation of word conjugations, declensions, other forms (eg: gendered or plural forms), or display of closely connected forms of the word. Only the main word is shown when searching or browsing.	</br>Each word entry can include all fields from the Mukurtu Essentials tab except cultural protocols, sharing setting, language, and glossary, since those describe the dictionary word as a whole. </br>Word entries can be rearranged and collapsed for easier editing. To create additional word entries, select ""Add Word Entry".'))
       ->setSettings([
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
