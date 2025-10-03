@@ -158,7 +158,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_transcription'] = BaseFieldDefinition::create('string_long')
+    $definitions['field_transcription'] = BaseFieldDefinition::create('string')
       ->setLabel('Transcription')
       ->setDescription(t('A basic text transcription of an audio or video recording, or of text in an image or document. Including a transcription allows the text to be discoverable when searching for digital heritage items.'))
       ->setSettings([
