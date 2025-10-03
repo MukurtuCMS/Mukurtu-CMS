@@ -13,7 +13,7 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
 
     $definitions['field_word_entry_term'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Term'))
-      ->setDescription(t('A word, term, phrase, or other language element that is is derived from the term field of the main entry. </br>.Maximum 255 characters.'))
+      ->setDescription(t('A word, term, phrase, or other language element that is is derived from the term field of the main entry. </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
