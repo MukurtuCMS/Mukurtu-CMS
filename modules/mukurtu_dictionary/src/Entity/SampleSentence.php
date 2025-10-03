@@ -15,7 +15,7 @@ class SampleSentence extends Paragraph implements SampleSentenceInterface {
 
     $definitions['field_sentence'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Sample Sentence'))
-      ->setDescription(t('One or more example sentences that demonstrate use of the word entry.'))
+      ->setDescription(t('Text entry of the sample sentence. </br>Maximum 255 characters.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -25,7 +25,7 @@ class SampleSentence extends Paragraph implements SampleSentenceInterface {
 
     $definitions['field_sentence_recording'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Recording'))
-      ->setDescription('')
+      ->setDescription('Audio recording of the sample sentence. Recordings can be assigned a different cultural protocol from the dictionary word to allow differential access to the recordings and metadata.	</br>Select ""Add media"" to select or upload an audio file. </br>Supported file formats: MP3, M4A, WAV, AAC, OGG. </br>Note that the audio file itself includes a contributor field that can be used to record and indicate the name of the speaker.')
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
