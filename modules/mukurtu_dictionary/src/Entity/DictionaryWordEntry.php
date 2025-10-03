@@ -85,7 +85,7 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
 
     $definitions['field_recording'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Recording'))
-      ->setDescription('Audio recordings of the entry being spoken, usually on its own. Multiple recordings may be used to represent different types of speakers (eg: speakers of different ages, genders, accents, or dialects), or different forms the entry can take. </br>Recordings can be assigned a different cultural protocol from the dictionary word to allow differential access to the recordings and metadata. </br>"Select "Add media"" to select or upload audio files. Supported file formats: MP3, M4A, WAV, AAC, OGG. </br>Note that the audio file itself includes a contributor field that can be used to record and display the name of the speaker.')
+      ->setDescription('Audio recordings of the entry being spoken, usually on its own. Multiple recordings may be used to represent different types of speakers (eg: speakers of different ages, genders, accents, or dialects), or different forms the entry can take. </br>Recordings can be assigned a different cultural protocol from the dictionary word to allow differential access to the recordings and metadata. </br>Select "Add media"" to select or upload audio files. Supported file formats: MP3, M4A, WAV, AAC, OGG. </br>Note that the audio file itself includes a contributor field that can be used to record and display the name of the speaker.')
         ->setSettings([
           'target_type' => 'media',
           'handler' => 'default:media',
@@ -105,7 +105,7 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
 
     $definitions['field_sample_sentences'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Sample Sentences'))
-      ->setDescription(t('The entry can be included in longer sentences or phrases to provide more context or better show multiple forms of the entry. A single sample sentence can be text only, audio only, or both corresponding text and audio. </br>To include additional sample sentences, select "Add another item.'))
+      ->setDescription(t('The entry can be included in longer sentences or phrases to provide more context or better show multiple forms of the entry. A single sample sentence can be text only, audio only, or both corresponding text and audio. </br>To include additional sample sentences, select "Add another item".'))
       ->setSettings([
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
