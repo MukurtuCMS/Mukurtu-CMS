@@ -44,6 +44,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_alternate_spelling'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Alternate Spelling'))
       ->setDescription(t('An alternate spelling of the term. Examples include historic or current variant spellings, spellings from different dialects or in different writing systems, or any other alternate spelling that will help find the dictionary word when searching. </br>Maximum 255 characters.'))
+      ->setDescription(t('An alternate spelling of the term. Examples include historic or current variant spellings, spellings from different dialects or in different writing systems, or any other alternate spelling that will help find the dictionary word when searching. </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -58,6 +59,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_glossary_entry'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Glossary Entry'))
       ->setDescription(t('By default, the dictionary word will be indexed, sorted, or alphabetized by the first character of the term. The glossary entry is used for indexing when a character or letter other than the first character in the term should be referenced. Examples include diacritic or accent-initial words, root word markers at the start of the term, or combined characters (eg: ch or á in some languages are considered a single character).'))
+      ->setDescription(t('By default, the dictionary word will be indexed, sorted, or alphabetized by the first character of the term. The glossary entry is used for indexing when a character or letter other than the first character in the term should be referenced. Examples include diacritic or accent-initial words, root word markers at the start of the term, or combined characters (eg: ch or á in some languages are considered a single character).'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -71,6 +73,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
+      ->setDescription(t('Keywords are used to tag dictionary words to ensure that they are discoverable when searching or browsing.	</br>As you type, existing keywords will be displayed. Select an existing keyword or enter a new one. To include additional keywords, select "Add another item".'))
       ->setDescription(t('Keywords are used to tag dictionary words to ensure that they are discoverable when searching or browsing.	</br>As you type, existing keywords will be displayed. Select an existing keyword or enter a new one. To include additional keywords, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
@@ -97,6 +100,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Map Points'))
       ->setDescription(t('A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a dictionary word. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the dictionary word. If the location is sensitive, carefully consider using this field.	</br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.'))
+      ->setDescription(t('A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a dictionary word. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the dictionary word. If the location is sensitive, carefully consider using this field.	</br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -107,6 +111,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
       ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the dictionary word.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
+      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the dictionary word.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -116,6 +121,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
+      ->setDescription(t('A named place, or places, that are closely connected to the dictionary word. Examples include words that are place names,  where a word originated, or a place the word is otherwise connected to. </br>As you type, existing locations will be displayed. Select an existing location or enter a new one. To include additional locations, select "Add another item".'))
       ->setDescription(t('A named place, or places, that are closely connected to the dictionary word. Examples include words that are place names,  where a word originated, or a place the word is otherwise connected to. </br>As you type, existing locations will be displayed. Select an existing location or enter a new one. To include additional locations, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
@@ -142,6 +148,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_dictionary_word_language'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Language'))
       ->setDescription(t('Each dictionary word is associated with one language. </br>As you type, existing languages will be displayed. Select a language. Languages must first be created by a Mukurtu Manager, or referenced in a digital heritage item.'))
+      ->setDescription(t('Each dictionary word is associated with one language. </br>As you type, existing languages will be displayed. Select a language. Languages must first be created by a Mukurtu Manager, or referenced in a digital heritage item.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -166,6 +173,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Assets'))
+      ->setDescription(t('Additional media assets can further enrich a dictionary word. Examples include photos of a plant or animal named in the word, a longer video of the word being taught, or a relevant page from a language learning book. Supported media types are images, documents, video, audio, and embed code. dictionary words can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the dictionary word to allow differential access to the media assets and metadata. </br>Select "Add media" to select or upload media assets.'))
       ->setDescription(t('Additional media assets can further enrich a dictionary word. Examples include photos of a plant or animal named in the word, a longer video of the word being taught, or a relevant page from a language learning book. Supported media types are images, documents, video, audio, and embed code. dictionary words can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the dictionary word to allow differential access to the media assets and metadata. </br>Select "Add media" to select or upload media assets.'))
       ->setSettings([
         'target_type' => 'media',
@@ -196,6 +204,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
       ->setDescription('A contributor is a person or group who aided in the making of the entry. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A dictionary word can have multiple contributors. Examples include language speakers who recorded the word, or contributed knowledge and history of the word. </br>Names can be in any format that is appropriate for the content, eg: ""John Smith"" or ""Smith, John"". </br>As you type, names of existing contributors will be displayed. Select an existing contributor or enter a new name. To include additional contributors, select "Add another item".')
+      ->setDescription('A contributor is a person or group who aided in the making of the entry. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A dictionary word can have multiple contributors. Examples include language speakers who recorded the word, or contributed knowledge and history of the word. </br>Names can be in any format that is appropriate for the content, eg: ""John Smith"" or ""Smith, John"". </br>As you type, names of existing contributors will be displayed. Select an existing contributor or enter a new name. To include additional contributors, select "Add another item".')
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -216,6 +225,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_definition'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Definition'))
       ->setDescription('A longer definition or description of the entry. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.')
+      ->setDescription('A longer definition or description of the entry. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.')
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
@@ -226,6 +236,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_pronunciation'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Pronunciation'))
+      ->setDescription(t('A pronunciation guide used to teach language learners the correct pronunciation of the entry. Pronunciation guides may use a standard phonetic alphabet or whatever notation system is used by speakers and teachers of the language, eg: indicating stress with bold text or capitalizing syllables. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setDescription(t('A pronunciation guide used to teach language learners the correct pronunciation of the entry. Pronunciation guides may use a standard phonetic alphabet or whatever notation system is used by speakers and teachers of the language, eg: indicating stress with bold text or capitalizing syllables. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setSettings([
         'max_length' => 255,
@@ -286,6 +297,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_source'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Source'))
       ->setDescription(t('Reference to a resource from which the entry was collected or sourced. Examples include a specific dictionary or language researcher, or the places where the entry is used (in the case of dialectical variation, for example). </br>Maximum 255 characters.'))
+      ->setDescription(t('Reference to a resource from which the entry was collected or sourced. Examples include a specific dictionary or language researcher, or the places where the entry is used (in the case of dialectical variation, for example). </br>Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -299,6 +311,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_translation'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Translation'))
+      ->setDescription(t('Translations of the entry into other languages. Consider indicating the language of the translation, eg: Apple (English). </br>Maximum 255 characters. </br>To include additional translations, select "Add another item."'))
       ->setDescription(t('Translations of the entry into other languages. Consider indicating the language of the translation, eg: Apple (English). </br>Maximum 255 characters. </br>To include additional translations, select "Add another item."'))
       ->setSettings([
         'max_length' => 255,
@@ -314,6 +327,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_word_origin'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Word Origin'))
       ->setDescription('Information about the history or etymology of the entry. Examples include the origin language of a borrowed word or the date the word came into the language. </br>Maximum 255 characters.')
+      ->setDescription('Information about the history or etymology of the entry. Examples include the origin language of a borrowed word or the date the word came into the language. </br>Maximum 255 characters.')
       ->setSettings([
         'max_length' => 255,
       ])
@@ -327,6 +341,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_word_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Word Type'))
+      ->setDescription('Word types may include parts of speech, syntactic or grammatical categories, or any other relevant system to classify entries.	</br>As you type, existing word types will be displayed. Select an existing word type or enter a new one. To include additional word types, select "Add another item".')
       ->setDescription('Word types may include parts of speech, syntactic or grammatical categories, or any other relevant system to classify entries.	</br>As you type, existing word types will be displayed. Select an existing word type or enter a new one. To include additional word types, select "Add another item".')
       ->setSettings([
         'target_type' => 'taxonomy_term',
@@ -347,6 +362,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
+      ->setDescription(t('Dictionary words can be related to any other site content when there is a connection between those items that is important to show. Examples include digital heritage items that include the word. 	</br>Select "Select Content" to choose from existing site content.'))
       ->setDescription(t('Dictionary words can be related to any other site content when there is a connection between those items that is important to show. Examples include digital heritage items that include the word. 	</br>Select "Select Content" to choose from existing site content.'))
       ->setSettings([
         'target_type' => 'node',
@@ -369,6 +385,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Thumbnail'))
+      ->setDescription(t('The thumbnail image is a clear visual example or illustration of the dictionary word. It is included in previews along with the term, translation, and recording fields.	</br>Select "Add media" to select or upload an image.'))
       ->setDescription(t('The thumbnail image is a clear visual example or illustration of the dictionary word. It is included in previews along with the term, translation, and recording fields.	</br>Select "Add media" to select or upload an image.'))
       ->setSettings([
         'target_type' => 'media',
@@ -395,6 +412,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
       ->setLabel(t('Local Contexts Projects'))
       ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the dictionary word.	</br>Select one or more Local Contexts Projects.'))
+      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the dictionary word.	</br>Select one or more Local Contexts Projects.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -404,6 +422,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
       ->setLabel(t('Local Contexts Labels and Notices'))
+      ->setDescription(t('This field allows selective application of one or more Labels from any available Local Contexts Project to the dictionary word.	</br>Select one or more Labels from the appropriate Local Contexts Project. If a complete project has already been selected, do not also select individual Labels from the same project.'))
       ->setDescription(t('This field allows selective application of one or more Labels from any available Local Contexts Project to the dictionary word.	</br>Select one or more Labels from the appropriate Local Contexts Project. If a complete project has already been selected, do not also select individual Labels from the same project.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)

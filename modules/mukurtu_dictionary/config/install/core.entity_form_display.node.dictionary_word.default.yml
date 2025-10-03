@@ -74,7 +74,7 @@ third_party_settings:
         id: ''
         label_as_html: false
         formatter: closed
-        description: 'A dictionary word can have multiple word entries within it. This allows for more granular presentation of word conjugations, declensions, other forms (eg: gendered or plural forms), or display of closely connected forms of the word. Only the main word is shown when searching or browsing.	</br>Each word entry can include all fields from the Mukurtu Essentials tab except cultural protocols, sharing setting, language, and glossary, since those describe the dictionary word as a whole. </br>Word entries can be rearranged and collapsed for easier editing. To create additional word entries, select "Add Word Entry".'
+        description: 'A dictionary word can have multiple word entries within it. This allows for more granular presentation of word conjugations, declensions, other forms (eg: gendered or plural forms), or display of closely connected forms of the word. Only the main word is shown when searching or browsing.	</br>Each word entry can include all fields from the Mukurtu Essentials tab except cultural protocols, sharing setting, language, and glossary, since those describe the dictionary word as a whole. </br>Word entries can be rearranged and collapsed for easier editing. To create additional word entries, select ""Add Word Entry".'
         required_fields: true
     group_related_content:
       children:
