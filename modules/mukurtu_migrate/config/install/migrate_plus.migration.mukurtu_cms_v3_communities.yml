@@ -26,8 +26,8 @@ process:
       plugin: static_map
       source: group_access
       map:
-        0: open
-        2: strict
+        0: public
+        2: community-only
       default_value: strict
   status: status
 
