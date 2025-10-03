@@ -141,7 +141,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_dictionary_word_language'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Language'))
-      ->setDescription(t('Each dictionary word is associated with one language. </br>As you type, existing languages will be displayed. Select aa language. Languages must first be created by a Mukurtu Manager, or referenced in a digital heritage item.'))
+      ->setDescription(t('Each dictionary word is associated with one language. </br>As you type, existing languages will be displayed. Select a language. Languages must first be created by a Mukurtu Manager, or referenced in a digital heritage item.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -215,7 +215,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_definition'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Definition'))
-      ->setDescription('A longer definition or description of the entry. ')
+      ->setDescription('A longer definition or description of the entry. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.')
       ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
@@ -259,7 +259,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_sample_sentences'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Sample Sentences'))
-      ->setDescription(t('The entry used in longer sentences or phrases to provide more context or better show multiple forms of the entry. A single sample sentence can be text only, audio only, or both corresponding text and audio. </br>To include additional sample sentences, select "Add another item."'))
+      ->setDescription(t('The entry can be included in longer sentences or phrases to provide more context or better show multiple forms of the entry. A single sample sentence can be text only, audio only, or both corresponding text and audio. </br>To include additional sample sentences, select "Add another item."'))
       ->setSettings([
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
@@ -416,7 +416,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     // Dictionary Word Additional Entries (paragraph)
     $definitions['field_additional_word_entries'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Word Entries'))
-      ->setDescription(t('A dictionary word can have multiple word entries within it. This allows for more granular presentation of word conjugations, declensions, other forms (eg: gendered or plural forms), or display of closely connected forms of the word. Only the main word is shown when searching or browsing.	</br>Each word entry can include all fields from the Mukurtu Essentials tab except cultural protocols, sharing setting, language, and glossary, since those describe the dictionary word as a whole. </br>Word entries can be rearranged and collapsed for easier editing. To create additional word entries, select ""Add Word Entry".'))
+      ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
