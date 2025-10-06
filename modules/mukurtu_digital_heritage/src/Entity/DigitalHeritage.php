@@ -160,7 +160,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_transcription'] = BaseFieldDefinition::create('string')
       ->setLabel('Transcription')
-      ->setDescription(t('A basic text transcription of an audio or video recording, or of text in an image or document. Including a transcription allows the text to be discoverable when searching for digital heritage items.'))
+      ->setDescription(t('A basic text transcription of an audio or video recording, or of text in an image or document. Including a transcription allows the text to be discoverable when searching for digital heritage items. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setSettings([
         'max_length' => 255,
       ])
