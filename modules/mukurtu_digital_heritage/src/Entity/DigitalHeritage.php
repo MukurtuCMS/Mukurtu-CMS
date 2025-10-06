@@ -414,7 +414,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
-      ->setDescription(t('A contributor is a person or group who aided in the making of a digital heritage item. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple contributors. Examples include someone who wrote, compiled, or illustrated a book or recorded a song, the people who edited or produced a film, or people collaborated or consulted on a project. </br>Names can be in any format that is appropriate for the content, eg: ""John Smith"" or ""Smith, John"". </br> As you type, names of existing contributors will be displayed. Select an existing contributor or enter a new name. To include additional contributors, select "Add another item".'))
+      ->setDescription(t('A contributor is a person or group who aided in the making of a digital heritage item. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple contributors. Examples include someone who wrote, compiled, or illustrated a book or recorded a song, the people who edited or produced a film, or people collaborated or consulted on a project. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br> As you type, names of existing contributors will be displayed. Select an existing contributor or enter a new name. To include additional contributors, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -514,7 +514,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('A person or people represented or referenced in the digital heritage item or media asset. This field complements the creator and contributor fields. Examples include people identifiable in a photograph, people speaking in an audio recording, present in a video, or referenced in a document. </br>Names can be in any format that is appropriate for the content, eg: ""John Smith"" or ""Smith, John"". </br>As you type, names of existing people will be displayed. Select an existing person or enter a new name. To include additional people, select "Add another item".'))
+      ->setDescription(t('A person or people represented or referenced in the digital heritage item or media asset. This field complements the creator and contributor fields. Examples include people identifiable in a photograph, people speaking in an audio recording, present in a video, or referenced in a document. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>As you type, names of existing people will be displayed. Select an existing person or enter a new name. To include additional people, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
