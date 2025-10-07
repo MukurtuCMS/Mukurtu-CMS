@@ -71,7 +71,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: closed
-        description: ''
+        description: 'The biography is an account of the person’s life, whether written or compiled by others, an autobiography, or both. While they are primarily written, they may include media assets as well. Biographies can be composed in sections to more clearly structure the person’s life events, story, accomplishments, and relationships.	</br>Biography sections can be rearranged and collapsed for easier editing. To add additional biography sections, select "Add Biography section".'
         required_fields: true
     group_additional_fields:
       children:
@@ -120,7 +120,7 @@ third_party_settings:
         id: ''
         label_as_html: false
         open: true
-        description: ''
+        description: 'Related people is used to reflect real-world relationships between people. Examples include family, professional, cultural, educational, or any other kind of interpersonal relationships. Note that these relationships are not automatically bi-directional, and must be added to both person records.	</br>Related people can be rearranged and collapsed for easier editing. To add additional relations, select "Add Related Person".'
         required_fields: true
     group_local_contexts:
       children:
@@ -136,7 +136,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: open
-        description: ''
+        description: '"The Local Contexts Traditional Knowledge (TK) and Biocultural (BC) Labels are tools for Indigenous communities and local organizations. Developed through sustained partnership and testing within Indigenous communities across multiple countries, the Labels allow communities to express local and specific conditions for sharing and engaging in future research and relationships in ways that are consistent with already existing community rules, governance, and protocols for using, sharing, and circulating knowledge and data." For more information, visit <a href="https://localcontexts.org">localcontexts.org</a>.	</br>You must first customize your TK and BC Labels using the Local Contexts Hub and import your Project(s) before you can apply Projects or Labels to person records.'
         required_fields: true
     group_locations:
       children:
@@ -153,7 +153,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: open
-        description: ''
+        description: 'A set of location related fields that include mapping/geographic data for visually placing and displaying person records, as well as descriptive and taxonomic fields.'
         required_fields: true
 id: node.person.default
 targetEntityType: node
