@@ -11,7 +11,7 @@ use Drupal\Core\Session\AccountInterface;
 class CollectionAddSubcollectionController extends ControllerBase {
 
   /**
-   * Check access for creating new subcollections via the entity form.
+   * Check access for creating new sub-collections via the entity form.
    *
    * @param \Drupal\node\NodeInterface $node
    *   The parent collection.
@@ -40,7 +40,7 @@ class CollectionAddSubcollectionController extends ControllerBase {
       ->getFormObject('node', 'default')
       ->setEntity($subcollection);
 
-    $form_title = $this->t('Creating a new subcollection in %collection', ['%collection' => $node->getTitle()]);
+    $form_title = $this->t('Creating a new sub-collection in %collection', ['%collection' => $node->getTitle()]);
     $build[] = ['#type' => 'markup', '#markup' => "<h2>$form_title</h2>"];
     $build[] = $this->formBuilder()->getForm($form);
 

@@ -7,7 +7,7 @@ mukurtu_collection.add_collection:
     - mukurtu_collection.collection_browse_page
 
 mukurtu_collection.new_subcollection:
-  title: 'New Subcollection'
+  title: 'New Sub-collection'
   route_name: mukurtu_collection.new_subcollection
   appears_on:
     - entity.node.canonical
