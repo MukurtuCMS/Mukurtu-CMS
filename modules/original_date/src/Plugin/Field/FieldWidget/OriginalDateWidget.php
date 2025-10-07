@@ -74,7 +74,7 @@ class OriginalDateWidget extends WidgetBase {
 
     $element['description'] = [
       '#type' => 'processed_text',
-      '#text' => $this->t('Acceptable date formats are YYYY, YYYY-MM, or YYYY-MM-DD.'),
+      '#text' => $this->t(''),
     ];
 
     return $element;

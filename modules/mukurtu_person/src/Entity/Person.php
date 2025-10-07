@@ -133,7 +133,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_related_people'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Related People'))
-      ->setDescription(t('Related people is used to reflect real-world relationships between people. Examples include family, professional, cultural, educational, or any other kind of interpersonal relationships. Note that these relationships are not automatically bi-directional, and must be added to both person records.	</br>Related people can be rearranged and collapsed for easier editing. To add additional relations, select "Add Related Person".'))
+      ->setDescription(t(''))
       ->setSettings([
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
@@ -177,7 +177,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_representative_terms'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Representative Terms'))
-      ->setDescription(t('People may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. Representative terms are used to aggregate and display all content where the person is identified by connecting those disparate names.	</br>"Select ""Select Terms"" to choose from existing names. Choose all names representing this person. </br>Each taxonomy (eg: creator, contributor, people) must first be enabled by a Mukurtu Manager. New names cannot be added here and must already be in used in existing site content, in an enabled taxonomy."'))
+      ->setDescription(t('People may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. Representative terms are used to aggregate and display all content where the person is identified by connecting those disparate names.	</br>Select "Select Terms" to choose from existing names. Choose all names representing this person. </br>Each taxonomy (eg: creator, contributor, people) must first be enabled by a Mukurtu Manager. New names cannot be added here and must already be in used in existing site content, in an enabled taxonomy.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
