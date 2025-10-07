@@ -46,13 +46,13 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_audio_file'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Audio file'))
-      ->setDescription(t('Allowed file formats are mp3, wav, and aac.'))
+      ->setDescription(t('Allowed file formats are mp3, m4a, wav, ogg, and aac.'))
       ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'file',
         'handler' => 'default:file',
         'file_directory' => '[date:custom:Y]-[date:custom:m]',
-        'file_extensions' => 'mp3 wav aac',
+        'file_extensions' => 'mp3 wav aac m4a ogg',
         'max_filesize' => '',
         'description_field' => FALSE,
         'display_field' => FALSE,
