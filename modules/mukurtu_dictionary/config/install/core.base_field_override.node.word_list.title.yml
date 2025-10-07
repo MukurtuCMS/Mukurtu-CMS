@@ -8,7 +8,7 @@ field_name: title
 entity_type: node
 bundle: word_list
 label: 'Word list name'
-description: ''
+description: 'A short, descriptive name for the word list. The name should give users useful information about the word list when browsing or searching. Maximum 255 characters.'
 required: true
 translatable: true
 default_value: {  }
