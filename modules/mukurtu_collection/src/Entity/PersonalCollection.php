@@ -287,7 +287,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Personal collection name'))
-      ->setDescription(t('The name of the Personal collection.'))
+      ->setDescription(t('A short, descriptive name for the personal collection. Maximum 255 characters.'))
       ->setRevisionable(TRUE)
       ->setSettings([
         'max_length' => 256,
@@ -309,7 +309,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
 
     $fields['field_summary'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Summary'))
-      ->setDescription(t(''))
+      ->setDescription(t('A short summary of the personal collection if needed to provide information or context. Maximum 255 characters.'))
       ->setDefaultValue('')
       ->setRevisionable(TRUE)
       ->setSettings([
@@ -328,7 +328,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
 
     $fields['field_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Description')
-      ->setDescription(t(''))
+      ->setDescription(t('A longer description or explanation of the personal collection if needed.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -338,12 +338,12 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
 
     $fields['field_pc_privacy'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Privacy Setting'))
-      ->setDescription(t('Private personal collections are only visible to you. Public personal collections are accessible by anyone.'))
+      ->setDescription(t('This privacy setting only applies to the personal collection page itself. If a public personal collection includes content that is not public, users will only see that content if they already have permission.'))
       ->setDefaultValue('private')
       ->setSettings([
         'allowed_values' => [
-          'private' => t('Private'),
-          'public' => t('Public'),
+          'private' => t('Private: Only you can see your private personal collections.'),
+          'public' => t('Public: Anyone with a link to a public personal collection can see it.'),
         ],
       ])
       ->setDisplayOptions('view', [
@@ -361,7 +361,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
 
     $fields['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Personal Collection Image'))
-      ->setDescription(t('An image to represent the personal collection.'))
+      ->setDescription(t('A featured image that is used on the personal collection page. The image may be drawn from content in the collection, or selected to complement the collection.	</br>Select "Add media" to select or upload an image.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -387,7 +387,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
 
     $fields['field_items_in_collection'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Items'))
-      ->setDescription(t('The content contained in the personal collection.'))
+      ->setDescription(t('The digital heritage items, person records, dictionary words, or other existing content included in the personal collection.	</br>Select "Select Content" to choose from existing site content.'))
       ->setSetting('target_type', 'node')
       ->setSetting('handler', 'default:node')
       ->setSetting('handler_settings', [
