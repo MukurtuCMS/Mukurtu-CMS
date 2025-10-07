@@ -137,6 +137,7 @@ class CulturalProtocolWidget extends WidgetBase {
       '#type' => 'details',
       '#title' => $this->t("Select cultural protocols to apply to the item."),
       '#open' => TRUE,
+      '#description' => $this->t("Cultural protocols determine which users can access this content. Cultural protocols are managed by their parent community, which represents a group of contributors. All content must be assigned at least one cultural protocol. Most content only requires one cultural protocol, but more granular access can be specified by selecting multiple protocols, or even protocols from multiple communities. </br>Select one or more cultural protocols. The relevant community or communities will be automatically applied."),
     ];
     $c_delta = 0;
 
@@ -213,6 +214,7 @@ class CulturalProtocolWidget extends WidgetBase {
         '#title' => $this->t('Sharing Setting'),
         '#options' => $items[$delta]->getSettableSharingOptions(),
         '#default_value' => $sharing_setting ?? 'all',
+        '#description' => $this->t('Sharing setting determines which users can access this content when multiple cultural protocols are selected. The more restrictive "all cultural protocols" is the default setting, and can be used when only one cultural protocol is selected.'),
       ],
       '#element_validate' => [
         [static::class, 'validate'],
