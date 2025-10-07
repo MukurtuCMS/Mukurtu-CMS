@@ -209,7 +209,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: open
-        description: 'A set of location related fields that include mapping/geographic data for visually placing and displaying digital heritage items, as well as descriptive and taxonomic fields. </br>Map points can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.'
+        description: 'A set of location related fields that include mapping/geographic data for visually placing and displaying digital heritage items, as well as descriptive and taxonomic fields.'
         required_fields: true
 id: node.digital_heritage.default
 targetEntityType: node
