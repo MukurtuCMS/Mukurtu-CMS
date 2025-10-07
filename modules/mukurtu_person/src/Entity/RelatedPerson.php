@@ -11,7 +11,7 @@ class RelatedPerson extends Paragraph {
     $definitions = [];
     $definitions['field_related_person'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Person'))
-      ->setDescription(t(''))
+      ->setDescription(t('A person that has a relationship with the subject of the person record. </br>Select "Select Content" to choose from existing person records.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -31,7 +31,7 @@ class RelatedPerson extends Paragraph {
 
     $definitions['field_relationship_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Relationship Type'))
-      ->setDescription('')
+      ->setDescription('The type of relationship between the related person and the subject of the person record. </br>As you type, existing relationship types will be displayed. Select an existing relationship type or enter a new one. To include additional relationship types, select "Add another item".')
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
