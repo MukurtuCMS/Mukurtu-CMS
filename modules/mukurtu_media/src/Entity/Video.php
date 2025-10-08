@@ -62,7 +62,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
       ->setDescription(t(''))
       ->setDefaultValue('')
       ->setSettings([
-        'file_extensions' => 'mp4',
+        'file_extensions' => 'mp4 webm ogv',
         'file_directory' => '[date:custom:Y]-[date:custom:m]',
         'max_filesize' => '',
         'description_field' => FALSE,
