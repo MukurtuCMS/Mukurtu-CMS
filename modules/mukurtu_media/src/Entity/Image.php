@@ -63,7 +63,7 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
           'height' => NULL,
         ],
         'file_directory' => '[date:custom:Y]-[date:custom:m]',
-        'file_extensions' => 'png gif jpg jpeg',
+        'file_extensions' => 'png gif jpg jpeg webp',
         'max_filesize' => '',
         'handler' => 'default:file',
         'uri_scheme' => 'private',
