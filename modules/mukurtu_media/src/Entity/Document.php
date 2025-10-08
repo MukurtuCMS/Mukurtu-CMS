@@ -79,7 +79,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
         'target_type' => 'file',
         'handler' => 'default:file',
         'file_directory' => '[date:custom:Y]-[date:custom:m]',
-        'file_extensions' => 'txt rtf doc docx ppt pptx xls xlsx pdf odf odg odp ods odt fodt fods fodp fodg key numbers pages',
+        'file_extensions' => 'txt rtf doc docx ppt pptx xls xlsx pdf odf odg odp ods odt fodt fods fodp fodg key numbers pages csv sxw zip rar gz 7z tar',
         'max_filesize' => '',
         'description_field' => FALSE,
         'display_field' => FALSE,
