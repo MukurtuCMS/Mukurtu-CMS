@@ -46,7 +46,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_audio_file'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Audio file'))
-      ->setDescription(t('Allowed file formats are mp3, m4a, wav, ogg, and aac.'))
+      ->setDescription(t('Allowed file formats are mp3, m4a, wav, ogg, and aac. </br>Select "Choose File" to upload an audio file.'))
       ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'file',
@@ -68,7 +68,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_transcription'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Transcription'))
-      ->setDescription(t('A short (255 character) transcription entered here will be displayed alongside the recording if it used as sample sentence in a dictionary word.'))
+      ->setDescription(t('A short text transcription of the audio file. This is used as the corresponding text when the audio file is used as a sample sentence in a dictionary word. Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -82,7 +82,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
-      ->setDescription(t('Names entered here will be displayed alongside the recording in a dictionary word to indicate the speaker.'))
+      ->setDescription(t('Speakers or singers present in the audio file. Contributors listed here are displayed in the speaker field that accompanies the audio file in dictionary words.	</br>As you type, names of existing contributors will be displayed. Select an existing contributor or enter a new name. To include additional contributors, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -107,7 +107,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t('Media tags entered here will be used to display media content warnings if those are used.'))
+      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	</br>As you type, existing media tags will be displayed. Select an existing media tag or enter a new term. To include additional media tags, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -132,7 +132,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('Names entered here will be used to display media content warnings if those are used.'))
+      ->setDescription(t('A person or people present or referenced in the audio file. This is used to trigger deceased person media content warnings.	</br>As you type, names of existing people will be displayed. Select an existing person or enter a new name. To include additional people, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -157,7 +157,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t('Mukurtu uses an interactive audio player or a generic thumbnail depending on the theme. You can provide your own image here if you want to use a specific thumbnail instead of the generic thumbnail for this audio file.'))
+      ->setDescription(t('Audio files are usually represented by an interactive audio player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	</br>Select "Choose File" to upload a thumbnail image.'))
       ->setDefaultValue('')
       ->setSettings([
         'alt_field' => TRUE,
@@ -191,7 +191,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_identifier'] = BaseFieldDefinition::create('string')
       ->setLabel('Identifier')
-      ->setDescription('A unique reference to the recording. Examples include call numbers or accession numbers. This field is mostly used for internal reference and is not displayed to most users.')
+      ->setDescription('A unique, unambiguous reference to the media asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. Maximum 255 characters.')
       ->setSettings([
         'max_length' => 255,
       ])
