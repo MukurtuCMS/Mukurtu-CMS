@@ -163,7 +163,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setLabel(t('Title'))
-      ->setDescription(t('The title of the multipage item.'))
+      ->setDescription(t('A short, descriptive name for the multipage item. The title should give users useful information about the item when browsing or searching. Maximum 255 characters.	</br>The title will default to the title or name of the content used as the first page, but can be changed.'))
       ->setRequired(TRUE)
       ->setSetting('max_length', 255)
       ->setDisplayOptions('form', [
@@ -180,7 +180,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
 
     $fields['field_pages'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Pages'))
-      ->setDescription(t('Item pages for the multipage item.'))
+      ->setDescription(t('All pages included in the multipage item. Examples include yearbooks, scrapbooks, or photo albums.	</br>Select "Select Content" to choose from existing site content. Pages will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order. </br>The content types that can be included in multipage items must be configured by a Mukurtu Manager.'))
       ->setSetting('target_type', 'node')
       ->setSetting('handler', 'default:node')
       ->setSetting('handler_settings', [

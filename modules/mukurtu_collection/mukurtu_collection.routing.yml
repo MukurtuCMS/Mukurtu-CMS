@@ -43,7 +43,7 @@ mukurtu_collection.add_item_to_personal_collection:
 mukurtu_collection.new_subcollection:
   path: '/node/{node}/new-subcollection'
   defaults:
-    _title: 'New Subcollection'
+    _title: 'New Sub-collection'
     _controller: '\Drupal\mukurtu_collection\Controller\CollectionAddSubcollectionController::newSubcollection'
   options:
     _admin_route: TRUE

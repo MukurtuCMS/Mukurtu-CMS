@@ -98,7 +98,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: open
-        description: ''
+        description: '"The Local Contexts Traditional Knowledge (TK) and Biocultural (BC) Labels are tools for Indigenous communities and local organizations. Developed through sustained partnership and testing within Indigenous communities across multiple countries, the Labels allow communities to express local and specific conditions for sharing and engaging in future research and relationships in ways that are consistent with already existing community rules, governance, and protocols for using, sharing, and circulating knowledge and data." For more information, visit <a href="https://localcontexts.org">localcontexts.org</a>.	</br>You must first customize your TK and BC Labels using the Local Contexts Hub and import your Project(s) before you can apply Projects or Labels to collections. </br>Note that this does NOT apply Projects or Labels to content within the collection, that is done on a per-content basis.'
         required_fields: true
     group_locations:
       children:
@@ -115,7 +115,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: open
-        description: ''
+        description: 'A set of location related fields that include mapping/geographic data for visually placing and displaying collections, as well as descriptive and taxonomic fields.'
         required_fields: true
 id: node.collection.default
 targetEntityType: node

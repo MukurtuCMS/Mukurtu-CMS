@@ -11,7 +11,7 @@ class FormattedTextWithTitle extends Paragraph {
     $definitions = [];
     $definitions['field_title'] = BaseFieldDefinition::create('string')
       ->setLabel('Title')
-      ->setDescription('')
+      ->setDescription('The title of the biography section. Examples include "Early life", "Education", or "Professional career". Maximum 255 characters.')
       ->setSettings([
         'max_length' => 255,
       ])
@@ -25,7 +25,7 @@ class FormattedTextWithTitle extends Paragraph {
 
     $definitions['field_body'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Body')
-      ->setDescription('')
+      ->setDescription('The body of the biography section.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.')
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
