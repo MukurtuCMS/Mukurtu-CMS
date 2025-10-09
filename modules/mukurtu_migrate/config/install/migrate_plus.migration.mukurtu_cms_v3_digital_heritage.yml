@@ -218,7 +218,10 @@ process:
     plugin: transform_tk_label
     source: field_licence_trad
   field_creative_commons: field_licence_std_cc
-  field_transcription: field_transcription
+  field_transcription/value: field_transcription/0/value
+  field_transcription/format:
+    plugin: default_value
+    default_value: basic_html
   field_external_links:
     -
       plugin: sub_process
