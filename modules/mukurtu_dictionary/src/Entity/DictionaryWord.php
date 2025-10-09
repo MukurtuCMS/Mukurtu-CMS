@@ -222,7 +222,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_definition'] = BaseFieldDefinition::create('string_long')
+    $definitions['field_definition'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Definition'))
       ->setDescription('A longer definition or description of the entry. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.')
       ->setDescription('A longer definition or description of the entry. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.')
