@@ -1,0 +1,7 @@
+name: 'Mukurtu Administration'
+description: 'Configuration and adjustments for administration pages and editor experience.'
+type: module
+core_version_requirement: '^9.4 || ^10'
+package: 'Mukurtu CMS'
+dependencies:
+  - 'drupal:navigation'
