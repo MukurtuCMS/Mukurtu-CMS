@@ -23,7 +23,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
 
     $definitions['field_media_external_embed'] = BaseFieldDefinition::create('text_long')
       ->setLabel('External Embed')
-      ->setDescription(t('Paste your embed code here. Note that externally hosted resources cannot be protected by cultural protocols.'))
+      ->setDescription(t('Embed code from an external website. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings.	</br>External embeds are usually some kind of code wrapped in <iframe></iframe> tags.'))
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
@@ -33,7 +33,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t(''))
+      ->setDescription(t('External embeds usually display the content of the embed, with a thumbnail image used in certain contexts. Thumbnail images must be provided for external embeds, and are often a screenshot of the embedded content.	</br>Select "Choose File" to upload a thumbnail image.'))
       ->setDefaultValue('')
       ->setSettings([
         'alt_field' => TRUE,
@@ -67,7 +67,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t(''))
+      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	</br>As you type, existing media tags will be displayed. Select an existing media tag or enter a new term. To include additional media tags, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -92,7 +92,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t(''))
+      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	</br>As you type, names of existing people will be displayed. Select an existing person or enter a new name. To include additional people, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -117,7 +117,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
 
     $definitions['field_identifier'] = BaseFieldDefinition::create('string')
       ->setLabel('Identifier')
-      ->setDescription('')
+      ->setDescription('A unique, unambiguous reference to the media asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. Maximum 255 characters.')
       ->setSettings([
         'max_length' => 255,
       ])
