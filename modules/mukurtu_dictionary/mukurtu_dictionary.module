@@ -10,6 +10,7 @@ use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordEntry;
 use Drupal\mukurtu_dictionary\Entity\SampleSentence;
 use Drupal\mukurtu_dictionary\Entity\WordList;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_theme().
@@ -100,5 +101,25 @@ function mukurtu_dictionary_entity_bundle_field_info(EntityTypeInterface $entity
       ->setDisplayConfigurable('view', TRUE);
 
     return $fields;
+  }
+}
+
+/**
+ * Implements hook_form_form_id_alter().
+ *
+ * Pull dictionary language field options from config.
+ */
+function mukurtu_dictionary_form_node_dictionary_word_form_alter(&$form, FormStateInterface $form_state) {
+  $config = \Drupal::config('mukurtu_dictionary_languages.settings');
+  $allowedLanguages = $config->get('available_languages');
+  $languageOptions = [];
+  if ($allowedLanguages) {
+    foreach ($allowedLanguages as $tid => $value) {
+      $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tid);
+      if ($term) {
+        $languageOptions[$tid] = $term->getName();
+      }
+    }
+    $form['field_dictionary_word_language']['widget']['#options'] = $languageOptions;
   }
 }
