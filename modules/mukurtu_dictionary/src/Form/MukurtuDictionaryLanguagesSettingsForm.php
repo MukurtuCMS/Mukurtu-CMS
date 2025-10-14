@@ -77,9 +77,15 @@ class MukurtuDictionaryLanguagesSettingsForm extends ConfigFormBase
     $terms = $this->getTerms();
 
     if (!empty($terms)) {
+      // If there's only one language on the site, select it automatically.
+      if (count($terms) == 1) {
+        $tid = array_key_first($terms);
+        $defaults = [ $tid => strval($tid) ];
+      }
+
       $form['available_languages'] = [
         '#type' => 'checkboxes',
-        '#options' => $this->getTerms(),
+        '#options' => $terms,
         '#title' => $this->t('Languages available for dictionary'),
         '#default_value' => $defaults,
         '#required' => TRUE,
