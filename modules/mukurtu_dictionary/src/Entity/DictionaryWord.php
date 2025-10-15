@@ -147,8 +147,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_dictionary_word_language'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Language'))
-      ->setDescription(t('Each dictionary word is associated with one language. </br>As you type, existing languages will be displayed. Select a language. Languages must first be created by a Mukurtu Manager, or referenced in a digital heritage item.'))
-      ->setDescription(t('Each dictionary word is associated with one language. </br>As you type, existing languages will be displayed. Select a language. Languages must first be created by a Mukurtu Manager, or referenced in a digital heritage item.'))
+      ->setDescription(t('Each dictionary word is associated with one language. </br>Select a language. If only one language is available, it will be be pre-selected. Dictionary languages must first be configured by a Mukurtu Manager.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',

@@ -10,6 +10,7 @@ use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordEntry;
 use Drupal\mukurtu_dictionary\Entity\SampleSentence;
 use Drupal\mukurtu_dictionary\Entity\WordList;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_theme().
@@ -100,5 +101,39 @@ function mukurtu_dictionary_entity_bundle_field_info(EntityTypeInterface $entity
       ->setDisplayConfigurable('view', TRUE);
 
     return $fields;
+  }
+}
+
+/**
+ * Implements hook_form_form_id_alter().
+ */
+function mukurtu_dictionary_form_node_dictionary_word_form_alter(&$form, FormStateInterface $form_state) {
+  mukurtu_dictionary_language_field_config_helper($form, $form_state);
+}
+
+/**
+ * Implements hook_form_form_id_alter().
+ */
+function mukurtu_dictionary_form_node_dictionary_word_edit_form_alter(&$form, FormStateInterface $form_state) {
+  mukurtu_dictionary_language_field_config_helper($form, $form_state);
+}
+
+// Helper method to pull dictionary language field options from config.
+function mukurtu_dictionary_language_field_config_helper(&$form, FormStateInterface $form_state) {
+  $config = \Drupal::config('mukurtu_dictionary_languages.settings');
+  $allowedLanguages = $config->get('available_languages');
+  $languageOptions = [];
+  if ($allowedLanguages) {
+    foreach ($allowedLanguages as $tid => $value) {
+      $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tid);
+      if ($term) {
+        $languageOptions[$tid] = $term->getName();
+      }
+    }
+    // If there's only one language on the site, select it automatically.
+    if (count($allowedLanguages) == 1) {
+      $form['field_dictionary_word_language']['widget']['#default_value'] = array_key_first($languageOptions);
+    }
+    $form['field_dictionary_word_language']['widget']['#options'] = $languageOptions;
   }
 }
