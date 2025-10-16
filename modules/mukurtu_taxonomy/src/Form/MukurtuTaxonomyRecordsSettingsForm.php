@@ -37,7 +37,7 @@ class MukurtuTaxonomyRecordsSettingsForm extends ConfigFormBase {
     return new static(
       $container->get('config.factory'),
       $container->get('entity_type.manager'),
-      $container->get('config.typed'),
+      $container->get('config.typed')
     );
   }
 
