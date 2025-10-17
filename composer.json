@@ -68,7 +68,8 @@
         "drupal/twig_tweak": "^3.2",
         "drupal/views_bulk_operations": "*",
         "drush/drush": "^13",
-        "sibyx/phpgpx": "@RC"
+        "sibyx/phpgpx": "@RC",
+        "drupal/dashboards": "^2.1"
     },
     "require-dev": {
         "drupal/devel": "*",
