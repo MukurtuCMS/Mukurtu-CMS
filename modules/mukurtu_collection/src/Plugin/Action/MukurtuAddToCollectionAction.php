@@ -179,13 +179,13 @@ class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase impleme
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) : void {
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void {
     $this->configuration['collection'] = $form_state->getValue('collection');
   }
 
