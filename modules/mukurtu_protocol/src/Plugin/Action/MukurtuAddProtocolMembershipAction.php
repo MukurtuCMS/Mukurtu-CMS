@@ -169,7 +169,7 @@ class MukurtuAddProtocolMembershipAction extends ViewsBulkOperationsActionBase i
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state)
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void
   {
     $role_manager = \Drupal::service('og.role_manager');
     $roles = $role_manager->getRolesByBundle('protocol', 'protocol');

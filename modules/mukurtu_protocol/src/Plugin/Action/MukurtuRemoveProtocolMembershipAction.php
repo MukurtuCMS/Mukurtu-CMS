@@ -134,7 +134,7 @@ class MukurtuRemoveProtocolMembershipAction extends ViewsBulkOperationsActionBas
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state)
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void
   {
     $this->configuration['protocol'] = $form_state->getValue('protocol');
   }
