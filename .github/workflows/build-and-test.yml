@@ -17,7 +17,7 @@ jobs:
         test-suite: ["kernel"]
     services:
       mariadb:
-        image: mariadb:10.5
+        image: mariadb:10.6
         env:
           MYSQL_USER: db
           MYSQL_PASSWORD: db
