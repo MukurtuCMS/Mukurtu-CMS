@@ -121,7 +121,7 @@ class ProtocolAwareEntityTestBase extends EntityKernelTestBase {
     $this->setCurrentUser($user);
   }
 
-  protected function setCurrentUser(AccountInterface $account) {
+  protected function setCurrentUser(AccountInterface $account): void {
     $this->container
       ->get('current_user')
       ->setAccount($account);
