@@ -169,26 +169,6 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_mukurtu_original_record'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Original Record'))
-      ->setDescription(t(''))
-      ->setSettings([
-        'target_type' => 'node',
-        'handler' => 'default:node',
-        'handler_settings' => [
-          'target_bundles' => [
-            'digital_heritage' => 'digital_heritage',
-          ],
-          'auto_create' => FALSE,
-        ]
-      ])
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
       ->setDescription(t('Digital heritage items can be related to any other site content when there is a connection between those items that is important to show. Examples include multiple photos of a place, objects discussed in an oral history, or dictionary words that appear in a digital heritage item. </br>Select "Select Content" to choose from existing site content.'))
