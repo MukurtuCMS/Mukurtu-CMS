@@ -17,7 +17,7 @@ jobs:
         test-suite: ["kernel"]
     services:
       mariadb:
-        image: mariadb:10.5
+        image: mariadb:10.6
         env:
           MYSQL_USER: db
           MYSQL_PASSWORD: db
@@ -71,5 +71,5 @@ jobs:
 
       - name: Mukurtu Tests
         run: |
-          ./vendor/bin/phpunit --verbose --testsuite "${{ matrix.test-suite }}"
+          ./vendor/bin/phpunit --display-all-issues --testsuite "${{ matrix.test-suite }}"
         continue-on-error: false

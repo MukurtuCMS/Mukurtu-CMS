@@ -1,0 +1,68 @@
+block.settings.mukurtu_footer:
+  type: block_settings
+  label: 'Mukurtu Footer'
+  mapping:
+    logo_upload:
+      type: string
+      label: 'Logo'
+    email_us_text:
+      type: string
+      label: 'Email us text'
+    contact_email_address:
+      type: string
+      label: 'Contact email address'
+    social_media:
+      type: mapping
+      label: 'Social media'
+      mapping:
+        twitter:
+          type: mapping
+          label: 'Twitter'
+          mapping:
+            message_text:
+              type: string
+              label: 'Message text'
+            account_1:
+              type: string
+              label: 'Account 1'
+            account_2:
+              type: string
+              label: 'Account 2'
+            account_3:
+              type: string
+              label: 'Account 3'
+        facebook:
+          type: mapping
+          label: 'Facebook'
+          mapping:
+            message_text:
+              type: string
+              label: 'Message text'
+            account_1:
+              type: string
+              label: 'Account 1'
+            account_2:
+              type: string
+              label: 'Account 2'
+            account_3:
+              type: string
+              label: 'Account 3'
+        instagram:
+          type: mapping
+          label: 'Instagram'
+          mapping:
+            message_text:
+              type: string
+              label: 'Message text'
+            account_1:
+              type: string
+              label: 'Account 1'
+            account_2:
+              type: string
+              label: 'Account 2'
+            account_3:
+              type: string
+              label: 'Account 3'
+    copyright_message:
+      type: string
+      label: 'Copyright message'
