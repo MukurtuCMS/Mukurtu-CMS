@@ -66,7 +66,6 @@ class MukurtuCommunityRecordSettingsForm extends ConfigFormBase {
    */
   protected function getBundleOptions() {
     $bundles = $this->entityTypeBundleInfo->getBundleInfo('node');
-    $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
     $options = [];
     foreach ($bundles as $type => $label) {
       $options[$type] = $label['label'];
