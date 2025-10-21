@@ -1,0 +1,39 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_footer
+  theme:
+    - mukurtu_v4
+id: mukurtu_v4_mukurtu_footer
+theme: mukurtu_v4
+region: footer
+weight: 0
+provider: null
+plugin: mukurtu_footer
+settings:
+  id: mukurtu_footer
+  label: 'Mukurtu Footer'
+  label_display: visible
+  provider: mukurtu_footer
+  logo_upload: {  }
+  email_us_text: 'Email us at '
+  contact_email_address: ''
+  social_media:
+    twitter:
+      message_text: ''
+      account_1: ''
+      account_2: ''
+      account_3: ''
+    facebook:
+      message_text: ''
+      account_1: ''
+      account_2: ''
+      account_3: ''
+    instagram:
+      message_text: ''
+      account_1: ''
+      account_2: ''
+      account_3: ''
+  copyright_message: '© 2025 Mukurtu CMS'
+visibility: {  }
