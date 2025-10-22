@@ -18,7 +18,7 @@
 
           const position = dropdown.getBoundingClientRect();
           // If the dropdown is overflowing to the right, move it to the left.
-          if(position.right > window.innerWidth) {
+          if (position.right > window.innerWidth) {
             dropdown.style.left = "auto";
             dropdown.style.right = "0";
             dropdown.style.transform = "none";
