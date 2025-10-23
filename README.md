@@ -80,6 +80,10 @@ Or, if hosting your own server with:
 sudo apt install poppler-utils
 ```
 
+### Updates
+
+To update your local DDEV environment to a newer version of main, run `composer upgrade`. Note that there may be data changes, so use at your own risk.
+
 ## Contributing
 Mukurtu CMS v4 is extremely unstable and under active development. If you wish to contribute, please first discuss it with us by starting an issue or discussion on the [Mukurtu CMS issue tracker](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or contact us via [mukurtu.org](https://mukurtu.org/).
 
