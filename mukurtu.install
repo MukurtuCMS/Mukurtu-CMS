@@ -14,6 +14,8 @@ use Drupal\node\Entity\Node;
 use Drupal\layout_builder\Section;
 use Drupal\layout_builder\SectionComponent;
 use Drupal\Component\Uuid\Php;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Implements hook_install().
@@ -443,6 +445,21 @@ function mukurtu_install() {
       $flag->delete();
     }
   }
+
+  // Create the community records field on digital heritage by default.
+  FieldConfig::create([
+    'entity_type' => 'node',
+    'bundle' => 'digital_heritage',
+    'field_name' => 'field_mukurtu_original_record',
+    'label' => 'Original Record',
+    'settings' => [
+      'handler' => 'default:node',
+      'handler_settings' => [
+        'target_bundles' => ['digital_heritage'],
+        'auto_create' => FALSE,
+      ],
+    ],
+  ])->save();
 
   // Configure user roles. These are not managed by Mukurtu because any change
   // in permissions would cause an override. Instead these are provided as
