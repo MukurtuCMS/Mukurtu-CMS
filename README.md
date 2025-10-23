@@ -62,7 +62,7 @@ Access control in Mukurtu depends on the Drupal private file system. You must co
 * Open `web/sites/default/settings.php` and modify the `$settings['file_private_path']` line, such as the following:
 ```php
 // Specify a private files path.
-$settings['file_private_path'] = '../private_files';
+$settings['file_private_path'] = '../../private_files';
 ```
 * Clear your site cache by visiting `admin/config/development/performance` within your Mukurtu site and clicking "Clear all caches".
 * Confirm the private files directory is found by visiting `admin/config/media/file-system` within your Mukurtu site.
