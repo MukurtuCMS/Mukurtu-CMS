@@ -636,7 +636,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
         'target_bundles' => ['image' => 'image'],
       ])
       ->setRequired(FALSE)
-      ->setCardinality(-1)
+      ->setCardinality(1)
       ->setTranslatable(FALSE)
       ->setDisplayOptions('view', [
         'label' => 'visible',
@@ -681,7 +681,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
         'target_bundles' => ['image' => 'image'],
       ])
       ->setRequired(FALSE)
-      ->setCardinality(-1)
+      ->setCardinality(1)
       ->setTranslatable(FALSE)
       ->setDisplayOptions('view', [
         'label' => 'visible',
