@@ -21,7 +21,10 @@ class MukurtuTaxonomyRecordSelection extends WidgetBase implements ContainerFact
   protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS', $exclude = []) {
     // Get the vocabs enabled for taxonomy records.
     $config = \Drupal::config('mukurtu_taxonomy.settings');
-    $enabledVocabs = $config->get('enabled_vocabularies') ?? [];
+
+    // In the future when we support taxonomy record relationships for other
+    // content types, fetch their enabled vocabs and append them here.
+    $enabledVocabs = $config->get('person_records_enabled_vocabularies') ?? [];
 
     $query = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery();
 

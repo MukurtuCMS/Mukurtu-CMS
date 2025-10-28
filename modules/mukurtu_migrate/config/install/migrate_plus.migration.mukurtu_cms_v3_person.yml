@@ -99,7 +99,7 @@ process:
             index:
               - 1
   field_related_content: field_related_content
-  field_representative_terms: field_mukurtu_terms
+  field_other_names: field_mukurtu_terms
   status: status
   created: created
   changed: changed

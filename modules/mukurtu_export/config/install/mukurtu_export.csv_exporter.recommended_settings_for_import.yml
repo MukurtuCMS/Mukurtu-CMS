@@ -101,7 +101,7 @@ entity_fields_export_list:
     field_sections: 'Biographical Information Sections'
     field_related_people: 'Related People'
     field_related_content: 'Related Content'
-    field_representative_terms: 'Representative Terms'
+    field_other_names: 'Other Names'
   node__word_list:
     nid: ID
     langcode: Locale

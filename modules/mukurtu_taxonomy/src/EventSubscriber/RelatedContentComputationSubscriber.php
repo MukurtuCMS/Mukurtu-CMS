@@ -54,12 +54,12 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
    */
   public function onRelatedContentComputation(RelatedContentComputationEvent $event) {
     // Here we only care about nodes with the taxonomy record field.
-    if (!$event->node->hasField('field_representative_terms')) {
+    if (!$event->node->hasField('field_other_names')) {
       return $event;
     }
 
     // Is the node configured to be a taxonomy record?
-    $terms = $event->node->get('field_representative_terms')->referencedEntities();
+    $terms = $event->node->get('field_other_names')->referencedEntities();
     $searchFields = $this->referencedContentConditionForTerm($terms, $event->node);
 
     // Return early if there are no supported fields to query.

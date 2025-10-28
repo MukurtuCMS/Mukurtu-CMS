@@ -44,7 +44,7 @@ third_party_settings:
         - field_date_born
         - field_date_died
         - field_deceased
-        - field_representative_terms
+        - field_other_names
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -362,7 +362,7 @@ content:
         collapse_edit_all: collapse_edit_all
         duplicate: duplicate
     third_party_settings: {  }
-  field_representative_terms:
+  field_other_names:
     type: entity_browser_entity_reference
     weight: 5
     region: content

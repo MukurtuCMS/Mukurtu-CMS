@@ -108,14 +108,14 @@ function mukurtu_v4_preprocess_field(&$variables)
         $peopleTerms = $media->get('field_people')->referencedEntities();
         if ($peopleTerms) {
           // Next, check the list of the media's field_people terms against the
-          // field_representative_terms of Person entities.
+          // field_other_names of Person entities.
           // For every people term that matches a representative term, add that
           // term name to the list of names of deceased people for the warning.
           foreach ($peopleTerms as $term) {
             $query = \Drupal::entityQuery('node')
               ->condition('type', 'person')
               ->condition('field_deceased', TRUE, '=')
-              ->condition('field_representative_terms.entity:taxonomy_term.tid', $term->id(), '=')
+              ->condition('field_other_names.entity:taxonomy_term.tid', $term->id(), '=')
               ->accessCheck(FALSE);
             $ids = $query->execute();
             if ($ids) {
