@@ -2,8 +2,8 @@
 
 namespace Drupal\mukurtu_dictionary\Entity;
 
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordEntryInterface;
 

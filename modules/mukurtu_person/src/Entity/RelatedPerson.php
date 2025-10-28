@@ -2,8 +2,8 @@
 
 namespace Drupal\mukurtu_person\Entity;
 
+use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\paragraphs\Entity\Paragraph;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 
 class RelatedPerson extends Paragraph {

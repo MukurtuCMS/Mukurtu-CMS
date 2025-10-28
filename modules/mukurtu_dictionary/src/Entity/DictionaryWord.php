@@ -3,11 +3,11 @@
 namespace Drupal\mukurtu_dictionary\Entity;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\node\Entity\Node;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordInterface;
 use Drupal\Core\Session\AccountInterface;
 use \Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
