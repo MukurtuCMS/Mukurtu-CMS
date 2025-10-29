@@ -18,8 +18,13 @@ In a normal default Drupal taxonomy term display, content that uses that term is
 
 ### Enabling a Content Type for Taxonomy Records
 Only content entities (nodes) can be used as taxonomy records. To enable a given
-content type, add the 'field_other_names' field to the content bundle.
+content type, add the `field_other_names` field to the content bundle.
 
-### Enabling a Taxonomy Vocabulary for Taxonomy Records
+For the moment, the Person content type is the only content type that supports
+taxonomy record relationships out of the box.
+
+### Enabling a Taxonomy Vocabulary for Person Records
 The vocabularies enabled for person records can be altered at the config page
 found at `/admin/config/mukurtu/person-records` (route `mukurtu_taxonomy.person_record_settings`).
+
+The vocabularies `people`, `creator`, and `contributor` are enabled by default.
