@@ -667,28 +667,28 @@ field_settings:
       module:
         - media
         - mukurtu_core
-  node__field_representative_terms__name:
-    label: 'Representative Terms'
+  node__field_other_names__name:
+    label: 'Other Names'
     datasource_id: 'entity:node'
-    property_path: 'field_representative_terms:entity:name'
+    property_path: 'field_other_names:entity:name'
     type: text
     dependencies:
       module:
         - node
         - taxonomy
-  node__field_representative_terms__name__facet:
-    label: 'Representative Terms Facet'
+  node__field_other_names__name__facet:
+    label: 'Other Names Facet'
     datasource_id: 'entity:node'
-    property_path: 'field_representative_terms:entity:name'
+    property_path: 'field_other_names:entity:name'
     type: string
     dependencies:
       module:
         - node
         - taxonomy
-  node__field_representative_terms__uuid:
-    label: 'Representative Terms » Taxonomy term » UUID'
+  node__field_other_names__uuid:
+    label: 'Other Names » Taxonomy term » UUID'
     datasource_id: 'entity:node'
-    property_path: 'field_representative_terms:entity:uuid'
+    property_path: 'field_other_names:entity:uuid'
     type: text
     dependencies:
       module:
@@ -1007,9 +1007,9 @@ processor_settings:
       - node__field_recording__name
       - node__field_related_content__title
       - node__field_representative_media__name
-      - node__field_representative_terms__name
-      - node__field_representative_terms__name__facet
-      - node__field_representative_terms__uuid
+      - node__field_other_names__name
+      - node__field_other_names__name__facet
+      - node__field_other_names__uuid
       - node__field_rights_and_usage
       - node__field_source
       - node__field_subject__name
