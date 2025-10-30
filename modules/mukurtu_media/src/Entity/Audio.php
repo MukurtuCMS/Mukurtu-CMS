@@ -3,8 +3,8 @@
 namespace Drupal\mukurtu_media\Entity;
 
 use Drupal\media\Entity\Media;
+use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\mukurtu_media\Entity\AudioInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;

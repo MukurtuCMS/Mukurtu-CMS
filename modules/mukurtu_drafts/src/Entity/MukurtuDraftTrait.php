@@ -2,9 +2,9 @@
 
 namespace Drupal\mukurtu_drafts\Entity;
 
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\mukurtu_core\BaseFieldDefinition;
 
 /**
  * Provides a trait for draft status.

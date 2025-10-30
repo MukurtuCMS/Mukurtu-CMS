@@ -2,8 +2,8 @@
 
 namespace Drupal\mukurtu_digital_heritage\Entity;
 
+use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\node\Entity\Node;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_digital_heritage\DigitalHeritageInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;

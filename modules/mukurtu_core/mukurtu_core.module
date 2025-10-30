@@ -8,6 +8,7 @@
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\mukurtu_core\BaseFieldOverride;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -295,7 +296,11 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
  * Implements hook_entity_type_alter().
  */
 function mukurtu_core_entity_type_alter(array &$entity_types) {
+  /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
   $entity_types['user']->setListBuilderClass('Drupal\mukurtu_core\MukurtuUserListBuilder');
+  if (isset($entity_types['base_field_override'])) {
+    $entity_types['base_field_override']->setClass(BaseFieldOverride::class);
+  }
 }
 
 /**
