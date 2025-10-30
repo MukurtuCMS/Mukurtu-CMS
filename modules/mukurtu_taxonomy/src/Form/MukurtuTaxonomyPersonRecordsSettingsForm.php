@@ -10,9 +10,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
 
 /**
- * Configuration form for commmunity records.
+ * Configuration form for person records.
  */
-class MukurtuTaxonomyRecordsSettingsForm extends ConfigFormBase {
+class MukurtuTaxonomyPersonRecordsSettingsForm extends ConfigFormBase {
 
   /**
    * The entity type manager.
@@ -45,7 +45,7 @@ class MukurtuTaxonomyRecordsSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'mukurtu_taxonomy_taxonomy_records_settings_form';
+    return 'mukurtu_taxonomy_person_records_settings_form';
   }
 
   /**
@@ -76,13 +76,21 @@ class MukurtuTaxonomyRecordsSettingsForm extends ConfigFormBase {
     $form = parent::buildForm($form, $form_state);
     $config = $this->config('mukurtu_taxonomy.settings');
 
-    $defaults = $config->get('enabled_vocabularies') ?? [];
+    $defaults = $config->get('person_records_enabled_vocabularies') ?? [];
+    if (empty($defaults)) {
+      $defaults = [
+        'creator' => 'creator',
+        'contributor' => 'contributor',
+        'people' => 'people',
+      ];
+    }
 
-    $form['taxonomy_record_vocabularies'] = [
+    $form['person_record_vocabularies'] = [
       '#type' => 'checkboxes',
       '#options' => $this->getVocabularyOptions(),
-      '#title' => $this->t('Taxonomy Vocabularies Enabled for Taxonomy Records'),
+      '#title' => $this->t('Taxonomy Vocabularies Enabled for Person Records'),
       '#default_value' => $defaults,
+      '#description' => $this->t("Person records aggregate content that references the individual featured in the person record. This is done by naming that person in specific taxonomy fields in digital heritage items and other content types. Select the taxonomies where you identify and name individuals. These will be listed in the \"other names\" field when creating a person record. In most cases this will be the creator, contributor, and/or people fields.")
     ];
 
     return $form;
@@ -95,11 +103,11 @@ class MukurtuTaxonomyRecordsSettingsForm extends ConfigFormBase {
     $config = $this->config('mukurtu_taxonomy.settings');
 
     $enabled_vocabs = [];
-    $vocabs = $form_state->getValue('taxonomy_record_vocabularies');
+    $vocabs = $form_state->getValue('person_record_vocabularies');
     $enabled_vocabs = array_filter($vocabs, fn($element) => $element !== 0);
 
-    // Save the new config.
-    $config->set('enabled_vocabularies', $enabled_vocabs);
+    // Save the configured vocabularies for person records.
+    $config->set('person_records_enabled_vocabularies', $enabled_vocabs);
     $config->save();
 
     return parent::submitForm($form, $form_state);
