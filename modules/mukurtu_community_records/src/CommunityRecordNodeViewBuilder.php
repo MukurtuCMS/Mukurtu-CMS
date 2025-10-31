@@ -189,6 +189,7 @@ class CommunityRecordNodeViewBuilder extends NodeViewBuilder {
     $original_record = $node->get('field_mukurtu_original_record')->referencedEntities()[0] ?? $node;
 
     // Check if the user can actually see the original record.
+    $allRecords = [];
     if ($original_record->access('view')) {
       $allRecords = [$original_record->id() => $original_record];
     }
