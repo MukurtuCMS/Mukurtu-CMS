@@ -45,6 +45,7 @@ install:
   - facets_reset_button
   - term_merge
   - term_merge_manager
+  - dashboards
 dependencies:
   - 'blazy:blazy'
   - 'ctools:ctools'
@@ -128,5 +129,6 @@ dependencies:
   - 'term_merge:term_merge'
   - 'token:token'
   - 'views_bulk_operations:views_bulk_operations'
+  - 'drupal:dashboards'
 themes:
   - mukurtu_v4

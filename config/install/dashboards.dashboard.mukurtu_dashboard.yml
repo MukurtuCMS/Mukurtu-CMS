@@ -1,0 +1,105 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - layout_builder_restrictions
+third_party_settings:
+  layout_builder_restrictions:
+    allowed_block_categories: {  }
+    entity_view_mode_restriction:
+      whitelisted_blocks: {  }
+      blacklisted_blocks: {  }
+      restricted_categories: {  }
+      allowed_layouts: {  }
+id: mukurtu_dashboard
+admin_label: 'Mukurtu Dashboard'
+category: ''
+frontend: false
+weight: 0
+sections:
+  -
+    layout_id: layout_2
+    layout_settings:
+      label: 'main content'
+      context_mapping: {  }
+    components:
+      ff08c395-6ca3-4fec-970a-d09e93a03cf4:
+        uuid: ff08c395-6ca3-4fec-970a-d09e93a03cf4
+        region: one
+        configuration:
+          id: 'dashboards_block:dashboard:add_content_menu'
+          label: 'Add content'
+          label_display: visible
+          provider: dashboards
+          context_mapping: {  }
+          include_destination: 0
+          items:
+            article:
+              weight: '0'
+            collection:
+              weight: '0'
+            dictionary_word:
+              weight: '0'
+            digital_heritage:
+              weight: '0'
+            landing_page:
+              weight: '0'
+            page:
+              weight: '0'
+            person:
+              weight: '0'
+            word_list:
+              weight: '0'
+        weight: 0
+        additional: {  }
+      602a8372-6b61-471f-928f-927040414355:
+        uuid: 602a8372-6b61-471f-928f-927040414355
+        region: two
+        configuration:
+          id: 'dashboards_block:dashboard:system_info'
+          label: 'Show system info'
+          label_display: visible
+          provider: dashboards
+          context_mapping: {  }
+        weight: 0
+        additional: {  }
+      0d6f9095-ddc7-4e04-b102-a47eab86f9dc:
+        uuid: 0d6f9095-ddc7-4e04-b102-a47eab86f9dc
+        region: three
+        configuration:
+          id: 'views_block:content_recent-block_1'
+          label: ''
+          label_display: visible
+          provider: views
+          context_mapping: {  }
+          views_label: ''
+          items_per_page: null
+        weight: 0
+        additional: {  }
+      48e2a2ac-3168-4726-acac-eb63ac5f59a3:
+        uuid: 48e2a2ac-3168-4726-acac-eb63ac5f59a3
+        region: three
+        configuration:
+          id: 'views_block:mukurtu_draft_content-mukurtu_draft_content_block'
+          label: 'Your Drafts'
+          label_display: visible
+          provider: views
+          context_mapping: {  }
+          views_label: 'Your Drafts'
+          items_per_page: null
+        weight: 2
+        additional: {  }
+      24d3fdd1-9a07-42ea-b88d-04d22f8cf684:
+        uuid: 24d3fdd1-9a07-42ea-b88d-04d22f8cf684
+        region: three
+        configuration:
+          id: 'views_block:export_list_content-export_content_list_block'
+          label: ''
+          label_display: visible
+          provider: views
+          context_mapping: {  }
+          views_label: ''
+          items_per_page: null
+        weight: 1
+        additional: {  }
+    third_party_settings: {  }
