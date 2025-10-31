@@ -2,447 +2,125 @@
 
 namespace Drupal\mukurtu_collection\Entity;
 
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Entity\EditorialContentEntityBase;
-use Drupal\Core\Entity\RevisionableInterface;
-use Drupal\Core\Entity\EntityChangedTrait;
-use Drupal\Core\Entity\EntityPublishedTrait;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\user\UserInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\RevisionLogInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
+use Drupal\Core\Entity\EntityPublishedInterface;
+use Drupal\user\EntityOwnerInterface;
+use Drupal\mukurtu_collection\Entity\CollectionInterface;
 
 /**
- * Defines the Personal collection entity.
+ * Provides an interface for defining Personal collection entities.
  *
  * @ingroup mukurtu_collection
- *
- * @ContentEntityType(
- *   id = "personal_collection",
- *   label = @Translation("Personal collection"),
- *   handlers = {
- *     "storage" = "Drupal\mukurtu_collection\PersonalCollectionStorage",
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "list_builder" = "Drupal\mukurtu_collection\PersonalCollectionListBuilder",
- *     "views_data" = "Drupal\mukurtu_collection\Entity\PersonalCollectionViewsData",
- *     "translation" = "Drupal\mukurtu_collection\PersonalCollectionTranslationHandler",
- *
- *     "form" = {
- *       "default" = "Drupal\mukurtu_collection\Form\PersonalCollectionForm",
- *       "add" = "Drupal\mukurtu_collection\Form\PersonalCollectionForm",
- *       "edit" = "Drupal\mukurtu_collection\Form\PersonalCollectionForm",
- *       "delete" = "Drupal\mukurtu_collection\Form\PersonalCollectionDeleteForm",
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\mukurtu_collection\PersonalCollectionHtmlRouteProvider",
- *     },
- *     "access" = "Drupal\mukurtu_collection\PersonalCollectionAccessControlHandler",
- *   },
- *   base_table = "personal_collection",
- *   data_table = "personal_collection_field_data",
- *   revision_table = "personal_collection_revision",
- *   revision_data_table = "personal_collection_field_revision",
- *   translatable = TRUE,
- *   admin_permission = "administer personal collection entities",
- *   entity_keys = {
- *     "id" = "id",
- *     "revision" = "vid",
- *     "label" = "name",
- *     "uuid" = "uuid",
- *     "uid" = "user_id",
- *     "langcode" = "langcode",
- *     "published" = "status",
- *   },
- *   revision_metadata_keys = {
- *     "revision_user" = "revision_user",
- *     "revision_created" = "revision_created",
- *     "revision_log_message" = "revision_log"
- *   },
- *   links = {
- *     "canonical" = "/personal-collection/{personal_collection}",
- *     "add-form" = "/personal-collection/add",
- *     "edit-form" = "/personal-collection/{personal_collection}/edit",
- *     "delete-form" = "/personal-collection/{personal_collection}/delete",
- *     "version-history" = "/personal-collection/{personal_collection}/revisions",
- *     "revision" = "/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/view",
- *     "revision_revert" = "/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/revert",
- *     "revision_delete" = "/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/delete",
- *     "translation_revert" = "/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/revert/{langcode}",
- *     "collection" = "/admin/structure/personal_collection",
- *   },
- *   field_ui_base_route = "personal_collection.settings"
- * )
  */
-class PersonalCollection extends EditorialContentEntityBase implements PersonalCollectionInterface {
-
-  use EntityChangedTrait;
-  use EntityPublishedTrait;
+interface PersonalCollectionInterface extends ContentEntityInterface, RevisionLogInterface, EntityChangedInterface, EntityPublishedInterface, EntityOwnerInterface, CollectionInterface {
 
   /**
-   * {@inheritdoc}
+   * Add get/set methods for your configuration properties here.
    */
-  public static function preCreate(EntityStorageInterface $storage_controller, array &$values) {
-    parent::preCreate($storage_controller, $values);
-    $values += [
-      'user_id' => \Drupal::currentUser()->id(),
-    ];
-  }
 
   /**
-   * {@inheritdoc}
+   * Gets the Personal collection name.
+   *
+   * @return string
+   *   Name of the Personal collection.
    */
-  protected function urlRouteParameters($rel) {
-    $uri_route_parameters = parent::urlRouteParameters($rel);
-
-    if ($rel === 'revision_revert' && $this instanceof RevisionableInterface) {
-      $uri_route_parameters[$this->getEntityTypeId() . '_revision'] = $this->getRevisionId();
-    }
-    elseif ($rel === 'revision_delete' && $this instanceof RevisionableInterface) {
-      $uri_route_parameters[$this->getEntityTypeId() . '_revision'] = $this->getRevisionId();
-    }
-
-    return $uri_route_parameters;
-  }
+  public function getName();
 
   /**
-   * {@inheritdoc}
+   * Sets the Personal collection name.
+   *
+   * @param string $name
+   *   The Personal collection name.
+   *
+   * @return \Drupal\mukurtu_collection\Entity\PersonalCollectionInterface
+   *   The called Personal collection entity.
    */
-  public function preSave(EntityStorageInterface $storage) {
-    parent::preSave($storage);
-
-    foreach (array_keys($this->getTranslationLanguages()) as $langcode) {
-      $translation = $this->getTranslation($langcode);
-
-      // If no owner has been set explicitly, make the anonymous user the owner.
-      if (!$translation->getOwner()) {
-        $translation->setOwnerId(0);
-      }
-    }
-
-    // If no revision author has been set explicitly,
-    // make the personal_collection owner the revision author.
-    if (!$this->getRevisionUser()) {
-      $this->setRevisionUserId($this->getOwnerId());
-    }
-  }
+  public function setName($name);
 
   /**
-   * {@inheritdoc}
+   * Gets the Personal collection creation timestamp.
+   *
+   * @return int
+   *   Creation timestamp of the Personal collection.
    */
-  public function getName() {
-    return $this->get('name')->value;
-  }
+  public function getCreatedTime();
 
   /**
-   * {@inheritdoc}
+   * Sets the Personal collection creation timestamp.
+   *
+   * @param int $timestamp
+   *   The Personal collection creation timestamp.
+   *
+   * @return \Drupal\mukurtu_collection\Entity\PersonalCollectionInterface
+   *   The called Personal collection entity.
    */
-  public function setName($name) {
-    $this->set('name', $name);
-    return $this;
-  }
+  public function setCreatedTime($timestamp);
 
   /**
-   * {@inheritdoc}
+   * Gets the Personal collection revision creation timestamp.
+   *
+   * @return int
+   *   The UNIX timestamp of when this revision was created.
    */
-  public function getTitle() {
-    return $this->getName();
-  }
+  public function getRevisionCreationTime();
 
   /**
-   * {@inheritdoc}
+   * Sets the Personal collection revision creation timestamp.
+   *
+   * @param int $timestamp
+   *   The UNIX timestamp of when this revision was created.
+   *
+   * @return \Drupal\mukurtu_collection\Entity\PersonalCollectionInterface
+   *   The called Personal collection entity.
    */
-  public function getCreatedTime() {
-    return $this->get('created')->value;
-  }
+  public function setRevisionCreationTime($timestamp);
 
   /**
-   * {@inheritdoc}
+   * Gets the Personal collection revision author.
+   *
+   * @return \Drupal\user\UserInterface
+   *   The user entity for the revision author.
    */
-  public function setCreatedTime($timestamp) {
-    $this->set('created', $timestamp);
-    return $this;
-  }
+  public function getRevisionUser();
 
   /**
-   * {@inheritdoc}
+   * Sets the Personal collection revision author.
+   *
+   * @param int $uid
+   *   The user ID of the revision author.
+   *
+   * @return \Drupal\mukurtu_collection\Entity\PersonalCollectionInterface
+   *   The called Personal collection entity.
    */
-  public function getOwner() {
-    return $this->get('user_id')->entity;
-  }
+  public function setRevisionUserId($uid);
 
   /**
-   * {@inheritdoc}
+   * Gets the Personal collection privacy setting.
+   *
+   * @return string
+   *   The privacy setting key.
    */
-  public function getOwnerId() {
-    return $this->get('user_id')->target_id;
-  }
+  public function getPrivacy();
 
   /**
-   * {@inheritdoc}
+   * Sets the Personal collection privacy setting.
+   *
+   * @param string $privacy
+   *   The privacy setting key.
+   *
+   * @return \Drupal\mukurtu_collection\Entity\PersonalCollectionInterface
+   *   The called Personal collection entity.
    */
-  public function setOwnerId($uid) {
-    $this->set('user_id', $uid);
-    return $this;
-  }
+  public function setPrivacy($privacy);
 
   /**
-   * {@inheritdoc}
+   * Is the personal collection set to private?
+   *
+   * @return bool
+   *   True if private.
    */
-  public function setOwner(UserInterface $account) {
-    $this->set('user_id', $account->id());
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getPrivacy() {
-    return $this->get('field_pc_privacy')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setPrivacy($privacy) {
-    $this->set('field_pc_privacy', $privacy);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isPrivate(): bool {
-    return $this->getPrivacy() != 'public';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function add(EntityInterface $entity): void {
-    $items = $this->get('field_items_in_collection')->getValue();
-    $items[] = ['target_id' => $entity->id()];
-    $this->set('field_items_in_collection', $items);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function remove(EntityInterface $entity): void {
-    $needle = $entity->id();
-    $items = $this->get('field_items_in_collection')->getValue();
-    foreach ($items as $delta => $item) {
-      if ($item['target_id'] == $needle) {
-        unset($items[$delta]);
-      }
-    }
-    $this->set('field_items_in_collection', $items);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCount(): int {
-    $items = $this->get('field_items_in_collection')->getValue();
-    if (is_countable($items)) {
-      return count($items);
-    }
-    return 0;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-
-    $fields = parent::baseFieldDefinitions($entity_type);
-
-    // Add the published field.
-    $fields += static::publishedBaseFieldDefinitions($entity_type);
-
-    $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Authored by'))
-      ->setDescription(t('The user ID of author of the Personal collection.'))
-      ->setRevisionable(TRUE)
-      ->setSetting('target_type', 'user')
-      ->setSetting('handler', 'default')
-      ->setTranslatable(FALSE)
-      ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'author',
-        'weight' => 10,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'entity_reference_autocomplete',
-        'weight' => 10,
-        'settings' => [
-          'match_operator' => 'CONTAINS',
-          'size' => '60',
-          'autocomplete_type' => 'tags',
-          'placeholder' => '',
-        ],
-      ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
-
-    $fields['name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Personal collection name'))
-      ->setDescription(t('A short, descriptive name for the personal collection. Maximum 255 characters.'))
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
-      ->setSettings([
-        'max_length' => 256,
-        'text_processing' => 0,
-      ])
-      ->setDefaultValue('')
-      ->setDisplayOptions('view', [
-        'label' => 'above',
-        'type' => 'string',
-        'weight' => -10,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-        'weight' => -10,
-      ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setRequired(TRUE);
-
-    $fields['field_summary'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Summary'))
-      ->setDescription(t('A short summary of the personal collection if needed to provide information or context. Maximum 255 characters.'))
-      ->setDefaultValue('')
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
-      ->setSettings([
-        'max_length' => 255,
-      ])
-      ->setDisplayOptions('view', [
-        'label' => 'above',
-        'type' => 'string',
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-      ])
-      ->setRequired(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $fields['field_description'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Description')
-      ->setDescription(t('A longer description or explanation of the personal collection if needed.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $fields['field_pc_privacy'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Privacy Setting'))
-      ->setDescription(t('This privacy setting only applies to the personal collection page itself. If a public personal collection includes content that is not public, users will only see that content if they already have permission.'))
-      ->setDefaultValue('private')
-      ->setSettings([
-        'allowed_values' => [
-          'private' => t('Private: Only you can see your private personal collections.'),
-          'public' => t('Public: Anyone with a link to a public personal collection can see it.'),
-        ],
-      ])
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'list_default',
-        'weight' => -9,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'options_buttons',
-        'weight' => -9,
-      ])
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE)
-      ->setRequired(TRUE);
-
-    $fields['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Personal Collection Image'))
-      ->setDescription(t('A featured image that is used on the personal collection page. The image may be drawn from content in the collection, or selected to complement the collection.	</br>Select "Add media" to select or upload an image.'))
-      ->setSetting('target_type', 'media')
-      ->setSetting('handler', 'default:media')
-      ->setSetting('handler_settings', [
-        'target_bundles' => ['image' => 'image'],
-        'auto_create' => FALSE,
-      ])
-      ->setRequired(FALSE)
-      ->setTranslatable(FALSE)
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'string',
-        'weight' => 2,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'media_library_widget',
-        'weight' => 2,
-        'settings' => [
-          'media_types' => ['image'],
-        ],
-      ])
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $fields['field_items_in_collection'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Items'))
-      ->setDescription(t('The digital heritage items, person records, dictionary words, or other existing content included in the personal collection.	</br>Select "Select Content" to choose from existing site content.'))
-      ->setSetting('target_type', 'node')
-      ->setSetting('handler', 'default:node')
-      ->setSetting('handler_settings', [
-        'auto_create' => FALSE,
-      ])
-      ->setRequired(FALSE)
-      ->setCardinality(-1)
-      ->setTranslatable(FALSE)
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'string',
-        'weight' => 4,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'entity_browser_entity_reference',
-        'weight' => 4,
-        'settings' => [
-          'entity_browser' => 'mukurtu_content_browser',
-          'field_widget_display' => 'label',
-          'field_widget_display_settings' => [],
-          'field_widget_edit' => FALSE,
-          'field_widget_remove' => TRUE,
-          'field_widget_replace' => FALSE,
-          'selection_mode' => 'selection_append',
-          'open' => FALSE,
-        ],
-      ])
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $fields['status']
-      ->setDescription(t('A boolean indicating whether the Personal collection is published.'))
-      ->setDisplayOptions('form', [
-        'region' => 'hidden',
-        'weight' => -3,
-      ]);
-
-    $fields['created'] = BaseFieldDefinition::create('created')
-      ->setLabel(t('Created'))
-      ->setDescription(t('The time that the entity was created.'));
-
-    $fields['changed'] = BaseFieldDefinition::create('changed')
-      ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the entity was last edited.'));
-
-    $fields['revision_translation_affected'] = BaseFieldDefinition::create('boolean')
-      ->setLabel(t('Revision translation affected'))
-      ->setDescription(t('Indicates if the last edit of a translation belongs to current revision.'))
-      ->setReadOnly(TRUE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE);
-
-    return $fields;
-  }
+  public function isPrivate(): bool;
 
 }
