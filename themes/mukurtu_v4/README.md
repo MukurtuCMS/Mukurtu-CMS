@@ -2,7 +2,7 @@
 
 This is the base theme for the Mukurtu CMS.
 
-This theme uses a single directory component structure, which is based on how the components (or elements) of the site are organized. Each component recieves its own directory, which contains any relevant template, Sass, or JavaScript files the component may utilize.
+This theme uses a single directory component structure, which is based on how the components (or elements) of the site are organized. Each component receives its own directory, which contains any relevant template, Sass, or JavaScript files the component may utilize.
 
 In addition to single directory components, the theme also borrows from the [SMACSS](https://smacss.com/) concept when organizing the components within the `components` directory. Components are organized by size, and range from base elements (colors, variables, etc) to template-level elements (full content types).
 
@@ -31,7 +31,7 @@ Once this is complete, you should be able to run the following two commands:
 
 _Note: if `gulp-watch` isn't tracking your changes, you may need to run `gulp-sass` once before running your `gulp-watch` command._
 
-## Bundled Librararies
+## Bundled Libraries
 
 A few libraries are bundled with the theme. These are:
 
@@ -77,7 +77,7 @@ If you need something to be full bleed, but also need its contents to adhere to 
 
 ## Breakpoints and Media Queries
 
-This theme uses the [`include-media` library](https://eduardoboucas.github.io/include-media/), which is imported directly into the theme, and can be used in your .scss files without any additional comfiguration.
+This theme uses the [`include-media` library](https://eduardoboucas.github.io/include-media/), which is imported directly into the theme, and can be used in your .scss files without any additional configuration.
 
 To use `include-media`, you can use the following syntax to wrap your styles:
 

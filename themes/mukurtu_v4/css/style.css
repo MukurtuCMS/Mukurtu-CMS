@@ -1488,7 +1488,7 @@ details.form-wrapper summary + div {
   margin: 0;
   -webkit-box-shadow: 2px 3px 4px var(--brand-light);
           box-shadow: 2px 3px 4px var(--brand-light);
-  z-index: 100;
+  z-index: 1000;
   -webkit-transform: translateX(-50%);
           transform: translateX(-50%);
 }

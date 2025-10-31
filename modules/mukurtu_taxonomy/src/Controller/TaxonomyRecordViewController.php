@@ -188,7 +188,10 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    */
   protected function getTaxonomyTermRecords(TermInterface $taxonomy_term) {
     $config = \Drupal::config('mukurtu_taxonomy.settings');
-    $enabledVocabs = $config->get('enabled_vocabularies') ?? [];
+    // In the future when we support taxonomy record relationships for other
+    // content types, we may need to fetch their enabled vocabs and append them
+    // here.
+    $enabledVocabs = $config->get('person_records_enabled_vocabularies') ?? [];
 
     // If the term vocabulary is not enabled for taxonomy records, return
     // an empty array.
@@ -197,7 +200,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     }
 
     $query = $this->entityTypeManager->getStorage('node')->getQuery();
-    $query->condition('field_representative_terms', $taxonomy_term->id());
+    $query->condition('field_other_names', $taxonomy_term->id());
     $query->condition('status', 1, '=');
     $query->accessCheck(TRUE);
     $results = $query->execute();

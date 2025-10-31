@@ -170,10 +170,10 @@ field_settings:
       module:
         - node
         - taxonomy
-  node__field_representative_terms__uuid:
-    label: 'Representative Terms » Taxonomy term » UUID'
+  node__field_other_names__uuid:
+    label: 'Other Names » Taxonomy term » UUID'
     datasource_id: 'entity:node'
-    property_path: 'field_representative_terms:entity:uuid'
+    property_path: 'field_other_names:entity:uuid'
     type: string
     dependencies:
       module:
@@ -289,7 +289,7 @@ processor_settings:
       - node__field_location__uuid
       - node__field_people__uuid
       - node__field_publisher__uuid
-      - node__field_representative_terms__uuid
+      - node__field_other_names__uuid
       - node__field_subject__uuid
       - node__field_type__uuid
       - node__field_word_type__uuid
@@ -322,7 +322,7 @@ processor_settings:
       - node__field_location__uuid
       - node__field_people__uuid
       - node__field_publisher__uuid
-      - node__field_representative_terms__uuid
+      - node__field_other_names__uuid
       - node__field_subject__uuid
       - node__field_type__uuid
       - node__field_word_type__uuid
@@ -363,7 +363,7 @@ processor_settings:
       - node__field_location__uuid
       - node__field_people__uuid
       - node__field_publisher__uuid
-      - node__field_representative_terms__uuid
+      - node__field_other_names__uuid
       - node__field_subject__uuid
       - node__field_type__uuid
       - node__field_word_type__uuid

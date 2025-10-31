@@ -22,10 +22,10 @@ mukurtu_taxonomy.add_page:
   requirements:
     _permission: 'access taxonomy overview'
 
-mukurtu_taxonomy.taxonomy_record_settings:
-  path: '/admin/config/mukurtu/taxonomy/records'
+mukurtu_taxonomy.person_record_settings:
+  path: '/admin/config/mukurtu/person-records'
   defaults:
-    _form: '\Drupal\mukurtu_taxonomy\Form\MukurtuTaxonomyRecordsSettingsForm'
-    _title: 'Mukurtu Taxonomy Record Settings'
+    _form: '\Drupal\mukurtu_taxonomy\Form\MukurtuTaxonomyPersonRecordsSettingsForm'
+    _title: 'Mukurtu Person Record Settings'
   requirements:
     _permission: 'administer site configuration'

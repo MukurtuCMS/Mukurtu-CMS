@@ -62,7 +62,7 @@ Access control in Mukurtu depends on the Drupal private file system. You must co
 * Open `web/sites/default/settings.php` and modify the `$settings['file_private_path']` line, such as the following:
 ```php
 // Specify a private files path.
-$settings['file_private_path'] = '../private_files';
+$settings['file_private_path'] = '../../private_files';
 ```
 * Clear your site cache by visiting `admin/config/development/performance` within your Mukurtu site and clicking "Clear all caches".
 * Confirm the private files directory is found by visiting `admin/config/media/file-system` within your Mukurtu site.
@@ -79,6 +79,10 @@ Or, if hosting your own server with:
 ```bash
 sudo apt install poppler-utils
 ```
+
+### Updates
+
+To update your local DDEV environment to a newer version of main, run `composer upgrade`. Note that there may be data changes, so use at your own risk.
 
 ## Contributing
 Mukurtu CMS v4 is extremely unstable and under active development. If you wish to contribute, please first discuss it with us by starting an issue or discussion on the [Mukurtu CMS issue tracker](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or contact us via [mukurtu.org](https://mukurtu.org/).

@@ -55,7 +55,7 @@ third_party_settings:
         - field_date_born
         - field_date_died
         - field_related_people
-        - field_representative_terms
+        - field_other_names
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
         - flag_export_content
@@ -279,7 +279,7 @@ content:
     third_party_settings: {  }
     weight: 12
     region: content
-  field_representative_terms:
+  field_other_names:
     type: entity_reference_label
     label: above
     settings:
@@ -314,7 +314,7 @@ hidden:
   field_related_content: true
   field_related_people: true
   field_representative_media: true
-  field_representative_terms: true
+  field_other_names: true
   field_sections: true
   field_sequence_collection: true
   field_title: true

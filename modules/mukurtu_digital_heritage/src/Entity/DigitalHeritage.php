@@ -2,8 +2,8 @@
 
 namespace Drupal\mukurtu_digital_heritage\Entity;
 
+use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\node\Entity\Node;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_digital_heritage\DigitalHeritageInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
@@ -166,26 +166,6 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $definitions['field_mukurtu_original_record'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Original Record'))
-      ->setDescription(t(''))
-      ->setSettings([
-        'target_type' => 'node',
-        'handler' => 'default:node',
-        'handler_settings' => [
-          'target_bundles' => [
-            'digital_heritage' => 'digital_heritage',
-          ],
-          'auto_create' => FALSE,
-        ]
-      ])
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 

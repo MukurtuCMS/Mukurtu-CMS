@@ -10,10 +10,10 @@ mukurtu_taxonomy.manage_categories:
   parent: mukurtu
   menu_name: mukurtu
   route_name: mukurtu_taxonomy.manage_categories
-mukurtu_taxonomy.taxonomy_record_settings_dashboard:
-  title: "Taxonomy Record Settings"
+mukurtu_taxonomy.person_record_settings_dashboard:
+  title: "Person Record Settings"
   menu_name: mukurtu
-  description: "Change settings related to Mukurtu taxonomy records."
-  route_name: mukurtu_taxonomy.taxonomy_record_settings
+  description: "Change settings related to Mukurtu person records."
+  route_name: mukurtu_taxonomy.person_record_settings
   parent: mukurtu_core.site_configuration
   weight: 1000

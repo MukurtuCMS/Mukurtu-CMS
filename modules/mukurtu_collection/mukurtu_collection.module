@@ -9,12 +9,12 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\mukurtu_core\BaseFieldDefinition;
 
 define("MUKURTU_COLLECTION_FIELD_NAME_ITEMS", "field_items_in_collection");
 

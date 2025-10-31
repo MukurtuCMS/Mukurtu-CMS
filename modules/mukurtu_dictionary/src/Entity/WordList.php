@@ -2,12 +2,12 @@
 
 namespace Drupal\mukurtu_dictionary\Entity;
 
+use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\mukurtu_dictionary\Entity\WordListInterface;
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;

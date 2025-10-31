@@ -56,7 +56,7 @@ hidden:
   field_protocol_control: true
   field_related_content: true
   field_related_people: true
-  field_representative_terms: true
+  field_other_names: true
   field_sections: true
   field_sequence_collection: true
   field_title: true

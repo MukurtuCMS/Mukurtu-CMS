@@ -2,8 +2,8 @@
 
 namespace Drupal\mukurtu_protocol;
 
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\og\Og;
 use Drupal\mukurtu_protocol\CulturalProtocols;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
