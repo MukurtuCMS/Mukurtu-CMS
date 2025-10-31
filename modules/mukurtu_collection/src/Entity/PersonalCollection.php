@@ -266,7 +266,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'author',
@@ -289,6 +289,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setLabel(t('Personal collection name'))
       ->setDescription(t('A short, descriptive name for the personal collection. Maximum 255 characters.'))
       ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
       ->setSettings([
         'max_length' => 256,
         'text_processing' => 0,
@@ -312,6 +313,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setDescription(t('A short summary of the personal collection if needed to provide information or context. Maximum 255 characters.'))
       ->setDefaultValue('')
       ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
       ->setSettings([
         'max_length' => 255,
       ])
@@ -332,7 +334,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
