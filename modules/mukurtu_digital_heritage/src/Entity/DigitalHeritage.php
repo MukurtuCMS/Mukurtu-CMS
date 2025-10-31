@@ -99,7 +99,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
