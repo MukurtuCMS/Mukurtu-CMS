@@ -30,7 +30,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -44,7 +44,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -58,7 +58,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -84,7 +84,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -110,7 +110,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -154,7 +154,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -174,7 +174,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 

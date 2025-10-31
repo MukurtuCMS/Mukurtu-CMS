@@ -585,7 +585,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'author',
@@ -608,6 +608,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setLabel(t('Community name'))
       ->setDescription(t('The name of the Community.'))
       ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
       ->setSettings([
         'max_length' => 255,
         'text_processing' => 0,
@@ -628,6 +629,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_description'] = BaseFieldDefinition::create('text_with_summary')
       ->setLabel(t('Description'))
+      ->setTranslatable(TRUE)
       ->setDisplayOptions('view', [
         'label' => 'visible',
         'type' => 'text_default',
@@ -694,7 +696,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setDescription(t('Indicates if the last edit of a translation belongs to current revision.'))
       ->setReadOnly(TRUE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE);
+      ->setTranslatable(FALSE);
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Community page visibility'))
@@ -743,7 +745,6 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
-
     $fields['field_featured_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Featured Content'))
       ->setSetting('target_type', 'node')
@@ -839,7 +840,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setName('field_local_contexts_description')
       ->setLabel(t('Local Contexts Description'))
       ->setRequired(FALSE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDefaultValue([])
       // Keep this field out of Form/Display UIs entirely.
       ->setDisplayConfigurable('form', FALSE)

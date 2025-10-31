@@ -19,7 +19,7 @@ class FormattedTextWithTitle extends Paragraph {
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -29,7 +29,7 @@ class FormattedTextWithTitle extends Paragraph {
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
