@@ -75,7 +75,7 @@ class IndigenousKnowledgeKeepers extends Paragraph implements IndigenousKnowledg
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(FTRUE)
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
