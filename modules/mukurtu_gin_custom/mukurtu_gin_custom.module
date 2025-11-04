@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Provide Mukurtu Gin Custom.
+ */
+
+/**
+ * Implements hook_page_attachments()
+ */
+function mukurtu_gin_custom_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'mukurtu_gin_custom/mukurtu-gin-custom';
+}
