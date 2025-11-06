@@ -1,0 +1,8 @@
+name: 'Mukurtu Gin Custom'
+type: module
+description: 'Provides custom Mukurtu overrides to the Gin theme.'
+core_version_requirement: '^10 || ^11'
+package: 'Mukurtu CMS'
+version: 4.x-dev
+libraries:
+  - mukurtu_gin_custom/mukurtu-gin-custom
