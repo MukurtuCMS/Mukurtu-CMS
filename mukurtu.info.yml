@@ -106,6 +106,7 @@ dependencies:
   - 'mukurtu_digital_heritage:mukurtu_digital_heritage'
   - 'mukurtu_export:mukurtu_export'
   - 'mukurtu_footer:mukurtu_footer'
+  - 'mukurtu_gin_custom:mukurtu_gin_custom'
   - 'mukurtu_import:mukurtu_import'
   - 'mukurtu_landing_page:mukurtu_landing_page'
   - 'mukurtu_local_contexts:mukurtu_local_contexts'

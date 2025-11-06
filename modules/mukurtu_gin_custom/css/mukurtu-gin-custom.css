@@ -1,0 +1,13 @@
+/* todo: when Claro is officially replaced by Gin (see https://www.drupal.org/about/core/blog/drupal-core-will-adopt-gin-admin-theme-to-replace-claro),
+remove the .claro-details__description class and replace it with its Gin
+counterpart, if one exists. */
+.form-item__description, .fieldset__description, .claro-details__description {
+  /* For form description text, force the line length to fill the width of its
+  container. */
+
+  /* I would rather not use !important here, but just setting max-width: 100%
+  wasn't getting the changes to show up. I know it's possible to override the
+  Gin variable --gin-max-line-length, however, I don't want to override that
+  for the entire site, I just need it for forms. So !important it is. */
+  max-width: 100% !important;
+}
