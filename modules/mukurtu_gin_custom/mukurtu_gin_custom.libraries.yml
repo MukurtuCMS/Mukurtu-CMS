@@ -1,0 +1,5 @@
+mukurtu-gin-custom:
+  version: 1.x
+  css:
+    base:
+      css/mukurtu-gin-custom.css: {}
