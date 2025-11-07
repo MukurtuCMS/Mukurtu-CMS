@@ -1525,6 +1525,12 @@ details.form-wrapper summary + div {
   background-color: var(--brand-primary-accent);
 }
 
+.language-switcher .contextual {
+    position: absolute;
+    top: 0;
+    right: 20px;
+}
+
 .local-tasks {
   display: grid;
   grid-template-columns: var(--grid-6col);
@@ -2584,11 +2590,11 @@ body.is-always-mobile-nav .header-nav::before {
   inline-size: 100%;
   margin: 0;
   margin-block: var(--v-space-2xs);
-  padding: 0;
+  padding-left: 0;
 }
 @media (min-width: 60rem) {
   .menu__account-menu {
-    padding: 0;
+    padding:0;
     margin-block: 0;
   }
 }
