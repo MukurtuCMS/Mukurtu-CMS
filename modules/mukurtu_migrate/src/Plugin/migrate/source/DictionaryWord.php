@@ -29,16 +29,7 @@ use Drupal\node\Plugin\migrate\source\d7\Node;
  * )
  */
 
-class DictionaryWord extends Node
-{
-  /**
-   * {@inheritdoc}
-   */
-  public function query() {
-    $query = parent::query();
-    $query->condition('n.type', 'dictionary_word');
-    return $query;
-  }
+class DictionaryWord extends Node {
 
   /**
    * {@inheritdoc}

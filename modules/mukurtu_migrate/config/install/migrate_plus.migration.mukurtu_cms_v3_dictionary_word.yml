@@ -12,6 +12,7 @@ migration_group: mukurtu_cms_v3
 label: 'Dictionary Word'
 source:
   plugin: dictionary_word
+  node_type: dictionary_word
 process:
   nid: nid
   uid: uid
