@@ -49,7 +49,23 @@ class SampleSentence extends ParagraphsItem {
     // for easy process mapping.
     $delta = $row->getSourceProperty('delta');
     $field_sample_sentence = $row->getSourceProperty('field_sample_sentence');
-    $row->setSourceProperty('sample_sentence', [$field_sample_sentence[$delta]]);
+    $sample_sentence = $field_sample_sentence[$delta];
+
+    // Look for tokens like [scald=2:sdl_editor_representation]. These may
+    // occur on their own, or in the midst of other text.
+    $regex = "/\[scald=(\d+):s[qd]l_editor_representation]/";
+    if (preg_match($regex, $sample_sentence['value'], $matches) > 0) {
+      // Remove the token from the sample sentence for later save as
+      // sample_sentence. When we find a token, pull the sid value and save
+      // as a source property for later lookup.
+      $sample_sentence['value'] = trim(preg_replace($regex, '', $sample_sentence['value']));
+      // Just take the first match.
+      if (isset($matches[1])) {
+        $row->setSourceProperty('sid', $matches[1]);
+      }
+    }
+
+    $row->setSourceProperty('sample_sentence', [$sample_sentence]);
     return $row;
   }
 

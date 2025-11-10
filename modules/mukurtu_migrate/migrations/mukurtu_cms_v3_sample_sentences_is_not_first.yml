@@ -15,7 +15,6 @@ source:
   is_first: false
 process:
   field_sentence: sample_sentence
-  # @todo flesh this out for sid source data.
   field_sentence_recording:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_media_audio
