@@ -23,8 +23,8 @@ class SampleSentence extends ParagraphsItem {
     $query->fields('fds', ['delta']);
     // We effectively allow for the source plugin to be used in two different
     // modes to facilitate two different migrations. One scenario
-    // (is_first == TRUE) is meant to limit the scope of sample sentences to only
-    // ones that are set on the first word entry on a Dictionary Word. The
+    // (is_first == TRUE) is meant to limit the scope of sample sentences to
+    // only ones that are set on the first word entry on a Dictionary Word. The
     // other scenario (is_first == FALSE) is meant to limit the scope of sample
     // sentences to only ones that are set on the second or later word entries
     // on a Dictionary Word.
@@ -42,9 +42,14 @@ class SampleSentence extends ParagraphsItem {
    */
   public function prepareRow(Row $row) {
     parent::prepareRow($row);
+    // Since this is based on ParagraphsItem, it is going to include all the
+    // field data from the paragraph. We only want the specific delta sample
+    // sentence for our row, since we joined on the field_sample_sentence table
+    // in order to migrate one sentence at a time. Pick out the relevant delta
+    // for easy process mapping.
     $delta = $row->getSourceProperty('delta');
     $field_sample_sentence = $row->getSourceProperty('field_sample_sentence');
-    $row->setSourceProperty('sample_sentence', $field_sample_sentence[$delta]);
+    $row->setSourceProperty('sample_sentence', [$field_sample_sentence[$delta]]);
     return $row;
   }
 
