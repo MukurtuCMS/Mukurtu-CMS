@@ -6,6 +6,16 @@ use Drupal\migrate\Attribute\MigrateSource;
 use Drupal\migrate\Row;
 use Drupal\paragraphs\Plugin\migrate\source\d7\ParagraphsItem;
 
+/**
+ * Migration source for Sample Sentences.
+ *
+ * Puts together a Sample Sentence source by staring with dictionary_word_bundle
+ * Paragraphs and joining on the field_sample_sentence field to effectively
+ * have a Paragraph source for each sample sentence on a dictionary_word_bundle.
+ * This is b/c Sample Sentences in v4 are their own Pargraph, whereas in v3,
+ * they existed as a multi-value text field on the dictionary_word_bundle
+ * paragraph.
+ */
 #[MigrateSource(id: 'mukurtu_v3_sample_sentence')]
 class SampleSentence extends ParagraphsItem {
 
@@ -14,6 +24,10 @@ class SampleSentence extends ParagraphsItem {
    */
   public function query() {
     $query = parent::query();
+    // Joining on the multi-value field field_sample_sentence, effectively
+    // produces a source Paragraph for each sample sentence. Ths is what we
+    // want given that we're migrating each sentence on this multi-value text
+    // field into a Paragraph in v4.
     $query->innerJoin('field_data_field_sample_sentence', 'fds', 'fds.entity_id = p.item_id');
     // Join to the node field, field_word_entry, to be able to scope the rows
     // to only the first word entry, or only additional word entries.
@@ -75,6 +89,7 @@ class SampleSentence extends ParagraphsItem {
   public function fields() {
     $fields = parent::fields();
     $fields['sample_sentence'] = $this->t('The singular sentence text meant to be mapped to the new Sample Sentence paragraph in Mukurtu v4.');
+    $fields['sid'] = $this->t('The Scald Atom ID of the sample sentence, if any.');
     return $fields;
   }
 
@@ -83,6 +98,9 @@ class SampleSentence extends ParagraphsItem {
    */
   public function getIds() {
     $ids = parent::getIds();
+    // Since we're joining on the field_sample_sentence multi-value field, the
+    // paragraph id would not be enough on its own to uniquely identify a row.
+    // We add the delta for the field_sample_sentence field.
     $ids['delta'] = [
       'type' => 'integer',
       'alias' => 'fds',
