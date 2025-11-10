@@ -56,6 +56,15 @@ class SampleSentence extends ParagraphsItem {
   /**
    * {@inheritdoc}
    */
+  public function fields() {
+    $fields = parent::fields();
+    $fields['sample_sentence'] = $this->t('The singular sentence text meant to be mapped to the new Sample Sentence paragraph in Mukurtu v4.');
+    return $fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getIds() {
     $ids = parent::getIds();
     $ids['delta'] = [

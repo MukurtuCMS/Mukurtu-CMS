@@ -28,14 +28,12 @@ use Drupal\node\Plugin\migrate\source\d7\Node;
  *   id = "dictionary_word"
  * )
  */
-
 class DictionaryWord extends Node {
 
   /**
    * {@inheritdoc}
    */
-  public function prepareRow(Row $row)
-  {
+  public function prepareRow(Row $row) {
     // Each row will have one dictionary word in there to begin with.
     // Here's where we add the word entries.
     $fieldData = NULL;
@@ -74,8 +72,15 @@ class DictionaryWord extends Node {
           case 'field_part_of_speech':
             $fieldQuery->addField('t', $fieldName . '_tid', 'target_id');
             break;
-          # TODO case 'field_sample_sentence':
-          # Sample sentence is a paragraph, so it is an entity reference field.
+          // Sample sentences are migrated as paragraphs in v4 (see migrations:
+          // mukurtu_cms_v3_sample_sentences_is_first, and
+          // mukurtu_cms_v3_sample_sentences_is_not_first). We pull out the ids
+          // necessary to use with migration_lookup to find where each of the
+          // sentences was migrated to.
+          case 'field_sample_sentence':
+            $fieldQuery->addField('t', 'entity_id');
+            $fieldQuery->addField('t', 'delta');
+            break;
           case 'field_pronunciation':
             $fieldQuery->addField('t', $fieldName . '_value', 'value');
             $fieldQuery->addField('t', $fieldName . '_format', 'format');
@@ -90,7 +95,7 @@ class DictionaryWord extends Node {
         // Set the source row with the data.
         if ($fieldData) {
           switch ($fieldName) {
-              // Multivalue fields
+            // Multivalue fields.
             case 'field_dictionary_word_recording':
             case 'field_sample_sentence':
               $sourceData = [];
@@ -137,4 +142,5 @@ class DictionaryWord extends Node {
     $row->setSourceProperty('field_additional_word_entries', $additionalWordEntries);
     return parent::prepareRow($row);
   }
+
 }
