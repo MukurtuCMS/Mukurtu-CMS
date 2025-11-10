@@ -131,5 +131,6 @@ dependencies:
   - 'token:token'
   - 'views_bulk_operations:views_bulk_operations'
   - 'drupal:dashboards'
+
 themes:
   - mukurtu_v4
