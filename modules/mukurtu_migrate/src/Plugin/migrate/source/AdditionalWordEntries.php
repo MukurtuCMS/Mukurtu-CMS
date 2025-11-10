@@ -32,6 +32,7 @@ class AdditionalWordEntries extends ParagraphsItem {
     $field_values = parent::getFieldValues($entity_type, $field, $entity_id, $revision_id, $language);
     if ($field === 'field_sample_sentence') {
       foreach ($field_values as $key => $value) {
+        $field_values[$key]['entity_id'] = $entity_id;
         $field_values[$key]['delta'] = $key;
       }
     }

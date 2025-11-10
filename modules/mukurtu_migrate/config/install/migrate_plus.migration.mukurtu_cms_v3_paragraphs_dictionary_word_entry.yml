@@ -54,6 +54,28 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_word_type
     source: field_part_of_speech
+  field_sample_sentences:
+    plugin: sub_process
+    source: field_sample_sentence
+    process:
+      target_id:
+        - plugin: migration_lookup
+          migration: mukurtu_cms_v3_sample_sentences_is_not_first
+          source:
+            - entity_id
+            - delta
+        - plugin: extract
+          index:
+            - 0
+      target_revision_id:
+        - plugin: migration_lookup
+          migration: mukurtu_cms_v3_sample_sentences_is_not_first
+          source:
+            - entity_id
+            - delta
+        - plugin: extract
+          index:
+            - 1
   # TODO language: language
 
 destination:
