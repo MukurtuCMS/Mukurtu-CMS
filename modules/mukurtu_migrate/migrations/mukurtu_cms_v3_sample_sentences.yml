@@ -1,4 +1,4 @@
-id: mukurtu_cms_v3_sample_sentences_is_not_first
+id: mukurtu_cms_v3_sample_sentences
 class: null
 idMap: {  }
 field_plugin_method: null
@@ -6,13 +6,10 @@ cck_plugin_method: null
 migration_tags:
   - 'Mukurtu 3'
 migration_group: mukurtu_cms_v3
-label: 'Sample Sentences - Rest of Dictionary Word Bundles'
+label: 'Sample Sentences'
 source:
   plugin: mukurtu_v3_sample_sentence
   bundle: dictionary_word_bundle
-  # Only migrate sample sentences from additional dictionary word bundles in the
-  # field_word_entry field.
-  is_first: false
 process:
   field_sentence: sample_sentence
   field_sentence_recording:

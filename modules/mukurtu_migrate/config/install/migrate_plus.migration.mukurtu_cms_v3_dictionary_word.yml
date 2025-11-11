@@ -121,7 +121,7 @@ process:
       target_id:
         -
           plugin: migration_lookup
-          migration: mukurtu_cms_v3_sample_sentences_is_first
+          migration: mukurtu_cms_v3_sample_sentences
           source:
             - entity_id
             - delta
@@ -131,7 +131,7 @@ process:
             - 0
       target_revision_id:
         - plugin: migration_lookup
-          migration: mukurtu_cms_v3_sample_sentences_is_first
+          migration: mukurtu_cms_v3_sample_sentences
           source:
             - entity_id
             - delta
@@ -151,7 +151,7 @@ migration_dependencies:
     - mukurtu_cms_v3_users_uid1
     - mukurtu_cms_v3_terms_keywords
     - mukurtu_cms_v3_terms_language
-    - mukurtu_cms_v3_sample_sentences_is_first
+    - mukurtu_cms_v3_sample_sentences
   optional:
     - d7_field_instance
 include: null

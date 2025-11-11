@@ -72,11 +72,10 @@ class DictionaryWord extends Node {
           case 'field_part_of_speech':
             $fieldQuery->addField('t', $fieldName . '_tid', 'target_id');
             break;
-          // Sample sentences are migrated as paragraphs in v4 (see migrations:
-          // mukurtu_cms_v3_sample_sentences_is_first, and
-          // mukurtu_cms_v3_sample_sentences_is_not_first). We pull out the ids
-          // necessary to use with migration_lookup to find where each of the
-          // sentences was migrated to.
+          // Sample sentences are migrated as paragraphs in v4 (see migration:
+          // mukurtu_cms_v3_sample_sentences). We pull out the ids necessary to
+          // use with migration_lookup to find where each of the sentences was
+          // migrated to.
           case 'field_sample_sentence':
             $fieldQuery->addField('t', 'entity_id');
             $fieldQuery->addField('t', 'delta');
