@@ -15,6 +15,7 @@ migration_group: mukurtu_cms_v3
 label: 'Paragraphs - Dictionary Word Entry'
 source:
   plugin: additional_word_entries
+  bundle: dictionary_word_bundle
 process:
   field_alternate_spelling: field_alternate_spelling
   field_source: field_source
@@ -53,7 +54,28 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_word_type
     source: field_part_of_speech
-  # TODO field_sample_sentence
+  field_sample_sentences:
+    plugin: sub_process
+    source: field_sample_sentence
+    process:
+      target_id:
+        - plugin: migration_lookup
+          migration: mukurtu_cms_v3_sample_sentences
+          source:
+            - entity_id
+            - delta
+        - plugin: extract
+          index:
+            - 0
+      target_revision_id:
+        - plugin: migration_lookup
+          migration: mukurtu_cms_v3_sample_sentences
+          source:
+            - entity_id
+            - delta
+        - plugin: extract
+          index:
+            - 1
   # TODO language: language
 
 destination:
@@ -64,6 +86,7 @@ migration_dependencies:
     - mukurtu_cms_v3_cultural_protocols
     - mukurtu_cms_v3_terms_word_type
     - mukurtu_cms_v3_media_audio
+    - mukurtu_cms_v3_sample_sentences
   optional:
     - d7_field_instance
 include: null
