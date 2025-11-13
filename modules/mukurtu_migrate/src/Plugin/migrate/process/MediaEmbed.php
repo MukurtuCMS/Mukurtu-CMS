@@ -210,7 +210,7 @@ class MediaEmbed extends MigrationLookup {
     if (empty($media_id_array)) {
       return NULL;
     }
-    return reset($media_id_array);
+    return (int) reset($media_id_array);
   }
 
 }
