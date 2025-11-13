@@ -1,0 +1,28 @@
+id: mukurtu_cms_v3_sample_sentences
+class: null
+idMap: {  }
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: 'Sample Sentences'
+source:
+  plugin: mukurtu_v3_sample_sentence
+  bundle: dictionary_word_bundle
+process:
+  field_sentence: sample_sentence
+  field_sentence_recording:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_media_audio
+    source: sid
+  status: status
+destination:
+  plugin: 'entity_reference_revisions:paragraph'
+  default_bundle: sample_sentence
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_media_audio
+  optional:
+    - d7_field_instance
+include: null
