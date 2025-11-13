@@ -110,7 +110,7 @@ class MediaEmbed extends MigrationLookup {
     }
 
     // Note that the HTML parser underlying DOMDocument is very liberal and will
-    // accept a wide range of strings that are not valid HTML. We somtimes get
+    // accept a wide range of strings that are not valid HTML. We sometimes get
     // JSON data as $value here. There is no harm here, as it will load, but
     // fail the xpath query.
     $doc = new DOMDocument();
