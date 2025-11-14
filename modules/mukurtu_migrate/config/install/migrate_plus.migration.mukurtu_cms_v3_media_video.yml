@@ -90,6 +90,10 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_media_tags
     source: scald_tags
+  field_media_oembed_video:
+      plugin: vimeo_player_url
+      source: base_id
+
 destination:
   plugin: 'entity:media'
 migration_dependencies:
