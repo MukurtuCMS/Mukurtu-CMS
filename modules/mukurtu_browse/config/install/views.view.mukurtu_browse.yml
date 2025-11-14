@@ -7,6 +7,8 @@ dependencies:
     - geofield
     - leaflet_views
     - search_api
+_core:
+  default_config_hash: fSZIIlx1XXnA3Fa2Mk6HDYANbaJcs6ip3YNZ4mI371Y
 id: mukurtu_browse
 label: 'Mukurtu Browse'
 module: views
@@ -277,6 +279,46 @@ display:
             default_group_multiple: {  }
             group_items: {  }
           reduce_duplicates: false
+        search_api_language:
+          id: search_api_language
+          table: search_api_index_mukurtu_default_content_index
+          field: search_api_language
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_language
+          operator: in
+          value:
+            '***LANGUAGE_language_interface***': '***LANGUAGE_language_interface***'
+          group: 1
+          exposed: false
+          expose:
+            operator_id: ''
+            label: ''
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: ''
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
       style:
         type: default
       row:
@@ -834,8 +876,8 @@ display:
             options: '{"permanent":false,"direction":"center"}'
           leaflet_popup:
             value: '#rendered_view_fields'
-            options: '{"maxWidth":"400","minWidth":"300","autoPan":true}'
             view_mode: full
+            options: '{"maxWidth":"400","minWidth":"300","autoPan":true}'
           leaflet_map: 'OSM Mapnik'
           height: '600'
           height_unit: px
@@ -891,10 +933,10 @@ display:
             control: false
             options: '{"position":"topleft","pseudoFullscreen":false}'
           path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
-          map_lazy_load:
-            lazy_load: false
           feature_properties:
             values: ''
+          map_lazy_load:
+            lazy_load: false
       row:
         type: search_api
         options:
