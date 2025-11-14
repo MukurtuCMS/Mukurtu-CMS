@@ -9,6 +9,8 @@ dependencies:
     - mukurtu_browse
     - search_api
     - user
+_core:
+  default_config_hash: FIwdrmi53sagPT6aCBApBUgj8M7VMU79oMlnyF-W5EE
 id: mukurtu_digital_heritage_browse_by_map
 label: 'Mukurtu Digital Heritage Browse by Map'
 module: views
@@ -324,6 +326,7 @@ display:
         type: mini
         options:
           offset: 0
+          pagination_heading_level: h4
           items_per_page: 10
           total_pages: null
           id: 0
@@ -338,7 +341,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-          pagination_heading_level: h4
       exposed_form:
         type: basic
         options:
@@ -514,6 +516,46 @@ display:
             default_group_multiple: {  }
             group_items: {  }
           reduce_duplicates: false
+        search_api_language:
+          id: search_api_language
+          table: search_api_index_mukurtu_default_content_index
+          field: search_api_language
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_language
+          operator: in
+          value:
+            '***LANGUAGE_language_interface***': '***LANGUAGE_language_interface***'
+          group: 1
+          exposed: false
+          expose:
+            operator_id: ''
+            label: ''
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: ''
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
       style:
         type: default
         options:
@@ -585,14 +627,12 @@ display:
             field_coverage: field_coverage
           entity_source: __base_table
           name_field: title
-          description_field: '#rendered_view_fields'
-          view_mode: map_browse
           leaflet_map: 'OSM Mapnik'
           height: '600'
           height_unit: px
           hide_empty_map: false
-          gesture_handling: false
           disable_wheel: false
+          gesture_handling: false
           reset_map:
             control: false
             position: topright
@@ -633,6 +673,8 @@ display:
             control: false
             options: '{"position":"topleft","pseudoFullscreen":false}'
           path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+          description_field: '#rendered_view_fields'
+          view_mode: map_browse
       row:
         type: fields
         options:
@@ -670,6 +712,7 @@ display:
         type: mini
         options:
           offset: 0
+          pagination_heading_level: h4
           items_per_page: 10
           total_pages: null
           id: 0
@@ -684,7 +727,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-          pagination_heading_level: h4
       defaults:
         pager: false
       display_description: ''
