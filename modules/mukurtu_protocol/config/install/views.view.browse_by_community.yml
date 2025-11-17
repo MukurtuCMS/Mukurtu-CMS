@@ -150,42 +150,15 @@ display:
           id: status
           table: community_field_data
           field: status
-          relationship: none
-          group_type: group
-          admin_label: ''
           entity_type: community
           entity_field: status
           plugin_id: boolean
-          operator: '='
           value: '1'
           group: 1
-          exposed: false
           expose:
-            operator_id: ''
-            label: ''
-            description: ''
-            use_operator: false
             operator: ''
             operator_limit_selection: false
             operator_list: {  }
-            identifier: ''
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
       style:
         type: default
       row:
@@ -204,7 +177,6 @@ display:
       relationships: {  }
       css_class: community--browse--wrapper
       use_ajax: true
-      group_by: false
       header: {  }
       footer: {  }
       display_extenders: {  }
