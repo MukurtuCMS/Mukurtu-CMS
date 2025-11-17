@@ -6,6 +6,8 @@ dependencies:
   module:
     - mukurtu_protocol
     - user
+_core:
+  default_config_hash: nDZhW_ObQzzQOo6m61zEcWr6HgB6YwtImB6xO-ffzQw
 id: browse_by_community
 label: 'Browse by Community'
 module: views
@@ -169,7 +171,7 @@ display:
         options:
           query_comment: ''
           disable_sql_rewrite: false
-          distinct: false
+          distinct: true
           replica: false
           query_tags: {  }
       relationships: {  }
