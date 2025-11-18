@@ -1,4 +1,4 @@
 services:
-  mukurtu_landing_page.landing_page:
-    class: Drupal\mukurtu_landing_page\LandingPageService
+  mukurtu_landing_page.default_landing_page:
+    class: Drupal\mukurtu_landing_page\DefaultLandingPage
     arguments: ['@config.factory']

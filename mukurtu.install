@@ -61,7 +61,7 @@ function mukurtu_install() {
     ->save();
 
   // Create the default landing page using the service.
-  \Drupal::service('mukurtu_landing_page.landing_page')->createDefaultLandingPage();
+  \Drupal::service('mukurtu_landing_page.default_landing_page')->createDefaultLandingPage();
 
   // Create Communities menu item.
   MenuLinkContent::create([

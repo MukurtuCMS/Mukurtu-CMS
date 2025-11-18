@@ -13,7 +13,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 /**
  * Service for creating default landing pages.
  */
-class LandingPageService {
+class DefaultLandingPage {
 
   use StringTranslationTrait;
 

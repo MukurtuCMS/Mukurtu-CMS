@@ -232,7 +232,7 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
     $create_landing_page = $store->get('create_landing_page');
     if ($create_landing_page && $success && $failures == 0) {
       try {
-        $landing_page_service = \Drupal::service('mukurtu_landing_page.landing_page');
+        $landing_page_service = \Drupal::service('mukurtu_landing_page.default_landing_page');
         $homepage_node = $landing_page_service->createDefaultLandingPage();
         if ($homepage_node) {
           \Drupal::messenger()->addStatus(t('Default landing page created and set as homepage.'));
