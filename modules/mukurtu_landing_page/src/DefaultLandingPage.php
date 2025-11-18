@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_landing_page;
 
 use Drupal\block_content\Entity\BlockContent;
@@ -9,6 +11,7 @@ use Drupal\layout_builder\SectionComponent;
 use Drupal\Component\Uuid\Php;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\node\NodeInterface;
 
 /**
  * Service for creating default landing pages.
@@ -18,29 +21,24 @@ class DefaultLandingPage {
   use StringTranslationTrait;
 
   /**
-   * The config factory.
+   * Constructs a DefaultLandingPage object.
    *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
-
-  /**
-   * Constructs a LandingPageService object.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config factory.
    */
-  public function __construct(ConfigFactoryInterface $config_factory) {
-    $this->configFactory = $config_factory;
+  public function __construct(protected ConfigFactoryInterface $configFactory) {
   }
 
   /**
    * Creates the default landing page with blocks and layout.
    *
-   * @return \Drupal\node\Entity\Node|null
+   * @return \Drupal\node\NodeInterface|null
    *   The created landing page node, or NULL if creation failed.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   *   When something goes wrong with saving required entities.
    */
-  public function createDefaultLandingPage() {
+  public function createDefaultLandingPage(): ?NodeInterface {
     // Create block content for Layout Builder (no theme placement).
     // Hero Image block content.
     $hero_block_content = BlockContent::create([
