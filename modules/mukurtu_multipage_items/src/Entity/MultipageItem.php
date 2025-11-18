@@ -239,7 +239,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setLabel(t('Author'))
       ->setDescription(t('The user ID of the multipage item author.'))
       ->setSetting('target_type', 'user')
@@ -262,7 +262,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Authored on'))
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDescription(t('The time that the multipage item was created.'))
       ->setDisplayOptions('view', [
         'label' => 'above',
@@ -278,7 +278,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDescription(t('The time that the multipage item was last edited.'));
 
     return $fields;

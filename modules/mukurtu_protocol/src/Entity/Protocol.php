@@ -499,7 +499,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'author',
@@ -521,6 +521,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setLabel(t('Cultural protocol name'))
       ->setDescription(t('The name of the Protocol.'))
       ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
       ->setSettings([
         'max_length' => 255,
         'text_processing' => 0,
@@ -540,6 +541,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_description'] = BaseFieldDefinition::create('text_with_summary')
       ->setLabel(t('Description'))
+      ->setTranslatable(TRUE)
       ->setDisplayOptions('view', [
         'label' => 'visible',
         'type' => 'text_default',
@@ -728,7 +730,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setName('field_local_contexts_description')
       ->setLabel(t('Local Contexts Description'))
       ->setRequired(FALSE)
-      ->setTranslatable(FALSE)
+      ->setTranslatable(TRUE)
       ->setDefaultValue([])
       // Keep this field out of Form/Display UIs entirely.
       ->setDisplayConfigurable('form', FALSE)
