@@ -250,6 +250,13 @@ class CredentialForm extends MukurtuMigrateFormBase {
       '#element_validate' => ['::validatePaths'],
     ];
 
+    $form['create_landing_page'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Create default landing page'),
+      '#description' => $this->t('When the migration finishes, create a default landing page with welcome content and set it as the homepage.'),
+      '#default_value' => FALSE,
+    ];
+
     return $form;
   }
 
@@ -444,6 +451,7 @@ class CredentialForm extends MukurtuMigrateFormBase {
       $this->store->set('source_base_path', $form_state->getValue('source_base_path'));
     }
     $this->store->set('source_private_file_path', $form_state->getValue('source_private_file_path'));
+    $this->store->set('create_landing_page', $form_state->getValue('create_landing_page'));
     // Store the retrieved system data in the private store.
     $this->store->set('system_data', $system_data);
   }
