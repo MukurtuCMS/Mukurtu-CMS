@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Mukurtu Multilingual module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_multilingual_install() {
+  // Assign translation permissions to mukurtu_manager role.
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if ($role) {
+    $permissions = [
+      'translate interface',
+      'translate configuration',
+      'translate editable entities',
+    ];
+    foreach ($permissions as $permission) {
+      $role->grantPermission($permission);
+    }
+    $role->save();
+  }
+
+  // Assign translate editable entities permission to authenticated role.
+  $authenticated_role = \Drupal\user\Entity\Role::load('authenticated');
+  if ($authenticated_role) {
+    $authenticated_role->grantPermission('translate editable entities');
+    $authenticated_role->save();
+  }
+}
