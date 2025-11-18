@@ -7,8 +7,6 @@ dependencies:
     - geofield
     - leaflet_views
     - search_api
-_core:
-  default_config_hash: fSZIIlx1XXnA3Fa2Mk6HDYANbaJcs6ip3YNZ4mI371Y
 id: mukurtu_browse
 label: 'Mukurtu Browse'
 module: views

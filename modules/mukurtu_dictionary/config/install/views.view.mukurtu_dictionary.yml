@@ -6,8 +6,6 @@ dependencies:
   module:
     - search_api
     - user
-_core:
-  default_config_hash: OLQPglju-4rc-mBqsd4-Tcxr0BYBnSN0m3JRC6A3oCE
 id: mukurtu_dictionary
 label: 'Mukurtu Dictionary'
 module: views

@@ -7,8 +7,6 @@ dependencies:
     - search_api
     - text
     - user
-_core:
-  default_config_hash: '-OPBM7KeYNX7qPSQWbyCgDBBp26ivDveoKwzJswixGo'
 id: mukurtu_browse_collections
 label: 'Mukurtu Browse Collections'
 module: views

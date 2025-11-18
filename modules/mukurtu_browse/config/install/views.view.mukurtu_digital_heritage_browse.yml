@@ -8,8 +8,6 @@ dependencies:
     - leaflet_views
     - search_api
     - user
-_core:
-  default_config_hash: Jfu8M2e47tbztHz0pf3aNKrm_UOO0qiWwTDBbgnisNg
 id: mukurtu_digital_heritage_browse
 label: 'Mukurtu Digital Heritage Browse'
 module: views

@@ -7,8 +7,6 @@ dependencies:
     - mukurtu_browse
     - search_api
     - user
-_core:
-  default_config_hash: AHuzmzpQ6L3AphVMH_angbwL7d9KtG7hPPQZkBx5Gik
 id: mukurtu_browse_map
 label: 'Mukurtu Browse - Map'
 module: views

@@ -9,8 +9,6 @@ dependencies:
     - mukurtu_browse
     - search_api
     - user
-_core:
-  default_config_hash: FIwdrmi53sagPT6aCBApBUgj8M7VMU79oMlnyF-W5EE
 id: mukurtu_digital_heritage_browse_by_map
 label: 'Mukurtu Digital Heritage Browse by Map'
 module: views
