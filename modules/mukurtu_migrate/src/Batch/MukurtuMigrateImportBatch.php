@@ -226,6 +226,40 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
       ->getEditable('pathauto.settings')
       ->set('transliterate', 1)
       ->save();
+
+    // Create landing page if requested, otherwise set the Drupal default.
+    // Without a landing page set, the Mukurtu install profile default may
+    // be set to an arbitraty migrated node.
+    $store = \Drupal::service('tempstore.private')->get('mukurtu_migrate');
+    $create_landing_page = $store->get('create_landing_page');
+    if ($success && $failures == 0) {
+      if ($create_landing_page) {
+        try {
+          $landing_page_service = \Drupal::service('mukurtu_landing_page.default_landing_page');
+          $homepage_node = $landing_page_service->createDefaultLandingPage();
+          if ($homepage_node) {
+            \Drupal::messenger()
+              ->addStatus(t('Default landing page created and set as homepage.'));
+          }
+        }
+        catch (\Exception $e) {
+          \Drupal::logger('mukurtu_migrate')
+            ->error('Failed to create landing page: @message', ['@message' => $e->getMessage()]);
+          \Drupal::messenger()
+            ->addWarning(t('Failed to create default landing page.'));
+        }
+      }
+      else {
+        // Set the homepage to the Drupal default, so its set to something,
+        // preventing errors.
+        \Drupal::service('config.factory')
+          ->getEditable('system.site')
+          ->set('page.front', '/node')
+          ->save();
+        \Drupal::messenger()
+          ->addStatus(t('The front page was set to the Drupal default of "/node". You will likely want to update this by navigating to <a href="/admin/config/system/site-information">Configuration > System > Basic Site Settings</a>.'));
+      }
+    }
   }
 
 }
