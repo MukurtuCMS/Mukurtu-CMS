@@ -1,0 +1,18 @@
+uuid: e6060e1d-f9c2-43bf-b419-e9f8528fcf4c
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.formatted_text_with_title
+id: paragraph.formatted_text_with_title.created
+field_name: created
+entity_type: paragraph
+bundle: formatted_text_with_title
+label: 'Authored on'
+description: 'The time that the Paragraph was created.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: created

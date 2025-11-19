@@ -1,0 +1,20 @@
+uuid: 83f7fc47-46ac-40e8-8f15-b3e285731911
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.dictionary_word_entry
+id: paragraph.dictionary_word_entry.field_source
+field_name: field_source
+entity_type: paragraph
+bundle: dictionary_word_entry
+label: Source
+description: 'Reference to a resource from which the entry was collected or sourced. Examples include a specific dictionary or language researcher, or the places where the entry is used (in the case of dialectical variation, for example). </br>Maximum 255 characters.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

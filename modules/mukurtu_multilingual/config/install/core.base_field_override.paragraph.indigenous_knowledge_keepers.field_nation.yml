@@ -1,0 +1,18 @@
+uuid: ada441c0-c992-4bd1-af39-126e0dd98b95
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.indigenous_knowledge_keepers
+id: paragraph.indigenous_knowledge_keepers.field_nation
+field_name: field_nation
+entity_type: paragraph
+bundle: indigenous_knowledge_keepers
+label: 'Nation or Community'
+description: "Including the Knowledge Keeper's Nation or community foregrounds the importance of relationships when it comes to Indigenous knowledges and recognizes which nations hold which teachings. The  nation/community  element  of  the  citation  not  only  recognizes  the  important  relationship of an Elder or Knowledge Keeper to their nation or community, it helps celebrate the nuances between different community teachings. </br>Maximum 255 characters."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

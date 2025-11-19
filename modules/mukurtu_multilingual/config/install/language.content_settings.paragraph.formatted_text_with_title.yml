@@ -1,0 +1,18 @@
+uuid: 1f3b8d20-86f1-4017-ad90-b9c7908a9f2c
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.formatted_text_with_title
+  module:
+    - content_translation
+third_party_settings:
+  content_translation:
+    enabled: true
+    bundle_settings:
+      untranslatable_fields_hide: '0'
+id: paragraph.formatted_text_with_title
+target_entity_type_id: paragraph
+target_bundle: formatted_text_with_title
+default_langcode: site_default
+language_alterable: true

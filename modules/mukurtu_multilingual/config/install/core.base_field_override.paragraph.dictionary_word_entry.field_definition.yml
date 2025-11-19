@@ -1,0 +1,23 @@
+uuid: ea0eb2f8-6998-4d70-82da-ff5c60095ee8
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.dictionary_word_entry
+  module:
+    - text
+id: paragraph.dictionary_word_entry.field_definition
+field_name: field_definition
+entity_type: paragraph
+bundle: dictionary_word_entry
+label: Definition
+description: 'A longer definition or description of the entry. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

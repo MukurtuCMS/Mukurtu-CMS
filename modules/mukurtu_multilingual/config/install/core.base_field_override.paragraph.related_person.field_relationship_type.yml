@@ -1,0 +1,24 @@
+uuid: 184a4913-7e90-45c7-ba05-3523a753b745
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.related_person
+    - taxonomy.vocabulary.interpersonal_relationship
+id: paragraph.related_person.field_relationship_type
+field_name: field_relationship_type
+entity_type: paragraph
+bundle: related_person
+label: 'Relationship Type'
+description: 'The type of relationship between the related person and the subject of the person record. </br>As you type, existing relationship types will be displayed. Select an existing relationship type or enter a new one. To include additional relationship types, select "Add another item".'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      interpersonal_relationship: interpersonal_relationship
+    auto_create: true
+field_type: entity_reference

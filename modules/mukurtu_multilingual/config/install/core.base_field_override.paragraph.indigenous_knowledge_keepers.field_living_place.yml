@@ -1,0 +1,18 @@
+uuid: 45c03e63-be01-4118-8bec-45513d7679a1
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.indigenous_knowledge_keepers
+id: paragraph.indigenous_knowledge_keepers.field_living_place
+field_name: field_living_place
+entity_type: paragraph
+bundle: indigenous_knowledge_keepers
+label: 'City or Community They Live in'
+description: 'Knowledge Keepers may live in places that differ from the origins of their knowledge, nation, or birthplace, and, in some cases, this may be an important relationship they want to recognize. Only used if applicable and indicated by the Knowledge Keeper. </br>Maximum 255 characters.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

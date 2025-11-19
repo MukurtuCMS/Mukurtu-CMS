@@ -1,0 +1,18 @@
+uuid: 684b82dc-3ed3-45ad-994b-255cea6652a8
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.sample_sentence
+id: paragraph.sample_sentence.created
+field_name: created
+entity_type: paragraph
+bundle: sample_sentence
+label: 'Authored on'
+description: 'The time that the Paragraph was created.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: created

@@ -1,0 +1,20 @@
+uuid: 01278310-22e1-4a51-9457-2fc1c07b1a25
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.formatted_text_with_title
+id: paragraph.formatted_text_with_title.field_title
+field_name: field_title
+entity_type: paragraph
+bundle: formatted_text_with_title
+label: Title
+description: 'The title of the biography section. Examples include "Early life", "Education", or "Professional career". Maximum 255 characters.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

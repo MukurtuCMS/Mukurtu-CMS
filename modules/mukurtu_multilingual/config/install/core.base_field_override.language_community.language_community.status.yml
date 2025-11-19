@@ -1,0 +1,22 @@
+uuid: 612c38bd-414b-4c8d-b459-c36cc9884a1e
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_dictionary
+id: language_community.language_community.status
+field_name: status
+entity_type: language_community
+bundle: language_community
+label: Published
+description: 'A boolean indicating whether the Language community is published.'
+required: false
+translatable: true
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

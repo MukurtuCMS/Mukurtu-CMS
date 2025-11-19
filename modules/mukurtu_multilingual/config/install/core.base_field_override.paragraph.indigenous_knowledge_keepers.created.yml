@@ -1,0 +1,18 @@
+uuid: 2a938d56-aec6-45b7-9138-05192ac66976
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.indigenous_knowledge_keepers
+id: paragraph.indigenous_knowledge_keepers.created
+field_name: created
+entity_type: paragraph
+bundle: indigenous_knowledge_keepers
+label: 'Authored on'
+description: 'The time that the Paragraph was created.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: created

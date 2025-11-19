@@ -1,0 +1,18 @@
+uuid: cd5d12c1-8d3b-4b1b-931f-c32326420fdc
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.sample_sentence
+  module:
+    - content_translation
+third_party_settings:
+  content_translation:
+    enabled: true
+    bundle_settings:
+      untranslatable_fields_hide: '0'
+id: paragraph.sample_sentence
+target_entity_type_id: paragraph
+target_bundle: sample_sentence
+default_langcode: site_default
+language_alterable: true

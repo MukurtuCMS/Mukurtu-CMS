@@ -1,0 +1,18 @@
+uuid: cda6b5c7-119a-4fc6-a720-a3b7207f6eac
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.indigenous_knowledge_keepers
+id: paragraph.indigenous_knowledge_keepers.field_treaty_territory
+field_name: field_treaty_territory
+entity_type: paragraph
+bundle: indigenous_knowledge_keepers
+label: 'Treaty Territory'
+description: 'For some individuals, or in relation to some teachings, it may be important for the Knowledge Keeper to acknowledge their relationship to a treaty. This may be particularly important regarding oral teachings about land or treaty rights. Only used if applicable and indicated by the Knowledge Keeper. </br>Maximum 255 characters.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

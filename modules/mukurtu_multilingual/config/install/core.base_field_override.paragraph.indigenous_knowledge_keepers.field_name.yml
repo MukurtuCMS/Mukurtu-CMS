@@ -1,0 +1,20 @@
+uuid: 7a8ee936-1cd7-41f3-a7fe-85addf3c989b
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.indigenous_knowledge_keepers
+id: paragraph.indigenous_knowledge_keepers.field_name
+field_name: field_name
+entity_type: paragraph
+bundle: indigenous_knowledge_keepers
+label: 'Name of the Elder or Knowledge Keeper'
+description: "The Knowledge Keeper's name(s), according to their personal or community preferences. This may include their appropriate title or status. </br>Maximum 255 characters."
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

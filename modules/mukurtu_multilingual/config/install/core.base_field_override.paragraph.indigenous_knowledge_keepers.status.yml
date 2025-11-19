@@ -1,0 +1,22 @@
+uuid: 43118483-08f8-4655-8298-e46139c6f839
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.indigenous_knowledge_keepers
+id: paragraph.indigenous_knowledge_keepers.status
+field_name: status
+entity_type: paragraph
+bundle: indigenous_knowledge_keepers
+label: Published
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

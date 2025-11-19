@@ -1,0 +1,18 @@
+uuid: 390eddd6-e053-48fa-8866-7c0f43bc5c1d
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.dictionary_word_entry
+id: paragraph.dictionary_word_entry.created
+field_name: created
+entity_type: paragraph
+bundle: dictionary_word_entry
+label: 'Authored on'
+description: 'The time that the Paragraph was created.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: created
