@@ -32,4 +32,23 @@ function mukurtu_multilingual_install() {
 
   // Clear the cache.discovery bin where field definitions are cached.
   \Drupal::service('cache.discovery')->deleteAll();
+
+  // Make adjustments to language negotiation settings. This will enable
+  // content language detection apart from interface language detection. It
+  // also prioritizes a users' Administration pages language setting, so that
+  // interface text follows their preference rather than the content language.
+  $config = \Drupal::configFactory()->getEditable('language.types');
+  $config->set('configurable', ['language_interface', 'language_content'])
+    ->set('negotiation.language_content.enabled', [
+      'language-url' => -8,
+      'language-interface' => 9,
+      'language-selected' => 12,
+    ])
+    ->set('negotiation.language_interface.enabled', [
+      'language-user-admin' => -10,
+      'language-url' => -8,
+      'language-user' => -4,
+      'language-selected' => 12,
+    ]);
+  $config->save();
 }
