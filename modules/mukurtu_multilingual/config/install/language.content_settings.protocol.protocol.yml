@@ -1,0 +1,17 @@
+uuid: 0f33f2ac-3a9a-46f0-ac16-8c29c20e7494
+langcode: en
+status: true
+dependencies:
+  module:
+    - content_translation
+    - mukurtu_protocol
+third_party_settings:
+  content_translation:
+    enabled: true
+    bundle_settings:
+      untranslatable_fields_hide: '0'
+id: protocol.protocol
+target_entity_type_id: protocol
+target_bundle: protocol
+default_langcode: site_default
+language_alterable: true

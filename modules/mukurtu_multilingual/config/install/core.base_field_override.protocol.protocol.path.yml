@@ -1,0 +1,19 @@
+uuid: 838b98ee-acb3-48f0-9f2a-836db5931f52
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+    - path
+id: protocol.protocol.path
+field_name: path
+entity_type: protocol
+bundle: protocol
+label: 'URL alias'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: path
