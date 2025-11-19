@@ -1,11 +1,8 @@
-uuid: c18d9db3-89d2-4711-82f9-ac3dad7e2c81
 langcode: en
 status: true
 dependencies:
   config:
     - node.type.dictionary_word
-_core:
-  default_config_hash: vt3dlku22PSbRDasCdTWoTcKBprUYUO9UlGe4eZLLLc
 id: node.dictionary_word.title
 field_name: title
 entity_type: node

@@ -1,11 +1,8 @@
-uuid: 42042ed3-3c02-4932-a632-f21d983d58d6
 langcode: en
 status: true
 dependencies:
   config:
     - node.type.landing_page
-_core:
-  default_config_hash: KZ4pDrGhkRiIo7Ee-E4HGZp7YPXKS_FLR0nLeUQ3P2U
 id: node.landing_page.promote
 field_name: promote
 entity_type: node

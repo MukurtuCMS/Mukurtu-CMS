@@ -1,4 +1,3 @@
-uuid: 5e910fd1-a20a-4c7b-9a36-03941cb07c2f
 langcode: en
 status: true
 dependencies:
@@ -11,8 +10,6 @@ third_party_settings:
     enabled: true
     bundle_settings:
       untranslatable_fields_hide: '0'
-_core:
-  default_config_hash: ZP94Cg6XEuh39UOvHOUWgSq22_fOuPP7RceVQaNPsqA
 id: block_content.image_with_description
 target_entity_type_id: block_content
 target_bundle: image_with_description

@@ -1,11 +1,8 @@
-uuid: 3d78d387-dabc-424e-8534-4b0d9cb5763e
 langcode: en
 status: true
 dependencies:
   module:
     - mukurtu_multipage_items
-_core:
-  default_config_hash: Sa9w6qAon0yYpiRNWUZwwvyfndkkKaa7R9Ltxd2DGWc
 id: multipage_item.multipage_item.title
 field_name: title
 entity_type: multipage_item

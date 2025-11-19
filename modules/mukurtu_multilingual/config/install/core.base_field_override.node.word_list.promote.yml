@@ -1,11 +1,8 @@
-uuid: 07f15f7d-2f56-4907-ab78-583626aefdec
 langcode: en
 status: true
 dependencies:
   config:
     - node.type.word_list
-_core:
-  default_config_hash: 6o_QU5_veuqYSgmj4pILBV856X9dkiBzM4wnKOZcRhQ
 id: node.word_list.promote
 field_name: promote
 entity_type: node

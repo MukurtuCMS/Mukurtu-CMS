@@ -1,4 +1,3 @@
-uuid: 5ef0678e-d0d5-425e-8488-f92fb23cab14
 langcode: en
 status: true
 dependencies:
@@ -10,8 +9,6 @@ third_party_settings:
     enabled: true
     bundle_settings:
       untranslatable_fields_hide: '0'
-_core:
-  default_config_hash: ojq8VhtBubAFRU9aj_ebwfTZFVIOzUvpSgcyhL20vWI
 id: multipage_item.multipage_item
 target_entity_type_id: multipage_item
 target_bundle: multipage_item

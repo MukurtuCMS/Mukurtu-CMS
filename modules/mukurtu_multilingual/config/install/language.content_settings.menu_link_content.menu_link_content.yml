@@ -1,4 +1,3 @@
-uuid: 9984c85b-2bcd-40b3-bc3a-bb6066602758
 langcode: en
 status: true
 dependencies:
@@ -10,8 +9,6 @@ third_party_settings:
     enabled: true
     bundle_settings:
       untranslatable_fields_hide: '0'
-_core:
-  default_config_hash: Yp_cRYEyuThX856TBEh9975OAs-V0qSTEgNQq10C1dQ
 id: menu_link_content.menu_link_content
 target_entity_type_id: menu_link_content
 target_bundle: menu_link_content

@@ -1,11 +1,8 @@
-uuid: 78391fe3-60f3-4efc-9ef5-889a7abef098
 langcode: en
 status: true
 dependencies:
   module:
     - menu_link_content
-_core:
-  default_config_hash: yLCRm5Gee_ENoZuwwLTVwGDYmQpSyem0GGLdjCuopVY
 id: menu_link_content.menu_link_content.title
 field_name: title
 entity_type: menu_link_content

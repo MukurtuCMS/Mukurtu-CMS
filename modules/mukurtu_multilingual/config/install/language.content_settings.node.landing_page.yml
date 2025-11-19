@@ -1,4 +1,3 @@
-uuid: 08f47087-f9b9-4966-84c6-42a01fe60096
 langcode: en
 status: true
 dependencies:
@@ -11,8 +10,6 @@ third_party_settings:
     enabled: true
     bundle_settings:
       untranslatable_fields_hide: '0'
-_core:
-  default_config_hash: 1cTirmDE94SY6hOb4MguojXtnYYs7iEOCnjirSJHOPY
 id: node.landing_page
 target_entity_type_id: node
 target_bundle: landing_page

@@ -1,11 +1,8 @@
-uuid: 88ec9eda-5946-4f0b-9dea-d3560544775e
 langcode: en
 status: true
 dependencies:
   config:
     - node.type.digital_heritage
-_core:
-  default_config_hash: buc0hrwLsTp8LcU8yTBvSzfsi689j8hcHqCuCmKW2f4
 id: node.digital_heritage.title
 field_name: title
 entity_type: node
