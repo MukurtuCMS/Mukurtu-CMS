@@ -1,0 +1,21 @@
+uuid: fb8efc95-6ce1-4c46-985d-398778061a8b
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.word_list
+  module:
+    - text
+id: node.word_list.field_description
+field_name: field_description
+entity_type: node
+bundle: word_list
+label: Description
+description: "The explanation or definition of the word list. The description may include guidance on use, explanation of word selection or arrangement, or any other contextual information.\t</br>This HTML field can support rich text and embedded media assets using the editing toolbar."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

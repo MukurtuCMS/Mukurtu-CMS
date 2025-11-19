@@ -1,0 +1,22 @@
+uuid: 93dd7e6b-8ea9-4ccf-82c7-5991f7c268f1
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.word_list
+id: node.word_list.status
+field_name: status
+entity_type: node
+bundle: word_list
+label: Published
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

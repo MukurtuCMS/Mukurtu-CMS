@@ -1,0 +1,18 @@
+uuid: 95a4862b-a2c0-45da-ae31-448e8a65a7ef
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.collection
+id: node.collection.created
+field_name: created
+entity_type: node
+bundle: collection
+label: 'Authored on'
+description: 'The date and time that the content was created.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: created

@@ -1,0 +1,39 @@
+uuid: 6ea65437-d942-4b85-b644-6367c269fb5a
+langcode: en
+status: true
+dependencies:
+  config:
+    - media.type.audio
+    - media.type.document
+    - media.type.image
+    - media.type.remote_video
+    - media.type.soundcloud
+    - media.type.video
+    - node.type.person
+id: node.person.field_media_assets
+field_name: field_media_assets
+entity_type: node
+bundle: person
+label: 'Media Assets'
+description: "Media assets are a key element of most person records, though they are not required. Supported media types are images, documents, video, audio, and embed code. Person records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the person record to allow differential access to the media assets and metadata.\t</br>Select \"Add media\" to select or upload media assets."
+required: false
+translatable: false
+default_value:
+  -
+    target_id: ''
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      audio: audio
+      document: document
+      image: image
+      remote_video: remote_video
+      video: video
+      soundcloud: soundcloud
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: audio
+field_type: entity_reference

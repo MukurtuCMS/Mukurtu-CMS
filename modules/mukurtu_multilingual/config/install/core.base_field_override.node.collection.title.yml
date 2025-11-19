@@ -1,0 +1,20 @@
+uuid: dc400a40-1bf5-40b9-8e12-986c9152027f
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.collection
+_core:
+  default_config_hash: '-akMbNSpHjw4DbXjFJN6BTlbz2tL3-Nv8PvbUupyEh0'
+id: node.collection.title
+field_name: title
+entity_type: node
+bundle: collection
+label: 'Collection name'
+description: 'A short, descriptive name for the collection. The name should give users useful information about the collection when browsing or searching. Maximum 255 characters.'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,20 @@
+uuid: 7c9366de-670b-4279-89d2-ba161f072298
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.person
+_core:
+  default_config_hash: vUZfHpZm0P2FDSZjWlw761lgVynPL1bwfAeUgI1bMTY
+id: node.person.title
+field_name: title
+entity_type: node
+bundle: person
+label: Name
+description: "The person's name, as they should be primarily identified. Maximum 255 characters."
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

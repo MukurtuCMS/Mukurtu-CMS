@@ -1,0 +1,21 @@
+uuid: b8f0ae1a-7733-49e8-9158-273e775e686f
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.collection
+  module:
+    - text
+id: node.collection.field_citation
+field_name: field_citation
+entity_type: node
+bundle: collection
+label: Citation
+description: 'Citation for the item.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

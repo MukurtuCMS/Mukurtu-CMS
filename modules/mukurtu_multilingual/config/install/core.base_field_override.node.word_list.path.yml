@@ -1,0 +1,20 @@
+uuid: 03795eef-6832-4628-9c91-07e575bd0871
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.word_list
+  module:
+    - path
+id: node.word_list.path
+field_name: path
+entity_type: node
+bundle: word_list
+label: 'URL alias'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: path

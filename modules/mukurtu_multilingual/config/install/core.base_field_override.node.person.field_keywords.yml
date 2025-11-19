@@ -1,0 +1,30 @@
+uuid: 49cd20f7-62bb-44fc-b527-ee4a3cd73c16
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.person
+    - taxonomy.vocabulary.keywords
+id: node.person.field_keywords
+field_name: field_keywords
+entity_type: node
+bundle: person
+label: Keywords
+description: "Keywords are used to tag person records to ensure that they are discoverable when searching or browsing. Examples include significant life events or organizations which the person was involved with.\tAs you type, existing keywords will be displayed. </br>Select an existing keyword or enter a new one. To include additional keywords, select \"Add another item\"."
+required: false
+translatable: false
+default_value:
+  -
+    target_id: ''
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      keywords: keywords
+    sort:
+      field: name
+      direction: asc
+    auto_create: true
+    auto_create_bundle: ''
+field_type: entity_reference

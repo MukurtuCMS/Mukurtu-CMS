@@ -1,0 +1,20 @@
+uuid: dccf5b20-267b-4a96-8948-d9ece34bac02
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.word_list
+id: node.word_list.field_source
+field_name: field_source
+entity_type: node
+bundle: word_list
+label: Source
+description: 'Source provides a reference to the organization or individual responsible for the holding, description, origination, or contribution of the word list. Examples include institutions (e.g.,: "Library of Congress, American Folklife Center"), or donors (e.g.,: "Donated by John Smith"). Maximum 255 characters.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -29,4 +29,7 @@ function mukurtu_multilingual_install() {
     $authenticated_role->grantPermission('translate editable entities');
     $authenticated_role->save();
   }
+
+  // Clear the cache.discovery bin where field definitions are cached.
+  \Drupal::service('cache.discovery')->deleteAll();
 }

@@ -1,0 +1,20 @@
+uuid: 459213ad-0dfd-42b1-b555-7981973dd278
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.person
+  module:
+    - mukurtu_protocol
+id: node.person.field_cultural_protocols
+field_name: field_cultural_protocols
+entity_type: node
+bundle: person
+label: 'Cultural Protocols'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: cultural_protocol

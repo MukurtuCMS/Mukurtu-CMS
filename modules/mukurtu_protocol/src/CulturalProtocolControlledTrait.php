@@ -18,7 +18,7 @@ trait CulturalProtocolControlledTrait {
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 

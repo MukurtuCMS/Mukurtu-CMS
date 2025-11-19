@@ -1,0 +1,20 @@
+uuid: f2a56176-4db4-4275-bff8-76195b4221bd
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.collection
+id: node.collection.field_source
+field_name: field_source
+entity_type: node
+bundle: collection
+label: Source
+description: 'Source provides a reference to the organization or individual responsible for the holding, description, origination, or contribution of the collection. Examples include institutions (e.g.,: "Library of Congress, American Folklife Center"), or donors (e.g.,: "Donated by John Smith"). Maximum 255 characters.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

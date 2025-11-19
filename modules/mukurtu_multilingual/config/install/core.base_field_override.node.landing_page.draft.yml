@@ -1,0 +1,22 @@
+uuid: 8747a2c3-9b63-4fd4-9d1c-00e7247aecdd
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.landing_page
+id: node.landing_page.draft
+field_name: draft
+entity_type: node
+bundle: landing_page
+label: Draft
+description: 'Mark this item as a draft.'
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

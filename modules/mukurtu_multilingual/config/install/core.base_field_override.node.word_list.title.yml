@@ -1,0 +1,20 @@
+uuid: b791e2d3-cb77-42ae-b3f8-9402521ff456
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.word_list
+_core:
+  default_config_hash: 7weMr6wqwVUnN3_5_opXPDQQ6HH2H2RxvOtnsEKXaIA
+id: node.word_list.title
+field_name: title
+entity_type: node
+bundle: word_list
+label: 'Word list name'
+description: 'A short, descriptive name for the word list. The name should give users useful information about the word list when browsing or searching. Maximum 255 characters.'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
