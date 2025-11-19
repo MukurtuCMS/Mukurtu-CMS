@@ -1,0 +1,17 @@
+uuid: cca6ee6a-4207-4068-bb70-6808ba892b2d
+langcode: en
+status: true
+dependencies:
+  module:
+    - content_translation
+    - mukurtu_collection
+third_party_settings:
+  content_translation:
+    enabled: true
+    bundle_settings:
+      untranslatable_fields_hide: '0'
+id: personal_collection.personal_collection
+target_entity_type_id: personal_collection
+target_bundle: personal_collection
+default_langcode: site_default
+language_alterable: true

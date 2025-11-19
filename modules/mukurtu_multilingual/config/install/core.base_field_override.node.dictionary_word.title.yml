@@ -1,0 +1,20 @@
+uuid: c18d9db3-89d2-4711-82f9-ac3dad7e2c81
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+_core:
+  default_config_hash: vt3dlku22PSbRDasCdTWoTcKBprUYUO9UlGe4eZLLLc
+id: node.dictionary_word.title
+field_name: title
+entity_type: node
+bundle: dictionary_word
+label: Term
+description: 'A word, term, phrase, or other language element. </br>Maximum 255 characters.'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

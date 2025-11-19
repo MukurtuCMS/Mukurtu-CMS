@@ -1,0 +1,20 @@
+uuid: cfbb7cdb-2d4f-484b-9ef7-a078b6c12b2f
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.digital_heritage
+id: node.digital_heritage.uid
+field_name: uid
+entity_type: node
+bundle: digital_heritage
+label: 'Authored by'
+description: 'The username of the content author.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: 'Drupal\node\Entity\Node::getDefaultEntityOwner'
+settings:
+  handler: default
+  handler_settings: {  }
+field_type: entity_reference

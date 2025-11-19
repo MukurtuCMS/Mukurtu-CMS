@@ -1,0 +1,20 @@
+uuid: 86de9147-92d6-450f-a93f-ab2e77b09fcc
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+id: node.dictionary_word.field_source
+field_name: field_source
+entity_type: node
+bundle: dictionary_word
+label: Source
+description: 'Reference to a resource from which the entry was collected or sourced. Examples include a specific dictionary or language researcher, or the places where the entry is used (in the case of dialectical variation, for example). </br>Maximum 255 characters.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,20 @@
+uuid: 7242c2b2-cdb2-4040-b668-e2d0c7a4c1b1
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+id: node.dictionary_word.field_translation
+field_name: field_translation
+entity_type: node
+bundle: dictionary_word
+label: Translation
+description: 'Translations of the entry into other languages. Consider indicating the language of the translation, eg: Apple (English). </br>Maximum 255 characters. </br>To include additional translations, select "Add another item."'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

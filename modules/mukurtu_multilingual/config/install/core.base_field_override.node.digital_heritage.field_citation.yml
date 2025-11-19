@@ -1,0 +1,21 @@
+uuid: e4ebde01-ea00-4f40-9a17-0e1c3ee735b8
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.digital_heritage
+  module:
+    - text
+id: node.digital_heritage.field_citation
+field_name: field_citation
+entity_type: node
+bundle: digital_heritage
+label: Citation
+description: 'Citation for the item.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

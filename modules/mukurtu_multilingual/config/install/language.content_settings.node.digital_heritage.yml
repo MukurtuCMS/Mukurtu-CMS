@@ -1,0 +1,18 @@
+uuid: 8aa1e7bf-3504-47d1-ae02-8a81e3f340ef
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.digital_heritage
+  module:
+    - content_translation
+third_party_settings:
+  content_translation:
+    enabled: true
+    bundle_settings:
+      untranslatable_fields_hide: '0'
+id: node.digital_heritage
+target_entity_type_id: node
+target_bundle: digital_heritage
+default_langcode: site_default
+language_alterable: true

@@ -1,0 +1,20 @@
+uuid: 4f051127-1bc6-4188-ae96-fd1805eabc1c
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+id: node.dictionary_word.uid
+field_name: uid
+entity_type: node
+bundle: dictionary_word
+label: 'Authored by'
+description: 'The username of the content author.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: 'Drupal\node\Entity\Node::getDefaultEntityOwner'
+settings:
+  handler: default
+  handler_settings: {  }
+field_type: entity_reference

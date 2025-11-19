@@ -1,0 +1,22 @@
+uuid: 48c46f2a-d75b-4291-a107-c164cd846938
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+id: node.dictionary_word.draft
+field_name: draft
+entity_type: node
+bundle: dictionary_word
+label: Draft
+description: 'Mark this item as a draft.'
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

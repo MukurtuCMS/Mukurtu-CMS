@@ -1,0 +1,20 @@
+uuid: 097a9ec4-9f0a-4355-a87b-430893d0e2a8
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+id: node.dictionary_word.field_word_origin
+field_name: field_word_origin
+entity_type: node
+bundle: dictionary_word
+label: 'Word Origin'
+description: 'Information about the history or etymology of the entry. Examples include the origin language of a borrowed word or the date the word came into the language. </br>Maximum 255 characters.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

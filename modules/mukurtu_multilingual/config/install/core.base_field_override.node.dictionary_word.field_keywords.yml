@@ -1,0 +1,28 @@
+uuid: 375a8518-0b25-4377-bc5a-cc728de7afa6
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+    - taxonomy.vocabulary.keywords
+id: node.dictionary_word.field_keywords
+field_name: field_keywords
+entity_type: node
+bundle: dictionary_word
+label: Keywords
+description: "Keywords are used to tag dictionary words to ensure that they are discoverable when searching or browsing.\t</br>As you type, existing keywords will be displayed. Select an existing keyword or enter a new one. To include additional keywords, select \"Add another item\"."
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      keywords: keywords
+    sort:
+      field: name
+      direction: asc
+    auto_create: true
+    auto_create_bundle: ''
+field_type: entity_reference

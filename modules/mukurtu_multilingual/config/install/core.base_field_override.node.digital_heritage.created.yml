@@ -1,0 +1,18 @@
+uuid: c6916336-efb9-47e7-9134-b8e630a5246b
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.digital_heritage
+id: node.digital_heritage.created
+field_name: created
+entity_type: node
+bundle: digital_heritage
+label: 'Authored on'
+description: 'The date and time that the content was created.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: created

@@ -1,0 +1,18 @@
+uuid: 8c1cba69-a30c-44c5-ad8a-239d7641dfdf
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.digital_heritage
+id: node.digital_heritage.changed
+field_name: changed
+entity_type: node
+bundle: digital_heritage
+label: Changed
+description: 'The time that the node was last edited.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: changed

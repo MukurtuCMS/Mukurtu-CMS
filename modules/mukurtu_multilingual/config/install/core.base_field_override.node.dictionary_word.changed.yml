@@ -1,0 +1,18 @@
+uuid: aea1105f-fd9f-4f78-a261-9210ecad3f9b
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+id: node.dictionary_word.changed
+field_name: changed
+entity_type: node
+bundle: dictionary_word
+label: Changed
+description: 'The time that the node was last edited.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: changed

@@ -1,0 +1,22 @@
+uuid: edeb0cb5-65e5-4fef-949e-d928f2d41e70
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+id: node.dictionary_word.sticky
+field_name: sticky
+entity_type: node
+bundle: dictionary_word
+label: 'Sticky at top of lists'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

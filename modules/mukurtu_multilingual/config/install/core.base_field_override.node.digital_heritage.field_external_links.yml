@@ -1,0 +1,22 @@
+uuid: b2d3380d-14bd-42ff-85db-bd541e639737
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.digital_heritage
+  module:
+    - link
+id: node.digital_heritage.field_external_links
+field_name: field_external_links
+entity_type: node
+bundle: digital_heritage
+label: 'External Links'
+description: 'Links to other records or websites where the digital heritage item is available online, or to other related websites. Examples include the online catalog of the holding repository, or the publisher''s listing. </br>To include additional links, select "Add another item".'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  title: 1
+  link_type: 16
+field_type: link
