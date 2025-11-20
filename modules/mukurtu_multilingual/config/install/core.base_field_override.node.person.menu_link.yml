@@ -2,11 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
-    - node.type.collection
-id: node.collection.menu_link
+    - node.type.person
+id: node.person.menu_link
 field_name: menu_link
 entity_type: node
-bundle: collection
+bundle: person
 label: 'Menu link'
 description: 'Computed menu link for the node (only available during node saving).'
 required: false

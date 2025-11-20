@@ -10,7 +10,7 @@ bundle: page
 label: 'Menu link'
 description: 'Computed menu link for the node (only available during node saving).'
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings:
