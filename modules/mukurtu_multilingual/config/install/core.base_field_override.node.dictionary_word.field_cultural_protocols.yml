@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+  module:
+    - mukurtu_protocol
+id: node.dictionary_word.field_cultural_protocols
+field_name: field_cultural_protocols
+entity_type: node
+bundle: dictionary_word
+label: 'Cultural Protocols'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: cultural_protocol

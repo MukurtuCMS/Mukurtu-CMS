@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_multipage_items
+id: multipage_item.multipage_item.title
+field_name: title
+entity_type: multipage_item
+bundle: multipage_item
+label: Title
+description: "A short, descriptive name for the multipage item. The title should give users useful information about the item when browsing or searching. Maximum 255 characters.\t</br>The title will default to the title or name of the content used as the first page, but can be changed."
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

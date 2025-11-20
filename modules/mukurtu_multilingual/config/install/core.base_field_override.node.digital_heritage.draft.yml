@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.digital_heritage
+id: node.digital_heritage.draft
+field_name: draft
+entity_type: node
+bundle: digital_heritage
+label: Draft
+description: 'Mark this item as a draft.'
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

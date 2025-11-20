@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: protocol.protocol.name
+field_name: name
+entity_type: protocol
+bundle: protocol
+label: 'Cultural protocol name'
+description: 'The name of the Protocol.'
+required: true
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

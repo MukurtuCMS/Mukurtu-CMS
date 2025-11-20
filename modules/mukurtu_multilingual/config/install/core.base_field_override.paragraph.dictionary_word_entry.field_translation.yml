@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.dictionary_word_entry
+id: paragraph.dictionary_word_entry.field_translation
+field_name: field_translation
+entity_type: paragraph
+bundle: dictionary_word_entry
+label: Translation
+description: 'Translations of the entry into other languages. Consider indicating the language of the translation, eg: Apple (English). </br>Maximum 255 characters. </br>To include additional translations, select "Add another item."'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

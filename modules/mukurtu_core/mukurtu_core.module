@@ -283,6 +283,7 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setLabel(t('Citation'))
       ->setDescription(t('Citation for the item.'))
       ->setComputed(TRUE)
+      ->setTranslatable(FALSE)
       ->setClass('Drupal\mukurtu_core\Plugin\Field\CitationItemList')
       ->setCardinality(1)
       ->setDisplayConfigurable('view', TRUE)

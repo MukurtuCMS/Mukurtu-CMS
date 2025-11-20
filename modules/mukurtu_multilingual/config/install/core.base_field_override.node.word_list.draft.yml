@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.word_list
+id: node.word_list.draft
+field_name: draft
+entity_type: node
+bundle: word_list
+label: Draft
+description: 'Mark this item as a draft.'
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

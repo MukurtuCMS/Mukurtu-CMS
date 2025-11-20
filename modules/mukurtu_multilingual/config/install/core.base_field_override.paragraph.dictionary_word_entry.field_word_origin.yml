@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.dictionary_word_entry
+id: paragraph.dictionary_word_entry.field_word_origin
+field_name: field_word_origin
+entity_type: paragraph
+bundle: dictionary_word_entry
+label: 'Word Origin'
+description: 'Information about the history or etymology of the entry. Examples include the origin language of a borrowed word or the date the word came into the language. </br>Maximum 255 characters.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

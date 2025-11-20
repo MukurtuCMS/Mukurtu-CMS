@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.dictionary_word_entry
+id: paragraph.dictionary_word_entry.field_alternate_spelling
+field_name: field_alternate_spelling
+entity_type: paragraph
+bundle: dictionary_word_entry
+label: 'Alternate Spelling'
+description: 'An alternate spelling of the term. Examples include historic or current variant spellings, spellings from different dialects or in different writing systems, or any other alternate spelling that will help find the dictionary word when searching. </br>Maximum 255 characters.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

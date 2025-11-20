@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+  module:
+    - text
+id: node.dictionary_word.field_definition
+field_name: field_definition
+entity_type: node
+bundle: dictionary_word
+label: Definition
+description: 'A longer definition or description of the entry. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

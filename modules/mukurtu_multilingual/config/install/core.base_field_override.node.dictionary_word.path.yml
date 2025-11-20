@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+  module:
+    - path
+id: node.dictionary_word.path
+field_name: path
+entity_type: node
+bundle: dictionary_word
+label: 'URL alias'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: path

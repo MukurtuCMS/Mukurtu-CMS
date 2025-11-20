@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+  module:
+    - text
+id: node.dictionary_word.field_pronunciation
+field_name: field_pronunciation
+entity_type: node
+bundle: dictionary_word
+label: Pronunciation
+description: 'A pronunciation guide used to teach language learners the correct pronunciation of the entry. Pronunciation guides may use a standard phonetic alphabet or whatever notation system is used by speakers and teachers of the language, eg: indicating stress with bold text or capitalizing syllables. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

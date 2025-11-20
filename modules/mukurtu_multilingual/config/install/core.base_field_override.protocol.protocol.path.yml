@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+    - path
+id: protocol.protocol.path
+field_name: path
+entity_type: protocol
+bundle: protocol
+label: 'URL alias'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: path

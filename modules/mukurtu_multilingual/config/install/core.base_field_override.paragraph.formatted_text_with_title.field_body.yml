@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.formatted_text_with_title
+  module:
+    - text
+id: paragraph.formatted_text_with_title.field_body
+field_name: field_body
+entity_type: paragraph
+bundle: formatted_text_with_title
+label: Body
+description: "The body of the biography section.\t</br>This HTML field can support rich text and embedded media assets using the editing toolbar."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

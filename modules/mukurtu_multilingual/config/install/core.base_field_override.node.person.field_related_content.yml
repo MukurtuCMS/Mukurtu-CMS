@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.person
+id: node.person.field_related_content
+field_name: field_related_content
+entity_type: node
+bundle: person
+label: 'Related Content'
+description: 'Person records can be related to any other site content when there is a connection between those items that is important to show. Note that the person record will automatically aggregate all content where the person is referenced based on the representative terms field, and manually managing related content may not be necessary. </br>Select "Select Content" to choose from existing site content.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles: null
+    auto_create: false
+field_type: entity_reference

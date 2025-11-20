@@ -38,4 +38,21 @@ class BaseFieldOverride extends BaseFieldOverrideCore {
     $this->baseFieldDefinition = $base_field_definition;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function getBaseFieldDefinition() {
+    /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $field_manager */
+    $field_manager = \Drupal::service('entity_field.manager');
+    if (!isset($this->baseFieldDefinition)) {
+      $fields = $field_manager->getBaseFieldDefinitions($this->entity_type);
+      $this->baseFieldDefinition = $fields[$this->getName()] ?? NULL;
+    }
+    if (!isset($this->baseFieldDefinition)) {
+      $fields = $field_manager->getFieldDefinitions($this->entity_type, $this->bundle);
+      $this->baseFieldDefinition = $fields[$this->getName()] ?? NULL;
+    }
+    return $this->baseFieldDefinition;
+  }
+
 }

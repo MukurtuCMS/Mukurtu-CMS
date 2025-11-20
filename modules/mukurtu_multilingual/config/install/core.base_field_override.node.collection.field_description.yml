@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.collection
+  module:
+    - text
+id: node.collection.field_description
+field_name: field_description
+entity_type: node
+bundle: collection
+label: Description
+description: "The history, story, explanation, provenance, arrangement information, or other description information about the collection. This is often based on existing collection descriptions and may include finding aids and other supplementary documentation.\t</br>This HTML field can support rich text and embedded media assets using the editing toolbar."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

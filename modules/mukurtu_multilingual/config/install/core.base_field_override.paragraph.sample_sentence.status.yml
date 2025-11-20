@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.sample_sentence
+id: paragraph.sample_sentence.status
+field_name: status
+entity_type: paragraph
+bundle: sample_sentence
+label: Published
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

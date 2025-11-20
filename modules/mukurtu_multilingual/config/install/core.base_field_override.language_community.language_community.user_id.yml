@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_dictionary
+id: language_community.language_community.user_id
+field_name: user_id
+entity_type: language_community
+bundle: language_community
+label: 'Authored by'
+description: 'The user ID of author of the Language community.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: default
+  handler_settings: {  }
+field_type: entity_reference

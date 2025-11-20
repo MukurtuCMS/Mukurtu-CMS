@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.sample_sentence
+id: paragraph.sample_sentence.field_sentence
+field_name: field_sentence
+entity_type: paragraph
+bundle: sample_sentence
+label: 'Sample Sentence'
+description: 'Text entry of the sample sentence. </br>Maximum 255 characters.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

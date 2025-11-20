@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.indigenous_knowledge_keepers
+id: paragraph.indigenous_knowledge_keepers.field_teaching
+field_name: field_teaching
+entity_type: paragraph
+bundle: indigenous_knowledge_keepers
+label: 'A Brief Description or Title of the Teaching'
+description: 'Information such as the familial provenance of the teaching could be included here. For example, the citation might read: “Story about the sisters of the river as told to [Name of story keeper] by their grandmother [or the grandmother’s name].” This element should be discussed with the Knowledge Keeper, to properly describe or classify the knowledge they are sharing. </br>Maximum 255 characters.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

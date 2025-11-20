@@ -1,0 +1,67 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Mukurtu Multilingual module.
+ */
+
+use Drupal\field\Entity\FieldConfig;
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_multilingual_install() {
+  // Assign translation permissions to mukurtu_manager role.
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if ($role) {
+    $permissions = [
+      'translate interface',
+      'translate configuration',
+      'translate editable entities',
+    ];
+    foreach ($permissions as $permission) {
+      $role->grantPermission($permission);
+    }
+    $role->save();
+  }
+
+  // Assign translate editable entities permission to authenticated role.
+  $authenticated_role = \Drupal\user\Entity\Role::load('authenticated');
+  if ($authenticated_role) {
+    $authenticated_role->grantPermission('translate editable entities');
+    $authenticated_role->save();
+  }
+
+  // Clear the cache.discovery bin where field definitions are cached.
+  \Drupal::service('cache.discovery')->deleteAll();
+
+  // Make adjustments to language negotiation settings. This will enable
+  // content language detection apart from interface language detection. It
+  // also prioritizes a users' Administration pages language setting, so that
+  // interface text follows their preference rather than the content language.
+  $config = \Drupal::configFactory()->getEditable('language.types');
+  $config->set('configurable', ['language_interface', 'language_content'])
+    ->set('negotiation.language_content.enabled', [
+      'language-url' => -8,
+      'language-interface' => 9,
+      'language-selected' => 12,
+    ])
+    ->set('negotiation.language_interface.enabled', [
+      'language-user-admin' => -10,
+      'language-url' => -8,
+      'language-user' => -4,
+      'language-selected' => 12,
+    ]);
+  $config->save();
+
+  // Make all comment fields on node bundles untranslatable.
+  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+  foreach ($node_types as $node_type) {
+    $bundle = $node_type->id();
+    $field_config = FieldConfig::loadByName('node', $bundle, 'comment');
+    if ($field_config) {
+      $field_config->setTranslatable(FALSE);
+      $field_config->save();
+    }
+  }
+}

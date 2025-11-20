@@ -1,0 +1,27 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.dictionary_word
+    - taxonomy.vocabulary.language
+id: node.dictionary_word.field_dictionary_word_language
+field_name: field_dictionary_word_language
+entity_type: node
+bundle: dictionary_word
+label: Language
+description: 'Each dictionary word is associated with one language. </br>Select a language. If only one language is available, it will be be pre-selected. Dictionary languages must first be configured by a Mukurtu Manager.'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      language: language
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

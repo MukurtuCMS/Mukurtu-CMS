@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.digital_heritage
+  module:
+    - text
+id: node.digital_heritage.field_description
+field_name: field_description
+entity_type: node
+bundle: digital_heritage
+label: Description
+description: 'Descriptions provide an account, explanation, or description of the digital heritage item or media asset. This may include physical characteristics, content information, an explanation of what is depicted, digitization and processing information, general notes, and any other relevant information that does not fit into a more structured field. </br>This HTML field can support rich text and embedded media assets using the editing toolbar.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long
