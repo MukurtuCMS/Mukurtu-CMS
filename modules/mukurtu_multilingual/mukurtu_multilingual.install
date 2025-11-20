@@ -5,6 +5,8 @@
  * Install, update and uninstall functions for the Mukurtu Multilingual module.
  */
 
+use Drupal\field\Entity\FieldConfig;
+
 /**
  * Implements hook_install().
  */
@@ -51,4 +53,15 @@ function mukurtu_multilingual_install() {
       'language-selected' => 12,
     ]);
   $config->save();
+
+  // Make all comment fields on node bundles untranslatable.
+  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+  foreach ($node_types as $node_type) {
+    $bundle = $node_type->id();
+    $field_config = FieldConfig::loadByName('node', $bundle, 'comment');
+    if ($field_config) {
+      $field_config->setTranslatable(FALSE);
+      $field_config->save();
+    }
+  }
 }
