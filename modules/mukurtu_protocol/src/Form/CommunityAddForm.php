@@ -5,13 +5,10 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Url;
 use Drupal\entity_browser\Element\EntityBrowserElement;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 
 /**
  * Form controller for Community creation forms.
@@ -19,20 +16,6 @@ use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
  * @ingroup mukurtu_protocol
  */
 class CommunityAddForm extends ContentEntityForm {
-  /**
-   * The current user account.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $account;
-
-
-  /**
-   * The users to be made community managers.
-   *
-   * @var \Drupal\core\Session\AccountInterface[]
-   */
-  protected $communityManagers;
 
   /**
    * The users to add to the community.
@@ -40,17 +23,6 @@ class CommunityAddForm extends ContentEntityForm {
    * @var mixed
    */
   protected $members;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    // Instantiates this form class.
-    $instance = parent::create($container);
-    $instance->account = $container->get('current_user');
-
-    return $instance;
-  }
 
   /**
    * {@inheritdoc}
@@ -80,8 +52,8 @@ class CommunityAddForm extends ContentEntityForm {
       $form['field_community_type']['#access'] = FALSE;
     }
 
-    /** @var \Drupal\Core\Session\AccountInterface $current_user */
-    $current_user = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
+    /** @var \Drupal\user\UserInterface $user */
+    $user = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
     // Community Members.
     $form['community_member_item'] = [
@@ -146,7 +118,7 @@ class CommunityAddForm extends ContentEntityForm {
     ];
 
     $defaultStatus = "<ul>";
-    $defaultStatus .= "<li>{$current_user->getAccountName()} ({$current_user->getEmail()})</li>";
+    $defaultStatus .= "<li>{$user->getAccountName()} ({$user->getEmail()})</li>";
     $defaultStatus .= "</ul>";
 
     $form['community_manager'] = [
@@ -154,7 +126,7 @@ class CommunityAddForm extends ContentEntityForm {
       '#id' => 'community-manager',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#default_value' => [$current_user],
+      '#default_value' => [$user],
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#prefix' => '<div id="role-community-manager">',
       '#suffix' => $defaultStatus . '</div>',
