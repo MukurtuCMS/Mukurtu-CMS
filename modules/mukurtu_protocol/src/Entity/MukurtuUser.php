@@ -25,7 +25,10 @@ class MukurtuUser extends User implements MukurtuUserInterface {
   public function getCommunities() {
     $memberships = array_filter(Og::getMemberships($this), fn ($m) => $m->getGroupBundle() === 'community');
     if (!empty($memberships)) {
-      return array_map(fn($m) => $m->getGroup(), $memberships);
+      // It's possible for getGroup() to return NULL due to delays in removing
+      // deleted og groups by cron or batch processes. Filter out NULL values
+      // before returning.
+      return array_filter(array_map(fn($m) => $m->getGroup(), $memberships));
     }
     return [];
   }
