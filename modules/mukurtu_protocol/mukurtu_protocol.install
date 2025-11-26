@@ -90,6 +90,7 @@ function mukurtu_protocol_schema() {
         'unsigned' => TRUE,
       ],
     ],
+    'primary key' => ['id', 'entity_type_id', 'protocol_set_id', 'langcode'],
   ];
 
   return $schema;
