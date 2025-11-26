@@ -19,6 +19,7 @@ function mukurtu_multilingual_install() {
       'translate interface',
       'translate configuration',
       'translate editable entities',
+      'administer content translation',
     ];
     foreach ($permissions as $permission) {
       $role->grantPermission($permission);
