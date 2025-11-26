@@ -2,108 +2,58 @@
 
 namespace Drupal\mukurtu_protocol\Form;
 
-use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\entity_browser\Element\EntityBrowserElement;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 
 /**
  * Form controller for Community creation forms.
  *
  * @ingroup mukurtu_protocol
  */
-class CommunityAddForm extends EntityForm {
-  /**
-   * The current user account.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $account;
-
-
-  /**
-   * The users to be made community managers.
-   *
-   * @var \Drupal\core\Session\AccountInterface[]
-   */
-  protected $communityManagers;
+class CommunityAddForm extends ContentEntityForm {
 
   /**
    * The users to add to the community.
    *
-   * @var mixed
+   * @var array
    */
-  protected $members;
+  protected array $members = [];
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
-    // Instantiates this form class.
-    $instance = parent::create($container);
-    $instance->account = $container->get('current_user');
+  public function form(array $form, FormStateInterface $form_state) {
+    $form = parent::form($form, $form_state);
 
-    return $instance;
-  }
+    // The Add form is a streamlined version of the edit form, hide any fields
+    // that are not required using an allow list.
+    $allow_list = [
+      'name',
+      'langcode',
+      'field_description',
+      'field_access_mode',
+      'field_community_type',
+      'field_membership_display',
+    ];
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function init(FormStateInterface $form_state) {
-    $form_display = EntityFormDisplay::collectRenderDisplay($this->entity, $this->getOperation());
-    $this->setFormDisplay($form_display, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getFormDisplay(FormStateInterface $form_state) {
-    return $form_state->get('form_display');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setFormDisplay(EntityFormDisplayInterface $form_display, FormStateInterface $form_state) {
-    $form_state->set('form_display', $form_display);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildForm(array $form, FormStateInterface $form_state) {
-    $form = parent::buildForm($form, $form_state);
-
-    // Set #parents to 'top-level' by default.
-    $form += ['#parents' => []];
-
-    /** @var \Drupal\Core\Session\AccountInterface $currentUser */
-    $currentUser = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
-
-    // Community name.
-    $form['name'] = $this->renderField('name', $form_state, $form);
-
-    // Description.
-    $form['field_description'] = $this->renderField('field_description', $form_state, $form);
-
-    // Access Mode.
-    $form['field_access_mode'] = $this->renderField('field_access_mode', $form_state, $form);
-
-    // Community Type.
-    $query = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery();
-    $community_type_terms = $query->condition('vid', 'community_type')
-      ->accessCheck(TRUE)
-      ->execute();
-    // Don't display if there aren't any available terms.
-    if (!empty($community_type_terms)) {
-      $form['field_community_type'] = $this->renderField('field_community_type', $form_state, $form);
+    foreach (Element::children($form) as $key) {
+      if (!in_array($key, $allow_list)) {
+        $form[$key]['#access'] = FALSE;
+      }
     }
+
+    // If there are no options for Community Type, hide that field as well.
+    if (empty($form['field_community_type']['#options'])) {
+      $form['field_community_type']['#access'] = FALSE;
+    }
+
+    /** @var \Drupal\user\UserInterface $user */
+    $user = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
     // Community Members.
     $form['community_member_item'] = [
@@ -111,6 +61,7 @@ class CommunityAddForm extends EntityForm {
       '#title' => $this->t('Community members'),
       '#description' => $this->t('Helper text about community members.'),
       '#weight' => '1001',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     $form['community_member'] = [
@@ -130,6 +81,7 @@ class CommunityAddForm extends EntityForm {
         [get_called_class(), 'processEntityBrowser'],
       ],
       '#weight' => '1002',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     // Community Affiliates.
@@ -138,6 +90,7 @@ class CommunityAddForm extends EntityForm {
       '#title' => $this->t('Community affiliates'),
       '#description' => $this->t('Helper text about community affiliates.'),
       '#weight' => '1003',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     $form['community_affiliate'] = [
@@ -157,6 +110,7 @@ class CommunityAddForm extends EntityForm {
         [get_called_class(), 'processEntityBrowser'],
       ],
       '#weight' => '1004',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     // Community Managers.
@@ -165,10 +119,11 @@ class CommunityAddForm extends EntityForm {
       '#title' => $this->t('Community managers'),
       '#description' => $this->t('Helper text about community managers.'),
       '#weight' => '1005',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     $defaultStatus = "<ul>";
-    $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
+    $defaultStatus .= "<li>{$user->getAccountName()} ({$user->getEmail()})</li>";
     $defaultStatus .= "</ul>";
 
     $form['community_manager'] = [
@@ -176,7 +131,7 @@ class CommunityAddForm extends EntityForm {
       '#id' => 'community-manager',
       '#cardinality' => -1,
       '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#default_value' => [$currentUser],
+      '#default_value' => [$user],
       '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
       '#prefix' => '<div id="role-community-manager">',
       '#suffix' => $defaultStatus . '</div>',
@@ -189,78 +144,10 @@ class CommunityAddForm extends EntityForm {
         [get_called_class(), 'processEntityBrowser'],
       ],
       '#weight' => '1006',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
-    // Membership list display setting.
-    $form['field_membership_display'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Membership display'),
-      '#description' => $this->t('TODO: membership display helper text'),
-      '#options' => [
-        'none' => $this->t('Do not display any community members'),
-        'managers' => $this->t('Only display community managers'),
-        'all' => $this->t('Display all community members'),
-      ],
-      '#default_value' => 'none',
-    ];
-
-    $form['#process'][] = [$this, 'processForm'];
     return $form;
-  }
-
-  /**
-   * Render a field form element.
-   *
-   * @param string $field_name
-   *   The machine name of the field.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state.
-   * @param array $form
-   *   The form.
-   *
-   * @return array
-   *   The field form element.
-   */
-  protected function renderField($field_name, FormStateInterface $form_state, array $form) {
-    $element = [];
-    $widget = $this->getFormDisplay($form_state)->getRenderer($field_name);
-    if ($widget) {
-      $items = $this->entity->get($field_name);
-      $items->filterEmptyItems();
-      $element = $widget->form($items, $form, $form_state);
-      $element['#access'] = $items->access('edit');
-    }
-
-    return $element;
-  }
-
-  /**
-   * Process callback: assigns weights and hides extra fields.
-   *
-   * @see \Drupal\Core\Entity\Entity\EntityFormDisplay::buildForm()
-   */
-  public function processForm($element, FormStateInterface $form_state, $form) {
-    $formDisplay = $this->getFormDisplay($form_state);
-
-    // Assign the weights configured in the form display.
-    foreach ($formDisplay->getComponents() as $name => $options) {
-      if (isset($element[$name])) {
-        $element[$name]['#weight'] = $options['weight'];
-      }
-    }
-
-    // Hide extra fields.
-    $extra_fields = \Drupal::service('entity_field.manager')->getExtraFields($this->entity->getEntityTypeId(), $this->entity->bundle());
-    $extra_fields = $extra_fields['form'] ?? [];
-    foreach ($extra_fields as $extra_field => $info) {
-      if (!$formDisplay->getComponent($extra_field)) {
-        $element[$extra_field]['#access'] = FALSE;
-      }
-    }
-
-    $element["actions"]['#weight'] = 9999;
-
-    return $element;
   }
 
   /**
@@ -307,30 +194,9 @@ class CommunityAddForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  protected function actions(array $form, FormStateInterface $form_state) {
-    $actions['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this
-        ->t('Create Community'),
-      '#submit' => [
-        '::submitForm',
-        '::save',
-      ],
-    ];
-    return $actions;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function buildEntity(array $form, FormStateInterface $form_state) {
-    $entity = clone $this->entity;
-    /** @var \Drupal\mukurtu_protocol\Entity\Community $entity */
-    $entity->setName($form_state->getValue('name'));
-    $entity->setDescription($form_state->getValue('field_description'));
-    $entity->setSharingSetting($form_state->getValue('field_access_mode'));
-    $entity->setCommunityType($form_state->getValue('field_community_type'));
-    $entity->setMembershipDisplay($form_state->getValue('field_membership_display'));
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    $entity = parent::buildEntity($form, $form_state);
 
     // Grab the memberships.
     foreach (['community_manager', 'community_member', 'community_affiliate'] as $role) {
@@ -351,7 +217,7 @@ class CommunityAddForm extends EntityForm {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
     if ($this->entity->save()) {
@@ -363,10 +229,10 @@ class CommunityAddForm extends EntityForm {
         $community->addMember($member['entity'])->setRoles($member['entity'], $member['roles']);
       }
 
-      // Redirect to the protocol creation form if the author is
-      // a community manager.
+      // Redirect to the protocol creation form if the author is a community
+      // manager, and this is the default langcode.
       $protocolCreateUrl = Url::fromRoute('mukurtu_protocol.add_protocol_from_community', ['community' => $community->id()]);
-      if ($protocolCreateUrl->access()) {
+      if ($protocolCreateUrl->access() && $this->isDefaultFormLangcode($form_state)) {
         $form_state->setRedirect('mukurtu_protocol.add_protocol_from_community', ['community' => $community->id()]);
       }
       else {

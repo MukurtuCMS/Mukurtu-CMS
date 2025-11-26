@@ -1,0 +1,20 @@
+uuid: 94323821-d308-4640-a7c6-dfdb0d301c1d
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+    - text
+id: community.community.field_local_contexts_description
+field_name: field_local_contexts_description
+entity_type: community
+bundle: community
+label: 'Local Contexts Description'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

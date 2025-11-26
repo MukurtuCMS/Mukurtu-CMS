@@ -1,0 +1,17 @@
+uuid: a6b07793-6a0d-4a2a-9283-56a214f2ad2f
+langcode: en
+status: true
+dependencies:
+  module:
+    - content_translation
+    - mukurtu_protocol
+third_party_settings:
+  content_translation:
+    enabled: true
+    bundle_settings:
+      untranslatable_fields_hide: '0'
+id: community.community
+target_entity_type_id: community
+target_bundle: community
+default_langcode: site_default
+language_alterable: true
