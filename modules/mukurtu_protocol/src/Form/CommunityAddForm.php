@@ -188,15 +188,6 @@ class CommunityAddForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  protected function actions(array $form, FormStateInterface $form_state) {
-    $actions = parent::actions($form, $form_state);
-    $actions['submit']['#value'] = $this->t('Create Community');
-    return $actions;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function buildEntity(array $form, FormStateInterface $form_state) {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = parent::buildEntity($form, $form_state);
@@ -232,10 +223,10 @@ class CommunityAddForm extends ContentEntityForm {
         $community->addMember($member['entity'])->setRoles($member['entity'], $member['roles']);
       }
 
-      // Redirect to the protocol creation form if the author is
-      // a community manager.
+      // Redirect to the protocol creation form if the author is a community
+      // manager, and this is the default langcode.
       $protocolCreateUrl = Url::fromRoute('mukurtu_protocol.add_protocol_from_community', ['community' => $community->id()]);
-      if ($protocolCreateUrl->access()) {
+      if ($protocolCreateUrl->access() && $this->isDefaultFormLangcode($form_state)) {
         $form_state->setRedirect('mukurtu_protocol.add_protocol_from_community', ['community' => $community->id()]);
       }
       else {
