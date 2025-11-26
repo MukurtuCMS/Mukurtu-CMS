@@ -20,9 +20,9 @@ class CommunityAddForm extends ContentEntityForm {
   /**
    * The users to add to the community.
    *
-   * @var mixed
+   * @var array
    */
-  protected $members;
+  protected array $members = [];
 
   /**
    * {@inheritdoc}
@@ -61,6 +61,7 @@ class CommunityAddForm extends ContentEntityForm {
       '#title' => $this->t('Community members'),
       '#description' => $this->t('Helper text about community members.'),
       '#weight' => '1001',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     $form['community_member'] = [
@@ -80,6 +81,7 @@ class CommunityAddForm extends ContentEntityForm {
         [get_called_class(), 'processEntityBrowser'],
       ],
       '#weight' => '1002',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     // Community Affiliates.
@@ -88,6 +90,7 @@ class CommunityAddForm extends ContentEntityForm {
       '#title' => $this->t('Community affiliates'),
       '#description' => $this->t('Helper text about community affiliates.'),
       '#weight' => '1003',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     $form['community_affiliate'] = [
@@ -107,6 +110,7 @@ class CommunityAddForm extends ContentEntityForm {
         [get_called_class(), 'processEntityBrowser'],
       ],
       '#weight' => '1004',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     // Community Managers.
@@ -115,6 +119,7 @@ class CommunityAddForm extends ContentEntityForm {
       '#title' => $this->t('Community managers'),
       '#description' => $this->t('Helper text about community managers.'),
       '#weight' => '1005',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     $defaultStatus = "<ul>";
@@ -139,6 +144,7 @@ class CommunityAddForm extends ContentEntityForm {
         [get_called_class(), 'processEntityBrowser'],
       ],
       '#weight' => '1006',
+      '#access' => $this->isDefaultFormLangcode($form_state),
     ];
 
     return $form;
