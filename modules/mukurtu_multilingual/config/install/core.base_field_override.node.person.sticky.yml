@@ -2,11 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
-    - node.type.word_list
-id: node.word_list.sticky
+    - node.type.person
+id: node.person.sticky
 field_name: sticky
 entity_type: node
-bundle: word_list
+bundle: person
 label: 'Sticky at top of lists'
 description: ''
 required: false
