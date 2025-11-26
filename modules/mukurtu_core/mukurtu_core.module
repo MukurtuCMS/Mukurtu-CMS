@@ -367,6 +367,7 @@ function mukurtu_core_create_content_type_field($entity_type, $bundle) {
       'entity_type' => $entity_type,
       'bundle' => $bundle,
       'label' => 'Content Type',
+      'translatable' => FALSE,
     ])->save();
   }
 }
