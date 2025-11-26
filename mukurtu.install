@@ -282,6 +282,7 @@ function mukurtu_install() {
     'bundle' => 'digital_heritage',
     'field_name' => 'field_mukurtu_original_record',
     'label' => 'Original Record',
+    'translatable' => FALSE,
     'settings' => [
       'handler' => 'default:node',
       'handler_settings' => [

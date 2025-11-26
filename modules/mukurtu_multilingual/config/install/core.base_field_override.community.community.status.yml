@@ -1,0 +1,22 @@
+uuid: 169063e2-3609-4228-ac3f-b45dd46883e1
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: community.community.status
+field_name: status
+entity_type: community
+bundle: community
+label: Published
+description: 'A boolean indicating whether the Community is published.'
+required: false
+translatable: true
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

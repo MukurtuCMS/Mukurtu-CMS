@@ -2,18 +2,18 @@ langcode: en
 status: true
 dependencies:
   config:
-    - node.type.word_list
-id: node.word_list.sticky
-field_name: sticky
+    - node.type.person
+id: node.person.promote
+field_name: promote
 entity_type: node
-bundle: word_list
-label: 'Sticky at top of lists'
+bundle: person
+label: 'Promoted to front page'
 description: ''
 required: false
 translatable: false
 default_value:
   -
-    value: 0
+    value: 1
 default_value_callback: ''
 settings:
   on_label: 'On'

@@ -10,7 +10,7 @@ bundle: dictionary_word
 label: Term
 description: 'A word, term, phrase, or other language element. </br>Maximum 255 characters.'
 required: true
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }

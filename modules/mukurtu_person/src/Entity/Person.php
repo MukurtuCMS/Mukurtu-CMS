@@ -43,7 +43,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -73,7 +73,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -171,7 +171,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
+      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
