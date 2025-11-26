@@ -268,7 +268,6 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     $config->set('people_warnings.warning_multiple', $values['people_warnings']['multiple_people_text']);
 
     // Taxonomy warnings settings.
-
     $taxonomyWarningsConfig = [];
     foreach ($values['taxonomy_warnings'] as $i => $warning) {
 
@@ -283,7 +282,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
           'term' => $warning['term'],
           'warning' => $warning['text'],
         ];
-        array_push($taxonomyWarningsConfig, $temp);
+        $taxonomyWarningsConfig[] = $temp;
       }
     }
     $config->set('taxonomy_warnings', $taxonomyWarningsConfig);
