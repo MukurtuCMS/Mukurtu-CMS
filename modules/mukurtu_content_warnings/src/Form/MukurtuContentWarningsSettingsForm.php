@@ -72,7 +72,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
       '#description' => $this->t('This is a site-wide setting.'),
       '#type' => 'checkbox',
       '#return_value' => TRUE,
-      '#default_value' => $config->get('people_warnings.enabled') ?? 0,
+      '#default_value' => $config->get('people_warnings.enabled') ?? FALSE,
     ];
 
     $form['people_warnings']['single_person_text'] = [
