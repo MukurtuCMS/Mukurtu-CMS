@@ -1,5 +1,4 @@
-# mukurtu_content_warnings.manage_content_warnings:
-#   title: Content Warnings
-#   route_name: mukurtu_content_warnings.manage_community_content_warnings
-#   base_route: entity.node.canonical
-#   weight: 30
+mukurtu_content_warnings.mukurtu_content_warnings_settings_tab:
+  route_name: mukurtu_content_warnings.settings
+  title: Settings
+  base_route: mukurtu_content_warnings.settings

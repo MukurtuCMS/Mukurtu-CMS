@@ -99,7 +99,7 @@ function mukurtu_v4_preprocess_field(&$variables)
     ) {
       $variables['media'] = $variables['element'][0]['#media'];
       $media = $variables['media'];
-      $config = \Drupal::service('config.factory')->getEditable('mukurtu_content_warnings.settings');
+      $config = \Drupal::config('mukurtu_content_warnings.settings');
 
       if ($config->get('people_warnings.enabled')) {
         $names = [];

@@ -8,8 +8,8 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Configure Mukurtu content warnings settings for this site.
  */
-class MukurtuContentWarningsSettingsForm extends ConfigFormBase
-{
+class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
+
   /**
    * Config settings.
    *
@@ -64,34 +64,35 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
 
     $form['people_warnings']['info'] = [
       '#type' => 'item',
-      '#title' => 'Configure warnings for media pertaining to a person who is deceased.'
+      '#title' => $this->t('Configure warnings for media pertaining to a person who is deceased.'),
     ];
 
     $form['people_warnings']['toggle'] = [
-      '#title' => 'Enable People Warnings',
+      '#title' => $this->t('Enable People Warnings'),
       '#description' => $this->t('This is a site-wide setting.'),
-      '#type'          => 'checkbox',
+      '#type' => 'checkbox',
       '#return_value' => TRUE,
-      '#default_value' => $config->get('people_warnings.enabled') ?? 0,
+      '#default_value' => $config->get('people_warnings.enabled') ?? FALSE,
     ];
 
     $form['people_warnings']['single_person_text'] = [
-      '#title' => 'Warning Text: Single Person',
+      '#title' => $this->t('Warning Text: Single Person'),
       '#description' => $this->t('The text that will be displayed on the media overlay for a single deceased person. Use the replacement token "[name]" to insert the person\'s name in the message.'),
-      '#type'          => 'textfield',
-      '#default_value' => $config->get('people_warnings.warning_single') ?? "Warning: [name] is deceased. Click through to access content.",
+      '#type' => 'textfield',
+      '#default_value' => $config->get('people_warnings.warning_single') ?? $this->t('Warning: [name] is deceased. Click through to access content.'),
     ];
 
     $form['people_warnings']['multiple_people_text'] = [
-      '#title' => 'Warning Text: Multiple People',
+      '#title' => $this->t('Warning Text: Multiple People'),
       '#description' => $this->t('The text that will be displayed on the media overlay for multiple deceased people. Use the replacement token "[names]" to insert the names in the message.'),
-      '#type'          => 'textfield',
+      '#type' => 'textfield',
       '#default_value' => $config->get('people_warnings.warning_multiple') ?? $this->t('Warning: The following people are deceased. Click through to access content. [names]'),
     ];
 
     $form['#tree'] = TRUE;
 
-    # todo: The description part is not placed well, but I need to move on for now.
+    // @todo The description part is not placed well, but I need to move on
+    //   for now.
     $form['taxonomy_warnings'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Taxonomy Triggered Warnings'),
@@ -123,8 +124,8 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
       $removed_widgets = $form_state->get('removed_widgets');
     }
 
-    // Todo: the num_widgets form state value is not being retained between
-    // form reloads. Not sure if caching is allowed or useful.
+    // @todo The num_widgets form state value is not being retained between
+    //   form reloads. Not sure if caching is allowed or useful.
     $rendered = [];
     for ($i = 0; $i < $num_widgets; $i++) {
       // Check if term was removed.
@@ -133,24 +134,25 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
         continue;
       }
 
-      // We should hopefully not have more taxonomy warnings to render
-      // than we have widgets to render...
+      // We should hopefully not have more taxonomy warnings to render than we
+      // have widgets to render...
       $id = NULL;
       $text = NULL;
-      // If we have taxonomy warnings from config, attempt to render them one at a time.
+      // If we have taxonomy warnings from config, attempt to render them one
+      // at a time.
       if ($taxonomyWarnings && isset($taxonomyWarnings[$i]) && $taxonomyWarnings[$i]) {
         $warning = $taxonomyWarnings[$i];
         if (!in_array($warning['term'], $rendered)) {
           $id = $warning['term'];
           $text = $warning['warning'];
-          // Mark this warning's term as being rendered (is this even necessary?)
-          array_push($rendered, $id);
+          // Mark this warning's term as being rendered (is this even
+          // necessary?).
+          $rendered[] = $id;
         }
       }
 
-      /* Create a new fieldset for each taxonomy term warning
-       * where we can add the term and warning text.
-       */
+      // Create a new fieldset for each taxonomy term warning where we can add
+      // the term and warning text.
       // Fieldset title.
       $form['taxonomy_warnings'][$i] = [
         '#type' => 'fieldset',
@@ -179,7 +181,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
         '#name' => $i,
         '#submit' => ['::removeCallback'],
         '#ajax' => [
-          'callback' => '::addmoreCallback',
+          'callback' => '::addMoreCallback',
           'wrapper' => 'taxonomy-warnings-fieldset-wrapper',
         ],
       ];
@@ -194,18 +196,12 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
       '#value' => $this->t('Add taxonomy warning'),
       '#submit' => ['::addOne'],
       '#ajax' => [
-        'callback' => '::addmoreCallback',
+        'callback' => '::addMoreCallback',
         'wrapper' => 'taxonomy-warnings-fieldset-wrapper',
       ],
     ];
 
-    $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Submit'),
-    ];
-
-    return $form;
-    //return parent::buildForm($form, $form_state);
+    return parent::buildForm($form, $form_state);
   }
 
   /**
@@ -213,10 +209,9 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
    *
    * Selects and returns the fieldset with the names in it.
    */
-  public function addmoreCallback(array &$form, FormStateInterface $form_state) {
+  public function addMoreCallback(array &$form, FormStateInterface $form_state) {
     return $form['taxonomy_warnings'];
   }
-
 
   /**
    * Submit handler for the "add-one-more" button.
@@ -236,11 +231,8 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
    * Removes the corresponding line.
    */
   public function removeCallback(array &$form, FormStateInterface $form_state) {
-    /*
-     * We use the name of the remove button to find
-     * the element we want to remove
-     * Line 72: '#name' => $i,.
-     */
+    // We use the name of the remove button to find the element we want to
+    // remove.
     $trigger = $form_state->getTriggeringElement();
     $indexToRemove = $trigger['#name'];
 
@@ -276,7 +268,6 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
     $config->set('people_warnings.warning_multiple', $values['people_warnings']['multiple_people_text']);
 
     // Taxonomy warnings settings.
-
     $taxonomyWarningsConfig = [];
     foreach ($values['taxonomy_warnings'] as $i => $warning) {
 
@@ -291,14 +282,13 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase
           'term' => $warning['term'],
           'warning' => $warning['text'],
         ];
-        array_push($taxonomyWarningsConfig, $temp);
+        $taxonomyWarningsConfig[] = $temp;
       }
     }
     $config->set('taxonomy_warnings', $taxonomyWarningsConfig);
 
     $config->save();
     $form_state->setRebuild();
-
-    //parent::submitForm($form, $form_state);
   }
+
 }

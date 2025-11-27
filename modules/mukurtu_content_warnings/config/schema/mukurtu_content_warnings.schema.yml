@@ -1,0 +1,33 @@
+mukurtu_content_warnings.settings:
+  type: config_object
+  label: 'Mukurtu Content Warnings settings'
+  mapping:
+    people_warnings:
+      type: mapping
+      label: 'People Warnings'
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Enable People Warnings'
+        warning_single:
+          type: label
+          label: 'Warning Text: Single Person'
+        warning_multiple:
+          type: label
+          label: 'Warning Text: Multiple People'
+    taxonomy_warnings:
+      type: sequence
+      label: 'Taxonomy Triggered Warnings'
+      sequence:
+        type: mukurtu_content_warnings.taxonomy_warning
+
+mukurtu_content_warnings.taxonomy_warning:
+  type: mapping
+  label: 'Taxonomy Triggered Warning'
+  mapping:
+    term:
+      type: integer
+      label: 'Term'
+    warning:
+      type: label
+      label: 'Warning Text'

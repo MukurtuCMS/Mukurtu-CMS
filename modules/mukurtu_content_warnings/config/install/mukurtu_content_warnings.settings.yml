@@ -1,0 +1,5 @@
+people_warnings:
+  enabled: false
+  warning_single: 'Warning: [name] is deceased. Click through to access content.'
+  warning_multiple: 'Warning: The following people are deceased. Click through to access content. [names]'
+taxonomy_warnings: {}
