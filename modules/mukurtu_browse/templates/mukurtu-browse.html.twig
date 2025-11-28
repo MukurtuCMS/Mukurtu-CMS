@@ -1,8 +1,8 @@
 <div class="browse-container">
   <div class="browse-results">
     <div class="browse-links">
-      <button id="mukurtu-browse-grid" aria-label="Switch to grid view">Grid</button>
-      <button id="mukurtu-browse-list" aria-label="Switch to list view" class="active-toggle">List</button>
+      <button data-browse-mode="grid" aria-label="{{ 'Switch to grid view'|t }}">{{ 'Grid'|t }}</button>
+      <button data-browse-mode="list" aria-label="{{ 'Switch to list view'|t }}" class="active-toggle">{{ 'List'|t }}</button>
       {% if maplink %}
         {{ maplink }}
       {% endif %}
