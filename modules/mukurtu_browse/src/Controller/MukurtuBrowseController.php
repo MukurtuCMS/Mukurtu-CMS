@@ -53,7 +53,7 @@ class MukurtuBrowseController extends ControllerBase {
       '#tag' => 'button',
       '#value' => $this->t('Map'),
       '#attributes' => [
-        'id' => 'mukurtu-browse-map',
+        'data-browse-mode' => 'map',
         'aria-label' => $this->t('Switch to Map'),
       ],
     ];

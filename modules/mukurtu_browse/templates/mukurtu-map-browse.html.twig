@@ -1,11 +1,11 @@
 <div class="browse-container">
   <div class="browse-results">
     <div class="browse-links">
-      <a href="/browse" id="mukurtu-browse-grid" aria-label="Switch to grid view">Grid</a>
+      <a href="/browse" data-browse-mode="grid" aria-label="{{ 'Switch to grid view'|t }}">{{ 'Grid'|t }}</a>
       {% if browselink %}
         {{ browselink }}
       {% endif %}
-      <a class="active-toggle" id="mukurtu-browse-map" aria-label="Switch to map view">Map</a>
+      <a class="active-toggle" data-browse-mode="map" aria-label="{{ 'Switch to map view'|t }}">{{ 'Map'|t }}</a>
     </div>
     <div id="mukurtu-map-browse-container">
       <div id="mukurtu-map-browse-map">{{ map }}</div>
