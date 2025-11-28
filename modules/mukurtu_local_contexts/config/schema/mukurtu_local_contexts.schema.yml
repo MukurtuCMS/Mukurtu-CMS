@@ -1,3 +1,27 @@
+mukurtu_local_contexts.settings:
+  type: config_object
+  label: 'Mukurtu Local Contexts Settings'
+  mapping:
+    site_api_key:
+      type: string
+      label: 'Site API Key'
+    site_projects_directory_description:
+      type: mapping
+      label: 'Site Projects Directory Description'
+      mapping:
+        value:
+          type: label
+          label: Description
+        format:
+          type: string
+          label: Format
+    hub_refresh_interval:
+      type: integer
+      label: 'Hub Refresh Interval'
+    hub_endpoint:
+      type: string
+      label: 'Hub Endpoint'
+
 field.value.local_contexts_project:
   type: mapping
   label: Default value

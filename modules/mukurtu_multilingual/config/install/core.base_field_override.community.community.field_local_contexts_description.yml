@@ -1,4 +1,3 @@
-uuid: 94323821-d308-4640-a7c6-dfdb0d301c1d
 langcode: en
 status: true
 dependencies:
@@ -12,7 +11,7 @@ bundle: community
 label: 'Local Contexts Description'
 description: ''
 required: false
-translatable: false
+translatable: true
 default_value: {  }
 default_value_callback: ''
 settings:

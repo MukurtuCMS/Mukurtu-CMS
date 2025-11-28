@@ -838,11 +838,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['field_local_contexts_description'] = BaseFieldDefinition::create('text_long')
       ->setName('field_local_contexts_description')
       ->setLabel(t('Local Contexts Description'))
+      ->setDescription(t('Enter the description for the Local Contexts project directory page.'))
       ->setRequired(FALSE)
       ->setTranslatable(TRUE)
       ->setDefaultValue([])
       // Keep this field out of Form/Display UIs entirely.
-      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', FALSE);
 
     return $fields;

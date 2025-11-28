@@ -1,0 +1,5 @@
+mukurtu_local_contexts.settings:
+  title: 'Project Directory Settings'
+  base_route_name: mukurtu_local_contexts.manage_site_supported_projects
+  names:
+    - mukurtu_local_contexts.settings
