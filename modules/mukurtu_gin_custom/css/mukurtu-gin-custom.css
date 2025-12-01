@@ -11,3 +11,17 @@ counterpart, if one exists. */
   for the entire site, I just need it for forms. So !important it is. */
   max-width: 100% !important;
 }
+
+
+.gin-entity-browser .entity-browser-form .views-row .views-field-name {
+    padding: var(--gin-spacing-xs);
+    padding-left: 2.5rem;
+}
+
+.gin-entity-browser .entity-browser-form .views-row .views-field-entity-browser-select {
+    position: absolute;
+    float: left;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    margin: var(--gin-spacing-s);
+}
