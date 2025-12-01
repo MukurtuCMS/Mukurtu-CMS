@@ -4,6 +4,8 @@ dependencies:
   module:
     - entity_browser
     - mukurtu_protocol
+_core:
+  default_config_hash: qSkXyaHDxuLQr4hz1Fi0LWtniv-QHbY10bZdNwsQL-M
 id: mukurtu_community_select
 label: 'Mukurtu Community Select'
 module: views
@@ -110,7 +112,7 @@ display:
             prefix: ''
             suffix: ''
             target: ''
-            nl2br: false
+            nl2br: true
             max_length: 0
             word_boundary: true
             ellipsis: true
@@ -208,10 +210,11 @@ display:
         options:
           query_comment: ''
           disable_sql_rewrite: false
-          distinct: false
+          distinct: true
           replica: false
           query_tags: {  }
       relationships: {  }
+      group_by: true
       header: {  }
       footer: {  }
       display_extenders: {  }
