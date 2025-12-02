@@ -11,3 +11,9 @@ counterpart, if one exists. */
   for the entire site, I just need it for forms. So !important it is. */
   max-width: 100% !important;
 }
+
+/* MW: Fixes checkbox and community name overlapping in protocol select community modal, hopefully other similar issues. Not sure why !important is required */
+.gin-entity-browser .entity-browser-form .views-row .views-field-name {
+    padding: 2.5rem !important;
+    display: inline-flex;
+}
