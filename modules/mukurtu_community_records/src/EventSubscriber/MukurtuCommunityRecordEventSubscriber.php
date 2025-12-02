@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_community_records\EventSubscriber;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -85,7 +86,11 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
       $event->mergeAccessResult(AccessResult::neutral()->addCacheableDependency($group_content_entity));
     }
     else {
-      $event->mergeAccessResult($this->ogAccess->userAccess($group_entity, 'administer community records', $user));
+      $access_result = $this->ogAccess->userAccess($group_entity, 'administer community records', $user);
+      if ($access_result instanceof RefinableCacheableDependencyInterface) {
+        $access_result->addCacheableDependency($group_content_entity);
+      }
+      $event->mergeAccessResult($access_result);
     }
   }
 
