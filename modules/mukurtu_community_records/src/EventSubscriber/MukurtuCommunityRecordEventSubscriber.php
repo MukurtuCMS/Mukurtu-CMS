@@ -34,8 +34,12 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
    * @param \Drupal\og\OgAccessInterface $ogAccess
    *   The OG access service.
    */
-  public function __construct(protected PermissionManagerInterface $permissionManager, protected EntityTypeManagerInterface $entityTypeManager, protected EntityTypeBundleInfoInterface $entityTypeBundleInfo, protected OgAccessInterface $ogAccess) {
-  }
+  public function __construct(
+    protected PermissionManagerInterface $permissionManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected EntityTypeBundleInfoInterface $entityTypeBundleInfo,
+    protected OgAccessInterface $ogAccess,
+  ) {}
 
   /**
    * {@inheritdoc}
