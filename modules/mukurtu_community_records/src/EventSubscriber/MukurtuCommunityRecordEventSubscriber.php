@@ -45,7 +45,7 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
         ['provideDefaultMukurtuOgPermissions'],
       ],
       GroupContentEntityOperationAccessEventInterface::EVENT_NAME => [
-        ['checkGroupContentEntityOperationAccess'],
+        ['checkGroupCommunityRecordsAccess'],
       ],
     ];
   }
@@ -71,12 +71,12 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
   }
 
   /**
-   * Checks if a user has access to perform a group content entity operation.
+   * Checks if a user has access to administer community records.
    *
    * @param \Drupal\og\Event\GroupContentEntityOperationAccessEventInterface $event
    *   The event fired when a group content entity operation is performed.
    */
-  public function checkGroupContentEntityOperationAccess(GroupContentEntityOperationAccessEventInterface $event): void {
+  public function checkGroupCommunityRecordsAccess(GroupContentEntityOperationAccessEventInterface $event): void {
     $group_content_entity = $event->getGroupContent();
     $group_entity = $event->getGroup();
     $user = $event->getUser();
