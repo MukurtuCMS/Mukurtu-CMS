@@ -82,9 +82,15 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
     $group_entity = $event->getGroup();
     $user = $event->getUser();
 
+    // If the group content is not a community record, then we have no opinion.
     if (!mukurtu_community_records_is_community_record($group_content_entity)) {
       $event->mergeAccessResult(AccessResult::neutral()->addCacheableDependency($group_content_entity));
     }
+    // If the group content is a community record, than grant access if the user
+    // has the 'administer community records' permission on the group. Note that
+    // \Drupal\og\OgAccessInterface::userAccess implicitly checks if the user
+    // is a member of the group, and if the user is a group admin, in addition
+    // to checking the 'administer community records' permission.
     else {
       $access_result = $this->ogAccess->userAccess($group_entity, 'administer community records', $user);
       if ($access_result instanceof RefinableCacheableDependencyInterface) {
