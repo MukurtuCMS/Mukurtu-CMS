@@ -2,11 +2,14 @@
 
 namespace Drupal\mukurtu_community_records\EventSubscriber;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\og\Event\GroupContentEntityOperationAccessEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupPermission;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -19,40 +22,18 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
   use StringTranslationTrait;
 
   /**
-   * The OG permission manager.
+   * Constructs an MukurtuCommunityRecordEventSubscriber object.
    *
-   * @var \Drupal\og\PermissionManagerInterface
-   */
-  protected $permissionManager;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The service providing information about bundles.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
-   */
-  protected $entityTypeBundleInfo;
-
-  /**
-   * Constructs an OgEventSubscriber object.
-   *
-   * @param \Drupal\og\PermissionManagerInterface $permission_manager
+   * @param \Drupal\og\PermissionManagerInterface $permissionManager
    *   The OG permission manager.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityTypeBundleInfo
    *   The service providing information about bundles.
+   * @param \Drupal\og\OgAccessInterface $ogAccess
+   *   The OG access service.
    */
-  public function __construct(PermissionManagerInterface $permission_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
-    $this->permissionManager = $permission_manager;
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityTypeBundleInfo = $entity_type_bundle_info;
+  public function __construct(protected PermissionManagerInterface $permissionManager, protected EntityTypeManagerInterface $entityTypeManager, protected EntityTypeBundleInfoInterface $entityTypeBundleInfo, protected OgAccessInterface $ogAccess) {
   }
 
   /**
@@ -62,6 +43,9 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
     return [
       PermissionEventInterface::EVENT_NAME => [
         ['provideDefaultMukurtuOgPermissions'],
+      ],
+      GroupContentEntityOperationAccessEventInterface::EVENT_NAME => [
+        ['checkGroupContentEntityOperationAccess'],
       ],
     ];
   }
@@ -83,6 +67,25 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
           'restrict access' => FALSE,
         ]),
       ]);
+    }
+  }
+
+  /**
+   * Checks if a user has access to perform a group content entity operation.
+   *
+   * @param \Drupal\og\Event\GroupContentEntityOperationAccessEventInterface $event
+   *   The event fired when a group content entity operation is performed.
+   */
+  public function checkGroupContentEntityOperationAccess(GroupContentEntityOperationAccessEventInterface $event): void {
+    $group_content_entity = $event->getGroupContent();
+    $group_entity = $event->getGroup();
+    $user = $event->getUser();
+
+    if (!mukurtu_community_records_is_community_record($group_content_entity)) {
+      $event->mergeAccessResult(AccessResult::neutral()->addCacheableDependency($group_content_entity));
+    }
+    else {
+      $event->mergeAccessResult($this->ogAccess->userAccess($group_entity, 'administer community records', $user));
     }
   }
 
