@@ -59,18 +59,6 @@ mukurtu_local_contexts.manage_community_supported_projects:
       group:
         type: entity:community
 
-mukurtu_local_contexts.community_project_directory_settings:
-  path: '/admin/communities/{group}/local-contexts/projects/settings'
-  defaults:
-    _title: 'Community-based Local Contexts projects directory settings'
-    _form: 'Drupal\mukurtu_local_contexts\Form\ManageProjectsDirectoryCommunity'
-  requirements:
-    _permission: 'update group'
-  options:
-    parameters:
-      group:
-        type: entity:community
-
 ##
 # Protocol LC projects (front-end):
 ##
@@ -101,14 +89,3 @@ mukurtu_local_contexts.manage_protocol_supported_projects:
       group:
         type: entity:protocol
 
-mukurtu_local_contexts.protocol_project_directory_settings:
-  path: '/admin/protocols/{group}/local-contexts/projects/settings'
-  defaults:
-    _title: 'Configure settings for protocol-based Local Contexts projects directory'
-    _form: 'Drupal\mukurtu_local_contexts\Form\ManageProjectsDirectoryProtocol'
-  requirements:
-    _permission: 'update group'
-  options:
-    parameters:
-      group:
-        type: entity:protocol

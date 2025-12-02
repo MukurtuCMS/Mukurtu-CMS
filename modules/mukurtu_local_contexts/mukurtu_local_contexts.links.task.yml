@@ -19,11 +19,6 @@ mukurtu_local_contexts.manage_community_supported_projects:
   title: 'Manage Projects'
   base_route: mukurtu_local_contexts.manage_community_supported_projects
 
-mukurtu_local_contexts.community_project_directory_settings:
-  route_name: mukurtu_local_contexts.community_project_directory_settings
-  title: 'Project Directory Settings'
-  base_route: mukurtu_local_contexts.manage_community_supported_projects
-
 ##
 # Local tasks for Contexts:
 ##
@@ -32,7 +27,3 @@ mukurtu_local_contexts.manage_protocol_supported_projects:
   title: 'Manage Projects'
   base_route: mukurtu_local_contexts.manage_protocol_supported_projects
 
-mukurtu_local_contexts.protocol_project_directory_settings:
-  route_name: mukurtu_local_contexts.protocol_project_directory_settings
-  title: 'Project Directory Settings'
-  base_route: mukurtu_local_contexts.manage_protocol_supported_projects

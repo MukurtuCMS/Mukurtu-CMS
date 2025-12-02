@@ -39,7 +39,6 @@ use Exception;
  *     "list_builder" = "Drupal\mukurtu_protocol\CommunityListBuilder",
  *     "views_data" = "Drupal\mukurtu_protocol\Entity\CommunityViewsData",
  *     "translation" = "Drupal\mukurtu_protocol\CommunityTranslationHandler",
- *
  *     "form" = {
  *       "default" = "Drupal\mukurtu_protocol\Form\CommunityForm",
  *       "add" = "Drupal\mukurtu_protocol\Form\CommunityAddForm",
@@ -805,12 +804,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_membership_display'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Membership Display'))
-      ->setDescription('TODO: Description')
+      ->setDescription('TODO: membership display helper text')
       ->setSettings([
         'allowed_values' => [
-          'none' => 'Do not display member list',
-          'managers' => 'Display community managers',
-          'all' => 'Display all members',
+          'none' => 'Do not display any community members',
+          'managers' => 'Only display community managers',
+          'all' => 'Display all community members',
         ],
       ])
       ->setDefaultValue('none')
@@ -839,11 +838,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['field_local_contexts_description'] = BaseFieldDefinition::create('text_long')
       ->setName('field_local_contexts_description')
       ->setLabel(t('Local Contexts Description'))
+      ->setDescription(t('Enter the description for the Local Contexts project directory page.'))
       ->setRequired(FALSE)
       ->setTranslatable(TRUE)
       ->setDefaultValue([])
       // Keep this field out of Form/Display UIs entirely.
-      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', FALSE);
 
     return $fields;

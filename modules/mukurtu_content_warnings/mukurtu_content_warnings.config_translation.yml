@@ -1,0 +1,5 @@
+mukurtu_content_warnings.settings:
+  title: 'Mukurtu Content Warnings Settings'
+  base_route_name: mukurtu_content_warnings.settings
+  names:
+    - mukurtu_content_warnings.settings

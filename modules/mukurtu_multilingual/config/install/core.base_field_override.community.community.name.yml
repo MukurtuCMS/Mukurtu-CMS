@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+id: community.community.name
+field_name: name
+entity_type: community
+bundle: community
+label: 'Community name'
+description: 'The name of the Community.'
+required: true
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

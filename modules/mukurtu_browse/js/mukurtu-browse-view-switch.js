@@ -1,54 +1,53 @@
 // JS functionality to toggle active class on map/grid/list buttons
-// and toggle visibility of map/list/grid contents. 
+// and toggle visibility of map/list/grid contents.
 
 ((Drupal, once) => {
   "use strict";
-   let gridLink, listLink, mapLink, mapContent, listContent, gridContent, browseLinks, button;
+
+  const browseModes = ["list", "grid", "map"];
+  const DEFAULT_BROWSE_MODE = "list";
+  let gridLink, listLink, mapLink, mapContent, listContent, gridContent, browseLinks;
+
+  function getBrowseMode() {
+    const browseMode = localStorage.getItem("browseMode");
+    if (browseModes.includes(browseMode)) {
+      return browseMode;
+    }
+    return DEFAULT_BROWSE_MODE;
+  }
+
+  function setBrowseMode(mode) {
+    if (!browseModes.includes(mode)) {
+      mode = DEFAULT_BROWSE_MODE;
+    }
+    localStorage.setItem("browseMode", mode);
+  }
 
   function listCheck() {
-
-    if (localStorage.getItem("browseMode") == "list") {
-      return true;
-    } else {
-      return false;
-    }
+    return getBrowseMode() === "list";
   }
 
   function gridCheck() {
-    if (localStorage.getItem("browseMode") == "grid") {
-      return true;
-    } else {
-      return false;
-    }
+    return getBrowseMode() === "grid";
   }
 
   function mapCheck() {
-    if (localStorage.getItem("browseMode") == "map") {
-      return true;
-    } else {
-      return false;
-    }
+    return getBrowseMode() === "map";
   }
 
-  function toggleBrowseMode(e) {
+  function handleToggleBrowseMode(e) {
+    toggleBrowseMode(e.target.dataset.browseMode);
+  }
 
-    button = e.target.getAttribute('id');
+  function toggleBrowseMode(browseMode) {
+    setBrowseMode(browseMode);
 
-    // First set the cookie. 
-    if (button == "mukurtu-browse-list") {
-      localStorage.setItem("browseMode", "list");
-    } else if (button == "mukurtu-browse-grid") {
-      localStorage.setItem("browseMode", "grid");
-    } else if (button == "mukurtu-browse-map"){
-      localStorage.setItem("browseMode", "map");
-    }
-
-    // Then perform class toggling/content visibility 
-    // toggling based on which cookie set.
+    // Then perform class toggling/content visibility toggling based on which
+    // browse mode was set.
     if (listCheck()) {
       listLink.classList.add("active-toggle");
-      gridLink.classList.remove("active-toggle");
-      mapLink.classList.remove("active-toggle");
+      gridLink?.classList.remove("active-toggle");
+      mapLink?.classList.remove("active-toggle");
 
       listContent.hidden = false;
       mapContent.hidden = true;
@@ -57,8 +56,8 @@
 
     if (gridCheck()) {
       gridLink.classList.add("active-toggle");
-      listLink.classList.remove("active-toggle");
-      mapLink.classList.remove("active-toggle");
+      listLink?.classList.remove("active-toggle");
+      mapLink?.classList.remove("active-toggle");
 
       gridContent.hidden = false;
       mapContent.hidden = true;
@@ -67,8 +66,8 @@
 
     if (mapCheck()) {
       mapLink.classList.add("active-toggle");
-      listLink.classList.remove("active-toggle");
-      gridLink.classList.remove("active-toggle");
+      listLink?.classList.remove("active-toggle");
+      gridLink?.classList.remove("active-toggle");
 
       mapContent.hidden = false;
       listContent.hidden = true;
@@ -76,33 +75,18 @@
     }
   }
 
-
   function init() {
     listContent = document.querySelector(".list");
     mapContent = document.querySelector(".map");
     gridContent = document.querySelector(".grid");
     browseLinks = document.querySelector(".browse-links");
 
-    gridLink = document.getElementById("mukurtu-browse-grid");
-    listLink = document.getElementById("mukurtu-browse-list");
-    mapLink = document.getElementById("mukurtu-browse-map");
+    gridLink = document.querySelector("[data-browse-mode=grid]");
+    listLink = document.querySelector("[data-browse-mode=list]");
+    mapLink = document.querySelector("[data-browse-mode=map]");
 
-    browseLinks.addEventListener("click", toggleBrowseMode);
-
-    let cookie = localStorage.getItem("browseMode");
-
-    // If cookie exists already, read it and 
-    // simulate a click on the corresponding button.
-    if (cookie) {
-      button = `mukurtu-browse-${cookie}`;
-      const event = new MouseEvent("click", {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-      });
-      const cb = document.getElementById(button);
-      cb.dispatchEvent(event);
-    }
+    browseLinks.addEventListener("click", handleToggleBrowseMode);
+    toggleBrowseMode(getBrowseMode());
   }
 
   Drupal.behaviors.mukurtuBrowseSwitch = {
@@ -110,5 +94,5 @@
       once("browseContainer", ".browse-container", context).forEach(init);
     },
   };
-  
+
 })(Drupal, once);

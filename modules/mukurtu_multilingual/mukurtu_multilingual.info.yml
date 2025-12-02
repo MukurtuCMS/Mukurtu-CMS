@@ -4,6 +4,6 @@ description: 'Enable default configuration for a Mukurtu Multilingual website.'
 package: Mukurtu
 core_version_requirement: ^10 || ^11
 dependencies:
-  - config_translation:config_translation
-  - content_translation:content_translation
-  - locale:locale
+  - drupal:config_translation
+  - drupal:content_translation
+  - drupal:locale

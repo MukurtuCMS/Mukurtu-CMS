@@ -17,6 +17,7 @@ function mukurtu_core_install() {
     'entity_type' => 'node',
     'type' => 'string',
     'cardinality' => 1,
+    'translatable' => FALSE,
   ])->save();
 
   foreach (node_type_get_names() as $bundle => $label) {
