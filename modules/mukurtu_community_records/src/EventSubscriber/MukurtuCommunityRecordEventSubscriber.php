@@ -2,11 +2,15 @@
 
 namespace Drupal\mukurtu_community_records\EventSubscriber;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\og\Event\GroupContentEntityOperationAccessEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupPermission;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -19,41 +23,23 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
   use StringTranslationTrait;
 
   /**
-   * The OG permission manager.
+   * Constructs an MukurtuCommunityRecordEventSubscriber object.
    *
-   * @var \Drupal\og\PermissionManagerInterface
-   */
-  protected $permissionManager;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The service providing information about bundles.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
-   */
-  protected $entityTypeBundleInfo;
-
-  /**
-   * Constructs an OgEventSubscriber object.
-   *
-   * @param \Drupal\og\PermissionManagerInterface $permission_manager
+   * @param \Drupal\og\PermissionManagerInterface $permissionManager
    *   The OG permission manager.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityTypeBundleInfo
    *   The service providing information about bundles.
+   * @param \Drupal\og\OgAccessInterface $ogAccess
+   *   The OG access service.
    */
-  public function __construct(PermissionManagerInterface $permission_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
-    $this->permissionManager = $permission_manager;
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityTypeBundleInfo = $entity_type_bundle_info;
-  }
+  public function __construct(
+    protected PermissionManagerInterface $permissionManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected EntityTypeBundleInfoInterface $entityTypeBundleInfo,
+    protected OgAccessInterface $ogAccess,
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -62,6 +48,9 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
     return [
       PermissionEventInterface::EVENT_NAME => [
         ['provideDefaultMukurtuOgPermissions'],
+      ],
+      GroupContentEntityOperationAccessEventInterface::EVENT_NAME => [
+        ['checkGroupCommunityRecordsAccess'],
       ],
     ];
   }
@@ -83,6 +72,35 @@ class MukurtuCommunityRecordEventSubscriber implements EventSubscriberInterface 
           'restrict access' => FALSE,
         ]),
       ]);
+    }
+  }
+
+  /**
+   * Checks if a user has access to administer community records.
+   *
+   * @param \Drupal\og\Event\GroupContentEntityOperationAccessEventInterface $event
+   *   The event fired when a group content entity operation is performed.
+   */
+  public function checkGroupCommunityRecordsAccess(GroupContentEntityOperationAccessEventInterface $event): void {
+    $group_content_entity = $event->getGroupContent();
+    $group_entity = $event->getGroup();
+    $user = $event->getUser();
+
+    // If the group content is not a community record, then we have no opinion.
+    if (!mukurtu_community_records_is_community_record($group_content_entity)) {
+      $event->mergeAccessResult(AccessResult::neutral()->addCacheableDependency($group_content_entity));
+    }
+    // If the group content is a community record, than grant access if the user
+    // has the 'administer community records' permission on the group. Note that
+    // \Drupal\og\OgAccessInterface::userAccess implicitly checks if the user
+    // is a member of the group, and if the user is a group admin, in addition
+    // to checking the 'administer community records' permission.
+    else {
+      $access_result = $this->ogAccess->userAccess($group_entity, 'administer community records', $user);
+      if ($access_result instanceof RefinableCacheableDependencyInterface) {
+        $access_result->addCacheableDependency($group_content_entity);
+      }
+      $event->mergeAccessResult($access_result);
     }
   }
 
