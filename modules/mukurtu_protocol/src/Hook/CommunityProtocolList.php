@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_protocol\Hook;
 
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
@@ -16,18 +18,17 @@ class CommunityProtocolList {
   use StringTranslationTrait;
 
   /**
-   * Implements hook_preprocess_node().
+   * Implements hook_ENTITY_TYPE_view_alter().
    *
    * Put the Communities and Cultural Protocols together for the sidebar
    * display.
    */
-  #[Hook('preprocess_node')]
-  public function nodePreprocess(array &$variables): void {
-    $node = $variables['node'];
-    if (!$node instanceof CulturalProtocolControlledInterface) {
+  #[Hook('node_view_alter')]
+  public function nodeViewAlter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display): void {
+    if (!$entity instanceof CulturalProtocolControlledInterface) {
       return;
     }
-    $variables['community_protocol_list'] = $this->buildCommunityProtocolList($node);
+    $build['community_protocol_list'] = $this->buildCommunityProtocolList($entity);
   }
 
   /**
