@@ -32,9 +32,13 @@ class CommunityProtocolList {
   }
 
   /**
-   * @param \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $node
+   * Build the community protocol list.
    *
-   * @return string[]
+   * @param \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $node
+   *   The node entity that is enabled for protocol sharing.
+   *
+   * @return array
+   *   Render array for the community protocol list.
    */
   protected function buildCommunityProtocolList(CulturalProtocolControlledInterface $node): array {
     $items = [];
