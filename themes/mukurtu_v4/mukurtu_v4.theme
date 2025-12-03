@@ -1,16 +1,16 @@
 <?php
 
 use Drupal\file\Entity\File;
-use Drupal\Core\Url;
 use Drupal\media\MediaInterface;
+use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 
 /**
  * Implements hook_preprocess_breadcrumb().
+ *
+ * @todo: adjust this so that it works on admin pages
  */
-// @todo: adjust this so that it works on admin pages
-function mukurtu_v4_preprocess_breadcrumb(&$variables)
-{
+function mukurtu_v4_preprocess_breadcrumb(&$variables) {
   $request = \Drupal::request();
   $route = \Drupal::routeMatch()->getRouteObject();
   $page_title = \Drupal::service('title_resolver')->getTitle($request, $route);
@@ -29,18 +29,15 @@ function mukurtu_v4_preprocess_breadcrumb(&$variables)
 /**
  * Implements hook_preprocess_node().
  */
-function mukurtu_v4_preprocess_node(&$variables)
-{
+function mukurtu_v4_preprocess_node(&$variables) {
   $node = $variables['node'];
 
-  if ($node instanceof \Drupal\mukurtu_collection\Entity\Collection) {
+  if ($node instanceof Collection) {
     $variables['collection_count'] = $node->getCount();
   }
 
-  /** This creates a twig variable that can be used in node templates to
-   * render the media assets field (a second time) with thumbnail display.
-   */
-
+  // This creates a twig variable that can be used in node templates to
+  // render the media assets field (a second time) with thumbnail display.
   if ($node->hasField('field_media_assets')) {
     if (!$node->field_media_assets->isEmpty()) {
       $variables['thumbnail_display'] = $node->field_media_assets->view([
@@ -57,8 +54,7 @@ function mukurtu_v4_preprocess_node(&$variables)
 /**
  * Implements hook_theme_suggestions_input_alter().
  */
-function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variables)
-{
+function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variables) {
   $element = $variables['element'];
   if ($element['#type'] == 'submit' && strpos($element['#id'], 'edit-submit-mukurtu-browse-collections--2') === 0) {
     $suggestions[] = 'input__collection__search';
@@ -68,8 +64,7 @@ function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variable
 /**
  * Implements template_preprocess_block().
  */
-function mukurtu_v4_preprocess_block(&$variables)
-{
+function mukurtu_v4_preprocess_block(&$variables) {
   // Pass block title to consent popup content template.
   if (isset($variables['plugin_id']) && $variables['plugin_id'] === 'consent_popup') {
     $variables['content']['#items']['title'] = $variables['label'];
@@ -87,8 +82,7 @@ function mukurtu_v4_preprocess_block(&$variables)
 /**
  * Implements template_preprocess_field().
  */
-function mukurtu_v4_preprocess_field(&$variables)
-{
+function mukurtu_v4_preprocess_field(&$variables) {
   // TODO move all this to template_preprocess_node() instead?
   if ($variables['field_name'] == 'field_media_assets') {
     if (
@@ -167,8 +161,7 @@ function mukurtu_v4_preprocess_field(&$variables)
 /**
  * Implements hook_preprocess_field__community__name__community().
  */
-function mukurtu_v4_preprocess_field__community__name__community(array &$variables): void
-{
+function mukurtu_v4_preprocess_field__community__name__community(array &$variables): void {
   $path = \Drupal::service('path.current')->getPath();
   if ($path != '/communities') {
     return;
@@ -188,8 +181,7 @@ function mukurtu_v4_preprocess_field__community__name__community(array &$variabl
 /**
  * Implements template_preprocess_media().
  */
-function mukurtu_v4_preprocess_media(array &$variables)
-{
+function mukurtu_v4_preprocess_media(array &$variables) {
   $media = $variables['media'];
 
   // Put media type in variable to use in twig.
@@ -211,8 +203,7 @@ function mukurtu_v4_preprocess_media(array &$variables)
 /**
  * Implements template_preprocess_media__audio__browse().
  */
-function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void
-{
+function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void {
   foreach ($variables['content']['field_media_audio_file'] as $key => $file) {
     if (is_numeric($key)) {
       $file['#attributes']['preload'] = 'none';
@@ -223,16 +214,14 @@ function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void
 /**
  * Implements hook_preprocess_media_soundcloud_embed().
  */
-function mukurtu_v4_preprocess_media_soundcloud_embed(array &$variables): void
-{
+function mukurtu_v4_preprocess_media_soundcloud_embed(array &$variables): void {
   $variables['height'] = '200';
 }
 
 /**
  * Implements hook_preprocess_field_group_html_element__group_community_sidebar().
  */
-function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar(array &$variables): void
-{
+function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar(array &$variables): void {
   $route_match = \Drupal::routeMatch();
   $community = $route_match->getParameter('community');
   $variables['community_name'] = $community->get('name')->value;
@@ -244,8 +233,7 @@ function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar
 /**
  * Implements hook_preprocess_field_group_html_element__group_protocol_sidebar().
  */
-function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(array &$variables): void
-{
+function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(array &$variables): void {
   $route_match = \Drupal::routeMatch();
   $protocol = $route_match->getParameter('protocol');
   $variables['protocol_name'] = $protocol->get('name')->value;
