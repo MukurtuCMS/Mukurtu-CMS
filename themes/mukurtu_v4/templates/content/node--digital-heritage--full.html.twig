@@ -124,7 +124,10 @@
       {% if content.group_metadata is not empty %}
         <div class="full-node__list">
           <aside class="full-node__sidebar">
-            {{ content.group_metadata.group_sidebar_mukurtu_fields }}
+            <div class="sidebar-section">
+              {{ community_protocol_list }}
+              {{ content.group_metadata.group_sidebar_mukurtu_fields|without('field_communities', 'field_cultural_protocols') }}
+            </div>
             {{ content.group_metadata.group_additional_metadata }}
             {{ content.group_metadata.group_rights }}
             {{ content.group_metadata.flag_export_content }}

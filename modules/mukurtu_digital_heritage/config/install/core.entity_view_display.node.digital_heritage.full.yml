@@ -93,7 +93,7 @@ third_party_settings:
       weight: 37
       format_type: html_element
       format_settings:
-        classes: sidebar-section
+        classes: sidebar-section-inner
         show_empty_fields: false
         id: ''
         label_as_html: false
