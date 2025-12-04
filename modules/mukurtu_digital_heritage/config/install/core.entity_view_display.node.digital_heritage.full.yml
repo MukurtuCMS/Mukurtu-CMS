@@ -80,8 +80,6 @@ third_party_settings:
     group_sidebar_mukurtu_fields:
       children:
         - field_title
-        - field_communities
-        - field_cultural_protocols
         - field_category
         - field_keywords
         - field_creator
@@ -93,7 +91,7 @@ third_party_settings:
       weight: 37
       format_type: html_element
       format_settings:
-        classes: sidebar-section
+        classes: sidebar-section-inner
         show_empty_fields: false
         id: ''
         label_as_html: false
@@ -205,14 +203,6 @@ content:
     third_party_settings: {  }
     weight: 43
     region: content
-  field_communities:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 24
-    region: content
   field_contributor:
     type: entity_reference_label
     label: above
@@ -320,13 +310,6 @@ content:
     settings: {  }
     third_party_settings: {  }
     weight: 36
-    region: content
-  field_cultural_protocols:
-    type: cultural_protocol_formatter
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 25
     region: content
   field_date_description:
     type: string
@@ -537,8 +520,9 @@ content:
     region: content
 hidden:
   draft: true
+  field_communities: true
   field_content_type: true
-  field_knowledge_keepers: true
+  field_cultural_protocols: true
   field_mukurtu_original_record: true
   field_multipage_page_of: true
   field_protocol_control: true

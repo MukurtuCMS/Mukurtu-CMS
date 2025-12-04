@@ -104,7 +104,7 @@
           {% endif %}
 
           {{ content.group_primary_fields|without('field_media_assets', 'comment') }}
-          
+
         </div>
 
         <div class="full-node__comment">
@@ -117,6 +117,7 @@
         {% if content.group_metadata is not empty %}
           <aside class="full-node__sidebar">
             <div class="sidebar-section">
+              {{ content.community_protocol_list }}
               {{ content.group_metadata }}
             </div>
           </aside>
@@ -125,7 +126,7 @@
         <div class="full-node__flag-export-content">
           {{ content.flag_export_content}}
         </div>
-        
+
       </div>
     </div> {# __grid #}
 

@@ -107,17 +107,16 @@
       </div>
       {# Sidebar. #}
       <div class="full-node__list">
-        {# As more content is made available to the sidebar, add it below. #} 
-        {% if content.field_communities is not empty %}
+        {# As more content is made available to the sidebar, add it below. #}
+        {% if content.community_protocol_list is not empty %}
           <aside class="full-node__sidebar">
             <div class="sidebar-section">
-              {{ content.field_communities }}
-              {{ content.field_cultural_protocols }}
+              {{ content.community_protocol_list }}
               {{ content.field_keywords }}
               {{ content.field_source }}
               {{ content.field_all_related_content }}
               {{ content.local_contexts_project }}
-              {{ content.local_contexts_label_and_notice }}   
+              {{ content.local_contexts_label_and_notice }}
             </div>
           </aside>
         {% endif %}

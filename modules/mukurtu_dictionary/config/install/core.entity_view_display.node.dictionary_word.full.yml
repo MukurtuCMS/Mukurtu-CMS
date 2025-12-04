@@ -22,8 +22,6 @@ third_party_settings:
   field_group:
     group_metadata:
       children:
-        - field_communities
-        - field_cultural_protocols
         - field_dictionary_word_language
         - field_glossary_entry
         - field_keywords
@@ -192,14 +190,6 @@ content:
     third_party_settings: {  }
     weight: 38
     region: content
-  field_communities:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 32
-    region: content
   field_contributor:
     type: entity_reference_label
     label: above
@@ -310,13 +300,6 @@ content:
     settings: {  }
     third_party_settings: {  }
     weight: 37
-    region: content
-  field_cultural_protocols:
-    type: cultural_protocol_formatter
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 33
     region: content
   field_definition:
     type: basic_string
@@ -476,7 +459,9 @@ content:
 hidden:
   draft: true
   field_all_related_content: true
+  field_communities: true
   field_content_type: true
+  field_cultural_protocols: true
   field_in_collection: true
   field_multipage_page_of: true
   field_protocol_control: true

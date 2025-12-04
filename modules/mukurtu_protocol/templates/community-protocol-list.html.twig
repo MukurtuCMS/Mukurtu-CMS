@@ -1,0 +1,19 @@
+{#
+/**
+ * @file
+ * Default theme implementation of a Community Protocol list.
+ *
+ * Available variables:
+ * - title: The title of the list.
+ * - items: Community / Protocol link pairs.
+ */
+#}
+{% if items|length > 0 %}
+  <div class="field">
+    <div class="field__label">{{ title }}</div>
+    {% for item in items %}
+      <div class="field__item">{{ item }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
