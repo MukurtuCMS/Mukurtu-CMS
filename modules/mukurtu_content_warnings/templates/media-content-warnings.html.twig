@@ -1,0 +1,13 @@
+{#
+/**
+ * @file
+ * Default theme implementation for media content warnings.
+ *
+ * Available variables:
+ * - media: The media entity.
+ * - warnings: The warnings.
+ */
+#}
+<div {{ attributes.addClass('mukurtu-content-warnings').setAttribute('data-mid', media.id) }}>
+  {{ warnings }}
+</div>
