@@ -6,7 +6,6 @@
 ((Drupal, once) => {
   Drupal.behaviors.contentWarnings = {
     attach: function (context) {
-      console.log('HEELOOO THERE');
 
       once("content-warnings", ".mukurtu-content-warning", context).forEach((e) => {
         e.addEventListener("click", () => {
