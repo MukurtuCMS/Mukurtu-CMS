@@ -5,17 +5,35 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_protocol\Hook;
 
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Hook implementations to get a list of community protocol pairs.
  */
-class CommunityProtocolList {
+class CommunityProtocolList implements ContainerInjectionInterface {
   use StringTranslationTrait;
+
+  /**
+   * Constructs a new CommunityProtocolList object.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $currentUser
+   *   The current user.
+   */
+  public function __construct(protected AccountInterface $currentUser) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): static {
+    return new static($container->get('current_user'));
+  }
 
   /**
    * Implements hook_ENTITY_TYPE_view_alter().
@@ -44,14 +62,25 @@ class CommunityProtocolList {
     $items = [];
     $protocols = $node->getProtocolEntities();
     foreach ($protocols as $protocol) {
-      $protocol_link = $protocol->toLink()->toString();
+      // Check access to the protocol and community, since some
+      // protocols/communities applied to content may not be accessible to the
+      // current user. In the case where the protocol/community is not
+      // accessible, just display the protocol/community label.
+      $protocol_access = $protocol->access('view', $this->currentUser, TRUE);
+      $protocol_display = $protocol_access->isAllowed()
+        ? $protocol->toLink()->toString()
+        : $protocol->label();
       $communities = $protocol->getCommunities();
       foreach ($communities as $community) {
-        $community_link = $community->toLink()->toString();
-        $item_render_array = ['#markup' => sprintf('%s: %s', $community_link, $protocol_link)];
+        $community_access = $community->access('view', $this->currentUser, TRUE);
+        $community_display = $community_access->isAllowed()
+          ? $community->toLink()->toString()
+          : $community->label();
+        $item_render_array = ['#markup' => sprintf('%s: %s', $community_display, $protocol_display)];
         CacheableMetadata::createFromRenderArray($item_render_array)
-          ->addCacheableDependency($protocol_link)
-          ->addCacheableDependency($community_link)
+          ->addCacheableDependency($protocol)
+          ->addCacheableDependency($community)
+          ->addCacheContexts(['user'])
           ->applyTo($item_render_array);
         $items[] = $item_render_array;
       }
