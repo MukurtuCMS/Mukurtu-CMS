@@ -69,7 +69,8 @@
         "drupal/views_bulk_operations": "*",
         "drush/drush": "^13",
         "sibyx/phpgpx": "@RC",
-        "drupal/dashboards": "^2.1"
+        "drupal/dashboards": "^2.1",
+        "drupal/admin_theme": "^1.1"
     },
     "require-dev": {
         "drupal/devel": "*",
