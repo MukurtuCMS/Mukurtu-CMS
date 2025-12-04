@@ -229,6 +229,10 @@ process:
       process:
         uri: url
         title: title
+  field_gear_type: 
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_gear_type
+    source: field_gear_type
 
   # This only works if we maintain nids. Self migration_lookup wasn't working for me...
   field_mukurtu_original_record: field_community_record_parent
@@ -271,6 +275,7 @@ migration_dependencies:
     - mukurtu_cms_v3_media_video
     - mukurtu_cms_v3_users
     - mukurtu_cms_v3_users_uid1
+    - mukurtu_cms_v3_terms_gear_type
   optional:
     - d7_field_instance
 include: null
