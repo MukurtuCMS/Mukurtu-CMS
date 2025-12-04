@@ -1009,11 +1009,23 @@ a:not(.primary-nav__menu-link) svg.tel path {
           flex-direction: column;
   -ms-flex-pack: distribute;
       justify-content: space-around;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(0, 0, 0, 0.9);
   color: white;
   line-height: var(--line-height-xs);
+  cursor: pointer;
+  text-align: center;
+}
+.mukurtu-content-warnings:hover {
+  text-decoration: underline;
+}
+.mukurtu-content-warnings:focus {
+  outline: var(--focus-color) solid 2px;
 }
 .mukurtu-content-warnings.dismissed {
+  display: none;
+}
+
+.splide__track--nav .mukurtu-content-warning {
   display: none;
 }
 

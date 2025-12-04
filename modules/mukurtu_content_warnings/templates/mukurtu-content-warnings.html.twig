@@ -8,6 +8,6 @@
  * - warnings: The warnings.
  */
 #}
-<div {{ attributes.addClass('mukurtu-content-warnings').setAttribute('data-mid', media.id) }}>
+<div {{ attributes.addClass('mukurtu-content-warnings').setAttribute('data-mid', media.id).setAttribute('role', 'button').setAttribute('tabindex', 0).setAttribute('aria-pressed', 'false') }}>
   {{ warnings }}
 </div>

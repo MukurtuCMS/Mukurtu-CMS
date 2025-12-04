@@ -16,11 +16,29 @@
   flex-direction: column;
   justify-content: space-around;
 
-  background-color: rgba(0 0 0 / 85%);
+  background-color: rgba(0 0 0 / 90%);
   color: white;
   line-height: var(--line-height-xs);
+  cursor: pointer;
+  text-align: center;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: var(--focus-color) solid 2px;
+  }
 
   &.dismissed {
     display: none;
   }
+}
+
+.mukurtu-content-warning {
+
+  .splide__track--nav & {
+    display: none;
+  }
+
 }
