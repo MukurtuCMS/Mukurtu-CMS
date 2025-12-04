@@ -72,7 +72,7 @@ class MukurtuMediaContentWarnings {
       return $build;
     }
     return array_merge($build, [
-      '#theme' => 'media_content_warnings',
+      '#theme' => 'mukurtu_content_warnings',
       '#media' => $entity,
       '#warnings' => array_merge($people_warnings, $taxonomy_warnings),
     ]);
@@ -106,7 +106,7 @@ class MukurtuMediaContentWarnings {
     }
     // Incorporate cacheability metadata from the people terms.
     $build = [
-      '#theme' => 'media_content_warning',
+      '#theme' => 'mukurtu_content_warning',
       '#warning' => $warning_text,
     ];
     $build = array_reduce($people_terms, function ($carry, TermInterface $people_term) {
@@ -144,7 +144,7 @@ class MukurtuMediaContentWarnings {
     foreach ($taxonomy_warnings as $warning) {
       if (in_array($warning['term'], $tids)) {
         $warnings[] = [
-          '#theme' => 'media_content_warning',
+          '#theme' => 'mukurtu_content_warning',
           '#warning' => $warning['warning'],
         ];
       }

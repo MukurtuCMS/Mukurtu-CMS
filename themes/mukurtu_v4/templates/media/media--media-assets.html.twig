@@ -38,9 +38,10 @@
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
+  {{ content.media_content_warnings }}
 
   <span class="media-asset--content">
-    {{ content }}
+    {{ content|without('media_content_warnings') }}
   </span>
 
 

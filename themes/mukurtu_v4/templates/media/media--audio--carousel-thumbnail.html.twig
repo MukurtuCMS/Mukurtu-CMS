@@ -38,6 +38,8 @@
 %}
 
 <div{{ attributes.addClass(classes) }}>
+  {{ content.media_content_warnings }}
+
   {% if content.field_thumbnail['#items'] is not empty %}
     {{ content.field_thumbnail }}
   {% else %}
