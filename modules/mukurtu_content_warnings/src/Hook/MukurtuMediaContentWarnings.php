@@ -53,6 +53,14 @@ class MukurtuMediaContentWarnings {
   }
 
   /**
+   * Implements template_preprocess_mukurtu_content_warnings().
+   */
+  #[Hook('preprocess_mukurtu_content_warnings')]
+  public function preprocessMukurtuContentWarnings(&$variables): void {
+    $variables['#attached']['library'][] = 'mukurtu_content_warnings/content-warnings';
+  }
+
+  /**
    * Build a render array of media content warnings for the given entity.
    *
    * @param \Drupal\mukurtu_core\Entity\PeopleInterface $entity

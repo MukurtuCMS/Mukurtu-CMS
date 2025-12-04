@@ -6,13 +6,6 @@ global-styling:
       css/content-warnings.css: {}
       css/leaflet-overrides.css: {}
 
-global-scripts:
-  js:
-    js/content-warnings.js: {}
-  dependencies:
-    - core/drupal
-    - core/once
-
 media-carousel:
   js:
     js/media-asset-carousel.js: {}
