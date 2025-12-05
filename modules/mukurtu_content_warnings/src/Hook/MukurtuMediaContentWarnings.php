@@ -11,6 +11,7 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\Core\Routing\AdminContext;
 use Drupal\mukurtu_core\Entity\PeopleInterface;
 use Drupal\taxonomy\TermInterface;
 
@@ -33,10 +34,13 @@ class MukurtuMediaContentWarnings {
    *   The config factory.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\Core\Routing\AdminContext $adminContext
+   *   The admin context.
    */
   public function __construct(
     ConfigFactoryInterface $configFactory,
-    protected EntityTypeManagerInterface $entityTypeManager
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected AdminContext $adminContext,
   ) {
     $this->contentWarningSettings = $configFactory->get('mukurtu_content_warnings.settings');
   }
@@ -49,16 +53,11 @@ class MukurtuMediaContentWarnings {
     if (!$entity instanceof PeopleInterface) {
       return;
     }
-    if (!in_array($display->getMode(), [
-      'browse',
-      'carousel_thumbnail',
-      'collections_3_2_',
-      'full',
-      // @todo the content warning display is a little off for this view mode.
-      'digital_heritage_full',
-      'digital_heritage_sidebar',
-      'media_assets',
-      'small_250px_',
+    // If this is an admin route, or the view mode is either token or
+    // media_library, don't display the content warnings.
+    if ($this->adminContext->isAdminRoute() || in_array($display->getMode(), [
+      'token',
+      'media_library',
     ])) {
       return;
     }

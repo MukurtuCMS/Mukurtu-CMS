@@ -6,7 +6,6 @@
 ((Drupal, once) => {
   Drupal.behaviors.contentWarnings = {
     attach: function (context) {
-
       once('mukurtu-content-warnings', '.mukurtu-content-warnings', context).forEach((element) => {
         element.addEventListener('click', (event) => {
           event.preventDefault();
