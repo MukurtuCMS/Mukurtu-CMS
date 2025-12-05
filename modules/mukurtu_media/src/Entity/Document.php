@@ -5,12 +5,11 @@ namespace Drupal\mukurtu_media\Entity;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\media\Entity\Media;
 use Drupal\mukurtu_core\BaseFieldDefinition;
-use Drupal\mukurtu_media\Entity\DocumentInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\mukurtu_core\Entity\PeopleInterface;
+use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
-use Drupal\mukurtu_media\Entity\MukurtuFilenameGenerationInterface;
-use Drupal\mukurtu_media\Entity\MukurtuThumbnailGenerationInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
 use Drupal\Core\File\FileSystemInterface;
@@ -18,9 +17,9 @@ use Drupal\Core\File\FileSystemInterface;
 /**
  * Defines the Document media entity bundle class.
  */
-class Document extends Media implements DocumentInterface, CulturalProtocolControlledInterface, MukurtuThumbnailGenerationInterface, MukurtuFilenameGenerationInterface {
-
+class Document extends Media implements DocumentInterface, CulturalProtocolControlledInterface, MukurtuThumbnailGenerationInterface, MukurtuFilenameGenerationInterface, PeopleInterface {
   use CulturalProtocolControlledTrait;
+  use PeopleTrait;
 
   /**
    * {@inheritdoc}

@@ -130,7 +130,6 @@ function watchFiles() {
   ], lintScripts);
   watch([
     "./css/00-base/**/*.css",
-    "./css/content-warnings.css",
     "./css/leaflet-overrides.css"
   ], lintStyles)
 }
