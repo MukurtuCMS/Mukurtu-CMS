@@ -85,6 +85,10 @@ class MukurtuMediaContentWarnings {
     $build = [];
     CacheableMetadata::createFromRenderArray($build)
       ->addCacheableDependency($this->contentWarningSettings)->addCacheableDependency($entity)
+       // For deceased content warnings, they are shown based on the presence of
+       // a person node with the same people tag as the media item, so we're
+       // potentially dependent on any change to a person node.
+      ->addCacheTags(['node_list:person'])
       ->applyTo($build);
     $people_warnings = $this->buildPeopleWarnings($entity);
     $taxonomy_warnings = $this->buildTaxonomyWarnings($entity);
