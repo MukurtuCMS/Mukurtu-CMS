@@ -15,7 +15,7 @@ permissions:
   - 'create audio media'
   - 'create digital_heritage content'
   - 'create document media'
-  - 'create exteral_embed media'
+  - 'create external_embed media'
   - 'create image media'
   - 'create person content'
   - 'create remote_video media'

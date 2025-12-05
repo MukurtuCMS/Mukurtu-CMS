@@ -15,7 +15,7 @@ permissions:
   - 'create audio media'
   - 'create dictionary_word content'
   - 'create document media'
-  - 'create exteral_embed media'
+  - 'create external_embed media'
   - 'create image media'
   - 'create remote_video media'
   - 'create soundcloud media'

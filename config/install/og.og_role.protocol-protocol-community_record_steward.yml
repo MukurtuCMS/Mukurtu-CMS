@@ -15,7 +15,7 @@ permissions:
   - 'apply protocol'
   - 'create audio media'
   - 'create document media'
-  - 'create exteral_embed media'
+  - 'create external_embed media'
   - 'create image media'
   - 'create remote_video media'
   - 'create soundcloud media'
