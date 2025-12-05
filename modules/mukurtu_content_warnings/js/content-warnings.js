@@ -9,7 +9,8 @@
 
       once('mukurtu-content-warnings', '.mukurtu-content-warnings', context).forEach((element) => {
         element.addEventListener('click', (event) => {
-          this.dismissContentWarning(event.target);
+          event.preventDefault();
+          this.dismissContentWarning(event.target.closest('.mukurtu-content-warnings'));
         });
       });
     },

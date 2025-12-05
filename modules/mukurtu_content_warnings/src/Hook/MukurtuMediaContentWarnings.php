@@ -49,6 +49,19 @@ class MukurtuMediaContentWarnings {
     if (!$entity instanceof PeopleInterface) {
       return;
     }
+    if (!in_array($display->getMode(), [
+      'browse',
+      'carousel_thumbnail',
+      'collections_3_2_',
+      'full',
+      // @todo the content warning display is a little off for this view mode.
+      'digital_heritage_full',
+      'digital_heritage_sidebar',
+      'media_assets',
+      'small_250px_',
+    ])) {
+      return;
+    }
     $build['media_content_warnings'] = $this->buildMediaContentWarnings($entity);
   }
 
@@ -146,7 +159,7 @@ class MukurtuMediaContentWarnings {
     //we see here.
     $media_tags = $entity->get('field_media_tags')->referencedEntities();
     // Make a quick list of tids that the media tags field has.
-    $tids = array_map(fn(TermInterface $media_tag) => $media_tags->id(), $media_tags);
+    $tids = array_map(fn(TermInterface $media_tag) => $media_tag->id(), $media_tags);
 
     $warnings = [];
     foreach ($taxonomy_warnings as $warning) {
