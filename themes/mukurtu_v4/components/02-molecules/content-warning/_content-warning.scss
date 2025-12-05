@@ -1,0 +1,44 @@
+.media:has(.mukurtu-content-warnings) {
+  position: relative;
+}
+
+.mukurtu-content-warnings {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 10;
+
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  background-color: rgba(0 0 0 / 90%);
+  color: white;
+  line-height: var(--line-height-xs);
+  cursor: pointer;
+  text-align: center;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: var(--focus-color) solid 2px;
+  }
+
+  &.dismissed {
+    display: none;
+  }
+}
+
+.mukurtu-content-warning {
+
+  .splide__track--nav & {
+    display: none;
+  }
+
+}

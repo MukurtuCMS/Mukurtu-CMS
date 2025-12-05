@@ -988,6 +988,48 @@ a:not(.primary-nav__menu-link) svg.tel path {
   border-radius: 5px;
 }
 
+.media:has(.mukurtu-content-warnings) {
+  position: relative;
+}
+
+.mukurtu-content-warnings {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 10;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 1rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  line-height: var(--line-height-xs);
+  cursor: pointer;
+  text-align: center;
+}
+.mukurtu-content-warnings:hover {
+  text-decoration: underline;
+}
+.mukurtu-content-warnings:focus {
+  outline: var(--focus-color) solid 2px;
+}
+.mukurtu-content-warnings.dismissed {
+  display: none;
+}
+
+.splide__track--nav .mukurtu-content-warning {
+  display: none;
+}
+
 .block-featured-content {
   padding-inline: var(--layout-padding);
 }
@@ -1523,12 +1565,6 @@ details.form-wrapper summary + div {
 }
 .language-switcher .links a.is-active:hover {
   background-color: var(--brand-primary-accent);
-}
-
-.language-switcher .contextual {
-    position: absolute;
-    top: 0;
-    right: 20px;
 }
 
 .local-tasks {
@@ -2590,11 +2626,11 @@ body.is-always-mobile-nav .header-nav::before {
   inline-size: 100%;
   margin: 0;
   margin-block: var(--v-space-2xs);
-  padding-left: 0;
+  padding: 0;
 }
 @media (min-width: 60rem) {
   .menu__account-menu {
-    padding:0;
+    padding: 0;
     margin-block: 0;
   }
 }

@@ -4,17 +4,18 @@ namespace Drupal\mukurtu_media\Entity;
 
 use Drupal\media\Entity\Media;
 use Drupal\mukurtu_core\BaseFieldDefinition;
-use Drupal\mukurtu_media\Entity\ImageInterface;
+use Drupal\mukurtu_core\Entity\PeopleInterface;
+use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
-use Drupal\mukurtu_media\Entity\MukurtuFilenameGenerationInterface;
 
 /**
  * Defines the Image media entity bundle class.
  */
-class Image extends Media implements ImageInterface, CulturalProtocolControlledInterface, MukurtuFilenameGenerationInterface {
+class Image extends Media implements ImageInterface, CulturalProtocolControlledInterface, MukurtuFilenameGenerationInterface, PeopleInterface {
   use CulturalProtocolControlledTrait;
+  use PeopleTrait;
 
   /**
    * {@inheritdoc}

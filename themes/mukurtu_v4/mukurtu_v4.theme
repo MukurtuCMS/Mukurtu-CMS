@@ -1,7 +1,6 @@
 <?php
 
 use Drupal\file\Entity\File;
-use Drupal\media\MediaInterface;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 
@@ -77,85 +76,6 @@ function mukurtu_v4_preprocess_block(&$variables) {
 
   // Add is_front variable for block templates.
   $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
-}
-
-/**
- * Implements template_preprocess_field().
- */
-function mukurtu_v4_preprocess_field(&$variables) {
-  // TODO move all this to template_preprocess_node() instead?
-  if ($variables['field_name'] == 'field_media_assets') {
-    if (
-      isset($variables['element'])              &&
-      isset($variables['element'][0])           &&
-      isset($variables['element'][0]['#media']) &&
-      ($variables['element'][0]['#media'] instanceof MediaInterface)
-    ) {
-      $variables['media'] = $variables['element'][0]['#media'];
-      $media = $variables['media'];
-      $config = \Drupal::config('mukurtu_content_warnings.settings');
-
-      if ($config->get('people_warnings.enabled')) {
-        $names = [];
-        $peopleTerms = [];
-        // Look at the People taxonomy field on the media.
-        $peopleTerms = $media->get('field_people')->referencedEntities();
-        if ($peopleTerms) {
-          // Next, check the list of the media's field_people terms against the
-          // field_other_names of Person entities.
-          // For every people term that matches a representative term, add that
-          // term name to the list of names of deceased people for the warning.
-          foreach ($peopleTerms as $term) {
-            $query = \Drupal::entityQuery('node')
-              ->condition('type', 'person')
-              ->condition('field_deceased', TRUE, '=')
-              ->condition('field_other_names.entity:taxonomy_term.tid', $term->id(), '=')
-              ->accessCheck(FALSE);
-            $ids = $query->execute();
-            if ($ids) {
-              // If that query yields any results, that means the dead person's name needs to
-              // be added to the list of names in the content warning.
-              array_push($names, $term->getName());
-            }
-          }
-          if ($names) {
-            $warningTemplate = '';
-            $warningText = '';
-            // todo: this can be improved with ternary operator.
-            if (count($names) > 1) {
-              $warningTemplate = $config->get('people_warnings.warning_multiple');
-              $warningText = str_replace("[names]", implode(' ', $names), $warningTemplate);
-            }
-            else {
-              $warningTemplate = $config->get('people_warnings.warning_single');
-              $warningText = str_replace("[name]", implode(' ', $names), $warningTemplate);
-            }
-            $variables['hasContentWarning'] = TRUE;
-            $variables['warnings'][] = $warningText;
-            $variables['media-id'] = $media->id();
-          }
-        }
-      }
-      $taxonomyWarnings = $config->get('taxonomy_warnings');
-      if ($taxonomyWarnings) {
-        // If we have taxonomy warnings in config, we need to iterate through
-        // them all and see if the media item's media tags field matches any of
-        // the terms we see here.
-        $mediaTags = $media->get('field_media_tags')->referencedEntities();
-        $tids = [];
-        foreach ($mediaTags as $tag) {
-          // Make a quick list of tids that the media tags field has.
-          array_push($tids, $tag->id());
-        }
-        foreach ($taxonomyWarnings as $warning) {
-          if (in_array($warning['term'], $tids)) {
-            $variables['hasContentWarning'] = TRUE;
-            $variables['warnings'][] = $warning['warning'];
-          }
-        }
-      }
-    }
-  }
 }
 
 /**
