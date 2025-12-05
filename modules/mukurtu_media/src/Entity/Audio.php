@@ -4,17 +4,18 @@ namespace Drupal\mukurtu_media\Entity;
 
 use Drupal\media\Entity\Media;
 use Drupal\mukurtu_core\BaseFieldDefinition;
-use Drupal\mukurtu_media\Entity\AudioInterface;
+use Drupal\mukurtu_core\Entity\PeopleInterface;
+use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
-use Drupal\mukurtu_media\Entity\MukurtuFilenameGenerationInterface;
 
 /**
  * Defines the Audio media entity bundle class.
  */
-class Audio extends Media implements AudioInterface, CulturalProtocolControlledInterface, MukurtuFilenameGenerationInterface {
+class Audio extends Media implements AudioInterface, CulturalProtocolControlledInterface, MukurtuFilenameGenerationInterface, PeopleInterface {
   use CulturalProtocolControlledTrait;
+  use PeopleTrait;
 
   /**
    * {@inheritdoc}

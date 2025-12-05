@@ -4,20 +4,23 @@ namespace Drupal\mukurtu_media\Entity;
 
 use Drupal\media\Entity\Media;
 use Drupal\mukurtu_core\BaseFieldDefinition;
-use Drupal\mukurtu_media\Entity\SoundCloudInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\mukurtu_core\Entity\PeopleInterface;
+use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Defines the SoundCloud media entity bundle class.
  */
-class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolControlledInterface
-{
+class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolControlledInterface, PeopleInterface {
   use CulturalProtocolControlledTrait;
+  use PeopleTrait;
 
-  public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
-  {
+  /**
+   * {@inheritdoc}
+   */
+  public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
 
     $definitions['field_media_soundcloud'] = BaseFieldDefinition::create('string')
