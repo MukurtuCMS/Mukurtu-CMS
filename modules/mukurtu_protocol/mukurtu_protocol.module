@@ -735,3 +735,17 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
     }
   }
 }
+
+/**
+ * Implements hook_form_form_id_alter().
+ *
+ * Change the roles select from multiselect to checkboxes.
+ */
+function mukurtu_protocol_form_og_membership_add_multiple_roles_action_form_alter(&$form, FormStateInterface $form_state) {
+  $rolesElement = $form['roles'];
+
+  $form['roles'] = [
+    '#type' => 'checkboxes',
+    '#options' => $rolesElement['#options']
+  ];
+}
