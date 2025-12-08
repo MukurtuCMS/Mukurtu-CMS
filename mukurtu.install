@@ -335,6 +335,7 @@ function mukurtu_install() {
     'unflag mukurtu_follow_community',
     'unflag mukurtu_follow_content',
     'use text format basic_html',
+    'use text format full_html',
     'view the administration theme',
     'view media',
     'view all revisions',
