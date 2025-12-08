@@ -4,7 +4,7 @@ dependencies:
   enforced:
     module:
       - mukurtu_migrate
-id: mukurtu_cms_v3_terms_gear_type
+id: mukurtu_cms_v3_terms_vessel_gear_type
 class: null
 idMap: {  }
 field_plugin_method: null
@@ -12,10 +12,10 @@ cck_plugin_method: null
 migration_tags:
   - 'Mukurtu 3'
 migration_group: mukurtu_cms_v3
-label: 'Taxonomy Terms - Gear Type'
+label: "Taxonomy Terms - Vessel Gear Type"
 source:
   plugin: d7_taxonomy_term
-  bundle: gear_type
+  bundle: vessel_gear_type
 process:
   # If you are using this file to build a custom migration consider removing
   # the tid field to allow incremental migrations.
@@ -23,7 +23,7 @@ process:
   langcode: language
   vid:
     plugin: default_value
-    default_value: gear_type
+    default_value: vessel_gear_type
   name: name
   description/value: description
   description/format:
