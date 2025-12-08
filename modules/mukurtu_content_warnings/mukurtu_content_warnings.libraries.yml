@@ -1,0 +1,6 @@
+content-warnings:
+  js:
+    js/content-warnings.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

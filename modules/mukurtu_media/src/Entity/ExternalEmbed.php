@@ -4,8 +4,9 @@ namespace Drupal\mukurtu_media\Entity;
 
 use Drupal\media\Entity\Media;
 use Drupal\mukurtu_core\BaseFieldDefinition;
-use Drupal\mukurtu_media\Entity\ExternalEmbedInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\mukurtu_core\Entity\PeopleInterface;
+use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -13,9 +14,9 @@ use Drupal\Core\Entity\EntityStorageInterface;
 /**
  * Defines the External Embed media entity bundle class.
  */
-class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalProtocolControlledInterface
-{
+class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalProtocolControlledInterface, PeopleInterface {
   use CulturalProtocolControlledTrait;
+  use PeopleTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
   {

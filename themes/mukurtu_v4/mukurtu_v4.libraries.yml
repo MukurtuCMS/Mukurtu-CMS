@@ -3,15 +3,7 @@ global-styling:
   css:
     theme:
       css/style.css: {}
-      css/content-warnings.css: {}
       css/leaflet-overrides.css: {}
-
-global-scripts:
-  js:
-    js/content-warnings.js: {}
-  dependencies:
-    - core/drupal
-    - core/once
 
 media-carousel:
   js:
