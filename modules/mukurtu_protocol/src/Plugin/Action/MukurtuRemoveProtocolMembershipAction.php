@@ -113,7 +113,7 @@ class MukurtuRemoveProtocolMembershipAction extends ViewsBulkOperationsActionBas
     $protocols = [];
     $protocolMemberships = array_filter(Og::getMemberships($currentUser), fn ($m) => $m->getGroupBundle() === 'protocol');
     $managerMemberships = array_filter($protocolMemberships, fn ($m) => $m->hasPermission('administer group') || $m->hasPermission('manage members'));
-    $managerCommunities = array_map(fn ($m) => $m->getGroup(), $managerMemberships);
+    $managerCommunities = array_filter(array_map(fn ($m) => $m->getGroup(), $managerMemberships));
 
     /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
     foreach ($managerCommunities as $protocol) {
