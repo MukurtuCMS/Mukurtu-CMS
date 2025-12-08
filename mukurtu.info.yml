@@ -47,6 +47,7 @@ install:
   - term_merge_manager
   - dashboards
   - admin_theme
+  - config_translation_po
 dependencies:
   - 'blazy:blazy'
   - 'ctools:ctools'
@@ -133,6 +134,7 @@ dependencies:
   - 'views_bulk_operations:views_bulk_operations'
   - 'drupal:dashboards'
   - 'drupal:admin_theme'
+  - 'drupal:config_translation_po'
 
 themes:
   - mukurtu_v4
