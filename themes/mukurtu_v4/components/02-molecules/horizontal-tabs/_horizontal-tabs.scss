@@ -1,5 +1,5 @@
 .horizontal-tabs {
-  .horizontal-tabs-list {
+  ul.horizontal-tabs-list {
     display: flex;
     flex-wrap: wrap;
     padding-inline: calc(var(--v-separation) * 2);
@@ -9,7 +9,6 @@
       list-style: none;
       inline-size: fit-content;
       max-inline-size: 275px;
-
 
       &:last-of-type {
         border-inline-end: none;
@@ -39,7 +38,7 @@
       }
     }
 
-    .horizontal-tab-button.selected {
+    li.horizontal-tab-button.selected {
       position: relative;
       background-color: var(--brand-primary-dark);
       border-block-end: none;
@@ -71,6 +70,7 @@
         background-color: var(--brand-primary-dark);
       }
     }
+
   }
 
   .horizontal-tabs-panes {

@@ -1320,7 +1320,7 @@ details.form-wrapper summary + div {
   content: ",";
 }
 
-.horizontal-tabs .horizontal-tabs-list {
+.horizontal-tabs ul.horizontal-tabs-list {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -1330,21 +1330,21 @@ details.form-wrapper summary + div {
   -webkit-box-shadow: -1px 8px 15px var(--brand-light);
           box-shadow: -1px 8px 15px var(--brand-light);
 }
-.horizontal-tabs .horizontal-tabs-list li {
+.horizontal-tabs ul.horizontal-tabs-list li {
   list-style: none;
   inline-size: -webkit-fit-content;
   inline-size: -moz-fit-content;
   inline-size: fit-content;
   max-inline-size: 275px;
 }
-.horizontal-tabs .horizontal-tabs-list li:last-of-type {
+.horizontal-tabs ul.horizontal-tabs-list li:last-of-type {
   -webkit-border-end: none;
           border-inline-end: none;
 }
-.horizontal-tabs .horizontal-tabs-list li:has(.selected) {
+.horizontal-tabs ul.horizontal-tabs-list li:has(.selected) {
   position: relative;
 }
-.horizontal-tabs .horizontal-tabs-list li:has(.selected)::after {
+.horizontal-tabs ul.horizontal-tabs-list li:has(.selected)::after {
   content: "";
   position: absolute;
   inset-block-end: -10px;
@@ -1358,25 +1358,25 @@ details.form-wrapper summary + div {
           transform: rotate(45deg);
   z-index: -1;
 }
-.horizontal-tabs .horizontal-tabs-list li .div-title {
+.horizontal-tabs ul.horizontal-tabs-list li .div-title {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected {
+.horizontal-tabs ul.horizontal-tabs-list li.horizontal-tab-button.selected {
   position: relative;
   background-color: var(--brand-primary-dark);
   -webkit-border-after: none;
           border-block-end: none;
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected a {
+.horizontal-tabs ul.horizontal-tabs-list li.horizontal-tab-button.selected a {
   color: var(--light-text-color);
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected a:hover, .horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected a:active {
+.horizontal-tabs ul.horizontal-tabs-list li.horizontal-tab-button.selected a:hover, .horizontal-tabs ul.horizontal-tabs-list li.horizontal-tab-button.selected a:active {
   color: var(--light-text-color);
   background-color: var(--brand-primary-dark);
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected::after {
+.horizontal-tabs ul.horizontal-tabs-list li.horizontal-tab-button.selected::after {
   content: "";
   position: absolute;
   inset-block-end: -10px;
@@ -1390,7 +1390,7 @@ details.form-wrapper summary + div {
           transform: rotate(45deg);
   z-index: 10;
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected:hover {
+.horizontal-tabs ul.horizontal-tabs-list li.horizontal-tab-button.selected:hover {
   background-color: var(--brand-primary-dark);
 }
 .horizontal-tabs .horizontal-tabs-panes {
