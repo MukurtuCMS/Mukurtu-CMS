@@ -47,6 +47,7 @@ install:
   - term_merge_manager
   - dashboards
   - admin_theme
+
 dependencies:
   - 'blazy:blazy'
   - 'ctools:ctools'
