@@ -30,30 +30,30 @@ class CommunityRecordController extends ControllerBase {
    */
   public function access(NodeInterface $node, AccountInterface $account): AccessResultInterface {
     // Check if CRs are enabled site wide for this bundle.
-    $crConfig = $this->config('mukurtu_community_records.settings');
-    $allowedBundles = $crConfig->get('allowed_community_record_bundles');
-    if (!in_array($node->bundle(), $allowedBundles)) {
+    $cr_config = $this->config('mukurtu_community_records.settings');
+    $allowed_bundles = $cr_config->get('allowed_community_record_bundles');
+    if (!in_array($node->bundle(), $allowed_bundles)) {
       // Not enabled for community records.
       return AccessResult::forbidden();
     }
 
     // Node might be a CR, find the OR.
-    $originalRecord = $this->getOriginalRecord($node);
+    $original_record = $this->getOriginalRecord($node);
 
     // Original record must support protocols in order to have community
     // records.
-    if (!($originalRecord instanceof CulturalProtocolControlledInterface)) {
+    if (!($original_record instanceof CulturalProtocolControlledInterface)) {
       return AccessResult::forbidden();
     }
 
     // Fail if the account can't view the original record.
-    if (!$originalRecord->access('view', $account)) {
+    if (!$original_record->access('view', $account)) {
       return AccessResult::forbidden();
     }
 
     // Check for the community record admin permission in one of the
     // owning protocols.
-    if ($protocols = $originalRecord->getProtocolEntities()) {
+    if ($protocols = $original_record->getProtocolEntities()) {
       foreach ($protocols as $protocol) {
         $membership = $protocol->getMembership($account);
         if ($membership && $membership->hasPermission('administer community records')) {
@@ -78,11 +78,11 @@ class CommunityRecordController extends ControllerBase {
    *   If the original record cannot be found.
    */
   public function createCommunityRecord(NodeInterface $node): array {
-    $originalRecord = $this->getOriginalRecord($node);
-    if (!$originalRecord) {
+    $original_record = $this->getOriginalRecord($node);
+    if (!$original_record) {
       throw new NotFoundHttpException();
     }
-    return $this->createCommunityRecordOfBundle($originalRecord, $originalRecord->bundle());
+    return $this->createCommunityRecordOfBundle($original_record, $original_record->bundle());
   }
 
   /**
@@ -124,12 +124,12 @@ class CommunityRecordController extends ControllerBase {
    *   - Community record creation form, eg. the given $node's form.
    */
   protected function createCommunityRecordOfBundle(NodeInterface $node, string $bundle): array {
-    $originalRecord = $this->getOriginalRecord($node);
+    $original_record = $this->getOriginalRecord($node);
 
     // Create a new node form for the given bundle.
     $communityRecord = Node::create([
       'type' => $bundle,
-      MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD => $originalRecord->id(),
+      MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD => $original_record->id(),
     ]);
 
     // Get the node form.
@@ -141,7 +141,7 @@ class CommunityRecordController extends ControllerBase {
       '#type' => 'inline_template',
       '#template' => '<h2>{% trans %}Original Record{% endtrans %}</h2>',
     ];
-    $original_record_browse = $this->entityTypeManager()->getViewBuilder('node')->view($originalRecord, 'browse');
+    $original_record_browse = $this->entityTypeManager()->getViewBuilder('node')->view($original_record, 'browse');
 
     // Build the form. Note that the form alter takes care of hiding the
     // original record field and media assets field.
