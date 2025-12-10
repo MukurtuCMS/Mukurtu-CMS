@@ -168,11 +168,15 @@ documentation on how to use @include media(). */
   --color-transparent: rgba(0 0 0 / 0%);
   --focus-color: #66afe9;
   --placeholder-color: #999;
+  --color-greys-alpha-background: #eee;
+  --color-greys-alpha-border: #ccc;
   --footer-text-color: #ccc;
   --footer-bg-color: #464646;
   --navbar-default-bg: var(--color-white);
   --navbar-mukurtu-bg: var(--brand-primary);
   --main-nav-divider: rgba(70 70 70 / 25%);
+  --cr-default-bg: var(--color-greys-alpha-background);
+  --cr-border: var(--color-greys-alpha-border);
   --mukurtu-view-row-divider-color: #eeeaea;
   --mukurtu-primary-field-divider-color: #e5e1e1;
   --mukurtu-navbar-collapse-bg: var(--brand-light-accent);
@@ -1320,7 +1324,42 @@ details.form-wrapper summary + div {
   content: ",";
 }
 
-.horizontal-tabs .horizontal-tabs-list {
+/* stylelint-disable no-descending-specificity */
+:is(#extra-specificity-hack, .horizontal-tabs) {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  -webkit-margin-after: var(--v-separation);
+          margin-block-end: var(--v-separation);
+  padding-block: 0;
+  padding-inline: 0;
+  border: 1px solid var(--cr-border);
+  position: relative;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) *:focus {
+  outline: var(--admin-toolbar-size-focus) solid var(--admin-toolbar-color-focus);
+}
+:is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *)) {
+  all: revert;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *)) button {
+  font-family: inherit;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *))::after, :is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *))::before {
+  all: revert;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) .visually-hidden {
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  inline-size: 1px;
+  block-size: 1px;
+  word-wrap: normal;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -1329,22 +1368,36 @@ details.form-wrapper summary + div {
   padding-inline: calc(var(--v-separation) * 2);
   -webkit-box-shadow: -1px 8px 15px var(--brand-light);
           box-shadow: -1px 8px 15px var(--brand-light);
+  margin-block: 0;
+  margin-inline: 0;
+  background-color: var(--cr-default-bg);
+  -webkit-border-after: 1px solid var(--cr-border);
+          border-block-end: 1px solid var(--cr-border);
+  inline-size: 100%;
+  block-size: auto;
+  clear: both;
 }
-.horizontal-tabs .horizontal-tabs-list li {
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li {
   list-style: none;
   inline-size: -webkit-fit-content;
   inline-size: -moz-fit-content;
   inline-size: fit-content;
   max-inline-size: 275px;
+  background-color: var(--cr-default-bg);
+  -webkit-border-end: 1px solid var(--cr-border);
+          border-inline-end: 1px solid var(--cr-border);
+  min-inline-size: 5em;
+  float: inline-start;
+  position: relative;
 }
-.horizontal-tabs .horizontal-tabs-list li:last-of-type {
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li:last-of-type {
   -webkit-border-end: none;
           border-inline-end: none;
 }
-.horizontal-tabs .horizontal-tabs-list li:has(.selected) {
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li:has(.selected) {
   position: relative;
 }
-.horizontal-tabs .horizontal-tabs-list li:has(.selected)::after {
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li:has(.selected)::after {
   content: "";
   position: absolute;
   inset-block-end: -10px;
@@ -1358,25 +1411,22 @@ details.form-wrapper summary + div {
           transform: rotate(45deg);
   z-index: -1;
 }
-.horizontal-tabs .horizontal-tabs-list li .div-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li:not(.selected) a:active, :is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li:not(.selected) a:focus {
+  background-color: var(--color-white);
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected {
-  position: relative;
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected {
   background-color: var(--brand-primary-dark);
   -webkit-border-after: none;
           border-block-end: none;
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected a {
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected a {
   color: var(--light-text-color);
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected a:hover, .horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected a:active {
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected a:hover, :is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected a:active {
   color: var(--light-text-color);
   background-color: var(--brand-primary-dark);
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected::after {
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected::after {
   content: "";
   position: absolute;
   inset-block-end: -10px;
@@ -1390,13 +1440,42 @@ details.form-wrapper summary + div {
           transform: rotate(45deg);
   z-index: 10;
 }
-.horizontal-tabs .horizontal-tabs-list .horizontal-tab-button.selected:hover {
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected:hover {
   background-color: var(--brand-primary-dark);
 }
-.horizontal-tabs .horizontal-tabs-panes {
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li a {
+  display: block;
+  text-decoration: none;
+  padding-block: 0.6em;
+  padding-inline: 1em;
+  position: relative;
+  inset-block-start: 0;
+  color: var(--brand-primary-dark);
+  -webkit-transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+  transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li a:hover {
+  outline: none;
+  background-color: var(--color-white);
+}
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li a:focus {
+  outline: 4px solid var(--focus-color);
+}
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li .div-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li .summary {
+  display: block;
+  line-height: normal;
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) .horizontal-tabs-panes {
   padding: 0;
 }
-.horizontal-tabs .horizontal-tabs-panes .horizontal-tabs-pane {
+:is(#extra-specificity-hack, .horizontal-tabs) .horizontal-tabs-panes .horizontal-tabs-pane {
   padding: 0;
   -webkit-padding-before: var(--v-separation);
           padding-block-start: var(--v-separation);

@@ -43,6 +43,8 @@
   --color-transparent: rgba(0 0 0 / 0%);
   --focus-color: #66afe9;
   --placeholder-color: #999;
+  --color-greys-alpha-background: #eee;
+  --color-greys-alpha-border: #ccc;
 
   // Footer.
   --footer-text-color: #ccc;
@@ -52,6 +54,10 @@
   --navbar-default-bg: var(--color-white);
   --navbar-mukurtu-bg: var(--brand-primary);
   --main-nav-divider: rgba(70 70 70 / 25%); // #464646 with 25% opacity.
+
+  // CR Nav.
+  --cr-default-bg: var(--color-greys-alpha-background);
+  --cr-border: var(--color-greys-alpha-border);
 
   // Views.
   --mukurtu-view-row-divider-color: #eeeaea;
