@@ -219,10 +219,6 @@ class CommunityRecordNodeViewBuilder extends NodeViewBuilder {
 
     $communityLabels = [];
     foreach ($communities as $community) {
-      // Skip any communities the user can't see.
-      if (!$community->access('view')) {
-        continue;
-      }
       // @todo ordering?
       $communityLabels[] = $community->getName();
     }
@@ -242,6 +238,7 @@ class CommunityRecordNodeViewBuilder extends NodeViewBuilder {
       }
 
       // Community record tab definitions.
+      $records = [];
       foreach ($allRecords as $record) {
         $records[] = [
           'id' => $record->id(),
