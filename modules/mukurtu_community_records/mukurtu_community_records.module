@@ -10,6 +10,8 @@ define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD", "field_mukurtu_or
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\mukurtu_digital_heritage\Entity\DigitalHeritage;
 use Drupal\node\NodeInterface;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 
@@ -197,3 +199,21 @@ function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, Enti
   }
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_community_records_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
+  /** @var \Drupal\Core\Entity\EntityFormInterface $form_object */
+  $form_object = $form_state->getFormObject();
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_object->getEntity();
+  if (!mukurtu_community_records_is_community_record($node)) {
+    return;
+  }
+  if (isset($form[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD])) {
+    $form[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD]['#access'] = FALSE;
+  }
+  if (isset($form['field_media_assets'])) {
+    $form['field_media_assets']['#access'] = FALSE;
+  }
+}

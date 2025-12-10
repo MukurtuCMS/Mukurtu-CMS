@@ -7,3 +7,4 @@ dependencies:
   - drupal:config_translation
   - drupal:content_translation
   - drupal:locale
+  - drupal:config_translation_po
