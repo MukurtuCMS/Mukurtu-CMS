@@ -5,7 +5,6 @@ namespace Drupal\mukurtu_collection\Entity;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\mukurtu_collection\Entity\CollectionInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
