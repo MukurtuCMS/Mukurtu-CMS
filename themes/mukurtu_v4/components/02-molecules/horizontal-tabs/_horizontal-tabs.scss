@@ -1,14 +1,64 @@
-.horizontal-tabs {
+/* stylelint-disable no-descending-specificity */
+:is(#extra-specificity-hack, .horizontal-tabs) {
+  box-sizing: border-box;
+  margin-block-end: var(--v-separation);
+  padding-block: 0;
+  padding-inline: 0;
+  border: 1px solid var(--cr-border);
+  position: relative;
+
+  *:focus {
+    outline: var(--admin-toolbar-size-focus) solid var(--admin-toolbar-color-focus);
+  }
+
+  // Style reset hack to shield us from field group module and Gin's styling of
+  // horizontal tabs.
+  *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *)) {
+    all: revert;
+    box-sizing: border-box;
+
+    button {
+      font-family: inherit;
+    }
+
+    &::after,
+    &::before {
+      all: revert;
+      box-sizing: border-box;
+    }
+  }
+
+  .visually-hidden {
+    position: absolute !important;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    inline-size: 1px;
+    block-size: 1px;
+    word-wrap: normal;
+  }
+
   ul.horizontal-tabs-list {
     display: flex;
     flex-wrap: wrap;
     padding-inline: calc(var(--v-separation) * 2);
     box-shadow: -1px 8px 15px var(--brand-light);
+    margin-block: 0;
+    margin-inline: 0;
+    background-color: var(--cr-default-bg);
+    border-block-end: 1px solid var(--cr-border);
+    inline-size: 100%;
+    block-size: auto;
+    clear: both;
 
     li {
       list-style: none;
       inline-size: fit-content;
       max-inline-size: 275px;
+      background-color: var(--cr-default-bg);
+      border-inline-end: 1px solid var(--cr-border);
+      min-inline-size: 5em;
+      float: inline-start;
+      position: relative;
 
       &:last-of-type {
         border-inline-end: none;
@@ -31,44 +81,80 @@
         }
       }
 
+      &:not(.selected) {
+        a {
+          &:active,
+          &:focus {
+            background-color: var(--color-white);
+          }
+        }
+      }
+
+      &.selected {
+        background-color: var(--brand-primary-dark);
+        border-block-end: none;
+
+
+        a {
+          color: var(--light-text-color);
+
+          &:hover,
+          &:active {
+            color: var(--light-text-color);
+            background-color: var(--brand-primary-dark);
+          }
+        }
+
+        &::after {
+          content: '';
+          position: absolute;
+          inset-block-end: -10px;
+          inset-inline-start: 50%;
+          inline-size: 20px;
+          block-size: 20px;
+          background: var(--brand-primary-dark);
+          margin-inline-start: -10px;
+          transform: rotate(45deg);
+          z-index: 10;
+        }
+
+        &:hover {
+          background-color: var(--brand-primary-dark);
+        }
+      }
+
+      a {
+        display: block;
+        text-decoration: none;
+        padding-block: 0.6em;
+        padding-inline: 1em;
+        position: relative;
+        inset-block-start: 0;
+        color: var(--brand-primary-dark);
+        transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
+
+        &:hover {
+          outline: none;
+          background-color: var(--color-white);
+        }
+
+        &:focus {
+          outline: 4px solid var(--focus-color);
+        }
+      }
+
       .div-title {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-    }
 
-    li.horizontal-tab-button.selected {
-      position: relative;
-      background-color: var(--brand-primary-dark);
-      border-block-end: none;
-
-      a {
-        color: var(--light-text-color);
-
-        &:hover,
-        &:active {
-          color: var(--light-text-color);
-          background-color: var(--brand-primary-dark);
-        }
+      .summary {
+        display: block;
+        line-height: normal;
+        margin-block-end: 0
       }
 
-      &::after {
-        content: '';
-        position: absolute;
-        inset-block-end: -10px;
-        inset-inline-start: 50%;
-        inline-size: 20px;
-        block-size: 20px;
-        background: var(--brand-primary-dark);
-        margin-inline-start: -10px;
-        transform: rotate(45deg);
-        z-index: 10;
-      }
-
-      &:hover {
-        background-color: var(--brand-primary-dark);
-      }
     }
 
   }
