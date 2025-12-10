@@ -2,4 +2,5 @@ community-records:
   js:
     js/mukurtu-community-records.js: {}
   dependencies:
-    - core/jquery
+    - core/drupal
+    - core/once
