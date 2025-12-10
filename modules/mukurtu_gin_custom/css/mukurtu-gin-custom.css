@@ -17,3 +17,12 @@ counterpart, if one exists. */
     padding: 2.5rem !important;
     display: inline-flex;
 }
+
+/* MW: fixes paragraph titles being cut off in forms. */
+.js .paragraph-type-title {
+    flex-basis: 25%;
+    min-width: 80px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: visible;
+}
