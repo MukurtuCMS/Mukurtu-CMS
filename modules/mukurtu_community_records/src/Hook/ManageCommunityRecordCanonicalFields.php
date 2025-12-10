@@ -31,12 +31,14 @@ class ManageCommunityRecordCanonicalFields {
     ],
     'dictionary_word' => [
       'title',
+      'field_dictionary_word_language',
     ],
     'word_list' => [
       'field_words',
     ],
     'collection' => [
       'field_items_in_collection',
+      'field_child_collections',
     ],
   ];
 
