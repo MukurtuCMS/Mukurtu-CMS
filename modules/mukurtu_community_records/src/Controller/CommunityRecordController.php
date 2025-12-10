@@ -34,7 +34,8 @@ class CommunityRecordController extends ControllerBase {
     $allowed_bundles = $cr_config->get('allowed_community_record_bundles');
     if (!in_array($node->bundle(), $allowed_bundles)) {
       // Not enabled for community records.
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()
+        ->addCacheableDependency($cr_config);
     }
 
     // Node might be a CR, find the OR.
@@ -43,12 +44,16 @@ class CommunityRecordController extends ControllerBase {
     // Original record must support protocols in order to have community
     // records.
     if (!($original_record instanceof CulturalProtocolControlledInterface)) {
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()
+        ->addCacheableDependency($cr_config)
+        ->addCacheableDependency($original_record);
     }
 
     // Fail if the account can't view the original record.
     if (!$original_record->access('view', $account)) {
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()
+        ->addCacheableDependency($cr_config)
+        ->addCacheableDependency($original_record);
     }
 
     // Check for the community record admin permission in one of the
@@ -57,12 +62,17 @@ class CommunityRecordController extends ControllerBase {
       foreach ($protocols as $protocol) {
         $membership = $protocol->getMembership($account);
         if ($membership && $membership->hasPermission('administer community records')) {
-          return AccessResult::allowed();
+          return AccessResult::allowed()
+            ->addCacheableDependency($cr_config)
+            ->addCacheableDependency($original_record)
+            ->addCacheableDependency($membership);
         }
       }
     }
 
-    return AccessResult::forbidden();
+    return AccessResult::forbidden()
+      ->addCacheableDependency($cr_config)
+      ->addCacheableDependency($original_record);
   }
 
   /**
