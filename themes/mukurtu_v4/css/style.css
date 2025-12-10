@@ -4108,7 +4108,7 @@ header {
   inline-size: -webkit-max-content;
   inline-size: -moz-max-content;
   inline-size: max-content;
-  max-inline-size: 100%;
+  max-inline-size: 75%;
   z-index: 2;
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
@@ -4117,10 +4117,8 @@ header {
   letter-spacing: var(--letter-spacing-label);
   border: none;
   padding-block: var(--v-space-5xs);
-  padding-inline: var(--v-space-4xs);
+  padding-inline: var(--v-space-2xs);
   cursor: pointer;
-  overflow-wrap: anywhere;
-  line-height: normal;
 }
 .communities__item .field--name-name a:hover, .communities__item .field--name-name a:active, .communities__item .field--name-name a:focus {
   color: var(--light-text-color);
