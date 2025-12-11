@@ -130,6 +130,10 @@ label {
   -webkit-line-clamp: 2;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 /*! See https://eduardoboucas.github.io/include-media/ for detailed
 documentation on how to use @include media(). */
 :root {
@@ -1328,8 +1332,7 @@ details.form-wrapper summary + div {
 :is(#extra-specificity-hack, .horizontal-tabs) {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
-  -webkit-margin-after: var(--v-separation);
-          margin-block-end: var(--v-separation);
+  margin-block: 0 var(--v-separation);
   padding-block: 0;
   padding-inline: 0;
   border: 1px solid var(--cr-border);
