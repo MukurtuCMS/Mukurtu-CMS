@@ -4125,6 +4125,7 @@ header {
   padding-inline: var(--v-space-4xs);
   overflow-wrap: break-word;
   line-height: normal;
+  text-wrap: pretty;
 }
 .communities__item .field--name-name a:hover, .communities__item .field--name-name a:active, .communities__item .field--name-name a:focus {
   color: var(--light-text-color);
