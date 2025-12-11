@@ -1,7 +1,7 @@
 /* stylelint-disable no-descending-specificity */
 :is(#extra-specificity-hack, .horizontal-tabs) {
   box-sizing: border-box;
-  margin-block-end: var(--v-separation);
+  margin-block: 0 var(--v-separation);
   padding-block: 0;
   padding-inline: 0;
   border: 1px solid var(--cr-border);
