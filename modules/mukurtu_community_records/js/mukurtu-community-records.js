@@ -87,7 +87,7 @@
     toggleCrTask: function(isCr) {
       const localTasksElements = document.querySelectorAll('.local-tasks');
       localTasksElements.forEach((localTasks) => {
-        localTasks.querySelectorAll('li:has([href*=community-record\\/add])')
+        localTasks.querySelectorAll('li:has([href*=community-record\\/add]), li:has([href*=new-multipage])')
           .forEach((element) => {
             if (isCr) {
               element.setAttribute('hidden', '');
