@@ -136,3 +136,7 @@ label {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
+
+[hidden] {
+  display: none !important;
+}

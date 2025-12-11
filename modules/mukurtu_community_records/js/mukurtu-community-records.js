@@ -1,7 +1,6 @@
 ((Drupal, once) => {
   Drupal.behaviors.mukurtuCommunityRecordTabs = {
     attach: function (context, settings) {
-
       // Act on horizontal tabs only once.
       once('mukurtu-community-record-tabs', '.horizontal-tabs-panes', context).forEach((element) => {
         // Set up a mutation observer to detect changes to the active pane.
@@ -25,6 +24,10 @@
           subtree: true,
           attributeFilter: ['class']
         });
+
+        // Show / hide the Community Record task based on the initial pane.
+        const activePane = element.querySelector('[data-initial-cr=true]');
+        this.toggleCrTask(activePane.dataset.isCr === 'true');
       });
     },
 
@@ -36,6 +39,7 @@
      */
     handlePaneChange: function(element) {
       const paneNid = element.dataset.nid;
+      const isCr = element.dataset.isCr === 'true';
 
       if (!paneNid) {
         return;
@@ -43,10 +47,21 @@
 
       // Update the local tasks to reflect the active tab. Take the approach of
       // a search / replace on known patterns.
-      const localTasksElements = document.querySelectorAll('.local-tasks');
+      this.updateTabLinks(paneNid);
+      this.toggleCrTask(isCr);
+    },
+
+    /**
+     * Update the local tasks to reflect the active tab.
+     *
+     * @param {int|string} nid
+     *   The nid of the active pane.
+     */
+    updateTabLinks: function(nid) {
       const patterns = [
         /node\/(\d+)/
       ];
+      const localTasksElements = document.querySelectorAll('.local-tasks');
       localTasksElements.forEach((localTasks) => {
         const anchors = localTasks.querySelectorAll('a');
         anchors.forEach((anchor) => {
@@ -54,12 +69,33 @@
           if (href) {
             patterns.forEach((pattern) => {
               href = href.replace(pattern, (match, anchorNid) => {
-                return match.replace(anchorNid, paneNid);
+                return match.replace(anchorNid, nid);
               });
             });
             anchor.setAttribute('href', href);
           }
         });
+      });
+    },
+
+    /**
+     * Toggle the Community Record task based on the active pane.
+     *
+     * @param {boolean} isCr
+     *   Whether the active pane is a Community Record pane.
+     */
+    toggleCrTask: function(isCr) {
+      const localTasksElements = document.querySelectorAll('.local-tasks');
+      localTasksElements.forEach((localTasks) => {
+        localTasks.querySelectorAll('li:has([href*=community-record\\/add])')
+          .forEach((element) => {
+            if (isCr) {
+              element.setAttribute('hidden', '');
+            }
+            else {
+              element.removeAttribute('hidden');
+            }
+          });
       });
     }
   }

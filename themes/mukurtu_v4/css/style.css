@@ -130,6 +130,10 @@ label {
   -webkit-line-clamp: 2;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 /*! See https://eduardoboucas.github.io/include-media/ for detailed
 documentation on how to use @include media(). */
 :root {
