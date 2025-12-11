@@ -4126,7 +4126,6 @@ header {
   overflow-wrap: break-word;
   line-height: normal;
   text-wrap: balance;
-  orphans: 4;
 }
 .communities__item .field--name-name a:hover, .communities__item .field--name-name a:active, .communities__item .field--name-name a:focus {
   color: var(--light-text-color);
