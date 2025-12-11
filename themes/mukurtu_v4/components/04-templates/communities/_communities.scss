@@ -43,10 +43,9 @@
 
   & .field--name-name a {
     @include mixins.button-arrow;
-    max-inline-size: 100%;
     padding-inline: var(--v-space-4xs);
     overflow-wrap: break-word;
-    line-height: normal;  
+    line-height: normal;
   }
 
   .media--image {
