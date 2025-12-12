@@ -38,3 +38,6 @@ mukurtu_migrate.results:
     _custom_access: '\Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::checkAccessResults'
   options:
     _admin_route: TRUE
+
+mukurtu_migrate.manual:
+  path: 'https://docs.mukurtu.org/migration/00MigrationOverview/'

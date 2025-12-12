@@ -1,7 +1,13 @@
 mukurtu_migrate.migrate:
-  title: 'Migrate from Mukurtu CMS version 3'
-  description: 'Migrate content from an existing Mukurtu CMS version 3 site'
-  parent: mukurtu
-  menu_name: mukurtu
+  title: 'Migrate from Mukurtu CMS 3'
+  description: 'Migrate content from an existing Mukurtu CMS version 3 site.'
+  parent: dashboard-migration
+  menu_name: mukurtu_dashboard
   route_name: mukurtu_migrate.migrate
-  weight: 1000
+
+mukurtu_migrate.manual:
+  title: 'Migration Overview'
+  description: 'Migration overview and instructions in the user manual.'
+  parent: dashboard-migration
+  menu_name: mukurtu_dashboard
+  route_name: mukurtu_migrate.manual
