@@ -81,6 +81,12 @@ class ProtocolForm extends ContentEntityForm {
           '%label' => $entity->label(),
         ]));
     }
+
+    // Add the current user as a member of this protocol and grant them the
+    // protocol steward role.
+    /** @var \Drupal\mukurtu_protocol\Entity\Protocol $entity */
+    $entity->addMember($this->account)->setRoles($this->account, ['protocol_steward']);
+
     $form_state->setRedirect('entity.protocol.canonical', ['protocol' => $entity->id()]);
   }
 

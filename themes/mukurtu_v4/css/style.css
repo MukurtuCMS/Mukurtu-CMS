@@ -878,6 +878,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
       -ms-flex: 1 0 auto;
           flex: 1 0 auto;
 }
+.multipage-carousel img {
+  max-block-size: 100px;
+  inline-size: auto;
+}
 
 .media-carousel .media {
   margin-block: 0 var(--v-space-s);
@@ -1647,6 +1651,11 @@ details.form-wrapper summary + div {
 }
 .language-switcher .links a.is-active:hover {
   background-color: var(--brand-primary-accent);
+}
+.language-switcher .contextual {
+  position: absolute;
+  top: 0;
+  right: 20px;
 }
 
 .local-tasks {
@@ -2708,7 +2717,7 @@ body.is-always-mobile-nav .header-nav::before {
   inline-size: 100%;
   margin: 0;
   margin-block: var(--v-space-2xs);
-  padding: 0;
+  padding-left: 0;
 }
 @media (min-width: 60rem) {
   .menu__account-menu {

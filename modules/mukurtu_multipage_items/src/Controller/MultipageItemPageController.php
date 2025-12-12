@@ -83,7 +83,7 @@ class MultipageItemPageController extends ControllerBase {
   public function viewRedirect(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
     $config = $this->configFactory->get('mukurtu_multipage_items.settings');
     $controllerString = $config->get('_controller');
-    list($controllerClass, $controllerMethod) = explode('::', $controllerString, 2);
+    [$controllerClass, $controllerMethod] = explode('::', $controllerString, 2);
     $originalController = $controllerClass::create(\Drupal::getContainer());
 
     if ($node instanceof NodeInterface) {
@@ -222,6 +222,18 @@ class MultipageItemPageController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
+  /**
+   * Returns the title of the page for a multipage route.
+   * .
+   * @param \Drupal\node\NodeInterface $node
+   *   The node entity.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string|null
+   */
+  public function title(NodeInterface $node) {
+    $mpi = $this->multipageItemManager->getMultipageEntity($node);
+    return $mpi->label();
+  }
 
   /**
    * Builds the view page.
@@ -250,7 +262,7 @@ class MultipageItemPageController extends ControllerBase {
 
     return [
       '#theme' => 'multipage_item_book_view',
-      '#pages' => array_map(fn($p) => $view_builder->view($p, 'grid_browse'), $pages),
+      '#pages' => array_map(fn($p) => $view_builder->view($p, 'multipage_browse'), $pages),
       '#page_nav_attributes' => NULL,
       '#table_of_contents' => $toc,
       '#current_page' => $view_builder->view($current_page, 'full'),
