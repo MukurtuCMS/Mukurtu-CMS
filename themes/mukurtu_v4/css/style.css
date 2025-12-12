@@ -1648,6 +1648,11 @@ details.form-wrapper summary + div {
 .language-switcher .links a.is-active:hover {
   background-color: var(--brand-primary-accent);
 }
+.language-switcher .contextual {
+  position: absolute;
+  top: 0;
+  right: 20px;
+}
 
 .local-tasks {
   display: grid;
@@ -2708,7 +2713,7 @@ body.is-always-mobile-nav .header-nav::before {
   inline-size: 100%;
   margin: 0;
   margin-block: var(--v-space-2xs);
-  padding: 0;
+  padding-left: 0;
 }
 @media (min-width: 60rem) {
   .menu__account-menu {
