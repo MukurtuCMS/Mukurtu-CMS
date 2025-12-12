@@ -10,8 +10,8 @@ entity.multipage_item.collection:
   parent: system.admin_content
 
 mukurtu_multipage_items.settings:
-  title: Multipage Item Settings
-  description: Configure multipage item settings.
+  title: 'Multi-page item settings'
+  description: 'Configure multi-page item settings.'
   route_name: mukurtu_multipage_items.settings
-  parent: mukurtu_core.site_configuration
-  menu_name: mukurtu
+  parent: mukurtu_dashboard
+  menu_name: dashboard-content-settings
