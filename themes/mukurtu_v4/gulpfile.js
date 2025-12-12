@@ -104,13 +104,6 @@ function copyLibraries() {
   ])
   .pipe(dest("./libraries/glightbox"));
 
-  // Copy Splide files.
-  const result2 = src([
-    "./node_modules/@splidejs/splide/dist/css/splide.min.css",
-    "./node_modules/@splidejs/splide/dist/js/splide.min.js"
-  ])
-  .pipe(dest("./libraries/splide"));
-
   // Return any non-zero exit codes.
   return result1 || result2 || 0;
 }
