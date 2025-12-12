@@ -1,0 +1,11 @@
+uuid: 82041a71-7fe6-4f68-adcd-d178990877f6
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.multipage_browse
+label: 'Multipage Browse'
+description: null
+targetEntityType: node
+cache: true

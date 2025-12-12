@@ -63,6 +63,12 @@
       flex: 1 0 auto;
     }
   }
+
+  img {
+    max-block-size: 100px;
+    inline-size: auto;
+  }
+
 }
 
 // Media Asset Carousels.

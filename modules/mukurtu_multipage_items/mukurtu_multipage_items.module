@@ -104,22 +104,22 @@ function mukurtu_multipage_items_form_alter(&$form, FormStateInterface $form_sta
   $route_name = \Drupal::routeMatch()->getRouteName();
   if ($route_name == 'mukurtu_multipage_items.add') {
     if ($page_node = \Drupal::routeMatch()->getParameter('page_node')) {
-      $mpiManager = \Drupal::service('mukurtu_multipage_items.multipage_item_manager');
-      if ($mpi = $mpiManager->getMultipageEntity($page_node)) {
+      $mpi_manager = \Drupal::service('mukurtu_multipage_items.multipage_item_manager');
+      if ($mpi = $mpi_manager->getMultipageEntity($page_node)) {
         // Store which MPI we're trying to add the page to.
         $form_state->set('multipage_item_target', $mpi->id());
 
-        // Attach our custom sumbmit handler after save.
+        // Attach our custom submit handler after save.
         // @see mukurtu_multipage_items_add_new_page_callback.
-        $oldHandlers = $form["actions"]["submit"]["#submit"];
-        $newHandlers = [];
-        foreach ($oldHandlers as $handler) {
-          $newHandlers[] = $handler;
-          if ($handler == '::save') {
-            $newHandlers[] = 'mukurtu_multipage_items_add_new_page_callback';
+        $old_handlers = $form['actions']['submit']['#submit'] ?? [];
+        $new_handlers = [];
+        foreach ($old_handlers as $handler) {
+          $new_handlers[] = $handler;
+          if ($handler === '::save') {
+            $new_handlers[] = 'mukurtu_multipage_items_add_new_page_callback';
           }
         }
-        $form["actions"]["submit"]["#submit"] = $newHandlers;
+        $form['actions']['submit']['#submit'] = $new_handlers;
       }
     }
   }

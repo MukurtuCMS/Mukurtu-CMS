@@ -1,53 +1,102 @@
-(function ($, Drupal) {
-  Drupal.behaviors.mukurtu_multipage_nav = {
+((Drupal, once, Splide, history) => {
+  Drupal.behaviors.mukurtuMultipageNav = {
     attach: function (context, settings) {
-      $(document).ready(function () {
-        function loadPage(pageId) {
-          try {
-            Drupal.ajax({ url: `/multipageitem/${pageId}/ajax` }).execute();
-            let nodeUrl = $('.splide__slide.is-active > article').attr('about');
-            let newUrl = "/node/" + pageId;
-            if (nodeUrl != undefined) {
-              newUrl = nodeUrl;
-            }
-            window.history.replaceState({}, '', newUrl);
-          } catch (error) {
-            return false;
-          }
-          return true;
-        }
+      // Initialize the multipage items carousel, only once per encountered
+      // instance of .multipage-items.
+      once('multipage-items', '.multipage-items', context).forEach((element) => {
+        this.initMultipageItems(element);
+      });
+    },
 
-        // TOC On change method to trigger the ajax call to view a specific page.
-        var jumpToPage = function (event) {
-          Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider.go(event.target.selectedIndex);
-        };
+    /**
+     * Initialize the multipage items carousel and selector.
+     *
+     * @param {HTMLElement} element
+     *   The multipage items wrapper element.
+     */
+    initMultipageItems: function(element) {
+      const tocElement = element.querySelector('#multipage-item-table-of-contents');
+      const initialPageId = tocElement.value;
+      const multipageNavSlider = new Splide(element.querySelector('.splide.multipage-carousel'), {
+        autoWidth: true,
+        fixedHeight: '106px',
+        gap: '10px',
+        perPage: 3,
+        isNavigation: true,
+        pagination: false,
+        updateOnMove: false,
+        start: this.pageIdToSlideIndex(element, initialPageId),
+      }).mount();
+      multipageNavSlider.on('active', (slide) => {
+        const pageId = slide.slide.firstElementChild.dataset.historyNodeId;
 
-        // Attach the table of contents handler.
-        $('#multipage-item-table-of-contents').once().change(jumpToPage);
-
-        if (Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider == undefined) {
-          Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider = new Splide('.splide.multipage-carousel', {
-            perPage: 3,
-            isNavigation: true,
-            pagination: false,
-            updateOnMove: false,
-            trimSpace: true,
-            autoWidth: true,
-            autoHeight: true,
-            gap: '16px',
-            start: document.getElementById('multipage-item-table-of-contents').selectedIndex,
-          }).mount();
-
-          Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider.on('active', function (slide) {
-            let pageId = slide.slide.firstElementChild.attributes["data-history-node-id"].value;
-
-            if (loadPage(pageId)) {
-              // Change the TOC if we switched pages successfully.
-              $('#multipage-item-table-of-contents').val(pageId);
-            }
-          });
+        if (this.loadPage(element, pageId)) {
+          // Change the TOC if we switched pages successfully.
+          tocElement.value = pageId;
         }
       });
+      element.multipageNavSlider = multipageNavSlider;
+
+      tocElement.addEventListener('change', (event) => {
+        this.jumpToPage(element, event.target.selectedIndex);
+      });
+    },
+
+    /**
+     * Jump to a specific page on the Splide carousel.
+     *
+     * @param {HTMLElement} element
+     *   The multipage items wrapper element.
+     * @param {string} pageId
+     *   The page id to jump to.
+     */
+    jumpToPage: function(element, pageId) {
+      const multipageNavSlider = element.multipageNavSlider;
+      if (!multipageNavSlider) {
+        return;
+      }
+      multipageNavSlider.go(pageId);
+    },
+
+    /**
+     * Load a page via AJAX and replace the page contents.
+     *
+     * @param {HTMLElement} element
+     *   The multipage items wrapper element.
+     * @param {string} pageId
+     *   The multipage item id to load.
+     * @returns {boolean}
+     *   Whether the page was successfully loaded.
+     */
+    loadPage: function(element, pageId) {
+      try {
+        Drupal.ajax({ url: `/multipageitem/${pageId}/ajax` }).execute();
+        history.replaceState({}, '', `/node/${pageId}`);
+      }
+      catch (error) {
+        return false;
+      }
+      return true;
+    },
+
+    /**
+     * Get the slide index for a given page id.
+     *
+     * @param {HTMLElement} element
+     *   The multipage items wrapper element.
+     * @param {string} pageId
+     *   The multipage item id to load.
+     * @returns {number}
+     *   The slide index.
+     */
+    pageIdToSlideIndex(element, pageId) {
+      const slides = element.querySelectorAll('.splide__slide');
+      for (let i = 0; i < slides.length; i++) {
+        if (slides[i].dataset.id === pageId) {
+          return i;
+        }
+      }
+      return 0;
     }
   };
-})(jQuery, Drupal);
+})(Drupal, once, Splide, history);
