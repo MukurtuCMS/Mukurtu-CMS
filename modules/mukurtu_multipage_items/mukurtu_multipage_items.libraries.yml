@@ -6,3 +6,4 @@ multipage-view-nav:
     - core/drupal.ajax
     - core/jquery
     - core/once
+    - mukurtu_core/splide
