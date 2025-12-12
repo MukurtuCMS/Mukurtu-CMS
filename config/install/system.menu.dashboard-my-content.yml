@@ -1,7 +1,7 @@
 langcode: en
 status: true
 dependencies: {  }
-id: dashboard-taxonomies
-label: 'Taxonomies'
-description: 'Manage taxonomies.'
+id: dashboard-my-content
+label: 'My content'
+description: 'Access users own content.'
 locked: false
