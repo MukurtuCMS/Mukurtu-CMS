@@ -1,13 +1,13 @@
 mukurtu_local_contexts.manage_projects:
   title: 'Manage site-wide Local Contexts projects'
   description: 'Manage site-wide Local Contexts projects and directory.'
-  parent: dashboard-site-settings
-  menu_name: mukurtu_dashboard
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
   route_name: mukurtu_local_contexts.manage_site_supported_projects
 
 mukurtu_local_contexts.site_projects_directory:
   title: 'View site-wide Local Contexts projects'
   description: 'View the directory of site-wide Local Contexts projects.'
-  menu_name: mukurtu_dashboard
-  parent: dashboard-site-settings
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
   route_name: mukurtu_local_contexts.site_project_directory
