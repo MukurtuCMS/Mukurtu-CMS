@@ -2,6 +2,6 @@ langcode: en
 status: true
 dependencies: {  }
 id: dashboard-media
-label: 'dashboard media'
+label: 'Dashboard Media'
 description: 'Media links for dashboard'
 locked: false
