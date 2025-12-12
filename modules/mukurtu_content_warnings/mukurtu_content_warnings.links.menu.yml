@@ -1,6 +1,6 @@
 mukurtu_content_warnings.mukurtu_content_warnings_settings_dashboard:
   title: "Media content warnings"
   menu_name: dashboard-media
-  description: "Change settings related to Mukurtu content warnings."
+  description: "Configure media content warnings."
   route_name: mukurtu_content_warnings.settings
   parent: mukurtu_dashboard
