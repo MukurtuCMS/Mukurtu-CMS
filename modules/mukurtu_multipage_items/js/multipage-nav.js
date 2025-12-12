@@ -18,14 +18,13 @@
       const tocElement = element.querySelector('#multipage-item-table-of-contents');
       const initialPageId = tocElement.value;
       const multipageNavSlider = new Splide(element.querySelector('.splide.multipage-carousel'), {
+        autoWidth: true,
+        fixedHeight: '106px',
+        gap: '10px',
         perPage: 3,
         isNavigation: true,
         pagination: false,
         updateOnMove: false,
-        trimSpace: true,
-        autoWidth: true,
-        autoHeight: true,
-        gap: '16px',
         start: this.pageIdToSlideIndex(element, initialPageId),
       }).mount();
       multipageNavSlider.on('active', (slide) => {

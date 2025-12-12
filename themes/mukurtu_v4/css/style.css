@@ -878,6 +878,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
       -ms-flex: 1 0 auto;
           flex: 1 0 auto;
 }
+.multipage-carousel img {
+  max-block-size: 100px;
+  inline-size: auto;
+}
 
 .media-carousel .media {
   margin-block: 0 var(--v-space-s);
