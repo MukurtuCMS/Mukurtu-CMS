@@ -8,17 +8,43 @@ mukurtu_core.dashboard_admin:
   weight: -1000
 
 #Dashboard links
+mukurtu_core.dashboard:
+  title: 'Dashboard'
+  description: 'Dashboard'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_core.dashboard
+  weight: -1000
 mukurtu_core.manage_content:
   title: 'Manage Content'
   description: 'Manage Content'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-content
+  parent: mukurtu
+  menu_name: mukurtu
   route_name: view.mukurtu_manage_all_content.mukurtu_manage_content
+mukurtu_core.manage_media:
+  title: 'Manage Media'
+  description: 'Manage Media'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: view.mukurtu_media.media_page_list
+mukurtu_core.create_media:
+  title: 'Add Media'
+  description: 'Add Media'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: entity.media.add_page
+mukurtu_core.create_content:
+  title: 'Add Content'
+  description: 'Add Content'
+  parent: mukurtu
+  menu_name: mukurtu
+  route_name: mukurtu_core.add_page
+  expanded: TRUE
 mukurtu_core.site_configuration:
-  title: 'Site configuration'
+  title: 'Site Configuration'
   description: 'Links to site configuration pages.'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-site-settings
+  parent: mukurtu
+  menu_name: mukurtu
   route_name: system.admin_config
   expanded: TRUE
 #View is not yet created, waiting on future work
@@ -29,10 +55,16 @@ mukurtu_core.site_configuration:
 #  menu_name: mukurtu
 #  route_name: view.mukurtu_manage_all_users.manage_users_page
 mukurtu_core.settings:
-  title: "Citation formats and default image"
-  parent: mukurtu_dashboard
-  menu_name: dashboard-site-settings
+  title: "Mukurtu Settings"
+  parent: mukurtu_core.site_configuration
+  menu_name: mukurtu
   description: "Configuration form for Mukurtu specific options."
   route_name: mukurtu_core.settings
   expanded: TRUE
   weight: 0
+mukurtu_protocol.communities_and_protocols:
+  title: 'Communities and Protocols'
+  description: 'Links to manage communities and protocols'
+  parent: mukurtu
+  menu_name: mukurtu
+  expanded: TRUE
