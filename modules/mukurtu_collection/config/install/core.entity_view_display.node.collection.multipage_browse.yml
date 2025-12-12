@@ -1,11 +1,10 @@
-uuid: f18e41cc-81ac-4819-9a45-d1e7136b24cf
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.node.multipage_browse
-    - field.field.node.dictionary_word.comment
-    - node.type.dictionary_word
+    - field.field.node.collection.comment
+    - node.type.collection
   module:
     - layout_builder
     - user
@@ -14,10 +13,10 @@ third_party_settings:
     enabled: false
     allow_custom: false
 _core:
-  default_config_hash: e5K45QdYHu7X13hx4qO6Jz7dTKRavtBULENqxx_7uY8
-id: node.dictionary_word.multipage_browse
+  default_config_hash: OCR6LuYgQyWbdxB1k9vYbd9XZaDo00WKsAGRwio9Nd8
+id: node.collection.multipage_browse
 targetEntityType: node
-bundle: dictionary_word
+bundle: collection
 mode: multipage_browse
 content:
   field_representative_media:
@@ -32,47 +31,33 @@ content:
 hidden:
   comment: true
   draft: true
-  field_additional_word_entries: true
   field_all_related_content: true
-  field_alternate_spelling: true
+  field_child_collections: true
   field_citation: true
+  field_collection_image: true
   field_communities: true
-  field_content_type: true
-  field_contributor: true
   field_coverage: true
   field_coverage_description: true
   field_cultural_protocols: true
-  field_definition: true
-  field_dictionary_word_language: true
-  field_glossary_entry: true
+  field_description: true
   field_in_collection: true
-  field_in_word_list: true
+  field_items_in_collection: true
   field_keywords: true
   field_local_contexts_labels_and_notices: true
   field_local_contexts_projects: true
   field_location: true
-  field_media_assets: true
   field_multipage_page_of: true
-  field_pronunciation: true
-  field_protocol_control: true
-  field_recording: true
+  field_parent_collection: true
   field_related_content: true
-  field_sample_sentences: true
-  field_sequence_collection: true
   field_source: true
-  field_thumbnail: true
+  field_summary: true
   field_title: true
-  field_translation: true
-  field_word_entry: true
-  field_word_origin: true
-  field_word_type: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true
-  flag_mukurtu_email_content: true
-  flag_mukurtu_email_node: true
+  flag_mukurtu_email_collection: true
   flag_mukurtu_email_og: true
-  flag_mukurtu_follow_content: true
+  flag_mukurtu_follow_collection: true
   flag_subscribe_node: true
   flag_subscribe_og: true
   langcode: true

@@ -1,11 +1,12 @@
-uuid: 142303db-5420-49bc-ade5-f47f9f5933a5
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.node.multipage_browse
-    - field.field.node.word_list.comment
-    - node.type.word_list
+    - field.field.node.digital_heritage.comment
+    - field.field.node.digital_heritage.field_content_type
+    - field.field.node.digital_heritage.field_mukurtu_original_record
+    - node.type.digital_heritage
   module:
     - layout_builder
     - user
@@ -14,12 +15,20 @@ third_party_settings:
     enabled: false
     allow_custom: false
 _core:
-  default_config_hash: GsNGtZZz-xmQ1Ain-ph1neRsvpTlLNgBY2tuCdZZgFg
-id: node.word_list.multipage_browse
+  default_config_hash: HHcXNxrFLyv4hpcFOOuq03xoN55OBnNWB2a2TMHfUbg
+id: node.digital_heritage.multipage_browse
 targetEntityType: node
-bundle: word_list
+bundle: digital_heritage
 mode: multipage_browse
 content:
+  field_all_community_records:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
@@ -27,37 +36,61 @@ content:
       view_mode: carousel_thumbnail
       link: false
     third_party_settings: {  }
-    weight: 1
+    weight: 0
     region: content
 hidden:
   comment: true
   draft: true
   field_all_related_content: true
+  field_category: true
   field_citation: true
   field_communities: true
+  field_content_type: true
+  field_contributor: true
   field_coverage: true
   field_coverage_description: true
+  field_creative_commons: true
+  field_creator: true
+  field_cultural_narrative: true
   field_cultural_protocols: true
+  field_date_description: true
   field_description: true
+  field_external_links: true
+  field_format: true
+  field_identifier: true
   field_in_collection: true
   field_keywords: true
+  field_knowledge_keepers: true
+  field_language: true
   field_local_contexts_labels_and_notices: true
   field_local_contexts_projects: true
   field_location: true
   field_media_assets: true
+  field_mukurtu_original_record: true
   field_multipage_page_of: true
+  field_original_date: true
+  field_people: true
   field_protocol_control: true
+  field_publisher: true
   field_related_content: true
+  field_rights: true
+  field_rights_and_usage: true
+  field_rights_statements: true
   field_sequence_collection: true
   field_source: true
+  field_subject: true
   field_summary: true
   field_title: true
-  field_word_list_image: true
-  field_words: true
+  field_traditional_knowledge: true
+  field_transcription: true
+  field_type: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true
+  flag_mukurtu_follow_content: true
   flag_subscribe_node: true
   flag_subscribe_og: true
   langcode: true
