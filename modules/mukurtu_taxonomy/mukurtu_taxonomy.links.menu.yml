@@ -17,7 +17,7 @@ mukurtu_taxonomy.person_record_settings_dashboard:
   route_name: mukurtu_taxonomy.person_record_settings
   parent: mukurtu_dashboard
 mukurtu_taxonomy.manage_languages:
-  title: 'Manage languages.'
+  title: 'Manage languages'
   description: 'Manage all languages.'
   parent: mukurtu_dashboard
   menu_name: dashboard-content-settings
