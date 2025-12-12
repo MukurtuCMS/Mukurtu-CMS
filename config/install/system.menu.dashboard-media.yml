@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-media
+label: 'dashboard media'
+description: 'Media links for dashboard'
+locked: false

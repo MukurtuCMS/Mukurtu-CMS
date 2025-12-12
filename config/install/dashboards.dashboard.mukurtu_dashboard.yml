@@ -11,6 +11,8 @@ third_party_settings:
       blacklisted_blocks: {  }
       restricted_categories: {  }
       allowed_layouts: {  }
+_core:
+  default_config_hash: 48JmOXxxXsZgPbXfxJcLeCxkwDcNCRJJoPu2hxu4In8
 id: mukurtu_dashboard
 admin_label: 'Mukurtu Dashboard'
 category: ''
@@ -100,6 +102,20 @@ sections:
           context_mapping: {  }
           views_label: ''
           items_per_page: null
+        weight: 1
+        additional: {  }
+      9c53fff8-81e9-481e-b21c-2000b83a178e:
+        uuid: 9c53fff8-81e9-481e-b21c-2000b83a178e
+        region: two
+        configuration:
+          id: 'system_menu_block:dashboard-media'
+          label: 'Media'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
         weight: 1
         additional: {  }
     third_party_settings: {  }
