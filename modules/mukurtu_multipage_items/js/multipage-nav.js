@@ -1,4 +1,4 @@
-(function ($, Drupal) {
+(function ($, Drupal, once) {
   Drupal.behaviors.mukurtu_multipage_nav = {
     attach: function (context, settings) {
       $(document).ready(function () {
@@ -23,7 +23,9 @@
         };
 
         // Attach the table of contents handler.
-        $('#multipage-item-table-of-contents').once().change(jumpToPage);
+        once('multipage-item-table-of-contents', '#multipage-item-table-of-contents', context).forEach(function (element) {
+          element.addEventListener('change', jumpToPage);
+        });
 
         if (Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider == undefined) {
           Drupal.behaviors.mukurtu_multipage_nav.multipageNavSlider = new Splide('.splide.multipage-carousel', {
@@ -50,4 +52,4 @@
       });
     }
   };
-})(jQuery, Drupal);
+})(jQuery, Drupal, once);
