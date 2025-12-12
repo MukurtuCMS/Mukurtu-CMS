@@ -3,5 +3,5 @@ status: true
 dependencies: {  }
 id: dashboard-look-feel
 label: 'Look and feel'
-description: 'Manage support look and feel (theme) settings.'
+description: 'Manage support look and feel settings.'
 locked: false
