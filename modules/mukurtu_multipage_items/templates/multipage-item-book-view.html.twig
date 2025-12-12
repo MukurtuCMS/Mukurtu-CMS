@@ -1,27 +1,27 @@
-{{ attach_library('mukurtu_v4/splide') }}
-
-{% if pages %}
-<div class="splide__wrapper">
-  <section class="splide multipage-carousel" aria-label="Multipage Item Carousel">
-    <div class="splide__track" id="mukurtu-multipage-item-page-nav" {{ page_nav_attributes }}>
-      <ul class="splide__list">
-      {% for page in pages %}
-        <li class="splide__slide">{{ page }}</li>
-      {% endfor %}
-      </ul>
+<div class="multipage-items">
+  {% if pages %}
+    <div class="splide__wrapper">
+      <section class="splide multipage-carousel" aria-label="Multipage Item Carousel">
+        <div class="splide__track" id="mukurtu-multipage-item-page-nav" {{ page_nav_attributes }}>
+          <ul class="splide__list">
+          {% for id, page in pages %}
+            <li class="splide__slide" data-id="{{ id }}">{{ page }}</li>
+          {% endfor %}
+          </ul>
+        </div>
+      </section>
     </div>
-  </section>
-</div>
-{% endif %}
+  {% endif %}
 
-{% if table_of_contents %}
-<div class="multipage-carousel__navigation">
-  {{ table_of_contents }}
-</div>
-{% endif %}
+  {% if table_of_contents %}
+    <div class="multipage-carousel__navigation">
+      {{ table_of_contents }}
+    </div>
+  {% endif %}
 
-{% if current_page %}
-<div id="mukurtu-multipage-item-selected-page" {{ current_page_attributes }}>
-  {{ current_page }}
+  {% if current_page %}
+    <div id="mukurtu-multipage-item-selected-page" {{ current_page_attributes }}>
+      {{ current_page }}
+    </div>
+  {% endif %}
 </div>
-{% endif %}
