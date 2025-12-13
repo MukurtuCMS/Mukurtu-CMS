@@ -104,3 +104,9 @@ mukurtu_core.user_settings:
   requirements:
     _permission: 'administer account settings'
 
+mukurtu_core.add_user:
+  path: '/admin/people/create'
+  defaults:
+    _title: 'Add a new user.'
+  requirements:
+    _permission: 'administer users'
