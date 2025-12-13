@@ -58,5 +58,5 @@ mukurtu_core.appearance_settings:
   title: 'Logo and favicon'
   description: 'Change logo and favicon'
   parent: mukurtu_dashboard
-  menu_name: dashboard-users
+  menu_name: dashboard-look-feel
   route_name: mukurtu_core.appearance_settings
