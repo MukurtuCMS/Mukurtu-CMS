@@ -28,11 +28,11 @@ mukurtu_core.site_configuration:
 #  parent: mukurtu
 #  menu_name: mukurtu
 #  route_name: view.mukurtu_manage_all_users.manage_users_page
-mukurtu_core.settings:
+mukurtu_core.settings_assorted:
   title: "Citation formats and default image"
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   description: "Configuration form for Mukurtu specific options."
-  route_name: mukurtu_core.settings
+  route_name: mukurtu_core.settings_assorted
   expanded: TRUE
   weight: 0

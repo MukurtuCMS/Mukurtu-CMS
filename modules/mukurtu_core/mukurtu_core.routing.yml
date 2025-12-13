@@ -1,4 +1,4 @@
-mukurtu_core.settings:
+mukurtu_core.settings_assorted:
   path: '/admin/config/mukurtu/settings'
   defaults:
     _form: '\Drupal\mukurtu_core\Form\MukurtuSettingsForm'

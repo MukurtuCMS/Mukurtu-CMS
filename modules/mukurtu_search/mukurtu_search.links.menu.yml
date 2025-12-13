@@ -1,7 +1,6 @@
 mukurtu_search.settings:
-  title: "Mukurtu Search Settings"
-  parent: mukurtu_core.settings
-  menu_name: mukurtu
+  title: "Mukurtu search settings"
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
   description: "Configure Mukurtu search options"
   route_name: mukurtu_search.settings
-  weight: 0
