@@ -204,3 +204,11 @@ mukurtu_protocol.community_organization:
     _title: 'Community Organization'
   requirements:
     _permission: 'add community entities'
+
+mukurtu_protocol.community_create:
+  path: '/communities/community/add'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\CommunityAddForm'
+    _title: 'Add community'
+  requirements:
+    _permission: 'add community entities'

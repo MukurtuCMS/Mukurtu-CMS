@@ -81,3 +81,10 @@ mukurtu_protocol.comment_settings:
   parent: mukurtu_dashboard
   description: "Configuration form for side wide commenting options."
   route_name: mukurtu_protocol.comment_settings
+
+mukurtu_protocol.community_create:
+  title: 'Add a community'
+  menu_name: dashboard-3Cs
+  parent: mukurtu_dashboard
+  description: 'Add a new community.'
+  route_name: mukurtu_protocol.community_create
