@@ -60,8 +60,8 @@ community.admin.structure.settings:
 mukurtu_protocol.config_community_permissions:
   title: 'Configure Community Permissions'
   description: 'Manage roles and permissions for all communities.'
-  parent: mukurtu_core.site_configuration
-  menu_name: mukurtu
+  parent: mukurtu_dashboard
+  menu_name: dashboard-3Cs
   route_name: mukurtu_protocol.permissions_overview
   route_parameters: { entity_type_id: 'community', bundle_id: 'community'}
   weight: 800
@@ -69,8 +69,8 @@ mukurtu_protocol.config_community_permissions:
 mukurtu_protocol.config_protocol_permissions:
   title: 'Configure Protocol Permissions'
   description: 'Manage roles and permissions for all protocols.'
-  parent: mukurtu_core.site_configuration
-  menu_name: mukurtu
+  parent: mukurtu_dashboard
+  menu_name: dashboard-3Cs
   route_name: mukurtu_protocol.permissions_overview
   route_parameters: { entity_type_id: 'protocol', bundle_id: 'protocol'}
   weight: 810
