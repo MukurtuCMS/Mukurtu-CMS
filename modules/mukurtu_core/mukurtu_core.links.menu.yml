@@ -43,3 +43,10 @@ mukurtu_core.manual:
   parent: mukurtu_dashboard
   menu_name: dashboard-site-info
   url: https://docs.mukurtu.org/
+
+mukurtu_core.basic_site_settings:
+  title: 'Basic site settings'
+  description: 'Basic site settings.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  route_name: /admin/config/system/site-information
