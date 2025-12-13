@@ -1,5 +1,6 @@
 mukurtu_export.export:
-  title: Export
-  description: Export Content and Media
-  menu_name: mukurtu
+  title: 'Export'
+  description: 'Export content and media.'
+  menu_name: dashboard-roundtrip
+  parent: mukurtu_dashboard
   route_name: mukurtu_export.export_item_and_format_selection

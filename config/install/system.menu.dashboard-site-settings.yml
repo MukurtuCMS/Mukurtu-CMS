@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-site-settings
+label: 'Site settings'
+description: 'Basic site settings and configuration.'
+locked: false

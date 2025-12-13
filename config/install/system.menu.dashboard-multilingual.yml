@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-multilingual
+label: 'Multilingual'
+description: 'Manage language and multilingual settings.'
+locked: false

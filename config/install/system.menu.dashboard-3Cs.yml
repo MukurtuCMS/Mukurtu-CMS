@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-3Cs
+label: 'Communities, cultural protocols, categories'
+description: 'Manage communities, cultural protocols, and categories.'
+locked: false

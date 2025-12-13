@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-content-settings
+label: 'Content settings'
+description: 'Manage content settings.'
+locked: false

@@ -1,0 +1,12 @@
+mukurtu_media.manage_media_dashboard:
+  title: 'Manage Media'
+  description: 'Manage Media'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-media
+  route_name: view.mukurtu_media.media_page_list
+mukurtu_media.add_media_dashboard:
+  title: 'Add Media'
+  description: 'Add Media'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-media
+  route_name: entity.media.add_page

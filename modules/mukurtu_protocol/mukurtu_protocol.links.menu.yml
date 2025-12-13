@@ -22,25 +22,24 @@ mukurtu_protocol.manage_communities:
   expanded: TRUE
 
 mukurtu_protocol.community_organization:
-  title: 'Community Organization'
-  description: 'Alter the ordering of communities on the site.'
-  parent: mukurtu_protocol.manage_communities
-  menu_name: mukurtu
+  title: 'Community organization'
+  description: 'Arrange sub-communities.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-3Cs
   route_name: mukurtu_protocol.community_organization
 
 mukurtu_protocol.community_manager_create_user:
-  title: 'Add User'
-  description: 'Add a new user and assign them to roles and communities.'
-  parent: mukurtu_protocol.manage_communities
-  menu_name: mukurtu
+  title: 'Add user (community managers)'
+  description: 'Add a new user and enrol them in communities.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-users
   route_name: mukurtu_protocol.community_manager_create_user
-  weight: -20
 
 mukurtu_protocol.manage_protocols:
-  title: 'Cultural Protocols'
-  description: 'Manage Cultural Protocols and memberships.'
-  parent: mukurtu
-  menu_name: mukurtu
+  title: 'Manage communities and cultural protocols'
+  description: 'Manage Cultural protocols and memberships.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-3Cs
   route_name: entity.protocol.collection
 
 # Community menu items definition
@@ -60,8 +59,8 @@ community.admin.structure.settings:
 mukurtu_protocol.config_community_permissions:
   title: 'Configure Community Permissions'
   description: 'Manage roles and permissions for all communities.'
-  parent: mukurtu_core.site_configuration
-  menu_name: mukurtu
+  parent: mukurtu_dashboard
+  menu_name: dashboard-3Cs
   route_name: mukurtu_protocol.permissions_overview
   route_parameters: { entity_type_id: 'community', bundle_id: 'community'}
   weight: 800
@@ -69,16 +68,30 @@ mukurtu_protocol.config_community_permissions:
 mukurtu_protocol.config_protocol_permissions:
   title: 'Configure Protocol Permissions'
   description: 'Manage roles and permissions for all protocols.'
-  parent: mukurtu_core.site_configuration
-  menu_name: mukurtu
+  parent: mukurtu_dashboard
+  menu_name: dashboard-3Cs
   route_name: mukurtu_protocol.permissions_overview
   route_parameters: { entity_type_id: 'protocol', bundle_id: 'protocol'}
   weight: 810
 
 mukurtu_protocol.comment_settings:
-  title: "Site Comment Settings"
-  parent: mukurtu_core.site_configuration
-  menu_name: mukurtu
+  title: "Site-wide comment settings"
+  menu_name: dashboard-site-settings
+  parent: mukurtu_dashboard
   description: "Configuration form for side wide commenting options."
   route_name: mukurtu_protocol.comment_settings
-  weight: 1
+
+mukurtu_protocol.community_create:
+  title: 'Add a community'
+  menu_name: dashboard-3Cs
+  parent: mukurtu_dashboard
+  description: 'Add a new community.'
+  route_name: mukurtu_protocol.community_create
+
+mukurtu_protocol.protocol_create:
+  title: 'Add a cultural protocol'
+  menu_name: dashboard-3Cs
+  parent: mukurtu_dashboard
+  description: 'Add a new cultural protocol.'
+  route_name: mukurtu_protocol.protocol_create
+

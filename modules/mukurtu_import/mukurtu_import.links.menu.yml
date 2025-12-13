@@ -10,7 +10,14 @@ entity.mukurtu_import_strategy.overview:
   description: 'List of all Import Configuration Templates.'
   route_name: entity.mukurtu_import_strategy.collection
 mukurtu_import.import:
-  title: Import
-  description: Import Content and Media
-  menu_name: mukurtu
+  title: 'Import'
+  description: 'Import content and media.'
+  menu_name: dashboard-roundtrip
+  parent: mukurtu_dashboard
   route_name: mukurtu_import.file_upload
+mukurtu_import.bundles_list:
+  title: 'Import format information.'
+  description: 'List of import information by content and entity type.'
+  menu_name: dashboard-roundtrip
+  parent: mukurtu_dashboard
+  route_name: mukurtu_import.bundles_list

@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-users
+label: 'Users'
+description: 'Manage users and user settings.'
+locked: false
