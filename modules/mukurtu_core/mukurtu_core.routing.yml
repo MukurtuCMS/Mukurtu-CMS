@@ -104,9 +104,9 @@ mukurtu_core.user_settings:
   requirements:
     _permission: 'administer account settings'
 
-mukurtu_core.add_user:
-  path: '/admin/people/create'
+mukurtu_core.appearance_settings:
+  path: '/admin/appearance/settings/mukurtu_v4'
   defaults:
-    _title: 'Add a new user.'
-  requirements:
-    _permission: 'administer users'
+    _title: 'Site logo and favicon'
+  requirements: 
+    _access: 'TRUE'

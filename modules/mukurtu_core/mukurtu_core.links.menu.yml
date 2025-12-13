@@ -36,24 +36,27 @@ mukurtu_core.settings_assorted:
   route_name: mukurtu_core.settings_assorted
   expanded: TRUE
   weight: 0
-
 mukurtu_core.manual:
   title: 'Mukurtu User Manual'
   description: 'Mukurtu 4 user manual.'
   parent: mukurtu_dashboard
   menu_name: dashboard-site-info
   url: https://docs.mukurtu.org/
-
 mukurtu_core.user_settings:
   title: 'Manage user settings and registration'
   description: 'Manage user account settings.'
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   route_name: mukurtu_core.user_settings
-
 mukurtu_core.people:
   title: 'Manage users'
   description: 'Manage users'
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   route_name: mukurtu_core.people
+mukurtu_core.appearance_settings:
+  title: 'Logo and favicon'
+  description: 'Change logo and favicon'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-users
+  route_name: mukurtu_core.appearance_settings
