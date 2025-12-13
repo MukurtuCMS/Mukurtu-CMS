@@ -88,3 +88,10 @@ mukurtu_protocol.community_create:
   parent: mukurtu_dashboard
   description: 'Add a new community.'
   route_name: mukurtu_protocol.community_create
+
+mukurtu_protocol.protocol_create:
+  title: 'Add a cultural protocol'
+  menu_name: dashboard-3Cs
+  parent: mukurtu_dashboard
+  description: 'Add a new cultural protocol.'
+  route_name: mukurtu_protocol.protocol_create

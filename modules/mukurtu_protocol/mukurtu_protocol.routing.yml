@@ -212,3 +212,11 @@ mukurtu_protocol.community_create:
     _title: 'Add community'
   requirements:
     _permission: 'add community entities'
+
+mukurtu_protocol.protocol_create:
+  path: '/protocols/protocol/add'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\ProtocolAddForm'
+    _title: 'Add cultural protocol'
+  requirements:
+    _permission: 'add protocol entities'
