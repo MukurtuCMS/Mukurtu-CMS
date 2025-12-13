@@ -29,12 +29,11 @@ mukurtu_protocol.community_organization:
   route_name: mukurtu_protocol.community_organization
 
 mukurtu_protocol.community_manager_create_user:
-  title: 'Add User'
-  description: 'Add a new user and assign them to roles and communities.'
-  parent: mukurtu_protocol.manage_communities
-  menu_name: mukurtu
+  title: 'Add user (community managers)'
+  description: 'Add a new user and enrol them in communities.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-users
   route_name: mukurtu_protocol.community_manager_create_user
-  weight: -20
 
 mukurtu_protocol.manage_protocols:
   title: 'Manage communities and cultural protocols'
@@ -95,3 +94,4 @@ mukurtu_protocol.protocol_create:
   parent: mukurtu_dashboard
   description: 'Add a new cultural protocol.'
   route_name: mukurtu_protocol.protocol_create
+
