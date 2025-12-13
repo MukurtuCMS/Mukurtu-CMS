@@ -10,4 +10,4 @@ mukurtu_migrate.manual:
   description: 'Migration overview and instructions in the user manual.'
   parent: mukurtu_dashboard
   menu_name: dashboard-migration
-  route_name: mukurtu_migrate.manual
+  url: https://docs.mukurtu.org/migration/00MigrationOverview/
