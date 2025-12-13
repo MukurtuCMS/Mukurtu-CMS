@@ -36,3 +36,10 @@ mukurtu_core.settings_assorted:
   route_name: mukurtu_core.settings_assorted
   expanded: TRUE
   weight: 0
+
+mukurtu_core.manual:
+  title: 'Mukurtu User Manual'
+  description: 'Mukurtu 4 user manual.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-info
+  url: https://docs.mukurtu.org/
