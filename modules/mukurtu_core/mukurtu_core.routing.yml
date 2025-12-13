@@ -96,3 +96,11 @@ mukurtu_core.front_page:
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuFrontPageController::build'
   requirements:
     _access: 'TRUE'
+
+mukurtu_core.user_settings:
+  path: '/admin/config/people/accounts'
+  defaults:
+    _title: 'Manage user account settings'
+  requirements:
+    _permission: 'administer account settings'
+

@@ -44,17 +44,16 @@ mukurtu_core.manual:
   menu_name: dashboard-site-info
   url: https://docs.mukurtu.org/
 
-mukurtu_core.basic_site_settings:
-  title: 'Basic site settings'
-  description: 'Basic site settings.'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-site-settings
-  route_name: system.admin_config_system_site-information
-  expanded: TRUE
-
 mukurtu_core.user_settings:
-  title: 'Manger user settings and registration'
+  title: 'Manage user settings and registration'
   description: 'Manage user account settings.'
   parent: mukurtu_dashboard
   menu_name: dashboard-users
-  route_name: system.admin_config_people_accounts
+  route_name: mukurtu_core.user_settings
+
+mukurtu_core.people:
+  title: 'Manage users'
+  description: 'Manage users'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-users
+  route_name: mukurtu_core.people
