@@ -49,4 +49,12 @@ mukurtu_core.basic_site_settings:
   description: 'Basic site settings.'
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
-  route_name: /admin/config/system/site-information
+  route_name: system.admin_config_system_site-information
+  expanded: TRUE
+
+mukurtu_core.user_settings:
+  title: 'Manger user settings and registration'
+  description: 'Manage user account settings.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-users
+  route_name: system.admin_config_people_accounts
