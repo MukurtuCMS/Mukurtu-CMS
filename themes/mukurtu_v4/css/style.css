@@ -1066,7 +1066,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
   inline-size: -webkit-max-content;
   inline-size: -moz-max-content;
   inline-size: max-content;
-  max-inline-size: 75%;
+  max-inline-size: 100%;
   z-index: 2;
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
@@ -4120,7 +4120,7 @@ header {
   inline-size: -webkit-max-content;
   inline-size: -moz-max-content;
   inline-size: max-content;
-  max-inline-size: 75%;
+  max-inline-size: 100%;
   z-index: 2;
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
@@ -4131,6 +4131,10 @@ header {
   padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-2xs);
   cursor: pointer;
+  padding-inline: var(--v-space-4xs);
+  overflow-wrap: break-word;
+  line-height: normal;
+  text-wrap: balance;
 }
 .communities__item .field--name-name a:hover, .communities__item .field--name-name a:active, .communities__item .field--name-name a:focus {
   color: var(--light-text-color);
