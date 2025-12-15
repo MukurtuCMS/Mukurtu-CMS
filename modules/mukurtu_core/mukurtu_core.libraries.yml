@@ -9,3 +9,11 @@ mukurtu-leaflet-widget:
     - core/jquery
     - core/jquery.once
     - leaflet/leaflet-widget
+
+splide:
+  version: 4.1.2
+  js:
+    libraries/splide/splide.min.js: {}
+  css:
+    theme:
+      libraries/splide/splide.min.css: {}
