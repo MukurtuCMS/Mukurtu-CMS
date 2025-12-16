@@ -6,3 +6,4 @@ services:
   mukurtu_multipage_items.multipage_item_manager:
     class: Drupal\mukurtu_multipage_items\MultipageItemManager
     arguments: ['@entity_type.manager']
+  Drupal\mukurtu_multipage_items\MultipageItemManager: '@mukurtu_multipage_items.multipage_item_manager'
