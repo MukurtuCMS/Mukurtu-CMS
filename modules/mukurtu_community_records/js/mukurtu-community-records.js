@@ -47,7 +47,7 @@
 
       // Update the local tasks to reflect the active tab. Take the approach of
       // a search / replace on known patterns.
-      this.updateTabLinks(paneNid);
+      this.updateTaskLinks(paneNid);
       this.toggleCrTask(isCr);
     },
 
@@ -57,7 +57,7 @@
      * @param {int|string} nid
      *   The nid of the active pane.
      */
-    updateTabLinks: function(nid) {
+    updateTaskLinks: function(nid) {
       const patterns = [
         /node\/(\d+)/
       ];
