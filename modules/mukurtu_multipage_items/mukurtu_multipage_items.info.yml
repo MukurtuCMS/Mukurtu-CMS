@@ -4,6 +4,6 @@ description: 'Provides a multipage item entity.'
 core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 dependencies:
-  - mukurtu_protocol
-  - mukurtu_collection
+  - mukurtu_protocol:mukurtu_protocol
+  - mukurtu_collection:mukurtu_collection
 configure: entity.multipage_item.settings

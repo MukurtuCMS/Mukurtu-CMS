@@ -49,7 +49,7 @@ class RelatedContentDisplay {
         '#type' => 'item',
         '#title' => $this->t('Original Record'),
         '#markup' => sprintf('<a href="%s">%s</a>', $original->toUrl()->toString(), $original->label()),
-        '#access' => $node->access('view'),
+        '#access' => $original->access('view'),
       ];
       $form['#fieldgroups']['group_related_content']->children[] = 'original_record';
       $form['#group_children']['original_record'] = 'group_related_content';
