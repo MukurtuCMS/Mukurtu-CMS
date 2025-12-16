@@ -86,7 +86,7 @@
     position: relative;
     display: block;
     inline-size: max-content;
-    max-inline-size: 75%;
+    max-inline-size: 100%;
     z-index: 2;
 
     @include button;
