@@ -109,7 +109,9 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     $communities = [];
     foreach ($memberships as $membership) {
       $community = $membership->getGroup();
-      $communities[$community->id()] = $community->getTitle();
+      if ($community) {
+        $communities[$community->id()] = $community->getTitle();
+      }
     }
     return $communities;
   }

@@ -127,7 +127,7 @@ class MukurtuAddProtocolMembershipAction extends ViewsBulkOperationsActionBase i
     $protocols = [];
     $protocolMemberships = array_filter(Og::getMemberships($currentUser), fn ($m) => $m->getGroupBundle() === 'protocol');
     $managerMemberships = array_filter($protocolMemberships, fn ($m) => $m->hasPermission('administer group') || $m->hasPermission('manage members'));
-    $managerProtocols = array_map(fn ($m) => $m->getGroup(), $managerMemberships);
+    $managerProtocols = array_filter(array_map(fn ($m) => $m->getGroup(), $managerMemberships));
 
     /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
     foreach ($managerProtocols as $protocol) {

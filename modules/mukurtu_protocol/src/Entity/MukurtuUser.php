@@ -39,7 +39,7 @@ class MukurtuUser extends User implements MukurtuUserInterface {
   public function getProtocols() {
     $memberships = array_filter(Og::getMemberships($this), fn ($m) => $m->getGroupBundle() === 'protocol');
     if (!empty($memberships)) {
-      return array_map(fn ($m) => $m->getGroup(), $memberships);
+      return array_filter(array_map(fn ($m) => $m->getGroup(), $memberships));
     }
     return [];
   }

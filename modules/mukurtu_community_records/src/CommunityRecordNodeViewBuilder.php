@@ -183,8 +183,15 @@ class CommunityRecordNodeViewBuilder extends NodeViewBuilder {
 
   /**
    * Find all records associated with a node.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node to find community records for.
+   *
+   * @return \Drupal\node\NodeInterface[]
+   *   An array of community record nodes that are associated with the given
+   *   node.
    */
-  protected function getCommunityRecords(NodeInterface $node) {
+  protected function getCommunityRecords(NodeInterface $node): array {
     // Find the original record.
     $original_record = $node->get('field_mukurtu_original_record')->referencedEntities()[0] ?? $node;
 
@@ -219,10 +226,6 @@ class CommunityRecordNodeViewBuilder extends NodeViewBuilder {
 
     $communityLabels = [];
     foreach ($communities as $community) {
-      // Skip any communities the user can't see.
-      if (!$community->access('view')) {
-        continue;
-      }
       // @todo ordering?
       $communityLabels[] = $community->getName();
     }
@@ -234,21 +237,23 @@ class CommunityRecordNodeViewBuilder extends NodeViewBuilder {
    */
   public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
     if ($view_mode == 'full' && $this->supportsCommunityRecords($entity)) {
-      $allRecords = $this->getCommunityRecords($entity);
+      $all_records = $this->getCommunityRecords($entity);
 
       // If we only have a single record, render normally.
-      if (empty($allRecords) || count($allRecords) == 1) {
+      if (empty($all_records) || count($all_records) === 1) {
         return parent::view($entity, $view_mode, $langcode);
       }
 
       // Community record tab definitions.
-      foreach ($allRecords as $record) {
+      $records = [];
+      foreach ($all_records as $record) {
         $records[] = [
           'id' => $record->id(),
           'tabid' => "record-{$record->id()}",
           'communities' => $this->getCommunitiesLabel($record),
           'title' => $record->getTitle(),
           'content' => parent::view($record, $view_mode),
+          'is_cr' => mukurtu_community_records_is_community_record($record),
         ];
       }
 

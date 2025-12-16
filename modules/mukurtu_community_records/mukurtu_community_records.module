@@ -5,13 +5,12 @@
  * Provide Mukurtu Community Records.
  */
 
-define("MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD", "field_mukurtu_original_record");
+const MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD = "field_mukurtu_original_record";
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\node\NodeInterface;
-use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 
 /**
  * Implements hook_theme().
@@ -39,42 +38,6 @@ function mukurtu_community_records_entity_type_alter(array &$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   $entity_types['node']
     ->setViewBuilderClass('Drupal\mukurtu_community_records\CommunityRecordNodeViewBuilder');
-}
-
-
-/**
- * Implements hook_node_view().
- *
- * This handles the media replication behavior for original record to
- * community records for viewing.
- */
-function mukurtu_community_records_node_view(&$build, $node, $view_mode, $langcode) {
-  $media_field = 'field_media_assets';
-  if ($node->hasField('field_mukurtu_original_record') && $node->hasField($media_field)) {
-    // Is the node a community record?
-    $original_record = $node->get('field_mukurtu_original_record')->referencedEntities()[0] ?? NULL;
-    if ($original_record && $original_record->hasField($media_field)) {
-      // CR media field should be OR media + CR media.
-      $orMedia = $original_record->get($media_field)->getValue();
-
-      // Only re-render the field if the OR has media.
-      if (!empty($orMedia)) {
-        $crMedia = $node->get($media_field)->getValue();
-        $node->set($media_field, array_merge($orMedia, $crMedia));
-
-        // Determine the view mode for the field.
-        $mode = ($view_mode instanceof LayoutBuilderEntityViewDisplay) ? $view_mode->getOriginalMode() : NULL;
-        if (!$mode) {
-          $mode = (is_string($view_mode)) ? $view_mode : NULL;
-        }
-
-        // Render the media field with the new values.
-        if ($mode) {
-          $build[$media_field] = $node->{$media_field}->view($mode);
-        }
-      }
-    }
-  }
 }
 
 /**
@@ -196,4 +159,3 @@ function mukurtu_community_records_entity_bundle_field_info_alter(&$fields, Enti
     $fields[MUKURTU_COMMUNITY_RECORDS_FIELD_NAME_ORIGINAL_RECORD]->addConstraint('ValidOriginalRecord', []);
   }
 }
-

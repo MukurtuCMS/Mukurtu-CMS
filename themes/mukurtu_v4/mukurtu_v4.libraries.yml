@@ -12,14 +12,7 @@ media-carousel:
     - core/drupal
     - core/once
     - core/jquery
-
-splide:
-  version: 4.1.2
-  js:
-    libraries/splide/splide.min.js: {}
-  css:
-    theme:
-      libraries/splide/splide.min.css: {}
+    - mukurtu_core/splide
 
 language-switcher:
   js:

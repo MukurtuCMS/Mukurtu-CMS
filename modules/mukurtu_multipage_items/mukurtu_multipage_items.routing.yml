@@ -34,6 +34,7 @@ mukurtu_multipage_items.multipage_node_view:
   path: '/node/{node}/multipage'
   defaults:
     _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::view'
+    _title_callback: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::title'
   options:
     parameters:
       node:
