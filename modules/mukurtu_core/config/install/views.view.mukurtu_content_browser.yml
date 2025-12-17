@@ -260,7 +260,7 @@ display:
           pagination_heading_level: h4
           items_per_page: 12
           total_pages: null
-          id: 12345
+          id: 0
           tags:
             next: 'Next ›'
             previous: '‹ Previous'
