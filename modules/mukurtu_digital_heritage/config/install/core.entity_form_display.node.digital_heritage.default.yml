@@ -5,6 +5,7 @@ dependencies:
     - entity_browser.browser.mukurtu_content_browser
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
+    - field.field.node.digital_heritage.field_vessel_gear_type
     - node.type.digital_heritage
   module:
     - comment
@@ -107,6 +108,7 @@ third_party_settings:
         - field_transcription
         - field_people
         - group_locations
+        - field_vessel_gear_type
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
@@ -202,7 +204,7 @@ third_party_settings:
       label: Locations
       region: content
       parent_name: group_additional_fields
-      weight: 24
+      weight: 25
       format_type: tab
       format_settings:
         classes: ''
@@ -372,7 +374,7 @@ content:
     third_party_settings: {  }
   field_external_links:
     type: link_default
-    weight: 27
+    weight: 29
     region: content
     settings:
       placeholder_url: ''
@@ -418,7 +420,7 @@ content:
     third_party_settings: {  }
   field_keywords:
     type: entity_reference_autocomplete
-    weight: 23
+    weight: 24
     region: content
     settings:
       match_operator: CONTAINS
@@ -440,7 +442,7 @@ content:
     third_party_settings: {  }
   field_language:
     type: entity_reference_autocomplete
-    weight: 24
+    weight: 26
     region: content
     settings:
       match_operator: CONTAINS
@@ -502,7 +504,7 @@ content:
     third_party_settings: {  }
   field_people:
     type: entity_reference_autocomplete
-    weight: 30
+    weight: 32
     region: content
     settings:
       match_operator: CONTAINS
@@ -518,7 +520,7 @@ content:
     third_party_settings: {  }
   field_publisher:
     type: entity_reference_autocomplete
-    weight: 26
+    weight: 28
     region: content
     settings:
       match_operator: CONTAINS
@@ -570,7 +572,7 @@ content:
     third_party_settings: {  }
   field_source:
     type: string_textfield
-    weight: 25
+    weight: 27
     region: content
     settings:
       size: 60
@@ -578,7 +580,7 @@ content:
     third_party_settings: {  }
   field_subject:
     type: entity_reference_autocomplete
-    weight: 28
+    weight: 30
     region: content
     settings:
       match_operator: CONTAINS
@@ -603,8 +605,8 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_transcription:
-    type: string_textarea
-    weight: 29
+    type: external_embed_widget
+    weight: 31
     region: content
     settings:
       rows: 5
@@ -613,6 +615,16 @@ content:
   field_type:
     type: entity_reference_autocomplete
     weight: 21
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_vessel_gear_type:
+    type: entity_reference_autocomplete
+    weight: 33
     region: content
     settings:
       match_operator: CONTAINS

@@ -6,6 +6,7 @@ dependencies:
     - core.entity_view_mode.node.full
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
+    - field.field.node.digital_heritage.field_vessel_gear_type
     - node.type.digital_heritage
   module:
     - comment
@@ -113,6 +114,7 @@ third_party_settings:
         - field_publisher
         - field_subject
         - field_type
+        - field_vessel_gear_type
         - field_format
         - field_external_links
       label: 'Additional Metadata'
@@ -439,7 +441,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 38
+    weight: 37
     region: content
   field_rights:
     type: basic_string
@@ -476,7 +478,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 39
+    weight: 38
     region: content
   field_summary:
     type: string
@@ -506,6 +508,14 @@ content:
     weight: 41
     region: content
   field_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 39
+    region: content
+  field_vessel_gear_type:
     type: entity_reference_label
     label: above
     settings:
