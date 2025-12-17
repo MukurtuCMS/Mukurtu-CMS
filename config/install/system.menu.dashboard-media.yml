@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-media
+label: 'Dashboard Media'
+description: 'Manage media.'
+locked: false

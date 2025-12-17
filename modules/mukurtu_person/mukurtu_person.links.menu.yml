@@ -6,3 +6,12 @@ mukurtu_person.create_person:
   route_name: mukurtu_core.add
   route_parameters:
     node_type: person
+
+mukurtu_person.create_person_dashboard:
+  title: 'Add person record'
+  description: 'Add a new person record.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-content
+  route_name: mukurtu_core.add
+  route_parameters:
+    node_type: person

@@ -29,3 +29,11 @@ mukurtu_taxonomy.person_record_settings:
     _title: 'Mukurtu Person Record Settings'
   requirements:
     _permission: 'administer site configuration'
+
+mukurtu_taxonomy.manage_languages:
+  path: '/admin/languages/manage'
+  defaults:
+    _title: 'Manage languages'
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuCategoryManageController::content'
+  requirements:
+    _permission: 'create terms in language,edit terms in language,delete terms in language'

@@ -1,19 +1,24 @@
 mukurtu_taxonomy.manage_vocabularies:
-  title: 'Manage Taxonomies'
-  description: 'Manage Taxonomies'
-  parent: mukurtu
-  menu_name: mukurtu
+  title: 'Manage taxonomies'
+  description: 'Manage all taxonomies.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-taxonomies
   route_name: mukurtu_taxonomy.add_page
 mukurtu_taxonomy.manage_categories:
-  title: 'Manage Categories'
-  description: 'Manage Categories'
-  parent: mukurtu
-  menu_name: mukurtu
+  title: 'Manage categories.'
+  description: 'Manage all categories.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-3Cs
   route_name: mukurtu_taxonomy.manage_categories
 mukurtu_taxonomy.person_record_settings_dashboard:
-  title: "Person Record Settings"
-  menu_name: mukurtu
-  description: "Change settings related to Mukurtu person records."
+  title: "Person record settings"
+  menu_name: dashboard-content-settings
+  description: "Configure person record settings."
   route_name: mukurtu_taxonomy.person_record_settings
-  parent: mukurtu_core.site_configuration
-  weight: 1000
+  parent: mukurtu_dashboard
+mukurtu_taxonomy.manage_languages:
+  title: 'Manage languages'
+  description: 'Manage all languages.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-content-settings
+  route_name: mukurtu_taxonomy.manage_languages
