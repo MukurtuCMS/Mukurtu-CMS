@@ -7,6 +7,15 @@ mukurtu_collection.create_collection:
   route_parameters:
     node_type: collection
 
+mukurtu_collection.create_collection_dashboard:
+  title: 'Add collection'
+  description: 'Add a new collection'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-content
+  route_name: mukurtu_core.add
+  route_parameters:
+    node_type: collection
+
 # Personal collection menu items definition
 entity.personal_collection.collection:
   title: 'Personal collection list'
@@ -25,4 +34,10 @@ mukurtu_collection.my_personal_collections:
   title: 'Personal Collections'
   description: 'My Personal Collections'
   menu_name: mukurtu
+  route_name: mukurtu_collection.my_personal_collections
+
+mukurtu_collection.my_personal_collections_dashboard:
+  title: 'Personal collections'
+  description: 'My personal collections.'
+  menu_name: dashboard-my-content
   route_name: mukurtu_collection.my_personal_collections
