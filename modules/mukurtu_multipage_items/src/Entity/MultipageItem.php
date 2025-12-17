@@ -189,7 +189,6 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
       ->setRequired(TRUE)
       ->setCardinality(-1)
       ->setTranslatable(FALSE)
-      ->addConstraint('MultipageValidPageConstraint')
       ->setDisplayOptions('view', [
         'label' => 'visible',
         'type' => 'string',
