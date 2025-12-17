@@ -569,26 +569,6 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_vessel_gear_type'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Gear Type'))
-      ->setDescription(t('Select one or more gear types. Gear types must first be created by a Mukurtu Manager.'))
-      ->setSettings([
-        'target_type' => 'taxonomy_term',
-        'handler' => 'default:taxonomy_term',
-        'handler_settings' => [
-          'target_bundles' => [
-            'vessel_gear_type' => 'vessel_gear_type'
-          ],
-          'auto_create' => FALSE,
-        ]
-      ])
-      ->setCardinality(-1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
     return $definitions;
   }
 
