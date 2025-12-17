@@ -1,31 +1,61 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_multipage_items\Plugin\Validation\Constraint;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
 /**
  * Validates the MultipageValidNode constraint.
  */
-class MultipageValidNodeConstraintValidator extends ConstraintValidator {
-  protected $enabledBundles;
+class MultipageValidNodeConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
+
+  /**
+   * Array of enabled bundles.
+   *
+   * @var array
+   */
+  protected array $enabledBundles;
+
+  /**
+   * Constructs an MultipageValidNodeConstraintValidator object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   */
+  public function __construct(protected EntityTypeManagerInterface $entityTypeManager, protected ConfigFactoryInterface $configFactory) {}
 
   /**
    * {@inheritdoc}
    */
-  public function validate($value, Constraint $constraint) {
-    $uniqueItems = [];
+  public static function create(ContainerInterface $container): static {
+    return new static(
+      $container->get('entity_type.manager'),
+      $container->get('config.factory')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validate($value, Constraint $constraint): void {
+    $unique_items = [];
 
     foreach ($value as $item) {
-      $id = $item->getValue()['target_id'];
+      $id = (int) $item->getValue()['target_id'];
 
       // Item is unique.
-      if (!in_array($id, $uniqueItems)) {
-        array_push($uniqueItems, $id);
+      if (!in_array($id, $unique_items)) {
+        $unique_items[] = $id;
       }
       // Item is a duplicate.
-      elseif (in_array($id, $uniqueItems)) {
+      elseif (in_array($id, $unique_items)) {
         $this->context->addViolation($constraint->isDuplicate, ['%value' => $this->getTitle($id)]);
       }
       // Check if the node is already in an MPI.
@@ -46,80 +76,93 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator {
   /**
    * See if the value represents a node already in an MPI.
    *
-   * @param string $value
+   * @param int $candidate_id
+   *   Candidate node ID.
+   *
+   * @return bool
+   *   TRUE if the value represents a node already in an MPI, FALSE otherwise.
    */
-  private function alreadyInMPI($value) {
-    // $value = [pages]
-    $query = \Drupal::entityQuery('multipage_item')
-      ->condition('field_pages', $value)
-      ->condition('id', $this->context->getRoot()->getEntity()->id(), '!=')
+  protected function alreadyInMPI(int $candidate_id): bool {
+    $query = $this->entityTypeManager->getStorage('multipage_item')->getQuery();
+    $query->condition('field_pages', $candidate_id)
       ->accessCheck(FALSE);
-    $result = $query->execute();
-
-    if ($result) {
-      return true;
+    if ($id = $this->context->getRoot()->getEntity()->id()) {
+      $query->condition('id', $id, '!=');
     }
-    return false;
+    return (bool) $query->execute();
   }
 
   /**
    * See if the value is a community record.
    *
-   * @param string $value
+   * @param int $candidate_id
+   *   Candidate node ID.
+   *
+   * @return bool
+   *   TRUE if the value is a community record, FALSE otherwise.
    */
-  private function isCommunityRecord($value) {
-    $nodeStorage = \Drupal::entityTypeManager()->getStorage('node');
+  protected function isCommunityRecord(int $candidate_id): bool {
+    $nodeStorage = $this->entityTypeManager->getStorage('node');
     $result = $nodeStorage->getQuery()
       ->condition('field_mukurtu_original_record', 0, '>')
       ->accessCheck(FALSE)
       ->execute();
 
-    if ($result) {
-      if (in_array($value, $result)) {
-        return true;
-      }
+    if (!$result) {
+      return FALSE;
     }
-    return false;
+    return in_array($candidate_id, $result);
   }
 
   /**
-   * See if the value's type is one of the enabled bundles for multipages items.
+   * See if the value's type is one of the enabled bundles for multipage items.
    *
-   * @param string $value
+   * @param int $candidate_id
+   *   Candidate node ID.
+   *
+   * @return bool
+   *   TRUE if the value's type is one of the enabled bundles for multipage
+   *   items, FALSE otherwise.
    */
-  private function isEnabledBundleType($value)
-  {
-    $enabledBundles = $this->getEnabledBundles();
+  private function isEnabledBundleType(int $candidate_id): bool {
+    $enabled_bundles = $this->getEnabledBundles();
 
-    $nodeStorage = \Drupal::entityTypeManager()->getStorage('node');
-    $result = $nodeStorage->getQuery()
-      ->condition('type', $enabledBundles, 'IN')
-      ->accessCheck(FALSE)
-      ->execute();
-
-    if ($result) {
-      if (in_array($value, $result)) {
-        return true;
-      }
+    $candidate_node = $this->entityTypeManager->getStorage('node')->load($candidate_id);
+    if (!$candidate_node) {
+      return FALSE;
     }
-    return false;
+    return in_array($candidate_node->bundle(), $enabled_bundles);
   }
 
   /**
    * Fetch enabled bundles.
+   *
+   * @return array
+   *   Array of enabled bundles.
    */
-  private function getEnabledBundles() {
-    if (!$this->enabledBundles) {
-      $this->enabledBundles = array_keys(array_filter(\Drupal::config('mukurtu_multipage_items.settings')->get('bundles_config')));
+  protected function getEnabledBundles(): array {
+    if (!isset($this->enabledBundles)) {
+      $config = $this->configFactory->get('mukurtu_multipage_items.settings');
+      $bundles_config = $config->get('bundles_config') ?? [];
+      $this->enabledBundles = array_keys(array_filter($bundles_config));
     }
     return $this->enabledBundles;
   }
 
   /**
    * Fetch the node title.
+   *
+   * @param int|string $id
+   *   Node ID.
+   * @return string
+   *   Node title.
    */
-  private function getTitle($id) {
-    $entity = \Drupal::entityTypeManager()->getStorage('node')->load($id);
+  protected function getTitle(int|string $id): string {
+    $entity = $this->entityTypeManager->getStorage('node')->load($id);
+    if (!$entity) {
+      return '';
+    }
     return $entity->label();
   }
+
 }
