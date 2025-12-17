@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_multipage_items\Plugin\Validation\Constraint;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -45,30 +46,51 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
    * {@inheritdoc}
    */
   public function validate($value, Constraint $constraint): void {
-    $unique_items = [];
+    if (!$value instanceof EntityReferenceFieldItemListInterface) {
+      return;
+    }
+    assert($constraint instanceof MultipageValidNodeConstraint);
 
-    foreach ($value as $item) {
-      $id = (int) $item->getValue()['target_id'];
+    $unique_items = [];
+    foreach ($value as $delta => $item) {
+      $target_id = (int) $item->target_id;
 
       // Item is unique.
-      if (!in_array($id, $unique_items)) {
-        $unique_items[] = $id;
+      if (!in_array($target_id, $unique_items)) {
+        $unique_items[] = $target_id;
       }
       // Item is a duplicate.
-      elseif (in_array($id, $unique_items)) {
-        $this->context->addViolation($constraint->isDuplicate, ['%value' => $this->getTitle($id)]);
+      else {
+        $this->context->buildViolation($constraint->isDuplicate)
+          ->setParameter('%value', $this->getTitle($target_id))
+          ->atPath((string) $delta . '.target_id')
+          ->setInvalidValue($target_id)
+          ->addViolation();
       }
+
       // Check if the node is already in an MPI.
-      if ($this->alreadyInMPI($id)) {
-        $this->context->addViolation($constraint->alreadyInMPI, ['%value' => $this->getTitle($id)]);
+      if ($this->alreadyInMPI($target_id)) {
+        $this->context->buildViolation($constraint->alreadyInMPI)
+          ->setParameter('%value', $this->getTitle($target_id))
+          ->atPath((string) $delta . '.target_id')
+          ->setInvalidValue($target_id)
+          ->addViolation();
       }
       // Check if the node is a community record.
-      if ($this->isCommunityRecord($id)) {
-        $this->context->addViolation($constraint->isCommunityRecord, ['%value' => $this->getTitle($id)]);
+      if ($this->isCommunityRecord($target_id)) {
+        $this->context->buildViolation($constraint->isCommunityRecord)
+          ->setParameter('%value', $this->getTitle($target_id))
+          ->atPath((string) $delta . '.target_id')
+          ->setInvalidValue($target_id)
+          ->addViolation();
       }
       // Check if the node is of type enabled for multipage items.
-      if (!$this->isEnabledBundleType($id)) {
-        $this->context->addViolation($constraint->notEnabledBundleType, ['%value' => $this->getTitle($id)]);
+      if (!$this->isEnabledBundleType($target_id)) {
+        $this->context->buildViolation($constraint->notEnabledBundleType)
+          ->setParameter('%value', $this->getTitle($target_id))
+          ->atPath((string) $delta . '.target_id')
+          ->setInvalidValue($target_id)
+          ->addViolation();
       }
     }
   }
@@ -152,13 +174,13 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
   /**
    * Fetch the node title.
    *
-   * @param int|string $id
-   *   Node ID.
+   * @param int $candidate_id
+   *   Candidate node ID.
    * @return string
    *   Node title.
    */
-  protected function getTitle(int|string $id): string {
-    $entity = $this->entityTypeManager->getStorage('node')->load($id);
+  protected function getTitle(int $candidate_id): string {
+    $entity = $this->entityTypeManager->getStorage('node')->load($candidate_id);
     if (!$entity) {
       return '';
     }

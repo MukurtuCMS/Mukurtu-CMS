@@ -210,7 +210,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
       ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE)
-      ->addConstraint("MultipageValidNode");
+      ->addConstraint('MultipageValidNode');
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setRevisionable(TRUE)
