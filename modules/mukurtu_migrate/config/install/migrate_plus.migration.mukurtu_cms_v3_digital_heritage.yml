@@ -229,10 +229,10 @@ process:
       process:
         uri: url
         title: title
-  field_vessel_gear_type: 
+  field_vessel_gear_type:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_vessel_gear_type
-    source: field_vessel_gear_type
+    source: field_gear_type
 
   # This only works if we maintain nids. Self migration_lookup wasn't working for me...
   field_mukurtu_original_record: field_community_record_parent
