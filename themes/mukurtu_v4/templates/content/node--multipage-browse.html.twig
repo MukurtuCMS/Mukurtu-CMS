@@ -70,7 +70,11 @@
 <article{{ attributes }}>
 
   <div{{ content_attributes }}>
-    {{ content|without('community_protocol_list') }}
+    {% if content|without('community_protocol_list')|render %}
+      {{ content|without('community_protocol_list') }}
+    {% else %}
+      <img alt="" src="/{{ active_theme_path() }}/images/no-thumbnail.png" />
+    {% endif %}
   </div>
 
 </article>
