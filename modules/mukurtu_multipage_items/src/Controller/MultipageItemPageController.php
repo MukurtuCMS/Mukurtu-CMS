@@ -157,7 +157,7 @@ class MultipageItemPageController extends ControllerBase {
     }
 
     // Node cannot be in an existing MPI.
-    if($this->multipageItemManager->getMultipageEntity($node)) {
+    if ($this->multipageItemManager->getMultipageEntity($node)) {
       return AccessResult::forbidden();
     }
 
