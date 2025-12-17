@@ -28,11 +28,12 @@
         start: this.pageIdToSlideIndex(element, initialPageId),
       }).mount();
       multipageNavSlider.on('active', (slide) => {
-        const pageId = slide.slide.firstElementChild.dataset.historyNodeId;
+        const nid = slide.slide.dataset.id;
 
-        if (this.loadPage(element, pageId)) {
+        if (this.loadPage(element, nid)) {
           // Change the TOC if we switched pages successfully.
-          tocElement.value = pageId;
+          tocElement.value = nid;
+          this.updateTaskLinks(nid);
         }
       });
       element.multipageNavSlider = multipageNavSlider;
@@ -97,6 +98,33 @@
         }
       }
       return 0;
+    },
+
+    /**
+     * Update the local tasks to reflect the active tab.
+     *
+     * @param {int|string} nid
+     *   The nid of the active pane.
+     */
+    updateTaskLinks: function(nid) {
+      const patterns = [
+        /node\/(\d+)/
+      ];
+      const localTasksElements = document.querySelectorAll('.local-tasks');
+      localTasksElements.forEach((localTasks) => {
+        const anchors = localTasks.querySelectorAll('a');
+        anchors.forEach((anchor) => {
+          let href = anchor.getAttribute('href');
+          if (href) {
+            patterns.forEach((pattern) => {
+              href = href.replace(pattern, (match, anchorNid) => {
+                return match.replace(anchorNid, nid);
+              });
+            });
+            anchor.setAttribute('href', href);
+          }
+        })
+      })
     }
   };
 })(Drupal, once, Splide, history);

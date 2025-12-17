@@ -1,26 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_multipage_items;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\node\NodeInterface;
 
+/**
+ * Multipage item manager for loading an MPI from a node.
+ */
 class MultipageItemManager {
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
 
   /**
    * Constructs an MultipageItemManager object.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
-    $this->entityTypeManager = $entity_type_manager;
-  }
+  public function __construct(protected EntityTypeManagerInterface $entityTypeManager) {}
 
   /**
    * Get the multipage_item entity that contains the node as a page.
@@ -31,7 +29,7 @@ class MultipageItemManager {
    * @return \Drupal\mukurtu_multipage_items\MultipageItemInterface|null
    *   The multipage_item entity or NULL if the node is not in a MPI.
    */
-  public function getMultipageEntity($node) {
+  public function getMultipageEntity(NodeInterface $node): ?MultipageItemInterface {
     $query = $this->entityTypeManager->getStorage('multipage_item')->getQuery();
 
     // CRs cannot be pages. Follow the OR relationship if node is a CR.
@@ -48,8 +46,9 @@ class MultipageItemManager {
       ->execute();
 
     if (!empty($result)) {
-      $mpiId = reset($result);
-      return $this->entityTypeManager->getStorage('multipage_item')->load($mpiId);
+      $mpi_id = reset($result);
+      $mpi = $this->entityTypeManager->getStorage('multipage_item')->load($mpi_id);
+      return $mpi instanceof MultipageItemInterface ? $mpi : NULL;
     }
     return NULL;
   }
