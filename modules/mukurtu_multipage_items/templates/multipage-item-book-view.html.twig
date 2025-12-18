@@ -1,5 +1,5 @@
 <div class="multipage-items">
-  {% if pages %}
+  {% if pages|length > 1 %}
     <div class="splide__wrapper">
       <section class="splide multipage-carousel" aria-label="Multipage Item Carousel">
         <div class="splide__track" id="mukurtu-multipage-item-page-nav" {{ page_nav_attributes }}>
@@ -13,7 +13,7 @@
     </div>
   {% endif %}
 
-  {% if table_of_contents %}
+  {% if table_of_contents and pages|length > 1 %}
     <div class="multipage-carousel__navigation">
       {{ table_of_contents }}
     </div>

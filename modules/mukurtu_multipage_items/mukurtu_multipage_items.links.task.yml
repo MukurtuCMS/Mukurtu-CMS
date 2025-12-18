@@ -16,7 +16,7 @@ entity.multipage_item.delete_form:
   base_route: entity.multipage_item.canonical
   weight: 10
 entity.multipage_item.collection:
-  title: Multi-page Items
+  title: Multipage Items
   route_name: entity.multipage_item.collection
   base_route: system.admin_content
   weight: 10

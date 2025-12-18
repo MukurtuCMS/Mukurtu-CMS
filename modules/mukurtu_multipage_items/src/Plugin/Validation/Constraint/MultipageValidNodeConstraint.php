@@ -1,19 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_multipage_items\Plugin\Validation\Constraint;
 
-use Symfony\Component\Validator\Constraint;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Validation\Attribute\Constraint;
+use Symfony\Component\Validator\Constraint as SymfonyConstraint;
 
 /**
  * Checks that the node to be added to MPI pages is valid.
- *
- * @Constraint(
- *   id = "MultipageValidNode",
- *   label = @Translation("Multipage Valid Node", context = "Validation"),
- *   type = "string"
- * )
  */
-class MultipageValidNodeConstraint extends Constraint {
+#[Constraint(
+  id: 'MultipageValidNode',
+  label: new TranslatableMarkup('Multipage Valid Node', [], ['context' => 'Validation']),
+  type: 'string'
+)]
+class MultipageValidNodeConstraint extends SymfonyConstraint {
 
   public $isDuplicate = '%value is a duplicate.';
 
