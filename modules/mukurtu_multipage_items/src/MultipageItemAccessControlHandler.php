@@ -6,6 +6,8 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\node\NodeInterface;
 
 /**
  * Access controller for the Multipage Item entity.
@@ -35,8 +37,28 @@ class MultipageItemAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    // @todo TBD.
-    return AccessResult::allowed();
+    $node = $context['node'] ?? NULL;
+    if (!$node instanceof NodeInterface && !$node instanceof CulturalProtocolControlledInterface) {
+      return AccessResult::neutral()->addCacheableDependency($node);
+    }
+    // If the account has permission globally to administer multipage items,
+    // grant access.
+    if ($account->hasPermission('administer multipage item')) {
+      return AccessResult::allowed()->addCacheableDependency($node);
+    }
+    // Check for the multipage item admin permission in one of the owning
+    // protocols.
+    if ($protocols = $node->getProtocolEntities()) {
+      foreach ($protocols as $protocol) {
+        $membership = $protocol->getMembership($account);
+        if ($membership && $membership->hasPermission('administer multipage item')) {
+          return AccessResult::allowed()
+            ->addCacheableDependency($node)
+            ->addCacheableDependency($membership);
+        }
+      }
+    }
+    return AccessResult::forbidden()->addCacheableDependency($node);
   }
 
 }

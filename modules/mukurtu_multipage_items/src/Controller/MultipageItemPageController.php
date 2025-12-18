@@ -163,7 +163,7 @@ class MultipageItemPageController extends ControllerBase {
     }
 
     // User must be able to create MPIs.
-    $access = $access_handler->createAccess('multipage_item', $account, [], TRUE);
+    $access = $access_handler->createAccess('multipage_item', $account, ['node' => $node], TRUE);
     assert($access instanceof AccessResultInterface);
     assert($access instanceof RefinableCacheableDependencyInterface);
     if (!$access->isForbidden()) {
