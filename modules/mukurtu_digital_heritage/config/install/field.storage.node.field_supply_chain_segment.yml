@@ -4,8 +4,8 @@ dependencies:
   module:
     - node
     - taxonomy
-id: node.supply_chain_segment
-field_name: supply_chain_segment
+id: node.field_supply_chain_segment
+field_name: field_supply_chain_segment
 entity_type: node
 type: entity_reference
 settings:

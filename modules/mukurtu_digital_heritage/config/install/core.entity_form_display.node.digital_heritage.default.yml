@@ -6,7 +6,7 @@ dependencies:
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_vessel_gear_type
-    - field.field.node.digital_heritage.supply_chain_segment
+    - field.field.node.digital_heritage.field_supply_chain_segment
     - node.type.digital_heritage
   module:
     - comment

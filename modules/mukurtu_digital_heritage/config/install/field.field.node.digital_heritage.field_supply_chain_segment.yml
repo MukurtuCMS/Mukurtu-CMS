@@ -2,11 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.supply_chain_segment
+    - field.storage.node.field_supply_chain_segment
     - node.type.digital_heritage
     - taxonomy.vocabulary.supply_chain_segment
-id: node.digital_heritage.supply_chain_segment
-field_name: supply_chain_segment
+id: node.digital_heritage.field_supply_chain_segment
+field_name: field_supply_chain_segment
 entity_type: node
 bundle: digital_heritage
 label: 'Supply Chain Segment'
