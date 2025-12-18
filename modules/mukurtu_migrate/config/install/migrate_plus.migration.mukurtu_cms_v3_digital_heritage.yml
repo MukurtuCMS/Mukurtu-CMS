@@ -232,7 +232,11 @@ process:
   field_vessel_gear_type:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_vessel_gear_type
-    source: field_gear_type
+    source: field_vessel_gear_type
+  field_supply_chain_segment:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_supply_chain_segment
+    source: field_supply_chain_segment
 
   # This only works if we maintain nids. Self migration_lookup wasn't working for me...
   field_mukurtu_original_record: field_community_record_parent
@@ -276,6 +280,7 @@ migration_dependencies:
     - mukurtu_cms_v3_users
     - mukurtu_cms_v3_users_uid1
     - mukurtu_cms_v3_terms_vessel_gear_type
+    - mukurtu_cms_v3_terms_supply_chain_segment
   optional:
     - d7_field_instance
 include: null

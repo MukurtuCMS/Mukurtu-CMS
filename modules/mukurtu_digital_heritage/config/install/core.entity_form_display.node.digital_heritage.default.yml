@@ -6,6 +6,7 @@ dependencies:
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_vessel_gear_type
+    - field.field.node.digital_heritage.supply_chain_segment
     - node.type.digital_heritage
   module:
     - comment
@@ -50,6 +51,7 @@ third_party_settings:
         - field_original_date
         - field_date_description
         - field_vessel_gear_type
+        - field_supply_chain_segment
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -623,6 +625,16 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_vessel_gear_type:
+    type: options_buttons
+    weight: 33
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_supply_chain_segment:
     type: options_buttons
     weight: 33
     region: content

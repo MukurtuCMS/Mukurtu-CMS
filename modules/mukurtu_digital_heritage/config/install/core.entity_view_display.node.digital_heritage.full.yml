@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_vessel_gear_type
+    - field.field.node.digital_heritage.field_supply_chain_segment
     - node.type.digital_heritage
   module:
     - comment
@@ -83,6 +84,7 @@ third_party_settings:
         - field_title
         - field_category
         - field_vessel_gear_type
+        - field_supply_chain_segment
         - field_keywords
         - field_creator
         - field_contributor
@@ -516,6 +518,14 @@ content:
     weight: 39
     region: content
   field_vessel_gear_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 40
+    region: content
+  field_supply_chain_segment:
     type: entity_reference_label
     label: above
     settings:
