@@ -3,8 +3,10 @@
 namespace Drupal\mukurtu_multipage_items\Controller;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityInterface;
@@ -142,27 +144,39 @@ class MultipageItemPageController extends ControllerBase {
     return $build;
   }
 
-
-  public function newFromNodeAccess(AccountInterface $account, NodeInterface $node) {
+  /**
+   * Checks access to create a new multipage item from a node.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The account to check access for.
+   * @param \Drupal\node\NodeInterface $node
+   *   The node to create a multipage item from.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   */
+  public function newFromNodeAccess(AccountInterface $account, NodeInterface $node): AccessResultInterface {
     $access_handler = $this->entityTypeManager()->getAccessControlHandler('multipage_item');
     // Node must be of a bundle that has been enabled for MPI.
-    $enabledBundles = $this->config('mukurtu_multipage_items.settings')->get('bundles_config');
-    if (!isset($enabledBundles[$node->bundle()]) || $enabledBundles[$node->bundle()] != 1) {
-      return AccessResult::forbidden();
+    $enabled_bundles = $this->config('mukurtu_multipage_items.settings')->get('bundles_config');
+    if (!isset($enabled_bundles[$node->bundle()]) || $enabled_bundles[$node->bundle()] != 1) {
+      return AccessResult::forbidden()->addCacheableDependency($node);
     }
 
     // User must be able to create MPIs.
-    if (!$access_handler->createAccess()) {
-      return AccessResult::forbidden();
+    $access = $access_handler->createAccess('multipage_item', $account, [], TRUE);
+    assert($access instanceof AccessResultInterface);
+    assert($access instanceof RefinableCacheableDependencyInterface);
+    if (!$access->isForbidden()) {
+      // Node cannot be in an existing MPI.
+      if ($this->multipageItemManager->getMultipageEntity($node)) {
+        $access = $access->orIf(AccessResult::forbidden($this->t('Node is already part of an MPI.')));
+      }
+      // User must have edit access to the item as well.
+      $access = $access->orIf($node->access('update', $account, TRUE));
     }
+    $access->addCacheableDependency($node);
 
-    // Node cannot be in an existing MPI.
-    if ($this->multipageItemManager->getMultipageEntity($node)) {
-      return AccessResult::forbidden();
-    }
-
-    // User must have edit access to the item as well.
-    return $node->access('update', $account, TRUE);
+    return $access;
   }
 
   public function getSelectedPageAjax(NodeInterface $page) {
