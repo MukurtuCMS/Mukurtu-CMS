@@ -14,6 +14,7 @@ permissions:
   - 'add user'
   - 'administer comments'
   - 'administer community records'
+  - 'administer multipage item'
   - 'administer permissions'
   - 'apply protocol'
   - 'create audio media'
