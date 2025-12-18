@@ -6,7 +6,7 @@ use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\TypedData\ComputedItemListTrait;
 
 /**
- * TermStatusItemList class to generate a computed field.
+ * RepresentativeMediaItemList class to generate a computed field.
  */
 class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
   use ComputedItemListTrait;
@@ -16,9 +16,8 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
    */
   protected function computeValue() {
     $entity = $this->getEntity();
-    $user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
 
-    $media_fields = ['field_media_assets', 'field_collection_image'];
+    $media_fields = ['field_thumbnail', 'field_media_assets', 'field_collection_image'];
 
     // Check available media fields. Find the first media item that is
     // accessible to the user and return that. This seems very heavy
@@ -32,7 +31,7 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
             $target = $media_ref->getValue()['target_id'] ?? NULL;
             if ($target) {
               $media = \Drupal::entityTypeManager()->getStorage('media')->load($media_ref->target_id);
-              if ($media && $media->access('view', $user)) {
+              if ($media && $media->access('view')) {
                 $this->list[0] = $this->createItem(0, $media->id());
                 return;
               }
