@@ -49,6 +49,7 @@ third_party_settings:
         - field_contributor
         - field_original_date
         - field_date_description
+        - field_vessel_gear_type
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -108,7 +109,6 @@ third_party_settings:
         - field_transcription
         - field_people
         - group_locations
-        - field_vessel_gear_type
       label: 'Additional Fields'
       region: content
       parent_name: group_main_tab
@@ -623,7 +623,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_vessel_gear_type:
-    type: entity_reference_autocomplete
+    type: options_buttons
     weight: 33
     region: content
     settings:

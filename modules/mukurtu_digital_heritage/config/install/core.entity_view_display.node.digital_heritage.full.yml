@@ -82,6 +82,7 @@ third_party_settings:
       children:
         - field_title
         - field_category
+        - field_vessel_gear_type
         - field_keywords
         - field_creator
         - field_contributor
@@ -114,7 +115,6 @@ third_party_settings:
         - field_publisher
         - field_subject
         - field_type
-        - field_vessel_gear_type
         - field_format
         - field_external_links
       label: 'Additional Metadata'
