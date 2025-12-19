@@ -1,7 +1,7 @@
 langcode: en
 status: true
 dependencies: {  }
-name: Gear Type
+name: Vessel Gear Type
 vid: vessel_gear_type
 description: null
 weight: 0

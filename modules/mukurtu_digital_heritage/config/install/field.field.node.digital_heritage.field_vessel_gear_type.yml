@@ -9,8 +9,8 @@ id: node.digital_heritage.field_vessel_gear_type
 field_name: field_vessel_gear_type
 entity_type: node
 bundle: digital_heritage
-label: 'Gear Type'
-description: 'Select one or more gear types. Gear types must first be created by a Mukurtu Manager.'
+label: 'Vessel Gear Type'
+description: 'Select one or more vessel gear types. Vessel gear types must first be created by a Mukurtu Manager.'
 required: false
 translatable: false
 default_value: {  }
