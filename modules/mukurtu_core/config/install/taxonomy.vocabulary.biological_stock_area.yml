@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: Fishing Area
+vid: biological_stock_area
+description: null
+weight: 0
+new_revision: false

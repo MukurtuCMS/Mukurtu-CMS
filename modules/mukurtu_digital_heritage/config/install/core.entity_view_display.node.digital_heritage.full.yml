@@ -8,6 +8,7 @@ dependencies:
     - field.field.node.digital_heritage.field_content_type
     - node.type.digital_heritage
     - field.field.node.digital_heritage.field_supply_chain_segment
+    - field.field.node.digital_heritage.field_biological_stock_area
   module:
     - comment
     - entity_reference_revisions
@@ -87,6 +88,7 @@ third_party_settings:
         - field_contributor
         - field_people
         - field_supply_chain_segment
+        - field_biological_stock_area
       label: 'Sidebar - Mukurtu fields'
       parent_name: group_metadata
       region: content
@@ -521,6 +523,14 @@ content:
     weight: 20
     region: content
   field_supply_chain_segment:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 50
+    region: content
+  field_biological_stock_area:
     type: entity_reference_label
     label: above
     settings:
