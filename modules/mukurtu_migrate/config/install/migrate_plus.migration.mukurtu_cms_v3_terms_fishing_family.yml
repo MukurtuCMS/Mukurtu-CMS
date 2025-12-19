@@ -12,7 +12,7 @@ cck_plugin_method: null
 migration_tags:
   - 'Mukurtu 3'
 migration_group: mukurtu_cms_v3
-label: "Taxonomy Terms - Fishing Family
+label: "Taxonomy Terms - Fishing Family"
 source:
   plugin: d7_taxonomy_term
   bundle: fishing_family
