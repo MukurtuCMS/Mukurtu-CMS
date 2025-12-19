@@ -63,7 +63,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
       else {
         $this->context->buildViolation($constraint->isDuplicate)
           ->setParameter('%value', $this->getTitle($target_id))
-          ->atPath((string) $delta . '.target_id')
+          ->atPath($delta . '.target_id')
           ->setInvalidValue($target_id)
           ->addViolation();
       }
@@ -72,7 +72,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
       if ($this->alreadyInMPI($target_id)) {
         $this->context->buildViolation($constraint->alreadyInMPI)
           ->setParameter('%value', $this->getTitle($target_id))
-          ->atPath((string) $delta . '.target_id')
+          ->atPath($delta . '.target_id')
           ->setInvalidValue($target_id)
           ->addViolation();
       }
@@ -80,7 +80,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
       if ($this->isCommunityRecord($target_id)) {
         $this->context->buildViolation($constraint->isCommunityRecord)
           ->setParameter('%value', $this->getTitle($target_id))
-          ->atPath((string) $delta . '.target_id')
+          ->atPath($delta . '.target_id')
           ->setInvalidValue($target_id)
           ->addViolation();
       }
@@ -88,7 +88,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
       if (!$this->isEnabledBundleType($target_id)) {
         $this->context->buildViolation($constraint->notEnabledBundleType)
           ->setParameter('%value', $this->getTitle($target_id))
-          ->atPath((string) $delta . '.target_id')
+          ->atPath($delta . '.target_id')
           ->setInvalidValue($target_id)
           ->addViolation();
       }

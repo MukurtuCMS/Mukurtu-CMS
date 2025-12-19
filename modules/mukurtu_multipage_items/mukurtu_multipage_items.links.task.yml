@@ -23,7 +23,7 @@ entity.multipage_item.collection:
 
 
 entity.node.create_multipage:
-  title: Create Multi-page Item
+  title: Create Multipage Item
   route_name: mukurtu_multipage_items.new_multipage_from_node
   base_route: entity.node.canonical
   weight: 60
