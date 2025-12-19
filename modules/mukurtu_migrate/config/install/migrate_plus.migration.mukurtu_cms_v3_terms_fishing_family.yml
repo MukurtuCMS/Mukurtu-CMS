@@ -1,0 +1,52 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_migrate
+id: mukurtu_cms_v3_terms_fishing_family
+class: null
+idMap: {  }
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Mukurtu 3'
+migration_group: mukurtu_cms_v3
+label: "Taxonomy Terms - Fishing Family
+source:
+  plugin: d7_taxonomy_term
+  bundle: fishing_family
+process:
+  # If you are using this file to build a custom migration consider removing
+  # the tid field to allow incremental migrations.
+  tid: tid
+  langcode: language
+  vid:
+    plugin: default_value
+    default_value: fishing_family
+  name: name
+  description/value: description
+  description/format:
+    plugin: default_value
+    default_value: basic_html
+  weight: weight
+  # Only attempt to stub real (non-zero) parents.
+  parent_id:
+    -
+      plugin: skip_on_empty
+      method: process
+      source: parent
+    -
+      plugin: migration_lookup
+      migration: d7_taxonomy_term
+  parent:
+    plugin: default_value
+    default_value: 0
+    source: '@parent_id'
+  changed: timestamp
+destination:
+  plugin: 'entity:taxonomy_term'
+migration_dependencies:
+  optional:
+    - d7_field_instance
+include: null

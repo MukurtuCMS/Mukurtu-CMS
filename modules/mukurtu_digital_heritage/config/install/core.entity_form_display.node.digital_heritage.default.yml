@@ -6,6 +6,10 @@ dependencies:
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_vessel_gear_type
+    - field.field.node.digital_heritage.field_biological_stock_area
+    - field.field.node.digital_heritage.field_fish_species
+    - field.field.node.digital_heritage.field_fishing_family
+    - field.field.node.digital_heritage.field_specific_fishing_fleet
     - field.field.node.digital_heritage.field_supply_chain_segment
     - node.type.digital_heritage
   module:
@@ -52,6 +56,10 @@ third_party_settings:
         - field_date_description
         - field_vessel_gear_type
         - field_supply_chain_segment
+        - field_biological_stock_area
+        - field_fish_species
+        - field_fishing_family
+        - field_specific_fishing_fleet
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -644,6 +652,46 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_biological_stock_area:
+    type: options_buttons
+    weight: 33
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_fish_species:
+    type: options_buttons
+    weight: 33
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_fishing_family:
+    type: options_buttons
+    weight: 33
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_specific_fishing_fleet:
+    type: options_buttons
+    weight: 33
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }  
   langcode:
     type: language_select
     weight: 2

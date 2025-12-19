@@ -8,6 +8,10 @@ dependencies:
     - field.field.node.digital_heritage.field_content_type
     - field.field.node.digital_heritage.field_vessel_gear_type
     - field.field.node.digital_heritage.field_supply_chain_segment
+    - field.field.node.digital_heritage.field_biological_stock_area
+    - field.field.node.digital_heritage.field_fish_species
+    - field.field.node.digital_heritage.field_fishing_family
+    - field.field.node.digital_heritage.field_specific_fishing_fleet
     - node.type.digital_heritage
   module:
     - comment
@@ -85,6 +89,10 @@ third_party_settings:
         - field_category
         - field_vessel_gear_type
         - field_supply_chain_segment
+        - field_biological_stock_area
+        - field_fish_species
+        - field_fishing_family
+        - field_specific_fishing_fleet
         - field_keywords
         - field_creator
         - field_contributor
@@ -526,6 +534,38 @@ content:
     weight: 40
     region: content
   field_supply_chain_segment:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 40
+    region: content
+  field_biological_stock_area:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 40
+    region: content
+  field_fish_species:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 40
+    region: content
+  field_fishing_family:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 40
+    region: content
+  field_specific_fishing_fleet:
     type: entity_reference_label
     label: above
     settings:

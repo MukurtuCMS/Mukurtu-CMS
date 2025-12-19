@@ -280,7 +280,11 @@ migration_dependencies:
     - mukurtu_cms_v3_users
     - mukurtu_cms_v3_users_uid1
     - mukurtu_cms_v3_terms_vessel_gear_type
+    - mukurtu_cms_v3_terms_biological_stock_area
     - mukurtu_cms_v3_terms_supply_chain_segment
+    - mukurtu_cms_v3_terms_fish_species
+    - mukurtu_cms_v3_terms_fishing_family
+    - mukurtu_cms_v3_terms_specific_fishing_fleet
   optional:
     - d7_field_instance
 include: null
