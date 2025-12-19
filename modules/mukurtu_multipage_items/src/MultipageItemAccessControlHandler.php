@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_multipage_items;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -38,13 +39,17 @@ class MultipageItemAccessControlHandler extends EntityAccessControlHandler {
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
     $node = $context['node'] ?? NULL;
-    if (!$node instanceof NodeInterface && !$node instanceof CulturalProtocolControlledInterface) {
-      return AccessResult::neutral()->addCacheableDependency($node);
-    }
     // If the account has permission globally to administer multipage items,
     // grant access.
     if ($account->hasPermission('administer multipage item')) {
-      return AccessResult::allowed()->addCacheableDependency($node);
+      $access = AccessResult::allowed();
+      if ($node instanceof CacheableDependencyInterface) {
+        $access = $access->addCacheableDependency($node);
+      }
+      return $access;
+    }
+    if (!$node instanceof NodeInterface && !$node instanceof CulturalProtocolControlledInterface) {
+      return AccessResult::neutral()->addCacheableDependency($node);
     }
     // Check for the multipage item admin permission in one of the owning
     // protocols.
