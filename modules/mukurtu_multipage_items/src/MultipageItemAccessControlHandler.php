@@ -30,7 +30,7 @@ class MultipageItemAccessControlHandler extends EntityAccessControlHandler {
       return parent::checkAccess($entity, $operation, $account);
     }
     return $firstPage->access($operation, $account, TRUE)
-      ->andIf(parent::checkAccess($entity, $operation, $account));
+      ->orIf(parent::checkAccess($entity, $operation, $account));
   }
 
   /**

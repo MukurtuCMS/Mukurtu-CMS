@@ -169,7 +169,7 @@ class MultipageItemPageController extends ControllerBase {
     if (!$access->isForbidden()) {
       // Node cannot be in an existing MPI.
       if ($this->multipageItemManager->getMultipageEntity($node)) {
-        $access = $access->orIf(AccessResult::forbidden($this->t('Node is already part of an MPI.')));
+        $access = $access->orIf(AccessResult::forbidden('Node is already part of an MPI.'));
       }
       // User must have edit access to the item as well.
       $access = $access->orIf($node->access('update', $account, TRUE));
@@ -206,7 +206,7 @@ class MultipageItemPageController extends ControllerBase {
    * @param NodeInterface $node
    *   The page node to view.
    *
-   * @return \Drupal\Core\Access\AccessResult
+   * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
   public function viewAccess(AccountInterface $account, NodeInterface $node) {
@@ -225,13 +225,13 @@ class MultipageItemPageController extends ControllerBase {
    * @param NodeInterface $node
    *   The page node to of the multipage item to edit.
    *
-   * @return \Drupal\Core\Access\AccessResult
+   * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
   public function editAccess(AccountInterface $account, NodeInterface $node) {
     $mpi = $this->multipageItemManager->getMultipageEntity($node);
     if ($mpi) {
-      return $mpi->access('edit', $account, TRUE);
+      return $mpi->access('update', $account, TRUE);
     }
     return AccessResult::forbidden();
   }
