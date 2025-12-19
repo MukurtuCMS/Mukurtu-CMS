@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
     - node.type.digital_heritage
+    - field.field.node.digital_heritage.field_supply_chain_segment
   module:
     - comment
     - entity_reference_revisions
@@ -85,6 +86,7 @@ third_party_settings:
         - field_creator
         - field_contributor
         - field_people
+        - field_supply_chain_segment
       label: 'Sidebar - Mukurtu fields'
       parent_name: group_metadata
       region: content
@@ -517,6 +519,14 @@ content:
     settings: {  }
     third_party_settings: {  }
     weight: 20
+    region: content
+  field_supply_chain_segment:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 50
     region: content
 hidden:
   draft: true
