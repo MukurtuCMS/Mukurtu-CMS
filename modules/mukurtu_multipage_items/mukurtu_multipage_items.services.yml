@@ -7,3 +7,6 @@ services:
     class: Drupal\mukurtu_multipage_items\MultipageItemManager
     arguments: ['@entity_type.manager']
   Drupal\mukurtu_multipage_items\MultipageItemManager: '@mukurtu_multipage_items.multipage_item_manager'
+  Drupal\mukurtu_multipage_items\EventSubscriber\MukurtuMultipageItemEventSubscriber:
+    tags:
+      - { name: 'event_subscriber' }
