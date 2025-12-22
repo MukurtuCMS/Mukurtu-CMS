@@ -1,4 +1,4 @@
-mukurtu_multilingual.manage_languages:
+entity.configurable_language.collection:
   title: 'Manage site languages'
   description: 'Manage site languages.'
   route_name: entity.configurable_language.collection
