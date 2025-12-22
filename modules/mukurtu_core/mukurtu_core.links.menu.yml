@@ -60,3 +60,9 @@ mukurtu_core.appearance_settings:
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
   route_name: mukurtu_core.appearance_settings
+mukurtu_core.entity.google_tag_container.collection:
+  title: 'Google Tag'
+  description: 'Configure the website integration with Google Tag and Google Tag Manager.'
+  route_name: entity.google_tag_container.single_form
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
