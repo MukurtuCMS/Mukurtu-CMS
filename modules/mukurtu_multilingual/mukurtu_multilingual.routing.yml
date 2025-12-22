@@ -1,0 +1,7 @@
+mukurtu_multilingual.manage_languages:
+  path: '/admin/config/regional/language'
+  defaults:
+    _form: 'configurable_language'
+    _title: 'Manage site languages'
+  requirements:
+    _permission: 'administer languages'
