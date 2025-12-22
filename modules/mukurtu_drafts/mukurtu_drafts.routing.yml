@@ -1,0 +1,5 @@
+mukurtu_drafts.your_drafts:
+  path: '/user/drafts'
+  defaults:
+    _title: 'Your Drafts'
+    _access: 'TRUE'
