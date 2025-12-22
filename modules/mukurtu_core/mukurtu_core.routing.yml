@@ -112,7 +112,7 @@ mukurtu_core.appearance_settings:
     _access: 'TRUE'
 
 mukurtu_core.my_account:
-  path: '/user'
+  path: '/user/{uid}'
   defaults:
    _title: 'My account'
   requirements:
