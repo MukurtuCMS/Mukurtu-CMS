@@ -1,0 +1,7 @@
+entity.configurable_language.collection:
+  path: '/admin/config/regional/language'
+  defaults:
+    _entity_list: 'configurable_language'
+    _title: 'Manage site languages'
+  requirements:
+    _permission: 'administer languages'
