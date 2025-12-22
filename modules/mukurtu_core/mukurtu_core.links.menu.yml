@@ -73,4 +73,4 @@ mukurtu_core.create_basic_page_dashboard:
   menu_name: dashboard-look-feel
   route_name: mukurtu_core.add
   route_parameters:
-    node_type: basic_page
+    node_type: page
