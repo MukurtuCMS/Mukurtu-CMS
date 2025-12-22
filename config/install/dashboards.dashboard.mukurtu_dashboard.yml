@@ -38,19 +38,6 @@ sections:
           items_per_page: null
         weight: 3
         additional: {  }
-      24d3fdd1-9a07-42ea-b88d-04d22f8cf684:
-        uuid: 24d3fdd1-9a07-42ea-b88d-04d22f8cf684
-        region: three
-        configuration:
-          id: 'views_block:export_list_content-export_content_list_block'
-          label: ''
-          label_display: visible
-          provider: views
-          context_mapping: {  }
-          views_label: ''
-          items_per_page: null
-        weight: 5
-        additional: {  }
       48e2a2ac-3168-4726-acac-eb63ac5f59a3:
         uuid: 48e2a2ac-3168-4726-acac-eb63ac5f59a3
         region: three
