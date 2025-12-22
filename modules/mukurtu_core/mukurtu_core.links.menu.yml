@@ -61,8 +61,16 @@ mukurtu_core.appearance_settings:
   menu_name: dashboard-look-feel
   route_name: mukurtu_core.appearance_settings
 mukurtu_core.entity.google_tag_container.collection:
-  title: 'Google Tag'
+  title: 'Google Tag Settings'
   description: 'Configure the website integration with Google Tag and Google Tag Manager.'
   route_name: entity.google_tag_container.single_form
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
+mukurtu_core.create_basic_page_dashboard:
+  title: 'Add a basic page'
+  description: 'Add a new basic page.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-look-feel
+  route_name: mukurtu_core.add
+  route_parameters:
+    node_type: basic_page

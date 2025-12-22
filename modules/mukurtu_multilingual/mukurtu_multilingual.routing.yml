@@ -1,4 +1,4 @@
-mukurtu_multilingual.manage_languages:
+mukurtu_multilingual.entity.configurable_language.collection:
   path: '/admin/config/regional/language'
   defaults:
     _entity_list: 'configurable_language'
