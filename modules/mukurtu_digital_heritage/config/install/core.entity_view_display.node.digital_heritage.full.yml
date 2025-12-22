@@ -538,6 +538,22 @@ content:
     third_party_settings: {  }
     weight: 50
     region: content
+  field_fish_species:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 50
+    region: content
+  field_gear_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 50
+    region: content
 hidden:
   draft: true
   field_communities: true

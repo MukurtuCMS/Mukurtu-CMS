@@ -624,13 +624,25 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_supply_chain_segment: 
+  field_supply_chain_segment:
     type: options_buttons
     weight: 50
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_biological_stock_area: 
+  field_biological_stock_area:
+    type: options_buttons
+    weight: 50
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_fish_species:
+    type: options_buttons
+    weight: 50
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_gear_type:
     type: options_buttons
     weight: 50
     region: content

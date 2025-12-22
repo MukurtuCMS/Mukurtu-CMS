@@ -1,8 +1,8 @@
 langcode: en
 status: true
 dependencies: {  }
-name: Biological Stock Area
-vid: biological_stock_area
+name: Fish Species
+vid: fish_species
 description: null
 weight: 0
 new_revision: false
