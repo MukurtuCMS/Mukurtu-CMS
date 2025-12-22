@@ -110,3 +110,11 @@ mukurtu_core.appearance_settings:
     _title: 'Site logo and favicon'
   requirements: 
     _access: 'TRUE'
+
+mukurtu_core.entity.google_tag_container.collection:
+  path: '/admin/config/services/google-tag/containers'
+  defaults:
+    _entity_list: 'google_tag_container'
+    _title: 'Google Tag containers'
+  requirements:
+    _custom_access: '\Drupal\google_tag\GoogleTagController::containerListingAccess'
