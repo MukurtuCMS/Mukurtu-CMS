@@ -60,9 +60,3 @@ mukurtu_core.appearance_settings:
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
   route_name: mukurtu_core.appearance_settings
-mukurtu_core.my_account:
-  title: 'My account'
-  description: 'My account page and settings.'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-my-content
-  route_name: mukurtu_core.my_account

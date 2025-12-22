@@ -110,10 +110,3 @@ mukurtu_core.appearance_settings:
     _title: 'Site logo and favicon'
   requirements: 
     _access: 'TRUE'
-
-mukurtu_core.my_account:
-  path: '/user/{user}'
-  defaults:
-   _title: 'My account'
-  requirements:
-    _access: 'TRUE'
