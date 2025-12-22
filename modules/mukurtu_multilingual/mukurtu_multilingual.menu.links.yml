@@ -1,7 +1,6 @@
-
 mukurtu_multilingual.manage_languages:
   title: 'Manage site languages'
   description: 'Manage site languages.'
-  route_name: mukurtu_multilingual.manage_languages
+  route_name: entity.configurable_language.collection
   parent: mukurtu_dashboard
   menu_name: dashboard-multilingual
