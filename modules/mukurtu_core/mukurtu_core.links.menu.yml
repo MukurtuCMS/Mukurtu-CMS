@@ -47,12 +47,12 @@ mukurtu_core.people:
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   route_name: mukurtu_core.people
-mukurtu_core.create_user:
-  title: 'Add user'
-  description: 'Create a new user account.'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-users
-  route_name: mukurtu_core.create_user
+# mukurtu_core.create_user:
+#   title: 'Add user'
+#   description: 'Create a new user account.'
+#   parent: mukurtu_dashboard
+#   menu_name: dashboard-users
+#   route_name: mukurtu_core.create_user
 mukurtu_core.appearance_settings:
   title: 'Logo and favicon'
   description: 'Change logo and favicon'

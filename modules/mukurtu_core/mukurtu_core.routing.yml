@@ -14,7 +14,6 @@ mukurtu_core.dashboard:
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
 
-
 mukurtu_core.add_page:
   path: '/admin/node/add'
   defaults:
@@ -47,12 +46,12 @@ mukurtu_core.people:
   requirements:
     _permission: 'administer users'
 
-mukurtu_core.create_user:
-  path: '/admin/people/create'
-  defaults:
-    _title: 'Create new user account'
-  requirements:
-    _permission: 'administer users'
+# mukurtu_core.create_user:
+#   path: '/admin/people/create'
+#   defaults:
+#     _title: 'Create new user account'
+#   requirements:
+#     _permission: 'administer users'
 
 mukurtu_core.approve_user:
   path: '/user/{uid}/approve'
