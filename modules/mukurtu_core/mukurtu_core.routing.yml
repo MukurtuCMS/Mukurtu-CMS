@@ -47,6 +47,13 @@ mukurtu_core.people:
   requirements:
     _permission: 'administer users'
 
+mukurtu_core.create_user:
+  path: '/admin/people/create'
+  defaults:
+    _title: 'Create new user account'
+  requirements:
+    _permission: 'administer users'
+
 mukurtu_core.approve_user:
   path: '/user/{uid}/approve'
   defaults:

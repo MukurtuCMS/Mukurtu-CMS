@@ -4,7 +4,7 @@ mukurtu_protocol.community_manager_create_user:
     _form: '\Drupal\mukurtu_protocol\Form\CommunityManagerUserCreationForm'
     _title: 'Add User'
   requirements:
-    _mukurtu_permission: 'community:manage members+administer users'
+    _mukurtu_permission: 'community:manage members'
 
 mukurtu_protocol.communities_page:
   path: '/communities'
