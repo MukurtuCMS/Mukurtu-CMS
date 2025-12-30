@@ -38,7 +38,8 @@
         .field--name-field-additional-word-entries,
         .field--name-field-word-entry-term + div.field,
         .dictionary-word-subheading + div.field,
-        .field--name-title)) {
+        .field--name-title,
+        .dictionary-word__teaser .field)) {
       @include mixins.divider;
     }
 

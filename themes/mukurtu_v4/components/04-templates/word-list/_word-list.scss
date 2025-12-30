@@ -2,13 +2,17 @@
 
 // Individual word list pages.
 .word-list {
-  .field--name-field-description {
-    margin-block-end: var(--v-space-s);
-
-    @include layout.layout--full-width-grid-item;
+  .field--name-field-all-related-content > .field__items > .field__item:last-child .horizontal-card {
+    border-block-end: none;
+    padding-block-end: 0;
   }
 
-  .word-list__items__label {
-    font-weight: var(--text-bold);
+  .field--name-field-words {
+    padding-inline: 0;
+    list-style: none;
+
+    li {
+      list-style: none;
+    }
   }
 }
