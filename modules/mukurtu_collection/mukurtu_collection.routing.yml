@@ -59,6 +59,7 @@ mukurtu_collection.collection_organization:
     _title: 'Manage Collection Organization'
     _controller: '\Drupal\mukurtu_collection\Controller\CollectionOrganizationController::build'
   options:
+    _admin_route: TRUE
     parameters:
       node:
         type: entity:node
