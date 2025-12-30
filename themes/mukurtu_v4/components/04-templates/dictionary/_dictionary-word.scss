@@ -48,25 +48,17 @@
     }
   }
 
-  // stylelint-disable-next-line no-descending-specificity
-  .field--name-field-additional-word-entries > .field__item,
+  .additional-word-entries,
   .additional-fields {
     @include mixins.divider;
 
     border-width: var(--v-space-4xs);
     margin-block-start: var(--v-space-l);
-    padding-block-start: var(--v-space-l);
+    padding-block-start: var(--v-space-xs);
   }
 
-  .additional-fields {
-    &::before {
-      content: 'Additional Information';
-      display: block;
-      font-size: var(--font-size-m);
-      font-weight: var(--text-bold);
-      color: var(--brand-text-color);
-      margin-block-end: var(--v-space-xs);
-    }
+  .dictionary-word-subheading {
+    margin-block-end: var(--v-space-xs);
   }
 
   .field--name-field-related-content {
