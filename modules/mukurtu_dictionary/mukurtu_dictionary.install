@@ -7,6 +7,7 @@
 
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
+use Drupal\user\Entity\Role;
 
 /**
  * Implements hook_install().
@@ -33,4 +34,11 @@ function mukurtu_dictionary_install() {
   $languageContributorRole->setGroupType('language_community');
   $languageContributorRole->setGroupBundle('language_community');
   $languageContributorRole->save();
+
+  // Grant dictionary glossary order permission to mukurtu_manager role.
+  $role = Role::load('mukurtu_manager');
+  if ($role) {
+    $role->grantPermission('administer dictionary glossary order');
+    $role->save();
+  }
 }

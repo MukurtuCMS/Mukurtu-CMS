@@ -26,3 +26,11 @@ mukurtu_dictionary.configure_dictionary_languages:
     _title: 'Mukurtu Dictionary Languages Settings'
   requirements:
     _permission: 'administer site configuration'
+
+mukurtu_dictionary.configure_glossary_order:
+  path: '/admin/config/mukurtu/dictionary-glossary-order'
+  defaults:
+    _form: '\Drupal\mukurtu_dictionary\Form\MukurtuDictionaryGlossaryOrderForm'
+    _title: 'Dictionary Glossary Order'
+  requirements:
+    _permission: 'administer dictionary glossary order'

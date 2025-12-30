@@ -29,3 +29,31 @@ facet.widget.config.glossaryaz:
       type: integer
     enable_default_theme:
       type: integer
+
+mukurtu_dictionary_glossary_order.settings:
+  type: config_object
+  label: 'Dictionary Glossary Order Settings'
+  mapping:
+    sort_mode:
+      type: string
+      label: 'Sort mode'
+    weights:
+      type: sequence
+      label: 'Glossary entry weights'
+      sequence:
+        type: mapping
+        mapping:
+          glossary_entry:
+            type: string
+            label: 'Glossary entry value'
+          weight:
+            type: integer
+            label: 'Sort weight'
+
+plugin.plugin_configuration.facets_processor.glossary_custom_order:
+  type: mapping
+  label: 'Glossary custom sort widget order'
+  mapping:
+    sort:
+      type: string
+      label: sort order
