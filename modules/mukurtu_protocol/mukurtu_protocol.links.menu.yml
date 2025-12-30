@@ -29,7 +29,7 @@ mukurtu_protocol.community_organization:
   route_name: mukurtu_protocol.community_organization
 
 mukurtu_protocol.community_manager_create_user:
-  title: 'Add user (community managers)'
+  title: 'Add user'
   description: 'Add a new user and enrol them in communities.'
   parent: mukurtu_dashboard
   menu_name: dashboard-users
