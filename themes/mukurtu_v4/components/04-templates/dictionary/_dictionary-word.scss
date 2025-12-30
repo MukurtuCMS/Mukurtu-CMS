@@ -174,7 +174,7 @@
       flex: 1;
     }
 
-    @include include-media.media('>=xl') {
+    @container (min-width: 34rem) {
       flex-direction: row;
     }
   }

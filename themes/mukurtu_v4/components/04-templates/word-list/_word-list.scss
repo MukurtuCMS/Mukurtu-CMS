@@ -2,6 +2,10 @@
 
 // Individual word list pages.
 .word-list {
+  .full-node__main {
+    container-type: inline-size;
+  }
+
   .field--name-field-all-related-content > .field__items > .field__item:last-child .horizontal-card {
     border-block-end: none;
     padding-block-end: 0;
@@ -9,9 +13,15 @@
 
   .field--name-field-words {
     padding-inline: 0;
-    list-style: none;
+
+    @container (min-width: 48rem) {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--gutter);
+    }
 
     li {
+      container-type: inline-size;
       list-style: none;
     }
   }

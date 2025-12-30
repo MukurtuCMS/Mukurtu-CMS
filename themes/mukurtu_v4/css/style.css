@@ -4728,7 +4728,7 @@ header {
       -ms-flex: 1;
           flex: 1;
 }
-@media (min-width: 80rem) {
+@container (min-width: 34rem) {
   .dictionary-word__teaser .dictionary-word__media {
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
@@ -5201,6 +5201,9 @@ header {
   background-color: var(--color-error-light);
 }
 
+.word-list .full-node__main {
+  container-type: inline-size;
+}
 .word-list .field--name-field-all-related-content > .field__items > .field__item:last-child .horizontal-card {
   -webkit-border-after: none;
           border-block-end: none;
@@ -5209,9 +5212,16 @@ header {
 }
 .word-list .field--name-field-words {
   padding-inline: 0;
-  list-style: none;
+}
+@container (min-width: 48rem) {
+  .word-list .field--name-field-words {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gutter);
+  }
 }
 .word-list .field--name-field-words li {
+  container-type: inline-size;
   list-style: none;
 }
 /*# sourceMappingURL=style.css.map */
