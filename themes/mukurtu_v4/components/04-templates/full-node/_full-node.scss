@@ -120,7 +120,7 @@
       }
 
       // If multiple items, show as comma-separated list.
-      &__items {
+      &__items:where(:not(.field--name-field-all-related-content .field__items)) {
         @include mixins.inline-list;
       }
     }
