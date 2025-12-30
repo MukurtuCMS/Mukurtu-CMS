@@ -29,3 +29,7 @@ delete all language community revisions:
   title: 'Delete all revisions'
   description: 'Role requires permission to <em>view Language community revisions</em> and <em>delete rights</em> for language community entities in question or <em>administer language community entities</em>.'
 
+administer dictionary glossary order:
+  title: 'Administer Dictionary Glossary Order'
+  description: 'Manage the sort order of glossary entries in the dictionary.'
+

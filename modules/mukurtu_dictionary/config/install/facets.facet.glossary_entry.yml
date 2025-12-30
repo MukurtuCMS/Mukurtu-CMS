@@ -34,22 +34,16 @@ hard_limit: 0
 exclude: false
 only_visible_when_facet_source_is_visible: false
 processor_configs:
-  active_widget_order:
-    processor_id: active_widget_order
-    weights:
-      sort: 20
-    settings:
-      sort: DESC
-  count_widget_order:
-    processor_id: count_widget_order
-    weights:
-      sort: 30
-    settings:
-      sort: DESC
   display_value_widget_order:
     processor_id: display_value_widget_order
     weights:
       sort: 40
+    settings:
+      sort: ASC
+  glossary_custom_order:
+    processor_id: glossary_custom_order
+    weights:
+      sort: 35
     settings:
       sort: ASC
   hide_1_result_facet:
