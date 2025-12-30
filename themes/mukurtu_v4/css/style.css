@@ -4880,13 +4880,13 @@ header {
 .full-node__sidebar .sidebar-section .field__item {
   line-height: var(--line-height-s);
 }
-.full-node__sidebar .sidebar-section .field__items .field__item {
+.full-node__sidebar .sidebar-section .field__items:where(:not(.field--name-field-all-related-content .field__items)) .field__item {
   display: inline;
 }
-.full-node__sidebar .sidebar-section .field__items .field__item::after {
+.full-node__sidebar .sidebar-section .field__items:where(:not(.field--name-field-all-related-content .field__items)) .field__item::after {
   content: ", ";
 }
-.full-node__sidebar .sidebar-section .field__items .field__item:last-of-type::after {
+.full-node__sidebar .sidebar-section .field__items:where(:not(.field--name-field-all-related-content .field__items)) .field__item:last-of-type::after {
   content: "";
 }
 .full-node__sidebar .sidebar-section .field--name-field-external-links a {
