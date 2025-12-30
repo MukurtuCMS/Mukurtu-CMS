@@ -4583,7 +4583,7 @@ header {
   -webkit-padding-before: 0;
           padding-block-start: 0;
 }
-.page-node-type-dictionary-word .field--name-field-additional-word-entries > .field__item,
+.page-node-type-dictionary-word .additional-word-entries,
 .page-node-type-dictionary-word .additional-fields {
   -webkit-padding-before: var(--v-space-2xs);
           padding-block-start: var(--v-space-2xs);
@@ -4594,15 +4594,10 @@ header {
   border-width: var(--v-space-4xs);
   -webkit-margin-before: var(--v-space-l);
           margin-block-start: var(--v-space-l);
-  -webkit-padding-before: var(--v-space-l);
-          padding-block-start: var(--v-space-l);
+  -webkit-padding-before: var(--v-space-xs);
+          padding-block-start: var(--v-space-xs);
 }
-.page-node-type-dictionary-word .additional-fields::before {
-  content: "Additional Information";
-  display: block;
-  font-size: var(--font-size-m);
-  font-weight: var(--text-bold);
-  color: var(--brand-text-color);
+.page-node-type-dictionary-word .dictionary-word-subheading {
   -webkit-margin-after: var(--v-space-xs);
           margin-block-end: var(--v-space-xs);
 }
@@ -4788,8 +4783,8 @@ header {
 .field--name-field-sentence,
 .field--name-field-additional-word-entries,
 .field--name-field-word-entry-term + div.field,
-.field--name-title,
-.additional-fields > div.field)) {
+.dictionary-word-subheading + div.field,
+.field--name-title)) {
   -webkit-padding-before: var(--v-space-2xs);
           padding-block-start: var(--v-space-2xs);
   -webkit-margin-before: var(--v-space-2xs);

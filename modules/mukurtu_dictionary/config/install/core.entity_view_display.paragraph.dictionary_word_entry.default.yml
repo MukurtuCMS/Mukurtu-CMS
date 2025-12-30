@@ -13,11 +13,11 @@ mode: default
 content:
   field_alternate_spelling:
     type: string
-    label: hidden
+    label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 0
+    weight: 1
     region: content
   field_contributor:
     type: entity_reference_label
@@ -25,14 +25,14 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 9
+    weight: 10
     region: content
   field_definition:
-    type: basic_string
+    type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 3
+    weight: 4
     region: content
   field_part_of_speech:
     type: entity_reference_label
@@ -47,7 +47,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 6
+    weight: 7
     region: content
   field_recording:
     type: entity_reference_entity_view
@@ -56,7 +56,7 @@ content:
       view_mode: full
       link: false
     third_party_settings: {  }
-    weight: 2
+    weight: 3
     region: content
   field_sample_sentences:
     type: entity_reference_revisions_entity_view
@@ -65,7 +65,7 @@ content:
       view_mode: default
       link: ''
     third_party_settings: {  }
-    weight: 4
+    weight: 5
     region: content
   field_source:
     type: string
@@ -73,7 +73,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 7
+    weight: 8
     region: content
   field_translation:
     type: string
@@ -81,7 +81,15 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 1
+    weight: 2
+    region: content
+  field_word_entry_term:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
     region: content
   field_word_origin:
     type: string
@@ -89,7 +97,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 8
+    weight: 9
     region: content
   field_word_type:
     type: entity_reference_label
@@ -97,8 +105,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 5
+    weight: 6
     region: content
 hidden:
-  field_word_entry_term: true
   search_api_excerpt: true
