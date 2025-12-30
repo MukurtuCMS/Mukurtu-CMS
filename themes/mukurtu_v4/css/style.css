@@ -4728,7 +4728,7 @@ header {
       -ms-flex: 1;
           flex: 1;
 }
-@media (min-width: 80rem) {
+@container (min-width: 34rem) {
   .dictionary-word__teaser .dictionary-word__media {
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
@@ -4784,7 +4784,8 @@ header {
 .field--name-field-additional-word-entries,
 .field--name-field-word-entry-term + div.field,
 .dictionary-word-subheading + div.field,
-.field--name-title)) {
+.field--name-title,
+.dictionary-word__teaser .field)) {
   -webkit-padding-before: var(--v-space-2xs);
           padding-block-start: var(--v-space-2xs);
   -webkit-margin-before: var(--v-space-2xs);
@@ -4880,13 +4881,13 @@ header {
 .full-node__sidebar .sidebar-section .field__item {
   line-height: var(--line-height-s);
 }
-.full-node__sidebar .sidebar-section .field__items .field__item {
+.full-node__sidebar .sidebar-section .field__items:where(:not(.field--name-field-all-related-content .field__items)) .field__item {
   display: inline;
 }
-.full-node__sidebar .sidebar-section .field__items .field__item::after {
+.full-node__sidebar .sidebar-section .field__items:where(:not(.field--name-field-all-related-content .field__items)) .field__item::after {
   content: ", ";
 }
-.full-node__sidebar .sidebar-section .field__items .field__item:last-of-type::after {
+.full-node__sidebar .sidebar-section .field__items:where(:not(.field--name-field-all-related-content .field__items)) .field__item:last-of-type::after {
   content: "";
 }
 .full-node__sidebar .sidebar-section .field--name-field-external-links a {
@@ -5198,5 +5199,29 @@ header {
   border: 2px solid var(--color-error-dark);
   color: var(--color-error-dark);
   background-color: var(--color-error-light);
+}
+
+.word-list .full-node__main {
+  container-type: inline-size;
+}
+.word-list .field--name-field-all-related-content > .field__items > .field__item:last-child .horizontal-card {
+  -webkit-border-after: none;
+          border-block-end: none;
+  -webkit-padding-after: 0;
+          padding-block-end: 0;
+}
+.word-list .field--name-field-words {
+  padding-inline: 0;
+}
+@container (min-width: 48rem) {
+  .word-list .field--name-field-words {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gutter);
+  }
+}
+.word-list .field--name-field-words li {
+  container-type: inline-size;
+  list-style: none;
 }
 /*# sourceMappingURL=style.css.map */

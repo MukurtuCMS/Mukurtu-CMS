@@ -24,7 +24,7 @@ content:
       view_mode: browse
       link: false
     third_party_settings: {  }
-    weight: 1
+    weight: 2
     region: content
   field_thumbnail:
     type: entity_reference_entity_view
@@ -32,6 +32,14 @@ content:
     settings:
       view_mode: browse
       link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_translation:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
     third_party_settings: {  }
     weight: 0
     region: content
@@ -76,7 +84,6 @@ hidden:
   field_sequence_collection: true
   field_source: true
   field_title: true
-  field_translation: true
   field_word_origin: true
   field_word_type: true
   flag_email_node: true
