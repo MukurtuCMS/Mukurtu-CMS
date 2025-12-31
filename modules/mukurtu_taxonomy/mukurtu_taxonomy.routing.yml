@@ -37,3 +37,17 @@ mukurtu_taxonomy.manage_languages:
     _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuCategoryManageController::content'
   requirements:
     _permission: 'create terms in language,edit terms in language,delete terms in language'
+
+mukurtu_taxonomy.term_merge_from:
+  path: '/admin/structure/term_merge_from'
+  defaults:
+    _title: 'Term merge from entities'
+  requirements:
+    _permission: 'administer term merge from entities'
+
+mukurtu_taxonomy.term_merge_into:
+  path: '/admin/structure/term_merge_into'
+  defaults:
+    _title: 'Term merge into entities'
+  requirements:
+    _permission: 'administer term merge into entities'
