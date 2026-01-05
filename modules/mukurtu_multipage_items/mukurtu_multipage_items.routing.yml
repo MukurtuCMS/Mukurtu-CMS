@@ -7,7 +7,7 @@ entity.multipage_item.settings:
     _permission: 'administer multipage item'
 
 mukurtu_multipage_items.multipage_view_first_page:
-  path: '/multi-page/{mpi}'
+  path: '/multipage/{mpi}'
   defaults:
     _title: 'Example'
     _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewFirstPage'
@@ -20,7 +20,7 @@ mukurtu_multipage_items.multipage_view_first_page:
 
 # This is our replacement canonical route, needs to match the expected format.
 mukurtu_multipage_items.multipage_view_first_page_entity:
-  path: '/multi-page/{multipage_item}'
+  path: '/multipage/{multipage_item}'
   defaults:
     _controller: '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewFirstPageEntity'
   options:
