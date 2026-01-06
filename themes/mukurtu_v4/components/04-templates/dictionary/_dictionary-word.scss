@@ -89,8 +89,22 @@
       flex-direction: row;
     }
 
-    .field--name-field-recording .field__item {
-      margin-block: 0;
+    .field--name-field-recording {
+      container-type: inline-size;
+
+      .field__item {
+        margin-block: 0;
+      }
+
+      .media--audio {
+        display: flex;
+        gap: var(--v-space-5xs);
+        flex-direction: column;
+
+        @container (min-width: 34rem) {
+          flex-direction: row;
+        }
+      }
     }
   }
 }
@@ -162,6 +176,7 @@
   }
 
   .field--name-field-recording {
+    // stylelint-disable-next-line no-descending-specificity
     .media--audio {
       flex-direction: column;
       gap: var(--v-space-4xxs);
