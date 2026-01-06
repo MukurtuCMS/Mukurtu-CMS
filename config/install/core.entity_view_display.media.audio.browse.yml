@@ -17,6 +17,14 @@ targetEntityType: media
 bundle: audio
 mode: browse
 content:
+  field_contributor:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
   field_media_audio_file:
     type: file_audio
     label: hidden
@@ -33,7 +41,6 @@ content:
 hidden:
   created: true
   field_communities: true
-  field_contributor: true
   field_cultural_protocols: true
   field_identifier: true
   field_media_tags: true
