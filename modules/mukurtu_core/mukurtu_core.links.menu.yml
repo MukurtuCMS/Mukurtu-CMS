@@ -21,13 +21,6 @@ mukurtu_core.site_configuration:
   menu_name: dashboard-site-settings
   route_name: system.admin_config
   expanded: TRUE
-#View is not yet created, waiting on future work
-#mukurtu_core.manage_users:
-#  title: 'Manage Users'
-#  description: 'Manage site user accounts.'
-#  parent: mukurtu
-#  menu_name: mukurtu
-#  route_name: view.mukurtu_manage_all_users.manage_users_page
 mukurtu_core.settings_assorted:
   title: "Citation formats and default image"
   parent: mukurtu_dashboard
@@ -54,9 +47,29 @@ mukurtu_core.people:
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   route_name: mukurtu_core.people
+# mukurtu_core.create_user:
+#   title: 'Add user'
+#   description: 'Create a new user account.'
+#   parent: mukurtu_dashboard
+#   menu_name: dashboard-users
+#   route_name: mukurtu_core.create_user
 mukurtu_core.appearance_settings:
   title: 'Logo and favicon'
   description: 'Change logo and favicon'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
   route_name: mukurtu_core.appearance_settings
+mukurtu_core.entity.google_tag_container.collection:
+  title: 'Google Tag Settings'
+  description: 'Configure the website integration with Google Tag and Google Tag Manager.'
+  route_name: entity.google_tag_container.single_form
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+mukurtu_core.create_basic_page_dashboard:
+  title: 'Add a basic page'
+  description: 'Add a new basic page.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-look-feel
+  route_name: mukurtu_core.add
+  route_parameters:
+    node_type: page
