@@ -2,15 +2,15 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_fish_species
+    - field.storage.node.field_supply_chain_segment
     - node.type.digital_heritage
-    - taxonomy.vocabulary.fish_species
-id: node.digital_heritage.field_fish_species
-field_name: field_fish_species
+    - taxonomy.vocabulary.supply_chain_segment
+id: node.digital_heritage.field_supply_chain_segment
+field_name: field_supply_chain_segment
 entity_type: node
 bundle: digital_heritage
-label: 'Fish Species'
-description: 'Select one or more fish species. Fish species must first be created by a Mukurtu Manager.'
+label: 'Supply Chain Segment'
+description: 'Select one or more supply chain segments. Supply chain segments must first be created by a Mukurtu Manager.'
 required: false
 translatable: true
 default_value: {  }
@@ -19,7 +19,7 @@ settings:
   handler: 'default:taxonomy_term'
   handler_settings:
     target_bundles:
-      fish_species: fish_species
+      supply_chain_segment: supply_chain_segment
     sort:
       field: name
       direction: asc
