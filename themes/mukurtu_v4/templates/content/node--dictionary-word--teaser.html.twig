@@ -70,7 +70,7 @@
 #}
 
 {% if (node.field_thumbnail.value is not empty or
-  content.field_word_entry.0['#paragraph'].field_translation is not empty or
+  content.field_translation|render is not empty or
   content.field_word_entry.0['#paragraph'].field_recording is not empty) or
   content.field_recording is not empty %}
   {% set teaser_content = true %}
@@ -88,13 +88,11 @@
 
   {% if teaser_content %}
   <div{{ content_attributes.addClass('dictionary-word__teaser-content') }}>
-    {{ content.field_word_entry.0['#paragraph']|view('teaser_translation') }}
+    {{ content.field_translation }}
 
     <div class="dictionary-word__media">
-      {{ content.field_thumbnail }}
-      {# Recording. #}
-      {{ content.field_word_entry.0['#paragraph']|view('teaser') }}
       {{ content.field_recording }}
+      {{ content.field_thumbnail }}
     </div>
   </div>
   {% endif %}
