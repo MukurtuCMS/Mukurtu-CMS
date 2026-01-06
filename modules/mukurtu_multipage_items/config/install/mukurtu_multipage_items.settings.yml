@@ -5,5 +5,5 @@ bundles_config:
   digital_heritage: true
   article: false
   page: false
-  person: true
+  person: false
   word_list: false
