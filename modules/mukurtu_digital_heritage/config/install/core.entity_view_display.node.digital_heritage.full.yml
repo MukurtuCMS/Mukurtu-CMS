@@ -7,7 +7,7 @@ dependencies:
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
     - node.type.digital_heritage
-    - field.field.node.digital_heritage.fish_species
+    - field.field.node.digital_heritage.field_fish_species
   module:
     - comment
     - entity_reference_revisions
