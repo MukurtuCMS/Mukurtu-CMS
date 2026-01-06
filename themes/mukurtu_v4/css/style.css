@@ -5212,12 +5212,13 @@ header {
 }
 .word-list .field--name-field-words {
   padding-inline: 0;
+  display: grid;
+  grid-template-columns: auto;
+  gap: var(--gutter-m);
 }
 @container (min-width: 48rem) {
   .word-list .field--name-field-words {
-    display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--gutter);
   }
 }
 .word-list .field--name-field-words li {
