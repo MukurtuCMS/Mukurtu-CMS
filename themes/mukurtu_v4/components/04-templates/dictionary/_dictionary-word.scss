@@ -1,108 +1,6 @@
 @use "../../../external/include-media";
 @use "../../00-base/mixins/mixins";
 
-// Full content display for dictionary word nodes.
-.page-node-type-dictionary-word {
-  .full-node__content {
-    .field--name-field-word-entry > .field__item:not(first-child) {
-      margin-block-start: var(--v-space-s);
-    }
-
-    .field--name-title,
-    .field--name-field-word-entry-term {
-      .field__label {
-        @include mixins.visually-hidden;
-      }
-
-      background-color: var(--brand-primary-dark);
-      position: relative;
-      font-size: var(--font-size-heading-lg);
-      color: var(--color-white);
-      border-block-start: 0;
-      padding-block: var(--v-space-2xs);
-      padding-inline: var(--v-space-xs) var(--v-space-2xs);
-      margin-block: 0 var(--v-space-s);
-
-      &::after {
-        content: '';
-        display: inline-block;
-        position: absolute;
-        inset-block-start: 71px;
-        inset-inline-start: var(--v-space-xs);
-        inline-size: 0;
-        block-size: 0;
-        border-style: solid;
-        border-width: var(--v-space-3xs) 0 var(--v-space-3xs) var(--v-space-2xs);
-        border-color: transparent transparent transparent var(--brand-primary-dark);
-        z-index: -1;
-      }
-    }
-
-    .field--name-field-word-entry-term {
-      margin-block-start: var(--v-space-xs);
-    }
-
-    .field--name-title + div.field {
-      border-block-start: 0;
-      padding-block-start: 0;
-    }
-  }
-
-  // stylelint-disable-next-line no-descending-specificity
-  .field--name-field-additional-word-entries > .field__item,
-  .additional-fields {
-    @include mixins.divider;
-
-    border-width: var(--v-space-4xs);
-    margin-block-start: var(--v-space-l);
-    padding-block-start: var(--v-space-l);
-  }
-
-  .additional-fields {
-    &::before {
-      content: 'Additional Information';
-      display: block;
-      font-size: var(--font-size-m);
-      font-weight: var(--text-bold);
-      color: var(--brand-text-color);
-      margin-block-end: var(--v-space-xs);
-    }
-  }
-
-  .field--name-field-related-content {
-    padding-block-start: var(--v-space-2xs);
-    margin-block-start: var(--v-space-2xs);
-    border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
-  }
-
-  .field--name-field-recording {
-    .media--audio {
-      flex-direction: column;
-      gap: var(--v-space-4xxs);
-      align-items: center;
-      justify-content: center;
-
-      @include include-media.media('>=md') {
-        flex-direction: row;
-      }
-
-      .field--name-field-media-audio-file,
-      .field--name-field-contributor {
-        flex: 1;
-      }
-
-      .field--name-field-contributor {
-        display: flex;
-        flex-direction: row;
-        gap: var(--v-space-4xxs);
-        justify-content: center;
-        align-items: center;
-      }
-    }
-  }
-
-}
-
 // The individual word teaser display used on /dictionary.
 .dictionary-word__teaser {
   &-heading {
@@ -152,6 +50,10 @@
   .field--name-field-media-audio-file {
     margin-block: 0 var(--v-space-4xxs);
     margin-inline: 0;
+
+    audio {
+      display: block;
+    }
   }
 
   // stylelint-disable-next-line no-descending-specificity
@@ -177,13 +79,127 @@
     display: flex;
     flex-direction: column;
     gap: var(--v-space-5xs);
+    margin-block: var(--v-space-5xs);
 
     > div {
       flex: 1;
     }
 
-    @include include-media.media('>=xl') {
+    @container (min-width: 34rem) {
       flex-direction: row;
     }
+
+    .field--name-field-recording {
+      container-type: inline-size;
+
+      .field__item {
+        margin-block: 0;
+      }
+
+      .media--audio {
+        display: flex;
+        gap: var(--v-space-5xs);
+        flex-direction: column;
+
+        @container (min-width: 34rem) {
+          flex-direction: row;
+        }
+      }
+    }
   }
+}
+
+// Full content display for dictionary word nodes.
+.page-node-type-dictionary-word {
+  .full-node__content {
+    .field--name-field-word-entry > .field__item:not(first-child) {
+      margin-block-start: var(--v-space-s);
+    }
+
+    .field--name-title,
+    .field--name-field-word-entry-term {
+      .field__label {
+        @include mixins.visually-hidden;
+      }
+
+      background-color: var(--brand-primary-dark);
+      position: relative;
+      font-size: var(--font-size-heading-lg);
+      color: var(--color-white);
+      border-block-start: 0;
+      padding-block: var(--v-space-2xs);
+      padding-inline: var(--v-space-xs) var(--v-space-2xs);
+      margin-block: 0 var(--v-space-s);
+
+      &::after {
+        content: '';
+        display: inline-block;
+        position: absolute;
+        inset-block-start: 71px;
+        inset-inline-start: var(--v-space-xs);
+        inline-size: 0;
+        block-size: 0;
+        border-style: solid;
+        border-width: var(--v-space-3xs) 0 var(--v-space-3xs) var(--v-space-2xs);
+        border-color: transparent transparent transparent var(--brand-primary-dark);
+        z-index: -1;
+      }
+    }
+
+    .field--name-field-word-entry-term {
+      margin-block-start: var(--v-space-xs);
+    }
+
+    .field--name-title + div.field {
+      border-block-start: 0;
+      padding-block-start: 0;
+    }
+  }
+
+  .additional-word-entries,
+  .additional-fields {
+    @include mixins.divider;
+
+    border-width: var(--v-space-4xs);
+    margin-block-start: var(--v-space-l);
+    padding-block-start: var(--v-space-xs);
+  }
+
+  .dictionary-word-subheading {
+    margin-block-end: var(--v-space-xs);
+  }
+
+  .field--name-field-related-content {
+    padding-block-start: var(--v-space-2xs);
+    margin-block-start: var(--v-space-2xs);
+    border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
+  }
+
+  .field--name-field-recording {
+    // stylelint-disable-next-line no-descending-specificity
+    .media--audio {
+      flex-direction: column;
+      gap: var(--v-space-4xxs);
+      align-items: center;
+      justify-content: center;
+
+      @include include-media.media('>=md') {
+        flex-direction: row;
+      }
+
+      .field--name-field-media-audio-file,
+      .field--name-field-contributor {
+        flex: 1;
+      }
+
+      .field--name-field-contributor {
+        display: flex;
+        flex-direction: row;
+        gap: var(--v-space-4xxs);
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  }
+
 }

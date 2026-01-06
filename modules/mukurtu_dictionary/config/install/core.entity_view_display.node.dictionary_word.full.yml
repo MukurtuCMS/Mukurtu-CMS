@@ -101,7 +101,7 @@ third_party_settings:
     group_additional_word_entries:
       children:
         - field_additional_word_entries
-      label: 'Additional Word Entries'
+      label: 'Other Entries'
       parent_name: group_primary_fields
       region: content
       weight: 33
@@ -112,9 +112,9 @@ third_party_settings:
         id: ''
         label_as_html: false
         element: div
-        show_label: false
-        label_element: h3
-        label_element_classes: ''
+        show_label: true
+        label_element: h2
+        label_element_classes: dictionary-word-subheading
         attributes: ''
         effect: none
         speed: fast
@@ -137,9 +137,9 @@ third_party_settings:
         id: ''
         label_as_html: false
         element: div
-        show_label: false
-        label_element: div
-        label_element_classes: field__label
+        show_label: true
+        label_element: h2
+        label_element_classes: dictionary-word-subheading
         attributes: ''
         effect: none
         speed: fast
@@ -302,7 +302,7 @@ content:
     weight: 37
     region: content
   field_definition:
-    type: basic_string
+    type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
@@ -470,7 +470,6 @@ hidden:
   field_thumbnail: true
   flag_email_node: true
   flag_email_og: true
-  flag_export_content: true
   flag_mukurtu_email_content: true
   flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true
