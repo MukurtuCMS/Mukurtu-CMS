@@ -4607,6 +4607,7 @@ header {
       -ms-flex-direction: column;
           flex-direction: column;
   gap: var(--v-space-5xs);
+  margin-block: var(--v-space-5xs);
 }
 .dictionary-word__teaser .dictionary-word__media > div {
   -webkit-box-flex: 1;

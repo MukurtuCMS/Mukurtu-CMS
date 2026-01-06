@@ -91,10 +91,8 @@
     {{ content.field_translation }}
 
     <div class="dictionary-word__media">
-      {{ content.field_thumbnail }}
-      {# Recording. #}
-      {{ content.field_word_entry.0['#paragraph']|view('teaser') }}
       {{ content.field_recording }}
+      {{ content.field_thumbnail }}
     </div>
   </div>
   {% endif %}
