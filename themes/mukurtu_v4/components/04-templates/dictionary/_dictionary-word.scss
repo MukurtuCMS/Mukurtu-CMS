@@ -1,6 +1,99 @@
 @use "../../../external/include-media";
 @use "../../00-base/mixins/mixins";
 
+// The individual word teaser display used on /dictionary.
+.dictionary-word__teaser {
+  &-heading {
+    background-color: var(--brand-primary-dark);
+    padding-block: var(--v-space-4xxs);
+    padding-inline: var(--v-space-2xs);
+
+    a {
+      color: var(--color-white);
+      font-size: var(--font-size-xl);
+    }
+  }
+
+  // This is the word heading, also a link.
+  &-word {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  svg {
+    fill: var(--color-white);
+    block-size: var(--line-height-m);
+    inline-size: var(--line-height-2xs);
+  }
+
+  &-content {
+    background-color: var(--brand-light-accent);
+    padding-block: var(--v-space-4xxs);
+    padding-inline: var(--v-space-2xs);
+  }
+
+  .field--name-field-translation,
+  .field--name-field-recording  {
+    .field__label {
+      display: none;
+    }
+  }
+
+  .field--name-field-translation  {
+    font-weight: var(--text-bold);
+    line-height: var(--line-height-xs);
+    margin-block: var(--v-space-5xs);
+    margin-inline: 0 var(--v-space-2xs);
+  }
+
+  // stylelint-disable-next-line no-descending-specificity
+  .field--name-field-media-audio-file {
+    margin-block: 0 var(--v-space-4xxs);
+    margin-inline: 0;
+
+    audio {
+      display: block;
+    }
+  }
+
+  // stylelint-disable-next-line no-descending-specificity
+  .field--name-field-contributor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v-space-6xs);
+    inline-size: 100%;
+
+    .field__label {
+      display: inline-block;
+      font-size: var(--font-size-s);
+      font-weight: var(--text-normal);
+
+      &::after {
+        content: ':';
+        margin-inline-end: var(--v-space-5xs);
+      }
+    }
+  }
+
+  .dictionary-word__media {
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-5xs);
+
+    > div {
+      flex: 1;
+    }
+
+    @container (min-width: 34rem) {
+      flex-direction: row;
+    }
+
+    .field--name-field-recording .field__item {
+      margin-block: 0;
+    }
+  }
+}
+
 // Full content display for dictionary word nodes.
 .page-node-type-dictionary-word {
   .full-node__content {
@@ -93,89 +186,4 @@
     }
   }
 
-}
-
-// The individual word teaser display used on /dictionary.
-.dictionary-word__teaser {
-  &-heading {
-    background-color: var(--brand-primary-dark);
-    padding-block: var(--v-space-4xxs);
-    padding-inline: var(--v-space-2xs);
-
-    a {
-      color: var(--color-white);
-      font-size: var(--font-size-xl);
-    }
-  }
-
-  // This is the word heading, also a link.
-  &-word {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  svg {
-    fill: var(--color-white);
-    block-size: var(--line-height-m);
-    inline-size: var(--line-height-2xs);
-  }
-
-  &-content {
-    background-color: var(--brand-light-accent);
-    padding-block: var(--v-space-4xxs);
-    padding-inline: var(--v-space-2xs);
-  }
-
-  .field--name-field-translation,
-  .field--name-field-recording  {
-    .field__label {
-      display: none;
-    }
-  }
-
-  .field--name-field-translation  {
-    font-weight: var(--text-bold);
-    line-height: var(--line-height-xs);
-    margin-block: var(--v-space-5xs);
-    margin-inline: 0 var(--v-space-2xs);
-  }
-
-  // stylelint-disable-next-line no-descending-specificity
-  .field--name-field-media-audio-file {
-    margin-block: 0 var(--v-space-4xxs);
-    margin-inline: 0;
-  }
-
-  // stylelint-disable-next-line no-descending-specificity
-  .field--name-field-contributor {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--v-space-6xs);
-    inline-size: 100%;
-
-    .field__label {
-      display: inline-block;
-      font-size: var(--font-size-s);
-      font-weight: var(--text-normal);
-
-      &::after {
-        content: ':';
-        margin-inline-end: var(--v-space-5xs);
-      }
-    }
-  }
-
-  .dictionary-word__media {
-    display: flex;
-    flex-direction: column;
-    gap: var(--v-space-5xs);
-
-    > div {
-      flex: 1;
-    }
-
-    @container (min-width: 34rem) {
-      flex-direction: row;
-    }
-  }
 }

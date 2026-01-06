@@ -45,9 +45,10 @@
       @include mixins.block-link-active;
     }
   }
+
   .contextual {
       position: absolute;
-      top: 0;
-      right: 20px;
+      inset-block-start: 0;
+      inset-inline-end: 20px;
   }
 }
