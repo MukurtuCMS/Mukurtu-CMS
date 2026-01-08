@@ -241,6 +241,10 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_vessel_gear_type
     source: field_vessel_gear_type
+  field_fishing_family: 
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_fishing_family
+    source: field_fishing_family
 
   # This only works if we maintain nids. Self migration_lookup wasn't working for me...
   field_mukurtu_original_record: field_community_record_parent
@@ -280,6 +284,7 @@ migration_dependencies:
     - mukurtu_cms_v3_terms_fish_species
     - mukurtu_cms_v3_terms_supply_chain_segment
     - mukurtu_cms_v3_terms_vessel_gear_type
+    - mukurtu_cms_v3_terms_fishing_family
     - mukurtu_cms_v3_media_image
     - mukurtu_cms_v3_media_document
     - mukurtu_cms_v3_media_audio
