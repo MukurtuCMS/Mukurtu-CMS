@@ -2,15 +2,15 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_vessel_gear_type
+    - field.storage.node.field_specific_fishing_fleet
     - node.type.digital_heritage
-    - taxonomy.vocabulary.vessel_gear_type
-id: node.digital_heritage.field_vessel_gear_type
-field_name: field_vessel_gear_type
+    - taxonomy.vocabulary.specific_fishing_fleet
+id: node.digital_heritage.field_specific_fishing_fleet
+field_name: field_specific_fishing_fleet
 entity_type: node
 bundle: digital_heritage
-label: 'Vessel Gear Type'
-description: 'Select one or more vessel gear types. Vessel gear types must first be created by a Mukurtu Manager.'
+label: 'Specific Fishing Fleet'
+description: 'Select one or more specific fishing fleets. Specific fishing fleets must first be created by a Mukurtu Manager.'
 required: false
 translatable: true
 default_value: {  }
@@ -19,7 +19,7 @@ settings:
   handler: 'default:taxonomy_term'
   handler_settings:
     target_bundles:
-      vessel_gear_type: vessel_gear_type
+      specific_fishing_fleet: specific_fishing_fleet
     sort:
       field: name
       direction: asc

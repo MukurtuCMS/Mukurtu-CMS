@@ -9,7 +9,7 @@ dependencies:
     - node.type.digital_heritage
     - field.field.node.digital_heritage.field_fish_species
     - field.field.node.digital_heritage.field_supply_chain_segment
-    - field.field.node.digital_heritage.field_vessel_gear_type
+    - field.field.node.digital_heritage.field_specific_fishing_fleet
     - field.field.node.digital_heritage.field_fishing_family
   module:
     - comment
@@ -91,7 +91,7 @@ third_party_settings:
         - field_people
         - field_fish_species
         - field_supply_chain_segment
-        - field_vessel_gear_type
+        - field_specific_fishing_fleet
         - field_fishing_family
       label: 'Sidebar - Mukurtu fields'
       parent_name: group_metadata
@@ -542,7 +542,7 @@ content:
     third_party_settings: {  }
     weight: 50
     region: content
-  field_vessel_gear_type:
+  field_specific_fishing_fleet:
     type: entity_reference_label
     label: above
     settings:
