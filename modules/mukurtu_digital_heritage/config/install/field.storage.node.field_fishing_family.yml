@@ -4,8 +4,8 @@ dependencies:
   module:
     - node
     - taxonomy
-id: node.field_vessel_gear_type
-field_name: field_vessel_gear_type
+id: node.field_fishing_family
+field_name: field_fishing_family
 entity_type: node
 type: entity_reference
 settings:

@@ -1,8 +1,8 @@
 langcode: en
 status: true
 dependencies: {  }
-name: Vessel Gear Type
-vid: vessel_gear_type
+name: Fishing Family
+vid: fishing_family
 description: null
 weight: 0
 new_revision: false
