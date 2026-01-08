@@ -1,8 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-name: Vessel Gear Type
-vid: vessel_gear_type
-description: null
-weight: 0
-new_revision: false
