@@ -8,7 +8,10 @@ dependencies:
     - node.type.digital_heritage
     - field.field.node.digital_heritage.field_fish_species
     - field.field.node.digital_heritage.field_supply_chain_segment
+    - field.field.node.digital_heritage.field_fishing_area
     - field.field.node.digital_heritage.field_fishing_family
+    - field.field.node.digital_heritage.field_gear_type
+    - field.field.node.digital_heritage.field_specific_fishing_fleet
   module:
     - comment
     - entity_browser
@@ -53,7 +56,10 @@ third_party_settings:
         - field_date_description
         - field_fish_species
         - field_supply_chain_segment
+        - field_fishing_area
         - field_fishing_family
+        - field_gear_type
+        - field_specific_fishing_fleet
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -638,7 +644,25 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_fishing_area:
+    type: options_buttons
+    weight: 50
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_fishing_family:
+    type: options_buttons
+    weight: 50
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_gear_type:
+    type: options_buttons
+    weight: 50
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_specific_fishing_fleet:
     type: options_buttons
     weight: 50
     region: content
