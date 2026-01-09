@@ -18,10 +18,10 @@ class CollectionOrganizationForm extends FormBase {
   /**
    * Constructs a new CollectionOrganizationForm object.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity type manager.
    */
-  public function __construct(protected EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(protected EntityTypeManagerInterface $entityTypeManager) {
   }
 
   /**
@@ -104,7 +104,7 @@ class CollectionOrganizationForm extends FormBase {
   /**
    * Build the collections table element based on a collections organization array.
    */
-  protected function buildCollectionsTable($collections_org) {
+  protected function buildCollectionsTable($collections_org, $root_collection_id = NULL) {
     $element = [
       '#type' => 'table',
       '#caption' => $this->t('Collection Organization'),
@@ -112,6 +112,7 @@ class CollectionOrganizationForm extends FormBase {
         $this->t('Collection'),
         $this->t('Weight'),
         $this->t('Parent'),
+        $this->t('Operations'),
       ],
       '#prefix' => '<div id="collections-table">',
       '#suffix' => '</div>',
@@ -168,6 +169,29 @@ class CollectionOrganizationForm extends FormBase {
         '#default_value' => $info['parent'] ?? 0,
         '#attributes' => ['class' => ['field-parent']],
       ];
+
+      // Add remove button for all collections except the root.
+      if ($root_collection_id && $collection->id() !== $root_collection_id) {
+        $element[$id]['operations'] = [
+          '#type' => 'submit',
+          '#value' => $this->t('Remove'),
+          '#name' => 'remove_collection_' . $collection->id(),
+          '#collection_id' => $collection->id(),
+          '#submit' => ['::removeCollectionFromOrganizationAjax'],
+          '#ajax' => [
+            'callback' => '::addCollectionToTableCallback',
+            'wrapper' => 'collections-table',
+          ],
+          '#attributes' => [
+            'class' => ['button--small'],
+          ],
+        ];
+      }
+      else {
+        $element[$id]['operations'] = [
+          '#markup' => '',
+        ];
+      }
     }
 
     return $element;
@@ -205,7 +229,7 @@ class CollectionOrganizationForm extends FormBase {
       ],
     ];
 
-    $form['collections'] = $this->buildCollectionsTable($collections_organization);
+    $form['collections'] = $this->buildCollectionsTable($collections_organization, $collection->id());
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -279,13 +303,57 @@ class CollectionOrganizationForm extends FormBase {
           $form_state->setValue('collections', $collection_values);
 
           // Rebuild the collections table.
-          $form['collections'] = $this->buildCollectionsTable($this->getOrganizationFromValues($collection_values));
+          $form['collections'] = $this->buildCollectionsTable($this->getOrganizationFromValues($collection_values), $root_collection_id);
         }
       }
     }
     $form_state->setRebuild(TRUE);
   }
 
+  /**
+   * Ajax submit handler to remove a collection from the organization.
+   */
+  public function removeCollectionFromOrganizationAjax(array &$form, FormStateInterface $form_state) {
+    $triggering_element = $form_state->getTriggeringElement();
+    $collection_id_to_remove = $triggering_element['#collection_id'] ?? NULL;
+
+    if ($collection_id_to_remove) {
+      $collection_values = $form_state->getValue('collections');
+      $root_collection_id = $form_state->get('root_collection_id');
+
+      // Remove the collection and any of its children from the values.
+      $filtered_values = [];
+      $removed_ids = [$collection_id_to_remove];
+
+      // First pass: identify all collections to remove (parent and children).
+      $changed = TRUE;
+      while ($changed) {
+        $changed = FALSE;
+        foreach ($collection_values as $value) {
+          $id = reset($value['label']);
+          if (in_array($value['parent'], $removed_ids) && !in_array($id, $removed_ids)) {
+            $removed_ids[] = $id;
+            $changed = TRUE;
+          }
+        }
+      }
+
+      // Second pass: keep only collections not in the removed list.
+      foreach ($collection_values as $value) {
+        $id = reset($value['label']);
+        if (!in_array($id, $removed_ids)) {
+          $filtered_values[] = $value;
+        }
+      }
+
+      $form_state->setValue('collections', $filtered_values);
+
+      // Rebuild the collections table.
+      $form['collections'] = $this->buildCollectionsTable($this->getOrganizationFromValues($filtered_values), $root_collection_id);
+    }
+
+    $form_state->setRebuild(TRUE);
+  }
 
   /**
    * {@inheritdoc}
@@ -338,7 +406,9 @@ class CollectionOrganizationForm extends FormBase {
       /** @var \Drupal\mukurtu_collection\Entity\Collection $collection */
       if ($collection = $this->entityTypeManager->getStorage('node')->load($id)) {
         if ($info['parent'] == "0") {
+          $collection->setChildCollections([]);
           $collection->removeAsChildCollection();
+          $collection->save();
 
           // Parent === 0 is a "top level" collection which don't have weights,
           // so we can move on.
@@ -347,7 +417,7 @@ class CollectionOrganizationForm extends FormBase {
 
         /** @var \Drupal\mukurtu_collection\Entity\Collection $parent */
         $parent = $this->entityTypeManager->getStorage('node')->load($info['parent']);
-        if ($collection && $parent) {
+        if ($parent) {
           if ($collection->getParentCollectionId() != $parent->id()) {
             $collection->removeAsChildCollection();
           }
