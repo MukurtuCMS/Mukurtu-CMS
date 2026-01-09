@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\mukurtu_dictionary\Form;
 
-use Collator;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -111,10 +110,19 @@ class MukurtuDictionaryGlossaryOrderForm extends ConfigFormBase {
    * Collator accepts ISO 639 language codes and automatically uses appropriate
    * locale-specific sorting rules.
    *
+   * Falls back to asort() if the intl extension is not available.
+   *
    * @param array &$array
    *   The array to sort (passed by reference).
    */
   protected function sortByLocale(array &$array): void {
+    // Check if the intl extension is available.
+    if (!class_exists('\Collator')) {
+      // Fallback to simple alphabetical sort if intl is not available.
+      asort($array);
+      return;
+    }
+
     // Get the current language code from Drupal.
     $current_language = $this->languageManager->getCurrentLanguage();
     $langcode = $current_language->getId();
@@ -122,7 +130,7 @@ class MukurtuDictionaryGlossaryOrderForm extends ConfigFormBase {
     // Create a Collator instance using the language code.
     // Collator accepts ISO 639 codes ('en', 'es', 'fr', etc.) and automatically
     // applies appropriate locale-specific sorting rules.
-    $collator = new Collator($langcode);
+    $collator = new \Collator($langcode);
 
     // Sort the array using the collator for locale-aware comparison.
     uasort($array, function ($a, $b) use ($collator) {
