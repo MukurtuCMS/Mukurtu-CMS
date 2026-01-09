@@ -10,21 +10,18 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-
 /**
  * Provides a Mukurtu Collections form.
  */
 class CollectionOrganizationForm extends FormBase {
 
   /**
-   * The entity type manager.
+   * Constructs a new CollectionOrganizationForm object.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager.
    */
-  protected $entityTypeManager;
-
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
-    $this->entityTypeManager = $entity_type_manager;
+  public function __construct(protected EntityTypeManagerInterface $entity_type_manager) {
   }
 
   /**
@@ -51,7 +48,7 @@ class CollectionOrganizationForm extends FormBase {
     $visited = [];
     $s = [[$collection, 0, 0, 0]];
     while(!empty($s)) {
-      list($c, $parent_id, $weight, $level) = array_pop($s);
+      [$c, $parent_id, $weight, $level] = array_pop($s);
       if (!isset($visited[$c->id()])) {
         $visited[$c->id()] = TRUE;
         $organization[] = ['title' => $c->getTitle(), 'id' => $c->id(), 'collection' => $c, 'parent' => $parent_id, 'weight' => $weight++, 'level' => $level];
