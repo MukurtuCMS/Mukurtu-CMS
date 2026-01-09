@@ -208,7 +208,11 @@ class CollectionOrganizationForm extends FormBase {
     // Store the root collection ID in form state.
     $form_state->set('root_collection_id', $collection->id());
 
-    $collections_value = $form_state->getValue('collections') ?? NULL;
+    $collections_value = $form_state->getValue('collections');
+    if ($collections_value === NULL) {
+      $user_input = $form_state->getUserInput();
+      $collections_value = $user_input['collections'] ?? NULL;
+    }
     $collections_organization = $collections_value ? $this->getOrganizationFromValues($collections_value) : $this->getOrganizationFromCollection($collection);
 
     $form['add_subcollection'] = [
