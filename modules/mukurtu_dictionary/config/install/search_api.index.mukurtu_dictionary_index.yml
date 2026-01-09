@@ -131,8 +131,8 @@ field_settings:
     type: string
     dependencies:
       module:
-        - mukurtu_dictionary
         - node
+        - taxonomy
 datasource_settings:
   'entity:node':
     bundles:
@@ -146,7 +146,6 @@ datasource_settings:
 processor_settings:
   add_url: {  }
   aggregated_field: {  }
-  auto_aggregated_fulltext_field: {  }
   content_access:
     weights:
       preprocess_query: -30
@@ -186,7 +185,6 @@ processor_settings:
       - title
   language_with_fallback: {  }
   rendered_item: {  }
-  solr_date_range: {  }
   tokenizer:
     weights:
       preprocess_index: -6
