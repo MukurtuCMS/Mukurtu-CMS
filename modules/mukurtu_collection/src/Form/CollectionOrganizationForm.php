@@ -432,10 +432,9 @@ class CollectionOrganizationForm extends FormBase {
       $id = reset($info['label']);
       /** @var \Drupal\mukurtu_collection\Entity\Collection $collection */
       if ($collection = $this->entityTypeManager->getStorage('node')->load($id)) {
+        $new_children[$collection->id()] = [];
         if ($info['parent'] == "0") {
-          $collection->setChildCollections([]);
           $collection->removeAsChildCollection();
-          $collection->save();
 
           // Parent === 0 is a "top level" collection which don't have weights,
           // so we can move on.
