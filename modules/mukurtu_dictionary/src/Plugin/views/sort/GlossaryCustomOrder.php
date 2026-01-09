@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\mukurtu_dictionary\Plugin\views\sort;
 
-use Drupal\Core\Cache\CacheableDependencyInterface;
-use Drupal\Core\Cache\UncacheableDependencyTrait;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Attribute\ViewsSort;
@@ -22,9 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @ViewsSort("glossary_custom_order")
  */
 #[ViewsSort("glossary_custom_order")]
-class GlossaryCustomOrder extends SortPluginBase implements CacheableDependencyInterface {
-
-  use UncacheableDependencyTrait;
+class GlossaryCustomOrder extends SortPluginBase {
 
   /**
    * The associated views query object.
@@ -111,6 +108,33 @@ class GlossaryCustomOrder extends SortPluginBase implements CacheableDependencyI
     parent::buildOptionsForm($form, $form_state);
 
     $form['order']['#description'] = $this->t('The sort order will be applied to the custom glossary order weights. Note: Items without a configured weight will sort to the end alphabetically regardless of this setting.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheMaxAge() {
+    $parent_max_age = parent::getCacheMaxAge();
+    $config = $this->configFactory->get('mukurtu_dictionary_glossary_order.settings');
+    return Cache::mergeMaxAges($parent_max_age, $config->getCacheMaxAge());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheContexts() {
+    $parent_contexts = parent::getCacheContexts();
+    $config = $this->configFactory->get('mukurtu_dictionary_glossary_order.settings');
+    return Cache::mergeContexts($parent_contexts, $config->getCacheContexts());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTags() {
+    $parent_tags = parent::getCacheTags();
+    $config = $this->configFactory->get('mukurtu_dictionary_glossary_order.settings');
+    return Cache::mergeTags($parent_tags, $config->getCacheTags());
   }
 
 }
