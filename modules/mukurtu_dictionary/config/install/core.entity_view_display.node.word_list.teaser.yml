@@ -53,6 +53,7 @@ hidden:
   field_source: true
   field_summary: true
   field_title: true
+  field_word_list_image: true
   field_words: true
   flag_email_node: true
   flag_email_og: true

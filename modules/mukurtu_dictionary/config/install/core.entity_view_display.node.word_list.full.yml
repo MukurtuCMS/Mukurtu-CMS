@@ -31,6 +31,15 @@ content:
     third_party_settings: {  }
     weight: 11
     region: content
+  field_all_related_content:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: false
+    third_party_settings: {  }
+    weight: 8
+    region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
     label: hidden
@@ -147,6 +156,13 @@ content:
     third_party_settings: {  }
     weight: 3
     region: content
+  field_keywords:
+    type: entity_reference_label
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
     label: above
@@ -169,15 +185,14 @@ content:
     third_party_settings: {  }
     weight: 7
     region: content
-  field_word_list_image:
-    type: entity_reference_entity_view
+  field_representative_media:
     label: hidden
-    settings:
-      view_mode: default
-      link: false
-    third_party_settings: {  }
-    weight: 0
     region: content
+    weight: 12
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
   field_source:
     type: string
     label: above
@@ -194,6 +209,15 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_word_list_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
   field_words:
     type: entity_reference_entity_view
     label: hidden
@@ -205,22 +229,6 @@ content:
     region: content
   flag_export_content:
     settings: {  }
-    third_party_settings: {  }
-    weight: 8
-    region: content
-  field_keywords:
-    type: entity_reference_label
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 6
-    region: content
-  field_all_related_content:
-    type: entity_reference_entity_view
-    label: above
-    settings:
-      view_mode: teaser
-      link: false
     third_party_settings: {  }
     weight: 8
     region: content

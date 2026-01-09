@@ -37,6 +37,13 @@ mukurtu_dictionary.configure_dictionary_languages:
   route_name: mukurtu_dictionary.configure_dictionary_languages
   parent: mukurtu_dashboard
 
+mukurtu_dictionary.configure_glossary_order:
+  title: "Dictionary glossary order"
+  menu_name: dashboard-content-settings
+  description: "Configure the sort order for glossary entries."
+  route_name: mukurtu_dictionary.configure_glossary_order
+  parent: mukurtu_dashboard
+
 # Language community menu items definition
 entity.language_community.collection:
   title: 'Language community list'
