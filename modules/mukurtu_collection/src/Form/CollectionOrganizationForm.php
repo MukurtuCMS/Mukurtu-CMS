@@ -55,12 +55,12 @@ class CollectionOrganizationForm extends FormBase {
       if (!isset($visited[$c->id()])) {
         $visited[$c->id()] = TRUE;
         $organization[] = ['title' => $c->getTitle(), 'id' => $c->id(), 'collection' => $c, 'parent' => $parent_id, 'weight' => $weight++, 'level' => $level];
-        $childWeight = 0;
+        $child_weight = 0;
         $children = $c->getChildCollections();
         $children = array_reverse($children);
         foreach ($children as $child) {
-          $childInfo = [$child, $c->id(), $childWeight++, $level + 1];
-          array_push($s, $childInfo);
+          $child_info = [$child, $c->id(), $child_weight++, $level + 1];
+          array_push($s, $child_info);
         }
       }
     }
@@ -107,7 +107,7 @@ class CollectionOrganizationForm extends FormBase {
   /**
    * Build the collections table element based on a collections organization array.
    */
-  protected function buildCollectionsTable($collectionsOrg) {
+  protected function buildCollectionsTable($collections_org) {
     $element = [
       '#type' => 'table',
       '#caption' => $this->t('Collection Organization'),
@@ -136,7 +136,7 @@ class CollectionOrganizationForm extends FormBase {
       ]
     ];
 
-    foreach ($collectionsOrg as $id => $info) {
+    foreach ($collections_org as $id => $info) {
       $collection = $info['collection'];
       $element[$id]['#weight'] = $info['weight'];
       $element[$id]['#attributes']['class'][] = 'draggable';
@@ -184,8 +184,11 @@ class CollectionOrganizationForm extends FormBase {
       return $form;
     }
 
-    $collectionsValue = $form_state->getValue('collections') ?? NULL;
-    $collections_organization = $collectionsValue ? $this->getOrganizationFromValues($collectionsValue) : $this->getOrganizationFromCollection($collection);
+    // Store the root collection ID in form state.
+    $form_state->set('root_collection_id', $collection->id());
+
+    $collections_value = $form_state->getValue('collections') ?? NULL;
+    $collections_organization = $collections_value ? $this->getOrganizationFromValues($collections_value) : $this->getOrganizationFromCollection($collection);
 
     $form['add_subcollection'] = [
       '#type' => 'textfield',
@@ -224,18 +227,18 @@ class CollectionOrganizationForm extends FormBase {
     return $response;
   }
 
-  protected function buildOrganizationFromTableCollections($tableCollections) {
+  protected function buildOrganizationFromTableCollections($table_collections) {
     $organization = [];
-    foreach ($tableCollections as $tableCollection) {
-      if ($id = $tableCollection['label'][2] ?? NULL) {
+    foreach ($table_collections as $table_collection) {
+      if ($id = $table_collection['label'][2] ?? NULL) {
         $collection = $this->entityTypeManager->getStorage('node')->load($id);
 
         $organization[] = [
           'title' => $collection->getTitle(),
           'id' => $collection->id(),
           'collection' => $collection,
-          'parent' => $tableCollection['parent'],
-          'weight' => $tableCollection['weight'],
+          'parent' => $table_collection['parent'],
+          'weight' => $table_collection['weight'],
           'level' => 0,
         ];
       }
@@ -258,24 +261,28 @@ class CollectionOrganizationForm extends FormBase {
   }
 
   public function addCollectionToOrganizationAjax(array &$form, FormStateInterface $form_state) {
-    $newCollectionAutocompleteValue = $form_state->getValue('add_subcollection') ?? '';
+    $new_collection_autocomplete_value = $form_state->getValue('add_subcollection') ?? '';
 
     $matches = [];
-    if (preg_match('/^(.*) \((\d+)\)$/', $newCollectionAutocompleteValue, $matches)) {
+    if (preg_match('/^(.*) \((\d+)\)$/', $new_collection_autocomplete_value, $matches)) {
       $id = $matches[2];
       if ($collection = $this->entityTypeManager->getStorage('node')->load($id)) {
         // Add the new collection to the values array.
-        $collectionValues = $form_state->getValue("collections");
-        if (!$this->alreadyInCollectionsTable($id, $collectionValues)) {
-          $collectionValues[] = [
+        $collection_values = $form_state->getValue("collections");
+        if (!$this->alreadyInCollectionsTable($id, $collection_values)) {
+          // Get the root collection ID.
+          $root_collection_id = $form_state->get('root_collection_id');
+
+          $collection_values[] = [
             'label' => [2 => $id],
             'weight' => 0,
-            'parent' => 0,
+            // Set parent to the root collection instead of 0.
+            'parent' => $root_collection_id,
           ];
-          $form_state->setValue('collections', $collectionValues);
+          $form_state->setValue('collections', $collection_values);
 
           // Rebuild the collections table.
-          $form['collections'] = $this->buildCollectionsTable($this->getOrganizationFromValues($collectionValues));
+          $form['collections'] = $this->buildCollectionsTable($this->getOrganizationFromValues($collection_values));
         }
       }
     }
@@ -287,16 +294,49 @@ class CollectionOrganizationForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    $root_collection_id = $form_state->get('root_collection_id');
+    $collections_values = $form_state->getValue('collections');
+
+    if (empty($root_collection_id) || empty($collections_values)) {
+      return;
+    }
+
+    // Load the root collection to get its title.
+    $root_collection = $this->entityTypeManager->getStorage('node')->load($root_collection_id);
+    if (!$root_collection) {
+      return;
+    }
+    $root_collection_title = $root_collection->getTitle();
+
+    // Count how many collections have parent 0.
+    $root_level_collections = [];
+    foreach ($collections_values as $value) {
+      $collection_id = reset($value['label']);
+      if ($value['parent'] == 0 || $value['parent'] == '0') {
+        $root_level_collections[] = $collection_id;
+      }
+    }
+
+    // Ensure only the root collection is at the top level.
+    if (count($root_level_collections) > 1) {
+      $form_state->setErrorByName('collections', $this->t('All collections in the collection organization must be organized as children of %root_collection. Please ensure no collections are placed at the same level as %root_collection.', ['%root_collection' => $root_collection_title]));
+    }
+    elseif (count($root_level_collections) === 1 && $root_level_collections[0] !== $root_collection_id) {
+      $form_state->setErrorByName('collections', $this->t('Only %root_collection should be at the top level. Please ensure all other collections are organized as children of %root_collection.', ['%root_collection' => $root_collection_title]));
+    }
+    elseif (count($root_level_collections) === 0) {
+      $form_state->setErrorByName('collections', $this->t('%root_collection must remain at the top level of the collection organization.', ['%root_collection' => $root_collection_title]));
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $newOrganization = $form_state->getValue('collections');
-    $newChildren = [];
+    $new_organization = $form_state->getValue('collections');
+    $new_children = [];
 
-    foreach ($newOrganization as $info) {
+    foreach ($new_organization as $info) {
       $id = reset($info['label']);
       /** @var \Drupal\mukurtu_collection\Entity\Collection $collection */
       if ($collection = $this->entityTypeManager->getStorage('node')->load($id)) {
@@ -318,15 +358,15 @@ class CollectionOrganizationForm extends FormBase {
           // Building the list of new parent -> child collections to
           // 1. Resolve ordering (weight)
           // 2. Delay saving until the end so we only save once per entity.
-          $newChildren[$parent->id()][] = $collection->id();
+          $new_children[$parent->id()][] = $collection->id();
         }
       }
     }
 
     // Save the final child collections.
-    foreach ($newChildren as $id => $childCollections) {
+    foreach ($new_children as $id => $child_collections) {
       if ($collection = $this->entityTypeManager->getStorage('node')->load($id)) {
-        $collection->setChildCollections($childCollections)->save();
+        $collection->setChildCollections($child_collections)->save();
       }
     }
 
