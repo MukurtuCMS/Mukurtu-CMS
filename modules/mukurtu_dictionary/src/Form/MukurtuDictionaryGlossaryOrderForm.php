@@ -4,12 +4,14 @@ declare(strict_types = 1);
 
 namespace Drupal\mukurtu_dictionary\Form;
 
+use Collator;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 
 /**
  * Configuration form for dictionary glossary order.
@@ -32,8 +34,15 @@ class MukurtuDictionaryGlossaryOrderForm extends ConfigFormBase {
    *   The typed config manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
+   *   The language manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typedConfigManager, protected EntityTypeManagerInterface $entityTypeManager) {
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typedConfigManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected LanguageManagerInterface $languageManager,
+  ) {
     parent::__construct($config_factory, $typedConfigManager);
   }
 
@@ -44,7 +53,8 @@ class MukurtuDictionaryGlossaryOrderForm extends ConfigFormBase {
     return new static(
       $container->get('config.factory'),
       $container->get('config.typed'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('language_manager')
     );
   }
 
@@ -91,6 +101,33 @@ class MukurtuDictionaryGlossaryOrderForm extends ConfigFormBase {
     }
 
     return $glossary_entries;
+  }
+
+  /**
+   * Sort an array using locale-aware collation.
+   *
+   * This uses PHP's Collator class to perform case-insensitive, locale-aware
+   * sorting that properly handles accented characters and natural number order.
+   * Collator accepts ISO 639 language codes and automatically uses appropriate
+   * locale-specific sorting rules.
+   *
+   * @param array &$array
+   *   The array to sort (passed by reference).
+   */
+  protected function sortByLocale(array &$array): void {
+    // Get the current language code from Drupal.
+    $current_language = $this->languageManager->getCurrentLanguage();
+    $langcode = $current_language->getId();
+
+    // Create a Collator instance using the language code.
+    // Collator accepts ISO 639 codes ('en', 'es', 'fr', etc.) and automatically
+    // applies appropriate locale-specific sorting rules.
+    $collator = new Collator($langcode);
+
+    // Sort the array using the collator for locale-aware comparison.
+    uasort($array, function ($a, $b) use ($collator) {
+      return $collator->compare($a, $b);
+    });
   }
 
   /**
@@ -157,11 +194,11 @@ class MukurtuDictionaryGlossaryOrderForm extends ConfigFormBase {
       }
     }
 
-    // Then, add new entries (not in weights) in unicode sort order.
+    // Then, add new entries (not in weights) in alphabetical order.
     $new_entries = array_diff($glossary_entries, array_keys($weights));
     if (!empty($new_entries)) {
-      // Sort new entries by unicode order.
-      asort($new_entries);
+      // Sort new entries using locale-aware collation.
+      $this->sortByLocale($new_entries);
       foreach ($new_entries as $entry) {
         $weighted_entries[(string) $max_weight] = $entry;
         $max_weight++;
@@ -223,6 +260,22 @@ class MukurtuDictionaryGlossaryOrderForm extends ConfigFormBase {
       '#type' => 'submit',
       '#value' => $this->t('Save Configuration'),
     ];
+    $form['actions']['reset_to_alphabetical'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Reset Order to Alphabetical'),
+      '#submit' => [
+        '::resetToAlphabetical',
+      ],
+      '#limit_validation_errors' => [],
+      '#states' => [
+        'visible' => [
+          ':input[name="sort_mode"]' => ['value' => 'custom'],
+        ],
+      ],
+      '#attributes' => [
+        'title' => $this->t('Reset all glossary entry weights to alphabetical order'),
+      ],
+    ];
     $form['actions']['cancel'] = [
       '#type' => 'submit',
       '#value' => 'Cancel',
@@ -236,6 +289,45 @@ class MukurtuDictionaryGlossaryOrderForm extends ConfigFormBase {
     ];
 
     return $form;
+  }
+
+  /**
+   * Form submission handler for the 'Reset Order to Alphabetical' action.
+   *
+   * @param array $form
+   *   An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public function resetToAlphabetical(array &$form, FormStateInterface $form_state): void {
+    $config = $this->config(static::SETTINGS);
+
+    // Get all current glossary entries.
+    $glossary_entries = $this->getGlossaryEntries();
+
+    // Sort entries using locale-aware collation.
+    $this->sortByLocale($glossary_entries);
+
+    // Build the weights array with sequential weights.
+    $weights = [];
+    $weight = 0;
+    foreach ($glossary_entries as $entry) {
+      $weights[] = [
+        'glossary_entry' => $entry,
+        'weight' => $weight,
+      ];
+      $weight++;
+    }
+
+    // Save the weights array to config.
+    $config->set('weights', $weights);
+    $config->save();
+
+    // Rebuild the form to show the new weights.
+    $form_state->setRebuild(TRUE);
+
+    // Give the user a success message.
+    $this->messenger()->addStatus($this->t('Glossary entry weights have been reset to alphabetical order.'));
   }
 
   /**
