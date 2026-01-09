@@ -5,6 +5,7 @@ dependencies:
     - core.entity_view_mode.node.map_browse
     - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
+    - field.field.node.digital_heritage.field_mukurtu_original_record
     - node.type.digital_heritage
   module:
     - layout_builder
