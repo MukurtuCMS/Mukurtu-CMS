@@ -281,6 +281,32 @@ class CollectionOrganizationForm extends FormBase {
     return FALSE;
   }
 
+  /**
+   * Recursively add a collection and all its children to the collection values.
+   */
+  protected function addCollectionWithChildren($collection, $parent_id, &$collection_values, $weight = 0) {
+    $collection_id = $collection->id();
+
+    // Skip if already in the table.
+    if ($this->alreadyInCollectionsTable($collection_id, $collection_values)) {
+      return;
+    }
+
+    // Add this collection.
+    $collection_values[] = [
+      'label' => [$collection_id],
+      'weight' => $weight,
+      'parent' => $parent_id,
+    ];
+
+    // Recursively add child collections.
+    $children = $collection->getChildCollections();
+    $child_weight = 0;
+    foreach ($children as $child) {
+      $this->addCollectionWithChildren($child, $collection_id, $collection_values, $child_weight++);
+    }
+  }
+
   public function addCollectionToOrganizationAjax(array &$form, FormStateInterface $form_state) {
     $new_collection_autocomplete_value = $form_state->getValue('add_subcollection') ?? '';
 
@@ -294,12 +320,9 @@ class CollectionOrganizationForm extends FormBase {
           // Get the root collection ID.
           $root_collection_id = $form_state->get('root_collection_id');
 
-          $collection_values[] = [
-            'label' => [2 => $id],
-            'weight' => 0,
-            // Set parent to the root collection instead of 0.
-            'parent' => $root_collection_id,
-          ];
+          // Add the collection and all its children recursively.
+          $this->addCollectionWithChildren($collection, $root_collection_id, $collection_values);
+
           $form_state->setValue('collections', $collection_values);
 
           // Rebuild the collections table.
