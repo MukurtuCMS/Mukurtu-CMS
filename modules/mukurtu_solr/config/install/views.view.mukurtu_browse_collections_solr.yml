@@ -95,10 +95,24 @@ display:
             multi_type: separator
             multi_separator: ', '
       pager:
-        type: some
+        type: mini
         options:
           offset: 0
+          pagination_heading_level: h4
           items_per_page: 20
+          total_pages: null
+          id: 0
+          tags:
+            next: 'Next ›'
+            previous: '‹ Previous'
+          expose:
+            items_per_page: false
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 25, 50'
+            items_per_page_options_all: false
+            items_per_page_options_all_label: '- All -'
+            offset: false
+            offset_label: Offset
       exposed_form:
         type: basic
         options:
@@ -110,8 +124,9 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access content'
       cache:
         type: search_api_none
         options: {  }
@@ -142,33 +157,7 @@ display:
           expose:
             label: Title
             field_identifier: title
-          exposed: true
-        node_changed:
-          id: node_changed
-          table: search_api_index_mukurtu_default_solr_index
-          field: node_changed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: DESC
-          expose:
-            label: Newest
-            field_identifier: newest
-          exposed: true
-        node_changed_1:
-          id: node_changed_1
-          table: search_api_index_mukurtu_default_solr_index
-          field: node_changed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: ASC
-          expose:
-            label: Oldest
-            field_identifier: oldest
-          exposed: true
+          exposed: false
         node_field_parent_collection_title:
           id: node_field_parent_collection_title
           table: search_api_index_mukurtu_default_solr_index
