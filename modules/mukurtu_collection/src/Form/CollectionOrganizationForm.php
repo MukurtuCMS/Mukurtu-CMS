@@ -196,8 +196,8 @@ class CollectionOrganizationForm extends FormBase {
     ];
 
     $form['add'] = [
-      "#type" => "submit",
-      "#value" => "Add to Organization",
+      '#type' => 'submit',
+      '#value' => $this->t('Add to Collection'),
       '#submit' => ['::addCollectionToOrganizationAjax'],
       '#ajax' => [
         'callback' => '::addCollectionToTableCallback',
