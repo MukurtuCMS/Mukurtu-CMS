@@ -11,6 +11,7 @@ use Drupal\mukurtu_dictionary\Entity\DictionaryWordEntry;
 use Drupal\mukurtu_dictionary\Entity\SampleSentence;
 use Drupal\mukurtu_dictionary\Entity\WordList;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_theme().
@@ -25,6 +26,70 @@ function mukurtu_dictionary_theme($existing, $type, $theme, $path) {
       ],
     ],
   ];
+}
+
+/**
+ * Implements hook_views_post_execute().
+ */
+function mukurtu_dictionary_views_post_execute(ViewExecutable $view) {
+  // Check if this view is using our custom glossary sort.
+  if (!isset($view->glossary_weights) || !isset($view->glossary_field) || !isset($view->glossary_order)) {
+    return;
+  }
+
+  $weights = $view->glossary_weights;
+  $field = $view->glossary_field;
+  $order = $view->glossary_order;
+
+  // Get the maximum weight for unweighted entries.
+  $max_weight = !empty($weights) ? max($weights) + 1 : PHP_INT_MAX;
+
+  // Sort the results based on glossary weights.
+  usort($view->result, function ($a, $b) use ($weights, $field, $order, $max_weight) {
+    // Get the glossary entry value from each result row.
+    $value_a = '';
+    $value_b = '';
+
+    // Try to get the field value from the search result.
+    if (isset($a->_item) && method_exists($a->_item, 'getField')) {
+      try {
+        $field_obj = $a->_item->getField($field);
+        if ($field_obj) {
+          $values = $field_obj->getValues();
+          $value_a = reset($values) ?: '';
+        }
+      }
+      catch (\Exception $e) {
+        // Field not available, continue with empty value.
+      }
+    }
+
+    if (isset($b->_item) && method_exists($b->_item, 'getField')) {
+      try {
+        $field_obj = $b->_item->getField($field);
+        if ($field_obj) {
+          $values = $field_obj->getValues();
+          $value_b = reset($values) ?: '';
+        }
+      }
+      catch (\Exception $e) {
+        // Field not available, continue with empty value.
+      }
+    }
+
+    // Get weights for both values.
+    $weight_a = $weights[$value_a] ?? $max_weight;
+    $weight_b = $weights[$value_b] ?? $max_weight;
+
+    // First compare by weight.
+    if ($weight_a != $weight_b) {
+      $comparison = $weight_a <=> $weight_b;
+      return $order === 'DESC' ? -$comparison : $comparison;
+    }
+
+    // If weights are equal, use alphabetical comparison.
+    return strnatcasecmp($value_a, $value_b);
+  });
 }
 
 /**

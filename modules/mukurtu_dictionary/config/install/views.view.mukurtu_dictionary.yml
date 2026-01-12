@@ -4,6 +4,7 @@ dependencies:
   config:
     - search_api.index.mukurtu_dictionary_index
   module:
+    - mukurtu_dictionary
     - search_api
     - user
 id: mukurtu_dictionary
@@ -131,19 +132,19 @@ display:
         options: {  }
       empty: {  }
       sorts:
-        search_api_relevance:
-          id: search_api_relevance
+        field_glossary_entry:
+          id: field_glossary_entry
           table: search_api_index_mukurtu_dictionary_index
-          field: search_api_relevance
+          field: field_glossary_entry
           relationship: none
           group_type: group
           admin_label: ''
           plugin_id: search_api
-          order: DESC
+          order: ASC
           expose:
-            label: 'Search Relevance'
-            field_identifier: search_api_relevance
-          exposed: true
+            label: ''
+            field_identifier: ''
+          exposed: false
         title:
           id: title
           table: search_api_index_mukurtu_dictionary_index
@@ -156,32 +157,6 @@ display:
           expose:
             label: Alphabetical
             field_identifier: title
-          exposed: true
-        changed:
-          id: changed
-          table: search_api_index_mukurtu_dictionary_index
-          field: changed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: DESC
-          expose:
-            label: Newest
-            field_identifier: newest
-          exposed: true
-        changed_1:
-          id: changed_1
-          table: search_api_index_mukurtu_dictionary_index
-          field: changed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: ASC
-          expose:
-            label: Oldest
-            field_identifier: oldest
           exposed: true
       arguments: {  }
       filters:
@@ -338,6 +313,7 @@ display:
         - 'user.node_grants:view'
         - user.permissions
       tags:
+        - 'config:mukurtu_dictionary_glossary_order.settings'
         - 'config:search_api.index.mukurtu_dictionary_index'
         - 'search_api_list:mukurtu_dictionary_index'
   mukurtu_dictionary_block:
@@ -362,5 +338,6 @@ display:
         - 'user.node_grants:view'
         - user.permissions
       tags:
+        - 'config:mukurtu_dictionary_glossary_order.settings'
         - 'config:search_api.index.mukurtu_dictionary_index'
         - 'search_api_list:mukurtu_dictionary_index'
