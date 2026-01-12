@@ -12,8 +12,6 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-_core:
-  default_config_hash: GsNGtZZz-xmQ1Ain-ph1neRsvpTlLNgBY2tuCdZZgFg
 id: node.word_list.multipage_browse
 targetEntityType: node
 bundle: word_list
