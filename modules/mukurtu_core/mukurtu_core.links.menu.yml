@@ -21,13 +21,6 @@ mukurtu_core.site_configuration:
   menu_name: dashboard-site-settings
   route_name: system.admin_config
   expanded: TRUE
-#View is not yet created, waiting on future work
-#mukurtu_core.manage_users:
-#  title: 'Manage Users'
-#  description: 'Manage site user accounts.'
-#  parent: mukurtu
-#  menu_name: mukurtu
-#  route_name: view.mukurtu_manage_all_users.manage_users_page
 mukurtu_core.settings_assorted:
   title: "Citation formats and default image"
   parent: mukurtu_dashboard
