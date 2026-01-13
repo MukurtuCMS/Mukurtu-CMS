@@ -6,6 +6,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_collection\Entity\Collection;
+use Drupal\mukurtu_collection\Entity\CollectionInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -56,19 +57,28 @@ class CollectionOrganizationController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
-
   /**
    * Autocomplete handler for collection organization form.
    *
    * Finds published collections user has edit access to.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The collection node being organized.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object containing the autocomplete query.
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   *   JSON response containing autocomplete results.
+   *
    * @see \Drupal\mukurtu_collection\Form\CollectionOrganizationForm
    */
-  public function handleAutocomplete(Request $request) {
+  public function handleAutocomplete(NodeInterface $node, Request $request) {
     $results = [];
     $input = $request->query->get('q');
     if (strlen($input) > 0) {
       $query = \Drupal::entityQuery('node')
         ->condition('status', 1)
+        ->condition('nid', $node->id(), '!=')
         ->condition('title', '%' . $input . '%', 'LIKE')
         ->condition('type', 'collection')
         ->accessCheck(TRUE)
