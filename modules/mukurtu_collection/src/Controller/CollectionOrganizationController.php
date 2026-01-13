@@ -74,13 +74,20 @@ class CollectionOrganizationController extends ControllerBase {
    */
   public function handleAutocomplete(NodeInterface $node, Request $request) {
     $results = [];
+    if (!$node instanceof CollectionInterface) {
+      return new JsonResponse($results);
+    }
     $input = $request->query->get('q');
     if (strlen($input) > 0) {
       $query = \Drupal::entityQuery('node')
         ->condition('status', 1)
+        // Exclude the current collection.
         ->condition('nid', $node->id(), '!=')
         ->condition('title', '%' . $input . '%', 'LIKE')
         ->condition('type', 'collection')
+        // Only return collections that don't have any child collections, eg.
+        // leaf nodes.
+        ->condition('field_child_collections', NULL, 'IS NULL')
         ->accessCheck(TRUE)
         ->range(0, 20);
       $nids = $query->execute();
