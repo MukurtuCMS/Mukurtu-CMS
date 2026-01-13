@@ -54,7 +54,7 @@ mukurtu_core.people:
 #   menu_name: dashboard-users
 #   route_name: mukurtu_core.create_user
 mukurtu_core.appearance_settings:
-  title: 'Logo and favicon'
+  title: 'Change logo'
   description: 'Change logo and favicon'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
