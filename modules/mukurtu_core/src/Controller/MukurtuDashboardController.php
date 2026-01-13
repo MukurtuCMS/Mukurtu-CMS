@@ -4,12 +4,11 @@ namespace Drupal\mukurtu_core\Controller;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Url;
 
 class MukurtuDashboardController extends ControllerBase {
 
   /**
-   * Check access for adding new community records.
+   * Only authenticated users may access the dashboard.
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
@@ -20,88 +19,5 @@ class MukurtuDashboardController extends ControllerBase {
     }
 
     return AccessResult::forbidden();
-  }
-
-  public function content() {
-    // Display message log.
-    $messageLogBlock = [
-      '#type' => 'view',
-      '#name' => 'mukurtu_message_log',
-      '#display_id' => 'mukurtu_message_log_block',
-      '#embed' => FALSE,
-    ];
-
-    // Display all recent content.
-    $allRecentContentBlock = [
-      '#type' => 'view',
-      '#name' => 'mukurtu_recent_content',
-      '#display_id' => 'all_recent_content_block',
-      '#embed' => FALSE,
-    ];
-
-    // Display all the user's recent content.
-    $userRecentContentBlock = [
-      '#type' => 'view',
-      '#name' => 'mukurtu_recent_content',
-      '#display_id' => 'user_recent_content_block',
-      '#embed' => FALSE,
-    ];
-
-    // Display the user's draft content.
-    $draftContentBlock = [
-      '#type' => 'view',
-      '#name' => 'mukurtu_draft_content',
-      '#display_id' => 'mukurtu_draft_content_block',
-      '#embed' => FALSE,
-    ];
-
-    return [
-      '#theme' => 'mukurtu_dashboard',
-      '#getting_started_community' => $this->gettingStartedCommunityContent(),
-      '#getting_started_category' => $this->gettingStartedCategoryContent(),
-      '#activity_log' => $messageLogBlock,
-      '#all_recent_content' => $allRecentContentBlock,
-      '#user_recent_content' => $userRecentContentBlock,
-      '#draft_content' => $draftContentBlock,
-    ];
-  }
-
-  /**
-   * Helper wizard for community creation.
-   */
-  public function gettingStartedCommunityContent() {
-    $build = [];
-
-    $query = \Drupal::entityQuery('community')
-      ->condition('status', TRUE)
-      ->accessCheck(TRUE);
-    $results = $query->execute();
-
-    if (count($results) == 0) {
-      $accessControlHandler = $this->entityTypeManager()->getAccessControlHandler('community');
-      if ($accessControlHandler->createAccess('community')) {
-        $build[] = ['#markup' => '<div class="mukurtu-getting-started mukurtu-getting-started-communities">' . $this->t('Communities are a foundational component of Mukurtu CMS. Get started by creating your first community <a href="@create-community-page">here</a>.', ['@create-community-page' => Url::fromRoute('entity.community.add_form')->toString()]) . '</div>'];
-      }
-    }
-
-    return $build;
-  }
-
-  /**
-   * Helper wizard for category creation.
-   */
-  public function gettingStartedCategoryContent() {
-    $build = [];
-
-    $terms = $this->entityTypeManager()->getStorage('taxonomy_term')->loadTree('category');
-
-    if (count($terms) == 1 && $terms[0]->name == 'Default') {
-      $account = \Drupal::currentUser();
-      if ($account->hasPermission('create terms in category')) {
-        $build[] = ['#markup' => '<div class="mukurtu-getting-started mukurtu-getting-started-categories">' . $this->t('Categories are important for grouping related content. Consider adding new terms and removing the default term <a href="@manage-category-page">here</a>.', ['@manage-category-page' => Url::fromRoute('mukurtu_taxonomy.manage_categories')->toString()]) . '</div>'];
-      }
-    }
-
-    return $build;
   }
 }

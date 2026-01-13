@@ -10,7 +10,6 @@ mukurtu_core.dashboard:
   path: '/dashboard'
   defaults:
     _title: 'Mukurtu Dashboard'
-    _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::content'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
 
