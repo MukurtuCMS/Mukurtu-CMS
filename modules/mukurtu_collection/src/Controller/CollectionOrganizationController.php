@@ -48,7 +48,8 @@ class CollectionOrganizationController extends ControllerBase {
 
   public function access(NodeInterface $node, AccountInterface $account) {
     if ($node instanceof Collection && $node->access('update', $account)) {
-      if ($this->hasUpdateAccessToAllChildCollections($node, $account)) {
+      // Non-root collections should not allow collection organization.
+      if (!$node->getParentCollectionId() && $this->hasUpdateAccessToAllChildCollections($node, $account)) {
         return AccessResult::allowed();
       }
     }
