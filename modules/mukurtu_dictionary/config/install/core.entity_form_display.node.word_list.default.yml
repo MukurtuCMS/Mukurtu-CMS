@@ -6,6 +6,7 @@ dependencies:
     - field.field.node.word_list.comment
     - node.type.word_list
   module:
+    - comment
     - entity_browser
     - field_group
     - media_library
@@ -100,7 +101,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: open
-        description: '"The Local Contexts Traditional Knowledge (TK) and Biocultural (BC) Labels are tools for Indigenous communities and local organizations. Developed through sustained partnership and testing within Indigenous communities across multiple countries, the Labels allow communities to express local and specific conditions for sharing and engaging in future research and relationships in ways that are consistent with already existing community rules, governance, and protocols for using, sharing, and circulating knowledge and data." For more information, visit <a href="https://localcontexts.org">localcontexts.org</a>.	</br>You must first customize your TK and BC Labels using the Local Contexts Hub and import your Project(s) before you can apply Projects or Labels to collections. </br>Note that this does NOT apply Projects or Labels to words within the word list, that is done on a per-word basis.'
+        description: "\"The Local Contexts Traditional Knowledge (TK) and Biocultural (BC) Labels are tools for Indigenous communities and local organizations. Developed through sustained partnership and testing within Indigenous communities across multiple countries, the Labels allow communities to express local and specific conditions for sharing and engaging in future research and relationships in ways that are consistent with already existing community rules, governance, and protocols for using, sharing, and circulating knowledge and data.\" For more information, visit <a href=\"https://localcontexts.org\">localcontexts.org</a>.\t</br>You must first customize your TK and BC Labels using the Local Contexts Hub and import your Project(s) before you can apply Projects or Labels to collections. </br>Note that this does NOT apply Projects or Labels to words within the word list, that is done on a per-word basis."
         required_fields: true
     group_locations:
       children:
@@ -129,7 +130,7 @@ content:
     weight: 10
     region: content
     settings: {  }
-    third_party_settings: {  }  
+    third_party_settings: {  }
   created:
     type: datetime_timestamp
     weight: 3
@@ -262,14 +263,6 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_word_list_image:
-    type: media_library_widget
-    weight: 5
-    region: content
-    settings:
-      media_types:
-        - image
-    third_party_settings: {  }
   field_mukurtu_protocol_r_scope:
     type: mukurtu_protocol_scope_widget
     weight: -6
@@ -329,6 +322,14 @@ content:
     settings:
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  field_word_list_image:
+    type: media_library_widget
+    weight: 5
+    region: content
+    settings:
+      media_types:
+        - image
     third_party_settings: {  }
   field_words:
     type: entity_browser_entity_reference
