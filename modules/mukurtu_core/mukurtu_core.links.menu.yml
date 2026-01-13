@@ -58,7 +58,7 @@ mukurtu_core.appearance_settings:
   description: 'Change logo and favicon'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
-  route_name: mukurtu_core.appearance_settings
+  route_name: system.theme_settings
 mukurtu_core.entity.google_tag_container.collection:
   title: 'Google Tag Settings'
   description: 'Configure the website integration with Google Tag and Google Tag Manager.'
