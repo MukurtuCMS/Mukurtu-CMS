@@ -79,3 +79,9 @@ mukurtu_core.basic_site_settings:
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   route_name: system.site_information_settings
+mukurtu_core.my_account:
+  title: 'My account'
+  description: 'User account page'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-my-content
+  route_name: user.page
