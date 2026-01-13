@@ -4316,38 +4316,6 @@ header {
   }
 }
 
-.dashboard {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  gap: var(--gutter);
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-flow: row wrap;
-          flex-flow: row wrap;
-  inline-size: 100%;
-  grid-column: 1/-1;
-}
-@media (min-width: 90rem) {
-  .dashboard {
-    grid-column: 2/-2;
-  }
-}
-.dashboard__layout-sidebar-first, .dashboard__menu, .dashboard__main-content {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-flow: column nowrap;
-          flex-flow: column nowrap;
-  -webkit-box-flex: 1;
-      -ms-flex: 1 1 100%;
-          flex: 1 1 100%;
-  padding: var(--v-space-4xs);
-  border: 1px solid var(--mukurtu-primary-field-divider-color);
-}
-
 .dictionary .browse__main-content {
   display: block;
 }
@@ -5079,50 +5047,7 @@ header {
 .layout-container main {
   display: block;
 }
-.layout-container main .dashboard {
-  display: grid;
-  grid-template-columns: var(--grid-6col);
-  padding-inline: var(--layout-padding) var(--layout-padding);
-  -webkit-column-gap: var(--gutter);
-     -moz-column-gap: var(--gutter);
-          column-gap: var(--gutter);
-}
-@media (min-width: 60rem) {
-  .layout-container main .dashboard {
-    grid-template-columns: var(--grid-12col);
-  }
-}
-@media (min-width: 90rem) {
-  .layout-container main .dashboard {
-    grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
-  }
-}
-.layout-container main .dashboard__layout-sidebar-first {
-  grid-column: 1/-1;
-}
-@media (min-width: 60rem) {
-  .layout-container main .dashboard__layout-sidebar-first {
-    grid-column: 1/span 6;
-  }
-}
-@media (min-width: 90rem) {
-  .layout-container main .dashboard__layout-sidebar-first {
-    grid-column: 2/span 6;
-  }
-}
-.layout-container main .dashboard__main-content {
-  grid-column: 1/-1;
-}
-@media (min-width: 60rem) {
-  .layout-container main .dashboard__main-content {
-    grid-column: 7/span 6;
-  }
-}
-@media (min-width: 90rem) {
-  .layout-container main .dashboard__main-content {
-    grid-column: 8/span 6;
-  }
-}
+
 .layout-container .page__account-menu {
   background-color: var(--brand-primary);
   display: grid;

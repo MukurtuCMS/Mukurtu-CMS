@@ -54,47 +54,49 @@ class CommunityOrganizationForm extends FormBase {
       ]
     ];
 
-    // Build rows.
-    foreach ($org as $id => $communityOrg) {
-      /** @var \Drupal\mukurtu_browse\Entity\CommunityInterface $community */
-      $community = $communities[$id];
-      $parent = $org[$community->id()]['parent'] ?? 0;
-      $weight = $org[$community->id()]['weight'] ?? 0;
-      $org[$id]['level'] = $parent == 0 ? 0 : ($org[$parent]['level'] + 1 ?? 0);
-      $form['communities'][$id]['#weight'] = $weight;
-      $form['communities'][$id]['#attributes']['class'][] = 'draggable';
+    // Build rows, but only if there are communities on the site.
+    if ($communities) {
+      foreach ($org as $id => $communityOrg) {
+        /** @var \Drupal\mukurtu_browse\Entity\CommunityInterface $community */
+        $community = $communities[$id];
+        $parent = $org[$community->id()]['parent'] ?? 0;
+        $weight = $org[$community->id()]['weight'] ?? 0;
+        $org[$id]['level'] = $parent == 0 ? 0 : ($org[$parent]['level'] + 1 ?? 0);
+        $form['communities'][$id]['#weight'] = $weight;
+        $form['communities'][$id]['#attributes']['class'][] = 'draggable';
 
-      $form['communities'][$id]['label'] = [
-        [
-          '#theme' => 'indentation',
-          '#size' => $org[$id]['level'],
-        ],
-        [
-          '#plain_text' => $community->getName(),
-        ],
-        [
-          '#type' => 'hidden',
+        $form['communities'][$id]['label'] = [
+          [
+            '#theme' => 'indentation',
+            '#size' => $org[$id]['level'],
+          ],
+          [
+            '#plain_text' => $community->getName(),
+          ],
+          [
+            '#type' => 'hidden',
+            '#title_display' => 'invisible',
+            '#value' => $community->id(),
+            '#attributes' => ['class' => ['community-id']],
+          ],
+        ];
+
+        $form['communities'][$id]['weight'] = [
+          '#type' => 'weight',
+          '#title' => $this->t('Weight for @title', ['@title' => $community->getName()]),
           '#title_display' => 'invisible',
-          '#value' => $community->id(),
-          '#attributes' => ['class' => ['community-id']],
-        ],
-      ];
+          '#default_value' => $weight ?? 0,
+          '#attributes' => ['class' => ['field-weight']],
+        ];
 
-      $form['communities'][$id]['weight'] = [
-        '#type' => 'weight',
-        '#title' => $this->t('Weight for @title', ['@title' => $community->getName()]),
-        '#title_display' => 'invisible',
-        '#default_value' => $weight ?? 0,
-        '#attributes' => ['class' => ['field-weight']],
-      ];
-
-      $form['communities'][$id]['parent'] = [
-        '#type' => 'weight',
-        '#title' => $this->t('Parent for @title', ['@title' => $community->getName()]),
-        '#title_display' => 'invisible',
-        '#default_value' => $parent ?? 0,
-        '#attributes' => ['class' => ['field-parent']],
-      ];
+        $form['communities'][$id]['parent'] = [
+          '#type' => 'weight',
+          '#title' => $this->t('Parent for @title', ['@title' => $community->getName()]),
+          '#title_display' => 'invisible',
+          '#default_value' => $parent ?? 0,
+          '#attributes' => ['class' => ['field-parent']],
+        ];
+      }
     }
 
     $form['actions'] = ['#type' => 'actions'];

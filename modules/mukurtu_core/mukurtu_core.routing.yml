@@ -10,7 +10,6 @@ mukurtu_core.dashboard:
   path: '/dashboard'
   defaults:
     _title: 'Mukurtu Dashboard'
-    _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::content'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
 
@@ -108,5 +107,5 @@ mukurtu_core.appearance_settings:
   path: '/admin/appearance/settings/mukurtu_v4'
   defaults:
     _title: 'Site logo and favicon'
-  requirements: 
+  requirements:
     _access: 'TRUE'

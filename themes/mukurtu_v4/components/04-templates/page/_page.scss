@@ -4,34 +4,6 @@
 .layout-container {
   main {
     display: block;
-
-    .dashboard {
-      @include layout.layout--full-width-grid;
-
-      &__layout-sidebar-first {
-        grid-column: 1 / -1;
-
-        @include include-media.media('>=lg') {
-          grid-column: 1 / span 6;
-        }
-
-        @include include-media.media('>=2xl') {
-          grid-column: 2 / span 6;
-        }
-      }
-
-      &__main-content {
-        grid-column: 1 / -1;
-
-        @include include-media.media('>=lg') {
-          grid-column: 7 / span 6;
-        }
-
-        @include include-media.media('>=2xl') {
-          grid-column: 8 / span 6;
-        }
-      }
-    }
   }
 
   .page {
