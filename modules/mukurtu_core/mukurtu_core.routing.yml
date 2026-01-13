@@ -113,6 +113,8 @@ mukurtu_core.appearance_settings:
   path: '/admin/appearance/settings'
   defaults:
     _title: 'Site logo and favicon'
+  requirements: 
+    _permission: 'administer site configuration'
 
 mukurtu_core.entity.google_tag_container.collection:
   path: '/admin/config/services/google-tag/containers'
