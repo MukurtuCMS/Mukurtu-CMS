@@ -111,7 +111,7 @@ mukurtu_core.user_settings:
     _permission: 'administer account settings'
 
 mukurtu_core.appearance_settings:
-  path: '/admin/appearance/settings/mukurtu_v4'
+  path: '/admin/appearance/settings'
   defaults:
     _title: 'Site logo and favicon'
   requirements: 
