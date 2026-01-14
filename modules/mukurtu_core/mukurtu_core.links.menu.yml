@@ -90,4 +90,4 @@ mukurtu_core.main_menu:
   description: 'Main navigation menu'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
-  route_name: system.menu.main
+  route_name: mukurtu_core.main_menu

@@ -116,3 +116,10 @@ mukurtu_core.entity.google_tag_container.collection:
     _title: 'Google Tag containers'
   requirements:
     _custom_access: '\Drupal\google_tag\GoogleTagController::containerListingAccess'
+
+mukurtu_core.main_menu:
+  path: '/admin/structure/menu/manage/main'
+  defaults:
+    _title: 'Manage main menu'
+  requirements:
+    _permission: 'administer menu'
