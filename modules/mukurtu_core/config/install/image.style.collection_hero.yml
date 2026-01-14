@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: collection_hero
+label: 'Collection Hero (3:2)'
+effects:
+  36cb7960-b3d6-4446-84a1-65d3c8b59ccb:
+    uuid: 36cb7960-b3d6-4446-84a1-65d3c8b59ccb
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 1200
+      height: 800
+      anchor: center-center
