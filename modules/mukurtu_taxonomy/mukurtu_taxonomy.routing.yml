@@ -34,8 +34,6 @@ mukurtu_taxonomy.manage_languages:
   path: '/admin/structure/taxonomy/manage/languages/overview'
   defaults:
     _title: 'Manage languages'
-    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
-    _entity_create_access: 'taxonomy_term:{taxonomy_vocabulary}'
   requirements:
     _permission: 'create terms in language,edit terms in language,delete terms in language'
 
@@ -57,7 +55,5 @@ mukurtu_taxonomy.manage_media_tag:
   path: '/admin/structure/taxonomy/manage/media_tag/overview'
   defaults:
     _title: 'Manage media tags'
-    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
-    _entity_create_access: 'taxonomy_term:{taxonomy_vocabulary}'
   requirements:
     _permission: 'create terms in media tag,edit terms in media tag,delete terms in media tag'
