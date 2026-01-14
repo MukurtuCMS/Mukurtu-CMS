@@ -85,3 +85,9 @@ mukurtu_core.my_account:
   parent: mukurtu_dashboard
   menu_name: dashboard-my-content
   route_name: user.page
+mukurtu_core.main_menu:
+  title: 'Manage main menu'
+  description: 'Main navigation menu'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-look-feel
+  route_name: system.menu.main
