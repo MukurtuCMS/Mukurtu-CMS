@@ -51,3 +51,11 @@ mukurtu_taxonomy.term_merge_into:
     _title: 'Term merge into entities'
   requirements:
     _permission: 'administer term merge into entities'
+
+mukurtu_taxonomy.manage_media_tag:
+  path: '/admin/structure/taxonomy/manage/media_tag/overview'
+  defaults:
+    _title: 'Manage media tags'
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuCategoryManageController::content'
+  requirements:
+    _permission: 'create terms in media tag,edit terms in media tag,delete terms in media tag'
