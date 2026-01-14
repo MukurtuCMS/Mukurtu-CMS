@@ -1,0 +1,47 @@
+uuid: c092fc3f-362f-45db-98a8-62a33147cfae
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.collections_hero
+    - image.style.collection_hero
+    - media.type.image
+  module:
+    - image
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+_core:
+  default_config_hash: QGQfMyL39UTljIiGZg7-ojtP4EJy_b4jXBAKaS4_ZH0
+id: media.image.collections_hero
+targetEntityType: media
+bundle: image
+mode: collections_hero
+content:
+  thumbnail:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: collection_hero
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_communities: true
+  field_cultural_protocols: true
+  field_identifier: true
+  field_media_image: true
+  field_media_tags: true
+  field_people: true
+  field_protocol_control: true
+  flag_export_media: true
+  langcode: true
+  name: true
+  search_api_excerpt: true
+  uid: true

@@ -1,0 +1,11 @@
+uuid: cb5283d2-8870-43c7-b690-194a07bcd2d0
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+id: media.collections_hero
+label: 'Collections Hero'
+description: null
+targetEntityType: media
+cache: true

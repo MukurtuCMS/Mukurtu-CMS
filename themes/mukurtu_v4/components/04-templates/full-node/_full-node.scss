@@ -87,6 +87,10 @@
     }
   }
 
+  &__comment {
+    margin-block-start: var(--v-space-xs);
+  }
+
   // Sidebar.
   &__list {
     grid-column: 1 / span 6;

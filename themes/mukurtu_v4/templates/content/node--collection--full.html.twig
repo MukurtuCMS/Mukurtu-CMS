@@ -73,7 +73,7 @@
 
     <div class="collection__header">
       <div class="collection__header__image">
-        {{ content.field_collection_image }}
+        {{ content.group_primary_fields.field_collection_image|render|striptags('<img>')|raw }}
       </div>
 
       <div class="collection__header__text">
@@ -86,7 +86,7 @@
           </h2>
         {% endif %}
 
-        {{ content.field_summary }}
+        {{ content.group_primary_fields.field_summary }}
       </div>
     </div> {# /header #}
 
@@ -94,44 +94,39 @@
     {# Main content + sidebar. #}
     <div class="full-node__grid">
       {# Full width collection description. #}
-      {{ content.field_description }}
+      {{ content.group_primary_fields.field_description }}
 
       {# Main content -- collection items grid. #}
       <div class="full-node__main">
-        {{ content.field_coverage }}
-        {{ content.field_coverage_description }}
 
         <div class="full-node__content">
-          {{ content.field_items_in_collection }}
+          {{ content.group_primary_fields|without('field_collection_image', 'field_summary', 'field_description', 'field_all_related_content', 'comment') }}
         </div>
 
-        <div class="full-node__content">
-          {{ content.comment }}
+        <div class="full-node__related-content">
+          {{ content.group_primary_fields.field_all_related_content }}
+        </div>
+
+        <div class="full-node__comment">
+          {{ content.group_primary_fields.comment }}
         </div>
 
       </div>
 
       {# Sidebar. #}
-      <div class="full-node__list">
-        {# As more content is made available to the sidebar, add it below. #}
-        {% if content.field_communities is not empty %}
+      {% if content.group_metadata is not empty %}
+        <div class="full-node__list">
           <aside class="full-node__sidebar">
             <div class="sidebar-section">
               {{ content.community_protocol_list }}
-              {{ content.field_source}}
+              {{ content.group_metadata.group_sidebar_mukurtu_fields|without('field_communities', 'field_cultural_protocols') }}
             </div>
+            {{ content.group_metadata.group_additional_metadata }}
+            {{ content.group_metadata.group_rights }}
+            {{ content.group_metadata.flag_export_content }}
           </aside>
-        {% endif %}
-
-        <div class="full-node__related-content">
-          {{ content.field_all_related_content }}
         </div>
-
-        <div class="full-node__flag-export-content">
-          {{ content.flag_export_content }}
-        </div>
-
-      </div>
+      {% endif %}
 
     </div>
 

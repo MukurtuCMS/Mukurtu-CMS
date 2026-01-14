@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.collection.comment
     - node.type.collection
   module:
+    - field_group
     - layout_builder
     - mukurtu_core
     - mukurtu_local_contexts
@@ -17,6 +18,122 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
+  field_group:
+    group_primary_fields:
+      children:
+        - field_collection_image
+        - field_summary
+        - field_description
+        - field_items_in_collection
+        - field_coverage
+        - field_location
+        - field_coverage_description
+        - field_all_related_content
+        - comment
+      label: 'Primary Fields'
+      parent_name: ''
+      region: content
+      weight: 0
+      format_type: html_element
+      format_settings:
+        classes: item-content
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_metadata:
+      children:
+        - flag_export_content
+        - group_sidebar_mukurtu_fields
+        - group_additional_metadata
+        - group_rights
+      label: Metadata
+      parent_name: ''
+      region: content
+      weight: 1
+      format_type: html_element
+      format_settings:
+        classes: metadata
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_sidebar_mukurtu_fields:
+      children:
+        - field_title
+        - field_keywords
+        - field_communities
+        - field_cultural_protocols
+      label: 'Sidebar - Mukurtu fields'
+      parent_name: group_metadata
+      region: content
+      weight: 6
+      format_type: html_element
+      format_settings:
+        classes: sidebar-section-inner
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_additional_metadata:
+      children:
+        - field_source
+      label: 'Additional Metadata'
+      parent_name: group_metadata
+      region: content
+      weight: 7
+      format_type: html_element
+      format_settings:
+        classes: sidebar-section
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+    group_rights:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: Rights
+      parent_name: group_metadata
+      region: content
+      weight: 8
+      format_type: html_element
+      format_settings:
+        classes: sidebar-section
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
 id: node.collection.full
 targetEntityType: node
 bundle: collection
@@ -29,13 +146,13 @@ content:
       view_mode: default
       pager_id: 0
     third_party_settings: {  }
-    weight: 11
+    weight: 9
     region: content
   field_all_related_content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: teaser
+      view_mode: browse
       link: false
     third_party_settings: {  }
     weight: 8
@@ -44,10 +161,10 @@ content:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: browse
+      view_mode: collections_hero
       link: false
     third_party_settings: {  }
-    weight: 0
+    weight: 1
     region: content
   field_communities:
     type: entity_reference_label
@@ -55,14 +172,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 4
-    region: content
-  field_cultural_protocols:
-    type: cultural_protocol_formatter
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 5
+    weight: 29
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -164,10 +274,10 @@ content:
     region: content
   field_coverage_description:
     type: text_default
-    label: hidden
+    label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 6
+    weight: 7
     region: content
   field_credit:
     type: string
@@ -177,12 +287,19 @@ content:
     third_party_settings: {  }
     weight: 5
     region: content
+  field_cultural_protocols:
+    type: cultural_protocol_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 30
+    region: content
   field_description:
     type: text_default
     label: hidden
     settings: {  }
     third_party_settings: {  }
-    weight: 2
+    weight: 3
     region: content
   field_items_in_collection:
     type: entity_reference_entity_view
@@ -191,21 +308,29 @@ content:
       view_mode: grid_browse
       link: false
     third_party_settings: {  }
-    weight: 3
+    weight: 4
+    region: content
+  field_keywords:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 28
     region: content
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 10
+    weight: 3
     region: content
   field_local_contexts_projects:
     type: local_contexts_project
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 9
+    weight: 2
     region: content
   field_location:
     type: entity_reference_label
@@ -213,20 +338,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 7
-    region: content
-  field_summary:
-    type: string
-    label: hidden
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    weight: 1
-    region: content
-  flag_export_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 100
+    weight: 6
     region: content
   field_source:
     type: string
@@ -234,7 +346,25 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 7
+    weight: 31
+    region: content
+  field_summary:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_title:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 27
+    region: content
+  flag_export_content:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 5
     region: content
 hidden:
   draft: true
@@ -242,19 +372,14 @@ hidden:
   field_citation: true
   field_collection_type: true
   field_content_type: true
-  field_cultural_protocols: true
   field_in_collection: true
-  field_keywords: true
   field_multipage_page_of: true
   field_parent_collection: true
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
-  field_source: true
-  field_title: true
   flag_email_node: true
   flag_email_og: true
-  flag_export_content: true
   flag_mukurtu_email_collection: true
   flag_mukurtu_email_og: true
   flag_mukurtu_follow_collection: true
