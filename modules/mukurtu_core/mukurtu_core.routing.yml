@@ -120,6 +120,7 @@ mukurtu_core.entity.google_tag_container.collection:
 mukurtu_core.main_menu:
   path: '/admin/structure/menu/manage/main'
   defaults:
-    _title: 'Manage main menu'
+    _entity_form: 'menu.edit'
+    _title_callback: '\Drupal\menu_ui\Controller\MenuController::menuTitle'
   requirements:
-    _permission: 'administer menu'
+    _entity_access: 'menu.update'
