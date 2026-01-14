@@ -31,11 +31,12 @@ mukurtu_taxonomy.person_record_settings:
     _permission: 'administer site configuration'
 
 mukurtu_taxonomy.manage_languages:
-  path: '/admin/structure/taxonomy/manage/language/overview'
+  path: '/admin/taxonomy/manage/language/overview'
   defaults:
-    _title: 'Manage languages'
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
   requirements:
-    _permission: 'create terms in language,edit terms in language,delete terms in language'
+    _entity_create_access: 'taxonomy_term:language'
+    _custom_access: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::access'
 
 mukurtu_taxonomy.manage_media_tag:
   path: '/admin/structure/taxonomy/manage/media_tag/overview'
