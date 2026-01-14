@@ -124,3 +124,10 @@ mukurtu_core.entity.menu.edit_form:
     _title_callback: '\Drupal\menu_ui\Controller\MenuController::menuTitle'
   requirements:
     _entity_access: 'menu.update'
+
+mukurtu_core.consent_popup:
+  path: '/admin/structure/block/manage/mukurtu_v4_consentpopup'
+  defaults:
+    _title: 'Configure consent popup'
+  requirements:
+    _permission: 'administer blocks'
