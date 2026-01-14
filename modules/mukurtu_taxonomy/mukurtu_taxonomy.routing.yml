@@ -33,17 +33,18 @@ mukurtu_taxonomy.person_record_settings:
 mukurtu_taxonomy.manage_languages:
   path: '/admin/taxonomy/manage/language/overview'
   defaults:
+    _title: 'Manage languages'
     _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
   requirements:
-    _entity_create_access: 'taxonomy_term:language'
-    _custom_access: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::access'
+    _permission: 'access taxonomy overview'
 
 mukurtu_taxonomy.manage_media_tag:
   path: '/admin/structure/taxonomy/manage/media_tag/overview'
   defaults:
     _title: 'Manage media tags'
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
   requirements:
-    _permission: 'create terms in media tag,edit terms in media tag,delete terms in media tag'
+    _permission: 'access taxonomy overview'
 
 mukurtu_taxonomy.term_merge_from:
   path: '/admin/structure/term_merge_from'
