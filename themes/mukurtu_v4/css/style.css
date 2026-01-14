@@ -3913,8 +3913,8 @@ header {
 }
 .collection__header__image img {
   display: block;
-  width: 100%;
-  height: 100%;
+  inline-size: 100%;
+  block-size: 100%;
   -o-object-fit: cover;
      object-fit: cover;
 }
@@ -5064,7 +5064,6 @@ header {
 .layout-container main {
   display: block;
 }
-
 .layout-container .page__account-menu {
   background-color: var(--brand-primary);
   display: grid;
