@@ -18,7 +18,7 @@
 
     &__image {
       position: relative;
-      background-color: var(--brand-primary);
+      background-color: var(--brand-primary-dark);
 
       // Creates the 25% black effect over the image.
       &::before {
@@ -33,18 +33,22 @@
         z-index: 10;
       }
 
-      img {
-        display: block;
-      }
+img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
     }
 
     &__text {
       background-color: var(--brand-primary-dark);
       color: var(--color-white);
+      padding-block: var(--v-space-2xl);
 
       h2 {
         position: relative;
-        margin-block: var(--v-space-2xl);
+        margin-block-end: var(--v-space-2xl);
         color: var(--color-white);
         font-size: var(--font-size-heading-2xl);
 
@@ -79,7 +83,7 @@
   }
 
   .collection__items__label {
-    font-weight: var(--text-bold);
+    margin-block-end: var(--v-space-5xs);
   }
 
   // The theming for the Collection instances in the Related Content field.
@@ -172,4 +176,10 @@
       }
     }
   }
+
+  .grid + .field {
+    padding-block-start: 0;
+    border-block-start: none;
+  }
+
 }

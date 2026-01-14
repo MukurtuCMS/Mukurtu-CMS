@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Template\Attribute;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
