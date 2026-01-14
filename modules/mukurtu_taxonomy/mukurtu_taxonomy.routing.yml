@@ -31,10 +31,10 @@ mukurtu_taxonomy.person_record_settings:
     _permission: 'administer site configuration'
 
 mukurtu_taxonomy.manage_languages:
-  path: '/admin/languages/manage'
+  path: '/admin/structure/taxonomy/manage/languages/overview'
   defaults:
     _title: 'Manage languages'
-    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuCategoryManageController::content'
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuTaxonomyManageController::content'
   requirements:
     _permission: 'create terms in language,edit terms in language,delete terms in language'
 
@@ -56,6 +56,6 @@ mukurtu_taxonomy.manage_media_tag:
   path: '/admin/structure/taxonomy/manage/media_tag/overview'
   defaults:
     _title: 'Manage media tags'
-    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuCategoryManageController::content'
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuTaxonomyManageController::content'
   requirements:
     _permission: 'create terms in media tag,edit terms in media tag,delete terms in media tag'
