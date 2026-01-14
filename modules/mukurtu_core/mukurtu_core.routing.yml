@@ -130,4 +130,4 @@ mukurtu_core.consent_popup:
   defaults:
     _title: 'Configure consent popup'
   requirements:
-    _permission: 'administer blocks'
+    _permission: 'administer block content'
