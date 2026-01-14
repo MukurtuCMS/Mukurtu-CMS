@@ -118,7 +118,7 @@ mukurtu_core.entity.google_tag_container.collection:
     _custom_access: '\Drupal\google_tag\GoogleTagController::containerListingAccess'
 
 mukurtu_core.entity.menu.edit_form:
-  path: '/admin/structure/menu/manage/{menu}'
+  path: '/admin/structure/menu/manage/main'
   defaults:
     _entity_form: 'menu.edit'
     _title_callback: '\Drupal\menu_ui\Controller\MenuController::menuTitle'
