@@ -31,7 +31,7 @@ mukurtu_taxonomy.person_record_settings:
     _permission: 'administer site configuration'
 
 mukurtu_taxonomy.manage_languages:
-  path: '/admin/structure/taxonomy/manage/languages/overview'
+  path: '/admin/structure/taxonomy/manage/language/overview'
   defaults:
     _title: 'Manage languages'
   requirements:
@@ -41,7 +41,6 @@ mukurtu_taxonomy.manage_media_tag:
   path: '/admin/structure/taxonomy/manage/media_tag/overview'
   defaults:
     _title: 'Manage media tags'
-    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::access'
   requirements:
     _permission: 'create terms in media tag,edit terms in media tag,delete terms in media tag'
 
