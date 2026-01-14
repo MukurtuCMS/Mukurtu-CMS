@@ -123,4 +123,4 @@ mukurtu_core.main_menu:
     _title: 'Manage main menu'
     _entity_form: 'menu.edit'
   requirements:
-    _permission: 'administer menu'
+    _entity_access: 'menu.update'
