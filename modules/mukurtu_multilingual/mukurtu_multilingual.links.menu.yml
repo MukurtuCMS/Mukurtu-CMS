@@ -1,6 +1,6 @@
-mukurtu_multilingual.entity.configurable_language.collection:
+entity.configurable_language.edit_form:
   title: 'Manage site languages'
   description: 'Manage site languages.'
-  route_name: entity.configurable_language.edit_form
   parent: mukurtu_dashboard
   menu_name: dashboard-multilingual
+  route_name: entity.configurable_language.edit_form
