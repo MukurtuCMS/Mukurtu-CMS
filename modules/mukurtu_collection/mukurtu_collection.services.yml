@@ -1,0 +1,12 @@
+services:
+  mukurtu_collection.hierarchy_service:
+    class: Drupal\mukurtu_collection\CollectionHierarchyService
+    arguments:
+      - '@entity_type.manager'
+      - '@current_user'
+
+  mukurtu_collection.menu_link_discovery:
+    class: Drupal\mukurtu_collection\CollectionMenuLinkDiscovery
+    arguments:
+      - '@mukurtu_collection.hierarchy_service'
+      - '@entity_type.manager'
