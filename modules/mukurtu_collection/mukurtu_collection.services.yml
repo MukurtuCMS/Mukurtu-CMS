@@ -4,15 +4,19 @@ services:
     arguments:
       - '@entity_type.manager'
       - '@current_user'
+  Drupal\mukurtu_collection\CollectionHierarchyServiceInterface: '@mukurtu_collection.hierarchy_service'
 
   mukurtu_collection.menu_link_discovery:
     class: Drupal\mukurtu_collection\CollectionMenuLinkDiscovery
     arguments:
       - '@mukurtu_collection.hierarchy_service'
       - '@entity_type.manager'
+  Drupal\mukurtu_collection\CollectionMenuLinkDiscoveryInterface: '@mukurtu_collection.menu_link_discovery'
 
-  Drupal\mukurtu_collection\MenuRebuildProcessor:
+  mukurtu_collection.menu_rebuild_processor:
+    class: Drupal\mukurtu_collection\MenuRebuildProcessor
     arguments:
       - '@plugin.manager.menu.link'
     tags:
       - { name: needs_destruction }
+  Drupal\mukurtu_collection\MenuRebuildProcessor: '@mukurtu_collection.menu_rebuild_processor'
