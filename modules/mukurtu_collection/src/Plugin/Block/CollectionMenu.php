@@ -5,8 +5,6 @@ namespace Drupal\mukurtu_collection\Plugin\Block;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\mukurtu_collection\CollectionHierarchyServiceInterface;
-use Drupal\mukurtu_collection\Entity\CollectionInterface;
 use Drupal\node\NodeInterface;
 use Drupal\system\Plugin\Block\SystemMenuBlock;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -52,7 +50,7 @@ class CollectionMenu extends SystemMenuBlock implements ContainerFactoryPluginIn
     // Get the node from context.
     $node = $this->getContextValue('node');
 
-    if (!$node || !($node instanceof NodeInterface)) {
+    if (!$node instanceof NodeInterface) {
       $build = [];
       $cache->applyTo($build);
       return $build;
@@ -63,9 +61,7 @@ class CollectionMenu extends SystemMenuBlock implements ContainerFactoryPluginIn
 
     if (!$collection) {
       $build = [];
-      if ($node) {
-        $cache->addCacheableDependency($node);
-      }
+      $cache->addCacheableDependency($node);
       $cache->applyTo($build);
       return $build;
     }
