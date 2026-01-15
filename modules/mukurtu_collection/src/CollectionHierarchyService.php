@@ -55,8 +55,7 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
     // Get all collection IDs that are referenced as child collections.
     $query = $storage->getQuery()
       ->condition('type', 'collection')
-      ->condition('status', 1)
-      ->accessCheck(TRUE)
+      ->accessCheck(FALSE)
       ->exists('field_child_collections');
     $parentsWithChildren = $query->execute();
 
@@ -73,8 +72,7 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
     // Get all collections that are NOT in the child collections list.
     $query = $storage->getQuery()
       ->condition('type', 'collection')
-      ->condition('status', 1)
-      ->accessCheck(TRUE);
+      ->accessCheck(FALSE);
 
     if (!empty($childCollectionIds)) {
       $query->condition('nid', $childCollectionIds, 'NOT IN');
