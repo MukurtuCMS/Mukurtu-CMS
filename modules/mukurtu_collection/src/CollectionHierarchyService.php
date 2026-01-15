@@ -53,6 +53,10 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
     $storage = $this->entityTypeManager->getStorage('node');
 
     // Get all collection IDs that are referenced as child collections.
+    // @todo There should be a better way to find all root ids in one query,
+    //   might require using the DB service instead of entity query. Need to go
+    //   to DB query b/c you want to join node, or node_field_data, to
+    //   node__field_child_collections.field_child_collections_target_id.
     $query = $storage->getQuery()
       ->condition('type', 'collection')
       ->accessCheck(FALSE)

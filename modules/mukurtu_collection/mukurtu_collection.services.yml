@@ -10,3 +10,9 @@ services:
     arguments:
       - '@mukurtu_collection.hierarchy_service'
       - '@entity_type.manager'
+
+  Drupal\mukurtu_collection\MenuRebuildProcessor:
+    arguments:
+      - '@plugin.manager.menu.link'
+    tags:
+      - { name: needs_destruction }
