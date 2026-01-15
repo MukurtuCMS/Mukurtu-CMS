@@ -14,6 +14,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides a collection menu block.
  *
+ * @todo We might get away with just using the core menu block here...
+ *
  * @Block(
  *   id = "mukurtu_collection_menu",
  *   admin_label = @Translation("Collection Menu"),

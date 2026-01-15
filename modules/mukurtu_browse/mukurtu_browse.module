@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
