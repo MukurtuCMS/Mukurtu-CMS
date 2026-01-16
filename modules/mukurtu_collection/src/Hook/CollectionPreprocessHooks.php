@@ -44,7 +44,7 @@ final class CollectionPreprocessHooks {
     }
 
     // Look up the root collection.
-    $root_collection = $this->hierarchyService->getRootCollectionForCollection($collection->id());
+    $root_collection = $this->hierarchyService->getRootCollectionForCollection((int) $collection->id());
 
     if ($root_collection && $root_collection->access('view')) {
       // Provide the root collection as a link.

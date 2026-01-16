@@ -65,9 +65,9 @@ class CollectionMenu extends SystemMenuBlock implements ContainerFactoryPluginIn
     }
 
     // Get the root collection for this collection.
-    $rootCollection = $this->hierarchyService->getRootCollectionForCollection($collection->id());
+    $root_collection = $this->hierarchyService->getRootCollectionForCollection((int) $collection->id());
 
-    if (!$rootCollection) {
+    if (!$root_collection) {
       $build = [];
       $cache->addCacheableDependency($node);
       $cache->applyTo($build);
@@ -77,7 +77,7 @@ class CollectionMenu extends SystemMenuBlock implements ContainerFactoryPluginIn
     // Add cacheable dependencies.
     $cache->addCacheableDependency($node);
     $cache->addCacheableDependency($collection);
-    $cache->addCacheableDependency($rootCollection);
+    $cache->addCacheableDependency($root_collection);
 
     $menu_name = $this->getDerivativeId();
 
@@ -92,7 +92,7 @@ class CollectionMenu extends SystemMenuBlock implements ContainerFactoryPluginIn
     }
 
     // Set the root to the root collection.
-    $parameters->setRoot('mukurtu_collection.collection_menu:' . $rootCollection->uuid());
+    $parameters->setRoot('mukurtu_collection.collection_menu:' . $root_collection->uuid());
 
     // Adjust the menu tree parameters based on the block's configuration.
     $level = $this->configuration['level'];

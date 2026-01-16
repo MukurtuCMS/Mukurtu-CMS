@@ -47,7 +47,7 @@ class CollectionMenuLinkDiscovery implements CollectionMenuLinkDiscoveryInterfac
 
     if ($collection) {
       // Get the root collection for this specific collection.
-      $rootCollection = $this->hierarchyService->getRootCollectionForCollection($collection->id());
+      $rootCollection = $this->hierarchyService->getRootCollectionForCollection((int) $collection->id());
       $rootCollections = $rootCollection ? [$rootCollection] : [];
     }
     else {
@@ -61,7 +61,7 @@ class CollectionMenuLinkDiscovery implements CollectionMenuLinkDiscoveryInterfac
       }
 
       // Get the full hierarchy for this root collection.
-      $hierarchy = $this->hierarchyService->getCollectionHierarchy($rootCollection->id());
+      $hierarchy = $this->hierarchyService->getCollectionHierarchy((int) $rootCollection->id());
 
       if (!empty($hierarchy)) {
         // Build menu link definitions from the hierarchy.

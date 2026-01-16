@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_collection;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -13,25 +15,11 @@ use Drupal\node\NodeInterface;
 class CollectionHierarchyService implements CollectionHierarchyServiceInterface {
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
    * Cache of processed collections to prevent circular references.
    *
    * @var array
    */
-  protected $processedCollections = [];
+  protected array $processedCollections = [];
 
   /**
    * Constructs a new CollectionHierarchyService.
@@ -41,15 +29,13 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
    * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
    *   The current user.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, AccountProxyInterface $currentUser) {
-    $this->entityTypeManager = $entityTypeManager;
-    $this->currentUser = $currentUser;
+  public function __construct(protected EntityTypeManagerInterface $entityTypeManager, protected AccountProxyInterface $currentUser) {
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRootCollections() {
+  public function getRootCollections(): array {
     $storage = $this->entityTypeManager->getStorage('node');
 
     // Get all collection IDs that are referenced as child collections.
@@ -90,23 +76,23 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function getCollectionHierarchy($rootCollectionId, $maxDepth = NULL) {
+  public function getCollectionHierarchy(int $root_collection_id, ?int $max_depth = NULL): array {
     // Reset processed collections cache for this operation.
     $this->processedCollections = [];
 
     $storage = $this->entityTypeManager->getStorage('node');
-    $rootCollection = $storage->load($rootCollectionId);
+    $root_collection = $storage->load($root_collection_id);
 
-    if (!$rootCollection || !$rootCollection instanceof CollectionInterface) {
+    if (!$root_collection || !$root_collection instanceof CollectionInterface) {
       return [];
     }
 
     // Drupal menu system max depth is 9.
-    if ($maxDepth === NULL) {
-      $maxDepth = 9;
+    if ($max_depth === NULL) {
+      $max_depth = 9;
     }
 
-    return $this->buildHierarchyRecursive($rootCollection, 0, $maxDepth);
+    return $this->buildHierarchyRecursive($root_collection, 0, $max_depth);
   }
 
   /**
@@ -114,15 +100,15 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
    *
    * @param \Drupal\mukurtu_collection\Entity\CollectionInterface $collection
    *   The collection to process.
-   * @param int $currentDepth
+   * @param int $current_depth
    *   The current depth in the hierarchy.
-   * @param int $maxDepth
+   * @param int $max_depth
    *   Maximum depth to traverse.
    *
    * @return array
    *   Hierarchy structure.
    */
-  protected function buildHierarchyRecursive(CollectionInterface $collection, $currentDepth, $maxDepth) {
+  protected function buildHierarchyRecursive(CollectionInterface $collection, int $current_depth, $max_depth) {
     $collectionId = $collection->id();
 
     // Prevent circular references and infinite loops.
@@ -134,27 +120,27 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
 
     $structure = [
       'entity' => $collection,
-      'depth' => $currentDepth,
+      'depth' => $current_depth,
       'children' => [],
     ];
 
     // Stop if we've reached max depth.
-    if ($currentDepth >= $maxDepth) {
+    if ($current_depth >= $max_depth) {
       return $structure;
     }
 
     // Get child collections.
-    $childCollections = $collection->getChildCollections();
+    $child_collections = $collection->getChildCollections();
 
-    if ($childCollections) {
-      foreach ($childCollections as $childCollection) {
+    if ($child_collections) {
+      foreach ($child_collections as $child_collection) {
         // Check access and published status.
-        if ($childCollection instanceof CollectionInterface &&
-            $childCollection->access('view') &&
-            $childCollection->isPublished()) {
-          $childStructure = $this->buildHierarchyRecursive($childCollection, $currentDepth + 1, $maxDepth);
-          if (!empty($childStructure)) {
-            $structure['children'][] = $childStructure;
+        if ($child_collection instanceof CollectionInterface &&
+          $child_collection->access('view') &&
+          $child_collection->isPublished()) {
+          $child_structure = $this->buildHierarchyRecursive($child_collection, $current_depth + 1, $max_depth);
+          if (!empty($child_structure)) {
+            $structure['children'][] = $child_structure;
           }
         }
       }
@@ -166,16 +152,16 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function getRootCollectionForCollection($collectionId) {
+  public function getRootCollectionForCollection(int $collection_id): ?CollectionInterface {
     $storage = $this->entityTypeManager->getStorage('node');
-    $collection = $storage->load($collectionId);
+    $collection = $storage->load($collection_id);
 
     if (!$collection || !$collection instanceof CollectionInterface) {
       return NULL;
     }
 
     // If this is already a root collection, return it.
-    if ($this->isRootCollection($collectionId)) {
+    if ($this->isRootCollection($collection_id)) {
       return $collection;
     }
 
@@ -184,13 +170,13 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
     $current = $collection;
 
     while ($current) {
-      $currentId = $current->id();
+      $current_id = $current->id();
 
       // Prevent infinite loops.
-      if (isset($visited[$currentId])) {
+      if (isset($visited[$current_id])) {
         break;
       }
-      $visited[$currentId] = TRUE;
+      $visited[$current_id] = TRUE;
 
       // Get parent collection.
       $parent = $current->getParentCollection();
@@ -209,13 +195,13 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function isRootCollection($collectionId) {
+  public function isRootCollection(int $collection_id): bool {
     $storage = $this->entityTypeManager->getStorage('node');
 
     // Check if any collection references this collection in field_child_collections.
     $query = $storage->getQuery()
       ->condition('type', 'collection')
-      ->condition('field_child_collections', $collectionId)
+      ->condition('field_child_collections', $collection_id)
       ->accessCheck(FALSE)
       ->range(0, 1);
 
@@ -228,9 +214,9 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function getChildCollections($collectionId, $depth = 1) {
+  public function getChildCollections(int $collection_id, int $depth = 1): array {
     $storage = $this->entityTypeManager->getStorage('node');
-    $collection = $storage->load($collectionId);
+    $collection = $storage->load($collection_id);
 
     if (!$collection || !$collection instanceof CollectionInterface) {
       return [];
@@ -251,36 +237,36 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
    *
    * @param \Drupal\mukurtu_collection\Entity\CollectionInterface $collection
    *   The collection to process.
-   * @param int $targetDepth
+   * @param int $target_depth
    *   The target depth to traverse.
-   * @param int $currentDepth
+   * @param int $current_depth
    *   The current depth.
    *
    * @return array
    *   Array of child collections.
    */
-  protected function getChildCollectionsRecursive(CollectionInterface $collection, $targetDepth, $currentDepth) {
-    $collectionId = $collection->id();
+  protected function getChildCollectionsRecursive(CollectionInterface $collection, int $target_depth, int $current_depth) {
+    $collection_id = $collection->id();
 
     // Prevent circular references.
-    if (isset($this->processedCollections[$collectionId])) {
+    if (isset($this->processedCollections[$collection_id])) {
       return [];
     }
 
-    $this->processedCollections[$collectionId] = TRUE;
+    $this->processedCollections[$collection_id] = TRUE;
 
     $children = [];
-    $immediateChildren = $collection->getChildCollections() ?? [];
+    $immediate_children = $collection->getChildCollections() ?? [];
 
-    foreach ($immediateChildren as $child) {
+    foreach ($immediate_children as $child) {
       if ($child instanceof CollectionInterface &&
           $child->access('view') &&
           $child->isPublished()) {
         $children[] = $child;
 
         // Continue recursing if we haven't reached target depth.
-        if ($currentDepth + 1 < $targetDepth) {
-          $grandchildren = $this->getChildCollectionsRecursive($child, $targetDepth, $currentDepth + 1);
+        if ($current_depth + 1 < $target_depth) {
+          $grandchildren = $this->getChildCollectionsRecursive($child, $target_depth, $current_depth + 1);
           $children = array_merge($children, $grandchildren);
         }
       }
@@ -292,7 +278,7 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function getCollectionFromNode(NodeInterface $node) {
+  public function getCollectionFromNode(NodeInterface $node): ?CollectionInterface {
     if ($node->bundle() === 'collection' && $node instanceof CollectionInterface) {
       return $node;
     }

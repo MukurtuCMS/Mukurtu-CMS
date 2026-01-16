@@ -1,10 +1,5 @@
 <?php
 
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\views\ViewExecutable;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Component\Serialization\Json;
 use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
 
 /**

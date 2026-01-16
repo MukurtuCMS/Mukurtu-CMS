@@ -42,7 +42,6 @@ mukurtu_collection.my_personal_collections_dashboard:
   menu_name: dashboard-my-content
   route_name: mukurtu_collection.my_personal_collections
 
-# Collection menu hierarchy items
 mukurtu_collection.collection_menu:
   class: \Drupal\mukurtu_collection\Plugin\Menu\CollectionMenuItem
   deriver: \Drupal\mukurtu_collection\Plugin\Deriver\CollectionMenuItemDeriver
