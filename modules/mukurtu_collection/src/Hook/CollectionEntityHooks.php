@@ -60,10 +60,6 @@ final class CollectionEntityHooks {
     $new_child_ids = $entity->getChildCollectionIds();
     $old_child_ids = $original->getChildCollectionIds();
 
-    // Sort both arrays to compare regardless of order.
-    sort($new_child_ids);
-    sort($old_child_ids);
-
     // If the child collections have changed, rebuild the menu.
     if ($new_child_ids !== $old_child_ids) {
       $this->menuRebuildProcessor->markRebuildNeeded();
