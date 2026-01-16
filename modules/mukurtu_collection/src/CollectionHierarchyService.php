@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_collection;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_collection\Entity\CollectionInterface;
 use Drupal\node\NodeInterface;
 
@@ -53,7 +54,7 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
     if (!empty($parents_with_children)) {
       $parent_collections = $storage->loadMultiple($parents_with_children);
       foreach ($parent_collections as $parent) {
-        if ($parent instanceof CollectionInterface) {
+        if ($parent instanceof Collection) {
           $child_collection_ids = array_merge($child_collection_ids, $parent->getChildCollectionIds());
         }
       }
@@ -68,9 +69,9 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
       $query->condition('nid', $child_collection_ids, 'NOT IN');
     }
 
-    $rootIds = $query->execute();
+    $root_ids = $query->execute();
 
-    return $storage->loadMultiple($rootIds);
+    return $storage->loadMultiple($root_ids);
   }
 
   /**
@@ -83,7 +84,7 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
     $storage = $this->entityTypeManager->getStorage('node');
     $root_collection = $storage->load($root_collection_id);
 
-    if (!$root_collection instanceof CollectionInterface) {
+    if (!$root_collection instanceof Collection) {
       return [];
     }
 
@@ -98,7 +99,7 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * Recursively build the hierarchy structure.
    *
-   * @param \Drupal\mukurtu_collection\Entity\CollectionInterface $collection
+   * @param \Drupal\mukurtu_collection\Entity\Collection $collection
    *   The collection to process.
    * @param int $current_depth
    *   The current depth in the hierarchy.
@@ -108,7 +109,7 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
    * @return array
    *   Hierarchy structure.
    */
-  protected function buildHierarchyRecursive(CollectionInterface $collection, int $current_depth, $max_depth) {
+  protected function buildHierarchyRecursive(Collection $collection, int $current_depth, int $max_depth): array {
     $collection_id = $collection->id();
 
     // Prevent circular references and infinite loops.
@@ -135,8 +136,8 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
     if ($child_collections) {
       foreach ($child_collections as $child_collection) {
         // Check access and published status.
-        if ($child_collection instanceof CollectionInterface &&
-          $child_collection->access('view') &&
+        if ($child_collection instanceof Collection &&
+          $child_collection->access() &&
           $child_collection->isPublished()) {
           $child_structure = $this->buildHierarchyRecursive($child_collection, $current_depth + 1, $max_depth);
           if (!empty($child_structure)) {
@@ -152,11 +153,11 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function getRootCollectionForCollection(int $collection_id): ?CollectionInterface {
+  public function getRootCollectionForCollection(int $collection_id): ?Collection {
     $storage = $this->entityTypeManager->getStorage('node');
     $collection = $storage->load($collection_id);
 
-    if (!$collection instanceof CollectionInterface) {
+    if (!$collection instanceof Collection) {
       return NULL;
     }
 
@@ -214,8 +215,8 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function getCollectionFromNode(NodeInterface $node): ?CollectionInterface {
-    if ($node->bundle() === 'collection' && $node instanceof CollectionInterface) {
+  public function getCollectionFromNode(NodeInterface $node): ?Collection {
+    if ($node instanceof Collection) {
       return $node;
     }
     return NULL;

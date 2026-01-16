@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_collection;
 
-use Drupal\mukurtu_collection\Entity\CollectionInterface;
+use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\node\NodeInterface;
 
 /**
@@ -18,7 +18,7 @@ interface CollectionHierarchyServiceInterface {
    * Root collections are collections that are not referenced in any other
    * collection's field_child_collections field.
    *
-   * @return \Drupal\mukurtu_collection\Entity\CollectionInterface[]
+   * @return \Drupal\mukurtu_collection\Entity\Collection[]
    *   Array of root collection entities.
    */
   public function getRootCollections(): array;
@@ -34,7 +34,7 @@ interface CollectionHierarchyServiceInterface {
    * @return array
    *   Nested array representing the collection hierarchy with structure:
    *   [
-   *     'entity' => CollectionInterface,
+   *     'entity' => Collection,
    *     'children' => [ ... recursive structure ... ],
    *     'depth' => int,
    *   ]
@@ -47,10 +47,10 @@ interface CollectionHierarchyServiceInterface {
    * @param int $collection_id
    *   The node ID of the collection.
    *
-   * @return \Drupal\mukurtu_collection\Entity\CollectionInterface|null
+   * @return \Drupal\mukurtu_collection\Entity\Collection|null
    *   The root collection entity, or NULL if not found.
    */
-  public function getRootCollectionForCollection(int $collection_id): ?CollectionInterface;
+  public function getRootCollectionForCollection(int $collection_id): ?Collection;
 
   /**
    * Check if a collection is a root collection.
@@ -69,9 +69,9 @@ interface CollectionHierarchyServiceInterface {
    * @param \Drupal\node\NodeInterface $node
    *   The node to check.
    *
-   * @return \Drupal\mukurtu_collection\Entity\CollectionInterface|null
+   * @return \Drupal\mukurtu_collection\Entity\Collection|null
    *   The collection entity if the node is a collection, NULL otherwise.
    */
-  public function getCollectionFromNode(NodeInterface $node): ?CollectionInterface;
+  public function getCollectionFromNode(NodeInterface $node): ?Collection;
 
 }
