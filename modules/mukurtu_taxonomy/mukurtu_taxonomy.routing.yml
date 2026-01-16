@@ -31,9 +31,24 @@ mukurtu_taxonomy.person_record_settings:
     _permission: 'administer site configuration'
 
 mukurtu_taxonomy.manage_languages:
-  path: '/admin/languages/manage'
+  path: '/admin/taxonomy/manage/language/overview'
   defaults:
     _title: 'Manage languages'
-    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuCategoryManageController::content'
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
   requirements:
-    _permission: 'create terms in language,edit terms in language,delete terms in language'
+    _permission: 'access taxonomy overview'
+
+mukurtu_taxonomy.term_merge_from:
+  path: '/admin/structure/term_merge_from'
+  defaults:
+    _title: 'Term merge from entities'
+  requirements:
+    _permission: 'administer term merge from entities'
+
+mukurtu_taxonomy.term_merge_into:
+  path: '/admin/structure/term_merge_into'
+  defaults:
+    _title: 'Term merge into entities'
+  requirements:
+    _permission: 'administer term merge into entities'
+

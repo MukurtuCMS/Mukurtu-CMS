@@ -13,7 +13,6 @@ mukurtu_core.dashboard:
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
 
-
 mukurtu_core.add_page:
   path: '/admin/node/add'
   defaults:
@@ -45,6 +44,13 @@ mukurtu_core.people:
     _title: 'People - All User Accounts'
   requirements:
     _permission: 'administer users'
+
+# mukurtu_core.create_user:
+#   path: '/admin/people/create'
+#   defaults:
+#     _title: 'Create new user account'
+#   requirements:
+#     _permission: ''
 
 mukurtu_core.approve_user:
   path: '/user/{uid}/approve'
@@ -103,9 +109,25 @@ mukurtu_core.user_settings:
   requirements:
     _permission: 'administer account settings'
 
-mukurtu_core.appearance_settings:
-  path: '/admin/appearance/settings/mukurtu_v4'
+mukurtu_core.entity.google_tag_container.collection:
+  path: '/admin/config/services/google-tag/containers'
   defaults:
-    _title: 'Site logo and favicon'
+    _entity_list: 'google_tag_container'
+    _title: 'Google Tag containers'
   requirements:
-    _access: 'TRUE'
+    _custom_access: '\Drupal\google_tag\GoogleTagController::containerListingAccess'
+
+# mukurtu_core.entity.menu.edit_form:
+#   path: '/admin/structure/menu/manage/main'
+#   defaults:
+#     _entity_form: 'menu.edit'
+#     _title_callback: '\Drupal\menu_ui\Controller\MenuController::menuTitle'
+#   requirements:
+#     _entity_access: 'menu.update'
+
+# mukurtu_core.consent_popup:
+#   path: '/admin/structure/block/manage/mukurtu_v4_consentpopup'
+#   defaults:
+#     _title: 'Configure consent popup'
+#   requirements:
+#     _permission: 'administer block content'

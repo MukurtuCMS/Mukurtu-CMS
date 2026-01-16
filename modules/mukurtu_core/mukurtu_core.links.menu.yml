@@ -47,9 +47,53 @@ mukurtu_core.people:
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   route_name: mukurtu_core.people
+# mukurtu_core.create_user:
+#   title: 'Add user'
+#   description: 'Create a new user account.'
+#   parent: mukurtu_dashboard
+#   menu_name: dashboard-users
+#   route_name: mukurtu_core.create_user
 mukurtu_core.appearance_settings:
-  title: 'Logo and favicon'
+  title: 'Change logo'
   description: 'Change logo and favicon'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
-  route_name: mukurtu_core.appearance_settings
+  route_name: system.theme_settings
+mukurtu_core.entity.google_tag_container.collection:
+  title: 'Google Tag Settings'
+  description: 'Configure the website integration with Google Tag and Google Tag Manager.'
+  route_name: entity.google_tag_container.single_form
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+mukurtu_core.create_basic_page_dashboard:
+  title: 'Add a basic page'
+  description: 'Add a new basic page.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-look-feel
+  route_name: mukurtu_core.add
+  route_parameters:
+    node_type: page
+mukurtu_core.basic_site_settings:
+  title: 'Basic site settings'
+  description: 'Basic site settings'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  route_name: system.site_information_settings
+mukurtu_core.my_account:
+  title: 'My account'
+  description: 'User account page'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-my-content
+  route_name: user.page
+# mukurtu_core.entity.menu.edit_form:
+#   title: 'Manage main menu'
+#   description: 'Main navigation menu'
+#   parent: mukurtu_dashboard
+#   menu_name: dashboard-look-feel
+#   route_name: mukurtu_core.entity.menu.edit_form
+mukurtu_core.consent_popup:
+  title: 'Configure consent popup'
+  description: 'COnfigure consent popup'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-look-feel
+  route_name: mukurtu_core.consent_popup

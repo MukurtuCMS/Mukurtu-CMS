@@ -1,0 +1,6 @@
+mukurtu_drafts.your_drafts:
+  title: 'My drafts'
+  description: 'View your drafts.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-my-content
+  route_name: mukurtu_drafts.your_drafts

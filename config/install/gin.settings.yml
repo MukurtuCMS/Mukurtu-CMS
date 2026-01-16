@@ -1,6 +1,6 @@
 favicon:
   mimetype: image/png
-  path: /profiles/mukurtu/themes/mukurtu_v4/logo.png
+  path: profiles/mukurtu/themes/mukurtu_v4/logo.png
   use_default: false
 features:
   comment_user_picture: true
@@ -8,7 +8,7 @@ features:
   favicon: true
   node_user_picture: true
 logo:
-  path: /profiles/mukurtu/themes/mukurtu_v4/logo.png
+  path: profiles/mukurtu/themes/mukurtu_v4/logo.png
   use_default: false
 third_party_settings:
   shortcut:
