@@ -64,21 +64,6 @@ interface CollectionHierarchyServiceInterface {
   public function isRootCollection(int $collection_id): bool;
 
   /**
-   * Get child collections for a given collection.
-   *
-   * @todo this isn't being used..
-   *
-   * @param int $collection_id
-   *   The node ID of the parent collection.
-   * @param int $depth
-   *   Depth to traverse. 1 = immediate children only.
-   *
-   * @return \Drupal\mukurtu_collection\Entity\CollectionInterface[]
-   *   Array of child collection entities.
-   */
-  public function getChildCollections(int $collection_id, int $depth = 1): array;
-
-  /**
    * Determine if a node is a collection or part of a collection hierarchy.
    *
    * @param \Drupal\node\NodeInterface $node
