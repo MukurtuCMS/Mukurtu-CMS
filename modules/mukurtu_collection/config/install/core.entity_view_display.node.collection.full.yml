@@ -72,10 +72,10 @@ third_party_settings:
         speed: fast
     group_sidebar_mukurtu_fields:
       children:
-        - field_title
         - field_keywords
         - field_communities
         - field_cultural_protocols
+        - field_source
       label: 'Sidebar - Mukurtu fields'
       parent_name: group_metadata
       region: content
@@ -83,26 +83,6 @@ third_party_settings:
       format_type: html_element
       format_settings:
         classes: sidebar-section-inner
-        show_empty_fields: false
-        id: ''
-        label_as_html: false
-        element: div
-        show_label: false
-        label_element: h3
-        label_element_classes: ''
-        attributes: ''
-        effect: none
-        speed: fast
-    group_additional_metadata:
-      children:
-        - field_source
-      label: 'Additional Metadata'
-      parent_name: group_metadata
-      region: content
-      weight: 7
-      format_type: html_element
-      format_settings:
-        classes: sidebar-section
         show_empty_fields: false
         id: ''
         label_as_html: false
@@ -356,11 +336,6 @@ content:
     third_party_settings: {  }
     weight: 2
     region: content
-  field_title:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 27
-    region: content
   flag_export_content:
     settings: {  }
     third_party_settings: {  }
@@ -378,6 +353,7 @@ hidden:
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
+  field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_mukurtu_email_collection: true
