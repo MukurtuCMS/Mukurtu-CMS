@@ -123,6 +123,17 @@
             </div>
             {{ content.group_metadata.group_additional_metadata }}
             {{ content.group_metadata.group_rights }}
+            {% if root_collection_has_children %}
+              <div class="sidebar-section collection__menu">
+                <h2 class="collection__menu-title">{{ 'In this Collection'|t }}</h2>
+                {{ root_collection }}
+                {{ drupal_block('system_menu_block:mukurtu-collection-menu', {
+                  label_display: 0,
+                  level: 2,
+                  expand_all_items: 1,
+                }) }}
+              </div>
+            {% endif %}
             {{ content.group_metadata.flag_export_content }}
           </aside>
         </div>

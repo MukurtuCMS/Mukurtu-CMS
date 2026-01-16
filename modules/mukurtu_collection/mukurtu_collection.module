@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Link;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -61,11 +62,11 @@ function mukurtu_collection_system_breadcrumb_alter(Breadcrumb &$breadcrumb, Rou
       $breadcrumb->addCacheContexts(['url']);
 
       // Add the collections landing page.
-      $breadcrumb->addLink(\Drupal\Core\Link::createFromRoute(t('Collections'), 'mukurtu_collection.collection_browse_page'));
+      $breadcrumb->addLink(Link::createFromRoute(t('Collections'), 'mukurtu_collection.collection_browse_page'));
 
       // Add each parent collection in order.
       foreach ($branch as $subcollection) {
-        $breadcrumb->addLink(\Drupal\Core\Link::createFromRoute($subcollection->getTitle(), 'entity.node.canonical', ['node' => $subcollection->id()]));
+        $breadcrumb->addLink(Link::createFromRoute($subcollection->getTitle(), 'entity.node.canonical', ['node' => $subcollection->id()]));
       }
     }
   }
