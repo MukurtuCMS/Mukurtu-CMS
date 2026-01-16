@@ -1,30 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_collection;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Menu\MenuTreeStorage;
-use Drupal\mukurtu_collection\Entity\CollectionInterface;
+use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_collection\Plugin\Menu\CollectionMenuItem;
 
 /**
  * Discovers menu links from collection hierarchies.
  */
 class CollectionMenuLinkDiscovery implements CollectionMenuLinkDiscoveryInterface {
-
-  /**
-   * The collection hierarchy service.
-   *
-   * @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface
-   */
-  protected $hierarchyService;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
 
   /**
    * Constructs a new CollectionMenuLinkDiscovery.
@@ -34,34 +22,32 @@ class CollectionMenuLinkDiscovery implements CollectionMenuLinkDiscoveryInterfac
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
    */
-  public function __construct(CollectionHierarchyServiceInterface $hierarchyService, EntityTypeManagerInterface $entityTypeManager) {
-    $this->hierarchyService = $hierarchyService;
-    $this->entityTypeManager = $entityTypeManager;
+  public function __construct(protected CollectionHierarchyServiceInterface $hierarchyService, protected EntityTypeManagerInterface $entityTypeManager) {
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getMenuLinkDefinitions(?CollectionInterface $collection = NULL) {
+  public function getMenuLinkDefinitions(?Collection $collection = NULL): array {
     $definitions = [];
 
     if ($collection) {
       // Get the root collection for this specific collection.
-      $rootCollection = $this->hierarchyService->getRootCollectionForCollection((int) $collection->id());
-      $rootCollections = $rootCollection ? [$rootCollection] : [];
+      $root_collection = $this->hierarchyService->getRootCollectionForCollection((int) $collection->id());
+      $root_collections = $root_collection ? [$root_collection] : [];
     }
     else {
       // Get all root collections.
-      $rootCollections = $this->hierarchyService->getRootCollections();
+      $root_collections = $this->hierarchyService->getRootCollections();
     }
 
-    foreach ($rootCollections as $rootCollection) {
-      if (!$rootCollection instanceof CollectionInterface) {
+    foreach ($root_collections as $root_collection) {
+      if (!$root_collection instanceof Collection) {
         continue;
       }
 
       // Get the full hierarchy for this root collection.
-      $hierarchy = $this->hierarchyService->getCollectionHierarchy((int) $rootCollection->id());
+      $hierarchy = $this->hierarchyService->getCollectionHierarchy((int) $root_collection->id());
 
       if (!empty($hierarchy)) {
         // Build menu link definitions from the hierarchy.
@@ -75,23 +61,23 @@ class CollectionMenuLinkDiscovery implements CollectionMenuLinkDiscoveryInterfac
   /**
    * Build menu link definitions from a hierarchy structure.
    *
-   * @param array $hierarchyNode
+   * @param array $hierarchy_node
    *   A hierarchy node with 'entity', 'depth', and 'children' keys.
    * @param array &$definitions
    *   Array to store menu link definitions.
-   * @param string|null $parentUuid
+   * @param string|null $parent_uuid
    *   UUID of the parent menu item, if any.
    * @param int $weight
    *   Weight for ordering siblings.
    */
-  protected function buildMenuLinksFromHierarchy(array $hierarchyNode, array &$definitions, $parentUuid = NULL, $weight = 0) {
-    if (empty($hierarchyNode['entity'])) {
+  protected function buildMenuLinksFromHierarchy(array $hierarchy_node, array &$definitions, ?string $parent_uuid = NULL, int $weight = 0): void {
+    if (empty($hierarchy_node['entity'])) {
       return;
     }
 
-    /** @var \Drupal\mukurtu_collection\Entity\CollectionInterface $collection */
-    $collection = $hierarchyNode['entity'];
-    $depth = $hierarchyNode['depth'];
+    /** @var \Drupal\mukurtu_collection\Entity\Collection $collection */
+    $collection = $hierarchy_node['entity'];
+    $depth = $hierarchy_node['depth'];
 
     // Skip if depth exceeds menu system limits.
     if ($depth >= MenuTreeStorage::MAX_DEPTH) {
@@ -123,18 +109,18 @@ class CollectionMenuLinkDiscovery implements CollectionMenuLinkDiscoveryInterfac
     ];
 
     // Set parent if this is not a root-level item.
-    if ($parentUuid !== NULL) {
-      $definition['parent'] = 'mukurtu_collection.collection_menu:' . $parentUuid;
+    if ($parent_uuid !== NULL) {
+      $definition['parent'] = 'mukurtu_collection.collection_menu:' . $parent_uuid;
     }
 
     $definitions[$uuid] = $definition;
 
     // Process children.
-    if (!empty($hierarchyNode['children'])) {
-      $childWeight = 0;
-      foreach ($hierarchyNode['children'] as $childNode) {
-        $this->buildMenuLinksFromHierarchy($childNode, $definitions, $uuid, $childWeight);
-        $childWeight++;
+    if (!empty($hierarchy_node['children'])) {
+      $child_weight = 0;
+      foreach ($hierarchy_node['children'] as $child_node) {
+        $this->buildMenuLinksFromHierarchy($child_node, $definitions, $uuid, $child_weight);
+        $child_weight++;
       }
     }
   }
