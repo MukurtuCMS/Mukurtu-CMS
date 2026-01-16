@@ -47,6 +47,8 @@ final class CollectionPreprocessHooks {
       CacheableMetadata::createFromRenderArray($variables['root_collection'])
         ->addCacheableDependency($root_collection)
         ->applyTo($variables['root_collection']);
+      // Provide a flag to indicate if the root collection has any children.
+      $variables['root_collection_has_children'] = count($root_collection->getChildCollectionIds()) > 0;
     }
   }
 
