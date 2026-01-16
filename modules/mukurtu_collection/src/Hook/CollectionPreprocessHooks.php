@@ -8,6 +8,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Template\Attribute;
 use Drupal\mukurtu_collection\CollectionHierarchyServiceInterface;
+use Drupal\mukurtu_collection\Entity\Collection;
 
 /**
  * Hook implementations for collection preprocessing.
@@ -32,21 +33,14 @@ final class CollectionPreprocessHooks {
     $node = $variables['node'];
 
     // Only process collection nodes in the full view mode.
-    if ($node->bundle() !== 'collection' || $variables['view_mode'] !== 'full') {
-      return;
-    }
-
-    // Get the collection entity.
-    $collection = $this->hierarchyService->getCollectionFromNode($node);
-
-    if (!$collection) {
+    if (!$node instanceof Collection || $variables['view_mode'] !== 'full') {
       return;
     }
 
     // Look up the root collection.
-    $root_collection = $this->hierarchyService->getRootCollectionForCollection((int) $collection->id());
+    $root_collection = $this->hierarchyService->getRootCollectionForCollection($node);
 
-    if ($root_collection && $root_collection->access('view')) {
+    if ($root_collection && $root_collection->access()) {
       // Provide the root collection as a link.
       $variables['root_collection'] = $root_collection->toLink()->toRenderable();
       $variables['root_collection']['#attributes'] = (new Attribute())->addClass('collection__root-link')->toArray();

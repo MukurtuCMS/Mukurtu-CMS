@@ -153,16 +153,9 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function getRootCollectionForCollection(int $collection_id): ?Collection {
-    $storage = $this->entityTypeManager->getStorage('node');
-    $collection = $storage->load($collection_id);
-
-    if (!$collection instanceof Collection) {
-      return NULL;
-    }
-
+  public function getRootCollectionForCollection(Collection $collection): ?Collection {
     // If this is already a root collection, return it.
-    if ($this->isRootCollection($collection_id)) {
+    if ($this->isRootCollection($collection)) {
       return $collection;
     }
 
@@ -196,13 +189,13 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function isRootCollection(int $collection_id): bool {
+  public function isRootCollection(Collection $collection): bool {
     $storage = $this->entityTypeManager->getStorage('node');
 
     // Check if any collection references this collection in field_child_collections.
     $query = $storage->getQuery()
       ->condition('type', 'collection')
-      ->condition('field_child_collections', $collection_id)
+      ->condition('field_child_collections', $collection->id())
       ->accessCheck(FALSE)
       ->range(0, 1);
 

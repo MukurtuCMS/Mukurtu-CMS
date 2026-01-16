@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_collection\Plugin\Block;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\mukurtu_collection\CollectionHierarchyServiceInterface;
+use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\node\NodeInterface;
 use Drupal\system\Plugin\Block\SystemMenuBlock;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -28,7 +32,7 @@ class CollectionMenu extends SystemMenuBlock implements ContainerFactoryPluginIn
    *
    * @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface
    */
-  protected $hierarchyService;
+  protected CollectionHierarchyServiceInterface $hierarchyService;
 
   /**
    * {@inheritdoc}
@@ -54,10 +58,7 @@ class CollectionMenu extends SystemMenuBlock implements ContainerFactoryPluginIn
       return $build;
     }
 
-    // Check if this node is a collection.
-    $collection = $this->hierarchyService->getCollectionFromNode($node);
-
-    if (!$collection) {
+    if (!$node instanceof Collection) {
       $build = [];
       $cache->addCacheableDependency($node);
       $cache->applyTo($build);
@@ -65,7 +66,7 @@ class CollectionMenu extends SystemMenuBlock implements ContainerFactoryPluginIn
     }
 
     // Get the root collection for this collection.
-    $root_collection = $this->hierarchyService->getRootCollectionForCollection((int) $collection->id());
+    $root_collection = $this->hierarchyService->getRootCollectionForCollection($node);
 
     if (!$root_collection) {
       $build = [];
@@ -76,7 +77,6 @@ class CollectionMenu extends SystemMenuBlock implements ContainerFactoryPluginIn
 
     // Add cacheable dependencies.
     $cache->addCacheableDependency($node);
-    $cache->addCacheableDependency($collection);
     $cache->addCacheableDependency($root_collection);
 
     $menu_name = $this->getDerivativeId();

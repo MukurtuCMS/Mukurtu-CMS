@@ -33,7 +33,7 @@ class CollectionMenuLinkDiscovery implements CollectionMenuLinkDiscoveryInterfac
 
     if ($collection) {
       // Get the root collection for this specific collection.
-      $root_collection = $this->hierarchyService->getRootCollectionForCollection((int) $collection->id());
+      $root_collection = $this->hierarchyService->getRootCollectionForCollection($collection);
       $root_collections = $root_collection ? [$root_collection] : [];
     }
     else {

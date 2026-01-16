@@ -44,24 +44,24 @@ interface CollectionHierarchyServiceInterface {
   /**
    * Find the root collection for a given collection.
    *
-   * @param int $collection_id
-   *   The node ID of the collection.
+   * @param \Drupal\mukurtu_collection\Entity\Collection $collection
+   *   The collection.
    *
    * @return \Drupal\mukurtu_collection\Entity\Collection|null
    *   The root collection entity, or NULL if not found.
    */
-  public function getRootCollectionForCollection(int $collection_id): ?Collection;
+  public function getRootCollectionForCollection(Collection $collection): ?Collection;
 
   /**
    * Check if a collection is a root collection.
    *
-   * @param int $collection_id
-   *   The node ID of the collection.
+   * @param \Drupal\mukurtu_collection\Entity\Collection $collection
+   *   The collection.
    *
    * @return bool
    *   TRUE if the collection is a root collection, FALSE otherwise.
    */
-  public function isRootCollection(int $collection_id): bool;
+  public function isRootCollection(Collection $collection): bool;
 
   /**
    * Determine if a node is a collection or part of a collection hierarchy.

@@ -6,7 +6,7 @@ namespace Drupal\mukurtu_collection\Hook;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Hook\Attribute\Hook;
-use Drupal\mukurtu_collection\Entity\CollectionInterface;
+use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_collection\MenuRebuildProcessor;
 
 /**
@@ -29,7 +29,7 @@ final class CollectionEntityHooks {
   #[Hook('node_insert')]
   public function entityTypeInsert(EntityInterface $entity): void {
     // Only process collection nodes.
-    if (!$entity instanceof CollectionInterface) {
+    if (!$entity instanceof Collection) {
       return;
     }
 
@@ -43,12 +43,12 @@ final class CollectionEntityHooks {
   #[Hook('node_update')]
   public function entityTypeUpdate(EntityInterface $entity): void {
     // Only process collection nodes.
-    if (!$entity instanceof CollectionInterface) {
+    if (!$entity instanceof Collection) {
       return;
     }
 
     // Check if there's an original to compare against.
-    if (!isset($entity->original) || !$entity->original instanceof CollectionInterface) {
+    if (!isset($entity->original) || !$entity->original instanceof Collection) {
       // No original, rebuild to be safe.
       $this->menuRebuildProcessor->markRebuildNeeded();
       return;
@@ -57,15 +57,15 @@ final class CollectionEntityHooks {
     $original = $entity->original;
 
     // Check if field_child_collections has changed.
-    $newChildIds = $entity->getChildCollectionIds();
-    $oldChildIds = $original->getChildCollectionIds();
+    $new_child_ids = $entity->getChildCollectionIds();
+    $old_child_ids = $original->getChildCollectionIds();
 
     // Sort both arrays to compare regardless of order.
-    sort($newChildIds);
-    sort($oldChildIds);
+    sort($new_child_ids);
+    sort($old_child_ids);
 
     // If the child collections have changed, rebuild the menu.
-    if ($newChildIds !== $oldChildIds) {
+    if ($new_child_ids !== $old_child_ids) {
       $this->menuRebuildProcessor->markRebuildNeeded();
       return;
     }
@@ -83,7 +83,7 @@ final class CollectionEntityHooks {
   #[Hook('node_delete')]
   public function entityTypeDelete(EntityInterface $entity): void {
     // Only process collection nodes.
-    if (!$entity instanceof CollectionInterface) {
+    if (!$entity instanceof Collection) {
       return;
     }
 
