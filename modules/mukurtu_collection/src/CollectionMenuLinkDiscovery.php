@@ -47,7 +47,7 @@ class CollectionMenuLinkDiscovery implements CollectionMenuLinkDiscoveryInterfac
       }
 
       // Get the full hierarchy for this root collection.
-      $hierarchy = $this->hierarchyService->getCollectionHierarchy((int) $root_collection->id());
+      $hierarchy = $this->hierarchyService->getCollectionHierarchy($root_collection);
 
       if (!empty($hierarchy)) {
         // Build menu link definitions from the hierarchy.

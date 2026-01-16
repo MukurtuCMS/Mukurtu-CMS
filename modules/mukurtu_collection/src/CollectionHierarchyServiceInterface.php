@@ -26,8 +26,8 @@ interface CollectionHierarchyServiceInterface {
   /**
    * Get the full hierarchy for a given root collection.
    *
-   * @param int $root_collection_id
-   *   The node ID of the root collection.
+   * @param \Drupal\mukurtu_collection\Entity\Collection $root_collection
+   *   The root collection.
    * @param int|null $max_depth
    *   Maximum depth to traverse. NULL for unlimited (up to menu system max).
    *
@@ -39,7 +39,7 @@ interface CollectionHierarchyServiceInterface {
    *     'depth' => int,
    *   ]
    */
-  public function getCollectionHierarchy(int $root_collection_id, ?int $max_depth = NULL): array;
+  public function getCollectionHierarchy(Collection $root_collection, ?int $max_depth = NULL): array;
 
   /**
    * Find the root collection for a given collection.

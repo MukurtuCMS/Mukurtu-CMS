@@ -77,16 +77,9 @@ class CollectionHierarchyService implements CollectionHierarchyServiceInterface 
   /**
    * {@inheritdoc}
    */
-  public function getCollectionHierarchy(int $root_collection_id, ?int $max_depth = NULL): array {
+  public function getCollectionHierarchy(Collection $root_collection, ?int $max_depth = NULL): array {
     // Reset processed collections cache for this operation.
     $this->processedCollections = [];
-
-    $storage = $this->entityTypeManager->getStorage('node');
-    $root_collection = $storage->load($root_collection_id);
-
-    if (!$root_collection instanceof Collection) {
-      return [];
-    }
 
     // Drupal menu system max depth is 9.
     if ($max_depth === NULL) {
