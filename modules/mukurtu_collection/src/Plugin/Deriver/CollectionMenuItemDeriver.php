@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_collection\Plugin\Deriver;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
@@ -13,20 +15,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class CollectionMenuItemDeriver extends DeriverBase implements ContainerDeriverInterface {
 
   /**
-   * The collection menu link discovery service.
-   *
-   * @var \Drupal\mukurtu_collection\CollectionMenuLinkDiscoveryInterface
-   */
-  protected $menuLinkDiscovery;
-
-  /**
    * Constructs a new CollectionMenuItemDeriver.
    *
    * @param \Drupal\mukurtu_collection\CollectionMenuLinkDiscoveryInterface $menuLinkDiscovery
    *   The menu link discovery service.
    */
-  public function __construct(CollectionMenuLinkDiscoveryInterface $menuLinkDiscovery) {
-    $this->menuLinkDiscovery = $menuLinkDiscovery;
+  public function __construct(protected CollectionMenuLinkDiscoveryInterface $menuLinkDiscovery) {
   }
 
   /**
@@ -41,7 +35,7 @@ class CollectionMenuItemDeriver extends DeriverBase implements ContainerDeriverI
   /**
    * {@inheritdoc}
    */
-  public function getDerivativeDefinitions($base_plugin_definition) {
+  public function getDerivativeDefinitions($base_plugin_definition): array {
     $this->derivatives = $this->menuLinkDiscovery->getMenuLinkDefinitions();
     return parent::getDerivativeDefinitions($base_plugin_definition);
   }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_collection\Plugin\Menu;
 
 use Drupal\Core\Menu\MenuLinkBase;
@@ -27,21 +29,21 @@ class CollectionMenuItem extends MenuLinkBase implements ContainerFactoryPluginI
   /**
    * {@inheritdoc}
    */
-  public function getTitle() {
+  public function getTitle(): string {
     return $this->pluginDefinition['title'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getDescription() {
+  public function getDescription(): string {
     return $this->pluginDefinition['description'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function updateLink(array $new_definition_values, $persist) {
+  public function updateLink(array $new_definition_values, $persist): array {
     // This menu link is not overridable.
     return $this->pluginDefinition;
   }
@@ -49,21 +51,21 @@ class CollectionMenuItem extends MenuLinkBase implements ContainerFactoryPluginI
   /**
    * {@inheritdoc}
    */
-  public function isDeletable() {
+  public function isDeletable(): bool {
     return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isTranslatable() {
+  public function isTranslatable(): bool {
     return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function deleteLink() {
+  public function deleteLink(): void {
     // This menu link cannot be deleted as it's derived from content.
   }
 
