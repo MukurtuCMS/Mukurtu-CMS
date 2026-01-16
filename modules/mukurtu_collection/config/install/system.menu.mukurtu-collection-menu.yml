@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: mukurtu-collection-menu
+label: 'Collection Menu'
+description: 'Menu for displaying collection hierarchies'
+locked: true

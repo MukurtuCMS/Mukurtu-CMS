@@ -75,6 +75,26 @@
     }
   }
 
+  &__menu-title {
+    font-size: var(--font-size-s);
+    line-height: var(--line-height-xs);
+    font-weight: var(--text-bold);
+  }
+
+  &__root-link {
+    line-height: var(--line-height-xs);
+  }
+
+  &__menu {
+    ul {
+      margin-block-start: 0;
+      padding-inline-start: 1.5rem;
+
+      li {
+        line-height: var(--line-height-xs);
+      }
+    }
+  }
 
   .field--name-field-description {
     margin-block-end: var(--v-space-s);

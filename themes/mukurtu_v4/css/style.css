@@ -3947,6 +3947,23 @@ header {
   -webkit-margin-after: var(--v-space-2xl);
           margin-block-end: var(--v-space-2xl);
 }
+.collection__menu-title {
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-xs);
+  font-weight: var(--text-bold);
+}
+.collection__root-link {
+  line-height: var(--line-height-xs);
+}
+.collection__menu ul {
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+  -webkit-padding-start: 1.5rem;
+          padding-inline-start: 1.5rem;
+}
+.collection__menu ul li {
+  line-height: var(--line-height-xs);
+}
 .collection .field--name-field-description {
   -webkit-margin-after: var(--v-space-s);
           margin-block-end: var(--v-space-s);
