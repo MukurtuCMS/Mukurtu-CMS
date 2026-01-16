@@ -38,14 +38,6 @@ mukurtu_taxonomy.manage_languages:
   requirements:
     _permission: 'access taxonomy overview'
 
-mukurtu_taxonomy.manage_media_tag:
-  path: '/admin/structure/taxonomy/manage/media_tag/overview'
-  defaults:
-    _title: 'Manage media tags'
-    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
-  requirements:
-    _permission: 'access taxonomy overview'
-
 mukurtu_taxonomy.term_merge_from:
   path: '/admin/structure/term_merge_from'
   defaults:

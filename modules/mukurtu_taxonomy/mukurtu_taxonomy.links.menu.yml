@@ -28,9 +28,3 @@ mukurtu_taxonomy.term_merge_from:
   parent: mukurtu_dashboard
   menu_name: dashboard-taxonomies
   route_name: mukurtu_taxonomy.term_merge_from
-mukurtu_taxonomy.manage_media_tag:
-  title: 'Manage media tags'
-  description: 'Manage media tags.'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-media
-  route_name: mukurtu_taxonomy.manage_media_tag
