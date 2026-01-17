@@ -30,7 +30,7 @@
 - Personal Collections
 - Comments
 - Community Record Relationships
-- Multipage Items
+- Multi-page Items
 - Taxonomy Record Relationships
 - [Local Contexts Legacy TK Labels](#local-contexts-legacy-tk-labels)
 - [Media Content Warnings](#media-content-warnings)
@@ -273,8 +273,8 @@ The following table shows the fields that will be migrated from version 3 for Di
 |field_word_entry|
 |title|
 
-### Multipage Items
-Multipage items are a bespoke entity type in version 4. The title of page 1 from version 3 will be used as the title in version 4.
+### Multi-page Items
+Multi-pages Items are a bespoke entity type in version 4. The title of page 1 from version 3 will be used as the title in version 4.
 
 Migration ID: `mukurtu_cms_v3_multipage_item`
 

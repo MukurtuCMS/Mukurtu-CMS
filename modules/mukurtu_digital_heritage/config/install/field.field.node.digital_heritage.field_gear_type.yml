@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_gear_type
+    - node.type.digital_heritage
+    - taxonomy.vocabulary.gear_type
+id: node.digital_heritage.field_gear_type
+field_name: field_gear_type
+entity_type: node
+bundle: digital_heritage
+label: 'Gear Type'
+description: 'Select one or more gear types. Gear types must first be created by a Mukurtu Manager.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      gear_type: gear_type
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference
