@@ -495,3 +495,11 @@ function mukurtu_core_invalidate_entity_reference_field_references(EntityInterfa
     }
   }
 }
+
+/**
+ * Implements hook_mukurtu_taxonomy_indexed_fields_alter().
+ */
+function mukurtu_core_mukurtu_taxonomy_indexed_fields_alter(array &$allowed_fields) {
+  $allowed_fields[] = 'field_article_category';
+  $allowed_fields[] = 'field_article_keywords';
+}

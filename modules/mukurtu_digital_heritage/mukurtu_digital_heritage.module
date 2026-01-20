@@ -36,3 +36,19 @@ function mukurtu_digital_heritage_entity_field_storage_info(EntityTypeInterface 
     return DigitalHeritage::bundleFieldDefinitions($entity_type, 'digital_heritage', []);
   }
 }
+
+/**
+ * Implements hook_mukurtu_taxonomy_indexed_fields_alter().
+ */
+function mukurtu_digital_heritage_mukurtu_taxonomy_indexed_fields_alter(array &$allowed_fields) {
+  $allowed_fields[] = 'field_category';
+  $allowed_fields[] = 'field_keywords';
+  $allowed_fields[] = 'field_contributor';
+  $allowed_fields[] = 'field_creator';
+  $allowed_fields[] = 'field_format';
+  $allowed_fields[] = 'field_location';
+  $allowed_fields[] = 'field_people';
+  $allowed_fields[] = 'field_publisher';
+  $allowed_fields[] = 'field_subject';
+  $allowed_fields[] = 'field_type';
+}

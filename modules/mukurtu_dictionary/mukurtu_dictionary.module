@@ -202,3 +202,12 @@ function mukurtu_dictionary_language_field_config_helper(&$form, FormStateInterf
     $form['field_dictionary_word_language']['widget']['#options'] = $languageOptions;
   }
 }
+
+/**
+ * Implements hook_mukurtu_taxonomy_indexed_fields_alter().
+ */
+function mukurtu_dictionary_mukurtu_taxonomy_indexed_fields_alter(array &$allowed_fields) {
+  $allowed_fields[] = 'field_dictionary_word_language';
+  $allowed_fields[] = 'field_language';
+  $allowed_fields[] = 'field_word_type';
+}

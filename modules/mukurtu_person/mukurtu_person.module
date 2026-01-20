@@ -42,3 +42,10 @@ function mukurtu_person_entity_field_storage_info(EntityTypeInterface $entity_ty
     return Person::bundleFieldDefinitions($entity_type, 'person', []);
   }
 }
+
+/**
+ * Implements hook_mukurtu_taxonomy_indexed_fields_alter().
+ */
+function mukurtu_person_mukurtu_taxonomy_indexed_fields_alter(array &$allowed_fields) {
+  $allowed_fields[] = 'field_other_names';
+}

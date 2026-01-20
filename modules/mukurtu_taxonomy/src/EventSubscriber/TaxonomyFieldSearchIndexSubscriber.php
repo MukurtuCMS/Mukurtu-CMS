@@ -65,31 +65,12 @@ class TaxonomyFieldSearchIndexSubscriber implements EventSubscriberInterface {
    *   An array of field names that should be indexed.
    */
   protected function getAllowedTaxonomyFields(): array {
-    // Default allow list.
-    // @todo distribute these fields to other modules via hook implementation.
-    $allowed_fields = [
-      'field_category',
-      'field_keywords',
-      'field_article_category',
-      'field_article_keywords',
-      'field_contributor',
-      'field_creator',
-      'field_format',
-      'field_dictionary_word_language',
-      'field_language',
-      'field_location',
-      'field_other_names',
-      'field_people',
-      'field_publisher',
-      'field_subject',
-      'field_type',
-      'field_word_type',
-    ];
+    $allowed_fields = [];
 
-    // Allow other modules to alter the allow list.
+    // Allow other modules to add fields to the allow list.
     $this->moduleHandler->alter('mukurtu_taxonomy_indexed_fields', $allowed_fields);
 
-    return $allowed_fields;
+    return array_unique($allowed_fields);
   }
 
   /**
