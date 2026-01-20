@@ -12,6 +12,6 @@ services:
 
   mukurtu_taxonomy.event_subscriber:
     class: Drupal\mukurtu_taxonomy\EventSubscriber\TaxonomyFieldSearchIndexSubscriber
-    arguments: ['@messenger']
+    arguments: ['@messenger', '@module_handler']
     tags:
       - { name: event_subscriber }
