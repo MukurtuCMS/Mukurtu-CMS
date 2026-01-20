@@ -1,64 +1,60 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_taxonomy\Controller;
 
-use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Block\BlockManagerInterface;
+use Drupal\Core\Config\Config;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\taxonomy\TermInterface;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Controller for taxonomy record view.
+ */
 class TaxonomyRecordViewController extends ControllerBase implements ContainerInjectionInterface {
 
   /**
-   * The entity type manager service.
+   * The search backend.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var string
    */
-  protected $entityTypeManager;
+  protected string $backend;
 
   /**
-   * The entity field manager service.
+   * The mukurtu taxonomy settings.
    *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   * @var \Drupal\Core\Config\Config
    */
-  protected $entityFieldManager;
+  protected Config $mukurtuTaxonomySettings;
 
   /**
-   * The language manager service.
+   * Constructs a new TaxonomyRecordViewController object.
    *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
+   *   The entity field manager service.
+   * @param \Drupal\Core\Block\BlockManagerInterface $blockManager
+   *   The block manager service.
    */
-  protected $languageManager;
-
-  protected $backend;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.manager'),
-      $container->get('entity_field.manager'),
-      $container->get('language_manager'),
-    );
+  public function __construct(protected EntityFieldManagerInterface $entityFieldManager, protected BlockManagerInterface $blockManager) {
+    $this->backend = $this->config('mukurtu_search.settings')->get('backend') ?? 'db';
+    $this->mukurtuTaxonomySettings = $this->config('mukurtu_taxonomy.settings');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, LanguageManagerInterface $language_manager) {
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityFieldManager = $entity_field_manager;
-    $this->languageManager = $language_manager;
-    $this->backend = $this->config('mukurtu_search.settings')->get('backend') ?? 'db';
+  public static function create(ContainerInterface $container): static {
+    return new static(
+      $container->get('entity_field.manager'),
+      $container->get('plugin.manager.block')
+    );
   }
 
   /**
@@ -67,7 +63,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    * @return string
    *   The machine name of the view.
    */
-  protected function getViewName() {
+  protected function getViewName(): string {
     $views = [
       'db' => 'mukurtu_taxonomy_references',
       'solr' => 'mukurtu_taxonomy_references_solr',
@@ -82,7 +78,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    * @return string
    *   The facet source ID.
    */
-  protected function getFacetSourceId() {
+  protected function getFacetSourceId(): string {
     $views = [
       'db' => 'search_api:views_block__mukurtu_taxonomy_references__content_block',
       'solr' => 'search_api:views_block__mukurtu_taxonomy_references_solr__content_block',
@@ -93,14 +89,21 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
 
   /**
    * Display the taxonomy term page.
+   *
+   * @param \Drupal\taxonomy\TermInterface $taxonomy_term
+   *   The taxonomy term.
+   *
+   * @return array
+   *   The render array for the canonical taxonomy term page, complete with
+   *   taxonomy term information, taxonomy term records, and facets.
    */
-  public function build(TermInterface $taxonomy_term) {
+  public function build(TermInterface $taxonomy_term): array {
     $build = [];
     $allRecords = $this->getTaxonomyTermRecords($taxonomy_term);
 
     // Load the entities so we can render them.
-    $entityViewBuilder = $this->entityTypeManager->getViewBuilder('node');
-    $langcode = $this->languageManager->getCurrentLanguage()->getId();
+    $entityViewBuilder = $this->entityTypeManager()->getViewBuilder('node');
+    $langcode = $this->languageManager()->getCurrentLanguage()->getId();
 
     // Render any records.
     $records = [];
@@ -120,29 +123,29 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       return $build;
     }
 
-    // Render the referenced entities.
-    // @see mukurtu_taxonomy_views_pre_view.
-    $referencedContent = [
-      '#type' => 'view',
-      '#name' => $this->getViewName(),
-      '#display_id' => 'content_block',
-      '#embed' => TRUE,
-    ];
+    // Set the display and inject the taxonomy term UUID into the fulltext
+    // search filter.
+    $view->setDisplay('content_block');
+    $filters = $view->display_handler->getOption('filters');
+    $filters['search_api_fulltext']['value'] = $taxonomy_term->uuid();
+    $view->display_handler->overrideOption('filters', $filters);
+
+    // Build the renderable array from the view.
+    $referencedContent = $view->buildRenderable('content_block');
 
     // Facets.
     // Load all facets configured to use our browse block as a datasource.
-    $facetEntities = \Drupal::entityTypeManager()
+    $facetEntities = $this->entityTypeManager()
       ->getStorage('facets_facet')
       ->loadByProperties(['facet_source_id' => $this->getFacetSourceId()]);
 
     // Render the facet block for each of them.
     $facets = [];
     if ($facetEntities) {
-      $block_manager = \Drupal::service('plugin.manager.block');
       foreach ($facetEntities as $facet_id => $facetEntity) {
         $config = [];
-        $block_plugin = $block_manager->createInstance('facet_block' . PluginBase::DERIVATIVE_SEPARATOR . $facet_id, $config);
-        if ($block_plugin && $block_plugin->access(\Drupal::currentUser())) {
+        $block_plugin = $this->blockManager->createInstance('facet_block' . PluginBase::DERIVATIVE_SEPARATOR . $facet_id, $config);
+        if ($block_plugin && $block_plugin->access($this->currentUser())) {
             $facets[$facet_id] = $block_plugin->build();
         }
       }
@@ -168,13 +171,13 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   /**
    * Build the communities label.
    */
-  protected function getCommunitiesLabel(EntityInterface $node) {
+  protected function getCommunitiesLabel(EntityInterface $node): string {
     $communities = $node->get('field_communities')->referencedEntities();
 
     $communityLabels = [];
     foreach ($communities as $community) {
       // Skip any communities the user can't see.
-      if (!$community->access('view', $this->currentUser)) {
+      if (!$community->access('view', $this->currentUser())) {
         continue;
       }
       // @todo ordering?
@@ -186,12 +189,11 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   /**
    * Return content with the taxonomy record relationship for this term.
    */
-  protected function getTaxonomyTermRecords(TermInterface $taxonomy_term) {
-    $config = \Drupal::config('mukurtu_taxonomy.settings');
+  protected function getTaxonomyTermRecords(TermInterface $taxonomy_term): array {
     // In the future when we support taxonomy record relationships for other
     // content types, we may need to fetch their enabled vocabs and append them
     // here.
-    $enabledVocabs = $config->get('person_records_enabled_vocabularies') ?? [];
+    $enabledVocabs = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
 
     // If the term vocabulary is not enabled for taxonomy records, return
     // an empty array.
@@ -199,12 +201,13 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       return [];
     }
 
-    $query = $this->entityTypeManager->getStorage('node')->getQuery();
+    $storage = $this->entityTypeManager()->getStorage('node');
+    $query = $storage->getQuery();
     $query->condition('field_other_names', $taxonomy_term->id());
     $query->condition('status', 1, '=');
-    $query->accessCheck(TRUE);
+    $query->accessCheck();
     $results = $query->execute();
-    return empty($results) ? [] : $this->entityTypeManager->getStorage('node')->loadMultiple($results);
+    return empty($results) ? [] : $storage->loadMultiple($results);
   }
 
 }
