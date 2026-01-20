@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Gear Type'
+vid: gear_type
+description: 'Which gear type is used on this vessel or fishery'
+weight: 0
+new_revision: false

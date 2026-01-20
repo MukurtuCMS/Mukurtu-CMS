@@ -111,6 +111,30 @@ process:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_creator
     source: field_creator
+  field_fish_species:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_fish_species
+    source: field_fish_species
+  field_supply_chain_segment:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_supply_chain_segment
+    source: field_supply_chain_segment
+  field_specific_fishing_fleet:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_specific_fishing_fleet
+    source: field_specific_fishing_fleet
+  field_fishing_family:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_fishing_family
+    source: field_fishing_family
+  field_gear_type:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_gear_type
+    source: field_gear_type
+  field_fishing_area:
+    plugin: migration_lookup
+    migration: mukurtu_cms_v3_terms_fishing_area
+    source: field_fishing_area
   field_keywords:
     plugin: migration_lookup
     migration: mukurtu_cms_v3_terms_keywords

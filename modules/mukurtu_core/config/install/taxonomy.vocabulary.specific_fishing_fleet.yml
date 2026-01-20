@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Specific Fishing Fleet'
+vid: specific_fishing_fleet
+description: 'If this item belongs to a known fleet ( family or company name)'
+weight: 0
+new_revision: false

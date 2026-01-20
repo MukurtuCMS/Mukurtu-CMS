@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Fishing Area'
+vid: fishing_area
+description: 'The geographic or biological fishing area associated.'
+weight: 0
+new_revision: false

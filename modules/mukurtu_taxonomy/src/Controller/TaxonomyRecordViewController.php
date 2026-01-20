@@ -121,7 +121,9 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     }
 
     // Render the referenced entities.
-    // @see mukurtu_taxonomy_views_pre_view.
+    // @see mukurtu_taxonomy_views_pre_view().
+    // @todo Could we move the functionality from
+    //   mukurtu_taxonomy_views_pre_view() here?
     $referencedContent = [
       '#type' => 'view',
       '#name' => $this->getViewName(),

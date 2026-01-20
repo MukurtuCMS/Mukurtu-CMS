@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Supply Chain Segment'
+vid: supply_chain_segment
+description: 'Which Segment of the Supply Chain'
+weight: 0
+new_revision: false
