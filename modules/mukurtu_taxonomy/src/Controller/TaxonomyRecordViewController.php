@@ -120,16 +120,15 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       return $build;
     }
 
-    // Render the referenced entities.
-    // @see mukurtu_taxonomy_views_pre_view().
-    // @todo Could we move the functionality from
-    //   mukurtu_taxonomy_views_pre_view() here?
-    $referencedContent = [
-      '#type' => 'view',
-      '#name' => $this->getViewName(),
-      '#display_id' => 'content_block',
-      '#embed' => TRUE,
-    ];
+    // Set the display and inject the taxonomy term UUID into the fulltext
+    // search filter.
+    $view->setDisplay('content_block');
+    $filters = $view->display_handler->getOption('filters');
+    $filters['search_api_fulltext']['value'] = $taxonomy_term->uuid();
+    $view->display_handler->overrideOption('filters', $filters);
+
+    // Build the renderable array from the view.
+    $referencedContent = $view->buildRenderable('content_block');
 
     // Facets.
     // Load all facets configured to use our browse block as a datasource.
