@@ -44,7 +44,7 @@ class TaxonomyFieldSearchIndexSubscriber implements EventSubscriberInterface {
       $field_id = "{$event->entity_type_id}__{$field_name}__uuid";
       $property_path = "{$field_name}:entity:uuid";
       $label = "{$event->field_definition->getLabel()} » Taxonomy term » UUID";
-      $event->indexField($indexes, $field_id, $property_path, $label);
+      $event->indexField($indexes, $field_id, $property_path, $label, 'string');
     }
   }
 
