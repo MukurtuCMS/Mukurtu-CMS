@@ -17,3 +17,7 @@ mukurtu_content_warnings.settings:
     _title: 'Mukurtu Content Warnings Settings'
   requirements:
     _permission: 'create media content warnings'
+# mukurtu_content_warnings.media_tags:
+#   path: '/admin/structure/taxonomy/manage/media_tag/overview'
+#   defaults:
+#   requirements:
