@@ -88,6 +88,7 @@ dependencies:
   - 'entity_embed:entity_embed'
   - 'entity_reference_revisions:entity_reference_revisions'
   - 'facets:facets'
+  - 'facets:facets_exposed_filters'
   - 'field_group:field_group'
   - 'flag:flag'
   - 'geofield:geofield'
