@@ -49,6 +49,7 @@ install:
   - admin_theme
 
 dependencies:
+  - 'better_exposed_filters:better_exposed_filters'
   - 'blazy:blazy'
   - 'ctools:ctools'
   - 'devel:devel'
