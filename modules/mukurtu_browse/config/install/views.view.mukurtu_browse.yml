@@ -170,6 +170,25 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
+              facets_community_title:
+                plugin_id: bef
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: true
+                  collapsible_disable_automatic_open: false
+                  open_by_default: true
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+                select_all_none: false
+                select_all_none_nested: false
+                display_inline: false
+                soft_limit: 0
+                soft_limit_label_less: 'Show less'
+                soft_limit_label_more: 'Show more'
               facets_field_cultural_protocols:
                 plugin_id: bef
                 advanced:
@@ -208,7 +227,7 @@ display:
                 soft_limit: 0
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
-              facets_community_title:
+              facets_media_type:
                 plugin_id: bef
                 advanced:
                   rewrite:
@@ -246,7 +265,7 @@ display:
                 soft_limit: 0
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
-              facets_media_type:
+              facets_name:
                 plugin_id: bef
                 advanced:
                   rewrite:
@@ -286,6 +305,19 @@ display:
             format: basic_html
           tokenize: false
       sorts:
+        changed:
+          id: changed
+          table: search_api_index_mukurtu_default_content_index
+          field: changed
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: DESC
+          expose:
+            label: Newest
+            field_identifier: newest
+          exposed: true
         search_api_relevance:
           id: search_api_relevance
           table: search_api_index_mukurtu_default_content_index
@@ -311,19 +343,6 @@ display:
           expose:
             label: Title
             field_identifier: title
-          exposed: true
-        changed:
-          id: changed
-          table: search_api_index_mukurtu_default_content_index
-          field: changed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: DESC
-          expose:
-            label: Newest
-            field_identifier: newest
           exposed: true
         changed_1:
           id: changed_1
@@ -385,6 +404,77 @@ display:
           parse_mode: terms
           min_length: null
           fields: {  }
+        facets_community_title:
+          id: facets_community_title
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_community_title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Community
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: community_title
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: false
+            processor_configs:
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
         facets_field_cultural_protocols:
           id: facets_field_cultural_protocols
           table: search_api_index_mukurtu_default_content_index
@@ -537,10 +627,10 @@ display:
                   sort: 40
                 settings:
                   sort: ASC
-        facets_community_title:
-          id: facets_community_title
+        facets_name:
+          id: facets_name
           table: search_api_index_mukurtu_default_content_index
-          field: facets_community_title
+          field: facets_name
           relationship: none
           group_type: group
           admin_label: ''
@@ -551,84 +641,13 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: Community
+            label: Category
             description: ''
             use_operator: false
             operator: ''
             operator_limit_selection: false
             operator_list: {  }
-            identifier: community_title
-            required: false
-            remember: false
-            multiple: true
-            remember_roles:
-              authenticated: authenticated
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          hierarchy: true
-          label_display: visible
-          facet:
-            expand_hierarchy: false
-            hierarchy: taxonomy
-            query_operator: or
-            hard_limit: 0
-            min_count: 1
-            show_numbers: false
-            processor_configs:
-              hierarchy_processor:
-                processor_id: hierarchy_processor
-                weights:
-                  build: 100
-                settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
-              display_value_widget_order:
-                processor_id: display_value_widget_order
-                weights:
-                  sort: 40
-                settings:
-                  sort: ASC
-        facets_name_1:
-          id: facets_name_1
-          table: search_api_index_mukurtu_default_content_index
-          field: facets_name_1
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: facets_filter
-          operator: '='
-          value: ''
-          group: 1
-          exposed: true
-          expose:
-            operator_id: ''
-            label: Keywords
-            description: ''
-            use_operator: false
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: keywords
+            identifier: category
             required: false
             remember: false
             multiple: true
@@ -732,6 +751,77 @@ display:
                 weights:
                   build: 5
                 settings: {  }
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_name_1:
+          id: facets_name_1
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_name_1
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Keywords
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: keywords
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: false
+            processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
                 weights:

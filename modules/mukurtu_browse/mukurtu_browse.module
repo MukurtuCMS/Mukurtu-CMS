@@ -82,3 +82,18 @@ function mukurtu_browse_views_plugins_argument_alter(array &$plugins) {
     'provider' => 'mukurtu_browse',
   ];
 }
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function mukurtu_browse_preprocess_block(&$variables) {
+  if (!isset($variables['plugin_id']) || $variables['plugin_id'] !== 'views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block') {
+    return;
+  }
+  if (isset($variables['content']['search_api_fulltext'])) {
+    $variables['content']['search_api_fulltext']['#weight'] = -10.9;
+  }
+  if (isset($variables['content']['sort_by'])) {
+    $variables['content']['sort_by']['#weight'] = -10.8;
+  }
+}

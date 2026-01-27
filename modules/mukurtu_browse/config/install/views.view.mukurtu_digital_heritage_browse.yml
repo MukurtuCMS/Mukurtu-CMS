@@ -288,6 +288,19 @@ display:
             format: basic_html
           tokenize: false
       sorts:
+        changed:
+          id: changed
+          table: search_api_index_mukurtu_default_content_index
+          field: changed
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: DESC
+          expose:
+            label: Newest
+            field_identifier: newest
+          exposed: true
         search_api_relevance:
           id: search_api_relevance
           table: search_api_index_mukurtu_default_content_index
@@ -313,19 +326,6 @@ display:
           expose:
             label: Title
             field_identifier: title
-          exposed: true
-        changed:
-          id: changed
-          table: search_api_index_mukurtu_default_content_index
-          field: changed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: DESC
-          expose:
-            label: Newest
-            field_identifier: newest
           exposed: true
         changed_1:
           id: changed_1
