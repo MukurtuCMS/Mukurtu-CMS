@@ -6,6 +6,7 @@ package: 'Mukurtu CMS'
 libraries:
   - mukurtu_browse/mukurtu-leaflet-preview
 dependencies:
+  - 'better_exposed_filters:better_exposed_filters'
   - 'blazy:blazy'
   - 'drupal:block'
   - 'drupal:field'
@@ -18,6 +19,7 @@ dependencies:
   - 'drupal:user'
   - 'drupal:views'
   - 'facets:facets'
+  - 'facets:facets_exposed_filters'
   - 'geofield:geofield'
   - 'leaflet:leaflet_views'
   - 'mukurtu_collection:mukurtu_collection'
