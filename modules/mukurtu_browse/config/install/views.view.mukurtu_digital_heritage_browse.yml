@@ -123,7 +123,7 @@ display:
         type: bef
         options:
           submit_button: Apply
-          reset_button: false
+          reset_button: true
           reset_button_label: Reset
           exposed_sorts_label: 'Sort by'
           expose_sort_order: false
@@ -133,7 +133,7 @@ display:
           text_input_required_format: basic_html
           bef:
             general:
-              autosubmit: true
+              autosubmit: false
               auto_submit_sort_only: false
               autosubmit_breakpoint: ''
               autosubmit_exclude_textfield: false
@@ -273,7 +273,20 @@ display:
       cache:
         type: search_api_none
         options: {  }
-      empty: {  }
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: text
+          empty: true
+          content:
+            value: 'No results. Try resetting filters or searching for a different term.'
+            format: basic_html
+          tokenize: false
       sorts:
         search_api_relevance:
           id: search_api_relevance
@@ -286,7 +299,7 @@ display:
           order: DESC
           expose:
             label: 'Search Relevance'
-            field_identifier: search_api_relevance
+            field_identifier: relevance
           exposed: true
         title:
           id: title
@@ -356,8 +369,9 @@ display:
             remember_roles:
               authenticated: authenticated
             expose_fields: false
-            placeholder: ''
+            placeholder: 'Enter keywords'
             searched_fields_id: search_api_fulltext_searched_fields
+            value_maxlength: 128
           is_grouped: false
           group_info:
             label: ''
@@ -1276,7 +1290,7 @@ display:
           leaflet_map: 'OSM Mapnik'
           height: '600'
           height_unit: px
-          hide_empty_map: false
+          hide_empty_map: true
           disable_wheel: false
           gesture_handling: false
           fitbounds_options: '{"padding":[0,0]}'
