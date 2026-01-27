@@ -109,6 +109,9 @@
             },
             "drupal/og": {
                 "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
+            },
+            "drupal/search_api_glossary": {
+                "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch"
             }
         }
     }
