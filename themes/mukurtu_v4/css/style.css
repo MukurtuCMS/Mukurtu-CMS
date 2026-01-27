@@ -3210,13 +3210,13 @@ header {
   }
 }
 
-.grid {
+.grid:has(.views-row) {
   -webkit-column-count: 1;
      -moz-column-count: 1;
           column-count: 1;
 }
 @media (min-width: 60rem) {
-  .grid {
+  .grid:has(.views-row) {
     -webkit-column-count: 2;
        -moz-column-count: 2;
             column-count: 2;
@@ -3226,14 +3226,14 @@ header {
   }
 }
 @media (min-width: 80rem) {
-  .grid {
+  .grid:has(.views-row) {
     -webkit-column-gap: var(--v-space-2xs);
        -moz-column-gap: var(--v-space-2xs);
             column-gap: var(--v-space-2xs);
   }
 }
 @media (min-width: 90rem) {
-  .grid {
+  .grid:has(.views-row) {
     -webkit-column-count: 3;
        -moz-column-count: 3;
             column-count: 3;
@@ -3497,25 +3497,27 @@ header {
   padding-block: var(--v-space-5xs);
 }
 .browse__main-content .browse-container .browse-facets .js-form-type-textfield input {
-  margin-inline: var(--v-space-4xxs);
-  margin-block: var(--v-space-5xs);
-  background-color: var(--color-white);
-  inline-size: calc(100% - 2 * var(--v-space-4xxs));
+  padding-inline: var(--v-space-4xxs);
+  inline-size: 100%;
 }
 .browse__main-content .browse-container .browse-facets .js-form-type-select::after {
-  inset-block: unset 20px;
+  inset-block-start: initial;
+  inset-block-end: 20px;
+}
+.browse__main-content .browse-container .browse-facets .js-form-type-select label {
+  display: block;
+  background-color: var(--brand-primary-dark);
+  color: var(--light-text-color);
+  font-size: var(--font-size-m);
+  font-weight: var(--text-bold);
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+  padding-inline: var(--v-space-4xxs);
+  padding-block: var(--v-space-5xs);
 }
 .browse__main-content .browse-container .browse-facets .js-form-type-select select {
   -webkit-margin-start: 0;
           margin-inline-start: 0;
-}
-.browse__main-content .browse-container .browse-facets .js-form-type-select label {
-  position: absolute !important;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-  inline-size: 0.063rem;
-  block-size: 0.063rem;
-  word-wrap: normal;
 }
 .browse__main-content .browse-container .browse-facets .form-actions {
   -webkit-margin-before: var(--v-space-4xs);

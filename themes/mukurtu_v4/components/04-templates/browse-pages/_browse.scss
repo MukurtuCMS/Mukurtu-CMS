@@ -207,25 +207,31 @@
           }
 
           input {
-            margin-inline: var(--v-space-4xxs);
-            margin-block: var(--v-space-5xs);
-            background-color: var(--color-white);
-            inline-size: calc(100% - 2 * var(--v-space-4xxs));
+            padding-inline: var(--v-space-4xxs);
+            inline-size: 100%;
           }
         }
 
         // Sort dropdown.
         .js-form-type-select {
           &::after {
-            inset-block: unset 20px;
+            inset-block-start: initial;
+            inset-block-end: 20px;
+          }
+
+          label {
+            display: block;
+            background-color: var(--brand-primary-dark);
+            color: var(--light-text-color);
+            font-size: var(--font-size-m);
+            font-weight: var(--text-bold);
+            margin-block-start: 0;
+            padding-inline: var(--v-space-4xxs);
+            padding-block: var(--v-space-5xs);
           }
 
           select {
             margin-inline-start: 0;
-          }
-
-          label {
-            @include mixins.visually-hidden;
           }
         }
 

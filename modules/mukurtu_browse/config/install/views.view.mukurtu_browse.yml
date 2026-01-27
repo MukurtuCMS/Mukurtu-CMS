@@ -296,7 +296,7 @@ display:
           plugin_id: search_api
           order: DESC
           expose:
-            label: 'Search Relevance'
+            label: Relevance
             field_identifier: relevance
           exposed: true
         title:
@@ -333,7 +333,7 @@ display:
           group_type: group
           admin_label: ''
           plugin_id: search_api
-          order: ASC
+          order: DESC
           expose:
             label: Oldest
             field_identifier: oldest
