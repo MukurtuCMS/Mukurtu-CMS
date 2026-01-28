@@ -18,7 +18,7 @@
 
 {% set children_rendered = children|render %}
 
-{% if children_rendered|striptags|trim %}
+{% if children_rendered|trim %}
 
   <{{ wrapper_element }} {{ attributes }}>
   {% if title %}
