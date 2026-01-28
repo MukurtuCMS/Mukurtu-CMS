@@ -4364,7 +4364,6 @@ header {
   display: block;
 }
 .dictionary .browse-facets__wrapper {
-  margin-inline: calc(50% - 50vw);
   background-color: var(--brand-secondary);
   padding-block: var(--v-space-3xs) var(--v-space-2xs);
   display: grid;
@@ -4385,6 +4384,7 @@ header {
   }
 }
 .dictionary .browse-facets {
+  grid-column: 1/-1;
   display: block;
   color: var(--color-white);
   grid-column: 1/-1;
@@ -4394,14 +4394,9 @@ header {
     grid-column: 2/-2;
   }
 }
-@media (min-width: 48rem) {
-  .dictionary .browse-facets {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    grid-column: 1/-1;
-    gap: var(--gutter);
-  }
+.dictionary .browse-facets .form-item {
+  -webkit-margin-before: 1rem;
+          margin-block-start: 1rem;
 }
 .dictionary .browse-facets .facets-widget-dropdown {
   grid-row: 1;
