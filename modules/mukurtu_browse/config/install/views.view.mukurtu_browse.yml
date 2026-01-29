@@ -471,7 +471,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
@@ -542,7 +542,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
@@ -618,7 +618,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               translate_entity:
                 processor_id: translate_entity
@@ -694,7 +694,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
@@ -765,7 +765,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
@@ -836,7 +836,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               translate_entity:
                 processor_id: translate_entity
@@ -912,7 +912,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
