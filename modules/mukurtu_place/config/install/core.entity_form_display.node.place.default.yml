@@ -1,0 +1,399 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - entity_browser.browser.mukurtu_taxonomy_record_term_browser
+    - field.field.node.place.comment
+    - node.type.place
+  module:
+    - comment
+    - entity_browser
+    - field_group
+    - media_library
+    - mukurtu_core
+    - mukurtu_local_contexts
+    - mukurtu_protocol
+    - paragraphs
+    - path
+    - text
+third_party_settings:
+  field_group:
+    group_main_tab:
+      children:
+        - group_mukurtu_essentials
+        - group_text_sections
+        - group_additional_fields
+        - group_related_content
+      label: 'Main Tab'
+      region: content
+      parent_name: ''
+      weight: 0
+      format_type: tabs
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        direction: horizontal
+        width_breakpoint: 640
+    group_mukurtu_essentials:
+      children:
+        - title
+        - field_media_assets
+        - field_cultural_protocols
+        - field_other_names
+      label: 'Mukurtu Essentials'
+      region: content
+      parent_name: group_main_tab
+      weight: 20
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: ''
+        required_fields: true
+    group_text_sections:
+      children:
+        - field_sections
+      label: Text Sections
+      region: content
+      parent_name: group_main_tab
+      weight: 21
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_additional_fields:
+      children:
+        - field_keywords
+        - group_locations
+        - group_local_contexts
+      label: 'Additional Fields'
+      region: content
+      parent_name: group_main_tab
+      weight: 22
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_related_content:
+      children:
+        - field_related_content
+      label: 'Related Content'
+      region: content
+      parent_name: group_main_tab
+      weight: 23
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+    group_local_contexts:
+      children:
+        - field_local_contexts_projects
+        - field_local_contexts_labels_and_notices
+      label: 'Local Contexts'
+      region: content
+      parent_name: group_additional_fields
+      weight: 25
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: '"The Local Contexts Traditional Knowledge (TK) and Biocultural (BC) Labels are tools for Indigenous communities and local organizations. Developed through sustained partnership and testing within Indigenous communities across multiple countries, the Labels allow communities to express local and specific conditions for sharing and engaging in future research and relationships in ways that are consistent with already existing community rules, governance, and protocols for using, sharing, and circulating knowledge and data." For more information, visit <a href="https://localcontexts.org">localcontexts.org</a>.	</br>You must first customize your TK and BC Labels using the Local Contexts Hub and import your Project(s) before you can apply Projects or Labels to place records.'
+        required_fields: true
+    group_locations:
+      children:
+        - field_coverage
+        - field_coverage_description
+        - field_location
+      label: Locations
+      region: content
+      parent_name: group_additional_fields
+      weight: 24
+      format_type: tab
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        formatter: open
+        description: 'A set of location related fields that include mapping/geographic data for visually placing and displaying place records, as well as descriptive and taxonomic fields.'
+        required_fields: true
+id: node.place.default
+targetEntityType: node
+bundle: place
+mode: default
+content:
+  comment:
+    type: comment_default
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  created:
+    type: datetime_timestamp
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  draft:
+    type: boolean_checkbox
+    weight: 30
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  field_coverage:
+    type: geofield_mukurtu
+    weight: 10
+    region: content
+    settings:
+      geometry_validation: 0
+      map:
+        leaflet_map: 'OSM Mapnik'
+        height: '400'
+        auto_center: '1'
+        scroll_zoom_enabled: '1'
+        map_position:
+          zoom: '12'
+          minZoom: '3'
+          maxZoom: '18'
+          zoomFiner: '0'
+          force: 0
+          center:
+            lat: '0'
+            lon: '0'
+          zoomControlPosition: topleft
+      toolbar:
+        position: topright
+        marker: defaultMarker
+        drawPolyline: '1'
+        drawRectangle: '1'
+        drawPolygon: '1'
+        editMode: '1'
+        dragMode: '1'
+        removalMode: '1'
+        drawCircle: false
+        drawText: false
+        cutPolygon: 0
+        rotateMode: 0
+      reset_map:
+        control: 0
+        options: '{"position":"topleft","title":"Reset View"}'
+      fullscreen:
+        options: '{"position":"topleft","pseudoFullscreen":false}'
+        control: 0
+      path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      input:
+        show: 0
+        readonly: 0
+      geocoder:
+        control: false
+        settings:
+          position: topright
+          input_size: 20
+          providers: {  }
+          min_terms: 4
+          delay: 800
+          zoom: 16
+          popup: false
+          options: ''
+      map_scale:
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+        control: 0
+      locate:
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        automatic: '1'
+        control: 0
+      feature_properties:
+        values: ''
+    third_party_settings: {  }
+  field_coverage_description:
+    type: text_textarea
+    weight: 11
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_keywords:
+    type: entity_reference_autocomplete
+    weight: 9
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 26
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 25
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_location:
+    type: entity_reference_autocomplete
+    weight: 12
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_media_assets:
+    type: media_library_widget
+    weight: 6
+    region: content
+    settings:
+      media_types:
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
+    third_party_settings: {  }
+  field_protocol_control:
+    type: mukurtu_protocol_control_widget
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_related_content:
+    type: entity_browser_entity_reference
+    weight: 6
+    region: content
+    settings:
+      entity_browser: mukurtu_content_browser
+      field_widget_display: label
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: true
+      field_widget_display_settings: {  }
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_other_names:
+    type: entity_browser_entity_reference
+    weight: 5
+    region: content
+    settings:
+      entity_browser: mukurtu_taxonomy_record_term_browser
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: true
+      field_widget_display_settings:
+        view_mode: default
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_sections:
+    type: paragraphs
+    weight: 2
+    region: content
+    settings:
+      title: Section
+      title_plural: Sections
+      edit_mode: open
+      closed_mode: summary
+      autocollapse: none
+      closed_mode_threshold: 0
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: formatted_text_with_title
+      features:
+        add_above: '0'
+        collapse_edit_all: collapse_edit_all
+        duplicate: duplicate
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  promote:
+    type: boolean_checkbox
+    weight: 4
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    weight: 8
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  sticky:
+    type: boolean_checkbox
+    weight: 5
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: 3
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: 1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  url_redirects:
+    weight: 7
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_content_type: true
+  field_sequence_collection: true

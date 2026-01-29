@@ -1,0 +1,38 @@
+<?php
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\mukurtu_place\Entity\FormattedTextWithTitle;
+use Drupal\mukurtu_place\Entity\Place;
+
+/**
+* @file
+* Provide Mukurtu Place Type.
+*/
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function mukurtu_place_entity_bundle_info_alter(array &$bundles)
+{
+  if (isset($bundles['node']['place'])) {
+    $bundles['node']['place']['class'] = Place::class;
+  }
+
+  if (isset($bundles['paragraph']['formatted_text_with_title'])) {
+    $bundles['paragraph']['formatted_text_with_title']['class'] = FormattedTextWithTitle::class;
+  }
+}
+
+/**
+ * Implements hook_entity_field_storage_info().
+ */
+function mukurtu_place_entity_field_storage_info(EntityTypeInterface $entity_type){
+  if ($entity_type->id() == 'paragraph') {
+    $fields = FormattedTextWithTitle::bundleFieldDefinitions($entity_type, 'formatted_text_with_title', []);
+    return $fields;
+  }
+
+  if ($entity_type->id() == 'node') {
+    return Place::bundleFieldDefinitions($entity_type, 'place', []);
+  }
+}
