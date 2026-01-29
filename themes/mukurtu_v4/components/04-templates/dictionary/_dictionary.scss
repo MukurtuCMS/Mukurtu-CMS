@@ -13,7 +13,6 @@
 
   // Dictionary search and filter area.
   .browse-facets__wrapper {
-    margin-inline: calc(50% - 50vw);
     background-color: var(--brand-secondary);
     padding-block: var(--v-space-3xs) var(--v-space-2xs);
 
@@ -21,17 +20,18 @@
   }
 
   .browse-facets {
+    grid-column: 1 / -1;
     display: block;
     color: var(--color-white);
 
     @include layout.layout--full-width-grid-item;
 
-    @include include-media.media('>=md') {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      grid-column: 1 / -1;
-      gap: var(--gutter);
+    .form-item {
+      margin-block-start: 1rem;
+    }
+
+    .form-item-glossary-entry {
+      display: none;
     }
 
     // Each dropdown facet.
@@ -55,12 +55,14 @@
       }
 
       form {
-        display: flex;
-        flex-direction: row;
-        gap: var(--gutter);
+        @include include-media.media('>=md') {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: var(--gutter);
+        }
 
-        > div {
-          flex: 1;
+        @include include-media.media('>=lg') {
+          grid-template-columns: repeat(4, 1fr);
         }
 
         .js-form-type-select {

@@ -4364,7 +4364,6 @@ header {
   display: block;
 }
 .dictionary .browse-facets__wrapper {
-  margin-inline: calc(50% - 50vw);
   background-color: var(--brand-secondary);
   padding-block: var(--v-space-3xs) var(--v-space-2xs);
   display: grid;
@@ -4385,6 +4384,7 @@ header {
   }
 }
 .dictionary .browse-facets {
+  grid-column: 1/-1;
   display: block;
   color: var(--color-white);
   grid-column: 1/-1;
@@ -4394,14 +4394,12 @@ header {
     grid-column: 2/-2;
   }
 }
-@media (min-width: 48rem) {
-  .dictionary .browse-facets {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    grid-column: 1/-1;
-    gap: var(--gutter);
-  }
+.dictionary .browse-facets .form-item {
+  -webkit-margin-before: 1rem;
+          margin-block-start: 1rem;
+}
+.dictionary .browse-facets .form-item-glossary-entry {
+  display: none;
 }
 .dictionary .browse-facets .facets-widget-dropdown {
   grid-row: 1;
@@ -4426,20 +4424,17 @@ header {
             margin-block-start: 0;
   }
 }
-.dictionary .browse-facets .views-exposed-form form {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
-  gap: var(--gutter);
+@media (min-width: 48rem) {
+  .dictionary .browse-facets .views-exposed-form form {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gutter);
+  }
 }
-.dictionary .browse-facets .views-exposed-form form > div {
-  -webkit-box-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+@media (min-width: 60rem) {
+  .dictionary .browse-facets .views-exposed-form form {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 .dictionary .browse-facets .views-exposed-form form .js-form-type-select::after {
   inset-block-start: 52px;
