@@ -1,6 +1,8 @@
 <?php
 
 use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
+use Drupal\node\NodeInterface;
+use Drupal\node\NodeTypeInterface;
 
 /**
  * Implements hook_theme().
@@ -74,10 +76,29 @@ function mukurtu_browse_views_plugins_argument_alter(array &$plugins) {
 }
 
 /**
+ * Implements hook_preprocess_node().
+ */
+function mukurtu_browse_preprocess_node(&$variables) {
+  // Only apply to browse view mode.
+  if ($variables['view_mode'] !== 'browse') {
+    return;
+  }
+  $node = $variables['node'];
+  if (!$node instanceof NodeInterface) {
+    return;
+  }
+  $node_type = $node->type->entity;
+  if (!$node_type instanceof NodeTypeInterface) {
+    return;
+  }
+  $variables['content_type_label'] = $node_type->label();
+}
+
+/**
  * Implements hook_preprocess_block().
  */
 function mukurtu_browse_preprocess_block(&$variables) {
-  if (!isset($variables['plugin_id']) || $variables['plugin_id'] !== 'views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block') {
+  if (!isset($variables['plugin_id']) || !in_array($variables['plugin_id'], ['views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block', 'views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block'])) {
     return;
   }
   if (isset($variables['content']['search_api_fulltext'])) {

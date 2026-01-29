@@ -1284,6 +1284,11 @@ details.form-wrapper summary + div {
 .horizontal-card__content-header svg {
   fill: var(--brand-secondary);
 }
+.horizontal-card__content-type {
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  text-transform: uppercase;
+}
 .horizontal-card__content-body {
   -webkit-margin-before: var(--v-space-3xs);
           margin-block-start: var(--v-space-3xs);

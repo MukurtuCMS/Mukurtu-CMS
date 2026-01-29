@@ -61,6 +61,12 @@
     }
   }
 
+  &__content-type {
+    font-size: var(--font-size-s);
+    font-weight: var(--text-bold);
+    text-transform: uppercase;
+  }
+
   &__content-body {
     margin-block-start: var(--v-space-3xs);
     line-height: var(--line-height-m);

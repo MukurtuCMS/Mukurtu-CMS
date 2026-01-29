@@ -9,6 +9,7 @@ dependencies:
     - geofield
     - leaflet_views
     - search_api
+    - user
 id: mukurtu_browse
 label: 'Mukurtu Browse'
 module: views
@@ -246,6 +247,25 @@ display:
                 soft_limit: 0
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
+              facets_collections:
+                plugin_id: bef
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: true
+                  collapsible_disable_automatic_open: false
+                  open_by_default: true
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+                select_all_none: false
+                select_all_none_nested: false
+                display_inline: false
+                soft_limit: 0
+                soft_limit_label_less: 'Show less'
+                soft_limit_label_more: 'Show more'
               facets_media_type:
                 plugin_id: bef
                 advanced:
@@ -285,8 +305,9 @@ display:
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access content'
       cache:
         type: search_api_none
         options: {  }
@@ -450,7 +471,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
@@ -521,7 +542,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
@@ -597,7 +618,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               translate_entity:
                 processor_id: translate_entity
@@ -673,7 +694,78 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
+            processor_configs:
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_collections:
+          id: facets_collections
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_collections
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Collections
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: collections
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: true
             processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
@@ -744,7 +836,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               translate_entity:
                 processor_id: translate_entity
@@ -820,7 +912,7 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
               hierarchy_processor:
                 processor_id: hierarchy_processor
@@ -968,6 +1060,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_default_content_index'
         - 'search_api_list:mukurtu_default_content_index'
@@ -988,6 +1081,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_default_content_index'
         - 'search_api_list:mukurtu_default_content_index'
@@ -995,7 +1089,7 @@ display:
     id: mukurtu_browse_block_grid
     display_title: 'Grid View Block'
     display_plugin: block
-    position: 1
+    position: 2
     display_options:
       style:
         type: default
@@ -1029,6 +1123,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_default_content_index'
         - 'search_api_list:mukurtu_default_content_index'
@@ -1036,7 +1131,7 @@ display:
     id: mukurtu_browse_block_map
     display_title: 'Map View Block'
     display_plugin: block
-    position: 1
+    position: 3
     display_options:
       fields:
         nid:
@@ -1447,6 +1542,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_default_content_index'
         - 'search_api_list:mukurtu_default_content_index'
