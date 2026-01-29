@@ -30,6 +30,10 @@
       margin-block-start: 1rem;
     }
 
+    .form-item-glossary-entry {
+      display: none;
+    }
+
     // Each dropdown facet.
     .facets-widget-dropdown {
       grid-row: 1;
@@ -51,12 +55,14 @@
       }
 
       form {
-        display: flex;
-        flex-direction: row;
-        gap: var(--gutter);
+        @include include-media.media('>=md') {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: var(--gutter);
+        }
 
-        > div {
-          flex: 1;
+        @include include-media.media('>=lg') {
+          grid-template-columns: repeat(4, 1fr);
         }
 
         .js-form-type-select {
