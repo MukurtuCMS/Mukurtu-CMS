@@ -8,6 +8,7 @@ dependencies:
     - node.type.digital_heritage
     - node.type.page
     - node.type.person
+    - node.type.place
     - node.type.word_list
   module:
     - content_moderation
@@ -49,5 +50,6 @@ type_settings:
       - digital_heritage
       - page
       - person
+      - place
       - word_list
   default_moderation_state: draft
