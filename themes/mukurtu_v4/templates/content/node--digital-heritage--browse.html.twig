@@ -91,6 +91,9 @@
         <a href="{{ url }}" rel="bookmark">{{ label.0 }}</a>
       </h2>
       {{ title_suffix }}
+      {% if content_type_label %}
+        <div class="horizontal-card__content-type">{{ content_type_label }}</div>
+      {% endif %}
     </div>
 
     <div class="horizontal-card__content-body">
