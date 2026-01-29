@@ -495,3 +495,22 @@ function mukurtu_core_invalidate_entity_reference_field_references(EntityInterfa
     }
   }
 }
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ *
+ * Add the Landing Page link in the dashboard. Cannot be defined in a
+ * *.links.menu.yml file because the user can set the landing page to any node,
+ * so the link to its layout page must be assembled dynamically.
+ */
+function mukurtu_core_menu_links_discovered_alter(&$links) {
+  $config = \Drupal::config('system.site');
+  $homepagePath = $config->get('page.front');
+  $links['mukurtu_core.landing_page_dashboard'] = [
+    'title' => t('Landing Page'),
+    'url' => 'internal:' . $homepagePath . '/layout',
+    'menu_name' => 'dashboard-look-feel',
+    'parent' => 'mukurtu_dashboard',
+    'weight' => 3,
+  ];
+}
