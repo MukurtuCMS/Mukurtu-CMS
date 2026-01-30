@@ -2,12 +2,12 @@ langcode: en
 status: true
 dependencies:
   config:
-    - paragraphs.paragraphs_type.formatted_text_with_title
+    - paragraphs.paragraphs_type.text_section_with_title
   module:
     - text
-id: paragraph.formatted_text_with_title.default
+id: paragraph.text_section_with_title.default
 targetEntityType: paragraph
-bundle: formatted_text_with_title
+bundle: text_section_with_title
 mode: default
 content:
   field_body:

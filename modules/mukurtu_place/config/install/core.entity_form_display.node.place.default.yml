@@ -331,7 +331,7 @@ content:
       closed_mode_threshold: 0
       add_mode: dropdown
       form_display_mode: default
-      default_paragraph_type: formatted_text_with_title
+      default_paragraph_type: text_section_with_title
       features:
         add_above: '0'
         collapse_edit_all: collapse_edit_all

@@ -86,10 +86,10 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
         'handler_settings' => [
           'negate' => FALSE,
           'target_bundles' => [
-            'formatted_text_with_title' => 'formatted_text_with_title'
+            'text_section_with_title' => 'text_section_with_title'
           ],
           'target_bundles_drag_drop' => [
-            'formatted_text_with_title' => [
+            'text_section_with_title' => [
               'enabled' => TRUE,
               'weight' => 2,
             ],
