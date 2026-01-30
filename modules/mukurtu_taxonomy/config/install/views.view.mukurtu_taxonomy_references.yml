@@ -354,6 +354,7 @@ display:
               digital_heritage: browse
               page: browse
               person: browse
+              place: browse
               word_list: browse
             'entity:paragraph':
               dictionary_word_entry: default
