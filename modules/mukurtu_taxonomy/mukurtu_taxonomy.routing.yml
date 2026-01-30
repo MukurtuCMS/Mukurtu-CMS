@@ -52,3 +52,10 @@ mukurtu_taxonomy.term_merge_into:
   requirements:
     _permission: 'administer term merge into entities'
 
+mukurtu_taxonomy.place_record_settings:
+  path: '/admin/config/mukurtu/place-records'
+  defaults:
+    _form: '\Drupal\mukurtu_taxonomy\Form\MukurtuTaxonomyPlaceRecordsSettingsForm'
+    _title: 'Mukurtu Place Record Settings'
+  requirements:
+    _permission: 'administer site configuration'

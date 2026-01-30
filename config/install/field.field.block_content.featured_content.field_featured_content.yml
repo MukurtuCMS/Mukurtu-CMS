@@ -10,6 +10,7 @@ dependencies:
     - node.type.digital_heritage
     - node.type.page
     - node.type.person
+    - node.type.place
     - node.type.word_list
 id: block_content.featured_content.field_featured_content
 field_name: field_featured_content
@@ -31,6 +32,7 @@ settings:
       dictionary_word: dictionary_word
       digital_heritage: digital_heritage
       person: person
+      place: place
       word_list: word_list
     sort:
       field: _none

@@ -102,6 +102,20 @@ entity_fields_export_list:
     field_related_people: 'Related People'
     field_related_content: 'Related Content'
     field_other_names: 'Other Names'
+  node__place:
+    nid: ID
+    uuid: UUID
+    langcode: Locale
+    uid: 'Authored by'
+    title: Title
+    field_cultural_protocols/protocols: Protocols
+    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_keywords: Keywords
+    field_media_assets: 'Media Assets'
+    field_sections: 'Text Sections'
+    field_related_people: 'Related People'
+    field_related_content: 'Related Content'
+    field_other_names: 'Other Names'
   node__word_list:
     nid: ID
     langcode: Locale
