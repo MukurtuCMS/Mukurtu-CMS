@@ -53,6 +53,12 @@ mukurtu_core.people:
 #   parent: mukurtu_dashboard
 #   menu_name: dashboard-users
 #   route_name: mukurtu_core.create_user
+# mukurtu_core.create_user:
+#   title: 'Add user'
+#   description: 'Create a new user account.'
+#   parent: mukurtu_dashboard
+#   menu_name: dashboard-users
+#   route_name: mukurtu_core.create_user
 mukurtu_core.appearance_settings:
   title: 'Change logo'
   description: 'Change logo and favicon'
@@ -91,9 +97,9 @@ mukurtu_core.my_account:
 #   parent: mukurtu_dashboard
 #   menu_name: dashboard-look-feel
 #   route_name: mukurtu_core.entity.menu.edit_form
-mukurtu_core.consent_popup:
-  title: 'Configure consent popup'
-  description: 'COnfigure consent popup'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-look-feel
-  route_name: mukurtu_core.consent_popup
+# mukurtu_core.consent_popup:
+#   title: 'Configure consent popup'
+#   description: 'COnfigure consent popup'
+#   parent: mukurtu_dashboard
+#   menu_name: dashboard-look-feel
+#   route_name: mukurtu_core.consent_popup
