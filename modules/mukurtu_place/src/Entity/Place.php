@@ -129,17 +129,14 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
         'handler' => 'default:taxonomy_term',
         'handler_settings' => [
           'target_bundles' => [
-            'contributor' => 'contributor',
-            'creator' => 'creator',
-            'people' => 'people',
-            'publisher' => 'publisher',
+            'location' => 'location',
           ],
           'sort' => [
             'field' => 'name',
             'direction' => 'asc'
           ],
           'auto_create' => FALSE,
-          'auto_create_bundle' => 'people',
+          'auto_create_bundle' => 'location',
         ]
       ])
       ->setDefaultValue('')
