@@ -191,20 +191,25 @@ function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Co
       $editAny = 'edit any ' . $bundleType . ' content';
       $editOwn = 'edit own ' . $bundleType . ' content';
 
-      /** @var \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $node */
-      $nodeProtocols = $node->getProtocolEntities();
-      $hasEditPermission = FALSE;
-      foreach ($nodeProtocols as $protocol) {
-        $membership = Og::getMembership($protocol, $currentUser);
-        if ($membership) {
-          if ($membership->hasPermission($editAny) || $membership->hasPermission($editOwn)) {
-            $hasEditPermission = TRUE;
-            break;
+      // Do not perform protocol-based permission checks on stock Drupal content
+      // types (article, basic page). Doing so caused an error since these
+      // content types are not protocol-controlled.
+      if ($node instanceof CulturalProtocolControlledInterface) {
+        /** @var \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $node */
+        $nodeProtocols = $node->getProtocolEntities();
+        $hasEditPermission = FALSE;
+        foreach ($nodeProtocols as $protocol) {
+          $membership = Og::getMembership($protocol, $currentUser);
+          if ($membership) {
+            if ($membership->hasPermission($editAny) || $membership->hasPermission($editOwn)) {
+              $hasEditPermission = TRUE;
+              break;
+            }
           }
         }
-      }
-      if ($hasEditPermission) {
-        $data['tabs'][0]['entity.node.version_history'] = $revisionsTab;
+        if ($hasEditPermission) {
+          $data['tabs'][0]['entity.node.version_history'] = $revisionsTab;
+        }
       }
     }
   }
