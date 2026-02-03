@@ -72,7 +72,15 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     if (!empty($options['limit']) && isset($context['results'][$migration->id()]['@numitems'])) {
       $options['limit'] -= $context['results'][$migration->id()]['@numitems'];
     }
-    $executable = new ImportBatchExecutable($migration, $message, $options);
+    $executable = new ImportBatchExecutable(
+      $migration,
+      $message,
+      \Drupal::service('keyvalue'),
+      \Drupal::time(),
+      \Drupal::translation(),
+      \Drupal::service('plugin.manager.migration'),
+      $options,
+    );
     if (empty($context['sandbox']['total'])) {
       $context['sandbox']['total'] = $executable->getSource()->count();
       $context['sandbox']['batch_limit'] = $executable->calculateBatchLimit($context);
