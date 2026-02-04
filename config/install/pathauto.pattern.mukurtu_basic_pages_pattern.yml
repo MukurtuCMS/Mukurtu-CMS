@@ -3,7 +3,7 @@ status: true
 dependencies:
   module:
     - node
-id: basic_pages
+id: mukurtu_basic_pages_pattern
 label: 'Basic Pages'
 type: 'canonical_entities:node'
 pattern: '[node:title]'
