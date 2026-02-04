@@ -1284,6 +1284,11 @@ details.form-wrapper summary + div {
 .horizontal-card__content-header svg {
   fill: var(--brand-secondary);
 }
+.horizontal-card__content-type {
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  text-transform: uppercase;
+}
 .horizontal-card__content-body {
   -webkit-margin-before: var(--v-space-3xs);
           margin-block-start: var(--v-space-3xs);
@@ -3210,13 +3215,13 @@ header {
   }
 }
 
-.grid {
+.grid:has(.views-row) {
   -webkit-column-count: 1;
      -moz-column-count: 1;
           column-count: 1;
 }
 @media (min-width: 60rem) {
-  .grid {
+  .grid:has(.views-row) {
     -webkit-column-count: 2;
        -moz-column-count: 2;
             column-count: 2;
@@ -3226,14 +3231,14 @@ header {
   }
 }
 @media (min-width: 80rem) {
-  .grid {
+  .grid:has(.views-row) {
     -webkit-column-gap: var(--v-space-2xs);
        -moz-column-gap: var(--v-space-2xs);
             column-gap: var(--v-space-2xs);
   }
 }
 @media (min-width: 90rem) {
-  .grid {
+  .grid:has(.views-row) {
     -webkit-column-count: 3;
        -moz-column-count: 3;
             column-count: 3;
@@ -3483,21 +3488,9 @@ header {
   }
 }
 .browse__main-content .browse-container .browse-facets .js-form-type-textfield {
-  -webkit-margin-after: var(--v-space-4xs);
-          margin-block-end: var(--v-space-4xs);
+  background-color: var(--brand-light-accent);
 }
-.browse__main-content .browse-container .browse-facets .js-form-type-select::after {
-  inset-block: unset 20px;
-}
-.browse__main-content .browse-container .browse-facets .js-form-type-select select {
-  -webkit-margin-start: 0;
-          margin-inline-start: 0;
-}
-.browse__main-content .browse-container .browse-facets .views-exposed-form {
-  -webkit-margin-after: var(--v-space-3xs);
-          margin-block-end: var(--v-space-3xs);
-}
-.browse__main-content .browse-container .browse-facets .views-exposed-form label {
+.browse__main-content .browse-container .browse-facets .js-form-type-textfield label {
   display: block;
   background-color: var(--brand-primary-dark);
   color: var(--light-text-color);
@@ -3508,16 +3501,39 @@ header {
   padding-inline: var(--v-space-4xxs);
   padding-block: var(--v-space-5xs);
 }
+.browse__main-content .browse-container .browse-facets .js-form-type-textfield input {
+  padding-inline: var(--v-space-4xxs);
+  inline-size: 100%;
+}
+.browse__main-content .browse-container .browse-facets .js-form-type-select::after {
+  inset-block-start: initial;
+  inset-block-end: 20px;
+}
+.browse__main-content .browse-container .browse-facets .js-form-type-select label {
+  display: block;
+  background-color: var(--brand-primary-dark);
+  color: var(--light-text-color);
+  font-size: var(--font-size-m);
+  font-weight: var(--text-bold);
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+  padding-inline: var(--v-space-4xxs);
+  padding-block: var(--v-space-5xs);
+}
+.browse__main-content .browse-container .browse-facets .js-form-type-select select {
+  -webkit-margin-start: 0;
+          margin-inline-start: 0;
+}
 .browse__main-content .browse-container .browse-facets .form-actions {
   -webkit-margin-before: var(--v-space-4xs);
           margin-block-start: var(--v-space-4xs);
 }
-.browse__main-content .browse-container .browse-facets .facets-widget-checkbox {
+.browse__main-content .browse-container .browse-facets details.form-item {
   background-color: var(--mukurtu-panel-pane-content-background-color);
   -webkit-margin-after: var(--v-space-4xs);
           margin-block-end: var(--v-space-4xs);
 }
-.browse__main-content .browse-container .browse-facets .facets-widget-checkbox summary {
+.browse__main-content .browse-container .browse-facets details.form-item summary {
   background-color: var(--brand-primary-dark);
   color: var(--light-text-color);
   font-size: var(--font-size-m);
@@ -3528,14 +3544,14 @@ header {
   padding-block: var(--v-space-5xs);
   cursor: pointer;
 }
-.browse__main-content .browse-container .browse-facets .facets-widget-checkbox summary::marker {
+.browse__main-content .browse-container .browse-facets details.form-item summary::marker {
   content: "";
 }
-.browse__main-content .browse-container .browse-facets .facets-widget-checkbox ul {
+.browse__main-content .browse-container .browse-facets details.form-item ul {
   padding-block: 0 var(--v-space-4xxs);
   padding-inline: var(--v-space-4xxs);
 }
-.browse__main-content .browse-container .browse-facets .facets-widget-checkbox ul li {
+.browse__main-content .browse-container .browse-facets details.form-item ul li {
   list-style: none;
 }
 .browse .pager__items {

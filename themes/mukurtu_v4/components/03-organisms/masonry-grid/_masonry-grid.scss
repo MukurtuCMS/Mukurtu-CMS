@@ -3,7 +3,7 @@
 // When the Grid button is selected on the Browse Digital Heritage page,
 // a masonry grid layout is applied. Also seen on collections pages for
 // collection items.
-.grid {
+.grid:has(.views-row) {
   column-count: 1;
 
   @include include-media.media('>=lg') {

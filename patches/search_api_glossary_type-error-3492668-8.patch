@@ -1,0 +1,90 @@
+diff --git a/src/Plugin/facets/processor/GlossaryAZAllItemsProcessor.php b/src/Plugin/facets/processor/GlossaryAZAllItemsProcessor.php
+index 01d136e..f6598e5 100644
+--- a/src/Plugin/facets/processor/GlossaryAZAllItemsProcessor.php
++++ b/src/Plugin/facets/processor/GlossaryAZAllItemsProcessor.php
+@@ -121,12 +121,22 @@ class GlossaryAZAllItemsProcessor extends ProcessorPluginBase implements BuildPr
+    */
+   public function supportsFacet(FacetInterface $facet) {
+     // Check if
+-    // 1) The correct widget is chosen for the facet
++    // 1) The correct widget is chosen for the facet. It can be '<nowidget>'
++    // from the facets_exposed_filters
+     // 2) If the glossary processor is enabled in Search API index.
+-    $widget = $facet->getWidget()['type'];
++    if (!empty($facet->getWidget()['type'])) {
++      $widget = $facet->getWidget()['type'];
++    }
++    elseif ($facet->getWidget() == '<nowidget>') {
++      $widget = '<nowidget>';
++    }
++    else {
++      return FALSE;
++    }
++
+     $search_processors = $facet->getFacetSource()->getIndex()->getProcessors();
+ 
+-    if ($widget == 'glossaryaz' && array_key_exists('glossary', $search_processors)) {
++    if (in_array($widget, ['glossaryaz', '<nowidget>']) && array_key_exists('glossary', $search_processors)) {
+       // Glossary processor is enabled.
+       return TRUE;
+     }
+diff --git a/src/Plugin/facets/processor/GlossaryAZPadItemsProcessor.php b/src/Plugin/facets/processor/GlossaryAZPadItemsProcessor.php
+index ddefa32..56254de 100644
+--- a/src/Plugin/facets/processor/GlossaryAZPadItemsProcessor.php
++++ b/src/Plugin/facets/processor/GlossaryAZPadItemsProcessor.php
+@@ -93,12 +93,22 @@ class GlossaryAZPadItemsProcessor extends ProcessorPluginBase implements BuildPr
+    */
+   public function supportsFacet(FacetInterface $facet) {
+     // Check if
+-    // 1) The correct widget is chosen for the facet
++    // 1) The correct widget is chosen for the facet. It can be '<nowidget>'
++    // from the facets_exposed_filters
+     // 2) If the glossary processor is enabled in Search API index.
+-    $widget = $facet->getWidget()['type'];
++    if (!empty($facet->getWidget()['type'])) {
++      $widget = $facet->getWidget()['type'];
++    }
++    elseif ($facet->getWidget() == '<nowidget>') {
++      $widget = '<nowidget>';
++    }
++    else {
++      return FALSE;
++    }
++
+     $search_processors = $facet->getFacetSource()->getIndex()->getProcessors();
+ 
+-    if ($widget == 'glossaryaz' && array_key_exists('glossary', $search_processors)) {
++    if (in_array($widget, ['glossaryaz', '<nowidget>']) && array_key_exists('glossary', $search_processors)) {
+       // Glossary processor is enabled.
+       return TRUE;
+     }
+diff --git a/src/Plugin/facets/processor/GlossaryAZWidgetOrderProcessor.php b/src/Plugin/facets/processor/GlossaryAZWidgetOrderProcessor.php
+index ebb81e2..d8b22b6 100644
+--- a/src/Plugin/facets/processor/GlossaryAZWidgetOrderProcessor.php
++++ b/src/Plugin/facets/processor/GlossaryAZWidgetOrderProcessor.php
+@@ -219,12 +219,22 @@ class GlossaryAZWidgetOrderProcessor extends SortProcessorPluginBase implements
+    */
+   public function supportsFacet(FacetInterface $facet) {
+     // Check if
+-    // 1) The correct widget is chosen for the facet
++    // 1) The correct widget is chosen for the facet. It can be '<nowidget>'
++    // from the facets_exposed_filters
+     // 2) If the glossary processor is enabled in Search API index.
+-    $widget = $facet->getWidget()['type'];
++    if (!empty($facet->getWidget()['type'])) {
++      $widget = $facet->getWidget()['type'];
++    }
++    elseif ($facet->getWidget() == '<nowidget>') {
++      $widget = '<nowidget>';
++    }
++    else {
++      return FALSE;
++    }
++
+     $search_processors = $facet->getFacetSource()->getIndex()->getProcessors();
+ 
+-    if ($widget == 'glossaryaz' && array_key_exists('glossary', $search_processors)) {
++    if (in_array($widget, ['glossaryaz', '<nowidget>']) && array_key_exists('glossary', $search_processors)) {
+       // Glossary processor is enabled.
+       return TRUE;
+     }

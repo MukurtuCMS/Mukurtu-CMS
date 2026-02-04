@@ -17,6 +17,7 @@
     "require": {
         "composer/installers": "^1.9",
         "cweagans/composer-patches": "^1.7",
+        "drupal/better_exposed_filters": "^7.1.1",
         "drupal/blazy": "^3.0",
         "drupal/color_field": "^3.0",
         "drupal/config_pages": "^2.15",
@@ -108,6 +109,9 @@
             },
             "drupal/og": {
                 "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
+            },
+            "drupal/search_api_glossary": {
+                "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch"
             }
         }
     }

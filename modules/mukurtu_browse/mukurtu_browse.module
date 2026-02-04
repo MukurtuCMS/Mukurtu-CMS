@@ -1,6 +1,8 @@
 <?php
 
 use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
+use Drupal\node\NodeInterface;
+use Drupal\node\NodeTypeInterface;
 
 /**
  * Implements hook_theme().
@@ -10,21 +12,9 @@ function mukurtu_browse_theme($existing, $type, $theme, $path) {
     'mukurtu_browse' => [
       'variables' => [
         'is_dh' => NULL,
-        'maplink' => NULL,
         'list_results' => NULL,
         'grid_results' => NULL,
         'map_results' => NULL,
-        'facets' => [],
-      ],
-    ],
-    'mukurtu_map_browse' => [
-      'variables' => [
-        'is_dh' => NULL,
-        'maplink' => NULL,
-        'list_results' => NULL,
-        'grid_results' => NULL,
-        'map_results' => NULL,
-        'facets' => [],
       ],
     ],
   ];
@@ -83,4 +73,38 @@ function mukurtu_browse_views_plugins_argument_alter(array &$plugins) {
     'class' => MukurtuBoundingBox::class,
     'provider' => 'mukurtu_browse',
   ];
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function mukurtu_browse_preprocess_node(&$variables) {
+  // Only apply to browse view mode.
+  if ($variables['view_mode'] !== 'browse') {
+    return;
+  }
+  $node = $variables['node'];
+  if (!$node instanceof NodeInterface) {
+    return;
+  }
+  $node_type = $node->type->entity;
+  if (!$node_type instanceof NodeTypeInterface) {
+    return;
+  }
+  $variables['content_type_label'] = $node_type->label();
+}
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function mukurtu_browse_preprocess_block(&$variables) {
+  if (!isset($variables['plugin_id']) || !in_array($variables['plugin_id'], ['views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block', 'views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block'])) {
+    return;
+  }
+  if (isset($variables['content']['search_api_fulltext'])) {
+    $variables['content']['search_api_fulltext']['#weight'] = -10.9;
+  }
+  if (isset($variables['content']['sort_by'])) {
+    $variables['content']['sort_by']['#weight'] = -10.8;
+  }
 }

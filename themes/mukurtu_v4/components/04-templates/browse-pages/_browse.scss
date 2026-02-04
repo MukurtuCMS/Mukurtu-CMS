@@ -193,23 +193,7 @@
 
         // Search textfield.
         .js-form-type-textfield {
-          margin-block-end: var(--v-space-4xs);
-        }
-
-        // Sort dropdown.
-        .js-form-type-select {
-          &::after {
-            inset-block: unset 20px;
-          }
-
-          select {
-            margin-inline-start: 0;
-          }
-        }
-
-        // Search box at the top of the sidebar.
-        .views-exposed-form {
-          margin-block-end: var(--v-space-3xs);
+          background-color: var(--brand-light-accent);
 
           label {
             display: block;
@@ -221,6 +205,34 @@
             padding-inline: var(--v-space-4xxs);
             padding-block: var(--v-space-5xs);
           }
+
+          input {
+            padding-inline: var(--v-space-4xxs);
+            inline-size: 100%;
+          }
+        }
+
+        // Sort dropdown.
+        .js-form-type-select {
+          &::after {
+            inset-block-start: initial;
+            inset-block-end: 20px;
+          }
+
+          label {
+            display: block;
+            background-color: var(--brand-primary-dark);
+            color: var(--light-text-color);
+            font-size: var(--font-size-m);
+            font-weight: var(--text-bold);
+            margin-block-start: 0;
+            padding-inline: var(--v-space-4xxs);
+            padding-block: var(--v-space-5xs);
+          }
+
+          select {
+            margin-inline-start: 0;
+          }
         }
 
         // Apply/reset buttons for search and relevance.
@@ -229,7 +241,7 @@
         }
 
         // Details/summary elements in sidebar; facets.
-        .facets-widget-checkbox {
+        details.form-item {
           background-color: var(--mukurtu-panel-pane-content-background-color);
           margin-block-end: var(--v-space-4xs);
 

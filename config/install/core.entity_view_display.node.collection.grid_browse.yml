@@ -17,7 +17,7 @@ targetEntityType: node
 bundle: collection
 mode: grid_browse
 content:
-  field_collection_image:
+  field_representative_media:
     type: entity_reference_entity_view
     label: hidden
     settings:
@@ -40,6 +40,7 @@ hidden:
   field_all_related_content: true
   field_child_collections: true
   field_citation: true
+  field_collection_image: true
   field_communities: true
   field_coverage: true
   field_coverage_description: true
@@ -54,7 +55,6 @@ hidden:
   field_multipage_page_of: true
   field_parent_collection: true
   field_related_content: true
-  field_representative_media: true
   field_source: true
   field_title: true
   flag_email_node: true

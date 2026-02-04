@@ -4,9 +4,12 @@ dependencies:
   config:
     - search_api.index.mukurtu_default_content_index
   module:
+    - better_exposed_filters
+    - facets_exposed_filters
     - geofield
     - leaflet_views
     - search_api
+    - user
 id: mukurtu_browse
 label: 'Mukurtu Browse'
 module: views
@@ -117,7 +120,7 @@ display:
             offset_label: Offset
           quantity: 9
       exposed_form:
-        type: basic
+        type: bef
         options:
           submit_button: Apply
           reset_button: true
@@ -126,14 +129,216 @@ display:
           expose_sort_order: false
           sort_asc_label: Asc
           sort_desc_label: Desc
+          text_input_required: 'Select any filter and click on Apply to see results'
+          text_input_required_format: basic_html
+          bef:
+            general:
+              autosubmit: true
+              auto_submit_sort_only: false
+              autosubmit_breakpoint: ''
+              autosubmit_exclude_textfield: false
+              autosubmit_textfield_delay: 500
+              autosubmit_textfield_minimum_length: 3
+              autosubmit_hide: false
+              input_required: false
+              allow_secondary: false
+              secondary_label: 'Advanced options'
+              secondary_open: false
+              reset_button_always_show: false
+            sort:
+              plugin_id: default
+              advanced:
+                combine: false
+                combine_rewrite: ''
+                combine_param: sort_bef_combine
+                reset: false
+                reset_label: ''
+                collapsible: false
+                collapsible_label: 'Sort options'
+                is_secondary: false
+            filter:
+              search_api_fulltext:
+                plugin_id: default
+                advanced:
+                  placeholder_text: ''
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: false
+                  collapsible_disable_automatic_open: false
+                  open_by_default: false
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+              facets_community_title:
+                plugin_id: bef
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: true
+                  collapsible_disable_automatic_open: false
+                  open_by_default: true
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+                select_all_none: false
+                select_all_none_nested: false
+                display_inline: false
+                soft_limit: 0
+                soft_limit_label_less: 'Show less'
+                soft_limit_label_more: 'Show more'
+              facets_field_cultural_protocols:
+                plugin_id: bef
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: true
+                  collapsible_disable_automatic_open: false
+                  open_by_default: true
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+                select_all_none: false
+                select_all_none_nested: false
+                display_inline: false
+                soft_limit: 0
+                soft_limit_label_less: 'Show less'
+                soft_limit_label_more: 'Show more'
+              facets_type:
+                plugin_id: bef
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: true
+                  collapsible_disable_automatic_open: false
+                  open_by_default: true
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+                select_all_none: false
+                select_all_none_nested: false
+                display_inline: false
+                soft_limit: 0
+                soft_limit_label_less: 'Show less'
+                soft_limit_label_more: 'Show more'
+              facets_name:
+                plugin_id: bef
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: true
+                  collapsible_disable_automatic_open: false
+                  open_by_default: true
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+                select_all_none: false
+                select_all_none_nested: false
+                display_inline: false
+                soft_limit: 0
+                soft_limit_label_less: 'Show less'
+                soft_limit_label_more: 'Show more'
+              facets_collections:
+                plugin_id: bef
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: true
+                  collapsible_disable_automatic_open: false
+                  open_by_default: true
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+                select_all_none: false
+                select_all_none_nested: false
+                display_inline: false
+                soft_limit: 0
+                soft_limit_label_less: 'Show less'
+                soft_limit_label_more: 'Show more'
+              facets_media_type:
+                plugin_id: bef
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: true
+                  collapsible_disable_automatic_open: false
+                  open_by_default: true
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+                select_all_none: false
+                select_all_none_nested: false
+                display_inline: false
+                soft_limit: 0
+                soft_limit_label_less: 'Show less'
+                soft_limit_label_more: 'Show more'
+              facets_name_1:
+                plugin_id: bef
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: true
+                  collapsible_disable_automatic_open: false
+                  open_by_default: true
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+                select_all_none: false
+                select_all_none_nested: false
+                display_inline: false
+                soft_limit: 0
+                soft_limit_label_less: 'Show less'
+                soft_limit_label_more: 'Show more'
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'access content'
       cache:
         type: search_api_none
         options: {  }
-      empty: {  }
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: text
+          empty: true
+          content:
+            value: 'No results. Try resetting filters or searching for a different term.'
+            format: basic_html
+          tokenize: false
       sorts:
+        changed:
+          id: changed
+          table: search_api_index_mukurtu_default_content_index
+          field: changed
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: DESC
+          expose:
+            label: Newest
+            field_identifier: newest
+          exposed: true
         search_api_relevance:
           id: search_api_relevance
           table: search_api_index_mukurtu_default_content_index
@@ -144,8 +349,8 @@ display:
           plugin_id: search_api
           order: DESC
           expose:
-            label: 'Search Relevance'
-            field_identifier: search_api_relevance
+            label: Relevance
+            field_identifier: relevance
           exposed: true
         title:
           id: title
@@ -160,19 +365,6 @@ display:
             label: Title
             field_identifier: title
           exposed: true
-        changed:
-          id: changed
-          table: search_api_index_mukurtu_default_content_index
-          field: changed
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api
-          order: DESC
-          expose:
-            label: Newest
-            field_identifier: newest
-          exposed: true
         changed_1:
           id: changed_1
           table: search_api_index_mukurtu_default_content_index
@@ -181,7 +373,7 @@ display:
           group_type: group
           admin_label: ''
           plugin_id: search_api
-          order: ASC
+          order: DESC
           expose:
             label: Oldest
             field_identifier: oldest
@@ -215,8 +407,9 @@ display:
             remember_roles:
               authenticated: authenticated
             expose_fields: false
-            placeholder: ''
+            placeholder: 'Enter keywords'
             searched_fields_id: search_api_fulltext_searched_fields
+            value_maxlength: 128
           is_grouped: false
           group_info:
             label: ''
@@ -232,6 +425,518 @@ display:
           parse_mode: terms
           min_length: null
           fields: {  }
+        facets_community_title:
+          id: facets_community_title
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_community_title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Community
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: community_title
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: true
+            processor_configs:
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_field_cultural_protocols:
+          id: facets_field_cultural_protocols
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_field_cultural_protocols
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: 'Cultural Protocols'
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: cultural_protocols
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: true
+            processor_configs:
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              cultural_protocol_facet_label_processor:
+                processor_id: cultural_protocol_facet_label_processor
+                weights:
+                  build: 50
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_type:
+          id: facets_type
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: 'Content type'
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: type
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: true
+            processor_configs:
+              translate_entity:
+                processor_id: translate_entity
+                weights:
+                  build: 5
+                settings: {  }
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_name:
+          id: facets_name
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_name
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Category
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: category
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: true
+            processor_configs:
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_collections:
+          id: facets_collections
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_collections
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Collections
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: collections
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: true
+            processor_configs:
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_media_type:
+          id: facets_media_type
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_media_type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: 'Media type'
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: media_type
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: true
+            processor_configs:
+              translate_entity:
+                processor_id: translate_entity
+                weights:
+                  build: 5
+                settings: {  }
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_name_1:
+          id: facets_name_1
+          table: search_api_index_mukurtu_default_content_index
+          field: facets_name_1
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Keywords
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: keywords
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: true
+          label_display: visible
+          facet:
+            expand_hierarchy: false
+            hierarchy: taxonomy
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: true
+            processor_configs:
+              hierarchy_processor:
+                processor_id: hierarchy_processor
+                weights:
+                  build: 100
+                settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
         type:
           id: type
           table: search_api_index_mukurtu_default_content_index
@@ -317,6 +1022,10 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
+      filter_groups:
+        operator: AND
+        groups:
+          1: AND
       style:
         type: default
       row:
@@ -351,6 +1060,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_default_content_index'
         - 'search_api_list:mukurtu_default_content_index'
@@ -371,6 +1081,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_default_content_index'
         - 'search_api_list:mukurtu_default_content_index'
@@ -378,7 +1089,7 @@ display:
     id: mukurtu_browse_block_grid
     display_title: 'Grid View Block'
     display_plugin: block
-    position: 1
+    position: 2
     display_options:
       style:
         type: default
@@ -412,6 +1123,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_default_content_index'
         - 'search_api_list:mukurtu_default_content_index'
@@ -419,7 +1131,7 @@ display:
     id: mukurtu_browse_block_map
     display_title: 'Map View Block'
     display_plugin: block
-    position: 1
+    position: 3
     display_options:
       fields:
         nid:
@@ -717,144 +1429,6 @@ display:
             use_highlighting: false
             multi_type: separator
             multi_separator: ', '
-      filters:
-        search_api_fulltext:
-          id: search_api_fulltext
-          table: search_api_index_mukurtu_default_content_index
-          field: search_api_fulltext
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api_fulltext
-          operator: and
-          value: ''
-          group: 1
-          exposed: true
-          expose:
-            operator_id: search_api_fulltext_op
-            label: Search
-            description: ''
-            use_operator: false
-            operator: search_api_fulltext_op
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: search_api_fulltext
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-            expose_fields: false
-            placeholder: ''
-            searched_fields_id: search_api_fulltext_searched_fields
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          parse_mode: terms
-          min_length: null
-          fields: {  }
-        type:
-          id: type
-          table: search_api_index_mukurtu_default_content_index
-          field: type
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api_options
-          operator: or
-          value:
-            collection: collection
-            dictionary_word: dictionary_word
-            digital_heritage: digital_heritage
-            person: person
-            word_list: word_list
-          group: 1
-          exposed: false
-          expose:
-            operator_id: ''
-            label: ''
-            description: ''
-            use_operator: false
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: ''
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-            reduce: false
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          reduce_duplicates: false
-        field_coverage:
-          id: field_coverage
-          table: search_api_index_mukurtu_default_content_index
-          field: field_coverage
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: search_api_text
-          operator: 'not empty'
-          value:
-            min: ''
-            max: ''
-            value: ''
-          group: 1
-          exposed: false
-          expose:
-            operator_id: ''
-            label: ''
-            description: ''
-            use_operator: false
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: ''
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-            min_placeholder: ''
-            max_placeholder: ''
-            placeholder: ''
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-      filter_groups:
-        operator: AND
-        groups:
-          1: AND
       style:
         type: leaflet_map
         options:
@@ -879,7 +1453,7 @@ display:
           leaflet_map: 'OSM Mapnik'
           height: '600'
           height_unit: px
-          hide_empty_map: false
+          hide_empty_map: true
           disable_wheel: false
           gesture_handling: false
           fitbounds_options: '{"padding":[0,0]}'
@@ -953,8 +1527,8 @@ display:
         style: false
         row: false
         fields: false
-        filters: false
-        filter_groups: false
+        filters: true
+        filter_groups: true
       css_class: 'browse-content map'
       display_description: ''
       exposed_block: true
@@ -968,6 +1542,7 @@ display:
         - url.query_args
         - 'url.query_args:sort_by'
         - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:search_api.index.mukurtu_default_content_index'
         - 'search_api_list:mukurtu_default_content_index'
