@@ -1,0 +1,35 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - consent_popup
+  theme:
+    - mukurtu_v4
+id: mukurtu_v4_consentpopup
+theme: mukurtu_v4
+region: header
+weight: 0
+provider: null
+plugin: consent_popup
+settings:
+  label: 'Consent Popup'
+  label_display: visible
+  provider: consent_popup
+  en:
+    text: 'Are you an adult?'
+    text_decline: "You can't access this page"
+    accept: 'Yes'
+    decline: 'No'
+    decline_link:
+      decline_url: /
+      decline_url_text: 'Keep browsing our site'
+  non_blocking: 0
+  redirect: 0
+  cookie:
+    cookie_name: consent_popup
+    cookie_life: '7'
+  design:
+    color: '#000000'
+    color_opacity: '8'
+    blur: ''
+visibility: {  }
