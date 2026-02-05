@@ -91,12 +91,12 @@ mukurtu_core.my_account:
   parent: mukurtu_dashboard
   menu_name: dashboard-my-content
   route_name: user.page
-# mukurtu_core.entity.menu.edit_form:
-#   title: 'Manage main menu'
-#   description: 'Main navigation menu'
-#   parent: mukurtu_dashboard
-#   menu_name: dashboard-look-feel
-#   route_name: mukurtu_core.entity.menu.edit_form
+mukurtu_core.entity.menu.edit_form:
+  title: 'Main navigation menu'
+  description: 'Main navigation menu'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-look-feel
+  url: 'internal:/admin/structure/menu/manage/main'
 mukurtu_core.consent_popup:
   title: 'Configure consent popup'
   description: 'Configure consent popup'
