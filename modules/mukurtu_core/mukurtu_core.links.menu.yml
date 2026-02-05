@@ -97,9 +97,9 @@ mukurtu_core.my_account:
 #   parent: mukurtu_dashboard
 #   menu_name: dashboard-look-feel
 #   route_name: mukurtu_core.entity.menu.edit_form
-# mukurtu_core.consent_popup:
-#   title: 'Configure consent popup'
-#   description: 'COnfigure consent popup'
-#   parent: mukurtu_dashboard
-#   menu_name: dashboard-look-feel
-#   route_name: mukurtu_core.consent_popup
+mukurtu_core.consent_popup:
+  title: 'Configure consent popup'
+  description: 'Configure consent popup'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-look-feel
+  url: 'internal:/admin/structure/block/manage/mukurtu_v4_consentpopup'
