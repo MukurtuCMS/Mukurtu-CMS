@@ -33,9 +33,9 @@ class ImportBaseForm extends FormBase {
   /**
    * The Mukurtu import ID.
    *
-   * @var string
+   * @var ?string
    */
-  protected string $importId;
+  protected ?string $importId = NULL;
 
   /**
    * The metadata file weights.

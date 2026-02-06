@@ -324,35 +324,37 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    *
    * @param \Drupal\file\FileInterface $file
    *   The import input file.
-   * @return mixed
+   * @return array
    *   The migration definition array
    */
-  public function toDefinition(FileInterface $file) {
+  public function toDefinition(FileInterface $file): array {
     $mapping = $this->getMapping();
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
-    $idKey = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('id');
-    $uuidKey = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
+    $id_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('id');
+    $uuid_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
     $process = $this->getProcess();
 
     $ids = [];
     // Entity ID has priority.
-    if (!empty($process[$idKey])) {
-      $ids = array_filter(array_map(fn($v) => $v['target'] == $idKey ? $v['source'] : NULL, $mapping));
+    if (!empty($process[$id_key])) {
+      $ids = array_filter(array_map(fn($v) => $v['target'] == $id_key ? $v['source'] : NULL, $mapping));
     }
 
     // UUID has next priority.
-    if (empty($ids) && !empty($process[$uuidKey])) {
-      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuidKey ? $v['source'] : NULL, $mapping));
+    if (empty($ids) && !empty($process[$uuid_key])) {
+      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
     }
 
     // If we have no ID or UUID, use all input fields as the collective ID.
     // This will effectively make each row a unique item.
+    // @todo This has problems as not all field names are suitable for this
+    //   context.
     if (empty($ids)) {
       $ids = array_map(fn ($v) => $v['source'], $mapping);
     }
 
-    $definition = [
+    return [
       'id' => $this->getDefinitionId($file),
       'label' => $this->getDefinitionLabel($file),
       'source' => [
@@ -372,8 +374,6 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         'validate' => TRUE,
       ],
     ];
-
-    return $definition;
   }
 
   public function mappedFieldsCount(FileInterface $file) {
@@ -384,6 +384,19 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $diff = array_diff($fileHeaders, $mappingHeaders);
     $mappedCount = count($fileHeaders) - count($diff);
     return $mappedCount;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMappedTarget(string $source): ?string {
+    $mapping = $this->getMapping();
+    foreach ($mapping as $target) {
+      if ($target['source'] === $source) {
+        return $target['target'];
+      }
+    }
+    return NULL;
   }
 
 }

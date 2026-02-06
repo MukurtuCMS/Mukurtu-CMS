@@ -2,35 +2,23 @@
 
 namespace Drupal\mukurtu_import\Form;
 
-use Drupal\Component\Uuid\UuidInterface;
-use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\file\FileInterface;
-use Drupal\Core\TempStore\PrivateTempStoreFactory;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 
 /**
  * Provides a Mukurtu Import form.
  */
 class CustomStrategyFromFileForm extends ImportBaseForm {
-  protected $importConfig;
-  protected $importConfigLoaded;
 
   /**
-   * {@inheritdoc}
+   * Import configuration object managed by this form.
+   *
+   * @var \Drupal\mukurtu_import\MukurtuImportStrategyInterface
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info, UuidInterface $uuid){
-    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info, $uuid);
-
-    // Initializing importConfig with a fresh import config just to make my
-    // IDE happy... Loading the real config in buildForm where we have the
-    // file id.
-    $this->importConfig = $this->getImportConfig(-1);
-    $this->importConfigLoaded = FALSE;
-  }
+  protected MukurtuImportStrategyInterface $importConfig;
 
   /**
    * {@inheritdoc}
@@ -42,16 +30,12 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, FileInterface $file = NULL) {
-    // Handle the initial loading of the import config for this file.
-    if (!$this->importConfigLoaded) {
-      $this->importConfig = $this->getImportConfig($file->id());
-      $this->importConfigLoaded = TRUE;
-    }
-
-    if(!$file) {
+  public function buildForm(array $form, FormStateInterface $form_state, FileInterface $file = NULL): array {
+    $form = parent::buildForm($form, $form_state);
+    if (!$file instanceof FileInterface) {
       return $form;
     }
+    $this->importConfig = $this->getImportConfig($file->id());
 
     $form['fid'] = [
       '#type' => 'value',
@@ -150,9 +134,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
         ],
       ],
     ];
-    if ($this->importConfig->isNew()) {
-
-    }
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -216,11 +197,10 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       $form['mappings'][$delta]['source_title'] = [
         '#plain_text' => $header,
       ];
-
       $form['mappings'][$delta]['target'] = [
         '#type' => 'select',
         '#options' => $this->buildTargetOptions($entity_type_id, $bundle),
-        '#default_value' => $this->getAutoMappedTarget($header, $entity_type_id, $bundle),
+        '#default_value' => $this->importConfig->getMappedTarget($header) ?? $this->getAutoMappedTarget($header, $entity_type_id, $bundle),
         '#prefix' => "<div id=\"edit-mappings-{$delta}-target-options\">",
         '#suffix' => "</div>",
         '#validated' => TRUE,
