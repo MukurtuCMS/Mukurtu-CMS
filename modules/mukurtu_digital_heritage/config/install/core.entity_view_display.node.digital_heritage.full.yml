@@ -59,7 +59,6 @@ third_party_settings:
         - field_coverage_description
         - field_transcription
         - field_all_related_content
-        - field_citation
         - comment
       label: 'Primary Fields'
       parent_name: ''
@@ -140,6 +139,7 @@ third_party_settings:
         - field_rights_and_usage
         - field_creative_commons
         - field_rights_statements
+        - field_citation
       label: Rights
       parent_name: group_metadata
       region: content
