@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\mukurtu_import\Form\ImportBaseForm;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\file\FileInterface;
+use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 
 /**
  * Provides a Mukurtu Import form.
@@ -15,17 +19,17 @@ class ImportFileSummaryForm extends ImportBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'mukurtu_import_import_file_summary';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $this->refreshMetadataFilesImportConfig();
-    $metadataFileWeights = $this->getMetadataFileWeights();
-    $metadataFiles = array_keys($metadataFileWeights);
+    $metadata_file_weights = $this->getMetadataFileWeights();
+    $metadata_files = array_keys($metadata_file_weights);
 
     $form['all_files_ready'] = [
       '#type' => 'hidden',
@@ -59,30 +63,30 @@ class ImportFileSummaryForm extends ImportBaseForm {
       ],
     ];
 
-    foreach ($metadataFiles as $fid) {
+    foreach ($metadata_files as $fid) {
       $config = $this->getImportConfig($fid);
-      $configId = $config->id() ?? 'custom';
-      $metadataFile = $this->entityTypeManager->getStorage('file')->load($fid);
-      if (!$metadataFile) {
+      $config_id = $config->id() ?? 'custom';
+      $metadata_file = $this->entityTypeManager->getStorage('file')->load($fid);
+      if (!$metadata_file instanceof FileInterface) {
         continue;
       }
 
       $form['table'][$fid]['label'] = [
-        '#markup' => $metadataFile->label(),
+        '#markup' => $metadata_file->label(),
       ];
 
-      $typeMessage = $this->getTypeSummaryMessage($fid);
-      $mappedFieldMsg = $this->getMappedFieldsMessage($fid);
+      $type_message = $this->getTypeSummaryMessage($fid);
+      $mapped_field_msg = $this->getMappedFieldsMessage($fid);
       $form['table'][$fid]['#attributes']['class'][] = 'draggable';
       $form['table'][$fid]['mapping'] = [
         '#type' => 'select',
         '#options' => $this->getImportConfigOptions($fid),
-        '#default_value' => $configId,
+        '#default_value' => $config_id,
         '#ajax' => [
           'callback' => [$this, 'mappingChangeAjaxCallback'],
           'event' => 'change',
         ],
-        '#suffix' => "<div id=\"mapping-summary-{$fid}\"><div>{$typeMessage}</div><div>{$mappedFieldMsg}</div></div>",
+        '#suffix' => "<div id=\"mapping-summary-{$fid}\"><div>{$type_message}</div><div>{$mapped_field_msg}</div></div>",
       ];
 
       $form['table'][$fid]['edit'] = [
@@ -96,8 +100,8 @@ class ImportFileSummaryForm extends ImportBaseForm {
       $form['table'][$fid]['weight'] = [
         '#type' => 'weight',
         '#title_display' => 'invisible',
-        '#title' => $this->t('Weight for @title', ['@title' => $metadataFile->getFilename()]),
-        '#default_value' => $metadataFileWeights[$fid] ?? 0,
+        '#title' => $this->t('Weight for @title', ['@title' => $metadata_file->getFilename()]),
+        '#default_value' => $metadata_file_weights[$fid] ?? 0,
         '#attributes' => ['class' => ['file-order-weight']],
       ];
     }
@@ -127,48 +131,88 @@ class ImportFileSummaryForm extends ImportBaseForm {
     return $form;
   }
 
-  protected function getImportConfigOptions($fid) {
-    $file = $this->entityTypeManager->getStorage('file')->load($fid);
-
+  /**
+   * Gets available import configuration options for a file.
+   *
+   * Retrieves a list of import configurations that can be applied to the
+   * specified file. Always includes a 'Custom Settings' option as the default.
+   * Additionally loads all import strategy configurations owned by the current
+   * user and filters them to only include strategies that apply to the file.
+   *
+   * @param int $fid
+   *   The file ID to get import configuration options for.
+   *
+   * @return array
+   *   An associative array of import configuration options where keys are
+   *   configuration IDs (or 'custom' for custom settings) and values are
+   *   human-readable labels.
+   */
+  protected function getImportConfigOptions($fid): array {
     // Custom is always available and is the default.
-    $options = ['custom' => 'Custom Settings'];
+    $options = ['custom' => $this->t('Custom Settings')];
+
+    $file = $this->entityTypeManager->getStorage('file')->load($fid);
+    if (!$file instanceof FileInterface) {
+      return $options;
+    }
 
     // Get the user's available import configs.
-    $query = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->getQuery();
-    $result = $query
+    $storage = $this->entityTypeManager->getStorage('mukurtu_import_strategy');
+    $result = $storage->getQuery()
       ->condition('uid', $this->currentUser()->id())
-      ->accessCheck(TRUE)
+      ->accessCheck()
       ->execute();
 
     if (!empty($result)) {
-      $configs = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->loadMultiple($result);
+      $configs = $storage->loadMultiple($result);
       foreach ($configs as $config_id => $config) {
-        if ($config->applies($file)) {
-          $options[$config_id] = $config->getLabel();
+        if (!$config instanceof MukurtuImportStrategyInterface || !$config->applies($file)) {
+          continue;
         }
+        $options[$config_id] = $config->getLabel();
       }
     }
 
     return $options;
   }
 
-  protected function getTypeSummaryMessage($fid) {
+  /**
+   * Gets a summary message describing the entity type and bundle imported.
+   *
+   * Generates a human-readable message indicating which entity type and bundle
+   * will be created during the import process for the specified file.
+   *
+   * @param int $fid
+   *   The file ID to get the import type summary for.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   A translatable message describing the entity type and bundle being
+   *   imported, or just the entity type if no bundle is specified.
+   */
+  protected function getTypeSummaryMessage($fid): TranslatableMarkup {
     // Get the import config for this file.
-    $importConfig = $this->getImportConfig($fid);
-
-    $entity_type_id = $importConfig->getTargetEntityTypeId();
-    $entityLabel = $this->entityTypeManager->getDefinition($entity_type_id)->getLabel();
-    $bundle = $importConfig->getTargetBundle();
-    $bundleLabel = $this->entityBundleInfo->getBundleInfo($entity_type_id)[$bundle]['label'] ?? '';
+    $import_config = $this->getImportConfig($fid);
+    $entity_type_id = $import_config->getTargetEntityTypeId();
+    $entity_label = $this->entityTypeManager->getDefinition($entity_type_id)->getLabel();
+    $bundle = $import_config->getTargetBundle();
+    $bundle_label = $this->entityBundleInfo->getBundleInfo($entity_type_id)[$bundle]['label'] ?? '';
 
     if ($bundle) {
-      return $this->t('Importing @type: @bundle', ['@type' => $entityLabel, '@bundle' => $bundleLabel]);
+      return $this->t('Importing @type: @bundle', ['@type' => $entity_label, '@bundle' => $bundle_label]);
     }
-
-    return $this->t('Importing @type', ['@type' => $entityLabel]);
+    return $this->t('Importing @type', ['@type' => $entity_label]);
   }
 
-  protected function getMappedFieldsMessage($fid) {
+  /**
+   * Get a message describing how many fields were mapped for a file.
+   *
+   * @param int $fid
+   *   File id for the metadat file.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   A message describing how many fields were mapped for the file.
+   */
+  protected function getMappedFieldsMessage($fid): TranslatableMarkup {
     // Get the import config for this file.
     $importConfig = $this->getImportConfig($fid);
 
@@ -201,56 +245,72 @@ class ImportFileSummaryForm extends ImportBaseForm {
     ]);
   }
 
-  public function mappingChangeAjaxCallback(array &$form, FormStateInterface $form_state) {
+  /**
+   * Ajax callback for when the mapping configuration dropdown changes.
+   *
+   * Handles updating the import configuration when a user selects a different
+   * mapping option for a file. Updates the mapping summary message and the
+   * all files ready status via Ajax commands.
+   *
+   * @param array $form
+   *   The complete form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An Ajax response containing commands to update the mapping summary
+   *   and all files ready status.
+   */
+  public function mappingChangeAjaxCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
     $element = $form_state->getTriggeringElement();
     $fid = $element['#parents'][1] ?? NULL;
     $table = $form_state->getValue('table');
-    $newConfigId = $table[$fid]['mapping'] ?? 'custom';
-    $currentConfig = $this->getImportConfig($fid);
+    $new_config_id = $table[$fid]['mapping'] ?? 'custom';
+    $current_config = $this->getImportConfig($fid);
 
     // If the config has actually changed, save the new change.
-    if ($newConfigId != $currentConfig->id()) {
+    if ($new_config_id != $current_config->id()) {
       // Switching from non-custom to custom is a special case.
-      if ($newConfigId == 'custom') {
+      if ($new_config_id == 'custom') {
         // User switched from non-custom to custom. Duplicate the config
         // and blank out the title so it's a "fresh" custom config but
         // retains the field mapping/settings of the previously selected config.
-        $newConfig = $currentConfig->createDuplicate();
-        $newConfig->setLabel('');
-        $this->setImportConfig($fid, $newConfig);
-      } else {
+        $new_config = $current_config->createDuplicate();
+        $new_config->setLabel('');
+        $this->setImportConfig($fid, $new_config);
+      }
+      else {
         // A new import config has been selected.
-        /** @var \Drupal\mukurtu_import\MukurtuImportStrategyInterface */
-        $newConfig = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->load($newConfigId);
-        if ($newConfig) {
-          $this->setImportConfig($fid, $newConfig);
+        $new_config = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->load($new_config_id);
+        if ($new_config instanceof MukurtuImportStrategyInterface) {
+          $this->setImportConfig($fid, $new_config);
         }
       }
     }
 
-    $form_state->setRebuild(TRUE);
+    $form_state->setRebuild();
 
     // Update the field mapping message.
     $response = new AjaxResponse();
 
-    $typeMessage = $this->getTypeSummaryMessage($fid);
+    $type_message = $this->getTypeSummaryMessage($fid);
     // Check how many fields for this file we have mapped with the selected process.
     $msg = $this->getMappedFieldsMessage($fid);
-    $response->addCommand(new ReplaceCommand("#mapping-summary-{$fid}", "<div id=\"mapping-summary-{$fid}\"><div>{$typeMessage}</div><div>{$msg}</div></div>"));
+    $response->addCommand(new ReplaceCommand("#mapping-summary-{$fid}", "<div id=\"mapping-summary-{$fid}\"><div>{$type_message}</div><div>{$msg}</div></div>"));
 
     // Check if all files are valid enough to proceed with import.
-    $form['all_files_ready']['#value'] = $this->allFilesReady() ? "1" : "0";
-    $response->addCommand(new ReplaceCommand("#all-files-ready", $form['all_files_ready']));
+    $form['all_files_ready']['#value'] = $this->allFilesReady() ? '1' : '0';
+    $response->addCommand(new ReplaceCommand('#all-files-ready', $form['all_files_ready']));
     return $response;
   }
 
   /**
    * Check if all files are ready for import.
    *
-   * @return boolean
+   * @return bool
    *  TRUE if all files are ready, FALSE otherwise.
    */
-  protected function allFilesReady() {
+  protected function allFilesReady(): bool {
     $unready_fids = $this->getUnreadyFileIds();
     return empty($unready_fids);
   }
@@ -261,18 +321,17 @@ class ImportFileSummaryForm extends ImportBaseForm {
    * @return int[]
    *  The array of file IDs with incomplete config.
    */
-  protected function getUnreadyFileIds() {
+  protected function getUnreadyFileIds(): array {
     $unready_fids = [];
-    $metadataFiles = $this->getMetadataFiles();
-    foreach ($metadataFiles as $fid) {
+    $metadata_files = $this->getMetadataFiles();
+    foreach ($metadata_files as $fid) {
       $config = $this->getImportConfig($fid);
-      /** @var \Drupal\file\FileInterface */
-      $metadataFile = $this->entityTypeManager->getStorage('file')->load($fid);
-      if (!$metadataFile) {
+      $metadata_file = $this->entityTypeManager->getStorage('file')->load($fid);
+      if (!$metadata_file instanceof FileInterface) {
         continue;
       }
 
-      if ($config->mappedFieldsCount($metadataFile) == 0) {
+      if ($config->mappedFieldsCount($metadata_file) == 0) {
         $unready_fids[] = $fid;
       }
     }
@@ -282,7 +341,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
     $triggering_element = $form_state->getTriggeringElement();
 
     if ($triggering_element['#type'] == 'submit') {
@@ -304,11 +363,33 @@ class ImportFileSummaryForm extends ImportBaseForm {
     }
   }
 
-  public function submitBack(array &$form, FormStateInterface $form_state) {
+  /**
+   * Form submission handler for the "Back" button.
+   *
+   * Redirects the user back to the file upload step of the import workflow.
+   *
+   * @param array $form
+   *   The complete form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public function submitBack(array &$form, FormStateInterface $form_state): void {
     $form_state->setRedirect('mukurtu_import.file_upload');
   }
 
-  public function defineCustomMapping(array &$form, FormStateInterface $form_state) {
+  /**
+   * Form submission handler for the "Customize Settings" button.
+   *
+   * Redirects the user to the custom strategy configuration form for the
+   * selected file. Extracts the file ID from the triggering element and
+   * passes it to the custom strategy form route.
+   *
+   * @param array $form
+   *   The complete form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public function defineCustomMapping(array &$form, FormStateInterface $form_state): void {
     // Get the file ID.
     $element = $form_state->getTriggeringElement();
     $fid = $element['#parents'][1] ?? NULL;
@@ -321,10 +402,10 @@ class ImportFileSummaryForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    parent::submitForm($form, $form_state);
     $table = $form_state->getValue('table');
     $weights = array_combine(array_keys($table), array_column($table, 'weight'));
     $this->setMetadataFileWeights($weights);
-
     $form_state->setRedirect('mukurtu_import.execute_import');
   }
 
