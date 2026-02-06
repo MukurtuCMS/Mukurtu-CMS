@@ -23,4 +23,15 @@ interface MukurtuImportStrategyInterface extends ConfigEntityInterface, EntityOw
   public function applies(FileInterface $file);
   public function toDefinition(FileInterface $file);
   public function mappedFieldsCount(FileInterface $file);
+
+  /**
+   * Get the mapped target field name for a given source column.
+   *
+   * @param string $source
+   *   The source column name from the CSV file.
+   *
+   * @return string|null
+   *   The target field name if a mapping exists, NULL otherwise.
+   */
+  public function getMappedTarget(string $source): ?string;
 }
