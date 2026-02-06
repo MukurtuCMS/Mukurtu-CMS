@@ -119,6 +119,7 @@
             <div class="sidebar-section">
               {{ content.community_protocol_list }}
               {{ content.group_metadata|without('flag_export_content') }}
+              {{ content.group_primary_fields.field_citation }}
               <div class="field">
                 <div class="field__label">{{ "Name"|t }}</div>
                 <div class="field__item">{{ node.label() }}</div>
