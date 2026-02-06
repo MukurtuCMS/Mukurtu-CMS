@@ -53,6 +53,7 @@ third_party_settings:
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
         - flag_export_content
+        - field_citation
       label: Metadata
       parent_name: ''
       region: content
@@ -258,9 +259,15 @@ content:
     third_party_settings: {  }
     weight: 20
     region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
+    region: content
 hidden:
   draft: true
-  field_citation: true
   field_communities: true
   field_content_type: true
   field_cultural_protocols: true
