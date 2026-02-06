@@ -109,7 +109,7 @@
           {% elseif carousels == false  %}
             {{ content.group_primary_fields.group_additional_fields }}
           {% else %}
-            {{ content.group_primary_fields.group_additional_fields|without('field_media_assets') }}
+            {{ content.group_primary_fields.group_additional_fields|without('field_media_assets', 'field_citation') }}
           {% endif %}
 
         </div>
