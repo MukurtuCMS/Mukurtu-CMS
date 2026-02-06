@@ -346,12 +346,11 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
     }
 
-    // If we have no ID or UUID, use all input fields as the collective ID.
-    // This will effectively make each row a unique item.
-    // @todo This has problems as not all field names are suitable for this
-    //   context.
+    // If we have no ID or UUID, fallback to _row_hash, which is automatically
+    // setup in hook_migrate_prepare_row.
+    // @see \Drupal\mukurtu_import\Hook\MukurtuImportHooks::migratePrepareRow
     if (empty($ids)) {
-      $ids = array_map(fn ($v) => $v['source'], $mapping);
+      $ids[] = '_row_hash';
     }
 
     return [
