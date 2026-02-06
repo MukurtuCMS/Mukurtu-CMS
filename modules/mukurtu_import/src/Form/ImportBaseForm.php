@@ -2,9 +2,11 @@
 
 namespace Drupal\mukurtu_import\Form;
 
+use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\TempStore\PrivateTempStore;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,65 +22,70 @@ use Drupal\Core\Session\AccountInterface;
  * Provides a Mukurtu Import form.
  */
 class ImportBaseForm extends FormBase {
-  /**
-   * @var \Drupal\Core\TempStore\PrivateTempStoreFactory
-   */
-  protected $tempStoreFactory;
 
   /**
+   * The private temporary storage.
+   *
    * @var \Drupal\Core\TempStore\PrivateTempStore
    */
-  protected $store;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-
-  /**
-   * The entity type bundle info service.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
-   */
-  protected $entityBundleInfo;
-
-  /**
-   * The entity field manager service.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected $entityFieldManager;
-  protected $metadataFileWeights;
-  protected $metadataFilesImportConfig;
+  protected PrivateTempStore $store;
 
   /**
    * The Mukurtu import ID.
    *
-   * @var string
+   * @var ?string
    */
-  protected $importId;
-
-  protected $fieldDefinitions;
+  protected ?string $importId = NULL;
 
   /**
-   * {@inheritdoc}
+   * The metadata file weights.
+   *
+   * @var array
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info) {
-    $this->tempStoreFactory = $temp_store_factory;
-    $this->store = $this->tempStoreFactory->get('mukurtu_import');
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityFieldManager = $entity_field_manager;
-    $this->entityBundleInfo = $entity_bundle_info;
-    $import_id = $this->store->get('import_id');
-    if (empty($import_id)) {
+  protected array $metadataFileWeights;
+
+  /**
+   * The metadata files import config.
+   *
+   * @var array
+   */
+  protected array $metadataFilesImportConfig;
+
+  /**
+   * The field definitions.
+   *
+   * @var \Drupal\Core\Field\FieldDefinitionInterface[]
+   */
+  protected array $fieldDefinitions;
+
+  /**
+   * Constructs an ImportBaseForm object.
+   *
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempStoreFactory
+   *   The private temporary storage factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
+   *   The entity field manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityBundleInfo
+   *   The entity type bundle info service.
+   * @param \Drupal\Component\Uuid\UuidInterface $uuid
+   *   The UUID service.
+   */
+  public function __construct(
+    protected PrivateTempStoreFactory $tempStoreFactory,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected EntityFieldManagerInterface $entityFieldManager,
+    protected EntityTypeBundleInfoInterface $entityBundleInfo,
+    protected UuidInterface $uuid,
+  ) {
+    $this->store = $tempStoreFactory->get('mukurtu_import');
+    $this->importId = $this->store->get('import_id');
+    if (empty($this->importId)) {
       $this->reset();
-      $import_id = \Drupal::service('uuid')->generate();
-      $this->store->set('import_id', $import_id);
+      $this->importId = $uuid->generate();
+      $this->store->set('import_id', $this->importId);
     }
-    $this->importId = $import_id;
     $this->refreshMetadataFilesImportConfig();
     $this->metadataFileWeights = $this->store->get('metadata_file_weights') ?? [];
   }
@@ -92,6 +99,7 @@ class ImportBaseForm extends FormBase {
       $container->get('entity_type.manager'),
       $container->get('entity_field.manager'),
       $container->get('entity_type.bundle.info'),
+      $container->get('uuid'),
     );
   }
 
@@ -144,24 +152,43 @@ class ImportBaseForm extends FormBase {
   /**
    * Load the import config from the private store.
    *
-   * This is a silly state management hack. Because of the ajax requests,
+   * This is a silly state management hack. Because of the AJAX requests,
    * the local object variable metadataFilesImportConfig can become out of
    * sync with the "real" current value. The correct way to handle this is
    * probably to remove the object variable completely and have the getter and
    * setter only deal with the private store.
    */
-  public function refreshMetadataFilesImportConfig() {
+  public function refreshMetadataFilesImportConfig(): void {
     $this->metadataFilesImportConfig = $this->store->get('import_config');
   }
 
-  public function getMetadataFiles() {
+  /**
+   * Get all metadata files for the current import.
+   *
+   * Retrieves file entity IDs for all files stored in the metadata upload
+   * location for this import session.
+   *
+   * @return int[]
+   *   An array of file entity IDs (fid) for metadata files.
+   */
+  public function getMetadataFiles(): array {
     $query = $this->entityTypeManager->getStorage('file')->getQuery();
     return $query->condition('uri', $this->getMetadataUploadLocation(), 'STARTS_WITH')
-      ->accessCheck(TRUE)
+      ->accessCheck()
       ->execute();
   }
 
-  public function getMetadataFileWeights() {
+  /**
+   * Get the metadata file weights.
+   *
+   * Retrieves the weights assigned to metadata files, removing any weights
+   * for files that no longer exist, and returns them sorted by weight.
+   *
+   * @return array
+   *   An associative array of file IDs (fid) as keys and their weights as
+   *   values, sorted in ascending order by weight.
+   */
+  public function getMetadataFileWeights(): array {
     $fids = $this->getMetadataFiles();
     $weights = $this->metadataFileWeights;
     // Remove any weights for files that no longer exist.
@@ -174,7 +201,14 @@ class ImportBaseForm extends FormBase {
     return $weights;
   }
 
-  public function setMetadataFileWeights($weights) {
+  /**
+   * Set the metadata file weights.
+   *
+   * @param array $weights
+   *   An associative array of file IDs (fid) as keys and their weights as
+   *   values.
+   */
+  public function setMetadataFileWeights(array $weights): void {
     $this->metadataFileWeights = $weights;
     $this->store->set('metadata_file_weights', $weights);
   }
@@ -199,7 +233,13 @@ class ImportBaseForm extends FormBase {
     return "private://{$this->getImportId()}/files/";
   }
 
-  public function getMetadataUploadLocation() {
+  /**
+   * Get the metadata upload location for the current import.
+   *
+   * @return string
+   *   The metadata upload location.
+   */
+  public function getMetadataUploadLocation(): string {
     return "private://{$this->getImportId()}/metadata/";
   }
 
@@ -298,16 +338,16 @@ class ImportBaseForm extends FormBase {
    * @return \Drupal\mukurtu_import\MukurtuImportStrategyInterface
    *   The import config.
    */
-  public function getImportConfig($fid) {
+  public function getImportConfig($fid): MukurtuImportStrategyInterface {
     $this->refreshMetadataFilesImportConfig();
-    $exitingConfigEntity = $this->metadataFilesImportConfig[(int) $fid] ?? NULL;
-    if ($exitingConfigEntity) {
-      return $exitingConfigEntity;
+    $exiting_config_entity = $this->metadataFilesImportConfig[(int) $fid] ?? NULL;
+    if ($exiting_config_entity) {
+      return $exiting_config_entity;
     }
 
-    $newConfigEntity = MukurtuImportStrategy::create(['uid' => $this->currentUser()->id()]);
-    $this->setImportConfig($fid, $newConfigEntity);
-    return $newConfigEntity;
+    $new_config_entity = MukurtuImportStrategy::create(['uid' => $this->currentUser()->id()]);
+    $this->setImportConfig($fid, $new_config_entity);
+    return $new_config_entity;
   }
 
   public function getMessages() {
