@@ -49,7 +49,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#default_value' => $this->getMetadataFiles(),
       '#upload_location' => $this->getMetadataUploadLocation(),
       '#upload_validators' => [
-        'file_validate_extensions' => ['csv'],
+        'FileExtension' => ['extensions' => 'csv'],
       ],
       '#attributes' => [
         'name' => 'import_file_upload',
@@ -64,9 +64,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#multiple' => TRUE,
       '#default_value' => $this->getBinaryFiles(),
       '#upload_location' => $this->getBinaryUploadLocation(),
-      '#upload_validators' => [
-        'file_validate_extensions' => [],
-      ],
+      '#upload_validators' => [],
       '#attributes' => [
         'name' => 'import_file_upload',
       ],
