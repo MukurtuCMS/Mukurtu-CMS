@@ -264,11 +264,19 @@ class MukurtuImportTestBase extends MigrateTestBase {
 
     // Run the import.
     $message = new MigrateMessage();
-    $migration = \Drupal::getContainer()->get('plugin.manager.migration')->createStubMigration($definition);
-    $time = \Drupal::getContainer()->get('datetime.time');
-    $translation = \Drupal::getContainer()->get('string_translation');
-    $migrationPluginManager = \Drupal::service('plugin.manager.migration');
-    $executable = new ImportBatchExecutable($migration, $message, $this->keyValue, $time, $translation, $migrationPluginManager, []);
+    $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
+    $migration = $migration_plugin_manager->createStubMigration($definition);
+    $time = \Drupal::service('datetime.time');
+    $translation = \Drupal::service('string_translation');
+    $executable = new ImportBatchExecutable(
+      $migration,
+      $message,
+      $this->keyValue,
+      $time,
+      $translation,
+      $migration_plugin_manager,
+      [],
+    );
     return $executable->import();
   }
 
