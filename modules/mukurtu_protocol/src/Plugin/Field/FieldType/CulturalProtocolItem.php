@@ -169,7 +169,7 @@ class CulturalProtocolItem extends FieldItemBase {
   public static function formatProtocols($value) {
     if (is_array($value)) {
       sort($value, SORT_NUMERIC);
-      return implode(',', array_map(fn($p) => "|$p|", array_map('trim', $value)));
+      return implode(',', array_map(fn($p) => "|$p|", array_map('trim', array_filter($value))));
     }
     return $value;
   }
