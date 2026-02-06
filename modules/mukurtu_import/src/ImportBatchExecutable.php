@@ -67,12 +67,21 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     }
     $message = new MigrateMessage();
 
-    $migration = \Drupal::getContainer()->get('plugin.manager.migration')->createStubMigration($migration_definition);
+    $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
+    $migration = $migration_plugin_manager->createStubMigration($migration_definition);
     unset($options['configuration']);
     if (!empty($options['limit']) && isset($context['results'][$migration->id()]['@numitems'])) {
       $options['limit'] -= $context['results'][$migration->id()]['@numitems'];
     }
-    $executable = new ImportBatchExecutable($migration, $message, $options);
+    $executable = new ImportBatchExecutable(
+      $migration,
+      $message,
+      \Drupal::service('keyvalue'),
+      \Drupal::time(),
+      \Drupal::translation(),
+      $migration_plugin_manager,
+      $options,
+    );
     if (empty($context['sandbox']['total'])) {
       $context['sandbox']['total'] = $executable->getSource()->count();
       $context['sandbox']['batch_limit'] = $executable->calculateBatchLimit($context);
@@ -141,11 +150,11 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     $store->set('batch_results_success', $success);
 
     $messages = [];
-    $exceptionFid = NULL;
+    $exception_fid = NULL;
 
     // Find our failure point.
     foreach (array_keys($results) as $migration_id) {
-      if ($migration_id == 'message') {
+      if ($migration_id === 'message') {
         continue;
       }
 
@@ -153,9 +162,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         preg_match('/^\d+__(\d+)__.*/', $migration_id, $matches);
         $fid = $matches[1] ?? NULL;
         if ($fid) {
-          /** @var \Drupal\file\FileInterface $file */
-          if ($file = \Drupal::entityTypeManager()->getStorage('file')->load(intval($fid))) {
-            $exceptionFid = $fid;
+          $storage = \Drupal::entityTypeManager()->getStorage('file');
+          if ($storage->load(intval($fid))) {
+            $exception_fid = $fid;
           }
         }
       }
@@ -163,10 +172,11 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
 
     // Tag the error messages with the fid so we can display it next to the
     // file later.
-    foreach ($results['messages'] as $rawMessage) {
-      $source_id = $rawMessage->src_ID ?? NULL;
-      $message = $source_id ? t("Problem with ID @source_id: @message", ['@source_id' => $source_id, '@message' => $rawMessage->message]) : $rawMessage->message;
-      $messages[] = ['fid' => $exceptionFid ?? NULL, 'message' => $message];
+    $raw_messages = $results['messages'] ?? [];
+    foreach ($raw_messages as $raw_message) {
+      $source_id = $raw_message->src_ID ?? NULL;
+      $message = $source_id ? t("Problem with ID @source_id: @message", ['@source_id' => $source_id, '@message' => $raw_message->message]) : $raw_message->message;
+      $messages[] = ['fid' => $exception_fid ?? NULL, 'message' => $message];
     }
     $store->set('batch_results_messages', $messages);
   }
