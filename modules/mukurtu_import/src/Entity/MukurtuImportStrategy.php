@@ -346,11 +346,11 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
     }
 
-    // If we have no ID or UUID, fallback to _row_hash, which is automatically
-    // setup in hook_migrate_prepare_row.
-    // @see \Drupal\mukurtu_import\Hook\MukurtuImportHooks::migratePrepareRow
+    // If we have no ID or UUID, fallback to _record_number, which is setup
+    // by the csv source plugin using the create_record_number and
+    // record_number_field properties.
     if (empty($ids)) {
-      $ids[] = '_row_hash';
+      $ids[] = '_record_number';
     }
 
     return [
@@ -364,6 +364,8 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         'enclosure' => $this->getConfig('enclosure') ?? '"',
         'escape' => $this->getConfig('escape') ?? '\\',
         'track_changes' => TRUE,
+        'create_record_number' => TRUE,
+        'record_number_field' => '_record_number',
       ],
       'process' => $process,
       'destination' => [
