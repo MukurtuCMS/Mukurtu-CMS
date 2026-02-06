@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_import\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
@@ -65,7 +66,7 @@ class ImportBaseForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info) {
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info) {
     $this->tempStoreFactory = $temp_store_factory;
     $this->store = $this->tempStoreFactory->get('mukurtu_import');
     $this->entityTypeManager = $entity_type_manager;

@@ -223,6 +223,10 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return $this->getOwnerId() . "__" . $file->id() . "__" . $this->getTargetEntityTypeId() . "__" . $this->getTargetBundle();
   }
 
+  protected function getDefinitionLabel(FileInterface $file) {
+    return sprintf('%s - %s', $this->label(), $file->getFilename());
+  }
+
   protected function getFieldDefinitions($entity_type_id, $bundle = NULL) {
     if ($bundle) {
       return \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
@@ -255,7 +259,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $target = $targets[0];
       $subtarget = NULL;
       if (count($targets) > 1) {
-        list($target, $subtarget) = $targets;
+        [$target, $subtarget] = $targets;
       }
 
 
@@ -350,6 +354,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
     $definition = [
       'id' => $this->getDefinitionId($file),
+      'label' => $this->getDefinitionLabel($file),
       'source' => [
         'plugin' => 'csv',
         'path' => $file->getFileUri(),
