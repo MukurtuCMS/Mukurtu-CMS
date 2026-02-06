@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -43,12 +46,13 @@ class ExecuteImportForm extends ImportBaseForm {
     EntityTypeManagerInterface $entity_type_manager,
     EntityFieldManagerInterface $entity_field_manager,
     EntityTypeBundleInfoInterface $entity_bundle_info,
+    UuidInterface $uuid,
     protected MigrationPluginManagerInterface $migrationPluginManager,
     protected KeyValueFactoryInterface $keyValue,
     protected TimeInterface $time,
     protected TranslationInterface $translation,
   ) {
-    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info);
+    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info, $uuid);
   }
 
   /**
@@ -60,6 +64,7 @@ class ExecuteImportForm extends ImportBaseForm {
       $container->get('entity_type.manager'),
       $container->get('entity_field.manager'),
       $container->get('entity_type.bundle.info'),
+      $container->get('uuid'),
       $container->get('plugin.manager.migration'),
       $container->get('keyvalue'),
       $container->get('datetime.time'),

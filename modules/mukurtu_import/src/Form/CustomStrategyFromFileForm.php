@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_import\Form;
 
+use Drupal\Component\Uuid\UuidInterface;
 use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
@@ -21,8 +22,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info){
-    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info);
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info, UuidInterface $uuid){
+    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info, $uuid);
 
     // Initializing importConfig with a fresh import config just to make my
     // IDE happy... Loading the real config in buildForm where we have the
@@ -34,7 +35,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'mukurtu_import_custom_strategy_from_file';
   }
 
