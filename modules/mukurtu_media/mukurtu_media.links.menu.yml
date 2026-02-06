@@ -10,3 +10,9 @@ mukurtu_media.add_media_dashboard:
   parent: mukurtu_dashboard
   menu_name: dashboard-media
   route_name: entity.media.add_page
+mukurtu_media.manage_media_tags_dashboard:
+  title: 'Manage media tags'
+  description: 'Manage media tags'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-media
+  url: 'internal:/admin/structure/taxonomy/manage/media_tag/overview'
