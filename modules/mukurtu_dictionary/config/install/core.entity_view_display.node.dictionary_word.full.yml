@@ -124,7 +124,6 @@ third_party_settings:
         - field_coverage
         - field_location
         - field_coverage_description
-        - field_citation
         - field_related_content
       label: 'Additional Information'
       parent_name: group_primary_fields
