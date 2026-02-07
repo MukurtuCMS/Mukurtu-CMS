@@ -2,23 +2,20 @@
 
 namespace Drupal\mukurtu_import\Plugin\MukurtuImportFieldProcess;
 
-use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginBase;
-use Drupal\mukurtu_import\Plugin\MukurtuImportFieldProcess\EntityReference;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_import\Attribute\MukurtuImportFieldProcess;
 use Drupal\Core\Field\FieldDefinitionInterface;
 
 /**
  * Plugin implementation of the mukurtu_import_field_process.
- *
- * @MukurtuImportFieldProcess(
- *   id = "entity_reference_revisions",
- *   label = @Translation("Entity Reference Revisions"),
- *   field_types = {
- *     "entity_reference_revisions",
- *   },
- *   weight = 0,
- *   description = @Translation("Entity Reference Revisions.")
- * )
  */
+#[MukurtuImportFieldProcess(
+  id: 'entity_reference_revisions',
+  label: new TranslatableMarkup('Entity Reference Revisions'),
+  description: new TranslatableMarkup('Entity Reference Revisions.'),
+  field_types: ['entity_reference_revisions'],
+  weight: 0,
+)]
 class EntityReferenceRevisions extends EntityReference {
   /**
    * {@inheritdoc}

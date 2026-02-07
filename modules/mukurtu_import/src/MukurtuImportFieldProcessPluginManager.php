@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_import;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\mukurtu_import\Attribute\MukurtuImportFieldProcess;
 
 /**
  * MukurtuImportFieldProcess plugin manager.
@@ -27,8 +28,8 @@ class MukurtuImportFieldProcessPluginManager extends DefaultPluginManager {
       'Plugin/MukurtuImportFieldProcess',
       $namespaces,
       $module_handler,
-      'Drupal\mukurtu_import\MukurtuImportFieldProcessInterface',
-      'Drupal\mukurtu_import\Annotation\MukurtuImportFieldProcess'
+      MukurtuImportFieldProcessInterface::class,
+      MukurtuImportFieldProcess::class
     );
     $this->alterInfo('mukurtu_import_field_process_info');
     $this->setCacheBackend($cache_backend, 'mukurtu_import_field_process_plugins');

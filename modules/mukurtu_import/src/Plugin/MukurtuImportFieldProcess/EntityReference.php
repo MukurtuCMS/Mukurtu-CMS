@@ -3,21 +3,20 @@
 namespace Drupal\mukurtu_import\Plugin\MukurtuImportFieldProcess;
 
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginBase;
+use Drupal\mukurtu_import\Attribute\MukurtuImportFieldProcess;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the mukurtu_import_field_process.
- *
- * @MukurtuImportFieldProcess(
- *   id = "entity_reference",
- *   label = @Translation("Entity Reference"),
- *   field_types = {
- *     "entity_reference",
- *   },
- *   weight = 0,
- *   description = @Translation("Entity Reference.")
- * )
  */
+#[MukurtuImportFieldProcess(
+  id: 'entity_reference',
+  label: new TranslatableMarkup('Entity Reference'),
+  description: new TranslatableMarkup('Entity Reference.'),
+  field_types: ['entity_reference'],
+  weight: 0,
+)]
 class EntityReference extends MukurtuImportFieldProcessPluginBase {
   /**
    * {@inheritdoc}

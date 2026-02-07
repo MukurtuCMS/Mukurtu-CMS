@@ -3,6 +3,9 @@
 namespace Drupal\mukurtu_import\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\mukurtu_import\MukurtuImportFieldProcessInterface;
+use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Drupal\user\UserInterface;
 use Drupal\file\FileInterface;
@@ -240,21 +243,21 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $mapping = $this->getMapping();
 
     // Get the field definitions for the target.
-    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
 
-    /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $manager */
     $manager = \Drupal::service('plugin.manager.mukurtu_import_field_process');
+    assert($manager instanceof MukurtuImportFieldProcessPluginManager);
 
     // This will cause collisions if there are dupes. Do we care?
-    $importProcess = array_combine(array_column($mapping, 'target'), array_column($mapping, 'source'));
+    $import_process = array_combine(array_column($mapping, 'target'), array_column($mapping, 'source'));
 
     // Remove ignored mappings. This depends on the above dupe collision behavior.
-    if (isset($importProcess['-1'])) {
-      unset($importProcess['-1']);
+    if (isset($import_process['-1'])) {
+      unset($import_process['-1']);
     }
 
     // @todo Add process plugins as appropriate for the target field type.
-    foreach ($importProcess as $target_option => $source) {
+    foreach ($import_process as $target_option => $source) {
       $targets = explode('/', $target_option, 2);
       $target = $targets[0];
       $subtarget = NULL;
@@ -262,26 +265,26 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         [$target, $subtarget] = $targets;
       }
 
-
-      /** @var \Drupal\field\FieldConfigInterface $fieldDef */
-      $fieldDef = $fieldDefs[$target] ?? NULL;
-      if (!$fieldDef) {
+      $field_def = $field_defs[$target] ?? NULL;
+      if (!$field_def instanceof FieldDefinitionInterface) {
         continue;
       }
 
-      /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessInterface $processPlugin */
-      if ($processPlugin = $manager->getInstance(['field_definition' => $fieldDef])) {
-        $context = [];
-        $context['multivalue_delimiter'] = $this->getConfig('multivalue_delimiter') ?? ';';
-        $context['upload_location'] = $this->getConfig('upload_location') ?? NULL;
-        if ($subtarget) {
-          $context['subfield'] = $subtarget;
-        }
-        $importProcess[$target_option] = $processPlugin->getProcess($fieldDef, $source, $context);
+      /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessInterface $process_plugin */
+      $process_plugin = $manager->getInstance(['field_definition' => $field_def]);
+      if (!$process_plugin instanceof MukurtuImportFieldProcessInterface) {
+        continue;
       }
+      $context = [];
+      $context['multivalue_delimiter'] = $this->getConfig('multivalue_delimiter') ?? ';';
+      $context['upload_location'] = $this->getConfig('upload_location') ?? NULL;
+      if ($subtarget) {
+        $context['subfield'] = $subtarget;
+      }
+      $import_process[$target_option] = $process_plugin->getProcess($field_def, $source, $context);
     }
 
-    return $importProcess;
+    return $import_process;
   }
 
   /**
