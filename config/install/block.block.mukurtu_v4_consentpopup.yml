@@ -1,5 +1,5 @@
 langcode: en
-status: true
+status: false
 dependencies:
   module:
     - consent_popup
@@ -12,17 +12,17 @@ weight: 0
 provider: null
 plugin: consent_popup
 settings:
-  label: 'Consent Popup'
+  label: 'Appropriate Site Use'
   label_display: visible
   provider: consent_popup
   en:
-    text: 'Are you an adult?'
-    text_decline: "You can't access this page"
+    text: 'Do you agree to the protocols and terms of use?'
+    text_decline: "Accepting the protocols and terms of use are required to access this site."
     accept: 'Yes'
     decline: 'No'
     decline_link:
       decline_url: /
-      decline_url_text: 'Keep browsing our site'
+      decline_url_text: 'Review the protocols and terms of use.'
   non_blocking: 0
   redirect: 0
   cookie:
