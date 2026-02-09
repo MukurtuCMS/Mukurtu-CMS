@@ -76,6 +76,7 @@ third_party_settings:
         - field_communities
         - field_cultural_protocols
         - field_source
+        - field_citation
       label: 'Sidebar - Mukurtu fields'
       parent_name: group_metadata
       region: content
@@ -341,10 +342,16 @@ content:
     third_party_settings: {  }
     weight: 5
     region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
+    region: content
 hidden:
   draft: true
   field_child_collections: true
-  field_citation: true
   field_collection_type: true
   field_content_type: true
   field_in_collection: true

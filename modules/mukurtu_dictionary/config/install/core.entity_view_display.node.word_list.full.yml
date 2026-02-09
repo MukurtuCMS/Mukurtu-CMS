@@ -232,11 +232,17 @@ content:
     third_party_settings: {  }
     weight: 8
     region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
+    region: content
 hidden:
   comment: true
   draft: true
   field_all_related_content: true
-  field_citation: true
   field_communities: true
   field_cultural_protocols: true
   field_in_collection: true
