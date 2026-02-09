@@ -12,7 +12,7 @@ weight: 0
 provider: null
 plugin: consent_popup
 settings:
-  label: 'Appropriate Site Use'
+  label: 'Consent Popup'
   label_display: visible
   provider: consent_popup
   en:
