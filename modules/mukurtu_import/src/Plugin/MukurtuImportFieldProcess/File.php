@@ -3,21 +3,20 @@
 namespace Drupal\mukurtu_import\Plugin\MukurtuImportFieldProcess;
 
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginBase;
+use Drupal\mukurtu_import\Attribute\MukurtuImportFieldProcess;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the mukurtu_import_field_process.
- *
- * @MukurtuImportFieldProcess(
- *   id = "file",
- *   label = @Translation("File"),
- *   field_types = {
- *     "file",
- *   },
- *   weight = 0,
- *   description = @Translation("File.")
- * )
  */
+#[MukurtuImportFieldProcess(
+  id: 'file',
+  label: new TranslatableMarkup('File'),
+  description: new TranslatableMarkup('File.'),
+  field_types: ['file'],
+  weight: 0,
+)]
 class File extends MukurtuImportFieldProcessPluginBase {
 
   /**
