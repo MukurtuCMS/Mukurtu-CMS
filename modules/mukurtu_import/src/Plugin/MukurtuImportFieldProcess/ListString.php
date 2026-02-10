@@ -3,21 +3,20 @@
 namespace Drupal\mukurtu_import\Plugin\MukurtuImportFieldProcess;
 
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginBase;
+use Drupal\mukurtu_import\Attribute\MukurtuImportFieldProcess;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the mukurtu_import_field_process.
- *
- * @MukurtuImportFieldProcess(
- *   id = "list_string",
- *   label = @Translation("List String"),
- *   field_types = {
- *     "list_string",
- *   },
- *   weight = 0,
- *   description = @Translation("List String.")
- * )
  */
+#[MukurtuImportFieldProcess(
+  id: 'list_string',
+  label: new TranslatableMarkup('List String'),
+  description: new TranslatableMarkup('List String.'),
+  field_types: ['list_string'],
+  weight: 0,
+)]
 class ListString extends MukurtuImportFieldProcessPluginBase {
   /**
    * {@inheritdoc}
