@@ -6,6 +6,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\file\FileInterface;
+use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 
 /**
@@ -108,7 +109,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       '#title' => $this->t('Multi-value Delimiter'),
       '#default_value' => $this->importConfig->getConfig('multivalue_delimiter') ?? ';',
     ];
-
+    $form['file_settings']['default_format'] = [
+      '#type' => 'select',
+      '#required' => TRUE,
+      '#title' => $this->t('Default Text Format'),
+      '#options' => $this->getTextFormatOptions(),
+      '#default_value' => $this->importConfig->getConfig('default_format') ?? MukurtuImportStrategy::DEFAULT_FORMAT,
+    ];
 
     // Provide an option to save this config for reuse.
     $form['import_config'] = [
@@ -150,6 +157,19 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     return $form;
+  }
+
+  /**
+   * Get the options array for available text formats.
+   *
+   * @return array
+   *   An array of text format labels indexed by format ID.
+   */
+  protected function getTextFormatOptions(): array {
+    $formats = filter_formats();
+    return array_map(function($format) {
+      return $format->label();
+    }, $formats);
   }
 
   /**
@@ -349,6 +369,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $this->importConfig->setConfig('enclosure', $form_state->getValue('enclosure'));
     $this->importConfig->setConfig('escape', $form_state->getValue('escape'));
     $this->importConfig->setConfig('multivalue_delimiter', $form_state->getValue('multivalue_delimiter'));
+    $this->importConfig->setConfig('default_format', $form_state->getValue('default_format'));
 
     if ($form_state->getValue('config_save')) {
       $userProvidedLabel = $form_state->getValue('config_title');

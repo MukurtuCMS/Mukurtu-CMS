@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_import\Plugin\MukurtuImportFieldProcess;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_import\Attribute\MukurtuImportFieldProcess;
+use Drupal\mukurtu_import\FormattedTextProcessCallback;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginBase;
 
 /**
@@ -39,24 +40,10 @@ class FormattedText extends MukurtuImportFieldProcessPluginBase {
     }
     $process[] = [
       'plugin' => 'callback',
-      'callable' => [static::class, 'formattedTextValueFormat'],
+      'callable' => new FormattedTextProcessCallback($context),
     ];
     $process[0]['source'] = $source;
     return $process;
   }
 
-  /**
-   * Formats a text value for a formatted text field.
-   *
-   * @param string $value
-   *   The text value to format.
-   *
-   * @return array
-   *   An array with 'value' and 'format' keys.
-   */
-  public static function formattedTextValueFormat(string $value): array {
-    // @todo We will probably want to expose 'basic_html' as an option for the
-    //   user to set at some point.
-    return ['value' => $value, 'format' => 'basic_html'];
-  }
 }

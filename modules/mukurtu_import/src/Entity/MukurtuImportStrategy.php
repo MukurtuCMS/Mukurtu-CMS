@@ -54,10 +54,16 @@ use Exception;
  *     "target_entity_type_id",
  *     "target_bundle",
  *     "mapping",
+ *     "default_format",
  *   }
  * )
  */
 class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStrategyInterface {
+
+  /**
+   * The default format for the import.
+   */
+  const string DEFAULT_FORMAT = 'basic_html';
 
   /**
    * The mukurtu_import_strategy ID.
@@ -270,7 +276,6 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         continue;
       }
 
-      /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessInterface $process_plugin */
       $process_plugin = $manager->getInstance(['field_definition' => $field_def]);
       if (!$process_plugin instanceof MukurtuImportFieldProcessInterface) {
         continue;
@@ -278,6 +283,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $context = [];
       $context['multivalue_delimiter'] = $this->getConfig('multivalue_delimiter') ?? ';';
       $context['upload_location'] = $this->getConfig('upload_location') ?? NULL;
+      $context['default_format'] = $this->getConfig('default_format') ?? self::DEFAULT_FORMAT;
       if ($subtarget) {
         $context['subfield'] = $subtarget;
       }
@@ -298,7 +304,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $mapping = $this->getMapping();
     $rawTargets = array_column($mapping, 'target');
 
-    // For subfield processes, we only want the fieldname.
+    // For subfield processes, we only want the field name.
     $targets = array_map(fn($t) => explode('/', $t, 2)[0], $rawTargets);
 
     // Get the field definitions for the target.
