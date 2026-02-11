@@ -20,20 +20,12 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
-  field_all_related_content:
-    type: entity_reference_label
-    label: hidden
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 14
-    region: content
   field_citation:
     type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 15
+    weight: 5
     region: content
   field_page_media_assets:
     type: entity_reference_entity_view
@@ -44,72 +36,22 @@ content:
     third_party_settings: {  }
     weight: 2
     region: content
-  field_representative_media:
-    type: entity_reference_label
-    label: hidden
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 13
-    region: content
-  field_title:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 0
-    region: content
-  flag_email_node:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 3
-    region: content
-  flag_email_og:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 4
-    region: content
-  flag_export_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 5
-    region: content
-  flag_mukurtu_email_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 6
-    region: content
-  flag_mukurtu_email_node:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 7
-    region: content
-  flag_mukurtu_email_og:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 8
-    region: content
-  flag_mukurtu_follow_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 9
-    region: content
-  flag_subscribe_node:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 10
-    region: content
-  flag_subscribe_og:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 11
-    region: content
-  links:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 12
-    region: content
 hidden:
+  field_all_related_content: true
   field_communities: true
   field_in_collection: true
   field_multipage_page_of: true
+  field_representative_media: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_email_node: true
+  flag_mukurtu_email_og: true
+  flag_mukurtu_follow_content: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
   langcode: true
+  links: true
   search_api_excerpt: true
+  field_title: true
