@@ -495,3 +495,44 @@ function mukurtu_core_invalidate_entity_reference_field_references(EntityInterfa
     }
   }
 }
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ *
+ * Add the Landing Page link in the dashboard. Cannot be defined in a
+ * *.links.menu.yml file because the user can set the landing page to any node,
+ * so the link to its layout page must be assembled dynamically.
+ */
+function mukurtu_core_menu_links_discovered_alter(&$links) {
+  $config = \Drupal::config('system.site');
+  $homepagePath = $config->get('page.front');
+  $links['mukurtu_core.landing_page_dashboard'] = [
+    'title' => t('Landing Page'),
+    'url' => 'internal:' . $homepagePath . '/layout',
+    'menu_name' => 'dashboard-look-feel',
+    'parent' => 'mukurtu_dashboard',
+    'weight' => 3,
+  ];
+
+  // Add the Mukurtu Version link in the dashboard. Cannot be defined in a
+  // *.links.menu.yml file because the version number will change, so the text
+  // must be generated dynamically.
+
+  // Get the version number from the VERSION.md file.
+  $version = "";
+  $version_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/VERSION.md';
+  if (file_exists($version_path)) {
+    if ($version_file = fopen($version_path, 'r')) {
+      $version = trim(fgets($version_file));
+    }
+  }
+  fclose($version_file);
+
+  $links['mukurtu_core.mukurtu_version_dashboard'] = [
+    'title' => t('Mukurtu Version: @version', ['@version' => $version]),
+    'description' => t('Mukurtu version'),
+    'menu_name' => 'dashboard-site-info',
+    'parent' => 'mukurtu_dashboard',
+    'url' => 'route:<nolink>',
+  ];
+}
