@@ -277,7 +277,7 @@ class ImportBaseForm extends FormBase {
    * @return bool
    *   TRUE if the user has access, FALSE otherwise.
    */
-  function userCanCreateEntity($entity_type_id, $bundle = NULL, AccountInterface $account = NULL) {
+  function userCanCreateEntity($entity_type_id, $bundle = NULL, ?AccountInterface $account = NULL) {
     // If no user account is provided, default to the current user.
     if (!$account) {
       $account = $this->currentUser();
@@ -300,7 +300,7 @@ class ImportBaseForm extends FormBase {
    * @return bool
    *   TRUE if the user has access, FALSE otherwise.
    */
-  function userCanCreateAnyBundleForEntityType($entity_type_id, AccountInterface $account = NULL) {
+  function userCanCreateAnyBundleForEntityType($entity_type_id, ?AccountInterface $account = NULL) {
     if (!$account) {
       $account = $this->currentUser();
     }
