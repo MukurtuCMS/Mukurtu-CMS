@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
 use Drupal\file\FileInterface;
 use Drupal\migrate\Attribute\MigrateProcess;
+use Drupal\migrate\MigrateException;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -30,10 +31,15 @@ class ImageItem extends ProcessPluginBase {
     $image = $matches[2] ?? $value;
     $title = $matches[3] ?? $alt;
 
+    // Fail the migration if we don't have any alt text.
+    if (!$alt) {
+      throw new MigrateException('Missing alt text for image: ' . $image);
+    }
+
     // Check if incoming value is an existing file ID.
     if (is_numeric($image)) {
       $file = $file_storage->load($image);
-      if ($file) {
+      if ($file instanceof FileInterface) {
         return [
           'target_id' => $file->id(),
           'alt' => $alt,
