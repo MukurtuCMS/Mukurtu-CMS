@@ -77,7 +77,7 @@ class MukurtuImportFieldProcessPluginBase extends PluginBase implements MukurtuI
       }
 
       $supported_properties[$property_name] = [
-        'label' => $property_definition->getLabel(),
+        'label' => sprintf('%s > %s', $field_definition->getLabel(), $property_definition->getLabel()),
         'description' => $this->getFormatDescription($field_definition, $property_name),
       ];
     }
