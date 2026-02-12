@@ -10,8 +10,6 @@ mukurtu_import.mukurtu_import_strategy.*:
     label:
       type: label
       label: 'Label'
-    uuid:
-      type: string
     description:
       type: string
     target_entity_type_id:
@@ -20,7 +18,10 @@ mukurtu_import.mukurtu_import_strategy.*:
     target_bundle:
       type: string
       label: 'Target Bundle'
-    mappings:
+    default_format:
+      type: string
+      label: 'Default Format'
+    mapping:
       type: sequence
       sequence:
         type: mapping

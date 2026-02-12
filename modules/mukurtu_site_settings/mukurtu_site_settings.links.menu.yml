@@ -1,9 +1,3 @@
-mukurtu_site_settings.site_settings:
-  title: 'Site Settings'
-  route_name: <nolink>
-  description: 'Site Settings'
-  parent: system.admin_config
-  weight: 99
 mukurtu_site_settings.design_settings:
   title: 'Color settings'
   route_name: config_pages.design_settings
