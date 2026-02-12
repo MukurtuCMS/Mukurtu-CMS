@@ -4,3 +4,33 @@ entity.configurable_language.edit_form:
   parent: mukurtu_dashboard
   menu_name: dashboard-multilingual
   route_name: entity.configurable_language.edit_form
+
+mukurtu_multilingual.manage_site_languages_dashboard:
+  title: 'Manage site languages'
+  description: 'Manage site languages'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-multilingual
+  url: 'internal:/admin/config/regional/language'
+
+mukurtu_multilingual.translate_interface_dashboard:
+  title: 'Translate interface'
+  description: 'Translate interface'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-multilingual
+  url: 'internal:/admin/config/regional/translate'
+
+mukurtu_multilingual.configure_content_translation_dashboard:
+  title: 'Configure content translation'
+  description: 'Configure content translation'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-multilingual
+  url: 'internal:/admin/config/regional/content-language'
+
+mukurtu_multilingual.translate_configuration_dashboard:
+  title: 'Translate configuration'
+  description: 'Translate configuration'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-multilingual
+  url: 'internal:/admin/config/regional/config-translation'
+
+# todo: translated content list (create a view for it)
