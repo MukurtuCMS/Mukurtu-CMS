@@ -17,6 +17,7 @@ use League\Csv\Reader;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 
 /**
  * Provides a Mukurtu Import form.
@@ -71,6 +72,8 @@ class ImportBaseForm extends FormBase {
    *   The entity type bundle info service.
    * @param \Drupal\Component\Uuid\UuidInterface $uuid
    *   The UUID service.
+   * @param \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $fieldProcessPluginManager
+   *   The field process plugin manager.
    */
   public function __construct(
     protected PrivateTempStoreFactory $tempStoreFactory,
@@ -78,6 +81,7 @@ class ImportBaseForm extends FormBase {
     protected EntityFieldManagerInterface $entityFieldManager,
     protected EntityTypeBundleInfoInterface $entityBundleInfo,
     protected UuidInterface $uuid,
+    protected MukurtuImportFieldProcessPluginManager $fieldProcessPluginManager,
   ) {
     $this->store = $tempStoreFactory->get('mukurtu_import');
     $this->importId = $this->store->get('import_id');
@@ -100,6 +104,7 @@ class ImportBaseForm extends FormBase {
       $container->get('entity_field.manager'),
       $container->get('entity_type.bundle.info'),
       $container->get('uuid'),
+      $container->get('plugin.manager.mukurtu_import_field_process'),
     );
   }
 
@@ -378,27 +383,32 @@ class ImportBaseForm extends FormBase {
    *   The select form element.
    */
   protected function buildTargetOptions($entity_type_id, $bundle = NULL) {
-    $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
-    $entityKeys = $entityDefinition->getKeys();
+    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entity_keys = $entity_definition->getKeys();
 
     $options = [-1 => $this->t('Ignore - Do not import')];
     foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
-      if ($field_definition->getType() == 'cultural_protocol') {
-        // Split our protocol field into the individual sharing
-        // setting/protocols subfields.
-        $options["{$field_name}/sharing_setting"] = $this->t('Sharing Setting');
-        $options["{$field_name}/protocols"] = $this->t('Protocols');
-        continue;
-      }
+      // Get the plugin for this field to check if it supports properties.
+      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
+      $supported_properties = $plugin->getSupportedProperties($field_definition);
 
-      $options[$field_name] = $field_definition->getLabel();
+      // If the plugin supports properties, add them as separate options.
+      if (!empty($supported_properties)) {
+        foreach ($supported_properties as $property_name => $property_info) {
+          $options["{$field_name}/{$property_name}"] = $property_info['label'];
+        }
+      }
+      else {
+        // No properties, add the field normally.
+        $options[$field_name] = $field_definition->getLabel();
+      }
     }
 
     // Very Mukurtu specific. We ship with a "Language" field which has
     // the exact same label as content entity langcodes. Here we disambiguate
     // the two.
-    if (isset($options[$entityKeys['langcode']])) {
-      $options[$entityKeys['langcode']] .= $this->t(' (langcode)');
+    if (isset($options[$entity_keys['langcode']])) {
+      $options[$entity_keys['langcode']] .= $this->t(' (langcode)');
     }
 
     return $options;

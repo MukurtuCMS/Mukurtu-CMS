@@ -16,6 +16,7 @@ use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\mukurtu_import\ImportBatchExecutable;
 use Drupal\migrate\MigrateMessage;
+use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -32,6 +33,10 @@ class ExecuteImportForm extends ImportBaseForm {
    *   Entity field manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_bundle_info
    *   Entity bundle info.
+   * @param \Drupal\Component\Uuid\UuidInterface $uuid
+   *   The UUID service.
+   * @param \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $field_process_plugin_manager
+   *   The field process plugin manager.
    * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migrationPluginManager
    *   Migration plugin manager.
    * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $keyValue
@@ -47,12 +52,13 @@ class ExecuteImportForm extends ImportBaseForm {
     EntityFieldManagerInterface $entity_field_manager,
     EntityTypeBundleInfoInterface $entity_bundle_info,
     UuidInterface $uuid,
+    MukurtuImportFieldProcessPluginManager $field_process_plugin_manager,
     protected MigrationPluginManagerInterface $migrationPluginManager,
     protected KeyValueFactoryInterface $keyValue,
     protected TimeInterface $time,
     protected TranslationInterface $translation,
   ) {
-    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info, $uuid);
+    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info, $uuid, $field_process_plugin_manager);
   }
 
   /**
@@ -65,6 +71,7 @@ class ExecuteImportForm extends ImportBaseForm {
       $container->get('entity_field.manager'),
       $container->get('entity_type.bundle.info'),
       $container->get('uuid'),
+      $container->get('plugin.manager.mukurtu_import_field_process'),
       $container->get('plugin.manager.migration'),
       $container->get('keyvalue'),
       $container->get('datetime.time'),
