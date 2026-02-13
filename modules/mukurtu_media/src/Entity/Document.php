@@ -145,7 +145,6 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
       ->setDescription(t('A thumbnail image showing the first page of the document is automatically generated and is normally used, with a generic image used in certain contexts. A thumbnail image does not usually need to be provided.	</br>Select "Choose File" to upload a thumbnail image.'))
-      ->setDefaultValue('')
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,
