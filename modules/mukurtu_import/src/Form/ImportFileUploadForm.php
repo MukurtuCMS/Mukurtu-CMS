@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Form;
 
-use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\FileInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
@@ -15,7 +16,10 @@ use Exception;
  */
 class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInterface {
 
-  public static function trustedCallbacks() {
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks(): array {
     return [
       'processManagedFile',
     ];
@@ -24,14 +28,14 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'mukurtu_import_import';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $form['import_description_link'] = [
       '#markup' => Link::createFromRoute(
         $this->t('Import Format Information by Type'),
@@ -64,7 +68,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#multiple' => TRUE,
       '#default_value' => $this->getBinaryFiles(),
       '#upload_location' => $this->getBinaryUploadLocation(),
-      '#upload_validators' => [],
+      '#upload_validators' => $this->getAllowedMediaExtensionsValidator(),
       '#attributes' => [
         'name' => 'import_file_upload',
       ],
@@ -112,17 +116,17 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $element = ManagedFile::processManagedFile($element, $form_state, $complete_form);
 
     // Get the upload folder for the binary files.
-    $uploadLocation = $form_state->get('binary_file_upload_location');
+    $upload_location = $form_state->get('binary_file_upload_location');
 
-    if ($uploadLocation) {
+    if ($upload_location) {
       $query = \Drupal::entityTypeManager()->getStorage('file')->getQuery();
-      $permanentFiles = $query->condition('uri', $uploadLocation, 'STARTS_WITH')
+      $permanent_files = $query->condition('uri', $upload_location, 'STARTS_WITH')
         ->condition('status', FileInterface::STATUS_PERMANENT)
         ->accessCheck(TRUE)
         ->execute();
 
       // Disable the remove checkbox for all the permanent files.
-      foreach ($permanentFiles as $pf) {
+      foreach ($permanent_files as $pf) {
         if (isset($element["file_$pf"])) {
           $element["file_$pf"]['selected']['#disabled'] = TRUE;
           $element["file_$pf"]['selected']['#attributes'] = ['title' => t("This file is in use and cannot be removed.")];
@@ -180,6 +184,50 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $this->setMetadataFileWeights($metadataFileWeights);
 
     $form_state->setRedirect('mukurtu_import.import_files');
+  }
+
+  /**
+   * Get upload validators with all allowed media extensions.
+   *
+   * Dynamically discovers all file extensions allowed by media entity bundles
+   * to ensure import supports the same file types as regular media uploads.
+   *
+   * @return array
+   *   Upload validators array with FileExtension validator.
+   */
+  protected function getAllowedMediaExtensionsValidator(): array {
+    $extensions = [];
+
+    // Get all media bundles.
+    $media_bundles = $this->entityTypeManager->getStorage('media_type')->loadMultiple();
+
+    foreach ($media_bundles as $bundle_id => $bundle) {
+      // Get field definitions for this media bundle.
+      $field_definitions = $this->entityFieldManager->getFieldDefinitions('media', $bundle_id);
+
+      // Extract file extensions from file and image fields.
+      foreach ($field_definitions as $field_definition) {
+        $field_type = $field_definition->getType();
+        if (in_array($field_type, ['file', 'image'])) {
+          $settings = $field_definition->getSettings();
+          if (!empty($settings['file_extensions'])) {
+            $field_extensions = explode(' ', $settings['file_extensions']);
+            $extensions = array_merge($extensions, $field_extensions);
+          }
+        }
+      }
+    }
+
+    // Deduplicate and sort for consistency.
+    $extensions = array_unique($extensions);
+    sort($extensions);
+
+    // Return the validator array.
+    return [
+      'FileExtension' => [
+        'extensions' => implode(' ', $extensions),
+      ],
+    ];
   }
 
 }
