@@ -84,6 +84,11 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#type' => 'submit',
       '#value' => $this->t('Next'),
     ];
+    $form['actions']['reset'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Reset'),
+      '#submit' => ['::resetForm'],
+    ];
 
     return $form;
   }
@@ -141,6 +146,13 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    // Skip validation if Reset button was clicked.
+    $triggering_element = $form_state->getTriggeringElement();
+    $clicked_button = isset($triggering_element['#parents']) ? end($triggering_element['#parents']) : '';
+    if ($clicked_button === 'reset') {
+      return;
+    }
+
     $metadataFiles = $form_state->getValue('metadata_files');
 
     if (empty($metadataFiles)) {
@@ -149,7 +161,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
 
     foreach ($metadataFiles as $fid) {
       /** @var \Drupal\file\FileInterface $file */
-      $file = \Drupal::entityTypeManager()
+      $file = $this->entityTypeManager
         ->getStorage('file')
         ->load($fid);
 
@@ -161,8 +173,9 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       // For CSV files, check if we can read the headers.
       if ($file->getMimeType() == 'text/csv') {
         try {
-          $headers = $this->getCSVHeaders($file);
-        } catch (Exception $e) {
+          $this->getCSVHeaders($file);
+        }
+        catch (Exception $e) {
           $form_state->setError($form['metadata_files'], $this->t("Could not parse CSV for file %file.", ['%file' => $file->getFilename()]));
         }
       }
@@ -172,7 +185,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     // Add a default weight for any new metadata files.
     $metadataFiles = $form_state->getValue('metadata_files');
     $metadataFileWeights = $this->getMetadataFileWeights();
@@ -184,6 +197,18 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $this->setMetadataFileWeights($metadataFileWeights);
 
     $form_state->setRedirect('mukurtu_import.import_files');
+  }
+
+  /**
+   * Reset to a clean state.
+   *
+   * @param array $form
+   *    An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *    The current state of the form.
+   */
+  public function resetForm(array &$form, FormStateInterface $form_state): void {
+    $this->reset();
   }
 
   /**
