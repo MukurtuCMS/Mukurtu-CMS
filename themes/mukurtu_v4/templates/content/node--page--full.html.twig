@@ -69,7 +69,7 @@
 #}
 
 {# If there's more than 1 media asset, render code for carousels. #}
-{% set num_media_assets = content.group_primary_fields.field_media_assets|children|length %}
+{% set num_media_assets = content.field_page_media_assets|children|length %}
 {% if num_media_assets > 1 %}
   {% set carousels = true %}
 {# If there's exactly one media asset, render the field without carousel code. #}
@@ -89,6 +89,8 @@
       <div class="full-node__main">
         <div class="full-node__content">
 
+          {{ content.field_body}}
+
           {% if carousels %}
             <div class="media-carousels" data-id="{{ node.id }}">
               <section class="splide media-carousel" aria-label="Media Assets Carousel">
@@ -104,7 +106,6 @@
             {{ content.field_page_media_assets }}
           {% endif %}
 
-          {{ content.field_body}}
         </div>
 
       </div>
