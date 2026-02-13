@@ -345,217 +345,217 @@ function mukurtu_install() {
     'view published protocol control entities',
   ];
   $roles['mukurtu_manager'] = [
-  - 'access administration pages'
-  - 'access content overview'
-  - 'access contextual links'
-  - 'access files overview'
-  - 'access media overview'
-  - 'access mukurtu export'
-  - 'access mukurtu import'
-  - 'access shortcuts'
-  - 'access site in maintenance mode'
-  - 'access site-wide contact form'
-  - 'access taxonomy overview'
-  - 'access toolbar'
-  - 'access user contact forms'
-  - 'access user profiles'
-  - 'add community entities'
-  - 'administer account settings'
-  - 'administer block_content display'
-  - 'administer block_content fields'
-  - 'administer block_content form display'
-  - 'administer blocks'
-  - 'administer comment display'
-  - 'administer comment fields'
-  - 'administer comment form display'
-  - 'administer comments'
-  - 'administer community display'
-  - 'administer community entities'
-  - 'administer community fields'
-  - 'administer community form display'
-  - 'administer contact forms'
-  - 'administer contact_message display'
-  - 'administer contact_message fields'
-  - 'administer contact_message form display'
-  - 'administer display modes'
-  - 'administer embed buttons'
-  - 'administer facets'
-  - 'administer filters'
-  - 'administer flagging display'
-  - 'administer flagging fields'
-  - 'administer flagging form display'
-  - 'administer flaggings'
-  - 'administer flags'
-  - 'administer image styles'
-  - 'administer language_community display'
-  - 'administer language_community fields'
-  - 'administer language_community form display'
-  - 'administer media display'
-  - 'administer media fields'
-  - 'administer media form display'
-  - 'administer menu'
-  - 'administer message digest'
-  - 'administer message display'
-  - 'administer message fields'
-  - 'administer message form display'
-  - 'administer message templates'
-  - 'administer messages'
-  - 'administer modules'
-  - 'administer mukurtu_import_strategy'
-  - 'administer multipage item'
-  - 'administer node display'
-  - 'administer node fields'
-  - 'administer node form display'
-  - 'administer og_membership display'
-  - 'administer og_membership fields'
-  - 'administer og_membership form display'
-  - 'administer paragraph display'
-  - 'administer paragraph fields'
-  - 'administer paragraph form display'
-  - 'administer paragraphs settings'
-  - 'administer paragraphs types'
-  - 'administer pathauto'
-  - 'administer permissions'
-  - 'administer personal_collection display'
-  - 'administer personal_collection fields'
-  - 'administer personal_collection form display'
-  - 'administer protocol display'
-  - 'administer protocol fields'
-  - 'administer protocol form display'
-  - 'administer redirect settings'
-  - 'administer redirects'
-  - 'administer rest resources'
-  - 'administer search_api'
-  - 'administer shortcuts'
-  - 'administer site configuration'
-  - 'administer taxonomy'
-  - 'administer taxonomy_term display'
-  - 'administer taxonomy_term fields'
-  - 'administer taxonomy_term form display'
-  - 'administer term merge from entities'
-  - 'administer term merge into entities'
-  - 'administer themes'
-  - 'administer url aliases'
-  - 'administer user display'
-  - 'administer user fields'
-  - 'administer user form display'
-  - 'administer users'
-  - 'configure leaflet'
-  - 'create any message template'
-  - 'create landing_page content'
-  - 'create media content warnings'
-  - 'create mukurtu_batch_import_report message'
-  - 'create mukurtu_new_item_in_collection message'
-  - 'create mukurtu_new_item_in_community message'
-  - 'create mukurtu_new_item_in_protocol message'
-  - 'create mukurtu_new_user_registration message'
-  - 'create mukurtu_single_node_delete message'
-  - 'create mukurtu_single_node_insert message'
-  - 'create mukurtu_single_node_update message'
-  - 'create page content'
-  - 'create terms in category'
-  - 'create terms in community_type'
-  - 'create terms in contributor'
-  - 'create terms in creator'
-  - 'create terms in format'
-  - 'create terms in interpersonal_relationship'
-  - 'create terms in keywords'
-  - 'create terms in language'
-  - 'create terms in people'
-  - 'create terms in publisher'
-  - 'create terms in subject'
-  - 'create terms in type'
-  - 'create terms in word_type'
-  - 'create url aliases'
-  - 'customize shortcut links'
-  - 'delete any landing_page content'
-  - 'delete any message template'
-  - 'delete any page content'
-  - 'delete community entities'
-  - 'delete mukurtu_batch_import_report message'
-  - 'delete mukurtu_new_item_in_collection message'
-  - 'delete mukurtu_new_item_in_community message'
-  - 'delete mukurtu_new_item_in_protocol message'
-  - 'delete mukurtu_new_user_registration message'
-  - 'delete mukurtu_single_node_delete message'
-  - 'delete mukurtu_single_node_insert message'
-  - 'delete mukurtu_single_node_update message'
-  - 'delete multiple messages'
-  - 'delete orphan revisions'
-  - 'delete own landing_page content'
-  - 'delete own page content'
-  - 'delete terms in category'
-  - 'delete terms in community_type'
-  - 'delete terms in contributor'
-  - 'delete terms in creator'
-  - 'delete terms in format'
-  - 'delete terms in interpersonal_relationship'
-  - 'delete terms in keywords'
-  - 'delete terms in language'
-  - 'delete terms in people'
-  - 'delete terms in publisher'
-  - 'delete terms in subject'
-  - 'delete terms in type'
-  - 'delete terms in word_type'
-  - 'edit any landing_page content'
-  - 'edit any message template'
-  - 'edit any page content'
-  - 'edit behavior plugin settings'
-  - 'edit design_settings config page entity'
-  - 'edit own comments'
-  - 'edit own landing_page content'
-  - 'edit own page content'
-  - 'edit terms in category'
-  - 'edit terms in community_type'
-  - 'edit terms in contributor'
-  - 'edit terms in creator'
-  - 'edit terms in format'
-  - 'edit terms in interpersonal_relationship'
-  - 'edit terms in keywords'
-  - 'edit terms in language'
-  - 'edit terms in people'
-  - 'edit terms in publisher'
-  - 'edit terms in subject'
-  - 'edit terms in type'
-  - 'edit terms in word_type'
-  - 'flag export_content'
-  - 'flag export_media'
-  - 'merge taxonomy terms'
-  - 'notify of path changes'
-  - 'overview messages'
-  - 'post comments'
-  - 'revert all community revisions'
-  - 'send message through the ui'
-  - 'switch shortcut sets'
-  - 'unflag export_content'
-  - 'unflag export_media'
-  - 'update mukurtu_batch_import_report message'
-  - 'update mukurtu_new_item_in_collection message'
-  - 'update mukurtu_new_item_in_community message'
-  - 'update mukurtu_new_item_in_protocol message'
-  - 'update mukurtu_new_user_registration message'
-  - 'update mukurtu_single_node_delete message'
-  - 'update mukurtu_single_node_insert message'
-  - 'update mukurtu_single_node_update message'
-  - 'update tokens'
-  - 'use text format full_html'
-  - 'view all community revisions'
-  - 'view any message template'
-  - 'view design_settings config page entity'
-  - 'view mukurtu_batch_import_report message'
-  - 'view mukurtu_new_item_in_collection message'
-  - 'view mukurtu_new_item_in_community message'
-  - 'view mukurtu_new_item_in_protocol message'
-  - 'view mukurtu_new_user_registration message'
-  - 'view mukurtu_single_node_delete message'
-  - 'view mukurtu_single_node_insert message'
-  - 'view mukurtu_single_node_update message'
-  - 'view own unpublished content'
-  - 'view own unpublished media'
-  - 'view the administration theme'
-  - 'view unpublished community entities'
-  - 'view unpublished paragraphs'
-  - 'view user email addresses'
+  - 'access administration pages',
+  - 'access content overview',
+  - 'access contextual links',
+  - 'access files overview',
+  - 'access media overview',
+  - 'access mukurtu export',
+  - 'access mukurtu import',
+  - 'access shortcuts',
+  - 'access site in maintenance mode',
+  - 'access site-wide contact form',
+  - 'access taxonomy overview',
+  - 'access toolbar',
+  - 'access user contact forms',
+  - 'access user profiles',
+  - 'add community entities',
+  - 'administer account settings',
+  - 'administer block_content display',
+  - 'administer block_content fields',
+  - 'administer block_content form display',
+  - 'administer blocks',
+  - 'administer comment display',
+  - 'administer comment fields',
+  - 'administer comment form display',
+  - 'administer comments',
+  - 'administer community display',
+  - 'administer community entities',
+  - 'administer community fields',
+  - 'administer community form display',
+  - 'administer contact forms',
+  - 'administer contact_message display',
+  - 'administer contact_message fields',
+  - 'administer contact_message form display',
+  - 'administer display modes',
+  - 'administer embed buttons',
+  - 'administer facets',
+  - 'administer filters',
+  - 'administer flagging display',
+  - 'administer flagging fields',
+  - 'administer flagging form display',
+  - 'administer flaggings',
+  - 'administer flags',
+  - 'administer image styles',
+  - 'administer language_community display',
+  - 'administer language_community fields',
+  - 'administer language_community form display',
+  - 'administer media display',
+  - 'administer media fields',
+  - 'administer media form display',
+  - 'administer menu',
+  - 'administer message digest',
+  - 'administer message display',
+  - 'administer message fields',
+  - 'administer message form display',
+  - 'administer message templates',
+  - 'administer messages',
+  - 'administer modules',
+  - 'administer mukurtu_import_strategy',
+  - 'administer multipage item',
+  - 'administer node display',
+  - 'administer node fields',
+  - 'administer node form display',
+  - 'administer og_membership display',
+  - 'administer og_membership fields',
+  - 'administer og_membership form display',
+  - 'administer paragraph display',
+  - 'administer paragraph fields',
+  - 'administer paragraph form display',
+  - 'administer paragraphs settings',
+  - 'administer paragraphs types',
+  - 'administer pathauto',
+  - 'administer permissions',
+  - 'administer personal_collection display',
+  - 'administer personal_collection fields',
+  - 'administer personal_collection form display',
+  - 'administer protocol display',
+  - 'administer protocol fields',
+  - 'administer protocol form display',
+  - 'administer redirect settings',
+  - 'administer redirects',
+  - 'administer rest resources',
+  - 'administer search_api',
+  - 'administer shortcuts',
+  - 'administer site configuration',
+  - 'administer taxonomy',
+  - 'administer taxonomy_term display',
+  - 'administer taxonomy_term fields',
+  - 'administer taxonomy_term form display',
+  - 'administer term merge from entities',
+  - 'administer term merge into entities',
+  - 'administer themes',
+  - 'administer url aliases',
+  - 'administer user display',
+  - 'administer user fields',
+  - 'administer user form display',
+  - 'administer users',
+  - 'configure leaflet',
+  - 'create any message template',
+  - 'create landing_page content',
+  - 'create media content warnings',
+  - 'create mukurtu_batch_import_report message',
+  - 'create mukurtu_new_item_in_collection message',
+  - 'create mukurtu_new_item_in_community message',
+  - 'create mukurtu_new_item_in_protocol message',
+  - 'create mukurtu_new_user_registration message',
+  - 'create mukurtu_single_node_delete message',
+  - 'create mukurtu_single_node_insert message',
+  - 'create mukurtu_single_node_update message',
+  - 'create page content',
+  - 'create terms in category',
+  - 'create terms in community_type',
+  - 'create terms in contributor',
+  - 'create terms in creator',
+  - 'create terms in format',
+  - 'create terms in interpersonal_relationship',
+  - 'create terms in keywords',
+  - 'create terms in language',
+  - 'create terms in people',
+  - 'create terms in publisher',
+  - 'create terms in subject',
+  - 'create terms in type',
+  - 'create terms in word_type',
+  - 'create url aliases',
+  - 'customize shortcut links',
+  - 'delete any landing_page content',
+  - 'delete any message template',
+  - 'delete any page content',
+  - 'delete community entities',
+  - 'delete mukurtu_batch_import_report message',
+  - 'delete mukurtu_new_item_in_collection message',
+  - 'delete mukurtu_new_item_in_community message',
+  - 'delete mukurtu_new_item_in_protocol message',
+  - 'delete mukurtu_new_user_registration message',
+  - 'delete mukurtu_single_node_delete message',
+  - 'delete mukurtu_single_node_insert message',
+  - 'delete mukurtu_single_node_update message',
+  - 'delete multiple messages',
+  - 'delete orphan revisions',
+  - 'delete own landing_page content',
+  - 'delete own page content',
+  - 'delete terms in category',
+  - 'delete terms in community_type',
+  - 'delete terms in contributor',
+  - 'delete terms in creator',
+  - 'delete terms in format',
+  - 'delete terms in interpersonal_relationship',
+  - 'delete terms in keywords',
+  - 'delete terms in language',
+  - 'delete terms in people',
+  - 'delete terms in publisher',
+  - 'delete terms in subject',
+  - 'delete terms in type',
+  - 'delete terms in word_type',
+  - 'edit any landing_page content',
+  - 'edit any message template',
+  - 'edit any page content',
+  - 'edit behavior plugin settings',
+  - 'edit design_settings config page entity',
+  - 'edit own comments',
+  - 'edit own landing_page content',
+  - 'edit own page content',
+  - 'edit terms in category',
+  - 'edit terms in community_type',
+  - 'edit terms in contributor',
+  - 'edit terms in creator',
+  - 'edit terms in format',
+  - 'edit terms in interpersonal_relationship',
+  - 'edit terms in keywords',
+  - 'edit terms in language',
+  - 'edit terms in people',
+  - 'edit terms in publisher',
+  - 'edit terms in subject',
+  - 'edit terms in type',
+  - 'edit terms in word_type',
+  - 'flag export_content',
+  - 'flag export_media',
+  - 'merge taxonomy terms',
+  - 'notify of path changes',
+  - 'overview messages',
+  - 'post comments',
+  - 'revert all community revisions',
+  - 'send message through the ui',
+  - 'switch shortcut sets',
+  - 'unflag export_content',
+  - 'unflag export_media',
+  - 'update mukurtu_batch_import_report message',
+  - 'update mukurtu_new_item_in_collection message',
+  - 'update mukurtu_new_item_in_community message',
+  - 'update mukurtu_new_item_in_protocol message',
+  - 'update mukurtu_new_user_registration message',
+  - 'update mukurtu_single_node_delete message',
+  - 'update mukurtu_single_node_insert message',
+  - 'update mukurtu_single_node_update message',
+  - 'update tokens',
+  - 'use text format full_html',
+  - 'view all community revisions',
+  - 'view any message template',
+  - 'view design_settings config page entity',
+  - 'view mukurtu_batch_import_report message',
+  - 'view mukurtu_new_item_in_collection message',
+  - 'view mukurtu_new_item_in_community message',
+  - 'view mukurtu_new_item_in_protocol message',
+  - 'view mukurtu_new_user_registration message',
+  - 'view mukurtu_single_node_delete message',
+  - 'view mukurtu_single_node_insert message',
+  - 'view mukurtu_single_node_update message',
+  - 'view own unpublished content',
+  - 'view own unpublished media',
+  - 'view the administration theme',
+  - 'view unpublished community entities',
+  - 'view unpublished paragraphs',
+  - 'view user email addresses',
   ];
 
   $roles['administrator'] = [
