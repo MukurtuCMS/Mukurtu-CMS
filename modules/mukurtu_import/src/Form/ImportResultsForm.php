@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Form;
 
-use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -13,14 +14,14 @@ class ImportResultsForm extends ImportBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'mukurtu_import_results';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $success = $this->store->get('batch_results_success') ?? FALSE;
     $messages = $this->getMessages();
 
@@ -40,15 +41,20 @@ class ImportResultsForm extends ImportBaseForm {
       }
     }
 
-    $this->buildTable($form, $form_state, 'node');
+    $this->buildTable($form, $form_state);
+
+    $form['actions'] = [
+      '#type' => 'actions',
+    ];
 
     if (!empty($messages) || !$success) {
-      $form['actions']['back'] = [
+      $form['actions']['submit'] = [
         '#type' => 'submit',
         '#value' => $this->t('Return to Uploaded Files'),
         '#submit' => ['::submitReturnToFiles'],
       ];
-    } else {
+    }
+    else {
       $form['actions']['submit'] = [
         '#type' => 'submit',
         '#value' => $this->t('Start a new import'),
@@ -61,16 +67,32 @@ class ImportResultsForm extends ImportBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $this->reset();
     $form_state->setRedirect('mukurtu_import.file_upload');
   }
 
-  public function submitReturnToFiles(array &$form, FormStateInterface $form_state) {
+  /**
+   * Submit handler for the 'Return to Uploaded Files' button.
+   *
+   * @param array $form
+   *    An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *    The current state of the form.
+   */
+  public function submitReturnToFiles(array &$form, FormStateInterface $form_state): void {
     $form_state->setRedirect('mukurtu_import.file_upload');
   }
 
-  protected function buildTable(array &$form, FormStateInterface $form_state, $entity_type_id) {
+  /**
+   * Builds the results table.
+   *
+   * @param array $form
+   *   An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  protected function buildTable(array &$form, FormStateInterface $form_state): void {
     $message = $this->getImportRevisionMessage();
 
     $communities_block = [
