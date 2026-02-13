@@ -16,8 +16,10 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
   description: new TranslatableMarkup('Cultural Protocols.'),
   field_types: ['cultural_protocol'],
   weight: 0,
+  properties: ['protocols', 'sharing_setting'],
 )]
 class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
+
   /**
    * {@inheritdoc}
    */

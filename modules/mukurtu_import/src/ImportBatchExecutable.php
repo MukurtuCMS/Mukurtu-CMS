@@ -181,4 +181,16 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     $store->set('batch_results_messages', $messages);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function saveMessage($message, $level = MigrationInterface::MESSAGE_ERROR) {
+    // Clean up process pipeline error messages for easier reading by our
+    // intended audience.
+    if (preg_match(sprintf('/^%s:.*?:.*?:(.*)$/im', preg_quote($this->migration->getPluginId())), $message, $matches)) {
+      $message = $matches[1];
+    }
+    parent::saveMessage($message, $level);
+  }
+
 }

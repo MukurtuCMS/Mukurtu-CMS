@@ -78,6 +78,10 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     // owner account. We don't want to do that. For the Mukurtu
     // importer the user doing the import is the content creator
     // and all checks should be run using their account.
+
+    // Add alt text validation constraint for image media during import.
+    $this->addImageAltConstraint($entity);
+
     try {
       $violations = $entity->validate();
     } finally {
@@ -86,6 +90,33 @@ class ProtocolAwareEntityContent extends EntityContentBase {
 
     if (count($violations) > 0) {
       throw new EntityValidationException($violations);
+    }
+  }
+
+  /**
+   * Adds alt text validation constraint to image media entities.
+   *
+   * This ensures that image media entities imported without alt text
+   * will fail validation, maintaining accessibility standards.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity being validated.
+   */
+  protected function addImageAltConstraint(FieldableEntityInterface $entity) {
+    // Only apply to image media entities.
+    if ($entity->getEntityTypeId() !== 'media' || $entity->bundle() !== 'image') {
+      return;
+    }
+
+    // Check if the field exists.
+    if (!$entity->hasField('field_media_image')) {
+      return;
+    }
+
+    // Get the field definition and add the constraint.
+    $field_definition = $entity->getFieldDefinition('field_media_image');
+    if ($field_definition) {
+      $field_definition->addPropertyConstraints('alt', ['ImageAltRequired' => []]);
     }
   }
 
