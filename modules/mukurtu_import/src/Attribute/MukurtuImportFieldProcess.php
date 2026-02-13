@@ -24,6 +24,8 @@ class MukurtuImportFieldProcess extends Plugin {
    *   The field types this plugin supports.
    * @param int $weight
    *   The weight of the plugin.
+   * @param array $properties
+   *   The field properties this plugin supports for import.
    * @param class-string|null $deriver
    *   (optional) The deriver class.
    */
@@ -33,6 +35,7 @@ class MukurtuImportFieldProcess extends Plugin {
     public readonly ?TranslatableMarkup $description = NULL,
     public readonly array $field_types = [],
     public readonly int $weight = 0,
+    public readonly array $properties = [],
     public readonly ?string $deriver = NULL,
   ) {}
 
