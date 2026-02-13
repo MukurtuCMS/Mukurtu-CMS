@@ -345,7 +345,7 @@ function mukurtu_install() {
     'view published protocol control entities',
   ];
   $roles['mukurtu_manager'] = [
-    - 'access administration pages'
+  - 'access administration pages'
   - 'access content overview'
   - 'access contextual links'
   - 'access files overview'
