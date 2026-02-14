@@ -445,7 +445,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
   /**
    * {@inheritdoc}
    */
-  public function access($operation = 'view', AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($operation = 'view', ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     return parent::access($operation, $account, $return_as_object);
   }
 

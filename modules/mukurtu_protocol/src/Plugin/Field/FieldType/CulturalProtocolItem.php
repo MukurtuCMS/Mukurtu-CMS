@@ -252,7 +252,7 @@ class CulturalProtocolItem extends FieldItemBase {
    * @return array
    *  An array of protocol IDs.
    */
-  public function getSettableProtocolIds(AccountInterface $account = NULL) {
+  public function getSettableProtocolIds(?AccountInterface $account = NULL) {
     $protocolIds = CulturalProtocols::getProtocolsByUserPermission(['apply protocol'], $account);
     return $protocolIds;
   }
@@ -260,7 +260,7 @@ class CulturalProtocolItem extends FieldItemBase {
   /**
    * Return the options array for the sharing settings.
    */
-  public function getSettableSharingOptions(AccountInterface $account = NULL) {
+  public function getSettableSharingOptions(?AccountInterface $account = NULL) {
     return CulturalProtocols::getItemSharingSettingOptions();
   }
 

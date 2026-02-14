@@ -54,7 +54,7 @@ class MukurtuRemoveProtocolMembershipAction extends ViewsBulkOperationsActionBas
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE)
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE)
   {
     if ($object instanceof User) {
       // Load the protocol we are altering memberships for.

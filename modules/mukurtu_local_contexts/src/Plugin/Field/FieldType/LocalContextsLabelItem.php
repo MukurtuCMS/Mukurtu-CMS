@@ -23,7 +23,7 @@ use Drupal\Core\Session\AccountInterface;
 class LocalContextsLabelItem extends StringItem implements OptionsProviderInterface {
   protected $localContextsProjectManager;
 
-  public function __construct(ComplexDataDefinitionInterface $definition, $name = NULL, TypedDataInterface $parent = NULL) {
+  public function __construct(ComplexDataDefinitionInterface $definition, $name = NULL, ?TypedDataInterface $parent = NULL) {
     parent::__construct($definition, $name, $parent);
     $this->localContextsProjectManager = new LocalContextsSupportedProjectManager();
   }
@@ -66,7 +66,7 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
   /**
    * {@inheritDoc}
    */
-  public function getPossibleValues(AccountInterface $account = NULL) {
+  public function getPossibleValues(?AccountInterface $account = NULL) {
     $values = [];
     $labels = $this->localContextsProjectManager->getAllLabels();
     $notices = $this->localContextsProjectManager->getAllNotices();
@@ -83,7 +83,7 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
   /**
    * {@inheritDoc}
    */
-  public function getPossibleOptions(AccountInterface $account = NULL) {
+  public function getPossibleOptions(?AccountInterface $account = NULL) {
     $labelOptions = $this->flattenOptions($this->localContextsProjectManager->getAllLabels());
     $noticeOptions = $this->flattenOptions($this->localContextsProjectManager->getAllNotices());
     return array_merge($labelOptions, $noticeOptions);
@@ -92,7 +92,7 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
   /**
    * {@inheritDoc}
    */
-  public function getSettableValues(AccountInterface $account = NULL) {
+  public function getSettableValues(?AccountInterface $account = NULL) {
     $labels = $account ? $this->localContextsProjectManager->getUserLabels($account) : $this->localContextsProjectManager->getSiteLabels();
     $notices = $account ? $this->localContextsProjectManager->getUserNotices($account) : $this->localContextsProjectManager->getSiteNotices();
     $values = [];
@@ -109,7 +109,7 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
   /**
    * {@inheritDoc}
    */
-  public function getSettableOptions(AccountInterface $account = NULL) {
+  public function getSettableOptions(?AccountInterface $account = NULL) {
     $labels = $account ? $this->localContextsProjectManager->getUserLabels($account) : $this->localContextsProjectManager->getSiteLabels();
     $notices = $account ? $this->localContextsProjectManager->getUserNotices($account) : $this->localContextsProjectManager->getSiteNotices();
     $labelOptions = $this->flattenOptions($labels);

@@ -185,7 +185,7 @@ class ProjectDirectoryController extends ControllerBase {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function groupDirectoryAccess(AccountInterface $account, ContentEntityInterface $group = NULL) {
+  public function groupDirectoryAccess(AccountInterface $account, ?ContentEntityInterface $group = NULL) {
     // Only show the page if the group exists.
     if ($group) {
       return AccessResult::allowed();
@@ -193,7 +193,7 @@ class ProjectDirectoryController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
-  public function title(ContentEntityInterface $group = NULL)  {
+  public function title(?ContentEntityInterface $group = NULL)  {
     return $this->t("Local Contexts Project Directory for %group", ['%group' => $group ? $group->getName() : 'Unknown Group']);
   }
 
