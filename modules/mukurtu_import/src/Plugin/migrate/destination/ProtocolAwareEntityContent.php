@@ -202,7 +202,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
 
     // Get the field definition and add the constraint.
     $field_definition = $entity->getFieldDefinition('field_media_image');
-    if ($field_definition instanceof FieldConfigInterface) {
+    if (method_exists($field_definition, 'addPropertyConstraints')) {
       $field_definition->addPropertyConstraints('alt', ['ImageAltRequired' => []]);
     }
   }
