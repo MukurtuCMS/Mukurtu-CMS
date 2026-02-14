@@ -35,7 +35,6 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
       ->setDescription(t('External embeds usually display the content of the embed, with a thumbnail image used in certain contexts. Thumbnail images must be provided for external embeds, and are often a screenshot of the embedded content.	</br>Select "Choose File" to upload a thumbnail image.'))
-      ->setDefaultValue('')
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,
