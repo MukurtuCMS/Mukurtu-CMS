@@ -2,3 +2,6 @@ person_records_enabled_vocabularies:
   - creator
   - contributor
   - people
+
+place_records_enabled_vocabularies:
+  - location
