@@ -26,6 +26,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * Configuration:
  * - migration_ids: An array of migration IDs to look up.
+ *
+ * The plugin searches across ALL sourceid columns (sourceid1, sourceid2, etc.)
+ * in each migration's ID map table, enabling lookup by any registered source
+ * key. For example, a media migration may use both the media name and filename
+ * as source IDs, allowing downstream CSVs to reference media by either value.
  */
 #[MigrateProcess('import_migration_lookup')]
 class ImportMigrationLookup extends ProcessPluginBase implements ContainerFactoryPluginInterface {
@@ -68,14 +73,30 @@ class ImportMigrationLookup extends ProcessPluginBase implements ContainerFactor
         continue;
       }
 
-      $dest_id = $this->database->select($table, 'm')
-        ->fields('m', ['destid1'])
-        ->condition('sourceid1', $value)
-        ->execute()
-        ->fetchField();
+      // Discover all sourceid columns in this table.
+      $schema = $this->database->schema();
+      $sourceid_columns = [];
+      for ($i = 1; $i <= 10; $i++) {
+        $col = 'sourceid' . $i;
+        if ($schema->fieldExists($table, $col)) {
+          $sourceid_columns[] = $col;
+        }
+        else {
+          break;
+        }
+      }
 
-      if ($dest_id !== FALSE) {
-        return $dest_id;
+      // Search each sourceid column independently.
+      foreach ($sourceid_columns as $col) {
+        $dest_id = $this->database->select($table, 'm')
+          ->fields('m', ['destid1'])
+          ->condition($col, $value)
+          ->execute()
+          ->fetchField();
+
+        if ($dest_id !== FALSE) {
+          return $dest_id;
+        }
       }
     }
 

@@ -47,9 +47,11 @@ There are several alternatives worth noting, though none are clearly better for 
 
 ## Solution Overview
 
-1. **Create a custom `import_migration_lookup` process plugin** that bypasses the migration plugin manager and directly queries the ID map database table by migration ID.
+1. **Create a custom `import_migration_lookup` process plugin** that bypasses the migration plugin manager and directly queries the ID map database table by migration ID. The plugin searches across all `sourceid` columns in the ID map, enabling lookup by any registered source key.
 
-2. **Modify the upstream (referenced) migration's source IDs** so the ID map contains values that the downstream migration can look up. Specifically, use the "label column" (the CSV column mapped to the entity's label field, e.g., `name` for media) as a source ID instead of the fallback `_record_number`.
+2. **Modify the upstream (referenced) migration's source IDs** so the ID map contains values that the downstream migration can look up. Use **multiple source IDs** where applicable:
+   - The "label column" (the CSV column mapped to the entity's label field, e.g., `name` for media).
+   - For **media entities**: the CSV column mapped to the media source field (e.g., `field_media_image`), which contains the filename. This allows downstream CSVs to reference media by either name *or* filename (e.g., `"My Photo"` or `"photo.jpg"`).
 
 3. **Post-process migration definitions** in `ExecuteImportForm::submitForm()` to detect cross-migration entity references and inject `import_migration_lookup` into the downstream migration's process pipeline.
 
@@ -92,6 +94,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * Configuration:
  * - migration_ids: An array of migration IDs to look up.
+ *
+ * The plugin searches across ALL sourceid columns (sourceid1, sourceid2, etc.)
+ * in each migration's ID map table, enabling lookup by any registered source
+ * key. For example, a media migration may use both the media name and filename
+ * as source IDs, allowing downstream CSVs to reference media by either value.
  */
 #[MigrateProcess('import_migration_lookup')]
 class ImportMigrationLookup extends ProcessPluginBase implements ContainerFactoryPluginInterface {
@@ -134,14 +141,31 @@ class ImportMigrationLookup extends ProcessPluginBase implements ContainerFactor
         continue;
       }
 
-      $dest_id = $this->database->select($table, 'm')
-        ->fields('m', ['destid1'])
-        ->condition('sourceid1', $value)
-        ->execute()
-        ->fetchField();
+      // Find all sourceid columns in the table (sourceid1, sourceid2, etc.)
+      // and search across all of them. This supports upstream migrations with
+      // multiple source IDs (e.g., label + filename for media).
+      $schema = $this->database->schema();
+      $sourceid_columns = [];
+      for ($i = 1; $i <= 10; $i++) {
+        $col = 'sourceid' . $i;
+        if ($schema->fieldExists($table, $col)) {
+          $sourceid_columns[] = $col;
+        }
+        else {
+          break;
+        }
+      }
 
-      if ($dest_id !== FALSE) {
-        return $dest_id;
+      foreach ($sourceid_columns as $col) {
+        $dest_id = $this->database->select($table, 'm')
+          ->fields('m', ['destid1'])
+          ->condition($col, $value)
+          ->execute()
+          ->fetchField();
+
+        if ($dest_id !== FALSE) {
+          return $dest_id;
+        }
       }
     }
 
@@ -155,6 +179,7 @@ class ImportMigrationLookup extends ProcessPluginBase implements ContainerFactor
 **Key design decisions:**
 
 - **Direct DB query**: The ID map table name follows the deterministic pattern `migrate_map_{migration_id}`. This is a stable internal convention of Drupal's `Sql` ID map plugin (see `core/modules/migrate/src/Plugin/migrate/id_map/Sql.php`).
+- **Multi-column search**: The plugin discovers all `sourceidN` columns in each ID map table and queries each independently. This allows upstream migrations with multiple source IDs (e.g., label + filename for media) to be matched on any of their source values. A user can write either `"My Photo"` (the media name) or `"photo.jpg"` (the filename) in their downstream CSV and both will resolve.
 - **Pass-through on miss**: If the value isn't found in any migration's ID map, the original value passes through unchanged. This lets the existing `mukurtu_entity_lookup` plugin try its label-based resolution as a fallback. This also means existing entities (not created by this import) are still referenceable by name/ID/UUID.
 - **Numeric bypass**: If the value is already numeric (an entity ID from `uuid_lookup`), skip the migration lookup entirely.
 - **Multiple migration IDs**: Supports looking up across several upstream migrations (e.g., both Image media and Audio media migrations).
@@ -168,11 +193,13 @@ Currently, `toDefinition()` determines source IDs as follows:
 2. UUID field if mapped → use its CSV column.
 3. Fallback → `_record_number` (auto-incremented by CSV source plugin).
 
-For cross-migration lookups, we need the ID map to contain the **label column value** (e.g., the `Name` column that maps to the `name` field on media). This is the value the downstream CSV will use to reference the entity.
+For cross-migration lookups, we need the ID map to contain values that the downstream migration can look up. We use **multiple source IDs** where applicable:
+- The **label column** (the CSV column mapped to the entity's label field, e.g., `Name` → `name` for media).
+- For **media entities**: the **media source column** (the CSV column mapped to the media source field, e.g., `File` → `field_media_image`). This contains the filename and allows referencing media by filename.
 
-Add a new method to `MukurtuImportStrategy` that determines what the "lookup source ID" should be, and a new version of `toDefinition()` that accepts information about related migrations.
+The ID map table supports composite source IDs (`sourceid1`, `sourceid2`, etc.), and `ImportMigrationLookup` searches across all of them independently.
 
-**New method on `MukurtuImportStrategy`:**
+**New methods on `MukurtuImportStrategy`:**
 
 ```php
 /**
@@ -199,12 +226,59 @@ public function getLabelSourceColumn(): ?string {
 
   return NULL;
 }
+
+/**
+ * Get the source column mapped to a media entity's source field.
+ *
+ * For media entities, the "source field" is the field that holds the primary
+ * media content (e.g., field_media_image for Image, field_media_document for
+ * Document). This is determined via the MediaType's source plugin API:
+ * MediaType::getSource()->getConfiguration()['source_field'].
+ *
+ * The returned column name is the CSV column mapped to the target_id subfield
+ * of the media source field. This typically contains the filename.
+ *
+ * @return string|null
+ *   The CSV column name mapped to the media source field, or NULL if:
+ *   - The entity type is not 'media'.
+ *   - The media type cannot be loaded.
+ *   - The source field is not mapped in the CSV.
+ */
+public function getMediaSourceColumn(): ?string {
+  if ($this->getTargetEntityTypeId() !== 'media') {
+    return NULL;
+  }
+
+  $bundle = $this->getTargetBundle();
+  $media_type = $this->entityTypeManager()
+    ->getStorage('media_type')
+    ->load($bundle);
+  if (!$media_type) {
+    return NULL;
+  }
+
+  $source_field = $media_type->getSource()->getConfiguration()['source_field'] ?? NULL;
+  if (!$source_field) {
+    return NULL;
+  }
+
+  // Look for a mapping to the source field's target_id subfield
+  // (e.g., field_media_image/target_id) or the base field itself.
+  foreach ($this->getMapping() as $mapping) {
+    $target = $mapping['target'];
+    if ($target === $source_field || $target === $source_field . '/target_id') {
+      return $mapping['source'];
+    }
+  }
+
+  return NULL;
+}
 ```
 
-**Modify `toDefinition()` to accept a `$lookup_source_id` parameter:**
+**Modify `toDefinition()` to accept an array of `$lookup_source_ids`:**
 
 ```php
-public function toDefinition(FileInterface $file, ?string $lookup_source_id = NULL): array {
+public function toDefinition(FileInterface $file, array $lookup_source_ids = []): array {
   $mapping = $this->getMapping();
   $entity_type_id = $this->getTargetEntityTypeId();
   $bundle = $this->getTargetBundle();
@@ -223,11 +297,11 @@ public function toDefinition(FileInterface $file, ?string $lookup_source_id = NU
     $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
   }
 
-  // If we have no ID or UUID, use the lookup column (for cross-migration
+  // If we have no ID or UUID, use the lookup columns (for cross-migration
   // references) or fallback to _record_number.
   if (empty($ids)) {
-    if ($lookup_source_id) {
-      $ids[] = $lookup_source_id;
+    if (!empty($lookup_source_ids)) {
+      $ids = $lookup_source_ids;
     }
     else {
       $ids[] = '_record_number';
@@ -241,7 +315,7 @@ public function toDefinition(FileInterface $file, ?string $lookup_source_id = NU
 }
 ```
 
-The `$lookup_source_id` is determined and passed in from `ExecuteImportForm` (Step 3 below). When it's `NULL`, behavior is unchanged from today.
+The `$lookup_source_ids` array is determined and passed in from `ExecuteImportForm` (Step 3 below). When empty, behavior is unchanged from today. When populated, all columns in the array become source IDs in the CSV source plugin, creating composite keys in the ID map table.
 
 Note: `toDefinition()` currently has no second parameter, and the `MukurtuImportStrategyInterface` defines it as `public function toDefinition(FileInterface $file)`. The interface will need updating too.
 
@@ -279,8 +353,8 @@ public function submitForm(array &$form, FormStateInterface $form_state): void {
     $entity_type_index[$entity_type][$fid] = $config;
   }
 
-  // Determine which upstream migrations need label-based source IDs.
-  // Key: fid, Value: the label source column to use.
+  // Determine which upstream migrations need lookup-based source IDs.
+  // Key: fid, Value: array of source column names to use as IDs.
   $upstream_lookup_columns = [];
   foreach ($configs_by_fid as $fid => $config) {
     $this->detectUpstreamDependencies(
@@ -299,9 +373,9 @@ public function submitForm(array &$form, FormStateInterface $form_state): void {
       continue;
     }
 
-    // Pass the lookup column if this migration is referenced by others.
-    $lookup_column = $upstream_lookup_columns[$fid] ?? NULL;
-    $definition = $config->toDefinition($file, $lookup_column)
+    // Pass the lookup columns if this migration is referenced by others.
+    $lookup_columns = $upstream_lookup_columns[$fid] ?? [];
+    $definition = $config->toDefinition($file, $lookup_columns)
       + ['mukurtu_import_message' => $this->getImportRevisionMessage()];
 
     $migration_definitions[$fid] = $definition;
@@ -347,15 +421,15 @@ public function submitForm(array &$form, FormStateInterface $form_state): void {
  *
  * Scans a migration config's field mappings. For each entity reference field,
  * checks if any other migration in this import creates that entity type.
- * If so, records the upstream migration's label column so it can be used
- * as a source ID.
+ * If so, records the upstream migration's lookup columns (label and, for
+ * media, the media source field column) so they can be used as source IDs.
  *
  * @param \Drupal\mukurtu_import\MukurtuImportStrategyInterface $config
  *   The import config to scan.
  * @param array $entity_type_index
  *   Index of entity_type => [fid => config].
  * @param array &$upstream_lookup_columns
- *   Accumulator: fid => label_source_column.
+ *   Accumulator: fid => array of source column names.
  */
 protected function detectUpstreamDependencies(
   MukurtuImportStrategyInterface $config,
@@ -387,9 +461,27 @@ protected function detectUpstreamDependencies(
 
     // This field references an entity type created by another migration.
     foreach ($entity_type_index[$ref_type] as $upstream_fid => $upstream_config) {
+      $columns = [];
+
+      // Always include the label column.
       $label_column = $upstream_config->getLabelSourceColumn();
       if ($label_column) {
-        $upstream_lookup_columns[$upstream_fid] = $label_column;
+        $columns[] = $label_column;
+      }
+
+      // For media entities, also include the media source field column
+      // (e.g., the filename column) so media can be referenced by filename.
+      $media_source_column = $upstream_config->getMediaSourceColumn();
+      if ($media_source_column && !in_array($media_source_column, $columns)) {
+        $columns[] = $media_source_column;
+      }
+
+      if (!empty($columns)) {
+        // Merge with any previously detected columns for this fid.
+        $existing = $upstream_lookup_columns[$upstream_fid] ?? [];
+        $upstream_lookup_columns[$upstream_fid] = array_unique(
+          array_merge($existing, $columns)
+        );
       }
     }
   }
@@ -491,7 +583,7 @@ protected function injectCrossMigrationLookups(
 
 **File to modify:** `src/MukurtuImportStrategyInterface.php`
 
-Add the new `getLabelSourceColumn()` method and update `toDefinition()` signature:
+Add the new methods and update `toDefinition()` signature:
 
 ```php
 /**
@@ -503,19 +595,30 @@ Add the new `getLabelSourceColumn()` method and update `toDefinition()` signatur
 public function getLabelSourceColumn(): ?string;
 
 /**
+ * Get the source column mapped to a media entity's source field.
+ *
+ * @return string|null
+ *   The CSV column name mapped to the media source field, or NULL if not
+ *   applicable (non-media entity type, unmapped source field, etc.).
+ */
+public function getMediaSourceColumn(): ?string;
+
+/**
  * Generate a Migrate API definition for a given file.
  *
  * @param \Drupal\file\FileInterface $file
  *   The import input file.
- * @param string|null $lookup_source_id
- *   (optional) A CSV column to use as the source ID for cross-migration
- *   lookups. When provided and no entity ID/UUID is mapped, this column
- *   is used instead of _record_number.
+ * @param array $lookup_source_ids
+ *   (optional) CSV column names to use as source IDs for cross-migration
+ *   lookups. When provided and no entity ID/UUID is mapped, these columns
+ *   are used as the source IDs instead of _record_number. Multiple columns
+ *   create a composite source key in the ID map, enabling lookup by any
+ *   of the values (e.g., media name or filename).
  *
  * @return array
  *   The migration definition array.
  */
-public function toDefinition(FileInterface $file, ?string $lookup_source_id = NULL): array;
+public function toDefinition(FileInterface $file, array $lookup_source_ids = []): array;
 ```
 
 ### Step 5: Clean Up ID Map Tables After Import
@@ -572,17 +675,18 @@ CSV value: "My Photo"
 ### After (with cross-migration lookup)
 
 ```
-CSV value: "My Photo"
+CSV value: "My Photo"  (or "photo.jpg")
     ↓
-[explode]  →  "My Photo"
+[explode]  →  "My Photo"  (or "photo.jpg")
     ↓
-[uuid_lookup]  →  not a UUID  →  "My Photo"
+[uuid_lookup]  →  not a UUID  →  "My Photo"  (or "photo.jpg")
     ↓
 [import_migration_lookup]  →  queries migrate_map_{media_migration_id}
-                               WHERE sourceid1 = "My Photo"
+                               WHERE sourceid1 = "My Photo" (label match)
+                                  OR sourceid2 = "My Photo" (filename match)
     ↓
     Found?  →  returns destination media ID (e.g., 5)
-    Not found?  →  passes "My Photo" through
+    Not found?  →  passes value through
     ↓
 [mukurtu_entity_lookup by name]  →  if already numeric, validates as entity ID
                                      if string, searches for media named "My Photo"
@@ -590,7 +694,7 @@ CSV value: "My Photo"
     Result: entity ID
 ```
 
-The `import_migration_lookup` acts as an early resolver that catches entities created in the same import session. If the entity wasn't part of this import (it was pre-existing), the value falls through to `mukurtu_entity_lookup` which handles it as before.
+The `import_migration_lookup` acts as an early resolver that catches entities created in the same import session. It searches across all source ID columns (label, filename, etc.) so the downstream CSV can reference media by **either name or filename**. If the entity wasn't part of this import (it was pre-existing), the value falls through to `mukurtu_entity_lookup` which handles it as before.
 
 ---
 
@@ -614,19 +718,21 @@ ID map table: `sourceid1 = 1, destid1 = 5`
 ```php
 'source' => [
   'plugin' => 'csv',
-  'ids' => ['Name'],               // ← the CSV column mapped to media's label
+  'ids' => ['Name', 'File'],       // ← label column + media source field column
   'create_record_number' => TRUE,   // kept for compatibility
   'record_number_field' => '_record_number',
 ]
 ```
 
-ID map table: `sourceid1 = "My Photo", destid1 = 5`
+ID map table: `sourceid1 = "My Photo", sourceid2 = "photo.jpg", destid1 = 5`
 
-Now `import_migration_lookup` can look up `"My Photo"` → `5`.
+Now `import_migration_lookup` can look up either `"My Photo"` → `5` or `"photo.jpg"` → `5`.
 
 **Important:** This change only applies when:
 - No entity ID (e.g., `mid`) or UUID column is mapped (otherwise those have priority).
 - Another migration in the batch references this entity type.
+- For media: the media source field column is only included if it's mapped in the CSV.
+- For non-media entity types: only the label column is used (single source ID, as before).
 
 If the user HAS mapped `mid` or `uuid`, those remain the source IDs and the downstream CSV should use those values. This is already the expected behavior.
 
@@ -646,11 +752,15 @@ A single CSV might create nodes that reference other nodes (e.g., "Related Items
 
 If the user writes the name of an entity that already existed (not created by this import), `import_migration_lookup` won't find it in the ID map and will pass the value through. `mukurtu_entity_lookup` then finds it by label as before.
 
-### Non-unique names in upstream CSV
+### Filename-based media references
 
-If two rows in `Media.csv` have the same `Name`, only the last one's mapping will be in the ID map (the first gets overwritten because source IDs must be unique). This is acceptable because:
-- Non-unique labels are already problematic for `mukurtu_entity_lookup`.
-- The user should use unique names when cross-referencing.
+A user can write `"photo.jpg"` in their Digital Heritage CSV's `field_media_assets` column instead of the media's name. `ImportMigrationLookup` will find it in `sourceid2` (the filename column) of the upstream media migration's ID map. If the filename isn't found (e.g., the media source field wasn't mapped, or the media was pre-existing), the value falls through to `mukurtu_entity_lookup`.
+
+Note: For `remote_video` media, the source field (`field_media_oembed_video`) contains the video URL, not a filename. The same mechanism applies — the user could reference a remote video by its URL.
+
+### Non-unique values in upstream CSV
+
+With composite source IDs (e.g., `Name` + `File`), two rows must have the same *combination* of all source ID values to collide. This means two media with the same name but different files are distinct entries in the ID map — an improvement over single-column source IDs. However, `ImportMigrationLookup` queries each column independently, so if two rows share the same filename but have different names, searching by that filename will match the first result found.
 
 ### Upstream migration has entity ID/UUID mapped
 
@@ -668,9 +778,9 @@ The `cultural_protocol` field type uses entity references for its `protocols` su
 
 | File | Change |
 |---|---|
-| `src/Plugin/migrate/process/ImportMigrationLookup.php` | **NEW** — Custom process plugin |
-| `src/Entity/MukurtuImportStrategy.php` | Add `getLabelSourceColumn()`, modify `toDefinition()` signature |
-| `src/MukurtuImportStrategyInterface.php` | Update interface for new method and modified `toDefinition()` |
+| `src/Plugin/migrate/process/ImportMigrationLookup.php` | **NEW** — Custom process plugin (multi-column search) |
+| `src/Entity/MukurtuImportStrategy.php` | Add `getLabelSourceColumn()`, `getMediaSourceColumn()`, modify `toDefinition()` signature |
+| `src/MukurtuImportStrategyInterface.php` | Update interface for new methods and modified `toDefinition()` |
 | `src/Form/ExecuteImportForm.php` | Add `detectUpstreamDependencies()`, `injectCrossMigrationLookups()`, `sortByDependencies()`, modify `submitForm()` |
 | `src/ImportBatchExecutable.php` | Add ID map table cleanup in `batchFinishedImport()` |
 
@@ -806,6 +916,7 @@ protected function sortByDependencies(
 - [x] Create `src/Plugin/migrate/process/ImportMigrationLookup.php`
   - [x] Implement `ContainerFactoryPluginInterface` with `Connection` dependency
   - [x] Implement `transform()`: numeric bypass, iterate `migration_ids`, query `migrate_map_*` tables, pass-through on miss
+  - [x] Update `transform()` to discover and search across all `sourceidN` columns (not just `sourceid1`) to support composite source IDs (label + filename)
 
 ### Phase 2: Strategy Entity Changes
 
@@ -813,10 +924,15 @@ protected function sortByDependencies(
 - [x] Add `getLabelSourceColumn()` implementation to `src/Entity/MukurtuImportStrategy.php`
   - [x] Look up the entity type's label key via `EntityTypeInterface::getKey('label')`
   - [x] Find and return the CSV source column mapped to that label key
-- [x] Update `toDefinition()` signature in `src/MukurtuImportStrategyInterface.php` to accept `?string $lookup_source_id = NULL`
-- [x] Update `toDefinition()` in `src/Entity/MukurtuImportStrategy.php`
-  - [x] Accept the new `$lookup_source_id` parameter
-  - [x] When no entity ID or UUID is mapped, use `$lookup_source_id` as the source ID (falling back to `_record_number` when `NULL`)
+- [ ] Add `getMediaSourceColumn()` to `src/MukurtuImportStrategyInterface.php`
+- [ ] Add `getMediaSourceColumn()` implementation to `src/Entity/MukurtuImportStrategy.php`
+  - [ ] Return `NULL` for non-media entity types
+  - [ ] Load the `MediaType` entity and get the source field name via `getSource()->getConfiguration()['source_field']`
+  - [ ] Find and return the CSV column mapped to the source field (or its `target_id` subfield)
+- [ ] Update `toDefinition()` signature in `src/MukurtuImportStrategyInterface.php` to accept `array $lookup_source_ids = []`
+- [ ] Update `toDefinition()` in `src/Entity/MukurtuImportStrategy.php`
+  - [ ] Accept the new `array $lookup_source_ids` parameter
+  - [ ] When no entity ID or UUID is mapped, use `$lookup_source_ids` as the source IDs (falling back to `['_record_number']` when empty)
 
 ### Phase 3: ExecuteImportForm — Dependency Detection and Injection
 
@@ -825,12 +941,13 @@ protected function sortByDependencies(
   - [x] Phase 1: Build configs and load files for all metadata files
   - [x] Phase 2: Build entity type index and detect upstream dependencies via `detectUpstreamDependencies()`
   - [x] Phase 2.5: Auto-sort files via `sortByDependencies()`
-  - [x] Phase 3: Build migration definitions, passing `$lookup_column` to `toDefinition()` for upstream migrations
+  - [ ] Phase 3: Build migration definitions, passing `$lookup_columns` array to `toDefinition()` for upstream migrations
   - [x] Phase 4: Inject `import_migration_lookup` into downstream definitions via `injectCrossMigrationLookups()`
   - [x] Phase 5: Run migrations (existing batch logic)
-- [x] Implement `detectUpstreamDependencies()`
+- [ ] Update `detectUpstreamDependencies()` to collect arrays of columns per upstream fid
   - [x] For each mapped field, check if it's an entity reference (`entity_reference` or `entity_reference_revisions`)
   - [x] If the referenced entity type is created by another migration in this import, record the upstream migration's label column
+  - [ ] Also record the upstream migration's media source column (if applicable) via `getMediaSourceColumn()`
 - [x] Implement `injectCrossMigrationLookups()`
   - [x] For each migration definition, scan process pipelines for entity reference fields
   - [x] For matching fields, collect upstream migration IDs (excluding self-references)
@@ -848,9 +965,11 @@ protected function sortByDependencies(
 
 ### Phase 5: Verification (Manual Testing Required)
 
-- [ ] Manual test: upload a Media CSV and a Digital Heritage CSV that references media by name
+- [ ] Manual test: upload a Media CSV and a Digital Heritage CSV that references media by **name**
   - [ ] Verify media entities are created first (auto-sort)
   - [ ] Verify DH nodes have correct `field_media_assets` references
   - [ ] Verify `migrate_map_*` and `migrate_message_*` tables are cleaned up after import
+- [ ] Manual test: upload a Media CSV and a Digital Heritage CSV that references media by **filename** (e.g., `"photo.jpg"` instead of the media name)
+  - [ ] Verify the filename resolves to the correct media entity via `sourceid2` lookup
 - [ ] Manual test: upload only a single CSV (no cross-migration references) to verify no regressions
 - [ ] Manual test: reference a pre-existing media entity by name to verify fallback to `mukurtu_entity_lookup` still works
