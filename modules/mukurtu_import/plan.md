@@ -846,7 +846,7 @@ protected function sortByDependencies(
 - [x] In `ImportBatchExecutable::batchProcessImportDefinition()`, store the migration definition in `$context['results']['definitions'][]`
 - [x] In `ImportBatchExecutable::batchFinishedImport()`, iterate stored definitions and call `$migration->getIdMap()->destroy()` on each
 
-### Phase 5: Verification
+### Phase 5: Verification (Manual Testing Required)
 
 - [ ] Manual test: upload a Media CSV and a Digital Heritage CSV that references media by name
   - [ ] Verify media entities are created first (auto-sort)
