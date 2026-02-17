@@ -52,7 +52,7 @@ class MukurtuAddCommunityMembershipAction extends ViewsBulkOperationsActionBase 
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     if ($object instanceof User) {
       // Load the community we are altering memberships for.
       /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
