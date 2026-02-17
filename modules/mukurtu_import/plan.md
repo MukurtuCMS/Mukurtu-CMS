@@ -671,13 +671,128 @@ The `cultural_protocol` field type uses entity references for its `protocols` su
 | `src/Plugin/migrate/process/ImportMigrationLookup.php` | **NEW** — Custom process plugin |
 | `src/Entity/MukurtuImportStrategy.php` | Add `getLabelSourceColumn()`, modify `toDefinition()` signature |
 | `src/MukurtuImportStrategyInterface.php` | Update interface for new method and modified `toDefinition()` |
-| `src/Form/ExecuteImportForm.php` | Add `detectUpstreamDependencies()`, `injectCrossMigrationLookups()`, modify `submitForm()` |
+| `src/Form/ExecuteImportForm.php` | Add `detectUpstreamDependencies()`, `injectCrossMigrationLookups()`, `sortByDependencies()`, modify `submitForm()` |
 | `src/ImportBatchExecutable.php` | Add ID map table cleanup in `batchFinishedImport()` |
 
 ---
 
-## Migration Execution Order
+## Migration Execution Order (Auto-Sorting)
 
-The system already supports file ordering via the weight-based drag table in `ImportFileSummaryForm`. However, with cross-migration dependencies, **execution order matters**: upstream migrations (e.g., Media) must run before downstream migrations (e.g., Digital Heritage).
+The system supports file ordering via the weight-based drag table in `ImportFileSummaryForm`. However, with cross-migration dependencies, **execution order matters**: upstream migrations (e.g., Media) must run before downstream migrations (e.g., Digital Heritage). The user should not have to manually sort these — since we already detect cross-migration dependencies in `detectUpstreamDependencies()`, we should auto-sort.
 
-The current weight system puts this responsibility on the user. For a future improvement, the system could auto-sort: detect dependencies and ensure referenced migrations run first, similar to how `MigrationPluginManager` resolves `migration_dependencies`. This is out of scope for this plan but worth noting.
+### Approach
+
+After Phase 2 (detecting dependencies) in `ExecuteImportForm::submitForm()`, reorder the `$metadata_files` array so that upstream migrations come before downstream ones. This is a topological sort based on the detected dependency graph.
+
+Add a new Phase 2.5 step in `submitForm()` between dependency detection and definition building:
+
+```php
+// Phase 2.5: Reorder files so upstream migrations run first.
+$metadata_files = $this->sortByDependencies($metadata_files, $configs_by_fid, $entity_type_index);
+```
+
+**New method on `ExecuteImportForm`:**
+
+```php
+/**
+ * Sort file IDs so upstream (referenced) migrations run before downstream.
+ *
+ * Uses a topological sort: for each file whose entity reference fields
+ * target an entity type created by another file in this import, the
+ * referenced file must come first.
+ *
+ * Falls back to the user's original weight-based ordering for files
+ * with no dependency relationship.
+ *
+ * @param array $metadata_files
+ *   File IDs in the user's original weight order.
+ * @param array $configs_by_fid
+ *   Import configs keyed by file ID.
+ * @param array $entity_type_index
+ *   Index of entity_type => [fid => config].
+ *
+ * @return array
+ *   File IDs reordered so dependencies are satisfied.
+ */
+protected function sortByDependencies(
+  array $metadata_files,
+  array $configs_by_fid,
+  array $entity_type_index
+): array {
+  // Build a dependency graph: fid => [fids it depends on].
+  $dependencies = array_fill_keys($metadata_files, []);
+
+  foreach ($configs_by_fid as $fid => $config) {
+    $entity_type_id = $config->getTargetEntityTypeId();
+    $bundle = $config->getTargetBundle();
+    $field_defs = $this->entityFieldManager
+      ->getFieldDefinitions($entity_type_id, $bundle);
+
+    foreach ($config->getMapping() as $mapping) {
+      $target = explode('/', $mapping['target'], 2)[0];
+      $field_def = $field_defs[$target] ?? NULL;
+      if (!$field_def) {
+        continue;
+      }
+
+      $field_type = $field_def->getType();
+      if (!in_array($field_type, ['entity_reference', 'entity_reference_revisions'])) {
+        continue;
+      }
+
+      $ref_type = $field_def->getSetting('target_type');
+      if (!isset($entity_type_index[$ref_type])) {
+        continue;
+      }
+
+      foreach (array_keys($entity_type_index[$ref_type]) as $upstream_fid) {
+        if ($upstream_fid !== $fid) {
+          $dependencies[$fid][] = $upstream_fid;
+        }
+      }
+    }
+    $dependencies[$fid] = array_unique($dependencies[$fid]);
+  }
+
+  // Topological sort (Kahn's algorithm).
+  // Preserve the user's weight order as a tiebreaker.
+  $position = array_flip($metadata_files);
+  $sorted = [];
+  $remaining = $dependencies;
+
+  while (!empty($remaining)) {
+    // Find all files with no unresolved dependencies.
+    $ready = [];
+    foreach ($remaining as $fid => $deps) {
+      $unresolved = array_intersect($deps, array_keys($remaining));
+      if (empty($unresolved)) {
+        $ready[] = $fid;
+      }
+    }
+
+    if (empty($ready)) {
+      // Circular dependency — fall back to original order for remaining.
+      usort($remaining_keys = array_keys($remaining), fn($a, $b) => $position[$a] <=> $position[$b]);
+      $sorted = array_merge($sorted, $remaining_keys);
+      break;
+    }
+
+    // Sort ready files by their original weight-based position.
+    usort($ready, fn($a, $b) => $position[$a] <=> $position[$b]);
+
+    foreach ($ready as $fid) {
+      $sorted[] = $fid;
+      unset($remaining[$fid]);
+    }
+  }
+
+  return $sorted;
+}
+```
+
+**Key behaviors:**
+
+- **Upstream migrations run first**: If Media.csv creates media and Digital Heritage.csv references media, Media.csv is sorted before Digital Heritage.csv regardless of the user's drag-and-drop ordering.
+- **User's weight order preserved as tiebreaker**: Among files with no dependency relationship (e.g., two independent CSVs), the user's original ordering is respected.
+- **Circular dependencies handled gracefully**: If two files reference each other (unlikely but possible), the sort falls back to the user's original order for those files.
+- **No UI changes needed**: The weight-based drag table in `ImportFileSummaryForm` remains as-is. The auto-sort is applied transparently at execution time.
