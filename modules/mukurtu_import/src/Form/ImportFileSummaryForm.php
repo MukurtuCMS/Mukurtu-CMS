@@ -31,16 +31,6 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $metadata_file_weights = $this->getMetadataFileWeights();
     $metadata_files = array_keys($metadata_file_weights);
 
-    $form['all_files_ready'] = [
-      '#type' => 'hidden',
-      '#value' => $this->allFilesReady() ? "1" : "0",
-      '#attributes' => [
-        'name' => 'all-files-ready',
-      ],
-      '#prefix' => "<div id=\"all-files-ready\">",
-      '#suffix' => "</div>",
-    ];
-
     $form['table'] = [
       '#type' => 'table',
       '#caption' => $this->t('Files will be imported top to bottom. Select your field mapping for each file by using the "Customize Settings" button.'),
@@ -118,14 +108,6 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Review Import'),
-      '#states' => [
-        'disabled' => [
-          ':input[name="all-files-ready"]' => ['value' => '0'],
-        ],
-        'enabled' => [
-          ':input[name="all-files-ready"]' => ['value' => '1'],
-        ],
-      ],
     ];
 
     return $form;
@@ -298,21 +280,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $msg = $this->getMappedFieldsMessage($fid);
     $response->addCommand(new ReplaceCommand("#mapping-summary-{$fid}", "<div id=\"mapping-summary-{$fid}\"><div>{$type_message}</div><div>{$msg}</div></div>"));
 
-    // Check if all files are valid enough to proceed with import.
-    $form['all_files_ready']['#value'] = $this->allFilesReady() ? '1' : '0';
-    $response->addCommand(new ReplaceCommand('#all-files-ready', $form['all_files_ready']));
     return $response;
-  }
-
-  /**
-   * Check if all files are ready for import.
-   *
-   * @return bool
-   *  TRUE if all files are ready, FALSE otherwise.
-   */
-  protected function allFilesReady(): bool {
-    $unready_fids = $this->getUnreadyFileIds();
-    return empty($unready_fids);
   }
 
   /**
@@ -359,7 +327,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
     }
 
     foreach ($this->getUnreadyFileIds() as $unready_fid) {
-      $form_state->setErrorByName("table][$unready_fid", $this->t("You must configure the import settings for this file."));
+      $form_state->setErrorByName("table][$unready_fid", $this->t("You must configure the import settings for %file.", ['%file' => $form['table'][$unready_fid]['label']['#markup']]));
     }
   }
 

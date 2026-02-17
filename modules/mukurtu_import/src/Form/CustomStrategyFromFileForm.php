@@ -462,37 +462,34 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    * 2. Check for field name matches (case insensitive).
    */
   protected function getAutoMappedTarget($source, $entity_type_id, $bundle = NULL) {
-    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
-    $configMapping = $this->importConfig ? $this->importConfig->getMapping() : [];
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $config_mapping = $this->importConfig ? $this->importConfig->getMapping() : [];
 
     // If the selected config has an existing valid mapping for this field,
     // it has precedence.
-    foreach ($configMapping as $mapping) {
+    foreach ($config_mapping as $mapping) {
       // Break up any subfields.
       $subfields = explode('/', $mapping['target'], 2);
       $target = reset($subfields);
 
       // Checking if we have a mapping and the root of the target field exists.
-      if ($mapping['source'] == $source && in_array($target, array_keys($fieldDefs))) {
+      if ($mapping['source'] == $source && in_array($target, array_keys($field_defs))) {
         return $mapping['target'];
       }
     }
 
     $needle = mb_strtolower($source);
 
-    // Hardcode our protocol subfields. Not ideal, but these are some of the
-    // most commonly imported fields, so having a good user experience trumps
-    // is more important.
-    $protocolLabel = t("Protocols");
-    $sharingSettingLabel = t("Sharing Setting");
-    if ($needle == mb_strtolower("$protocolLabel")) {
-      if ($protocolField = $this->getProtocolField($entity_type_id, $bundle)) {
-        return $protocolField . "/protocols";
-      }
-    }
-    if ($needle == mb_strtolower("$sharingSettingLabel")) {
-      if ($protocolField = $this->getProtocolField($entity_type_id, $bundle)) {
-        return $protocolField . "/sharing_setting";
+    // Check if any field has a property, which our import field process plugins
+    // support, matching the source label.
+    foreach ($field_defs as $field_name => $field_definition) {
+      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
+      $supported_properties = $plugin->getSupportedProperties($field_definition);
+
+      foreach ($supported_properties as $property_name => $property_info) {
+        if ($needle == mb_strtolower($property_info['label'])) {
+          return "{$field_name}/{$property_name}";
+        }
       }
     }
 
@@ -506,7 +503,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     }
 
     // Check if we have a (case insensitive) field name match.
-    if (isset($fieldDefs[$needle])) {
+    if (isset($field_defs[$needle])) {
       return $needle;
     }
 

@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_import\Plugin\MukurtuImportFieldProcess;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginBase;
 use Drupal\mukurtu_import\Attribute\MukurtuImportFieldProcess;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -16,13 +17,17 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
   description: new TranslatableMarkup('Image.'),
   field_types: ['image'],
   weight: 0,
+  properties: ['target_id', 'alt'],
 )]
 class Image extends MukurtuImportFieldProcessPluginBase {
+  use StringTranslationTrait;
+
   /**
    * {@inheritdoc}
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
     $multivalue_delimiter = $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER;
+    $subfield = $context['subfield'] ?? NULL;
 
     $process = [];
     if ($this->isMultiple($field_config)) {
@@ -31,10 +36,17 @@ class Image extends MukurtuImportFieldProcessPluginBase {
         'delimiter' => $multivalue_delimiter,
       ];
     }
-    $process[] = [
-      'plugin' => 'mukurtu_imageitem',
-      'upload_location' => $context['upload_location'] ?? '',
-    ];
+    if ($subfield === 'target_id') {
+      $process[] = [
+        'plugin' => 'mukurtu_imageitem',
+        'upload_location' => $context['upload_location'] ?? '',
+      ];
+    }
+    if ($subfield === 'alt') {
+      $process[] = [
+        'plugin' => 'get',
+      ];
+    }
 
     $process[0]['source'] = $source;
     return $process;
@@ -44,8 +56,10 @@ class Image extends MukurtuImportFieldProcessPluginBase {
    * {@inheritdoc}
    */
   public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
-    $description = $this->isMultiple($field_config) ? "The file IDs or filenames of the uploaded images, separated by your selected multi-value delimiter." : "The file ID or filename of the uploaded image.";
-    return t($description);
+    if ($field_property == 'alt') {
+      return $this->t('The alt text for the image.');
+    }
+    return $this->isMultiple($field_config) ? $this->t("The file IDs or filenames of the uploaded images, separated by your selected multi-value delimiter.") : $this->t("The file ID or filename of the uploaded image.");
   }
 
 }

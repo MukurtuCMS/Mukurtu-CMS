@@ -17,6 +17,7 @@ use League\Csv\Reader;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 
 /**
  * Provides a Mukurtu Import form.
@@ -54,7 +55,7 @@ class ImportBaseForm extends FormBase {
   /**
    * The field definitions.
    *
-   * @var \Drupal\Core\Field\FieldDefinitionInterface[]
+   * @var array
    */
   protected array $fieldDefinitions;
 
@@ -71,6 +72,8 @@ class ImportBaseForm extends FormBase {
    *   The entity type bundle info service.
    * @param \Drupal\Component\Uuid\UuidInterface $uuid
    *   The UUID service.
+   * @param \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $fieldProcessPluginManager
+   *   The field process plugin manager.
    */
   public function __construct(
     protected PrivateTempStoreFactory $tempStoreFactory,
@@ -78,6 +81,7 @@ class ImportBaseForm extends FormBase {
     protected EntityFieldManagerInterface $entityFieldManager,
     protected EntityTypeBundleInfoInterface $entityBundleInfo,
     protected UuidInterface $uuid,
+    protected MukurtuImportFieldProcessPluginManager $fieldProcessPluginManager,
   ) {
     $this->store = $tempStoreFactory->get('mukurtu_import');
     $this->importId = $this->store->get('import_id');
@@ -100,6 +104,7 @@ class ImportBaseForm extends FormBase {
       $container->get('entity_field.manager'),
       $container->get('entity_type.bundle.info'),
       $container->get('uuid'),
+      $container->get('plugin.manager.mukurtu_import_field_process'),
     );
   }
 
@@ -378,27 +383,32 @@ class ImportBaseForm extends FormBase {
    *   The select form element.
    */
   protected function buildTargetOptions($entity_type_id, $bundle = NULL) {
-    $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
-    $entityKeys = $entityDefinition->getKeys();
+    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entity_keys = $entity_definition->getKeys();
 
     $options = [-1 => $this->t('Ignore - Do not import')];
     foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
-      if ($field_definition->getType() == 'cultural_protocol') {
-        // Split our protocol field into the individual sharing
-        // setting/protocols subfields.
-        $options["{$field_name}/sharing_setting"] = $this->t('Sharing Setting');
-        $options["{$field_name}/protocols"] = $this->t('Protocols');
-        continue;
-      }
+      // Get the plugin for this field to check if it supports properties.
+      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
+      $supported_properties = $plugin->getSupportedProperties($field_definition);
 
-      $options[$field_name] = $field_definition->getLabel();
+      // If the plugin supports properties, add them as separate options.
+      if (!empty($supported_properties)) {
+        foreach ($supported_properties as $property_name => $property_info) {
+          $options["{$field_name}/{$property_name}"] = $property_info['label'];
+        }
+      }
+      else {
+        // No properties, add the field normally.
+        $options[$field_name] = $field_definition->getLabel();
+      }
     }
 
     // Very Mukurtu specific. We ship with a "Language" field which has
     // the exact same label as content entity langcodes. Here we disambiguate
     // the two.
-    if (isset($options[$entityKeys['langcode']])) {
-      $options[$entityKeys['langcode']] .= $this->t(' (langcode)');
+    if (isset($options[$entity_keys['langcode']])) {
+      $options[$entity_keys['langcode']] .= $this->t(' (langcode)');
     }
 
     return $options;
@@ -409,42 +419,43 @@ class ImportBaseForm extends FormBase {
    *
    * @param string $entity_type_id
    *   The entity type id.
-   * @param string $bundle
+   * @param ?string $bundle
    *   The bundle.
-   * @return mixed
+   *
+   * @return \Drupal\Core\Field\FieldDefinitionInterface[]
    *   The field definitions.
    */
-  protected function getFieldDefinitions($entity_type_id, $bundle = NULL) {
+  protected function getFieldDefinitions(string $entity_type_id, ?string $bundle = NULL): array {
     // Memoize the field defs.
     if (empty($this->fieldDefinitions[$entity_type_id][$bundle])) {
-      $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
-      $entityKeys = $entityDefinition->getKeys();
-      $fieldDefs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
+      $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+      $entity_keys = $entity_definition->getKeys();
+      $field_defs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
 
       // Remove computed fields/fields that can't be targeted for import.
-      foreach ($fieldDefs as $field_name => $fieldDef) {
+      foreach ($field_defs as $field_name => $fieldDef) {
         // Don't remove ID/UUID fields.
-        if ($field_name == $entityKeys['id'] || $field_name == $entityKeys['uuid']) {
+        if ($field_name === $entity_keys['id'] || $field_name === $entity_keys['uuid']) {
           continue;
         }
 
         // Remove the revision log message as a valid target. We are using
         // specific revision log messages to control import behavior.
-        if ($field_name == 'revision_log') {
-          unset($fieldDefs[$field_name]);
+        if ($field_name === 'revision_log') {
+          unset($field_defs[$field_name]);
         }
 
         // Remove unwanted 'behavior_settings' paragraph base field.
-        if ($entity_type_id == "paragraph" && $field_name == 'behavior_settings') {
-          unset($fieldDefs[$field_name]);
+        if ($entity_type_id === "paragraph" && $field_name === 'behavior_settings') {
+          unset($field_defs[$field_name]);
         }
 
         // Remove computed and read-only fields.
         if ($fieldDef->isComputed() || $fieldDef->isReadOnly()) {
-          unset($fieldDefs[$field_name]);
+          unset($field_defs[$field_name]);
         }
       }
-      $this->fieldDefinitions[$entity_type_id][$bundle] = $fieldDefs;
+      $this->fieldDefinitions[$entity_type_id][$bundle] = $field_defs;
     }
 
     return $this->fieldDefinitions[$entity_type_id][$bundle];
