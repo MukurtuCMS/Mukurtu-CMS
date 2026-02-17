@@ -941,13 +941,13 @@ protected function sortByDependencies(
   - [x] Phase 1: Build configs and load files for all metadata files
   - [x] Phase 2: Build entity type index and detect upstream dependencies via `detectUpstreamDependencies()`
   - [x] Phase 2.5: Auto-sort files via `sortByDependencies()`
-  - [ ] Phase 3: Build migration definitions, passing `$lookup_columns` array to `toDefinition()` for upstream migrations
+  - [x] Phase 3: Build migration definitions, passing `$lookup_columns` array to `toDefinition()` for upstream migrations
   - [x] Phase 4: Inject `import_migration_lookup` into downstream definitions via `injectCrossMigrationLookups()`
   - [x] Phase 5: Run migrations (existing batch logic)
-- [ ] Update `detectUpstreamDependencies()` to collect arrays of columns per upstream fid
+- [x] Update `detectUpstreamDependencies()` to collect arrays of columns per upstream fid
   - [x] For each mapped field, check if it's an entity reference (`entity_reference` or `entity_reference_revisions`)
   - [x] If the referenced entity type is created by another migration in this import, record the upstream migration's label column
-  - [ ] Also record the upstream migration's media source column (if applicable) via `getMediaSourceColumn()`
+  - [x] Also record the upstream migration's media source column (if applicable) via `getMediaSourceColumn()`
 - [x] Implement `injectCrossMigrationLookups()`
   - [x] For each migration definition, scan process pipelines for entity reference fields
   - [x] For matching fields, collect upstream migration IDs (excluding self-references)

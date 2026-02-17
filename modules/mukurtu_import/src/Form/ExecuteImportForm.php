@@ -204,8 +204,8 @@ class ExecuteImportForm extends ImportBaseForm {
         continue;
       }
 
-      $lookup_column = $upstream_lookup_columns[$fid] ?? NULL;
-      $definition = $config->toDefinition($file, $lookup_column)
+      $lookup_columns = $upstream_lookup_columns[$fid] ?? [];
+      $definition = $config->toDefinition($file, $lookup_columns)
         + ['mukurtu_import_message' => $this->getImportRevisionMessage()];
 
       $migration_definitions[$fid] = $definition;
@@ -255,7 +255,7 @@ class ExecuteImportForm extends ImportBaseForm {
    * @param array $entity_type_index
    *   Index of entity_type => [fid => config].
    * @param array &$upstream_lookup_columns
-   *   Accumulator: fid => label_source_column.
+   *   Accumulator: fid => array of source column names (label, media source).
    */
   protected function detectUpstreamDependencies(
     MukurtuImportStrategyInterface $config,
@@ -287,9 +287,20 @@ class ExecuteImportForm extends ImportBaseForm {
 
       // This field references an entity type created by another migration.
       foreach ($entity_type_index[$ref_type] as $upstream_fid => $upstream_config) {
+        $columns = [];
         $label_column = $upstream_config->getLabelSourceColumn();
         if ($label_column) {
-          $upstream_lookup_columns[$upstream_fid] = $label_column;
+          $columns[] = $label_column;
+        }
+        $media_source_column = $upstream_config->getMediaSourceColumn();
+        if ($media_source_column && !in_array($media_source_column, $columns)) {
+          $columns[] = $media_source_column;
+        }
+        if (!empty($columns)) {
+          $existing = $upstream_lookup_columns[$upstream_fid] ?? [];
+          $upstream_lookup_columns[$upstream_fid] = array_unique(
+            array_merge($existing, $columns)
+          );
         }
       }
     }
