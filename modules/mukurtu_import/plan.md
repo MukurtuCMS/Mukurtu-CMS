@@ -969,7 +969,7 @@ protected function sortByDependencies(
   - [ ] Verify media entities are created first (auto-sort)
   - [ ] Verify DH nodes have correct `field_media_assets` references
   - [ ] Verify `migrate_map_*` and `migrate_message_*` tables are cleaned up after import
-- [ ] Manual test: upload a Media CSV and a Digital Heritage CSV that references media by **filename** (e.g., `"photo.jpg"` instead of the media name)
+- [ ] Manual test: upload a Media CSV and a Digital Heritage CSV that references media by **filename** (e.g., `"photo.jpg"` instead of the media name) *(requires manual testing)*
   - [ ] Verify the filename resolves to the correct media entity via `sourceid2` lookup
 - [ ] Manual test: upload only a single CSV (no cross-migration references) to verify no regressions
 - [ ] Manual test: reference a pre-existing media entity by name to verify fallback to `mukurtu_entity_lookup` still works
