@@ -16,6 +16,33 @@ However, `mukurtu_entity_lookup` has a critical limitation: it **throws an excep
 
 Drupal core's `migration_lookup` process plugin (`core/modules/migrate/src/Plugin/migrate/process/MigrationLookup.php`) uses the `MigrateLookup` service, which calls `$this->migrationPluginManager->createInstances($migration_id)` to load migrations. The mukurtu_import module creates transient migrations via `createStubMigration()` — these are **not registered** with the plugin manager and cannot be discovered by `migration_lookup`.
 
+### Artifacts Left Behind by `createStubMigration()`
+
+`createStubMigration()` (in `MigrationPluginManager`) simply instantiates a `Migration` plugin object from a raw array definition — it does **not** register the migration with the plugin manager. The object lives only in memory and cannot be discovered by other code (e.g., `migration_lookup`, `createInstances()`).
+
+However, running a stub migration **does** create persistent database artifacts. The `Sql` ID map plugin (which is the default) lazily creates two tables the first time the ID map is accessed:
+
+1. **`migrate_map_{migration_id}`** — maps source IDs to destination entity IDs (used for rollback, duplicate detection, and cross-migration lookups).
+2. **`migrate_message_{migration_id}`** — stores error/warning messages from the migration run.
+
+Since mukurtu_import's migration IDs are deterministic (e.g., `{uid}__{fid}__{entity_type}__{bundle}`), these tables accumulate in the database after each import. **Currently, mukurtu_import never cleans them up.** There is no call to `$idMap->destroy()` (which drops both tables) anywhere in the module.
+
+For this plan, the ID map tables are actually essential — `ImportMigrationLookup` queries `migrate_map_*` tables directly. The tables must persist at least until all migrations in the batch complete. After that, they should be cleaned up.
+
+**Recommended cleanup approach:** After batch completion in `ImportBatchExecutable::batchFinishedImport()`, iterate through the completed migration definitions and call `destroy()` on each ID map. This is addressed in Step 5 below.
+
+### Alternatives to `createStubMigration()`
+
+There are several alternatives worth noting, though none are clearly better for this module's use case:
+
+1. **`hook_migration_plugins_alter(&$definitions)`** — Injects dynamic definitions into the discovery system, making migrations fully registered. However, this hook fires during plugin cache rebuilds and doesn't have access to per-request state (file paths, user session data), making it impractical for user-initiated imports.
+
+2. **YAML migration templates + `createInstances()`** — Ship parameterized YAML files in `migrations/` and pass file-specific config at runtime. Makes migrations registered but is inflexible for the fully dynamic field mapping this module supports.
+
+3. **Custom in-memory ID map plugin** — Replace the `Sql` ID map with an array-backed implementation to avoid DB artifacts entirely. Loses duplicate detection across batch boundaries and wouldn't support the cross-migration lookup approach in this plan (which queries the DB table directly).
+
+**Conclusion:** `createStubMigration()` remains the right choice for this module. Its transient, unregistered nature is actually appropriate — these are ephemeral, user-specific migrations that shouldn't pollute the global migration registry. The only issue is the orphaned DB tables, which we address with explicit cleanup.
+
 ---
 
 ## Solution Overview
@@ -491,130 +518,36 @@ public function getLabelSourceColumn(): ?string;
 public function toDefinition(FileInterface $file, ?string $lookup_source_id = NULL): array;
 ```
 
-### Step 5: Update the Test Base
+### Step 5: Clean Up ID Map Tables After Import
 
-**File to modify:** `tests/src/Kernel/MukurtuImportTestBase.php`
+**File to modify:** `src/ImportBatchExecutable.php`
 
-Update `importCsvFile()` to pass the new parameter:
+As discussed in the "Artifacts Left Behind" section above, each migration run creates `migrate_map_*` and `migrate_message_*` tables that are never cleaned up. Since the cross-migration lookup feature relies on these tables persisting across migrations within a single batch, we must clean them up **after** the entire batch completes — not after each individual migration.
+
+Add cleanup in the `batchFinishedImport()` static callback:
 
 ```php
-protected function importCsvFile(
-  FileInterface $file,
-  array $mapping,
-  $entity_type_id = 'node',
-  $bundle = 'protocol_aware_content',
-  ?string $lookup_source_id = NULL,
-): int {
-  $import_config = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);
-  $import_config->setTargetEntityTypeId($entity_type_id);
-  $import_config->setTargetBundle($bundle);
-  $import_config->setMapping($mapping);
-  $definition = $import_config->toDefinition($file, $lookup_source_id);
-  // ... rest unchanged
+public static function batchFinishedImport($success, $results, $operations): void {
+  // ... existing message/error handling ...
+
+  // Clean up ID map tables for all migrations in this batch.
+  // These are no longer needed after the import is complete.
+  $database = \Drupal::database();
+  $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
+  foreach ($results['definitions'] ?? [] as $definition) {
+    $migration = $migration_plugin_manager->createStubMigration($definition);
+    $migration->getIdMap()->destroy();
+  }
 }
 ```
 
-### Step 6: Write Tests
-
-**New file:** `tests/src/Kernel/ImportCrossMigrationLookupTest.php`
+This requires that the batch `$results` array carries the migration definitions. In `batchProcessImportDefinition()`, add:
 
 ```php
-<?php
-
-declare(strict_types=1);
-
-namespace Drupal\Tests\mukurtu_import\Kernel;
-
-use Drupal\migrate\Plugin\MigrationInterface;
-use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
-
-/**
- * Tests cross-migration entity reference resolution.
- */
-class ImportCrossMigrationLookupTest extends MukurtuImportTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-    $this->installEntitySchema('media');
-    $this->installEntitySchema('media_type');
-    // Install necessary media config...
-  }
-
-  /**
-   * Test that a node can reference media created by another migration.
-   */
-  public function testCrossMigrationMediaReference() {
-    // 1. Create media migration (upstream).
-    $media_csv_data = [
-      ['Name', 'File'],
-      ['My Photo', 'photo.jpg'],
-    ];
-    $media_file = $this->createCsvFile($media_csv_data);
-    $media_mapping = [
-      ['target' => 'name', 'source' => 'Name'],
-      ['target' => 'field_media_image/target_id', 'source' => 'File'],
-    ];
-    $media_config = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);
-    $media_config->setTargetEntityTypeId('media');
-    $media_config->setTargetBundle('image');
-    $media_config->setMapping($media_mapping);
-
-    // Use 'Name' as the source ID for cross-migration lookup.
-    $media_definition = $media_config->toDefinition($media_file, 'Name');
-
-    // 2. Run the media migration.
-    $media_result = $this->runMigrationDefinition($media_definition);
-    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $media_result);
-
-    // 3. Create node migration (downstream) with import_migration_lookup.
-    $node_csv_data = [
-      ['Title', 'Media Assets'],
-      ['My DH Item', 'My Photo'],
-    ];
-    $node_file = $this->createCsvFile($node_csv_data);
-    $node_mapping = [
-      ['target' => 'title', 'source' => 'Title'],
-      ['target' => 'field_media_assets', 'source' => 'Media Assets'],
-    ];
-    $node_config = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);
-    $node_config->setTargetEntityTypeId('node');
-    $node_config->setTargetBundle('digital_heritage');
-    $node_config->setMapping($node_mapping);
-    $node_definition = $node_config->toDefinition($node_file);
-
-    // Inject import_migration_lookup into the process.
-    // (This simulates what ExecuteImportForm::injectCrossMigrationLookups does.)
-    $process = &$node_definition['process']['field_media_assets'];
-    // Find the mukurtu_entity_lookup step and insert before it.
-    foreach ($process as $i => $step) {
-      if (is_array($step) && ($step['plugin'] ?? '') === 'mukurtu_entity_lookup') {
-        array_splice($process, $i, 0, [[
-          'plugin' => 'import_migration_lookup',
-          'migration_ids' => [$media_definition['id']],
-        ]]);
-        break;
-      }
-    }
-
-    // 4. Run the node migration.
-    $node_result = $this->runMigrationDefinition($node_definition);
-    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $node_result);
-
-    // 5. Verify the reference.
-    $nodes = $this->entityTypeManager->getStorage('node')
-      ->loadByProperties(['title' => 'My DH Item']);
-    $node = reset($nodes);
-    $this->assertNotEmpty($node);
-    $media_refs = $node->get('field_media_assets')->referencedEntities();
-    $this->assertCount(1, $media_refs);
-    $this->assertEquals('My Photo', $media_refs[0]->getName());
-  }
-
-}
+$context['results']['definitions'][] = $definition;
 ```
+
+**Note:** This cleanup step is independent of the cross-migration lookup feature and fixes a pre-existing issue. It could be done as a separate commit.
 
 ---
 
@@ -739,8 +672,7 @@ The `cultural_protocol` field type uses entity references for its `protocols` su
 | `src/Entity/MukurtuImportStrategy.php` | Add `getLabelSourceColumn()`, modify `toDefinition()` signature |
 | `src/MukurtuImportStrategyInterface.php` | Update interface for new method and modified `toDefinition()` |
 | `src/Form/ExecuteImportForm.php` | Add `detectUpstreamDependencies()`, `injectCrossMigrationLookups()`, modify `submitForm()` |
-| `tests/src/Kernel/MukurtuImportTestBase.php` | Update `importCsvFile()` for new parameter |
-| `tests/src/Kernel/ImportCrossMigrationLookupTest.php` | **NEW** — Tests for cross-migration lookup |
+| `src/ImportBatchExecutable.php` | Add ID map table cleanup in `batchFinishedImport()` |
 
 ---
 
