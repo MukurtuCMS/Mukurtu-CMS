@@ -346,6 +346,7 @@ function mukurtu_install() {
   ];
   $roles['mukurtu_manager'] = [
     'access administration pages',
+    'access block library',
     'access content overview',
     'access contextual links',
     'access files overview',
