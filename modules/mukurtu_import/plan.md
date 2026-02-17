@@ -803,9 +803,9 @@ protected function sortByDependencies(
 
 ### Phase 1: New Process Plugin
 
-- [ ] Create `src/Plugin/migrate/process/ImportMigrationLookup.php`
-  - [ ] Implement `ContainerFactoryPluginInterface` with `Connection` dependency
-  - [ ] Implement `transform()`: numeric bypass, iterate `migration_ids`, query `migrate_map_*` tables, pass-through on miss
+- [x] Create `src/Plugin/migrate/process/ImportMigrationLookup.php`
+  - [x] Implement `ContainerFactoryPluginInterface` with `Connection` dependency
+  - [x] Implement `transform()`: numeric bypass, iterate `migration_ids`, query `migrate_map_*` tables, pass-through on miss
 
 ### Phase 2: Strategy Entity Changes
 
