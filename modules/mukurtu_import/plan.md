@@ -796,3 +796,61 @@ protected function sortByDependencies(
 - **User's weight order preserved as tiebreaker**: Among files with no dependency relationship (e.g., two independent CSVs), the user's original ordering is respected.
 - **Circular dependencies handled gracefully**: If two files reference each other (unlikely but possible), the sort falls back to the user's original order for those files.
 - **No UI changes needed**: The weight-based drag table in `ImportFileSummaryForm` remains as-is. The auto-sort is applied transparently at execution time.
+
+---
+
+## Implementation Todo List
+
+### Phase 1: New Process Plugin
+
+- [ ] Create `src/Plugin/migrate/process/ImportMigrationLookup.php`
+  - [ ] Implement `ContainerFactoryPluginInterface` with `Connection` dependency
+  - [ ] Implement `transform()`: numeric bypass, iterate `migration_ids`, query `migrate_map_*` tables, pass-through on miss
+
+### Phase 2: Strategy Entity Changes
+
+- [ ] Add `getLabelSourceColumn()` to `src/MukurtuImportStrategyInterface.php`
+- [ ] Add `getLabelSourceColumn()` implementation to `src/Entity/MukurtuImportStrategy.php`
+  - [ ] Look up the entity type's label key via `EntityTypeInterface::getKey('label')`
+  - [ ] Find and return the CSV source column mapped to that label key
+- [ ] Update `toDefinition()` signature in `src/MukurtuImportStrategyInterface.php` to accept `?string $lookup_source_id = NULL`
+- [ ] Update `toDefinition()` in `src/Entity/MukurtuImportStrategy.php`
+  - [ ] Accept the new `$lookup_source_id` parameter
+  - [ ] When no entity ID or UUID is mapped, use `$lookup_source_id` as the source ID (falling back to `_record_number` when `NULL`)
+
+### Phase 3: ExecuteImportForm — Dependency Detection and Injection
+
+- [ ] Inject `EntityFieldManagerInterface` into `ExecuteImportForm` (if not already available)
+- [ ] Restructure `submitForm()` into the 5-phase approach:
+  - [ ] Phase 1: Build configs and load files for all metadata files
+  - [ ] Phase 2: Build entity type index and detect upstream dependencies via `detectUpstreamDependencies()`
+  - [ ] Phase 2.5: Auto-sort files via `sortByDependencies()`
+  - [ ] Phase 3: Build migration definitions, passing `$lookup_column` to `toDefinition()` for upstream migrations
+  - [ ] Phase 4: Inject `import_migration_lookup` into downstream definitions via `injectCrossMigrationLookups()`
+  - [ ] Phase 5: Run migrations (existing batch logic)
+- [ ] Implement `detectUpstreamDependencies()`
+  - [ ] For each mapped field, check if it's an entity reference (`entity_reference` or `entity_reference_revisions`)
+  - [ ] If the referenced entity type is created by another migration in this import, record the upstream migration's label column
+- [ ] Implement `injectCrossMigrationLookups()`
+  - [ ] For each migration definition, scan process pipelines for entity reference fields
+  - [ ] For matching fields, collect upstream migration IDs (excluding self-references)
+  - [ ] Find the `mukurtu_entity_lookup` or `mukurtu_entity_generate` step position
+  - [ ] Insert `import_migration_lookup` step before it with the upstream migration IDs
+- [ ] Implement `sortByDependencies()`
+  - [ ] Build dependency graph from entity reference field mappings
+  - [ ] Topological sort (Kahn's algorithm) with user's weight order as tiebreaker
+  - [ ] Handle circular dependencies by falling back to user's original order
+
+### Phase 4: ID Map Cleanup
+
+- [ ] In `ImportBatchExecutable::batchProcessImportDefinition()`, store the migration definition in `$context['results']['definitions'][]`
+- [ ] In `ImportBatchExecutable::batchFinishedImport()`, iterate stored definitions and call `$migration->getIdMap()->destroy()` on each
+
+### Phase 5: Verification
+
+- [ ] Manual test: upload a Media CSV and a Digital Heritage CSV that references media by name
+  - [ ] Verify media entities are created first (auto-sort)
+  - [ ] Verify DH nodes have correct `field_media_assets` references
+  - [ ] Verify `migrate_map_*` and `migrate_message_*` tables are cleaned up after import
+- [ ] Manual test: upload only a single CSV (no cross-migration references) to verify no regressions
+- [ ] Manual test: reference a pre-existing media entity by name to verify fallback to `mukurtu_entity_lookup` still works
