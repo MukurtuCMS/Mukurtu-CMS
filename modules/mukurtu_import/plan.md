@@ -843,8 +843,8 @@ protected function sortByDependencies(
 
 ### Phase 4: ID Map Cleanup
 
-- [ ] In `ImportBatchExecutable::batchProcessImportDefinition()`, store the migration definition in `$context['results']['definitions'][]`
-- [ ] In `ImportBatchExecutable::batchFinishedImport()`, iterate stored definitions and call `$migration->getIdMap()->destroy()` on each
+- [x] In `ImportBatchExecutable::batchProcessImportDefinition()`, store the migration definition in `$context['results']['definitions'][]`
+- [x] In `ImportBatchExecutable::batchFinishedImport()`, iterate stored definitions and call `$migration->getIdMap()->destroy()` on each
 
 ### Phase 5: Verification
 
