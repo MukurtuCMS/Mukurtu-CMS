@@ -362,6 +362,7 @@ function mukurtu_install() {
     'access user profiles',
     'add community entities',
     'administer account settings',
+    'administer block content',
     'administer block_content display',
     'administer block_content fields',
     'administer block_content form display',
