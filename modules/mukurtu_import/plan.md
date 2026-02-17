@@ -924,15 +924,15 @@ protected function sortByDependencies(
 - [x] Add `getLabelSourceColumn()` implementation to `src/Entity/MukurtuImportStrategy.php`
   - [x] Look up the entity type's label key via `EntityTypeInterface::getKey('label')`
   - [x] Find and return the CSV source column mapped to that label key
-- [ ] Add `getMediaSourceColumn()` to `src/MukurtuImportStrategyInterface.php`
-- [ ] Add `getMediaSourceColumn()` implementation to `src/Entity/MukurtuImportStrategy.php`
-  - [ ] Return `NULL` for non-media entity types
-  - [ ] Load the `MediaType` entity and get the source field name via `getSource()->getConfiguration()['source_field']`
-  - [ ] Find and return the CSV column mapped to the source field (or its `target_id` subfield)
-- [ ] Update `toDefinition()` signature in `src/MukurtuImportStrategyInterface.php` to accept `array $lookup_source_ids = []`
-- [ ] Update `toDefinition()` in `src/Entity/MukurtuImportStrategy.php`
-  - [ ] Accept the new `array $lookup_source_ids` parameter
-  - [ ] When no entity ID or UUID is mapped, use `$lookup_source_ids` as the source IDs (falling back to `['_record_number']` when empty)
+- [x] Add `getMediaSourceColumn()` to `src/MukurtuImportStrategyInterface.php`
+- [x] Add `getMediaSourceColumn()` implementation to `src/Entity/MukurtuImportStrategy.php`
+  - [x] Return `NULL` for non-media entity types
+  - [x] Load the `MediaType` entity and get the source field name via `getSource()->getConfiguration()['source_field']`
+  - [x] Find and return the CSV column mapped to the source field (or its `target_id` subfield)
+- [x] Update `toDefinition()` signature in `src/MukurtuImportStrategyInterface.php` to accept `array $lookup_source_ids = []`
+- [x] Update `toDefinition()` in `src/Entity/MukurtuImportStrategy.php`
+  - [x] Accept the new `array $lookup_source_ids` parameter
+  - [x] When no entity ID or UUID is mapped, use `$lookup_source_ids` as the source IDs (falling back to `['_record_number']` when empty)
 
 ### Phase 3: ExecuteImportForm — Dependency Detection and Injection
 

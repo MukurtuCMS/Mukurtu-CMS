@@ -336,7 +336,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    * @return array
    *   The migration definition array
    */
-  public function toDefinition(FileInterface $file, ?string $lookup_source_id = NULL): array {
+  public function toDefinition(FileInterface $file, array $lookup_source_ids = []): array {
     $mapping = $this->getMapping();
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
@@ -358,8 +358,8 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     // If we have no ID or UUID, use the lookup column (for cross-migration
     // references) or fallback to _record_number.
     if (empty($ids)) {
-      if ($lookup_source_id) {
-        $ids[] = $lookup_source_id;
+      if (!empty($lookup_source_ids)) {
+        $ids = $lookup_source_ids;
       }
       else {
         $ids[] = '_record_number';
@@ -415,6 +415,38 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
     foreach ($this->getMapping() as $mapping) {
       if ($mapping['target'] === $label_key) {
+        return $mapping['source'];
+      }
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMediaSourceColumn(): ?string {
+    if ($this->getTargetEntityTypeId() !== 'media') {
+      return NULL;
+    }
+
+    $bundle = $this->getTargetBundle();
+    $media_type = $this->entityTypeManager()
+      ->getStorage('media_type')
+      ->load($bundle);
+    if (!$media_type) {
+      return NULL;
+    }
+
+    $source_field = $media_type->getSource()->getConfiguration()['source_field'] ?? NULL;
+    if (!$source_field) {
+      return NULL;
+    }
+
+    foreach ($this->getMapping() as $mapping) {
+      $target = $mapping['target'];
+      // Match the source field directly or its target_id subfield.
+      if ($target === $source_field || $target === $source_field . '/target_id') {
         return $mapping['source'];
       }
     }
