@@ -809,14 +809,14 @@ protected function sortByDependencies(
 
 ### Phase 2: Strategy Entity Changes
 
-- [ ] Add `getLabelSourceColumn()` to `src/MukurtuImportStrategyInterface.php`
-- [ ] Add `getLabelSourceColumn()` implementation to `src/Entity/MukurtuImportStrategy.php`
-  - [ ] Look up the entity type's label key via `EntityTypeInterface::getKey('label')`
-  - [ ] Find and return the CSV source column mapped to that label key
-- [ ] Update `toDefinition()` signature in `src/MukurtuImportStrategyInterface.php` to accept `?string $lookup_source_id = NULL`
-- [ ] Update `toDefinition()` in `src/Entity/MukurtuImportStrategy.php`
-  - [ ] Accept the new `$lookup_source_id` parameter
-  - [ ] When no entity ID or UUID is mapped, use `$lookup_source_id` as the source ID (falling back to `_record_number` when `NULL`)
+- [x] Add `getLabelSourceColumn()` to `src/MukurtuImportStrategyInterface.php`
+- [x] Add `getLabelSourceColumn()` implementation to `src/Entity/MukurtuImportStrategy.php`
+  - [x] Look up the entity type's label key via `EntityTypeInterface::getKey('label')`
+  - [x] Find and return the CSV source column mapped to that label key
+- [x] Update `toDefinition()` signature in `src/MukurtuImportStrategyInterface.php` to accept `?string $lookup_source_id = NULL`
+- [x] Update `toDefinition()` in `src/Entity/MukurtuImportStrategy.php`
+  - [x] Accept the new `$lookup_source_id` parameter
+  - [x] When no entity ID or UUID is mapped, use `$lookup_source_id` as the source ID (falling back to `_record_number` when `NULL`)
 
 ### Phase 3: ExecuteImportForm — Dependency Detection and Injection
 

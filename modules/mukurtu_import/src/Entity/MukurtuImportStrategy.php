@@ -336,7 +336,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    * @return array
    *   The migration definition array
    */
-  public function toDefinition(FileInterface $file): array {
+  public function toDefinition(FileInterface $file, ?string $lookup_source_id = NULL): array {
     $mapping = $this->getMapping();
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
@@ -355,11 +355,15 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
     }
 
-    // If we have no ID or UUID, fallback to _record_number, which is setup
-    // by the csv source plugin using the create_record_number and
-    // record_number_field properties.
+    // If we have no ID or UUID, use the lookup column (for cross-migration
+    // references) or fallback to _record_number.
     if (empty($ids)) {
-      $ids[] = '_record_number';
+      if ($lookup_source_id) {
+        $ids[] = $lookup_source_id;
+      }
+      else {
+        $ids[] = '_record_number';
+      }
     }
 
     return [
@@ -394,6 +398,28 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $diff = array_diff($fileHeaders, $mappingHeaders);
     $mappedCount = count($fileHeaders) - count($diff);
     return $mappedCount;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLabelSourceColumn(): ?string {
+    $entity_type_id = $this->getTargetEntityTypeId();
+    $label_key = $this->entityTypeManager()
+      ->getDefinition($entity_type_id)
+      ->getKey('label');
+
+    if (!$label_key) {
+      return NULL;
+    }
+
+    foreach ($this->getMapping() as $mapping) {
+      if ($mapping['target'] === $label_key) {
+        return $mapping['source'];
+      }
+    }
+
+    return NULL;
   }
 
   /**
