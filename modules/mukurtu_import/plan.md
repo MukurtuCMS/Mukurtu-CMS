@@ -820,26 +820,26 @@ protected function sortByDependencies(
 
 ### Phase 3: ExecuteImportForm — Dependency Detection and Injection
 
-- [ ] Inject `EntityFieldManagerInterface` into `ExecuteImportForm` (if not already available)
-- [ ] Restructure `submitForm()` into the 5-phase approach:
-  - [ ] Phase 1: Build configs and load files for all metadata files
-  - [ ] Phase 2: Build entity type index and detect upstream dependencies via `detectUpstreamDependencies()`
-  - [ ] Phase 2.5: Auto-sort files via `sortByDependencies()`
-  - [ ] Phase 3: Build migration definitions, passing `$lookup_column` to `toDefinition()` for upstream migrations
-  - [ ] Phase 4: Inject `import_migration_lookup` into downstream definitions via `injectCrossMigrationLookups()`
-  - [ ] Phase 5: Run migrations (existing batch logic)
-- [ ] Implement `detectUpstreamDependencies()`
-  - [ ] For each mapped field, check if it's an entity reference (`entity_reference` or `entity_reference_revisions`)
-  - [ ] If the referenced entity type is created by another migration in this import, record the upstream migration's label column
-- [ ] Implement `injectCrossMigrationLookups()`
-  - [ ] For each migration definition, scan process pipelines for entity reference fields
-  - [ ] For matching fields, collect upstream migration IDs (excluding self-references)
-  - [ ] Find the `mukurtu_entity_lookup` or `mukurtu_entity_generate` step position
-  - [ ] Insert `import_migration_lookup` step before it with the upstream migration IDs
-- [ ] Implement `sortByDependencies()`
-  - [ ] Build dependency graph from entity reference field mappings
-  - [ ] Topological sort (Kahn's algorithm) with user's weight order as tiebreaker
-  - [ ] Handle circular dependencies by falling back to user's original order
+- [x] Inject `EntityFieldManagerInterface` into `ExecuteImportForm` (if not already available)
+- [x] Restructure `submitForm()` into the 5-phase approach:
+  - [x] Phase 1: Build configs and load files for all metadata files
+  - [x] Phase 2: Build entity type index and detect upstream dependencies via `detectUpstreamDependencies()`
+  - [x] Phase 2.5: Auto-sort files via `sortByDependencies()`
+  - [x] Phase 3: Build migration definitions, passing `$lookup_column` to `toDefinition()` for upstream migrations
+  - [x] Phase 4: Inject `import_migration_lookup` into downstream definitions via `injectCrossMigrationLookups()`
+  - [x] Phase 5: Run migrations (existing batch logic)
+- [x] Implement `detectUpstreamDependencies()`
+  - [x] For each mapped field, check if it's an entity reference (`entity_reference` or `entity_reference_revisions`)
+  - [x] If the referenced entity type is created by another migration in this import, record the upstream migration's label column
+- [x] Implement `injectCrossMigrationLookups()`
+  - [x] For each migration definition, scan process pipelines for entity reference fields
+  - [x] For matching fields, collect upstream migration IDs (excluding self-references)
+  - [x] Find the `mukurtu_entity_lookup` or `mukurtu_entity_generate` step position
+  - [x] Insert `import_migration_lookup` step before it with the upstream migration IDs
+- [x] Implement `sortByDependencies()`
+  - [x] Build dependency graph from entity reference field mappings
+  - [x] Topological sort (Kahn's algorithm) with user's weight order as tiebreaker
+  - [x] Handle circular dependencies by falling back to user's original order
 
 ### Phase 4: ID Map Cleanup
 
