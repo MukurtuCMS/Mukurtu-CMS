@@ -1,6 +1,6 @@
 mukurtu_import.settings_form:
-  title: 'Mukurtu Import'
-  description: 'Configure Mukurtu Import.'
+  title: Mukurtu Import
+  description: Configure Mukurtu Import.
   parent: system.admin_config_system
   route_name: mukurtu_import.settings_form
   weight: 10
@@ -21,9 +21,3 @@ mukurtu_import.bundles_list:
   menu_name: dashboard-roundtrip
   parent: mukurtu_dashboard
   route_name: mukurtu_import.bundles_list
-mukurtu_import.import_settings_dashboard:
-  title: 'Import settings'
-  description: 'Configure Mukurtu Import.'
-  menu_name: dashboard-roundtrip
-  parent: mukurtu_dashboard
-  route_name: mukurtu_import.settings_form

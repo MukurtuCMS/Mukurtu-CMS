@@ -11,10 +11,3 @@ mukurtu_export.content_selected_for_export:
   menu_name: dashboard-roundtrip
   parent: mukurtu_dashboard
   route_name: mukurtu_export.content_selected_for_export
-
-mukurtu_export.export_settings:
-  title: 'Export Settings'
-  description: 'Export Settings.'
-  menu_name: dashboard-roundtrip
-  parent: mukurtu_dashboard
-  route_name: mukurtu_export.export_settings

@@ -4,3 +4,9 @@ mukurtu_content_warnings.mukurtu_content_warnings_settings_dashboard:
   description: "Configure media content warnings."
   route_name: mukurtu_content_warnings.settings
   parent: mukurtu_dashboard
+# mukurtu_content_warnings.media_tags:
+#   title: 'Mange media tags'
+#   menu_name: dashboard-media
+#   description: 'Create and manage media tags.'
+#   route_name: mukurtu_content_warnings.media_tags
+#   parent: mukurtu_dashboard
