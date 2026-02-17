@@ -18,13 +18,15 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
   use CulturalProtocolControlledTrait;
   use PeopleTrait;
 
-  public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
-  {
+  /**
+   * {@inheritdoc}
+   */
+  public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
 
     $definitions['field_media_external_embed'] = BaseFieldDefinition::create('text_long')
       ->setLabel('External Embed')
-      ->setDescription(t('Embed code from an external website. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings.	</br>External embeds are usually some kind of code wrapped in <iframe></iframe> tags.'))
+      ->setDescription(t('Embed code from an external website. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings. External embeds are usually some kind of code wrapped in &lt;iframe&gt;&lt;/iframe&gt; tags.'))
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setRevisionable(TRUE)
@@ -34,7 +36,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t('External embeds usually display the content of the embed, with a thumbnail image used in certain contexts. Thumbnail images must be provided for external embeds, and are often a screenshot of the embedded content.	</br>Select "Choose File" to upload a thumbnail image.'))
+      ->setDescription(t('External embeds usually display the content of the embed, with a thumbnail image used in certain contexts. Thumbnail images must be provided for external embeds, and are often a screenshot of the embedded content.	Select "Choose File" to upload a thumbnail image.'))
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,
@@ -67,7 +69,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	</br>As you type, existing media tags will be displayed. Select an existing media tag or enter a new term. To include additional media tags, select "Add another item".'))
+      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings. As you type, existing media tags will be displayed. Select an existing media tag or enter a new term. To include additional media tags, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -92,7 +94,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	</br>As you type, names of existing people will be displayed. Select an existing person or enter a new name. To include additional people, select "Add another item".'))
+      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	As you type, names of existing people will be displayed. Select an existing person or enter a new name. To include additional people, select "Add another item".'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -130,14 +132,13 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
       ->setDisplayConfigurable('form', TRUE);
 
 
-      return $definitions;
+    return $definitions;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageInterface $storage)
-  {
+  public function preSave(EntityStorageInterface $storage) {
     // Set the 'thumbnail' field to the user-uploaded thumbnail.
     $thumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
     if ($thumb) {
@@ -145,4 +146,5 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
     }
     parent::preSave($storage);
   }
+
 }
