@@ -68,6 +68,7 @@ class ProtocolSelection extends DefaultSelection {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $entityRepo = $container->get('entity.repository');
     return new static(
       $configuration,
       $plugin_id,
@@ -76,9 +77,9 @@ class ProtocolSelection extends DefaultSelection {
       $container->get('module_handler'),
       $container->get('current_user'),
       $container->get('entity_field.manager'),
-      $container->get('entity_type.bundle.info'),
       $container->get('entity.repository'),
-      $container->get('og.role_manager')
+      $container->get('og.role_manager'),
+      $container->get('entity_type.bundle.info')
     );
   }
 
