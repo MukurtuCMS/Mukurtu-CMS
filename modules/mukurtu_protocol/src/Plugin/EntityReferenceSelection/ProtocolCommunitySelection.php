@@ -76,9 +76,9 @@ class ProtocolCommunitySelection extends DefaultSelection {
       $container->get('module_handler'),
       $container->get('current_user'),
       $container->get('entity_field.manager'),
-      $container->get('entity_type.bundle.info'),
       $container->get('entity.repository'),
-      $container->get('og.role_manager')
+      $container->get('og.role_manager'),
+      $container->get('entity_type.bundle.info')
     );
   }
 
