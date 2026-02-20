@@ -336,7 +336,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    * @return array
    *   The migration definition array
    */
-  public function toDefinition(FileInterface $file): array {
+  public function toDefinition(FileInterface $file, array $lookup_source_ids = []): array {
     $mapping = $this->getMapping();
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
@@ -355,11 +355,15 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
     }
 
-    // If we have no ID or UUID, fallback to _record_number, which is setup
-    // by the csv source plugin using the create_record_number and
-    // record_number_field properties.
+    // If we have no ID or UUID, use the lookup column (for cross-migration
+    // references) or fallback to _record_number.
     if (empty($ids)) {
-      $ids[] = '_record_number';
+      if (!empty($lookup_source_ids)) {
+        $ids = $lookup_source_ids;
+      }
+      else {
+        $ids[] = '_record_number';
+      }
     }
 
     return [
@@ -394,6 +398,73 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $diff = array_diff($fileHeaders, $mappingHeaders);
     $mappedCount = count($fileHeaders) - count($diff);
     return $mappedCount;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLabelSourceColumn(): ?string {
+    $entity_type_id = $this->getTargetEntityTypeId();
+    $label_key = $this->entityTypeManager()
+      ->getDefinition($entity_type_id)
+      ->getKey('label');
+
+    if (!$label_key) {
+      return NULL;
+    }
+
+    foreach ($this->getMapping() as $mapping) {
+      if ($mapping['target'] === $label_key) {
+        return $mapping['source'];
+      }
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMediaSourceColumn(): ?string {
+    if ($this->getTargetEntityTypeId() !== 'media') {
+      return NULL;
+    }
+
+    $bundle = $this->getTargetBundle();
+    $media_type = $this->entityTypeManager()
+      ->getStorage('media_type')
+      ->load($bundle);
+    if (!$media_type) {
+      return NULL;
+    }
+
+    $source_field = $media_type->getSource()->getConfiguration()['source_field'] ?? NULL;
+    if (!$source_field) {
+      return NULL;
+    }
+
+    // Only include the source column for field types that store short values
+    // (filenames). Fields like text_long (external embeds) or string (URLs)
+    // can exceed the 255-character limit of the migrate_map sourceid columns.
+    $field_defs = $this->getFieldDefinitions('media', $bundle);
+    $source_field_def = $field_defs[$source_field] ?? NULL;
+    if (!$source_field_def) {
+      return NULL;
+    }
+    $field_type = $source_field_def->getType();
+    if (!in_array($field_type, ['file', 'image'])) {
+      return NULL;
+    }
+
+    foreach ($this->getMapping() as $mapping) {
+      $target = $mapping['target'];
+      // Match the source field directly or its target_id subfield.
+      if ($target === $source_field || $target === $source_field . '/target_id') {
+        return $mapping['source'];
+      }
+    }
+
+    return NULL;
   }
 
   /**

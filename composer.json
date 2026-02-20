@@ -112,6 +112,9 @@
             },
             "drupal/search_api_glossary": {
                 "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch"
+            },
+            "drupal/migrate_source_csv": {
+                "Issue #3413894: Revert requirement that IDs not include spaces or special characters": "web/profiles/mukurtu/patches/migrate_source_csv-3413894--revert-strict-id-requirements.patch"
             }
         }
     }
