@@ -223,10 +223,10 @@ content:
         html_class: leaflet-map-divicon
         circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
-        control: false
+        control: true
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
         excluded: ''
-        include_path: false
+        include_path: true
       fullscreen:
         control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
