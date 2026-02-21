@@ -117,6 +117,7 @@ dependencies:
   - 'mukurtu_multipage_items:mukurtu_multipage_items'
   - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_person:mukurtu_person'
+  - 'mukurtu_place:mukurtu_place'
   - 'mukurtu_protocol:mukurtu_protocol'
   - 'mukurtu_site_settings:mukurtu_site_settings'
   - 'mukurtu_taxonomy:mukurtu_taxonomy'
