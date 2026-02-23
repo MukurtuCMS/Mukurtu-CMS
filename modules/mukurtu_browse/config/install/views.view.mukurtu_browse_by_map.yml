@@ -555,6 +555,11 @@ display:
             view_mode: map_browse
             options: '{"maxWidth":"300","minWidth":"50","autoPan":true}'
           leaflet_map: 'OSM Mapnik'
+          leaflet_markercluster:
+            control: true
+            options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
+            excluded: ''
+            include_path: true
           height: '600'
           height_unit: px
           hide_empty_map: false
