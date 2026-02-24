@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\file\FileInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\file\Element\ManagedFile;
 use Drupal\Core\Link;
@@ -64,7 +63,6 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#type' => 'managed_file',
       '#title' => $this->t('Media/Binary Files'),
       '#description' => $this->t('Add your media & binary files here. You can reference these files by file name in your metadata files.'),
-      '#process' => [[static::class, 'flagPermanentFiles']],
       '#multiple' => TRUE,
       '#default_value' => $this->getBinaryFiles(),
       '#upload_location' => $this->getBinaryUploadLocation(),
@@ -73,9 +71,6 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
         'name' => 'import_file_upload',
       ],
     ];
-
-    // This is unfortunate but we need to pass this path to flagPermanentFiles.
-    $form_state->set('binary_file_upload_location', $this->getBinaryUploadLocation());
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -107,35 +102,6 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     foreach ($messages as $message) {
       if (isset($message['fid']) && isset($element["file_{$message['fid']}"])) {
         $element["file_{$message['fid']}"]["selected"]["#title"] .= "<span class=\"import--error\">{$message['message']}</span>";
-      }
-    }
-
-    return $element;
-  }
-
-  /**
-   * Process callback to disable the removal checkbox for permanent files.
-   */
-  public static function flagPermanentFiles(&$element, FormStateInterface $form_state, &$complete_form) {
-    // Call the original handler.
-    $element = ManagedFile::processManagedFile($element, $form_state, $complete_form);
-
-    // Get the upload folder for the binary files.
-    $upload_location = $form_state->get('binary_file_upload_location');
-
-    if ($upload_location) {
-      $query = \Drupal::entityTypeManager()->getStorage('file')->getQuery();
-      $permanent_files = $query->condition('uri', $upload_location, 'STARTS_WITH')
-        ->condition('status', FileInterface::STATUS_PERMANENT)
-        ->accessCheck(TRUE)
-        ->execute();
-
-      // Disable the remove checkbox for all the permanent files.
-      foreach ($permanent_files as $pf) {
-        if (isset($element["file_$pf"])) {
-          $element["file_$pf"]['selected']['#disabled'] = TRUE;
-          $element["file_$pf"]['selected']['#attributes'] = ['title' => t("This file is in use and cannot be removed.")];
-        }
       }
     }
 
