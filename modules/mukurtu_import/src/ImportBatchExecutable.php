@@ -108,6 +108,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Save the messages.
     $context['results']['messages'] = array_merge($context['results']['messages'], iterator_to_array($executable->getIdMap()->getMessages()));
 
+    // Store the definition for ID map cleanup after the batch completes.
+    $context['results']['definitions'][$migration->id()] = $migration_definition;
+
     // Store the result; will need to combine the results of all our iterations.
     $context['results'][$migration->id()] = [
       '@numitems' => $context['results'][$migration->id()]['@numitems'] + $executable->getProcessedCount(),
@@ -179,6 +182,14 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $messages[] = ['fid' => $exception_fid ?? NULL, 'message' => $message];
     }
     $store->set('batch_results_messages', $messages);
+
+    // Clean up ID map tables for all migrations in this batch.
+    // These are no longer needed after the import is complete.
+    $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
+    foreach ($results['definitions'] ?? [] as $definition) {
+      $migration = $migration_plugin_manager->createStubMigration($definition);
+      $migration->getIdMap()->destroy();
+    }
   }
 
   /**

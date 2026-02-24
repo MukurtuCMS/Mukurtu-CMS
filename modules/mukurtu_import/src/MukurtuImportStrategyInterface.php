@@ -21,8 +21,28 @@ interface MukurtuImportStrategyInterface extends ConfigEntityInterface, EntityOw
   public function setConfig($key, $value);
   public function getConfig($key);
   public function applies(FileInterface $file);
-  public function toDefinition(FileInterface $file);
+  public function toDefinition(FileInterface $file, array $lookup_source_ids = []);
   public function mappedFieldsCount(FileInterface $file);
+
+  /**
+   * Get the source column mapped to the entity's label field.
+   *
+   * @return string|null
+   *   The CSV column name mapped to the label field, or NULL if not mapped.
+   */
+  public function getLabelSourceColumn(): ?string;
+
+  /**
+   * Get the source column mapped to the media source field (e.g., filename).
+   *
+   * For media entity types, returns the CSV column mapped to the media type's
+   * source field (e.g., field_media_image for Image media). Returns NULL for
+   * non-media entity types or if the source field is not mapped.
+   *
+   * @return string|null
+   *   The CSV column name mapped to the media source field, or NULL.
+   */
+  public function getMediaSourceColumn(): ?string;
 
   /**
    * Get the mapped target field name for a given source column.

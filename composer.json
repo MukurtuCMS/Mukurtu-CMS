@@ -53,7 +53,7 @@
         "drupal/message_subscribe": "^2.0",
         "drupal/message_ui": "^1.0@beta",
         "drupal/migrate_plus": "^6.0",
-        "drupal/migrate_source_csv": "^3.5",
+        "drupal/migrate_source_csv": "^3.8",
         "drupal/migrate_tools": "^6.0",
         "drupal/og": "^1.x-dev",
         "drupal/paragraphs": "*",
