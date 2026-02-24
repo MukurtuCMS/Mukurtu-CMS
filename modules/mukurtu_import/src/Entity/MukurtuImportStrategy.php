@@ -443,16 +443,27 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       return NULL;
     }
 
-    // Only include the source column for field types that store short values
-    // (filenames). Fields like text_long (external embeds) or string (URLs)
-    // can exceed the 255-character limit of the migrate_map sourceid columns.
+    // Only include the source column for field types whose values fit within
+    // the migrate_map sourceid varchar(255) limit. File/image fields store
+    // filenames (always short). String fields are allowed if their max_length
+    // is <= 255. Fields like text_long (external embeds with iframe codes)
+    // are excluded since they have no length limit.
     $field_defs = $this->getFieldDefinitions('media', $bundle);
     $source_field_def = $field_defs[$source_field] ?? NULL;
     if (!$source_field_def) {
       return NULL;
     }
     $field_type = $source_field_def->getType();
-    if (!in_array($field_type, ['file', 'image'])) {
+    if (in_array($field_type, ['file', 'image'])) {
+      // File/image fields store filenames — always safe.
+    }
+    elseif ($field_type === 'string') {
+      $max_length = $source_field_def->getSetting('max_length') ?? 255;
+      if ($max_length > 255) {
+        return NULL;
+      }
+    }
+    else {
       return NULL;
     }
 
