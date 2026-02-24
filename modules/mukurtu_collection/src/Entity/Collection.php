@@ -42,7 +42,6 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -81,7 +80,6 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -129,7 +127,6 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
           'auto_create_bundle' => 'collection',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -155,7 +152,6 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -178,7 +174,6 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
           'auto_create_bundle' => 'article',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
