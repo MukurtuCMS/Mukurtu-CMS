@@ -454,17 +454,15 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       return NULL;
     }
     $field_type = $source_field_def->getType();
-    if (in_array($field_type, ['file', 'image'])) {
-      // File/image fields store filenames — always safe.
+    if (!in_array($field_type, ['file', 'image', 'string'])) {
+      return NULL;
     }
-    elseif ($field_type === 'string') {
+    // Double check string fields so they won't blow past out 255 char limit.
+    if ($field_type === 'string') {
       $max_length = $source_field_def->getSetting('max_length') ?? 255;
       if ($max_length > 255) {
         return NULL;
       }
-    }
-    else {
-      return NULL;
     }
 
     foreach ($this->getMapping() as $mapping) {
