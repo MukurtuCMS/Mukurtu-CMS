@@ -47,6 +47,32 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_place_type'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Place type'))
+      ->setDescription(t('Place types are used to tag place records to indicate different types of locations or places.	As you type, existing place types will be displayed. </br>Select an existing place type or enter a new one. To include additional place types, select "Add another item".'))
+      ->setSettings([
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => [
+            'place_type' => 'place_type'
+          ],
+          'sort' => [
+            'field' => 'name',
+            'direction' => 'asc'
+          ],
+          'auto_create' => TRUE,
+          'auto_create_bundle' => '',
+        ]
+      ])
+      ->setDefaultValue('')
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Assets'))
       ->setDescription(t('Media assets are a key element of most place records, though they are not required. Supported media types are images, documents, video, audio, and embed code. Place records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the place record to allow differential access to the media assets and metadata.	</br>Select "Add media" to select or upload media assets.'))

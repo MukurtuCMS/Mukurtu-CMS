@@ -49,6 +49,7 @@ third_party_settings:
     group_metadata:
       children:
         - field_keywords
+        - field_place_type
         - field_other_names
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
@@ -198,6 +199,14 @@ content:
     weight: 81
     region: content
   field_keywords:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  field_place_type:
     type: entity_reference_label
     label: above
     settings:

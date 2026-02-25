@@ -41,6 +41,8 @@ third_party_settings:
         - field_media_assets
         - field_cultural_protocols
         - field_other_names
+        - field_place_type
+        - group_locations
       label: 'Mukurtu Essentials'
       region: content
       parent_name: group_main_tab
@@ -71,7 +73,6 @@ third_party_settings:
     group_additional_fields:
       children:
         - field_keywords
-        - group_locations
         - group_local_contexts
       label: 'Additional Fields'
       region: content
@@ -124,7 +125,7 @@ third_party_settings:
         - field_location
       label: Locations
       region: content
-      parent_name: group_additional_fields
+      parent_name: group_mukurtu_essentials
       weight: 24
       format_type: tab
       format_settings:
@@ -238,6 +239,16 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_keywords:
+    type: entity_reference_autocomplete
+    weight: 9
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_place_type:
     type: entity_reference_autocomplete
     weight: 9
     region: content
