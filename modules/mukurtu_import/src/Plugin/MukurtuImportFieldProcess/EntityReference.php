@@ -35,6 +35,12 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
       ];
     }
 
+    // Trim whitespace.
+    $process[] = [
+      'plugin' => 'callback',
+      'callable' => 'trim',
+    ];
+
     // Resolve UUIDs.
     $process[] = [
       'plugin' => 'uuid_lookup',
