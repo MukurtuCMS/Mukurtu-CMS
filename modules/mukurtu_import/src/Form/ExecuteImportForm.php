@@ -457,8 +457,8 @@ class ExecuteImportForm extends ImportBaseForm {
       $dependencies[$fid] = array_unique($dependencies[$fid]);
     }
 
-    // Topological sort (Kahn's algorithm).
-    // Preserve the user's weight order as a tiebreaker.
+    // Topological sort (Kahn's algorithm). Preserve the user's weight order as
+    // a tiebreaker.
     $position = array_flip($metadata_files);
     $sorted = [];
     $remaining = $dependencies;
