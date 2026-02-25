@@ -12,10 +12,10 @@ settings:
   allowed_values:
     -
       value: blue-gold
-      label: 'Blue Gold'
+      label: 'Blue and gold'
     -
       value: red-bone
-      label: 'Red Bone'
+      label: 'Red and bone'
     -
       value: custom
       label: Custom

@@ -47,6 +47,7 @@ install:
   - term_merge_manager
   - dashboards
   - admin_theme
+  - leaflet_markercluster
 
 dependencies:
   - 'blazy:blazy'

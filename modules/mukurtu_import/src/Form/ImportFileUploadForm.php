@@ -1,10 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Form;
 
-use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\file\FileInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\file\Element\ManagedFile;
 use Drupal\Core\Link;
@@ -15,7 +15,10 @@ use Exception;
  */
 class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInterface {
 
-  public static function trustedCallbacks() {
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks(): array {
     return [
       'processManagedFile',
     ];
@@ -24,14 +27,14 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'mukurtu_import_import';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $form['import_description_link'] = [
       '#markup' => Link::createFromRoute(
         $this->t('Import Format Information by Type'),
@@ -60,18 +63,14 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#type' => 'managed_file',
       '#title' => $this->t('Media/Binary Files'),
       '#description' => $this->t('Add your media & binary files here. You can reference these files by file name in your metadata files.'),
-      '#process' => [[static::class, 'flagPermanentFiles']],
       '#multiple' => TRUE,
       '#default_value' => $this->getBinaryFiles(),
       '#upload_location' => $this->getBinaryUploadLocation(),
-      '#upload_validators' => [],
+      '#upload_validators' => $this->getAllowedMediaExtensionsValidator(),
       '#attributes' => [
         'name' => 'import_file_upload',
       ],
     ];
-
-    // This is unfortunate but we need to pass this path to flagPermanentFiles.
-    $form_state->set('binary_file_upload_location', $this->getBinaryUploadLocation());
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -79,6 +78,11 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Next'),
+    ];
+    $form['actions']['reset'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Reset'),
+      '#submit' => ['::resetForm'],
     ];
 
     return $form;
@@ -105,38 +109,16 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
   }
 
   /**
-   * Process callback to disable the removal checkbox for permanent files.
-   */
-  public static function flagPermanentFiles(&$element, FormStateInterface $form_state, &$complete_form) {
-    // Call the original handler.
-    $element = ManagedFile::processManagedFile($element, $form_state, $complete_form);
-
-    // Get the upload folder for the binary files.
-    $uploadLocation = $form_state->get('binary_file_upload_location');
-
-    if ($uploadLocation) {
-      $query = \Drupal::entityTypeManager()->getStorage('file')->getQuery();
-      $permanentFiles = $query->condition('uri', $uploadLocation, 'STARTS_WITH')
-        ->condition('status', FileInterface::STATUS_PERMANENT)
-        ->accessCheck(TRUE)
-        ->execute();
-
-      // Disable the remove checkbox for all the permanent files.
-      foreach ($permanentFiles as $pf) {
-        if (isset($element["file_$pf"])) {
-          $element["file_$pf"]['selected']['#disabled'] = TRUE;
-          $element["file_$pf"]['selected']['#attributes'] = ['title' => t("This file is in use and cannot be removed.")];
-        }
-      }
-    }
-
-    return $element;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    // Skip validation if Reset button was clicked.
+    $triggering_element = $form_state->getTriggeringElement();
+    $clicked_button = isset($triggering_element['#parents']) ? end($triggering_element['#parents']) : '';
+    if ($clicked_button === 'reset') {
+      return;
+    }
+
     $metadataFiles = $form_state->getValue('metadata_files');
 
     if (empty($metadataFiles)) {
@@ -145,7 +127,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
 
     foreach ($metadataFiles as $fid) {
       /** @var \Drupal\file\FileInterface $file */
-      $file = \Drupal::entityTypeManager()
+      $file = $this->entityTypeManager
         ->getStorage('file')
         ->load($fid);
 
@@ -157,8 +139,9 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       // For CSV files, check if we can read the headers.
       if ($file->getMimeType() == 'text/csv') {
         try {
-          $headers = $this->getCSVHeaders($file);
-        } catch (Exception $e) {
+          $this->getCSVHeaders($file);
+        }
+        catch (Exception $e) {
           $form_state->setError($form['metadata_files'], $this->t("Could not parse CSV for file %file.", ['%file' => $file->getFilename()]));
         }
       }
@@ -168,7 +151,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     // Add a default weight for any new metadata files.
     $metadataFiles = $form_state->getValue('metadata_files');
     $metadataFileWeights = $this->getMetadataFileWeights();
@@ -180,6 +163,62 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $this->setMetadataFileWeights($metadataFileWeights);
 
     $form_state->setRedirect('mukurtu_import.import_files');
+  }
+
+  /**
+   * Reset to a clean state.
+   *
+   * @param array $form
+   *    An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *    The current state of the form.
+   */
+  public function resetForm(array &$form, FormStateInterface $form_state): void {
+    $this->reset();
+  }
+
+  /**
+   * Get upload validators with all allowed media extensions.
+   *
+   * Dynamically discovers all file extensions allowed by media entity bundles
+   * to ensure import supports the same file types as regular media uploads.
+   *
+   * @return array
+   *   Upload validators array with FileExtension validator.
+   */
+  protected function getAllowedMediaExtensionsValidator(): array {
+    $extensions = [];
+
+    // Get all media bundles.
+    $media_bundles = $this->entityTypeManager->getStorage('media_type')->loadMultiple();
+
+    foreach ($media_bundles as $bundle_id => $bundle) {
+      // Get field definitions for this media bundle.
+      $field_definitions = $this->entityFieldManager->getFieldDefinitions('media', $bundle_id);
+
+      // Extract file extensions from file and image fields.
+      foreach ($field_definitions as $field_definition) {
+        $field_type = $field_definition->getType();
+        if (in_array($field_type, ['file', 'image'])) {
+          $settings = $field_definition->getSettings();
+          if (!empty($settings['file_extensions'])) {
+            $field_extensions = explode(' ', $settings['file_extensions']);
+            $extensions = array_merge($extensions, $field_extensions);
+          }
+        }
+      }
+    }
+
+    // Deduplicate and sort for consistency.
+    $extensions = array_unique($extensions);
+    sort($extensions);
+
+    // Return the validator array.
+    return [
+      'FileExtension' => [
+        'extensions' => implode(' ', $extensions),
+      ],
+    ];
   }
 
 }

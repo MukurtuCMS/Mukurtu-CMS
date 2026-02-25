@@ -59,7 +59,7 @@ class ProtocolCommunitySelection extends DefaultSelection {
    * @param \Drupal\og\OgRoleManagerInterface $ogRoleManager
    *   The OG role manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, EntityRepositoryInterface $entity_repository, OgRoleManagerInterface $ogRoleManager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, EntityFieldManagerInterface $entity_field_manager, EntityRepositoryInterface $entity_repository, OgRoleManagerInterface $ogRoleManager, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $module_handler, $current_user, $entity_field_manager, $entity_type_bundle_info, $entity_repository);
     $this->ogRoleManager = $ogRoleManager;
   }
@@ -76,9 +76,9 @@ class ProtocolCommunitySelection extends DefaultSelection {
       $container->get('module_handler'),
       $container->get('current_user'),
       $container->get('entity_field.manager'),
-      $container->get('entity_type.bundle.info'),
       $container->get('entity.repository'),
-      $container->get('og.role_manager')
+      $container->get('og.role_manager'),
+      $container->get('entity_type.bundle.info')
     );
   }
 
