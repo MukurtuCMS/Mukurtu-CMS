@@ -131,6 +131,15 @@ class ImportResultsForm extends ImportBaseForm {
       '#arguments' => [$message->render()],
     ];
     $form['content_results'] = $content_block;
+
+    $multipage_block = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_import_results_multipage_items',
+      '#display_id' => 'results',
+      '#embed' => TRUE,
+      '#arguments' => [$message->render()],
+    ];
+    $form['multipage_results'] = $multipage_block;
   }
 
 }

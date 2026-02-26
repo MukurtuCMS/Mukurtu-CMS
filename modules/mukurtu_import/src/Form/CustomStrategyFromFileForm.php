@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -58,13 +60,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     $entity_type_id = $form_state->getValue('entity_type_id') ?? $this->importConfig->getTargetEntityTypeId();
-    $bundleOptions = $this->getBundleOptions($entity_type_id);
-    $bundleKeys = array_keys($bundleOptions);
+    $bundle_options = $this->getBundleOptions($entity_type_id);
+    $bundle_keys = array_keys($bundle_options);
     $form['bundle'] = [
       '#type' => 'radios',
       '#title' => $this->t('Sub-type'),
-      '#options' => $bundleOptions,
-      '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle() ?? reset($bundleKeys),
+      '#options' => $bundle_options,
+      '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle() ?? reset($bundle_keys),
       '#description' => $this->t('Optional Sub-type. When importing new content or media, they will be of this type if not specified in the import metadata.'),
       '#prefix' => "<div id=\"bundle-select\">",
       '#suffix' => "</div>",
@@ -176,11 +178,11 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    * Get the options array for available target entity types.
    */
   protected function getEntityTypeIdOptions() {
-    $definitons = $this->entityTypeManager->getDefinitions();
+    $definitions = $this->entityTypeManager->getDefinitions();
     $options = [];
     foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item'] as $entity_type_id) {
-      if (isset($definitons[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
-        $options[$entity_type_id] = $definitons[$entity_type_id]->getLabel();
+      if (isset($definitions[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
+        $options[$entity_type_id] = $definitions[$entity_type_id]->getLabel();
 
         // Override certain labels, including paragraphs.
         if ($entity_type_id === 'paragraph') {
@@ -192,7 +194,32 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     return $options;
   }
 
-  protected function buildMappingTable(array &$form, FormStateInterface $form_state, FileInterface $file) {
+  /**
+   * Builds the mapping table form element for CSV column to field mapping.
+   *
+   * This method creates a table form element that allows users to map columns
+   * from the uploaded CSV file to target entity fields. The available target
+   * fields depend on the selected entity type and bundle.
+   *
+   * The method:
+   * - Reads the CSV headers from the uploaded file
+   * - Creates a row for each CSV column
+   * - Provides a select dropdown for each column to choose the target field
+   * - Attempts to auto-map columns to fields based on label/name matching
+   * - Uses AJAX wrapper divs to allow dynamic updates when entity type/bundle
+   * changes
+   *
+   * @param array $form
+   *   The form array to add the mapping table to (passed by reference).
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state containing user selections.
+   * @param \Drupal\file\FileInterface $file
+   *   The uploaded CSV file to map columns from.
+   *
+   * @return array
+   *   The modified form array with the mapping table added.
+   */
+  protected function buildMappingTable(array &$form, FormStateInterface $form_state, FileInterface $file): array {
     $userInput = $form_state->getUserInput();
     $entity_type_id = $form_state->getValue('entity_type_id') ?? ($userInput['entity_type_id'] ?? ($form['entity_type_id']['#default_value'] ?? 'node'));
     $bundle = $form_state->getValue('bundle') ?? ($userInput['bundle'] ?? $this->importConfig->getTargetBundle());
@@ -234,14 +261,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     return $form;
   }
 
-
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
     $element = $form_state->getTriggeringElement();
     // Skip validation if we're cancelling.
-    if ($element['#parents'][0] == 'cancel') {
+    if ($element['#parents'][0] === 'cancel') {
       return;
     }
 
@@ -249,17 +275,17 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     // Check for duplicate target mapping.
     $targets = array_column($mappings, 'target');
-    $uniqueTargets = array_unique($targets);
-    if (count($uniqueTargets) != count($targets)) {
+    $unique_targets = array_unique($targets);
+    if (count($unique_targets) !== count($targets)) {
 
-      foreach (array_count_values($targets) as $dupeTarget => $count) {
+      foreach (array_count_values($targets) as $dupe_target => $count) {
         // Ignore the ignore field option, users can have duplicates of that.
-        if ($count < 2 || $dupeTarget == -1) {
+        if ($count < 2 || $dupe_target == -1) {
           continue;
         }
 
         foreach ($targets as $delta => $target) {
-          if ($dupeTarget == $target) {
+          if ($dupe_target == $target) {
             $form_state->setError($form['mappings'][$delta], $this->t("Only a single source can be mapped to each target field."));
           }
         }
@@ -267,20 +293,39 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     }
   }
 
-  protected function getBundleOptions($entity_type_id) {
-    $bundleInfoService = \Drupal::service('entity_type.bundle.info');
-    $bundleInfo = $bundleInfoService->getAllBundleInfo();
+  /**
+   * Gets the available bundle options for a given entity type.
+   *
+   * This method retrieves all bundles for the specified entity type that the
+   * current user has permission to create. It provides a select list of
+   * available sub-types/bundles for the import form.
+   *
+   * If there is only one bundle available, the "None: Base Fields Only" option
+   * is excluded from the returned options array.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID to get bundles for (e.g., 'node', 'media', etc.).
+   *
+   * @return array
+   *   An associative array of bundle options where keys are bundle machine
+   *   names (or -1 for base fields only) and values are bundle labels. Returns
+   *   an array with a single "No sub-types available" option if no bundles
+   *   exist for the entity type.
+   */
+  protected function getBundleOptions($entity_type_id): array {
+    $bundle_info = $this->entityBundleInfo->getAllBundleInfo();
 
-    if (!isset($bundleInfo[$entity_type_id])) {
+    if (!isset($bundle_info[$entity_type_id])) {
       return [-1 => $this->t('No sub-types available')];
     }
 
     // Don't provide the base fields option if there is only one valid bundle.
-    if (count($bundleInfo[$entity_type_id]) > 1) {
+    $options = [];
+    if (count($bundle_info[$entity_type_id]) > 1) {
       $options = [-1 => $this->t('None: Base Fields Only')];
     }
 
-    foreach ($bundleInfo[$entity_type_id] as $bundle => $info) {
+    foreach ($bundle_info[$entity_type_id] as $bundle => $info) {
       if ($this->userCanCreateEntity($entity_type_id, $bundle)) {
         $options[$bundle] = $info['label'] ?? $bundle;
       }
@@ -288,7 +333,23 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     return $options;
   }
 
-  public function entityTypeChangeAjaxCallback(array &$form, FormStateInterface $form_state) {
+  /**
+   * AJAX callback handler for entity type selection changes.
+   *
+   * This method handles the dynamic form updates when the user changes the
+   * entity type selection (e.g., from 'node' to 'media').
+   *
+   * @param array $form
+   *   The complete form array (passed by reference).
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state containing user input and values.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An AJAX response object containing ReplaceCommand operations to update
+   *   the bundle selector and all field mapping dropdowns with appropriate
+   *   options for the newly selected entity type.
+   */
+  public function entityTypeChangeAjaxCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
     // Update the field mapping message.
     $response = new AjaxResponse();
 
@@ -393,23 +454,20 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    *   The search term.
    * @param string $entity_type_id
    *   The entity type id.
-   * @param string $bundle
+   * @param string|null $bundle
    *   The bundle.
    * @return string|null
    *   The field name of the match or NULL if no matches found.
    */
-  protected function searchFieldLabels($needle, $entity_type_id, $bundle = NULL) {
-    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
-    $matchingFields = [];
-    foreach ($fieldDefs as $field_name => $field) {
-      if ($needle == mb_strtolower($field->getLabel())) {
-        $matchingFields[$field_name] = $field;
-      }
-    }
+  protected function searchFieldLabels(string $needle, string $entity_type_id, ?string $bundle = NULL): ?string {
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $matching_fields = array_filter($field_defs, function($field) use ($needle) {
+      return $needle == mb_strtolower((string) $field->getLabel());
+    });
 
     // If there are multiple matches, return the first bundle specific match.
-    if (count($matchingFields) > 1) {
-      foreach ($matchingFields as $matched_field_name => $matched_field) {
+    if (count($matching_fields) > 1) {
+      foreach ($matching_fields as $matched_field_name => $matched_field) {
         if ($matched_field->getTargetBundle()) {
           return $matched_field_name;
         }
@@ -417,8 +475,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     }
 
     // If all are base fields, return the first.
-    if (count($matchingFields) >= 1) {
-      $field_names = array_keys($matchingFields);
+    if (count($matching_fields) >= 1) {
+      $field_names = array_keys($matching_fields);
       return reset($field_names);
     }
 
@@ -429,27 +487,27 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    * Search for a cultural_protocol field for a given entity/bundle.
    */
   protected function getProtocolField($entity_type_id, $bundle = NULL) {
-    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
-    $protocolFields = [];
-    foreach ($fieldDefs as $field_name => $field) {
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $protocol_fields = [];
+    foreach ($field_defs as $field_name => $field) {
       if ($field->getType() == 'cultural_protocol') {
-        $protocolFields[$field_name] = $field_name;
+        $protocol_fields[$field_name] = $field_name;
       }
     }
 
-    if (count($protocolFields) == 1) {
-      return reset($protocolFields);
+    if (count($protocol_fields) == 1) {
+      return reset($protocol_fields);
     }
 
-    if (count($protocolFields) > 1) {
+    if (count($protocol_fields) > 1) {
       // If there are multiple protocol fields for some reason, but ours is
       // present, default to that.
-      if (isset($protocolFields['field_cultural_protocols'])) {
-        return $protocolFields['field_cultural_protocols'];
+      if (isset($protocol_fields['field_cultural_protocols'])) {
+        return $protocol_fields['field_cultural_protocols'];
       }
 
       // Otherwise use the first one.
-      return reset($protocolFields);
+      return reset($protocol_fields);
     }
 
     return NULL;
