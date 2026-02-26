@@ -30,6 +30,19 @@ interface MukurtuImportStrategyInterface extends ConfigEntityInterface, EntityOw
    * @return string|null
    *   The CSV column name mapped to the label field, or NULL if not mapped.
    */
+  /**
+   * Get the configured identifier column name.
+   *
+   * When set, this column is used as the migration source ID, taking
+   * precedence over entity ID, UUID, and label column detection. It enables
+   * cross-migration lookups by arbitrary user-defined values (e.g. for
+   * paragraph entities that have no natural label).
+   *
+   * @return string|null
+   *   The CSV column name, or NULL if not configured.
+   */
+  public function getIdentifierColumn(): ?string;
+
   public function getLabelSourceColumn(): ?string;
 
   /**

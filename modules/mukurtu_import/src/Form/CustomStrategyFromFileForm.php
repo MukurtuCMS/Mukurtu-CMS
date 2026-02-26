@@ -111,6 +111,17 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       '#title' => $this->t('Multi-value Delimiter'),
       '#default_value' => $this->importConfig->getConfig('multivalue_delimiter') ?? ';',
     ];
+    $header_options = ['' => $this->t('- None -')];
+    foreach ($this->getCSVHeaders($file) as $header) {
+      $header_options[$header] = $header;
+    }
+    $form['file_settings']['identifier_column'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Identifier Column'),
+      '#description' => $this->t('Optional. Select a column to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
+      '#options' => $header_options,
+      '#default_value' => $this->importConfig->getConfig('identifier_column') ?? '',
+    ];
     $form['file_settings']['default_format'] = [
       '#type' => 'select',
       '#required' => TRUE,
@@ -431,6 +442,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $this->importConfig->setConfig('escape', $form_state->getValue('escape'));
     $this->importConfig->setConfig('multivalue_delimiter', $form_state->getValue('multivalue_delimiter'));
     $this->importConfig->setConfig('default_format', $form_state->getValue('default_format'));
+    $this->importConfig->setConfig('identifier_column', $form_state->getValue('identifier_column') ?: NULL);
 
     if ($form_state->getValue('config_save')) {
       $userProvidedLabel = $form_state->getValue('config_title');
