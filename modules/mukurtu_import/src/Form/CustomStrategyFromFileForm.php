@@ -111,7 +111,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       '#title' => $this->t('Multi-value Delimiter'),
       '#default_value' => $this->importConfig->getConfig('multivalue_delimiter') ?? ';',
     ];
-    $header_options = ['' => $this->t('-- None --')];
+    $header_options = ['' => $this->t('- None -')];
     foreach ($this->getCSVHeaders($file) as $header) {
       $header_options[$header] = $header;
     }
