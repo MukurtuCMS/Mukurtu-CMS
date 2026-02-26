@@ -245,14 +245,15 @@ class ExecuteImportForm extends ImportBaseForm {
   /**
    * Detect upstream migrations that downstream entity references depend on.
    *
-   * Scans a migration config's field mappings. For each entity reference field,
+   * Scans a migration config's field mappings. For each entity reference
+   * field,
    * checks if any other migration in this import creates that entity type.
    * If so, records the upstream migration's label column so it can be used
    * as a source ID.
    *
    * @param \Drupal\mukurtu_import\MukurtuImportStrategyInterface $config
    *   The import config to scan.
-   * @param array $entity_type_index
+   * @param \Drupal\mukurtu_import\MukurtuImportStrategyInterface[] $entity_type_index
    *   Index of entity_type => [fid => config].
    * @param array &$upstream_lookup_columns
    *   Accumulator: fid => array of source column names (label, media source).
@@ -287,20 +288,34 @@ class ExecuteImportForm extends ImportBaseForm {
 
       // This field references an entity type created by another migration.
       foreach ($entity_type_index[$ref_type] as $upstream_fid => $upstream_config) {
-        $columns = [];
-        $label_column = $upstream_config->getLabelSourceColumn();
-        if ($label_column) {
-          $columns[] = $label_column;
+        if (!$upstream_config instanceof MukurtuImportStrategyInterface) {
+          continue;
         }
-        $media_source_column = $upstream_config->getMediaSourceColumn();
-        if ($media_source_column && !in_array($media_source_column, $columns)) {
-          $columns[] = $media_source_column;
-        }
-        if (!empty($columns)) {
+        $identifier_column = $upstream_config->getIdentifierColumn();
+        if ($identifier_column) {
+          // User-configured identifier column takes exclusive precedence.
           $existing = $upstream_lookup_columns[$upstream_fid] ?? [];
           $upstream_lookup_columns[$upstream_fid] = array_unique(
-            array_merge($existing, $columns)
+            array_merge($existing, [$identifier_column])
           );
+        }
+        else {
+          // Fall back to label and media source columns.
+          $columns = [];
+          $label_column = $upstream_config->getLabelSourceColumn();
+          if ($label_column) {
+            $columns[] = $label_column;
+          }
+          $media_source_column = $upstream_config->getMediaSourceColumn();
+          if ($media_source_column && !in_array($media_source_column, $columns)) {
+            $columns[] = $media_source_column;
+          }
+          if (!empty($columns)) {
+            $existing = $upstream_lookup_columns[$upstream_fid] ?? [];
+            $upstream_lookup_columns[$upstream_fid] = array_unique(
+              array_merge($existing, $columns)
+            );
+          }
         }
       }
     }
