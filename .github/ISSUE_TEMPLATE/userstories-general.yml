@@ -61,6 +61,7 @@ body:
         - migration
         - notifications and events
         - person records
+        - place records
         - publishing workflows
         - roundtrip
         - search and discovery

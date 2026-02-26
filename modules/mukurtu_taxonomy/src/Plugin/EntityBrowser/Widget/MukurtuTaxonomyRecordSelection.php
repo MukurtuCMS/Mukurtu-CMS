@@ -26,6 +26,8 @@ class MukurtuTaxonomyRecordSelection extends WidgetBase implements ContainerFact
     // content types, fetch their enabled vocabs and append them here.
     $enabledVocabs = $config->get('person_records_enabled_vocabularies') ?? [];
 
+    $enabledVocabs = $config->get('place_records_enabled_vocabularies') ?? [];
+
     $query = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery();
 
     // Restrict to only enabled taxonomy vocabularies.

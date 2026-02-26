@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.place
+    - taxonomy.vocabulary.keywords
+id: node.place.field_keywords
+field_name: field_keywords
+entity_type: node
+bundle: place
+label: Keywords
+description: "Keywords are used to tag place records to ensure that they are discoverable when searching or browsing. \tAs you type, existing keywords will be displayed. </br>Select an existing keyword or enter a new one. To include additional keywords, select \"Add another item\"."
+required: false
+translatable: false
+default_value:
+  -
+    target_id: ''
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      keywords: keywords
+    sort:
+      field: name
+      direction: asc
+    auto_create: true
+    auto_create_bundle: ''
+field_type: entity_reference

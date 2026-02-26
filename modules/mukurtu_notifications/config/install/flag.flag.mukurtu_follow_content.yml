@@ -15,6 +15,7 @@ bundles:
   - digital_heritage
   - page
   - person
+  - place
 entity_type: node
 global: false
 weight: 0
