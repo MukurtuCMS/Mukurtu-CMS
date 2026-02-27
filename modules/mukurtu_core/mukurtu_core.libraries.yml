@@ -17,3 +17,8 @@ splide:
   css:
     theme:
       libraries/splide/splide.min.css: {}
+
+entity_browser_view_decoration:
+  version: 1.x
+  js:
+    js/entity_browser_view_decoration.js: {}
