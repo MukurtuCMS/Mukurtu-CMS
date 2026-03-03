@@ -90,6 +90,18 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       ],
     ];
 
+    $header_options = ['' => $this->t('- Computed -')];
+    foreach ($this->getCSVHeaders($file) as $header) {
+      $header_options[$header] = $header;
+    }
+    $form['identifier_column'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Identifier Column'),
+      '#description' => $this->t('Optional. Select a column to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
+      '#options' => $header_options,
+      '#default_value' => $this->importConfig->getConfig('identifier_column') ?? '',
+    ];
+
     $this->buildMappingTable($form, $form_state, $file);
 
     // File options for import like multivalue delimiter, enclosure, etc.
@@ -123,17 +135,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       '#size' => 5,
       '#title' => $this->t('Multi-value Delimiter'),
       '#default_value' => $this->importConfig->getConfig('multivalue_delimiter') ?? ';',
-    ];
-    $header_options = ['' => $this->t('- None -')];
-    foreach ($this->getCSVHeaders($file) as $header) {
-      $header_options[$header] = $header;
-    }
-    $form['file_settings']['identifier_column'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Identifier Column'),
-      '#description' => $this->t('Optional. Select a column to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
-      '#options' => $header_options,
-      '#default_value' => $this->importConfig->getConfig('identifier_column') ?? '',
     ];
     $form['file_settings']['default_format'] = [
       '#type' => 'select',
@@ -313,6 +314,44 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
             $form_state->setError($form['mappings'][$delta], $this->t("Only a single source can be mapped to each target field."));
           }
         }
+      }
+    }
+
+    // When no Identifier Column is chosen, verify that toDefinition() will be
+    // able to compute a unique source ID from the current mapping. It can do
+    // so if any of the following are true:
+    //   - The entity type's ID key is mapped.
+    //   - The entity type's UUID key is mapped.
+    //   - The entity type has a label key and it is mapped.
+    //   - The entity is a media type whose source field (file, image, or
+    //     string ≤ 255) is mapped.
+    if (!$form_state->getValue('identifier_column') && isset($this->importConfig)) {
+      $entity_type_id = $form_state->getValue('entity_type_id');
+      $bundle = $form_state->getValue('bundle') == -1 ? NULL : $form_state->getValue('bundle');
+      $entity_type_def = $this->entityTypeManager->getDefinition($entity_type_id);
+      $mapped_targets = array_column($mappings, 'target');
+
+      $has_id = ($id_key = $entity_type_def->getKey('id')) && in_array($id_key, $mapped_targets);
+      $has_uuid = ($uuid_key = $entity_type_def->getKey('uuid')) && in_array($uuid_key, $mapped_targets);
+
+      // Temporarily apply the current form values so getLabelSourceColumn()
+      // and getMediaSourceColumn() operate on the submitted mapping.
+      $saved_mapping = $this->importConfig->getMapping();
+      $saved_entity_type_id = $this->importConfig->getTargetEntityTypeId();
+      $saved_bundle = $this->importConfig->getTargetBundle();
+      $this->importConfig->setMapping($mappings);
+      $this->importConfig->setTargetEntityTypeId($entity_type_id);
+      $this->importConfig->setTargetBundle($bundle);
+
+      $has_label = (bool) $this->importConfig->getLabelSourceColumn();
+      $has_media_source = (bool) $this->importConfig->getMediaSourceColumn();
+
+      $this->importConfig->setMapping($saved_mapping);
+      $this->importConfig->setTargetEntityTypeId($saved_entity_type_id);
+      $this->importConfig->setTargetBundle($saved_bundle);
+
+      if (!$has_id && !$has_uuid && !$has_label && !$has_media_source) {
+        $form_state->setError($form['identifier_column'], $this->t('An Identifier Column is required. No ID, UUID, label, or compatible media source field is mapped, so the importer cannot uniquely identify rows. Select an Identifier Column above, or map one of the required fields.'));
       }
     }
   }
