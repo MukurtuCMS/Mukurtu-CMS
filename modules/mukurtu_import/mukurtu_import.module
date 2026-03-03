@@ -20,6 +20,9 @@ function mukurtu_import_migrate_destination_info_alter(array &$definitions) {
   if (isset($definitions['entity:protocol'])) {
     $definitions['entity:protocol']['class'] = ProtocolAwareEntityContent::class;
   }
+  if (isset($definitions['entity:multipage_item'])) {
+    $definitions['entity:multipage_item']['class'] = ProtocolAwareEntityContent::class;
+  }
 }
 
 /**

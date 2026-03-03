@@ -21,6 +21,10 @@ mukurtu_import.mukurtu_import_strategy.*:
     default_format:
       type: string
       label: 'Default Format'
+    identifier_column:
+      type: string
+      nullable: true
+      label: 'Identifier Column'
     mapping:
       type: sequence
       sequence:
