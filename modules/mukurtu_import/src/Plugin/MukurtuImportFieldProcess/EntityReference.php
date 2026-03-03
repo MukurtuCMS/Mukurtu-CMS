@@ -48,7 +48,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
     ];
 
     // Default.
-    $refProcess = [
+    $ref_process = [
       'plugin' => 'mukurtu_entity_lookup',
       'value_key' => 'uuid',
       'ignore_case' => TRUE,
@@ -60,7 +60,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
       $allTargetBundles = array_keys($targetBundles);
       $targetBundle = reset($allTargetBundles);
 
-      $refProcess = [
+      $ref_process = [
         'plugin' => $field_config->getSetting('handler_settings')['auto_create'] ? 'mukurtu_entity_generate' : 'mukurtu_entity_lookup',
         'value_key' => 'name',
         'bundle_key' => 'vid',
@@ -71,7 +71,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
     }
 
     if (in_array($refType, ['community', 'media', 'node', 'protocol'])) {
-      $refProcess = [
+      $ref_process = [
         'plugin' => 'mukurtu_entity_lookup',
         'value_key' => \Drupal::entityTypeManager()->getDefinition($refType)->getKey('label'),
         'ignore_case' => TRUE,
@@ -81,7 +81,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
 
     // User ref. Only difference is value_key is set to 'name'.
     if ($refType == 'user') {
-      $refProcess = [
+      $ref_process = [
         'plugin' => 'mukurtu_entity_lookup',
         'value_key' => 'name',
         'ignore_case' => TRUE,
@@ -89,7 +89,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase {
       ];
     }
 
-    $process[] = $refProcess;
+    $process[] = $ref_process;
 
     // Attach source value to the first process.
     $process[0]['source'] = $source;

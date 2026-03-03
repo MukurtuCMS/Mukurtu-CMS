@@ -345,8 +345,14 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $process = $this->getProcess();
 
     $ids = [];
-    // Entity ID has priority.
-    if (!empty($process[$id_key])) {
+    // User-configured identifier column has highest priority.
+    $identifier_column = $this->getIdentifierColumn();
+    if ($identifier_column) {
+      $ids = [$identifier_column];
+    }
+
+    // Entity ID has next priority.
+    if (empty($ids) && !empty($process[$id_key])) {
       $ids = array_filter(array_map(fn($v) => $v['target'] == $id_key ? $v['source'] : NULL, $mapping));
     }
 
@@ -398,6 +404,14 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $diff = array_diff($fileHeaders, $mappingHeaders);
     $mappedCount = count($fileHeaders) - count($diff);
     return $mappedCount;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIdentifierColumn(): ?string {
+    $column = $this->getConfig('identifier_column');
+    return !empty($column) ? $column : NULL;
   }
 
   /**
