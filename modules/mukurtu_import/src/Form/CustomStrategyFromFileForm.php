@@ -24,6 +24,19 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   protected MukurtuImportStrategyInterface $importConfig;
 
   /**
+   * Title callback for route mukurtu_import.custom_strategy_from_file_form.
+   *
+   * @param \Drupal\file\FileInterface $file
+   *   The uploaded file entity.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The page title.
+   */
+  public function getTitle(FileInterface $file) {
+    return $this->t('Customize Import Settings - @filename', ['@filename' => $file->getFilename()]);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId(): string {
