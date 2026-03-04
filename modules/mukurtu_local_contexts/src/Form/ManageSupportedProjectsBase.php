@@ -19,10 +19,16 @@ use Symfony\Component\HttpFoundation\RequestStack;
 abstract class ManageSupportedProjectsBase extends FormBase {
 
   /**
+   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
+   */
+  protected $supportedProjectManager;
+
+  /**
    * Constructs the form with dependencies.
    */
-  public function __construct(RequestStack $request_stack) {
+  public function __construct(RequestStack $request_stack, LocalContextsSupportedProjectManager $supportedProjectManager) {
     $this->requestStack = $request_stack;
+    $this->supportedProjectManager = $supportedProjectManager;
   }
 
   /**
@@ -30,7 +36,8 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    */
   public static function create(ContainerInterface $container): static {
     return new static(
-      $container->get('request_stack')
+      $container->get('request_stack'),
+      $container->get('mukurtu_local_contexts.supported_project_manager'),
     );
   }
 
@@ -77,12 +84,11 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     }
 
     // Get the list of supported projects for this group or the entire site.
-    $supportedProjectManager = new LocalContextsSupportedProjectManager();
     if ($group) {
-      $supported_projects = $supportedProjectManager->getGroupSupportedProjects($group);
+      $supported_projects = $this->supportedProjectManager->getGroupSupportedProjects($group);
     }
     else {
-      $supported_projects = $supportedProjectManager->getSiteSupportedProjects();
+      $supported_projects = $this->supportedProjectManager->getSiteSupportedProjects();
     }
 
     $form['#tree'] = TRUE;
@@ -311,7 +317,6 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    * @return void
    */
   protected function submitAdd(array $all_projects, array $selected_projects, ?ContentEntityInterface $group, string $api_key): void {
-    $supportedProjectManager = new LocalContextsSupportedProjectManager();
     $added_count = 0;
     $sync_count = 0;
     $last_added_title = '';
@@ -323,10 +328,10 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       $is_new = !$project->getUpdated();
       $project->fetchFromHub($api_key);
       if ($group) {
-        $supportedProjectManager->addGroupProject($group, $id);
+        $this->supportedProjectManager->addGroupProject($group, $id);
       }
       else {
-        $supportedProjectManager->addSiteProject($id);
+        $this->supportedProjectManager->addSiteProject($id);
       }
       if ($is_new) {
         $added_count++;
@@ -367,12 +372,11 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    * @return void
    */
   protected function submitDelete(array $all_projects, array $selected_projects, ?ContentEntityInterface $group): void {
-    $supportedProjectManager = new LocalContextsSupportedProjectManager();
     foreach ($selected_projects as $id) {
       if ($projectToRemove = new LocalContextsProject($id)) {
         // Ensure this project is added before trying to remove it.
-        $is_group_project = $group && $supportedProjectManager->isGroupSupportedProject($group, $id);
-        $is_site_project = !$group && $supportedProjectManager->isSiteSupportedProject($id);
+        $is_group_project = $group && $this->supportedProjectManager->isGroupSupportedProject($group, $id);
+        $is_site_project = !$group && $this->supportedProjectManager->isSiteSupportedProject($id);
         if (!$is_group_project && !$is_site_project) {
           $title = $all_projects[$id]['title'] ?? '';
           $this->messenger()->addWarning($this->t('The project %project was not added, so no delete action was taken on it.', ['%project' => $title]));
@@ -381,10 +385,10 @@ abstract class ManageSupportedProjectsBase extends FormBase {
 
         if (!$projectToRemove->inUse()) {
           if ($group) {
-            $supportedProjectManager->removeGroupProject($group, $id);
+            $this->supportedProjectManager->removeGroupProject($group, $id);
           }
           else {
-            $supportedProjectManager->removeSiteProject($id);
+            $this->supportedProjectManager->removeSiteProject($id);
           }
           $title = $projectToRemove->getTitle();
           $this->messenger()->addStatus($this->t('Removed project %project.', ['%project' => $title]));

@@ -24,9 +24,9 @@ class ProjectDirectoryController extends ControllerBase {
    */
   protected $localContextsProjectManager;
 
-  public function __construct(ConfigFactoryInterface $configFactory) {
-    $this->localContextsProjectManager = new LocalContextsSupportedProjectManager();
+  public function __construct(ConfigFactoryInterface $configFactory, LocalContextsSupportedProjectManager $supportedProjectManager) {
     $this->configFactory = $configFactory;
+    $this->localContextsProjectManager = $supportedProjectManager;
   }
 
   /**
@@ -35,6 +35,7 @@ class ProjectDirectoryController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
+      $container->get('mukurtu_local_contexts.supported_project_manager'),
     );
   }
 
