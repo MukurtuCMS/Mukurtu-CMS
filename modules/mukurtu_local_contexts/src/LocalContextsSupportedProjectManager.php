@@ -9,10 +9,14 @@ use Drupal\og\Og;
 use Drupal\Core\Session\AccountInterface;
 
 class LocalContextsSupportedProjectManager {
-  protected $db;
 
-  public function __construct(?Connection $database = NULL) {
-    $this->db = $database ?? \Drupal::database();
+  /**
+   * Create a new LocalContextsSupportedProjectManager instance.
+   *
+   * @param \Drupal\Core\Database\Connection $db
+   *   The database connection.
+   */
+  public function __construct(protected Connection $db) {
   }
 
   /**
