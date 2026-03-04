@@ -40,7 +40,7 @@ third_party_settings:
         - title
         - field_media_assets
         - field_cultural_protocols
-        - field_other_names
+        - field_other_place_names
         - field_place_type
         - group_locations
       label: 'Mukurtu Essentials'
@@ -314,7 +314,7 @@ content:
       field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
-  field_other_names:
+  field_other_place_names:
     type: entity_browser_entity_reference
     weight: 5
     region: content

@@ -50,7 +50,7 @@ third_party_settings:
       children:
         - field_keywords
         - field_place_type
-        - field_other_names
+        - field_other_place_names
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
         - flag_export_content
@@ -245,7 +245,7 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
-  field_other_names:
+  field_other_place_names:
     type: entity_reference_label
     label: above
     settings:
@@ -285,7 +285,7 @@ hidden:
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
-  field_other_names: true
+  field_other_place_names: true
   field_sections: true
   field_sequence_collection: true
   field_title: true
