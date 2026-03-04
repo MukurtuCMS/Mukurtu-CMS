@@ -107,7 +107,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_sections'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Text sections'))
-      ->setDescription(t('TBD.	Biography sections can be rearranged and collapsed for easier editing. To add additional biography sections, select "Add Biography section".'))
+      ->setDescription(t('TBD.	Texts sections can be rearranged and collapsed for easier editing. To add additional text sections, select "Add Text section".'))
       ->setSettings([
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
