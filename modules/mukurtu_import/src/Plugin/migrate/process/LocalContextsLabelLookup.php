@@ -1,39 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateException;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Component\Plugin\ContainerFactoryPluginInterface;
 
 /**
  * Looks up a Local Contexts label or notice by name, or passes through a
  * valid compound stored value.
- *
- * @MigrateProcessPlugin(
- *   id = "local_contexts_label_lookup"
- * )
  */
+#[MigrateProcess('local_contexts_label_lookup')]
 class LocalContextsLabelLookup extends ProcessPluginBase implements ContainerFactoryPluginInterface {
 
   /**
-   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
+   * Constructs a LocalContextsLabelLookup object.
+   *
+   * @param array $configuration
+   *    A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *    The plugin ID for the plugin instance.
+   * @param mixed $plugin_definition
+   *    The plugin implementation definition.
+   * @param \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager $manager
+   *    The Local Contexts supported project manager service.
    */
-  protected $manager;
-
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, LocalContextsSupportedProjectManager $manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, protected LocalContextsSupportedProjectManager $manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->manager = $manager;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     return new static(
       $configuration,
       $plugin_id,
