@@ -60,7 +60,8 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
             'image' => 'image',
             'remote_video' => 'remote_video',
             'video' => 'video',
-            'soundcloud' => 'soundcloud'
+            'soundcloud' => 'soundcloud',
+            'external_embed' => 'external_embed'
           ],
           'sort' => [
             'field' => '_none'
