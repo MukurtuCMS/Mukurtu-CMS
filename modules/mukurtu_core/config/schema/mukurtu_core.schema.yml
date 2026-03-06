@@ -692,3 +692,7 @@ block.settings.mukurtu_core_example:
 media.source.external_embed:
   type: media.source.field_aware
   label: '"External Embed" media source configuration'
+
+plugin.plugin_configuration.search_api_backend.mukurtu_db:
+  type: plugin.plugin_configuration.search_api_backend.search_api_db
+  label: 'Mukurtu Search API DB settings'
