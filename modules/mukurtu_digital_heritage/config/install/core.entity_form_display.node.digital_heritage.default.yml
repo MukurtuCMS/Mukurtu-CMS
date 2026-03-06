@@ -256,65 +256,65 @@ content:
     weight: 31
     region: content
     settings:
-      geometry_validation: 0
+      geometry_validation: false
       map:
         leaflet_map: 'OSM Mapnik'
-        height: '400'
-        auto_center: '1'
-        scroll_zoom_enabled: '1'
+        height: 400
+        auto_center: 1
         map_position:
-          zoom: '12'
-          minZoom: '3'
-          maxZoom: '18'
-          zoomFiner: '0'
-          force: 0
+          force: false
           center:
-            lat: '0'
-            lon: '0'
+            lat: 0.0
+            lon: 0.0
           zoomControlPosition: topleft
+          zoom: 12
+          minZoom: 3
+          maxZoom: 18
+          zoomFiner: 0
+        scroll_zoom_enabled: 1
+      input:
+        show: false
+        readonly: false
       toolbar:
         position: topright
         marker: defaultMarker
-        drawPolyline: '1'
-        drawRectangle: '1'
-        drawPolygon: '1'
-        editMode: '1'
-        dragMode: '1'
-        removalMode: '1'
+        drawPolyline: true
+        drawRectangle: true
+        drawPolygon: true
         drawCircle: false
         drawText: false
-        cutPolygon: 0
-        rotateMode: 0
+        editMode: true
+        dragMode: true
+        cutPolygon: false
+        removalMode: true
+        rotateMode: false
       reset_map:
-        control: 0
+        control: false
         options: '{"position":"topleft","title":"Reset View"}'
+      map_scale:
+        control: false
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
       fullscreen:
+        control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
-        control: 0
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
-      input:
-        show: 0
-        readonly: 0
+      feature_properties:
+        values: ''
+      locate:
+        control: false
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        automatic: true
       geocoder:
         control: false
         settings:
+          popup: false
           position: topright
           input_size: 20
           providers: {  }
           min_terms: 4
           delay: 800
           zoom: 16
-          popup: false
           options: ''
-      map_scale:
-        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
-        control: 0
-      locate:
-        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
-        automatic: '1'
-        control: 0
-      feature_properties:
-        values: ''
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea

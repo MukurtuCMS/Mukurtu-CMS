@@ -20,8 +20,8 @@ third_party_settings:
     group_main_tab:
       children:
         - group_mukurtu_essentials
-        - group_related_content
         - group_additional_fields
+        - group_related_content
       label: 'Main Tab'
       region: content
       parent_name: ''
@@ -98,7 +98,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: open
-        description: '"The Local Contexts Traditional Knowledge (TK) and Biocultural (BC) Labels are tools for Indigenous communities and local organizations. Developed through sustained partnership and testing within Indigenous communities across multiple countries, the Labels allow communities to express local and specific conditions for sharing and engaging in future research and relationships in ways that are consistent with already existing community rules, governance, and protocols for using, sharing, and circulating knowledge and data." For more information, visit <a href="https://localcontexts.org">localcontexts.org</a>.	</br>You must first customize your TK and BC Labels using the Local Contexts Hub and import your Project(s) before you can apply Projects or Labels to collections. </br>Note that this does NOT apply Projects or Labels to content within the collection, that is done on a per-content basis.'
+        description: "\"The Local Contexts Traditional Knowledge (TK) and Biocultural (BC) Labels are tools for Indigenous communities and local organizations. Developed through sustained partnership and testing within Indigenous communities across multiple countries, the Labels allow communities to express local and specific conditions for sharing and engaging in future research and relationships in ways that are consistent with already existing community rules, governance, and protocols for using, sharing, and circulating knowledge and data.\" For more information, visit <a href=\"https://localcontexts.org\">localcontexts.org</a>.\t</br>You must first customize your TK and BC Labels using the Local Contexts Hub and import your Project(s) before you can apply Projects or Labels to collections. </br>Note that this does NOT apply Projects or Labels to content within the collection, that is done on a per-content basis."
         required_fields: true
     group_locations:
       children:
@@ -167,65 +167,71 @@ content:
     weight: 0
     region: content
     settings:
-      geometry_validation: 0
+      geometry_validation: false
       map:
         leaflet_map: 'OSM Mapnik'
-        height: '400'
-        auto_center: '1'
-        scroll_zoom_enabled: '1'
+        height: 400
+        auto_center: 1
         map_position:
-          zoom: '12'
-          minZoom: '3'
-          maxZoom: '18'
-          zoomFiner: '0'
-          force: 0
+          force: false
           center:
-            lat: '0'
-            lon: '0'
+            lat: 0.0
+            lon: 0.0
           zoomControlPosition: topleft
+          zoom: 12
+          minZoom: 3
+          maxZoom: 18
+          zoomFiner: 0
+        scroll_zoom_enabled: 1
+      input:
+        show: false
+        readonly: false
       toolbar:
         position: topright
         marker: defaultMarker
-        drawPolyline: '1'
-        drawRectangle: '1'
-        drawPolygon: '1'
-        editMode: '1'
-        dragMode: '1'
-        removalMode: '1'
+        drawPolyline: true
+        drawRectangle: true
+        drawPolygon: true
         drawCircle: false
         drawText: false
-        cutPolygon: 0
-        rotateMode: 0
+        editMode: true
+        dragMode: true
+        cutPolygon: false
+        removalMode: true
+        rotateMode: false
       reset_map:
-        control: 0
+        control: false
         options: '{"position":"topleft","title":"Reset View"}'
+      map_scale:
+        control: false
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
       fullscreen:
+        control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
-        control: 0
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
-      input:
-        show: 0
-        readonly: 0
+      feature_properties:
+        values: ''
+      locate:
+        control: false
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        automatic: true
       geocoder:
         control: false
         settings:
+          popup: false
           position: topright
           input_size: 20
           providers: {  }
           min_terms: 4
           delay: 800
           zoom: 16
-          popup: false
           options: ''
-      map_scale:
-        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
-        control: 0
-      locate:
-        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
-        automatic: '1'
-        control: 0
-      feature_properties:
-        values: ''
+      geojson_overlays:
+        sources:
+          fields: {  }
+        zoom_to_geojson: true
+        path: '{"color":"#f71ed3","opacity":"0.7","stroke":true,"weight":2,"fillColor":"#ffddfe","fillOpacity":"0.1","radius":3,"dashArray":"5, 5"}'
+        snapping: true
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea
