@@ -2,16 +2,13 @@
 
 namespace Drupal\mukurtu_local_contexts\Form;
 
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_local_contexts\LocalContextsApi;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Provides a Local Contexts form that can be used by both groups and sites.
@@ -19,16 +16,12 @@ use Symfony\Component\HttpFoundation\RequestStack;
 abstract class ManageSupportedProjectsBase extends FormBase {
 
   /**
-   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
-   */
-  protected $supportedProjectManager;
-
-  /**
    * Constructs the form with dependencies.
+   *
+   * @param \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager $supportedProjectManager
+   *   The Local Contexts supported project manager.
    */
-  public function __construct(RequestStack $request_stack, LocalContextsSupportedProjectManager $supportedProjectManager) {
-    $this->requestStack = $request_stack;
-    $this->supportedProjectManager = $supportedProjectManager;
+  public function __construct(protected LocalContextsSupportedProjectManager $supportedProjectManager) {
   }
 
   /**
@@ -36,7 +29,6 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    */
   public static function create(ContainerInterface $container): static {
     return new static(
-      $container->get('request_stack'),
       $container->get('mukurtu_local_contexts.supported_project_manager'),
     );
   }
@@ -254,7 +246,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    * Submit handler for the reset API key button.
    */
   public function resetApiKey(array &$form, FormStateInterface $form_state) {
-    $this->requestStack->getCurrentRequest()->getSession()->remove('mukurtu_local_contexts_api_key');
+    $this->getRequest()->getSession()->remove('mukurtu_local_contexts_api_key');
     $form_state->setValue('api_key', NULL);
     $group = $form_state->get('group');
 
