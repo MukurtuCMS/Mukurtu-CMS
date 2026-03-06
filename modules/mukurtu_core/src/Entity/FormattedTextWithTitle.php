@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\mukurtu_place\Entity;
+namespace Drupal\mukurtu_core\Entity;
 
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\paragraphs\Entity\Paragraph;
