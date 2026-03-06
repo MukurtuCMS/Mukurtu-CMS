@@ -3,15 +3,20 @@
 namespace Drupal\mukurtu_local_contexts;
 
 use PDO;
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\og\Og;
 use Drupal\Core\Session\AccountInterface;
 
 class LocalContextsSupportedProjectManager {
-  protected $db;
 
-  public function __construct() {
-    $this->db = \Drupal::database();
+  /**
+   * Create a new LocalContextsSupportedProjectManager instance.
+   *
+   * @param \Drupal\Core\Database\Connection $db
+   *   The database connection.
+   */
+  public function __construct(protected Connection $db) {
   }
 
   /**
