@@ -39,7 +39,6 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -65,7 +64,6 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -97,7 +95,6 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
           'auto_create_bundle' => 'audio',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -167,7 +164,6 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
           'auto_create_bundle' => 'location',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
