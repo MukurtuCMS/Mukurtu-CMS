@@ -25,7 +25,7 @@ class FormattedTextWithTitle extends Paragraph {
 
     $definitions['field_body'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Body')
-      ->setDescription('The body of the section.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.')
+      ->setDescription('The body of the section.	</br>This rich text field can support HTML and embedded media assets using the editing toolbar.')
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

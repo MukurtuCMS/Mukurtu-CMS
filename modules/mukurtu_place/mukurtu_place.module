@@ -1,7 +1,7 @@
 <?php
 
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\mukurtu_place\Entity\FormattedTextWithTitle;
+use Drupal\mukurtu_core\Entity\FormattedTextWithTitle;
 use Drupal\mukurtu_place\Entity\Place;
 
 /**
