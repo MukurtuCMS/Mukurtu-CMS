@@ -1,4 +1,7 @@
 services:
+  mukurtu_local_contexts.supported_project_manager:
+    class: Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
+    arguments: ['@database']
   mukurtu_local_contexts.event_subscriber:
     class: Drupal\mukurtu_local_contexts\EventSubscriber\MukurtuLocalContextsProjectReferenceUpdatedSubscriber
     arguments: ['@messenger']
