@@ -21,11 +21,12 @@ use Drupal\Core\Session\AccountInterface;
  * )
  */
 class LocalContextsProjectItem extends StringItem implements OptionsProviderInterface {
+
   protected $localContextsProjectManager;
 
   public function __construct(ComplexDataDefinitionInterface $definition, $name = NULL, ?TypedDataInterface $parent = NULL) {
     parent::__construct($definition, $name, $parent);
-    $this->localContextsProjectManager = new LocalContextsSupportedProjectManager();
+    $this->localContextsProjectManager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
   }
 
   /**

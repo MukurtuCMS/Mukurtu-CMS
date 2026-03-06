@@ -79,8 +79,9 @@ function mukurtu_local_contexts_cron() {
   $project_count = 0;
 
   try {
-    $supportedProjectManager = new LocalContextsSupportedProjectManager();
-    $projects = $supportedProjectManager->getAllProjects();
+    $supported_project_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
+    assert($supported_project_manager instanceof LocalContextsSupportedProjectManager);
+    $projects = $supported_project_manager->getAllProjects();
 
     // If no Local Contexts projects are configured, skip the sync.
     if (empty($projects)) {
