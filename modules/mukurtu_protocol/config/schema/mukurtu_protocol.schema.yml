@@ -94,3 +94,6 @@ views.access.site_and_mukurtu_role:
         type: string
         label: 'Permission'
 
+field.formatter.settings.mukurtu_comment_default:
+  type: field.formatter.settings.comment_default
+  label: 'Mukurtu comment display format settings'
