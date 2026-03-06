@@ -151,8 +151,8 @@ test.beforeEach(async ({ page }) => {
 
   // Check if default content already exists, and if so, skip recreation.
   if (testContentExists === null) {
-    await page.goto('/dashboard');
-    const getStartedVisible = await page.locator('.mukurtu-getting-started-communities').isVisible();
+    await page.goto('/communities');
+    const getStartedVisible = !await page.locator('.communities__item').isVisible();
     testContentExists = (getStartedVisible === false);
   }
   test.skip(testContentExists === true, 'Content already exists within the database, skipping the default content creation. To create default content, empty all existing content by running delete-content.spec.ts.');
@@ -171,7 +171,7 @@ test('Default Content: Community', async ({ page, browserName }) => {
       .getByRole('group', { name: 'Community page visibility' })
       .getByRole('radio', { name: community.field_access_mode })
       .check();
-    await submitEntityForm(page, 'Create Community');
+    await submitEntityForm(page, 'Save');
 
     // After creating the community, ensure we are redirected to create a
     // protocol associated with this community.
@@ -333,10 +333,13 @@ test('Default Content: Dictionary Word', async ({ page, browserName }) => {
         .check();
     }
 
-    await page.getByRole('textbox', { name: 'Language' }).fill(word.field_dictionary_word_language);
-    await waitForAjax(page);
+    await page
+      .getByRole('group', { name: 'Language' })
+      .getByRole('radio', { name: word.field_dictionary_word_language, exact: true })
+      .first()
+      .check();
     await page.getByRole('textbox', { name: 'Alternate Spelling' }).fill(word.field_alternate_spelling);
-    await page.getByRole('textbox', { name: 'Definition' }).fill(word.field_definition);
+    await new Ckeditor5(page, '[data-drupal-selector="edit-field-definition-wrapper"]').fill(word.field_definition);
 
     // Loop through the sample sentences to be added to this word.
     const paragraphsWrapper = page.locator('[data-drupal-selector="edit-field-sample-sentences-wrapper"]');
