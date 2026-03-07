@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.person.comment
     - node.type.person
   module:
+    - blazy
     - entity_reference_revisions
     - field_group
     - layout_builder
@@ -24,11 +25,11 @@ third_party_settings:
     group_primary_fields:
       children:
         - field_media_assets
-        - field_all_related_content
-        - field_coverage
-        - field_location
-        - field_coverage_description
         - field_sections
+        - field_coverage
+        - field_coverage_description
+        - field_location
+        - field_all_related_content
         - comment
       label: 'Primary Fields'
       parent_name: ''
@@ -97,6 +98,13 @@ content:
       link: false
     third_party_settings: {  }
     weight: 90
+    region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -188,7 +196,6 @@ content:
           delay: 800
           zoom: 16
           options: ''
-          set_marker: false
       map_lazy_load:
         lazy_load: false
     third_party_settings: {  }
@@ -254,23 +261,25 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
-  field_related_people:
-    type: entity_reference_entity_view
-    label: above
-    settings:
-      view_mode: teaser
-      link: true
-    third_party_settings: {  }
-    weight: 12
-    region: content
   field_other_names:
     type: entity_reference_label
     label: above
     settings:
-      view_mode: default
       link: true
     third_party_settings: {  }
     weight: 13
+    region: content
+  field_related_people:
+    type: blazy_entity
+    label: above
+    settings:
+      view_mode: teaser
+      grid: ''
+      grid_medium: ''
+      grid_small: ''
+      style: ''
+    third_party_settings: {  }
+    weight: 12
     region: content
   field_sections:
     type: entity_reference_revisions_entity_view
@@ -286,13 +295,6 @@ content:
     third_party_settings: {  }
     weight: 20
     region: content
-  field_citation:
-    type: text_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 38
-    region: content
 hidden:
   draft: true
   field_communities: true
@@ -303,10 +305,7 @@ hidden:
   field_multipage_page_of: true
   field_protocol_control: true
   field_related_content: true
-  field_related_people: true
   field_representative_media: true
-  field_other_names: true
-  field_sections: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true

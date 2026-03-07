@@ -51,7 +51,6 @@ third_party_settings:
       children:
         - flag_export_content
         - group_sidebar_mukurtu_fields
-        - group_additional_metadata
         - group_rights
       label: Metadata
       parent_name: ''
@@ -138,6 +137,13 @@ content:
     third_party_settings: {  }
     weight: 8
     region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
+    region: content
   field_collection_image:
     type: entity_reference_entity_view
     label: hidden
@@ -186,8 +192,6 @@ content:
         control: '1'
         content: ''
         options: '{"maxWidth":"300","minWidth":"50","autoPan":true}'
-        value: ''
-        view_mode: full
       map_position:
         force: false
         center:
@@ -225,7 +229,6 @@ content:
       leaflet_markercluster:
         control: true
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
-        excluded: ''
         include_path: true
       fullscreen:
         control: false
@@ -247,7 +250,6 @@ content:
           delay: 800
           zoom: 16
           options: ''
-          set_marker: false
       map_lazy_load:
         lazy_load: false
     third_party_settings: {  }
@@ -341,13 +343,6 @@ content:
     settings: {  }
     third_party_settings: {  }
     weight: 5
-    region: content
-  field_citation:
-    type: text_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 38
     region: content
 hidden:
   draft: true

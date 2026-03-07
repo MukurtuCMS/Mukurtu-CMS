@@ -265,7 +265,6 @@ content:
       leaflet_markercluster:
         control: true
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
-        excluded: ''
         include_path: true
       fullscreen:
         control: false
@@ -287,7 +286,6 @@ content:
           delay: 800
           zoom: 16
           options: ''
-          set_marker: false
       map_lazy_load:
         lazy_load: false
     third_party_settings: {  }

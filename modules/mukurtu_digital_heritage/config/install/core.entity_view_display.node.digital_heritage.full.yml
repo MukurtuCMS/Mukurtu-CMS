@@ -27,10 +27,10 @@ third_party_settings:
   field_group:
     group_metadata:
       children:
+        - flag_export_content
         - group_sidebar_mukurtu_fields
         - group_additional_metadata
         - group_rights
-        - flag_export_content
       label: Metadata
       parent_name: ''
       region: content
@@ -136,10 +136,10 @@ third_party_settings:
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
         - field_knowledge_keepers
+        - field_citation
         - field_rights_and_usage
         - field_creative_commons
         - field_rights_statements
-        - field_citation
       label: Rights
       parent_name: group_metadata
       region: content
@@ -222,20 +222,37 @@ content:
       hide_empty_map: true
       disable_wheel: false
       gesture_handling: false
+      fitbounds_options: '{"padding":[0,0]}'
       reset_map:
         control: false
-        position: topright
-      popup: true
+        options: '{"position":"topleft","title":"Reset View"}'
+      map_scale:
+        control: false
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+      locate:
+        control: false
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        automatic: false
+      leaflet_tooltip:
+        value: ''
+        options: '{"permanent":false,"direction":"center"}'
+      popup: false
       popup_content: ''
+      leaflet_popup:
+        control: '1'
+        content: ''
+        options: '{"maxWidth":"300","minWidth":"50","autoPan":true}'
       map_position:
         force: false
         center:
           lat: 0.0
           lon: 0.0
+        zoomControlPosition: topleft
         zoom: 12
         minZoom: 1
         maxZoom: 18
         zoomFiner: 0
+      weight: '0'
       icon:
         iconType: marker
         iconUrl: ''
@@ -267,18 +284,24 @@ content:
         control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
       path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      feature_properties:
+        values: ''
       geocoder:
         control: false
         settings:
+          popup: false
+          autocomplete:
+            placeholder: 'Search Address'
+            title: 'Search an Address on the Map'
           position: topright
-          input_size: 25
+          input_size: 20
           providers: {  }
           min_terms: 4
           delay: 800
           zoom: 16
-          popup: false
           options: ''
-      weight: null
+      map_lazy_load:
+        lazy_load: false
     third_party_settings: {  }
     weight: 38
     region: content
@@ -499,7 +522,7 @@ content:
     weight: 37
     region: content
   field_transcription:
-    type: basic_string
+    type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }

@@ -40,6 +40,13 @@ content:
     third_party_settings: {  }
     weight: 8
     region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
+    region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
     label: hidden
@@ -108,7 +115,6 @@ content:
       leaflet_markercluster:
         control: true
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
-        excluded: ''
         include_path: true
       fullscreen:
         control: false
@@ -130,15 +136,8 @@ content:
           delay: 800
           zoom: 16
           options: ''
-          set_marker: false
       map_lazy_load:
         lazy_load: false
-      geojson_overlays:
-        sources:
-          fields: {  }
-        path: '{"color":"#f71ed3","opacity":"0.7","stroke":true,"weight":2,"fillColor":"#ffddfe","fillOpacity":"0.1","radius":3,"dashArray":"5, 5"}'
-        zoom_to_geojson: true
-        snapping: true
     third_party_settings: {  }
     weight: 5
     region: content
@@ -159,7 +158,8 @@ content:
   field_keywords:
     type: entity_reference_label
     label: above
-    settings: {  }
+    settings:
+      link: true
     third_party_settings: {  }
     weight: 6
     region: content
@@ -186,13 +186,13 @@ content:
     weight: 7
     region: content
   field_representative_media:
+    type: entity_reference_label
     label: hidden
-    region: content
-    weight: 12
     settings:
       link: true
     third_party_settings: {  }
-    type: entity_reference_label
+    weight: 12
+    region: content
   field_source:
     type: string
     label: above
@@ -232,21 +232,11 @@ content:
     third_party_settings: {  }
     weight: 8
     region: content
-  field_citation:
-    type: text_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 38
-    region: content
 hidden:
-  comment: true
   draft: true
-  field_all_related_content: true
   field_communities: true
   field_cultural_protocols: true
   field_in_collection: true
-  field_keywords: true
   field_media_assets: true
   field_multipage_page_of: true
   field_protocol_control: true
