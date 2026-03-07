@@ -1,7 +1,7 @@
 <?php
 
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\mukurtu_person\Entity\FormattedTextWithTitle;
+use Drupal\mukurtu_core\Entity\FormattedTextWithTitle;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\Entity\RelatedPerson;
 

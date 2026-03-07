@@ -201,6 +201,17 @@ function mukurtu_install() {
     'weight' => 40,
   ])->save();
 
+  // Place record (under Create Content)
+  MenuLinkContent::create([
+    'title' => 'Place record',
+    'link' => ['uri' => 'internal:' . '/node/add/place'],
+    'menu_name' => 'account',
+    'description' => 'Create place record',
+    'parent' => 'menu_link_content:' . $create_content_menu->uuid(),
+    'expanded' => FALSE,
+    'weight' => 35,
+  ])->save();
+
   // Media (under Create Content)
   MenuLinkContent::create([
     'title' => 'Media',
