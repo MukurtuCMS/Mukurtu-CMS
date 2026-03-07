@@ -57,3 +57,7 @@ plugin.plugin_configuration.facets_processor.glossary_custom_order:
     sort:
       type: string
       label: sort order
+
+plugin.plugin_configuration.facets_processor.cultural_protocol_facet_label_processor:
+  type: mapping
+  label: 'Cultural protocol facet label processor'
