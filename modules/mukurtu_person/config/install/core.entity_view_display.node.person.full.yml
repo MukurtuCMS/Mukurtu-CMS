@@ -93,10 +93,17 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: teaser
+      view_mode: featured
       link: false
     third_party_settings: {  }
     weight: 90
+    region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -254,15 +261,6 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
-  field_related_people:
-    type: entity_reference_entity_view
-    label: above
-    settings:
-      view_mode: teaser
-      link: true
-    third_party_settings: {  }
-    weight: 12
-    region: content
   field_other_names:
     type: entity_reference_label
     label: above
@@ -271,6 +269,15 @@ content:
       link: true
     third_party_settings: {  }
     weight: 13
+    region: content
+  field_related_people:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: true
+    third_party_settings: {  }
+    weight: 12
     region: content
   field_sections:
     type: entity_reference_revisions_entity_view
@@ -286,13 +293,6 @@ content:
     third_party_settings: {  }
     weight: 20
     region: content
-  field_citation:
-    type: text_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 38
-    region: content
 hidden:
   draft: true
   field_communities: true
@@ -301,11 +301,11 @@ hidden:
   field_deceased: true
   field_in_collection: true
   field_multipage_page_of: true
+  field_other_names: true
   field_protocol_control: true
   field_related_content: true
   field_related_people: true
   field_representative_media: true
-  field_other_names: true
   field_sections: true
   field_sequence_collection: true
   field_title: true

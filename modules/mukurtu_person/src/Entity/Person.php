@@ -106,7 +106,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('view', TRUE);
 
     $definitions['field_sections'] = BaseFieldDefinition::create('entity_reference_revisions')
-      ->setLabel(t('Biography sections'))
+      ->setLabel(t('Biography'))
       ->setDescription(t('The biography is an account of the person\'s life, whether written or compiled by others, an autobiography, or both. While they are primarily written, they may include media assets as well. Biographies can be composed in sections to more clearly structure the person\'s life events, story, accomplishments, and relationships.	Biography sections can be rearranged and collapsed for easier editing. To add additional biography sections, select "Add Biography section".'))
       ->setSettings([
         'target_type' => 'paragraph',
