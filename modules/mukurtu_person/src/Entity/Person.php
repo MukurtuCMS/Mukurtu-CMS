@@ -39,7 +39,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -69,7 +68,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create_bundle' => 'audio',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -196,7 +194,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create_bundle' => 'people',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
