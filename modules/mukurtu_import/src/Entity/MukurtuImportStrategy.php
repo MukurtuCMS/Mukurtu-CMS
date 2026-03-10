@@ -284,6 +284,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $context['multivalue_delimiter'] = $this->getConfig('multivalue_delimiter') ?? ';';
       $context['upload_location'] = $this->getConfig('upload_location') ?? NULL;
       $context['default_format'] = $this->getConfig('default_format') ?? self::DEFAULT_FORMAT;
+      $context['local_contexts_delimiter'] = $this->getConfig('local_contexts_delimiter') ?? '>';
       if ($subtarget) {
         $context['subfield'] = $subtarget;
       }

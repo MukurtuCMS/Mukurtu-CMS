@@ -136,6 +136,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       '#title' => $this->t('Multi-value Delimiter'),
       '#default_value' => $this->importConfig->getConfig('multivalue_delimiter') ?? ';',
     ];
+    $form['file_settings']['local_contexts_delimiter'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#title' => $this->t('Local Contexts Delimiter'),
+      '#description' => $this->t('Delimiter used to separate the project name from the label/notice name in Local Contexts fields (e.g., "My Project > TK Attribution").'),
+      '#default_value' => $this->importConfig->getConfig('local_contexts_delimiter') ?? '>',
+    ];
     $form['file_settings']['default_format'] = [
       '#type' => 'select',
       '#required' => TRUE,
@@ -493,6 +500,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $this->importConfig->setConfig('enclosure', $form_state->getValue('enclosure'));
     $this->importConfig->setConfig('escape', $form_state->getValue('escape'));
     $this->importConfig->setConfig('multivalue_delimiter', $form_state->getValue('multivalue_delimiter'));
+    $this->importConfig->setConfig('local_contexts_delimiter', $form_state->getValue('local_contexts_delimiter'));
     $this->importConfig->setConfig('default_format', $form_state->getValue('default_format'));
     $this->importConfig->setConfig('identifier_column', $form_state->getValue('identifier_column') ?: NULL);
 

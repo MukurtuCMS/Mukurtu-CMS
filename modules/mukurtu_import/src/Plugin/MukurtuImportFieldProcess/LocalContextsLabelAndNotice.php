@@ -39,8 +39,10 @@ class LocalContextsLabelAndNotice extends MukurtuImportFieldProcessPluginBase {
       'plugin' => 'callback',
       'callable' => 'trim',
     ];
+    $local_contexts_delimiter = $context['local_contexts_delimiter'] ?? '>';
     $process[] = [
       'plugin' => 'local_contexts_label_lookup',
+      'delimiter' => $local_contexts_delimiter,
     ];
     $process[0]['source'] = $source;
     return $process;
