@@ -8,6 +8,6 @@ import {Page} from "@playwright/test";
  */
 export default async function submitEntityForm(page, buttonText = 'Save') {
   // The Gin theme makes multiple Save buttons, select the visible one.
-  const actionsWrapper = page.locator('[data-drupal-selector="edit-gin-sticky-actions"]');
+  const actionsWrapper = page.locator('[data-drupal-selector="edit-gin-sticky-actions"], [data-drupal-selector="gin-sticky-edit-submit"]').first();
   await actionsWrapper.getByRole('button', { name: buttonText, exact: true }).click();
 }
