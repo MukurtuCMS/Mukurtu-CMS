@@ -51,7 +51,9 @@ third_party_settings:
       children:
         - field_keywords
         - field_date_born
+        - field_place_of_birth
         - field_date_died
+        - field_place_of_death
         - field_related_people
         - field_other_names
         - field_local_contexts_projects
@@ -215,10 +217,26 @@ content:
     third_party_settings: {  }
     weight: 9
     region: content
+  field_place_of_birth:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 9
+    region: content
   field_date_died:
     type: month_day_year_original_date_formatter
     label: above
     settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  field_place_of_death:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
     third_party_settings: {  }
     weight: 10
     region: content

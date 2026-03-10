@@ -244,6 +244,46 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_place_of_birth'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Place of Birth'))
+      ->setDescription(t('The place where the person was born.	</br>As you type, existing locations will be displayed. Select an existing location or enter a new one. To include additional locations, select "Add another item".'))
+      ->setSettings([
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => [
+            'location' => 'location'
+          ],
+          'auto_create' => TRUE,
+        ]
+      ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_place_of_death'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Place of Death'))
+      ->setDescription(t('The place where the person died.	</br>As you type, existing locations will be displayed. Select an existing location or enter a new one. To include additional locations, select "Add another item".'))
+      ->setSettings([
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => [
+            'location' => 'location'
+          ],
+          'auto_create' => TRUE,
+        ]
+      ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
       ->setLabel(t('Local Contexts Projects'))
       ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the person record.	</br>Select one or more Local Contexts Projects.'))
