@@ -3,7 +3,7 @@ status: true
 dependencies:
   module:
     - mukurtu_taxonomy
-name: mukurtu_taxonomy_record_term_browser
+name: mukurtu_taxonomy_record_place_term_browser
 label: 'Select Taxonomy Record Terms'
 display: modal
 display_configuration:
@@ -22,11 +22,11 @@ selection_display_configuration:
 widget_selector: single
 widget_selector_configuration: {  }
 widgets:
-  7154fb62-3e71-4769-9121-b328e601b8f4:
+  e82639e0-e6b2-42ca-9a1c-ad78e5f9458d:
+    id: mukurtu_taxonomy_record_term_selection
+    uuid: e82639e0-e6b2-42ca-9a1c-ad78e5f9458d
+    label: 'Select Taxonomy Terms'
+    weight: 1
     settings:
       submit_text: 'Add Terms'
-    uuid: 7154fb62-3e71-4769-9121-b328e601b8f4
-    weight: 1
-    label: 'Select Taxonomy Terms'
-    id: mukurtu_taxonomy_record_term_selection
-    allow_list: person
+    allow_list: place

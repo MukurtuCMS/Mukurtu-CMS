@@ -18,21 +18,51 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class MukurtuTaxonomyRecordSelection extends WidgetBase implements ContainerFactoryPluginInterface {
 
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    return array_merge(parent::defaultConfiguration(), [
+      'allow_list' => 'person',
+    ]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildConfigurationForm($form, $form_state);
+
+    $form['allow_list'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Select the configured taxonomy allow list'),
+      '#options' => [
+        'person' => $this->t('Person'),
+        'place' => $this->t('Place'),
+      ],
+      '#default_value' => $this->configuration['allow_list'],
+    ];
+
+    return $form;
+  }
+
   protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS', $exclude = []) {
     // Get the vocabs enabled for taxonomy records.
     $config = \Drupal::config('mukurtu_taxonomy.settings');
 
     // In the future when we support taxonomy record relationships for other
     // content types, fetch their enabled vocabs and append them here.
-    $enabledVocabs = $config->get('person_records_enabled_vocabularies') ?? [];
-
-    $enabledVocabs = $config->get('place_records_enabled_vocabularies') ?? [];
+    if ($this->configuration['allow_list'] == 'place') {
+      $enabled_vocabs = $config->get('place_records_enabled_vocabularies') ?? [];
+    } else {
+      $enabled_vocabs = $config->get('person_records_enabled_vocabularies') ?? [];
+    }
 
     $query = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery();
 
     // Restrict to only enabled taxonomy vocabularies.
-    if (!empty($enabledVocabs)) {
-      $query->condition('vid', $enabledVocabs, 'IN');
+    if (!empty($enabled_vocabs)) {
+      $query->condition('vid', $enabled_vocabs, 'IN');
     } else {
       // Can't have an empty array for this condition.
       $query->condition('vid', '');
@@ -120,7 +150,7 @@ class MukurtuTaxonomyRecordSelection extends WidgetBase implements ContainerFact
 
     foreach ($termKeys as $termKey) {
       if ($values[$termKey]) {
-        list(, $tid) = explode(':', $termKey);
+        [, $tid] = explode(':', $termKey);
         $entities[] = $this->entityTypeManager->getStorage('taxonomy_term')->load($tid);
       }
     }

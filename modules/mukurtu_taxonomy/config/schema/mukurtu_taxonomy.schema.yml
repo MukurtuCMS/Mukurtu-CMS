@@ -1,0 +1,7 @@
+entity_browser.browser.widget.mukurtu_taxonomy_record_term_selection:
+  type: entity_browser.browser.widget.base
+  label: 'Mukurtu Taxonomy Record Term Selection'
+  mapping:
+    allow_list:
+      type: string
+      label: 'Select the configured taxonomy allow list'
