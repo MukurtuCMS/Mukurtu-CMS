@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Plugin\MukurtuImportFieldProcess;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_import\Attribute\MukurtuImportFieldProcess;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -17,10 +20,12 @@ use Drupal\Core\Field\FieldDefinitionInterface;
   weight: 0,
 )]
 class EntityReferenceRevisions extends EntityReference {
+  use StringTranslationTrait;
+
   /**
    * {@inheritdoc}
    */
-  public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
+  public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []): array {
     $process = parent::getProcess($field_config, $source, $context);
     $last = end($process);
     $process[] = [
@@ -42,11 +47,11 @@ class EntityReferenceRevisions extends EntityReference {
   /**
    * {@inheritdoc}
    */
-  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+  public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL): TranslatableMarkup {
     if ($this->isMultiple($field_config)) {
-      return t("The ID or UUIDs of the paragraphs, separated by your selected multi-value delimiter.");
+      return $this->t("The ID or UUIDs of the paragraphs, separated by your selected multi-value delimiter.");
     }
-    return t('The ID or UUID of the paragraph.');
+    return $this->t('The ID or UUID of the paragraph.');
   }
 
 }
