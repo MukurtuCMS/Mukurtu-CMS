@@ -55,6 +55,7 @@ use Exception;
  *     "target_bundle",
  *     "mapping",
  *     "default_format",
+ *     "configuration",
  *   }
  * )
  */
