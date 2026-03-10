@@ -1,0 +1,22 @@
+entity_browser.browser.widget.mukurtu_taxonomy_record_term_selection:
+  type: entity_browser.browser.widget.base
+  label: 'Mukurtu Taxonomy Record Term Selection'
+  mapping:
+    allow_list:
+      type: string
+      label: 'Select the configured taxonomy allow list'
+
+mukurtu_taxonomy.settings:
+  type: config_object
+  label: 'Mukurtu Taxonomy settings'
+  mapping:
+    person_records_enabled_vocabularies:
+      type: sequence
+      label: 'Person record vocabularies'
+      sequence:
+        type: string
+    place_records_enabled_vocabularies:
+      type: sequence
+      label: 'Place record vocabularies'
+      sequence:
+        type: string
