@@ -74,7 +74,7 @@
         "drupal/dashboards": "^2.1",
         "drupal/admin_theme": "^1.1",
         "drupal/config_translation_po": "^1.0",
-        "geocoder-php/nomiatim-provider"
+        "geocoder-php/nominatim-provider": "*"
     },
     "require-dev": {
         "drupal/devel": "*",
