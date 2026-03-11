@@ -37,6 +37,7 @@
         "drupal/features": "^3.14",
         "drupal/field_group": "^4.0",
         "drupal/flag": "^4.0",
+        "drupal/geocoder": "^4.30",
         "drupal/geofield": "^1.59",
         "drupal/geolocation": "*",
         "drupal/gin": "^5.0",
@@ -72,7 +73,8 @@
         "sibyx/phpgpx": "@RC",
         "drupal/dashboards": "^2.1",
         "drupal/admin_theme": "^1.1",
-        "drupal/config_translation_po": "^1.0"
+        "drupal/config_translation_po": "^1.0",
+        "geocoder-php/nomiatim-provider"
     },
     "require-dev": {
         "drupal/devel": "*",
