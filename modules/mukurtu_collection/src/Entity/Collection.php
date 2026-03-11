@@ -411,6 +411,8 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+
     $parentCollection = $this->getParentCollection();
     $this->addCacheableDependency($parentCollection);
     if ($parentCollection) {
@@ -425,6 +427,8 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
    * {@inheritdoc}
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+
     // Check for request to add as a subcollection.
     if (isset($this->values["_parent_collection"]) && $id = intval($this->values["_parent_collection"])) {
       /** @var \Drupal\mukurtu_collection\Entity\Collection $parentCollection */
