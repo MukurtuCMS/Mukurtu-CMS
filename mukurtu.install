@@ -774,6 +774,10 @@ function mukurtu_install() {
     'view user email addresses',
     'merge taxonomy terms',
   ];
+  $roles['mukurtu_roundtrip_manager'] = [
+    'access mukurtu import',
+    'administer mukurtu_import_strategy',
+  ];
   foreach ($roles as $role_name => $permissions) {
     $role = Role::load($role_name);
     foreach ($permissions as $permission) {
