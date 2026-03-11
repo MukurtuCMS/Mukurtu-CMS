@@ -257,7 +257,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create' => TRUE,
         ]
       ])
-      ->setCardinality(-1)
+      ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
@@ -277,7 +277,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create' => TRUE,
         ]
       ])
-      ->setCardinality(-1)
+      ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
