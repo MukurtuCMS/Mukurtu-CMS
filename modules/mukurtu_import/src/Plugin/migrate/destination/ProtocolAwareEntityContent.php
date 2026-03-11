@@ -114,6 +114,23 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       $entity->prepareSave();
     }
 
+    // Determine if this is a create or update operation.
+    $operation = $entity->isNew() ? 'create' : 'update';
+
+    // Check entity access for the current user.
+    $access = $entity->access($operation, $this->currentUser, TRUE);
+    if (!$access->isAllowed()) {
+      $reason = $access->getReason();
+      throw new MigrateException(
+        sprintf('The current user does not have %s access for this %s entity (ID: %s). %s',
+          $operation,
+          $entity->getEntityTypeId(),
+          $entity->isNew() ? 'new' : $entity->id(),
+          $reason ? ' ' . $reason : '',
+        )
+      );
+    }
+
     if ($this->isEntityValidationRequired($entity)) {
       $this->validateEntity($entity);
     }
