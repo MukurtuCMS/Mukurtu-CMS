@@ -94,15 +94,35 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
     if ($ref_type == 'taxonomy_term') {
       $target_bundles = $field_config->getSetting('handler_settings')['target_bundles'] ?? [];
       $all_target_bundles = array_keys($target_bundles);
+      $auto_create = $field_config->getSetting('handler_settings')['auto_create'];
+      $auto_create_bundle = $field_config->getSetting('handler_settings')['auto_create_bundle'] ?? NULL;
 
-      $ref_process = [
-        'plugin' => $field_config->getSetting('handler_settings')['auto_create'] ? 'mukurtu_entity_generate' : 'mukurtu_entity_lookup',
-        'value_key' => 'name',
-        'bundle_key' => 'vid',
-        'bundle' => $all_target_bundles,
-        'entity_type' => $field_config->getSetting('target_type'),
-        'ignore_case' => TRUE,
-      ];
+      if (empty($auto_create_bundle)) {
+        $auto_create_bundle = reset($all_target_bundles);
+      }
+
+      if ($auto_create) {
+        $ref_process = [
+          'plugin' => 'mukurtu_entity_generate',
+          'value_key' => 'name',
+          'bundle_key' => 'vid',
+          'bundle' => $auto_create_bundle,
+          'entity_type' => $field_config->getSetting('target_type'),
+          'ignore_case' => TRUE,
+        ];
+      }
+      else {
+        $ref_process = [
+          'plugin' => 'mukurtu_entity_lookup',
+          'value_key' => 'name',
+          'entity_type' => $field_config->getSetting('target_type'),
+          'ignore_case' => TRUE,
+        ];
+        if (!empty($target_bundles)) {
+          $ref_process['bundle_key'] = 'vid';
+          $ref_process['bundle'] = $all_target_bundles;
+        }
+      }
     }
 
     if (in_array($ref_type, ['community', 'media', 'node', 'protocol'])) {
