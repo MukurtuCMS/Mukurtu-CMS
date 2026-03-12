@@ -39,7 +39,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -60,7 +59,8 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
             'image' => 'image',
             'remote_video' => 'remote_video',
             'video' => 'video',
-            'soundcloud' => 'soundcloud'
+            'soundcloud' => 'soundcloud',
+            'external_embed' => 'external_embed'
           ],
           'sort' => [
             'field' => '_none'
@@ -69,7 +69,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create_bundle' => 'audio',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -182,12 +181,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
         'handler_settings' => [
-          'target_bundles' => [
-            'contributor' => 'contributor',
-            'creator' => 'creator',
-            'people' => 'people',
-            'publisher' => 'publisher',
-          ],
+          'target_bundles' => NULL,
           'sort' => [
             'field' => 'name',
             'direction' => 'asc'
@@ -196,13 +190,13 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create_bundle' => 'people',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
+      ->setDisplayConfigurable('form', TRUE)
+      ->addConstraint('EnabledVocabulary', ['configKey' => 'person_records_enabled_vocabularies']);
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Map Points'))

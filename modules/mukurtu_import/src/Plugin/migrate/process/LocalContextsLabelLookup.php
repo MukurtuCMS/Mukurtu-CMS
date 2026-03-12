@@ -73,8 +73,10 @@ class LocalContextsLabelLookup extends ProcessPluginBase implements ContainerFac
       return $value;
     }
 
-    // Split on the first non-escaped colon to detect compound format.
-    $parts = preg_split('/(?<!\\\\):/', $value, 2);
+    // Split on the first non-escaped delimiter to detect compound format.
+    $delimiter = $this->configuration['delimiter'] ?? '>';
+    $escaped_delimiter = preg_quote($delimiter, '/');
+    $parts = preg_split('/(?<!\\\\)' . $escaped_delimiter . '/', $value, 2);
 
     if (count($parts) === 2) {
       return $this->transformCompound($parts[0], $parts[1], $labels, $notices, $value);
@@ -84,12 +86,12 @@ class LocalContextsLabelLookup extends ProcessPluginBase implements ContainerFac
   }
 
   /**
-   * Resolves a compound "Project Title: Label Name" value.
+   * Resolves a compound "Project Title > Label Name" value.
    *
    * @param string $project_part
-   *   The raw project title segment (may contain escaped colons).
+   *   The raw project title segment (may contain escaped delimiters).
    * @param string $label_part
-   *   The raw label/notice name segment (may contain escaped colons).
+   *   The raw label/notice name segment (may contain escaped delimiters).
    * @param array $labels
    *   All labels from the manager.
    * @param array $notices
@@ -103,8 +105,9 @@ class LocalContextsLabelLookup extends ProcessPluginBase implements ContainerFac
    * @throws \Drupal\migrate\MigrateException
    */
   protected function transformCompound(string $project_part, string $label_part, array $labels, array $notices, string $original_value): ?string {
-    $project_title = trim(str_replace('\:', ':', $project_part));
-    $label_name = trim(str_replace('\:', ':', $label_part));
+    $delimiter = $this->configuration['delimiter'] ?? '>';
+    $project_title = trim(str_replace('\\' . $delimiter, $delimiter, $project_part));
+    $label_name = trim(str_replace('\\' . $delimiter, $delimiter, $label_part));
 
     // Build a lowercased project title → [project_id, ...] map.
     $project_title_map = [];

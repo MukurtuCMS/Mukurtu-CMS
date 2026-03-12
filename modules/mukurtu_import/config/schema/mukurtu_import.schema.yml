@@ -34,3 +34,31 @@ mukurtu_import.mukurtu_import_strategy.*:
             type: string
           target:
             type: string
+    configuration:
+      type: mapping
+      label: 'Configuration'
+      mapping:
+        upload_location:
+          type: string
+          label: 'Upload Location'
+        delimiter:
+          type: string
+          label: 'Delimiter'
+        enclosure:
+          type: string
+          label: 'Enclosure'
+        escape:
+          type: string
+          label: 'Escape'
+        multivalue_delimiter:
+          type: string
+          label: 'Multivalue Delimiter'
+        default_format:
+          type: string
+          label: 'Default Format'
+        identifier_column:
+          type: string
+          label: 'Identifier Column'
+        local_contexts_delimiter:
+          type: string
+          label: 'Local Contexts Delimiter'

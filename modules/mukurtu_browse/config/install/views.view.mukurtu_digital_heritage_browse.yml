@@ -952,6 +952,7 @@ display:
               homepage: browse
               page: browse
               person: browse
+              place: browse
               word_list: browse
       query:
         type: search_api_query
@@ -1025,6 +1026,7 @@ display:
               homepage: grid_browse
               page: grid_browse
               person: grid_browse
+              place: grid_browse
               word_list: grid_browse
       defaults:
         cache: false
@@ -1453,6 +1455,7 @@ display:
               digital_heritage: map_browse
               page: map_browse
               person: map_browse
+              place: map_browse
               word_list: map_browse
       defaults:
         cache: false
