@@ -52,13 +52,12 @@
     label_display == 'visually_hidden' ? 'visually-hidden',
   ]
 %}
-
+{# validate that the field has content #}
+{% if not items.0.content['#paragraph'].field_title.isEmpty() %}
 
   <div{{ attributes.addClass(classes) }}>
-    {# validate that the field has content #}
-    {% if not items.0.content['#paragraph'].field_title.isEmpty() %}
-      <h2{{ title_attributes.addClass(title_classes) }}>{{ label }}</h2>
-    {% endif %}
+    <h2{{ title_attributes.addClass(title_classes) }}>{{ label }}</h2>
+
     {% if multiple %}
       <div class="field__items">
     {% endif %}
@@ -69,4 +68,4 @@
       </div>
     {% endif %}
   </div>
-
+{% endif %}

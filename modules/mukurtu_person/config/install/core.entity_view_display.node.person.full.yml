@@ -49,7 +49,6 @@ third_party_settings:
         speed: fast
     group_metadata:
       children:
-        - field_keywords
         - field_date_born
         - field_place_of_birth
         - field_date_died
@@ -58,6 +57,7 @@ third_party_settings:
         - field_other_names
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
+        - field_keywords
         - flag_export_content
         - field_citation
       label: Metadata
@@ -246,7 +246,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 8
+    weight: 19
     region: content
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
