@@ -153,9 +153,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
         'handler_settings' => [
-          'target_bundles' => [
-            'location' => 'location',
-          ],
+          'target_bundles' => NULL,
           'sort' => [
             'field' => 'name',
             'direction' => 'asc'
@@ -169,7 +167,8 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
+      ->setDisplayConfigurable('form', TRUE)
+      ->addConstraint('EnabledVocabulary', ['configKey' => 'place_records_enabled_vocabularies']);
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Map Points'))

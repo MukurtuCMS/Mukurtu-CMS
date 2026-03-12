@@ -181,12 +181,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
         'handler_settings' => [
-          'target_bundles' => [
-            'contributor' => 'contributor',
-            'creator' => 'creator',
-            'people' => 'people',
-            'publisher' => 'publisher',
-          ],
+          'target_bundles' => NULL,
           'sort' => [
             'field' => 'name',
             'direction' => 'asc'
@@ -200,7 +195,8 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
+      ->setDisplayConfigurable('form', TRUE)
+      ->addConstraint('EnabledVocabulary', ['configKey' => 'person_records_enabled_vocabularies']);
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Map Points'))
