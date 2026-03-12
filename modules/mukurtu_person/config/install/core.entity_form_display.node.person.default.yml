@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.mukurtu_content_browser
+    - entity_browser.browser.mukurtu_taxonomy_record_term_browser
     - field.field.node.person.comment
     - node.type.person
   module:
