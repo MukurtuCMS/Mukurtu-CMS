@@ -48,6 +48,7 @@ install:
   - dashboards
   - admin_theme
   - leaflet_markercluster
+  - tagify
 
 dependencies:
   - 'blazy:blazy'
@@ -136,6 +137,7 @@ dependencies:
   - 'views_bulk_operations:views_bulk_operations'
   - 'drupal:dashboards'
   - 'drupal:admin_theme'
+  - 'drupal:tagify'
 
 themes:
   - mukurtu_v4
