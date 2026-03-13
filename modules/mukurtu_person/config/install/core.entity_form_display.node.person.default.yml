@@ -328,15 +328,18 @@ content:
         - video
     third_party_settings: {  }
   field_other_names:
-    type: tagify_select_widget
+    type: tagify_entity_reference_autocomplete_widget
     weight: 5
     region: content
     settings:
       match_operator: CONTAINS
       match_limit: 0
       placeholder: ''
-      parent_selection: '1'
+      suggestions_dropdown: 0
       show_entity_id: 0
+      show_info_label: 1
+      info_label: '[term:vocabulary]'
+      parent_selection: 1
     third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget
