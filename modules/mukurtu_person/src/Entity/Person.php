@@ -186,7 +186,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
             'field' => 'name',
             'direction' => 'asc'
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
           'auto_create_bundle' => 'people',
         ]
       ])

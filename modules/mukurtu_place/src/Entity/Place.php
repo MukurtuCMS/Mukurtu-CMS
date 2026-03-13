@@ -158,8 +158,8 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
             'field' => 'name',
             'direction' => 'asc'
           ],
-          'auto_create' => FALSE,
-          'auto_create_bundle' => 'location',
+          'auto_create' => TRUE,
+          'auto_create_bundle' => '',
         ]
       ])
       ->setCardinality(-1)

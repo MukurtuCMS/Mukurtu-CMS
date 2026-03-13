@@ -18,6 +18,7 @@ dependencies:
     - paragraphs
     - path
     - text
+    - tagify
 third_party_settings:
   field_group:
     group_main_tab:
@@ -327,19 +328,18 @@ content:
         - video
     third_party_settings: {  }
   field_other_names:
-    type: entity_browser_entity_reference
+    type: tagify_entity_reference_autocomplete_widget
     weight: 5
     region: content
     settings:
-      entity_browser: mukurtu_taxonomy_record_term_browser
-      field_widget_display: rendered_entity
-      field_widget_edit: false
-      field_widget_remove: true
-      field_widget_replace: false
-      open: true
-      field_widget_display_settings:
-        view_mode: default
-      selection_mode: selection_append
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 1
+      info_label: '[term:vocabulary]'
+      parent_selection: 1
     third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget
