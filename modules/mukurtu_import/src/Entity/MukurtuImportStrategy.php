@@ -447,6 +447,10 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     }
 
     $bundle = $this->getTargetBundle();
+    if (!$bundle) {
+      return NULL;
+    }
+
     $media_type = $this->entityTypeManager()
       ->getStorage('media_type')
       ->load($bundle);
