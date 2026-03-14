@@ -536,3 +536,20 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
     'url' => 'route:<nolink>',
   ];
 }
+
+/**
+ * Implements hook_preprocess_views_view().
+ *
+ * Provided by Nate Lampton, see
+ * https://github.com/MukurtuCMS/Mukurtu-CMS/issues/775#issuecomment-2763105092.
+ */
+function mukurtu_core_preprocess_views_view(&$variables)
+{
+  // Add entity browser library tweaks when appropriate.
+  $affected_views = [
+    'mukurtu_content_browser'
+  ];
+  if (in_array($variables['view']->id(), $affected_views)) {
+    $variables['view_array']['#attached']['library'][] = 'mukurtu_core/entity_browser_view_decoration';
+  }
+}
