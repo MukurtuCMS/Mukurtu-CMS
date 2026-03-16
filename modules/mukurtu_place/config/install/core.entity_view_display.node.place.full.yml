@@ -169,8 +169,7 @@ content:
         circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
         control: false
-        options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
-        excluded: ''
+        options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds":false}'
         include_path: false
       fullscreen:
         control: false
@@ -195,6 +194,7 @@ content:
           set_marker: false
       map_lazy_load:
         lazy_load: false
+      include_related_coverage: '1'
     third_party_settings: {  }
     weight: 80
     region: content
@@ -250,7 +250,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 10
+    weight: 13
     region: content
   field_place_type:
     type: entity_reference_label
