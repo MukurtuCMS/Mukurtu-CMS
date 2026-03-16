@@ -54,4 +54,38 @@ class FormHooks {
     }
   }
 
+  /**
+   * Implements hook_form_FORM_ID_alter() for 'user-register-form' and
+   * 'user-form'.
+   *
+   * Hides 'Administrator' option from the Roles selection for Mukurtu Managers
+   * so that they cannot assign the admin role.
+   */
+  #[Hook('form_user_register_form_alter')]
+  public function formUserRegisterFormAlter(array &$form, FormStateInterface $form_state): void {
+    $currentUser = \Drupal::currentUser()->getAccount();
+    /** @var \Drupal\Core\Session\UserSession $currentUser */
+    if ($currentUser->hasRole('mukurtu_manager')) {
+      if (isset($form['account']['roles']['#options']['administrator'])) {
+        unset($form['account']['roles']['#options']['administrator']);
+      }
+    }
+  }
+
+  /**
+   * Implements hook_form_FORM_ID_alter() for 'user-form'.
+   *
+   * Hides 'Administrator' option from the Roles selection for Mukurtu Managers
+   * so that they cannot assign the admin role.
+   */
+  #[Hook('form_user_form_alter')]
+  public function formUserFormAlter(array &$form, FormStateInterface $form_state): void {
+    $currentUser = \Drupal::currentUser()->getAccount();
+    /** @var \Drupal\Core\Session\UserSession $currentUser */
+    if ($currentUser->hasRole('mukurtu_manager')) {
+      if (isset($form['account']['roles']['#options']['administrator'])) {
+        unset($form['account']['roles']['#options']['administrator']);
+      }
+    }
+  }
 }
