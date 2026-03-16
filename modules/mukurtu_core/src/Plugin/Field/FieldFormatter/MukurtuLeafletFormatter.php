@@ -2,8 +2,9 @@
 
 namespace Drupal\mukurtu_core\Plugin\Field\FieldFormatter;
 
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\leaflet\Plugin\Field\FieldFormatter\LeafletDefaultFormatter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -19,6 +20,37 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements ContainerFactoryPluginInterface {
+  /**
+   * {@inheritdoc}
+   */
+  public static function defaultSettings() {
+    return ['include_related_coverage' => false] + parent::defaultSettings();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsForm(array $form, FormStateInterface $form_state) {
+    $form = parent::settingsForm($form, $form_state);
+    $form['include_related_coverage'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Include related content locations'),
+      '#default_value' => $this->getSetting('include_related_coverage'),
+    ];
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsSummary() {
+    $summary = parent::settingsSummary();
+    if ($this->getSetting('include_related_coverage')) {
+      $summary[] = $this->t('Includes related content locations');
+    }
+    return $summary;
+  }
+
   /**
    * {@inheritdoc}
    *
@@ -76,6 +108,17 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
         // If not GeoJSON or the GeoJSON is in a format we weren't expecting,
         // default back to standard geofield/leaflet behavior.
         $new_values[] = $item->getValue();
+      }
+    }
+
+    if ($this->getSetting('include_related_coverage')) {
+      $entity = $items->getEntity();
+      if ($entity->hasField('field_all_related_content')) {
+        foreach ($entity->get('field_all_related_content')->referencedEntities() as $related) {
+          if ($related->hasField('field_coverage') && !$related->get('field_coverage')->isEmpty()) {
+            $new_values[] = $related->get('field_coverage')->first()->getValue();
+          }
+        }
       }
     }
 
