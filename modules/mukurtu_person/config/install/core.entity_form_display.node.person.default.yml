@@ -282,14 +282,18 @@ content:
       display_label: true
     third_party_settings: {  }
   field_keywords:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 9
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
@@ -304,14 +308,18 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_location:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 12
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_media_assets:
     type: media_library_widget
@@ -400,24 +408,32 @@ content:
         duplicate: duplicate
     third_party_settings: {  }
   field_place_of_birth:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 12
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_place_of_death:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 12
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   langcode:
     type: language_select

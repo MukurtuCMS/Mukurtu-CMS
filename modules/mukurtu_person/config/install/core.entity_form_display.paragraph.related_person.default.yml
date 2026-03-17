@@ -6,6 +6,7 @@ dependencies:
     - paragraphs.paragraphs_type.related_person
   module:
     - entity_browser
+    - tagify
 id: paragraph.related_person.default
 targetEntityType: paragraph
 bundle: related_person
@@ -26,14 +27,18 @@ content:
       selection_mode: selection_append
     third_party_settings: {  }
   field_relationship_type:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 1
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
 hidden:
   created: true
