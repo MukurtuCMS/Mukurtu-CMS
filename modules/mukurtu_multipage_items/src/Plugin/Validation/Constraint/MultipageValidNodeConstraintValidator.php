@@ -57,6 +57,22 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
     }
     assert($constraint instanceof MultipageValidNodeConstraint);
 
+    // Build set of pre-existing reference IDs so we only check access for
+    // newly added items, grandfathering in previously referenced nodes.
+    $previously_referenced_ids = [];
+    $entity = !empty($value->getParent()) ? $value->getEntity() : NULL;
+    if ($entity && !$entity->isNew()) {
+      $existing_entity = $this->entityTypeManager
+        ->getStorage($entity->getEntityTypeId())
+        ->loadUnchanged($entity->id());
+      if ($existing_entity) {
+        $field_name = $value->getFieldDefinition()->getName();
+        foreach ($existing_entity->{$field_name} as $item) {
+          $previously_referenced_ids[$item->target_id] = $item->target_id;
+        }
+      }
+    }
+
     $unique_items = [];
     foreach ($value as $delta => $item) {
       $target_id = (int) $item->target_id;
@@ -104,7 +120,8 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
           ->addViolation();
       }
       // Check that the user has access for the new nodes being added.
-      if (!$this->hasAccessToAddedContent($target_entity)) {
+      // Skip nodes that were already referenced — they are grandfathered in.
+      if (!isset($previously_referenced_ids[$target_id]) && !$this->hasAccessToAddedContent($target_entity)) {
         $this->context->buildViolation($constraint->noAccessToAddedContent)
           ->setParameter('%value', $target_entity->label())
           ->atPath($delta . '.target_id')
