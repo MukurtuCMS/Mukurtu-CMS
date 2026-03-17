@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_multipage_items;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\node\NodeInterface;
 
@@ -17,8 +18,13 @@ class MultipageItemManager {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
-  public function __construct(protected EntityTypeManagerInterface $entityTypeManager) {}
+  public function __construct(
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected ConfigFactoryInterface $configFactory,
+  ) {}
 
   /**
    * Get the multipage_item entity that contains the node as a page.
@@ -51,6 +57,25 @@ class MultipageItemManager {
       return $mpi instanceof MultipageItemInterface ? $mpi : NULL;
     }
     return NULL;
+  }
+
+  /**
+   * Check if a bundle type is enabled for multipage items.
+   *
+   * @param string $bundle
+   *   The bundle machine name.
+   *
+   * @return \Drupal\mukurtu_multipage_items\MultipageEnabledBundleResult
+   *   Result including cacheability metadata.
+   */
+  public function isEnabledBundleType(string $bundle): MultipageEnabledBundleResult {
+    $result = new MultipageEnabledBundleResult();
+    $config = $this->configFactory->get('mukurtu_multipage_items.settings');
+    $bundles_config = $config->get('bundles_config') ?? [];
+    $enabled_bundles = array_keys(array_filter($bundles_config));
+    $result->setEnabled(in_array($bundle, $enabled_bundles));
+    $result->addCacheableDependency($config);
+    return $result;
   }
 
 }

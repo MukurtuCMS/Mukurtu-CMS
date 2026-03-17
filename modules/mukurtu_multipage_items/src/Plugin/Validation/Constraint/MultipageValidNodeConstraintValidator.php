@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_multipage_items\Plugin\Validation\Constraint;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\mukurtu_multipage_items\MultipageItemManager;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -19,19 +22,20 @@ use Symfony\Component\Validator\ConstraintValidator;
 class MultipageValidNodeConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
 
   /**
-   * Array of enabled bundles.
-   *
-   * @var array
-   */
-  protected array $enabledBundles;
-
-  /**
    * Constructs an MultipageValidNodeConstraintValidator object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\mukurtu_multipage_items\MultipageItemManager $multipageItemManager
+   *   The multipage item manager.
+   * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
+   *   The current user.
    */
-  public function __construct(protected EntityTypeManagerInterface $entityTypeManager, protected ConfigFactoryInterface $configFactory) {}
+  public function __construct(
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected MultipageItemManager $multipageItemManager,
+    protected AccountProxyInterface $currentUser,
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -39,7 +43,8 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('config.factory')
+      $container->get(MultipageItemManager::class),
+      $container->get('current_user'),
     );
   }
 
@@ -91,8 +96,16 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
           ->addViolation();
       }
       // Check if the node is of type enabled for multipage items.
-      if (!$this->isEnabledBundleType($target_id)) {
+      if (!$this->multipageItemManager->isEnabledBundleType($target_entity->bundle())) {
         $this->context->buildViolation($constraint->notEnabledBundleType)
+          ->setParameter('%value', $target_entity->label())
+          ->atPath($delta . '.target_id')
+          ->setInvalidValue($target_id)
+          ->addViolation();
+      }
+      // Check that the user has access for the new nodes being added.
+      if (!$this->hasAccessToAddedContent($target_entity)) {
+        $this->context->buildViolation($constraint->noAccessToAddedContent)
           ->setParameter('%value', $target_entity->label())
           ->atPath($delta . '.target_id')
           ->setInvalidValue($target_id)
@@ -143,38 +156,35 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
   }
 
   /**
-   * See if the value's type is one of the enabled bundles for multipage items.
+   * Check if the current user has access to add the target entity to an MPI.
    *
-   * @param int $candidate_id
-   *   Candidate node ID.
+   * Users with 'administer multipage item' permission globally have access.
+   * For protocol-controlled nodes, users must have 'administer multipage item'
+   * permission in at least one of the node's owning protocols.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $target_entity
+   *   The entity being added to the multipage item.
    *
    * @return bool
-   *   TRUE if the value's type is one of the enabled bundles for multipage
-   *   items, FALSE otherwise.
+   *   TRUE if the current user has access to add the entity, FALSE otherwise.
    */
-  private function isEnabledBundleType(int $candidate_id): bool {
-    $enabled_bundles = $this->getEnabledBundles();
-
-    $candidate_node = $this->entityTypeManager->getStorage('node')->load($candidate_id);
-    if (!$candidate_node) {
+  protected function hasAccessToAddedContent(EntityInterface $target_entity): bool {
+    // If this isn't a node, or doesn't have cultural protocol access control,
+    // it shouldn't be allowed to be added.
+    if (!$target_entity instanceof NodeInterface || !$target_entity instanceof CulturalProtocolControlledInterface) {
       return FALSE;
     }
-    return in_array($candidate_node->bundle(), $enabled_bundles);
-  }
-
-  /**
-   * Fetch enabled bundles.
-   *
-   * @return array
-   *   Array of enabled bundles.
-   */
-  protected function getEnabledBundles(): array {
-    if (!isset($this->enabledBundles)) {
-      $config = $this->configFactory->get('mukurtu_multipage_items.settings');
-      $bundles_config = $config->get('bundles_config') ?? [];
-      $this->enabledBundles = array_keys(array_filter($bundles_config));
+    // Check for the multipage item admin permission in one of the owning
+    // protocols.
+    if ($protocols = $target_entity->getProtocolEntities()) {
+      foreach ($protocols as $protocol) {
+        $membership = $protocol->getMembership($this->currentUser);
+        if ($membership && $membership->hasPermission('administer multipage item')) {
+          return TRUE;
+        }
+      }
     }
-    return $this->enabledBundles;
+    return FALSE;
   }
 
 }
