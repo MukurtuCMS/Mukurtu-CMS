@@ -112,7 +112,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
           ->addViolation();
       }
       // Check if the node is of type enabled for multipage items.
-      if (!$this->multipageItemManager->isEnabledBundleType($target_entity->bundle())) {
+      if (!$this->multipageItemManager->isEnabledBundleType($target_entity->bundle())->isEnabled()) {
         $this->context->buildViolation($constraint->notEnabledBundleType)
           ->setParameter('%value', $target_entity->label())
           ->atPath($delta . '.target_id')
