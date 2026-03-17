@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_taxonomy\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -8,6 +10,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -28,24 +31,16 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class EnabledVocabularySelection extends TermSelection {
 
   /**
-   * The config factory service.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected ConfigFactoryInterface $configFactory;
-
-  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EntityRepositoryInterface $entity_repository, ConfigFactoryInterface $config_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EntityRepositoryInterface $entity_repository, protected ConfigFactoryInterface $configFactory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $module_handler, $current_user, $entity_field_manager, $entity_type_bundle_info, $entity_repository);
-    $this->configFactory = $config_factory;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     return new static(
       $configuration,
       $plugin_id,
@@ -63,7 +58,7 @@ class EnabledVocabularySelection extends TermSelection {
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration() {
+  public function defaultConfiguration(): array {
     return [
       'vocabulary_config_key' => 'person_records_enabled_vocabularies',
     ] + parent::defaultConfiguration();
@@ -94,7 +89,7 @@ class EnabledVocabularySelection extends TermSelection {
   /**
    * {@inheritdoc}
    */
-  protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS') {
+  protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS'): QueryInterface {
     $this->applyResolvedBundles();
     return parent::buildEntityQuery($match, $match_operator);
   }
@@ -102,7 +97,7 @@ class EnabledVocabularySelection extends TermSelection {
   /**
    * {@inheritdoc}
    */
-  public function getReferenceableEntities($match = NULL, $match_operator = 'CONTAINS', $limit = 0) {
+  public function getReferenceableEntities($match = NULL, $match_operator = 'CONTAINS', $limit = 0): array {
     $this->applyResolvedBundles();
     return parent::getReferenceableEntities($match, $match_operator, $limit);
   }
@@ -110,7 +105,7 @@ class EnabledVocabularySelection extends TermSelection {
   /**
    * {@inheritdoc}
    */
-  public function validateReferenceableNewEntities(array $entities) {
+  public function validateReferenceableNewEntities(array $entities): array {
     $resolved = $this->resolveTargetBundles();
     if (!empty($resolved)) {
       $entities = array_filter($entities, function ($entity) use ($resolved) {
@@ -123,7 +118,7 @@ class EnabledVocabularySelection extends TermSelection {
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
     $form = parent::buildConfigurationForm($form, $form_state);
 
     // Remove target_bundles elements — bundles are derived from config.
