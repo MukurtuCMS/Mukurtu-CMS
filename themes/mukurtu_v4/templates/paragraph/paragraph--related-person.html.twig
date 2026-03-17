@@ -1,0 +1,17 @@
+{#
+/**
+ * @file
+ * Theme override for related_person paragraph.
+ *
+ * Renders as "Person Name (Relationship Type)" linked to the person node.
+ */
+#}
+{% set person = paragraph.field_related_person.entity %}
+{% set relation = paragraph.field_relationship_type.entity %}
+
+{% if person %}
+  <a href="{{ path('entity.node.canonical', {'node': person.id()}) }}">
+    {{- person.label() -}}
+    {%- if relation %} ({{ relation.label() }}){% endif %}
+  </a>
+{% endif %}

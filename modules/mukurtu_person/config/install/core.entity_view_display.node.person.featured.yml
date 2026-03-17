@@ -50,13 +50,15 @@ hidden:
   field_local_contexts_projects: true
   field_location: true
   field_multipage_page_of: true
+  field_other_names: true
   field_protocol_control: true
   field_related_content: true
   field_related_people: true
   field_representative_media: true
-  field_other_names: true
   field_sections: true
   field_sequence_collection: true
+  field_place_of_birth: true
+  field_place_of_death: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true
