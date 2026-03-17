@@ -151,9 +151,11 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
       ->setDescription(t('Places may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the place is identified by connecting those disparate names.	</br>Select "Select Terms" to choose from existing names. Choose all names representing this place. </br>Each taxonomy (eg: location, keywords) must first be enabled by a Mukurtu Manager. New names cannot be added here and must already be in used in existing site content, in an enabled taxonomy.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
-        'handler' => 'mukurtu_enabled_vocabulary:taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        // target_bundles is set dynamically from mukurtu_taxonomy.settings config
+        // via mukurtu_taxonomy_entity_bundle_field_info_alter().
         'handler_settings' => [
-          'vocabulary_config_key' => 'place_records_enabled_vocabularies',
+          'target_bundles' => NULL,
           'sort' => [
             'field' => 'name',
             'direction' => 'asc',
