@@ -180,13 +180,15 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
+        // target_bundles is set dynamically from mukurtu_taxonomy.settings config
+        // via mukurtu_taxonomy_entity_bundle_field_info_alter().
         'handler_settings' => [
           'target_bundles' => NULL,
           'sort' => [
             'field' => 'name',
-            'direction' => 'asc'
+            'direction' => 'asc',
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
           'auto_create_bundle' => 'people',
         ]
       ])
@@ -195,8 +197,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE)
-      ->addConstraint('EnabledVocabulary', ['configKey' => 'person_records_enabled_vocabularies']);
+      ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Map Points'))

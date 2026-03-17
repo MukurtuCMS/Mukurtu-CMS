@@ -8,6 +8,7 @@
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 
@@ -115,6 +116,46 @@ function template_preprocess_mukurtu_vocabulary_add_list(array &$variables) {
         ],
       ];
     }
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ *
+ * Sets target_bundles on taxonomy term reference fields from Mukurtu taxonomy
+ * settings so that selection handlers and widgets see the correct bundles.
+ */
+function mukurtu_taxonomy_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  // Map bundle names to their fields and config keys. Person and Place are
+  // node bundles that define these fields via bundleFieldDefinitions().
+  $field_config_map = [
+    'person' => [
+      'field_other_names' => 'person_records_enabled_vocabularies',
+    ],
+    'place' => [
+      'field_other_place_names' => 'place_records_enabled_vocabularies',
+    ],
+  ];
+
+  if ($entity_type->id() !== 'node' || !isset($field_config_map[$bundle])) {
+    return;
+  }
+
+  $config = \Drupal::config('mukurtu_taxonomy.settings');
+  foreach ($field_config_map[$bundle] as $field_name => $config_key) {
+    if (!isset($fields[$field_name])) {
+      continue;
+    }
+
+    $enabled_vocabs = $config->get($config_key);
+    if (!is_array($enabled_vocabs) || empty($enabled_vocabs)) {
+      continue;
+    }
+
+    $target_bundles = array_combine($enabled_vocabs, $enabled_vocabs);
+    $settings = $fields[$field_name]->getSettings();
+    $settings['handler_settings']['target_bundles'] = $target_bundles;
+    $fields[$field_name]->setSettings($settings);
   }
 }
 

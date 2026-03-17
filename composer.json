@@ -72,7 +72,8 @@
         "sibyx/phpgpx": "@RC",
         "drupal/dashboards": "^2.1",
         "drupal/admin_theme": "^1.1",
-        "drupal/config_translation_po": "^1.0"
+        "drupal/config_translation_po": "^1.0",
+        "drupal/tagify": "^1.2"
     },
     "require-dev": {
         "drupal/devel": "*",
