@@ -179,12 +179,12 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDescription(t('People may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the person is identified by connecting those disparate names.	</br>Select "Select Terms" to choose from existing names. Choose all names representing this person. </br>Each taxonomy (eg: creator, contributor, people) must first be enabled by a Mukurtu Manager. New names cannot be added here and must already be in used in existing site content, in an enabled taxonomy.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
-        'handler' => 'default:taxonomy_term',
+        'handler' => 'mukurtu_enabled_vocabulary:taxonomy_term',
         'handler_settings' => [
-          'target_bundles' => NULL,
+          'vocabulary_config_key' => 'person_records_enabled_vocabularies',
           'sort' => [
             'field' => 'name',
-            'direction' => 'asc'
+            'direction' => 'asc',
           ],
           'auto_create' => TRUE,
           'auto_create_bundle' => 'people',
@@ -195,8 +195,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE)
-      ->addConstraint('EnabledVocabulary', ['configKey' => 'person_records_enabled_vocabularies']);
+      ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
       ->setLabel(t('Map Points'))

@@ -20,3 +20,6 @@ mukurtu_taxonomy.settings:
       label: 'Place record vocabularies'
       sequence:
         type: string
+
+entity_reference_selection.default:mukurtu_enabled_vocabulary:taxonomy_term:
+  type: entity_reference_selection.default:taxonomy_term
