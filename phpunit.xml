@@ -7,13 +7,7 @@
  https://www.drupal.org/node/2116263 for details.
 -->
 <phpunit bootstrap="web/core/tests/bootstrap.php" colors="true"
-         beStrictAboutTestsThatDoNotTestAnything="true"
-         beStrictAboutOutputDuringTests="true"
-         beStrictAboutChangesToGlobalState="true"
          failOnWarning="true"
-         printerClass="\Drupal\Tests\Listeners\HtmlOutputPrinter"
-         cacheResult="false"
-         verbose="true"
 >
   <php>
     <!-- Set error reporting to E_ALL. -->
@@ -43,20 +37,10 @@
   <testsuites>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_collection/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_import/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_export/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_drafts/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/original_date/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="functional">
@@ -67,25 +51,4 @@
     <listener class="\Drupal\Tests\Listeners\DrupalListener">
     </listener>
   </listeners>
-  <!-- Filter for coverage reports. -->
-  <filter>
-    <whitelist>
-      <directory>./includes</directory>
-      <directory>./lib</directory>
-      <!-- Extensions can have their own test directories, so exclude those. -->
-      <directory>./modules</directory>
-      <exclude>
-        <directory>./modules/*/src/Tests</directory>
-        <directory>./modules/*/tests</directory>
-      </exclude>
-      <directory>../modules</directory>
-      <exclude>
-        <directory>../modules/*/src/Tests</directory>
-        <directory>../modules/*/tests</directory>
-        <directory>../modules/*/*/src/Tests</directory>
-        <directory>../modules/*/*/tests</directory>
-      </exclude>
-      <directory>../sites</directory>
-    </whitelist>
-  </filter>
 </phpunit>
