@@ -16,18 +16,10 @@ bundle: community
 mode: default
 content:
   community_type:
-    type: tagify_entity_reference_autocomplete_widget
+    type: options_buttons
     weight: 5
     region: content
-    settings:
-      match_operator: CONTAINS
-      match_limit: 0
-      placeholder: ''
-      suggestions_dropdown: 0
-      show_entity_id: 0
-      show_info_label: 0
-      info_label: ''
-      parent_selection: 1
+    settings: {  }
     third_party_settings: {  }
   field_access_mode:
     type: options_buttons
