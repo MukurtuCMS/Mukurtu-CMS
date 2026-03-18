@@ -322,16 +322,6 @@ content:
         view_mode: default
       selection_mode: selection_append
     third_party_settings: {  }
-  field_place_type:
-    type: entity_reference_autocomplete
-    weight: 9
-    region: content
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget
     weight: 2
