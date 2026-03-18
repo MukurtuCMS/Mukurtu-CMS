@@ -10,8 +10,6 @@ mukurtu_import.mukurtu_import_strategy.*:
     label:
       type: label
       label: 'Label'
-    uuid:
-      type: string
     description:
       type: string
     target_entity_type_id:
@@ -20,7 +18,14 @@ mukurtu_import.mukurtu_import_strategy.*:
     target_bundle:
       type: string
       label: 'Target Bundle'
-    mappings:
+    default_format:
+      type: string
+      label: 'Default Format'
+    identifier_column:
+      type: string
+      nullable: true
+      label: 'Identifier Column'
+    mapping:
       type: sequence
       sequence:
         type: mapping
@@ -29,3 +34,31 @@ mukurtu_import.mukurtu_import_strategy.*:
             type: string
           target:
             type: string
+    configuration:
+      type: mapping
+      label: 'Configuration'
+      mapping:
+        upload_location:
+          type: string
+          label: 'Upload Location'
+        delimiter:
+          type: string
+          label: 'Delimiter'
+        enclosure:
+          type: string
+          label: 'Enclosure'
+        escape:
+          type: string
+          label: 'Escape'
+        multivalue_delimiter:
+          type: string
+          label: 'Multivalue Delimiter'
+        default_format:
+          type: string
+          label: 'Default Format'
+        identifier_column:
+          type: string
+          label: 'Identifier Column'
+        local_contexts_delimiter:
+          type: string
+          label: 'Local Contexts Delimiter'

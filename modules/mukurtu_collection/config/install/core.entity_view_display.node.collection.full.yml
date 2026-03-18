@@ -76,6 +76,7 @@ third_party_settings:
         - field_communities
         - field_cultural_protocols
         - field_source
+        - field_citation
       label: 'Sidebar - Mukurtu fields'
       parent_name: group_metadata
       region: content
@@ -222,10 +223,10 @@ content:
         html_class: leaflet-map-divicon
         circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
-        control: false
+        control: true
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
         excluded: ''
-        include_path: false
+        include_path: true
       fullscreen:
         control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
@@ -341,10 +342,16 @@ content:
     third_party_settings: {  }
     weight: 5
     region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
+    region: content
 hidden:
   draft: true
   field_child_collections: true
-  field_citation: true
   field_collection_type: true
   field_content_type: true
   field_in_collection: true

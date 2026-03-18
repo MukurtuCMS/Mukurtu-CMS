@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.text_section_with_title
+id: paragraph.text_section_with_title.field_title
+field_name: field_title
+entity_type: paragraph
+bundle: text_section_with_title
+label: Title
+description: 'The title of the text section. Maximum 255 characters.'
+required: false
+translatable: true
+default_value:
+  -
+    value: ''
+default_value_callback: ''
+settings: {  }
+field_type: string

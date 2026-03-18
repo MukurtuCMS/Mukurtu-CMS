@@ -38,13 +38,7 @@ class MukurtuEntityLookup extends EntityLookup {
   }
 
   /**
-   * Checks for the existence of some value.
-   *
-   * @param mixed $value
-   *   The value to query.
-   *
-   * @return mixed|null
-   *   Entity id if the queried entity exists. Otherwise NULL.
+   * {@inheritdoc}
    */
   protected function query($value) {
     if ($this->isValidIdentifier($value)) {
@@ -59,7 +53,7 @@ class MukurtuEntityLookup extends EntityLookup {
     // handle case-sensitive filtering as a post-query step. By default, it
     // filters case-insensitive. Change to true if that is not the desired
     // outcome.
-    $ignoreCase = !empty($this->configuration['ignore_case']) ?: FALSE;
+    $ignore_case = !empty($this->configuration['ignore_case']) ?: FALSE;
     $operator = !empty($this->configuration['operator']) ? $this->configuration['operator'] : '=';
     $multiple = is_array($value);
 
@@ -93,7 +87,7 @@ class MukurtuEntityLookup extends EntityLookup {
     }
 
     // Do a case-sensitive comparison only for strict operators.
-    if (!$ignoreCase && in_array($operator, ['=', 'IN'], TRUE)) {
+    if (!$ignore_case && in_array($operator, ['=', 'IN'], TRUE)) {
       // Returns the entity's identifier.
       foreach ($results as $k => $identifier) {
         $entity = $this->entityTypeManager->getStorage($this->lookupEntityType)->load($identifier);

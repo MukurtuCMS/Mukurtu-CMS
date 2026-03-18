@@ -124,7 +124,6 @@ third_party_settings:
         - field_coverage
         - field_location
         - field_coverage_description
-        - field_citation
         - field_related_content
       label: 'Additional Information'
       parent_name: group_primary_fields
@@ -264,10 +263,10 @@ content:
         html_class: leaflet-map-divicon
         circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
-        control: false
+        control: true
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
         excluded: ''
-        include_path: false
+        include_path: true
       fullscreen:
         control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'

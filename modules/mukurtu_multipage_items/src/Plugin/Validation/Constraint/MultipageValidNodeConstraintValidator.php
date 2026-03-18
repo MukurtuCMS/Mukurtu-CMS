@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_multipage_items\Plugin\Validation\Constraint;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -55,6 +56,11 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
     foreach ($value as $delta => $item) {
       $target_id = (int) $item->target_id;
 
+      $target_entity = $item->entity;
+      if (!$target_entity instanceof EntityInterface) {
+        continue;
+      }
+
       // Item is unique.
       if (!in_array($target_id, $unique_items)) {
         $unique_items[] = $target_id;
@@ -62,7 +68,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
       // Item is a duplicate.
       else {
         $this->context->buildViolation($constraint->isDuplicate)
-          ->setParameter('%value', $this->getTitle($target_id))
+          ->setParameter('%value', $target_entity->label())
           ->atPath($delta . '.target_id')
           ->setInvalidValue($target_id)
           ->addViolation();
@@ -71,7 +77,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
       // Check if the node is already in an MPI.
       if ($this->alreadyInMPI($target_id)) {
         $this->context->buildViolation($constraint->alreadyInMPI)
-          ->setParameter('%value', $this->getTitle($target_id))
+          ->setParameter('%value', $target_entity->label())
           ->atPath($delta . '.target_id')
           ->setInvalidValue($target_id)
           ->addViolation();
@@ -79,7 +85,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
       // Check if the node is a community record.
       if ($this->isCommunityRecord($target_id)) {
         $this->context->buildViolation($constraint->isCommunityRecord)
-          ->setParameter('%value', $this->getTitle($target_id))
+          ->setParameter('%value', $target_entity->label())
           ->atPath($delta . '.target_id')
           ->setInvalidValue($target_id)
           ->addViolation();
@@ -87,7 +93,7 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
       // Check if the node is of type enabled for multipage items.
       if (!$this->isEnabledBundleType($target_id)) {
         $this->context->buildViolation($constraint->notEnabledBundleType)
-          ->setParameter('%value', $this->getTitle($target_id))
+          ->setParameter('%value', $target_entity->label())
           ->atPath($delta . '.target_id')
           ->setInvalidValue($target_id)
           ->addViolation();
@@ -169,22 +175,6 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
       $this->enabledBundles = array_keys(array_filter($bundles_config));
     }
     return $this->enabledBundles;
-  }
-
-  /**
-   * Fetch the node title.
-   *
-   * @param int $candidate_id
-   *   Candidate node ID.
-   * @return string
-   *   Node title.
-   */
-  protected function getTitle(int $candidate_id): string {
-    $entity = $this->entityTypeManager->getStorage('node')->load($candidate_id);
-    if (!$entity) {
-      return '';
-    }
-    return $entity->label();
   }
 
 }

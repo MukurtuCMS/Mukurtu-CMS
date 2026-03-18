@@ -1,56 +1,57 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Form;
 
-use Drupal\mukurtu_import\Form\ImportBaseForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\file\FileInterface;
-use Drupal\Core\TempStore\PrivateTempStoreFactory;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
+use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 
 /**
  * Provides a Mukurtu Import form.
  */
 class CustomStrategyFromFileForm extends ImportBaseForm {
-  protected $importConfig;
-  protected $importConfigLoaded;
 
   /**
-   * {@inheritdoc}
+   * Import configuration object managed by this form.
+   *
+   * @var \Drupal\mukurtu_import\MukurtuImportStrategyInterface
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info){
-    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info);
+  protected MukurtuImportStrategyInterface $importConfig;
 
-    // Initializing importConfig with a fresh import config just to make my
-    // IDE happy... Loading the real config in buildForm where we have the
-    // file id.
-    $this->importConfig = $this->getImportConfig(-1);
-    $this->importConfigLoaded = FALSE;
+  /**
+   * Title callback for route mukurtu_import.custom_strategy_from_file_form.
+   *
+   * @param \Drupal\file\FileInterface $file
+   *   The uploaded file entity.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The page title.
+   */
+  public function getTitle(FileInterface $file) {
+    return $this->t('Customize Import Settings - @filename', ['@filename' => $file->getFilename()]);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'mukurtu_import_custom_strategy_from_file';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, FileInterface $file = NULL) {
-    // Handle the initial loading of the import config for this file.
-    if (!$this->importConfigLoaded) {
-      $this->importConfig = $this->getImportConfig($file->id());
-      $this->importConfigLoaded = TRUE;
-    }
-
-    if(!$file) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?FileInterface $file = NULL): array {
+    $form = parent::buildForm($form, $form_state);
+    if (!$file instanceof FileInterface) {
       return $form;
     }
+    $this->importConfig = $this->getImportConfig($file->id());
 
     $form['fid'] = [
       '#type' => 'value',
@@ -72,13 +73,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     $entity_type_id = $form_state->getValue('entity_type_id') ?? $this->importConfig->getTargetEntityTypeId();
-    $bundleOptions = $this->getBundleOptions($entity_type_id);
-    $bundleKeys = array_keys($bundleOptions);
+    $bundle_options = $this->getBundleOptions($entity_type_id);
+    $bundle_keys = array_keys($bundle_options);
     $form['bundle'] = [
       '#type' => 'radios',
       '#title' => $this->t('Sub-type'),
-      '#options' => $bundleOptions,
-      '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle() ?? reset($bundleKeys),
+      '#options' => $bundle_options,
+      '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle() ?? reset($bundle_keys),
       '#description' => $this->t('Optional Sub-type. When importing new content or media, they will be of this type if not specified in the import metadata.'),
       '#prefix' => "<div id=\"bundle-select\">",
       '#suffix' => "</div>",
@@ -87,6 +88,18 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
         'callback' => [$this, 'bundleChangeAjaxCallback'],
         'event' => 'change',
       ],
+    ];
+
+    $header_options = ['' => $this->t('- Computed -')];
+    foreach ($this->getCSVHeaders($file) as $header) {
+      $header_options[$header] = $header;
+    }
+    $form['identifier_column'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Identifier Column'),
+      '#description' => $this->t('Optional. Select a column to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
+      '#options' => $header_options,
+      '#default_value' => $this->importConfig->getConfig('identifier_column') ?? '',
     ];
 
     $this->buildMappingTable($form, $form_state, $file);
@@ -123,7 +136,20 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       '#title' => $this->t('Multi-value Delimiter'),
       '#default_value' => $this->importConfig->getConfig('multivalue_delimiter') ?? ';',
     ];
-
+    $form['file_settings']['local_contexts_delimiter'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#title' => $this->t('Local Contexts Delimiter'),
+      '#description' => $this->t('Delimiter used to separate the project name from the label/notice name in Local Contexts fields (e.g., "My Project > TK Attribution").'),
+      '#default_value' => $this->importConfig->getConfig('local_contexts_delimiter') ?? '>',
+    ];
+    $form['file_settings']['default_format'] = [
+      '#type' => 'select',
+      '#required' => TRUE,
+      '#title' => $this->t('Default Text Format'),
+      '#options' => $this->getTextFormatOptions(),
+      '#default_value' => $this->importConfig->getConfig('default_format') ?? MukurtuImportStrategy::DEFAULT_FORMAT,
+    ];
 
     // Provide an option to save this config for reuse.
     $form['import_config'] = [
@@ -149,9 +175,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
         ],
       ],
     ];
-    if ($this->importConfig->isNew()) {
-
-    }
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -171,14 +194,27 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   }
 
   /**
+   * Get the options array for available text formats.
+   *
+   * @return array
+   *   An array of text format labels indexed by format ID.
+   */
+  protected function getTextFormatOptions(): array {
+    $formats = filter_formats();
+    return array_map(function($format) {
+      return $format->label();
+    }, $formats);
+  }
+
+  /**
    * Get the options array for available target entity types.
    */
   protected function getEntityTypeIdOptions() {
-    $definitons = $this->entityTypeManager->getDefinitions();
+    $definitions = $this->entityTypeManager->getDefinitions();
     $options = [];
     foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item'] as $entity_type_id) {
-      if (isset($definitons[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
-        $options[$entity_type_id] = $definitons[$entity_type_id]->getLabel();
+      if (isset($definitions[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
+        $options[$entity_type_id] = $definitions[$entity_type_id]->getLabel();
 
         // Override certain labels, including paragraphs.
         if ($entity_type_id === 'paragraph') {
@@ -190,7 +226,32 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     return $options;
   }
 
-  protected function buildMappingTable(array &$form, FormStateInterface $form_state, FileInterface $file) {
+  /**
+   * Builds the mapping table form element for CSV column to field mapping.
+   *
+   * This method creates a table form element that allows users to map columns
+   * from the uploaded CSV file to target entity fields. The available target
+   * fields depend on the selected entity type and bundle.
+   *
+   * The method:
+   * - Reads the CSV headers from the uploaded file
+   * - Creates a row for each CSV column
+   * - Provides a select dropdown for each column to choose the target field
+   * - Attempts to auto-map columns to fields based on label/name matching
+   * - Uses AJAX wrapper divs to allow dynamic updates when entity type/bundle
+   * changes
+   *
+   * @param array $form
+   *   The form array to add the mapping table to (passed by reference).
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state containing user selections.
+   * @param \Drupal\file\FileInterface $file
+   *   The uploaded CSV file to map columns from.
+   *
+   * @return array
+   *   The modified form array with the mapping table added.
+   */
+  protected function buildMappingTable(array &$form, FormStateInterface $form_state, FileInterface $file): array {
     $userInput = $form_state->getUserInput();
     $entity_type_id = $form_state->getValue('entity_type_id') ?? ($userInput['entity_type_id'] ?? ($form['entity_type_id']['#default_value'] ?? 'node'));
     $bundle = $form_state->getValue('bundle') ?? ($userInput['bundle'] ?? $this->importConfig->getTargetBundle());
@@ -215,11 +276,10 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       $form['mappings'][$delta]['source_title'] = [
         '#plain_text' => $header,
       ];
-
       $form['mappings'][$delta]['target'] = [
         '#type' => 'select',
         '#options' => $this->buildTargetOptions($entity_type_id, $bundle),
-        '#default_value' => $this->getAutoMappedTarget($header, $entity_type_id, $bundle),
+        '#default_value' => $this->importConfig->getMappedTarget($header) ?? $this->getAutoMappedTarget($header, $entity_type_id, $bundle),
         '#prefix' => "<div id=\"edit-mappings-{$delta}-target-options\">",
         '#suffix' => "</div>",
         '#validated' => TRUE,
@@ -233,14 +293,13 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     return $form;
   }
 
-
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
     $element = $form_state->getTriggeringElement();
     // Skip validation if we're cancelling.
-    if ($element['#parents'][0] == 'cancel') {
+    if ($element['#parents'][0] === 'cancel') {
       return;
     }
 
@@ -248,38 +307,95 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     // Check for duplicate target mapping.
     $targets = array_column($mappings, 'target');
-    $uniqueTargets = array_unique($targets);
-    if (count($uniqueTargets) != count($targets)) {
+    $unique_targets = array_unique($targets);
+    if (count($unique_targets) !== count($targets)) {
 
-      foreach (array_count_values($targets) as $dupeTarget => $count) {
+      foreach (array_count_values($targets) as $dupe_target => $count) {
         // Ignore the ignore field option, users can have duplicates of that.
-        if ($count < 2 || $dupeTarget == -1) {
+        if ($count < 2 || $dupe_target == -1) {
           continue;
         }
 
         foreach ($targets as $delta => $target) {
-          if ($dupeTarget == $target) {
+          if ($dupe_target == $target) {
             $form_state->setError($form['mappings'][$delta], $this->t("Only a single source can be mapped to each target field."));
           }
         }
       }
     }
+
+    // When no Identifier Column is chosen, verify that toDefinition() will be
+    // able to compute a unique source ID from the current mapping. It can do
+    // so if any of the following are true:
+    //   - The entity type's ID key is mapped.
+    //   - The entity type's UUID key is mapped.
+    //   - The entity type has a label key and it is mapped.
+    //   - The entity is a media type whose source field (file, image, or
+    //     string ≤ 255) is mapped.
+    if (!$form_state->getValue('identifier_column') && isset($this->importConfig)) {
+      $entity_type_id = $form_state->getValue('entity_type_id');
+      $bundle = $form_state->getValue('bundle') == -1 ? NULL : $form_state->getValue('bundle');
+      $entity_type_def = $this->entityTypeManager->getDefinition($entity_type_id);
+      $mapped_targets = array_column($mappings, 'target');
+
+      $has_id = ($id_key = $entity_type_def->getKey('id')) && in_array($id_key, $mapped_targets);
+      $has_uuid = ($uuid_key = $entity_type_def->getKey('uuid')) && in_array($uuid_key, $mapped_targets);
+
+      // Temporarily apply the current form values so getLabelSourceColumn()
+      // and getMediaSourceColumn() operate on the submitted mapping.
+      $saved_mapping = $this->importConfig->getMapping();
+      $saved_entity_type_id = $this->importConfig->getTargetEntityTypeId();
+      $saved_bundle = $this->importConfig->getTargetBundle();
+      $this->importConfig->setMapping($mappings);
+      $this->importConfig->setTargetEntityTypeId($entity_type_id);
+      $this->importConfig->setTargetBundle($bundle);
+
+      $has_label = (bool) $this->importConfig->getLabelSourceColumn();
+      $has_media_source = (bool) $this->importConfig->getMediaSourceColumn();
+
+      $this->importConfig->setMapping($saved_mapping);
+      $this->importConfig->setTargetEntityTypeId($saved_entity_type_id);
+      $this->importConfig->setTargetBundle($saved_bundle);
+
+      if (!$has_id && !$has_uuid && !$has_label && !$has_media_source) {
+        $form_state->setError($form['identifier_column'], $this->t('An Identifier Column is required. No ID, UUID, label, or compatible media source field is mapped, so the importer cannot uniquely identify rows. Select an Identifier Column above, or map one of the required fields.'));
+      }
+    }
   }
 
-  protected function getBundleOptions($entity_type_id) {
-    $bundleInfoService = \Drupal::service('entity_type.bundle.info');
-    $bundleInfo = $bundleInfoService->getAllBundleInfo();
+  /**
+   * Gets the available bundle options for a given entity type.
+   *
+   * This method retrieves all bundles for the specified entity type that the
+   * current user has permission to create. It provides a select list of
+   * available sub-types/bundles for the import form.
+   *
+   * If there is only one bundle available, the "None: Base Fields Only" option
+   * is excluded from the returned options array.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID to get bundles for (e.g., 'node', 'media', etc.).
+   *
+   * @return array
+   *   An associative array of bundle options where keys are bundle machine
+   *   names (or -1 for base fields only) and values are bundle labels. Returns
+   *   an array with a single "No sub-types available" option if no bundles
+   *   exist for the entity type.
+   */
+  protected function getBundleOptions($entity_type_id): array {
+    $bundle_info = $this->entityBundleInfo->getAllBundleInfo();
 
-    if (!isset($bundleInfo[$entity_type_id])) {
+    if (!isset($bundle_info[$entity_type_id])) {
       return [-1 => $this->t('No sub-types available')];
     }
 
     // Don't provide the base fields option if there is only one valid bundle.
-    if (count($bundleInfo[$entity_type_id]) > 1) {
+    $options = [];
+    if (count($bundle_info[$entity_type_id]) > 1) {
       $options = [-1 => $this->t('None: Base Fields Only')];
     }
 
-    foreach ($bundleInfo[$entity_type_id] as $bundle => $info) {
+    foreach ($bundle_info[$entity_type_id] as $bundle => $info) {
       if ($this->userCanCreateEntity($entity_type_id, $bundle)) {
         $options[$bundle] = $info['label'] ?? $bundle;
       }
@@ -287,7 +403,23 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     return $options;
   }
 
-  public function entityTypeChangeAjaxCallback(array &$form, FormStateInterface $form_state) {
+  /**
+   * AJAX callback handler for entity type selection changes.
+   *
+   * This method handles the dynamic form updates when the user changes the
+   * entity type selection (e.g., from 'node' to 'media').
+   *
+   * @param array $form
+   *   The complete form array (passed by reference).
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state containing user input and values.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An AJAX response object containing ReplaceCommand operations to update
+   *   the bundle selector and all field mapping dropdowns with appropriate
+   *   options for the newly selected entity type.
+   */
+  public function entityTypeChangeAjaxCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
     // Update the field mapping message.
     $response = new AjaxResponse();
 
@@ -368,6 +500,9 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $this->importConfig->setConfig('enclosure', $form_state->getValue('enclosure'));
     $this->importConfig->setConfig('escape', $form_state->getValue('escape'));
     $this->importConfig->setConfig('multivalue_delimiter', $form_state->getValue('multivalue_delimiter'));
+    $this->importConfig->setConfig('local_contexts_delimiter', $form_state->getValue('local_contexts_delimiter'));
+    $this->importConfig->setConfig('default_format', $form_state->getValue('default_format'));
+    $this->importConfig->setConfig('identifier_column', $form_state->getValue('identifier_column') ?: NULL);
 
     if ($form_state->getValue('config_save')) {
       $userProvidedLabel = $form_state->getValue('config_title');
@@ -391,23 +526,20 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    *   The search term.
    * @param string $entity_type_id
    *   The entity type id.
-   * @param string $bundle
+   * @param string|null $bundle
    *   The bundle.
    * @return string|null
    *   The field name of the match or NULL if no matches found.
    */
-  protected function searchFieldLabels($needle, $entity_type_id, $bundle = NULL) {
-    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
-    $matchingFields = [];
-    foreach ($fieldDefs as $field_name => $field) {
-      if ($needle == mb_strtolower($field->getLabel())) {
-        $matchingFields[$field_name] = $field;
-      }
-    }
+  protected function searchFieldLabels(string $needle, string $entity_type_id, ?string $bundle = NULL): ?string {
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $matching_fields = array_filter($field_defs, function($field) use ($needle) {
+      return $needle == mb_strtolower((string) $field->getLabel());
+    });
 
     // If there are multiple matches, return the first bundle specific match.
-    if (count($matchingFields) > 1) {
-      foreach ($matchingFields as $matched_field_name => $matched_field) {
+    if (count($matching_fields) > 1) {
+      foreach ($matching_fields as $matched_field_name => $matched_field) {
         if ($matched_field->getTargetBundle()) {
           return $matched_field_name;
         }
@@ -415,8 +547,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     }
 
     // If all are base fields, return the first.
-    if (count($matchingFields) >= 1) {
-      $field_names = array_keys($matchingFields);
+    if (count($matching_fields) >= 1) {
+      $field_names = array_keys($matching_fields);
       return reset($field_names);
     }
 
@@ -427,27 +559,27 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    * Search for a cultural_protocol field for a given entity/bundle.
    */
   protected function getProtocolField($entity_type_id, $bundle = NULL) {
-    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
-    $protocolFields = [];
-    foreach ($fieldDefs as $field_name => $field) {
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $protocol_fields = [];
+    foreach ($field_defs as $field_name => $field) {
       if ($field->getType() == 'cultural_protocol') {
-        $protocolFields[$field_name] = $field_name;
+        $protocol_fields[$field_name] = $field_name;
       }
     }
 
-    if (count($protocolFields) == 1) {
-      return reset($protocolFields);
+    if (count($protocol_fields) == 1) {
+      return reset($protocol_fields);
     }
 
-    if (count($protocolFields) > 1) {
+    if (count($protocol_fields) > 1) {
       // If there are multiple protocol fields for some reason, but ours is
       // present, default to that.
-      if (isset($protocolFields['field_cultural_protocols'])) {
-        return $protocolFields['field_cultural_protocols'];
+      if (isset($protocol_fields['field_cultural_protocols'])) {
+        return $protocol_fields['field_cultural_protocols'];
       }
 
       // Otherwise use the first one.
-      return reset($protocolFields);
+      return reset($protocol_fields);
     }
 
     return NULL;
@@ -460,37 +592,34 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
    * 2. Check for field name matches (case insensitive).
    */
   protected function getAutoMappedTarget($source, $entity_type_id, $bundle = NULL) {
-    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
-    $configMapping = $this->importConfig ? $this->importConfig->getMapping() : [];
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $config_mapping = $this->importConfig ? $this->importConfig->getMapping() : [];
 
     // If the selected config has an existing valid mapping for this field,
     // it has precedence.
-    foreach ($configMapping as $mapping) {
+    foreach ($config_mapping as $mapping) {
       // Break up any subfields.
       $subfields = explode('/', $mapping['target'], 2);
       $target = reset($subfields);
 
       // Checking if we have a mapping and the root of the target field exists.
-      if ($mapping['source'] == $source && in_array($target, array_keys($fieldDefs))) {
+      if ($mapping['source'] == $source && in_array($target, array_keys($field_defs))) {
         return $mapping['target'];
       }
     }
 
     $needle = mb_strtolower($source);
 
-    // Hardcode our protocol subfields. Not ideal, but these are some of the
-    // most commonly imported fields, so having a good user experience trumps
-    // is more important.
-    $protocolLabel = t("Protocols");
-    $sharingSettingLabel = t("Sharing Setting");
-    if ($needle == mb_strtolower("$protocolLabel")) {
-      if ($protocolField = $this->getProtocolField($entity_type_id, $bundle)) {
-        return $protocolField . "/protocols";
-      }
-    }
-    if ($needle == mb_strtolower("$sharingSettingLabel")) {
-      if ($protocolField = $this->getProtocolField($entity_type_id, $bundle)) {
-        return $protocolField . "/sharing_setting";
+    // Check if any field has a property, which our import field process plugins
+    // support, matching the source label.
+    foreach ($field_defs as $field_name => $field_definition) {
+      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
+      $supported_properties = $plugin->getSupportedProperties($field_definition);
+
+      foreach ($supported_properties as $property_name => $property_info) {
+        if ($needle == mb_strtolower($property_info['label'])) {
+          return "{$field_name}/{$property_name}";
+        }
       }
     }
 
@@ -504,7 +633,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     }
 
     // Check if we have a (case insensitive) field name match.
-    if (isset($fieldDefs[$needle])) {
+    if (isset($field_defs[$needle])) {
       return $needle;
     }
 

@@ -104,7 +104,6 @@
             {{ content.group_primary_fields.group_additional_fields.field_coverage }}
             {{ content.group_primary_fields.group_additional_fields.field_location }}
             {{ content.group_primary_fields.group_additional_fields.field_coverage_description }}
-            {{ content.group_primary_fields.group_additional_fields.field_citation }}
 
           </div>
           {% elseif carousels == false  %}
@@ -114,15 +113,6 @@
           {% endif %}
 
         </div>
-
-{#
-        <div class="full-node__related-content">
-          {{ content.group_primary_fields.field_all_related_content }}
-        </div>
-
-        <div class="full-node__citation">
-          {{ content.group_primary_fields.field_citation }}
-        </div> #}
 
         <div class="full-node__content">
           {{ content.group_primary_fields.comment }}
@@ -136,6 +126,7 @@
             <div class="sidebar-section">
               {{ content.community_protocol_list }}
               {{ content.group_metadata }}
+              {{ content.field_citation }}
             </div>
           </aside>
         </div>

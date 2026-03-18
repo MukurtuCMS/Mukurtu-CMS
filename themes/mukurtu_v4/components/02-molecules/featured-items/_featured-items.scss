@@ -10,7 +10,8 @@
   }
 }
 
-.field--name-field-featured-content {
+.field--name-field-featured-content,
+.field--name-field-all-related-content .field__items {
   margin-block: var(--v-space-4xxs);
 
   @include layout.layout--threecol-grid;
@@ -51,6 +52,7 @@
         inline-size: 100%;
         block-size: 100%;
 
+        // stylelint-disable-next-line no-descending-specificity
         .field, iframe {
           inline-size: 100%;
           block-size: 100%;
@@ -60,6 +62,7 @@
       .media--audio {
         background: var(--brand-secondary-accent);
 
+        // stylelint-disable-next-line no-descending-specificity
         .field {
           display: flex;
           justify-content: center;
