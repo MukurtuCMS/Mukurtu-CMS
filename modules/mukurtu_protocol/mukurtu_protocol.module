@@ -138,9 +138,6 @@ function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Co
   // buttons for uid 1.
   if ($route_name == 'entity.community.canonical' || $route_name == 'entity.protocol.canonical') {
     if (\Drupal::currentUser()->id() != 1) {
-      unset($data['tabs'][0]['devel.entities:community.devel_tab']);
-      unset($data['tabs'][0]['devel.entities:protocol.devel_tab']);
-
       // Right now, there are two Revisions local task buttons showing up on
       // community and protocol pages. Eventually, local task
       // 'entity.node.version_history' will be replaced by
@@ -167,9 +164,6 @@ function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Co
     $route_match = \Drupal::routeMatch();
     $currentUser = \Drupal::currentUser();
     if ($currentUser->id() != 1) {
-      // Hide devel button for non uid 1.
-      unset($data['tabs'][0]['devel.entities:node.devel_tab']);
-
       // Only show revisions button if current user has permission to edit the
       // current node.
 
@@ -191,20 +185,25 @@ function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Co
       $editAny = 'edit any ' . $bundleType . ' content';
       $editOwn = 'edit own ' . $bundleType . ' content';
 
-      /** @var \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $node */
-      $nodeProtocols = $node->getProtocolEntities();
-      $hasEditPermission = FALSE;
-      foreach ($nodeProtocols as $protocol) {
-        $membership = Og::getMembership($protocol, $currentUser);
-        if ($membership) {
-          if ($membership->hasPermission($editAny) || $membership->hasPermission($editOwn)) {
-            $hasEditPermission = TRUE;
-            break;
+      // Do not perform protocol-based permission checks on stock Drupal content
+      // types (article, basic page). Doing so caused an error since these
+      // content types are not protocol-controlled.
+      if ($node instanceof CulturalProtocolControlledInterface) {
+        /** @var \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $node */
+        $nodeProtocols = $node->getProtocolEntities();
+        $hasEditPermission = FALSE;
+        foreach ($nodeProtocols as $protocol) {
+          $membership = Og::getMembership($protocol, $currentUser);
+          if ($membership) {
+            if ($membership->hasPermission($editAny) || $membership->hasPermission($editOwn)) {
+              $hasEditPermission = TRUE;
+              break;
+            }
           }
         }
-      }
-      if ($hasEditPermission) {
-        $data['tabs'][0]['entity.node.version_history'] = $revisionsTab;
+        if ($hasEditPermission) {
+          $data['tabs'][0]['entity.node.version_history'] = $revisionsTab;
+        }
       }
     }
   }

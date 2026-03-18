@@ -3,21 +3,20 @@
 namespace Drupal\mukurtu_import\Plugin\MukurtuImportFieldProcess;
 
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginBase;
+use Drupal\mukurtu_import\Attribute\MukurtuImportFieldProcess;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the mukurtu_import_field_process.
- *
- * @MukurtuImportFieldProcess(
- *   id = "default",
- *   label = @Translation("Default"),
- *   field_types = {
- *     "*",
- *   },
- *   weight = 0,
- *   description = @Translation("Default Process Plugin.")
- * )
  */
+#[MukurtuImportFieldProcess(
+  id: 'default',
+  label: new TranslatableMarkup('Default'),
+  description: new TranslatableMarkup('Default Process Plugin.'),
+  field_types: ['*'],
+  weight: 0,
+)]
 class DefaultProcess extends MukurtuImportFieldProcessPluginBase {
   /**
    * {@inheritdoc}

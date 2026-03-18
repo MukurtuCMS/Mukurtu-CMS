@@ -106,10 +106,10 @@ content:
         html_class: leaflet-map-divicon
         circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
-        control: false
+        control: true
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
         excluded: ''
-        include_path: false
+        include_path: true
       fullscreen:
         control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
@@ -232,11 +232,17 @@ content:
     third_party_settings: {  }
     weight: 8
     region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
+    region: content
 hidden:
   comment: true
   draft: true
   field_all_related_content: true
-  field_citation: true
   field_communities: true
   field_cultural_protocols: true
   field_in_collection: true

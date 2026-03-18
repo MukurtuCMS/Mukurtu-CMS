@@ -9,7 +9,12 @@ use Drupal\Core\Field\FieldDefinitionInterface;
  * Base class for mukurtu_import_field_process plugins.
  */
 class MukurtuImportFieldProcessPluginBase extends PluginBase implements MukurtuImportFieldProcessInterface {
+
+  /**
+   * The delimiter used to separate multiple values.
+   */
   const MULTIVALUE_DELIMITER = ";";
+
   /**
    * An array of field types the process supports.
    *
@@ -17,8 +22,6 @@ class MukurtuImportFieldProcessPluginBase extends PluginBase implements MukurtuI
    */
   public $field_types = [];
   public $weight = 0;
-
-
 
   /**
    * {@inheritdoc}
@@ -46,7 +49,43 @@ class MukurtuImportFieldProcessPluginBase extends PluginBase implements MukurtuI
    * {@inheritdoc}
    */
   public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL) {
+    // If no specific property is requested, use the schema description.
+    if ($field_property === NULL) {
+      return $this->getSchemaDescription($field_config);
+    }
     return '';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSupportedProperties(FieldDefinitionInterface $field_definition): array {
+    $supported_properties = [];
+
+    // Get the properties defined in the plugin configuration.
+    $properties = $this->pluginDefinition['properties'] ?? [];
+
+    if (empty($properties)) {
+      return $supported_properties;
+    }
+
+    // Get the field storage definition to access property definitions.
+    $field_storage = $field_definition->getFieldStorageDefinition();
+
+    foreach ($properties as $property_name) {
+      $property_definition = $field_storage->getPropertyDefinition($property_name);
+
+      if (!$property_definition) {
+        continue;
+      }
+
+      $supported_properties[$property_name] = [
+        'label' => sprintf('%s > %s', $field_definition->getLabel(), $property_definition->getLabel()),
+        'description' => $this->getFormatDescription($field_definition, $property_name),
+      ];
+    }
+
+    return $supported_properties;
   }
 
   /**

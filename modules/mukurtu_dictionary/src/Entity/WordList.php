@@ -79,7 +79,6 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -105,7 +104,6 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -131,7 +129,6 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

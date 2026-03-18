@@ -1,6 +1,5 @@
 <?php
 
-use Drupal\Core\Template\Attribute;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
@@ -147,8 +146,9 @@ function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar
   $community = $route_match->getParameter('community');
   $variables['community_name'] = $community->get('name')->value;
   $variables['community_id'] = $community->get('id')->value;
-  $localContextsProjectManager = new LocalContextsSupportedProjectManager();
-  $variables['has_lc_projects'] = $localContextsProjectManager->getGroupSupportedProjects($community) ? TRUE : FALSE;
+  $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
+  assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
+  $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($community);
 }
 
 /**
@@ -159,6 +159,7 @@ function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(
   $protocol = $route_match->getParameter('protocol');
   $variables['protocol_name'] = $protocol->get('name')->value;
   $variables['protocol_id'] = $protocol->get('id')->value;
-  $localContextsProjectManager = new LocalContextsSupportedProjectManager();
-  $variables['has_lc_projects'] = $localContextsProjectManager->getGroupSupportedProjects($protocol) ? TRUE : FALSE;
+  $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
+  assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
+  $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($protocol);
 }

@@ -47,6 +47,8 @@ install:
   - term_merge_manager
   - dashboards
   - admin_theme
+  - leaflet_markercluster
+  - tagify
 
 dependencies:
   - 'blazy:blazy'
@@ -82,6 +84,9 @@ dependencies:
   - 'drupal:toolbar'
   - 'drupal:user'
   - 'drupal:views'
+  - 'drupal:dashboards'
+  - 'drupal:admin_theme'
+  - 'drupal:tagify'
   - 'embed:embed'
   - 'entity_browser:entity_browser'
   - 'entity_embed:entity_embed'
@@ -117,6 +122,7 @@ dependencies:
   - 'mukurtu_multipage_items:mukurtu_multipage_items'
   - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_person:mukurtu_person'
+  - 'mukurtu_place:mukurtu_place'
   - 'mukurtu_protocol:mukurtu_protocol'
   - 'mukurtu_site_settings:mukurtu_site_settings'
   - 'mukurtu_taxonomy:mukurtu_taxonomy'
@@ -132,8 +138,7 @@ dependencies:
   - 'term_merge:term_merge'
   - 'token:token'
   - 'views_bulk_operations:views_bulk_operations'
-  - 'drupal:dashboards'
-  - 'drupal:admin_theme'
+
 
 themes:
   - mukurtu_v4

@@ -21,11 +21,12 @@ use Drupal\Core\Session\AccountInterface;
  * )
  */
 class LocalContextsProjectItem extends StringItem implements OptionsProviderInterface {
+
   protected $localContextsProjectManager;
 
-  public function __construct(ComplexDataDefinitionInterface $definition, $name = NULL, TypedDataInterface $parent = NULL) {
+  public function __construct(ComplexDataDefinitionInterface $definition, $name = NULL, ?TypedDataInterface $parent = NULL) {
     parent::__construct($definition, $name, $parent);
-    $this->localContextsProjectManager = new LocalContextsSupportedProjectManager();
+    $this->localContextsProjectManager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
   }
 
   /**
@@ -61,7 +62,7 @@ class LocalContextsProjectItem extends StringItem implements OptionsProviderInte
   /**
    * {@inheritDoc}
    */
-  public function getPossibleValues(AccountInterface $account = NULL) {
+  public function getPossibleValues(?AccountInterface $account = NULL) {
     $options = $this->flattenProjectOptions($this->localContextsProjectManager->getAllProjects());
     return array_keys($options);
   }
@@ -69,14 +70,14 @@ class LocalContextsProjectItem extends StringItem implements OptionsProviderInte
   /**
    * {@inheritDoc}
    */
-  public function getPossibleOptions(AccountInterface $account = NULL){
+  public function getPossibleOptions(?AccountInterface $account = NULL){
     return $this->flattenProjectOptions($this->localContextsProjectManager->getAllProjects());
   }
 
   /**
    * {@inheritDoc}
    */
-  public function getSettableValues(AccountInterface $account = NULL) {
+  public function getSettableValues(?AccountInterface $account = NULL) {
     $options = $account ? $this->localContextsProjectManager->getUserProjects($account) : $this->localContextsProjectManager->getSiteSupportedProjects();
     return array_keys($this->flattenProjectOptions($options));
   }
@@ -84,7 +85,7 @@ class LocalContextsProjectItem extends StringItem implements OptionsProviderInte
   /**
    * {@inheritDoc}
    */
-  public function getSettableOptions(AccountInterface $account = NULL) {
+  public function getSettableOptions(?AccountInterface $account = NULL) {
     $options = $account ? $this->localContextsProjectManager->getUserProjects($account) : $this->localContextsProjectManager->getSiteSupportedProjects();
     return $this->flattenProjectOptions($options);
   }

@@ -49,14 +49,17 @@ third_party_settings:
         speed: fast
     group_metadata:
       children:
-        - field_keywords
         - field_date_born
+        - field_place_of_birth
         - field_date_died
+        - field_place_of_death
         - field_related_people
         - field_other_names
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
+        - field_keywords
         - flag_export_content
+        - field_citation
       label: Metadata
       parent_name: ''
       region: content
@@ -92,10 +95,17 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: teaser
+      view_mode: featured
       link: false
     third_party_settings: {  }
     weight: 90
+    region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -163,10 +173,10 @@ content:
         html_class: leaflet-map-divicon
         circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
-        control: false
+        control: true
         options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
         excluded: ''
-        include_path: false
+        include_path: true
       fullscreen:
         control: false
         options: '{"position":"topleft","pseudoFullscreen":false}'
@@ -207,10 +217,26 @@ content:
     third_party_settings: {  }
     weight: 9
     region: content
+  field_place_of_birth:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 9
+    region: content
   field_date_died:
     type: month_day_year_original_date_formatter
     label: above
     settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  field_place_of_death:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
     third_party_settings: {  }
     weight: 10
     region: content
@@ -220,7 +246,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 8
+    weight: 19
     region: content
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
@@ -253,15 +279,6 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
-  field_related_people:
-    type: entity_reference_entity_view
-    label: above
-    settings:
-      view_mode: teaser
-      link: true
-    third_party_settings: {  }
-    weight: 12
-    region: content
   field_other_names:
     type: entity_reference_label
     label: above
@@ -270,6 +287,15 @@ content:
       link: true
     third_party_settings: {  }
     weight: 13
+    region: content
+  field_related_people:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: teaser
+      link: true
+    third_party_settings: {  }
+    weight: 12
     region: content
   field_sections:
     type: entity_reference_revisions_entity_view
@@ -287,18 +313,17 @@ content:
     region: content
 hidden:
   draft: true
-  field_citation: true
   field_communities: true
   field_content_type: true
   field_cultural_protocols: true
   field_deceased: true
   field_in_collection: true
   field_multipage_page_of: true
+  field_other_names: true
   field_protocol_control: true
   field_related_content: true
   field_related_people: true
   field_representative_media: true
-  field_other_names: true
   field_sections: true
   field_sequence_collection: true
   field_title: true
