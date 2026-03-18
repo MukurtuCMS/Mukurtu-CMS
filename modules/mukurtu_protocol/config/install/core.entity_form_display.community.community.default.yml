@@ -9,17 +9,20 @@ dependencies:
     - mukurtu_protocol
     - path
     - text
-    - tagify
 id: community.community.default
 targetEntityType: community
 bundle: community
 mode: default
 content:
   community_type:
-    type: options_buttons
+    type: entity_reference_autocomplete
     weight: 5
     region: content
-    settings: {  }
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   field_access_mode:
     type: options_buttons
@@ -45,7 +48,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_community_type:
-    type: options_select
+    type: options_buttons
     weight: 5
     region: content
     settings: {  }
