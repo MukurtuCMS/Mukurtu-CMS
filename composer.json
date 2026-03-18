@@ -64,6 +64,7 @@
         "drupal/search_api": "*",
         "drupal/search_api_glossary": "*",
         "drupal/search_api_solr": "^4.3",
+        "drupal/tagify": "^1.2",
         "drupal/term_merge": "^2.0@beta",
         "drupal/term_merge_manager": "^2.0",
         "drupal/token": "*",
