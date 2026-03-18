@@ -45,7 +45,7 @@ jobs:
       - name: Cache composer dependencies
         uses: actions/cache@v4
         with:
-          path: $COMPCACHE
+          path: ${{ steps.composercache.outputs.COMPCACHE }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
@@ -53,7 +53,7 @@ jobs:
       # version of mukurtu-cms, which will be replaced by the git checkout.
       - name: Install Mukurtu Template
         run: |
-          composer create mukurtu/mukurtu-template:dev-main . --no-install --no-interaction
+          composer create-project mukurtu/mukurtu-template:dev-main . --no-install --no-interaction
           rm web/profiles/mukurtu -rf
 
       # Usually checkout is the first action, but we set up the mukurtu-template
