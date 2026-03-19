@@ -255,6 +255,37 @@ class CulturalProtocolItemTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
+   * Updated entity where user re-submits with pre-existing inaccessible
+   * protocols included (as the widget does via hidden form values). The
+   * inaccessible protocols should be preserved.
+   */
+  public function testUpdatedEntityPreservesInaccessibleProtocols() {
+    $entity = $this->entity;
+
+    // otherUser can apply protocols 0 and 1 but not 2.
+    foreach (range(0, 1) as $delta) {
+      $this->communities[$delta]->addMember($this->otherUser);
+      $this->protocols[$delta]->addMember($this->otherUser, ['protocol_steward']);
+    }
+
+    // privilegedUser sets all three protocols.
+    $this->setCurrentUser($this->privilegedUser);
+    $entity->setOwner($this->privilegedUser);
+    $original_protocol_ids = [$this->protocols[0]->id(), $this->protocols[1]->id(), $this->protocols[2]->id()];
+    $entity->setSharingSetting('any');
+    $entity->setProtocols($original_protocol_ids);
+    $entity->save();
+    $this->assertEquals($original_protocol_ids, $entity->getProtocols());
+
+    // otherUser saves the entity with all protocols still present (the widget
+    // includes inaccessible protocol IDs as hidden form values).
+    $this->setCurrentUser($this->otherUser);
+    $entity->setProtocols($original_protocol_ids);
+    $entity->save();
+    $this->assertEquals($original_protocol_ids, $entity->getProtocols());
+  }
+
+  /**
    * Test on updated entity where user tries to both add and remove protocols
    * they cannot apply.
    */
