@@ -156,23 +156,19 @@ class MultipageItemPageController extends ControllerBase {
    */
   public function newFromNodeAccess(AccountInterface $account, NodeInterface $node): AccessResultInterface {
     $access_handler = $this->entityTypeManager()->getAccessControlHandler('multipage_item');
-    // Node must be of a bundle that has been enabled for MPI.
-    $enabled_bundles = $this->config('mukurtu_multipage_items.settings')->get('bundles_config');
-    if (!isset($enabled_bundles[$node->bundle()]) || $enabled_bundles[$node->bundle()] != 1) {
-      return AccessResult::forbidden()->addCacheableDependency($node);
-    }
 
     // User must be able to create MPIs.
-    $access = $access_handler->createAccess('multipage_item', $account, ['node' => $node], TRUE);
+    $access = $access_handler->createAccess('multipage_item', $account, [], TRUE);
     assert($access instanceof AccessResultInterface);
     assert($access instanceof RefinableCacheableDependencyInterface);
     if (!$access->isForbidden()) {
-      // Node cannot be in an existing MPI.
-      if ($this->multipageItemManager->getMultipageEntity($node)) {
-        $access = $access->orIf(AccessResult::forbidden('Node is already part of an MPI.'));
+      // Check for validation issues with the given $node as part of a new MPI.
+      $mpi = MultipageItem::create(['title' => $node->getTitle(), 'field_pages' => [$node->id()]]);
+      $violations = $mpi->validate();
+      if ($violations->count() > 0) {
+        $access = AccessResult::forbidden('Validation failed for the given node as part of a new multipage item.')
+          ->addCacheableDependency($access);
       }
-      // User must have edit access to the item as well.
-      $access = $access->orIf($node->access('update', $account, TRUE));
     }
     $access->addCacheableDependency($node);
 

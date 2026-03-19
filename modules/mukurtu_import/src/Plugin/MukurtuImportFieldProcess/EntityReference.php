@@ -125,7 +125,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
       }
     }
 
-    if (in_array($ref_type, ['community', 'media', 'node', 'protocol'])) {
+    if (in_array($ref_type, ['community', 'media', 'node', 'protocol', 'multipage_item'])) {
       $ref_process = [
         'plugin' => 'mukurtu_entity_lookup',
         'value_key' => $this->entityTypeManager->getDefinition($ref_type)->getKey('label'),

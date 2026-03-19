@@ -85,7 +85,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     if (empty($context['sandbox']['total'])) {
       $context['sandbox']['total'] = $executable->getSource()->count();
       $context['sandbox']['batch_limit'] = $executable->calculateBatchLimit($context);
-      $context['results']['messages'] = [];
+      $context['results']['messages'] = $context['results']['messages'] ?? [];
       $context['results'][$migration->id()] = [
         '@numitems' => 0,
         '@created' => 0,
