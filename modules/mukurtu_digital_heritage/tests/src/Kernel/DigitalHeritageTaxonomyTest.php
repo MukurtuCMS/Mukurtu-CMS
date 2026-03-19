@@ -15,9 +15,8 @@ use Drupal\user\Entity\User;
  *
  * Covers: auto-create terms (keywords, creator, contributor), required
  * field_category without auto-create, and multi-value term assignment.
- *
- * @group mukurtu_digital_heritage
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_digital_heritage')]
 class DigitalHeritageTaxonomyTest extends DigitalHeritageTestBase {
 
   /**

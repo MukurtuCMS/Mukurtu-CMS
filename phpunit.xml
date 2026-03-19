@@ -48,7 +48,8 @@
       <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
     </testsuite>
   </testsuites>
-  <extensions>
-    <bootstrap class="\Drupal\Tests\Listeners\DrupalListener"/>
-  </extensions>
+  <listeners>
+    <listener class="\Drupal\Tests\Listeners\DrupalListener">
+    </listener>
+  </listeners>
 </phpunit>

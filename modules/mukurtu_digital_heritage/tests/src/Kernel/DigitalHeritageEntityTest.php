@@ -12,9 +12,8 @@ use Drupal\node\Entity\Node;
 
 /**
  * Tests the DigitalHeritage entity class, interfaces, and field definitions.
- *
- * @group mukurtu_digital_heritage
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_digital_heritage')]
 class DigitalHeritageEntityTest extends DigitalHeritageTestBase {
 
   /**

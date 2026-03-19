@@ -8,9 +8,8 @@ use Drupal\drafts_entity_test\Entity\TestDraftEntity;
 
 /**
  * Test access to draft entities.
- *
- * @group mukurtu_drafts
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_drafts')]
 class MukurtuDraftsEntityTest extends KernelTestBase {
   /**
    * {@inheritdoc}
