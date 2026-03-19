@@ -122,9 +122,9 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     if (!$access->isAllowed()) {
       $reason = $access->getReason();
       throw new MigrateException(
-        sprintf('The current user does not have %s access for this %s entity (ID: %s). %s',
+        sprintf('The current user does not have %s access for this %s (ID: %s).%s',
           $operation,
-          $entity->getEntityTypeId(),
+          mb_strtolower((string)$entity->getEntityType()->getLabel()),
           $entity->isNew() ? 'new' : $entity->id(),
           $reason ? ' ' . $reason : '',
         )
@@ -221,6 +221,31 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     if (method_exists($field_definition, 'addPropertyConstraints')) {
       $field_definition->addPropertyConstraints('alt', ['ImageAltRequired' => []]);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function updateEntity(EntityInterface $entity, Row $row) {
+    // Check update access against the original, unmodified entity before the
+    // parent applies imported field values. This prevents a user from bypassing
+    // access control by importing their own protocol onto content they cannot
+    // otherwise edit. Without this check, the protocol change would already be
+    // applied in memory by the time the post-edit access check runs in
+    // import(), causing it to incorrectly pass.
+    $access = $entity->access('update', $this->currentUser, TRUE);
+    if (!$access->isAllowed()) {
+      $reason = $access->getReason();
+      throw new MigrateException(
+        sprintf('The current user does not have access to update this %s (ID: %s).%s',
+          mb_strtolower((string)$entity->getEntityType()->getLabel()),
+          $entity->id(),
+          $reason ? ' ' . $reason : '',
+        )
+      );
+    }
+
+    return parent::updateEntity($entity, $row);
   }
 
   /**
