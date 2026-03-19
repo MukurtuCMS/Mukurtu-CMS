@@ -91,12 +91,16 @@ class ImportTaxonomyTermsTest extends MukurtuImportTestBase {
     $this->assertEquals('Keyword 3', $terms[2]->getName());
 
     // Create a new node via import. Use some of the same terms created above.
+    // Include a UUID so the migration has a stable unique identifier; without
+    // one it falls back to _record_number which is unreliable across runs.
+    $uuid2 = \Drupal::service('uuid')->generate();
     $data2 = [
-      ['title', 'keywords'],
-      ["Existing Term Test", 'Keyword 1;Keyword 3'],
+      ['uuid', 'title', 'keywords'],
+      [$uuid2, "Existing Term Test", 'Keyword 1;Keyword 3'],
     ];
     $import_file2 = $this->createCsvFile($data2);
     $mapping2 = [
+      ['target' => 'uuid', 'source' => 'uuid'],
       ['target' => 'title', 'source' => 'title'],
       ['target' => 'field_keywords', 'source' => 'keywords'],
     ];
