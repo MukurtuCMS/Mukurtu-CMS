@@ -951,6 +951,7 @@ display:
             dictionary_word: dictionary_word
             digital_heritage: digital_heritage
             person: person
+            place: place
             word_list: word_list
           group: 1
           exposed: false
@@ -1040,6 +1041,7 @@ display:
               homepage: browse
               page: browse
               person: browse
+              place: browse
               word_list: browse
       query:
         type: search_api_query
@@ -1106,6 +1108,7 @@ display:
               homepage: grid_browse
               page: grid_browse
               person: grid_browse
+              place: grid_browse
               word_list: grid_browse
       defaults:
         css_class: false
@@ -1526,6 +1529,7 @@ display:
               digital_heritage: ':default'
               page: ':default'
               person: ':default'
+              place: ':default'
               word_list: ':default'
       defaults:
         css_class: false

@@ -20,6 +20,7 @@ dependencies:
   - 'drupal:text'
   - 'drupal:user'
   - 'drupal:views'
+  - 'drupal:tagify'
   - 'entity_browser:entity_browser'
   - 'field_group:field_group'
   - 'message:message'

@@ -11,6 +11,7 @@ dependencies:
   - 'drupal:system'
   - 'drupal:text'
   - 'drupal:user'
+  - 'drupal:tagify'
   - 'flag:flag'
   - 'media_entity_soundcloud:media_entity_soundcloud'
   - 'mukurtu_core:mukurtu_core'

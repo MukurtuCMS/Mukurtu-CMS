@@ -12,8 +12,6 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-_core:
-  default_config_hash: OHGqXOU7dMge_2p9g-CAXL5Bh7ejgbjgrAowNOC2BOM
 id: node.person.multipage_browse
 targetEntityType: node
 bundle: person
@@ -55,6 +53,8 @@ hidden:
   field_sections: true
   field_sequence_collection: true
   field_title: true
+  field_place_of_birth: true
+  field_place_of_death: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true

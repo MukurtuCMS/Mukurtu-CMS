@@ -110,6 +110,9 @@ class MukurtuTaxonomyPersonRecordsSettingsForm extends ConfigFormBase {
     $config->set('person_records_enabled_vocabularies', $enabled_vocabs);
     $config->save();
 
+    // Clear cached field definitions so the altered target_bundles take effect.
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+
     return parent::submitForm($form, $form_state);
   }
 

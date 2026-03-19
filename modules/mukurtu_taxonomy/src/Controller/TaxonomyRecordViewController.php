@@ -193,11 +193,12 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     // In the future when we support taxonomy record relationships for other
     // content types, we may need to fetch their enabled vocabs and append them
     // here.
-    $enabledVocabs = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
-
+    $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
+    $place_vocabularies = $this->mukurtuTaxonomySettings->get('place_records_enabled_vocabularies') ?? [];
+    $enabled_vocabularies = array_merge($person_vocabularies, $place_vocabularies);
     // If the term vocabulary is not enabled for taxonomy records, return
     // an empty array.
-    if (!in_array($taxonomy_term->bundle(), $enabledVocabs)) {
+    if (!in_array($taxonomy_term->bundle(), $enabled_vocabularies)) {
       return [];
     }
 

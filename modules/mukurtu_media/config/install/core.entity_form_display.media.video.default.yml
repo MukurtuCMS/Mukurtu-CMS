@@ -9,6 +9,7 @@ dependencies:
     - image
     - mukurtu_protocol
     - path
+    - tagify
 id: media.video.default
 targetEntityType: media
 bundle: video
@@ -35,14 +36,18 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_media_tags:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 6
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_media_video_file:
     type: file_generic
@@ -52,14 +57,18 @@ content:
       progress_indicator: throbber
     third_party_settings: {  }
   field_people:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 5
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_thumbnail:
     type: image_image
