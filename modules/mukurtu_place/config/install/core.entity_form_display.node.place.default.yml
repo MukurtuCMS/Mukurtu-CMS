@@ -307,31 +307,6 @@ content:
         - soundcloud
         - video
     third_party_settings: {  }
-  field_other_place_names:
-    type: entity_browser_entity_reference
-    weight: 5
-    region: content
-    settings:
-      entity_browser: mukurtu_taxonomy_record_place_term_browser
-      field_widget_display: rendered_entity
-      field_widget_edit: false
-      field_widget_remove: true
-      field_widget_replace: false
-      open: true
-      field_widget_display_settings:
-        view_mode: default
-      selection_mode: selection_append
-    third_party_settings: {  }
-  field_place_type:
-    type: entity_reference_autocomplete
-    weight: 9
-    region: content
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget
     weight: 2

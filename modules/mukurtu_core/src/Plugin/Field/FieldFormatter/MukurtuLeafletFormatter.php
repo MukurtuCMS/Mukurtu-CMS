@@ -116,6 +116,8 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
       if ($entity->hasField('field_all_related_content')) {
         foreach ($entity->get('field_all_related_content')->referencedEntities() as $related) {
           if ($related->hasField('field_coverage') && !$related->get('field_coverage')->isEmpty()) {
+            $build = \Drupal::entityTypeManager()->getViewBuilder('node')->view($related, 'map_browse');
+            $descriptions[count($new_values)] = (string) $this->renderer->render($build);
             $new_values[] = $related->get('field_coverage')->first()->getValue();
           }
         }
