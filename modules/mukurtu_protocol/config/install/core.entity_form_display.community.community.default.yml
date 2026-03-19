@@ -48,7 +48,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_community_type:
-    type: options_select
+    type: options_buttons
     weight: 5
     region: content
     settings: {  }
