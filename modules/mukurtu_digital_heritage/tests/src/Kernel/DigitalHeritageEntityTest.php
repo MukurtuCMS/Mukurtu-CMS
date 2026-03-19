@@ -113,7 +113,7 @@ class DigitalHeritageEntityTest extends DigitalHeritageTestBase {
 
     $loaded = Node::load($item->id());
     $this->assertEquals('all', $loaded->getSharingSetting());
-    $this->assertContains($this->protocol->id(), $loaded->getProtocols());
+    $this->assertContains((int) $this->protocol->id(), $loaded->getProtocols());
   }
 
   /**
