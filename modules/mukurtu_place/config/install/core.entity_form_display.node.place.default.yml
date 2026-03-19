@@ -17,6 +17,7 @@ dependencies:
     - paragraphs
     - path
     - text
+    - tagify
 third_party_settings:
   field_group:
     group_main_tab:
