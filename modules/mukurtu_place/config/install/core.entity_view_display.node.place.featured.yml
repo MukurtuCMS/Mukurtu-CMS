@@ -47,10 +47,12 @@ hidden:
   field_local_contexts_projects: true
   field_location: true
   field_multipage_page_of: true
+  field_other_names: true
+  field_other_place_names: true
+  field_place_type: true
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
-  field_other_names: true
   field_sections: true
   field_sequence_collection: true
   flag_email_node: true

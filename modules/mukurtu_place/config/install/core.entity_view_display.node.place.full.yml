@@ -23,11 +23,11 @@ third_party_settings:
     group_primary_fields:
       children:
         - field_media_assets
-        - field_all_related_content
-        - field_coverage
-        - field_location
-        - field_coverage_description
         - field_sections
+        - field_coverage
+        - field_coverage_description
+        - field_location
+        - field_all_related_content
         - comment
       label: 'Primary Fields'
       parent_name: ''
@@ -48,10 +48,10 @@ third_party_settings:
         speed: fast
     group_metadata:
       children:
-        - field_keywords
         - field_place_type
-        - field_other_place_names
+        - field_keywords
         - field_local_contexts_projects
+        - field_other_place_names
         - field_local_contexts_labels_and_notices
         - flag_export_content
         - field_citation
@@ -90,10 +90,17 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: teaser
+      view_mode: featured
       link: false
     third_party_settings: {  }
     weight: 90
+    region: content
+  field_citation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 38
     region: content
   field_coverage:
     type: mukurtu_leaflet_formatter
@@ -162,8 +169,7 @@ content:
         circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
       leaflet_markercluster:
         control: false
-        options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
-        excluded: ''
+        options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds":false}'
         include_path: false
       fullscreen:
         control: false
@@ -188,6 +194,7 @@ content:
           set_marker: false
       map_lazy_load:
         lazy_load: false
+      include_related_coverage: '1'
     third_party_settings: {  }
     weight: 80
     region: content
@@ -204,29 +211,21 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 8
-    region: content
-  field_place_type:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 8
+    weight: 11
     region: content
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 16
+    weight: 13
     region: content
   field_local_contexts_projects:
     type: local_contexts_project
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 15
+    weight: 12
     region: content
   field_location:
     type: entity_reference_label
@@ -249,14 +248,21 @@ content:
     type: entity_reference_label
     label: above
     settings:
-      view_mode: default
       link: true
     third_party_settings: {  }
     weight: 13
     region: content
+  field_place_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 9
+    region: content
   field_sections:
     type: entity_reference_revisions_entity_view
-    label: above
+    label: visually_hidden
     settings:
       view_mode: default
       link: ''
@@ -268,13 +274,6 @@ content:
     third_party_settings: {  }
     weight: 20
     region: content
-  field_citation:
-    type: text_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 38
-    region: content
 hidden:
   draft: true
   field_communities: true
@@ -285,8 +284,6 @@ hidden:
   field_protocol_control: true
   field_related_content: true
   field_representative_media: true
-  field_other_place_names: true
-  field_sections: true
   field_sequence_collection: true
   field_title: true
   flag_email_node: true

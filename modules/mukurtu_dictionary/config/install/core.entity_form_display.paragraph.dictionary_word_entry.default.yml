@@ -7,6 +7,7 @@ dependencies:
     - media_library
     - paragraphs
     - text
+    - tagify
 id: paragraph.dictionary_word_entry.default
 targetEntityType: paragraph
 bundle: dictionary_word_entry
@@ -21,14 +22,18 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_contributor:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 10
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_definition:
     type: string_textarea
@@ -39,14 +44,18 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_part_of_speech:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 2
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_pronunciation:
     type: text_textarea
@@ -110,14 +119,18 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_word_type:
-    type: entity_reference_autocomplete
+    type: tagify_entity_reference_autocomplete_widget
     weight: 6
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
 hidden:
   created: true
