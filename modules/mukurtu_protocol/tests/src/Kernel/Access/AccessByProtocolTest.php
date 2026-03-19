@@ -19,9 +19,8 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Tests access to content by protocol control.
- *
- * @group mukurtu_protocol
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_protocol')]
 class AccessByProtocolTest extends KernelTestBase {
 
   use ContentTypeCreationTrait;

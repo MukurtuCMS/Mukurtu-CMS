@@ -13,9 +13,8 @@ use Drupal\user\Entity\User;
 
 /**
  * Tests access to personal collections.
- *
- * @group mukurtu_collection
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_collection')]
 class PersonalCollectionEntityAccessTest extends KernelTestBase
 {
 

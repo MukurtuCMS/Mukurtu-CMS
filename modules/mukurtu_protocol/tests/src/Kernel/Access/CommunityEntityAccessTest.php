@@ -13,9 +13,8 @@ use Drupal\user\Entity\User;
 
 /**
  * Tests access to communities.
- *
- * @group mukurtu_protocol
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_protocol')]
 class CommunityEntityAccessTest extends KernelTestBase {
 
   /**

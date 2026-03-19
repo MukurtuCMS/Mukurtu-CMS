@@ -14,9 +14,8 @@ use Drupal\user\Entity\User;
 
 /**
  * Tests access to protocols.
- *
- * @group mukurtu_protocol
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_protocol')]
 class ProtocolEntityAccessTest extends KernelTestBase {
 
   /**

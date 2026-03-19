@@ -11,9 +11,8 @@ use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 
 /**
  * Tests collection operations & functionality.
- *
- * @group mukurtu_collection
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_collection')]
 class CollectionEntityTest extends ProtocolAwareEntityTestBase {
 
   /**
