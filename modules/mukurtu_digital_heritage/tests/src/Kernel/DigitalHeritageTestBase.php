@@ -9,6 +9,7 @@ use Drupal\mukurtu_digital_heritage\Entity\DigitalHeritage;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\taxonomy\Entity\Term;
@@ -100,6 +101,15 @@ abstract class DigitalHeritageTestBase extends KernelTestBase {
     $this->installEntitySchema('file');
 
     $this->installConfig(['filter', 'og', 'system']);
+
+    // Create the digital_heritage node type so hook_entity_bundle_info_alter
+    // in mukurtu_digital_heritage assigns the DigitalHeritage bundle class.
+    // Without this, Node::create(['type' => 'digital_heritage']) returns a
+    // base Node instance and setSharingSetting() / setProtocols() are missing.
+    NodeType::create([
+      'type' => 'digital_heritage',
+      'name' => 'Digital Heritage',
+    ])->save();
 
     node_access_rebuild();
 
