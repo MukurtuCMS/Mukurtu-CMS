@@ -268,8 +268,8 @@ class ProtocolEntityAccessTest extends KernelTestBase {
         'owner' => FALSE,
         'access_mode' => 'strict',
         'expected_access' => [
-          'view' => TRUE,
-          'update' => TRUE,
+          'view' => FALSE,
+          'update' => FALSE,
           'delete' => TRUE,
         ],
       ],
@@ -283,8 +283,8 @@ class ProtocolEntityAccessTest extends KernelTestBase {
         'owner' => TRUE,
         'access_mode' => 'strict',
         'expected_access' => [
-          'view' => TRUE,
-          'update' => TRUE,
+          'view' => FALSE,
+          'update' => FALSE,
           'delete' => TRUE,
         ],
       ],
@@ -369,7 +369,7 @@ class ProtocolEntityAccessTest extends KernelTestBase {
         'access_mode' => 'open',
         'expected_access' => [
           'view' => TRUE,
-          'update' => TRUE,
+          'update' => FALSE,
           'delete' => TRUE,
         ],
       ],
@@ -384,7 +384,7 @@ class ProtocolEntityAccessTest extends KernelTestBase {
         'access_mode' => 'open',
         'expected_access' => [
           'view' => TRUE,
-          'update' => TRUE,
+          'update' => FALSE,
           'delete' => TRUE,
         ],
       ],
@@ -580,8 +580,8 @@ class ProtocolEntityAccessTest extends KernelTestBase {
         'owner' => FALSE,
         'access_mode' => 'strict',
         'expected_access' => [
-          'view' => TRUE,
-          'update' => TRUE,
+          'view' => FALSE,
+          'update' => FALSE,
           'delete' => TRUE,
         ],
       ],
@@ -597,8 +597,8 @@ class ProtocolEntityAccessTest extends KernelTestBase {
         'owner' => TRUE,
         'access_mode' => 'strict',
         'expected_access' => [
-          'view' => TRUE,
-          'update' => TRUE,
+          'view' => FALSE,
+          'update' => FALSE,
           'delete' => TRUE,
         ],
       ],
@@ -795,7 +795,7 @@ class ProtocolEntityAccessTest extends KernelTestBase {
         'access_mode' => 'open',
         'expected_access' => [
           'view' => TRUE,
-          'update' => TRUE,
+          'update' => FALSE,
           'delete' => TRUE,
         ],
       ],
@@ -812,7 +812,7 @@ class ProtocolEntityAccessTest extends KernelTestBase {
         'access_mode' => 'open',
         'expected_access' => [
           'view' => TRUE,
-          'update' => TRUE,
+          'update' => FALSE,
           'delete' => TRUE,
         ],
       ],
