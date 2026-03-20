@@ -23,7 +23,10 @@ abstract class LocalContextsTestBase extends KernelTestBase {
    */
   protected static $modules = [
     'field',
+    'file',
     'filter',
+    'image',
+    'media',
     'node',
     'og',
     'options',

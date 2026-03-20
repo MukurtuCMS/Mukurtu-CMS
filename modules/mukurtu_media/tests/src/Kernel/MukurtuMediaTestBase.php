@@ -80,6 +80,7 @@ abstract class MukurtuMediaTestBase extends KernelTestBase {
     parent::setUp();
 
     $this->installSchema('system', 'sequences');
+    $this->installSchema('file', 'file_usage');
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
 
@@ -117,6 +118,13 @@ abstract class MukurtuMediaTestBase extends KernelTestBase {
         'source_configuration' => ['source_field' => 'field_media_test_source'],
       ])->save();
     }
+
+    // After saving MediaType bundles the entity field manager may still hold a
+    // cached version of the media field definitions that was built before the
+    // FieldConfig for field_media_test_source was created. Clear it so that
+    // subsequent entity operations (preSave, get(), validate()) pick up the
+    // newly-registered source field on every bundle.
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Vocabularies used by media bundle field definitions.
     Vocabulary::create(['vid' => 'media_tag', 'name' => 'Media Tag'])->save();

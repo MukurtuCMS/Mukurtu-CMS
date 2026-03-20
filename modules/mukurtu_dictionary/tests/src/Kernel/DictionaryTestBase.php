@@ -18,6 +18,7 @@ use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Base class for Mukurtu Dictionary kernel tests.
@@ -101,9 +102,28 @@ abstract class DictionaryTestBase extends KernelTestBase {
 
   /**
    * {@inheritdoc}
+   *
+   * The installed version of the blazy module declares blazy.file with a hard
+   * dependency on file.repository, a Drupal 9 service removed in Drupal 10.
+   * Register a synthetic stub so Symfony's DI compiler does not reject the
+   * container. The stub is set in setUp() and is never actually called by our
+   * kernel tests, which do not exercise any Blazy file operations.
+   */
+  public function register(ContainerBuilder $container): void {
+    parent::register($container);
+    if (!$container->has('file.repository')) {
+      $container->register('file.repository')->setSynthetic(TRUE);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
+
+    // Provide the synthetic file.repository stub declared in register().
+    $this->container->set('file.repository', new \stdClass());
 
     $this->installSchema('system', 'sequences');
     $this->installSchema('node', ['node_access']);
