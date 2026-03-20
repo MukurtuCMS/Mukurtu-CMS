@@ -47,6 +47,8 @@
       <directory>web/profiles/mukurtu/modules/original_date/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_digital_heritage/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_media/tests/src/Kernel</directory>
+      <directory>web/profiles/mukurtu/modules/mukurtu_dictionary/tests/src/Kernel</directory>
+      <directory>web/profiles/mukurtu/modules/mukurtu_local_contexts/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="functional">
       <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
