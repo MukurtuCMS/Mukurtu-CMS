@@ -53,6 +53,7 @@ abstract class DictionaryTestBase extends KernelTestBase {
     'options',
     'paragraphs',
     'path',
+    'path_alias',
     'search_api',
     'search_api_glossary',
     'system',
@@ -152,6 +153,7 @@ abstract class DictionaryTestBase extends KernelTestBase {
 
     $this->installEntitySchema('user');
     $this->installEntitySchema('comment');
+    $this->installEntitySchema('path_alias');
     $this->installEntitySchema('file');
     $this->installEntitySchema('node');
     $this->installEntitySchema('paragraph');
