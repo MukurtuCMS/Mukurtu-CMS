@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_media\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
@@ -85,7 +84,6 @@ abstract class MukurtuMediaTestBase extends KernelTestBase {
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
 
     $this->installEntitySchema('user');
-    $this->installEntitySchema('media');
     $this->installEntitySchema('file');
     $this->installEntitySchema('taxonomy_term');
     $this->installEntitySchema('taxonomy_vocabulary');
@@ -96,15 +94,20 @@ abstract class MukurtuMediaTestBase extends KernelTestBase {
 
     $this->installConfig(['filter', 'og', 'system', 'media']);
 
-    // Create a shared source field used by all test media type bundles.
-    // Using a single test source field avoids naming conflicts with Mukurtu's
-    // own bundle field definitions (field_media_audio_file, field_media_image,
+    // Register the shared test source field BEFORE installEntitySchema('media')
+    // so the field is known when Drupal builds the media entity field map.
+    // Using a single shared field avoids naming conflicts with Mukurtu's own
+    // bundle field definitions (field_media_audio_file, field_media_image,
     // etc.) which are provided programmatically via hook_entity_field_storage_info.
     FieldStorageConfig::create([
       'entity_type' => 'media',
       'field_name' => 'field_media_test_source',
       'type' => 'file',
     ])->save();
+
+    // Install media entity schema after the source FieldStorageConfig exists,
+    // so the field definition is present in the initial field map build.
+    $this->installEntitySchema('media');
 
     // Create media type bundles so hook_entity_bundle_info_alter in
     // mukurtu_media assigns the correct custom bundle classes.
@@ -118,13 +121,6 @@ abstract class MukurtuMediaTestBase extends KernelTestBase {
         'source_configuration' => ['source_field' => 'field_media_test_source'],
       ])->save();
     }
-
-    // After saving MediaType bundles the entity field manager may still hold a
-    // cached version of the media field definitions that was built before the
-    // FieldConfig for field_media_test_source was created. Clear it so that
-    // subsequent entity operations (preSave, get(), validate()) pick up the
-    // newly-registered source field on every bundle.
-    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Vocabularies used by media bundle field definitions.
     Vocabulary::create(['vid' => 'media_tag', 'name' => 'Media Tag'])->save();
