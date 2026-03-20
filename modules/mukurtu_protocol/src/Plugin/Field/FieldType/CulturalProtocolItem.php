@@ -19,6 +19,7 @@ use Drupal\mukurtu_protocol\CulturalProtocols;
  * )
  */
 class CulturalProtocolItem extends FieldItemBase {
+
   /**
    * {@inheritdoc}
    */
@@ -113,7 +114,8 @@ class CulturalProtocolItem extends FieldItemBase {
         }
 
         // If the user tried to add protocols they cannot apply, remove them.
-        $added_protocols_to_remove = array_diff($new_protocols, $protocol_ids_user_can_apply);
+        $newly_added_protocols = array_diff($new_protocols, $original_protocols);
+        $added_protocols_to_remove = array_diff($newly_added_protocols, $protocol_ids_user_can_apply);
         if (!empty($added_protocols_to_remove)) {
           $silently_changed_protocols = TRUE;
         }
