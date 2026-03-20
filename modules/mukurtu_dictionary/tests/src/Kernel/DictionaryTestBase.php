@@ -38,6 +38,7 @@ abstract class DictionaryTestBase extends KernelTestBase {
     'facets',
     'field',
     'field_group',
+    'file',
     'filter',
     'geofield',
     'image',
@@ -135,6 +136,7 @@ abstract class DictionaryTestBase extends KernelTestBase {
     );
 
     $this->installSchema('system', 'sequences');
+    $this->installSchema('file', 'file_usage');
     $this->installSchema('node', ['node_access']);
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
@@ -148,6 +150,7 @@ abstract class DictionaryTestBase extends KernelTestBase {
     ]);
 
     $this->installEntitySchema('user');
+    $this->installEntitySchema('file');
     $this->installEntitySchema('node');
     $this->installEntitySchema('paragraph');
     $this->installEntitySchema('taxonomy_term');
