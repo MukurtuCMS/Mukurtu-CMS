@@ -27,21 +27,21 @@ class CollectionHierarchyTest extends CollectionTestBase {
    *
    * @var \Drupal\mukurtu_collection\Entity\Collection
    */
-  protected Collection $root;
+  protected Collection $rootCollection;
 
   /**
-   * Child of $root.
+   * Child of $rootCollection.
    *
    * @var \Drupal\mukurtu_collection\Entity\Collection
    */
-  protected Collection $child;
+  protected Collection $childCollection;
 
   /**
-   * Grandchild of $root (child of $child).
+   * Grandchild of $rootCollection (child of $childCollection).
    *
    * @var \Drupal\mukurtu_collection\Entity\Collection
    */
-  protected Collection $grandchild;
+  protected Collection $grandchildCollection;
 
   /**
    * {@inheritdoc}
@@ -50,22 +50,22 @@ class CollectionHierarchyTest extends CollectionTestBase {
     parent::setUp();
 
     // Build a three-level hierarchy: root → child → grandchild.
-    $this->root = $this->buildCollection('Root');
-    $this->root->save();
+    $this->rootCollection = $this->buildCollection('Root');
+    $this->rootCollection->save();
 
-    $this->child = $this->buildCollection('Child');
-    $this->child->save();
+    $this->childCollection = $this->buildCollection('Child');
+    $this->childCollection->save();
 
-    $this->grandchild = $this->buildCollection('Grandchild');
-    $this->grandchild->save();
+    $this->grandchildCollection = $this->buildCollection('Grandchild');
+    $this->grandchildCollection->save();
 
     // root → child.
-    $this->root->addChildCollection($this->child);
-    $this->root->save();
+    $this->rootCollection->addChildCollection($this->childCollection);
+    $this->rootCollection->save();
 
     // child → grandchild.
-    $this->child->addChildCollection($this->grandchild);
-    $this->child->save();
+    $this->childCollection->addChildCollection($this->grandchildCollection);
+    $this->childCollection->save();
   }
 
   // ---------------------------------------------------------------------------
@@ -77,7 +77,7 @@ class CollectionHierarchyTest extends CollectionTestBase {
    * bundle and that it implements the expected interfaces.
    */
   public function testCollectionBundleClass(): void {
-    $loaded = Node::load($this->root->id());
+    $loaded = Node::load($this->rootCollection->id());
     $this->assertInstanceOf(Collection::class, $loaded);
     $this->assertInstanceOf(CollectionInterface::class, $loaded);
     $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $loaded);
@@ -91,39 +91,39 @@ class CollectionHierarchyTest extends CollectionTestBase {
    * A root collection (not a child of anything) has no parent.
    */
   public function testGetParentCollection_noParent(): void {
-    $this->assertNull($this->root->getParentCollection());
+    $this->assertNull($this->rootCollection->getParentCollection());
   }
 
   /**
    * A collection that is a child of another returns the parent entity.
    */
   public function testGetParentCollection_withParent(): void {
-    $parent = $this->child->getParentCollection();
+    $parent = $this->childCollection->getParentCollection();
     $this->assertNotNull($parent);
-    $this->assertEquals($this->root->id(), $parent->id());
+    $this->assertEquals($this->rootCollection->id(), $parent->id());
   }
 
   /**
    * getParentCollectionId() returns NULL for a root collection.
    */
   public function testGetParentCollectionId_noParent(): void {
-    $this->assertNull($this->root->getParentCollectionId());
+    $this->assertNull($this->rootCollection->getParentCollectionId());
   }
 
   /**
    * getParentCollectionId() returns the parent's node ID.
    */
   public function testGetParentCollectionId_withParent(): void {
-    $this->assertEquals($this->root->id(), $this->child->getParentCollectionId());
+    $this->assertEquals($this->rootCollection->id(), $this->childCollection->getParentCollectionId());
   }
 
   /**
    * Grandchild's parent is the child, not the root.
    */
   public function testGetParentCollection_grandchild(): void {
-    $parent = $this->grandchild->getParentCollection();
+    $parent = $this->grandchildCollection->getParentCollection();
     $this->assertNotNull($parent);
-    $this->assertEquals($this->child->id(), $parent->id());
+    $this->assertEquals($this->childCollection->id(), $parent->id());
   }
 
   // ---------------------------------------------------------------------------
@@ -134,16 +134,16 @@ class CollectionHierarchyTest extends CollectionTestBase {
    * getChildCollectionIds() returns an array of child node IDs.
    */
   public function testGetChildCollectionIds(): void {
-    $ids = $this->root->getChildCollectionIds();
+    $ids = $this->rootCollection->getChildCollectionIds();
     $this->assertIsArray($ids);
-    $this->assertTrue(in_array($this->child->id(), $ids));
+    $this->assertTrue(in_array($this->childCollection->id(), $ids));
   }
 
   /**
    * getChildCollectionIds() returns an empty array for a leaf collection.
    */
   public function testGetChildCollectionIds_leaf(): void {
-    $ids = $this->grandchild->getChildCollectionIds();
+    $ids = $this->grandchildCollection->getChildCollectionIds();
     $this->assertIsArray($ids);
     $this->assertEmpty($ids);
   }
@@ -159,12 +159,12 @@ class CollectionHierarchyTest extends CollectionTestBase {
     $newChild = $this->buildCollection('New Child');
     $newChild->save();
 
-    $this->root->setChildCollections([$newChild->id()]);
-    $this->root->save();
+    $this->rootCollection->setChildCollections([$newChild->id()]);
+    $this->rootCollection->save();
 
-    $ids = $this->root->getChildCollectionIds();
+    $ids = $this->rootCollection->getChildCollectionIds();
     $this->assertTrue(in_array($newChild->id(), $ids), 'New child is in the list after setChildCollections.');
-    $this->assertFalse(in_array($this->child->id(), $ids), 'Old child is no longer in the list.');
+    $this->assertFalse(in_array($this->childCollection->id(), $ids), 'Old child is no longer in the list.');
   }
 
   // ---------------------------------------------------------------------------
@@ -177,14 +177,14 @@ class CollectionHierarchyTest extends CollectionTestBase {
    */
   public function testRemoveAsChildCollection(): void {
     // Verify the relationship exists before removal.
-    $this->assertTrue(in_array($this->child->id(), $this->root->getChildCollectionIds()));
+    $this->assertTrue(in_array($this->childCollection->id(), $this->rootCollection->getChildCollectionIds()));
 
-    $this->child->removeAsChildCollection();
+    $this->childCollection->removeAsChildCollection();
 
     // Reload the parent from the database to confirm the change was saved.
     /** @var \Drupal\mukurtu_collection\Entity\Collection $reloadedRoot */
-    $reloadedRoot = Node::load($this->root->id());
-    $this->assertFalse(in_array($this->child->id(), $reloadedRoot->getChildCollectionIds()));
+    $reloadedRoot = Node::load($this->rootCollection->id());
+    $this->assertFalse(in_array($this->childCollection->id(), $reloadedRoot->getChildCollectionIds()));
   }
 
   // ---------------------------------------------------------------------------
@@ -197,7 +197,7 @@ class CollectionHierarchyTest extends CollectionTestBase {
   public function testIsRootCollection_true(): void {
     /** @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface $service */
     $service = $this->container->get('mukurtu_collection.hierarchy_service');
-    $this->assertTrue($service->isRootCollection($this->root));
+    $this->assertTrue($service->isRootCollection($this->rootCollection));
   }
 
   /**
@@ -206,8 +206,8 @@ class CollectionHierarchyTest extends CollectionTestBase {
   public function testIsRootCollection_false(): void {
     /** @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface $service */
     $service = $this->container->get('mukurtu_collection.hierarchy_service');
-    $this->assertFalse($service->isRootCollection($this->child));
-    $this->assertFalse($service->isRootCollection($this->grandchild));
+    $this->assertFalse($service->isRootCollection($this->childCollection));
+    $this->assertFalse($service->isRootCollection($this->grandchildCollection));
   }
 
   // ---------------------------------------------------------------------------
@@ -223,9 +223,9 @@ class CollectionHierarchyTest extends CollectionTestBase {
     $roots = $service->getRootCollections();
 
     $rootIds = array_keys($roots);
-    $this->assertContains($this->root->id(), $rootIds, 'Root collection is in the root list.');
-    $this->assertNotContains($this->child->id(), $rootIds, 'Child collection is not in the root list.');
-    $this->assertNotContains($this->grandchild->id(), $rootIds, 'Grandchild collection is not in the root list.');
+    $this->assertContains($this->rootCollection->id(), $rootIds, 'Root collection is in the root list.');
+    $this->assertNotContains($this->childCollection->id(), $rootIds, 'Child collection is not in the root list.');
+    $this->assertNotContains($this->grandchildCollection->id(), $rootIds, 'Grandchild collection is not in the root list.');
   }
 
   /**
@@ -252,8 +252,8 @@ class CollectionHierarchyTest extends CollectionTestBase {
   public function testGetRootCollectionForCollection_alreadyRoot(): void {
     /** @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface $service */
     $service = $this->container->get('mukurtu_collection.hierarchy_service');
-    $found = $service->getRootCollectionForCollection($this->root);
-    $this->assertEquals($this->root->id(), $found->id());
+    $found = $service->getRootCollectionForCollection($this->rootCollection);
+    $this->assertEquals($this->rootCollection->id(), $found->id());
   }
 
   /**
@@ -262,8 +262,8 @@ class CollectionHierarchyTest extends CollectionTestBase {
   public function testGetRootCollectionForCollection_fromGrandchild(): void {
     /** @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface $service */
     $service = $this->container->get('mukurtu_collection.hierarchy_service');
-    $found = $service->getRootCollectionForCollection($this->grandchild);
-    $this->assertEquals($this->root->id(), $found->id());
+    $found = $service->getRootCollectionForCollection($this->grandchildCollection);
+    $this->assertEquals($this->rootCollection->id(), $found->id());
   }
 
   /**
@@ -272,8 +272,8 @@ class CollectionHierarchyTest extends CollectionTestBase {
   public function testGetRootCollectionForCollection_fromChild(): void {
     /** @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface $service */
     $service = $this->container->get('mukurtu_collection.hierarchy_service');
-    $found = $service->getRootCollectionForCollection($this->child);
-    $this->assertEquals($this->root->id(), $found->id());
+    $found = $service->getRootCollectionForCollection($this->childCollection);
+    $this->assertEquals($this->rootCollection->id(), $found->id());
   }
 
   // ---------------------------------------------------------------------------
@@ -286,22 +286,22 @@ class CollectionHierarchyTest extends CollectionTestBase {
   public function testGetCollectionHierarchy_structure(): void {
     /** @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface $service */
     $service = $this->container->get('mukurtu_collection.hierarchy_service');
-    $hierarchy = $service->getCollectionHierarchy($this->root);
+    $hierarchy = $service->getCollectionHierarchy($this->rootCollection);
 
     // Root node.
-    $this->assertEquals($this->root->id(), $hierarchy['entity']->id());
+    $this->assertEquals($this->rootCollection->id(), $hierarchy['entity']->id());
     $this->assertEquals(0, $hierarchy['depth']);
 
     // Child node.
     $this->assertCount(1, $hierarchy['children']);
     $childEntry = $hierarchy['children'][0];
-    $this->assertEquals($this->child->id(), $childEntry['entity']->id());
+    $this->assertEquals($this->childCollection->id(), $childEntry['entity']->id());
     $this->assertEquals(1, $childEntry['depth']);
 
     // Grandchild node.
     $this->assertCount(1, $childEntry['children']);
     $grandchildEntry = $childEntry['children'][0];
-    $this->assertEquals($this->grandchild->id(), $grandchildEntry['entity']->id());
+    $this->assertEquals($this->grandchildCollection->id(), $grandchildEntry['entity']->id());
     $this->assertEquals(2, $grandchildEntry['depth']);
   }
 
@@ -311,7 +311,7 @@ class CollectionHierarchyTest extends CollectionTestBase {
   public function testGetCollectionHierarchy_maxDepth(): void {
     /** @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface $service */
     $service = $this->container->get('mukurtu_collection.hierarchy_service');
-    $hierarchy = $service->getCollectionHierarchy($this->root, 1);
+    $hierarchy = $service->getCollectionHierarchy($this->rootCollection, 1);
 
     // Child should appear, but grandchild should not (depth cut at 1).
     $this->assertCount(1, $hierarchy['children']);
@@ -324,9 +324,9 @@ class CollectionHierarchyTest extends CollectionTestBase {
   public function testGetCollectionHierarchy_leaf(): void {
     /** @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface $service */
     $service = $this->container->get('mukurtu_collection.hierarchy_service');
-    $hierarchy = $service->getCollectionHierarchy($this->grandchild);
+    $hierarchy = $service->getCollectionHierarchy($this->grandchildCollection);
 
-    $this->assertEquals($this->grandchild->id(), $hierarchy['entity']->id());
+    $this->assertEquals($this->grandchildCollection->id(), $hierarchy['entity']->id());
     $this->assertEmpty($hierarchy['children']);
   }
 
@@ -340,9 +340,9 @@ class CollectionHierarchyTest extends CollectionTestBase {
   public function testGetCollectionFromNode_collection(): void {
     /** @var \Drupal\mukurtu_collection\CollectionHierarchyServiceInterface $service */
     $service = $this->container->get('mukurtu_collection.hierarchy_service');
-    $result = $service->getCollectionFromNode($this->root);
+    $result = $service->getCollectionFromNode($this->rootCollection);
     $this->assertNotNull($result);
-    $this->assertEquals($this->root->id(), $result->id());
+    $this->assertEquals($this->rootCollection->id(), $result->id());
   }
 
   /**
