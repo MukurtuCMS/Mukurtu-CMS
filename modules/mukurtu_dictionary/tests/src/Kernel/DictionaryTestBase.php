@@ -150,6 +150,7 @@ abstract class DictionaryTestBase extends KernelTestBase {
     ]);
 
     $this->installEntitySchema('user');
+    $this->installEntitySchema('comment');
     $this->installEntitySchema('file');
     $this->installEntitySchema('node');
     $this->installEntitySchema('paragraph');
