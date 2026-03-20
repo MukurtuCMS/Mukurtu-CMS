@@ -39,6 +39,7 @@
   </php>
   <testsuites>
     <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_core/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_collection/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_import/tests/src/Kernel</directory>

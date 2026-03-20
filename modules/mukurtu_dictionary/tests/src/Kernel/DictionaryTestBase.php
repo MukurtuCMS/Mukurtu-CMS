@@ -4,26 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
-use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\mukurtu_core\Kernel\MukurtuKernelTestBase;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
 use Drupal\mukurtu_dictionary\Entity\WordList;
-use Drupal\mukurtu_protocol\Entity\Community;
-use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\og\Entity\OgRole;
-use Drupal\og\Og;
 use Drupal\paragraphs\Entity\ParagraphsType;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\user\Entity\Role;
-use Drupal\user\Entity\User;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Base class for Mukurtu Dictionary kernel tests.
  */
-abstract class DictionaryTestBase extends KernelTestBase {
+abstract class DictionaryTestBase extends MukurtuKernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -75,27 +69,6 @@ abstract class DictionaryTestBase extends KernelTestBase {
   ];
 
   /**
-   * The current test user.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  protected User $currentUser;
-
-  /**
-   * A community for the content.
-   *
-   * @var \Drupal\mukurtu_protocol\Entity\Community
-   */
-  protected Community $community;
-
-  /**
-   * A protocol for the content.
-   *
-   * @var \Drupal\mukurtu_protocol\Entity\Protocol
-   */
-  protected Protocol $protocol;
-
-  /**
    * A language taxonomy term required for dictionary words.
    *
    * @var \Drupal\taxonomy\Entity\Term
@@ -104,70 +77,27 @@ abstract class DictionaryTestBase extends KernelTestBase {
 
   /**
    * {@inheritdoc}
-   *
-   * The installed version of the blazy module declares blazy.file with a hard
-   * dependency on file.repository, a Drupal 9 service removed in Drupal 10.
-   * Register a synthetic stub so Symfony's DI compiler does not reject the
-   * container at compile time. The stub value is set in setUp() using
-   * createMock() to satisfy BlazyFile::__construct(FileRepository)'s type
-   * check at runtime. Our kernel tests do not exercise any Blazy file
-   * operations, so the mock is never actually called.
-   */
-  public function register(ContainerBuilder $container): void {
-    parent::register($container);
-    if (!$container->has('file.repository')) {
-      $container->register('file.repository')->setSynthetic(TRUE);
-    }
-  }
-
-  /**
-   * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
 
-    // Provide the synthetic file.repository stub declared in register().
-    // Must be a FileRepository instance (or subclass/mock) to satisfy the
-    // type declaration on BlazyFile::__construct(), which is invoked when
-    // installConfig(['filter']) loads a filter format that includes a blazy
-    // filter plugin.
-    $this->container->set(
-      'file.repository',
-      $this->createMock(\Drupal\file\FileRepository::class)
-    );
-
-    $this->installSchema('system', 'sequences');
     $this->installSchema('comment', 'comment_entity_statistics');
-    $this->installSchema('file', 'file_usage');
     $this->installSchema('node', ['node_access']);
-    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
-    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
-    $this->installSchema('mukurtu_local_contexts', [
-      'mukurtu_local_contexts_supported_projects',
-      'mukurtu_local_contexts_projects',
-      'mukurtu_local_contexts_labels',
-      'mukurtu_local_contexts_label_translations',
-      'mukurtu_local_contexts_notices',
-      'mukurtu_local_contexts_notice_translations',
-    ]);
 
-    $this->installEntitySchema('user');
+    // Grant dictionary node permissions to the authenticated role so that
+    // bundleCheckCreateAccess() passes for logged-in users.
+    $role = Role::load('authenticated');
+    $role->grantPermission('create dictionary_word content');
+    $role->grantPermission('create word_list content');
+    $role->save();
+
     $this->installEntitySchema('comment');
     $this->installEntitySchema('path_alias');
     $this->installEntitySchema('search_api_index');
     $this->installEntitySchema('search_api_server');
-    $this->installEntitySchema('file');
     $this->installEntitySchema('node');
     $this->installEntitySchema('paragraph');
-    $this->installEntitySchema('taxonomy_term');
-    $this->installEntitySchema('taxonomy_vocabulary');
-    $this->installEntitySchema('og_membership');
-    $this->installEntitySchema('workflow');
-    $this->installEntitySchema('community');
-    $this->installEntitySchema('protocol');
     $this->installEntitySchema('language_community');
-
-    $this->installConfig(['filter', 'og', 'system']);
 
     // Create the node type bundles so hook_entity_bundle_info_alter in
     // mukurtu_dictionary assigns DictionaryWord and WordList bundle classes.
@@ -179,8 +109,6 @@ abstract class DictionaryTestBase extends KernelTestBase {
     ParagraphsType::create(['id' => 'sample_sentence', 'label' => 'Sample Sentence'])->save();
 
     node_access_rebuild();
-    Og::addGroup('community', 'community');
-    Og::addGroup('protocol', 'protocol');
 
     // Vocabularies required by dictionary word fields.
     Vocabulary::create(['vid' => 'language', 'name' => 'Language'])->save();
@@ -193,56 +121,21 @@ abstract class DictionaryTestBase extends KernelTestBase {
     // requires at least one language to exist.
     $this->language = Term::create(['name' => 'Test Language', 'vid' => 'language']);
     $this->language->save();
+  }
 
-    // Authenticated role.
-    $role = Role::create(['id' => 'authenticated', 'label' => 'authenticated']);
-    $role->grantPermission('access content');
-    $role->grantPermission('create dictionary_word content');
-    $role->grantPermission('create word_list content');
-    $role->save();
-
-    // Protocol steward OG role.
-    $protocolStewardRole = OgRole::create([
-      'name' => 'protocol_steward',
-      'label' => 'Protocol Steward',
-      'permissions' => [
-        'add user',
-        'apply protocol',
-        'administer permissions',
-        'approve and deny subscription',
-        'create dictionary_word node',
-        'delete any dictionary_word node',
-        'delete own dictionary_word node',
-        'update any dictionary_word node',
-        'update own dictionary_word node',
-        'manage members',
-        'update group',
-      ],
+  /**
+   * {@inheritdoc}
+   *
+   * Add dictionary-specific node CRUD permissions to the protocol steward role.
+   */
+  protected function getProtocolStewardPermissions(): array {
+    return array_merge(parent::getProtocolStewardPermissions(), [
+      'create dictionary_word node',
+      'delete any dictionary_word node',
+      'delete own dictionary_word node',
+      'update any dictionary_word node',
+      'update own dictionary_word node',
     ]);
-    $protocolStewardRole->setGroupType('protocol');
-    $protocolStewardRole->setGroupBundle('protocol');
-    $protocolStewardRole->save();
-
-    $this->container = \Drupal::getContainer();
-
-    $user = User::create(['name' => $this->randomString()]);
-    $user->save();
-    $this->currentUser = $user;
-    $this->container->get('current_user')->setAccount($user);
-
-    $community = Community::create(['name' => 'Test Community']);
-    $community->save();
-    $community->addMember($user);
-    $this->community = $community;
-
-    $protocol = Protocol::create([
-      'name' => 'Test Protocol',
-      'field_communities' => [$community->id()],
-      'field_access_mode' => 'open',
-    ]);
-    $protocol->save();
-    $protocol->addMember($user, ['protocol_steward']);
-    $this->protocol = $protocol;
   }
 
   /**

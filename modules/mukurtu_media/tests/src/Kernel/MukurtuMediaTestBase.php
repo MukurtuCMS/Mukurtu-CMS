@@ -4,23 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_media\Kernel;
 
-use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\mukurtu_core\Kernel\MukurtuKernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
-use Drupal\mukurtu_protocol\Entity\Community;
-use Drupal\mukurtu_protocol\Entity\Protocol;
-use Drupal\og\Entity\OgRole;
-use Drupal\og\Og;
 use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\user\Entity\Role;
-use Drupal\user\Entity\User;
 
 /**
  * Base class for Mukurtu Media kernel tests.
  */
-abstract class MukurtuMediaTestBase extends KernelTestBase {
+abstract class MukurtuMediaTestBase extends MukurtuKernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -53,47 +47,12 @@ abstract class MukurtuMediaTestBase extends KernelTestBase {
   ];
 
   /**
-   * The current test user.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  protected User $currentUser;
-
-  /**
-   * A community for the content.
-   *
-   * @var \Drupal\mukurtu_protocol\Entity\Community
-   */
-  protected Community $community;
-
-  /**
-   * A protocol for the content.
-   *
-   * @var \Drupal\mukurtu_protocol\Entity\Protocol
-   */
-  protected Protocol $protocol;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
 
-    $this->installSchema('system', 'sequences');
-    $this->installSchema('file', 'file_usage');
-    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
-    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
-
-    $this->installEntitySchema('user');
-    $this->installEntitySchema('file');
-    $this->installEntitySchema('taxonomy_term');
-    $this->installEntitySchema('taxonomy_vocabulary');
-    $this->installEntitySchema('og_membership');
-    $this->installEntitySchema('workflow');
-    $this->installEntitySchema('community');
-    $this->installEntitySchema('protocol');
-
-    $this->installConfig(['filter', 'og', 'system', 'media']);
+    $this->installConfig(['media']);
 
     // Register the shared test source field BEFORE installEntitySchema('media')
     // so the field is known when Drupal builds the media entity field map.
@@ -146,52 +105,6 @@ abstract class MukurtuMediaTestBase extends KernelTestBase {
     Vocabulary::create(['vid' => 'media_tag', 'name' => 'Media Tag'])->save();
     Vocabulary::create(['vid' => 'contributor', 'name' => 'Contributor'])->save();
     Vocabulary::create(['vid' => 'people', 'name' => 'People'])->save();
-
-    Og::addGroup('community', 'community');
-    Og::addGroup('protocol', 'protocol');
-
-    // Authenticated role.
-    $role = Role::create(['id' => 'authenticated', 'label' => 'authenticated']);
-    $role->grantPermission('access content');
-    $role->save();
-
-    // Protocol steward OG role.
-    $protocolStewardRole = OgRole::create([
-      'name' => 'protocol_steward',
-      'label' => 'Protocol Steward',
-      'permissions' => [
-        'add user',
-        'apply protocol',
-        'administer permissions',
-        'approve and deny subscription',
-        'manage members',
-        'update group',
-      ],
-    ]);
-    $protocolStewardRole->setGroupType('protocol');
-    $protocolStewardRole->setGroupBundle('protocol');
-    $protocolStewardRole->save();
-
-    $this->container = \Drupal::getContainer();
-
-    $user = User::create(['name' => $this->randomString()]);
-    $user->save();
-    $this->currentUser = $user;
-    $this->container->get('current_user')->setAccount($user);
-
-    $community = Community::create(['name' => 'Test Community']);
-    $community->save();
-    $community->addMember($user);
-    $this->community = $community;
-
-    $protocol = Protocol::create([
-      'name' => 'Test Protocol',
-      'field_communities' => [$community->id()],
-      'field_access_mode' => 'open',
-    ]);
-    $protocol->save();
-    $protocol->addMember($user, ['protocol_steward']);
-    $this->protocol = $protocol;
   }
 
   /**
