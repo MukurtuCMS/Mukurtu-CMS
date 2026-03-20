@@ -11,9 +11,9 @@ selection_criteria:
   id: 'entity_bundle:node'
   negate: false
   context_mapping:
-    node: node
+    node: 'node'
   bundles:
-    page: page  
+    page: 'page'  
 selection_logic: and
 weight: 0
 relationships: {  }
