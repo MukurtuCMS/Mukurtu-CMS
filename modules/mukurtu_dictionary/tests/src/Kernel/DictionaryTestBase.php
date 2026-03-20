@@ -106,8 +106,10 @@ abstract class DictionaryTestBase extends KernelTestBase {
    * The installed version of the blazy module declares blazy.file with a hard
    * dependency on file.repository, a Drupal 9 service removed in Drupal 10.
    * Register a synthetic stub so Symfony's DI compiler does not reject the
-   * container. The stub is set in setUp() and is never actually called by our
-   * kernel tests, which do not exercise any Blazy file operations.
+   * container at compile time. The stub value is set in setUp() using
+   * createMock() to satisfy BlazyFile::__construct(FileRepository)'s type
+   * check at runtime. Our kernel tests do not exercise any Blazy file
+   * operations, so the mock is never actually called.
    */
   public function register(ContainerBuilder $container): void {
     parent::register($container);
@@ -123,7 +125,14 @@ abstract class DictionaryTestBase extends KernelTestBase {
     parent::setUp();
 
     // Provide the synthetic file.repository stub declared in register().
-    $this->container->set('file.repository', new \stdClass());
+    // Must be a FileRepository instance (or subclass/mock) to satisfy the
+    // type declaration on BlazyFile::__construct(), which is invoked when
+    // installConfig(['filter']) loads a filter format that includes a blazy
+    // filter plugin.
+    $this->container->set(
+      'file.repository',
+      $this->createMock(\Drupal\file\FileRepository::class)
+    );
 
     $this->installSchema('system', 'sequences');
     $this->installSchema('node', ['node_access']);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_media\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
@@ -111,8 +112,6 @@ abstract class MukurtuMediaTestBase extends KernelTestBase {
 
     // Create media type bundles so hook_entity_bundle_info_alter in
     // mukurtu_media assigns the correct custom bundle classes.
-    // MediaType::save() will automatically create FieldConfig for the source
-    // field on each bundle.
     foreach (['audio', 'image', 'document'] as $bundle) {
       MediaType::create([
         'id' => $bundle,
@@ -120,7 +119,28 @@ abstract class MukurtuMediaTestBase extends KernelTestBase {
         'source' => 'file',
         'source_configuration' => ['source_field' => 'field_media_test_source'],
       ])->save();
+
+      // Explicitly create the FieldConfig for field_media_test_source on this
+      // bundle. hook_media_type_insert should do this automatically, but
+      // mukurtu_media's hook_entity_field_storage_info() registers bundle
+      // fields as shared storage definitions which can trigger field manager
+      // cache rebuilds that lose track of newly-created FieldConfigs. By
+      // creating the FieldConfig here we guarantee it exists regardless of
+      // hook ordering. If the hook already created it, this is a no-op update.
+      if (!FieldConfig::loadByName('media', $bundle, 'field_media_test_source')) {
+        FieldConfig::create([
+          'field_storage' => FieldStorageConfig::loadByName('media', 'field_media_test_source'),
+          'bundle' => $bundle,
+          'label' => 'Test Source',
+          'required' => FALSE,
+        ])->save();
+      }
     }
+
+    // Clear the entity field manager cache so that getFieldDefinitions() on
+    // any subsequently-created media entity sees the FieldConfig for
+    // field_media_test_source on each bundle.
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Vocabularies used by media bundle field definitions.
     Vocabulary::create(['vid' => 'media_tag', 'name' => 'Media Tag'])->save();
