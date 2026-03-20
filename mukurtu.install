@@ -128,7 +128,7 @@ function mukurtu_install() {
   // Dashboard
   MenuLinkContent::create([
     'title' => 'Dashboard',
-    'link' => ['uri' => 'internal:' . "/dashboard"],
+    'link' => ['uri' => 'internal:' . "/dashboard/mukurtu_dashboard"],
     'menu_name' => 'account',
     'description' => 'Dashboard',
     'expanded' => FALSE,
@@ -226,7 +226,7 @@ function mukurtu_install() {
   // Add Component (parent)
   $add_component_menu = MenuLinkContent::create([
     'title' => 'Add Component',
-    'link' => ['uri' => 'internal:' . '/dashboard'],
+    'link' => ['uri' => 'internal:' . '/dashboard/mukurtu_dashboard'],
     'menu_name' => 'account',
     'description' => 'Add component',
     'expanded' => FALSE,
