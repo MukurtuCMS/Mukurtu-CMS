@@ -310,9 +310,13 @@ class ImportBaseForm extends FormBase {
       $account = $this->currentUser();
     }
 
-    $bundleInfo = $this->entityBundleInfo->getAllBundleInfo();
-    if (isset($bundleInfo[$entity_type_id]) && !empty($bundleInfo[$entity_type_id])) {
-      return TRUE;
+    $bundle_info = $this->entityBundleInfo->getAllBundleInfo();
+    if (!empty($bundle_info[$entity_type_id])) {
+      foreach ($bundle_info[$entity_type_id] as $bundle_id => $bundle_info) {
+        if ($this->userCanCreateEntity($entity_type_id, $bundle_id, $account)) {
+          return TRUE;
+        }
+      }
     }
     return FALSE;
   }

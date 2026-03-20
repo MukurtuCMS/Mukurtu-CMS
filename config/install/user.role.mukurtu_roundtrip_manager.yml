@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_import
+id: mukurtu_roundtrip_manager
+label: 'Mukurtu Roundtrip Manager'
+weight: 3
+is_admin: null

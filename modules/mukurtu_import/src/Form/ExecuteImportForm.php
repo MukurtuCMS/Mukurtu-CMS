@@ -286,6 +286,11 @@ class ExecuteImportForm extends ImportBaseForm {
         continue;
       }
 
+      // Avoid fields that can result in a circular reference via a paragraph.
+      if ($entity_type_id === 'paragraph' && $ref_type === 'node') {
+        continue;
+      }
+
       // This field references an entity type created by another migration.
       foreach ($entity_type_index[$ref_type] as $upstream_fid => $upstream_config) {
         if (!$upstream_config instanceof MukurtuImportStrategyInterface) {
@@ -368,6 +373,11 @@ class ExecuteImportForm extends ImportBaseForm {
 
         $ref_type = $field_def->getSetting('target_type');
         if (!isset($entity_type_index[$ref_type])) {
+          continue;
+        }
+
+        // Avoid fields that can result in a circular reference via a paragraph.
+        if ($entity_type_id === 'paragraph' && $ref_type === 'node') {
           continue;
         }
 
@@ -460,6 +470,11 @@ class ExecuteImportForm extends ImportBaseForm {
 
         $ref_type = $field_def->getSetting('target_type');
         if (!isset($entity_type_index[$ref_type])) {
+          continue;
+        }
+
+        // Avoid fields that can result in a circular reference via a paragraph.
+        if ($entity_type_id === 'paragraph' && $ref_type === 'node') {
           continue;
         }
 
