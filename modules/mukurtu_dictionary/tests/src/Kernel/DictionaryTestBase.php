@@ -140,7 +140,6 @@ abstract class DictionaryTestBase extends KernelTestBase {
     $this->installSchema('comment', 'comment_entity_statistics');
     $this->installSchema('file', 'file_usage');
     $this->installSchema('node', ['node_access']);
-    $this->installSchema('search_api', ['search_api_item', 'search_api_task']);
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
     $this->installSchema('mukurtu_local_contexts', [
