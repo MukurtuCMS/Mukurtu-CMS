@@ -152,7 +152,7 @@ test.beforeEach(async ({ page }) => {
   // Check if default content already exists, and if so, skip recreation.
   if (testContentExists === null) {
     await page.goto('/communities');
-    const getStartedVisible = !await page.locator('.communities__item').isVisible();
+    const getStartedVisible = !await page.locator('.communities__item').first().isVisible();
     testContentExists = (getStartedVisible === false);
   }
   test.skip(testContentExists === true, 'Content already exists within the database, skipping the default content creation. To create default content, empty all existing content by running delete-content.spec.ts.');
@@ -226,7 +226,7 @@ test('Default Content: Person', async ({ page, browserName }) => {
   for (const person of defaultContentSpec.person) {
     // Create through the custom admin URL.
     await page.goto('/admin/node/add/person');
-    await page.getByRole('textbox', { name: 'Name' }).fill(person.name);
+    await page.getByRole('textbox', { name: /^Name/ }).fill(person.name);
     await page
       .getByRole('group', { name: 'Sharing Setting' })
       .getByRole('radio', { name: person.field_cultural_protocols__sharing })
