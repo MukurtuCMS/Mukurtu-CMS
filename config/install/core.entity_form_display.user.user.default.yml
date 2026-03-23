@@ -19,11 +19,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  contact:
-    weight: 2
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   field_display_name:
     type: string_textfield
     weight: 1
@@ -48,6 +43,7 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
+  contact: true
   langcode: true
   message_digest: true
   message_subscribe_email: true
