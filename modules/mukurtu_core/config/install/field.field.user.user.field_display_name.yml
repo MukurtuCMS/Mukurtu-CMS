@@ -10,7 +10,7 @@ field_name: field_display_name
 entity_type: user
 bundle: user
 label: 'Display Name'
-description: 'Optional. If no display name is provided, the usernames will be displayed instead.'
+description: 'Optional. If no display name is provided, your username will be displayed instead.'
 required: false
 translatable: false
 default_value: {  }
