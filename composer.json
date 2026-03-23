@@ -74,7 +74,8 @@
         "drupal/admin_theme": "^1.1",
         "drupal/config_translation_po": "^1.0",
         "drupal/tagify": "^1.2",
-        "drupal/rebuild_cache_access": "^1.12"
+        "drupal/rebuild_cache_access": "^1.12",
+        "drupal/notify_user_default": "^1.0"
     },
     "require-dev": {
         "drupal/devel": "*",
