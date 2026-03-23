@@ -36,11 +36,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  timezone:
-    weight: 2
-    region: content
-    settings: {  }
-    third_party_settings: {  }
 hidden:
   contact: true
   langcode: true
@@ -48,3 +43,4 @@ hidden:
   message_subscribe_email: true
   path: true
   user_picture: true
+  timezone: true
