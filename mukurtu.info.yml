@@ -50,6 +50,8 @@ install:
   - leaflet_markercluster
   - tagify
   - genpass
+  - rebuild_cache_access
+  - notify_user_default
 
 dependencies:
   - 'blazy:blazy'
@@ -88,6 +90,7 @@ dependencies:
   - 'drupal:dashboards'
   - 'drupal:admin_theme'
   - 'drupal:tagify'
+  - 'drupal:rebuild_cache_access'
   - 'embed:embed'
   - 'entity_browser:entity_browser'
   - 'entity_embed:entity_embed'
