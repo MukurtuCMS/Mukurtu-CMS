@@ -73,7 +73,8 @@
         "drupal/dashboards": "^2.1",
         "drupal/admin_theme": "^1.1",
         "drupal/config_translation_po": "^1.0",
-        "drupal/tagify": "^1.2"
+        "drupal/tagify": "^1.2",
+        "drupal/genpass": "^2.1"
     },
     "require-dev": {
         "drupal/devel": "*",

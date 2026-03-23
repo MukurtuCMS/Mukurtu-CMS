@@ -49,6 +49,7 @@ install:
   - admin_theme
   - leaflet_markercluster
   - tagify
+  - genpass
 
 dependencies:
   - 'blazy:blazy'
