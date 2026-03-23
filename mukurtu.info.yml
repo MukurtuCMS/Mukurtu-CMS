@@ -50,7 +50,6 @@ install:
   - leaflet_markercluster
   - tagify
   - rebuild_cache_access
-  - notify_user_default
 
 dependencies:
   - 'blazy:blazy'
