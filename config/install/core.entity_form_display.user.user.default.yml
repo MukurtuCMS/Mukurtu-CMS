@@ -38,11 +38,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  timezone:
-    weight: 7
-    region: content
-    settings: {  }
-    third_party_settings: {  }
 hidden:
   langcode: true
   path: true
@@ -50,3 +45,4 @@ hidden:
   message_digest: true
   message_subscribe_email: true
   contact: true
+  timezone: true
