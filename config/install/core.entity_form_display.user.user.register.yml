@@ -1,19 +1,17 @@
-langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_form_mode.user.register
     - field.field.user.user.field_display_name
     - field.field.user.user.message_digest
     - field.field.user.user.message_subscribe_email
     - field.field.user.user.user_picture
-    - image.style.media_library
   module:
-    - image
     - user
-id: user.user.default
+id: user.user.register
 targetEntityType: user
 bundle: user
-mode: default
+mode: register
 content:
   account:
     weight: 0
@@ -34,19 +32,19 @@ content:
     settings: {  }
     third_party_settings: {  }
   language:
-    weight: 8
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
   timezone:
-    weight: 7
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
 hidden:
+  contact: true
   langcode: true
-  path: true
-  user_picture: true
   message_digest: true
   message_subscribe_email: true
-  contact: true
+  path: true
+  user_picture: true
