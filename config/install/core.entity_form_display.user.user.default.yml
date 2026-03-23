@@ -7,8 +7,6 @@ dependencies:
     - field.field.user.user.message_subscribe_email
   module:
     - user
-_core:
-  default_config_hash: aMUDlTjSPcCFMOr9hmThv9rcGoH7nF7qQlEVlGGhyHE
 id: user.user.default
 targetEntityType: user
 bundle: user
