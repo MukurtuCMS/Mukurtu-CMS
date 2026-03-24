@@ -570,6 +570,7 @@ function mukurtu_install() {
     'view unpublished community entities',
     'view unpublished paragraphs',
     'view user email addresses',
+    'rebuild cache access',
   ];
 
   $roles['administrator'] = [
@@ -773,6 +774,11 @@ function mukurtu_install() {
     'view unpublished paragraphs',
     'view user email addresses',
     'merge taxonomy terms',
+    'rebuild cache access',
+  ];
+  $roles['mukurtu_roundtrip_manager'] = [
+    'access mukurtu import',
+    'administer mukurtu_import_strategy',
   ];
   foreach ($roles as $role_name => $permissions) {
     $role = Role::load($role_name);

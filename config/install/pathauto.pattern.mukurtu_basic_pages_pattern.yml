@@ -7,7 +7,15 @@ id: mukurtu_basic_pages_pattern
 label: 'Basic Pages'
 type: 'canonical_entities:node'
 pattern: '[node:title]'
-selection_criteria: {  }
+selection_criteria:
+  130468a8-2a50-48dc-abf0-a7b851c5ce29:
+    id: 'entity_bundle:node'
+    negate: false
+    uuid: 130468a8-2a50-48dc-abf0-a7b851c5ce29
+    context_mapping:
+      node: node
+    bundles:
+      page: page
 selection_logic: and
 weight: 0
 relationships: {  }

@@ -51,8 +51,7 @@ mukurtu_import/
 │   │   ├── ExecuteImportForm.php             # Step 3: Review and execute import
 │   │   ├── ImportResultsForm.php             # Step 4: View import results
 │   │   ├── ImportFieldDescriptionListForm.php # Format info + CSV template download
-│   │   ├── MukurtuImportStrategyForm.php     # Admin form for strategy config entity
-│   │   └── SettingsForm.php                  # Module settings (placeholder)
+│   │   └── MukurtuImportStrategyForm.php     # Admin form for strategy config entity
 │   ├── Plugin/
 │   │   ├── MukurtuImportFieldProcess/        # Field process plugins (custom plugin type)
 │   │   │   ├── CulturalProtocols.php         # cultural_protocol field type
@@ -494,7 +493,6 @@ Lists all importable entity types (node, media, community, protocol, paragraph, 
 |---|---|
 | `administer mukurtu_import_strategy` | Manage import configuration templates |
 | `access mukurtu import` | Access the import wizard UI |
-| `administer mukurtu_import configuration` | Access module settings form |
 
 ---
 
@@ -509,7 +507,6 @@ Lists all importable entity types (node, media, community, protocol, paragraph, 
 | `mukurtu_import.import_results` | `/admin/import/results` | Step 4: Results |
 | `mukurtu_import.bundles_list` | `/admin/import/format` | Format info: entity type list |
 | `mukurtu_import.fields_list` | `/admin/import/format/{entity_type}/{bundle}` | Format info: field list |
-| `mukurtu_import.settings_form` | `/admin/config/system/mukurtu-import` | Module settings |
 | `entity.mukurtu_import_strategy.*` | `/admin/structure/mukurtu-import-strategy/*` | Strategy CRUD |
 
 ---
@@ -524,9 +521,6 @@ The plugin system supports mapping to individual subfields of compound field typ
 
 ### Entity Resolution Flexibility
 Entity references can be resolved by multiple identifiers: entity ID (numeric), UUID, or label/name. The `uuid_lookup` process plugin runs first to convert UUIDs, then the entity lookup plugin falls back to label matching if the value isn't an ID. This allows users to mix reference formats in their CSV data.
-
-### Settings Form is a Placeholder
-The `SettingsForm` class is essentially scaffolded boilerplate with a single "example" field that validates to the literal string "example". It's not functional.
 
 ### Install Schema is Scaffolding
 The `mukurtu_import_example` table defined in `hook_schema()` and the `hook_requirements()` random value check are both leftover scaffolding from module generation and are not used by the actual import functionality.

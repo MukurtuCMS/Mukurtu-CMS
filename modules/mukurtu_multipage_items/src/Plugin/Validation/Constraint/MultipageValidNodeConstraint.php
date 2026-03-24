@@ -26,6 +26,8 @@ class MultipageValidNodeConstraint extends SymfonyConstraint {
 
   public $notEnabledBundleType = '%value: This content type is not enabled for multipage items.';
 
+  public $noAccessToAddedContent = '%value: You do not have permission to add this content to a multipage item.';
+
   protected $enabledBundles;
 
 }
