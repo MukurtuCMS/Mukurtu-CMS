@@ -189,7 +189,7 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 
 | File | Change | Date | Commit(s) |
 |------|--------|------|-----------|
-| `modules/mukurtu_protocol/src/MukurtuProtocolNodeAccessControlHandler.php` | Bug fix — `all`-mode access | 2026-03-19 | [`4f2ae15b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/4f2ae15b) [`d50d5491`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d50d5491) |
+| `modules/mukurtu_protocol/src/MukurtuProtocolNodeAccessControlHandler.php` | Bug fix — `all`-mode access | 2026-03-19 | [`4f2ae15b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/4f2ae15b) [`d50d5491`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d50d5491) [`3dc3889b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3dc3889b) |
 | `modules/mukurtu_protocol/tests/src/Kernel/Access/ProtocolEntityAccessTest.php` | Test assertion alignment | 2026-03-19 | [`3dc3889b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3dc3889b) |
 | `modules/mukurtu_core/tests/src/Kernel/MukurtuKernelTestBase.php` | **Created** — shared abstract base | 2026-03-19 | [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) |
 | `modules/mukurtu_local_contexts/tests/src/Kernel/LocalContextsTestBase.php` | Created + refactored to extend MukurtuKernelTestBase | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) |
