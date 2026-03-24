@@ -51,6 +51,7 @@
       <directory>web/profiles/mukurtu/modules/mukurtu_media/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_dictionary/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_local_contexts/tests/src/Kernel</directory>
+      <directory>web/profiles/mukurtu/modules/mukurtu_community_records/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_person/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_place/tests/src/Kernel</directory>
     </testsuite>
