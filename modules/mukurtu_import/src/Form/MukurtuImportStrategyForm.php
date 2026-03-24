@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -114,6 +115,55 @@ class MukurtuImportStrategyForm extends EntityForm {
     $resolved_bundle = ($bundle == -1) ? NULL : $bundle;
 
     $this->buildMappingTable($form, $form_state, $entity_type_id, $resolved_bundle);
+
+    // File settings for import (CSV parsing, delimiters, text format).
+    $configuration = $this->entity->get('configuration') ?? [];
+    $form['configuration'] = [
+      '#type' => 'details',
+      '#title' => $this->t('File Settings'),
+      '#tree' => TRUE,
+    ];
+    $form['configuration']['delimiter'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#maxlength' => 1,
+      '#title' => $this->t('CSV Delimiter'),
+      '#default_value' => $configuration['delimiter'] ?? ',',
+    ];
+    $form['configuration']['enclosure'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#maxlength' => 1,
+      '#title' => $this->t('CSV Enclosure'),
+      '#default_value' => $configuration['enclosure'] ?? '"',
+    ];
+    $form['configuration']['escape'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#maxlength' => 1,
+      '#title' => $this->t('CSV Escape Character'),
+      '#default_value' => $configuration['escape'] ?? '\\',
+    ];
+    $form['configuration']['multivalue_delimiter'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#title' => $this->t('Multi-value Delimiter'),
+      '#default_value' => $configuration['multivalue_delimiter'] ?? ';',
+    ];
+    $form['configuration']['local_contexts_delimiter'] = [
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#title' => $this->t('Local Contexts Delimiter'),
+      '#description' => $this->t('Delimiter used to separate the project name from the label/notice name in Local Contexts fields (e.g., "My Project > TK Attribution").'),
+      '#default_value' => $configuration['local_contexts_delimiter'] ?? '>',
+    ];
+    $form['configuration']['default_format'] = [
+      '#type' => 'select',
+      '#required' => TRUE,
+      '#title' => $this->t('Default Text Format'),
+      '#options' => $this->getTextFormatOptions(),
+      '#default_value' => $configuration['default_format'] ?? MukurtuImportStrategy::DEFAULT_FORMAT,
+    ];
 
     return $form;
   }
@@ -235,6 +285,17 @@ class MukurtuImportStrategyForm extends EntityForm {
    */
   public function mappingTableAjaxCallback(array &$form, FormStateInterface $form_state): array {
     return $form['mapping'];
+  }
+
+  /**
+   * Get the options array for available text formats.
+   *
+   * @return array
+   *   An array of text format labels indexed by format ID.
+   */
+  protected function getTextFormatOptions(): array {
+    $formats = filter_formats();
+    return array_map(fn($format) => $format->label(), $formats);
   }
 
   /**
