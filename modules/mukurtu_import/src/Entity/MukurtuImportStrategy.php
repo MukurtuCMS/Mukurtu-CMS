@@ -184,11 +184,10 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     if (!$this->id()) {
       $this->id = $this->uuidGenerator()->generate();
     }
-
     if (!$this->uid) {
       $this->uid = 1;
     }
-    parent::save();
+    return parent::save();
   }
 
   public function getOwner() {
