@@ -82,6 +82,7 @@ abstract class DictionaryTestBase extends MukurtuKernelTestBase {
     parent::setUp();
 
     $this->installSchema('comment', 'comment_entity_statistics');
+    $this->installSchema('layout_builder', ['inline_block_usage']);
     $this->installSchema('node', ['node_access']);
     $this->installSchema('search_api', ['search_api_item']);
 
