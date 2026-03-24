@@ -45,7 +45,7 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#title' => $this->t('Label'),
       '#maxlength' => 255,
       '#default_value' => $this->entity->label(),
-      '#description' => $this->t('Label for the mukurtu_import_strategy.'),
+      '#description' => $this->t('Label for the Import Configuration template.'),
       '#required' => TRUE,
     ];
 
@@ -53,7 +53,7 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#type' => 'textarea',
       '#title' => $this->t('Description'),
       '#default_value' => $this->entity->get('description'),
-      '#description' => $this->t('Description.'),
+      '#description' => $this->t('Enter a description for the Import Configuration template.'),
     ];
 
     $form['target_entity_type_id'] = [
