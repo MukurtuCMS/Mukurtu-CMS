@@ -4,7 +4,9 @@ mukurtu_core.dashboard_admin:
   title: 'Mukurtu Dashboard'
   description: 'Mukurtu Dashboard'
   parent: system.admin
-  route_name: mukurtu_core.dashboard
+  route_name: entity.dashboard.canonical
+  route_parameters:
+    dashboard: 'mukurtu_dashboard'
   weight: -1000
 
 #Dashboard links
