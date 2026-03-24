@@ -221,6 +221,7 @@ class MukurtuImportStrategyForm extends EntityForm {
         '#title_display' => 'invisible',
         '#default_value' => $default_source,
         '#size' => 30,
+        '#attributes' => ['class' => ['mapping-source-input']],
       ];
 
       $form['mapping'][$delta]['target'] = [
