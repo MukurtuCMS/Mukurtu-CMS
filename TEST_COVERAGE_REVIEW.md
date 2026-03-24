@@ -187,36 +187,36 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 
 ## All Files Changed
 
-| File | Change | Date |
-|------|--------|------|
-| `modules/mukurtu_protocol/src/MukurtuProtocolNodeAccessControlHandler.php` | Bug fix — `all`-mode access | 2026-03-19 |
-| `modules/mukurtu_protocol/tests/src/Kernel/Access/ProtocolEntityAccessTest.php` | Test assertion alignment | 2026-03-19 |
-| `modules/mukurtu_core/tests/src/Kernel/MukurtuKernelTestBase.php` | **Created** — shared abstract base | 2026-03-19 |
-| `modules/mukurtu_local_contexts/tests/src/Kernel/LocalContextsTestBase.php` | Refactored to extend MukurtuKernelTestBase | 2026-03-19 |
-| `modules/mukurtu_media/tests/src/Kernel/MukurtuMediaTestBase.php` | Refactored to extend MukurtuKernelTestBase | 2026-03-19 |
-| `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryTestBase.php` | Refactored + CI fixes | 2026-03-19 / 2026-03-24 |
-| `modules/mukurtu_collection/tests/src/Kernel/CollectionTestBase.php` | **Created** | 2026-03-19 |
-| `modules/mukurtu_collection/tests/src/Kernel/CollectionHierarchyTest.php` | **Created** (20 tests) + fix | 2026-03-19 / 2026-03-24 |
-| `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageTestBase.php` | **Created** | 2026-03-19 |
-| `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageEntityTest.php` | **Created** (5 tests) | 2026-03-19 |
-| `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageTaxonomyTest.php` | **Created** (6 tests) | 2026-03-19 |
-| `modules/mukurtu_media/tests/src/Kernel/MukurtuMediaEntityTest.php` | **Created** (11 tests) | 2026-03-19 |
-| `modules/mukurtu_media/tests/src/Kernel/MukurtuMediaTaxonomyTest.php` | **Created** (8 tests) | 2026-03-19 |
-| `modules/mukurtu_local_contexts/tests/src/Kernel/LocalContextsSupportedProjectTest.php` | **Created** (13 tests) | 2026-03-19 |
-| `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryEntityTest.php` | **Created** (11 tests) | 2026-03-19 |
-| `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryWordListTest.php` | **Created** (8 tests) | 2026-03-19 |
-| `modules/mukurtu_drafts/tests/src/Kernel/MukurtuDraftsBehaviorTest.php` | **Created** (10 tests) | 2026-03-24 |
-| `modules/mukurtu_multipage_items/tests/src/Kernel/MultipageItemTestBase.php` | **Created** | 2026-03-24 |
-| `modules/mukurtu_multipage_items/tests/src/Kernel/MultipageItemEntityTest.php` | **Created** (18 tests) | 2026-03-24 |
-| `modules/mukurtu_person/tests/src/Kernel/PersonTestBase.php` | **Created** | 2026-03-24 |
-| `modules/mukurtu_person/tests/src/Kernel/PersonEntityTest.php` | **Created** (17 tests) | 2026-03-24 |
-| `modules/mukurtu_place/tests/src/Kernel/PlaceTestBase.php` | **Created** | 2026-03-24 |
-| `modules/mukurtu_place/tests/src/Kernel/PlaceEntityTest.php` | **Created** (14 tests) | 2026-03-24 |
-| `modules/mukurtu_community_records/tests/src/Kernel/CommunityRecordTestBase.php` | **Created** | 2026-03-24 |
-| `modules/mukurtu_community_records/tests/src/Kernel/CommunityRecordFunctionsTest.php` | **Created** (12 tests) | 2026-03-24 |
-| `modules/mukurtu_browse/tests/src/Unit/MukurtuMapNodesParamConverterTest.php` | **Created** (7 tests) | 2026-03-24 |
-| `modules/mukurtu_browse/tests/src/Unit/MukurtuBoundingBoxTest.php` | **Created** (10 tests) | 2026-03-24 |
-| `phpunit.xml` | Added kernel + unit testsuite directories; PHPUnit 10 schema + @group fixes | 2026-03-19 / 2026-03-24 |
+| File | Change | Date | Commit(s) |
+|------|--------|------|-----------|
+| `modules/mukurtu_protocol/src/MukurtuProtocolNodeAccessControlHandler.php` | Bug fix — `all`-mode access | 2026-03-19 | [`4f2ae15b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/4f2ae15b) [`d50d5491`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d50d5491) |
+| `modules/mukurtu_protocol/tests/src/Kernel/Access/ProtocolEntityAccessTest.php` | Test assertion alignment | 2026-03-19 | [`3dc3889b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3dc3889b) |
+| `modules/mukurtu_core/tests/src/Kernel/MukurtuKernelTestBase.php` | **Created** — shared abstract base | 2026-03-19 | [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) |
+| `modules/mukurtu_local_contexts/tests/src/Kernel/LocalContextsTestBase.php` | Created + refactored to extend MukurtuKernelTestBase | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) |
+| `modules/mukurtu_local_contexts/tests/src/Kernel/LocalContextsSupportedProjectTest.php` | **Created** (13 tests) | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) |
+| `modules/mukurtu_media/tests/src/Kernel/MukurtuMediaTestBase.php` | Created + refactored to extend MukurtuKernelTestBase | 2026-03-19 | [`840fb318`](https://github.com/alexmerrill/Mukurtu-CMS/commit/840fb318) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) |
+| `modules/mukurtu_media/tests/src/Kernel/MukurtuMediaEntityTest.php` | **Created** (11 tests) | 2026-03-19 | [`840fb318`](https://github.com/alexmerrill/Mukurtu-CMS/commit/840fb318) |
+| `modules/mukurtu_media/tests/src/Kernel/MukurtuMediaTaxonomyTest.php` | **Created** (8 tests) | 2026-03-19 | [`840fb318`](https://github.com/alexmerrill/Mukurtu-CMS/commit/840fb318) |
+| `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryTestBase.php` | Created + refactored + CI fixes | 2026-03-19 / 2026-03-24 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) [`b5b7e29d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/b5b7e29d) [`f54f8953`](https://github.com/alexmerrill/Mukurtu-CMS/commit/f54f8953) [`03110274`](https://github.com/alexmerrill/Mukurtu-CMS/commit/03110274) |
+| `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryEntityTest.php` | **Created** (11 tests) | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) |
+| `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryWordListTest.php` | **Created** (8 tests) | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) |
+| `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageTestBase.php` | **Created** | 2026-03-19 | [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) |
+| `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageEntityTest.php` | **Created** (5 tests) + fix | 2026-03-19 | [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) [`3a6367f6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3a6367f6) |
+| `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageTaxonomyTest.php` | **Created** (6 tests) | 2026-03-19 | [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) |
+| `modules/mukurtu_collection/tests/src/Kernel/CollectionTestBase.php` | **Created** | 2026-03-19 | [`d2061340`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d2061340) |
+| `modules/mukurtu_collection/tests/src/Kernel/CollectionHierarchyTest.php` | **Created** (20 tests) + fix | 2026-03-19 / 2026-03-24 | [`d2061340`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d2061340) [`b5b7e29d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/b5b7e29d) |
+| `modules/mukurtu_drafts/tests/src/Kernel/MukurtuDraftsBehaviorTest.php` | **Created** (10 tests) | 2026-03-24 | [`ac0b73eb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/ac0b73eb) |
+| `modules/mukurtu_multipage_items/tests/src/Kernel/MultipageItemTestBase.php` | **Created** + path_alias fix | 2026-03-24 | [`9618bddb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/9618bddb) [`8c65781b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/8c65781b) |
+| `modules/mukurtu_multipage_items/tests/src/Kernel/MultipageItemEntityTest.php` | **Created** (18 tests) | 2026-03-24 | [`9618bddb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/9618bddb) |
+| `modules/mukurtu_person/tests/src/Kernel/PersonTestBase.php` | **Created** | 2026-03-24 | [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) |
+| `modules/mukurtu_person/tests/src/Kernel/PersonEntityTest.php` | **Created** (17 tests) + fix | 2026-03-24 | [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) [`caee4c0b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/caee4c0b) |
+| `modules/mukurtu_place/tests/src/Kernel/PlaceTestBase.php` | **Created** | 2026-03-24 | [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) |
+| `modules/mukurtu_place/tests/src/Kernel/PlaceEntityTest.php` | **Created** (14 tests) + fix | 2026-03-24 | [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) [`caee4c0b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/caee4c0b) |
+| `modules/mukurtu_community_records/tests/src/Kernel/CommunityRecordTestBase.php` | **Created** + path_alias fix | 2026-03-24 | [`e5ea5e23`](https://github.com/alexmerrill/Mukurtu-CMS/commit/e5ea5e23) [`daf384f4`](https://github.com/alexmerrill/Mukurtu-CMS/commit/daf384f4) |
+| `modules/mukurtu_community_records/tests/src/Kernel/CommunityRecordFunctionsTest.php` | **Created** (12 tests) | 2026-03-24 | [`e5ea5e23`](https://github.com/alexmerrill/Mukurtu-CMS/commit/e5ea5e23) |
+| `modules/mukurtu_browse/tests/src/Unit/MukurtuMapNodesParamConverterTest.php` | **Created** (7 tests) | 2026-03-24 | [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
+| `modules/mukurtu_browse/tests/src/Unit/MukurtuBoundingBoxTest.php` | **Created** (10 tests) | 2026-03-24 | [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
+| `phpunit.xml` | Added kernel + unit testsuite directories; PHPUnit 10 schema + @group fixes | 2026-03-19 / 2026-03-24 | [`12b71fca`](https://github.com/alexmerrill/Mukurtu-CMS/commit/12b71fca) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`840fb318`](https://github.com/alexmerrill/Mukurtu-CMS/commit/840fb318) [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) [`d2061340`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d2061340) [`9618bddb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/9618bddb) [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) [`e5ea5e23`](https://github.com/alexmerrill/Mukurtu-CMS/commit/e5ea5e23) [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
 
 **Total new tests added: ~180** across 20 test classes and 10 modules.
 
