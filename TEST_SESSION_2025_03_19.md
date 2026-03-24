@@ -138,3 +138,110 @@ Ranked by testability of untested business logic:
 1. `mukurtu_multipage_items` — custom content entity with ~15 page-management methods
 2. `mukurtu_digital_heritage` — existing base uses old `KernelTestBase` directly; migrate + expand coverage
 3. `mukurtu_drafts` — existing test covers basic owner access; draft access hook has uncovered branches
+
+---
+
+# Test Infrastructure Session — 2026-03-24
+
+## Overview
+
+Two CI failures were fixed, then kernel test coverage was added for five previously untested modules (`mukurtu_drafts`, `mukurtu_multipage_items`, `mukurtu_person`, `mukurtu_place`, `mukurtu_community_records`), and PHPUnit unit tests were added for two classes in `mukurtu_browse`.
+
+---
+
+## Part 1: CI Fixes
+
+### Fix A — `CollectionHierarchyTest::testGetRootCollections` (assertContains type mismatch)
+
+**Root cause:** PHPUnit 10 uses strict type comparison in `assertContains`. `array_keys()` on an entity `loadMultiple()` result returns `int[]`, but `$entity->id()` returns `string`. `assertContains('1', [1])` fails.
+
+**Fix:** Replaced `assertContains`/`assertNotContains` with `assertTrue(in_array(...))` / `assertFalse(in_array(...))`, which uses loose comparison and handles the string/int mismatch correctly.
+
+### Fix B — `DictionaryEntityTest::testBundleCheckCreateAccessForbiddenWithoutLanguage` (TransactionOutOfOrderException)
+
+Root cause pattern: a missing database table causes MariaDB to implicitly roll back the transaction. When Drupal then tries to roll back explicitly, the transaction stack is empty → `TransactionOutOfOrderException`. Required two rounds:
+
+**Round 1:** `search_api` module's entity delete hook queries `search_api_item` for every deleted entity. Added `installSchema('search_api', ['search_api_item'])`. Attempted `search_api_task` simultaneously — this table does not exist in the installed version and threw a `LogicException` for all 24 dictionary tests. Removed `search_api_task`.
+
+**Round 2:** `layout_builder_entity_delete()` unconditionally calls `removeByLayoutEntity()` for every entity type, including taxonomy terms, which queries `inline_block_usage`. Added `installSchema('layout_builder', ['inline_block_usage'])`.
+
+**General rule:** Any kernel test that deletes entities (including taxonomy terms via `node_access_rebuild()`) while `layout_builder` and `search_api` are in the module list must install both of these tables.
+
+---
+
+## Part 2: New test coverage
+
+### `mukurtu_drafts` — `MukurtuDraftsBehaviorTest` (10 tests)
+
+Second test class alongside the existing `MukurtuDraftsEntityTest`, same namespace and module list. Uses the existing `TestDraftEntity` fixture (from `drafts_entity_test` module). Covers:
+- `isDraft()` default false, `setDraft()`, `unsetDraft()`, fluent chaining for both
+- Draft status persists through save/reload; non-draft status also persists
+- `mukurtu_drafts_entity_view()` hook injects `node--unpublished` CSS class for drafts and does not inject it for non-drafts
+- `hook_entity_access`: anonymous user is forbidden from viewing a draft entity; neutral on non-draft (defers to other handlers)
+
+### `mukurtu_multipage_items` — `MultipageItemTestBase` + `MultipageItemEntityTest` (18 tests)
+
+`MultipageItemTestBase` extends `CollectionTestBase` (which provides the OG/node/protocol setup). Additions: `path_alias` module + `installEntitySchema('path_alias')` (required because `mukurtu_multipage_items`' node insert/update hook calls `path_alias.manager`), `multipage_item` entity schema, `mukurtu_multipage_items.settings` config. Provides `buildMultipageItem()`.
+
+Tests cover: entity class + `MultipageItemInterface`; `addPage()`/`getPages()`/`hasPage()`/`getFirstPage()`; `setFirstPage()` (prepend to empty, prepend new node, move existing to front, already-first is no-op); `getPages($accessCheck)` with published/unpublished filtering; `MultipageItemManager::getMultipageEntity()` (found, not found, correct MPI among multiples); `MultipageItemManager::isEnabledBundleType()` (enabled, disabled, not-in-config).
+
+### `mukurtu_person` — `PersonTestBase` + `PersonEntityTest` (17 tests)
+
+Extends `MukurtuKernelTestBase`. Module list is the base list plus `original_date`, `geofield`, `paragraphs`, `entity_reference_revisions`, `layout_builder`, `node`, `node_access_test`, `mukurtu_person`, and others. **Deliberately omits** `mukurtu_browse` and `mukurtu_taxonomy` — their dependency chains (~30 modules) are not needed because Person's module hooks do not call browse/taxonomy services at runtime.
+
+Tests cover: bundle class + `PersonInterface` + `CulturalProtocolControlledInterface` + `MukurtuDraftInterface`; cardinality for all 13 bundle fields; all bundle fields are optional; location/birth/death fields target the `location` vocabulary; protocol field persistence via `getProtocolEntities()` (not `getProtocols()`, which returns IDs); draft persistence; `field_deceased` defaults FALSE.
+
+**Bug found and fixed during testing:** `getProtocols()` returns a raw ID array (integers), not entity objects. Tests that assert on protocol identity must call `getProtocolEntities()` instead.
+
+### `mukurtu_place` — `PlaceTestBase` + `PlaceEntityTest` (14 tests)
+
+Same pattern as Person. Uses `place_type` vocabulary instead of `people`. Key difference asserted explicitly: Place has no `field_date_born` or `field_date_died` (unlike Person).
+
+### `mukurtu_community_records` — `CommunityRecordTestBase` + `CommunityRecordFunctionsTest` (12 tests)
+
+Community records are not a custom entity type — they are regular nodes with a `field_mukurtu_original_record` entity reference field. The field storage is created programmatically via `FieldStorageConfig::create()` (not `installConfig()`) for explicit control. A `page` bundle has the field; a `basic_page` bundle does not.
+
+Tests cover: `mukurtu_community_records_has_record_field()` with/without field; `mukurtu_community_records_entity_type_supports_records()` enabled/disabled bundle; `mukurtu_community_records_is_community_record()` (no field, empty field, field set); `mukurtu_community_records_is_original_record()` (no CRs, single CR, multiple CRs, non-node entity short-circuits to FALSE); `ValidOriginalRecord` constraint (circular self-reference, target is a CR, entity already has CRs pointing to it, valid case with 0 violations).
+
+**Constraint test design:** All constraint tests operate on already-saved entities. For new entities the validator also runs a `Url::access()` check against the CR creation route, which is not available in kernel tests. By saving the entity first (`$entity->isNew() === false`), that branch is skipped and only the field-logic violations are exercised.
+
+**Fix needed after initial CI run:** `$entity->validate()` traverses the node's `path` computed field, which calls `path_alias.repository`. Added `path_alias` to `$modules` and `installEntitySchema('path_alias')` to the test base.
+
+---
+
+## Part 3: PHPUnit unit tests for `mukurtu_browse`
+
+`mukurtu_browse`'s dependency tree (~30 modules including `search_api`, `leaflet`, `facets`, `mukurtu_dictionary`, `mukurtu_digital_heritage`) makes kernel tests impractical. The two classes with isolated business logic were targeted with plain PHPUnit unit tests (no Drupal bootstrap).
+
+A `unit` testsuite was added to `phpunit.xml`.
+
+### `MukurtuMapNodesParamConverterTest` (7 tests)
+
+`EntityTypeManagerInterface` is constructor-injected → straightforward mock. Tests: `convert()` with single ID, multiple CSV IDs, result passthrough; `applies()` true for `type: nodes`, false for other type, false when key missing, false for empty type.
+
+### `MukurtuBoundingBoxTest` (10 tests)
+
+`MukurtuBoundingBox` extends `SearchApiStandard` (deep Drupal Views DI chain). Instance created via `getMockBuilder()->disableOriginalConstructor()->onlyMethods([])->getMock()` to skip the constructor while keeping real method implementations. `parseBoundingBox()` (protected) called via `ReflectionMethod`. `$this->query` set via `ReflectionProperty` (no `setAccessible(true)` needed in PHP 8.1+). `addCondition()` calls intercepted via a `stdClass` mock with `addMethods(['addCondition'])`.
+
+Tests: valid 4-value CSV parsed to correct float keys; integers cast to float; too few coordinates returns empty; too many returns empty; empty string returns empty; non-numeric strings cast to 0.0 (method only validates count). `query()`: valid bbox triggers exactly 4 `addCondition()` calls; invalid bbox triggers none; correct field names (`centroid_lat`/`centroid_lon`) and operators (`>=`/`<=`) verified via callback.
+
+---
+
+## Files changed
+
+| File | Change |
+|---|---|
+| `modules/mukurtu_collection/tests/src/Kernel/CollectionHierarchyTest.php` | Fix: `assertContains` → `in_array()` |
+| `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryTestBase.php` | Fix: add `search_api_item` + `inline_block_usage` schemas |
+| `modules/mukurtu_drafts/tests/src/Kernel/MukurtuDraftsBehaviorTest.php` | **Created** (10 tests) |
+| `modules/mukurtu_multipage_items/tests/src/Kernel/MultipageItemTestBase.php` | **Created** |
+| `modules/mukurtu_multipage_items/tests/src/Kernel/MultipageItemEntityTest.php` | **Created** (18 tests) |
+| `modules/mukurtu_person/tests/src/Kernel/PersonTestBase.php` | **Created** |
+| `modules/mukurtu_person/tests/src/Kernel/PersonEntityTest.php` | **Created** (17 tests) |
+| `modules/mukurtu_place/tests/src/Kernel/PlaceTestBase.php` | **Created** |
+| `modules/mukurtu_place/tests/src/Kernel/PlaceEntityTest.php` | **Created** (14 tests) |
+| `modules/mukurtu_community_records/tests/src/Kernel/CommunityRecordTestBase.php` | **Created** |
+| `modules/mukurtu_community_records/tests/src/Kernel/CommunityRecordFunctionsTest.php` | **Created** (12 tests) |
+| `modules/mukurtu_browse/tests/src/Unit/MukurtuMapNodesParamConverterTest.php` | **Created** (7 tests) |
+| `modules/mukurtu_browse/tests/src/Unit/MukurtuBoundingBoxTest.php` | **Created** (10 tests) |
+| `phpunit.xml` | Added 6 kernel directories + 1 unit testsuite |
