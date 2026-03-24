@@ -24,3 +24,27 @@ function mukurtu_core_install() {
     mukurtu_core_create_content_type_field('node', $bundle);
   }
 }
+
+/**
+ * Upgrade to Mukurtu 4.0.
+ */
+function mukurtu_core_update_4000() {
+  // Reserved for future use if needed.
+}
+
+/**
+ * Enable Tagify module and enable it on needed fields.
+ */
+function mukurtu_core_update_4001() {
+  // Fill in needed code.
+}
+
+/**
+ * Install genpass and notify_user_default modules.
+ * Add new user registration form.
+ * Update user creation form.
+ * Add display name field description.
+ * Update user account page view.
+ */
+function mukurtu_core_update_4002() {
+}
