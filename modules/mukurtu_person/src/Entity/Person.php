@@ -39,7 +39,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create_bundle' => '',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -60,7 +59,8 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
             'image' => 'image',
             'remote_video' => 'remote_video',
             'video' => 'video',
-            'soundcloud' => 'soundcloud'
+            'soundcloud' => 'soundcloud',
+            'external_embed' => 'external_embed'
           ],
           'sort' => [
             'field' => '_none'
@@ -69,7 +69,6 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
           'auto_create_bundle' => 'audio',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -106,7 +105,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('view', TRUE);
 
     $definitions['field_sections'] = BaseFieldDefinition::create('entity_reference_revisions')
-      ->setLabel(t('Biography sections'))
+      ->setLabel(t('Biography'))
       ->setDescription(t('The biography is an account of the person\'s life, whether written or compiled by others, an autobiography, or both. While they are primarily written, they may include media assets as well. Biographies can be composed in sections to more clearly structure the person\'s life events, story, accomplishments, and relationships.	Biography sections can be rearranged and collapsed for easier editing. To add additional biography sections, select "Add Biography section".'))
       ->setSettings([
         'target_type' => 'paragraph',
@@ -181,22 +180,18 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
+        // target_bundles is set dynamically from mukurtu_taxonomy.settings config
+        // via mukurtu_taxonomy_entity_bundle_field_info_alter().
         'handler_settings' => [
-          'target_bundles' => [
-            'contributor' => 'contributor',
-            'creator' => 'creator',
-            'people' => 'people',
-            'publisher' => 'publisher',
-          ],
+          'target_bundles' => NULL,
           'sort' => [
             'field' => 'name',
-            'direction' => 'asc'
+            'direction' => 'asc',
           ],
-          'auto_create' => FALSE,
+          'auto_create' => TRUE,
           'auto_create_bundle' => 'people',
         ]
       ])
-      ->setDefaultValue('')
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -238,6 +233,46 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
         ]
       ])
       ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_place_of_birth'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Place of Birth'))
+      ->setDescription(t('The place where the person was born.	</br>As you type, existing locations will be displayed. Select an existing location or enter a new one. To include additional locations, select "Add another item".'))
+      ->setSettings([
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => [
+            'location' => 'location'
+          ],
+          'auto_create' => TRUE,
+        ]
+      ])
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $definitions['field_place_of_death'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Place of Death'))
+      ->setDescription(t('The place where the person died.	</br>As you type, existing locations will be displayed. Select an existing location or enter a new one. To include additional locations, select "Add another item".'))
+      ->setSettings([
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => [
+            'location' => 'location'
+          ],
+          'auto_create' => TRUE,
+        ]
+      ])
+      ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(FALSE)

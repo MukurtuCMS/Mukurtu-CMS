@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_core\Plugin\Field;
 
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\TypedData\ComputedItemListTrait;
 
@@ -14,7 +17,7 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
   /**
    * {@inheritdoc}
    */
-  protected function computeValue() {
+  protected function computeValue(): void {
     $entity = $this->getEntity();
 
     $media_fields = ['field_thumbnail', 'field_media_assets', 'field_collection_image'];
@@ -46,6 +49,27 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
     if ($default_image) {
       $this->list[0] = $this->createItem(0, $default_image);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEntity(): FieldableEntityInterface {
+    $entity = parent::getEntity();
+    if (!$entity->hasField('field_mukurtu_original_record') || $entity->get('field_mukurtu_original_record')->isEmpty()) {
+      return $entity;
+    }
+    // Support Community Records by using the CR as the source of truth when
+    // set.
+    $original_record_field = $entity->get('field_mukurtu_original_record');
+    if (!$original_record_field instanceof EntityReferenceFieldItemList) {
+      return $entity;
+    }
+    $original_record = $original_record_field->referencedEntities()[0];
+    if (!$original_record instanceof FieldableEntityInterface) {
+      return $entity;
+    }
+    return $original_record;
   }
 
 }

@@ -19,6 +19,7 @@ use Drupal\mukurtu_protocol\CulturalProtocols;
  * )
  */
 class CulturalProtocolItem extends FieldItemBase {
+
   /**
    * {@inheritdoc}
    */
@@ -113,7 +114,8 @@ class CulturalProtocolItem extends FieldItemBase {
         }
 
         // If the user tried to add protocols they cannot apply, remove them.
-        $added_protocols_to_remove = array_diff($new_protocols, $protocol_ids_user_can_apply);
+        $newly_added_protocols = array_diff($new_protocols, $original_protocols);
+        $added_protocols_to_remove = array_diff($newly_added_protocols, $protocol_ids_user_can_apply);
         if (!empty($added_protocols_to_remove)) {
           $silently_changed_protocols = TRUE;
         }
@@ -169,7 +171,7 @@ class CulturalProtocolItem extends FieldItemBase {
   public static function formatProtocols($value) {
     if (is_array($value)) {
       sort($value, SORT_NUMERIC);
-      return implode(',', array_map(fn($p) => "|$p|", array_map('trim', $value)));
+      return implode(',', array_map(fn($p) => "|$p|", array_map('trim', array_filter($value))));
     }
     return $value;
   }
@@ -252,7 +254,7 @@ class CulturalProtocolItem extends FieldItemBase {
    * @return array
    *  An array of protocol IDs.
    */
-  public function getSettableProtocolIds(AccountInterface $account = NULL) {
+  public function getSettableProtocolIds(?AccountInterface $account = NULL) {
     $protocolIds = CulturalProtocols::getProtocolsByUserPermission(['apply protocol'], $account);
     return $protocolIds;
   }
@@ -260,7 +262,7 @@ class CulturalProtocolItem extends FieldItemBase {
   /**
    * Return the options array for the sharing settings.
    */
-  public function getSettableSharingOptions(AccountInterface $account = NULL) {
+  public function getSettableSharingOptions(?AccountInterface $account = NULL) {
     return CulturalProtocols::getItemSharingSettingOptions();
   }
 

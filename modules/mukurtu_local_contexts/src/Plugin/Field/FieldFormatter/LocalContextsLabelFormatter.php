@@ -39,6 +39,7 @@ class LocalContextsLabelFormatter extends FormatterBase {
           '#name' => $label->name,
           '#text' => $label->default_text,
           '#svg_url' => $label->svg_url,
+          '#img_url' => $label->img_url,
           '#translations' => $label->translations,
         ];
       }

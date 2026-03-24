@@ -21,6 +21,50 @@ interface MukurtuImportStrategyInterface extends ConfigEntityInterface, EntityOw
   public function setConfig($key, $value);
   public function getConfig($key);
   public function applies(FileInterface $file);
-  public function toDefinition(FileInterface $file);
+  public function toDefinition(FileInterface $file, array $lookup_source_ids = []);
   public function mappedFieldsCount(FileInterface $file);
+
+  /**
+   * Get the source column mapped to the entity's label field.
+   *
+   * @return string|null
+   *   The CSV column name mapped to the label field, or NULL if not mapped.
+   */
+  /**
+   * Get the configured identifier column name.
+   *
+   * When set, this column is used as the migration source ID, taking
+   * precedence over entity ID, UUID, and label column detection. It enables
+   * cross-migration lookups by arbitrary user-defined values (e.g. for
+   * paragraph entities that have no natural label).
+   *
+   * @return string|null
+   *   The CSV column name, or NULL if not configured.
+   */
+  public function getIdentifierColumn(): ?string;
+
+  public function getLabelSourceColumn(): ?string;
+
+  /**
+   * Get the source column mapped to the media source field (e.g., filename).
+   *
+   * For media entity types, returns the CSV column mapped to the media type's
+   * source field (e.g., field_media_image for Image media). Returns NULL for
+   * non-media entity types or if the source field is not mapped.
+   *
+   * @return string|null
+   *   The CSV column name mapped to the media source field, or NULL.
+   */
+  public function getMediaSourceColumn(): ?string;
+
+  /**
+   * Get the mapped target field name for a given source column.
+   *
+   * @param string $source
+   *   The source column name from the CSV file.
+   *
+   * @return string|null
+   *   The target field name if a mapping exists, NULL otherwise.
+   */
+  public function getMappedTarget(string $source): ?string;
 }

@@ -7,29 +7,6 @@ mukurtu-leaflet-preview:
     - core/jquery.once
     - leaflet/leaflet
 
-mukurtu-leaflet-markercluster:
-  version: 1.4.1
-  js:
-    js/leaflet.markercluster-src.js: {}
-  css:
-    component:
-      js/leaflet-markercluster/dist/MarkerCluster.css: {}
-      js/leaflet-markercluster/dist/MarkerCluster.Default.css: {}
-      css/mukurtu-map-browse.default.css: {}
-  dependencies:
-    - core/jquery
-    - core/jquery.once
-    - leaflet/leaflet
-
-mukurtu-leaflet-custom-markercluster:
-  version: 1.x
-  js:
-    js/mukurtu-leaflet-custom-markercluster.js: {}
-  dependencies:
-    - core/jquery
-    - core/jquery.once
-    - leaflet/leaflet
-
 mukurtu-browse-view-switch:
   version: 1.x
   js:
@@ -42,14 +19,6 @@ map-browse-bounding-box-query:
   version: 1.x
   js:
     js/map-browse-bounding-box-query.js: {}
-  dependencies:
-    - core/jquery
-    - core/jquery.once
-
-map-browse-teasers:
-  version: 1.x
-  js:
-    js/map-browse-teasers.js: {}
   dependencies:
     - core/jquery
     - core/jquery.once

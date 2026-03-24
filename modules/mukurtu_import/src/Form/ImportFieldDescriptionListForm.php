@@ -1,26 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class ImportFieldDescriptionListForm extends ImportBaseForm {
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'mukurtu_import_format_by_bundle';
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $entity_type = NULL, $bundle = NULL) {
-    /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $manager */
-    $importFieldManager = \Drupal::service('plugin.manager.mukurtu_import_field_process');
-
-    $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type, $bundle);
+  public function buildForm(array $form, FormStateInterface $form_state, $entity_type = NULL, $bundle = NULL): array {
+    $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);
     $options = [];
 
 
@@ -31,11 +31,11 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       $field_components = explode('/', $field_target);
       $field_name = $field_components[0];
       $field_property = $field_components[1] ?? NULL;
-      $processPlugin = $importFieldManager->getInstance(['field_definition' => $fields[$field_name]]);
+      $process_plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $fields[$field_name]]);
       $options[$field_target] = [
         'label' => $target_label,
         'description' => $fields[$field_name]->getDescription() ?? '',
-        'format' => $processPlugin->getFormatDescription($fields[$field_name], $field_property),
+        'format' => $process_plugin->getFormatDescription($fields[$field_name], $field_property),
       ];
     }
 
@@ -60,6 +60,10 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       '#empty' => $this->t('No fields found'),
     ];
 
+    // Form actions.
+    $form['actions'] = [
+      '#type' => 'actions',
+    ];
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Download CSV Template'),
@@ -69,9 +73,9 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $entity_type_id = $form_state->getValue('entity_type_id');
     $bundle = $form_state->getValue('bundle');
 
@@ -95,7 +99,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     fclose($handle);
 
     // Trigger CSV download.
-    $response = new \Symfony\Component\HttpFoundation\Response($csv);
+    $response = new Response($csv);
     $response->headers->set('Content-Type', 'text/csv');
     $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
 

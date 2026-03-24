@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_community_records\Plugin\Validation\Constraint;
 
+use Drupal\Core\Entity\EntityInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Drupal\Core\Url;
@@ -14,13 +17,15 @@ class ValidOriginalRecordValidator extends ConstraintValidator {
   /**
    * {@inheritdoc}
    */
-  public function validate($items, Constraint $constraint) {
+  public function validate($value, Constraint $constraint): void {
+    assert($constraint instanceof ValidOriginalRecord);
+
     // Get the owning entity and its ID.
-    $entity = $items->getEntity();
+    $entity = $value->getEntity();
     $entity_id = $entity->id();
 
     // If the field is empty, we have no opinion.
-    if ($items->count() === 0) {
+    if ($value->count() === 0) {
       return;
     }
 
@@ -30,7 +35,7 @@ class ValidOriginalRecordValidator extends ConstraintValidator {
       $this->context->addViolation($constraint->nestedCommunityRecord, ['%title' => $entity->title->value, '%id' => $entity->id()]);
     }
 
-    foreach ($items as $item) {
+    foreach ($value as $item) {
       $target_id = $item->target_id;
 
       // Are we trying to set a circular reference?
@@ -39,26 +44,28 @@ class ValidOriginalRecordValidator extends ConstraintValidator {
         $this->context->addViolation($constraint->circularReference, ['%title' => $entity->title->value, '%id' => $entity->id()]);
       }
 
-      if ($target_id) {
-        $entity_type = $item->getFieldDefinition()->getSetting('target_type');
-        $target_entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($target_id);
+      $target_entity = $item->entity;
+      if (!$target_entity instanceof EntityInterface) {
+        continue;
+      }
 
-        // Target original record cannot be a community record.
-        if (mukurtu_community_records_is_community_record($target_entity)) {
-          $this->context->addViolation($constraint->invalidTargetNoAccess, ['%id' => $target_id]);
-        }
+      // Target original record cannot be a community record.
+      if (mukurtu_community_records_is_community_record($target_entity)) {
+        $this->context->addViolation($constraint->invalidTargetNoAccess, ['%id' => $target_id]);
+      }
 
-        if ($entity->isNew()) {
-          // If this is a brand new CR, we need to make sure the creator has
-          // correct protocol access to the original record.
-          // We do that by cheating and testing access to the CR creation route.
-          $params = ['node' => $target_id, 'node_type' => $entity->bundle()];
-          $url = Url::fromRoute('mukurtu_community_records.add_new_record_by_type', $params);
+      if (!$entity->isNew()) {
+        continue;
+      }
 
-          if (!$url->access()) {
-            $this->context->addViolation($constraint->invalidTargetNoAccess, ['%id' => $target_id]);
-          }
-        }
+      // If this is a brand new CR, we need to make sure the creator has
+      // correct protocol access to the original record. We do that by cheating
+      // and testing access to the CR creation route.
+      $params = ['node' => $target_id];
+      $url = Url::fromRoute('mukurtu_community_records.add_new_record', $params);
+
+      if (!$url->access()) {
+        $this->context->addViolation($constraint->invalidTargetNoAccess, ['%id' => $target_id]);
       }
     }
   }

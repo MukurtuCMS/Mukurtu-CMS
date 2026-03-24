@@ -2,8 +2,11 @@
 
 namespace Drupal\mukurtu_import\Form;
 
+use Drupal\Component\Uuid\UuidInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\TempStore\PrivateTempStore;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -14,70 +17,79 @@ use League\Csv\Reader;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 
 /**
  * Provides a Mukurtu Import form.
  */
 class ImportBaseForm extends FormBase {
-  /**
-   * @var \Drupal\Core\TempStore\PrivateTempStoreFactory
-   */
-  protected $tempStoreFactory;
 
   /**
+   * The private temporary storage.
+   *
    * @var \Drupal\Core\TempStore\PrivateTempStore
    */
-  protected $store;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-
-  /**
-   * The entity type bundle info service.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
-   */
-  protected $entityBundleInfo;
-
-  /**
-   * The entity field manager service.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected $entityFieldManager;
-  protected $metadataFileWeights;
-  protected $metadataFilesImportConfig;
+  protected PrivateTempStore $store;
 
   /**
    * The Mukurtu import ID.
    *
-   * @var string
+   * @var ?string
    */
-  protected $importId;
-
-  protected $fieldDefinitions;
+  protected ?string $importId = NULL;
 
   /**
-   * {@inheritdoc}
+   * The metadata file weights.
+   *
+   * @var array
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_bundle_info) {
-    $this->tempStoreFactory = $temp_store_factory;
-    $this->store = $this->tempStoreFactory->get('mukurtu_import');
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityFieldManager = $entity_field_manager;
-    $this->entityBundleInfo = $entity_bundle_info;
-    $import_id = $this->store->get('import_id');
-    if (empty($import_id)) {
+  protected array $metadataFileWeights;
+
+  /**
+   * The metadata files import config.
+   *
+   * @var array
+   */
+  protected array $metadataFilesImportConfig;
+
+  /**
+   * The field definitions.
+   *
+   * @var array
+   */
+  protected array $fieldDefinitions;
+
+  /**
+   * Constructs an ImportBaseForm object.
+   *
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempStoreFactory
+   *   The private temporary storage factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
+   *   The entity field manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityBundleInfo
+   *   The entity type bundle info service.
+   * @param \Drupal\Component\Uuid\UuidInterface $uuid
+   *   The UUID service.
+   * @param \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $fieldProcessPluginManager
+   *   The field process plugin manager.
+   */
+  public function __construct(
+    protected PrivateTempStoreFactory $tempStoreFactory,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected EntityFieldManagerInterface $entityFieldManager,
+    protected EntityTypeBundleInfoInterface $entityBundleInfo,
+    protected UuidInterface $uuid,
+    protected MukurtuImportFieldProcessPluginManager $fieldProcessPluginManager,
+  ) {
+    $this->store = $tempStoreFactory->get('mukurtu_import');
+    $this->importId = $this->store->get('import_id');
+    if (empty($this->importId)) {
       $this->reset();
-      $import_id = \Drupal::service('uuid')->generate();
-      $this->store->set('import_id', $import_id);
+      $this->importId = $uuid->generate();
+      $this->store->set('import_id', $this->importId);
     }
-    $this->importId = $import_id;
     $this->refreshMetadataFilesImportConfig();
     $this->metadataFileWeights = $this->store->get('metadata_file_weights') ?? [];
   }
@@ -91,6 +103,8 @@ class ImportBaseForm extends FormBase {
       $container->get('entity_type.manager'),
       $container->get('entity_field.manager'),
       $container->get('entity_type.bundle.info'),
+      $container->get('uuid'),
+      $container->get('plugin.manager.mukurtu_import_field_process'),
     );
   }
 
@@ -143,24 +157,43 @@ class ImportBaseForm extends FormBase {
   /**
    * Load the import config from the private store.
    *
-   * This is a silly state management hack. Because of the ajax requests,
+   * This is a silly state management hack. Because of the AJAX requests,
    * the local object variable metadataFilesImportConfig can become out of
    * sync with the "real" current value. The correct way to handle this is
    * probably to remove the object variable completely and have the getter and
    * setter only deal with the private store.
    */
-  public function refreshMetadataFilesImportConfig() {
+  public function refreshMetadataFilesImportConfig(): void {
     $this->metadataFilesImportConfig = $this->store->get('import_config');
   }
 
-  public function getMetadataFiles() {
+  /**
+   * Get all metadata files for the current import.
+   *
+   * Retrieves file entity IDs for all files stored in the metadata upload
+   * location for this import session.
+   *
+   * @return int[]
+   *   An array of file entity IDs (fid) for metadata files.
+   */
+  public function getMetadataFiles(): array {
     $query = $this->entityTypeManager->getStorage('file')->getQuery();
     return $query->condition('uri', $this->getMetadataUploadLocation(), 'STARTS_WITH')
-      ->accessCheck(TRUE)
+      ->accessCheck()
       ->execute();
   }
 
-  public function getMetadataFileWeights() {
+  /**
+   * Get the metadata file weights.
+   *
+   * Retrieves the weights assigned to metadata files, removing any weights
+   * for files that no longer exist, and returns them sorted by weight.
+   *
+   * @return array
+   *   An associative array of file IDs (fid) as keys and their weights as
+   *   values, sorted in ascending order by weight.
+   */
+  public function getMetadataFileWeights(): array {
     $fids = $this->getMetadataFiles();
     $weights = $this->metadataFileWeights;
     // Remove any weights for files that no longer exist.
@@ -173,7 +206,14 @@ class ImportBaseForm extends FormBase {
     return $weights;
   }
 
-  public function setMetadataFileWeights($weights) {
+  /**
+   * Set the metadata file weights.
+   *
+   * @param array $weights
+   *   An associative array of file IDs (fid) as keys and their weights as
+   *   values.
+   */
+  public function setMetadataFileWeights(array $weights): void {
     $this->metadataFileWeights = $weights;
     $this->store->set('metadata_file_weights', $weights);
   }
@@ -198,7 +238,13 @@ class ImportBaseForm extends FormBase {
     return "private://{$this->getImportId()}/files/";
   }
 
-  public function getMetadataUploadLocation() {
+  /**
+   * Get the metadata upload location for the current import.
+   *
+   * @return string
+   *   The metadata upload location.
+   */
+  public function getMetadataUploadLocation(): string {
     return "private://{$this->getImportId()}/metadata/";
   }
 
@@ -236,7 +282,7 @@ class ImportBaseForm extends FormBase {
    * @return bool
    *   TRUE if the user has access, FALSE otherwise.
    */
-  function userCanCreateEntity($entity_type_id, $bundle = NULL, AccountInterface $account = NULL) {
+  function userCanCreateEntity($entity_type_id, $bundle = NULL, ?AccountInterface $account = NULL) {
     // If no user account is provided, default to the current user.
     if (!$account) {
       $account = $this->currentUser();
@@ -259,14 +305,18 @@ class ImportBaseForm extends FormBase {
    * @return bool
    *   TRUE if the user has access, FALSE otherwise.
    */
-  function userCanCreateAnyBundleForEntityType($entity_type_id, AccountInterface $account = NULL) {
+  function userCanCreateAnyBundleForEntityType($entity_type_id, ?AccountInterface $account = NULL) {
     if (!$account) {
       $account = $this->currentUser();
     }
 
-    $bundleInfo = $this->entityBundleInfo->getAllBundleInfo();
-    if (isset($bundleInfo[$entity_type_id]) && !empty($bundleInfo[$entity_type_id])) {
-      return TRUE;
+    $bundle_info = $this->entityBundleInfo->getAllBundleInfo();
+    if (!empty($bundle_info[$entity_type_id])) {
+      foreach ($bundle_info[$entity_type_id] as $bundle_id => $bundle_info) {
+        if ($this->userCanCreateEntity($entity_type_id, $bundle_id, $account)) {
+          return TRUE;
+        }
+      }
     }
     return FALSE;
   }
@@ -297,16 +347,16 @@ class ImportBaseForm extends FormBase {
    * @return \Drupal\mukurtu_import\MukurtuImportStrategyInterface
    *   The import config.
    */
-  public function getImportConfig($fid) {
+  public function getImportConfig($fid): MukurtuImportStrategyInterface {
     $this->refreshMetadataFilesImportConfig();
-    $exitingConfigEntity = $this->metadataFilesImportConfig[(int) $fid] ?? NULL;
-    if ($exitingConfigEntity) {
-      return $exitingConfigEntity;
+    $exiting_config_entity = $this->metadataFilesImportConfig[(int) $fid] ?? NULL;
+    if ($exiting_config_entity) {
+      return $exiting_config_entity;
     }
 
-    $newConfigEntity = MukurtuImportStrategy::create(['uid' => $this->currentUser()->id()]);
-    $this->setImportConfig($fid, $newConfigEntity);
-    return $newConfigEntity;
+    $new_config_entity = MukurtuImportStrategy::create(['uid' => $this->currentUser()->id()]);
+    $this->setImportConfig($fid, $new_config_entity);
+    return $new_config_entity;
   }
 
   public function getMessages() {
@@ -337,27 +387,32 @@ class ImportBaseForm extends FormBase {
    *   The select form element.
    */
   protected function buildTargetOptions($entity_type_id, $bundle = NULL) {
-    $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
-    $entityKeys = $entityDefinition->getKeys();
+    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entity_keys = $entity_definition->getKeys();
 
     $options = [-1 => $this->t('Ignore - Do not import')];
     foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
-      if ($field_definition->getType() == 'cultural_protocol') {
-        // Split our protocol field into the individual sharing
-        // setting/protocols subfields.
-        $options["{$field_name}/sharing_setting"] = $this->t('Sharing Setting');
-        $options["{$field_name}/protocols"] = $this->t('Protocols');
-        continue;
-      }
+      // Get the plugin for this field to check if it supports properties.
+      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
+      $supported_properties = $plugin->getSupportedProperties($field_definition);
 
-      $options[$field_name] = $field_definition->getLabel();
+      // If the plugin supports properties, add them as separate options.
+      if (!empty($supported_properties)) {
+        foreach ($supported_properties as $property_name => $property_info) {
+          $options["{$field_name}/{$property_name}"] = $property_info['label'];
+        }
+      }
+      else {
+        // No properties, add the field normally.
+        $options[$field_name] = $field_definition->getLabel();
+      }
     }
 
     // Very Mukurtu specific. We ship with a "Language" field which has
     // the exact same label as content entity langcodes. Here we disambiguate
     // the two.
-    if (isset($options[$entityKeys['langcode']])) {
-      $options[$entityKeys['langcode']] .= $this->t(' (langcode)');
+    if (isset($options[$entity_keys['langcode']])) {
+      $options[$entity_keys['langcode']] .= $this->t(' (langcode)');
     }
 
     return $options;
@@ -368,42 +423,43 @@ class ImportBaseForm extends FormBase {
    *
    * @param string $entity_type_id
    *   The entity type id.
-   * @param string $bundle
+   * @param ?string $bundle
    *   The bundle.
-   * @return mixed
+   *
+   * @return \Drupal\Core\Field\FieldDefinitionInterface[]
    *   The field definitions.
    */
-  protected function getFieldDefinitions($entity_type_id, $bundle = NULL) {
+  protected function getFieldDefinitions(string $entity_type_id, ?string $bundle = NULL): array {
     // Memoize the field defs.
     if (empty($this->fieldDefinitions[$entity_type_id][$bundle])) {
-      $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
-      $entityKeys = $entityDefinition->getKeys();
-      $fieldDefs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
+      $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+      $entity_keys = $entity_definition->getKeys();
+      $field_defs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
 
       // Remove computed fields/fields that can't be targeted for import.
-      foreach ($fieldDefs as $field_name => $fieldDef) {
+      foreach ($field_defs as $field_name => $fieldDef) {
         // Don't remove ID/UUID fields.
-        if ($field_name == $entityKeys['id'] || $field_name == $entityKeys['uuid']) {
+        if ($field_name === $entity_keys['id'] || $field_name === $entity_keys['uuid']) {
           continue;
         }
 
         // Remove the revision log message as a valid target. We are using
         // specific revision log messages to control import behavior.
-        if ($field_name == 'revision_log') {
-          unset($fieldDefs[$field_name]);
+        if ($field_name === 'revision_log') {
+          unset($field_defs[$field_name]);
         }
 
         // Remove unwanted 'behavior_settings' paragraph base field.
-        if ($entity_type_id == "paragraph" && $field_name == 'behavior_settings') {
-          unset($fieldDefs[$field_name]);
+        if ($entity_type_id === "paragraph" && $field_name === 'behavior_settings') {
+          unset($field_defs[$field_name]);
         }
 
         // Remove computed and read-only fields.
         if ($fieldDef->isComputed() || $fieldDef->isReadOnly()) {
-          unset($fieldDefs[$field_name]);
+          unset($field_defs[$field_name]);
         }
       }
-      $this->fieldDefinitions[$entity_type_id][$bundle] = $fieldDefs;
+      $this->fieldDefinitions[$entity_type_id][$bundle] = $field_defs;
     }
 
     return $this->fieldDefinitions[$entity_type_id][$bundle];

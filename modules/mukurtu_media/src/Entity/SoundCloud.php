@@ -92,7 +92,6 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
       ->setDescription(t('SoundCloud audio is usually represented by an interactive audio player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	</br>Select "Choose File" to upload a thumbnail image.'))
-      ->setDefaultValue('')
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,

@@ -37,4 +37,17 @@ interface MukurtuImportFieldProcessInterface {
    */
   public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL);
 
+  /**
+   * Get the supported properties for this field.
+   *
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The field definition.
+   *
+   * @return array
+   *   An array keyed by property name, with values being an array containing:
+   *   - label: The human-readable label for the property.
+   *   - description: The import format description for the property.
+   */
+  public function getSupportedProperties(FieldDefinitionInterface $field_definition): array;
+
 }

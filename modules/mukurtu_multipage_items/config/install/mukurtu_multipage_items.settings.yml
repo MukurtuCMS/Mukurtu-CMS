@@ -6,4 +6,5 @@ bundles_config:
   article: false
   page: false
   person: false
+  place: false
   word_list: false

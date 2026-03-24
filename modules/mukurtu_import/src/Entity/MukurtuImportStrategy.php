@@ -3,6 +3,9 @@
 namespace Drupal\mukurtu_import\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\mukurtu_import\MukurtuImportFieldProcessInterface;
+use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Drupal\user\UserInterface;
 use Drupal\file\FileInterface;
@@ -51,10 +54,17 @@ use Exception;
  *     "target_entity_type_id",
  *     "target_bundle",
  *     "mapping",
+ *     "default_format",
+ *     "configuration",
  *   }
  * )
  */
 class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStrategyInterface {
+
+  /**
+   * The default format for the import.
+   */
+  const string DEFAULT_FORMAT = 'basic_html';
 
   /**
    * The mukurtu_import_strategy ID.
@@ -223,6 +233,10 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return $this->getOwnerId() . "__" . $file->id() . "__" . $this->getTargetEntityTypeId() . "__" . $this->getTargetBundle();
   }
 
+  protected function getDefinitionLabel(FileInterface $file) {
+    return sprintf('%s - %s', $this->label(), $file->getFilename());
+  }
+
   protected function getFieldDefinitions($entity_type_id, $bundle = NULL) {
     if ($bundle) {
       return \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
@@ -236,48 +250,49 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $mapping = $this->getMapping();
 
     // Get the field definitions for the target.
-    $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
 
-    /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $manager */
     $manager = \Drupal::service('plugin.manager.mukurtu_import_field_process');
+    assert($manager instanceof MukurtuImportFieldProcessPluginManager);
 
     // This will cause collisions if there are dupes. Do we care?
-    $importProcess = array_combine(array_column($mapping, 'target'), array_column($mapping, 'source'));
+    $import_process = array_combine(array_column($mapping, 'target'), array_column($mapping, 'source'));
 
     // Remove ignored mappings. This depends on the above dupe collision behavior.
-    if (isset($importProcess['-1'])) {
-      unset($importProcess['-1']);
+    if (isset($import_process['-1'])) {
+      unset($import_process['-1']);
     }
 
     // @todo Add process plugins as appropriate for the target field type.
-    foreach ($importProcess as $target_option => $source) {
+    foreach ($import_process as $target_option => $source) {
       $targets = explode('/', $target_option, 2);
       $target = $targets[0];
       $subtarget = NULL;
       if (count($targets) > 1) {
-        list($target, $subtarget) = $targets;
+        [$target, $subtarget] = $targets;
       }
 
-
-      /** @var \Drupal\field\FieldConfigInterface $fieldDef */
-      $fieldDef = $fieldDefs[$target] ?? NULL;
-      if (!$fieldDef) {
+      $field_def = $field_defs[$target] ?? NULL;
+      if (!$field_def instanceof FieldDefinitionInterface) {
         continue;
       }
 
-      /** @var \Drupal\mukurtu_import\MukurtuImportFieldProcessInterface $processPlugin */
-      if ($processPlugin = $manager->getInstance(['field_definition' => $fieldDef])) {
-        $context = [];
-        $context['multivalue_delimiter'] = $this->getConfig('multivalue_delimiter') ?? ';';
-        $context['upload_location'] = $this->getConfig('upload_location') ?? NULL;
-        if ($subtarget) {
-          $context['subfield'] = $subtarget;
-        }
-        $importProcess[$target_option] = $processPlugin->getProcess($fieldDef, $source, $context);
+      $process_plugin = $manager->getInstance(['field_definition' => $field_def]);
+      if (!$process_plugin instanceof MukurtuImportFieldProcessInterface) {
+        continue;
       }
+      $context = [];
+      $context['multivalue_delimiter'] = $this->getConfig('multivalue_delimiter') ?? ';';
+      $context['upload_location'] = $this->getConfig('upload_location') ?? NULL;
+      $context['default_format'] = $this->getConfig('default_format') ?? self::DEFAULT_FORMAT;
+      $context['local_contexts_delimiter'] = $this->getConfig('local_contexts_delimiter') ?? '>';
+      if ($subtarget) {
+        $context['subfield'] = $subtarget;
+      }
+      $import_process[$target_option] = $process_plugin->getProcess($field_def, $source, $context);
     }
 
-    return $importProcess;
+    return $import_process;
   }
 
   /**
@@ -291,7 +306,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $mapping = $this->getMapping();
     $rawTargets = array_column($mapping, 'target');
 
-    // For subfield processes, we only want the fieldname.
+    // For subfield processes, we only want the field name.
     $targets = array_map(fn($t) => explode('/', $t, 2)[0], $rawTargets);
 
     // Get the field definitions for the target.
@@ -320,36 +335,48 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    *
    * @param \Drupal\file\FileInterface $file
    *   The import input file.
-   * @return mixed
+   * @return array
    *   The migration definition array
    */
-  public function toDefinition(FileInterface $file) {
+  public function toDefinition(FileInterface $file, array $lookup_source_ids = []): array {
     $mapping = $this->getMapping();
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
-    $idKey = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('id');
-    $uuidKey = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
+    $id_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('id');
+    $uuid_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
     $process = $this->getProcess();
 
     $ids = [];
-    // Entity ID has priority.
-    if (!empty($process[$idKey])) {
-      $ids = array_filter(array_map(fn($v) => $v['target'] == $idKey ? $v['source'] : NULL, $mapping));
+    // User-configured identifier column has highest priority.
+    $identifier_column = $this->getIdentifierColumn();
+    if ($identifier_column) {
+      $ids = [$identifier_column];
+    }
+
+    // Entity ID has next priority.
+    if (empty($ids) && !empty($process[$id_key])) {
+      $ids = array_filter(array_map(fn($v) => $v['target'] == $id_key ? $v['source'] : NULL, $mapping));
     }
 
     // UUID has next priority.
-    if (empty($ids) && !empty($process[$uuidKey])) {
-      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuidKey ? $v['source'] : NULL, $mapping));
+    if (empty($ids) && !empty($process[$uuid_key])) {
+      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
     }
 
-    // If we have no ID or UUID, use all input fields as the collective ID.
-    // This will effectively make each row a unique item.
+    // If we have no ID or UUID, use the lookup column (for cross-migration
+    // references) or fallback to _record_number.
     if (empty($ids)) {
-      $ids = array_map(fn ($v) => $v['source'], $mapping);
+      if (!empty($lookup_source_ids)) {
+        $ids = $lookup_source_ids;
+      }
+      else {
+        $ids[] = '_record_number';
+      }
     }
 
-    $definition = [
+    return [
       'id' => $this->getDefinitionId($file),
+      'label' => $this->getDefinitionLabel($file),
       'source' => [
         'plugin' => 'csv',
         'path' => $file->getFileUri(),
@@ -358,6 +385,8 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         'enclosure' => $this->getConfig('enclosure') ?? '"',
         'escape' => $this->getConfig('escape') ?? '\\',
         'track_changes' => TRUE,
+        'create_record_number' => TRUE,
+        'record_number_field' => '_record_number',
       ],
       'process' => $process,
       'destination' => [
@@ -367,8 +396,6 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         'validate' => TRUE,
       ],
     ];
-
-    return $definition;
   }
 
   public function mappedFieldsCount(FileInterface $file) {
@@ -379,6 +406,107 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $diff = array_diff($fileHeaders, $mappingHeaders);
     $mappedCount = count($fileHeaders) - count($diff);
     return $mappedCount;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIdentifierColumn(): ?string {
+    $column = $this->getConfig('identifier_column');
+    return !empty($column) ? $column : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLabelSourceColumn(): ?string {
+    $entity_type_id = $this->getTargetEntityTypeId();
+    $label_key = $this->entityTypeManager()
+      ->getDefinition($entity_type_id)
+      ->getKey('label');
+
+    if (!$label_key) {
+      return NULL;
+    }
+
+    foreach ($this->getMapping() as $mapping) {
+      if ($mapping['target'] === $label_key) {
+        return $mapping['source'];
+      }
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMediaSourceColumn(): ?string {
+    if ($this->getTargetEntityTypeId() !== 'media') {
+      return NULL;
+    }
+
+    $bundle = $this->getTargetBundle();
+    if (!$bundle) {
+      return NULL;
+    }
+
+    $media_type = $this->entityTypeManager()
+      ->getStorage('media_type')
+      ->load($bundle);
+    if (!$media_type) {
+      return NULL;
+    }
+
+    $source_field = $media_type->getSource()->getConfiguration()['source_field'] ?? NULL;
+    if (!$source_field) {
+      return NULL;
+    }
+
+    // Only include the source column for field types whose values fit within
+    // the migrate_map sourceid varchar(255) limit. File/image fields store
+    // filenames (always short). String fields are allowed if their max_length
+    // is <= 255. Fields like text_long (external embeds with iframe codes)
+    // are excluded since they have no length limit.
+    $field_defs = $this->getFieldDefinitions('media', $bundle);
+    $source_field_def = $field_defs[$source_field] ?? NULL;
+    if (!$source_field_def) {
+      return NULL;
+    }
+    $field_type = $source_field_def->getType();
+    if (!in_array($field_type, ['file', 'image', 'string'])) {
+      return NULL;
+    }
+    // Double check string fields so they won't blow past out 255 char limit.
+    if ($field_type === 'string') {
+      $max_length = $source_field_def->getSetting('max_length') ?? 255;
+      if ($max_length > 255) {
+        return NULL;
+      }
+    }
+
+    foreach ($this->getMapping() as $mapping) {
+      $target = $mapping['target'];
+      // Match the source field directly or its target_id subfield.
+      if ($target === $source_field || $target === $source_field . '/target_id') {
+        return $mapping['source'];
+      }
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMappedTarget(string $source): ?string {
+    $mapping = $this->getMapping();
+    foreach ($mapping as $target) {
+      if ($target['source'] === $source) {
+        return $target['target'];
+      }
+    }
+    return NULL;
   }
 
 }

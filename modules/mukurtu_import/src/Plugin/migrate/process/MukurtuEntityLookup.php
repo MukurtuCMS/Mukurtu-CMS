@@ -30,7 +30,7 @@ class MukurtuEntityLookup extends EntityLookup {
     $id = is_array($value) ? reset($value) : $value;
     if (is_numeric($id)) {
       $entity = $this->entityTypeManager->getStorage($this->lookupEntityType)->load($id);
-      if ($entity && (!$this->accessCheck || $entity->access('view'))) {
+      if ($entity) {
         return TRUE;
       }
     }
@@ -38,13 +38,7 @@ class MukurtuEntityLookup extends EntityLookup {
   }
 
   /**
-   * Checks for the existence of some value.
-   *
-   * @param mixed $value
-   *   The value to query.
-   *
-   * @return mixed|null
-   *   Entity id if the queried entity exists. Otherwise NULL.
+   * {@inheritdoc}
    */
   protected function query($value) {
     if ($this->isValidIdentifier($value)) {
@@ -52,14 +46,16 @@ class MukurtuEntityLookup extends EntityLookup {
     }
 
     // Below is basically a copy of migrate_plus EntityLookup::query but with
-    // some tweaks to always respect access and to throw an exception when
-    // multiple query results are found.
+    // a tweak to throw an exception when multiple query results are found.
+    // Access checking is deferred to entity validation, specifically
+    // ValidReferenceConstraintValidator, which grandfathers pre-existing
+    // references the user cannot view while blocking new ones.
 
     // Entity queries typically are case-insensitive. Therefore, we need to
     // handle case-sensitive filtering as a post-query step. By default, it
     // filters case-insensitive. Change to true if that is not the desired
     // outcome.
-    $ignoreCase = !empty($this->configuration['ignore_case']) ?: FALSE;
+    $ignore_case = !empty($this->configuration['ignore_case']) ?: FALSE;
     $operator = !empty($this->configuration['operator']) ? $this->configuration['operator'] : '=';
     $multiple = is_array($value);
 
@@ -68,9 +64,16 @@ class MukurtuEntityLookup extends EntityLookup {
       $operator = 'IN';
     }
 
+    // Skip access checks here so that lookups resolve all referenced entities,
+    // even those the importing user cannot view. Without this, re-importing
+    // existing references the user lacks view access to (e.g. items protected
+    // by a different protocol) would silently resolve to NULL and wipe the
+    // field value. Access is enforced later during entity validation by
+    // ValidReferenceConstraintValidator, which grandfathers pre-existing
+    // references while blocking new ones to inaccessible entities.
     $query = $this->entityTypeManager->getStorage($this->lookupEntityType)
       ->getQuery()
-      ->accessCheck(TRUE)
+      ->accessCheck(FALSE)
       ->condition($this->lookupValueKey, $value, $operator);
     // Sqlite and possibly others returns data in a non-deterministic order.
     // Make it deterministic.
@@ -93,7 +96,7 @@ class MukurtuEntityLookup extends EntityLookup {
     }
 
     // Do a case-sensitive comparison only for strict operators.
-    if (!$ignoreCase && in_array($operator, ['=', 'IN'], TRUE)) {
+    if (!$ignore_case && in_array($operator, ['=', 'IN'], TRUE)) {
       // Returns the entity's identifier.
       foreach ($results as $k => $identifier) {
         $entity = $this->entityTypeManager->getStorage($this->lookupEntityType)->load($identifier);

@@ -3,7 +3,6 @@
 namespace Drupal\mukurtu_local_contexts\Controller;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_local_contexts\LocalContextsHubBase;
@@ -20,21 +19,20 @@ use Drupal\Core\Entity\ContentEntityInterface;
 class ProjectDirectoryController extends ControllerBase {
 
   /**
-   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
+   * Creates a new ProjectDirectoryController instance.
+   *
+   * @param \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager $localContextsProjectManager
+   *   The Local Contexts supported project manager service.
    */
-  protected $localContextsProjectManager;
-
-  public function __construct(ConfigFactoryInterface $configFactory) {
-    $this->localContextsProjectManager = new LocalContextsSupportedProjectManager();
-    $this->configFactory = $configFactory;
+  public function __construct(protected LocalContextsSupportedProjectManager $localContextsProjectManager) {
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): static {
     return new static(
-      $container->get('config.factory'),
+      $container->get('mukurtu_local_contexts.supported_project_manager'),
     );
   }
 
@@ -44,7 +42,7 @@ class ProjectDirectoryController extends ControllerBase {
    * @return array
    */
   function siteDirectory() {
-    $endpointUrl = $this->configFactory->get(LocalContextsHubBase::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsHubBase::DEFAULT_HUB_URL;
+    $endpointUrl = $this->config(LocalContextsHubBase::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsHubBase::DEFAULT_HUB_URL;
     $endpointParts = parse_url($endpointUrl);
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
     $config = $this->config('mukurtu_local_contexts.settings');
@@ -99,7 +97,7 @@ class ProjectDirectoryController extends ControllerBase {
    * @return array
    */
   function communityDirectory(CommunityInterface $group) {
-    $endpointUrl = $this->configFactory->get(LocalContextsHubBase::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsHubBase::DEFAULT_HUB_URL;
+    $endpointUrl = $this->config(LocalContextsHubBase::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsHubBase::DEFAULT_HUB_URL;
     $endpointParts = parse_url($endpointUrl);
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
 
@@ -139,7 +137,7 @@ class ProjectDirectoryController extends ControllerBase {
    * @return array
    */
   function protocolDirectory(ProtocolInterface $group) {
-    $endpointUrl = $this->configFactory->get(LocalContextsHubBase::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsHubBase::DEFAULT_HUB_URL;
+    $endpointUrl = $this->config(LocalContextsHubBase::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsHubBase::DEFAULT_HUB_URL;
     $endpointParts = parse_url($endpointUrl);
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
 
@@ -185,7 +183,7 @@ class ProjectDirectoryController extends ControllerBase {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function groupDirectoryAccess(AccountInterface $account, ContentEntityInterface $group = NULL) {
+  public function groupDirectoryAccess(AccountInterface $account, ?ContentEntityInterface $group = NULL) {
     // Only show the page if the group exists.
     if ($group) {
       return AccessResult::allowed();
@@ -193,7 +191,7 @@ class ProjectDirectoryController extends ControllerBase {
     return AccessResult::forbidden();
   }
 
-  public function title(ContentEntityInterface $group = NULL)  {
+  public function title(?ContentEntityInterface $group = NULL)  {
     return $this->t("Local Contexts Project Directory for %group", ['%group' => $group ? $group->getName() : 'Unknown Group']);
   }
 

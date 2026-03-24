@@ -445,15 +445,16 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
   /**
    * {@inheritdoc}
    */
-  public function access($operation = 'view', AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($operation = 'view', ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     return parent::access($operation, $account, $return_as_object);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageInterface $storage)
-  {
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+
     if ($this->hasField('field_glossary_entry')) {
       if (empty($this->get('field_glossary_entry')->getValue())) {
         $this->set("field_glossary_entry", mb_substr($this->getTitle(), 0, 1));
