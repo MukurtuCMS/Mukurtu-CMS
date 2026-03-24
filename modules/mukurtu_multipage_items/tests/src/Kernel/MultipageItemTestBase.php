@@ -29,6 +29,7 @@ abstract class MultipageItemTestBase extends CollectionTestBase {
     'og',
     'options',
     'path',
+    'path_alias',
     'system',
     'taxonomy',
     'text',
@@ -49,6 +50,7 @@ abstract class MultipageItemTestBase extends CollectionTestBase {
   protected function setUp(): void {
     parent::setUp();
 
+    $this->installEntitySchema('path_alias');
     $this->installEntitySchema('multipage_item');
 
     // Provide the bundle configuration used by MultipageItemManager::isEnabledBundleType().
