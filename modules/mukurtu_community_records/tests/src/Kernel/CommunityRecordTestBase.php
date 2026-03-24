@@ -29,6 +29,7 @@ abstract class CommunityRecordTestBase extends MukurtuKernelTestBase {
     'og',
     'options',
     'path',
+    'path_alias',
     'system',
     'taxonomy',
     'text',
@@ -49,6 +50,7 @@ abstract class CommunityRecordTestBase extends MukurtuKernelTestBase {
 
     $this->installSchema('node', ['node_access']);
     $this->installEntitySchema('node');
+    $this->installEntitySchema('path_alias');
 
     // A bundle that supports community records.
     NodeType::create(['type' => 'page', 'name' => 'Page'])->save();
