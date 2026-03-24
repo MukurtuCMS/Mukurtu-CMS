@@ -244,7 +244,7 @@ class PersonEntityTest extends PersonTestBase {
     $loaded = Node::load($person->id());
 
     $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $loaded);
-    $protocols = $loaded->getProtocols();
+    $protocols = $loaded->getProtocolEntities();
     $this->assertCount(1, $protocols);
     $this->assertEquals($this->protocol->id(), reset($protocols)->id());
     $this->assertEquals('any', $loaded->getSharingSetting());
