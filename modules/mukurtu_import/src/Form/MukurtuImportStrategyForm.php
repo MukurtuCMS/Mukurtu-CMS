@@ -147,6 +147,7 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#header' => [
         $this->t('Column Name'),
         $this->t('Target Field'),
+        '',
       ],
       '#prefix' => "<div id=\"import-field-mapping-config\">",
       '#suffix' => "</div>",
@@ -172,6 +173,20 @@ class MukurtuImportStrategyForm extends EntityForm {
         '#default_value' => $default_target,
         '#validated' => TRUE,
       ];
+
+      $form['mapping'][$delta]['remove'] = [
+        '#delta' => $delta,
+        '#name' => "mapping_{$delta}_remove_button",
+        '#type' => 'submit',
+        '#value' => $this->t('Remove'),
+        '#validate' => [],
+        '#submit' => ['::removeMappingSubmit'],
+        '#limit_validation_errors' => [],
+        '#ajax' => [
+          'callback' => '::mappingTableAjaxCallback',
+          'wrapper' => 'import-field-mapping-config',
+        ],
+      ];
     }
 
     $form['add_mapping'] = [
@@ -192,6 +207,26 @@ class MukurtuImportStrategyForm extends EntityForm {
   public function addMappingCallback(array &$form, FormStateInterface $form_state): void {
     $num_mappings = $form_state->get('num_mappings');
     $form_state->set('num_mappings', $num_mappings + 1);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Submit callback for the "Remove" button on a mapping row.
+   */
+  public function removeMappingSubmit(array &$form, FormStateInterface $form_state): void {
+    $button = $form_state->getTriggeringElement();
+    $delta = (int) $button['#delta'];
+
+    // Remove the row from user input and re-index.
+    $user_input = $form_state->getUserInput();
+    $mapping_input = $user_input['mapping'] ?? [];
+    unset($mapping_input[$delta]);
+    $user_input['mapping'] = array_values($mapping_input);
+    $form_state->setUserInput($user_input);
+
+    // Decrement the row count (minimum 1).
+    $num_mappings = $form_state->get('num_mappings');
+    $form_state->set('num_mappings', max($num_mappings - 1, 1));
     $form_state->setRebuild();
   }
 
