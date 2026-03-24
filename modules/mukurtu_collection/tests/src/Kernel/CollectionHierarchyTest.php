@@ -223,9 +223,9 @@ class CollectionHierarchyTest extends CollectionTestBase {
     $roots = $service->getRootCollections();
 
     $rootIds = array_keys($roots);
-    $this->assertContains($this->rootCollection->id(), $rootIds, 'Root collection is in the root list.');
-    $this->assertNotContains($this->childCollection->id(), $rootIds, 'Child collection is not in the root list.');
-    $this->assertNotContains($this->grandchildCollection->id(), $rootIds, 'Grandchild collection is not in the root list.');
+    $this->assertTrue(in_array($this->rootCollection->id(), $rootIds), 'Root collection is in the root list.');
+    $this->assertFalse(in_array($this->childCollection->id(), $rootIds), 'Child collection is not in the root list.');
+    $this->assertFalse(in_array($this->grandchildCollection->id(), $rootIds), 'Grandchild collection is not in the root list.');
   }
 
   /**

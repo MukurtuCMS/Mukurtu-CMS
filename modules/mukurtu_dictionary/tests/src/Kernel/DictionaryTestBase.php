@@ -83,6 +83,7 @@ abstract class DictionaryTestBase extends MukurtuKernelTestBase {
 
     $this->installSchema('comment', 'comment_entity_statistics');
     $this->installSchema('node', ['node_access']);
+    $this->installSchema('search_api', ['search_api_item', 'search_api_task']);
 
     // Grant dictionary node permissions to the authenticated role so that
     // bundleCheckCreateAccess() passes for logged-in users.
