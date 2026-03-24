@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import\Form;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -18,13 +21,26 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class MukurtuImportStrategyForm extends EntityForm {
 
   /**
+   * Memoized field definitions.
+   *
+   * @var array
+   */
+  protected array $fieldDefinitions = [];
+
+  /**
    * Constructs a MukurtuImportStrategyForm object.
    *
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityBundleInfo
    *   The entity type bundle info service.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
+   *   The entity field manager.
+   * @param \Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager $fieldProcessPluginManager
+   *   The field process plugin manager.
    */
   public function __construct(
     protected EntityTypeBundleInfoInterface $entityBundleInfo,
+    protected EntityFieldManagerInterface $entityFieldManager,
+    protected MukurtuImportFieldProcessPluginManager $fieldProcessPluginManager,
   ) {}
 
   /**
@@ -33,6 +49,8 @@ class MukurtuImportStrategyForm extends EntityForm {
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('entity_type.bundle.info'),
+      $container->get('entity_field.manager'),
+      $container->get('plugin.manager.mukurtu_import_field_process'),
     );
   }
 
@@ -40,6 +58,8 @@ class MukurtuImportStrategyForm extends EntityForm {
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state): array {
+    $form = parent::form($form, $form_state);
+
     $form['label'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Label'),
@@ -73,18 +93,113 @@ class MukurtuImportStrategyForm extends EntityForm {
     $entity_type_id = $form_state->getValue('target_entity_type_id') ?? $this->entity->get('target_entity_type_id');
     $bundle_options = $this->getBundleOptions($entity_type_id);
     $bundle_keys = array_keys($bundle_options);
+    $bundle = $form_state->getValue('target_bundle') ?? $this->entity->get('target_bundle') ?? reset($bundle_keys);
     $form['target_bundle'] = [
       '#type' => 'radios',
       '#title' => $this->t('Sub-type'),
       '#options' => $bundle_options,
-      '#default_value' => $form_state->getValue('target_bundle') ?? $this->entity->get('target_bundle') ?? reset($bundle_keys),
+      '#default_value' => $bundle,
       '#description' => $this->t('Optional Sub-type. When importing new content or media, they will be of this type if not specified in the import metadata.'),
       '#prefix' => "<div id=\"bundle-select\">",
       '#suffix' => "</div>",
       '#validated' => TRUE,
+      '#ajax' => [
+        'callback' => [$this, 'bundleChangeAjaxCallback'],
+        'event' => 'change',
+      ],
     ];
 
+    // Resolve the bundle for building target options. A value of -1 means
+    // "Base Fields Only", which corresponds to NULL for field definitions.
+    $resolved_bundle = ($bundle == -1) ? NULL : $bundle;
+
+    $this->buildMappingTable($form, $form_state, $entity_type_id, $resolved_bundle);
+
     return $form;
+  }
+
+  /**
+   * Builds the mapping table for source column to target field mapping.
+   *
+   * @param array $form
+   *   The form array to add the mapping table to (passed by reference).
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state.
+   * @param string|null $entity_type_id
+   *   The target entity type ID.
+   * @param string|null $bundle
+   *   The target bundle (NULL for base fields only).
+   */
+  protected function buildMappingTable(array &$form, FormStateInterface $form_state, ?string $entity_type_id, ?string $bundle): void {
+    $existing_mapping = $this->entity->getMapping();
+    $target_options = $entity_type_id ? $this->buildTargetOptions($entity_type_id, $bundle) : [-1 => $this->t('Ignore - Do not import')];
+
+    // Determine the number of mapping rows.
+    $num_mappings = $form_state->get('num_mappings');
+    if ($num_mappings === NULL) {
+      $num_mappings = max(count($existing_mapping), 1);
+      $form_state->set('num_mappings', $num_mappings);
+    }
+
+    $form['mapping'] = [
+      '#type' => 'table',
+      '#caption' => $this->t('Define source column to target field mappings.'),
+      '#header' => [
+        $this->t('Column Name'),
+        $this->t('Target Field'),
+      ],
+      '#prefix' => "<div id=\"import-field-mapping-config\">",
+      '#suffix' => "</div>",
+    ];
+
+    for ($delta = 0; $delta < $num_mappings; $delta++) {
+      $default_source = $existing_mapping[$delta]['source'] ?? '';
+      $default_target = $existing_mapping[$delta]['target'] ?? -1;
+
+      $form['mapping'][$delta]['source'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Column Name'),
+        '#title_display' => 'invisible',
+        '#default_value' => $default_source,
+        '#size' => 30,
+      ];
+
+      $form['mapping'][$delta]['target'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Target Field'),
+        '#title_display' => 'invisible',
+        '#options' => $target_options,
+        '#default_value' => $default_target,
+        '#validated' => TRUE,
+      ];
+    }
+
+    $form['add_mapping'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add mapping'),
+      '#submit' => ['::addMappingCallback'],
+      '#ajax' => [
+        'callback' => '::mappingTableAjaxCallback',
+        'wrapper' => 'import-field-mapping-config',
+      ],
+      '#limit_validation_errors' => [],
+    ];
+  }
+
+  /**
+   * Submit callback for the "Add mapping" button.
+   */
+  public function addMappingCallback(array &$form, FormStateInterface $form_state): void {
+    $num_mappings = $form_state->get('num_mappings');
+    $form_state->set('num_mappings', $num_mappings + 1);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * AJAX callback that returns the mapping table.
+   */
+  public function mappingTableAjaxCallback(array &$form, FormStateInterface $form_state): array {
+    return $form['mapping'];
   }
 
   /**
@@ -136,6 +251,44 @@ class MukurtuImportStrategyForm extends EntityForm {
         $options[$bundle] = $info['label'] ?? $bundle;
       }
     }
+    return $options;
+  }
+
+  /**
+   * Build the target field options for the mapping select elements.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param string|null $bundle
+   *   The bundle.
+   *
+   * @return array
+   *   An associative array of field names/subfields to labels.
+   */
+  protected function buildTargetOptions(string $entity_type_id, ?string $bundle = NULL): array {
+    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entity_keys = $entity_definition->getKeys();
+
+    $options = [-1 => $this->t('Ignore - Do not import')];
+    foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
+      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
+      $supported_properties = $plugin->getSupportedProperties($field_definition);
+
+      if (!empty($supported_properties)) {
+        foreach ($supported_properties as $property_name => $property_info) {
+          $options["{$field_name}/{$property_name}"] = $property_info['label'];
+        }
+      }
+      else {
+        $options[$field_name] = $field_definition->getLabel();
+      }
+    }
+
+    // Disambiguate the Language field from the langcode base field.
+    if (isset($options[$entity_keys['langcode']])) {
+      $options[$entity_keys['langcode']] .= $this->t(' (langcode)');
+    }
+
     return $options;
   }
 
@@ -198,20 +351,26 @@ class MukurtuImportStrategyForm extends EntityForm {
    *   The field definitions.
    */
   protected function getFieldDefinitions(string $entity_type_id, ?string $bundle = NULL): array {
-    // Memoize the field defs.
     if (empty($this->fieldDefinitions[$entity_type_id][$bundle])) {
       $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
       $entityKeys = $entityDefinition->getKeys();
       $fieldDefs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
 
-      // Remove computed fields/fields that can't be targeted for import.
       foreach ($fieldDefs as $field_name => $fieldDef) {
-        // Don't remove ID/UUID fields.
-        if ($field_name == $entityKeys['id'] || $field_name == $entityKeys['uuid']) {
+        if ($field_name === $entityKeys['id'] || $field_name === $entityKeys['uuid']) {
           continue;
         }
 
-        // Remove computed and read-only fields.
+        // Remove the revision log message as a valid target.
+        if ($field_name === 'revision_log') {
+          unset($fieldDefs[$field_name]);
+        }
+
+        // Remove unwanted 'behavior_settings' paragraph base field.
+        if ($entity_type_id === 'paragraph' && $field_name === 'behavior_settings') {
+          unset($fieldDefs[$field_name]);
+        }
+
         if ($fieldDef->isComputed() || $fieldDef->isReadOnly()) {
           unset($fieldDefs[$field_name]);
         }
@@ -225,17 +384,29 @@ class MukurtuImportStrategyForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, FormStateInterface $form_state): int {
-    // Store NULL for target_bundle when "None: Base Fields Only" is selected.
-    if ($this->entity->get('target_bundle') == -1) {
-      $this->entity->set('target_bundle', NULL);
+  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state): void {
+    // Filter out mapping rows with no source column name and re-index.
+    $mapping = $form_state->getValue('mapping') ?? [];
+    $mapping = array_filter($mapping, fn($row) => !empty(trim($row['source'] ?? '')));
+    $form_state->setValue('mapping', array_values($mapping));
+
+    // Normalize target_bundle: -1 means "Base Fields Only" = NULL.
+    if ($form_state->getValue('target_bundle') == -1) {
+      $form_state->setValue('target_bundle', NULL);
     }
 
+    parent::copyFormValuesToEntity($entity, $form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function save(array $form, FormStateInterface $form_state): int {
     $result = parent::save($form, $form_state);
     $message_args = ['%label' => $this->entity->label()];
     $message = $result == SAVED_NEW
-      ? $this->t('Created new mukurtu_import_strategy %label.', $message_args)
-      : $this->t('Updated mukurtu_import_strategy %label.', $message_args);
+      ? $this->t('Created new Import Configuration Template %label.', $message_args)
+      : $this->t('Updated Import Configuration Template: %label.', $message_args);
     $this->messenger()->addStatus($message);
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
     return $result;
@@ -247,6 +418,7 @@ class MukurtuImportStrategyForm extends EntityForm {
   public function entityTypeChangeAjaxCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
     $response = new AjaxResponse();
 
+    // Update the bundle radios.
     $form['target_bundle']['#options'] = $this->getBundleOptions($form_state->getValue('target_entity_type_id'));
     $optionKeys = array_keys($form['target_bundle']['#options']);
     $default = reset($optionKeys);
@@ -255,6 +427,18 @@ class MukurtuImportStrategyForm extends EntityForm {
     $form_state->setValue('target_bundle', $default);
     $response->addCommand(new ReplaceCommand("#bundle-select", $form['target_bundle']));
 
+    // Update the mapping table target options.
+    $response->addCommand(new ReplaceCommand("#import-field-mapping-config", $form['mapping']));
+
+    return $response;
+  }
+
+  /**
+   * AJAX callback for bundle selection changes.
+   */
+  public function bundleChangeAjaxCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
+    $response = new AjaxResponse();
+    $response->addCommand(new ReplaceCommand("#import-field-mapping-config", $form['mapping']));
     return $response;
   }
 
