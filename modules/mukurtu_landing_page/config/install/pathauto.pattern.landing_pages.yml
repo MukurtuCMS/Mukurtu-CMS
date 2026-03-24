@@ -8,14 +8,14 @@ label: 'Landing Pages'
 type: 'canonical_entities:node'
 pattern: '[node:title]'
 selection_criteria:
-  fc939fdf-197e-4d35-848f-505c81121f0b:
+  130468a8-2a50-48dc-abf0-a7b851c5ce29:
     id: 'entity_bundle:node'
     negate: false
-    uuid: fc939fdf-197e-4d35-848f-505c81121f0b
+    uuid: 130468a8-2a50-48dc-abf0-a7b851c5ce29
     context_mapping:
       node: node
     bundles:
-      landing_page: landing_page
+      page: page
 selection_logic: and
 weight: -5
 relationships: {  }
