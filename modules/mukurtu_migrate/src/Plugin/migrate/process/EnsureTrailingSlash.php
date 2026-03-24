@@ -12,7 +12,10 @@ use Drupal\migrate\Row;
 /**
  * Ensures a URL value has a trailing slash.
  */
-#[MigrateProcess(id: 'ensure_trailing_slash', handle_multiples: FALSE)]
+#[MigrateProcess(
+  id: 'ensure_trailing_slash',
+  handle_multiples: FALSE,
+)]
 class EnsureTrailingSlash extends ProcessPluginBase {
 
   /**
