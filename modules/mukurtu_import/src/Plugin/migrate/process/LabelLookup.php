@@ -75,8 +75,12 @@ class LabelLookup extends ProcessPluginBase implements ContainerFactoryPluginInt
         return $value_with_slash;
       }
 
-      $lowercase_values = array_map('mb_strtolower', $allowed_values);
-      if ($key = array_search(mb_strtolower($value), $lowercase_values)) {
+      // Strip markup and normalize whitespace from labels before comparing,
+      // so plain text input like "In Copyright" matches labels that contain
+      // HTML (e.g., <img> and <a> tags).
+      $stripped_values = array_map(fn ($label) => mb_strtolower(trim(preg_replace('/\s+/', ' ', strip_tags((string) $label)))), $allowed_values);
+      $normalized_input = mb_strtolower(trim(preg_replace('/\s+/', ' ', $value)));
+      if ($key = array_search($normalized_input, $stripped_values)) {
         return $key;
       }
     }
