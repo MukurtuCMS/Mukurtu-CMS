@@ -1,20 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * For list text fields (fields of type 'list_string'), do a lookup for machine
  * name based on label.
  *
  * Accepts three mandatory config values: entity type, field name, and bundle.
- *
- * @MigrateProcessPlugin(
- *   id = "label_lookup"
- * )
  *
  * @code
  *  plugin: label_lookup
@@ -26,28 +29,54 @@ use Drupal\migrate\Row;
  * @endcode
  *
  */
+#[MigrateProcess('label_lookup')]
+class LabelLookup extends ProcessPluginBase implements ContainerFactoryPluginInterface {
 
-class LabelLookup extends ProcessPluginBase {
+  /**
+   * Constructs a LabelLookup object.
+   *
+   * @param array $configuration
+   *    A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *    The plugin ID for the plugin instance.
+   * @param mixed $plugin_definition
+   *    The plugin implementation definition.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, protected EntityFieldManagerInterface $entityFieldManager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_field.manager'));
+  }
+
   /**
    * {@inheritdoc}
    */
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
-    $allowedValues = [];
-    $entityType = $this->configuration['entity_type'];
-    $fieldName = $this->configuration['field_name'];
+    $entity_type = $this->configuration['entity_type'];
+    $field_name = $this->configuration['field_name'];
     $bundle = $this->configuration['bundle'];
 
-    $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions($entityType, $bundle);
-
-    /** @var \Drupal\field\Entity\FieldConfig $fieldConfig */
-    if ($fieldConfig = $fields[$fieldName] ?? NULL) {
-      $allowedValues = $fieldConfig->getSetting('allowed_values');
-      if (isset($allowedValues[$value])) {
+    $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);
+    $field_config = $fields[$field_name];
+    if ($field_config instanceof FieldDefinitionInterface) {
+      $allowed_values = $field_config->getSetting('allowed_values');
+      if (isset($allowed_values[$value])) {
         return $value;
       }
 
-      $lowercaseValues = array_map('mb_strtolower', $allowedValues);
-      if ($key = array_search(mb_strtolower($value), $lowercaseValues)) {
+      // Try with a trailing slash for URL-based list values.
+      $value_with_slash = rtrim($value, '/') . '/';
+      if ($value_with_slash !== $value && isset($allowed_values[$value_with_slash])) {
+        return $value_with_slash;
+      }
+
+      $lowercase_values = array_map('mb_strtolower', $allowed_values);
+      if ($key = array_search(mb_strtolower($value), $lowercase_values)) {
         return $key;
       }
     }
