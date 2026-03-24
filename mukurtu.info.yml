@@ -51,6 +51,7 @@ install:
   - geocoder
   - geocoder_field
   - tagify
+  - rebuild_cache_access
 
 dependencies:
   - 'blazy:blazy'
@@ -89,6 +90,7 @@ dependencies:
   - 'drupal:dashboards'
   - 'drupal:admin_theme'
   - 'drupal:tagify'
+  - 'drupal:rebuild_cache_access'
   - 'embed:embed'
   - 'entity_browser:entity_browser'
   - 'entity_embed:entity_embed'
