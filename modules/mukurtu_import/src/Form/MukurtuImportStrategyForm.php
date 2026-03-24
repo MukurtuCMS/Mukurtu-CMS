@@ -114,10 +114,17 @@ class MukurtuImportStrategyForm extends EntityForm {
     // "Base Fields Only", which corresponds to NULL for field definitions.
     $resolved_bundle = ($bundle == -1) ? NULL : $bundle;
 
+    $configuration = $this->entity->get('configuration') ?? [];
+    $form['identifier_column'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Identifier Column'),
+      '#description' => $this->t('Optional. Enter the column name to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
+      '#default_value' => $configuration['identifier_column'] ?? '',
+    ];
+
     $this->buildMappingTable($form, $form_state, $entity_type_id, $resolved_bundle);
 
     // File settings for import (CSV parsing, delimiters, text format).
-    $configuration = $this->entity->get('configuration') ?? [];
     $form['configuration'] = [
       '#type' => 'details',
       '#title' => $this->t('File Settings'),
@@ -491,7 +498,45 @@ class MukurtuImportStrategyForm extends EntityForm {
       $form_state->setValue('target_bundle', NULL);
     }
 
+    // Fold identifier_column into configuration.
+    $configuration = $form_state->getValue('configuration') ?? [];
+    $configuration['identifier_column'] = $form_state->getValue('identifier_column') ?: NULL;
+    $form_state->setValue('configuration', $configuration);
+
     parent::copyFormValuesToEntity($entity, $form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    parent::validateForm($form, $form_state);
+
+    // Build a temporary entity with the submitted values so we can call
+    // methods like getLabelSourceColumn() and getMediaSourceColumn() directly
+    // without save/restore gymnastics.
+    $entity = $this->buildEntity($form, $form_state);
+
+    if (!$entity instanceof MukurtuImportStrategy) {
+      return;
+    }
+
+    // When no Identifier Column is chosen, verify that toDefinition() will be
+    // able to compute a unique source ID from the current mapping.
+    if (!$entity->getIdentifierColumn()) {
+      $entity_type_id = $entity->getTargetEntityTypeId();
+      $entity_type_def = $this->entityTypeManager->getDefinition($entity_type_id);
+      $mapped_targets = array_column($entity->getMapping(), 'target');
+
+      $has_id = ($id_key = $entity_type_def->getKey('id')) && in_array($id_key, $mapped_targets);
+      $has_uuid = ($uuid_key = $entity_type_def->getKey('uuid')) && in_array($uuid_key, $mapped_targets);
+      $has_label = (bool) $entity->getLabelSourceColumn();
+      $has_media_source = (bool) $entity->getMediaSourceColumn();
+
+      if (!$has_id && !$has_uuid && !$has_label && !$has_media_source) {
+        $form_state->setError($form['identifier_column'], $this->t('An Identifier Column is required. No ID, UUID, label, or compatible media source field is mapped, so the importer cannot uniquely identify rows. Set an Identifier Column above, or map one of the required fields.'));
+      }
+    }
   }
 
   /**
