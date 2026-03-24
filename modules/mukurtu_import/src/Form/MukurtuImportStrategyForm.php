@@ -92,7 +92,7 @@ class MukurtuImportStrategyForm extends EntityForm {
       ],
     ];
 
-    $entity_type_id = $form_state->getValue('target_entity_type_id') ?? $this->entity->get('target_entity_type_id');
+    $entity_type_id = $form_state->getValue('target_entity_type_id') ?? $this->entity->get('target_entity_type_id') ?? 'node';
     $bundle_options = $this->getBundleOptions($entity_type_id);
     $bundle_keys = array_keys($bundle_options);
     $bundle = $form_state->getValue('target_bundle') ?? $this->entity->get('target_bundle') ?? reset($bundle_keys);
