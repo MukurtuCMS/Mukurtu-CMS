@@ -26,17 +26,6 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
       'template' => 'mukurtu-node-add-list',
       'variables' => ['content' => NULL],
     ],
-    'mukurtu_dashboard' => [
-      'template' => 'mukurtu-dashboard',
-      'variables' => [
-        'getting_started_community' => NULL,
-        'getting_started_category' => NULL,
-        'activity_log' => NULL,
-        'all_recent_content' => NULL,
-        'user_recent_content' => NULL,
-        'draft_content' => NULL,
-      ],
-    ],
   ];
 }
 
@@ -147,7 +136,7 @@ function mukurtu_core_form_user_login_form_alter(&$form, FormStateInterface $for
  * Custom submit handler to redirect to dashboard on login.
  */
 function mukurtu_core_user_login_form_submit($form, FormStateInterface $form_state) {
-  $url = Url::fromRoute('mukurtu_core.dashboard');
+  $url = Url::fromRoute('entity.dashboard.canonical', ['dashboard' => 'mukurtu_dashboard']);
   $form_state->setRedirectUrl($url);
 }
 

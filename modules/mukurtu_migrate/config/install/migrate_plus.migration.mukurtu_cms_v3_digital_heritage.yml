@@ -144,13 +144,13 @@ process:
   field_rights_and_usage/value:
     -
       plugin: get
-      source: field_rights/value
+      source: field_rights/0/value
     -
       plugin: media_embed
   field_rights_and_usage/format:
     -
       plugin: static_map
-      source: field_rights/format
+      source: field_rights/0/format
       map:
         filtered_html: basic_html
         plain_text: plain_text
