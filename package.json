@@ -1,0 +1,23 @@
+{
+  "name": "gulp",
+  "version": "1.0.0",
+  "description": "[![Mukurtu CI Tests](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/workflows/build-and-test.yml)",
+  "homepage": "https://github.com/MukurtuCMS/Mukurtu-CMS#readme",
+  "bugs": {
+    "url": "https://github.com/MukurtuCMS/Mukurtu-CMS/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MukurtuCMS/Mukurtu-CMS.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
