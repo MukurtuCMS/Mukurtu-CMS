@@ -26,6 +26,7 @@ use Exception;
  *     plural = "@count Import Templates",
  *   ),
  *   handlers = {
+ *     "access" = "Drupal\mukurtu_import\MukurtuImportStrategyAccessControlHandler",
  *     "list_builder" = "Drupal\mukurtu_import\MukurtuImportStrategyListBuilder",
  *     "form" = {
  *       "add" = "Drupal\mukurtu_import\Form\MukurtuImportStrategyForm",
@@ -185,7 +186,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $this->id = $this->uuidGenerator()->generate();
     }
     if (!$this->uid) {
-      $this->uid = 1;
+      $this->uid = \Drupal::currentUser()->id();
     }
     return parent::save();
   }
