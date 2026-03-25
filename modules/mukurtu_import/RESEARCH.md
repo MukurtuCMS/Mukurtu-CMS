@@ -507,7 +507,7 @@ Lists all importable entity types (node, media, community, protocol, paragraph, 
 | `mukurtu_import.import_results` | `/admin/import/results` | Step 4: Results |
 | `mukurtu_import.bundles_list` | `/admin/import/format` | Format info: entity type list |
 | `mukurtu_import.fields_list` | `/admin/import/format/{entity_type}/{bundle}` | Format info: field list |
-| `entity.mukurtu_import_strategy.*` | `/admin/structure/mukurtu-import-strategy/*` | Strategy CRUD |
+| `entity.mukurtu_import_strategy.*` | `/admin/import-templates/*` | Strategy CRUD |
 
 ---
 

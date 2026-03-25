@@ -36,10 +36,10 @@ use Exception;
  *   config_prefix = "mukurtu_import_strategy",
  *   admin_permission = "administer mukurtu_import_strategy",
  *   links = {
- *     "collection" = "/admin/structure/mukurtu-import-strategy",
- *     "add-form" = "/admin/structure/mukurtu-import-strategy/add",
- *     "edit-form" = "/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}",
- *     "delete-form" = "/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}/delete"
+ *     "collection" = "/admin/import-templates",
+ *     "add-form" = "/admin/import-templates/add",
+ *     "edit-form" = "/admin/import-templates/{mukurtu_import_strategy}",
+ *     "delete-form" = "/admin/import-templates/{mukurtu_import_strategy}/delete"
  *   },
  *   entity_keys = {
  *     "id" = "id",
