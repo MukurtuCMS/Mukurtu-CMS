@@ -27,7 +27,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *  bundle: bundle
  *
  * @endcode
- *
  */
 #[MigrateProcess('label_lookup')]
 class LabelLookup extends ProcessPluginBase implements ContainerFactoryPluginInterface {
@@ -60,6 +59,9 @@ class LabelLookup extends ProcessPluginBase implements ContainerFactoryPluginInt
     $entity_type = $this->configuration['entity_type'];
     $field_name = $this->configuration['field_name'];
     $bundle = $this->configuration['bundle'];
+
+    // Trim whitespace from the value.
+    $value = trim((string) $value);
 
     $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);
     $field_config = $fields[$field_name];
