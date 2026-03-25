@@ -177,7 +177,7 @@ class MukurtuCommunityRecordOrderForm extends ConfigFormBase {
    *   The current state of the form.
    */
   public function cancel(array &$form, FormStateInterface $form_state) {
-    $form_state->setRedirect('mukurtu_core.dashboard');
+    $form_state->setRedirect('entity.dashboard.canonical', ['dashboard' => 'mukurtu_dashboard']);
   }
 
   /**
