@@ -18,18 +18,22 @@
       );
 
       selects.forEach(function (select) {
+        select.dataset.recentSource = select.querySelector('option[selected]').textContent;
         select.addEventListener('change', function () {
           const row = select.closest('tr');
           if (!row) {
             return;
           }
           const sourceInput = row.querySelector('input[name*="[source]"]');
-          if (!sourceInput || sourceInput.value.trim() !== '') {
+          const selectedOption = select.options[select.selectedIndex];
+          const recentSource = select.dataset.recentSource;
+
+          select.dataset.recentSource = selectedOption.textContent;
+          if (!sourceInput || (sourceInput.value.trim() !== '' && sourceInput.value.trim() !== recentSource)) {
             return;
           }
-          const selectedOption = select.options[select.selectedIndex];
           if (selectedOption && select.value !== '-1') {
-            sourceInput.value = selectedOption.text;
+            sourceInput.value = selectedOption.textContent;
           }
         });
       });
@@ -123,13 +127,13 @@
 
     const computedOption = document.createElement('option');
     computedOption.value = '';
-    computedOption.text = Drupal.t('- Computed -');
+    computedOption.textContent = Drupal.t('- Computed -');
     select.appendChild(computedOption);
 
     sources.forEach(function (source) {
       const option = document.createElement('option');
       option.value = source;
-      option.text = source;
+      option.textContent = source;
       select.appendChild(option);
     });
 
