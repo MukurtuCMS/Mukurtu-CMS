@@ -154,7 +154,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     // Provide an option to save this config for reuse.
     $form['import_config'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Import Configuration Template'),
+      '#title' => $this->t('Import Template'),
     ];
     $form['import_config']['config_save'] = [
       '#type' => 'checkbox',

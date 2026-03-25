@@ -1,6 +1,6 @@
 /**
  * @file
- * Behaviors for the Import Configuration Template form.
+ * Behaviors for the Import Template form.
  */
 
 (function (Drupal, once) {

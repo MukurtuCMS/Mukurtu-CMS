@@ -17,7 +17,7 @@ use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form for adding and editing Import Configuration Template entities.
+ * Form for adding and editing Import Template entities.
  */
 class MukurtuImportStrategyForm extends EntityForm {
 
@@ -67,7 +67,7 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#title' => $this->t('Label'),
       '#maxlength' => 255,
       '#default_value' => $this->entity->label(),
-      '#description' => $this->t('Label for the Import Configuration template.'),
+      '#description' => $this->t('Label for the Import Template.'),
       '#required' => TRUE,
     ];
 
@@ -75,7 +75,7 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#type' => 'textarea',
       '#title' => $this->t('Description'),
       '#default_value' => $this->entity->get('description'),
-      '#description' => $this->t('Enter a description for the Import Configuration template.'),
+      '#description' => $this->t('Enter a description for the Import Template.'),
     ];
 
     $form['target_entity_type_id'] = [
@@ -548,8 +548,8 @@ class MukurtuImportStrategyForm extends EntityForm {
     $result = parent::save($form, $form_state);
     $message_args = ['%label' => $this->entity->label()];
     $message = $result == SAVED_NEW
-      ? $this->t('Created new Import Configuration Template %label.', $message_args)
-      : $this->t('Updated Import Configuration Template: %label.', $message_args);
+      ? $this->t('Created new Import Template %label.', $message_args)
+      : $this->t('Updated Import Template: %label.', $message_args);
     $this->messenger()->addStatus($message);
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
     return $result;

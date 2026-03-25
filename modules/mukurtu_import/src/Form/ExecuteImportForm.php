@@ -96,7 +96,7 @@ class ExecuteImportForm extends ImportBaseForm {
       '#caption' => $this->t('Review your import. Once you begin the import you cannot stop it. There is no way to rollback the import. Click the "Start Import" button to begin.'),
       '#header' => [
         $this->t('Filename'),
-        $this->t('Import Configuration'),
+        $this->t('Import Settings'),
         $this->t('Destination Import Type'),
       ],
       '#attributes' => [
@@ -115,7 +115,10 @@ class ExecuteImportForm extends ImportBaseForm {
       ];
 
       // Import Configuration.
-      $label = $import_config_for_file->label() ?? $this->t("Custom");
+      $label = $import_config_for_file->label();
+      if (empty($label)) {
+        $label = $this->t("Custom");
+      }
       $form['table'][$fid]['config'] = [
         '#type' => 'markup',
         '#markup' => "<div>{$label}</div>",

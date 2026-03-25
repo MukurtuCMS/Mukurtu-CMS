@@ -131,7 +131,7 @@ The import is a **4-step wizard** implemented as separate routes/forms, with sta
 ### Step 2: Configure Mappings (`/admin/import/files` — `ImportFileSummaryForm`)
 
 - Displays a **draggable table** of uploaded CSV files, each with:
-  - A dropdown to select an existing **Import Configuration Template** (saved `MukurtuImportStrategy` entities owned by the current user) or "Custom Settings".
+  - A dropdown to select an existing **Import Template** (saved `MukurtuImportStrategy` entities owned by the current user) or "Custom Settings".
   - A "Customize Settings" button to go to the detailed mapping form.
   - A weight column for ordering import execution.
   - Summary messages showing target entity type/bundle and mapped field count.
@@ -491,7 +491,7 @@ Lists all importable entity types (node, media, community, protocol, paragraph, 
 
 | Permission | Description |
 |---|---|
-| `administer mukurtu_import_strategy` | Manage import configuration templates |
+| `administer mukurtu_import_strategy` | Manage Import Templates |
 | `access mukurtu import` | Access the import wizard UI |
 
 ---
