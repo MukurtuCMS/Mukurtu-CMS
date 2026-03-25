@@ -218,7 +218,7 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 | `modules/mukurtu_browse/tests/src/Unit/MukurtuBoundingBoxTest.php` | **Created** (10 tests) | 2026-03-24 | [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
 | `phpunit.xml` | Added kernel + unit testsuite directories; PHPUnit 10 schema + @group fixes | 2026-03-19 / 2026-03-24 | [`12b71fca`](https://github.com/alexmerrill/Mukurtu-CMS/commit/12b71fca) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`840fb318`](https://github.com/alexmerrill/Mukurtu-CMS/commit/840fb318) [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) [`d2061340`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d2061340) [`9618bddb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/9618bddb) [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) [`e5ea5e23`](https://github.com/alexmerrill/Mukurtu-CMS/commit/e5ea5e23) [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
 
-**Total new tests added: ~180** across 20 test classes and 10 modules.
+**Total new tests added: ~184** across 20 test classes and 10 modules.
 
 ---
 
@@ -232,6 +232,6 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 
 4. **`LocalContextsTestBase::insertProjectRecord()`** — inserts directly to the DB to satisfy JOIN queries. Couples test setup to the schema, but gives more realistic coverage than testing only the non-JOIN paths.
 
-5. **`DictionaryWordListTest::testAddSameWordTwiceResultsInDuplicate`** — documents that `add()` does not deduplicate. If the intent is that a word should appear at most once, this test should assert count=1 and `add()` should get a guard. Confirm with the team.
+5. **`DictionaryWordListTest::testAddSameWordTwiceResultsInDuplicate`** — `add()` does not deduplicate; the test asserts count=2 and documents that deduplication is the UI's responsibility. The docblock explicitly states that if deduplication is ever moved into the API, the test should assert count=1 instead. Confirm the intended boundary with the team.
 
 6. **`mukurtu_browse` unit tests** — complement Playwright end-to-end coverage. The unit tests lock down bounding-box parsing math and CSV-to-entity delegation, which are the pieces Playwright can't easily reach.
