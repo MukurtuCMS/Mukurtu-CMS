@@ -144,13 +144,13 @@ process:
   field_rights_and_usage/value:
     -
       plugin: get
-      source: field_rights/value
+      source: field_rights/0/value
     -
       plugin: media_embed
   field_rights_and_usage/format:
     -
       plugin: static_map
-      source: field_rights/format
+      source: field_rights/0/format
       map:
         filtered_html: basic_html
         plain_text: plain_text
@@ -217,7 +217,14 @@ process:
   field_local_contexts_labels_and_notices:
     plugin: transform_tk_label
     source: field_licence_trad
-  field_creative_commons: field_licence_std_cc
+  field_creative_commons:
+    -
+      plugin: get
+      source: field_licence_std_cc/0/value
+    -
+      plugin: ensure_https
+    -
+      plugin: ensure_trailing_slash
   field_transcription/value: field_transcription/0/value
   field_transcription/format:
     plugin: default_value

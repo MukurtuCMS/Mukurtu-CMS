@@ -29,12 +29,12 @@ class ImportListStringTest extends MukurtuImportTestBase {
       'cardinality' => -1,
       'settings' => [
         'allowed_values' => [
-          'http://creativecommons.org/licenses/by/4.0' => t('Attribution 4.0 International (CC BY 4.0)'),
-          'http://creativecommons.org/licenses/by-nc/4.0' => t('Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)'),
-          'http://creativecommons.org/licenses/by-sa/4.0' => t('Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)'),
-          'http://creativecommons.org/licenses/by-nc-sa/4.0' => t('Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)'),
-          'http://creativecommons.org/licenses/by-nd/4.0' => t('Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)'),
-          'http://creativecommons.org/licenses/by-nc-nd/4.0' => t('Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)'),
+          'https://creativecommons.org/licenses/by/4.0/' => t('Attribution 4.0 International (CC BY 4.0)'),
+          'https://creativecommons.org/licenses/by-nc/4.0/' => t('Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)'),
+          'https://creativecommons.org/licenses/by-sa/4.0/' => t('Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)'),
+          'https://creativecommons.org/licenses/by-nc-sa/4.0/' => t('Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)'),
+          'https://creativecommons.org/licenses/by-nd/4.0/' => t('Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)'),
+          'https://creativecommons.org/licenses/by-nc-nd/4.0/' => t('Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)'),
         ],
       ],
     ]);
@@ -65,7 +65,7 @@ class ImportListStringTest extends MukurtuImportTestBase {
   public function testSingleListImportByKey() {
     $data = [
       ['nid', 'List'],
-      [$this->node->id(), "http://creativecommons.org/licenses/by-nc-sa/4.0"],
+      [$this->node->id(), "https://creativecommons.org/licenses/by-nc-sa/4.0/"],
     ];
     $import_file = $this->createCsvFile($data);
 
@@ -78,7 +78,7 @@ class ImportListStringTest extends MukurtuImportTestBase {
     $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
     $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
     $list = $updated_node->get('field_list')->getValue();
-    $this->assertEquals("http://creativecommons.org/licenses/by-nc-sa/4.0", $list[0]['value']);
+    $this->assertEquals("https://creativecommons.org/licenses/by-nc-sa/4.0/", $list[0]['value']);
   }
 
   /**
@@ -100,7 +100,7 @@ class ImportListStringTest extends MukurtuImportTestBase {
     $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
     $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
     $list = $updated_node->get('field_list')->getValue();
-    $this->assertEquals("http://creativecommons.org/licenses/by-nd/4.0", $list[0]['value']);
+    $this->assertEquals("https://creativecommons.org/licenses/by-nd/4.0/", $list[0]['value']);
   }
 
   /**
@@ -109,7 +109,7 @@ class ImportListStringTest extends MukurtuImportTestBase {
   public function testMultipleListImports() {
     $data = [
       ['nid', 'List'],
-      [$this->node->id(), "Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0);http://creativecommons.org/licenses/by-nc/4.0;Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)"],
+      [$this->node->id(), "Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0);https://creativecommons.org/licenses/by-nc/4.0;Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)"],
     ];
     $import_file = $this->createCsvFile($data);
 
@@ -123,9 +123,9 @@ class ImportListStringTest extends MukurtuImportTestBase {
     $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
     $list = $updated_node->get('field_list')->getValue();
     $this->assertCount(3, $list);
-    $this->assertEquals("http://creativecommons.org/licenses/by-nd/4.0", $list[0]['value']);
-    $this->assertEquals("http://creativecommons.org/licenses/by-nc/4.0", $list[1]['value']);
-    $this->assertEquals("http://creativecommons.org/licenses/by-nc-nd/4.0", $list[2]['value']);
+    $this->assertEquals("https://creativecommons.org/licenses/by-nd/4.0/", $list[0]['value']);
+    $this->assertEquals("https://creativecommons.org/licenses/by-nc/4.0/", $list[1]['value']);
+    $this->assertEquals("https://creativecommons.org/licenses/by-nc-nd/4.0/", $list[2]['value']);
   }
 
 }
