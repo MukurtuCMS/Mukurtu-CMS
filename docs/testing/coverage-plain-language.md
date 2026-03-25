@@ -1,13 +1,13 @@
 # Mukurtu CMS — What the Tests Check (Plain Language)
 
-This document explains what each automated test verifies, written for anyone who wants to understand the coverage without reading code. For technical detail — module names, file paths, commit references, and schema notes — see [TEST_COVERAGE_REVIEW.md](TEST_COVERAGE_REVIEW.md).
+This document explains what each automated test verifies, written for anyone who wants to understand the coverage without reading code. For technical detail — module names, file paths, commit references, and schema notes — see [coverage.md](coverage.md).
 
 Tests are grouped by the feature they protect. Each item is one test that runs automatically on every code change.
 
 ---
 
 ## Collections
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_collection](TEST_COVERAGE_REVIEW.md#mukurtu_collection)*
+*See [coverage.md § mukurtu_collection](coverage.md#mukurtu_collection)*
 
 Collections are folders that can be nested inside each other. These tests confirm the hierarchy behaves correctly at every level.
 
@@ -41,7 +41,7 @@ Collections are folders that can be nested inside each other. These tests confir
 ---
 
 ## Digital Heritage Items
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_digital_heritage](TEST_COVERAGE_REVIEW.md#mukurtu_digital_heritage)*
+*See [coverage.md § mukurtu_digital_heritage](coverage.md#mukurtu_digital_heritage)*
 
 **Structure**
 - A digital heritage item is recognized as the correct content type and has all required capabilities.
@@ -68,7 +68,7 @@ Collections are folders that can be nested inside each other. These tests confir
 ---
 
 ## Media (Audio, Image, Document)
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_media](TEST_COVERAGE_REVIEW.md#mukurtu_media)*
+*See [coverage.md § mukurtu_media](coverage.md#mukurtu_media)*
 
 **Structure and field rules — per bundle**
 - Audio, Image, and Document are each recognized as their own content type with the correct capabilities.
@@ -99,7 +99,7 @@ Collections are folders that can be nested inside each other. These tests confir
 ---
 
 ## Dictionary
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_dictionary](TEST_COVERAGE_REVIEW.md#mukurtu_dictionary)*
+*See [coverage.md § mukurtu_dictionary](coverage.md#mukurtu_dictionary)*
 
 **Structure**
 - Dictionary words, word lists, word entries, and sample sentences are each recognized as their own content type.
@@ -135,7 +135,7 @@ Collections are folders that can be nested inside each other. These tests confir
 ---
 
 ## Local Contexts Labels & Projects
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_local_contexts](TEST_COVERAGE_REVIEW.md#mukurtu_local_contexts)*
+*See [coverage.md § mukurtu_local_contexts](coverage.md#mukurtu_local_contexts)*
 
 Local Contexts projects can be supported at the site level or by individual communities (groups).
 
@@ -159,7 +159,7 @@ Local Contexts projects can be supported at the site level or by individual comm
 ---
 
 ## Drafts
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_drafts](TEST_COVERAGE_REVIEW.md#mukurtu_drafts)*
+*See [coverage.md § mukurtu_drafts](coverage.md#mukurtu_drafts)*
 
 Drafts are content that has been saved but is not yet published.
 
@@ -177,7 +177,7 @@ Drafts are content that has been saved but is not yet published.
 ---
 
 ## Multipage Items
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_multipage_items](TEST_COVERAGE_REVIEW.md#mukurtu_multipage_items)*
+*See [coverage.md § mukurtu_multipage_items](coverage.md#mukurtu_multipage_items)*
 
 Multipage items link a series of content pages into an ordered sequence.
 
@@ -213,7 +213,7 @@ Multipage items link a series of content pages into an ordered sequence.
 ---
 
 ## People
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_person](TEST_COVERAGE_REVIEW.md#mukurtu_person)*
+*See [coverage.md § mukurtu_person](coverage.md#mukurtu_person)*
 
 People are content records about individuals (historical or contemporary).
 
@@ -235,7 +235,7 @@ People are content records about individuals (historical or contemporary).
 ---
 
 ## Places
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_place](TEST_COVERAGE_REVIEW.md#mukurtu_place)*
+*See [coverage.md § mukurtu_place](coverage.md#mukurtu_place)*
 
 Places are content records about locations (physical or cultural).
 
@@ -256,7 +256,7 @@ Places are content records about locations (physical or cultural).
 ---
 
 ## Community Records
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_community_records](TEST_COVERAGE_REVIEW.md#mukurtu_community_records)*
+*See [coverage.md § mukurtu_community_records](coverage.md#mukurtu_community_records)*
 
 Community records allow communities to add their own perspective on an existing content item (the "original record").
 
@@ -284,7 +284,7 @@ Community records allow communities to add their own perspective on an existing 
 ---
 
 ## Browse — Map and Bounding Box
-*See [TEST_COVERAGE_REVIEW.md § mukurtu_browse](TEST_COVERAGE_REVIEW.md#mukurtu_browse)*
+*See [coverage.md § mukurtu_browse](coverage.md#mukurtu_browse)*
 
 The browse map accepts a geographic area (bounding box) and a list of content IDs from the URL and uses them to filter results.
 

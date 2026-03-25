@@ -1,5 +1,6 @@
 # Mukurtu CMS — Test Infrastructure & Coverage
-**Repo:** https://github.com/alexmerrill/Mukurtu-CMS
+**Repo:** https://github.com/MukurtuCMS/Mukurtu-CMS
+**Plain-language summary:** [coverage-plain-language.md](coverage-plain-language.md)
 **Last updated:** 2026-03-24
 
 ---
