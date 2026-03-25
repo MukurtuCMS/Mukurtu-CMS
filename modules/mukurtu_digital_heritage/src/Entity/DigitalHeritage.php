@@ -232,12 +232,12 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDescription(t('Creative Commons licenses provide a standardized way for copyright holders to grant the public permission to use their creative work under copyright law, and to specify the ways in which their work may be altered, shared, and used. For more information, visit <a href="https://creativecommons.org/">creativecommons.org</a>. </br>Select a Creative Commons license from the dropdown menu.'))
       ->setSettings([
         'allowed_values' => [
-          'http://creativecommons.org/licenses/by/4.0/' => t('Attribution 4.0 International (CC BY 4.0)'),
-          'http://creativecommons.org/licenses/by-nc/4.0/' => t('Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)'),
-          'http://creativecommons.org/licenses/by-sa/4.0/' => t('Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)'),
-          'http://creativecommons.org/licenses/by-nc-sa/4.0/' => t('Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)'),
-          'http://creativecommons.org/licenses/by-nd/4.0/' => t('Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)'),
-          'http://creativecommons.org/licenses/by-nc-nd/4.0/' => t('Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)'),
+          'https://creativecommons.org/licenses/by/4.0/' => t('Attribution 4.0 International (CC BY 4.0)'),
+          'https://creativecommons.org/licenses/by-nc/4.0/' => t('Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)'),
+          'https://creativecommons.org/licenses/by-sa/4.0/' => t('Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)'),
+          'https://creativecommons.org/licenses/by-nc-sa/4.0/' => t('Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)'),
+          'https://creativecommons.org/licenses/by-nd/4.0/' => t('Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)'),
+          'https://creativecommons.org/licenses/by-nc-nd/4.0/' => t('Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)'),
         ]
       ])
       ->setCardinality(1)

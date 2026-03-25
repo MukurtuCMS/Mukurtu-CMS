@@ -10,12 +10,12 @@
  */
 function mukurtu_digital_heritage_update_11001(&$sandbox) {
   $url_map = [
-    'http://creativecommons.org/licenses/by/4.0' => 'http://creativecommons.org/licenses/by/4.0/',
-    'http://creativecommons.org/licenses/by-nc/4.0' => 'http://creativecommons.org/licenses/by-nc/4.0/',
-    'http://creativecommons.org/licenses/by-sa/4.0' => 'http://creativecommons.org/licenses/by-sa/4.0/',
-    'http://creativecommons.org/licenses/by-nc-sa/4.0' => 'http://creativecommons.org/licenses/by-nc-sa/4.0/',
-    'http://creativecommons.org/licenses/by-nd/4.0' => 'http://creativecommons.org/licenses/by-nd/4.0/',
-    'http://creativecommons.org/licenses/by-nc-nd/4.0' => 'http://creativecommons.org/licenses/by-nc-nd/4.0/',
+    'http://creativecommons.org/licenses/by/4.0' => 'https://creativecommons.org/licenses/by/4.0/',
+    'http://creativecommons.org/licenses/by-nc/4.0' => 'https://creativecommons.org/licenses/by-nc/4.0/',
+    'http://creativecommons.org/licenses/by-sa/4.0' => 'https://creativecommons.org/licenses/by-sa/4.0/',
+    'http://creativecommons.org/licenses/by-nc-sa/4.0' => 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+    'http://creativecommons.org/licenses/by-nd/4.0' => 'https://creativecommons.org/licenses/by-nd/4.0/',
+    'http://creativecommons.org/licenses/by-nc-nd/4.0' => 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
   ];
 
   if (!isset($sandbox['nids'])) {
