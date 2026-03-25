@@ -1,6 +1,7 @@
 langcode: en
 status: null
 dependencies: {  }
+id: digital_heritage_items_all_fields
 uid: 1
 label: 'Digital heritage items - all fields'
 description: null
