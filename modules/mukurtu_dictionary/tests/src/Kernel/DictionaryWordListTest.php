@@ -163,10 +163,10 @@ class DictionaryWordListTest extends DictionaryTestBase {
   }
 
   /**
-   * Test that the same word can appear only once conceptually
-   * (add is a push — duplicate adds result in duplicate entries).
-   *
-   * This documents the current behavior: add() does not deduplicate.
+   * add() does not deduplicate — adding the same word twice results in two
+   * entries. This documents current behavior; deduplication is enforced by
+   * the UI, not the API. If deduplication is ever added to add(), this test
+   * should assert count=1 instead.
    */
   public function testAddSameWordTwiceResultsInDuplicate(): void {
     $word = $this->buildDictionaryWord('Duplicate Word');
@@ -195,10 +195,8 @@ class DictionaryWordListTest extends DictionaryTestBase {
     $list = $this->buildWordList('Cache Test List');
     $list->add($word);
 
-    // Should not throw.
+    // Should not throw — the absence of an exception is the assertion.
     $list->save();
-
-    $this->assertTrue(TRUE, 'postSave completed without error.');
   }
 
 }

@@ -168,7 +168,11 @@ class CommunityRecordFunctionsTest extends CommunityRecordTestBase {
     $node->set('field_mukurtu_original_record', $node->id());
     $violations = $node->validate();
 
-    $this->assertGreaterThan(0, $violations->count());
+    $this->assertCount(1, $violations);
+    $this->assertEquals(
+      'An item %title (%id) cannot be its own community record.',
+      $violations[0]->getMessageTemplate()
+    );
   }
 
   /**
@@ -188,7 +192,11 @@ class CommunityRecordFunctionsTest extends CommunityRecordTestBase {
     $other->set('field_mukurtu_original_record', $cr->id());
     $violations = $other->validate();
 
-    $this->assertGreaterThan(0, $violations->count());
+    $this->assertCount(1, $violations);
+    $this->assertEquals(
+      'The item ID %id is not a valid original record target.',
+      $violations[0]->getMessageTemplate()
+    );
   }
 
   /**
@@ -211,7 +219,11 @@ class CommunityRecordFunctionsTest extends CommunityRecordTestBase {
     $or->set('field_mukurtu_original_record', $other->id());
     $violations = $or->validate();
 
-    $this->assertGreaterThan(0, $violations->count());
+    $this->assertCount(1, $violations);
+    $this->assertEquals(
+      'The item %title (%id) cannot be a community record.',
+      $violations[0]->getMessageTemplate()
+    );
   }
 
   /**
