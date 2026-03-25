@@ -1,0 +1,172 @@
+langcode: en
+status: null
+dependencies: {  }
+uid: 1
+label: 'Digital heritage items - all fields'
+description: null
+target_entity_type_id: node
+target_bundle: digital_heritage
+default_format: null
+mapping:
+  -
+    source: ID
+    target: nid
+  -
+    source: UUID
+    target: uuid
+  -
+    source: 'Language (langcode)'
+    target: '-1'
+  -
+    source: 'Revision create time'
+    target: revision_timestamp
+  -
+    source: 'Revision user'
+    target: revision_uid
+  -
+    source: Published
+    target: status
+  -
+    source: 'Authored by'
+    target: uid
+  -
+    source: Title
+    target: title
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: Changed
+    target: changed
+  -
+    source: 'Promoted to front page'
+    target: promote
+  -
+    source: 'Sticky at top of lists'
+    target: sticky
+  -
+    source: 'Default translation'
+    target: default_langcode
+  -
+    source: 'Default revision'
+    target: revision_default
+  -
+    source: 'Cultural Protocols > Protocols'
+    target: field_cultural_protocols/protocols
+  -
+    source: 'Cultural Protocols > Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
+  -
+    source: Draft
+    target: draft
+  -
+    source: 'Cultural Narrative'
+    target: field_cultural_narrative
+  -
+    source: Description
+    target: field_description
+  -
+    source: 'Location Description'
+    target: field_coverage_description
+  -
+    source: 'Traditional Knowledge'
+    target: field_traditional_knowledge
+  -
+    source: 'Date Description'
+    target: field_date_description
+  -
+    source: Source
+    target: field_source
+  -
+    source: Summary
+    target: field_summary
+  -
+    source: Identifier
+    target: field_identifier
+  -
+    source: 'Rights and Usage'
+    target: field_rights_and_usage
+  -
+    source: 'Citing Indigenous Elders and Knowledge Keepers'
+    target: field_knowledge_keepers
+  -
+    source: Transcription
+    target: field_transcription
+  -
+    source: 'Related Content'
+    target: field_related_content
+  -
+    source: 'Media Assets'
+    target: field_media_assets
+  -
+    source: 'External Links'
+    target: field_external_links
+  -
+    source: 'Creative Commons Licenses'
+    target: field_creative_commons
+  -
+    source: 'Local Contexts Projects'
+    target: field_local_contexts_projects
+  -
+    source: 'Local Contexts Labels and Notices'
+    target: field_local_contexts_labels_and_notices
+  -
+    source: 'Rights Statements'
+    target: field_rights_statements
+  -
+    source: 'Map Points'
+    target: field_coverage
+  -
+    source: Location
+    target: field_location
+  -
+    source: 'Original Date'
+    target: field_original_date
+  -
+    source: Category
+    target: field_category
+  -
+    source: Contributor
+    target: field_contributor
+  -
+    source: Creator
+    target: field_creator
+  -
+    source: Format
+    target: field_format
+  -
+    source: Keywords
+    target: field_keywords
+  -
+    source: Language
+    target: field_language
+  -
+    source: People
+    target: field_people
+  -
+    source: Publisher
+    target: field_publisher
+  -
+    source: Subject
+    target: field_subject
+  -
+    source: Type
+    target: field_type
+  -
+    source: Comments
+    target: comment
+  -
+    source: 'Content Type'
+    target: field_content_type
+  -
+    source: 'Original Record'
+    target: field_mukurtu_original_record
+configuration:
+  upload_location: 'private://0e0848dd-dc11-4e5f-9100-8f0858cf68e5/files/'
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'
