@@ -109,7 +109,7 @@ Heaviest base — ~30 transitive dependencies. Installs `search_api_item` and `i
 
 **`DictionaryEntityTest`** (11 tests): bundle class + interfaces for all 4 bundles; `field_dictionary_word_language` is the only required custom field; cardinality; `preSave` glossary_entry auto-fill (including multi-byte UTF-8 via `mb_substr`); `preSave` does not overwrite manually-set value; `bundleCheckCreateAccess` allowed/forbidden based on language term existence; `auto_create` (keywords TRUE, language FALSE — manager controlled); protocol + language field persistence.
 
-**`DictionaryWordListTest`** (8 tests): `add()` increases count and survives save/reload; multiple adds preserve order; `remove()` removes correct word, no-op for absent word; removing all words → count 0; `getCount()` reflects in-memory state; `add()` does not deduplicate (documents current behavior — UI enforces uniqueness).
+**`DictionaryWordListTest`** (9 tests): `add()` increases count and survives save/reload; multiple adds preserve order; `remove()` removes correct word, no-op for absent word; removing all words → count 0; `getCount()` reflects in-memory state; `add()` does not deduplicate (documents current behavior — UI enforces uniqueness); `postSave` smoke test (absence of exception is the assertion).
 
 ---
 
@@ -156,7 +156,7 @@ Same pattern as `PersonTestBase`. Uses `place_type` vocabulary instead of `peopl
 **Test base:** `CommunityRecordTestBase` (extends `MukurtuKernelTestBase`)
 Community records are regular nodes with a `field_mukurtu_original_record` entity reference field — not a custom entity type. Field storage + instance created programmatically via `FieldStorageConfig::create()` / `FieldConfig::create()` (not `installConfig()`) for explicit control. Bundles: `page` (CR-enabled), `basic_page` (no field). Requires `path_alias` for `$entity->validate()`.
 
-**`CommunityRecordFunctionsTest`** (12 tests): `mukurtu_community_records_has_record_field()` with/without field; `mukurtu_community_records_entity_type_supports_records()` enabled/disabled; `mukurtu_community_records_is_community_record()` no-field/empty/set; `mukurtu_community_records_is_original_record()` no-CRs/one-CR/multiple-CRs/non-node-short-circuits; `ValidOriginalRecord` constraint — circular self-reference, target is a CR, entity already has CRs (nesting), valid case → 0 violations.
+**`CommunityRecordFunctionsTest`** (15 tests): `mukurtu_community_records_has_record_field()` with/without field; `mukurtu_community_records_entity_type_supports_records()` enabled/disabled; `mukurtu_community_records_is_community_record()` no-field/empty/set; `mukurtu_community_records_is_original_record()` no-CRs/one-CR/multiple-CRs/non-node-short-circuits; `ValidOriginalRecord` constraint — circular self-reference, target is a CR, entity already has CRs (nesting), valid case → 0 violations. Each failing constraint case asserts `assertCount(1, $violations)` plus `getMessageTemplate()` to confirm the specific constraint fired, not just that any violation occurred.
 
 **Constraint test design:** Tests operate on already-saved entities. The validator runs a `Url::access()` route check only for brand-new entities — skipping that branch keeps tests focused on the field logic without needing a full router.
 
