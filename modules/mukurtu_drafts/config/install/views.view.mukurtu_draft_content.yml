@@ -327,13 +327,13 @@ display:
       display_extenders: {  }
       path: user/drafts
       menu:
-        type: normal
+        type: none
         title: 'Your Drafts'
-        description: 'See all your draft content on the site.'
+        description: ''
         weight: 0
         expanded: true
         menu_name: mukurtu
-        parent: mukurtu_core.dashboard
+        parent: ''
         context: '0'
     cache_metadata:
       max-age: -1

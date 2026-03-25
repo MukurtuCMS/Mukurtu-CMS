@@ -37,6 +37,7 @@
         "drupal/features": "^3.14",
         "drupal/field_group": "^4.0",
         "drupal/flag": "^4.0",
+        "drupal/geocoder": "^4.30",
         "drupal/geofield": "^1.59",
         "drupal/geolocation": "*",
         "drupal/gin": "^5.0",
@@ -63,6 +64,7 @@
         "drupal/search_api": "*",
         "drupal/search_api_glossary": "*",
         "drupal/search_api_solr": "^4.3",
+        "drupal/tagify": "^1.2",
         "drupal/term_merge": "^2.0@beta",
         "drupal/term_merge_manager": "^2.0",
         "drupal/token": "*",
@@ -73,6 +75,7 @@
         "drupal/dashboards": "^2.1",
         "drupal/admin_theme": "^1.1",
         "drupal/config_translation_po": "^1.0",
+        "geocoder-php/nominatim-provider": "*",
         "drupal/tagify": "^1.2",
         "drupal/rebuild_cache_access": "^1.12"
     },

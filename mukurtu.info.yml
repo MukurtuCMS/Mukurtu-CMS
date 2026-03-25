@@ -48,6 +48,8 @@ install:
   - dashboards
   - admin_theme
   - leaflet_markercluster
+  - geocoder
+  - geocoder_field
   - tagify
   - rebuild_cache_access
 

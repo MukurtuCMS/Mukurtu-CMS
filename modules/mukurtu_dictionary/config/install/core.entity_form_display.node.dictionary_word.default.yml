@@ -221,8 +221,8 @@ content:
       parent_selection: 1
     third_party_settings: {  }
   field_coverage:
-    type: geofield_mukurtu
-    weight: 1
+    type: leaflet_widget_default
+    weight: 31
     region: content
     settings:
       geometry_validation: 0
@@ -265,11 +265,14 @@ content:
         show: 0
         readonly: 0
       geocoder:
-        control: false
+        control: true
         settings:
           position: topright
           input_size: 20
-          providers: {  }
+          providers: 
+            nominatim:
+              weight: 0
+              checked: true  
           min_terms: 4
           delay: 800
           zoom: 16
@@ -284,12 +287,6 @@ content:
         control: 0
       feature_properties:
         values: ''
-      geojson_overlays:
-        sources:
-          fields: {  }
-        path: '{"color":"#f71ed3","opacity":"0.7","stroke":true,"weight":2,"fillColor":"#ffddfe","fillOpacity":"0.1","radius":3,"dashArray":"5, 5"}'
-        zoom_to_geojson: true
-        snapping: true
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea
