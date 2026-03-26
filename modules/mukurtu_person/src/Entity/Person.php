@@ -176,7 +176,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_other_names'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Other Names'))
-      ->setDescription(t('People may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the person is identified by connecting those disparate names.	</br>Include as many names as needed. Select from existing names or add new ones.</br>Each taxonomy (eg: creator, contributor, people) must first be enabled by a Mukurtu Manager.'))
+      ->setDescription(t('People may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the person is identified by connecting those disparate names.	</br>Include as many names as needed. Select from existing names or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
