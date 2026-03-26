@@ -31,7 +31,7 @@ class RelatedPerson extends Paragraph {
 
     $definitions['field_relationship_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Relationship Type'))
-      ->setDescription('The type of relationship between the related person and the subject of the person record. </br>As you type, existing relationship types will be displayed. Select an existing relationship type or enter a new one. To include additional relationship types, select "Add another item".')
+      ->setDescription('The type of relationship between the related person and the subject of the person record. </br>Select an existing relationship type or enter a new one.')
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
