@@ -136,7 +136,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag collections to ensure they are discoverable when searching or browsing. 	As you type, existing keywords will be displayed. </br>Select an existing keyword or enter a new one. To include additional keywords, select "Add another item".'))
+      ->setDescription(t('Keywords are used to tag collections to ensure they are discoverable when searching or browsing. </br>Select existing keywords or enter new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -217,7 +217,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the collection. Examples include the location where a photo was taken, places named in a story, or the site where an object was created.	</br>As you type, existing locations will be displayed. Select an existing location or enter a new one. To include additional locations, select "Add another item".'))
+      ->setDescription(t('A named place, or places, that are closely connected to the collection. Examples include the location where a photo was taken, places named in a story, or the site where an object was created.	</br>Select existing locations or enter new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
