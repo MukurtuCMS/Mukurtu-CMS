@@ -148,7 +148,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_other_place_names'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Other Names'))
-      ->setDescription(t('Places may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the place is identified by connecting those disparate names.	</br>Include as many place names as needed. Select from existing place names or add new ones.</br>Each taxonomy (eg: location, keywords) must first be enabled by a Mukurtu Manager.'))
+      ->setDescription(t('Places may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the place is identified by connecting those disparate names.	</br>Include as many place names as needed. Select from existing place names or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
