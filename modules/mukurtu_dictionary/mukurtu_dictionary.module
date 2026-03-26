@@ -21,7 +21,6 @@ function mukurtu_dictionary_theme($existing, $type, $theme, $path) {
     'mukurtu_dictionary_page' => [
       'variables' => [
         'results' => NULL,
-        'facets' => [],
         'glossary' => NULL,
       ],
     ],

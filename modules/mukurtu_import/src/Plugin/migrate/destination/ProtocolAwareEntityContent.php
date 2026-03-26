@@ -114,6 +114,29 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       $entity->prepareSave();
     }
 
+    // Skip access checks for user 1. The initial v3-to-v4 site migration is
+    // restricted to user 1 (see MukurtuMigrateAccessCheck) and runs before OG
+    // memberships are migrated, so protocol/community access checks would
+    // incorrectly deny entity creation.
+    if ((int) $this->currentUser->id() !== 1) {
+      // Determine if this is a create or update operation.
+      $operation = $entity->isNew() ? 'create' : 'update';
+
+      // Check entity access for the current user.
+      $access = $entity->access($operation, $this->currentUser, TRUE);
+      if (!$access->isAllowed()) {
+        $reason = $access->getReason();
+        throw new MigrateException(
+          sprintf('The current user does not have %s access for this %s (ID: %s).%s',
+            $operation,
+            mb_strtolower((string)$entity->getEntityType()->getLabel()),
+            $entity->isNew() ? 'new' : $entity->id(),
+            $reason ? ' ' . $reason : '',
+          )
+        );
+      }
+    }
+
     if ($this->isEntityValidationRequired($entity)) {
       $this->validateEntity($entity);
     }
@@ -204,6 +227,37 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     if (method_exists($field_definition, 'addPropertyConstraints')) {
       $field_definition->addPropertyConstraints('alt', ['ImageAltRequired' => []]);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function updateEntity(EntityInterface $entity, Row $row) {
+    // Skip access checks for user 1. See the corresponding check in import()
+    // for rationale.
+    if ((int) $this->currentUser->id() !== 1) {
+      return parent::updateEntity($entity, $row);
+    }
+
+    // Check update access against the original, unmodified entity before the
+    // parent applies imported field values. This prevents a user from
+    // bypassing access control by importing their own protocol onto content
+    // they cannot otherwise edit. Without this check, the protocol change
+    // would already be applied in memory by the time the post-edit access
+    // check runs in import(), causing it to incorrectly pass.
+    $access = $entity->access('update', $this->currentUser, TRUE);
+    if (!$access->isAllowed()) {
+      $reason = $access->getReason();
+      throw new MigrateException(
+        sprintf('The current user does not have access to update this %s (ID: %s).%s',
+          mb_strtolower((string)$entity->getEntityType()->getLabel()),
+          $entity->id(),
+          $reason ? ' ' . $reason : '',
+        )
+      );
+    }
+
+    return parent::updateEntity($entity, $row);
   }
 
   /**

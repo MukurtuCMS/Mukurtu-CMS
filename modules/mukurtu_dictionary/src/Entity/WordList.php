@@ -258,6 +258,8 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
    * {@inheritdoc}
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+
     // Invalid the cache of referenced entities
     // to trigger recalculation of the computed fields.
     $refs = $this->get(self::WORDS_FIELD)->referencedEntities() ?? NULL;

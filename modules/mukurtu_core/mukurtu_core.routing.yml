@@ -6,13 +6,6 @@ mukurtu_core.settings_assorted:
   requirements:
     _permission: 'administer site configuration'
 
-mukurtu_core.dashboard:
-  path: '/dashboard'
-  defaults:
-    _title: 'Mukurtu Dashboard'
-  requirements:
-    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
-
 mukurtu_core.add_page:
   path: '/admin/node/add'
   defaults:

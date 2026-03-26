@@ -30,14 +30,6 @@ entity.mukurtu_import_strategy.delete_form:
   requirements:
     _permission: 'administer mukurtu_import_strategy'
 
-mukurtu_import.settings_form:
-  path: '/admin/config/system/mukurtu-import'
-  defaults:
-    _title: 'Mukurtu Import settings'
-    _form: 'Drupal\mukurtu_import\Form\SettingsForm'
-  requirements:
-    _permission: 'administer mukurtu_import configuration'
-
 mukurtu_import.file_upload:
   path: '/admin/import'
   defaults:

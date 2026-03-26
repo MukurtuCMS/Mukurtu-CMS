@@ -31,6 +31,9 @@ class ListString extends MukurtuImportFieldProcessPluginBase {
       ];
     }
     $process[] = [
+      'plugin' => 'ensure_https',
+    ];
+    $process[] = [
       'plugin' => 'label_lookup',
       'entity_type' => $field_config->getTargetEntityTypeId(),
       'field_name' => $field_config->getName(),

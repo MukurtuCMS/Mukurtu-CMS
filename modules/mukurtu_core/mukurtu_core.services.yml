@@ -1,5 +1,5 @@
 services:
-  mukurtu_core.event_subscriber:
-    class: Drupal\mukurtu_core\EventSubscriber\DashboardRedirectEventSubscriber
+  mukurtu_core.route_subscriber:
+    class: Drupal\mukurtu_core\Routing\RouteSubscriber
     tags:
       - { name: event_subscriber }
