@@ -1,12 +1,6 @@
 <div class="browse-facets__wrapper">
   <div class="browse-facets">
-    {% if facets %}
-      {% for facet in facets %}
-        {{ facet }}
-      {% endfor %}
-    {% endif %}
-
-    {{ drupal_entity('block', 'views_exposed_filter_block:mukurtu_dictionary-mukurtu_dictionary_block') }}
+    {{ drupal_block('views_exposed_filter_block:mukurtu_dictionary-mukurtu_dictionary_block') }}
   </div>
 </div>
 

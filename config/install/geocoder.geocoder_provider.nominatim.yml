@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies: {  }
+id: nominatim
+label: Nominatim
+plugin: nominatim
+configuration:
+  throttle:
+    period: 2
+    limit: 1
+  geocoder:
+    locale: ''
+  rootUrl: 'https://nominatim.openstreetmap.org'
+  userAgent: 'Mukurtu mukurtu.org'
+  referer: 'https://mukurtu.org'
