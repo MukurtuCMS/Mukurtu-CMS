@@ -4,3 +4,99 @@
  * @file
  * Install, update and uninstall functions for the mukurtu_digital_heritage module.
  */
+
+/**
+ * Update Creative Commons license URLs to include trailing slash.
+ */
+function mukurtu_digital_heritage_update_11001(&$sandbox) {
+  $url_map = [
+    'http://creativecommons.org/licenses/by/4.0' => 'https://creativecommons.org/licenses/by/4.0/',
+    'http://creativecommons.org/licenses/by-nc/4.0' => 'https://creativecommons.org/licenses/by-nc/4.0/',
+    'http://creativecommons.org/licenses/by-sa/4.0' => 'https://creativecommons.org/licenses/by-sa/4.0/',
+    'http://creativecommons.org/licenses/by-nc-sa/4.0' => 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+    'http://creativecommons.org/licenses/by-nd/4.0' => 'https://creativecommons.org/licenses/by-nd/4.0/',
+    'http://creativecommons.org/licenses/by-nc-nd/4.0' => 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
+  ];
+
+  if (!isset($sandbox['nids'])) {
+    $nids = \Drupal::entityQuery('node')
+      ->condition('type', 'digital_heritage')
+      ->condition('field_creative_commons', array_keys($url_map), 'IN')
+      ->accessCheck(FALSE)
+      ->execute();
+    $sandbox['nids'] = array_values($nids);
+    $sandbox['total'] = count($nids);
+    $sandbox['current'] = 0;
+  }
+
+  $batch_size = 25;
+  $batch = array_slice($sandbox['nids'], $sandbox['current'], $batch_size);
+
+  if (!empty($batch)) {
+    $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($batch);
+    foreach ($nodes as $node) {
+      $old_value = $node->get('field_creative_commons')->value;
+      if (isset($url_map[$old_value])) {
+        $node->set('field_creative_commons', $url_map[$old_value]);
+        $node->setNewRevision(FALSE);
+        $node->save();
+      }
+    }
+  }
+
+  $sandbox['current'] += $batch_size;
+  $sandbox['#finished'] = $sandbox['total'] > 0
+    ? min($sandbox['current'] / $sandbox['total'], 1)
+    : 1;
+}
+
+/**
+ * Update Rights Statements URLs from http to https.
+ */
+function mukurtu_digital_heritage_update_11002(&$sandbox) {
+  $url_map = [
+    'http://rightsstatements.org/vocab/InC/1.0/' => 'https://rightsstatements.org/vocab/InC/1.0/',
+    'http://rightsstatements.org/vocab/InC-OW-EU/1.0/' => 'https://rightsstatements.org/vocab/InC-OW-EU/1.0/',
+    'http://rightsstatements.org/vocab/InC-EDU/1.0/' => 'https://rightsstatements.org/vocab/InC-EDU/1.0/',
+    'http://rightsstatements.org/vocab/InC-NC/1.0/' => 'https://rightsstatements.org/vocab/InC-NC/1.0/',
+    'http://rightsstatements.org/vocab/InC-RUU/1.0/' => 'https://rightsstatements.org/vocab/InC-RUU/1.0/',
+    'http://rightsstatements.org/vocab/NoC-CR/1.0/' => 'https://rightsstatements.org/vocab/NoC-CR/1.0/',
+    'http://rightsstatements.org/vocab/NoC-NC/1.0/' => 'https://rightsstatements.org/vocab/NoC-NC/1.0/',
+    'http://rightsstatements.org/vocab/NoC-OKLR/1.0/' => 'https://rightsstatements.org/vocab/NoC-OKLR/1.0/',
+    'http://rightsstatements.org/vocab/NoC-US/1.0/' => 'https://rightsstatements.org/vocab/NoC-US/1.0/',
+    'http://rightsstatements.org/vocab/CNE/1.0/' => 'https://rightsstatements.org/vocab/CNE/1.0/',
+    'http://rightsstatements.org/vocab/UND/1.0/' => 'https://rightsstatements.org/vocab/UND/1.0/',
+    'http://rightsstatements.org/vocab/NKC/1.0/' => 'https://rightsstatements.org/vocab/NKC/1.0/',
+  ];
+
+  if (!isset($sandbox['nids'])) {
+    $nids = \Drupal::entityQuery('node')
+      ->condition('type', 'digital_heritage')
+      ->condition('field_rights_statements', array_keys($url_map), 'IN')
+      ->accessCheck(FALSE)
+      ->execute();
+    $sandbox['nids'] = array_values($nids);
+    $sandbox['total'] = count($nids);
+    $sandbox['current'] = 0;
+  }
+
+  $batch_size = 25;
+  $batch = array_slice($sandbox['nids'], $sandbox['current'], $batch_size);
+
+  if (!empty($batch)) {
+    $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($batch);
+    foreach ($nodes as $node) {
+      $old_value = $node->get('field_rights_statements')->value;
+      if (isset($url_map[$old_value])) {
+        $node->set('field_rights_statements', $url_map[$old_value]);
+        $node->setNewRevision(FALSE);
+        $node->save();
+      }
+    }
+  }
+
+  $sandbox['current'] += $batch_size;
+  $sandbox['#finished'] = $sandbox['total'] > 0
+    ? min($sandbox['current'] / $sandbox['total'], 1)
+    : 1;
+}

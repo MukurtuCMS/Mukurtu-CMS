@@ -54,7 +54,7 @@ class ResultsForm extends MukurtuMigrateFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $form_state->setRedirect('mukurtu_core.dashboard');
+    $form_state->setRedirect('entity.dashboard.canonical', ['dashboard' => 'mukurtu_dashboard']);
   }
 
 }
