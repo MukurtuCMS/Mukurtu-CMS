@@ -341,7 +341,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the digital heritage item. Examples include the location where a photo was taken, places named in a story, or the site where an object was created. </br>Select existing locations or enter new ones.'))
+      ->setDescription(t('A named place, or places, that are closely connected to the digital heritage item. Examples include the location where a photo was taken, places named in a story, or the site where an object was created. </br>Include as many locations as needed. Select from existing locations or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -391,7 +391,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
-      ->setDescription(t('A contributor is a person or group who aided in the making of a digital heritage item. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple contributors. Examples include someone who wrote, compiled, or illustrated a book or recorded a song, the people who edited or produced a film, or people collaborated or consulted on a project. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Select existing contributors or enter new names.'))
+      ->setDescription(t('A contributor is a person or group who aided in the making of a digital heritage item. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple contributors. Examples include someone who wrote, compiled, or illustrated a book or recorded a song, the people who edited or produced a film, or people collaborated or consulted on a project. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Include as many contributors as needed. Select from existing contributors or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -411,7 +411,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_creator'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Creator'))
-      ->setDescription(t('A creator is the person or group primarily responsible for making  or providing the core media assets or knowledge represented in a digital heritage item. While a creator is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple creators. Examples include a basket designer or weaver, knowledge holders who provided information for a book, a book’s author or illustrator, singers, songwriters, dancers, or performers. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Note that this is not the user publishing the digital heritage item on the site - that information is recorded in the automated author field. </br>Select existing creators or enter new names.'))
+      ->setDescription(t('A creator is the person or group primarily responsible for making  or providing the core media assets or knowledge represented in a digital heritage item. While a creator is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple creators. Examples include a basket designer or weaver, knowledge holders who provided information for a book, a book’s author or illustrator, singers, songwriters, dancers, or performers. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Note that this is not the user publishing the digital heritage item on the site - that information is recorded in the automated author field. </br>Include as many creators as needed. Select from existing creators or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -431,7 +431,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_format'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Format'))
-      ->setDescription(t('Format is the specific physical and/or digital properties of the media asset(s) represented in the digital heritage item. This may include details about the physical format (eg: pamphlet, glass slide, open reel tape), duration (eg: 90 minutes), extent (eg: 20 pages, 11 sheets), dimensions (eg: 4x6", 12x6x8cm), file format (eg: PDF, JPG, MP3), or additional information as needed. </br>Select existing formats or enter new ones.'))
+      ->setDescription(t('Format is the specific physical and/or digital properties of the media asset(s) represented in the digital heritage item. This may include details about the physical format (eg: pamphlet, glass slide, open reel tape), duration (eg: 90 minutes), extent (eg: 20 pages, 11 sheets), dimensions (eg: 4x6", 12x6x8cm), file format (eg: PDF, JPG, MP3), or additional information as needed. </br>Include as many formats as needed. Select from existing formats or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -451,7 +451,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag digital heritage items to ensure that the items are discoverable when searching or browsing. They are often used to supplement categories as they can be created on the fly and may be more specific. </br>Select existing keywords or enter new ones.'))
+      ->setDescription(t('Keywords are used to tag digital heritage items to ensure that the items are discoverable when searching or browsing. They are often used to supplement categories as they can be created on the fly and may be more specific. </br>Include as many keywords as needed. Select from existing keywords or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -471,7 +471,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_language'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Language'))
-      ->setDescription(t('Language(s) present in the digital heritage item. This includes the textual metadata and any media assets. </br>As you type, existing languages will be displayed. </br>Select existing languages or enter new ones.'))
+      ->setDescription(t('Language(s) present in the digital heritage item. This includes the textual metadata and any media assets. </br>As you type, existing languages will be displayed. </br>Include as many languages as needed. Select from existing languages or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -491,7 +491,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('A person or people represented or referenced in the digital heritage item or media asset. This field complements the creator and contributor fields. Examples include people identifiable in a photograph, people speaking in an audio recording, present in a video, or referenced in a document. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Select existing people or enter new names.'))
+      ->setDescription(t('A person or people represented or referenced in the digital heritage item or media asset. This field complements the creator and contributor fields. Examples include people identifiable in a photograph, people speaking in an audio recording, present in a video, or referenced in a document. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Include as many people as needed. Select from existing people or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -511,7 +511,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_publisher'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Publisher'))
-      ->setDescription(t('The person, organization, or service responsible for publishing the digital heritage item or media asset.	</br>As you type, existing publishers will be displayed. </br>Select existing publishers or enter new ones.'))
+      ->setDescription(t('The person, organization, or service responsible for publishing the digital heritage item or media asset.	</br>As you type, existing publishers will be displayed. </br>Include as many publishers as needed. Select from existing publishers or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -531,7 +531,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_subject'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Subject'))
-      ->setDescription(t('Subject reflects the main topic(s) of the digital heritage item. It is primarily used to reference existing controlled vocabularies (eg: Library of Congress Subject Headings or Getty Art and Architecture Thesaurus), but a site-specific subject list can be developed as well. </br>Select existing subjects or enter new ones.'))
+      ->setDescription(t('Subject reflects the main topic(s) of the digital heritage item. It is primarily used to reference existing controlled vocabularies (eg: Library of Congress Subject Headings or Getty Art and Architecture Thesaurus), but a site-specific subject list can be developed as well. </br>Include as many subjects as needed. Select from existing subjects or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -551,7 +551,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Type'))
-      ->setDescription(t('Type is the broad nature, genre, or function of the media asset(s) represented in the digital heritage item. Examples include Image, Text, Sound, Video, or Physical Object. </br>Select existing types or enter new ones.'))
+      ->setDescription(t('Type is the broad nature, genre, or function of the media asset(s) represented in the digital heritage item. Examples include Image, Text, Sound, Video, or Physical Object. </br>Include as many types as needed. Select from existing types or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',

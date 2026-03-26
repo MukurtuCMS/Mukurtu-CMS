@@ -23,7 +23,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag place records to ensure that they are discoverable when searching or browsing.	</br>Select existing keywords or enter new ones.'))
+      ->setDescription(t('Keywords are used to tag place records to ensure that they are discoverable when searching or browsing.	</br>Include as many keywords as needed. Select from existing keywords or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -48,7 +48,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_place_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Place type'))
-      ->setDescription(t('Place types are used to tag place records to indicate different types of locations or places.	</br>Select existing place types or enter new ones.'))
+      ->setDescription(t('Place types are used to tag place records to indicate different types of locations or places.	</br>Include as many place types as needed. Select from existing place types or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -148,7 +148,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_other_place_names'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Other Names'))
-      ->setDescription(t('Places may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the place is identified by connecting those disparate names.	</br>Select existing place names or enter new ones. Choose all names representing this place. </br>Each taxonomy (eg: location, keywords) must first be enabled by a Mukurtu Manager.'))
+      ->setDescription(t('Places may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the place is identified by connecting those disparate names.	</br>Include as many place names as needed. Select from existing place names or add new ones.</br>Each taxonomy (eg: location, keywords) must first be enabled by a Mukurtu Manager.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -193,7 +193,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the place record.	</br>Select existing locations or enter new ones.'))
+      ->setDescription(t('A named place, or places, that are closely connected to the place record.	</br>Include as many locations as needed. Select from existing locations or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',

@@ -23,7 +23,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag person records to ensure that they are discoverable when searching or browsing. Examples include significant life events or organizations which the person was involved with.	</br>Select existing keywords or enter new ones.'))
+      ->setDescription(t('Keywords are used to tag person records to ensure that they are discoverable when searching or browsing. Examples include significant life events or organizations which the person was involved with.	</br>Include as many keywords as needed. Select from existing keywords or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -176,7 +176,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_other_names'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Other Names'))
-      ->setDescription(t('People may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the person is identified by connecting those disparate names.	</br>Select existing names or enter new ones. Choose all names representing this person. </br>Each taxonomy (eg: creator, contributor, people) must first be enabled by a Mukurtu Manager.'))
+      ->setDescription(t('People may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the person is identified by connecting those disparate names.	</br>Include as many names as needed. Select from existing names or add new ones.</br>Each taxonomy (eg: creator, contributor, people) must first be enabled by a Mukurtu Manager.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -221,7 +221,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the person record. Examples include the places a person was born, lived, died, or sites of important life events.	</br>Select existing locations or enter new ones.'))
+      ->setDescription(t('A named place, or places, that are closely connected to the person record. Examples include the places a person was born, lived, died, or sites of important life events.	</br>Include as many locations as needed. Select from existing locations or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -241,7 +241,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_place_of_birth'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Place of Birth'))
-      ->setDescription(t('The place where the person was born.	</br>Select an existing location or enter a new one.'))
+      ->setDescription(t('The place where the person was born.	</br>Select from existing locations or add a new one.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -261,7 +261,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_place_of_death'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Place of Death'))
-      ->setDescription(t('The place where the person died.	Select an existing location or enter a new one.'))
+      ->setDescription(t('The place where the person died. Select from existing locations or add a new one.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',

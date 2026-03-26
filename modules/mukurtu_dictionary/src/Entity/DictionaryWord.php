@@ -71,7 +71,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag dictionary words to ensure that they are discoverable when searching or browsing.	</br>Select existing keywords or enter new ones.'))
+      ->setDescription(t('Keywords are used to tag dictionary words to ensure that they are discoverable when searching or browsing.	</br>Include as many keywords as needed. Select from existing keywords or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -116,7 +116,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the dictionary word. Examples include words that are place names,  where a word originated, or a place the word is otherwise connected to. </br>Select existing locations or enter new ones.'))
+      ->setDescription(t('A named place, or places, that are closely connected to the dictionary word. Examples include words that are place names,  where a word originated, or a place the word is otherwise connected to. </br>Include as many locations as needed. Select from existing locations or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -195,7 +195,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
-      ->setDescription('A contributor is a person or group who aided in the making of the entry. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A dictionary word can have multiple contributors. Examples include language speakers who recorded the word, or contributed knowledge and history of the word. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Select existing contributors or enter new names.')
+      ->setDescription('A contributor is a person or group who aided in the making of the entry. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A dictionary word can have multiple contributors. Examples include language speakers who recorded the word, or contributed knowledge and history of the word. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Include as many contributors as needed. Select from existing contributors or add new ones.')
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -327,7 +327,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_word_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Word Type'))
-      ->setDescription('Word types may include parts of speech, syntactic or grammatical categories, or any other relevant system to classify entries.	</br>As you type, existing word types will be displayed. </br>Select existing word types or enter new ones.')
+      ->setDescription('Word types may include parts of speech, syntactic or grammatical categories, or any other relevant system to classify entries.	</br>As you type, existing word types will be displayed. </br>Include as many word types as needed. Select from existing word types or add new ones.')
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',

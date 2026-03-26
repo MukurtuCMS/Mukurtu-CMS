@@ -41,7 +41,7 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
-      ->setDescription('A contributor is a person or group who aided in the making of the entry. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A dictionary word can have multiple contributors. Examples include language speakers who recorded the word, or contributed knowledge and history of the word. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Select existing contributors or enter new names.')
+      ->setDescription('A contributor is a person or group who aided in the making of the entry. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A dictionary word can have multiple contributors. Examples include language speakers who recorded the word, or contributed knowledge and history of the word. </br>Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". </br>Include as many contributors as needed. Select from existing contributors or add new ones.')
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -173,7 +173,7 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
 
     $definitions['field_word_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Word Type'))
-      ->setDescription('Word types may include parts of speech, syntactic or grammatical categories, or any other relevant system to classify entries.	</br>Select existing word types or enter new ones.')
+      ->setDescription('Word types may include parts of speech, syntactic or grammatical categories, or any other relevant system to classify entries.	</br>Include as many word types as needed. Select from existing word types or add new ones.')
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
