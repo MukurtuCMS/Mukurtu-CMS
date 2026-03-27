@@ -16,7 +16,7 @@ mapping:
     target: uuid
   -
     source: 'Language (langcode)'
-    target: '-1'
+    target: langcode
   -
     source: 'Revision create time'
     target: revision_timestamp
