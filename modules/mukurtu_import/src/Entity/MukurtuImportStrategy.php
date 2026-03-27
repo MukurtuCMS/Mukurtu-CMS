@@ -17,15 +17,16 @@ use Exception;
  *
  * @ConfigEntityType(
  *   id = "mukurtu_import_strategy",
- *   label = @Translation("Import Configuration Templates"),
- *   label_collection = @Translation("Import Configuration Templates"),
- *   label_singular = @Translation("Import Configuration Template"),
- *   label_plural = @Translation("Import Configuration Templates"),
+ *   label = @Translation("Import Templates"),
+ *   label_collection = @Translation("Import Templates"),
+ *   label_singular = @Translation("Import Template"),
+ *   label_plural = @Translation("Import Templates"),
  *   label_count = @PluralTranslation(
- *     singular = "@count Import Configuration Template",
- *     plural = "@count Import Configuration Templates",
+ *     singular = "@count Import Template",
+ *     plural = "@count Import Templates",
  *   ),
  *   handlers = {
+ *     "access" = "Drupal\mukurtu_import\MukurtuImportStrategyAccessControlHandler",
  *     "list_builder" = "Drupal\mukurtu_import\MukurtuImportStrategyListBuilder",
  *     "form" = {
  *       "add" = "Drupal\mukurtu_import\Form\MukurtuImportStrategyForm",
@@ -36,10 +37,10 @@ use Exception;
  *   config_prefix = "mukurtu_import_strategy",
  *   admin_permission = "administer mukurtu_import_strategy",
  *   links = {
- *     "collection" = "/admin/structure/mukurtu-import-strategy",
- *     "add-form" = "/admin/structure/mukurtu-import-strategy/add",
- *     "edit-form" = "/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}",
- *     "delete-form" = "/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}/delete"
+ *     "collection" = "/admin/import-templates",
+ *     "add-form" = "/admin/import-templates/add",
+ *     "edit-form" = "/admin/import-templates/{mukurtu_import_strategy}",
+ *     "delete-form" = "/admin/import-templates/{mukurtu_import_strategy}/delete"
  *   },
  *   entity_keys = {
  *     "id" = "id",
@@ -184,11 +185,10 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     if (!$this->id()) {
       $this->id = $this->uuidGenerator()->generate();
     }
-
     if (!$this->uid) {
-      $this->uid = 1;
+      $this->uid = \Drupal::currentUser()->id();
     }
-    parent::save();
+    return parent::save();
   }
 
   public function getOwner() {
@@ -209,14 +209,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return $this;
   }
 
-  public function applies(FileInterface $file) {
+  /**
+   * {@inheritdoc}
+   */
+  public function applies(FileInterface $file): bool {
     $headers = $this->getCSVHeaders($file);
-    $mapping = $this->getMapping();
-    $diff = array_diff(array_column($mapping, 'source'), $headers);
-    if (empty($diff)) {
-      return TRUE;
-    }
-    return FALSE;
+    $mapping = array_column($this->getMapping(), 'source');
+    // If there is at least one column of overlap between the headers in the
+    // *.csv and the mapping, then we'll assume the file is a match.
+    $intersect = array_intersect($mapping, $headers);
+    return !empty($intersect);
   }
 
   protected function getCSVHeaders(FileInterface $file) {

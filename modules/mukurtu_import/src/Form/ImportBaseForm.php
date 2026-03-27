@@ -16,13 +16,13 @@ use Exception;
 use League\Csv\Reader;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 
 /**
  * Provides a Mukurtu Import form.
  */
 class ImportBaseForm extends FormBase {
+  use ImportFormTrait;
 
   /**
    * The private temporary storage.
@@ -51,13 +51,6 @@ class ImportBaseForm extends FormBase {
    * @var array
    */
   protected array $metadataFilesImportConfig;
-
-  /**
-   * The field definitions.
-   *
-   * @var array
-   */
-  protected array $fieldDefinitions;
 
   /**
    * Constructs an ImportBaseForm object.
@@ -270,58 +263,6 @@ class ImportBaseForm extends FormBase {
   }
 
   /**
-   * Checks if a user has permission to create an entity of a specific type and bundle.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID, e.g., 'node', 'taxonomy_term', etc.
-   * @param string|null $bundle
-   *   (optional) The bundle, e.g., 'article', 'page', etc. If omitted, checks access for the entity type generally.
-   * @param \Drupal\Core\Session\AccountInterface|null $account
-   *   (optional) The user account for which to check access. Defaults to the current user.
-   *
-   * @return bool
-   *   TRUE if the user has access, FALSE otherwise.
-   */
-  function userCanCreateEntity($entity_type_id, $bundle = NULL, ?AccountInterface $account = NULL) {
-    // If no user account is provided, default to the current user.
-    if (!$account) {
-      $account = $this->currentUser();
-    }
-
-    // Use the access control handler to check create access.
-    $access = $this->entityTypeManager->getAccessControlHandler($entity_type_id)->createAccess($bundle, $account);
-
-    return $access;
-  }
-
-  /**
-   * Checks if a user can create any bundle of a specific entity type.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID, e.g., 'node', 'taxonomy_term', etc.
-   * @param \Drupal\Core\Session\AccountInterface|null $account
-   *   (optional) The user account for which to check access. Defaults to the current user.
-   *
-   * @return bool
-   *   TRUE if the user has access, FALSE otherwise.
-   */
-  function userCanCreateAnyBundleForEntityType($entity_type_id, ?AccountInterface $account = NULL) {
-    if (!$account) {
-      $account = $this->currentUser();
-    }
-
-    $bundle_info = $this->entityBundleInfo->getAllBundleInfo();
-    if (!empty($bundle_info[$entity_type_id])) {
-      foreach ($bundle_info[$entity_type_id] as $bundle_id => $bundle_info) {
-        if ($this->userCanCreateEntity($entity_type_id, $bundle_id, $account)) {
-          return TRUE;
-        }
-      }
-    }
-    return FALSE;
-  }
-
-  /**
    * Set the import config for a specific file.
    *
    * @param int $fid
@@ -374,95 +315,6 @@ class ImportBaseForm extends FormBase {
     }
     $csv->setHeaderOffset(0);
     return $csv->getHeader();
-  }
-
-  /**
-   * Build the mapper target options for a single source column.
-   *
-   * @param string $entity_type_id
-   *   The entity type id.
-   * @param string $bundle
-   *   The bundle.
-   * @return mixed
-   *   The select form element.
-   */
-  protected function buildTargetOptions($entity_type_id, $bundle = NULL) {
-    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
-    $entity_keys = $entity_definition->getKeys();
-
-    $options = [-1 => $this->t('Ignore - Do not import')];
-    foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
-      // Get the plugin for this field to check if it supports properties.
-      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
-      $supported_properties = $plugin->getSupportedProperties($field_definition);
-
-      // If the plugin supports properties, add them as separate options.
-      if (!empty($supported_properties)) {
-        foreach ($supported_properties as $property_name => $property_info) {
-          $options["{$field_name}/{$property_name}"] = $property_info['label'];
-        }
-      }
-      else {
-        // No properties, add the field normally.
-        $options[$field_name] = $field_definition->getLabel();
-      }
-    }
-
-    // Very Mukurtu specific. We ship with a "Language" field which has
-    // the exact same label as content entity langcodes. Here we disambiguate
-    // the two.
-    if (isset($options[$entity_keys['langcode']])) {
-      $options[$entity_keys['langcode']] .= $this->t(' (langcode)');
-    }
-
-    return $options;
-  }
-
-  /**
-   * Get the field definitions for an entity type/bundle.
-   *
-   * @param string $entity_type_id
-   *   The entity type id.
-   * @param ?string $bundle
-   *   The bundle.
-   *
-   * @return \Drupal\Core\Field\FieldDefinitionInterface[]
-   *   The field definitions.
-   */
-  protected function getFieldDefinitions(string $entity_type_id, ?string $bundle = NULL): array {
-    // Memoize the field defs.
-    if (empty($this->fieldDefinitions[$entity_type_id][$bundle])) {
-      $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
-      $entity_keys = $entity_definition->getKeys();
-      $field_defs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
-
-      // Remove computed fields/fields that can't be targeted for import.
-      foreach ($field_defs as $field_name => $fieldDef) {
-        // Don't remove ID/UUID fields.
-        if ($field_name === $entity_keys['id'] || $field_name === $entity_keys['uuid']) {
-          continue;
-        }
-
-        // Remove the revision log message as a valid target. We are using
-        // specific revision log messages to control import behavior.
-        if ($field_name === 'revision_log') {
-          unset($field_defs[$field_name]);
-        }
-
-        // Remove unwanted 'behavior_settings' paragraph base field.
-        if ($entity_type_id === "paragraph" && $field_name === 'behavior_settings') {
-          unset($field_defs[$field_name]);
-        }
-
-        // Remove computed and read-only fields.
-        if ($fieldDef->isComputed() || $fieldDef->isReadOnly()) {
-          unset($field_defs[$field_name]);
-        }
-      }
-      $this->fieldDefinitions[$entity_type_id][$bundle] = $field_defs;
-    }
-
-    return $this->fieldDefinitions[$entity_type_id][$bundle];
   }
 
   /**
