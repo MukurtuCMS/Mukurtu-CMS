@@ -562,13 +562,21 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       }
     }
 
-    // Similarly, resolve language/langcode here. Our field_language in English
-    // has a "Language" field label which keeps matching to the locale langcode.
-
+    // Disambiguate the langcode base field. In buildTargetOptions(), its label
+    // gets " (langcode)" appended to distinguish it from other Language fields.
+    // Match against that disambiguated label here so auto-mapping picks it up.
+    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entity_keys = $entity_definition->getKeys();
+    if (!empty($entity_keys['langcode']) && isset($field_defs[$entity_keys['langcode']])) {
+      $langcode_label = mb_strtolower($field_defs[$entity_keys['langcode']]->getLabel() . ' (langcode)');
+      if ($needle === $langcode_label) {
+        return $entity_keys['langcode'];
+      }
+    }
 
     // Check for field label matches.
-    if ($fieldLabelMatch = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
-      return $fieldLabelMatch;
+    if ($field_label_match = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
+      return $field_label_match;
     }
 
     // Check if we have a (case insensitive) field name match.

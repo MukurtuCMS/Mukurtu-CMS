@@ -189,30 +189,30 @@ trait ImportFormTrait {
    */
   protected function getFieldDefinitions(string $entity_type_id, ?string $bundle = NULL): array {
     if (empty($this->fieldDefinitions[$entity_type_id][$bundle])) {
-      $entityDefinition = $this->entityTypeManager->getDefinition($entity_type_id);
-      $entityKeys = $entityDefinition->getKeys();
-      $fieldDefs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
+      $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+      $entity_keys = $entity_definition->getKeys();
+      $field_defs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
 
-      foreach ($fieldDefs as $field_name => $fieldDef) {
-        if ($field_name === $entityKeys['id'] || $field_name === $entityKeys['uuid']) {
+      foreach ($field_defs as $field_name => $fieldDef) {
+        if ($field_name === $entity_keys['id'] || $field_name === $entity_keys['uuid']) {
           continue;
         }
 
         // Remove the revision log message as a valid target.
         if ($field_name === 'revision_log') {
-          unset($fieldDefs[$field_name]);
+          unset($field_defs[$field_name]);
         }
 
         // Remove unwanted 'behavior_settings' paragraph base field.
         if ($entity_type_id === 'paragraph' && $field_name === 'behavior_settings') {
-          unset($fieldDefs[$field_name]);
+          unset($field_defs[$field_name]);
         }
 
         if ($fieldDef->isComputed() || $fieldDef->isReadOnly()) {
-          unset($fieldDefs[$field_name]);
+          unset($field_defs[$field_name]);
         }
       }
-      $this->fieldDefinitions[$entity_type_id][$bundle] = $fieldDefs;
+      $this->fieldDefinitions[$entity_type_id][$bundle] = $field_defs;
     }
 
     return $this->fieldDefinitions[$entity_type_id][$bundle];
