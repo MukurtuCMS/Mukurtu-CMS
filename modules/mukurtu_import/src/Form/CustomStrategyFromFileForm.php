@@ -154,7 +154,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     // Provide an option to save this config for reuse.
     $form['import_config'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Import Configuration Template'),
+      '#title' => $this->t('Import Template'),
     ];
     $form['import_config']['config_save'] = [
       '#type' => 'checkbox',
@@ -191,39 +191,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     return $form;
-  }
-
-  /**
-   * Get the options array for available text formats.
-   *
-   * @return array
-   *   An array of text format labels indexed by format ID.
-   */
-  protected function getTextFormatOptions(): array {
-    $formats = filter_formats();
-    return array_map(function($format) {
-      return $format->label();
-    }, $formats);
-  }
-
-  /**
-   * Get the options array for available target entity types.
-   */
-  protected function getEntityTypeIdOptions() {
-    $definitions = $this->entityTypeManager->getDefinitions();
-    $options = [];
-    foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item'] as $entity_type_id) {
-      if (isset($definitions[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
-        $options[$entity_type_id] = $definitions[$entity_type_id]->getLabel();
-
-        // Override certain labels, including paragraphs.
-        if ($entity_type_id === 'paragraph') {
-          $options[$entity_type_id] = $this->t('Compound Types (paragraphs)');
-        }
-      }
-    }
-
-    return $options;
   }
 
   /**
@@ -361,46 +328,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
         $form_state->setError($form['identifier_column'], $this->t('An Identifier Column is required. No ID, UUID, label, or compatible media source field is mapped, so the importer cannot uniquely identify rows. Select an Identifier Column above, or map one of the required fields.'));
       }
     }
-  }
-
-  /**
-   * Gets the available bundle options for a given entity type.
-   *
-   * This method retrieves all bundles for the specified entity type that the
-   * current user has permission to create. It provides a select list of
-   * available sub-types/bundles for the import form.
-   *
-   * If there is only one bundle available, the "None: Base Fields Only" option
-   * is excluded from the returned options array.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID to get bundles for (e.g., 'node', 'media', etc.).
-   *
-   * @return array
-   *   An associative array of bundle options where keys are bundle machine
-   *   names (or -1 for base fields only) and values are bundle labels. Returns
-   *   an array with a single "No sub-types available" option if no bundles
-   *   exist for the entity type.
-   */
-  protected function getBundleOptions($entity_type_id): array {
-    $bundle_info = $this->entityBundleInfo->getAllBundleInfo();
-
-    if (!isset($bundle_info[$entity_type_id])) {
-      return [-1 => $this->t('No sub-types available')];
-    }
-
-    // Don't provide the base fields option if there is only one valid bundle.
-    $options = [];
-    if (count($bundle_info[$entity_type_id]) > 1) {
-      $options = [-1 => $this->t('None: Base Fields Only')];
-    }
-
-    foreach ($bundle_info[$entity_type_id] as $bundle => $info) {
-      if ($this->userCanCreateEntity($entity_type_id, $bundle)) {
-        $options[$bundle] = $info['label'] ?? $bundle;
-      }
-    }
-    return $options;
   }
 
   /**

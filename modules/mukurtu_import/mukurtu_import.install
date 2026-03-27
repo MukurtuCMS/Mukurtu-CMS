@@ -78,6 +78,29 @@ function mukurtu_import_schema() {
 }
 
 /**
+ * Add granular import template permissions to roles with administer permission.
+ */
+function mukurtu_import_update_11001(): void {
+  $new_permissions = [
+    'create mukurtu_import_strategy',
+    'edit own mukurtu_import_strategy',
+    'delete own mukurtu_import_strategy',
+  ];
+
+  $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+  /** @var \Drupal\user\RoleInterface[] $roles */
+  $roles = $role_storage->loadMultiple();
+  foreach ($roles as $role) {
+    if ($role->hasPermission('administer mukurtu_import_strategy')) {
+      foreach ($new_permissions as $permission) {
+        $role->grantPermission($permission);
+      }
+      $role->save();
+    }
+  }
+}
+
+/**
  * Implements hook_requirements().
  */
 function mukurtu_import_requirements($phase) {
