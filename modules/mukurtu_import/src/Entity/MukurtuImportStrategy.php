@@ -209,14 +209,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return $this;
   }
 
-  public function applies(FileInterface $file) {
+  /**
+   * {@inheritdoc}
+   */
+  public function applies(FileInterface $file): bool {
     $headers = $this->getCSVHeaders($file);
-    $mapping = $this->getMapping();
-    $diff = array_diff(array_column($mapping, 'source'), $headers);
-    if (empty($diff)) {
-      return TRUE;
-    }
-    return FALSE;
+    $mapping = array_column($this->getMapping(), 'source');
+    // If there is at least one column of overlap between the headers in the
+    // *.csv and the mapping, then we'll assume the file is a match.
+    $intersect = array_intersect($mapping, $headers);
+    return !empty($intersect);
   }
 
   protected function getCSVHeaders(FileInterface $file) {
