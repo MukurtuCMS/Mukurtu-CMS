@@ -4,7 +4,7 @@ dependencies: {  }
 id: digital_heritage_items_all_fields
 uid: 1
 label: 'Digital heritage items - all fields'
-description: null
+description: ''
 target_entity_type_id: node
 target_bundle: digital_heritage
 default_format: null
@@ -163,7 +163,6 @@ mapping:
     source: 'Original Record'
     target: field_mukurtu_original_record
 configuration:
-  upload_location: 'private://0e0848dd-dc11-4e5f-9100-8f0858cf68e5/files/'
   delimiter: ','
   enclosure: '"'
   escape: \
