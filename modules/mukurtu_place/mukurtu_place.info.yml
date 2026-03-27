@@ -20,6 +20,7 @@ dependencies:
   - 'entity_reference_revisions:entity_reference_revisions'
   - 'field_group:field_group'
   - 'geofield:geofield'
+  - 'leaflet:leaflet'
   - 'mukurtu_browse:mukurtu_browse'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_drafts:mukurtu_drafts'

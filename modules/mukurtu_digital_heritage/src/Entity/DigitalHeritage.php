@@ -232,12 +232,12 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDescription(t('Creative Commons licenses provide a standardized way for copyright holders to grant the public permission to use their creative work under copyright law, and to specify the ways in which their work may be altered, shared, and used. For more information, visit <a href="https://creativecommons.org/">creativecommons.org</a>. </br>Select a Creative Commons license from the dropdown menu.'))
       ->setSettings([
         'allowed_values' => [
-          'http://creativecommons.org/licenses/by/4.0' => t('Attribution 4.0 International (CC BY 4.0)'),
-          'http://creativecommons.org/licenses/by-nc/4.0' => t('Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)'),
-          'http://creativecommons.org/licenses/by-sa/4.0' => t('Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)'),
-          'http://creativecommons.org/licenses/by-nc-sa/4.0' => t('Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)'),
-          'http://creativecommons.org/licenses/by-nd/4.0' => t('Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)'),
-          'http://creativecommons.org/licenses/by-nc-nd/4.0' => t('Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)'),
+          'https://creativecommons.org/licenses/by/4.0/' => t('Attribution 4.0 International (CC BY 4.0)'),
+          'https://creativecommons.org/licenses/by-nc/4.0/' => t('Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)'),
+          'https://creativecommons.org/licenses/by-sa/4.0/' => t('Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)'),
+          'https://creativecommons.org/licenses/by-nc-sa/4.0/' => t('Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)'),
+          'https://creativecommons.org/licenses/by-nd/4.0/' => t('Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)'),
+          'https://creativecommons.org/licenses/by-nc-nd/4.0/' => t('Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)'),
         ]
       ])
       ->setCardinality(1)
@@ -272,53 +272,53 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDescription(t('"RightsStatements.org provides standardized rights statements that can be used by cultural heritage institutions to indicate the copyright status of digital objects that they make available online, either on their own website or via aggregation platforms. These rights statements are high level summaries of the underlying rights status of the digital objects that they apply to. These rights statements are intended to be used in addition to (more detailed) rights information that institutions already have and not to replace existing information." For more information, visit <a href="https://rightsstatements.org/">rightsstatements.org</a>. </br>Select a Rights Statement from the dropdown menu. '))
       ->setSettings([
         'allowed_values' => [
-          'http://rightsstatements.org/vocab/InC/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright"/>
+          'https://rightsstatements.org/vocab/InC/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright"/>
           <a href="@in-copyright">In Copyright</a>', [
-            '@in-copyright' => 'http://rightsstatements.org/vocab/InC/1.0/'
+            '@in-copyright' => 'https://rightsstatements.org/vocab/InC/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/InC-OW-EU/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright - EU Orphan Work"/>
+          'https://rightsstatements.org/vocab/InC-OW-EU/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright - EU Orphan Work"/>
           <a href="@in-copyright-eu-orphan-work">In Copyright - EU Orphan Work</a>', [
-            '@in-copyright-eu-orphan-work' => 'http://rightsstatements.org/vocab/InC-OW-EU/1.0/'
+            '@in-copyright-eu-orphan-work' => 'https://rightsstatements.org/vocab/InC-OW-EU/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/InC-EDU/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright - Educational Use Permitted"/>
+          'https://rightsstatements.org/vocab/InC-EDU/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright - Educational Use Permitted"/>
           <a href="@in-copyright-educational-use-permitted">In Copyright - Educational Use Permitted</a>', [
-            '@in-copyright-educational-use-permitted' => 'http://rightsstatements.org/vocab/InC-EDU/1.0/'
+            '@in-copyright-educational-use-permitted' => 'https://rightsstatements.org/vocab/InC-EDU/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/InC-NC/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright - Non-Commercial Use Permitted"/>
+          'https://rightsstatements.org/vocab/InC-NC/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright - Non-Commercial Use Permitted"/>
           <a href="@in-copyright-non-commercial-use-permitted">In Copyright - Non-Commercial Use Permitted</a>', [
-            '@in-copyright-non-commercial-use-permitted' => 'http://rightsstatements.org/vocab/InC-NC/1.0/'
+            '@in-copyright-non-commercial-use-permitted' => 'https://rightsstatements.org/vocab/InC-NC/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/InC-RUU/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright - Rights-Holder(s) Unlocatable or Unidentifiable"/>
+          'https://rightsstatements.org/vocab/InC-RUU/1.0/' => t('<img src="https://rightsstatements.org/files/icons/InC.Icon-Only.dark.svg" height="15" width="15" alt="In Copyright - Rights-Holder(s) Unlocatable or Unidentifiable"/>
           <a href="@in-copyright-rights-holder(s)-unlocatable-or-unidentifiable">In Copyright - Rights-Holder(s) Unlocatable or Unidentifiable</a>', [
-            '@in-copyright-rights-holder(s)-unlocatable-or-unidentifiable' => 'http://rightsstatements.org/vocab/InC-RUU/1.0/'
+            '@in-copyright-rights-holder(s)-unlocatable-or-unidentifiable' => 'https://rightsstatements.org/vocab/InC-RUU/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/NoC-CR/1.0/' => t('<img src="https://rightsstatements.org/files/icons/NoC.Icon-Only.dark.svg" height="15" width="15" alt="No Copyright - Contractual Restrictions"/>
+          'https://rightsstatements.org/vocab/NoC-CR/1.0/' => t('<img src="https://rightsstatements.org/files/icons/NoC.Icon-Only.dark.svg" height="15" width="15" alt="No Copyright - Contractual Restrictions"/>
           <a href="@no-copyright-contractual-restrictions">No Copyright - Contractual Restrictions</a>', [
-            '@no-copyright-contractual-restrictions' => 'http://rightsstatements.org/vocab/NoC-CR/1.0/'
+            '@no-copyright-contractual-restrictions' => 'https://rightsstatements.org/vocab/NoC-CR/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/NoC-NC/1.0/' => t('<img src="https://rightsstatements.org/files/icons/NoC.Icon-Only.dark.svg" height="15" width="15" alt="No Copyright - Non-Commercial Use Only"/>
+          'https://rightsstatements.org/vocab/NoC-NC/1.0/' => t('<img src="https://rightsstatements.org/files/icons/NoC.Icon-Only.dark.svg" height="15" width="15" alt="No Copyright - Non-Commercial Use Only"/>
           <a href="@no-copyright-non-commercial-use-only">No Copyright - Non-Commercial Use Only</a>', [
-            '@no-copyright-non-commercial-use-only' => 'http://rightsstatements.org/vocab/NoC-NC/1.0/'
+            '@no-copyright-non-commercial-use-only' => 'https://rightsstatements.org/vocab/NoC-NC/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/NoC-OKLR/1.0/' => t('<img src="https://rightsstatements.org/files/icons/NoC.Icon-Only.dark.svg" height="15" width="15" alt="No Copyright - Other Known Legal Restrictions"/>
+          'https://rightsstatements.org/vocab/NoC-OKLR/1.0/' => t('<img src="https://rightsstatements.org/files/icons/NoC.Icon-Only.dark.svg" height="15" width="15" alt="No Copyright - Other Known Legal Restrictions"/>
           <a href="@no-copyright-other-known-legal-restrictions">No Copyright - Other Known Legal Restrictions</a>', [
-            '@no-copyright-other-known-legal-restrictions' => 'http://rightsstatements.org/vocab/NoC-OKLR/1.0/'
+            '@no-copyright-other-known-legal-restrictions' => 'https://rightsstatements.org/vocab/NoC-OKLR/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/NoC-US/1.0/' => t('<img src="https://rightsstatements.org/files/icons/NoC.Icon-Only.dark.svg" height="15" width="15" alt="No Copyright - United States"/>
+          'https://rightsstatements.org/vocab/NoC-US/1.0/' => t('<img src="https://rightsstatements.org/files/icons/NoC.Icon-Only.dark.svg" height="15" width="15" alt="No Copyright - United States"/>
           <a href="@no-copyright-united-states">No Copyright - United States</a>', [
-            '@no-copyright-united-states' => 'http://rightsstatements.org/vocab/NoC-US/1.0/'
+            '@no-copyright-united-states' => 'https://rightsstatements.org/vocab/NoC-US/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/CNE/1.0/' => t('<img src="https://rightsstatements.org/files/icons/Other.Icon-Only.dark.svg" height="15" width="15" alt="Copyright Not Evaluated"/>
+          'https://rightsstatements.org/vocab/CNE/1.0/' => t('<img src="https://rightsstatements.org/files/icons/Other.Icon-Only.dark.svg" height="15" width="15" alt="Copyright Not Evaluated"/>
           <a href="@copyright-not-evaluated">Copyright Not Evaluated</a>', [
-            '@copyright-not-evaluated' => 'http://rightsstatements.org/vocab/CNE/1.0/'
+            '@copyright-not-evaluated' => 'https://rightsstatements.org/vocab/CNE/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/UND/1.0/' => t('<img src="https://rightsstatements.org/files/icons/Other.Icon-Only.dark.svg" height="15" width="15" alt="Copyright Undetermined"/>
+          'https://rightsstatements.org/vocab/UND/1.0/' => t('<img src="https://rightsstatements.org/files/icons/Other.Icon-Only.dark.svg" height="15" width="15" alt="Copyright Undetermined"/>
           <a href="@copyright-undetermined">Copyright Undetermined</a>', [
-            '@copyright-undetermined' => 'http://rightsstatements.org/vocab/UND/1.0/'
+            '@copyright-undetermined' => 'https://rightsstatements.org/vocab/UND/1.0/'
           ]),
-          'http://rightsstatements.org/vocab/NKC/1.0/' => t('<img src="https://rightsstatements.org/files/icons/Other.Icon-Only.dark.svg" height="15" width="15" alt="No Known Copyright"/>
+          'https://rightsstatements.org/vocab/NKC/1.0/' => t('<img src="https://rightsstatements.org/files/icons/Other.Icon-Only.dark.svg" height="15" width="15" alt="No Known Copyright"/>
           <a href="@no-known-copyright">No Known Copyright</a>', [
-            '@no-known-copyright' => 'http://rightsstatements.org/vocab/NKC/1.0/'
+            '@no-known-copyright' => 'https://rightsstatements.org/vocab/NKC/1.0/'
           ]),
         ],
       ])

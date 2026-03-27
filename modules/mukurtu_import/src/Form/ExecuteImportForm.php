@@ -91,9 +91,13 @@ class ExecuteImportForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
+    $form['review_message'] = [
+      '#markup' => '<p>' . $this->t('Review your import. Once you begin the import you cannot stop it. There is no way to rollback the import. Click the "Start Import" button to begin.') . '</p>',
+    ];
+
     $form['table'] = [
       '#type' => 'table',
-      '#caption' => $this->t('Review your import. Once you begin the import you cannot stop it. There is no way to rollback the import. Click the "Start Import" button to begin.'),
+      '#caption' => ['#markup' => '<strong>' . $this->t('Metadata Files') . '</strong>'],
       '#header' => [
         $this->t('Filename'),
         $this->t('Import Settings'),
@@ -133,6 +137,27 @@ class ExecuteImportForm extends ImportBaseForm {
         '#markup' => "<div>$entity_label: $bundle_label</div>",
       ];
 
+    }
+
+    $binary_files = $this->getBinaryFiles();
+    $form['binary_table'] = [
+      '#type' => 'table',
+      '#caption' => ['#markup' => '<strong>' . $this->t('Media/Binary Files') . '</strong>'],
+      '#header' => [
+        $this->t('Filename'),
+      ],
+      '#attributes' => [
+        'id' => 'import-review-binary',
+      ],
+      '#empty' => $this->t('No media/binary files uploaded.'),
+    ];
+
+    foreach ($binary_files as $fid) {
+      $filename = $this->getImportFilename($fid);
+      $form['binary_table'][$fid]['filename'] = [
+        '#type' => 'markup',
+        '#markup' => "<div>$filename</div>",
+      ];
     }
 
     $form['actions'] = [
