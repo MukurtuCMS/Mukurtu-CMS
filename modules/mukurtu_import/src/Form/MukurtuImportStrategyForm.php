@@ -394,7 +394,11 @@ class MukurtuImportStrategyForm extends EntityForm {
       $options[$entity_keys['langcode']] .= $this->t(' (langcode)');
     }
 
-    return $options;
+    // Keep the "Ignore" option at the top, then sort the rest alphabetically.
+    $ignore = [-1 => $options[-1]];
+    unset($options[-1]);
+    natcasesort($options);
+    return $ignore + $options;
   }
 
   /**
