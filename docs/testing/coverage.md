@@ -1,7 +1,7 @@
 # Mukurtu CMS — Test Infrastructure & Coverage
 **Repo:** https://github.com/MukurtuCMS/Mukurtu-CMS
 **Plain-language summary:** [coverage-plain-language.md](coverage-plain-language.md)
-**Last updated:** 2026-03-24
+**Last updated:** 2026-03-27
 
 ---
 
@@ -110,7 +110,7 @@ Heaviest base — ~30 transitive dependencies. Installs `search_api_item` and `i
 
 **`DictionaryEntityTest`** (11 tests): bundle class + interfaces for all 4 bundles; `field_dictionary_word_language` is the only required custom field; cardinality; `preSave` glossary_entry auto-fill (including multi-byte UTF-8 via `mb_substr`); `preSave` does not overwrite manually-set value; `bundleCheckCreateAccess` allowed/forbidden based on language term existence; `auto_create` (keywords TRUE, language FALSE — manager controlled); protocol + language field persistence.
 
-**`DictionaryWordListTest`** (9 tests): `add()` increases count and survives save/reload; multiple adds preserve order; `remove()` removes correct word, no-op for absent word; removing all words → count 0; `getCount()` reflects in-memory state; `add()` does not deduplicate (documents current behavior — UI enforces uniqueness); `postSave` smoke test (absence of exception is the assertion).
+**`DictionaryWordListTest`** (9 tests): `add()` increases count and survives save/reload; multiple adds preserve order; `remove()` removes correct word, no-op for absent word; removing all words → count 0; `getCount()` reflects in-memory state; `add()` does not deduplicate (documents current behavior — UI enforces uniqueness); `postSave` smoke test (absence of exception is the assertion). Note: originally created with 8 tests; 9th test (`testAddSameWordTwiceResultsInDuplicate`) added in a subsequent commit.
 
 ---
 
@@ -172,6 +172,16 @@ Community records are regular nodes with a `field_mukurtu_original_record` entit
 
 ---
 
+### `mukurtu_import`
+**Test base:** `MukurtuImportTestBase` (extends Drupal core's `MigrateTestBase` — not `MukurtuKernelTestBase`)
+The import module exercises the full Drupal migrate pipeline, so it uses Drupal's own migration test base rather than the shared Mukurtu base. `MukurtuImportTestBase` layers OG/community/protocol setup on top, and provides `createCsvFile()` (writes a temp CSV and registers it as a managed file) and `importCsvFile()` (builds a `MukurtuImportStrategy`, compiles a migration definition, and runs it via `ImportBatchExecutable`).
+
+**Production fix — `EnsureHttps.php`:** `ensure_https` was a migrate process plugin removed from `migrate_plus` 6.x (Drupal 10). Several migration definitions still reference it at runtime via `Migration.php:400`. `EnsureHttps` is re-implemented locally in `mukurtu_import` as a pass-through plugin (returns the value unchanged) so any migration YAML referencing `ensure_https` continues to work without modification. The pass-through behavior is intentional: the test field's allowed values use `https://` already, so no conversion is needed.
+
+**`ImportListStringTest`** (3 tests): A `list_string` field is created with Creative Commons license URLs as allowed keys. All three tests were previously failing with `PluginNotFoundException: The "ensure_https" plugin does not exist` — fixed by the `EnsureHttps.php` stub above. Test coverage: single import matching by exact key URL; single import matching by human-readable label (the import pipeline looks up the correct key); multiple values in a single cell as a semicolon-delimited mix of keys and labels.
+
+---
+
 ## PHPUnit 10 Migrations
 
 All test classes use `#[\PHPUnit\Framework\Attributes\Group('...')]` instead of `@group` in docblocks. Using both simultaneously still triggers the deprecation warning — the docblock annotation must be removed entirely.
@@ -200,7 +210,7 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 | `modules/mukurtu_media/tests/src/Kernel/MukurtuMediaTaxonomyTest.php` | **Created** (8 tests) | 2026-03-19 | [`840fb318`](https://github.com/alexmerrill/Mukurtu-CMS/commit/840fb318) |
 | `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryTestBase.php` | Created + refactored + CI fixes | 2026-03-19 / 2026-03-24 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) [`b5b7e29d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/b5b7e29d) [`f54f8953`](https://github.com/alexmerrill/Mukurtu-CMS/commit/f54f8953) [`03110274`](https://github.com/alexmerrill/Mukurtu-CMS/commit/03110274) |
 | `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryEntityTest.php` | **Created** (11 tests) | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) |
-| `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryWordListTest.php` | **Created** (8 tests) | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) |
+| `modules/mukurtu_dictionary/tests/src/Kernel/DictionaryWordListTest.php` | **Created** (9 tests) | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) |
 | `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageTestBase.php` | **Created** | 2026-03-19 | [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) |
 | `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageEntityTest.php` | **Created** (5 tests) + fix | 2026-03-19 | [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) [`3a6367f6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3a6367f6) |
 | `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageTaxonomyTest.php` | **Created** (6 tests) | 2026-03-19 | [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) |
@@ -214,12 +224,13 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 | `modules/mukurtu_place/tests/src/Kernel/PlaceTestBase.php` | **Created** | 2026-03-24 | [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) |
 | `modules/mukurtu_place/tests/src/Kernel/PlaceEntityTest.php` | **Created** (14 tests) + fix | 2026-03-24 | [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) [`caee4c0b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/caee4c0b) |
 | `modules/mukurtu_community_records/tests/src/Kernel/CommunityRecordTestBase.php` | **Created** + path_alias fix | 2026-03-24 | [`e5ea5e23`](https://github.com/alexmerrill/Mukurtu-CMS/commit/e5ea5e23) [`daf384f4`](https://github.com/alexmerrill/Mukurtu-CMS/commit/daf384f4) |
-| `modules/mukurtu_community_records/tests/src/Kernel/CommunityRecordFunctionsTest.php` | **Created** (12 tests) | 2026-03-24 | [`e5ea5e23`](https://github.com/alexmerrill/Mukurtu-CMS/commit/e5ea5e23) |
+| `modules/mukurtu_community_records/tests/src/Kernel/CommunityRecordFunctionsTest.php` | **Created** (15 tests) | 2026-03-24 | [`e5ea5e23`](https://github.com/alexmerrill/Mukurtu-CMS/commit/e5ea5e23) |
 | `modules/mukurtu_browse/tests/src/Unit/MukurtuMapNodesParamConverterTest.php` | **Created** (7 tests) | 2026-03-24 | [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
 | `modules/mukurtu_browse/tests/src/Unit/MukurtuBoundingBoxTest.php` | **Created** (10 tests) | 2026-03-24 | [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
 | `phpunit.xml` | Added kernel + unit testsuite directories; PHPUnit 10 schema + @group fixes | 2026-03-19 / 2026-03-24 | [`12b71fca`](https://github.com/alexmerrill/Mukurtu-CMS/commit/12b71fca) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`840fb318`](https://github.com/alexmerrill/Mukurtu-CMS/commit/840fb318) [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) [`d2061340`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d2061340) [`9618bddb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/9618bddb) [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) [`e5ea5e23`](https://github.com/alexmerrill/Mukurtu-CMS/commit/e5ea5e23) [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
+| `modules/mukurtu_import/src/Plugin/migrate/process/EnsureHttps.php` | **Created** — pass-through `ensure_https` process plugin stub | 2026-03-27 | [`984026fb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/984026fb) |
 
-**Total new tests added: ~184** across 20 test classes and 10 modules.
+**Total new tests added: ~184** across 20 test classes and 10 modules. Additionally, 3 pre-existing `ImportListStringTest` tests in `mukurtu_import` were unblocked by the `EnsureHttps.php` production fix (those tests exist in the repo but were previously failing with `PluginNotFoundException`).
 
 ---
 

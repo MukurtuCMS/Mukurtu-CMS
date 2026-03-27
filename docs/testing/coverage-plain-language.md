@@ -283,6 +283,17 @@ Community records allow communities to add their own perspective on an existing 
 
 ---
 
+## Imports — List String Fields
+*See [coverage.md § mukurtu_import](coverage.md#mukurtu_import)*
+
+When importing content from a CSV file, fields that accept a fixed list of values (like Creative Commons licenses) can be matched by either the raw stored value or the human-readable label.
+
+- Providing an exact stored key in the CSV (e.g. a full license URL) imports that value correctly.
+- Providing the human-readable label (e.g. "Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)") is looked up and converted to the correct stored key on import.
+- Multiple values in a single cell separated by semicolons all import correctly, mixing keys and labels.
+
+---
+
 ## Browse — Map and Bounding Box
 *See [coverage.md § mukurtu_browse](coverage.md#mukurtu_browse)*
 
