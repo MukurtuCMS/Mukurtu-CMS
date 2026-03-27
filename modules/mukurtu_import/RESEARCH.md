@@ -522,9 +522,6 @@ The plugin system supports mapping to individual subfields of compound field typ
 ### Entity Resolution Flexibility
 Entity references can be resolved by multiple identifiers: entity ID (numeric), UUID, or label/name. The `uuid_lookup` process plugin runs first to convert UUIDs, then the entity lookup plugin falls back to label matching if the value isn't an ID. This allows users to mix reference formats in their CSV data.
 
-### Install Schema is Scaffolding
-The `mukurtu_import_example` table defined in `hook_schema()` and the `hook_requirements()` random value check are both leftover scaffolding from module generation and are not used by the actual import functionality.
-
 ### No Rollback Support
 The module explicitly warns that imports cannot be rolled back. While the Migrate API supports rollbacks, this module uses `createStubMigration()` which creates transient migrations that don't persist their ID maps.
 

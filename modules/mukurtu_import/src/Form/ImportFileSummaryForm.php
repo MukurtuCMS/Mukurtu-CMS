@@ -141,7 +141,6 @@ class ImportFileSummaryForm extends ImportBaseForm {
     // Get the user's available import configs.
     $storage = $this->entityTypeManager->getStorage('mukurtu_import_strategy');
     $result = $storage->getQuery()
-      ->condition('uid', $this->currentUser()->id())
       ->accessCheck()
       ->execute();
 

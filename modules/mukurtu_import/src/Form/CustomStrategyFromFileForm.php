@@ -152,14 +152,22 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     // Provide an option to save this config for reuse.
+    $can_update = !$this->importConfig->isNew() && $this->importConfig->access('update');
+    $can_create = $this->entityTypeManager->getAccessControlHandler('mukurtu_import_strategy')
+      ->createAccess(NULL, $this->currentUser());
+
     $form['import_config'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Import Template'),
+      '#access' => $can_update || $can_create,
     ];
+    $save_label = $can_update
+      ? $this->t('Save the changes to this existing template')
+      : $this->t('Save this import configuration as a template for future imports');
     $form['import_config']['config_save'] = [
       '#type' => 'checkbox',
       '#default_value' => FALSE,
-      '#title' => $this->importConfig->isNew() ? $this->t('Save this import configuration as a template for future imports.') : $this->t('Save the changes to this existing template.'),
+      '#title' => $save_label,
       '#attributes' => [
         'name' => 'config_save',
       ],
@@ -168,7 +176,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $form['import_config']['config_title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Title'),
-      '#default_value' => $this->importConfig->isNew() ? '' : $this->importConfig->getLabel(),
+      '#default_value' => $can_update ? $this->importConfig->getLabel() : (string) $this->getTitle($file),
       '#states' => [
         'visible' => [
           ':input[name="config_save"]' => ['checked' => TRUE],
@@ -432,6 +440,10 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $this->importConfig->setConfig('identifier_column', $form_state->getValue('identifier_column') ?: NULL);
 
     if ($form_state->getValue('config_save')) {
+      $can_update = !$this->importConfig->isNew() && $this->importConfig->access('update');
+      if (!$can_update) {
+        $this->importConfig = $this->importConfig->createDuplicate();
+      }
       $userProvidedLabel = $form_state->getValue('config_title');
       if (trim($userProvidedLabel) != '') {
         $this->importConfig->setLabel($userProvidedLabel);
@@ -550,13 +562,21 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       }
     }
 
-    // Similarly, resolve language/langcode here. Our field_language in English
-    // has a "Language" field label which keeps matching to the locale langcode.
-
+    // Disambiguate the langcode base field. In buildTargetOptions(), its label
+    // gets " (langcode)" appended to distinguish it from other Language fields.
+    // Match against that disambiguated label here so auto-mapping picks it up.
+    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entity_keys = $entity_definition->getKeys();
+    if (!empty($entity_keys['langcode']) && isset($field_defs[$entity_keys['langcode']])) {
+      $langcode_label = mb_strtolower($field_defs[$entity_keys['langcode']]->getLabel() . ' (langcode)');
+      if ($needle === $langcode_label) {
+        return $entity_keys['langcode'];
+      }
+    }
 
     // Check for field label matches.
-    if ($fieldLabelMatch = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
-      return $fieldLabelMatch;
+    if ($field_label_match = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
+      return $field_label_match;
     }
 
     // Check if we have a (case insensitive) field name match.

@@ -2,85 +2,13 @@
 
 /**
  * @file
- * Install, update and uninstall functions for the Mukurtu Import module.
+ * Update functions for the Mukurtu Import module.
  */
-
-/**
- * Implements hook_install().
- */
-function mukurtu_import_install() {
-  \Drupal::messenger()->addStatus(__FUNCTION__);
-}
-
-/**
- * Implements hook_uninstall().
- */
-function mukurtu_import_uninstall() {
-  \Drupal::messenger()->addStatus(__FUNCTION__);
-}
-
-/**
- * Implements hook_schema().
- */
-function mukurtu_import_schema() {
-  $schema['mukurtu_import_example'] = [
-    'description' => 'Table description.',
-    'fields' => [
-      'id' => [
-        'type' => 'serial',
-        'not null' => TRUE,
-        'description' => 'Primary Key: Unique record ID.',
-      ],
-      'uid' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'The {users}.uid of the user who created the record.',
-      ],
-      'status' => [
-        'description' => 'Boolean indicating whether this record is active.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'size' => 'tiny',
-      ],
-      'type' => [
-        'type' => 'varchar_ascii',
-        'length' => 64,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Type of the record.',
-      ],
-      'created' => [
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Timestamp when the record was created.',
-      ],
-      'data' => [
-        'type' => 'blob',
-        'not null' => TRUE,
-        'size' => 'big',
-        'description' => 'The arbitrary data for the item.',
-      ],
-    ],
-    'primary key' => ['id'],
-    'indexes' => [
-      'type' => ['type'],
-      'uid' => ['uid'],
-      'status' => ['status'],
-    ],
-  ];
-
-  return $schema;
-}
 
 /**
  * Add granular import template permissions to roles with administer permission.
  */
-function mukurtu_import_update_11001(): void {
+function mukurtu_import_update_40001(): void {
   $new_permissions = [
     'create mukurtu_import_strategy',
     'edit own mukurtu_import_strategy',
@@ -101,19 +29,28 @@ function mukurtu_import_update_11001(): void {
 }
 
 /**
- * Implements hook_requirements().
+ * Create the 'Digital heritage items - all fields' import strategy.
  */
-function mukurtu_import_requirements($phase) {
-  $requirements = [];
+function mukurtu_import_update_40002(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.digital_heritage_items_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
 
-  if ($phase == 'runtime') {
-    $value = mt_rand(0, 100);
-    $requirements['mukurtu_import_status'] = [
-      'title' => t('Mukurtu Import status'),
-      'value' => t('Mukurtu Import value: @value', ['@value' => $value]),
-      'severity' => $value > 50 ? REQUIREMENT_INFO : REQUIREMENT_WARNING,
-    ];
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
   }
-
-  return $requirements;
 }
+
+/**
+ * Drop the unused mukurtu_import_example table.
+ */
+function mukurtu_import_update_40003(): void {
+  $schema = \Drupal::database()->schema();
+  if ($schema->tableExists('mukurtu_import_example')) {
+    $schema->dropTable('mukurtu_import_example');
+  }
+}
+

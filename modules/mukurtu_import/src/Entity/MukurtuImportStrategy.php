@@ -55,7 +55,6 @@ use Exception;
  *     "target_entity_type_id",
  *     "target_bundle",
  *     "mapping",
- *     "default_format",
  *     "configuration",
  *   }
  * )
@@ -80,13 +79,6 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    * @var string
    */
   protected $label;
-
-  /**
-   * The mukurtu_import_strategy status.
-   *
-   * @var bool
-   */
-  protected $status;
 
   /**
    * The mukurtu_import_strategy description.
