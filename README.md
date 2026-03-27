@@ -84,9 +84,5 @@ sudo apt install poppler-utils
 
 To update your local DDEV environment to a newer version of main, run `ddev composer upgrade`. Note that there may be data changes, so use at your own risk.
 
-## Testing
-
-Mukurtu CMS uses PHPUnit kernel tests and unit tests. See [`docs/testing/coverage.md`](docs/testing/coverage.md) for a full breakdown of test infrastructure and coverage by module. A plain-language summary of what each test verifies is available at [`docs/testing/coverage-plain-language.md`](docs/testing/coverage-plain-language.md).
-
 ## Contributing
 Mukurtu CMS v4 is under active development. Code contribution and feedback is welcome, and can be submitted in [our issues](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or you can contact us at [support@mukurtu.org](mailto:support@mukurtu.org).
