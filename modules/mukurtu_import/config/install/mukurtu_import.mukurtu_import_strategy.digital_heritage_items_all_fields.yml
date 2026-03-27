@@ -1,4 +1,5 @@
 langcode: en
+status: true
 dependencies: {  }
 id: digital_heritage_items_all_fields
 uid: 1
