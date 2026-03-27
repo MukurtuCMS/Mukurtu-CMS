@@ -74,7 +74,6 @@ class MukurtuImportTestBase extends MigrateTestBase {
     'filter',
     'image',
     'media',
-    'migrate_plus',
     'mukurtu_core',
     'mukurtu_protocol',
     'node_access_test',
