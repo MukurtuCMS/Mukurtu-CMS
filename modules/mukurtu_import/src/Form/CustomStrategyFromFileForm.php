@@ -159,7 +159,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $form['import_config']['config_save'] = [
       '#type' => 'checkbox',
       '#default_value' => FALSE,
-      '#title' => $this->importConfig->isNew() ? $this->t('Save this import configuration as a template for future imports.') : $this->t('Save the changes to this existing template.'),
+      '#title' => $this->importConfig->isNew() ? $this->t('Save this import configuration as a template for future imports') : $this->t('Save the changes to this existing template'),
       '#attributes' => [
         'name' => 'config_save',
       ],
