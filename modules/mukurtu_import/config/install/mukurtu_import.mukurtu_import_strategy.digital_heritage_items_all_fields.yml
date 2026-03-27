@@ -45,12 +45,6 @@ mapping:
     source: 'Sticky at top of lists'
     target: sticky
   -
-    source: 'Default translation'
-    target: default_langcode
-  -
-    source: 'Default revision'
-    target: revision_default
-  -
     source: 'Cultural Protocols > Protocols'
     target: field_cultural_protocols/protocols
   -

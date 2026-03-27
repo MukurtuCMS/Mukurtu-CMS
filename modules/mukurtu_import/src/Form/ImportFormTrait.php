@@ -193,7 +193,7 @@ trait ImportFormTrait {
       $entity_keys = $entity_definition->getKeys();
       $field_defs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
 
-      foreach ($field_defs as $field_name => $fieldDef) {
+      foreach ($field_defs as $field_name => $field_def) {
         if ($field_name === $entity_keys['id'] || $field_name === $entity_keys['uuid']) {
           continue;
         }
@@ -208,7 +208,14 @@ trait ImportFormTrait {
           unset($field_defs[$field_name]);
         }
 
-        if ($fieldDef->isComputed() || $fieldDef->isReadOnly()) {
+        if ($field_def->isComputed() || $field_def->isReadOnly() || $field_def->isInternal()) {
+          unset($field_defs[$field_name]);
+        }
+
+        // The default_langcode field is managed internally by Drupal's
+        // translation system and throws a LogicException if modified directly,
+        // but core does not mark it as internal or read-only.
+        if (isset($entity_keys['default_langcode']) && $field_name === $entity_keys['default_langcode']) {
           unset($field_defs[$field_name]);
         }
       }
