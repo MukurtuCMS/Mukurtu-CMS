@@ -7,7 +7,6 @@ label: 'Digital heritage items - all fields'
 description: ''
 target_entity_type_id: node
 target_bundle: digital_heritage
-default_format: null
 mapping:
   -
     source: ID

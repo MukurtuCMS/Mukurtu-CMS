@@ -55,7 +55,6 @@ use Exception;
  *     "target_entity_type_id",
  *     "target_bundle",
  *     "mapping",
- *     "default_format",
  *     "configuration",
  *   }
  * )
