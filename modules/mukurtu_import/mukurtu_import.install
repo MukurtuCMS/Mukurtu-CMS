@@ -8,7 +8,7 @@
 /**
  * Add granular import template permissions to roles with administer permission.
  */
-function mukurtu_import_update_11001(): void {
+function mukurtu_import_update_40001(): void {
   $new_permissions = [
     'create mukurtu_import_strategy',
     'edit own mukurtu_import_strategy',
@@ -31,7 +31,7 @@ function mukurtu_import_update_11001(): void {
 /**
  * Create the 'Digital heritage items - all fields' import strategy.
  */
-function mukurtu_import_update_11002(): void {
+function mukurtu_import_update_40002(): void {
   $config_name = 'mukurtu_import.mukurtu_import_strategy.digital_heritage_items_all_fields';
   $config = \Drupal::configFactory()->getEditable($config_name);
 
@@ -47,7 +47,7 @@ function mukurtu_import_update_11002(): void {
 /**
  * Drop the unused mukurtu_import_example table.
  */
-function mukurtu_import_update_11003(): void {
+function mukurtu_import_update_40003(): void {
   $schema = \Drupal::database()->schema();
   if ($schema->tableExists('mukurtu_import_example')) {
     $schema->dropTable('mukurtu_import_example');
