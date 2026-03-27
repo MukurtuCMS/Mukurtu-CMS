@@ -30,14 +30,6 @@ field_settings:
     dependencies:
       module:
         - mukurtu_protocol
-  field_cultural_protocols:
-    label: 'Cultural Protocols'
-    datasource_id: 'entity:node'
-    property_path: mukurtu_cultural_protocol_ids
-    type: string
-    dependencies:
-      module:
-        - mukurtu_protocol
   field_glossary_entry:
     label: 'Glossary Entry'
     datasource_id: 'entity:node'
@@ -71,6 +63,11 @@ field_settings:
       module:
         - node
         - taxonomy
+  mukurtu_cultural_protocol_ids:
+    label: 'Cultural Protocol IDs'
+    datasource_id: 'entity:node'
+    property_path: mukurtu_cultural_protocol_ids
+    type: string
   node_grants:
     label: 'Node access information'
     property_path: search_api_node_grants
@@ -150,15 +147,12 @@ processor_settings:
     weights:
       preprocess_query: -30
   custom_value: {  }
-  mukurtu_protocol_cultural_protocol_ids:
-    weights:
-      add_properties: 0
   entity_status: {  }
   entity_type: {  }
   glossary:
     weights:
       preprocess_index: -20
-    glossarytable: 'a:1:{s:13:"glossarytable";a:3:{s:4:"name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:5:"title";a:2:{s:8:"glossary";s:1:"1";s:8:"grouping";a:3:{s:11:"grouping_09";s:11:"grouping_09";s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;}}s:3:"uid";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}}}'
+    glossarytable: 'a:1:{s:13:"glossarytable";a:9:{s:15:"community_title";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:20:"field_glossary_entry";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:7:"keyword";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:8:"language";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:5:"title";a:2:{s:8:"glossary";s:1:"1";s:8:"grouping";a:3:{s:11:"grouping_09";s:11:"grouping_09";s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;}}s:4:"type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:3:"uid";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:10:"word_lists";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:9:"word_type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}}}'
     field_enabled: 0
     grouping_defaults:
       grouping_other: grouping_other
@@ -174,11 +168,11 @@ processor_settings:
     title: true
     alt: true
     tags:
-      b: 2
-      h1: 5
-      h2: 3
-      h3: 2
-      strong: 2
+      b: 2.0
+      h1: 5.0
+      h2: 3.0
+      h3: 2.0
+      strong: 2.0
   ignorecase:
     weights:
       preprocess_index: -20
@@ -187,6 +181,7 @@ processor_settings:
     fields:
       - title
   language_with_fallback: {  }
+  mukurtu_protocol_cultural_protocol_ids: {  }
   rendered_item: {  }
   tokenizer:
     weights:
