@@ -9,6 +9,8 @@ use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
 use Drupal\mukurtu_protocol\Entity\MukurtuNode;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
+use Drupal\search_api\Entity\Index;
+use Drupal\search_api\Item\Field;
 
 /**
  * Implements hook_schema().
@@ -120,4 +122,65 @@ function mukurtu_protocol_install() {
   $types[] = 'protocol';
   $config->set('enabled_entity_types', $types);
   $config->save();
+}
+
+/**
+ * Use Search API processor to split cultural protocol IDs for proper faceting.
+ */
+function mukurtu_protocol_update_40001() {
+  $index_ids = [
+    'mukurtu_default_content_index',
+    'mukurtu_dictionary_index',
+    'mukurtu_default_solr_index',
+    'mukurtu_dictionary_solr_index',
+  ];
+
+  foreach ($index_ids as $index_id) {
+    $index = Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+
+    // Enable the cultural protocol IDs processor.
+    $processor = \Drupal::getContainer()
+      ->get('search_api.plugin_helper')
+      ->createProcessorPlugin($index, 'mukurtu_protocol_cultural_protocol_ids');
+    if ($processor) {
+      $index->addProcessor($processor);
+    }
+
+    // Update or add the field_cultural_protocols field to use the new
+    // processor property.
+    $field = $index->getField('field_cultural_protocols');
+    if ($field) {
+      $field->setPropertyPath('mukurtu_cultural_protocol_ids');
+      $field->setType('string');
+    }
+    else {
+      $field = new Field($index, 'field_cultural_protocols');
+      $field->setLabel('Cultural Protocols');
+      $field->setDatasourceId('entity:node');
+      $field->setPropertyPath('mukurtu_cultural_protocol_ids');
+      $field->setType('string');
+      $index->addField($field);
+    }
+
+    // Remove field_cultural_protocols from text-processing processor field
+    // lists since IDs don't need text processing.
+    $text_processors = ['html_filter', 'transliteration'];
+    $processors = $index->getProcessors();
+    foreach ($text_processors as $processor_id) {
+      if (isset($processors[$processor_id])) {
+        $config = $processors[$processor_id]->getConfiguration();
+        if (isset($config['fields']) && is_array($config['fields'])) {
+          $config['fields'] = array_values(array_diff($config['fields'], ['field_cultural_protocols']));
+          $processors[$processor_id]->setConfiguration($config);
+        }
+      }
+    }
+    $index->setProcessors($processors);
+
+    $index->save();
+    $index->reindex();
+  }
 }

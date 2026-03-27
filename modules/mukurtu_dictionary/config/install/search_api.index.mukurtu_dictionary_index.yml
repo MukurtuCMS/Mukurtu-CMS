@@ -33,11 +33,11 @@ field_settings:
   field_cultural_protocols:
     label: 'Cultural Protocols'
     datasource_id: 'entity:node'
-    property_path: field_cultural_protocols
+    property_path: mukurtu_cultural_protocol_ids
     type: string
     dependencies:
       module:
-        - node
+        - mukurtu_protocol
   field_glossary_entry:
     label: 'Glossary Entry'
     datasource_id: 'entity:node'
@@ -150,6 +150,9 @@ processor_settings:
     weights:
       preprocess_query: -30
   custom_value: {  }
+  mukurtu_protocol_cultural_protocol_ids:
+    weights:
+      add_properties: 0
   entity_status: {  }
   entity_type: {  }
   glossary:
@@ -203,7 +206,6 @@ processor_settings:
     all_fields: false
     fields:
       - community_title
-      - field_cultural_protocols
       - keyword
       - language
       - title
