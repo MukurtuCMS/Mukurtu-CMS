@@ -44,3 +44,13 @@ function mukurtu_import_update_11002(): void {
   }
 }
 
+/**
+ * Drop the unused mukurtu_import_example table.
+ */
+function mukurtu_import_update_11003(): void {
+  $schema = \Drupal::database()->schema();
+  if ($schema->tableExists('mukurtu_import_example')) {
+    $schema->dropTable('mukurtu_import_example');
+  }
+}
+
