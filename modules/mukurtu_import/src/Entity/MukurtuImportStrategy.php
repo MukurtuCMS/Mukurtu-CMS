@@ -81,13 +81,6 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   protected $label;
 
   /**
-   * The mukurtu_import_strategy status.
-   *
-   * @var bool
-   */
-  protected $status;
-
-  /**
    * The mukurtu_import_strategy description.
    *
    * @var string
