@@ -39,6 +39,13 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'translations' => [],
       ],
     ],
+    'local_contexts_label_group' => [
+      'template' => 'local-contexts-label-group',
+      'variables' => [
+        'project_title' => NULL,
+        'items' => [],
+      ],
+    ],
     'local_contexts_site_project_directory' => [
       'template' => 'local-contexts-site-project-directory',
       'variables' => [
