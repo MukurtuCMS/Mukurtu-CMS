@@ -1,9 +1,9 @@
 langcode: en
 status: true
 dependencies: {  }
-id: digital_heritage_items_all_fields
+id: digital_heritage_item_all_fields
 uid: 1
-label: 'Digital heritage items - all fields'
+label: 'Digital heritage item - all fields'
 description: ''
 target_entity_type_id: node
 target_bundle: digital_heritage

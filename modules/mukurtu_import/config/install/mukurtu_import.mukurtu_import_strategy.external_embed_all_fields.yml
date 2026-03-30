@@ -1,0 +1,72 @@
+langcode: en
+status: true
+dependencies: {  }
+id: external_embed_all_fields
+uid: 1
+label: 'External embed - all fields'
+description: ''
+target_entity_type_id: media
+target_bundle: external_embed
+mapping:
+  -
+    source: 'Authored by'
+    target: uid
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: Changed
+    target: changed
+  -
+    source: 'Cultural Protocols > Protocols'
+    target: field_cultural_protocols/protocols
+  -
+    source: 'Cultural Protocols > Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
+  -
+    source: 'External Embed'
+    target: field_media_external_embed
+  -
+    source: ID
+    target: mid
+  -
+    source: Identifier
+    target: field_identifier
+  -
+    source: 'Language (langcode)'
+    target: langcode
+  -
+    source: 'Media Tags'
+    target: field_media_tags
+  -
+    source: Name
+    target: name
+  -
+    source: People
+    target: field_people
+  -
+    source: Published
+    target: status
+  -
+    source: 'Revision create time'
+    target: revision_timestamp
+  -
+    source: 'Revision user'
+    target: revision_uid
+  -
+    source: 'Thumbnail > Alternative text'
+    target: field_thumbnail/alt
+  -
+    source: 'Thumbnail > File ID'
+    target: field_thumbnail/target_id
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

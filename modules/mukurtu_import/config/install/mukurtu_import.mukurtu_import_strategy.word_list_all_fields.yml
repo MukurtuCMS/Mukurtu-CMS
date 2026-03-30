@@ -1,0 +1,102 @@
+langcode: en
+status: true
+dependencies: {  }
+id: wordlist_all_fields
+uid: 1
+label: 'Word list - all fields'
+description: ''
+target_entity_type_id: node
+target_bundle: word_list
+mapping:
+  -
+    source: 'Authored by'
+    target: uid
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: Changed
+    target: changed
+  -
+    source: Comments
+    target: comment
+  -
+    source: 'Cultural Protocols > Protocols'
+    target: field_cultural_protocols/protocols
+  -
+    source: 'Cultural Protocols > Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
+  -
+    source: Description
+    target: field_description
+  -
+    source: Draft
+    target: draft
+  -
+    source: ID
+    target: nid
+  -
+    source: Image
+    target: field_word_list_image
+  -
+    source: Keywords
+    target: field_keywords
+  -
+    source: 'Language (langcode)'
+    target: langcode
+  -
+    source: 'Local Contexts Labels and Notices'
+    target: field_local_contexts_labels_and_notices
+  -
+    source: 'Local Contexts Projects'
+    target: field_local_contexts_projects
+  -
+    source: Location
+    target: field_location
+  -
+    source: 'Location Description'
+    target: field_coverage_description
+  -
+    source: 'Map Points'
+    target: field_coverage
+  -
+    source: 'Promoted to front page'
+    target: promote
+  -
+    source: Published
+    target: status
+  -
+    source: 'Related Content'
+    target: field_related_content
+  -
+    source: 'Revision create time'
+    target: revision_timestamp
+  -
+    source: 'Revision user'
+    target: revision_uid
+  -
+    source: Source
+    target: field_source
+  -
+    source: 'Sticky at top of lists'
+    target: sticky
+  -
+    source: Summary
+    target: field_summary
+  -
+    source: UUID
+    target: uuid
+  -
+    source: 'Word list name'
+    target: title
+  -
+    source: Words
+    target: field_words
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

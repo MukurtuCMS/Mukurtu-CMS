@@ -1,0 +1,75 @@
+langcode: en
+status: true
+dependencies: {  }
+id: community_all_fields
+uid: 1
+label: 'Community - all fields'
+description: ''
+target_entity_type_id: community
+target_bundle: community
+mapping:
+  -
+    source: 'Authored by'
+    target: user_id
+  -
+    source: 'Banner Image'
+    target: field_banner_image
+  -
+    source: Changed
+    target: changed
+  -
+    source: 'Community name'
+    target: name
+  -
+    source: 'Community page visibility'
+    target: field_access_mode
+  -
+    source: 'Community Type'
+    target: field_community_type
+  -
+    source: Created
+    target: created
+  -
+    source: Description
+    target: field_description
+  -
+    source: 'Featured Content'
+    target: field_featured_content
+  -
+    source: ID
+    target: id
+  -
+    source: 'Language (langcode)'
+    target: langcode
+  -
+    source: 'Local Contexts API key'
+    target: field_local_contexts_api_key
+  -
+    source: 'Local Contexts Description'
+    target: field_local_contexts_description
+  -
+    source: 'Membership Display'
+    target: field_membership_display
+  -
+    source: Published
+    target: status
+  -
+    source: 'Revision create time'
+    target: revision_timestamp
+  -
+    source: 'Revision user'
+    target: revision_uid
+  -
+    source: 'Thumbnail Image'
+    target: field_thumbnail_image
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

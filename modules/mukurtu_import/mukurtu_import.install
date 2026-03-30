@@ -29,10 +29,10 @@ function mukurtu_import_update_40001(): void {
 }
 
 /**
- * Create the 'Digital heritage items - all fields' import strategy.
+ * Create the 'Digital heritage item - all fields' import strategy.
  */
 function mukurtu_import_update_40002(): void {
-  $config_name = 'mukurtu_import.mukurtu_import_strategy.digital_heritage_items_all_fields';
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.digital_heritage_item_all_fields';
   $config = \Drupal::configFactory()->getEditable($config_name);
 
   // Only create if it doesn't already exist.

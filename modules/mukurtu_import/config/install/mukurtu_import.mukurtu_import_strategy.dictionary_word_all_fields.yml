@@ -1,0 +1,132 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dictionary_word_all_fields
+uid: 1
+label: 'Dictionary word - all fields'
+description: ''
+target_entity_type_id: node
+target_bundle: dictionary_word
+mapping:
+  -
+    source: 'Alternate Spelling'
+    target: field_alternate_spelling
+  -
+    source: 'Authored by'
+    target: uid
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: Changed
+    target: changed
+  -
+    source: Comments
+    target: comment
+  -
+    source: Contributor
+    target: field_contributor
+  -
+    source: 'Cultural Protocols > Protocols'
+    target: field_cultural_protocols/protocols
+  -
+    source: 'Cultural Protocols > Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
+  -
+    source: Definition
+    target: field_definition
+  -
+    source: Draft
+    target: draft
+  -
+    source: 'Glossary Entry'
+    target: field_glossary_entry
+  -
+    source: ID
+    target: nid
+  -
+    source: Keywords
+    target: field_keywords
+  -
+    source: Language
+    target: field_dictionary_word_language
+  -
+    source: 'Language (langcode)'
+    target: langcode
+  -
+    source: 'Local Contexts Labels and Notices'
+    target: field_local_contexts_labels_and_notices
+  -
+    source: 'Local Contexts Projects'
+    target: field_local_contexts_projects
+  -
+    source: Location
+    target: field_location
+  -
+    source: 'Location Description'
+    target: field_coverage_description
+  -
+    source: 'Map Points'
+    target: field_coverage
+  -
+    source: 'Media Assets'
+    target: field_media_assets
+  -
+    source: 'Promoted to front page'
+    target: promote
+  -
+    source: Pronunciation
+    target: field_pronunciation
+  -
+    source: Published
+    target: status
+  -
+    source: Recording
+    target: field_recording
+  -
+    source: 'Related Content'
+    target: field_related_content
+  -
+    source: 'Revision create time'
+    target: revision_timestamp
+  -
+    source: 'Revision user'
+    target: revision_uid
+  -
+    source: 'Sample Sentences'
+    target: field_sample_sentences
+  -
+    source: Source
+    target: field_source
+  -
+    source: 'Sticky at top of lists'
+    target: sticky
+  -
+    source: Term
+    target: title
+  -
+    source: Thumbnail
+    target: field_thumbnail
+  -
+    source: Translation
+    target: field_translation
+  -
+    source: UUID
+    target: uuid
+  -
+    source: 'Word Entries'
+    target: field_additional_word_entries
+  -
+    source: 'Word Origin'
+    target: field_word_origin
+  -
+    source: 'Word Type'
+    target: field_word_type
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'
