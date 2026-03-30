@@ -825,3 +825,42 @@ function mukurtu_install() {
   // }
 
 }
+
+
+/**
+ * Sort category browse terms alphabetically.
+ */
+function mukurtu_update_40001(): void {
+  $view = \Drupal\views\Entity\View::load('mukurtu_categories');
+  if (!$view) {
+    return;
+  }
+
+  $display = $view->get('display');
+  if (empty($display['default']['display_options'])) {
+    return;
+  }
+
+  $display['default']['display_options']['sorts'] = [
+    'name' => [
+      'id' => 'name',
+      'table' => 'taxonomy_term_field_data',
+      'field' => 'name',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'taxonomy_term',
+      'entity_field' => 'name',
+      'plugin_id' => 'standard',
+      'order' => 'ASC',
+      'expose' => [
+        'label' => '',
+        'field_identifier' => 'name',
+      ],
+      'exposed' => FALSE,
+    ],
+  ];
+
+  $view->set('display', $display);
+  $view->save();
+}
