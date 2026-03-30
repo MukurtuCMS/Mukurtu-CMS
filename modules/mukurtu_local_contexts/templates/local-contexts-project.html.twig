@@ -1,12 +1,24 @@
+{{ attach_library('mukurtu_local_contexts/local-contexts-dialog') }}
 <div class="local-contexts-project">
-  <div class="project-title">{{ title }}</div>
+  <h3 class="project-title">{{ title }}</h3>
   {% if tk_labels %}
   <div class="tk-labels">
     {% for tk_label in tk_labels %}
-    <div class="tk-label">
-      <img src="{{ tk_label.svg_url ?? tk_label.img_url }}" alt="{{ tk_label.name }}">
-      <div class="name">{{ tk_label.name }}</div>
-      <div class="text">{{ tk_label.text }}</div>
+    <div class="tk-label local-contexts-dialog">
+      <button type="button" class="local-contexts-dialog__trigger" aria-haspopup="dialog" aria-expanded="false">
+        <img src="{{ tk_label.svg_url ?? tk_label.img_url }}" alt="">
+        <span class="local-contexts-label__name">{{ tk_label.name }}</span>
+      </button>
+      <dialog class="local-contexts-dialog__panel" aria-label="{{ tk_label.name }}">
+        <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}" autofocus>&#x2715;</button>
+        <div class="local-contexts-dialog__header">
+          <img src="{{ tk_label.svg_url ?? tk_label.img_url }}" alt="">
+          <div class="local-contexts-dialog__header-text">
+            <h2 class="local-contexts-dialog__title">{{ tk_label.name }}</h2>
+          </div>
+        </div>
+        <div class="local-contexts-dialog__text">{{ tk_label.text }}</div>
+      </dialog>
     </div>
     {% endfor %}
   </div>
@@ -14,23 +26,45 @@
   {% if bc_labels %}
   <div class="bc-labels">
     {% for bc_label in bc_labels %}
-    <div class="bc-label">
-      <img src="{{ bc_label.svg_url ?? bc_label.img_url }}" alt="{{ bc_label.name }}">
-      <div class="name">{{ bc_label.name }}</div>
-      <div class="text">{{ bc_label.text }}</div>
+    <div class="bc-label local-contexts-dialog">
+      <button type="button" class="local-contexts-dialog__trigger" aria-haspopup="dialog" aria-expanded="false">
+        <img src="{{ bc_label.svg_url ?? bc_label.img_url }}" alt="">
+        <span class="local-contexts-label__name">{{ bc_label.name }}</span>
+      </button>
+      <dialog class="local-contexts-dialog__panel" aria-label="{{ bc_label.name }}">
+        <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}" autofocus>&#x2715;</button>
+        <div class="local-contexts-dialog__header">
+          <img src="{{ bc_label.svg_url ?? bc_label.img_url }}" alt="">
+          <div class="local-contexts-dialog__header-text">
+            <h2 class="local-contexts-dialog__title">{{ bc_label.name }}</h2>
+          </div>
+        </div>
+        <div class="local-contexts-dialog__text">{{ bc_label.text }}</div>
+      </dialog>
     </div>
     {% endfor %}
   </div>
   {% endif %}
   {% if notices %}
-    <div class="notices">
-      {% for notice in notices %}
-        <div class="notice">
-          <img src="{{ notice.svg_url ?? notice.img_url }}" alt="{{ notice.name }}">
-          <div class="name">{{ notice.name }}</div>
-          <div class="text">{{ notice.text }}</div>
+  <div class="notices">
+    {% for notice in notices %}
+    <div class="notice local-contexts-dialog">
+      <button type="button" class="local-contexts-dialog__trigger" aria-haspopup="dialog" aria-expanded="false">
+        <img src="{{ notice.svg_url ?? notice.img_url }}" alt="">
+        <span class="local-contexts-notice__name">{{ notice.name }}</span>
+      </button>
+      <dialog class="local-contexts-dialog__panel" aria-label="{{ notice.name }}">
+        <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}" autofocus>&#x2715;</button>
+        <div class="local-contexts-dialog__header">
+          <img src="{{ notice.svg_url ?? notice.img_url }}" alt="">
+          <div class="local-contexts-dialog__header-text">
+            <h2 class="local-contexts-dialog__title">{{ notice.name }}</h2>
+          </div>
         </div>
-      {% endfor %}
+        <div class="local-contexts-dialog__text">{{ notice.text }}</div>
+      </dialog>
     </div>
+    {% endfor %}
+  </div>
   {% endif %}
 </div>

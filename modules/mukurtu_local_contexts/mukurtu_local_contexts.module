@@ -26,7 +26,10 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'name' => [],
         'svg_url' => NULL,
         'img_url' => NULL,
+        'audio_url' => NULL,
+        'community' => NULL,
         'translations' => [],
+        'dialog_id' => NULL,
       ],
     ],
     'local_contexts_notice' => [
@@ -37,6 +40,7 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'svg_url' => NULL,
         'img_url' => NULL,
         'translations' => [],
+        'dialog_id' => NULL,
       ],
     ],
     'local_contexts_label_group' => [

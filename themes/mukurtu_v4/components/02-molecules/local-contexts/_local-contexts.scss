@@ -1,0 +1,193 @@
+.local-contexts-dialog {
+  display: inline-block;
+
+  &__trigger {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-6xs);
+    padding-block: var(--v-space-5xs);
+    padding-inline: var(--v-space-5xs);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: var(--font-size-s);
+    color: inherit;
+    text-align: center;
+    inline-size: 100%;
+
+    img {
+      block-size: 3rem;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      color: var(--light-text-color);
+      background: var(--brand-primary-accent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
+  }
+
+  &__panel {
+    position: relative;
+    inline-size: 90vw;
+    max-inline-size: 520px;
+    max-block-size: 80vh;
+    overflow-y: auto;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgb(0 0 0 / 25%);
+    padding: var(--v-space-3xs);
+    color: var(--brand-text-color);
+
+    &::backdrop {
+      background: rgb(0 0 0 / 50%);
+    }
+  }
+
+  &__close {
+    position: absolute;
+    inset-block-start: var(--v-space-5xs);
+    inset-inline-end: var(--v-space-5xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--color-gray);
+
+    &:hover {
+      background-color: var(--brand-light);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--v-space-4xxs);
+    margin-block-end: var(--v-space-4xxs);
+
+    img {
+      block-size: 4rem;
+      flex-shrink: 0;
+    }
+  }
+
+  &__header-text {
+    flex: 1;
+  }
+
+  &__title {
+    margin-block: 0 var(--v-space-6xs);
+    font-size: var(--font-size-xl);
+    color: var(--brand-text-color);
+  }
+
+  &__community {
+    font-size: var(--font-size-s);
+    color: var(--color-gray);
+  }
+
+  &__text {
+    margin-block-end: var(--v-space-4xxs);
+    line-height: var(--line-height-s);
+  }
+
+  &__translation {
+    margin-block-end: var(--v-space-4xxs);
+    padding-block-start: var(--v-space-5xs);
+    border-block-start: 1px solid var(--brand-light);
+
+    &-name {
+      font-weight: var(--text-bold);
+      margin-block-end: var(--v-space-6xs);
+    }
+  }
+
+  &__audio {
+    margin-block-start: var(--v-space-4xxs);
+
+    audio {
+      inline-size: 100%;
+    }
+  }
+}
+
+// Shared project title style across both label group and project displays.
+.local-contexts-label-group,
+.local-contexts-project {
+  .project-title {
+    font-size: var(--font-size-s);
+    font-weight: var(--text-bold);
+    color: var(--brand-primary-dark);
+    padding-block-end: var(--v-space-5xs);
+    border-block-end: 1px solid var(--brand-light);
+    margin-block: 0 var(--v-space-5xs);
+  }
+}
+
+// Labels grouped by project: title spans full width, icons in 2-column grid.
+.local-contexts-label-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-5xs);
+
+  & + .local-contexts-label-group {
+    margin-block-start: var(--v-space-4xxs);
+    padding-block-start: var(--v-space-4xxs);
+    border-block-start: 1px solid var(--brand-light);
+  }
+
+  .project-title {
+    grid-column: 1 / -1;
+  }
+}
+
+// Local Contexts Projects: card with gold accent, icons in 2-column grid.
+.local-contexts-project,
+.field--name-field-local-contexts-labels-and-notices .field__item {
+  background-color: var(--brand-light-accent);
+  padding-inline: var(--v-space-4xxs);
+  padding-block: var(--v-space-5xs) var(--v-space-4xxs);
+  margin-block-end: var(--v-space-4xxs);
+
+  .tk-labels,
+  .bc-labels,
+  .notices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--v-space-5xs);
+    margin-block-end: var(--v-space-5xs);
+  }
+
+  .tk-label,
+  .bc-label,
+  .notice {
+    .text {
+      display: none;
+    }
+  }
+}
+
+.field--name-field-local-contexts-projects .field__label,
+.field--name-field-local-contexts-labels-and-notices .field__label {
+  border-block-end: 4px solid var(--brand-secondary);
+  margin-block: 0 1rem;
+}

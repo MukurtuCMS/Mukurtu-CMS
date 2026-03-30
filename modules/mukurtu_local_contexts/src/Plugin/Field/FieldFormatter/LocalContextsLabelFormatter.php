@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
+use Drupal\Component\Utility\Html;
 use Drupal\mukurtu_local_contexts\LocalContextsLabel;
 use Drupal\mukurtu_local_contexts\LocalContextsNotice;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
@@ -37,7 +38,10 @@ class LocalContextsLabelFormatter extends FormatterBase {
           '#text' => $label->default_text,
           '#svg_url' => $label->svg_url,
           '#img_url' => $label->img_url,
+          '#audio_url' => $label->audio_url,
+          '#community' => $label->community,
           '#translations' => $label->translations,
+          '#dialog_id' => Html::getUniqueId('lc-label'),
         ];
       }
       elseif ($third === 'notice') {
@@ -49,6 +53,7 @@ class LocalContextsLabelFormatter extends FormatterBase {
           '#svg_url' => $notice->svg_url,
           '#img_url' => $notice->img_url,
           '#translations' => $notice->translations,
+          '#dialog_id' => Html::getUniqueId('lc-notice'),
         ];
       }
     }
