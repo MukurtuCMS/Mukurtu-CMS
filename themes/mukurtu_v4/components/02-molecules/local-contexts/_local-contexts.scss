@@ -34,7 +34,6 @@
   }
 
   &__panel {
-    position: relative;
     inline-size: 90vw;
     max-inline-size: 520px;
     max-block-size: 80vh;
@@ -48,6 +47,10 @@
     &::backdrop {
       background: rgb(0 0 0 / 50%);
     }
+  }
+
+  &__inner {
+    position: relative;
   }
 
   &__close {
@@ -130,7 +133,6 @@
   }
 }
 
-// Shared project title style across both label group and project displays.
 .local-contexts-label-group,
 .local-contexts-project {
   .project-title {
@@ -143,7 +145,6 @@
   }
 }
 
-// Labels grouped by project: title spans full width, icons in 2-column grid.
 .local-contexts-label-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -160,7 +161,6 @@
   }
 }
 
-// Local Contexts Projects: card with gold accent, icons in 2-column grid.
 .local-contexts-project,
 .field--name-field-local-contexts-labels-and-notices .field__item {
   background-color: var(--brand-light-accent);

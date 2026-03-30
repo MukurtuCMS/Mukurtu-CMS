@@ -1727,7 +1727,6 @@ details.form-wrapper summary + div {
   outline-offset: 2px;
 }
 .local-contexts-dialog__panel {
-  position: relative;
   inline-size: 90vw;
   max-inline-size: 520px;
   max-block-size: 80vh;
@@ -1744,6 +1743,9 @@ details.form-wrapper summary + div {
 }
 .local-contexts-dialog__panel::backdrop {
   background: rgba(0, 0, 0, 0.5);
+}
+.local-contexts-dialog__inner {
+  position: relative;
 }
 .local-contexts-dialog__close {
   position: absolute;

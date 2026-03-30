@@ -5,6 +5,7 @@
     <span class="local-contexts-{{ type }}__name">{{ name }}</span>
   </button>
   <dialog id="{{ dialog_id }}" class="local-contexts-dialog__panel" aria-label="{{ name }}">
+    <div class="local-contexts-dialog__inner">
     <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}">&#x2715;</button>
     <div class="local-contexts-dialog__header">
       <img src="{{ svg_url ?? img_url }}" alt="">
@@ -35,5 +36,6 @@
         </audio>
       </div>
     {% endif %}
+    </div>
   </dialog>
 </div>

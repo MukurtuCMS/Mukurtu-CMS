@@ -14,7 +14,9 @@
         const closeBtn = dialog.querySelector('.local-contexts-dialog__close');
 
         trigger.addEventListener('click', () => {
+          const scrollY = window.scrollY;
           dialog.showModal();
+          window.scrollTo({ top: scrollY, behavior: 'instant' });
           trigger.setAttribute('aria-expanded', 'true');
           if (closeBtn) {
             closeBtn.focus({ preventScroll: true });

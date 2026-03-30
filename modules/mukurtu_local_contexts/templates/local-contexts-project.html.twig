@@ -10,14 +10,16 @@
         <span class="local-contexts-label__name">{{ tk_label.name }}</span>
       </button>
       <dialog class="local-contexts-dialog__panel" aria-label="{{ tk_label.name }}">
-        <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}">&#x2715;</button>
-        <div class="local-contexts-dialog__header">
-          <img src="{{ tk_label.svg_url ?? tk_label.img_url }}" alt="">
-          <div class="local-contexts-dialog__header-text">
-            <h2 class="local-contexts-dialog__title">{{ tk_label.name }}</h2>
+        <div class="local-contexts-dialog__inner">
+          <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}">&#x2715;</button>
+          <div class="local-contexts-dialog__header">
+            <img src="{{ tk_label.svg_url ?? tk_label.img_url }}" alt="">
+            <div class="local-contexts-dialog__header-text">
+              <h2 class="local-contexts-dialog__title">{{ tk_label.name }}</h2>
+            </div>
           </div>
+          <div class="local-contexts-dialog__text">{{ tk_label.text }}</div>
         </div>
-        <div class="local-contexts-dialog__text">{{ tk_label.text }}</div>
       </dialog>
     </div>
     {% endfor %}
@@ -32,14 +34,16 @@
         <span class="local-contexts-label__name">{{ bc_label.name }}</span>
       </button>
       <dialog class="local-contexts-dialog__panel" aria-label="{{ bc_label.name }}">
-        <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}">&#x2715;</button>
-        <div class="local-contexts-dialog__header">
-          <img src="{{ bc_label.svg_url ?? bc_label.img_url }}" alt="">
-          <div class="local-contexts-dialog__header-text">
-            <h2 class="local-contexts-dialog__title">{{ bc_label.name }}</h2>
+        <div class="local-contexts-dialog__inner">
+          <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}">&#x2715;</button>
+          <div class="local-contexts-dialog__header">
+            <img src="{{ bc_label.svg_url ?? bc_label.img_url }}" alt="">
+            <div class="local-contexts-dialog__header-text">
+              <h2 class="local-contexts-dialog__title">{{ bc_label.name }}</h2>
+            </div>
           </div>
+          <div class="local-contexts-dialog__text">{{ bc_label.text }}</div>
         </div>
-        <div class="local-contexts-dialog__text">{{ bc_label.text }}</div>
       </dialog>
     </div>
     {% endfor %}
@@ -54,14 +58,16 @@
         <span class="local-contexts-notice__name">{{ notice.name }}</span>
       </button>
       <dialog class="local-contexts-dialog__panel" aria-label="{{ notice.name }}">
-        <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}">&#x2715;</button>
-        <div class="local-contexts-dialog__header">
-          <img src="{{ notice.svg_url ?? notice.img_url }}" alt="">
-          <div class="local-contexts-dialog__header-text">
-            <h2 class="local-contexts-dialog__title">{{ notice.name }}</h2>
+        <div class="local-contexts-dialog__inner">
+          <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}">&#x2715;</button>
+          <div class="local-contexts-dialog__header">
+            <img src="{{ notice.svg_url ?? notice.img_url }}" alt="">
+            <div class="local-contexts-dialog__header-text">
+              <h2 class="local-contexts-dialog__title">{{ notice.name }}</h2>
+            </div>
           </div>
+          <div class="local-contexts-dialog__text">{{ notice.text }}</div>
         </div>
-        <div class="local-contexts-dialog__text">{{ notice.text }}</div>
       </dialog>
     </div>
     {% endfor %}
