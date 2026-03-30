@@ -327,7 +327,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_word_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Word Type'))
-      ->setDescription('Word types may include parts of speech, syntactic or grammatical categories, or any other relevant system to classify entries.	</br>As you type, existing word types will be displayed. </br>Include as many word types as needed. Select from existing word types or add new ones.')
+      ->setDescription('Word types may include parts of speech, syntactic or grammatical categories, or any other relevant system to classify entries.	</br>Include as many word types as needed. Select from existing word types or add new ones.')
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
