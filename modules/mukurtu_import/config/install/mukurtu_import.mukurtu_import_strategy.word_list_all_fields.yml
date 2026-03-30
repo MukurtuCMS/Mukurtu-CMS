@@ -1,7 +1,7 @@
 langcode: en
 status: true
 dependencies: {  }
-id: wordlist_all_fields
+id: word_list_all_fields
 uid: 1
 label: 'Word list - all fields'
 description: ''
