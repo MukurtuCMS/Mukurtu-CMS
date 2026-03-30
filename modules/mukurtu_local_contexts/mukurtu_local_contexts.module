@@ -20,8 +20,9 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       ],
     ],
     'local_contexts_label' => [
-      'template' => 'local-contexts-label',
+      'template' => 'local-contexts-item',
       'variables' => [
+        'type' => 'label',
         'text' => [],
         'name' => [],
         'svg_url' => NULL,
@@ -33,8 +34,9 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       ],
     ],
     'local_contexts_notice' => [
-      'template' => 'local-contexts-notice',
+      'template' => 'local-contexts-item',
       'variables' => [
+        'type' => 'notice',
         'text' => [],
         'name' => [],
         'svg_url' => NULL,

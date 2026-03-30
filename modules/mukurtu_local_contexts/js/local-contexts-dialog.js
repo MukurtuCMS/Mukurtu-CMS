@@ -16,6 +16,9 @@
         trigger.addEventListener('click', () => {
           dialog.showModal();
           trigger.setAttribute('aria-expanded', 'true');
+          if (closeBtn) {
+            closeBtn.focus({ preventScroll: true });
+          }
         });
 
         if (closeBtn) {
