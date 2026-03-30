@@ -1,4 +1,15 @@
 administer mukurtu_import_strategy:
-  title: 'Administer mukurtu_import_strategy'
+  title: 'Administer Import Templates'
+  restrict access: true
+create mukurtu_import_strategy:
+  title: 'Create Import Templates'
+edit own mukurtu_import_strategy:
+  title: 'Edit own Import Templates'
+edit any mukurtu_import_strategy:
+  title: 'Edit any Import Templates'
+delete own mukurtu_import_strategy:
+  title: 'Delete own Import Templates'
+delete any mukurtu_import_strategy:
+  title: 'Delete any Import Templates'
 access mukurtu import:
   title: 'Access Mukurtu Import'
