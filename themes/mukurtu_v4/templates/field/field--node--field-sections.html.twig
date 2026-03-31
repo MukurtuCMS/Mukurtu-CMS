@@ -53,7 +53,8 @@
   ]
 %}
 {# validate that the field has content #}
-{% if not items.0.content['#paragraph'].field_title.isEmpty() %}
+{% if not items.0.content['#paragraph'].field_title.isEmpty()
+  or not items.0.content['#paragraph'].field_body.isEmpty() %}
 
   <div{{ attributes.addClass(classes) }}>
     <h2{{ title_attributes.addClass(title_classes) }}>{{ label }}</h2>
