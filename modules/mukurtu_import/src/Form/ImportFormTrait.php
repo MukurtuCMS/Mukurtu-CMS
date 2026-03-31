@@ -191,6 +191,7 @@ trait ImportFormTrait {
     if (empty($this->fieldDefinitions[$entity_type_id][$bundle])) {
       $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
       $entity_keys = $entity_definition->getKeys();
+      $revision_metadata_keys = $entity_definition->getRevisionMetadataKeys();
       $field_defs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
 
       foreach ($field_defs as $field_name => $field_def) {
@@ -198,8 +199,10 @@ trait ImportFormTrait {
           continue;
         }
 
-        // Remove the revision log message as a valid target.
-        if ($field_name === 'revision_log') {
+        // Remove revision metadata fields (revision log, user, and timestamp)
+        // as valid targets. These are system-managed but not formally marked
+        // as internal or read-only in core.
+        if (in_array($field_name, $revision_metadata_keys, TRUE)) {
           unset($field_defs[$field_name]);
         }
 
