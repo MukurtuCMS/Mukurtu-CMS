@@ -21,7 +21,7 @@ mukurtu_taxonomy.manage_languages:
   description: 'Manage all languages.'
   parent: mukurtu_dashboard
   menu_name: dashboard-content-settings
-  route_name: mukurtu_taxonomy.manage_languages
+  url: 'internal:/admin/structure/taxonomy/manage/language/overview'
 mukurtu_taxonomy.term_merge_from:
   title: 'Manage taxonomy term merge list'
   description: 'Manage taxonomy term merge list.'

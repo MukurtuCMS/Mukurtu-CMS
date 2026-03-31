@@ -1,0 +1,102 @@
+langcode: en
+status: true
+dependencies: {  }
+id: person_record_all_fields
+uid: 1
+label: 'Person record - all fields'
+description: ''
+target_entity_type_id: node
+target_bundle: person
+mapping:
+  -
+    source: 'Authored by'
+    target: uid
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: Biography
+    target: field_sections
+  -
+    source: 'Cultural Protocols > Protocols'
+    target: field_cultural_protocols/protocols
+  -
+    source: 'Cultural Protocols > Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
+  -
+    source: 'Date Born'
+    target: field_date_born
+  -
+    source: 'Date Died'
+    target: field_date_died
+  -
+    source: Deceased
+    target: field_deceased
+  -
+    source: Draft
+    target: draft
+  -
+    source: ID
+    target: nid
+  -
+    source: Keywords
+    target: field_keywords
+  -
+    source: 'Language (langcode)'
+    target: langcode
+  -
+    source: 'Local Contexts Labels and Notices'
+    target: field_local_contexts_labels_and_notices
+  -
+    source: 'Local Contexts Projects'
+    target: field_local_contexts_projects
+  -
+    source: Location
+    target: field_location
+  -
+    source: 'Location Description'
+    target: field_coverage_description
+  -
+    source: 'Map Points'
+    target: field_coverage
+  -
+    source: 'Media Assets'
+    target: field_media_assets
+  -
+    source: Name
+    target: title
+  -
+    source: 'Other Names'
+    target: field_other_names
+  -
+    source: 'Place of Birth'
+    target: field_place_of_birth
+  -
+    source: 'Place of Death'
+    target: field_place_of_death
+  -
+    source: 'Promoted to front page'
+    target: promote
+  -
+    source: Published
+    target: status
+  -
+    source: 'Related Content'
+    target: field_related_content
+  -
+    source: 'Related People'
+    target: field_related_people
+  -
+    source: 'Sticky at top of lists'
+    target: sticky
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

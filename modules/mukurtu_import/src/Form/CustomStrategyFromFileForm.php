@@ -152,14 +152,22 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     // Provide an option to save this config for reuse.
+    $can_update = !$this->importConfig->isNew() && $this->importConfig->access('update');
+    $can_create = $this->entityTypeManager->getAccessControlHandler('mukurtu_import_strategy')
+      ->createAccess(NULL, $this->currentUser());
+
     $form['import_config'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Import Configuration Template'),
+      '#title' => $this->t('Import Template'),
+      '#access' => $can_update || $can_create,
     ];
+    $save_label = $can_update
+      ? $this->t('Save the changes to this existing template')
+      : $this->t('Save this import configuration as a template for future imports');
     $form['import_config']['config_save'] = [
       '#type' => 'checkbox',
       '#default_value' => FALSE,
-      '#title' => $this->importConfig->isNew() ? $this->t('Save this import configuration as a template for future imports.') : $this->t('Save the changes to this existing template.'),
+      '#title' => $save_label,
       '#attributes' => [
         'name' => 'config_save',
       ],
@@ -168,7 +176,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $form['import_config']['config_title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Title'),
-      '#default_value' => $this->importConfig->isNew() ? '' : $this->importConfig->getLabel(),
+      '#default_value' => $can_update ? $this->importConfig->getLabel() : (string) $this->getTitle($file),
       '#states' => [
         'visible' => [
           ':input[name="config_save"]' => ['checked' => TRUE],
@@ -191,39 +199,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     ];
 
     return $form;
-  }
-
-  /**
-   * Get the options array for available text formats.
-   *
-   * @return array
-   *   An array of text format labels indexed by format ID.
-   */
-  protected function getTextFormatOptions(): array {
-    $formats = filter_formats();
-    return array_map(function($format) {
-      return $format->label();
-    }, $formats);
-  }
-
-  /**
-   * Get the options array for available target entity types.
-   */
-  protected function getEntityTypeIdOptions() {
-    $definitions = $this->entityTypeManager->getDefinitions();
-    $options = [];
-    foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item'] as $entity_type_id) {
-      if (isset($definitions[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
-        $options[$entity_type_id] = $definitions[$entity_type_id]->getLabel();
-
-        // Override certain labels, including paragraphs.
-        if ($entity_type_id === 'paragraph') {
-          $options[$entity_type_id] = $this->t('Compound Types (paragraphs)');
-        }
-      }
-    }
-
-    return $options;
   }
 
   /**
@@ -364,46 +339,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   }
 
   /**
-   * Gets the available bundle options for a given entity type.
-   *
-   * This method retrieves all bundles for the specified entity type that the
-   * current user has permission to create. It provides a select list of
-   * available sub-types/bundles for the import form.
-   *
-   * If there is only one bundle available, the "None: Base Fields Only" option
-   * is excluded from the returned options array.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID to get bundles for (e.g., 'node', 'media', etc.).
-   *
-   * @return array
-   *   An associative array of bundle options where keys are bundle machine
-   *   names (or -1 for base fields only) and values are bundle labels. Returns
-   *   an array with a single "No sub-types available" option if no bundles
-   *   exist for the entity type.
-   */
-  protected function getBundleOptions($entity_type_id): array {
-    $bundle_info = $this->entityBundleInfo->getAllBundleInfo();
-
-    if (!isset($bundle_info[$entity_type_id])) {
-      return [-1 => $this->t('No sub-types available')];
-    }
-
-    // Don't provide the base fields option if there is only one valid bundle.
-    $options = [];
-    if (count($bundle_info[$entity_type_id]) > 1) {
-      $options = [-1 => $this->t('None: Base Fields Only')];
-    }
-
-    foreach ($bundle_info[$entity_type_id] as $bundle => $info) {
-      if ($this->userCanCreateEntity($entity_type_id, $bundle)) {
-        $options[$bundle] = $info['label'] ?? $bundle;
-      }
-    }
-    return $options;
-  }
-
-  /**
    * AJAX callback handler for entity type selection changes.
    *
    * This method handles the dynamic form updates when the user changes the
@@ -505,6 +440,10 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $this->importConfig->setConfig('identifier_column', $form_state->getValue('identifier_column') ?: NULL);
 
     if ($form_state->getValue('config_save')) {
+      $can_update = !$this->importConfig->isNew() && $this->importConfig->access('update');
+      if (!$can_update) {
+        $this->importConfig = $this->importConfig->createDuplicate();
+      }
       $userProvidedLabel = $form_state->getValue('config_title');
       if (trim($userProvidedLabel) != '') {
         $this->importConfig->setLabel($userProvidedLabel);
@@ -623,13 +562,21 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       }
     }
 
-    // Similarly, resolve language/langcode here. Our field_language in English
-    // has a "Language" field label which keeps matching to the locale langcode.
-
+    // Disambiguate the langcode base field. In buildTargetOptions(), its label
+    // gets " (langcode)" appended to distinguish it from other Language fields.
+    // Match against that disambiguated label here so auto-mapping picks it up.
+    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entity_keys = $entity_definition->getKeys();
+    if (!empty($entity_keys['langcode']) && isset($field_defs[$entity_keys['langcode']])) {
+      $langcode_label = mb_strtolower($field_defs[$entity_keys['langcode']]->getLabel() . ' (langcode)');
+      if ($needle === $langcode_label) {
+        return $entity_keys['langcode'];
+      }
+    }
 
     // Check for field label matches.
-    if ($fieldLabelMatch = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
-      return $fieldLabelMatch;
+    if ($field_label_match = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
+      return $field_label_match;
     }
 
     // Check if we have a (case insensitive) field name match.

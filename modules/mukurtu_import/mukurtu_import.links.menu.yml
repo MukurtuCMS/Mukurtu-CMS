@@ -1,7 +1,7 @@
 entity.mukurtu_import_strategy.overview:
-  title: Import Configuration Templates
+  title: Import Templates
   parent: system.admin_structure
-  description: 'List of all Import Configuration Templates.'
+  description: 'List of all Import Templates.'
   route_name: entity.mukurtu_import_strategy.collection
 mukurtu_import.import:
   title: 'Import'
@@ -9,6 +9,12 @@ mukurtu_import.import:
   menu_name: dashboard-roundtrip
   parent: mukurtu_dashboard
   route_name: mukurtu_import.file_upload
+mukurtu_import.manage_import_templates:
+  title: 'Manage Import Templates'
+  description: 'Create and manage reusable import templates.'
+  menu_name: dashboard-roundtrip
+  parent: mukurtu_dashboard
+  route_name: entity.mukurtu_import_strategy.collection
 mukurtu_import.bundles_list:
   title: 'Import format information.'
   description: 'List of import information by content and entity type.'

@@ -1,0 +1,42 @@
+langcode: en
+status: true
+dependencies: {  }
+id: multipage_item_all_fields
+uid: 1
+label: 'Multipage item - all fields'
+description: ''
+target_entity_type_id: multipage_item
+target_bundle: multipage_item
+mapping:
+  -
+    source: Author
+    target: uid
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: ID
+    target: id
+  -
+    source: 'Language (langcode)'
+    target: langcode
+  -
+    source: Pages
+    target: field_pages
+  -
+    source: Status
+    target: status
+  -
+    source: Title
+    target: title
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

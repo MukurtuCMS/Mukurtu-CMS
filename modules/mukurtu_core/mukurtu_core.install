@@ -24,3 +24,49 @@ function mukurtu_core_install() {
     mukurtu_core_create_content_type_field('node', $bundle);
   }
 }
+
+/**
+ * Upgrade to Mukurtu 4.0.
+ */
+function mukurtu_core_update_40000() {
+  // Reserved for future use if needed.
+}
+
+
+/**
+ * Sort category browse terms alphabetically.
+ */
+function mukurtu_core_update_40001(): void {
+  $view = \Drupal\views\Entity\View::load('mukurtu_categories');
+  if (!$view) {
+    return;
+  }
+
+  $display = $view->get('display');
+  if (empty($display['default']['display_options'])) {
+    return;
+  }
+
+  $display['default']['display_options']['sorts'] = [
+    'name' => [
+      'id' => 'name',
+      'table' => 'taxonomy_term_field_data',
+      'field' => 'name',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'taxonomy_term',
+      'entity_field' => 'name',
+      'plugin_id' => 'standard',
+      'order' => 'ASC',
+      'expose' => [
+        'label' => '',
+        'field_identifier' => 'name',
+      ],
+      'exposed' => FALSE,
+    ],
+  ];
+
+  $view->set('display', $display);
+  $view->save();
+}

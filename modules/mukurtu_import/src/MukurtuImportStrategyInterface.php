@@ -20,7 +20,18 @@ interface MukurtuImportStrategyInterface extends ConfigEntityInterface, EntityOw
   public function getLabel();
   public function setConfig($key, $value);
   public function getConfig($key);
-  public function applies(FileInterface $file);
+
+  /**
+   * Check if the strategy applies to the given CSV file.
+   *
+   * @param \Drupal\file\FileInterface $file
+   *   The CSV file to check.
+   *
+   * @return bool
+   *   TRUE if the strategy applies to the file, FALSE otherwise.
+   */
+  public function applies(FileInterface $file): bool;
+
   public function toDefinition(FileInterface $file, array $lookup_source_ids = []);
   public function mappedFieldsCount(FileInterface $file);
 

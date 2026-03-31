@@ -36,7 +36,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
       '#caption' => $this->t('Files will be imported top to bottom. Select your field mapping for each file by using the "Customize Settings" button.'),
       '#header' => [
         $this->t('File'),
-        $this->t('Import Configuration'),
+        $this->t('Import Settings'),
         '',
         $this->t('Weight'),
       ],
@@ -141,7 +141,6 @@ class ImportFileSummaryForm extends ImportBaseForm {
     // Get the user's available import configs.
     $storage = $this->entityTypeManager->getStorage('mukurtu_import_strategy');
     $result = $storage->getQuery()
-      ->condition('uid', $this->currentUser()->id())
       ->accessCheck()
       ->execute();
 
