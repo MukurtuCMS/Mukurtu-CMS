@@ -1,0 +1,75 @@
+langcode: en
+status: true
+dependencies: {  }
+id: word_entry_all_fields
+uid: 1
+label: 'Word entry - all fields'
+description: ''
+target_entity_type_id: paragraph
+target_bundle: dictionary_word_entry
+mapping:
+  -
+    source: 'Alternate Spelling'
+    target: field_alternate_spelling
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: Contributor
+    target: field_contributor
+  -
+    source: Definition
+    target: field_definition
+  -
+    source: ID
+    target: id
+  -
+    source: 'Language code (langcode)'
+    target: langcode
+  -
+    source: 'Parent field name'
+    target: parent_field_name
+  -
+    source: 'Parent ID'
+    target: parent_id
+  -
+    source: 'Parent type'
+    target: parent_type
+  -
+    source: Pronunciation
+    target: field_pronunciation
+  -
+    source: Published
+    target: status
+  -
+    source: Recording
+    target: field_recording
+  -
+    source: 'Sample Sentences'
+    target: field_sample_sentences
+  -
+    source: Source
+    target: field_source
+  -
+    source: Term
+    target: field_word_entry_term
+  -
+    source: Translation
+    target: field_translation
+  -
+    source: UUID
+    target: uuid
+  -
+    source: 'Word Origin'
+    target: field_word_origin
+  -
+    source: 'Word Type'
+    target: field_word_type
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

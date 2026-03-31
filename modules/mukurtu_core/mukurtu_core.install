@@ -33,18 +33,39 @@ function mukurtu_core_update_40000() {
 }
 
 /**
- * Enable Tagify module and enable it on needed fields.
+ * Sort category browse terms alphabetically.
  */
-function mukurtu_core_update_40001() {
-  // Fill in needed code.
-}
+function mukurtu_core_update_40001(): void {
+  $view = \Drupal\views\Entity\View::load('mukurtu_categories');
+  if (!$view) {
+    return;
+  }
 
-/**
- * Install genpass and notify_user_default modules.
- * Add new user registration form.
- * Update user creation form.
- * Add display name field description.
- * Update user account page view.
- */
-function mukurtu_core_update_40002() {
+  $display = $view->get('display');
+  if (empty($display['default']['display_options'])) {
+    return;
+  }
+
+  $display['default']['display_options']['sorts'] = [
+    'name' => [
+      'id' => 'name',
+      'table' => 'taxonomy_term_field_data',
+      'field' => 'name',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'taxonomy_term',
+      'entity_field' => 'name',
+      'plugin_id' => 'standard',
+      'order' => 'ASC',
+      'expose' => [
+        'label' => '',
+        'field_identifier' => 'name',
+      ],
+      'exposed' => FALSE,
+    ],
+  ];
+
+  $view->set('display', $display);
+  $view->save();
 }

@@ -257,7 +257,7 @@ content:
       parent_selection: 1
     third_party_settings: {  }
   field_coverage:
-    type: geofield_mukurtu
+    type: leaflet_widget_default
     weight: 31
     region: content
     settings:
@@ -301,11 +301,14 @@ content:
         show: 0
         readonly: 0
       geocoder:
-        control: false
+        control: true
         settings:
           position: topright
           input_size: 20
-          providers: {  }
+          providers: 
+            nominatim:
+              weight: 0
+              checked: true  
           min_terms: 4
           delay: 800
           zoom: 16

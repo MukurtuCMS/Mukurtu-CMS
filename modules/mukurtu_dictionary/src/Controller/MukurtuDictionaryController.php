@@ -2,8 +2,8 @@
 
 namespace Drupal\mukurtu_dictionary\Controller;
 
+use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\views\Views;
@@ -56,36 +56,34 @@ class MukurtuDictionaryController extends ControllerBase {
     ];
 
     // Load all facets configured to use our browse block as a datasource.
-    $facetEntities = \Drupal::entityTypeManager()
+    $facet_entities = \Drupal::entityTypeManager()
       ->getStorage('facets_facet')
       ->loadByProperties(['facet_source_id' => $this->getFacetSourceId()]);
 
-    // Render the facet block for each of them.
-    $block_manager = \Drupal::service('plugin.manager.block');
-    $facets = [];
+    // Render the glossary facet block for each of them.
     $glossary = NULL;
-    if ($facetEntities) {
-      foreach ($facetEntities as $facet_id => $facetEntity) {
+    if ($facet_entities) {
+      $block_manager = \Drupal::service('plugin.manager.block');
+      foreach ($facet_entities as $facet_id => $facet_entity) {
+        if (!str_contains($facet_id, 'glossary_entry')) {
+          continue;
+        }
         $config = [];
         $block_plugin = $block_manager->createInstance('facet_block' . PluginBase::DERIVATIVE_SEPARATOR . $facet_id, $config);
-        if ($block_plugin) {
-          $access_result = $block_plugin->access(\Drupal::currentUser());
-          if ($access_result) {
-            if (strpos($facet_id, 'glossary_entry') !== FALSE) {
-              $glossary = $block_plugin->build();
-            }
-            else {
-              $facets[$facet_id] = $block_plugin->build();
-            }
-          }
+        if (!$block_plugin) {
+          continue;
         }
+        $access_result = $block_plugin->access(\Drupal::currentUser());
+        if (!$access_result) {
+          continue;
+        }
+        $glossary = $block_plugin->build();
       }
     }
 
     return [
       '#theme' => 'mukurtu_dictionary_page',
       '#results' => $browse_view_block,
-      '#facets' => $facets,
       '#glossary' => $glossary,
     ];
   }

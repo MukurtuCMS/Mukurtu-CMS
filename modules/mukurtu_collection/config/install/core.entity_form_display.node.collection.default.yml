@@ -164,8 +164,8 @@ content:
       media_types: {  }
     third_party_settings: {  }
   field_coverage:
-    type: geofield_mukurtu
-    weight: 0
+    type: leaflet_widget_default
+    weight: 31
     region: content
     settings:
       geometry_validation: 0
@@ -208,11 +208,14 @@ content:
         show: 0
         readonly: 0
       geocoder:
-        control: false
+        control: true
         settings:
           position: topright
           input_size: 20
-          providers: {  }
+          providers: 
+            nominatim:
+              weight: 0
+              checked: true  
           min_terms: 4
           delay: 800
           zoom: 16

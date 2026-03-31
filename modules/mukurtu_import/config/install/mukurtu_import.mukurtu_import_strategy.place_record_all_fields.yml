@@ -1,0 +1,87 @@
+langcode: en
+status: true
+dependencies: {  }
+id: place_record_all_fields
+uid: 1
+label: 'Place record - all fields'
+description: ''
+target_entity_type_id: node
+target_bundle: place
+mapping:
+  -
+    source: 'Authored by'
+    target: uid
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: 'Cultural Protocols > Protocols'
+    target: field_cultural_protocols/protocols
+  -
+    source: 'Cultural Protocols > Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
+  -
+    source: Draft
+    target: draft
+  -
+    source: ID
+    target: nid
+  -
+    source: Keywords
+    target: field_keywords
+  -
+    source: 'Language (langcode)'
+    target: langcode
+  -
+    source: 'Local Contexts Labels and Notices'
+    target: field_local_contexts_labels_and_notices
+  -
+    source: 'Local Contexts Projects'
+    target: field_local_contexts_projects
+  -
+    source: Location
+    target: field_location
+  -
+    source: 'Location Description'
+    target: field_coverage_description
+  -
+    source: 'Map Points'
+    target: field_coverage
+  -
+    source: 'Media Assets'
+    target: field_media_assets
+  -
+    source: Name
+    target: title
+  -
+    source: 'Other Names'
+    target: field_other_place_names
+  -
+    source: 'Place type'
+    target: field_place_type
+  -
+    source: 'Promoted to front page'
+    target: promote
+  -
+    source: Published
+    target: status
+  -
+    source: 'Related Content'
+    target: field_related_content
+  -
+    source: 'Sticky at top of lists'
+    target: sticky
+  -
+    source: 'Text sections'
+    target: field_sections
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

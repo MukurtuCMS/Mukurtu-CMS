@@ -128,7 +128,7 @@ function mukurtu_install() {
   // Dashboard
   MenuLinkContent::create([
     'title' => 'Dashboard',
-    'link' => ['uri' => 'internal:' . "/dashboard"],
+    'link' => ['uri' => 'internal:' . "/dashboard/mukurtu_dashboard"],
     'menu_name' => 'account',
     'description' => 'Dashboard',
     'expanded' => FALSE,
@@ -226,7 +226,7 @@ function mukurtu_install() {
   // Add Component (parent)
   $add_component_menu = MenuLinkContent::create([
     'title' => 'Add Component',
-    'link' => ['uri' => 'internal:' . '/dashboard'],
+    'link' => ['uri' => 'internal:' . '/dashboard/mukurtu_dashboard'],
     'menu_name' => 'account',
     'description' => 'Add component',
     'expanded' => FALSE,
@@ -778,7 +778,9 @@ function mukurtu_install() {
   ];
   $roles['mukurtu_roundtrip_manager'] = [
     'access mukurtu import',
-    'administer mukurtu_import_strategy',
+    'create mukurtu_import_strategy',
+    'edit own mukurtu_import_strategy',
+    'delete own mukurtu_import_strategy',
   ];
   foreach ($roles as $role_name => $permissions) {
     $role = Role::load($role_name);
@@ -823,3 +825,4 @@ function mukurtu_install() {
   // }
 
 }
+
