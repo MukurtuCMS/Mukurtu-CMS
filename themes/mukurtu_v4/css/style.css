@@ -3578,6 +3578,18 @@ header {
 .browse__main-content .browse-container .browse-facets details.form-item ul li {
   list-style: none;
 }
+.browse__main-content .browse-container .browse-facets .form-checkboxes > .form-item {
+  margin-inline: var(--v-space-4xxs);
+  margin-block: 0;
+}
+.browse__main-content .browse-container .browse-facets .form-checkboxes > .form-item:first-child {
+  -webkit-margin-before: var(--v-space-4xxs);
+          margin-block-start: var(--v-space-4xxs);
+}
+.browse__main-content .browse-container .browse-facets .form-checkboxes > .form-item:last-child {
+  -webkit-padding-after: var(--v-space-4xxs);
+          padding-block-end: var(--v-space-4xxs);
+}
 .browse .pager__items {
   display: -webkit-box;
   display: -ms-flexbox;

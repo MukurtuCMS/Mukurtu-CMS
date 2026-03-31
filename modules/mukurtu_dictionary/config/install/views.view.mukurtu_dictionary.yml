@@ -477,10 +477,10 @@ display:
                   sort: 40
                 settings:
                   sort: ASC
-        facets_field_cultural_protocols:
-          id: facets_field_cultural_protocols
+        facets_mukurtu_cultural_protocol_ids:
+          id: facets_mukurtu_cultural_protocol_ids
           table: search_api_index_mukurtu_dictionary_index
-          field: facets_field_cultural_protocols
+          field: facets_mukurtu_cultural_protocol_ids
           relationship: none
           group_type: group
           admin_label: ''
