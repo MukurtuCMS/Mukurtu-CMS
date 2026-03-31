@@ -1,0 +1,60 @@
+langcode: en
+status: true
+dependencies: {  }
+id: indigenous_knowledge_keepers_all_fields
+uid: 1
+label: 'Citing Indigenous Elders and Knowledge Keepers - all fields'
+description: ''
+target_entity_type_id: paragraph
+target_bundle: indigenous_knowledge_keepers
+mapping:
+  -
+    source: 'A Brief Description or Title of the Teaching'
+    target: field_teaching
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: 'City or Community They Live in'
+    target: field_living_place
+  -
+    source: Date
+    target: field_original_date
+  -
+    source: ID
+    target: id
+  -
+    source: 'Language code (langcode)'
+    target: langcode
+  -
+    source: 'Name of the Elder or Knowledge Keeper'
+    target: field_name
+  -
+    source: 'Nation or Community'
+    target: field_nation
+  -
+    source: 'Parent field name'
+    target: parent_field_name
+  -
+    source: 'Parent ID'
+    target: parent_id
+  -
+    source: 'Parent type'
+    target: parent_type
+  -
+    source: Published
+    target: status
+  -
+    source: 'Treaty Territory'
+    target: field_treaty_territory
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

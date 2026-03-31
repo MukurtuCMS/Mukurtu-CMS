@@ -1,34 +1,34 @@
 entity.mukurtu_import_strategy.collection:
-  path: '/admin/structure/mukurtu-import-strategy'
+  path: '/admin/import-templates'
   defaults:
     _entity_list: 'mukurtu_import_strategy'
-    _title: 'Import Configuration Templates'
+    _title: 'Import Templates'
   requirements:
-    _permission: 'administer mukurtu_import_strategy'
+    _permission: 'create mukurtu_import_strategy+edit own mukurtu_import_strategy+edit any mukurtu_import_strategy+delete own mukurtu_import_strategy+delete any mukurtu_import_strategy+administer mukurtu_import_strategy'
 
 entity.mukurtu_import_strategy.add_form:
-  path: '/admin/structure/mukurtu_import_strategy/add'
+  path: '/admin/import-templates/add'
   defaults:
     _entity_form: 'mukurtu_import_strategy.add'
-    _title: 'Add an import configuration template'
+    _title: 'Add an Import Template'
   requirements:
-    _permission: 'administer mukurtu_import_strategy'
+    _entity_create_access: 'mukurtu_import_strategy'
 
 entity.mukurtu_import_strategy.edit_form:
-  path: '/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}'
+  path: '/admin/import-templates/{mukurtu_import_strategy}'
   defaults:
     _entity_form: 'mukurtu_import_strategy.edit'
-    _title: 'Edit an import configuration template'
+    _title: 'Edit an Import Template'
   requirements:
-    _permission: 'administer mukurtu_import_strategy'
+    _entity_access: 'mukurtu_import_strategy.update'
 
 entity.mukurtu_import_strategy.delete_form:
-  path: '/admin/structure/mukurtu-import-strategy/{mukurtu_import_strategy}/delete'
+  path: '/admin/import-templates/{mukurtu_import_strategy}/delete'
   defaults:
     _entity_form: 'mukurtu_import_strategy.delete'
-    _title: 'Delete an import configuration template'
+    _title: 'Delete an Import Template'
   requirements:
-    _permission: 'administer mukurtu_import_strategy'
+    _entity_access: 'mukurtu_import_strategy.delete'
 
 mukurtu_import.file_upload:
   path: '/admin/import'

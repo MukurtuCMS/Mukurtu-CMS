@@ -1,0 +1,5 @@
+strategy_form:
+  js:
+    js/strategy-form.js: {}
+  dependencies:
+    - core/once

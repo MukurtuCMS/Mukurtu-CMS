@@ -1,13 +1,13 @@
 <?php
 
-namespace Drupal\mukurtu_dictionary\Plugin\facets\processor;
+namespace Drupal\mukurtu_protocol\Plugin\facets\processor;
 
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\BuildProcessorInterface;
 use Drupal\facets\Processor\ProcessorPluginBase;
 
 /**
- * Provides a processor for CulturalProtocolFacetLabelProcessor.
+ * Replaces protocol IDs with protocol names in facet results.
  *
  * @FacetsProcessor(
  *   id = "cultural_protocol_facet_label_processor",
@@ -18,14 +18,13 @@ use Drupal\facets\Processor\ProcessorPluginBase;
  *   }
  * )
  */
-class CulturalProtocolFacetLabelProcessor extends ProcessorPluginBase implements BuildProcessorInterface
-{
+class CulturalProtocolFacetLabelProcessor extends ProcessorPluginBase implements BuildProcessorInterface {
+
   /**
    * {@inheritdoc}
    */
-  public function build(FacetInterface $facet, array $results)
-  {
-    /* @var \Drupal\facets\Result\Result $result */
+  public function build(FacetInterface $facet, array $results) {
+    /** @var \Drupal\facets\Result\Result $result */
     foreach ($results as $result) {
       $protocolId = trim($result->getDisplayValue(), '|');
       $protocolEntity = \Drupal::entityTypeManager()->getStorage('protocol')->load($protocolId);

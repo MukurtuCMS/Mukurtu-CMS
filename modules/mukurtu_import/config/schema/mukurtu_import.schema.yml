@@ -18,13 +18,6 @@ mukurtu_import.mukurtu_import_strategy.*:
     target_bundle:
       type: string
       label: 'Target Bundle'
-    default_format:
-      type: string
-      label: 'Default Format'
-    identifier_column:
-      type: string
-      nullable: true
-      label: 'Identifier Column'
     mapping:
       type: sequence
       sequence:

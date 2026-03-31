@@ -139,11 +139,11 @@ field_settings:
   field_cultural_protocols:
     label: 'Cultural Protocols'
     datasource_id: 'entity:node'
-    property_path: field_cultural_protocols
+    property_path: mukurtu_cultural_protocol_ids
     type: string
     dependencies:
       module:
-        - node
+        - mukurtu_protocol
   status:
     label: status
     datasource_id: 'entity:node'
@@ -175,6 +175,9 @@ processor_settings:
   aggregated_field: {  }
   auto_aggregated_fulltext_field: {  }
   custom_value: {  }
+  mukurtu_protocol_cultural_protocol_ids:
+    weights:
+      add_properties: 0
   entity_type: {  }
   language_with_fallback: {  }
   rendered_item: {  }
