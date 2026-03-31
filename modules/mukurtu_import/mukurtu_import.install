@@ -29,10 +29,10 @@ function mukurtu_import_update_40001(): void {
 }
 
 /**
- * Create the 'Digital heritage items - all fields' import strategy.
+ * Create the 'Digital heritage item - all fields' import strategy.
  */
 function mukurtu_import_update_40002(): void {
-  $config_name = 'mukurtu_import.mukurtu_import_strategy.digital_heritage_items_all_fields';
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.digital_heritage_item_all_fields';
   $config = \Drupal::configFactory()->getEditable($config_name);
 
   // Only create if it doesn't already exist.
@@ -54,3 +54,338 @@ function mukurtu_import_update_40003(): void {
   }
 }
 
+/**
+ * Create the 'Audio - all fields' import strategy.
+ */
+function mukurtu_import_update_40004(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.audio_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Biography section - all fields' import strategy.
+ */
+function mukurtu_import_update_40005(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.biography_section_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Collection - all fields' import strategy.
+ */
+function mukurtu_import_update_40006(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.collection_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Community - all fields' import strategy.
+ */
+function mukurtu_import_update_40007(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.community_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Cultural protocol - all fields' import strategy.
+ */
+function mukurtu_import_update_40008(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.cultural_protocol_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Dictionary word - all fields' import strategy.
+ */
+function mukurtu_import_update_40009(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.dictionary_word_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Document - all fields' import strategy.
+ */
+function mukurtu_import_update_40010(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.document_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'External embed - all fields' import strategy.
+ */
+function mukurtu_import_update_40011(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.external_embed_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Image - all fields' import strategy.
+ */
+function mukurtu_import_update_40012(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.image_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Indigenous Knowledge Keepers - all fields' import strategy.
+ */
+function mukurtu_import_update_40013(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.indigenous_knowledge_keepers_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Multipage item - all fields' import strategy.
+ */
+function mukurtu_import_update_40014(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.multipage_item_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Person record - all fields' import strategy.
+ */
+function mukurtu_import_update_40015(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.person_record_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Place record - all fields' import strategy.
+ */
+function mukurtu_import_update_40016(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.place_record_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Related person - all fields' import strategy.
+ */
+function mukurtu_import_update_40017(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.related_person_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Remote video - all fields' import strategy.
+ */
+function mukurtu_import_update_40018(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.remote_video_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Sample sentence - all fields' import strategy.
+ */
+function mukurtu_import_update_40019(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.sample_sentence_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'SoundCloud- all fields' import strategy.
+ */
+function mukurtu_import_update_40020(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.soundcloud_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Text section - all fields' import strategy.
+ */
+function mukurtu_import_update_40021(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.text_section_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Video - all fields' import strategy.
+ */
+function mukurtu_import_update_40022(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.video_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Word entry - all fields' import strategy.
+ */
+function mukurtu_import_update_40023(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.word_entry_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Create the 'Word list - all fields' import strategy.
+ */
+function mukurtu_import_update_40024(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.word_list_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
