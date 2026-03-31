@@ -93,12 +93,6 @@ mapping:
     source: 'Related People'
     target: field_related_people
   -
-    source: 'Revision create time'
-    target: revision_timestamp
-  -
-    source: 'Revision user'
-    target: revision_uid
-  -
     source: 'Sticky at top of lists'
     target: sticky
   -

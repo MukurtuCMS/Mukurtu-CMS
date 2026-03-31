@@ -87,12 +87,6 @@ mapping:
     source: 'Related Content'
     target: field_related_content
   -
-    source: 'Revision create time'
-    target: revision_timestamp
-  -
-    source: 'Revision user'
-    target: revision_uid
-  -
     source: 'Sample Sentences'
     target: field_sample_sentences
   -

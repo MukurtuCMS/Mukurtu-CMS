@@ -18,12 +18,6 @@ mapping:
     source: 'Language (langcode)'
     target: langcode
   -
-    source: 'Revision create time'
-    target: revision_timestamp
-  -
-    source: 'Revision user'
-    target: revision_uid
-  -
     source: Published
     target: status
   -

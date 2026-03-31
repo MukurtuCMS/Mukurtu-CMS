@@ -48,12 +48,6 @@ mapping:
     source: Published
     target: status
   -
-    source: 'Revision create time'
-    target: revision_timestamp
-  -
-    source: 'Revision user'
-    target: revision_uid
-  -
     source: 'SoundCloud URL'
     target: field_media_soundcloud
   -

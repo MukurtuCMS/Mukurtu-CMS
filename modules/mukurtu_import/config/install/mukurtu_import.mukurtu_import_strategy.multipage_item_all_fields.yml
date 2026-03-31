@@ -27,12 +27,6 @@ mapping:
     source: Pages
     target: field_pages
   -
-    source: 'Revision create time'
-    target: revision_timestamp
-  -
-    source: 'Revision user'
-    target: revision_uid
-  -
     source: Status
     target: status
   -

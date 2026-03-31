@@ -45,12 +45,6 @@ mapping:
     source: Published
     target: status
   -
-    source: 'Revision create time'
-    target: revision_timestamp
-  -
-    source: 'Revision user'
-    target: revision_uid
-  -
     source: 'Thumbnail > Alternative text'
     target: field_thumbnail/alt
   -
