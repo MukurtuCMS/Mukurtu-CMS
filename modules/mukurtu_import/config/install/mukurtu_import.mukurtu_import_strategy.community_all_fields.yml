@@ -15,9 +15,6 @@ mapping:
     source: 'Banner Image'
     target: field_banner_image
   -
-    source: Changed
-    target: changed
-  -
     source: 'Community name'
     target: name
   -

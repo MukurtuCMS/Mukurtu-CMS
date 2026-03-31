@@ -15,9 +15,6 @@ mapping:
     source: 'Banner Image'
     target: field_banner_image
   -
-    source: Changed
-    target: changed
-  -
     source: 'Comments Require Approval'
     target: field_comment_require_approval
   -

@@ -206,6 +206,12 @@ trait ImportFormTrait {
           unset($field_defs[$field_name]);
         }
 
+        // The 'changed' timestamp and 'comment' fields are not relevant to
+        // the import use case.
+        if ($field_name === 'changed' || $field_name === 'comment') {
+          unset($field_defs[$field_name]);
+        }
+
         // Remove unwanted 'behavior_settings' paragraph base field.
         if ($entity_type_id === 'paragraph' && $field_name === 'behavior_settings') {
           unset($field_defs[$field_name]);

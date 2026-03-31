@@ -15,14 +15,8 @@ mapping:
     source: 'Authored on'
     target: created
   -
-    source: Changed
-    target: changed
-  -
     source: 'Collection name'
     target: title
-  -
-    source: Comments
-    target: comment
   -
     source: 'Cultural Protocols > Protocols'
     target: field_cultural_protocols/protocols

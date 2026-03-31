@@ -18,9 +18,6 @@ mapping:
     source: 'Authored on'
     target: created
   -
-    source: Changed
-    target: changed
-  -
     source: Contributor
     target: field_contributor
   -

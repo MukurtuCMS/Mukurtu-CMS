@@ -30,9 +30,6 @@ mapping:
     source: 'Authored on'
     target: created
   -
-    source: Changed
-    target: changed
-  -
     source: 'Promoted to front page'
     target: promote
   -
@@ -140,9 +137,6 @@ mapping:
   -
     source: Type
     target: field_type
-  -
-    source: Comments
-    target: comment
   -
     source: 'Content Type'
     target: field_content_type
