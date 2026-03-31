@@ -96,20 +96,20 @@ display:
         options: {  }
       empty: {  }
       sorts:
-        weight:
-          id: weight
+        name:
+          id: name
           table: taxonomy_term_field_data
-          field: weight
+          field: name
           relationship: none
           group_type: group
           admin_label: ''
           entity_type: taxonomy_term
-          entity_field: weight
+          entity_field: name
           plugin_id: standard
           order: ASC
           expose:
             label: ''
-            field_identifier: weight
+            field_identifier: name
           exposed: false
       arguments: {  }
       filters:

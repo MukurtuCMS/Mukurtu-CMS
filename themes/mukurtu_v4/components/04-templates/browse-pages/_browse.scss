@@ -269,6 +269,19 @@
             }
           }
         }
+
+        .form-checkboxes > .form-item {
+          margin-inline: var(--v-space-4xxs);
+          margin-block: 0;
+        }
+
+        .form-checkboxes > .form-item:first-child {
+          margin-block-start: var(--v-space-4xxs);
+        }
+
+        .form-checkboxes > .form-item:last-child {
+          padding-block-end: var(--v-space-4xxs);
+        }
       }
     }
   }

@@ -30,14 +30,6 @@ mukurtu_taxonomy.person_record_settings:
   requirements:
     _permission: 'administer site configuration'
 
-mukurtu_taxonomy.manage_languages:
-  path: '/admin/taxonomy/manage/language/overview'
-  defaults:
-    _title: 'Manage languages'
-    _controller: '\Drupal\mukurtu_taxonomy\Controller\MukurtuManageTaxonomyController::content'
-  requirements:
-    _permission: 'access taxonomy overview'
-
 mukurtu_taxonomy.term_merge_from:
   path: '/admin/structure/term_merge_from'
   defaults:
