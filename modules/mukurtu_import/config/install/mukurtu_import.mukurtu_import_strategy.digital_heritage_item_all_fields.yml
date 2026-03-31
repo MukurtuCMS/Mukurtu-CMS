@@ -1,9 +1,9 @@
 langcode: en
 status: true
 dependencies: {  }
-id: digital_heritage_items_all_fields
+id: digital_heritage_item_all_fields
 uid: 1
-label: 'Digital heritage items - all fields'
+label: 'Digital heritage item - all fields'
 description: ''
 target_entity_type_id: node
 target_bundle: digital_heritage
@@ -18,12 +18,6 @@ mapping:
     source: 'Language (langcode)'
     target: langcode
   -
-    source: 'Revision create time'
-    target: revision_timestamp
-  -
-    source: 'Revision user'
-    target: revision_uid
-  -
     source: Published
     target: status
   -
@@ -35,9 +29,6 @@ mapping:
   -
     source: 'Authored on'
     target: created
-  -
-    source: Changed
-    target: changed
   -
     source: 'Promoted to front page'
     target: promote
@@ -146,9 +137,6 @@ mapping:
   -
     source: Type
     target: field_type
-  -
-    source: Comments
-    target: comment
   -
     source: 'Content Type'
     target: field_content_type

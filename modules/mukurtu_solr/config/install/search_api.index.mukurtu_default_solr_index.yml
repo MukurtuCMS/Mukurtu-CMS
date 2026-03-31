@@ -232,6 +232,14 @@ field_settings:
     dependencies:
       module:
         - mukurtu_protocol
+  field_cultural_protocols:
+    label: 'Cultural Protocols'
+    datasource_id: 'entity:node'
+    property_path: mukurtu_cultural_protocol_ids
+    type: string
+    dependencies:
+      module:
+        - mukurtu_protocol
   node__field_communities__name:
     label: Communities
     datasource_id: 'entity:node'
@@ -935,6 +943,9 @@ processor_settings:
   custom_value: {  }
   entity_status: {  }
   entity_type: {  }
+  mukurtu_protocol_cultural_protocol_ids:
+    weights:
+      add_properties: 0
   html_filter:
     weights:
       preprocess_index: -15

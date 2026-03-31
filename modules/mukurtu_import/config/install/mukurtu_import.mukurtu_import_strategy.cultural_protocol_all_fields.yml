@@ -1,0 +1,72 @@
+langcode: en
+status: true
+dependencies: {  }
+id: cultural_protocol_all_fields
+uid: 1
+label: 'Cultural protocol - all fields'
+description: ''
+target_entity_type_id: protocol
+target_bundle: protocol
+mapping:
+  -
+    source: 'Authored by'
+    target: user_id
+  -
+    source: 'Banner Image'
+    target: field_banner_image
+  -
+    source: 'Comments Require Approval'
+    target: field_comment_require_approval
+  -
+    source: 'Comments Status'
+    target: field_comment_status
+  -
+    source: Communities
+    target: field_communities
+  -
+    source: Created
+    target: created
+  -
+    source: 'Cultural protocol name'
+    target: name
+  -
+    source: 'Cultural Protocol Type'
+    target: field_access_mode
+  -
+    source: Description
+    target: field_description
+  -
+    source: 'Featured Content'
+    target: field_featured_content
+  -
+    source: ID
+    target: id
+  -
+    source: 'Language (langcode)'
+    target: langcode
+  -
+    source: 'Local Contexts API key'
+    target: field_local_contexts_api_key
+  -
+    source: 'Local Contexts Description'
+    target: field_local_contexts_description
+  -
+    source: 'Membership Display'
+    target: field_membership_display
+  -
+    source: Published
+    target: status
+  -
+    source: 'Thumbnail Image'
+    target: field_thumbnail_image
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

@@ -1,0 +1,48 @@
+langcode: en
+status: true
+dependencies: {  }
+id: text_section_all_fields
+uid: 1
+label: 'Text section - all fields'
+description: ''
+target_entity_type_id: paragraph
+target_bundle: text_section_with_title
+mapping:
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: Body
+    target: field_body
+  -
+    source: ID
+    target: id
+  -
+    source: 'Language code (langcode)'
+    target: langcode
+  -
+    source: 'Parent field name'
+    target: parent_field_name
+  -
+    source: 'Parent ID'
+    target: parent_id
+  -
+    source: 'Parent type'
+    target: parent_type
+  -
+    source: Published
+    target: status
+  -
+    source: Title
+    target: field_title
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'
