@@ -14,6 +14,7 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'variables' => [
         'title' => [],
         'privacy' => [],
+        'project_url' => NULL,
         'tk_labels' => [],
         'bc_labels' => [],
         'notices' => [],
@@ -31,6 +32,8 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'community' => NULL,
         'translations' => [],
         'dialog_id' => NULL,
+        'project_title' => NULL,
+        'project_url' => NULL,
       ],
     ],
     'local_contexts_notice' => [
@@ -43,6 +46,8 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'img_url' => NULL,
         'translations' => [],
         'dialog_id' => NULL,
+        'project_title' => NULL,
+        'project_url' => NULL,
       ],
     ],
     'local_contexts_label_group' => [

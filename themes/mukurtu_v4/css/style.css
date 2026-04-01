@@ -1714,7 +1714,7 @@ details.form-wrapper summary + div {
   inline-size: 100%;
 }
 .local-contexts-dialog__trigger img {
-  block-size: 3rem;
+  block-size: 5rem;
   -ms-flex-negative: 0;
       flex-shrink: 0;
 }
@@ -1728,7 +1728,7 @@ details.form-wrapper summary + div {
 }
 .local-contexts-dialog__panel {
   inline-size: 90vw;
-  max-inline-size: 520px;
+  max-inline-size: 620px;
   max-block-size: 80vh;
   overflow-y: auto;
   border: none;
@@ -1833,6 +1833,18 @@ details.form-wrapper summary + div {
 .local-contexts-dialog__audio audio {
   inline-size: 100%;
 }
+.local-contexts-dialog__project-link {
+  -webkit-margin-before: var(--v-space-4xxs);
+          margin-block-start: var(--v-space-4xxs);
+  -webkit-padding-before: var(--v-space-5xs);
+          padding-block-start: var(--v-space-5xs);
+  -webkit-border-before: 1px solid var(--brand-light);
+          border-block-start: 1px solid var(--brand-light);
+  font-size: var(--font-size-s);
+}
+.local-contexts-dialog__project-link a {
+  color: var(--brand-primary);
+}
 
 .local-contexts-label-group .project-title,
 .local-contexts-project .project-title {
@@ -1844,6 +1856,12 @@ details.form-wrapper summary + div {
   -webkit-border-after: 1px solid var(--brand-light);
           border-block-end: 1px solid var(--brand-light);
   margin-block: 0 var(--v-space-5xs);
+}
+
+.local-contexts-project .local-contexts-projects-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-5xs);
 }
 
 .local-contexts-label-group {
@@ -1870,26 +1888,6 @@ details.form-wrapper summary + div {
   padding-block: var(--v-space-5xs) var(--v-space-4xxs);
   -webkit-margin-after: var(--v-space-4xxs);
           margin-block-end: var(--v-space-4xxs);
-}
-.local-contexts-project .tk-labels,
-.local-contexts-project .bc-labels,
-.local-contexts-project .notices,
-.field--name-field-local-contexts-labels-and-notices .field__item .tk-labels,
-.field--name-field-local-contexts-labels-and-notices .field__item .bc-labels,
-.field--name-field-local-contexts-labels-and-notices .field__item .notices {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--v-space-5xs);
-  -webkit-margin-after: var(--v-space-5xs);
-          margin-block-end: var(--v-space-5xs);
-}
-.local-contexts-project .tk-label .text,
-.local-contexts-project .bc-label .text,
-.local-contexts-project .notice .text,
-.field--name-field-local-contexts-labels-and-notices .field__item .tk-label .text,
-.field--name-field-local-contexts-labels-and-notices .field__item .bc-label .text,
-.field--name-field-local-contexts-labels-and-notices .field__item .notice .text {
-  display: none;
 }
 
 .field--name-field-local-contexts-projects .field__label,
@@ -5204,12 +5202,6 @@ header {
 .full-node__sidebar .sidebar-section .field--name-field-rights-statements img {
   display: inline-block;
   vertical-align: middle;
-}
-.full-node__sidebar .sidebar-section .tk-labels,
-.full-node__sidebar .sidebar-section .bc-labels {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--v-space-4xxs);
 }
 .full-node__sidebar .sidebar-section .name {
   line-height: var(--line-height-xs);

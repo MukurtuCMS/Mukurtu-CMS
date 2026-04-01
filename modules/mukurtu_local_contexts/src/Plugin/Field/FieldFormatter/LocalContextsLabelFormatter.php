@@ -62,9 +62,16 @@ class LocalContextsLabelFormatter extends FormatterBase {
     $delta = 0;
     foreach ($grouped as $project_id => $group_items) {
       $project = new LocalContextsProject($project_id);
+      $project_title = $project->isValid() ? $project->getTitle() : null;
+      $project_url = $project->isValid() ? $project->getUrl() : null;
+      $group_items = array_map(function ($item) use ($project_title, $project_url) {
+        $item['#project_title'] = $project_title;
+        $item['#project_url'] = $project_url;
+        return $item;
+      }, $group_items);
       $element[$delta] = [
         '#theme' => 'local_contexts_label_group',
-        '#project_title' => $project->isValid() ? $project->getTitle() : null,
+        '#project_title' => $project_title,
         '#items' => $group_items,
       ];
       $delta++;

@@ -170,13 +170,6 @@
       }
     }
 
-    .tk-labels,
-    .bc-labels {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--v-space-4xxs);
-    }
-
     .name {
       line-height: var(--line-height-xs);
     }

@@ -2,7 +2,11 @@
 <div class="local-contexts-{{ type }} local-contexts-dialog">
   <button type="button" class="local-contexts-dialog__trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ dialog_id }}">
     <img src="{{ svg_url ?? img_url }}" alt="">
-    <span class="local-contexts-{{ type }}__name">{{ name }}</span>
+    {% set name_parts = name|split(' (') %}
+    <span class="local-contexts-{{ type }}__name">
+      {{- name_parts[0] -}}
+      {% if name_parts[1] is defined %}<br><span class="local-contexts-{{ type }}__abbr">({{ name_parts[1] }}</span>{% endif %}
+    </span>
   </button>
   <dialog id="{{ dialog_id }}" class="local-contexts-dialog__panel" aria-label="{{ name }}">
     <div class="local-contexts-dialog__inner">
@@ -17,6 +21,11 @@
       </div>
     </div>
     <div class="local-contexts-dialog__text">{{ text }}</div>
+    {% if project_url %}
+      <div class="local-contexts-dialog__project-link">
+        <a href="{{ project_url }}" target="_blank" rel="noopener noreferrer">{{ project_title }}</a>
+      </div>
+    {% endif %}
     {% if translations %}
       {% for translation in translations %}
         <div class="local-contexts-dialog__translation">

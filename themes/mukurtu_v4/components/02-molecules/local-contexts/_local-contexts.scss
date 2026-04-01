@@ -18,7 +18,7 @@
     inline-size: 100%;
 
     img {
-      block-size: 3rem;
+      block-size: 5rem;
       flex-shrink: 0;
     }
 
@@ -35,7 +35,7 @@
 
   &__panel {
     inline-size: 90vw;
-    max-inline-size: 520px;
+    max-inline-size: 620px;
     max-block-size: 80vh;
     overflow-y: auto;
     border: none;
@@ -131,6 +131,17 @@
       inline-size: 100%;
     }
   }
+
+  &__project-link {
+    margin-block-start: var(--v-space-4xxs);
+    padding-block-start: var(--v-space-5xs);
+    border-block-start: 1px solid var(--brand-light);
+    font-size: var(--font-size-s);
+
+    a {
+      color: var(--brand-primary);
+    }
+  }
 }
 
 .local-contexts-label-group,
@@ -143,6 +154,12 @@
     border-block-end: 1px solid var(--brand-light);
     margin-block: 0 var(--v-space-5xs);
   }
+}
+
+.local-contexts-project .local-contexts-projects-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-5xs);
 }
 
 .local-contexts-label-group {
@@ -167,23 +184,6 @@
   padding-inline: var(--v-space-4xxs);
   padding-block: var(--v-space-5xs) var(--v-space-4xxs);
   margin-block-end: var(--v-space-4xxs);
-
-  .tk-labels,
-  .bc-labels,
-  .notices {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--v-space-5xs);
-    margin-block-end: var(--v-space-5xs);
-  }
-
-  .tk-label,
-  .bc-label,
-  .notice {
-    .text {
-      display: none;
-    }
-  }
 }
 
 .field--name-field-local-contexts-projects .field__label,
