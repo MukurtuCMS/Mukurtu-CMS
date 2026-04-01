@@ -11,9 +11,9 @@ jobs:
     name: Mukurtu v4 - PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        php-versions: ['8.3']
+        php-versions: ['8.3', '8.4']
         test-suite: ["kernel"]
     services:
       mariadb:
