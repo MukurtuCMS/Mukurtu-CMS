@@ -69,3 +69,68 @@ function mukurtu_core_update_40001(): void {
   $view->set('display', $display);
   $view->save();
 }
+
+/**
+ * Add dedicated user registration form display.
+ */
+function mukurtu_core_update_40002(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  $display = $storage->load('user.user.register');
+
+  if (!$display) {
+    $display = $storage->create([
+      'targetEntityType' => 'user',
+      'bundle' => 'user',
+      'mode' => 'register',
+      'status' => TRUE,
+    ]);
+  }
+
+  $display
+    ->setComponent('account', [
+      'weight' => 0,
+      'region' => 'content',
+      'settings' => [],
+      'third_party_settings' => [],
+    ])
+    ->setComponent('field_display_name', [
+      'type' => 'string_textfield',
+      'weight' => 1,
+      'region' => 'content',
+      'settings' => [
+        'size' => 60,
+        'placeholder' => '',
+      ],
+      'third_party_settings' => [],
+    ])
+    ->setComponent('google_analytics', [
+      'weight' => 3,
+      'region' => 'content',
+      'settings' => [],
+      'third_party_settings' => [],
+    ])
+    ->setComponent('language', [
+      'weight' => 3,
+      'region' => 'content',
+      'settings' => [],
+      'third_party_settings' => [],
+    ])
+    ->removeComponent('contact')
+    ->removeComponent('langcode')
+    ->removeComponent('message_digest')
+    ->removeComponent('message_subscribe_email')
+    ->removeComponent('path')
+    ->removeComponent('user_picture')
+    ->removeComponent('timezone')
+    ->save();
+}
+
+/**
+ * Set user registration to admin_only if not already explicitly configured.
+ */
+function mukurtu_core_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('user.settings');
+  if ($config->get('register') === 'visitors') {
+    $config->set('register', 'admin_only')->save();
+  }
+}
