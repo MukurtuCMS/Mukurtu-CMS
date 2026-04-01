@@ -20,11 +20,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  contact:
-    weight: 4
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   field_display_name:
     type: string_textfield
     weight: 1
@@ -43,32 +38,11 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  message_digest:
-    type: options_select
-    weight: 6
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  message_subscribe_email:
-    type: boolean_checkbox
-    weight: 5
-    region: content
-    settings:
-      display_label: true
-    third_party_settings: {  }
-  timezone:
-    weight: 7
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  user_picture:
-    type: image_image
-    weight: 2
-    region: content
-    settings:
-      progress_indicator: throbber
-      preview_image_style: media_library
-    third_party_settings: {  }
 hidden:
   langcode: true
   path: true
+  user_picture: true
+  message_digest: true
+  message_subscribe_email: true
+  contact: true
+  timezone: true
