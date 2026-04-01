@@ -100,7 +100,7 @@ class ExecuteImportForm extends ImportBaseForm {
       '#caption' => ['#markup' => '<strong>' . $this->t('Metadata Files') . '</strong>'],
       '#header' => [
         $this->t('Filename'),
-        $this->t('Import Configuration'),
+        $this->t('Import Settings'),
         $this->t('Destination Import Type'),
       ],
       '#attributes' => [
@@ -119,7 +119,10 @@ class ExecuteImportForm extends ImportBaseForm {
       ];
 
       // Import Configuration.
-      $label = $import_config_for_file->label() ?? $this->t("Custom");
+      $label = $import_config_for_file->label();
+      if (empty($label)) {
+        $label = $this->t("Custom");
+      }
       $form['table'][$fid]['config'] = [
         '#type' => 'markup',
         '#markup' => "<div>{$label}</div>",
