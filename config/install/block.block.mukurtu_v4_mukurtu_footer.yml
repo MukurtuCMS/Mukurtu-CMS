@@ -14,6 +14,6 @@ plugin: mukurtu_footer
 settings:
   id: mukurtu_footer
   label: 'Mukurtu Footer'
-  label_display: visible
+  label_display: '0'
   provider: mukurtu_footer
 visibility: {  }

@@ -67,6 +67,9 @@ class MukurtuFooterBlock extends BlockBase {
       '#contact_email_text'    => $config->get('contact_email_text') ?? '',
       '#contact_email_address' => $config->get('contact_email_address') ?? '',
       '#copyright_message'     => $copyright,
+      '#cache'                 => [
+        'tags' => ['config:mukurtu_footer.settings'],
+      ],
     ];
   }
 

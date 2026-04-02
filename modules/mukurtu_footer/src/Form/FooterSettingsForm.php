@@ -305,15 +305,19 @@ class FooterSettingsForm extends ConfigFormBase {
     // Formatted text field.
     $text_field = $form_state->getValue('text_field');
     $config->set('text_field.value', $text_field['value'] ?? '');
-    $config->set('text_field.format', $text_field['format'] ?? 'basic_html');
+    $config->set('text_field.format', $text_field['format'] ?? 'mukurtu_html');
 
     // Contact email.
     $config->set('contact_email_text', $form_state->getValue(['contact', 'contact_email_text']) ?? '');
     $config->set('contact_email_address', $form_state->getValue(['contact', 'contact_email_address']) ?? '');
 
-    // Logos — filter empty entries, mark uploaded files as permanent.
-    $logo_count = $form_state->get('logo_count');
+    // Logos — diff old vs new fids to manage file usage and permanence.
+    $file_usage = \Drupal::service('file.usage');
+    $old_fids = array_column($config->get('logos') ?? [], 'fid');
+
+    $logo_count = $form_state->get('logo_count') ?? count($config->get('logos') ?? []);
     $logos = [];
+    $new_fids = [];
     for ($i = 0; $i < $logo_count; $i++) {
       $logo_data = $form_state->getValue(['logos_fieldset', 'logo_' . $i]);
       $fids = array_filter((array) ($logo_data['fid'] ?? []));
@@ -321,8 +325,13 @@ class FooterSettingsForm extends ConfigFormBase {
         $fid = (int) reset($fids);
         $file = File::load($fid);
         if ($file) {
-          $file->setPermanent();
-          $file->save();
+          $new_fids[] = $fid;
+          // Only mark permanent and add usage for newly added files.
+          if (!in_array($fid, $old_fids)) {
+            $file->setPermanent();
+            $file->save();
+            $file_usage->add($file, 'mukurtu_footer', 'config', 1);
+          }
           $logos[] = [
             'fid'      => $fid,
             'alt'      => $logo_data['alt'] ?? '',
@@ -331,6 +340,20 @@ class FooterSettingsForm extends ConfigFormBase {
         }
       }
     }
+
+    // Release usage and set temporary for any removed files.
+    foreach (array_diff($old_fids, $new_fids) as $removed_fid) {
+      $file = File::load($removed_fid);
+      if ($file) {
+        $file_usage->delete($file, 'mukurtu_footer', 'config', 1);
+        // Only set temporary if nothing else is using the file.
+        if (empty($file_usage->listUsage($file))) {
+          $file->setTemporary();
+          $file->save();
+        }
+      }
+    }
+
     $config->set('logos', $logos);
 
     // Social accounts — filter entries with no URL.
