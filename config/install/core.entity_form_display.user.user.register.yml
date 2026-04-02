@@ -1,39 +1,46 @@
-langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_form_mode.user.register
     - field.field.user.user.field_display_name
     - field.field.user.user.message_digest
     - field.field.user.user.message_subscribe_email
+    - field.field.user.user.user_picture
   module:
     - user
-id: user.user.default
+id: user.user.register
 targetEntityType: user
 bundle: user
-mode: default
+mode: register
 content:
-  field_display_name:
-    type: string
-    label: hidden
-    settings:
-      link_to_entity: false
+  account:
+    weight: 0
+    region: content
+    settings: {  }
     third_party_settings: {  }
+  field_display_name:
+    type: string_textfield
     weight: 1
     region: content
-  flag_email_user:
-    weight: 10
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  google_analytics:
+    weight: 3
+    region: content
     settings: {  }
     third_party_settings: {  }
+  language:
+    weight: 3
     region: content
-  flag_subscribe_user:
-    weight: 10
     settings: {  }
     third_party_settings: {  }
-    region: content
 hidden:
-  field_communities: true
+  contact: true
   langcode: true
-  member_for: true
   message_digest: true
   message_subscribe_email: true
-  search_api_excerpt: true
+  path: true
+  user_picture: true
+  timezone: true
