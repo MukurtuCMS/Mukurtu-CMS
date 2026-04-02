@@ -1,105 +1,115 @@
+{#
+/**
+ * @file
+ * Template for the Mukurtu Footer block.
+ *
+ * Available variables:
+ *   - text_field: Render array for formatted footer text (top of footer).
+ *   - logos: Array of logo items, each with keys: url, alt, link_url.
+ *   - social_accounts: Array of social account items, each with: platform, url, label.
+ *   - other_links: Array of link items, each with: url, label.
+ *   - contact_email_text: Label text shown before the email link.
+ *   - contact_email_address: The contact email address.
+ *   - copyright_message: Copyright text (tokens already replaced).
+ */
+#}
+
+{# --- SVG icon macro (solid style) --- #}
+{% macro social_icon(platform) %}
+  {% if platform == 'twitter' %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.6 19.5" fill="currentColor" aria-hidden="true" focusable="false"><path d="M16.99 0h3.308l-7.227 8.26 8.502 11.24h-6.658l-5.214-6.817L3.735 19.5H.425l7.73-8.835L0 0h6.825l4.713 6.231zm-1.161 17.52h1.833L5.83 1.876H3.863z"/></svg>
+  {% elseif platform == 'facebook' %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.5 20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 11.5h2.5l1-4H7v-2c0-1.03 0-2 2-2h1.5V.14C10.174.097 8.943 0 7.643 0 4.928 0 3 1.657 3 4.7v2.8H0v4h3V20h4z"/></svg>
+  {% elseif platform == 'instagram' %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M11.029 0c1.125.003 1.696.009 2.189.023l.194.007c.224.008.445.018.712.03 1.064.05 1.79.218 2.427.465.66.254 1.216.598 1.772 1.153a4.9 4.9 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.012.266.022.487.03.712l.006.194c.015.492.021 1.063.023 2.188l.001.746v1.31q.003 1.094-.023 2.188l-.006.194c-.008.225-.018.446-.03.712-.05 1.065-.22 1.79-.466 2.428a4.9 4.9 0 0 1-1.153 1.772c-.5.509-1.105.902-1.772 1.153-.637.247-1.363.415-2.427.465l-.712.03-.194.006c-.493.014-1.064.021-2.189.023l-.746.001H8.974q-1.095.004-2.189-.023l-.194-.006a56 56 0 0 1-.712-.031c-1.064-.05-1.79-.218-2.428-.465a4.9 4.9 0 0 1-1.771-1.153A4.9 4.9 0 0 1 .526 16.55c-.247-.637-.415-1.363-.465-2.428l-.03-.712-.005-.194a76 76 0 0 1-.025-2.188V8.972q-.005-1.094.022-2.188L.03 6.59c.008-.225.018-.446.03-.712.05-1.065.218-1.79.465-2.428a4.9 4.9 0 0 1 1.156-1.772A4.9 4.9 0 0 1 3.451.525C4.089.278 4.814.11 5.879.06c.266-.012.488-.022.712-.03l.194-.006A80 80 0 0 1 8.973.001zm-1.028 5C6.152 5 3.746 9.167 5.67 12.5a5 5 0 0 0 4.331 2.5c3.849 0 6.254-4.167 4.33-7.5a5 5 0 0 0-4.33-2.5m0 2c2.309 0 3.753 2.499 2.598 4.5a3 3 0 0 1-2.597 1.5c-2.31 0-3.753-2.5-2.599-4.5A3 3 0 0 1 10.002 7m5.25-3.5a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5"/></svg>
+  {% elseif platform == 'youtube' %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+  {% elseif platform == 'linkedin' %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+  {% elseif platform == 'tiktok' %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+  {% elseif platform == 'bluesky' %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.144-.02.292-.041.44-.065-.146.025-.294.046-.44.065-3.337.486-6.3 1.618-2.442 5.684C7.842 23 10.697 23 12 23c1.303 0 4.158 0 7.435-3.704 3.858-4.066.895-5.198-2.442-5.684a8.01 8.01 0 0 1-.44-.065c.148.024.296.045.44.065 2.67.296 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.479 0-.688-.139-1.86-.902-2.203-.659-.299-1.664-.621-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z"/></svg>
+  {% elseif platform == 'mastodon' %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M23.193 7.88c0-5.207-3.411-6.733-3.411-6.733C18.062.357 15.108.025 12.041 0h-.076c-3.069.025-6.02.357-7.74 1.147 0 0-3.411 1.526-3.411 6.733 0 1.193-.023 2.619.015 4.133.124 5.092.934 10.11 5.641 11.355 2.17.574 4.034.695 5.535.612 2.722-.15 4.25-.972 4.25-.972l-.09-1.975s-1.945.613-4.13.539c-2.165-.074-4.449-.233-4.799-2.891a5.499 5.499 0 0 1-.048-.745s2.125.52 4.818.643c1.646.075 3.19-.097 4.758-.288 3.007-.359 5.625-2.212 5.954-3.905.517-2.665.475-6.507.475-6.507zm-4.024 6.709h-2.497V8.469c0-1.29-.543-1.944-1.628-1.944-1.2 0-1.802.776-1.802 2.312v3.349h-2.484V8.837c0-1.536-.602-2.312-1.802-2.312-1.085 0-1.628.655-1.628 1.944v6.12H4.831V8.309c0-1.289.328-2.313.987-3.07.68-.759 1.57-1.147 2.674-1.147 1.278 0 2.246.491 2.886 1.474l.622 1.043.623-1.043c.64-.983 1.608-1.474 2.886-1.474 1.104 0 1.994.388 2.674 1.147.659.757.987 1.781.987 3.07v6.28z"/></svg>
+  {% else %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 0C5.374 0 0 5.373 0 12c0 6.628 5.374 12 12 12s12-5.372 12-12c0-6.627-5.374-12-12-12zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 4a1 1 0 0 0-1 1v5.586l-2.707 2.707a1 1 0 1 0 1.414 1.414L12 14.414l2.293 2.293a1 1 0 0 0 1.414-1.414L13 12.586V7a1 1 0 0 0-1-1z"/></svg>
+  {% endif %}
+{% endmacro %}
+
+{% import _self as icons %}
+
 <div class="mukurtu-footer">
+
+  {# 1. Formatted text field #}
+  {% if text_field %}
+    <div class="footer-text">
+      {{ text_field }}
+    </div>
+  {% endif %}
+
+  {# 2. Logos #}
   {% if logos %}
     <div class="logos">
       {% for logo in logos %}
         {% if logo %}
           <div class="logo">
-            <img src={{ logo.url }} alt={{ logo.alt }}>
+            {% if logo.link_url %}
+              <a href="{{ logo.link_url }}" target="_blank" rel="noopener noreferrer">
+                <img src="{{ logo.url }}" alt="{{ logo.alt }}">
+              </a>
+            {% else %}
+              <img src="{{ logo.url }}" alt="{{ logo.alt }}">
+            {% endif %}
           </div>
         {% endif %}
       {% endfor %}
     </div>
   {% endif %}
 
-  {# Email. #}
-  <div class="email">
-  {% if email_us_text %}
-    <div class="email-us-text">
-      <a href="mailto:{{ contact_email_address }}">
-        <svg role="img" aria-label="Send an email to {{ contact_email_address }}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="21" height="13" fill="#ccc" stroke="#ccc" aria-hidden="true" style="margin-right: 5px"><path d="M19.87.04 19.69 0H1.31L1.2.02l9.3 8.21zM20.91.86l-6.62 5.79 6.54 5.66c.1-.18.17-.39.17-.61V1.3c0-.15-.04-.3-.09-.44zM.1.8c-.06.15-.1.32-.1.5v10.4c0 .19.05.37.12.53l6.59-5.6z"/><path d="M10.5 9.97 7.7 7.5l-6.46 5.49.07.01h18.32L13.3 7.52z"/></svg>{{ email_us_text }}
-      </a>
+
+  {# 4. Social accounts + other links — single flex row #}
+  {% if social_accounts or other_links %}
+    <div class="footer-links-row">
+      {% for account in social_accounts %}
+        {% if account.url %}
+          <div class="socials__item socials__item--{{ account.platform }}">
+            <a href="{{ account.url }}" target="_blank" rel="noopener noreferrer me">
+              <span class="socials__icon">
+                {{ icons.social_icon(account.platform) }}
+              </span>
+              {% if account.label %}
+                <span class="socials__label">{{ account.label }}</span>
+              {% endif %}
+            </a>
+          </div>
+        {% endif %}
+      {% endfor %}
+      {% for link in other_links %}
+        {% if link.url %}
+          <div class="footer-link-item">
+            <a href="{{ link.url }}">{{ link.label ?: link.url }}</a>
+          </div>
+        {% endif %}
+      {% endfor %}
     </div>
   {% endif %}
-  </div>
 
-  {# Socials. #}
-  <div class="socials">
-
-    {% if twitter and twitter_accounts %}
-      <div class="socials__item">
-        {% if twitter %}
-          <div class="twitter icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.6 19.5" fill="#ccc" aria-hidden="true"><path d="M16.99 0h3.308l-7.227 8.26 8.502 11.24h-6.658l-5.214-6.817L3.735 19.5H.425l7.73-8.835L0 0h6.825l4.713 6.231zm-1.161 17.52h1.833L5.83 1.876H3.863z"/></svg>
-            {{ twitter }}
-          </div>
-        {% endif %}
-        {% if twitter_accounts %}
-          <div class="socials__accounts">
-            {% for account in twitter_accounts %}
-              {% if account %}
-                <div class="socials__account">
-                  <a href="https://x.com/{{ account|replace({' ': ''}) }}">
-                    {{ account }}
-                  </a>
-                </div>
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
-    {% endif %}
-
-    {% if facebook and facebook_accounts %}
-      <div class="socials__item">
-        {% if facebook %}
-          <div class="facebook icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.5 20" fill="#ccc" aria-hidden="true"><path d="M7 11.5h2.5l1-4H7v-2c0-1.03 0-2 2-2h1.5V.14C10.174.097 8.943 0 7.643 0 4.928 0 3 1.657 3 4.7v2.8H0v4h3V20h4z"/></svg>
-            {{ facebook }}
-          </div>
-        {% endif %}
-        {% if facebook_accounts is not empty %}
-          <div class="socials__accounts">
-            {% for account in facebook_accounts %}
-              {% if account %}
-                <div class="socials__account">
-                  <a href="https://facebook.com/{{ account|replace({' ': '.'}) }}">
-                    {{ account }}
-                  </a>
-                </div>
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
-    {% endif %}
-
-    {% if instagram and instagram_accounts %}
-      <div class="socials__item">
-        {% if instagram %}
-          <div class="instagram icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#ccc" aria-hidden="true"><path d="M11.029 0c1.125.003 1.696.009 2.189.023l.194.007c.224.008.445.018.712.03 1.064.05 1.79.218 2.427.465.66.254 1.216.598 1.772 1.153a4.9 4.9 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.012.266.022.487.03.712l.006.194c.015.492.021 1.063.023 2.188l.001.746v1.31q.003 1.094-.023 2.188l-.006.194c-.008.225-.018.446-.03.712-.05 1.065-.22 1.79-.466 2.428a4.9 4.9 0 0 1-1.153 1.772c-.5.509-1.105.902-1.772 1.153-.637.247-1.363.415-2.427.465l-.712.03-.194.006c-.493.014-1.064.021-2.189.023l-.746.001H8.974q-1.095.004-2.189-.023l-.194-.006a56 56 0 0 1-.712-.031c-1.064-.05-1.79-.218-2.428-.465a4.9 4.9 0 0 1-1.771-1.153A4.9 4.9 0 0 1 .526 16.55c-.247-.637-.415-1.363-.465-2.428l-.03-.712-.005-.194a76 76 0 0 1-.025-2.188V8.972q-.005-1.094.022-2.188L.03 6.59c.008-.225.018-.446.03-.712.05-1.065.218-1.79.465-2.428a4.9 4.9 0 0 1 1.156-1.772A4.9 4.9 0 0 1 3.451.525C4.089.278 4.814.11 5.879.06c.266-.012.488-.022.712-.03l.194-.006A80 80 0 0 1 8.973.001zm-1.028 5C6.152 5 3.746 9.167 5.67 12.5a5 5 0 0 0 4.331 2.5c3.849 0 6.254-4.167 4.33-7.5a5 5 0 0 0-4.33-2.5m0 2c2.309 0 3.753 2.499 2.598 4.5a3 3 0 0 1-2.597 1.5c-2.31 0-3.753-2.5-2.599-4.5A3 3 0 0 1 10.002 7m5.25-3.5a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5"/></svg>
-            {{ instagram }}
-          </div>
-        {% endif %}
-        {% if instagram_accounts %}
-          <div class="socials__accounts">
-            {% for account in instagram_accounts %}
-              {% if account %}
-                <div class="socials__account">
-                  <a href="https://instagram.com/{{ account|replace({' ': '.'}) }}">
-                    {{ account }}
-                  </a>
-                </div>
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
-    {% endif %}
-
-  </div> {# end Socials. #}
-
-  {% if copyright_message %}
-    <small class="copyright-message">{{ copyright_message }}</small>
+  {# 5. Contact email + copyright — single flex row at the bottom #}
+  {% if contact_email_address or copyright_message %}
+    <div class="footer-bottom-row">
+      {% if contact_email_address %}
+        <div class="email">
+          <a href="mailto:{{ contact_email_address }}">
+            <svg role="img" aria-label="{{ 'Send an email to'|t }} {{ contact_email_address }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 13" fill="currentColor" focusable="false"><path d="M19.87.04 19.69 0H1.31L1.2.02l9.3 8.21zM20.91.86l-6.62 5.79 6.54 5.66c.1-.18.17-.39.17-.61V1.3c0-.15-.04-.3-.09-.44zM.1.8c-.06.15-.1.32-.1.5v10.4c0 .19.05.37.12.53l6.59-5.6z"/><path d="M10.5 9.97 7.7 7.5l-6.46 5.49.07.01h18.32L13.3 7.52z"/></svg>
+            {% if contact_email_text %}{{ contact_email_text }}{% else %}{{ contact_email_address }}{% endif %}
+          </a>
+        </div>
+      {% endif %}
+      {% if copyright_message %}
+        <small class="copyright-message">{{ copyright_message }}</small>
+      {% endif %}
+    </div>
   {% endif %}
+
 </div>

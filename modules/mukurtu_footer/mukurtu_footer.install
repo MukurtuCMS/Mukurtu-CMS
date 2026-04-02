@@ -1,0 +1,97 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the Mukurtu Footer module.
+ */
+
+/**
+ * Migrate footer settings from block configuration to mukurtu_footer.settings.
+ *
+ * Previous versions stored all footer content (logos, social accounts,
+ * email, copyright) inside the block plugin's settings array. This hook
+ * moves that data to the dedicated mukurtu_footer.settings config object
+ * so the footer can be edited via a full admin form at
+ * /admin/config/mukurtu/footer.
+ */
+function mukurtu_footer_update_10000(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // If the new config already exists (e.g. fresh install), leave it alone.
+  $footer_settings = $config_factory->getEditable('mukurtu_footer.settings');
+  if ($footer_settings->get('_migrated')) {
+    return;
+  }
+
+  // Read existing block plugin settings.
+  $block_config = $config_factory->get('block.block.mukurtu_v4_mukurtu_footer');
+  $block_settings = $block_config->get('settings') ?? [];
+
+  // --- Text field: new field, no migration source, default to empty. ---
+  $footer_settings->set('text_field.value', '');
+  $footer_settings->set('text_field.format', 'mukurtu_html');
+
+  // --- Contact email. ---
+  $footer_settings->set('contact_email_text', $block_settings['email_us_text'] ?? 'Email us at');
+  $footer_settings->set('contact_email_address', $block_settings['contact_email_address'] ?? '');
+
+  // --- Logos: convert fids array to new [{fid, alt, link_url}] structure. ---
+  $logos = [];
+  $old_fids = (array) ($block_settings['logo_upload'] ?? []);
+  foreach (array_filter($old_fids) as $fid) {
+    if ((int) $fid > 0) {
+      $logos[] = [
+        'fid'      => (int) $fid,
+        'alt'      => '',
+        'link_url' => '',
+      ];
+    }
+  }
+  $footer_settings->set('logos', $logos);
+
+  // --- Social accounts: convert per-platform fixed slots to unified array. ---
+  $social_accounts = [];
+  $platform_urls = [
+    'twitter'   => 'https://x.com/',
+    'facebook'  => 'https://facebook.com/',
+    'instagram' => 'https://instagram.com/',
+  ];
+  $old_social = $block_settings['social_media'] ?? [];
+  foreach ($platform_urls as $platform => $base_url) {
+    for ($i = 1; $i <= 3; $i++) {
+      $account = $old_social[$platform]['account_' . $i] ?? '';
+      if (!empty(trim($account))) {
+        $handle = trim($account);
+        $social_accounts[] = [
+          'platform' => $platform,
+          'url'      => $base_url . ltrim($handle, '@/'),
+          'label'    => $handle,
+        ];
+      }
+    }
+  }
+  $footer_settings->set('social_accounts', $social_accounts);
+
+  // --- Other links: new field, no migration source. ---
+  $footer_settings->set('other_links', []);
+
+  // --- Copyright message. ---
+  $footer_settings->set('copyright_message', $block_settings['copyright_message'] ?? '© [current-date:html_year] Mukurtu CMS');
+
+  // Mark as migrated so this hook is idempotent.
+  $footer_settings->set('_migrated', TRUE);
+  $footer_settings->save(TRUE);
+
+  // Clean up the now-redundant block plugin settings (content fields only;
+  // keep block placement, region, visibility, etc.).
+  $block_editable = $config_factory->getEditable('block.block.mukurtu_v4_mukurtu_footer');
+  if ($block_editable->get('id')) {
+    $block_editable->set('settings', [
+      'id'            => 'mukurtu_footer',
+      'label'         => $block_editable->get('settings.label') ?? 'Mukurtu Footer',
+      'label_display' => $block_editable->get('settings.label_display') ?? 'visible',
+      'provider'      => 'mukurtu_footer',
+    ]);
+    $block_editable->save(TRUE);
+  }
+}

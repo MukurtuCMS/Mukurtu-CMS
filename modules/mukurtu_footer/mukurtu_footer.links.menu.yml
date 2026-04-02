@@ -1,0 +1,7 @@
+mukurtu_footer.settings:
+  title: 'Footer settings'
+  description: 'Configure the site footer: text, logos, social media, and links.'
+  route_name: mukurtu_footer.settings
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  weight: 10

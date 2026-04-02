@@ -1,0 +1,7 @@
+mukurtu_footer.settings:
+  path: '/admin/config/mukurtu/footer'
+  defaults:
+    _form: '\Drupal\mukurtu_footer\Form\FooterSettingsForm'
+    _title: 'Footer settings'
+  requirements:
+    _permission: 'administer site configuration'

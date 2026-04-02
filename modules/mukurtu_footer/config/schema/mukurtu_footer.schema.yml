@@ -1,68 +1,74 @@
-block.settings.mukurtu_footer:
-  type: block_settings
-  label: 'Mukurtu Footer'
+mukurtu_footer.settings:
+  type: config_object
+  label: 'Mukurtu Footer settings'
   mapping:
-    logo_upload:
+    text_field:
+      type: mapping
+      label: 'Footer text'
+      mapping:
+        value:
+          type: text
+          label: 'Text'
+        format:
+          type: string
+          label: 'Text format'
+    logos:
+      type: sequence
+      label: 'Logos'
+      sequence:
+        type: mapping
+        label: 'Logo'
+        mapping:
+          fid:
+            type: integer
+            label: 'File ID'
+          alt:
+            type: string
+            label: 'Alt text'
+          link_url:
+            type: string
+            label: 'Link URL'
+    social_accounts:
+      type: sequence
+      label: 'Social media accounts'
+      sequence:
+        type: mapping
+        label: 'Social account'
+        mapping:
+          platform:
+            type: string
+            label: 'Platform'
+          url:
+            type: string
+            label: 'Profile URL'
+          label:
+            type: string
+            label: 'Display label'
+    other_links:
+      type: sequence
+      label: 'Other links'
+      sequence:
+        type: mapping
+        label: 'Link'
+        mapping:
+          url:
+            type: string
+            label: 'URL'
+          label:
+            type: string
+            label: 'Label'
+    contact_email_text:
       type: string
-      label: 'Logo'
-    email_us_text:
-      type: string
-      label: 'Email us text'
+      label: 'Contact email link text'
     contact_email_address:
       type: string
       label: 'Contact email address'
-    social_media:
-      type: mapping
-      label: 'Social media'
-      mapping:
-        twitter:
-          type: mapping
-          label: 'Twitter'
-          mapping:
-            message_text:
-              type: string
-              label: 'Message text'
-            account_1:
-              type: string
-              label: 'Account 1'
-            account_2:
-              type: string
-              label: 'Account 2'
-            account_3:
-              type: string
-              label: 'Account 3'
-        facebook:
-          type: mapping
-          label: 'Facebook'
-          mapping:
-            message_text:
-              type: string
-              label: 'Message text'
-            account_1:
-              type: string
-              label: 'Account 1'
-            account_2:
-              type: string
-              label: 'Account 2'
-            account_3:
-              type: string
-              label: 'Account 3'
-        instagram:
-          type: mapping
-          label: 'Instagram'
-          mapping:
-            message_text:
-              type: string
-              label: 'Message text'
-            account_1:
-              type: string
-              label: 'Account 1'
-            account_2:
-              type: string
-              label: 'Account 2'
-            account_3:
-              type: string
-              label: 'Account 3'
     copyright_message:
       type: string
       label: 'Copyright message'
+
+# Block plugin settings schema — block config is now minimal (no content fields).
+block.settings.mukurtu_footer:
+  type: block_settings
+  label: 'Mukurtu Footer'
+  mapping: {  }
