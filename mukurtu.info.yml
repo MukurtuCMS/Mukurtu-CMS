@@ -51,7 +51,9 @@ install:
   - geocoder
   - geocoder_field
   - tagify
+  - genpass
   - rebuild_cache_access
+  - notify_user_default
 
 dependencies:
   - 'blazy:blazy'
