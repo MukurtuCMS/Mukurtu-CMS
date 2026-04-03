@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the Mukurtu Footer module.
+ */
+
+use Drupal\block_content\Entity\BlockContent;
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_footer_install() {
+  // Create the default footer block_content entity if one doesn't exist.
+  $existing = \Drupal::entityTypeManager()
+    ->getStorage('block_content')
+    ->loadByProperties(['type' => 'mukurtu_footer']);
+
+  if (empty($existing)) {
+    $footer = BlockContent::create([
+      'type' => 'mukurtu_footer',
+      'info' => 'Mukurtu Footer',
+      'status' => TRUE,
+      'field_footer_contact_email_label' => 'Email us at',
+      'field_footer_copyright' => '© [current-date:html_year] Mukurtu CMS',
+    ]);
+    $footer->save();
+  }
+}

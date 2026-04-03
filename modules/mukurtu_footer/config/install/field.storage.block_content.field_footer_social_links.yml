@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - link
+id: block_content.field_footer_social_links
+field_name: field_footer_social_links
+entity_type: block_content
+type: link
+settings:
+  link_type: 17
+  title: 1
+module: link
+locked: false
+cardinality: -1
+translatable: true
+indexes: {}
+persist_with_no_fields: false
+custom_storage: false

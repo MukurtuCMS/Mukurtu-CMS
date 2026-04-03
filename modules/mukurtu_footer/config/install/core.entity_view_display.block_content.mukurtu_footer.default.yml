@@ -1,0 +1,85 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.mukurtu_footer
+    - field.field.block_content.mukurtu_footer.body
+    - field.field.block_content.mukurtu_footer.field_footer_logos
+    - field.field.block_content.mukurtu_footer.field_footer_social_links
+    - field.field.block_content.mukurtu_footer.field_footer_other_links
+    - field.field.block_content.mukurtu_footer.field_footer_contact_email
+    - field.field.block_content.mukurtu_footer.field_footer_contact_email_label
+    - field.field.block_content.mukurtu_footer.field_footer_copyright
+  module:
+    - image
+    - link
+    - text
+id: block_content.mukurtu_footer.default
+targetEntityType: block_content
+bundle: mukurtu_footer
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {}
+    third_party_settings: {}
+    weight: 0
+    region: content
+  field_footer_logos:
+    type: image
+    label: hidden
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {}
+    weight: 1
+    region: content
+  field_footer_social_links:
+    type: link
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: 'noopener noreferrer'
+      target: _blank
+    third_party_settings: {}
+    weight: 2
+    region: content
+  field_footer_other_links:
+    type: link
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: _self
+    third_party_settings: {}
+    weight: 3
+    region: content
+  field_footer_contact_email:
+    type: basic_string
+    label: hidden
+    settings: {}
+    third_party_settings: {}
+    weight: 4
+    region: content
+  field_footer_contact_email_label:
+    type: basic_string
+    label: hidden
+    settings: {}
+    third_party_settings: {}
+    weight: 5
+    region: content
+  field_footer_copyright:
+    type: basic_string
+    label: hidden
+    settings: {}
+    third_party_settings: {}
+    weight: 6
+    region: content
+hidden:
+  langcode: true
+  search_api_excerpt: true
