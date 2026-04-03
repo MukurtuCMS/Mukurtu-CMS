@@ -11,8 +11,9 @@ dependencies:
     - field.field.block_content.mukurtu_footer.field_footer_contact_email_label
     - field.field.block_content.mukurtu_footer.field_footer_copyright
   module:
-    - image
+    - entity_reference_revisions
     - link
+    - paragraphs
     - text
 id: block_content.mukurtu_footer.default
 targetEntityType: block_content
@@ -38,20 +39,36 @@ content:
       show_summary: false
     third_party_settings: {}
   field_footer_logos:
-    type: image_image
+    type: paragraphs
     weight: 2
     region: content
     settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
+      title: 'Logo'
+      title_plural: 'Logos'
+      edit_mode: open
+      closed_mode: summary
+      autocollapse: none
+      closed_mode_threshold: 0
+      add_mode: button
+      form_display_mode: default
+      default_paragraph_type: footer_logo
+      features: {}
     third_party_settings: {}
   field_footer_social_links:
-    type: link_default
+    type: paragraphs
     weight: 3
     region: content
     settings:
-      placeholder_url: ''
-      placeholder_title: ''
+      title: 'Social link'
+      title_plural: 'Social links'
+      edit_mode: open
+      closed_mode: summary
+      autocollapse: none
+      closed_mode_threshold: 0
+      add_mode: button
+      form_display_mode: default
+      default_paragraph_type: footer_social_link
+      features: {}
     third_party_settings: {}
   field_footer_other_links:
     type: link_default

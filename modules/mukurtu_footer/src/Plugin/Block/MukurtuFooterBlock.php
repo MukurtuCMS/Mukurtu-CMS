@@ -65,27 +65,44 @@ class MukurtuFooterBlock extends BlockBase implements ContainerFactoryPluginInte
       return [];
     }
 
-    // Resolve logo images to renderable data.
+    // Resolve logo paragraph entities to renderable data.
     $logos = [];
     foreach ($footer->get('field_footer_logos') as $item) {
-      $file = $item->entity;
+      $paragraph = $item->entity;
+      if (!$paragraph) {
+        continue;
+      }
+      $image_item = $paragraph->get('field_footer_logo_image')->first();
+      if (!$image_item) {
+        continue;
+      }
+      $file = $image_item->entity;
       if ($file) {
+        $link_item = $paragraph->get('field_footer_logo_link')->first();
         $logos[] = [
-          'url' => $this->fileUrlGenerator->generateString($file->getFileUri()),
-          'alt' => $item->alt ?? '',
+          'url'      => $this->fileUrlGenerator->generateString($file->getFileUri()),
+          'alt'      => $image_item->alt ?? '',
+          'link_url' => $link_item ? $link_item->getUrl()->toString() : '',
         ];
       }
     }
 
-    // Build social links array.
+    // Build social links array from paragraph entities.
     $social_links = [];
     foreach ($footer->get('field_footer_social_links') as $item) {
-      if ($item->uri) {
-        $social_links[] = [
-          'url'   => $item->getUrl()->toString(),
-          'label' => $item->title ?? '',
-        ];
+      $paragraph = $item->entity;
+      if (!$paragraph) {
+        continue;
       }
+      $url_item = $paragraph->get('field_footer_social_url')->first();
+      if (!$url_item || !$url_item->uri) {
+        continue;
+      }
+      $social_links[] = [
+        'platform' => $paragraph->get('field_footer_social_platform')->value ?? '',
+        'url'      => $url_item->getUrl()->toString(),
+        'label'    => $url_item->title ?? '',
+      ];
     }
 
     // Build other links array.
