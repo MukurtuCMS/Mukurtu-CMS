@@ -14,6 +14,18 @@
  */
 #}
 
+{# --- Platform display labels for accessible link names --- #}
+{% set platform_labels = {
+  'twitter':   'Twitter / X',
+  'facebook':  'Facebook',
+  'instagram': 'Instagram',
+  'youtube':   'YouTube',
+  'linkedin':  'LinkedIn',
+  'tiktok':    'TikTok',
+  'bluesky':   'Bluesky',
+  'mastodon':  'Mastodon',
+} %}
+
 {# --- SVG icon macro — keyed by platform value from the select field --- #}
 {% macro social_icon(platform) %}
   {% if platform == 'twitter' %}
@@ -54,8 +66,9 @@
       {% for logo in logos %}
         <div class="logo">
           {% if logo.link_url %}
-            <a href="{{ logo.link_url }}" target="_blank" rel="noopener noreferrer">
-              <img src="{{ logo.url }}" alt="{{ logo.alt }}">
+            <a href="{{ logo.link_url }}" target="_blank" rel="noopener noreferrer"
+               aria-label="{{ logo.alt ?: 'Logo'|t }}{% if logo.alt %} {% endif %}{{ '(opens in new tab)'|t }}">
+              <img src="{{ logo.url }}" alt="" aria-hidden="true">
             </a>
           {% else %}
             <img src="{{ logo.url }}" alt="{{ logo.alt }}">
@@ -69,14 +82,17 @@
   {% if social_links or other_links %}
     <div class="footer-links-row">
       {% for link in social_links %}
+        {% set platform_label = platform_labels[link.platform] ?? link.platform %}
+        {% set visible_label = link.label ?: platform_label %}
         <div class="socials__item socials__item--{{ link.platform }}">
-          <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer me">
+          <a href="{{ link.url }}"
+             target="_blank"
+             rel="noopener noreferrer me"
+             aria-label="{{ visible_label }}, {{ '(opens in new tab)'|t }}">
             <span class="socials__icon">
               {{ icons.social_icon(link.platform) }}
             </span>
-            {% if link.label %}
-              <span class="socials__label">{{ link.label }}</span>
-            {% endif %}
+            <span class="socials__label" aria-hidden="true">{{ visible_label }}</span>
           </a>
         </div>
       {% endfor %}
@@ -93,14 +109,15 @@
     <div class="footer-bottom-row">
       {% if contact_email_address %}
         <div class="email">
-          <a href="mailto:{{ contact_email_address }}">
-            <svg role="img" aria-label="{{ 'Send an email to'|t }} {{ contact_email_address }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 13" fill="currentColor" focusable="false"><path d="M19.87.04 19.69 0H1.31L1.2.02l9.3 8.21zM20.91.86l-6.62 5.79 6.54 5.66c.1-.18.17-.39.17-.61V1.3c0-.15-.04-.3-.09-.44zM.1.8c-.06.15-.1.32-.1.5v10.4c0 .19.05.37.12.53l6.59-5.6z"/><path d="M10.5 9.97 7.7 7.5l-6.46 5.49.07.01h18.32L13.3 7.52z"/></svg>
-            {% if contact_email_text %}{{ contact_email_text }}{% else %}{{ contact_email_address }}{% endif %}
+          <a href="mailto:{{ contact_email_address }}"
+             aria-label="{{ 'Send an email to'|t }} {{ contact_email_address }}">
+            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 13" fill="currentColor"><path d="M19.87.04 19.69 0H1.31L1.2.02l9.3 8.21zM20.91.86l-6.62 5.79 6.54 5.66c.1-.18.17-.39.17-.61V1.3c0-.15-.04-.3-.09-.44zM.1.8c-.06.15-.1.32-.1.5v10.4c0 .19.05.37.12.53l6.59-5.6z"/><path d="M10.5 9.97 7.7 7.5l-6.46 5.49.07.01h18.32L13.3 7.52z"/></svg>
+            <span aria-hidden="true">{% if contact_email_text %}{{ contact_email_text }}{% else %}{{ contact_email_address }}{% endif %}</span>
           </a>
         </div>
       {% endif %}
       {% if copyright_message %}
-        <small class="copyright-message">{{ copyright_message }}</small>
+        <p class="copyright-message">{{ copyright_message }}</p>
       {% endif %}
     </div>
   {% endif %}
