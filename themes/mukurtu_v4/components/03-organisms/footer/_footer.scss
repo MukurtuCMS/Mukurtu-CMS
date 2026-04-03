@@ -103,10 +103,13 @@
   .socials__icon {
     display: flex;
     align-items: center;
+    flex-shrink: 0;
 
     svg {
       block-size: 1.25rem;
-      inline-size: auto;
+      inline-size: 1.25rem;
+      max-inline-size: 1.25rem;
+      max-block-size: 1.25rem;
     }
   }
 
