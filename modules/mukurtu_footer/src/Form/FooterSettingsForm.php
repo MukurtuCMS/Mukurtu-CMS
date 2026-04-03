@@ -1,10 +1,19 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\mukurtu_footer\Form\FooterSettingsForm.
+ */
+
 namespace Drupal\mukurtu_footer\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\file\Entity\File;
+use Drupal\file\FileUsage\FileUsageInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the Mukurtu Footer settings form.
@@ -12,6 +21,27 @@ use Drupal\file\Entity\File;
 class FooterSettingsForm extends ConfigFormBase {
 
   const SETTINGS = 'mukurtu_footer.settings';
+
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typed_config_manager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected FileUsageInterface $fileUsage,
+  ) {
+    parent::__construct($config_factory, $typed_config_manager);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('config.typed'),
+      $container->get('entity_type.manager'),
+      $container->get('file.usage'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -301,6 +331,7 @@ class FooterSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config(static::SETTINGS);
+    $file_storage = $this->entityTypeManager->getStorage('file');
 
     // Formatted text field.
     $text_field = $form_state->getValue('text_field');
@@ -312,7 +343,6 @@ class FooterSettingsForm extends ConfigFormBase {
     $config->set('contact_email_address', $form_state->getValue(['contact', 'contact_email_address']) ?? '');
 
     // Logos — diff old vs new fids to manage file usage and permanence.
-    $file_usage = \Drupal::service('file.usage');
     $old_fids = array_column($config->get('logos') ?? [], 'fid');
 
     $logo_count = $form_state->get('logo_count') ?? count($config->get('logos') ?? []);
@@ -323,14 +353,14 @@ class FooterSettingsForm extends ConfigFormBase {
       $fids = array_filter((array) ($logo_data['fid'] ?? []));
       if (!empty($fids)) {
         $fid = (int) reset($fids);
-        $file = File::load($fid);
+        $file = $file_storage->load($fid);
         if ($file) {
           $new_fids[] = $fid;
           // Only mark permanent and add usage for newly added files.
           if (!in_array($fid, $old_fids)) {
             $file->setPermanent();
             $file->save();
-            $file_usage->add($file, 'mukurtu_footer', 'config', 1);
+            $this->fileUsage->add($file, 'mukurtu_footer', 'config', 1);
           }
           $logos[] = [
             'fid'      => $fid,
@@ -343,11 +373,11 @@ class FooterSettingsForm extends ConfigFormBase {
 
     // Release usage and set temporary for any removed files.
     foreach (array_diff($old_fids, $new_fids) as $removed_fid) {
-      $file = File::load($removed_fid);
+      $file = $file_storage->load($removed_fid);
       if ($file) {
-        $file_usage->delete($file, 'mukurtu_footer', 'config', 1);
+        $this->fileUsage->delete($file, 'mukurtu_footer', 'config', 1);
         // Only set temporary if nothing else is using the file.
-        if (empty($file_usage->listUsage($file))) {
+        if (empty($this->fileUsage->listUsage($file))) {
           $file->setTemporary();
           $file->save();
         }

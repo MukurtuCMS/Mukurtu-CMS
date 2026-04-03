@@ -17,9 +17,9 @@
 function mukurtu_footer_update_10000(): void {
   $config_factory = \Drupal::configFactory();
 
-  // If the new config already exists (e.g. fresh install), leave it alone.
+  // If the new config already has content (e.g. fresh install), leave it alone.
   $footer_settings = $config_factory->getEditable('mukurtu_footer.settings');
-  if ($footer_settings->get('_migrated')) {
+  if ($footer_settings->get('text_field.value') !== NULL) {
     return;
   }
 
@@ -78,14 +78,12 @@ function mukurtu_footer_update_10000(): void {
   // --- Copyright message. ---
   $footer_settings->set('copyright_message', $block_settings['copyright_message'] ?? '© [current-date:html_year] Mukurtu CMS');
 
-  // Mark as migrated so this hook is idempotent.
-  $footer_settings->set('_migrated', TRUE);
   $footer_settings->save(TRUE);
 
   // Clean up the now-redundant block plugin settings (content fields only;
   // keep block placement, region, visibility, etc.).
   $block_editable = $config_factory->getEditable('block.block.mukurtu_v4_mukurtu_footer');
-  if ($block_editable->get('id')) {
+  if (!$block_editable->isNew()) {
     $block_editable->set('settings', [
       'id'            => 'mukurtu_footer',
       'label'         => $block_editable->get('settings.label') ?? 'Mukurtu Footer',

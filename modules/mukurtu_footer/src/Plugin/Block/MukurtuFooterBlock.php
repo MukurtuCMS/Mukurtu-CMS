@@ -1,9 +1,19 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\mukurtu_footer\Plugin\Block\MukurtuFooterBlock.
+ */
+
 namespace Drupal\mukurtu_footer\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
-use Drupal\file\Entity\File;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Utility\Token;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the Mukurtu Footer block.
@@ -18,22 +28,50 @@ use Drupal\file\Entity\File;
  *   category = "Custom"
  * )
  */
-class MukurtuFooterBlock extends BlockBase {
+class MukurtuFooterBlock extends BlockBase implements ContainerFactoryPluginInterface {
+
+  public function __construct(
+    array $configuration,
+    string $plugin_id,
+    mixed $plugin_definition,
+    protected ConfigFactoryInterface $configFactory,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected FileUrlGeneratorInterface $fileUrlGenerator,
+    protected Token $token,
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('config.factory'),
+      $container->get('entity_type.manager'),
+      $container->get('file_url_generator'),
+      $container->get('token'),
+    );
+  }
 
   /**
    * {@inheritdoc}
    */
   public function build() {
-    $config = \Drupal::config('mukurtu_footer.settings');
+    $config = $this->configFactory->get('mukurtu_footer.settings');
+    $file_storage = $this->entityTypeManager->getStorage('file');
 
     // Resolve logo file entities to public URLs.
     $logos = [];
     foreach ($config->get('logos') ?? [] as $logo) {
       if (!empty($logo['fid'])) {
-        $file = File::load($logo['fid']);
+        $file = $file_storage->load($logo['fid']);
         if ($file) {
           $logos[] = [
-            'url'      => \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri()),
+            'url'      => $this->fileUrlGenerator->generateString($file->getFileUri()),
             'alt'      => $logo['alt'] ?? '',
             'link_url' => $logo['link_url'] ?? '',
           ];
@@ -44,7 +82,7 @@ class MukurtuFooterBlock extends BlockBase {
     // Replace tokens in the copyright message at render time (not at save time).
     $copyright = $config->get('copyright_message') ?? '';
     if ($copyright) {
-      $copyright = \Drupal::service('token')->replace($copyright, [], ['clear' => TRUE]);
+      $copyright = $this->token->replace($copyright, [], ['clear' => TRUE]);
     }
 
     // Build a render array for the formatted text field.

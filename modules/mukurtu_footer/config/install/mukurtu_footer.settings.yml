@@ -1,9 +1,9 @@
 text_field:
   value: ''
   format: mukurtu_html
-logos: {  }
-social_accounts: {  }
-other_links: {  }
+logos: []
+social_accounts: []
+other_links: []
 contact_email_text: 'Email us at'
 contact_email_address: ''
 copyright_message: '© [current-date:html_year] Mukurtu CMS'
