@@ -6,6 +6,16 @@
  */
 
 /**
+ * Hide the Mukurtu Footer block label on existing sites.
+ */
+function mukurtu_footer_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('block.block.mukurtu_v4_mukurtu_footer');
+  if (!$config->isNew()) {
+    $config->set('settings.label_display', '0')->save(TRUE);
+  }
+}
+
+/**
  * Migrate footer settings from block configuration to mukurtu_footer.settings.
  *
  * Previous versions stored all footer content (logos, social accounts,
