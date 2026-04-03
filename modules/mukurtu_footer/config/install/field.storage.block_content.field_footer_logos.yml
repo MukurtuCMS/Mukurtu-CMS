@@ -2,24 +2,18 @@ langcode: en
 status: true
 dependencies:
   module:
-    - image
+    - entity_reference_revisions
+    - paragraphs
 id: block_content.field_footer_logos
 field_name: field_footer_logos
 entity_type: block_content
-type: image
+type: entity_reference_revisions
 settings:
-  uri_scheme: public
-  default_image:
-    uuid: null
-    alt: ''
-    title: ''
-    width: null
-    height: null
-  column_groups: {}
-module: image
+  target_type: paragraph
+module: entity_reference_revisions
 locked: false
 cardinality: -1
-translatable: true
+translatable: false
 indexes: {}
 persist_with_no_fields: false
 custom_storage: false

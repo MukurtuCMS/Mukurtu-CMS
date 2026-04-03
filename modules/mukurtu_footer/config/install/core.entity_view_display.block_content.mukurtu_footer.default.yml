@@ -11,8 +11,9 @@ dependencies:
     - field.field.block_content.mukurtu_footer.field_footer_contact_email_label
     - field.field.block_content.mukurtu_footer.field_footer_copyright
   module:
-    - image
+    - entity_reference_revisions
     - link
+    - paragraphs
     - text
 id: block_content.mukurtu_footer.default
 targetEntityType: block_content
@@ -27,23 +28,20 @@ content:
     weight: 0
     region: content
   field_footer_logos:
-    type: image
+    type: entity_reference_revisions_entity_view
     label: hidden
     settings:
-      image_style: ''
-      image_link: ''
+      view_mode: default
+      link: false
     third_party_settings: {}
     weight: 1
     region: content
   field_footer_social_links:
-    type: link
+    type: entity_reference_revisions_entity_view
     label: hidden
     settings:
-      trim_length: 80
-      url_only: false
-      url_plain: false
-      rel: 'noopener noreferrer'
-      target: _blank
+      view_mode: default
+      link: false
     third_party_settings: {}
     weight: 2
     region: content

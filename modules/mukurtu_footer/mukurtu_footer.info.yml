@@ -12,3 +12,5 @@ dependencies:
   - drupal:link
   - drupal:text
   - drupal:token
+  - entity_reference_revisions:entity_reference_revisions
+  - paragraphs:paragraphs
