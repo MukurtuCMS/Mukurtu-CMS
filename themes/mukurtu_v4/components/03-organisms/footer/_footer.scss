@@ -56,6 +56,13 @@
     justify-content: center;
     align-items: center;
 
+    a {
+      &:focus-visible {
+        outline: var(--focus-color) solid 2px;
+        outline-offset: 2px;
+      }
+    }
+
     img {
       inline-size: auto;
       max-block-size: 150px;
@@ -84,6 +91,12 @@
         text-decoration: underline;
         text-decoration-thickness: 1px;
       }
+
+      &:focus-visible {
+        outline: var(--focus-color) solid 2px;
+        outline-offset: 2px;
+        text-decoration: none;
+      }
     }
   }
 
@@ -110,6 +123,11 @@
       &:hover {
         text-decoration-color: var(--color-transparent);
       }
+
+      &:focus-visible {
+        outline: var(--focus-color) solid 2px;
+        outline-offset: 2px;
+      }
     }
   }
 
@@ -134,6 +152,11 @@
 
       &:hover {
         text-decoration-color: var(--color-transparent);
+      }
+
+      &:focus-visible {
+        outline: var(--focus-color) solid 2px;
+        outline-offset: 2px;
       }
 
       svg {
