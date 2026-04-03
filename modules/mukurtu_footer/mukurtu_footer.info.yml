@@ -1,7 +1,14 @@
 name: Mukurtu Footer
-description: Provides custom footer
+description: 'Provides the Mukurtu Footer block content type and default footer block.'
 type: module
-core_version_requirement: '^9.4 || ^10 || ^11'
+package: Mukurtu
+core_version_requirement: '^10.2 || ^11'
 dependencies:
- - drupal:block
- - drupal:config
+  - drupal:block
+  - drupal:block_content
+  - drupal:file
+  - drupal:filter
+  - drupal:image
+  - drupal:link
+  - drupal:text
+  - drupal:token
