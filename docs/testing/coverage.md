@@ -67,6 +67,22 @@ PHPUnit\Framework\TestCase (no Drupal bootstrap)
 
 ---
 
+### Mocking strategy
+
+**Kernel tests do not use mocks.** The purpose of a kernel test is to exercise real Drupal services, real entity saves, and real database interactions. Mocking collaborators in a kernel test would undermine what the test is verifying. The two exceptions in this codebase are infrastructure workarounds, not testing tools:
+- `MukurtuKernelTestBase` registers a `file.repository` stub in the DI container to satisfy a Blazy dependency removed in Drupal 10.
+- `MukurtuDraftsBehaviorTest` passes a stub `EntityViewDisplayInterface` purely to satisfy a type hint — the mock is never called.
+
+**Unit tests use mocks.** The two unit tests in `mukurtu_browse` test classes in isolation from their dependencies:
+- `MukurtuBoundingBoxTest` — uses `getMockBuilder()->disableOriginalConstructor()` to bypass the Views plugin constructor, plus PHP reflection to access a `protected` method. Prophecy does not help with either of these requirements.
+- `MukurtuMapNodesParamConverterTest` — uses **Prophecy** (`prophesize()/reveal()`). This is the appropriate fit: the class takes its dependencies via constructor injection and the test verifies both return values and interaction contracts (`shouldBeCalledOnce()`).
+
+**Why Prophecy is limited to one test:** Prophecy's strength is verifying how a class interacts with its injected collaborators. Kernel tests don't inject mocked collaborators — they use real ones. Of the unit tests, only `MukurtuMapNodesParamConverter` has the constructor injection + interaction verification pattern that Prophecy is designed for.
+
+**Drupal ecosystem note:** Prophecy has been a `require-dev` dependency of Drupal core since ~2015 via `phpspec/prophecy-phpunit`. PHPUnit 10 removed built-in Prophecy support, requiring the bridge package. The current direction in core (PHPUnit 12 era) is distinguishing `createMock()` (sets expectations) from `createStub()` (returns values only) rather than Prophecy vs native mocks.
+
+---
+
 ## Coverage by Module
 
 ### `mukurtu_protocol`

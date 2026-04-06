@@ -6,6 +6,18 @@ Tests are grouped by the feature they protect. Each item is one test that runs a
 
 ---
 
+## How the tests are structured
+
+There are two kinds of tests in this codebase: **kernel tests** and **unit tests**.
+
+**Kernel tests** spin up a real (in-memory) version of Drupal — real database, real entities, real services. They test that features actually work end-to-end within Drupal's infrastructure. The vast majority of Mukurtu's tests are kernel tests.
+
+**Unit tests** test a single PHP class in complete isolation, with no Drupal or database involved. They're faster but narrower. Mukurtu has two: one for the map bounding box filter and one for the map URL parameter converter.
+
+**On mocking:** Unit tests sometimes use "mock" objects — fake stand-ins for collaborators — to isolate the class being tested. Kernel tests do not use mocks because the whole point is to test against real Drupal behavior. The map parameter converter test uses a library called Prophecy for its mocks, which lets the test also verify *how* the class interacted with its dependencies, not just what it returned.
+
+---
+
 ## Collections
 *See [coverage.md § mukurtu_collection](coverage.md#mukurtu_collection)*
 
