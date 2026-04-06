@@ -89,7 +89,9 @@ class DigitalHeritageTaxonomyTest extends DigitalHeritageTestBase {
       ['entity' => Term::create(['name' => 'Oral History', 'vid' => 'keywords'])],
     ]);
     $item1->save();
-    $term = Node::load($item1->id())->get('field_keywords')->referencedEntities()[0];
+    $item1Terms = Node::load($item1->id())->get('field_keywords')->referencedEntities();
+    $this->assertNotEmpty($item1Terms, 'The keyword term should have been created and referenced.');
+    $term = $item1Terms[0];
     $originalId = $term->id();
 
     // Save second item referencing the same term by ID.

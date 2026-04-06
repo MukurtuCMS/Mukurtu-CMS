@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_protocol\Kernel\Access;
 
@@ -242,7 +242,7 @@ class AccessByProtocolTest extends KernelTestBase {
       'uid' => $this->owner->id(),
     ]);
 
-    assert($content instanceof CulturalProtocolControlledInterface);
+    $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $content);
 
     $content->setSharingSetting($access_setting);
     $content->setProtocols(array_values($protocols));
@@ -308,21 +308,21 @@ class AccessByProtocolTest extends KernelTestBase {
       'uid' => $owner->id(),
     ]);
 
-    assert($content instanceof CulturalProtocolControlledInterface);
+    $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $content);
 
     $content->setSharingSetting('any');
     $content->setProtocols([]);
     $content->save();
 
     // Non-owner.
-    $this->assertEquals(FALSE, $content->access('view', $user));
-    $this->assertEquals(FALSE, $content->access('view', $user));
-    $this->assertEquals(FALSE, $content->access('view', $user));
+    $this->assertFalse($content->access('view', $user));
+    $this->assertFalse($content->access('update', $user));
+    $this->assertFalse($content->access('delete', $user));
 
     // Owner.
-    $this->assertEquals(TRUE, $content->access('view', $owner));
-    $this->assertEquals(TRUE, $content->access('update', $owner));
-    $this->assertEquals(TRUE, $content->access('delete', $owner));
+    $this->assertTrue($content->access('view', $owner));
+    $this->assertTrue($content->access('update', $owner));
+    $this->assertTrue($content->access('delete', $owner));
   }
 
   /**

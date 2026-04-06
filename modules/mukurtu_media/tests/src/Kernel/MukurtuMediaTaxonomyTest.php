@@ -72,7 +72,9 @@ class MukurtuMediaTaxonomyTest extends MukurtuMediaTestBase {
       ['entity' => Term::create(['name' => 'Traditional Song', 'vid' => 'media_tag'])],
     ]);
     $media1->save();
-    $term = Media::load($media1->id())->get('field_media_tags')->referencedEntities()[0];
+    $media1Tags = Media::load($media1->id())->get('field_media_tags')->referencedEntities();
+    $this->assertNotEmpty($media1Tags, 'The tag term should have been created and referenced.');
+    $term = $media1Tags[0];
     $originalId = $term->id();
 
     // Save second entity referencing the same term by ID.

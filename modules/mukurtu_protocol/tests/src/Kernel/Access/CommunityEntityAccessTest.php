@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_protocol\Kernel\Access;
 
@@ -127,25 +127,25 @@ class CommunityEntityAccessTest extends KernelTestBase {
     // Non-member.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
-    $this->assertEquals(FALSE, $this->community->access('view', $user));
-    $this->assertEquals(FALSE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertFalse($this->community->access('view', $user));
+    $this->assertFalse($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
 
     // Member.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
     $this->community->addMember($user);
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(FALSE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertFalse($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
 
     // Community Manager.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
     $this->community->addMember($user, ['community_manager']);
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(TRUE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertTrue($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
   }
 
   /**
@@ -158,25 +158,25 @@ class CommunityEntityAccessTest extends KernelTestBase {
     // Non-member.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(FALSE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertFalse($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
 
     // Member.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
     $this->community->addMember($user);
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(FALSE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertFalse($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
 
     // Community Manager.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
     $this->community->addMember($user, ['community_manager']);
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(TRUE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertTrue($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
   }
 
   /**
@@ -241,17 +241,15 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test getCommunityType().
    */
-  public function testGetCommunityType()
-  {
-    // TODO
+  public function testGetCommunityType(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test setCommunityType().
    */
-  public function testSetCommunityType()
-  {
-    // TODO
+  public function testSetCommunityType(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
@@ -318,72 +316,64 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test getParentCommunity().
    */
-  public function testGetParentCommunity() {
-    // TODO
+  public function testGetParentCommunity(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test getThumbnailImage().
    */
-  public function testGetThumbnailImage()
-  {
-    // TODO?
+  public function testGetThumbnailImage(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test setThumbnailImage().
    */
-  public function testSetThumbnailImage()
-  {
-    // TODO?
+  public function testSetThumbnailImage(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test getBannerImage().
    */
-  public function testGetBannerImage()
-  {
-    // TODO?
+  public function testGetBannerImage(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test setBannerImage().
    */
-  public function testSetBannerImage()
-  {
-    // TODO?
+  public function testSetBannerImage(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test getChildCommunities().
    */
-  public function testGetChildCommunities()
-  {
-    // TODO
+  public function testGetChildCommunities(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test isParentCommunity().
    */
-  public function testIsParentCommunity()
-  {
-    // TODO
+  public function testIsParentCommunity(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test isChildCommunity().
    */
-  public function testIsChildCommunity()
-  {
-    // TODO
+  public function testIsChildCommunity(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test getProtocols().
    */
-  public function testGetProtocols()
-  {
-    // TODO
+  public function testGetProtocols(): void {
+    $this->markTestIncomplete('TODO');
   }
 
 }

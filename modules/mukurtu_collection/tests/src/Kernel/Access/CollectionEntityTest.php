@@ -151,9 +151,7 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
    */
    public function testSubCollectionNoSelfReference() {
     $this->collection->addChildCollection($this->collection);
-    //$this->collection->set('field_child_collections', [$this->collection->id()]);
     $violationList = $this->collection->validate();
-    //$this->debugValidationList($violationList);
     $this->assertEquals(1, $violationList->count());
     $itemsViolations = $violationList->getByField('field_child_collections');
     $this->assertCount(1, $itemsViolations);
