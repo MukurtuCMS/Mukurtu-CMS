@@ -6,7 +6,7 @@ namespace Drupal\Tests\mukurtu_drafts\Kernel;
 
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Session\AnonymousUserSession;
-use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\mukurtu_core\Kernel\MukurtuKernelTestBase;
 use Drupal\drafts_entity_test\Entity\TestDraftEntity;
 use Drupal\user\Entity\User;
 
@@ -19,16 +19,36 @@ use Drupal\user\Entity\User;
  * @group mukurtu_drafts
  */
 #[\PHPUnit\Framework\Attributes\Group('mukurtu_drafts')]
-class MukurtuDraftsBehaviorTest extends KernelTestBase {
+class MukurtuDraftsBehaviorTest extends MukurtuKernelTestBase {
 
   /**
    * {@inheritdoc}
+   *
+   * Extends MukurtuKernelTestBase's module list with the drafts-specific
+   * modules needed for this test. The full parent list must be included since
+   * PHP static property overriding replaces the parent's list entirely.
    */
   protected static $modules = [
+    'field',
+    'file',
+    'filter',
+    'image',
+    'media',
+    'node',
+    'og',
+    'options',
+    'path',
     'system',
+    'taxonomy',
+    'text',
+    'user',
+    'views',
+    'workflows',
+    'mukurtu_core',
+    'mukurtu_local_contexts',
+    'mukurtu_protocol',
     'entity_test',
     'drafts_entity_test',
-    'user',
     'mukurtu_drafts',
   ];
 
@@ -45,9 +65,9 @@ class MukurtuDraftsBehaviorTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
+    // entity_test and drafts_entity_test are not part of MukurtuKernelTestBase.
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('drafts_entity_test');
-    $this->installEntitySchema('user');
 
     $this->owner = User::create(['name' => $this->randomString()]);
     $this->owner->save();
@@ -105,8 +125,6 @@ class MukurtuDraftsBehaviorTest extends KernelTestBase {
    * Draft status persists through save and reload.
    */
   public function testDraftStatusPersistsAfterSave(): void {
-    $this->installSchema('system', 'sequences');
-
     $entity = TestDraftEntity::create(['name' => 'persistTest']);
     $entity->setDraft();
     $entity->save();
@@ -119,8 +137,6 @@ class MukurtuDraftsBehaviorTest extends KernelTestBase {
    * Non-draft status also persists correctly through save and reload.
    */
   public function testNonDraftStatusPersistsAfterSave(): void {
-    $this->installSchema('system', 'sequences');
-
     $entity = TestDraftEntity::create(['name' => 'nonDraftPersist']);
     $entity->unsetDraft();
     $entity->save();
@@ -141,6 +157,7 @@ class MukurtuDraftsBehaviorTest extends KernelTestBase {
     $entity->setDraft();
 
     $build = [];
+    // Required by the hook signature but never called — stub satisfies type hint only.
     $display = $this->createMock(EntityViewDisplayInterface::class);
     mukurtu_drafts_entity_view($build, $entity, $display, 'full');
 
@@ -156,6 +173,7 @@ class MukurtuDraftsBehaviorTest extends KernelTestBase {
     $entity->unsetDraft();
 
     $build = [];
+    // Required by the hook signature but never called — stub satisfies type hint only.
     $display = $this->createMock(EntityViewDisplayInterface::class);
     mukurtu_drafts_entity_view($build, $entity, $display, 'full');
 
