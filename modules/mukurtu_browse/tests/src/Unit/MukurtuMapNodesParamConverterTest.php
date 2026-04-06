@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\mukurtu_browse\ParamConverter\MukurtuMapNodesParamConverter;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -18,22 +19,19 @@ use Symfony\Component\Routing\Route;
 #[\PHPUnit\Framework\Attributes\Group('mukurtu_browse')]
 class MukurtuMapNodesParamConverterTest extends TestCase {
 
-  private EntityTypeManagerInterface $entityTypeManager;
-  private EntityStorageInterface $nodeStorage;
+  use ProphecyTrait;
+
   private MukurtuMapNodesParamConverter $converter;
 
   protected function setUp(): void {
     parent::setUp();
 
-    $this->nodeStorage = $this->createMock(EntityStorageInterface::class);
+    $nodeStorage = $this->prophesize(EntityStorageInterface::class);
 
-    $this->entityTypeManager = $this->createMock(EntityTypeManagerInterface::class);
-    $this->entityTypeManager
-      ->method('getStorage')
-      ->with('node')
-      ->willReturn($this->nodeStorage);
+    $entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+    $entityTypeManager->getStorage('node')->willReturn($nodeStorage->reveal());
 
-    $this->converter = new MukurtuMapNodesParamConverter($this->entityTypeManager);
+    $this->converter = new MukurtuMapNodesParamConverter($entityTypeManager->reveal());
   }
 
   // ---------------------------------------------------------------------------
@@ -45,13 +43,15 @@ class MukurtuMapNodesParamConverterTest extends TestCase {
    */
   public function testConvert_singleId(): void {
     $node = new \stdClass();
-    $this->nodeStorage
-      ->expects($this->once())
-      ->method('loadMultiple')
-      ->with(['42'])
-      ->willReturn([42 => $node]);
 
-    $result = $this->converter->convert('42', [], 'nodes', []);
+    $nodeStorage = $this->prophesize(EntityStorageInterface::class);
+    $nodeStorage->loadMultiple(['42'])->shouldBeCalledOnce()->willReturn([42 => $node]);
+
+    $entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+    $entityTypeManager->getStorage('node')->willReturn($nodeStorage->reveal());
+
+    $converter = new MukurtuMapNodesParamConverter($entityTypeManager->reveal());
+    $result = $converter->convert('42', [], 'nodes', []);
     $this->assertSame([42 => $node], $result);
   }
 
@@ -59,13 +59,14 @@ class MukurtuMapNodesParamConverterTest extends TestCase {
    * A comma-separated list is split and forwarded to loadMultiple.
    */
   public function testConvert_multipleIds(): void {
-    $this->nodeStorage
-      ->expects($this->once())
-      ->method('loadMultiple')
-      ->with(['1', '2', '3'])
-      ->willReturn([]);
+    $nodeStorage = $this->prophesize(EntityStorageInterface::class);
+    $nodeStorage->loadMultiple(['1', '2', '3'])->shouldBeCalledOnce()->willReturn([]);
 
-    $this->converter->convert('1,2,3', [], 'nodes', []);
+    $entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+    $entityTypeManager->getStorage('node')->willReturn($nodeStorage->reveal());
+
+    $converter = new MukurtuMapNodesParamConverter($entityTypeManager->reveal());
+    $converter->convert('1,2,3', [], 'nodes', []);
   }
 
   /**
@@ -73,9 +74,15 @@ class MukurtuMapNodesParamConverterTest extends TestCase {
    */
   public function testConvert_returnsStorageResult(): void {
     $nodes = [7 => new \stdClass(), 8 => new \stdClass()];
-    $this->nodeStorage->method('loadMultiple')->willReturn($nodes);
 
-    $result = $this->converter->convert('7,8', [], 'nodes', []);
+    $nodeStorage = $this->prophesize(EntityStorageInterface::class);
+    $nodeStorage->loadMultiple(['7', '8'])->willReturn($nodes);
+
+    $entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+    $entityTypeManager->getStorage('node')->willReturn($nodeStorage->reveal());
+
+    $converter = new MukurtuMapNodesParamConverter($entityTypeManager->reveal());
+    $result = $converter->convert('7,8', [], 'nodes', []);
     $this->assertSame($nodes, $result);
   }
 
@@ -87,7 +94,7 @@ class MukurtuMapNodesParamConverterTest extends TestCase {
    * Returns TRUE when the definition type is exactly 'nodes'.
    */
   public function testApplies_trueForNodesType(): void {
-    $route = $this->createMock(Route::class);
+    $route = $this->prophesize(Route::class)->reveal();
     $this->assertTrue($this->converter->applies(['type' => 'nodes'], 'nodes', $route));
   }
 
@@ -95,7 +102,7 @@ class MukurtuMapNodesParamConverterTest extends TestCase {
    * Returns FALSE for a different type string.
    */
   public function testApplies_falseForOtherType(): void {
-    $route = $this->createMock(Route::class);
+    $route = $this->prophesize(Route::class)->reveal();
     $this->assertFalse($this->converter->applies(['type' => 'node'], 'nodes', $route));
   }
 
@@ -103,7 +110,7 @@ class MukurtuMapNodesParamConverterTest extends TestCase {
    * Returns FALSE when the 'type' key is absent from the definition.
    */
   public function testApplies_falseWhenTypeKeyMissing(): void {
-    $route = $this->createMock(Route::class);
+    $route = $this->prophesize(Route::class)->reveal();
     $this->assertFalse($this->converter->applies([], 'nodes', $route));
   }
 
@@ -111,7 +118,7 @@ class MukurtuMapNodesParamConverterTest extends TestCase {
    * Returns FALSE when the 'type' key is present but empty.
    */
   public function testApplies_falseForEmptyType(): void {
-    $route = $this->createMock(Route::class);
+    $route = $this->prophesize(Route::class)->reveal();
     $this->assertFalse($this->converter->applies(['type' => ''], 'nodes', $route));
   }
 
