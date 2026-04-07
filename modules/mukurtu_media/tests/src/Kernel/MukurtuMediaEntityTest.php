@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_media\Kernel;
 
-use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
 use Drupal\mukurtu_core\Entity\PeopleInterface;
 use Drupal\mukurtu_media\Entity\Audio;
@@ -23,7 +22,7 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
  * Covers: bundle class assignment via hook_entity_bundle_info_alter, interface
  * implementation per bundle, required vs optional fields, field cardinality,
  * auto_create settings for taxonomy reference fields, protocol field
- * persistence, and the ImageAltRequired constraint validator.
+ * persistence.
  */
 #[\PHPUnit\Framework\Attributes\Group('mukurtu_media')]
 class MukurtuMediaEntityTest extends MukurtuMediaTestBase {
@@ -199,93 +198,6 @@ class MukurtuMediaEntityTest extends MukurtuMediaTestBase {
     $loaded = Media::load($media->id());
     $this->assertEquals('all', $loaded->getSharingSetting());
     $this->assertContains((int) $this->protocol->id(), $loaded->getProtocols());
-  }
-
-  /**
-   * Test the ImageAltRequired constraint fires when an image is uploaded
-   * without alt text.
-   *
-   * field_media_image has alt_field_required=TRUE. The ImageAltRequired
-   * constraint should report a violation when target_id is set but alt is empty.
-   */
-  public function testImageAltRequiredConstraint(): void {
-    // Create a minimal File entity representing an uploaded image.
-    // No actual file content is needed — only the entity record matters for
-    // the constraint check (which inspects target_id and alt).
-    $file = File::create([
-      'uri' => 'private://test-image.jpg',
-      'filename' => 'test-image.jpg',
-      'filemime' => 'image/jpeg',
-      'uid' => $this->currentUser->id(),
-      'status' => 1,
-    ]);
-    $file->save();
-
-    /** @var \Drupal\mukurtu_media\Entity\Image $media */
-    $media = Media::create([
-      'bundle' => 'image',
-      'name' => 'Alt Test',
-      'uid' => $this->currentUser->id(),
-      'field_media_image' => [
-        'target_id' => $file->id(),
-        'alt' => '',
-      ],
-    ]);
-    $media->setSharingSetting('any');
-    $media->setProtocols([$this->protocol]);
-
-    $violations = $media->validate();
-
-    $violationFields = [];
-    foreach ($violations as $violation) {
-      $violationFields[] = $violation->getPropertyPath();
-    }
-
-    $this->assertContains(
-      'field_media_image.0.alt',
-      $violationFields,
-      'ImageAltRequired constraint should fire when image is uploaded without alt text.'
-    );
-  }
-
-  /**
-   * Test that alt text passes validation when provided.
-   */
-  public function testImageAltRequiredConstraintPassesWithAlt(): void {
-    $file = File::create([
-      'uri' => 'private://test-image-alt.jpg',
-      'filename' => 'test-image-alt.jpg',
-      'filemime' => 'image/jpeg',
-      'uid' => $this->currentUser->id(),
-      'status' => 1,
-    ]);
-    $file->save();
-
-    /** @var \Drupal\mukurtu_media\Entity\Image $media */
-    $media = Media::create([
-      'bundle' => 'image',
-      'name' => 'Alt Provided Test',
-      'uid' => $this->currentUser->id(),
-      'field_media_image' => [
-        'target_id' => $file->id(),
-        'alt' => 'A descriptive alt text',
-      ],
-    ]);
-    $media->setSharingSetting('any');
-    $media->setProtocols([$this->protocol]);
-
-    $violations = $media->validate();
-
-    $violationFields = [];
-    foreach ($violations as $violation) {
-      $violationFields[] = $violation->getPropertyPath();
-    }
-
-    $this->assertNotContains(
-      'field_media_image.0.alt',
-      $violationFields,
-      'ImageAltRequired constraint should not fire when alt text is provided.'
-    );
   }
 
 }

@@ -104,10 +104,6 @@ Collections are folders that can be nested inside each other. These tests confir
 - A user with no protocol membership cannot see media under a strict protocol.
 - A protocol member can see that same media.
 
-**Image alt text**
-- Uploading an image without alt text triggers a validation error.
-- Providing alt text passes validation.
-
 ---
 
 ## Dictionary

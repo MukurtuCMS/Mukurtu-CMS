@@ -116,7 +116,7 @@ Adds: node, node_access, geofield, content_moderation, mukurtu_collection, mukur
 
 **Design decision:** All three bundles (`audio`, `image`, `document`) use the `file` media source plugin backed by a shared `field_media_test_source` field. `MediaType::save()` would auto-create a source field that collides with Mukurtu's `hook_entity_field_storage_info`-registered bundle fields. The test source field is entirely separate; the real Mukurtu bundle fields and bundle classes remain active.
 
-**`MukurtuMediaEntityTest`** (11 tests): bundle class + interface checks per bundle (`Document` additionally implements `MukurtuThumbnailGenerationInterface`); required fields per bundle; cardinality; `auto_create=TRUE` on all taxonomy reference fields; protocol round-trip; `ImageAltRequired` constraint (fires without alt, passes with alt).
+**`MukurtuMediaEntityTest`** (9 tests): bundle class + interface checks per bundle (`Document` additionally implements `MukurtuThumbnailGenerationInterface`); required fields per bundle; cardinality; `auto_create=TRUE` on all taxonomy reference fields; protocol round-trip.
 
 **`MukurtuMediaTaxonomyTest`** (8 tests): tag auto-create; multiple tags in order; tag reuse across bundles; multiple contributors; `field_people` on audio and document; protocol access smoke test; `field_identifier` persistence across bundle types.
 
