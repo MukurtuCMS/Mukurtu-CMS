@@ -1,7 +1,7 @@
 # Mukurtu CMS — Test Infrastructure & Coverage
 **Repo:** https://github.com/MukurtuCMS/Mukurtu-CMS
 **Plain-language summary:** [coverage-plain-language.md](coverage-plain-language.md)
-**Last updated:** 2026-03-27
+**Last updated:** 2026-04-07
 
 ---
 
@@ -88,7 +88,9 @@ PHPUnit\Framework\TestCase (no Drupal bootstrap)
 ### `mukurtu_protocol`
 **Existing tests:** `AccessByProtocolTest`, `CommunityEntityAccessTest`, `ProtocolEntityAccessTest`, `CollectionEntityTest` (access), `PersonalCollectionEntityAccessTest`
 
-**Bug fixed (2026-03-19):** `MukurtuProtocolNodeAccessControlHandler` — `all`-mode content incorrectly granted edit/delete when user held a qualifying role in any one protocol instead of all of them. The loop was restructured to fail fast when any protocol in the set doesn't satisfy the role requirement. This is the only production code change across all sessions.
+** Intended Protocol behavior confirmed (2026-03-19):** `MukurtuProtocolNodeAccessControlHandler` — `all`-mode content grants edit/delete when user holds a qualifying role in any one protocol instead of all of them (this allows for a user with a edit/delete role on protocol A but only a view role on protocol B still edit the content) A protocol scenario where a user must have edit/delete on protocol A and B -- and potentially C,D,E  is too restricitve in practice. 
+
+**`CommunityEntityAccessTest` — incomplete tests:** `testGetProtocols()` is now implemented and passing. `testGetCommunityType()` and `testSetCommunityType()` remain `markTestIncomplete` — `Community::getCommunityType()` uses `->value` on an entity reference field (always returns NULL; should be `->target_id`). Fix that production bug in a separate branch before implementing these two tests. The remaining 8 incomplete methods (`testGetParentCommunity`, `testGetChildCommunities`, `testIsParentCommunity`, `testIsChildCommunity`, image methods) are deferred as described in Design Notes.
 
 ---
 
@@ -192,9 +194,9 @@ Community records are regular nodes with a `field_mukurtu_original_record` entit
 **Test base:** `MukurtuImportTestBase` (extends Drupal core's `MigrateTestBase` — not `MukurtuKernelTestBase`)
 The import module exercises the full Drupal migrate pipeline, so it uses Drupal's own migration test base rather than the shared Mukurtu base. `MukurtuImportTestBase` layers OG/community/protocol setup on top, and provides `createCsvFile()` (writes a temp CSV and registers it as a managed file) and `importCsvFile()` (builds a `MukurtuImportStrategy`, compiles a migration definition, and runs it via `ImportBatchExecutable`).
 
-**Production fix — `EnsureHttps.php`:** `ensure_https` was a migrate process plugin removed from `migrate_plus` 6.x (Drupal 10). Several migration definitions still reference it at runtime via `Migration.php:400`. `EnsureHttps` is re-implemented locally in `mukurtu_import` as a pass-through plugin (returns the value unchanged) so any migration YAML referencing `ensure_https` continues to work without modification. The pass-through behavior is intentional: the test field's allowed values use `https://` already, so no conversion is needed.
+**`ensure_https` plugin fix:** The `ensure_https` migrate process plugin was previously stubbed as a no-op in `mukurtu_import/src/Plugin/migrate/process/EnsureHttps.php`. That stub was removed after discovering the real implementation lives in `mukurtu_migrate`. The fix was adding `mukurtu_migrate` to `MukurtuImportTestBase::$modules` so the correct plugin is discovered. Dual registration of the same plugin ID risked unpredictable plugin resolution at runtime.
 
-**`ImportListStringTest`** (3 tests): A `list_string` field is created with Creative Commons license URLs as allowed keys. All three tests were previously failing with `PluginNotFoundException: The "ensure_https" plugin does not exist` — fixed by the `EnsureHttps.php` stub above. Test coverage: single import matching by exact key URL; single import matching by human-readable label (the import pipeline looks up the correct key); multiple values in a single cell as a semicolon-delimited mix of keys and labels.
+**`ImportListStringTest`** (3 tests): A `list_string` field is created with Creative Commons license URLs as allowed keys. All three tests were previously failing with `PluginNotFoundException: The "ensure_https" plugin does not exist` — fixed by adding `mukurtu_migrate` to the test base modules. Test coverage: single import matching by exact key URL; single import matching by human-readable label (the import pipeline looks up the correct key); multiple values in a single cell as a semicolon-delimited mix of keys and labels.
 
 ---
 
@@ -216,7 +218,7 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 
 | File | Change | Date | Commit(s) |
 |------|--------|------|-----------|
-| `modules/mukurtu_protocol/src/MukurtuProtocolNodeAccessControlHandler.php` | Bug fix — `all`-mode access | 2026-03-19 | [`4f2ae15b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/4f2ae15b) [`d50d5491`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d50d5491) [`3dc3889b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3dc3889b) |
+| `modules/mukurtu_protocol/src/MukurtuProtocolNodeAccessControlHandler.php` | Investigated `all`-mode access — behavior confirmed intentional (see Design Notes) | 2026-03-19 | [`4f2ae15b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/4f2ae15b) [`d50d5491`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d50d5491) [`3dc3889b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3dc3889b) |
 | `modules/mukurtu_protocol/tests/src/Kernel/Access/ProtocolEntityAccessTest.php` | Test assertion alignment | 2026-03-19 | [`3dc3889b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3dc3889b) |
 | `modules/mukurtu_core/tests/src/Kernel/MukurtuKernelTestBase.php` | **Created** — shared abstract base | 2026-03-19 | [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) |
 | `modules/mukurtu_local_contexts/tests/src/Kernel/LocalContextsTestBase.php` | Created + refactored to extend MukurtuKernelTestBase | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) |
@@ -244,15 +246,28 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 | `modules/mukurtu_browse/tests/src/Unit/MukurtuMapNodesParamConverterTest.php` | **Created** (7 tests) | 2026-03-24 | [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
 | `modules/mukurtu_browse/tests/src/Unit/MukurtuBoundingBoxTest.php` | **Created** (10 tests) | 2026-03-24 | [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
 | `phpunit.xml` | Added kernel + unit testsuite directories; PHPUnit 10 schema + @group fixes | 2026-03-19 / 2026-03-24 | [`12b71fca`](https://github.com/alexmerrill/Mukurtu-CMS/commit/12b71fca) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`840fb318`](https://github.com/alexmerrill/Mukurtu-CMS/commit/840fb318) [`2302d328`](https://github.com/alexmerrill/Mukurtu-CMS/commit/2302d328) [`d2061340`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d2061340) [`9618bddb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/9618bddb) [`d085dfa6`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d085dfa6) [`e5ea5e23`](https://github.com/alexmerrill/Mukurtu-CMS/commit/e5ea5e23) [`db1d016f`](https://github.com/alexmerrill/Mukurtu-CMS/commit/db1d016f) |
-| `modules/mukurtu_import/src/Plugin/migrate/process/EnsureHttps.php` | **Created** — pass-through `ensure_https` process plugin stub | 2026-03-27 | [`984026fb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/984026fb) |
+| `modules/mukurtu_import/src/Plugin/migrate/process/EnsureHttps.php` | **Deleted** — no-op stub removed; real plugin in `mukurtu_migrate` used instead | 2026-03-27 | [`984026fb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/984026fb) |
+| `modules/mukurtu_import/tests/src/Kernel/MukurtuImportTestBase.php` | Added `mukurtu_migrate` to `$modules` so `ensure_https` plugin is discovered | 2026-03-27 | [`984026fb`](https://github.com/alexmerrill/Mukurtu-CMS/commit/984026fb) |
+| `modules/mukurtu_browse/tests/src/Unit/MukurtuMapNodesParamConverterTest.php` | Refactored to use Prophecy (`prophesize()/reveal()`, `shouldBeCalledOnce()`) | 2026-03-27 | — |
+| `docs/testing/coverage.md` | Added mocking strategy section; EnsureHttps correction | 2026-03-27 | — |
+| `docs/testing/coverage-plain-language.md` | Added "How the tests are structured" section | 2026-03-27 | — |
+| `modules/mukurtu_protocol/tests/src/Kernel/Access/AccessByProtocolTest.php` | Replace `assert()` with `assertInstanceOf()`; fix copy-paste bug (lines 319–320); `assertEquals(TRUE/FALSE)` → `assertTrue`/`assertFalse`; fix `declare` spacing | 2026-04-07 | — |
+| `modules/mukurtu_protocol/tests/src/Kernel/Access/CommunityEntityAccessTest.php` | 11 TODO methods → `markTestIncomplete()`; `testGetProtocols()` implemented; `assertEquals(TRUE/FALSE)` → `assertTrue`/`assertFalse`; fix `declare` spacing; add `Protocol` use statement | 2026-04-07 | — |
+| `modules/mukurtu_protocol/tests/src/Kernel/Access/ProtocolEntityAccessTest.php` | Remove duplicate `installEntitySchema('user')` and `///` comment | 2026-04-07 | — |
+| `modules/mukurtu_collection/tests/src/Kernel/Access/CollectionEntityTest.php` | Remove commented-out debug lines | 2026-04-07 | — |
+| `modules/mukurtu_collection/tests/src/Kernel/Access/PersonalCollectionEntityAccessTest.php` | `assertEquals(TRUE/FALSE)` → `assertTrue`/`assertFalse` | 2026-04-07 | — |
+| `modules/mukurtu_drafts/tests/src/Kernel/MukurtuDraftsEntityTest.php` | `assertEquals(TRUE, ...)` → `assertTrue(...)` throughout | 2026-04-07 | — |
+| `modules/mukurtu_import/tests/src/Kernel/ImportBooleanTest.php` | `assertEquals(TRUE/FALSE)` → `assertTrue`/`assertFalse` | 2026-04-07 | — |
+| `modules/mukurtu_digital_heritage/tests/src/Kernel/DigitalHeritageTaxonomyTest.php` | Add `assertNotEmpty` guard before `[0]` array access | 2026-04-07 | — |
+| `modules/mukurtu_media/tests/src/Kernel/MukurtuMediaTaxonomyTest.php` | Add `assertNotEmpty` guard before `[0]` array access | 2026-04-07 | — |
 
-**Total new tests added: ~184** across 20 test classes and 10 modules. Additionally, 3 pre-existing `ImportListStringTest` tests in `mukurtu_import` were unblocked by the `EnsureHttps.php` production fix (those tests exist in the repo but were previously failing with `PluginNotFoundException`).
+**Total new tests added: ~184** across 20 test classes and 10 modules. Additionally, 3 pre-existing `ImportListStringTest` tests in `mukurtu_import` were unblocked by adding `mukurtu_migrate` to `MukurtuImportTestBase::$modules`. `testGetProtocols()` in `CommunityEntityAccessTest` moved from incomplete to passing in the code review commit.
 
 ---
 
 ## Design Notes & Open Questions
 
-1. **`MukurtuProtocolNodeAccessControlHandler.php`** — the only production code change. The `any`/`all` branches are independent; verify that the `any` mode path is unaffected by the restructuring.
+1. **`MukurtuProtocolNodeAccessControlHandler.php`** — investigated but **not changed**. The `all`-mode path grants edit/delete when a user holds a qualifying role in any one of the content's protocols rather than all of them. This is intentional: requiring edit/delete across every protocol in a multi-protocol set is too restrictive in practice (a user with edit on protocol A but only view on protocol B would be blocked from editing). The `any`/`all` branches remain as written.
 
 2. **`MukurtuMediaTestBase` — shared source field workaround** — `field_media_test_source` is a testing-only workaround. If Mukurtu ever moves media bundle fields from `hook_entity_field_storage_info` to config YAML, this becomes unnecessary.
 
@@ -263,3 +278,5 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 5. **`DictionaryWordListTest::testAddSameWordTwiceResultsInDuplicate`** — `add()` does not deduplicate; the test asserts count=2 and documents that deduplication is the UI's responsibility. The docblock explicitly states that if deduplication is ever moved into the API, the test should assert count=1 instead. Confirm the intended boundary with the team.
 
 6. **`mukurtu_browse` unit tests** — complement Playwright end-to-end coverage. The unit tests lock down bounding-box parsing math and CSV-to-entity delegation, which are the pieces Playwright can't easily reach.
+
+7. **`Community::getCommunityType()` production bug** — returns `->value` on an entity reference field, which always returns NULL. Should be `->target_id`. Discovered while implementing `testGetCommunityType()`. Fix in a separate branch; the two community type tests are marked incomplete pending that fix.

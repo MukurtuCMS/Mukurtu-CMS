@@ -119,14 +119,14 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     // Non-owner.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
-    $this->assertEquals(FALSE, $this->personalCollection->access('view', $user));
-    $this->assertEquals(FALSE, $this->personalCollection->access('update', $user));
-    $this->assertEquals(FALSE, $this->personalCollection->access('delete', $user));
+    $this->assertFalse($this->personalCollection->access('view', $user));
+    $this->assertFalse($this->personalCollection->access('update', $user));
+    $this->assertFalse($this->personalCollection->access('delete', $user));
 
     // Owner.
-    $this->assertEquals(TRUE, $this->personalCollection->access('view', $this->owner));
-    $this->assertEquals(TRUE, $this->personalCollection->access('update', $this->owner));
-    $this->assertEquals(TRUE, $this->personalCollection->access('delete', $this->owner));
+    $this->assertTrue($this->personalCollection->access('view', $this->owner));
+    $this->assertTrue($this->personalCollection->access('update', $this->owner));
+    $this->assertTrue($this->personalCollection->access('delete', $this->owner));
   }
 
   /**

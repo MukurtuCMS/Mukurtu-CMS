@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_import\Kernel;
 
@@ -10,6 +10,7 @@ use Drupal\migrate\Plugin\MigrationInterface;
 /**
  * Test the import of boolean fields.
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_import')]
 class ImportBooleanTest extends MukurtuImportTestBase {
   protected $node;
 

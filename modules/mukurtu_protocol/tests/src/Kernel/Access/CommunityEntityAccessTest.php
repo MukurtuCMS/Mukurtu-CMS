@@ -8,6 +8,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
 use Drupal\mukurtu_protocol\Entity\Community;
+use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -120,7 +121,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test access operations for a "Community only" community.
    */
-  public function testCommunityOnlyCommunity() {
+  public function testCommunityOnlyCommunity(): void {
     $this->community->setSharingSetting('community-only');
     $this->community->save();
 
@@ -151,7 +152,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test access operations for a public community.
    */
-  public function testPublicCommunity() {
+  public function testPublicCommunity(): void {
     $this->community->setSharingSetting('public');
     $this->community->save();
 
@@ -182,7 +183,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test getName().
    */
-  public function testGetName()
+  public function testGetName(): void
   {
     $name = $this->randomString();
     $testCommunity = Community::create([
@@ -196,7 +197,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test setName().
    */
-  public function testSetName()
+  public function testSetName(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -211,7 +212,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test getDescription().
    */
-  public function testGetDescription()
+  public function testGetDescription(): void
   {
     $description = $this->randomString();
     $testCommunity = Community::create([
@@ -226,7 +227,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test setDescription().
    */
-  public function testSetDescription()
+  public function testSetDescription(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -240,22 +241,29 @@ class CommunityEntityAccessTest extends KernelTestBase {
 
   /**
    * Test getCommunityType().
+   *
+   * @todo Community::getCommunityType() uses ->value on an entity reference
+   *   field, which always returns NULL. It should use ->target_id. Fix in a
+   *   separate branch before implementing this test.
    */
   public function testGetCommunityType(): void {
-    $this->markTestIncomplete('TODO');
+    $this->markTestIncomplete('getCommunityType() returns NULL due to ->value on entity reference field; requires production fix first.');
   }
 
   /**
    * Test setCommunityType().
+   *
+   * @todo Blocked by the same getCommunityType() bug — cannot assert the
+   *   round-trip until getCommunityType() is fixed to use ->target_id.
    */
   public function testSetCommunityType(): void {
-    $this->markTestIncomplete('TODO');
+    $this->markTestIncomplete('Blocked by getCommunityType() bug; requires production fix first.');
   }
 
   /**
    * Test getSharingSetting().
    */
-  public function testGetSharingSetting()
+  public function testGetSharingSetting(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -269,7 +277,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test setSharingSetting().
    */
-  public function testSetSharingSetting()
+  public function testSetSharingSetting(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -284,7 +292,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test getCreatedTime().
    */
-  public function testGetCreatedTime()
+  public function testGetCreatedTime(): void
   {
     $createdTime = 1677537655;
     $testCommunity = Community::create([
@@ -300,7 +308,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test setCreatedTime().
    */
-  public function testSetCreatedTime()
+  public function testSetCreatedTime(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -373,7 +381,19 @@ class CommunityEntityAccessTest extends KernelTestBase {
    * Test getProtocols().
    */
   public function testGetProtocols(): void {
-    $this->markTestIncomplete('TODO');
+    $this->community->setSharingSetting('public');
+    $this->community->save();
+
+    $protocol = Protocol::create([
+      'name' => 'Test Protocol',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $protocol->save();
+
+    $protocols = $this->community->getProtocols();
+    $this->assertCount(1, $protocols);
+    $this->assertArrayHasKey($protocol->id(), $protocols);
   }
 
 }
