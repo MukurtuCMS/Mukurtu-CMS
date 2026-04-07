@@ -77,8 +77,7 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE)
-      ->addPropertyConstraints('alt', ['ImageAltRequired' => []]);
+      ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
