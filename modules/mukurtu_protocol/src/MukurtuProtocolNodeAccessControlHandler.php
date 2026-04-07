@@ -46,35 +46,35 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
 
       case 'update':
       case 'delete':
+        // Ask each member OG group about specific permissions.
         $ogAccessService = \Drupal::service('og.access');
+        $protocols = $entity->getMemberProtocols($account);
 
-        if ($entity->getSharingSetting() == 'all') {
-          // For 'all', every protocol must individually grant edit access.
-          // We use andIf starting from allowed; neutral (no edit permission) is
-          // treated as forbidden since every single protocol must grant access.
-          // Cache metadata from each OG result is preserved via addCacheableDependency.
-          $protocolEntities = $entity->getProtocolEntities();
-          if (empty($protocolEntities)) {
-            // Broken protocol references — deny conservatively.
-            return AccessResult::forbidden();
-          }
-          $result = AccessResult::allowed();
-          foreach ($protocolEntities as $protocol) {
-            $protocolResult = $ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account);
-            if ($protocolResult->isNeutral()) {
-              $protocolResult = AccessResult::forbidden()->addCacheableDependency($protocolResult);
-            }
-            $result = $result->andIf($protocolResult);
-          }
-        }
-        else {
-          // For 'any', one protocol granting edit access is sufficient.
-          // getMemberProtocols() ensures the user is a member of at least one
-          // protocol (guaranteed by isProtocolSetMember() above).
-          $result = AccessResult::neutral();
-          foreach ($entity->getMemberProtocols($account) as $protocol) {
-            $result = $result->orIf($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
-          }
+        // By this point, we have already taken the sharing setting into account
+        // with the call to isProtocolSetMember() above, which guarantees that
+        // if the sharing setting is 'any', the user is a member of at least one
+        // of the protocols, and if it is 'all', the user is a member of all the
+        // protocols.
+
+        // Given this, the access result for each protocol must be combined
+        // using orIf. Previously, orIf was only used for entities under the
+        // 'any' sharing setting; andIf was used for 'all'. Using andIf for
+        // 'all' was denying legitimate access in the case where a user has a
+        // mix of highly privileged roles and lesser privileged roles, i.e., if
+        // the user was both a protocol steward of one protocol and a protocol
+        // member of another and both these protocols were applied to an entity
+        // under the 'all' setting. The access check on the protocol where the
+        // user was merely a protocol member returned neutral(), which, when
+        // andIfed with the protocol steward access of allowed(), returned
+        // neutral(). We don't grant access if the result is only neutral(), so
+        // access was denied in this case.
+
+        // The correct thing to do is to consider the user's most privileged
+        // permissions for access, hence the change to using orIf for 'all'.
+        $result = AccessResult::neutral();
+
+        foreach ($protocols as $protocol) {
+          $result = $result->orIf($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
         }
 
         // Protocols are very opinionated, neutral is not good enough for
