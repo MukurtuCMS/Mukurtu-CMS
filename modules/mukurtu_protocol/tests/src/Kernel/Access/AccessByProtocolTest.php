@@ -829,8 +829,8 @@ class AccessByProtocolTest extends KernelTestBase {
         ],
         'expected_access' => [
           'view' => TRUE,
-          'update' => FALSE,
-          'delete' => FALSE,
+          'update' => TRUE,
+          'delete' => TRUE,
         ],
       ],
       [
@@ -841,8 +841,8 @@ class AccessByProtocolTest extends KernelTestBase {
         ],
         'expected_access' => [
           'view' => TRUE,
-          'update' => FALSE,
-          'delete' => FALSE,
+          'update' => TRUE,
+          'delete' => TRUE,
         ],
       ],
       [
@@ -853,8 +853,8 @@ class AccessByProtocolTest extends KernelTestBase {
         ],
         'expected_access' => [
           'view' => TRUE,
-          'update' => FALSE,
-          'delete' => FALSE,
+          'update' => TRUE,
+          'delete' => TRUE,
         ],
       ],
       [
@@ -901,8 +901,8 @@ class AccessByProtocolTest extends KernelTestBase {
         ],
         'expected_access' => [
           'view' => TRUE,
-          'update' => FALSE,
-          'delete' => FALSE,
+          'update' => TRUE,
+          'delete' => TRUE,
         ],
       ],
       [
@@ -937,8 +937,8 @@ class AccessByProtocolTest extends KernelTestBase {
         ],
         'expected_access' => [
           'view' => TRUE,
-          'update' => FALSE,
-          'delete' => FALSE,
+          'update' => TRUE,
+          'delete' => TRUE,
         ],
       ],
       [
@@ -949,8 +949,8 @@ class AccessByProtocolTest extends KernelTestBase {
         ],
         'expected_access' => [
           'view' => TRUE,
-          'update' => FALSE,
-          'delete' => FALSE,
+          'update' => TRUE,
+          'delete' => TRUE,
         ],
       ],
       [
@@ -961,8 +961,8 @@ class AccessByProtocolTest extends KernelTestBase {
         ],
         'expected_access' => [
           'view' => TRUE,
-          'update' => FALSE,
-          'delete' => FALSE,
+          'update' => TRUE,
+          'delete' => TRUE,
         ],
       ],
       [

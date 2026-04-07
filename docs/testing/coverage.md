@@ -88,7 +88,7 @@ PHPUnit\Framework\TestCase (no Drupal bootstrap)
 ### `mukurtu_protocol`
 **Existing tests:** `AccessByProtocolTest`, `CommunityEntityAccessTest`, `ProtocolEntityAccessTest`, `CollectionEntityTest` (access), `PersonalCollectionEntityAccessTest`
 
-** Intended Protocol behavior confirmed (2026-03-19):** `MukurtuProtocolNodeAccessControlHandler` — `all`-mode content grants edit/delete when user holds a qualifying role in any one protocol instead of all of them (this allows for a user with a edit/delete role on protocol A but only a view role on protocol B still edit the content) A protocol scenario where a user must have edit/delete on protocol A and B -- and potentially C,D,E  is too restricitve in practice. 
+**Protocol access behavior (original/current):** For `view`, the `all` sharing setting requires the user to satisfy all protocols. For `update`/`delete`, a qualifying role (`contributor` or `protocol_steward`) in **any one** member protocol is sufficient — requiring a qualifying role in every protocol was deemed too restrictive in practice (a user with an edit role in protocol A and only a view role in protocol B should still be able to edit). A previous commit introduced `andIf` logic requiring edit roles in all protocols; this was reverted. The `AccessByProtocolTest` scenarios reflect the correct relaxed behavior for edit/delete.
 
 **`CommunityEntityAccessTest` — incomplete tests:** `testGetProtocols()` is now implemented and passing. `testGetCommunityType()` and `testSetCommunityType()` remain `markTestIncomplete` — `Community::getCommunityType()` uses `->value` on an entity reference field (always returns NULL; should be `->target_id`). Fix that production bug in a separate branch before implementing these two tests. The remaining 8 incomplete methods (`testGetParentCommunity`, `testGetChildCommunities`, `testIsParentCommunity`, `testIsChildCommunity`, image methods) are deferred as described in Design Notes.
 
@@ -218,7 +218,7 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 
 | File | Change | Date | Commit(s) |
 |------|--------|------|-----------|
-| `modules/mukurtu_protocol/src/MukurtuProtocolNodeAccessControlHandler.php` | Investigated `all`-mode access — behavior confirmed intentional (see Design Notes) | 2026-03-19 | [`4f2ae15b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/4f2ae15b) [`d50d5491`](https://github.com/alexmerrill/Mukurtu-CMS/commit/d50d5491) [`3dc3889b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3dc3889b) |
+| `modules/mukurtu_protocol/src/MukurtuProtocolNodeAccessControlHandler.php` | Restored to original `orIf` behavior from `origin/main` — prior commits in this branch introduced `andIf` (strict all-mode edit); reverted per intended design | 2026-04-07 | — |
 | `modules/mukurtu_protocol/tests/src/Kernel/Access/ProtocolEntityAccessTest.php` | Test assertion alignment | 2026-03-19 | [`3dc3889b`](https://github.com/alexmerrill/Mukurtu-CMS/commit/3dc3889b) |
 | `modules/mukurtu_core/tests/src/Kernel/MukurtuKernelTestBase.php` | **Created** — shared abstract base | 2026-03-19 | [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) |
 | `modules/mukurtu_local_contexts/tests/src/Kernel/LocalContextsTestBase.php` | Created + refactored to extend MukurtuKernelTestBase | 2026-03-19 | [`bc26108d`](https://github.com/alexmerrill/Mukurtu-CMS/commit/bc26108d) [`56921141`](https://github.com/alexmerrill/Mukurtu-CMS/commit/56921141) |
@@ -267,7 +267,7 @@ The `<listeners>` block in `phpunit.xml` is **intentionally kept**. `DrupalListe
 
 ## Design Notes & Open Questions
 
-1. **`MukurtuProtocolNodeAccessControlHandler.php`** — investigated but **not changed**. The `all`-mode path grants edit/delete when a user holds a qualifying role in any one of the content's protocols rather than all of them. This is intentional: requiring edit/delete across every protocol in a multi-protocol set is too restrictive in practice (a user with edit on protocol A but only view on protocol B would be blocked from editing). The `any`/`all` branches remain as written.
+1. **`MukurtuProtocolNodeAccessControlHandler.php`** — restored to original `origin/main` behavior. For `view`, `all` mode requires satisfying all protocols. For `update`/`delete`, a qualifying role in any one member protocol is sufficient regardless of `any`/`all` mode. An earlier branch commit introduced `andIf` logic requiring edit roles across all protocols; this was reverted after confirming it contradicted the intended design. The `AccessByProtocolTest` scenarios now correctly reflect the relaxed edit/delete behavior.
 
 2. **`MukurtuMediaTestBase` — shared source field workaround** — `field_media_test_source` is a testing-only workaround. If Mukurtu ever moves media bundle fields from `hook_entity_field_storage_info` to config YAML, this becomes unnecessary.
 
