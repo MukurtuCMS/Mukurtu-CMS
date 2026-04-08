@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_place module.
+ */
+
+/**
+ * Update the weight of field_coverage in the place record form display.
+ */
+function mukurtu_place_update_40001() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.place.default');
+  $config->set('content.field_coverage.weight', 10);
+  $config->save();
+  return t('Updated the weight of field_coverage in place record form display.');
+}
