@@ -68,6 +68,27 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
 function mukurtu_taxonomy_form_taxonomy_term_category_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
   // Change Category title field label.
   $form['name']['widget'][0]['value']['#title'] = t('Category name');
+  $form['name']['widget'][0]['value']['#description'] = t('Enter the name of this category. This is how it will appear throughout the site.');
+
+  // Add helper text to description field.
+  if (isset($form['description'])) {
+    $form['description']['widget'][0]['value']['#description'] = t('Provide a brief explanation of when and how to use this category for organizing content.');
+  }
+
+  // Add helper text to thumbnail image field.
+  if (isset($form['field_thumbnail_image'])) {
+    $form['field_thumbnail_image']['widget']['#description'] = t('Upload an image that represents this category. This image will appear in category browsing interfaces.');
+  }
+
+  // Add helper text to path field.
+  if (isset($form['path'])) {
+    $form['path']['widget'][0]['#description'] = t('Leave blank to auto-generate a URL path based on the category name. Optionally, enter a custom path.');
+  }
+
+  // Hide the relations field (see issue #204).
+  if (isset($form['relations'])) {
+    $form['relations']['#access'] = FALSE;
+  }
 }
 
 /**
