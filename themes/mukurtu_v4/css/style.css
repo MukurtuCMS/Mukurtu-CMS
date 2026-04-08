@@ -1928,6 +1928,13 @@ details.form-wrapper summary + div {
   color: var(--color-gray);
   margin-block: var(--v-space-4xxs) var(--v-space-6xs);
 }
+.local-contexts-projects .tk-labels,
+.local-contexts-projects .bc-labels,
+.local-contexts-projects .notices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--v-space-2xs);
+}
 .local-contexts-projects .tk-label,
 .local-contexts-projects .bc-label,
 .local-contexts-projects .notice {
@@ -1939,16 +1946,6 @@ details.form-wrapper summary + div {
       -ms-flex-align: start;
           align-items: flex-start;
   padding-block: var(--v-space-2xs);
-}
-.local-contexts-projects .tk-label + .tk-label, .local-contexts-projects .tk-label + .bc-label, .local-contexts-projects .tk-label + .notice,
-.local-contexts-projects .bc-label + .tk-label,
-.local-contexts-projects .bc-label + .bc-label,
-.local-contexts-projects .bc-label + .notice,
-.local-contexts-projects .notice + .tk-label,
-.local-contexts-projects .notice + .bc-label,
-.local-contexts-projects .notice + .notice {
-  -webkit-border-before: 1px solid var(--brand-light);
-          border-block-start: 1px solid var(--brand-light);
 }
 .local-contexts-projects .tk-label img,
 .local-contexts-projects .bc-label img,

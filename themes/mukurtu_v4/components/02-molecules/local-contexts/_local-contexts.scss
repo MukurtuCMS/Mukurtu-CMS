@@ -229,6 +229,14 @@
     margin-block: var(--v-space-4xxs) var(--v-space-6xs);
   }
 
+  .tk-labels,
+  .bc-labels,
+  .notices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--v-space-2xs);
+  }
+
   .tk-label,
   .bc-label,
   .notice {
@@ -236,12 +244,6 @@
     gap: var(--v-space-4xxs);
     align-items: flex-start;
     padding-block: var(--v-space-2xs);
-
-    & + .tk-label,
-    & + .bc-label,
-    & + .notice {
-      border-block-start: 1px solid var(--brand-light);
-    }
 
     img {
       block-size: 6rem;

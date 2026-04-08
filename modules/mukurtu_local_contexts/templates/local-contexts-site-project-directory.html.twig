@@ -36,7 +36,7 @@ NOTICE_UUID:notice_type => [
           {% for label in project.tk_labels %}
             <div class="tk-label">
               <img src="{{ label.svg_url ?? label.img_url }}" alt="{{ label.name }}">
-              <div class="label-content">
+              <div class="label-content grid-layout">
                 <h4 class="label__name">{{ label.name }}</h4>
                 <div class="text">{{ label.text }}</div>
               </div>
