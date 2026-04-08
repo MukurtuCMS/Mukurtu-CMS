@@ -8,7 +8,7 @@
 /**
  * Update the weight of field_coverage in the collection form display.
  */
-function mukurtu_collection_update_8001() {
+function mukurtu_collection_update_40001() {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
   $config->set('content.field_coverage.weight', 0);
   $config->save();
