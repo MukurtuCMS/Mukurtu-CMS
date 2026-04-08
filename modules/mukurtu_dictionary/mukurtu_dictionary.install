@@ -42,3 +42,23 @@ function mukurtu_dictionary_install() {
     $role->save();
   }
 }
+
+/**
+ * Update the weight of field_coverage in the dictionary word form display.
+ */
+function mukurtu_dictionary_update_40001() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  $config->set('content.field_coverage.weight', 1);
+  $config->save();
+  return t('Updated the weight of field_coverage in dictionary word form display.');
+}
+
+/**
+ * Update the weight of field_coverage in the word list form display.
+ */
+function mukurtu_dictionary_update_40002() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.word_list.default');
+  $config->set('content.field_coverage.weight',8);
+  $config->save();
+  return t('Updated the weight of field_coverage in word list form display.');
+}
