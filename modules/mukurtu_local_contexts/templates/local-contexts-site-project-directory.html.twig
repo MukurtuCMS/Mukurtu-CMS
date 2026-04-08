@@ -28,17 +28,17 @@ NOTICE_UUID:notice_type => [
     <div class="project">
       <h2 class="project__title"><a href={{ project.url }} title="{{'View the project details on the Local Contexts Hub'|t}}">{{ project.title }}</a></h2>
       {% if project.tk_labels %}
-        <div class="tk-labels">
         <h3 class="labels-type">{{ 'TK Labels'|t }}</h3>
-        {% for label in project.tk_labels %}
-          <div class="tk-label">
-            <img src="{{ label.svg_url ?? label.img_url }}" alt="{{ label.name }}">
-            <div class="label-content">
-              <h4 class="label__name">{{ label.name }}</h4>
-              <div class="text">{{ label.text }}</div>
+        <div class="tk-labels">
+          {% for label in project.tk_labels %}
+            <div class="tk-label">
+              <img src="{{ label.svg_url ?? label.img_url }}" alt="{{ label.name }}">
+              <div class="label-content">
+                <h4 class="label__name">{{ label.name }}</h4>
+                <div class="text">{{ label.text }}</div>
+              </div>
             </div>
-          </div>
-        {% endfor %}
+          {% endfor %}
         </div>
       {% endif %}
       {% if project.bc_labels %}
