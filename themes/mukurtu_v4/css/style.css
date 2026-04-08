@@ -302,6 +302,10 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
   padding-block: var(--v-separation);
 }
 
+.layout-content {
+  padding-inline: var(--layout-padding);
+}
+
 div.palette-demo {
   position: relative;
   display: -webkit-box;
