@@ -233,7 +233,7 @@
   .bc-labels,
   .notices {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--v-space-2xs);
   }
 

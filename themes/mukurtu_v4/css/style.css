@@ -302,10 +302,6 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
   padding-block: var(--v-separation);
 }
 
-.layout-content {
-  padding-inline: var(--layout-padding);
-}
-
 div.palette-demo {
   position: relative;
   display: -webkit-box;
@@ -1936,7 +1932,7 @@ details.form-wrapper summary + div {
 .local-contexts-projects .bc-labels,
 .local-contexts-projects .notices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--v-space-2xs);
 }
 .local-contexts-projects .tk-label,
