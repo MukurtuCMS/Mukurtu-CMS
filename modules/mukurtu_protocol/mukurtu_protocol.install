@@ -123,13 +123,13 @@ function mukurtu_protocol_install() {
 }
 
 /**
- * Update browse_by_community view to show only parent communities.
+ * Update browse_by_community view to show only non-child communities.
  */
 function mukurtu_protocol_update_40001() {
   $config_factory = \Drupal::configFactory();
   $config = $config_factory->getEditable('views.view.browse_by_community');
   
-  // Add filter to show only parent communities (those without a parent).
+  // Add filter to show only non-child communities (those without a parent).
   $filters = $config->get('display.default.display_options.filters');
   $filters['parent_community'] = [
     'id' => 'parent_community',
@@ -147,5 +147,8 @@ function mukurtu_protocol_update_40001() {
     ],
   ];
   $config->set('display.default.display_options.filters', $filters);
+  
+  // Ensure the block display doesn't hide when empty.
+  $config->set('display.community_browse_block.display_options.block_hide_empty', FALSE);
   $config->save();
 }
