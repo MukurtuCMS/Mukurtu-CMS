@@ -134,3 +134,11 @@ function mukurtu_core_update_40003(): void {
     $config->set('register', 'admin_only')->save();
   }
 }
+
+/**
+ * Set tagify default widget setting.
+ */
+function mukurtu_core_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('tagify.settings');
+  $config->set('set_default_widget', TRUE)->save();
+}
