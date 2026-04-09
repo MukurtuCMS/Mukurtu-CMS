@@ -27,6 +27,7 @@ NOTICE_UUID:notice_type => [
     {% for project in projects %}
     <div class="project">
       <h2 class="project__title"><a href={{ project.url }} title="{{'View the project details on the Local Contexts Hub'|t}}">{{ project.title }}</a></h2>
+      <p>{{ project.description }}</p>
       {% if project.tk_labels %}
         <h3 class="labels-type">{{ 'TK Labels'|t }}</h3>
         <div class="tk-labels">
