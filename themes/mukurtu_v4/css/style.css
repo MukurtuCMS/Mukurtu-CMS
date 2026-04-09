@@ -5317,6 +5317,33 @@ header {
   }
 }
 
+.local-contexts-directory__main-content {
+  display: grid;
+  grid-template-columns: var(--grid-6col);
+  padding-inline: var(--layout-padding) var(--layout-padding);
+  -webkit-column-gap: var(--gutter);
+     -moz-column-gap: var(--gutter);
+          column-gap: var(--gutter);
+}
+@media (min-width: 60rem) {
+  .local-contexts-directory__main-content {
+    grid-template-columns: var(--grid-12col);
+  }
+}
+@media (min-width: 90rem) {
+  .local-contexts-directory__main-content {
+    grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
+  }
+}
+.local-contexts-directory__main-content .region {
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .local-contexts-directory__main-content .region {
+    grid-column: 2/-2;
+  }
+}
+
 /* @file
  * Styles for the layout builder.
  */

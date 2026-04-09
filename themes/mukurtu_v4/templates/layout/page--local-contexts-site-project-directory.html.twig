@@ -46,18 +46,17 @@
 
 {% block page_content %}
 
-  <div class="node">
+  <div class="local-contexts-directory">
     {# link is in html.html.twig #}
     {% if page.sidebar_first %}
-      <aside class="node__layout-sidebar-first" role="complementary">
+      <aside class="local-contexts-directory__sidebar-first" role="complementary">
         {{ page.sidebar_first }}
       </aside>
     {% endif %}
 
-    <div class="node__main-content">
+    <div class="local-contexts-directory__main-content">
       {{ page.content }}
     </div>
-    {# /.layout-content #}
 
   </div>
 {% endblock %}
