@@ -121,3 +121,35 @@ function mukurtu_protocol_install() {
   $config->set('enabled_entity_types', $types);
   $config->save();
 }
+
+/**
+ * Update browse_by_community view to show only parent communities.
+ */
+function mukurtu_protocol_update_40001() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('views.view.browse_by_community');
+  
+  // Add filter to show only parent communities (those without a parent).
+  $filters = $config->get('display.default.display_options.filters');
+  $filters['field_parent_community'] = [
+    'id' => 'field_parent_community',
+    'table' => 'community__field_parent_community',
+    'field' => 'field_parent_community_target_id',
+    'relationship' => 'none',
+    'group_type' => 'group',
+    'admin_label' => '',
+    'entity_type' => 'community',
+    'entity_field' => 'field_parent_community',
+    'plugin_id' => 'null',
+    'operator' => '',
+    'value' => NULL,
+    'group' => 1,
+    'expose' => [
+      'operator' => '',
+      'operator_limit_selection' => FALSE,
+      'operator_list' => [],
+    ],
+  ];
+  $config->set('display.default.display_options.filters', $filters);
+  $config->save();
+}
