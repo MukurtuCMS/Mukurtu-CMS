@@ -43,6 +43,7 @@ install:
   - google_tag
   - twig_tweak
   - facets_reset_button
+  - flat_taxonomy
   - term_merge
   - term_merge_manager
   - dashboards
@@ -94,6 +95,7 @@ dependencies:
   - 'drupal:tagify'
   - 'drupal:rebuild_cache_access'
   - 'embed:embed'
+  - 'flat_taxonomy:flat_taxonomy'
   - 'entity_browser:entity_browser'
   - 'entity_embed:entity_embed'
   - 'entity_reference_revisions:entity_reference_revisions'
