@@ -62,3 +62,21 @@ function mukurtu_dictionary_update_40002() {
   $config->save();
   return t('Updated the weight of field_coverage in word list form display.');
 }
+
+/**
+ * Update Search API indexes and Views to support multiple cultural protocols faceting.
+ */
+function mukurtu_dictionary_update_40003() {
+  // Import updated Search API index and Views configurations.
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_dictionary');
+
+  // Reindex the affected Search API indexes.
+  $indexes = ['mukurtu_dictionary_index'];
+  foreach ($indexes as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if ($index) {
+      $index->reindex();
+    }
+  }
+}
