@@ -40,24 +40,37 @@ class ParentCommunity extends FilterPluginBase {
       return;
     }
     
-    // Find all community IDs that have a parent (child communities).
-    $child_community_ids = [];
+    // Find all community IDs that are non-child (parent: 0).
+    // These are root-level communities that should be displayed.
+    $parent_community_ids = [];
     foreach ($organization as $community_id => $data) {
-      if (is_array($data) && !empty($data['parent'])) {
-        $child_community_ids[] = (int) $community_id;
+      if (is_array($data) && isset($data['parent']) && (int)$data['parent'] === 0) {
+        // This is a parent/non-child community.
+        $parent_community_ids[] = (int) $community_id;
       }
     }
     
-    // Filter to show only communities that don't have a parent.
-    if (!empty($child_community_ids)) {
+    // Filter to show only the parent communities.
+    if (!empty($parent_community_ids)) {
       $this->query->addWhere(
         $this->options['group'],
         "{$this->tableAlias}.id",
-        $child_community_ids,
-        'NOT IN'
+        $parent_community_ids,
+        'IN'
+      );
+    } else {
+      // If there are no parent communities configured, show nothing.
+      // Add a condition that will never be true.
+      $this->query->addWhere(
+        $this->options['group'],
+        "{$this->tableAlias}.id",
+        -1,
+        '='
       );
     }
   }
 
 }
+
+
 
