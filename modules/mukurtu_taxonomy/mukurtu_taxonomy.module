@@ -70,9 +70,10 @@ function mukurtu_taxonomy_form_taxonomy_term_category_form_alter(&$form, \Drupal
   $form['name']['widget'][0]['value']['#title'] = t('Category name');
   $form['name']['widget'][0]['value']['#description'] = t('Enter the name of this category. This is how it will appear throughout the site.');
 
-  // Add helper text to description field.
+   // Add helper text to description field.
   if (isset($form['description'])) {
-    $form['description']['widget'][0]['value']['#description'] = t('Provide a brief explanation of when and how to use this category for organizing content.');
+    // For textarea, set at the field level, not the widget value
+    $form['description']['#description'] = t('Provide a brief explanation of when and how to use this category for organizing content.');
   }
 
   // Add helper text to thumbnail image field.
