@@ -159,6 +159,23 @@ display:
             operator: ''
             operator_limit_selection: false
             operator_list: {  }
+        field_parent_community:
+          id: field_parent_community
+          table: community__field_parent_community
+          field: field_parent_community_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: community
+          entity_field: field_parent_community
+          plugin_id: null
+          operator: ''
+          value: null
+          group: 1
+          expose:
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
         langcode:
           id: langcode
           table: community_field_data
