@@ -46,15 +46,15 @@
 
 {% block page_content %}
 
-  <div class="browse">
+  <div class="node">
     {# link is in html.html.twig #}
     {% if page.sidebar_first %}
-      <aside class="browse__layout-sidebar-first" role="complementary">
+      <aside class="node__layout-sidebar-first" role="complementary">
         {{ page.sidebar_first }}
       </aside>
     {% endif %}
 
-    <div class="browse__main-content">
+    <div class="node__main-content">
       {{ page.content }}
     </div>
     {# /.layout-content #}
