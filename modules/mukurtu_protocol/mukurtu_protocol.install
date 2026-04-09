@@ -131,18 +131,14 @@ function mukurtu_protocol_update_40001() {
   
   // Add filter to show only parent communities (those without a parent).
   $filters = $config->get('display.default.display_options.filters');
-  $filters['field_parent_community'] = [
-    'id' => 'field_parent_community',
-    'table' => 'community__field_parent_community',
-    'field' => 'field_parent_community_target_id',
+  $filters['parent_community'] = [
+    'id' => 'parent_community',
+    'table' => 'community_field_data',
+    'field' => 'id',
     'relationship' => 'none',
     'group_type' => 'group',
-    'admin_label' => '',
-    'entity_type' => 'community',
-    'entity_field' => 'field_parent_community',
-    'plugin_id' => 'null',
-    'operator' => '',
-    'value' => NULL,
+    'admin_label' => 'Parent Communities Only',
+    'plugin_id' => 'mukurtu_protocol_parent_community',
     'group' => 1,
     'expose' => [
       'operator' => '',
