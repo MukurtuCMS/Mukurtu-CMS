@@ -627,7 +627,8 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setRequired(TRUE);
 
     $fields['field_description'] = BaseFieldDefinition::create('text_with_summary')
-      ->setLabel(t('A description of the community that gives site visitors more information about the community and its purpose. This is shown to anyone who can view the community page.'))
+      ->setLabel(t('Description'))
+      ->setDescription(t('A description of the community that gives site visitors more information about the community and its purpose. This is shown to anyone who can view the community page.'))
       ->setTranslatable(TRUE)
       ->setDisplayOptions('view', [
         'label' => 'visible',
