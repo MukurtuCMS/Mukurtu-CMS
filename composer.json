@@ -80,7 +80,7 @@
         "drupal/genpass": "^2.1",
         "drupal/rebuild_cache_access": "^1.12",
         "drupal/notify_user_default": "^1.0",
-        "drupal/readonly_field_widget":"^2.1"
+        "drupal/readonly_field_widget": "^2.1"
     },
     "require-dev": {
         "drupal/devel": "*",
