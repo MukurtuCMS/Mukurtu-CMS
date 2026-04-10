@@ -232,8 +232,9 @@
   .tk-labels,
   .bc-labels,
   .notices {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: var(--v-space-2xs);
   }
 
@@ -241,6 +242,7 @@
   .bc-label,
   .notice {
     display: flex;
+    flex-direction: row;
     gap: var(--v-space-4xxs);
     align-items: flex-start;
     padding-block: var(--v-space-2xs);
