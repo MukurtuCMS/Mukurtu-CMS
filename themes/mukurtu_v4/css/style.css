@@ -1928,13 +1928,7 @@ details.form-wrapper summary + div {
   color: var(--color-gray);
   margin-block: var(--v-space-4xxs) var(--v-space-6xs);
 }
-.local-contexts-projects .tk-labels,
-.local-contexts-projects .bc-labels,
-.local-contexts-projects .notices {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--v-space-2xs);
-}
+
 .local-contexts-projects .tk-label,
 .local-contexts-projects .bc-label,
 .local-contexts-projects .notice {
@@ -1950,7 +1944,7 @@ details.form-wrapper summary + div {
 .local-contexts-projects .tk-label img,
 .local-contexts-projects .bc-label img,
 .local-contexts-projects .notice img {
-  block-size: 6rem;
+  block-size: 8rem;
   -ms-flex-negative: 0;
       flex-shrink: 0;
   -o-object-fit: contain;
