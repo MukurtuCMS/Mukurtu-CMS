@@ -125,7 +125,7 @@ function mukurtu_protocol_install() {
 /**
  * Update community form display: show parent/child communities as read-only.
  */
-function mukurtu_protocol_update_40000(): void {
+function mukurtu_protocol_update_40001(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.community.community.default');
 
   // Add readonly_field_widget to config dependencies.
