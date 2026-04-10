@@ -191,3 +191,81 @@
   border-block-end: 4px solid var(--brand-secondary);
   margin-block: 0 1rem;
 }
+
+// Project directory page (site-wide, community, and protocol views)
+.local-contexts-projects {
+  .description {
+    margin-block-end: var(--v-space-3xs);
+  }
+
+  .project {
+    padding-block: var(--v-space-3xs);
+    border-block-end: 1px solid var(--brand-light);
+
+    &:last-child {
+      border-block-end: none;
+    }
+  }
+
+  .project__title {
+    font-size: var(--font-size-xl);
+    margin-block: 0 var(--v-space-4xxs);
+
+    a {
+      color: var(--brand-primary);
+
+      &:hover {
+        color: var(--brand-primary-dark);
+      }
+    }
+  }
+
+  .labels-type {
+    font-size: var(--font-size-l);
+    font-weight: var(--text-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-gray);
+    margin-block: var(--v-space-4xxs) var(--v-space-6xs);
+  }
+
+  .tk-labels,
+  .bc-labels,
+  .notices {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--v-space-2xs);
+  }
+
+  .tk-label,
+  .bc-label,
+  .notice {
+    display: flex;
+    gap: var(--v-space-4xxs);
+    align-items: flex-start;
+    padding-block: var(--v-space-2xs);
+
+    img {
+      block-size: 6rem;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+  }
+
+  .label-content {
+    flex: 1;
+  }
+
+  .label__name {
+    font-size: var(--font-size-m);
+    font-weight: var(--text-bold);
+    color: var(--brand-text-color);
+    margin-block: 0 var(--v-space-6xs);
+  }
+
+  .text {
+    font-size: var(--font-size-s);
+    line-height: var(--line-height-s);
+    color: var(--brand-text-color);
+  }
+}
