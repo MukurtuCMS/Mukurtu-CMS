@@ -146,7 +146,5 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden:
-  create_new_revision: true
-  revision_log: true
+hidden: {}
   
