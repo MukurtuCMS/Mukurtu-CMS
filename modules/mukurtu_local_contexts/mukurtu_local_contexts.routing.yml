@@ -39,7 +39,7 @@ mukurtu_local_contexts.community_projects_directory:
   options:
     parameters:
       group:
-        type: entity:community
+        type: community_alias
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
 
@@ -70,7 +70,7 @@ mukurtu_local_contexts.protocol_projects_directory:
   options:
     parameters:
       group:
-        type: entity:protocol
+        type: protocol_alias
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
 

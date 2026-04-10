@@ -1,4 +1,10 @@
 services:
+  mukurtu_local_contexts.group_alias_param_converter:
+    class: Drupal\mukurtu_local_contexts\ParamConverter\GroupAliasParamConverter
+    arguments: ['@path_alias.manager', '@entity_type.manager']
+    tags:
+      - { name: paramconverter }
+
   mukurtu_local_contexts.supported_project_manager:
     class: Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
     arguments: ['@database']
