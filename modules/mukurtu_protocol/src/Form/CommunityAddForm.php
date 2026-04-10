@@ -59,7 +59,7 @@ class CommunityAddForm extends ContentEntityForm {
     $form['community_member_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Community members'),
-      '#description' => $this->t('Community members have basic membership in the community. This role is assigned to all community members by default. If they have not been added to any protocols, they can view the community page and any public content.'),
+      '#description' => $this->t('Community members can view the community page and be added to protocols within the community.'),
       '#weight' => '1001',
       '#access' => $this->isDefaultFormLangcode($form_state),
     ];
@@ -88,7 +88,7 @@ class CommunityAddForm extends ContentEntityForm {
     $form['community_affiliate_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Community affiliates'),
-      '#description' => $this->t('The community affiliates role is designated for users who aren\'t part of the community but work with the community in some capacity that requires a level of access to community content. Community affiliates may be assigned other roles within the community and it\' protocols.'),
+      '#description' => $this->t('Community affiliates can view the community page and be added to protocols within the community. This is a designation for community partners.'),
       '#weight' => '1003',
       '#access' => $this->isDefaultFormLangcode($form_state),
     ];
@@ -117,7 +117,7 @@ class CommunityAddForm extends ContentEntityForm {
     $form['community_manager_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Community managers'),
-      '#description' => $this->t('Community managers are responsible for managing membership in the community. They can manage the title, banner and thumbnail images, description, featured content, Local Contexts projects, and other display settings.'),
+      '#description' => $this->t('Community managers can manage community information and membership, and create new protocols.'),
       '#weight' => '1005',
       '#access' => $this->isDefaultFormLangcode($form_state),
     ];
