@@ -580,7 +580,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
-      ->setDescription(t('The user ID of author of the Community entity.'))
+      ->setDescription(t('The username and ID that created the community.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
@@ -605,7 +605,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Community name'))
-      ->setDescription(t('The name of the Community.'))
+      ->setDescription(t('The name of the community as you want it displayed across the site.'))
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setSettings([
@@ -627,7 +627,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setRequired(TRUE);
 
     $fields['field_description'] = BaseFieldDefinition::create('text_with_summary')
-      ->setLabel(t('Description'))
+      ->setLabel(t('A description of the community that gives site visitors more information about the community and its purpose. This is shown to anyone who can view the community page.'))
       ->setTranslatable(TRUE)
       ->setDisplayOptions('view', [
         'label' => 'visible',
@@ -646,7 +646,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['field_parent_community'] = BaseFieldDefinition::create('entity_reference')
       ->setName('field_parent_community')
       ->setLabel(t('Parent Community'))
-      ->setDescription('')
+      ->setDescription('Displays the parent community, if one exists. This is a read only field. Community organization is managed through the community organization admin page and not through this field.')
       ->setComputed(TRUE)
       ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityParentCommunityItemList')
       ->setSetting('target_type', 'community')
@@ -661,6 +661,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['field_child_communities'] = BaseFieldDefinition::create('entity_reference')
       ->setName('field_child_communities')
       ->setLabel(t('Sub-communities'))
+      ->setDescription('Displays any child communities. This is a read only field. Community organization is managed through the community organization admin page and not through this field.')
       ->setComputed(TRUE)
       ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityChildCommunitiesItemList')
       ->setSetting('target_type', 'community')
@@ -676,7 +677,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $fields['status']->setDescription(t('A boolean indicating whether the Community is published.'))
+    $fields['status']->setDescription(t('Publish or unpublish the community. If unpublished, this community will not be visible to anyone except community managers and site admins.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
         'weight' => 30,
@@ -684,11 +685,11 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
-      ->setDescription(t('The time that the entity was created.'));
+      ->setDescription(t('The time that the community was created.'));
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the entity was last edited.'));
+      ->setDescription(t('The time that the community was last edited.'));
 
     $fields['revision_translation_affected'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Revision translation affected'))
@@ -725,7 +726,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_community_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Community Type'))
-      ->setDescription(t('Indicates the type of community.'))
+      ->setDescription(t('Indicates the type of community. This can be used to group and filter different types of communities. eg: institution, repository, tribe, nation.'))
       ->setSetting('target_type', 'taxonomy_term')
       ->setSetting('handler', 'default:taxonomy_term')
       ->setSetting('handler_settings',
@@ -746,6 +747,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setDisplayConfigurable('form', TRUE);
     $fields['field_featured_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Featured Content'))
+      ->setDescription(t('Select content to be displayed on the community page. Protocols apply to featured content.'))
       ->setSetting('target_type', 'node')
       ->setSetting('handler', 'default:node')
       ->setSetting('handler_settings', [
@@ -764,7 +766,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_banner_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Banner Image'))
-      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
+      ->setDescription(t('The banner image is displayed on the community page. Note: banner images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -784,7 +786,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_thumbnail_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Thumbnail Image'))
-      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
+      ->setDescription(t('The thumbnail image is displayed in the browse communities page and block. Note: thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -804,7 +806,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_membership_display'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Membership Display'))
-      ->setDescription('TODO: membership display helper text')
+      ->setDescription('Select which, if any, community members are displayed on the community page.')
       ->setSettings([
         'allowed_values' => [
           'none' => 'Do not display any community members',
@@ -838,7 +840,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['field_local_contexts_description'] = BaseFieldDefinition::create('text_long')
       ->setName('field_local_contexts_description')
       ->setLabel(t('Local Contexts Description'))
-      ->setDescription(t('Enter the description for the Local Contexts project directory page.'))
+      ->setDescription(t('All community-level Local Contexts projects are displayed on a directory page. Provide a more detailed description of the use and development of these projects if applicable.'))
       ->setRequired(FALSE)
       ->setTranslatable(TRUE)
       ->setDefaultValue([])

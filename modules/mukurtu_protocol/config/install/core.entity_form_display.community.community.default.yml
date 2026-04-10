@@ -8,7 +8,10 @@ dependencies:
     - media_library
     - mukurtu_protocol
     - path
+    - readonly_field_widget
     - text
+_core:
+  default_config_hash: aaK99YSsV5QeMama3zE5jC_SPMsK6krhSHq_lyCOSjQ
 id: community.community.default
 targetEntityType: community
 bundle: community
@@ -32,24 +35,27 @@ content:
     third_party_settings: {  }
   field_banner_image:
     type: media_library_widget
-    weight: 7
+    weight: 6
     region: content
     settings:
       media_types: {  }
     third_party_settings: {  }
   field_child_communities:
-    type: entity_reference_autocomplete
-    weight: 10
+    type: readonly_field_widget
+    weight: 11
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      label: above
+      formatter_type: entity_reference_label
+      formatter_settings:
+        entity_reference_label:
+          link: true
+      show_description: false
+      error_validation: false
     third_party_settings: {  }
   field_community_type:
     type: options_buttons
-    weight: 5
+    weight: 9
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -65,7 +71,7 @@ content:
     third_party_settings: {  }
   field_featured_content:
     type: entity_browser_entity_reference
-    weight: 9
+    weight: 8
     region: content
     settings:
       entity_browser: mukurtu_content_browser
@@ -87,13 +93,24 @@ content:
     third_party_settings: {  }
   field_membership_display:
     type: options_buttons
-    weight: 6
+    weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_parent_community:
+    type: readonly_field_widget
+    weight: 10
+    region: content
+    settings:
+      label: above
+      formatter_type: null
+      formatter_settings: {  }
+      show_description: false
+      error_validation: false
+    third_party_settings: {  }
   field_thumbnail_image:
     type: media_library_widget
-    weight: 8
+    weight: 7
     region: content
     settings:
       media_types: {  }
@@ -115,13 +132,13 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 11
+    weight: 12
     region: content
     settings: {  }
     third_party_settings: {  }
   user_id:
     type: entity_reference_autocomplete
-    weight: 12
+    weight: 13
     region: content
     settings:
       match_operator: CONTAINS
@@ -130,4 +147,6 @@ content:
       placeholder: ''
     third_party_settings: {  }
 hidden:
-  field_parent_community: true
+  create_new_revision: true
+  revision_log: true
+  

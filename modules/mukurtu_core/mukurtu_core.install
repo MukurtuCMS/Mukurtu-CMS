@@ -149,3 +149,10 @@ function mukurtu_core_update_40004(): void {
 function mukurtu_core_update_40005(): void {
   \Drupal::service('module_installer')->install(['genpass', 'notify_user_default']);
 }
+
+/**
+ * Install readonly_field_widget module.
+ */
+function mukurtu_core_update_40006(): void {
+  \Drupal::service('module_installer')->install(['readonly_field_widget']);
+}
