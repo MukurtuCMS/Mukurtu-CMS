@@ -43,7 +43,7 @@ class CommunityAddForm extends ContentEntityForm {
 
     foreach (Element::children($form) as $key) {
       if (!in_array($key, $allow_list)) {
-        $form[$key]['#access'] = FALSE;
+        unset($form[$key]);
       }
     }
 
