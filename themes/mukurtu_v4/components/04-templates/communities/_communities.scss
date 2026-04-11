@@ -31,7 +31,6 @@
 
   @include include-media.media('>=lg') {
     @include layout.layout--fourcol-grid;
-    padding-inline: var(--layout-padding-m);
   }
 }
 
