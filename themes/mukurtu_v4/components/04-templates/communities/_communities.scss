@@ -6,6 +6,10 @@
 .community-page-listing {
   @include layout.layout--full-width-grid;
 
+  @include include-media.media('>=lg') {
+    grid-template-columns: var(--grid-4col);
+  }
+
   .communities {
     @include layout.layout--full-width-grid-item;
   }

@@ -4440,6 +4440,11 @@ header {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }
 }
+@media (min-width: 60rem) {
+  .community-page-listing {
+    grid-template-columns: var(--grid-4col);
+  }
+}
 .community-page-listing .communities {
   grid-column: 1/-1;
 }
