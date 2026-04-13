@@ -123,7 +123,8 @@ function mukurtu_protocol_install() {
 }
 
 /**
- * Add community_is_root filter to the browse_by_community view.
+ * Add community_is_root filter and community_organization_weight sort to
+ * the browse_by_community view.
  */
 function mukurtu_protocol_update_40001(): void {
   $config = \Drupal::configFactory()->getEditable('views.view.browse_by_community');
@@ -131,25 +132,43 @@ function mukurtu_protocol_update_40001(): void {
     return;
   }
 
+  // Add community_is_root filter.
   $filters = $config->get('display.default.display_options.filters') ?? [];
-
-  if (isset($filters['community_is_root'])) {
-    return;
+  if (!isset($filters['community_is_root'])) {
+    $filters = ['community_is_root' => [
+      'id' => 'community_is_root',
+      'table' => 'community_field_data',
+      'field' => 'id',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'community',
+      'plugin_id' => 'community_is_root',
+      'group' => 1,
+      'exposed' => FALSE,
+    ]] + $filters;
+    $config->set('display.default.display_options.filters', $filters);
   }
 
-  $filters = ['community_is_root' => [
-    'id' => 'community_is_root',
-    'table' => 'community_field_data',
-    'field' => 'id',
-    'relationship' => 'none',
-    'group_type' => 'group',
-    'admin_label' => '',
-    'entity_type' => 'community',
-    'plugin_id' => 'community_is_root',
-    'group' => 1,
-    'exposed' => FALSE,
-  ]] + $filters;
+  // Replace alphabetical name sort with config-based weight sort.
+  $sorts = $config->get('display.default.display_options.sorts') ?? [];
+  if (!isset($sorts['community_organization_weight'])) {
+    $sorts = ['community_organization_weight' => [
+      'id' => 'community_organization_weight',
+      'table' => 'community_field_data',
+      'field' => 'id',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'community',
+      'plugin_id' => 'community_organization_weight',
+      'order' => 'ASC',
+      'expose' => ['label' => '', 'field_identifier' => ''],
+      'exposed' => FALSE,
+    ]];
+    unset($sorts['name']);
+    $config->set('display.default.display_options.sorts', $sorts);
+  }
 
-  $config->set('display.default.display_options.filters', $filters);
   $config->save();
 }

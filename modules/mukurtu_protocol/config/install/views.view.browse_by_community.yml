@@ -129,16 +129,15 @@ display:
         options: {  }
       empty: {  }
       sorts:
-        name:
-          id: name
+        community_organization_weight:
+          id: community_organization_weight
           table: community_field_data
-          field: name
+          field: id
           relationship: none
           group_type: group
           admin_label: ''
           entity_type: community
-          entity_field: name
-          plugin_id: standard
+          plugin_id: community_organization_weight
           order: ASC
           expose:
             label: ''
