@@ -247,7 +247,7 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      block_hide_empty: true
+      block_hide_empty: false
     cache_metadata:
       max-age: -1
       contexts:
