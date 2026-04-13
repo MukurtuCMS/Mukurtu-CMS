@@ -132,8 +132,24 @@ function mukurtu_protocol_update_40001(): void {
     return;
   }
 
-  // Add community_is_root filter.
+  // Add community_accessible and community_is_root filters.
   $filters = $config->get('display.default.display_options.filters') ?? [];
+  $changed = FALSE;
+  if (!isset($filters['community_accessible'])) {
+    $filters = ['community_accessible' => [
+      'id' => 'community_accessible',
+      'table' => 'community_field_data',
+      'field' => 'id',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'community',
+      'plugin_id' => 'community_accessible',
+      'group' => 1,
+      'exposed' => FALSE,
+    ]] + $filters;
+    $changed = TRUE;
+  }
   if (!isset($filters['community_is_root'])) {
     $filters = ['community_is_root' => [
       'id' => 'community_is_root',
@@ -147,7 +163,19 @@ function mukurtu_protocol_update_40001(): void {
       'group' => 1,
       'exposed' => FALSE,
     ]] + $filters;
+    $changed = TRUE;
+  }
+  if ($changed) {
     $config->set('display.default.display_options.filters', $filters);
+  }
+
+  // Add user cache context.
+  foreach (['default', 'community_browse_block'] as $display_id) {
+    $contexts = $config->get("display.$display_id.cache_metadata.contexts") ?? [];
+    if (!in_array('user', $contexts)) {
+      $contexts[] = 'user';
+      $config->set("display.$display_id.cache_metadata.contexts", $contexts);
+    }
   }
 
   // Replace alphabetical name sort with config-based weight sort.

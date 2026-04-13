@@ -145,6 +145,17 @@ display:
           exposed: false
       arguments: {  }
       filters:
+        community_accessible:
+          id: community_accessible
+          table: community_field_data
+          field: id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: community
+          plugin_id: community_accessible
+          group: 1
+          exposed: false
         community_is_root:
           id: community_is_root
           table: community_field_data
@@ -238,6 +249,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
+        - user
         - user.permissions
       tags: {  }
   community_browse_block:
@@ -254,5 +266,6 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
+        - user
         - user.permissions
       tags: {  }
