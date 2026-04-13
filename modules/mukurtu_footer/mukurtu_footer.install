@@ -6,6 +6,7 @@
  */
 
 use Drupal\block_content\Entity\BlockContent;
+use Drupal\paragraphs\Entity\Paragraph;
 
 /**
  * Implements hook_install().
@@ -26,4 +27,88 @@ function mukurtu_footer_install() {
     ]);
     $footer->save();
   }
+}
+
+/**
+ * Migrate footer data from block plugin configuration to block_content entity.
+ *
+ * Prior to this change, footer content (logos, social links, contact email,
+ * and copyright) was stored directly in the mukurtu_footer block plugin's
+ * settings array. This hook creates the new mukurtu_footer block_content
+ * entity and migrates existing data into its fields.
+ */
+function mukurtu_footer_update_40001(): void {
+  // If a mukurtu_footer block_content entity already exists, nothing to do.
+  $existing = \Drupal::entityTypeManager()
+    ->getStorage('block_content')
+    ->loadByProperties(['type' => 'mukurtu_footer']);
+
+  if (!empty($existing)) {
+    return;
+  }
+
+  // Read existing block plugin settings.
+  $block_settings = \Drupal::config('block.block.mukurtu_v4_mukurtu_footer')
+    ->get('settings') ?? [];
+
+  // Build footer_logo paragraph entities from old fid array.
+  $logo_paragraphs = [];
+  foreach (array_filter((array) ($block_settings['logo_upload'] ?? [])) as $fid) {
+    if ((int) $fid > 0) {
+      $paragraph = Paragraph::create([
+        'type' => 'footer_logo',
+        'field_footer_logo_image' => [
+          'target_id' => (int) $fid,
+          'alt' => '',
+          'title' => '',
+        ],
+      ]);
+      $paragraph->save();
+      $logo_paragraphs[] = [
+        'target_id' => $paragraph->id(),
+        'target_revision_id' => $paragraph->getRevisionId(),
+      ];
+    }
+  }
+
+  // Build footer_social_link paragraph entities from old per-platform slots.
+  $social_paragraphs = [];
+  $platform_base_urls = [
+    'twitter' => 'https://x.com/',
+    'facebook' => 'https://facebook.com/',
+    'instagram' => 'https://instagram.com/',
+  ];
+  $old_social = $block_settings['social_media'] ?? [];
+  foreach ($platform_base_urls as $platform => $base_url) {
+    for ($i = 1; $i <= 3; $i++) {
+      $account = trim($old_social[$platform]['account_' . $i] ?? '');
+      if (!empty($account)) {
+        $paragraph = Paragraph::create([
+          'type' => 'footer_social_link',
+          'field_footer_social_platform' => $platform,
+          'field_footer_social_url' => [
+            'uri' => $base_url . ltrim($account, '@/'),
+            'title' => $account,
+          ],
+        ]);
+        $paragraph->save();
+        $social_paragraphs[] = [
+          'target_id' => $paragraph->id(),
+          'target_revision_id' => $paragraph->getRevisionId(),
+        ];
+      }
+    }
+  }
+
+  // Create the block_content entity with migrated data.
+  BlockContent::create([
+    'type' => 'mukurtu_footer',
+    'info' => 'Mukurtu Footer',
+    'status' => TRUE,
+    'field_footer_logos' => $logo_paragraphs,
+    'field_footer_social_links' => $social_paragraphs,
+    'field_footer_contact_email' => $block_settings['contact_email_address'] ?? '',
+    'field_footer_contact_email_label' => $block_settings['email_us_text'] ?? 'Email us at',
+    'field_footer_copyright' => $block_settings['copyright_message'] ?? '© [current-date:html_year] Mukurtu CMS',
+  ])->save();
 }
