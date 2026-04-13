@@ -24,7 +24,7 @@ function mukurtu_footer_update_40001(): void {
  * so the footer can be edited via a full admin form at
  * /admin/config/mukurtu/footer.
  */
-function mukurtu_footer_update_10000(): void {
+function mukurtu_footer_update_40002(): void {
   $config_factory = \Drupal::configFactory();
 
   // If the new config already has content (e.g. fresh install), leave it alone.
