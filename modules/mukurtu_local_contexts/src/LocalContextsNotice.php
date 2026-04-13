@@ -28,7 +28,7 @@ class LocalContextsNotice extends LocalContextsHubBase
     $query = $this->db->select('mukurtu_local_contexts_notices', 'n')
       ->condition('n.project_id', $this->project_id)
       ->condition('n.type', $this->type)
-      ->fields('n', ['name', 'svg_url', 'default_text']);
+      ->fields('n', ['name', 'img_url', 'svg_url', 'default_text']);
     $result = $query->execute();
 
     $notice = $result->fetchAssoc();
