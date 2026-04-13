@@ -9,7 +9,7 @@ mukurtu_taxonomy.manage_categories:
   description: 'Manage all categories.'
   parent: mukurtu_dashboard
   menu_name: dashboard-3Cs
-  route_name: mukurtu_taxonomy.manage_categories
+  url: 'internal:/admin/structure/taxonomy/manage/category/overview'
 mukurtu_taxonomy.person_record_settings_dashboard:
   title: "Person record settings"
   menu_name: dashboard-content-settings
