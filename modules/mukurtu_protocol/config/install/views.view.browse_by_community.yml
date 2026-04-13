@@ -146,6 +146,17 @@ display:
           exposed: false
       arguments: {  }
       filters:
+        community_is_root:
+          id: community_is_root
+          table: community_field_data
+          field: id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: community
+          plugin_id: community_is_root
+          group: 1
+          exposed: false
         status:
           id: status
           table: community_field_data

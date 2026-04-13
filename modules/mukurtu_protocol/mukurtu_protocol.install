@@ -121,3 +121,35 @@ function mukurtu_protocol_install() {
   $config->set('enabled_entity_types', $types);
   $config->save();
 }
+
+/**
+ * Add community_is_root filter to the browse_by_community view.
+ */
+function mukurtu_protocol_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.browse_by_community');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $filters = $config->get('display.default.display_options.filters') ?? [];
+
+  if (isset($filters['community_is_root'])) {
+    return;
+  }
+
+  $filters = ['community_is_root' => [
+    'id' => 'community_is_root',
+    'table' => 'community_field_data',
+    'field' => 'id',
+    'relationship' => 'none',
+    'group_type' => 'group',
+    'admin_label' => '',
+    'entity_type' => 'community',
+    'plugin_id' => 'community_is_root',
+    'group' => 1,
+    'exposed' => FALSE,
+  ]] + $filters;
+
+  $config->set('display.default.display_options.filters', $filters);
+  $config->save();
+}
