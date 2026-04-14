@@ -15,6 +15,14 @@ targetEntityType: community
 bundle: community
 mode: browse
 content:
+  community_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_thumbnail_image:
     type: entity_reference_entity_view
     label: hidden
@@ -33,7 +41,6 @@ content:
     weight: 0
     region: content
 hidden:
-  community_type: true
   field_access_mode: true
   field_banner_image: true
   field_child_communities: true
