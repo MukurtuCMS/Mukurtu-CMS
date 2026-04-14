@@ -1,6 +1,0 @@
-local-contexts-dialog:
-  js:
-    js/local-contexts-dialog.js: {}
-  dependencies:
-    - core/drupal
-    - core/once

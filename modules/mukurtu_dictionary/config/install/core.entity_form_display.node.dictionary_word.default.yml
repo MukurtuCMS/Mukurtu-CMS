@@ -222,7 +222,7 @@ content:
     third_party_settings: {  }
   field_coverage:
     type: leaflet_widget_default
-    weight: 1
+    weight: 31
     region: content
     settings:
       geometry_validation: 0

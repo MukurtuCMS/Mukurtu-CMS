@@ -69,7 +69,7 @@ class CurrentEntityRevision extends ProcessPluginBase implements ContainerFactor
 
     // We kinda need a non-null id to have a hope of loading something.
     if (!$target_id) {
-      return NULL;
+      throw new MigrateException(sprintf('"%s" is not a valid entity reference.', $value));
     }
 
     try {

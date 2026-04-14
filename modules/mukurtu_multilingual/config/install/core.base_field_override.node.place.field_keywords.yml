@@ -9,7 +9,7 @@ field_name: field_keywords
 entity_type: node
 bundle: place
 label: Keywords
-description: "Keywords are used to tag place records to ensure that they are discoverable when searching or browsing. </br>Include as many keywords as needed. Select from existing keywords or add new ones."
+description: "Keywords are used to tag place records to ensure that they are discoverable when searching or browsing. \tAs you type, existing keywords will be displayed. </br>Select an existing keyword or enter a new one. To include additional keywords, select \"Add another item\"."
 required: false
 translatable: false
 default_value:

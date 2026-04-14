@@ -9,7 +9,7 @@ field_name: field_relationship_type
 entity_type: paragraph
 bundle: related_person
 label: 'Relationship Type'
-description: 'The type of relationship between the related person and the subject of the person record. </br>Select from existing relationship types or add a new one.'
+description: 'The type of relationship between the related person and the subject of the person record. </br>As you type, existing relationship types will be displayed. Select an existing relationship type or enter a new one. To include additional relationship types, select "Add another item".'
 required: true
 translatable: false
 default_value: {  }

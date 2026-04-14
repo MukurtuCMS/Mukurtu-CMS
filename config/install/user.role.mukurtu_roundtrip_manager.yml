@@ -4,6 +4,6 @@ dependencies:
   module:
     - mukurtu_import
 id: mukurtu_roundtrip_manager
-label: 'Roundtrip Manager'
+label: 'Mukurtu Roundtrip Manager'
 weight: 3
 is_admin: null
