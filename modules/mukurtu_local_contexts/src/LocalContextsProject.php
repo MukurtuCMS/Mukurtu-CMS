@@ -354,6 +354,12 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $this->title;
   }
 
+  public function getUrl(): string {
+    $endpoint = $this->configFactory->get(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsApi::DEFAULT_HUB_URL;
+    $baseUrl = preg_replace('#/api/v2/?$#', '', rtrim($endpoint, '/'));
+    return $baseUrl . '/projects/' . $this->id . '/';
+  }
+
   public function getPrivacy() {
     return $this->privacy;
   }

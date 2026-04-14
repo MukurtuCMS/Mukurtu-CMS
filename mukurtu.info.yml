@@ -93,6 +93,8 @@ dependencies:
   - 'drupal:admin_theme'
   - 'drupal:tagify'
   - 'drupal:rebuild_cache_access'
+  - 'drupal:genpass'
+  - 'drupal:notify_user_default'
   - 'embed:embed'
   - 'entity_browser:entity_browser'
   - 'entity_embed:entity_embed'
