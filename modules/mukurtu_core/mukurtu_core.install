@@ -389,6 +389,8 @@ function mukurtu_core_update_40006(): void {
 
   $view->set('display', $display);
   $view->save();
+}
+
 /*
  * Install readonly_field_widget module.
  */
