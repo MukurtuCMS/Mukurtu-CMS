@@ -30,5 +30,6 @@ dependencies:
   - 'og:og'
   - 'og_ui:og_ui'
   - 'pathauto:pathauto'
+  - 'readonly_field_widget:readonly_field_widget'
   - 'views_bulk_operations:views_bulk_operations'
 version: 4.x-dev
