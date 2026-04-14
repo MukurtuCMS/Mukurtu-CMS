@@ -55,6 +55,7 @@ install:
   - genpass
   - rebuild_cache_access
   - notify_user_default
+  - readonly_field_widget
 
 dependencies:
   - 'blazy:blazy'
@@ -96,6 +97,7 @@ dependencies:
   - 'drupal:rebuild_cache_access'
   - 'drupal:genpass'
   - 'drupal:notify_user_default'
+  - 'drupal:readonly_field_widget'
   - 'embed:embed'
   - 'flat_taxonomy:flat_taxonomy'
   - 'entity_browser:entity_browser'
