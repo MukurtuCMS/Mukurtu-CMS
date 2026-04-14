@@ -9,7 +9,7 @@ field_name: field_keywords
 entity_type: node
 bundle: dictionary_word
 label: Keywords
-description: "Keywords are used to tag dictionary words to ensure that they are discoverable when searching or browsing.\t</br>As you type, existing keywords will be displayed. Select an existing keyword or enter a new one. To include additional keywords, select \"Add another item\"."
+description: "Keywords are used to tag dictionary words to ensure that they are discoverable when searching or browsing.<br>Include as many keywords as needed. Select from existing keywords or add new ones."
 required: false
 translatable: false
 default_value: {  }
