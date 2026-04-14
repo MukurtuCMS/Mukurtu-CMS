@@ -134,3 +134,25 @@ function mukurtu_core_update_40003(): void {
     $config->set('register', 'admin_only')->save();
   }
 }
+
+/**
+ * Set tagify default widget setting.
+ */
+function mukurtu_core_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('tagify.settings');
+  $config->set('set_default_widget', TRUE)->save();
+}
+
+/**
+ * Install genpass and notify_user_default modules.
+ */
+function mukurtu_core_update_40005(): void {
+  \Drupal::service('module_installer')->install(['genpass', 'notify_user_default']);
+}
+
+/**
+ * Install readonly_field_widget module.
+ */
+function mukurtu_core_update_40006(): void {
+  \Drupal::service('module_installer')->install(['readonly_field_widget']);
+}
