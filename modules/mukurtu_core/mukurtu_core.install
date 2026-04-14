@@ -160,6 +160,6 @@ function mukurtu_core_update_40006(): void {
 /**
  * Install readonly_field_widget module.
  */
-function mukurtu_core_update_40006(): void {
+function mukurtu_core_update_40007(): void {
   \Drupal::service('module_installer')->install(['readonly_field_widget']);
 }
