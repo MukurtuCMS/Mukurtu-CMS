@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_person module.
+ */
+
+/**
+ * Update the weight of field_coverage in the person record form display.
+ */
+function mukurtu_person_update_40001() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.person.default');
+  $config->set('content.field_coverage.weight', 10);
+  $config->save();
+  return t('Updated the weight of field_coverage in person record form display.');
+}

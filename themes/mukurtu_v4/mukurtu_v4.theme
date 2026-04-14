@@ -51,6 +51,21 @@ function mukurtu_v4_preprocess_node(&$variables) {
 }
 
 /**
+ * Implements hook_theme_suggestions_page_alter().
+ */
+function mukurtu_v4_theme_suggestions_page_alter(array &$suggestions, array $variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  $lc_directory_routes = [
+    'mukurtu_local_contexts.site_project_directory',
+    'mukurtu_local_contexts.community_projects_directory',
+    'mukurtu_local_contexts.protocol_projects_directory',
+  ];
+  if (in_array($route_name, $lc_directory_routes)) {
+    $suggestions[] = 'page__local_contexts_site_project_directory';
+  }
+}
+
+/**
  * Implements hook_theme_suggestions_input_alter().
  */
 function mukurtu_v4_theme_suggestions_input_alter(&$suggestions, array $variables) {

@@ -136,9 +136,24 @@ function mukurtu_core_update_40003(): void {
 }
 
 /**
- * Add author, status, and updated fields to the content browser view.
+* Set tagify default widget setting.
  */
 function mukurtu_core_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('tagify.settings');
+  $config->set('set_default_widget', TRUE)->save();
+}
+
+/**
+ * Install genpass and notify_user_default modules.
+ */
+function mukurtu_core_update_40005(): void {
+  \Drupal::service('module_installer')->install(['genpass', 'notify_user_default']);
+}
+
+/**
+ * Add author, status, and updated fields to the content browser view.
+ */
+function mukurtu_core_update_40006(): void {
   $view = \Drupal\views\Entity\View::load('mukurtu_content_browser');
   if (!$view) {
     return;
@@ -375,5 +390,3 @@ function mukurtu_core_update_40004(): void {
   $view->set('display', $display);
   $view->save();
 }
-
-
