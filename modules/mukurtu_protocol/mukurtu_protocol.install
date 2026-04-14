@@ -122,10 +122,74 @@ function mukurtu_protocol_install() {
   $config->save();
 }
 
+/*
+  * Update community form display: show parent/child communities as read-only.
+ */
+function mukurtu_protocol_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.community.community.default');
+
+  // Add readonly_field_widget to config dependencies.
+  $dependencies = $config->get('dependencies.module');
+  if (!in_array('readonly_field_widget', $dependencies)) {
+    $dependencies[] = 'readonly_field_widget';
+    sort($dependencies);
+    $config->set('dependencies.module', $dependencies);
+  }
+
+  // Switch field_child_communities from entity_reference_autocomplete to
+  // readonly_field_widget.
+  $config->set('content.field_child_communities', [
+    'type' => 'readonly_field_widget',
+    'weight' => 11,
+    'region' => 'content',
+    'settings' => [
+      'label' => 'above',
+      'formatter_type' => 'entity_reference_label',
+      'formatter_settings' => [
+        'entity_reference_label' => ['link' => TRUE],
+      ],
+      'show_description' => FALSE,
+      'error_validation' => FALSE,
+    ],
+    'third_party_settings' => [],
+  ]);
+
+  // Move field_parent_community from hidden to visible as readonly_field_widget.
+  $config->set('content.field_parent_community', [
+    'type' => 'readonly_field_widget',
+    'weight' => 10,
+    'region' => 'content',
+    'settings' => [
+      'label' => 'above',
+      'formatter_type' => NULL,
+      'formatter_settings' => [],
+      'show_description' => FALSE,
+      'error_validation' => FALSE,
+    ],
+    'third_party_settings' => [],
+  ]);
+  $config->clear('hidden.field_parent_community');
+
+  // Hide revision fields.
+  $config->set('hidden.create_new_revision', TRUE);
+  $config->set('hidden.revision_log', TRUE);
+
+  // Update field weights.
+  $config->set('content.field_banner_image.weight', 6);
+  $config->set('content.field_community_type.weight', 9);
+  $config->set('content.field_featured_content.weight', 8);
+  $config->set('content.field_membership_display.weight', 5);
+  $config->set('content.field_thumbnail_image.weight', 7);
+  $config->set('content.path.weight', 12);
+  $config->set('content.user_id.weight', 13);
+
+  $config->save();
+}
+
 /**
  * Remove orphaned community_type field from community browse view display.
  */
-function mukurtu_protocol_update_40001(): void {
+function mukurtu_protocol_update_40002(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.community.community.browse');
 
   $content = $config->get('content');
@@ -139,6 +203,3 @@ function mukurtu_protocol_update_40001(): void {
     $hidden['community_type'] = TRUE;
     $config->set('hidden', $hidden);
   }
-
-  $config->save();
-}
