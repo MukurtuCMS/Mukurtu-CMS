@@ -156,3 +156,11 @@ function mukurtu_core_update_40005(): void {
 function mukurtu_core_update_40006(): void {
   \Drupal::service('module_installer')->install(['readonly_field_widget']);
 }
+
+/**
+ * Install the mukurtu_all_paragraphs view.
+ */
+function mukurtu_core_update_40007(): void {
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_core');
+}
