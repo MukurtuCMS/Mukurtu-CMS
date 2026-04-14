@@ -203,3 +203,4 @@ function mukurtu_protocol_update_40002(): void {
     $hidden['community_type'] = TRUE;
     $config->set('hidden', $hidden);
   }
+}
