@@ -87,7 +87,7 @@ class BrowseByCommunityBlock extends BlockBase implements ContainerFactoryPlugin
     }
 
     return [
-      '#theme' => 'communities_page',
+      '#theme' => 'browse_by_community_block',
       '#communities' => $renderedCommunities,
     ];
   }

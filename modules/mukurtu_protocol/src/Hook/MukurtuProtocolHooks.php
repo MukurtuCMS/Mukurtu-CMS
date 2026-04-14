@@ -30,6 +30,11 @@ class MukurtuProtocolHooks {
           'communities' => NULL,
         ],
       ],
+      'browse_by_community_block' => [
+        'variables' => [
+          'communities' => NULL,
+        ],
+      ],
       'manage_community' => [
         'variables' => [
           'community' => NULL,
