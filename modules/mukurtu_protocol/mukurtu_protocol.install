@@ -185,3 +185,20 @@ function mukurtu_protocol_update_40001(): void {
 
   $config->save();
 }
+
+/**
+ * Update community and protocol featured content to use featured view mode.
+ */
+function mukurtu_protocol_update_40002(): void {
+  $configs = [
+    'core.entity_view_display.community.community.full',
+    'core.entity_view_display.protocol.protocol.default',
+  ];
+
+  foreach ($configs as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    $config->set('content.field_featured_content.label', 'hidden');
+    $config->set('content.field_featured_content.settings.view_mode', 'featured');
+    $config->save();
+  }
+}
