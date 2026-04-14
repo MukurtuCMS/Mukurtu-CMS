@@ -97,6 +97,11 @@ function mukurtu_v4_preprocess_block(&$variables) {
  * Implements hook_preprocess_field__community__name__community().
  */
 function mukurtu_v4_preprocess_field__community__name__community(array &$variables): void {
+  // Vary the render cache by URL path — this hook conditionally modifies
+  // output based on the current page, so cached output must not be shared
+  // across different pages.
+  $variables['#cache']['contexts'][] = 'url.path';
+
   $path = \Drupal::service('path.current')->getPath();
   if ($path != '/communities') {
     return;
