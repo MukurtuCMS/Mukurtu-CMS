@@ -68,16 +68,16 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
 function mukurtu_taxonomy_form_taxonomy_term_category_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
   // Change Category title field label.
   $form['name']['widget'][0]['value']['#title'] = t('Category name');
-  $form['name']['widget'][0]['value']['#description'] = t('Enter the name of this category. This is how it will appear throughout the site.');
+  $form['name']['widget'][0]['value']['#description'] = t('Provide the category name. Categories are high-level descriptive terms that help users browse and discover digital heritage items.');
 
   // Add helper text to description field using a markup element.
 if (isset($form['description'])) {
   // Insert help text as a separate element
-  $form['description']['#suffix'] = '<div class="description"><small>Provide a brief explanation of when and how to use this category for organizing content.</small></div>';
+  $form['description']['#suffix'] = '<div class="description"><small>The description is not normally shown to end users. It may be used for internal documentation to clarify or define the content that should be included in the category, or to provide additional details about the category.</small></div>';
 }
   // Add helper text to thumbnail image field.
   if (isset($form['field_thumbnail_image'])) {
-    $form['field_thumbnail_image']['widget']['#description'] = t('Upload an image that represents this category. This image will appear in category browsing interfaces.');
+    $form['field_thumbnail_image']['widget']['#description'] = t('The thumbnail image is used in the "browse by category" page and landing page block. A thumbnail could be a photograph, graphic, or other image that represents the content or concept of the category. If a thumbnail image is not provided, a placeholder graphic will be displayed instead.<br>Note: thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.');
   }
 
   // Add helper text to path field.
