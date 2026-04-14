@@ -121,3 +121,24 @@ function mukurtu_protocol_install() {
   $config->set('enabled_entity_types', $types);
   $config->save();
 }
+
+/**
+ * Remove orphaned community_type field from community browse view display.
+ */
+function mukurtu_protocol_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.community.community.browse');
+
+  $content = $config->get('content');
+  if (isset($content['community_type'])) {
+    unset($content['community_type']);
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden');
+  if (!isset($hidden['community_type'])) {
+    $hidden['community_type'] = TRUE;
+    $config->set('hidden', $hidden);
+  }
+
+  $config->save();
+}

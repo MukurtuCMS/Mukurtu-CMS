@@ -101,6 +101,17 @@ function mukurtu_v4_preprocess_field__community__name__community(array &$variabl
   if ($path != '/communities') {
     return;
   }
+
+  // Get community type label if set.
+  $community = $variables['element']['#object'] ?? NULL;
+  $community_type_label = '';
+  if ($community && $community->hasField('field_community_type') && !$community->field_community_type->isEmpty()) {
+    $term = $community->field_community_type->entity;
+    if ($term) {
+      $community_type_label = $term->label();
+    }
+  }
+
   $truncate_length = 60;
   foreach ($variables['items'] as &$item) {
     if (!isset($item['content']['#title'])) {
@@ -108,8 +119,12 @@ function mukurtu_v4_preprocess_field__community__name__community(array &$variabl
     }
     $value = $item['content']['#title']['#context']['value'];
     if (strlen($value) > $truncate_length) {
-      $item['content']['#title']['#context']['value'] = substr($value, 0, $truncate_length) . '…';
+      $value = substr($value, 0, $truncate_length) . '…';
     }
+    if ($community_type_label) {
+      $value .= ' (' . $community_type_label . ')';
+    }
+    $item['content']['#title']['#context']['value'] = $value;
   }
 }
 
