@@ -122,8 +122,8 @@ function mukurtu_protocol_install() {
   $config->save();
 }
 
-/**
- * Update community form display: show parent/child communities as read-only.
+/*
+  * Update community form display: show parent/child communities as read-only.
  */
 function mukurtu_protocol_update_40001(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.community.community.default');
@@ -184,4 +184,23 @@ function mukurtu_protocol_update_40001(): void {
   $config->set('content.user_id.weight', 13);
 
   $config->save();
+}
+
+/**
+ * Remove orphaned community_type field from community browse view display.
+ */
+function mukurtu_protocol_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.community.community.browse');
+
+  $content = $config->get('content');
+  if (isset($content['community_type'])) {
+    unset($content['community_type']);
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden');
+  if (!isset($hidden['community_type'])) {
+    $hidden['community_type'] = TRUE;
+    $config->set('hidden', $hidden);
+  }
 }
