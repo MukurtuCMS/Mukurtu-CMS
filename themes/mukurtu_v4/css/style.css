@@ -4423,29 +4423,11 @@ header {
 }
 
 .community-page-listing {
-  display: grid;
-  grid-template-columns: var(--grid-6col);
-  padding-inline: var(--layout-padding) var(--layout-padding);
-  -webkit-column-gap: var(--gutter);
-     -moz-column-gap: var(--gutter);
-          column-gap: var(--gutter);
+  padding-inline: var(--layout-padding);
 }
 @media (min-width: 60rem) {
   .community-page-listing {
-    grid-template-columns: var(--grid-12col);
-  }
-}
-@media (min-width: 90rem) {
-  .community-page-listing {
-    grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
-  }
-}
-.community-page-listing .communities {
-  grid-column: 1/-1;
-}
-@media (min-width: 90rem) {
-  .community-page-listing .communities {
-    grid-column: 2/-2;
+    padding-inline: var(--layout-padding-m);
   }
 }
 
