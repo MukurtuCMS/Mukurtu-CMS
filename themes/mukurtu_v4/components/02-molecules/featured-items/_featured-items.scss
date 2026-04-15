@@ -4,6 +4,7 @@
 
 .block-featured-content {
   padding-inline: var(--layout-padding);
+  padding-block-end: var(--v-space-s);
 
   @include include-media.media('>=lg') {
     padding-inline: var(--layout-padding-m);

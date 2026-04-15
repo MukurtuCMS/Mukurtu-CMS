@@ -1044,6 +1044,8 @@ a:not(.primary-nav__menu-link) svg.tel path {
 
 .block-featured-content {
   padding-inline: var(--layout-padding);
+  -webkit-padding-after: var(--v-space-s);
+          padding-block-end: var(--v-space-s);
 }
 @media (min-width: 60rem) {
   .block-featured-content {
