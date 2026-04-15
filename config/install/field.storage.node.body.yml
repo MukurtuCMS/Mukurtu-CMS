@@ -1,0 +1,25 @@
+# Mukurtu provides this config explicitly to ensure compatibility with Drupal
+# 11.3.0+, which no longer installs field.storage.node.body automatically via
+# the node module. The page and article content types (installed via
+# standard_install()) depend on this field storage, as do several
+# mukurtu_solr configs. In Drupal <=11.2 this is a no-op since the node
+# module already provides it; in 11.3+ Mukurtu owns it at the profile level.
+# See: https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1292
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.body
+field_name: body
+entity_type: node
+type: text_with_summary
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: true
+custom_storage: false
