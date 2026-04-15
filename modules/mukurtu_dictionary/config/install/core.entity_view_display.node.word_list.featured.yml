@@ -17,7 +17,7 @@ targetEntityType: node
 bundle: word_list
 mode: featured
 content:
-  field_representative_media:
+  field_word_list_image:
     type: entity_reference_entity_view
     label: hidden
     settings:
