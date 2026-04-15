@@ -68,6 +68,63 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
 function mukurtu_taxonomy_form_taxonomy_term_category_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
   // Change Category title field label.
   $form['name']['widget'][0]['value']['#title'] = t('Category name');
+  $form['name']['widget'][0]['value']['#description'] = t('Provide the category name. Categories are high-level descriptive terms that help users browse and discover digital heritage items.');
+
+  // Add helper text to description field using a markup element.
+if (isset($form['description'])) {
+  // Insert help text as a separate element
+  $form['description']['#suffix'] = '<div class="description"><small>The description is not normally shown to end users. It may be used for internal documentation to clarify or define the content that should be included in the category, or to provide additional details about the category.</small></div>';
+}
+  // Add helper text to thumbnail image field.
+  if (isset($form['field_thumbnail_image'])) {
+    $form['field_thumbnail_image']['widget']['#description'] = t('The thumbnail image is used in the "browse by category" page and landing page block. A thumbnail could be a photograph, graphic, or other image that represents the content or concept of the category. If a thumbnail image is not provided, a placeholder graphic will be displayed instead.<br>Note: thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.');
+  }
+
+  // Add helper text to path field.
+  if (isset($form['path'])) {
+    $form['path']['widget'][0]['#description'] = t('Leave blank to auto-generate a URL path based on the category name. Optionally, enter a custom path.');
+  }
+
+  // Hide the relations field (see issue #204).
+  if (isset($form['relations'])) {
+    $form['relations']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for taxonomy_term_category_delete_form.
+ *
+ * Prevents deletion of a category term that is referenced by digital
+ * heritage items, since field_category is a required field on those items.
+ */
+function mukurtu_taxonomy_form_taxonomy_term_category_delete_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $form['#validate'][] = 'mukurtu_taxonomy_category_term_delete_validate';
+}
+
+/**
+ * Validation handler: blocks category term deletion when DH items reference it.
+ */
+function mukurtu_taxonomy_category_term_delete_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  /** @var \Drupal\taxonomy\TermInterface $term */
+  $term = $form_state->getFormObject()->getEntity();
+
+  $count = \Drupal::entityTypeManager()
+    ->getStorage('node')
+    ->getQuery()
+    ->condition('type', 'digital_heritage')
+    ->condition('field_category', $term->id())
+    ->accessCheck(FALSE)
+    ->count()
+    ->execute();
+
+  if ($count > 0) {
+    $form_state->setError($form, \Drupal::translation()->formatPlural(
+      $count,
+      'The category %name cannot be deleted because it is used by 1 digital heritage item.',
+      'The category %name cannot be deleted because it is used by @count digital heritage items.',
+      ['%name' => $term->label(), '@count' => $count]
+    ));
+  }
 }
 
 /**

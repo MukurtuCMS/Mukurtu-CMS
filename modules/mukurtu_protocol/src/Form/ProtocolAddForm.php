@@ -116,7 +116,7 @@ class ProtocolAddForm extends EntityForm {
     $form['field_membership_display'] = [
       '#type' => 'radios',
       '#title' => $this->t('Membership display'),
-      '#description' => $this->t('TODO: membership display helper text'),
+      '#description' => $this->t('Select which, if any, protocol members to display on the protocol page.'),
       '#options' => [
         'none' => $this->t('Do not display any protocol members'),
         'stewards' => $this->t('Only display cultural protocol stewards'),
@@ -132,7 +132,7 @@ class ProtocolAddForm extends EntityForm {
     $form['protocol_member_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Protocol members'),
-      '#description' => $this->t('Helper text about protocol members.'),
+      '#description' => $this->t('Protocol members can view content but cannot add or edit content.'),
     ];
     $form['protocol_member'] = [
       '#type' => 'entity_browser',
@@ -158,7 +158,7 @@ class ProtocolAddForm extends EntityForm {
     $form['protocol_affiliate_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Protocol affiliates'),
-      '#description' => $this->t('Helper text about protocol affiliates.'),
+      '#description' => $this->t('Protocol affiliates can view content but cannot add or edit. This is a designation for community partners that mirrors the community affiliate role.'),
     ];
     $form['protocol_affiliate'] = [
       '#type' => 'entity_browser',
@@ -184,7 +184,7 @@ class ProtocolAddForm extends EntityForm {
     $form['protocol_contributor_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Contributors'),
-      '#description' => $this->t('Helper text about contributors.'),
+      '#description' => $this->t('Contributors can create, edit and delete their own digital heritage items, person records, place records, and media assets.'),
     ];
     $form['contributor'] = [
       '#type' => 'entity_browser',
@@ -210,7 +210,7 @@ class ProtocolAddForm extends EntityForm {
     $form['protocol_curator_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Curators'),
-      '#description' => $this->t('Helper text about curators.'),
+      '#description' => $this->t('Curators can create, edit and delete their own collections and upload media assets.'),
     ];
     $form['curator'] = [
       '#type' => 'entity_browser',
@@ -236,7 +236,7 @@ class ProtocolAddForm extends EntityForm {
     $form['protocol_community_record_steward_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Community record stewards'),
-      '#description' => $this->t('Helper text about community record stewards'),
+      '#description' => $this->t('Community record stewards can add community records to content, as well as edit and delete their community records.'),
     ];
     $form['community_record_steward'] = [
       '#type' => 'entity_browser',
@@ -262,7 +262,7 @@ class ProtocolAddForm extends EntityForm {
     $form['protocol_language_contributor_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Language contributors'),
-      '#description' => $this->t('Helper text about language contributors.'),
+      '#description' => $this->t('Language contributors can add, edit and delete their own dictionary words and word lists.'),
     ];
     $form['language_contributor'] = [
       '#type' => 'entity_browser',
@@ -288,7 +288,7 @@ class ProtocolAddForm extends EntityForm {
     $form['protocol_language_steward_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Language stewards'),
-      '#description' => $this->t('Helper text about language stewards.'),
+      '#description' => $this->t('Language stewards can add, edit and delete ALL dictionary words and word lists,and add media assets.'),
     ];
     $form['language_steward'] = [
       '#type' => 'entity_browser',
@@ -314,7 +314,7 @@ class ProtocolAddForm extends EntityForm {
     $form['protocol_steward_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Protocol stewards'),
-      '#description' => $this->t('Helper text about protocol stewards.'),
+      '#description' => $this->t('Protocol stewards can manage protocol membership, add edit and delete ALL content and media assets, manage the look and feel of the protocol page, and manage Local Contexts projects.'),
     ];
     $defaultStatus = "<ul>";
     $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";

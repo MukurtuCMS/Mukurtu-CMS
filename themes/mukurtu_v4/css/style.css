@@ -1928,7 +1928,13 @@ details.form-wrapper summary + div {
   color: var(--color-gray);
   margin-block: var(--v-space-4xxs) var(--v-space-6xs);
 }
-
+.local-contexts-projects .tk-labels,
+.local-contexts-projects .bc-labels,
+.local-contexts-projects .notices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--v-space-2xs);
+}
 .local-contexts-projects .tk-label,
 .local-contexts-projects .bc-label,
 .local-contexts-projects .notice {
@@ -1944,7 +1950,7 @@ details.form-wrapper summary + div {
 .local-contexts-projects .tk-label img,
 .local-contexts-projects .bc-label img,
 .local-contexts-projects .notice img {
-  block-size: 8rem;
+  block-size: 6rem;
   -ms-flex-negative: 0;
       flex-shrink: 0;
   -o-object-fit: contain;
@@ -4489,29 +4495,11 @@ header {
 }
 
 .community-page-listing {
-  display: grid;
-  grid-template-columns: var(--grid-6col);
-  padding-inline: var(--layout-padding) var(--layout-padding);
-  -webkit-column-gap: var(--gutter);
-     -moz-column-gap: var(--gutter);
-          column-gap: var(--gutter);
+  padding-inline: var(--layout-padding);
 }
 @media (min-width: 60rem) {
   .community-page-listing {
-    grid-template-columns: var(--grid-12col);
-  }
-}
-@media (min-width: 90rem) {
-  .community-page-listing {
-    grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
-  }
-}
-.community-page-listing .communities {
-  grid-column: 1/-1;
-}
-@media (min-width: 90rem) {
-  .community-page-listing .communities {
-    grid-column: 2/-2;
+    padding-inline: var(--layout-padding-m);
   }
 }
 

@@ -5,11 +5,11 @@ mukurtu_taxonomy.manage_vocabularies:
   menu_name: dashboard-taxonomies
   route_name: mukurtu_taxonomy.add_page
 mukurtu_taxonomy.manage_categories:
-  title: 'Manage categories.'
+  title: 'Manage categories'
   description: 'Manage all categories.'
   parent: mukurtu_dashboard
   menu_name: dashboard-3Cs
-  route_name: mukurtu_taxonomy.manage_categories
+  url: 'internal:/admin/structure/taxonomy/manage/category/overview'
 mukurtu_taxonomy.person_record_settings_dashboard:
   title: "Person record settings"
   menu_name: dashboard-content-settings
