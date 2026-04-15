@@ -47,8 +47,23 @@
     min-inline-size: calc(46.5vw + 1rem);
   }
 
-  .field--name-field-featured-content {
+  .featured-content__heading {
     margin-block-start: var(--v-space-l);
+    margin-block-end: var(--v-space-2xs);
+  }
+
+  .field--name-field-featured-content {
+    margin-block-start: 0;
+
+    // Cap at 3 columns — community/protocol pages have a sidebar
+    @include include-media.media('>=xl') {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    // No audio player on community/protocol cards — let thumbnail fill the full media area
+    .featured-item__media .media--audio {
+      padding-block-start: 0;
+    }
   }
 }
 

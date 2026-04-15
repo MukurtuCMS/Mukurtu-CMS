@@ -36,7 +36,9 @@
     {% endif %}
   </div>
 
+  {% if not skip_player %}
   <div class="media__audio-player">
     {{ content.field_media_audio_file }}
   </div>
+  {% endif %}
 </div>
