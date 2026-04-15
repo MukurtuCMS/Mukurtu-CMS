@@ -171,12 +171,10 @@ class DefaultLandingPage {
       $uuid_generator->generate(),
       'content',
       [
-        'id' => 'views_block:browse_by_community-community_browse_block',
+        'id' => 'mukurtu_browse_by_community',
         'label' => 'Browse by Community',
         'label_display' => 1,
-        'provider' => 'views',
-        'views_label' => '',
-        'items_per_page' => 'none',
+        'provider' => 'mukurtu_protocol',
       ]
     );
     $community_component->setWeight(3); // Fourth block
