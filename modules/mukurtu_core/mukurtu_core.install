@@ -391,8 +391,8 @@ function mukurtu_core_update_40006(): void {
   $view->save();
 }
 
-/*
-  * Install readonly_field_widget module.
+/**
+ * Install readonly_field_widget module.
  */
 function mukurtu_core_update_40007(): void {
   \Drupal::service('module_installer')->install(['readonly_field_widget']);
