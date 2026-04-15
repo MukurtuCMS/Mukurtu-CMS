@@ -121,3 +121,130 @@ function mukurtu_protocol_install() {
   $config->set('enabled_entity_types', $types);
   $config->save();
 }
+
+/*
+  * Update community form display: show parent/child communities as read-only.
+ */
+function mukurtu_protocol_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.community.community.default');
+
+  // Add readonly_field_widget to config dependencies.
+  $dependencies = $config->get('dependencies.module');
+  if (!in_array('readonly_field_widget', $dependencies)) {
+    $dependencies[] = 'readonly_field_widget';
+    sort($dependencies);
+    $config->set('dependencies.module', $dependencies);
+  }
+
+  // Switch field_child_communities from entity_reference_autocomplete to
+  // readonly_field_widget.
+  $config->set('content.field_child_communities', [
+    'type' => 'readonly_field_widget',
+    'weight' => 11,
+    'region' => 'content',
+    'settings' => [
+      'label' => 'above',
+      'formatter_type' => 'entity_reference_label',
+      'formatter_settings' => [
+        'entity_reference_label' => ['link' => TRUE],
+      ],
+      'show_description' => FALSE,
+      'error_validation' => FALSE,
+    ],
+    'third_party_settings' => [],
+  ]);
+
+  // Move field_parent_community from hidden to visible as readonly_field_widget.
+  $config->set('content.field_parent_community', [
+    'type' => 'readonly_field_widget',
+    'weight' => 10,
+    'region' => 'content',
+    'settings' => [
+      'label' => 'above',
+      'formatter_type' => NULL,
+      'formatter_settings' => [],
+      'show_description' => FALSE,
+      'error_validation' => FALSE,
+    ],
+    'third_party_settings' => [],
+  ]);
+  $config->clear('hidden.field_parent_community');
+
+  // Hide revision fields.
+  $config->set('hidden.create_new_revision', TRUE);
+  $config->set('hidden.revision_log', TRUE);
+
+  // Update field weights.
+  $config->set('content.field_banner_image.weight', 6);
+  $config->set('content.field_community_type.weight', 9);
+  $config->set('content.field_featured_content.weight', 8);
+  $config->set('content.field_membership_display.weight', 5);
+  $config->set('content.field_thumbnail_image.weight', 7);
+  $config->set('content.path.weight', 12);
+  $config->set('content.user_id.weight', 13);
+
+  $config->save();
+}
+
+/**
+ * Replace the Views-based browse by community block with the custom block plugin
+ * on existing landing page nodes so sub-communities are filtered out.
+ */
+function mukurtu_protocol_update_40002(): void {
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+  $nids = $node_storage->getQuery()
+    ->condition('type', 'landing_page')
+    ->accessCheck(FALSE)
+    ->execute();
+
+  foreach ($nids as $nid) {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $node_storage->load($nid);
+    if (!$node->hasField('layout_builder__layout')) {
+      continue;
+    }
+
+    $changed = FALSE;
+    $sections = $node->get('layout_builder__layout')->getSections();
+
+    foreach ($sections as $section) {
+      foreach ($section->getComponents() as $component) {
+        $config = $component->getConfiguration();
+        if (($config['id'] ?? '') === 'views_block:browse_by_community-community_browse_block') {
+          $component->setConfiguration([
+            'id' => 'mukurtu_browse_by_community',
+            'label' => $config['label'] ?? 'Browse by Community',
+            'label_display' => $config['label_display'] ?? '0',
+            'provider' => 'mukurtu_protocol',
+            'context_mapping' => $config['context_mapping'] ?? [],
+          ]);
+          $changed = TRUE;
+        }
+      }
+    }
+
+    if ($changed) {
+      $node->set('layout_builder__layout', $sections);
+      $node->save();
+    }
+  }
+}
+/**    
+ * Remove orphaned community_type field from community browse view display.
+ */
+function mukurtu_protocol_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.community.community.browse');
+
+  $content = $config->get('content');
+  if (isset($content['community_type'])) {
+    unset($content['community_type']);
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden');
+  if (!isset($hidden['community_type'])) {
+    $hidden['community_type'] = TRUE;
+    $config->set('hidden', $hidden);
+  }
+}

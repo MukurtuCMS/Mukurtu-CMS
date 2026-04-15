@@ -4,3 +4,24 @@
  * @file
  * Install, update and uninstall functions for the mukurtu_media module.
  */
+
+/**
+ * Hide field_media_document in document media browse and media_library view modes.
+ */
+function mukurtu_media_update_40001(): void {
+  foreach (['browse', 'media_library'] as $mode) {
+    $config = \Drupal::configFactory()->getEditable("core.entity_view_display.media.document.{$mode}");
+    if ($config->isNew()) {
+      continue;
+    }
+    $content = $config->get('content') ?? [];
+    if (isset($content['field_media_document'])) {
+      unset($content['field_media_document']);
+      $config->set('content', $content);
+      $hidden = $config->get('hidden') ?? [];
+      $hidden['field_media_document'] = TRUE;
+      $config->set('hidden', $hidden);
+      $config->save();
+    }
+  }
+}

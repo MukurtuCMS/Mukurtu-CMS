@@ -526,3 +526,43 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
     'url' => 'route:<nolink>',
   ];
 }
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function mukurtu_core_views_data_alter(array &$data)
+{
+  if (isset($data['paragraphs_item_field_data'])) {
+    // Add the parent type field to Views.
+    $data['paragraphs_item_field_data']['parent_type'] = [
+      'title' => t('Parent type'),
+      'field' => [
+        'id' => 'paragraph_parent_type',
+      ],
+    ];
+    // Add the parent name field to Views.
+    $data['paragraphs_item_field_data']['parent_name'] = [
+      'title' => t('Parent name'),
+      'field' => [
+        'id' => 'paragraph_parent_name',
+      ],
+    ];
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view().
+ *
+ * Provided by Nate Lampton, see
+ * https://github.com/MukurtuCMS/Mukurtu-CMS/issues/775#issuecomment-2763105092.
+ */
+function mukurtu_core_preprocess_views_view(&$variables)
+{
+  // Add entity browser library tweaks when appropriate.
+  $affected_views = [
+    'mukurtu_content_browser'
+  ];
+  if (in_array($variables['view']->id(), $affected_views)) {
+    $variables['view_array']['#attached']['library'][] = 'mukurtu_core/entity_browser_view_decoration';
+  }
+}

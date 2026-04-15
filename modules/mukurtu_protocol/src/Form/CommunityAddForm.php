@@ -43,7 +43,7 @@ class CommunityAddForm extends ContentEntityForm {
 
     foreach (Element::children($form) as $key) {
       if (!in_array($key, $allow_list)) {
-        $form[$key]['#access'] = FALSE;
+        unset($form[$key]);
       }
     }
 
@@ -59,7 +59,7 @@ class CommunityAddForm extends ContentEntityForm {
     $form['community_member_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Community members'),
-      '#description' => $this->t('Helper text about community members.'),
+      '#description' => $this->t('Community members can view the community page and be added to protocols within the community.'),
       '#weight' => '1001',
       '#access' => $this->isDefaultFormLangcode($form_state),
     ];
@@ -88,7 +88,7 @@ class CommunityAddForm extends ContentEntityForm {
     $form['community_affiliate_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Community affiliates'),
-      '#description' => $this->t('Helper text about community affiliates.'),
+      '#description' => $this->t('Community affiliates can view the community page and be added to protocols within the community. This is a designation for community partners.'),
       '#weight' => '1003',
       '#access' => $this->isDefaultFormLangcode($form_state),
     ];
@@ -117,7 +117,7 @@ class CommunityAddForm extends ContentEntityForm {
     $form['community_manager_item'] = [
       '#type' => 'item',
       '#title' => $this->t('Community managers'),
-      '#description' => $this->t('Helper text about community managers.'),
+      '#description' => $this->t('Community managers can manage community information and membership, and create new protocols.'),
       '#weight' => '1005',
       '#access' => $this->isDefaultFormLangcode($form_state),
     ];
