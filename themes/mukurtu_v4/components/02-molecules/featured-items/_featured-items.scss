@@ -13,85 +13,171 @@
 .field--name-field-featured-content,
 .field--name-field-all-related-content .field__items {
   margin-block: var(--v-space-4xxs);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gutter);
 
-  @include layout.layout--threecol-grid;
+  @include include-media.media('>=md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include include-media.media('>=lg') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @include include-media.media('>=xl') {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 
   .field__item {
     position: relative;
 
-    .featured-item__link {
-      @include mixins.button-arrow;
+    article {
+      block-size: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-white);
 
-      position: absolute;
-      inset-block-start: 0;
-      inset-inline-start: 0;
-      z-index: 5;
+    }
+  }
+
+  .featured-item__media {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background-color: var(--brand-light);
+    flex-shrink: 0;
+
+    .media,
+    .media .field {
+      block-size: 100%;
     }
 
-    .featured-item__media {
-      block-size: 280px;
-      background-color: var(--brand-light);
+    img {
+      block-size: 100%;
+      object-fit: cover;
+      inline-size: 100%;
+    }
 
-      .media,
-      .media .field {
+    // Lift interactive media above the card-link ::after overlay so players remain usable.
+    // Images are left beneath the overlay so clicking them navigates to the content.
+    video,
+    audio,
+    .media--remote_video,
+    .media__audio-player {
+      position: relative;
+      z-index: 1;
+    }
+
+    video {
+      inline-size: 100%;
+      block-size: 100%;
+    }
+
+    .media--remote_video {
+      inline-size: 100%;
+      block-size: 100%;
+
+      // stylelint-disable-next-line no-descending-specificity
+      .field, iframe {
+        inline-size: 100%;
         block-size: 100%;
       }
+    }
 
-      img {
-        block-size: 100%;
-        object-fit: cover;
-        inline-size: 100%;
-      }
+    .media--audio {
+      block-size: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--brand-secondary-accent);
+      padding-block-start: var(--v-space-4xs);
 
-      video {
-        inline-size: 100%;
-        block-size: 100%;
-      }
-
-      .media--remote_video {
-        inline-size: 100%;
-        block-size: 100%;
+      .media__thumbnail {
+        flex: 1;
+        min-block-size: 0;
+        overflow: hidden;
 
         // stylelint-disable-next-line no-descending-specificity
-        .field, iframe {
-          inline-size: 100%;
+        img {
           block-size: 100%;
+          inline-size: 100%;
+          object-fit: cover;
         }
-      }
 
-      .media--audio {
-        background: var(--brand-secondary-accent);
-
-        // stylelint-disable-next-line no-descending-specificity
-        .field {
+        .media__audio-fallback {
+          block-size: 100%;
           display: flex;
           justify-content: center;
           align-items: center;
-          padding-inline: var(--v-space-2xs);
+          background: var(--brand-secondary-accent);
+
+          // stylelint-disable-next-line no-descending-specificity
+          img {
+            block-size: auto;
+            max-block-size: 100%;
+            inline-size: auto;
+            object-fit: contain;
+          }
         }
       }
-    }
 
-    .featured-item__type {
-      font-size: var(--font-size-s);
-      font-weight: 800;
-      text-align: center;
-    }
-
-    h3 {
-      font-size: var(--font-size-xl);
-      font-weight: 400;
-      margin-block-end: var(--v-space-2xs);
-      text-align: center;
-
-      a {
-        text-decoration: none;
-
-        &:hover {
-          text-decoration: underline;
-          filter: brightness(1.2);
-        }
+      .media__audio-player {
+        flex-shrink: 0;
+        padding-inline: var(--v-space-2xs);
+        padding-block: var(--v-space-5xs);
       }
     }
   }
+
+  .featured-item__body {
+    padding-block: var(--v-space-5xs) var(--v-space-4xxs);
+    padding-inline: var(--v-space-4xxs);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background: var(--brand-primary-accent);
+  }
+
+  .featured-item__type {
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-label);
+    color: var(--color-white);
+    opacity: 0.8;
+    margin-block-end: var(--v-space-6xs);
+  }
+
+  h3 {
+    font-size: var(--font-size-m);
+    font-weight: var(--text-bold);
+    line-height: var(--line-height-3xs);
+    margin-block-end: var(--v-space-5xs);
+    flex: 1;
+
+    .featured-item__title-link {
+      text-decoration: none;
+      color: var(--color-white);
+
+      // Card-link pattern: stretch to cover the entire .field__item
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+      }
+
+      // stylelint-disable-next-line no-descending-specificity
+      &:focus-visible {
+        outline: 2px solid var(--focus-color);
+        outline-offset: 2px;
+      }
+
+      // stylelint-disable-next-line no-descending-specificity
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
 }
+
