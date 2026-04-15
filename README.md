@@ -36,12 +36,6 @@ ddev launch
 
 If installing directly on a web host that has a command line interface, you can install Mukurtu via composer.
 
-**Database requirement:** Create your database using the `utf8mb4` character set and `utf8mb4_general_ci` collation. Using plain `utf8` can cause issues with content that includes characters outside the Basic Multilingual Plane (e.g. emoji). This follows [Drupal's recommendation](https://www.drupal.org/docs/getting-started/system-requirements/database-server-requirements) for MySQL/MariaDB:
-
-```sql
-CREATE DATABASE mukurtu CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-```
-
 * First, [install composer](https://getcomposer.org/download/). If you do not have it already, it can be downloaded into a directory with the following:
 ```
 wget https://raw.githubusercontent.com/composer/getcomposer.org/main/web/installer -O - -q | php -- --quiet

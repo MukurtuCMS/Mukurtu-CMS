@@ -29,21 +29,6 @@ function mukurtu_install() {
   include_once DRUPAL_ROOT . '/core/profiles/standard/standard.install';
   standard_install();
 
-  // Remove article content permissions granted by standard_install().
-  $article_permissions = [
-    'create article content',
-    'delete article revisions',
-    'delete own article content',
-    'edit own article content',
-  ];
-  $content_editor = Role::load('content_editor');
-  if ($content_editor) {
-    foreach ($article_permissions as $permission) {
-      $content_editor->revokePermission($permission);
-    }
-    $content_editor->save();
-  }
-
   // Uninstall search.
   \Drupal::service('module_installer')->uninstall(['search']);
 
@@ -839,25 +824,6 @@ function mukurtu_install() {
   //   $block->save();
   // }
 
-}
-
-/**
- * Remove article content permissions from the content_editor role.
- */
-function mukurtu_update_40002(): void {
-  $article_permissions = [
-    'create article content',
-    'delete article revisions',
-    'delete own article content',
-    'edit own article content',
-  ];
-  $content_editor = Role::load('content_editor');
-  if ($content_editor) {
-    foreach ($article_permissions as $permission) {
-      $content_editor->revokePermission($permission);
-    }
-    $content_editor->save();
-  }
 }
 
 /**
