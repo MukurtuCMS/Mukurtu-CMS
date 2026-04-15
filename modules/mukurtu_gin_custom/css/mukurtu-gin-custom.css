@@ -26,3 +26,14 @@ counterpart, if one exists. */
     text-overflow: ellipsis;
     overflow: visible !important;
 }
+
+/* Fix Layout Builder settings menu blocking block contextual/edit links (#1385).
+   The gin_lb configure and region-label links are absolutely positioned at
+   z-index:1 and can cover block contextual links in DDEV/production environments. */
+.layout-builder .contextual {
+    z-index: 3;
+}
+
+.layout-builder__region {
+    overflow: visible;
+}

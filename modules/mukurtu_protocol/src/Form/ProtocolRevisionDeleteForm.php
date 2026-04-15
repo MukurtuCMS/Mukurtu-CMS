@@ -79,7 +79,7 @@ class ProtocolRevisionDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $protocol_revision = NULL) {
-    $this->revision = $this->ProtocolStorage->loadRevision($protocol_revision);
+    $this->revision = $this->protocolStorage->loadRevision($protocol_revision);
     $form = parent::buildForm($form, $form_state);
 
     return $form;
@@ -89,7 +89,7 @@ class ProtocolRevisionDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->ProtocolStorage->deleteRevision($this->revision->getRevisionId());
+    $this->protocolStorage->deleteRevision($this->revision->getRevisionId());
 
     $this->logger('content')->notice('Protocol: deleted %title revision %revision.', ['%title' => $this->revision->label(), '%revision' => $this->revision->getRevisionId()]);
     $this->messenger()->addMessage(t('Revision from %revision-date of Protocol %title has been deleted.', ['%revision-date' => \Drupal::service('date.formatter')->format($this->revision->getRevisionCreationTime()), '%title' => $this->revision->label()]));

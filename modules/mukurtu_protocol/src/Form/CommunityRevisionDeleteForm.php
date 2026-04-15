@@ -79,7 +79,7 @@ class CommunityRevisionDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $community_revision = NULL) {
-    $this->revision = $this->CommunityStorage->loadRevision($community_revision);
+    $this->revision = $this->communityStorage->loadRevision($community_revision);
     $form = parent::buildForm($form, $form_state);
 
     return $form;
@@ -89,7 +89,7 @@ class CommunityRevisionDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->CommunityStorage->deleteRevision($this->revision->getRevisionId());
+    $this->communityStorage->deleteRevision($this->revision->getRevisionId());
 
     $this->logger('content')->notice('Community: deleted %title revision %revision.', ['%title' => $this->revision->label(), '%revision' => $this->revision->getRevisionId()]);
     $this->messenger()->addMessage(t('Revision from %revision-date of Community %title has been deleted.', ['%revision-date' => \Drupal::service('date.formatter')->format($this->revision->getRevisionCreationTime()), '%title' => $this->revision->label()]));
