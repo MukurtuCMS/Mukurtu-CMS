@@ -136,9 +136,16 @@ function mukurtu_core_update_40003(): void {
 }
 
 /**
-* Set tagify default widget setting.
+ * Enable flat_taxonomy module.
  */
 function mukurtu_core_update_40004(): void {
+  \Drupal::service('module_installer')->install(['flat_taxonomy']);
+ }
+ 
+/**
+ * Set tagify default widget setting.
+ */
+function mukurtu_core_update_40005(): void {
   $config = \Drupal::configFactory()->getEditable('tagify.settings');
   $config->set('set_default_widget', TRUE)->save();
 }
@@ -146,14 +153,14 @@ function mukurtu_core_update_40004(): void {
 /**
  * Install genpass and notify_user_default modules.
  */
-function mukurtu_core_update_40005(): void {
+function mukurtu_core_update_40006(): void {
   \Drupal::service('module_installer')->install(['genpass', 'notify_user_default']);
 }
 
 /**
  * Add author, status, and updated fields to the content browser view.
  */
-function mukurtu_core_update_40006(): void {
+function mukurtu_core_update_40007(): void {
   $view = \Drupal\views\Entity\View::load('mukurtu_content_browser');
   if (!$view) {
     return;
@@ -394,14 +401,14 @@ function mukurtu_core_update_40006(): void {
 /*
  * Install readonly_field_widget module.
  */
-function mukurtu_core_update_40007(): void {
+function mukurtu_core_update_40008(): void {
   \Drupal::service('module_installer')->install(['readonly_field_widget']);
 }
 
 /**
  * Install the mukurtu_all_paragraphs view.
  */
-function mukurtu_core_update_40008(): void {
+function mukurtu_core_update_40009(): void {
   $config_installer = \Drupal::service('config.installer');
   $config_installer->installDefaultConfig('module', 'mukurtu_core');
 }
