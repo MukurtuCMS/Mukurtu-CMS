@@ -528,6 +528,118 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
 }
 
 /**
+ * Mukurtu-specific node fields to expose as tokens.
+ *
+ * Shared by hook_token_info_alter() and hook_tokens().
+ */
+function mukurtu_core_token_fields(): array {
+  return [
+    // Digital Heritage fields.
+    'field_creator'                => t('Creator'),
+    'field_contributor'            => t('Contributor'),
+    'field_publisher'              => t('Publisher'),
+    'field_people'                 => t('People'),
+    'field_keywords'               => t('Keywords'),
+    'field_subject'                => t('Subject'),
+    'field_language'               => t('Language'),
+    'field_source'                 => t('Source'),
+    'field_format'                 => t('Format'),
+    'field_type'                   => t('Type'),
+    'field_identifier'             => t('Identifier'),
+    'field_description'            => t('Description'),
+    'field_cultural_narrative'     => t('Cultural Narrative'),
+    'field_traditional_knowledge'  => t('Traditional Knowledge'),
+    'field_date_description'       => t('Date Description'),
+    'field_category'               => t('Category'),
+    'field_summary'                => t('Summary'),
+    'field_original_date'          => t('Original Date (Mukurtu)'),
+    'field_coverage'               => t('Coverage'),
+    'field_coverage_description'   => t('Coverage Description'),
+    'field_transcription'          => t('Transcription'),
+    // Dictionary Word fields.
+    'field_translation'            => t('Translation'),
+    'field_definition'             => t('Definition'),
+    'field_word_type'              => t('Word Type'),
+    'field_pronunciation'          => t('Pronunciation'),
+    'field_alternate_spelling'     => t('Alternate Spelling'),
+    'field_glossary_entry'         => t('Glossary Entry'),
+  ];
+}
+
+/**
+ * Implements hook_token_info_alter().
+ *
+ * Registers Mukurtu custom field tokens under the existing 'node' token type
+ * so they appear in the token tree on the citation settings form (#1386).
+ */
+function mukurtu_core_token_info_alter(&$data) {
+  foreach (mukurtu_core_token_fields() as $field_name => $label) {
+    $data['tokens']['node'][$field_name] = [
+      'name' => $label,
+      'description' => t('The @label field value (Mukurtu).', ['@label' => $label]),
+    ];
+  }
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function mukurtu_core_tokens($type, $tokens, array $data, array $options, \Drupal\Core\Render\BubbleableMetadata $bubbleable_metadata) {
+  $replacements = [];
+
+  if ($type !== 'node' || empty($data['node'])) {
+    return $replacements;
+  }
+
+  $node = $data['node'];
+  $bubbleable_metadata->addCacheableDependency($node);
+
+  foreach (mukurtu_core_token_fields() as $field_name => $label) {
+    if (!isset($tokens[$field_name])) {
+      continue;
+    }
+    if (!$node->hasField($field_name)) {
+      continue;
+    }
+    $replacements[$tokens[$field_name]] = mukurtu_core_token_field_value($node->get($field_name));
+  }
+
+  return $replacements;
+}
+
+/**
+ * Returns a plain-text string for a field item list.
+ *
+ * Entity reference fields (taxonomy terms, nodes, etc.) produce a
+ * comma-separated list of entity labels. Text and string fields produce
+ * their plain-text value with HTML stripped.
+ */
+function mukurtu_core_token_field_value(\Drupal\Core\Field\FieldItemListInterface $field): string {
+  if ($field->isEmpty()) {
+    return '';
+  }
+
+  $field_type = $field->getFieldDefinition()->getType();
+
+  if (in_array($field_type, ['entity_reference', 'entity_reference_revisions'])) {
+    $labels = [];
+    foreach ($field->referencedEntities() as $entity) {
+      $labels[] = $entity->label();
+    }
+    return implode(', ', $labels);
+  }
+
+  $values = [];
+  foreach ($field as $item) {
+    $raw = $item->value ?? $item->getString();
+    if ($raw !== '' && $raw !== NULL) {
+      $values[] = strip_tags((string) $raw);
+    }
+  }
+  return implode(', ', $values);
+}
+
+/**
  * Implements hook_views_data_alter().
  */
 function mukurtu_core_views_data_alter(array &$data)
