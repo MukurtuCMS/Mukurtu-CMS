@@ -401,7 +401,7 @@ function mukurtu_core_update_40007(): void {
 /**
  * Install the mukurtu_all_paragraphs view.
  */
-function mukurtu_core_update_40007(): void {
+function mukurtu_core_update_40008(): void {
   $config_installer = \Drupal::service('config.installer');
   $config_installer->installDefaultConfig('module', 'mukurtu_core');
 }
