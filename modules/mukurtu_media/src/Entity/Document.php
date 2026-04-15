@@ -220,7 +220,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
           $resultCode = -1;
 
           // Check if pdftotext exists.
-          exec($cmd, $output, $resultCode);
+          exec($cmd . ' 2>/dev/null', $output, $resultCode);
 
           if ($resultCode == 127) {
             // If pdftotext has not been installed, exit.
@@ -324,7 +324,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
     $tempThumbnailDest = $tmpDir . '/' . $thumbnailName;
 
     // Verify that pdftoppm is installed.
-    exec('pdftoppm --help', $output, $resultCode);
+    exec('pdftoppm --help 2>/dev/null', $output, $resultCode);
     if ($resultCode === 127) {
       return NULL;
     }
