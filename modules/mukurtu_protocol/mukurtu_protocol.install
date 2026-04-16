@@ -247,7 +247,7 @@ function mukurtu_protocol_update_40003(): void {
     }
   }
 }
-/**    
+/**
  * Remove orphaned community_type field from community browse view display.
  */
 function mukurtu_protocol_update_40004(): void {
@@ -263,5 +263,25 @@ function mukurtu_protocol_update_40004(): void {
   if (!isset($hidden['community_type'])) {
     $hidden['community_type'] = TRUE;
     $config->set('hidden', $hidden);
+  }
+}
+
+/**
+ * Update community and protocol featured content field to use featured view
+ * mode with hidden label.
+ */
+function mukurtu_protocol_update_40005(): void {
+  foreach ([
+    'core.entity_view_display.community.community.full',
+    'core.entity_view_display.protocol.protocol.default',
+  ] as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    $content = $config->get('content');
+
+    if (isset($content['field_featured_content'])) {
+      $content['field_featured_content']['label'] = 'hidden';
+      $content['field_featured_content']['settings']['view_mode'] = 'featured';
+      $config->set('content', $content)->save();
+    }
   }
 }
