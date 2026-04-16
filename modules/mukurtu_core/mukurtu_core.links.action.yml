@@ -1,6 +1,6 @@
 mukurtu_core.user_admin_create:
   route_name: user.admin_create
-  title: '+ Add User'
+  title: 'Add User'
   appears_on:
     - mukurtu_core.people
     - mukurtu_core.manage_users
@@ -8,7 +8,7 @@ mukurtu_core.user_admin_create:
     - view.mukurtu_people.page_1
 mukurtu_core.community_manager_create_user:
   route_name: mukurtu_protocol.community_manager_create_user
-  title: '+ Add User: Community Roles Only'
+  title: 'Add User: Community Roles Only'
   appears_on:
     - view.mukurtu_people.page_1
 mukurtu_core.add_media:
