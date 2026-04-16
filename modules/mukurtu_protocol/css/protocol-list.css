@@ -1,0 +1,74 @@
+/**
+ * Styles for the hierarchical protocol list at /admin/communities-protocols.
+ */
+
+/* Community rows */
+tr.community-row td {
+  font-weight: bold;
+  border-top: 2px solid var(--gin-border-color, #ccc);
+}
+
+tr.community-row:first-child td {
+  border-top: none;
+}
+
+/* Depth-based indentation on the community name cell */
+tr.community-row.depth-1 td:first-child {
+  padding-left: 2em;
+}
+
+tr.community-row.depth-2 td:first-child {
+  padding-left: 4em;
+}
+
+/* Protocol list inside community rows */
+tr.community-row ul,
+tr.community-row ul ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+tr.community-row li::marker {
+  content: none;
+}
+
+tr.community-row .item-list li {
+  margin: 0 0 0.25em 0;
+  padding: 0;
+}
+
+/* Inline name + operations button layout.
+ * The operations button is last in the DOM (after the name) for screen reader
+ * context, but moved visually to the left via order: -1. */
+.name-ops-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.name-ops-wrapper .dropbutton-wrapper {
+  order: -1;
+  margin: 0;
+}
+
+/* Focus-visible styles scoped to each depth background.
+ * Outline colour #003ecc provides at least 3:1 contrast against all
+ * depth-level backgrounds in both light and dark mode. */
+tr.community-row a:focus-visible,
+tr.community-row button:focus-visible {
+  outline: 3px solid #003ecc;
+  outline-offset: 2px;
+}
+
+html.gin--dark-mode tr.community-row a:focus-visible,
+html.gin--dark-mode tr.community-row button:focus-visible {
+  outline-color: #7ab8f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  tr.community-row a:focus-visible,
+  tr.community-row button:focus-visible {
+    outline-color: #7ab8f5;
+  }
+}
