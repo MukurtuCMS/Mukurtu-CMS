@@ -836,3 +836,72 @@ function mukurtu_update_40001() {
     ->save();
 }
 
+/**
+ * Revert audio browse view mode to hide field_thumbnail; create
+ * digital_heritage_sidebar view display for audio with thumbnail + player.
+ */
+function mukurtu_update_40002(): void {
+  // Revert any field_thumbnail exposure in the browse view mode.
+  $browse = \Drupal::configFactory()->getEditable(
+    'core.entity_view_display.media.audio.browse'
+  );
+  $content = $browse->get('content');
+  unset($content['field_thumbnail']);
+  $browse->set('content', $content);
+  $hidden = $browse->get('hidden') ?? [];
+  $hidden['field_thumbnail'] = TRUE;
+  $browse->set('hidden', $hidden);
+  $browse->save();
+
+  // Create the digital_heritage_sidebar view display for audio if it doesn't
+  // already exist.
+  $storage = \Drupal::entityTypeManager()
+    ->getStorage('entity_view_display');
+  if (!$storage->load('media.audio.digital_heritage_sidebar')) {
+    $storage->create([
+      'targetEntityType' => 'media',
+      'bundle' => 'audio',
+      'mode' => 'digital_heritage_sidebar',
+      'status' => TRUE,
+      'content' => [
+        'field_thumbnail' => [
+          'type' => 'image',
+          'label' => 'hidden',
+          'settings' => [
+            'image_link' => '',
+            'image_style' => 'carousel_thumbnail',
+            'image_loading' => ['attribute' => 'lazy'],
+          ],
+          'third_party_settings' => [],
+          'weight' => 0,
+          'region' => 'content',
+        ],
+        'field_media_audio_file' => [
+          'type' => 'file_audio',
+          'label' => 'hidden',
+          'settings' => [
+            'controls' => TRUE,
+            'autoplay' => FALSE,
+            'loop' => FALSE,
+            'multiple_file_display_type' => 'tags',
+          ],
+          'third_party_settings' => ['blazy' => ['blazy' => FALSE]],
+          'weight' => 1,
+          'region' => 'content',
+        ],
+      ],
+    ])->save();
+  }
+}
+
+/**
+ * Update digital heritage featured view mode to use digital_heritage_sidebar
+ * for representative media so featured cards show thumbnail above audio player.
+ */
+function mukurtu_update_40003(): void {
+  \Drupal::configFactory()
+    ->getEditable('core.entity_view_display.node.digital_heritage.featured')
+    ->set('content.field_representative_media.settings.view_mode', 'digital_heritage_sidebar')
+    ->save();
+}
+
