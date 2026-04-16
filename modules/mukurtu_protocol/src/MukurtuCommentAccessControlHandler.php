@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_protocol;
 
 use Drupal\comment\CommentAccessControlHandler;
 use Drupal\comment\CommentInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
@@ -51,14 +52,25 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
     // See if the user has protocol level comment admin.
     $protocols = $entity->getProtocolEntities();
     $protocol_comment_admin = TRUE;
+    $cacheability = new CacheableMetadata();
+    $cacheability->addCacheableDependency($entity);
     foreach ($protocols as $protocol) {
       $membership = $protocol->getMembership($account);
+      if (!$membership) {
+        $protocol_comment_admin = FALSE;
+        // No membership found; tag with user:{id} so this cached result is
+        // invalidated if the user gains a protocol membership later.
+        $cacheability->addCacheTags(["user:{$account->id()}"]);
+        break;
+      }
+      // Carry the membership so role changes auto-invalidate this result.
+      $cacheability->addCacheableDependency($membership);
       $protocol_comment_admin = $protocol_comment_admin && $membership->hasPermission('administer comments');
     }
 
     return AccessResult::allowedIf($protocol_comment_admin && !$entity->isPublished())
       ->cachePerPermissions()
-      ->addCacheableDependency($entity);
+      ->addCacheableDependency($cacheability);
   }
 
   /**
