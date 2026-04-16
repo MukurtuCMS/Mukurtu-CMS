@@ -11,6 +11,7 @@ To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu
 
 * The necessary database server, web server, and PHP installed that meet [modern Drupal requirements](https://www.drupal.org/docs/system-requirements)
 * [Composer](https://getcomposer.org/)
+* To generate PDF thumbnails, [poppler-utils](https://pypi.org/project/poppler-utils/) must be installed on the server.
 * For local development, we encourage using [Docker](https://ddev.readthedocs.io/en/stable/users/install/docker-installation/) and [DDEV](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/) (which includes composer)
 
 ## Install Mukurtu with DDEV
