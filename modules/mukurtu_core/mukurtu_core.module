@@ -90,6 +90,11 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       }
     }
     if ($can_manage) {
+      $is_site_admin = $account->hasPermission('administer users');
+      $target_is_protected = !empty(array_intersect(
+        \Drupal\mukurtu_core\Controller\MukurtuUserController::PROTECTED_ROLES,
+        $entity->getRoles()
+      ));
       $status = $entity->get('status')->value;
       if ($status == 0) {
         $operations['approve_user'] = [
@@ -99,7 +104,7 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
           'attributes' => ['class' => ['use-ajax']],
         ];
       }
-      else {
+      elseif ($is_site_admin || !$target_is_protected) {
         $operations['block_user'] = [
           'title' => t('Block User'),
           'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
