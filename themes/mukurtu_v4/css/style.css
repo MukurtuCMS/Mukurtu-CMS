@@ -1232,7 +1232,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .field--name-field-all-related-content .field__items h3 {
   font-size: var(--font-size-m);
   font-weight: var(--text-bold);
-  line-height: var(--line-height-3xs);
+  line-height: var(--line-height-xs);
   -webkit-margin-after: var(--v-space-5xs);
           margin-block-end: var(--v-space-5xs);
   -webkit-box-flex: 1;
