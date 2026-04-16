@@ -187,10 +187,27 @@ function mukurtu_protocol_update_40001(): void {
 }
 
 /**
+ * Update community and protocol featured content to use featured view mode.
+ */
+function mukurtu_protocol_update_40002(): void {
+  $configs = [
+    'core.entity_view_display.community.community.full',
+    'core.entity_view_display.protocol.protocol.default',
+  ];
+
+  foreach ($configs as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    $config->set('content.field_featured_content.label', 'hidden');
+    $config->set('content.field_featured_content.settings.view_mode', 'featured');
+    $config->save();
+  }
+}
+
+/*
  * Replace the Views-based browse by community block with the custom block plugin
  * on existing landing page nodes so sub-communities are filtered out.
  */
-function mukurtu_protocol_update_40002(): void {
+function mukurtu_protocol_update_40003(): void {
   $node_storage = \Drupal::entityTypeManager()->getStorage('node');
 
   $nids = $node_storage->getQuery()
@@ -210,7 +227,7 @@ function mukurtu_protocol_update_40002(): void {
 
     foreach ($sections as $section) {
       foreach ($section->getComponents() as $component) {
-        $config = $component->getConfiguration();
+        $config = $component->toArray()['configuration'] ?? [];
         if (($config['id'] ?? '') === 'views_block:browse_by_community-community_browse_block') {
           $component->setConfiguration([
             'id' => 'mukurtu_browse_by_community',
@@ -230,10 +247,10 @@ function mukurtu_protocol_update_40002(): void {
     }
   }
 }
-/**    
+/**
  * Remove orphaned community_type field from community browse view display.
  */
-function mukurtu_protocol_update_40003(): void {
+function mukurtu_protocol_update_40004(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.community.community.browse');
 
   $content = $config->get('content');

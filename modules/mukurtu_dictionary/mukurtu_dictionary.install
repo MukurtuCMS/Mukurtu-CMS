@@ -80,3 +80,37 @@ function mukurtu_dictionary_update_40003() {
     }
   }
 }
+
+/**
+ * Update word list featured view display to use field_word_list_image.
+ */
+function mukurtu_dictionary_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.featured');
+
+  // Remove old field_representative_media from content.
+  $content = $config->get('content');
+  unset($content['field_representative_media']);
+
+  // Add field_word_list_image if not already present.
+  if (!isset($content['field_word_list_image'])) {
+    $content['field_word_list_image'] = [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'digital_heritage_sidebar',
+        'link' => FALSE,
+      ],
+      'third_party_settings' => [],
+      'weight' => 1,
+      'region' => 'content',
+    ];
+  }
+  $config->set('content', $content);
+
+  // Remove field_word_list_image from hidden if present.
+  $hidden = $config->get('hidden');
+  unset($hidden['field_word_list_image']);
+  $config->set('hidden', $hidden);
+
+  $config->save();
+}

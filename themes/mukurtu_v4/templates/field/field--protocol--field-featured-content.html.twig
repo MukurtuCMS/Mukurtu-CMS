@@ -1,0 +1,18 @@
+{#
+/**
+ * @file
+ * Template for field_featured_content on protocol entities.
+ *
+ * Renders a "Featured Content" heading above the card grid.
+ * Classes are hardcoded because {{ attributes }} is empty when rendered
+ * via a field group's children|render path.
+ */
+#}
+{% if items %}
+<h2 class="featured-content__heading">{{ 'Featured Content'|t }}</h2>
+<div class="field field--name-field-featured-content field--type-entity-reference field--label-hidden field__items">
+  {% for item in items %}
+    <div class="field__item">{{ item.content }}</div>
+  {% endfor %}
+</div>
+{% endif %}
