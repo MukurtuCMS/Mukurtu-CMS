@@ -55,6 +55,32 @@ function mukurtu_core_entity_type_build(array &$entity_types) {
 }
 
 /**
+ * Implements hook_entity_field_access().
+ *
+ * Allow community managers to view restricted user fields (status, roles,
+ * access) that core hides from non-admins.
+ */
+function mukurtu_core_entity_field_access($operation, \Drupal\Core\Field\FieldDefinitionInterface $field_definition, \Drupal\Core\Session\AccountInterface $account, \Drupal\Core\Field\FieldItemListInterface $items = NULL) {
+  if ($operation !== 'view' || $field_definition->getTargetEntityTypeId() !== 'user') {
+    return \Drupal\Core\Access\AccessResult::neutral();
+  }
+  $restricted = ['status', 'roles', 'access', 'mail'];
+  if (!in_array($field_definition->getName(), $restricted)) {
+    return \Drupal\Core\Access\AccessResult::neutral();
+  }
+  if ($account->hasPermission('administer users')) {
+    return \Drupal\Core\Access\AccessResult::neutral();
+  }
+  $user = \Drupal\user\Entity\User::load($account->id());
+  foreach (\Drupal\og\Og::getMemberships($user) as $membership) {
+    if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
+      return \Drupal\Core\Access\AccessResult::allowed()->cachePerUser()->addCacheTags(['user:' . $account->id()]);
+    }
+  }
+  return \Drupal\Core\Access\AccessResult::neutral();
+}
+
+/**
  * Implements hook_entity_operation().
  */
 function mukurtu_core_entity_operation(EntityInterface $entity) {
