@@ -1,0 +1,97 @@
+/**
+ * Styles for the hierarchical protocol list at /admin/communities-protocols.
+ */
+
+/* Community rows */
+tr.community-row td {
+  font-weight: bold;
+  border-top: 2px solid var(--gin-border-color, #ccc);
+}
+
+tr.community-row:first-child td {
+  border-top: none;
+}
+
+/* Depth-based background tints — light mode */
+tr.community-row.depth-0 td {
+  background-color: #dce8f0;
+}
+
+tr.community-row.depth-1 td {
+  background-color: #eaf2f7;
+}
+
+tr.community-row.depth-2 td {
+  background-color: #f2f7fa;
+}
+
+/* Dark mode overrides — Gin class-based */
+html.gin--dark-mode tr.community-row.depth-0 td {
+  background-color: #1a2e38;
+}
+
+html.gin--dark-mode tr.community-row.depth-1 td {
+  background-color: #162630;
+}
+
+html.gin--dark-mode tr.community-row.depth-2 td {
+  background-color: #122028;
+}
+
+/* Dark mode overrides — prefers-color-scheme fallback (Gin "auto" mode) */
+@media (prefers-color-scheme: dark) {
+  tr.community-row.depth-0 td {
+    background-color: #1a2e38;
+  }
+
+  tr.community-row.depth-1 td {
+    background-color: #162630;
+  }
+
+  tr.community-row.depth-2 td {
+    background-color: #122028;
+  }
+}
+
+/* Depth-based indentation on the community name cell */
+tr.community-row.depth-1 td:first-child {
+  padding-left: 2em;
+}
+
+tr.community-row.depth-2 td:first-child {
+  padding-left: 4em;
+}
+
+/* Protocol list inside community rows */
+tr.community-row ul.protocol-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+tr.community-row ul,
+tr.community-row ul ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+tr.community-row li::marker {
+  content: none;
+}
+
+tr.community-row .item-list li {
+  margin: 0 0 0.25em 0;
+  padding: 0;
+}
+
+/* Inline name + operations button layout */
+.name-ops-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.name-ops-wrapper .dropbutton-wrapper {
+  margin: 0;
+}
