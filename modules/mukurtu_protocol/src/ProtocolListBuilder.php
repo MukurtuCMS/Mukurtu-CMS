@@ -117,8 +117,8 @@ class ProtocolListBuilder extends EntityListBuilder {
     $community_cell = [
       '#type' => 'container',
       '#attributes' => ['class' => ['name-ops-wrapper']],
-      'name' => $label,
       'operations' => $this->buildCommunityOperations($community),
+      'name' => $label,
     ];
 
     $rows[] = [
@@ -167,8 +167,8 @@ class ProtocolListBuilder extends EntityListBuilder {
       $items[] = [
         '#type' => 'container',
         '#attributes' => ['class' => ['name-ops-wrapper']],
-        'name' => $name,
         'operations' => $this->buildProtocolOperations($protocol),
+        'name' => $name,
       ];
     }
 
