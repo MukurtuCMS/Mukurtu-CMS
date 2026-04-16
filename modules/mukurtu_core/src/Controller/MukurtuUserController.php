@@ -9,6 +9,8 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\Core\Ajax\MessageCommand;
+use Drupal\og\Og;
+use Drupal\user\Entity\User;
 
 class MukurtuUserController extends ControllerBase {
   use StringTranslationTrait;
@@ -24,12 +26,20 @@ class MukurtuUserController extends ControllerBase {
       return AccessResult::allowed();
     }
 
+    // Also allow community managers (have 'manage members' in any community).
+    $user = User::load($account->id());
+    foreach (Og::getMemberships($user) as $membership) {
+      if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
+        return AccessResult::allowed();
+      }
+    }
+
     return AccessResult::forbidden();
   }
 
   public function approveAjax($uid) {
     // This is the user we want to approve (unblock).
-    $user = \Drupal\user\Entity\User::load($uid);
+    $user = User::load($uid);
     $content = [];
 
     $response = new AjaxResponse();
@@ -57,7 +67,7 @@ class MukurtuUserController extends ControllerBase {
 
   public function blockAjax($uid) {
     // This is the user we want to block.
-    $user = \Drupal\user\Entity\User::load($uid);
+    $user = User::load($uid);
     $content = [];
 
     $response = new AjaxResponse();

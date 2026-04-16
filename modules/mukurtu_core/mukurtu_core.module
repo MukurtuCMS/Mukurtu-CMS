@@ -73,6 +73,42 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       'weight' => 150,
     );
   }
+  if ($entity->getEntityTypeId() == 'user') {
+    $account = \Drupal::currentUser();
+    // Don't show approve/block on a user's own account.
+    if ($account->id() == $entity->id()) {
+      return $operations;
+    }
+    $can_manage = $account->hasPermission('administer users');
+    if (!$can_manage) {
+      $current_user = \Drupal\user\Entity\User::load($account->id());
+      foreach (\Drupal\og\Og::getMemberships($current_user) as $membership) {
+        if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
+          $can_manage = TRUE;
+          break;
+        }
+      }
+    }
+    if ($can_manage) {
+      $status = $entity->get('status')->value;
+      if ($status == 0) {
+        $operations['approve_user'] = [
+          'title' => t('Approve User'),
+          'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
+          'weight' => 100,
+          'attributes' => ['class' => ['use-ajax']],
+        ];
+      }
+      else {
+        $operations['block_user'] = [
+          'title' => t('Block User'),
+          'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+          'weight' => 100,
+          'attributes' => ['class' => ['use-ajax']],
+        ];
+      }
+    }
+  }
   return $operations;
 }
 
