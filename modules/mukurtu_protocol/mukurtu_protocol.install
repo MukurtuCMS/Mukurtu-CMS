@@ -227,7 +227,7 @@ function mukurtu_protocol_update_40003(): void {
 
     foreach ($sections as $section) {
       foreach ($section->getComponents() as $component) {
-        $config = $component->getConfiguration();
+        $config = $component->toArray()['configuration'] ?? [];
         if (($config['id'] ?? '') === 'views_block:browse_by_community-community_browse_block') {
           $component->setConfiguration([
             'id' => 'mukurtu_browse_by_community',
