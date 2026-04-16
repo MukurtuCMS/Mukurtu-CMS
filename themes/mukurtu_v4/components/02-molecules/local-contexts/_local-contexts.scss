@@ -229,24 +229,16 @@
     margin-block: var(--v-space-4xxs) var(--v-space-6xs);
   }
 
-  .tk-labels,
-  .bc-labels,
-  .notices {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--v-space-2xs);
-  }
-
   .tk-label,
   .bc-label,
   .notice {
     display: flex;
     gap: var(--v-space-4xxs);
     align-items: flex-start;
-    padding-block: var(--v-space-2xs);
+    padding-block: var(--v-space-3xs);
 
     img {
-      block-size: 6rem;
+      block-size: 8rem;
       flex-shrink: 0;
       object-fit: contain;
     }
