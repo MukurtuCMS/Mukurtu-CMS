@@ -114,11 +114,23 @@ class ProtocolListBuilder extends EntityListBuilder {
       $label = ['#markup' => $community->label()];
     }
 
+    // Accessibility: add visually-hidden prefix so screen readers convey depth.
+    if ($depth > 0) {
+      $label = [
+        'prefix' => [
+          '#markup' => '<span class="visually-hidden">' . $this->t('Sub-community') . ': </span>',
+        ],
+        'label' => $label,
+      ];
+    }
+
+    // Name comes before operations in the DOM for screen reader context.
+    // CSS flex order moves the button visually to the left.
     $community_cell = [
       '#type' => 'container',
       '#attributes' => ['class' => ['name-ops-wrapper']],
-      'operations' => $this->buildCommunityOperations($community),
       'name' => $label,
+      'operations' => $this->buildCommunityOperations($community),
     ];
 
     $rows[] = [
@@ -164,11 +176,12 @@ class ProtocolListBuilder extends EntityListBuilder {
         $name = ['#markup' => $protocol->label()];
       }
 
+      // Name before operations in DOM; CSS moves button visually to the left.
       $items[] = [
         '#type' => 'container',
         '#attributes' => ['class' => ['name-ops-wrapper']],
-        'operations' => $this->buildProtocolOperations($protocol),
         'name' => $name,
+        'operations' => $this->buildProtocolOperations($protocol),
       ];
     }
 
@@ -185,6 +198,7 @@ class ProtocolListBuilder extends EntityListBuilder {
    */
   protected function buildCommunityOperations(EntityInterface $community) {
     $access_manager = \Drupal::service('access_manager');
+    $label = $community->label();
     $operations = [];
 
     if ($access_manager->checkNamedRoute('entity.community.canonical', ['community' => $community->id()])) {
@@ -192,6 +206,7 @@ class ProtocolListBuilder extends EntityListBuilder {
         'title' => $this->t('View'),
         'weight' => 10,
         'url' => Url::fromRoute('entity.community.canonical', ['community' => $community->id()]),
+        'attributes' => ['aria-label' => $this->t('View @name', ['@name' => $label])],
       ];
     }
     if ($access_manager->checkNamedRoute('mukurtu_protocol.manage_community', ['group' => $community->id()])) {
@@ -199,6 +214,7 @@ class ProtocolListBuilder extends EntityListBuilder {
         'title' => $this->t('Manage Community'),
         'weight' => 20,
         'url' => Url::fromRoute('mukurtu_protocol.manage_community', ['group' => $community->id()]),
+        'attributes' => ['aria-label' => $this->t('Manage Community: @name', ['@name' => $label])],
       ];
     }
     if ($access_manager->checkNamedRoute('mukurtu_protocol.community_members_list', ['group' => $community->id()])) {
@@ -206,6 +222,7 @@ class ProtocolListBuilder extends EntityListBuilder {
         'title' => $this->t('Manage Members'),
         'weight' => 30,
         'url' => Url::fromRoute('mukurtu_protocol.community_members_list', ['group' => $community->id()]),
+        'attributes' => ['aria-label' => $this->t('Manage Members of @name', ['@name' => $label])],
       ];
     }
     if ($access_manager->checkNamedRoute('mukurtu_protocol.community_add_membership', ['group' => $community->id()])) {
@@ -213,6 +230,7 @@ class ProtocolListBuilder extends EntityListBuilder {
         'title' => $this->t('Add Member'),
         'weight' => 40,
         'url' => Url::fromRoute('mukurtu_protocol.community_add_membership', ['group' => $community->id()]),
+        'attributes' => ['aria-label' => $this->t('Add Member to @name', ['@name' => $label])],
       ];
     }
 
@@ -227,6 +245,7 @@ class ProtocolListBuilder extends EntityListBuilder {
    */
   protected function buildProtocolOperations(EntityInterface $protocol) {
     $access_manager = \Drupal::service('access_manager');
+    $label = $protocol->label();
     $operations = [];
 
     if ($access_manager->checkNamedRoute('entity.protocol.canonical', ['protocol' => $protocol->id()])) {
@@ -234,6 +253,7 @@ class ProtocolListBuilder extends EntityListBuilder {
         'title' => $this->t('View'),
         'weight' => 10,
         'url' => Url::fromRoute('entity.protocol.canonical', ['protocol' => $protocol->id()]),
+        'attributes' => ['aria-label' => $this->t('View @name', ['@name' => $label])],
       ];
     }
     if ($access_manager->checkNamedRoute('mukurtu_protocol.manage_protocol', ['group' => $protocol->id()])) {
@@ -241,6 +261,7 @@ class ProtocolListBuilder extends EntityListBuilder {
         'title' => $this->t('Manage Protocol'),
         'weight' => 20,
         'url' => Url::fromRoute('mukurtu_protocol.manage_protocol', ['group' => $protocol->id()]),
+        'attributes' => ['aria-label' => $this->t('Manage Protocol: @name', ['@name' => $label])],
       ];
     }
     if ($access_manager->checkNamedRoute('mukurtu_protocol.protocol_members_list', ['group' => $protocol->id()])) {
@@ -248,6 +269,7 @@ class ProtocolListBuilder extends EntityListBuilder {
         'title' => $this->t('Manage Members'),
         'weight' => 30,
         'url' => Url::fromRoute('mukurtu_protocol.protocol_members_list', ['group' => $protocol->id()]),
+        'attributes' => ['aria-label' => $this->t('Manage Members of @name', ['@name' => $label])],
       ];
     }
     if ($access_manager->checkNamedRoute('mukurtu_protocol.protocol_add_membership', ['group' => $protocol->id()])) {
@@ -255,6 +277,7 @@ class ProtocolListBuilder extends EntityListBuilder {
         'title' => $this->t('Add Member'),
         'weight' => 40,
         'url' => Url::fromRoute('mukurtu_protocol.protocol_add_membership', ['group' => $protocol->id()]),
+        'attributes' => ['aria-label' => $this->t('Add Member to @name', ['@name' => $label])],
       ];
     }
 
