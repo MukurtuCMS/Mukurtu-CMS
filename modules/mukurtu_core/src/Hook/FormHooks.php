@@ -107,8 +107,8 @@ class FormHooks {
 
     $form['notify'] = [
       '#type' => 'details',
-      '#title' => t('Notify users of this new account'),
-      '#description' => t('Optionally notify users about this new account.'),
+      '#title' => t('Notify other users of new account'),
+      '#description' => t('Optionally send a notification to other users when the account is created.'),
       '#open' => FALSE,
     ];
 
@@ -121,7 +121,7 @@ class FormHooks {
     if (!empty($communityOptions)) {
       $form['notify']['notify_communities'] = [
         '#type' => 'checkboxes',
-        '#title' => t('Notify all community managers of'),
+        '#title' => t('Notify all protocol stewards in the following protocols:'),
         '#options' => $communityOptions,
         '#required' => FALSE,
       ];
@@ -130,12 +130,14 @@ class FormHooks {
     if (!empty($protocolsByCommunity)) {
       $form['notify']['notify_protocols'] = [
         '#type' => 'container',
+        '#title' => t('Notify protocol stewards'),
         '#attributes' => ['class' => ['notify-protocols-wrapper']],
       ];
-      $form['notify']['notify_protocols']['title'] = [
-        '#markup' => '<label>' . t('Notify all protocol stewards of') . '</label>',
-      ];
-      foreach ($protocolsByCommunity as $communityId => $data) {
+/*      $form['notify']['notify_protocols']['title'] = [
+*        '#markup' => '<label>' . t('Notify all protocol stewards in the following protocols:') . '</label>',
+*      ];
+*/
+foreach ($protocolsByCommunity as $communityId => $data) {
         $form['notify']['notify_protocols'][$communityId] = [
           '#type' => 'checkboxes',
           '#title' => $data['label'],
@@ -147,7 +149,7 @@ class FormHooks {
     $form['notify']['notify_users'] = [
       '#type' => 'entity_autocomplete',
       '#target_type' => 'user',
-      '#title' => t('Other users by name'),
+      '#title' => t('Notify specific users:'),
       '#description' => t('Notify individual users by name. Separate multiple users with commas.'),
       '#tags' => TRUE,
       '#required' => FALSE,
