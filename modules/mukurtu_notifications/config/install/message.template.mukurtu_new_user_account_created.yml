@@ -11,7 +11,7 @@ text:
     value: "New user account created: [message:field_user:entity:account-name]"
     format: mukurtu_html
   -
-    value: "<p>A new user account <a href=\"[message:field_user:entity:url]\">[message:field_user:entity:field_display_name] ([message:field_user:entity:account-name])</a> has been created.</p>\r\n"
+    value: "<p>A new user account <a href=\"[message:field_user:entity:url]\">[message:field_user:entity:field_display_name] ([message:field_user:entity:account-name])</a> has been created. You may want to add them to more communities or protocols. <a href=\"[message:field_user:entity:url]\">Review their account</a>.</p>\r\n"
     format: mukurtu_html
 settings:
   'token options':
