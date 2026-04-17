@@ -25,3 +25,16 @@ function mukurtu_notifications_update_40001(): void {
     $config_storage->write($config_name, $source->read($config_name));
   }
 }
+
+/**
+ * Update new user account notification email body.
+ */
+function mukurtu_notifications_update_40002(): void {
+  $config = \Drupal::service('config.factory')->getEditable('message.template.mukurtu_new_user_account_created');
+  if ($config->isNew()) {
+    return;
+  }
+  $text = $config->get('text');
+  $text[1]['value'] = "<p>A new user account <a href=\"[message:field_user:entity:url]\">[message:field_user:entity:field_display_name] ([message:field_user:entity:account-name])</a> has been created. You may want to add them to more communities or protocols. <a href=\"[message:field_user:entity:url]\">Review their account</a>.</p>\r\n";
+  $config->set('text', $text)->save();
+}
