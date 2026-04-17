@@ -133,10 +133,10 @@ class FormHooks {
         '#title' => t('Notify protocol stewards'),
         '#attributes' => ['class' => ['notify-protocols-wrapper']],
       ];
-/*      $form['notify']['notify_protocols']['title'] = [
-*        '#markup' => '<label>' . t('Notify all protocol stewards in the following protocols:') . '</label>',
-*      ];
-*/
+      $form['notify']['notify_protocols']['title'] = [
+        '#markup' => '<label>' . t('Notify all protocol stewards in the following protocols:') . '</label>',
+      ];
+
 foreach ($protocolsByCommunity as $communityId => $data) {
         $form['notify']['notify_protocols'][$communityId] = [
           '#type' => 'checkboxes',
