@@ -71,10 +71,13 @@ class FormHooks {
       }
     }
 
-    // Move display name field to sit directly below username in the account group.
+    // Move display name field to sit directly below password in the account group.
+    if (isset($form['account']['pass'])) {
+      $form['account']['pass']['#weight'] = 0.0012;
+    }
     if (isset($form['field_display_name'])) {
       $form['account']['field_display_name'] = $form['field_display_name'];
-      $form['account']['field_display_name']['#weight'] = 0.0015;
+      $form['account']['field_display_name']['#weight'] = 0.0013;
       unset($form['field_display_name']);
     }
 
@@ -203,6 +206,16 @@ foreach ($protocolsByCommunity as $communityId => $data) {
       if (isset($form['account']['roles']['#options']['administrator'])) {
         unset($form['account']['roles']['#options']['administrator']);
       }
+    }
+
+    // Move display name field to sit directly below password in the account group.
+    if (isset($form['account']['pass'])) {
+      $form['account']['pass']['#weight'] = 0.0012;
+    }
+    if (isset($form['field_display_name'])) {
+      $form['account']['field_display_name'] = $form['field_display_name'];
+      $form['account']['field_display_name']['#weight'] = 0.0013;
+      unset($form['field_display_name']);
     }
   }
 }
