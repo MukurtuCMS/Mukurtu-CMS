@@ -70,6 +70,121 @@ class FormHooks {
         unset($form['account']['roles']['#options']['administrator']);
       }
     }
+
+    // Move display name field to sit directly below username in the account group.
+    if (isset($form['field_display_name'])) {
+      $form['account']['field_display_name'] = $form['field_display_name'];
+      $form['account']['field_display_name']['#weight'] = 0.0015;
+      unset($form['field_display_name']);
+    }
+
+    // Build community options and protocol options grouped by community (site-wide).
+    $communityOptions = [];
+    $protocolsByCommunity = [];
+    $entityTypeManager = \Drupal::entityTypeManager();
+    $protocolStorage = $entityTypeManager->getStorage('protocol');
+    $communityEntities = $entityTypeManager->getStorage('community')->loadMultiple();
+    foreach ($communityEntities as $community) {
+      $communityOptions[$community->id()] = $community->getName();
+      $communityProtocolIds = $protocolStorage->getQuery()
+        ->condition('field_communities', $community->id())
+        ->accessCheck(FALSE)
+        ->execute();
+      $communityProtocols = [];
+      foreach ($protocolStorage->loadMultiple($communityProtocolIds) as $protocol) {
+        $communityProtocols[$protocol->id()] = $protocol->getName();
+      }
+      asort($communityProtocols);
+      if (!empty($communityProtocols)) {
+        $protocolsByCommunity[$community->id()] = [
+          'label' => $community->getName(),
+          'protocols' => $communityProtocols,
+        ];
+      }
+    }
+    asort($communityOptions);
+    uasort($protocolsByCommunity, fn($a, $b) => strcmp($a['label'], $b['label']));
+
+    $form['notify'] = [
+      '#type' => 'details',
+      '#title' => t('Notify users of this new account'),
+      '#description' => t('Optionally notify users about this new account.'),
+      '#open' => FALSE,
+    ];
+
+    $form['notify']['notify_all_managers'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Notify all Mukurtu Managers'),
+      '#default_value' => FALSE,
+    ];
+
+    if (!empty($communityOptions)) {
+      $form['notify']['notify_communities'] = [
+        '#type' => 'checkboxes',
+        '#title' => t('Notify all community managers of'),
+        '#options' => $communityOptions,
+        '#required' => FALSE,
+      ];
+    }
+
+    if (!empty($protocolsByCommunity)) {
+      $form['notify']['notify_protocols'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['notify-protocols-wrapper']],
+      ];
+      $form['notify']['notify_protocols']['title'] = [
+        '#markup' => '<label>' . t('Notify all protocol stewards of') . '</label>',
+      ];
+      foreach ($protocolsByCommunity as $communityId => $data) {
+        $form['notify']['notify_protocols'][$communityId] = [
+          '#type' => 'checkboxes',
+          '#title' => $data['label'],
+          '#options' => $data['protocols'],
+        ];
+      }
+    }
+
+    $form['notify']['notify_users'] = [
+      '#type' => 'entity_autocomplete',
+      '#target_type' => 'user',
+      '#title' => t('Other users by name'),
+      '#description' => t('Notify individual users by name. Separate multiple users with commas.'),
+      '#tags' => TRUE,
+      '#required' => FALSE,
+      '#selection_handler' => 'mukurtu_manager_users',
+    ];
+
+    $form['actions']['submit']['#submit'][] = [self::class, 'userRegisterNotifySubmit'];
+  }
+
+  /**
+   * Submit handler that sends notifications after a new user account is created.
+   */
+  public static function userRegisterNotifySubmit(array &$form, FormStateInterface $form_state): void {
+    // Resolve individual user selections.
+    $rawNotifyUsers = $form_state->getValue('notify_users') ?? [];
+    $notifyUids = array_column($rawNotifyUsers, 'target_id');
+
+    // Resolve group selections.
+    $allManagers = (bool) $form_state->getValue('notify_all_managers');
+    $communityIds = array_keys(array_filter($form_state->getValue('notify_communities') ?? []));
+    $protocolIds = [];
+    foreach ($form_state->getValue('notify_protocols') ?? [] as $groupValues) {
+      if (is_array($groupValues)) {
+        $protocolIds = array_merge($protocolIds, array_keys(array_filter($groupValues)));
+      }
+    }
+    $protocolIds = array_unique($protocolIds);
+
+    if (function_exists('mukurtu_notifications_resolve_notify_groups')) {
+      $groupUids = mukurtu_notifications_resolve_notify_groups($allManagers, $communityIds, $protocolIds);
+      $notifyUids = array_unique(array_merge($notifyUids, $groupUids));
+    }
+
+    if (!empty($notifyUids) && function_exists('mukurtu_notifications_notify_new_account_created')) {
+      $new_user = $form_state->getFormObject()->getEntity();
+      mukurtu_notifications_notify_new_account_created($new_user, $notifyUids);
+    }
   }
 
   /**
