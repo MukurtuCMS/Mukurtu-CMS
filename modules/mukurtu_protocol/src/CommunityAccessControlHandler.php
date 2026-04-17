@@ -24,14 +24,15 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
     switch ($operation) {
 
       case 'view':
-
         if (!$entity->isPublished()) {
-          return AccessResult::allowedIfHasPermission($account, 'view unpublished community entities');
+          return AccessResult::allowedIfHasPermission($account, 'view unpublished community entities')
+            ->addCacheableDependency($entity);
         }
 
         // If field_access_mode is "public", anyone can view.
         if ($entity->getSharingSetting() == 'public') {
-          return AccessResult::allowedIfHasPermission($account, 'view published community entities');
+          return AccessResult::allowedIfHasPermission($account, 'view published community entities')
+            ->addCacheableDependency($entity);
         }
 
         // If field_access_mode is "community-only", only members can view.
@@ -41,31 +42,42 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
 
           // Members can view community-only communities.
           if ($membership) {
-            return AccessResult::allowedIfHasPermission($account, 'view published community entities');
+            return AccessResult::allowedIfHasPermission($account, 'view published community entities')
+              ->addCacheableDependency($entity)
+              ->addCacheableDependency($membership);
           }
         }
-        return AccessResult::forbidden();
+        // Forbidden: depends on sharing setting (entity) and membership status.
+        return AccessResult::forbidden()
+          ->addCacheableDependency($entity)
+          ->addCacheTags(["user:{$account->id()}"]);
 
       case 'update':
         // Only community managers have permission to edit communities.
         $membership = Og::getMembership($entity, $account);
         if ($membership && $membership->hasRole("community-community-community_manager")) {
-          return AccessResult::allowed();
+          return AccessResult::allowed()->addCacheableDependency($membership);
         }
-        return AccessResult::forbidden();
+        // Tag with the membership if it exists (role mismatch), or user:{id}
+        // so Community::addMember() can invalidate the cached result.
+        $result = AccessResult::forbidden();
+        return $membership
+          ? $result->addCacheableDependency($membership)
+          : $result->addCacheTags(["user:{$account->id()}"]);
 
       case 'delete':
-        // Cannot delete a parent community.
+        // Cannot delete a parent community. Depends on entity structure.
         if ($entity->isParentCommunity()) {
-          return AccessResult::forbidden();
+          return AccessResult::forbidden()->addCacheableDependency($entity);
         }
 
-        // Cannot delete a community with protocols.
+        // Cannot delete a community with protocols. Depends on entity field.
         $protocols = $entity->getProtocols();
         if (!empty($protocols)) {
-          return AccessResult::forbidden();
+          return AccessResult::forbidden()->addCacheableDependency($entity);
         }
-        return AccessResult::allowedIfHasPermission($account, 'delete community entities');
+        return AccessResult::allowedIfHasPermission($account, 'delete community entities')
+          ->addCacheableDependency($entity);
     }
 
     // Unknown operation, no opinion.

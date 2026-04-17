@@ -339,9 +339,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       $membership->setRoles($ogRoles);
       $membership->save();
 
-      // @todo Do better, repeated too much, factor out.
       Cache::invalidateTags(["user:{$account->id()}", "user_roles"]);
-      \Drupal::service('cache.render')->invalidateAll();
     }
     return $this;
   }
@@ -355,9 +353,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       $membership->delete();
     }
 
-    // @todo Do better, repeated too much, factor out.
     Cache::invalidateTags(["user:{$account->id()}", "user_roles"]);
-    \Drupal::service('cache.render')->invalidateAll();
 
     return $this;
   }
@@ -381,9 +377,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       $membership->setRoles($ogRoles);
       $membership->save();
 
-      // @todo Do better, repeated too much, factor out.
       Cache::invalidateTags(["user:{$account->id()}", "user_roles"]);
-      \Drupal::service('cache.render')->invalidateAll();
     }
 
     return $this;
