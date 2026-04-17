@@ -141,7 +141,9 @@ class CommunityManagerUserCreationForm extends FormBase {
     if (!empty($communities)) {
       $form['notify']['notify_communities'] = [
         '#type' => 'checkboxes',
-        '#title' => $this->t('Notify all community managers of'),
+        '#title' => $this->t('Notify all community managers in the following communities'),
+        '#title_display' => 'invisible',
+        '#prefix' => '<label>' . $this->t('Notify all community managers in the following communities:') . '</label>',
         '#options' => $communities,
         '#required' => FALSE,
       ];
@@ -153,7 +155,7 @@ class CommunityManagerUserCreationForm extends FormBase {
         '#attributes' => ['class' => ['notify-protocols-wrapper']],
       ];
       $form['notify']['notify_protocols']['title'] = [
-        '#markup' => '<label>' . $this->t('Notify all protocol stewards of') . '</label>',
+        '#markup' => '<label>' . $this->t('Notify all protocol stewards in the following protocols:') . '</label>',
       ];
       foreach ($protocolsByCommunity as $communityId => $data) {
         $form['notify']['notify_protocols'][$communityId] = [
@@ -164,14 +166,34 @@ class CommunityManagerUserCreationForm extends FormBase {
       }
     }
 
+    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+
     $form['notify']['notify_users'] = [
-      '#type' => 'entity_autocomplete',
-      '#target_type' => 'user',
-      '#title' => $this->t('Other users by name'),
-      '#description' => $this->t('Notify individual users by name. Separate multiple users with commas.'),
-      '#tags' => TRUE,
-      '#required' => FALSE,
-      '#selection_handler' => 'mukurtu_manager_users',
+      '#type' => 'container',
+      '#prefix' => '<div id="notify-users-wrapper"><label>' . $this->t('Notify specific users:') . '</label>',
+      '#suffix' => '</div>',
+    ];
+
+    for ($i = 0; $i < $notifyUserCount; $i++) {
+      $form['notify']['notify_users']['user_' . $i] = [
+        '#type' => 'entity_autocomplete',
+        '#target_type' => 'user',
+        '#title' => $this->t('User'),
+        '#title_display' => 'invisible',
+        '#selection_handler' => 'mukurtu_manager_users',
+        '#required' => FALSE,
+      ];
+    }
+
+    $form['notify']['notify_users']['add_more'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add another'),
+      '#submit' => ['::addMoreNotifyUser'],
+      '#ajax' => [
+        'callback' => '::addMoreNotifyUserCallback',
+        'wrapper' => 'notify-users-wrapper',
+      ],
+      '#limit_validation_errors' => [],
     ];
 
     $form['actions'] = [
@@ -230,8 +252,14 @@ class CommunityManagerUserCreationForm extends FormBase {
     $this->messenger()->addMessage($this->t('A welcome message with further instructions has been emailed to the new user <a href=":url">%name</a>.', [':url' => $user->toUrl()->toString(), '%name' => $user->getAccountName()]));
 
     // Resolve individual user selections.
-    $rawNotifyUsers = $form_state->getValue('notify_users') ?? [];
-    $notifyUids = array_column($rawNotifyUsers, 'target_id');
+    $notifyUids = [];
+    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+    for ($i = 0; $i < $notifyUserCount; $i++) {
+      $uid = $form_state->getValue(['notify_users', 'user_' . $i]);
+      if (!empty($uid)) {
+        $notifyUids[] = (int) $uid;
+      }
+    }
 
     // Resolve group selections.
     $allManagers = (bool) $form_state->getValue('notify_all_managers');
@@ -252,6 +280,22 @@ class CommunityManagerUserCreationForm extends FormBase {
     if (!empty($notifyUids) && function_exists('mukurtu_notifications_notify_new_account_created')) {
       mukurtu_notifications_notify_new_account_created($user, $notifyUids);
     }
+  }
+
+  /**
+   * AJAX submit handler to add another user autocomplete field.
+   */
+  public function addMoreNotifyUser(array &$form, FormStateInterface $form_state): void {
+    $count = $form_state->get('notify_user_count') ?? 1;
+    $form_state->set('notify_user_count', $count + 1);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * AJAX callback to return the updated notify_users container.
+   */
+  public function addMoreNotifyUserCallback(array &$form, FormStateInterface $form_state): array {
+    return $form['notify']['notify_users'];
   }
 
   /**

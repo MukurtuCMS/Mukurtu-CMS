@@ -124,7 +124,9 @@ class FormHooks {
     if (!empty($communityOptions)) {
       $form['notify']['notify_communities'] = [
         '#type' => 'checkboxes',
-        '#title' => t('Notify all protocol stewards in the following protocols:'),
+        '#title' => t('Notify all community managers in the following communities'),
+        '#title_display' => 'invisible',
+        '#prefix' => '<label>' . t('Notify all community managers in the following communities:') . '</label>',
         '#options' => $communityOptions,
         '#required' => FALSE,
       ];
@@ -149,14 +151,34 @@ foreach ($protocolsByCommunity as $communityId => $data) {
       }
     }
 
+    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+
     $form['notify']['notify_users'] = [
-      '#type' => 'entity_autocomplete',
-      '#target_type' => 'user',
-      '#title' => t('Notify specific users:'),
-      '#description' => t('Notify individual users by name. Separate multiple users with commas.'),
-      '#tags' => TRUE,
-      '#required' => FALSE,
-      '#selection_handler' => 'mukurtu_manager_users',
+      '#type' => 'container',
+      '#prefix' => '<div id="notify-users-wrapper"><label>' . t('Notify specific users:') . '</label>',
+      '#suffix' => '</div>',
+    ];
+
+    for ($i = 0; $i < $notifyUserCount; $i++) {
+      $form['notify']['notify_users']['user_' . $i] = [
+        '#type' => 'entity_autocomplete',
+        '#target_type' => 'user',
+        '#title' => t('User'),
+        '#title_display' => 'invisible',
+        '#selection_handler' => 'mukurtu_manager_users',
+        '#required' => FALSE,
+      ];
+    }
+
+    $form['notify']['notify_users']['add_more'] = [
+      '#type' => 'submit',
+      '#value' => t('Add another'),
+      '#submit' => [[self::class, 'addMoreNotifyUser']],
+      '#ajax' => [
+        'callback' => [self::class, 'addMoreNotifyUserCallback'],
+        'wrapper' => 'notify-users-wrapper',
+      ],
+      '#limit_validation_errors' => [],
     ];
 
     $form['actions']['submit']['#submit'][] = [self::class, 'userRegisterNotifySubmit'];
@@ -166,9 +188,15 @@ foreach ($protocolsByCommunity as $communityId => $data) {
    * Submit handler that sends notifications after a new user account is created.
    */
   public static function userRegisterNotifySubmit(array &$form, FormStateInterface $form_state): void {
-    // Resolve individual user selections.
-    $rawNotifyUsers = $form_state->getValue('notify_users') ?? [];
-    $notifyUids = array_column($rawNotifyUsers, 'target_id');
+    // Resolve individual user selections from AJAX "Add another" fields.
+    $notifyUids = [];
+    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+    for ($i = 0; $i < $notifyUserCount; $i++) {
+      $uid = $form_state->getValue(['notify_users', 'user_' . $i]);
+      if (!empty($uid)) {
+        $notifyUids[] = (int) $uid;
+      }
+    }
 
     // Resolve group selections.
     $allManagers = (bool) $form_state->getValue('notify_all_managers');
@@ -190,6 +218,22 @@ foreach ($protocolsByCommunity as $communityId => $data) {
       $new_user = $form_state->getFormObject()->getEntity();
       mukurtu_notifications_notify_new_account_created($new_user, $notifyUids);
     }
+  }
+
+  /**
+   * AJAX submit handler to add another user autocomplete field.
+   */
+  public static function addMoreNotifyUser(array &$form, FormStateInterface $form_state): void {
+    $count = $form_state->get('notify_user_count') ?? 1;
+    $form_state->set('notify_user_count', $count + 1);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * AJAX callback to return the updated notify_users container.
+   */
+  public static function addMoreNotifyUserCallback(array &$form, FormStateInterface $form_state): array {
+    return $form['notify']['notify_users'];
   }
 
   /**
