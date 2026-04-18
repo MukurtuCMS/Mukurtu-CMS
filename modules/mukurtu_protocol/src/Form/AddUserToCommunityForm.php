@@ -238,13 +238,8 @@ class AddUserToCommunityForm extends FormBase {
       }
     }
 
-    // Use a plain container (not #type => 'actions') so the Gin admin theme
-    // does not hoist this button into the header bar and render it off-screen.
-    $form['step1_actions'] = [
-      '#type'       => 'container',
-      '#attributes' => ['class' => ['form-actions']],
-    ];
-    $form['step1_actions']['next'] = [
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['submit'] = [
       '#type'   => 'submit',
       '#value'  => $this->t('Next: Assign protocol roles'),
       '#submit' => ['::submitStep1'],
