@@ -35,7 +35,7 @@ async function lintStyles(cb) {
 function buildStyles() {
   return src("./components/**/*.scss")
     .pipe(sourcemaps.init())
-    .pipe(sassCompiler({ style: "compressed" }).on("error", sassCompiler.logError))
+    .pipe(sassCompiler({ style: "expanded" }).on("error", sassCompiler.logError))
     .pipe(autoprefixer("last 2 versions"))
     .pipe(sourcemaps.write("."))
     .pipe(dest("./css"));
