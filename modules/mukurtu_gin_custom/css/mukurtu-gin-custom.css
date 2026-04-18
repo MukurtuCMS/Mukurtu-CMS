@@ -43,4 +43,11 @@ counterpart, if one exists. */
 
 .layout-builder .contextual {
     z-index: 600;
+    right: auto;
+    left: 0;
+}
+
+[dir="rtl"] .layout-builder .contextual {
+    left: auto;
+    right: 0;
 }
