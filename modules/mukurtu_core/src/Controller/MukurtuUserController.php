@@ -62,7 +62,7 @@ class MukurtuUserController extends ControllerBase {
       }
 
       // Prompt the approving user to also add the new member to communities.
-      $add_url = Url::fromRoute('mukurtu_protocol.community_manager_create_user')->toString();
+      $add_url = Url::fromRoute('mukurtu_protocol.add_user_to_community', ['user' => $uid])->toString();
       \Drupal::messenger()->addStatus($this->t(
         '@name has been approved. <a href="@url">Add them to a community</a>.',
         ['@name' => $user->getDisplayName(), '@url' => $add_url]
