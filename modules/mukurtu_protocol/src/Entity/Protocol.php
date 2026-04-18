@@ -24,7 +24,7 @@ use Exception;
  * @ContentEntityType(
  *   id = "protocol",
  *   label = @Translation("Cultural Protocol"),
- *   label_collection = @Translation("Cultural Protocols"),
+ *   label_collection = @Translation("Communities and Cultural Protocols"),
  *   label_singular = @Translation("Cultural Protocol"),
  *   label_plural = @Translation("Cultural Protocols"),
  *   label_count = @PluralTranslation(
@@ -79,7 +79,7 @@ use Exception;
  *     "revision_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert",
  *     "revision_delete" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/delete",
  *     "translation_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert/{langcode}",
- *     "collection" = "/admin/protocols",
+ *     "collection" = "/admin/communities-protocols",
  *   },
  *   field_ui_base_route = "protocol.settings"
  * )
