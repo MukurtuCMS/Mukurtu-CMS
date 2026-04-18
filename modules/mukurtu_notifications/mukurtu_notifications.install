@@ -38,3 +38,19 @@ function mukurtu_notifications_update_40002(): void {
   $text[1]['value'] = "<p>A new user account <a href=\"[message:field_user:entity:url]\">[message:field_user:entity:field_display_name] ([message:field_user:entity:account-name])</a> has been created. You may want to add them to more communities or protocols. <a href=\"[message:field_user:entity:url]\">Review their account</a>.</p>\r\n";
   $config->set('text', $text)->save();
 }
+
+/**
+ * Attach field_user to the mukurtu_new_user_account_created message template.
+ */
+function mukurtu_notifications_update_40003(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'field.field.message.mukurtu_new_user_account_created.field_user',
+    $source->read('field.field.message.mukurtu_new_user_account_created.field_user')
+  );
+
+  // Rebuild entity type and field definitions so the new field is recognised.
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
