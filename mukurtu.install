@@ -844,6 +844,10 @@ function mukurtu_update_40002() {
     ->getEditable('gin.settings')
     ->set('favicon.path', 'profiles/mukurtu/themes/mukurtu_v4/favicon.ico')
     ->set('favicon.mimetype', 'image/x-icon')
+    ->save();
+}
+
+/**
  * Revert audio browse view mode to hide field_thumbnail; create
  * digital_heritage_sidebar view display for audio with thumbnail + player.
  */
