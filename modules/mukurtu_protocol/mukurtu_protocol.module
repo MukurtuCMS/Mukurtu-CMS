@@ -69,6 +69,30 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles)
 }
 
 /**
+ * Implements hook_views_pre_render().
+ *
+ * Clears stale VBO tempstore on the people list when a bulk action was
+ * started but never completed (the user navigated away from the action form).
+ * The presence of 'action_id' in the tempstore indicates a submitted-but-
+ * abandoned operation; plain row selections do not set this key.
+ */
+function mukurtu_protocol_views_pre_render(\Drupal\views\ViewExecutable $view): void {
+  if ($view->id() !== 'mukurtu_people' || $view->current_display !== 'page_1') {
+    return;
+  }
+  if (!\Drupal::request()->isMethod('GET')) {
+    return;
+  }
+  $uid = \Drupal::currentUser()->id();
+  $tempstore = \Drupal::service('tempstore.private')
+    ->get('views_bulk_operations_mukurtu_people_page_1');
+  $data = $tempstore->get((string) $uid);
+  if (!empty($data['action_id'])) {
+    $tempstore->delete((string) $uid);
+  }
+}
+
+/**
  * Implements hook_views_data_alter().
  */
 function mukurtu_protocol_views_data_alter(array &$data)
