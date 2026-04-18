@@ -28,12 +28,19 @@ counterpart, if one exists. */
 }
 
 /* Fix Layout Builder settings menu blocking block contextual/edit links (#1385).
-   The gin_lb configure and region-label links are absolutely positioned at
-   z-index:1 and can cover block contextual links in DDEV/production environments. */
-.layout-builder .contextual {
-    z-index: 3;
+   gin_lb removes core's layout-builder.css and replaces it with its own, which
+   positions section configure/remove links and region labels absolutely at
+   z-index: 1-11. The layout-builder__region must allow overflow so absolutely-
+   positioned contextual triggers are not clipped. The contextual trigger itself
+   needs a z-index above gin_lb's highest interior value (11 for block labels in
+   preview-disabled mode) but the element already has position:absolute from
+   core's contextual.theme.css, so we only need to ensure overflow is not
+   clipping it. If z-index is still needed, set it high enough to clear gin_lb's
+   interior stack, not low (z-index:3 would fall below the block labels at 11). */
+.layout-builder .layout-builder__region {
+    overflow: visible;
 }
 
-.layout-builder__region {
-    overflow: visible;
+.layout-builder .contextual {
+    z-index: 600;
 }
