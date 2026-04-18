@@ -8,7 +8,7 @@
 /**
  * Enable flat_taxonomy and mark all stock Mukurtu vocabularies as flat.
  */
-function mukurtu_taxonomy_update_40000(): void {
+function mukurtu_taxonomy_update_40001(): void {
   // Ensure the flat_taxonomy module is enabled.
   \Drupal::service('module_installer')->install(['flat_taxonomy']);
 
