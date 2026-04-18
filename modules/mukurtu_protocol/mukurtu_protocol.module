@@ -81,6 +81,13 @@ function mukurtu_protocol_views_data_alter(array &$data)
         'id' => 'user_community',
       ],
     ];
+    // Add a plain-text roles field (no list markup).
+    $data['users']['roles_plain'] = [
+      'title' => t('Site Roles (plain)'),
+      'field' => [
+        'id' => 'user_roles_plain',
+      ],
+    ];
   }
 }
 
