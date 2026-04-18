@@ -279,3 +279,13 @@ function mukurtu_protocol_update_40005(): void {
   $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($data)->save(TRUE);
 }
+
+/**
+ * Update Site Users view: replace community/protocol bulk actions with block/unblock.
+ */
+function mukurtu_protocol_update_40006(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $config_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($data)->save(TRUE);
+}
