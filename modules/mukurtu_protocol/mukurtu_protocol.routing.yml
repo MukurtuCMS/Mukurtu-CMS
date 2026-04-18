@@ -7,6 +7,7 @@ mukurtu_protocol.add_user_to_community:
     _custom_access: '\Drupal\mukurtu_protocol\Form\AddUserToCommunityForm::access'
     user: \d+
   options:
+    _admin_route: TRUE
     parameters:
       user:
         type: entity:user
