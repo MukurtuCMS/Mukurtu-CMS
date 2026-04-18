@@ -3,3 +3,9 @@ mukurtu-gin-custom:
   css:
     base:
       css/mukurtu-gin-custom.css: {}
+  js:
+    js/mukurtu-gin-custom.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - toolbar/toolbar
