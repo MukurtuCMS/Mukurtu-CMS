@@ -113,6 +113,7 @@ class FormHooks {
       '#title' => t('Notify other users of new account'),
       '#description' => t('Optionally send a notification to other users when the account is created.'),
       '#open' => FALSE,
+      '#attached' => ['library' => ['mukurtu_core/notify-form']],
     ];
 
     $form['notify']['notify_all_managers'] = [
@@ -124,29 +125,32 @@ class FormHooks {
     if (!empty($communityOptions)) {
       $form['notify']['notify_communities'] = [
         '#type' => 'checkboxes',
-        '#title' => t('Notify all community managers in the following communities'),
-        '#title_display' => 'invisible',
-        '#prefix' => '<label>' . t('Notify all community managers in the following communities:') . '</label>',
+        // Use the visible legend rendered by #type => 'checkboxes' as the
+        // group label so it is properly associated via <fieldset>/<legend>.
+        '#title' => t('Notify all community managers in the following communities:'),
         '#options' => $communityOptions,
         '#required' => FALSE,
+        '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
       ];
     }
 
     if (!empty($protocolsByCommunity)) {
       $form['notify']['notify_protocols'] = [
         '#type' => 'container',
-        '#title' => t('Notify protocol stewards'),
         '#attributes' => ['class' => ['notify-protocols-wrapper']],
       ];
       $form['notify']['notify_protocols']['title'] = [
-        '#markup' => '<label>' . t('Notify all protocol stewards in the following protocols:') . '</label>',
+        // Use <p> instead of <label> — this text labels the group visually
+        // but is not associated with a specific control.
+        '#markup' => '<p class="fieldset__label fieldset__label--group">' . t('Notify all protocol stewards in the following protocols:') . '</p>',
       ];
 
-foreach ($protocolsByCommunity as $communityId => $data) {
+      foreach ($protocolsByCommunity as $communityId => $data) {
         $form['notify']['notify_protocols'][$communityId] = [
           '#type' => 'checkboxes',
           '#title' => $data['label'],
           '#options' => $data['protocols'],
+          '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
         ];
       }
     }
@@ -155,7 +159,9 @@ foreach ($protocolsByCommunity as $communityId => $data) {
 
     $form['notify']['notify_users'] = [
       '#type' => 'container',
-      '#prefix' => '<div id="notify-users-wrapper"><label>' . t('Notify specific users:') . '</label>',
+      // aria-live="polite" announces new fields to screen readers when
+      // "Add another user" fires. <p> replaces the unassociated <label>.
+      '#prefix' => '<div id="notify-users-wrapper" aria-live="polite"><p class="fieldset__label fieldset__label--group">' . t('Notify specific users:') . '</p>',
       '#suffix' => '</div>',
     ];
 
@@ -163,7 +169,9 @@ foreach ($protocolsByCommunity as $communityId => $data) {
       $form['notify']['notify_users']['user_' . $i] = [
         '#type' => 'entity_autocomplete',
         '#target_type' => 'user',
-        '#title' => t('User'),
+        // Numbered labels give screen reader users positional context when
+        // multiple fields exist.
+        '#title' => t('User @num', ['@num' => $i + 1]),
         '#title_display' => 'invisible',
         '#selection_handler' => 'mukurtu_manager_users',
         '#required' => FALSE,
@@ -172,7 +180,7 @@ foreach ($protocolsByCommunity as $communityId => $data) {
 
     $form['notify']['notify_users']['add_more'] = [
       '#type' => 'submit',
-      '#value' => t('Add another'),
+      '#value' => t('Add another user'),
       '#submit' => [[self::class, 'addMoreNotifyUser']],
       '#ajax' => [
         'callback' => [self::class, 'addMoreNotifyUserCallback'],

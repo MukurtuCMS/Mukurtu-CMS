@@ -127,9 +127,10 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $form['notify'] = [
       '#type' => 'details',
-      '#title' => $this->t('Notify users of this new account'),
+      '#title' => $this->t('Notify other users'),
       '#description' => $this->t('Optionally notify users about this new account.'),
       '#open' => FALSE,
+      '#attached' => ['library' => ['mukurtu_core/notify-form']],
     ];
 
     $form['notify']['notify_all_managers'] = [
@@ -141,11 +142,12 @@ class CommunityManagerUserCreationForm extends FormBase {
     if (!empty($communities)) {
       $form['notify']['notify_communities'] = [
         '#type' => 'checkboxes',
-        '#title' => $this->t('Notify all community managers in the following communities'),
-        '#title_display' => 'invisible',
-        '#prefix' => '<label>' . $this->t('Notify all community managers in the following communities:') . '</label>',
+        // Use the visible legend rendered by #type => 'checkboxes' as the
+        // group label so it is properly associated via <fieldset>/<legend>.
+        '#title' => $this->t('Notify all community managers in the following communities:'),
         '#options' => $communities,
         '#required' => FALSE,
+        '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
       ];
     }
 
@@ -155,13 +157,17 @@ class CommunityManagerUserCreationForm extends FormBase {
         '#attributes' => ['class' => ['notify-protocols-wrapper']],
       ];
       $form['notify']['notify_protocols']['title'] = [
-        '#markup' => '<label>' . $this->t('Notify all protocol stewards in the following protocols:') . '</label>',
+        // Use <p> instead of <label> — this text labels the group visually
+        // but is not associated with a specific control. #title is not rendered
+        // on #type => 'container' elements, so #markup is required here.
+        '#markup' => '<p class="fieldset__label fieldset__label--group">' . $this->t('Notify all protocol stewards in the following protocols:') . '</p>',
       ];
       foreach ($protocolsByCommunity as $communityId => $data) {
         $form['notify']['notify_protocols'][$communityId] = [
           '#type' => 'checkboxes',
           '#title' => $data['label'],
           '#options' => $data['protocols'],
+          '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
         ];
       }
     }
@@ -170,7 +176,9 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $form['notify']['notify_users'] = [
       '#type' => 'container',
-      '#prefix' => '<div id="notify-users-wrapper"><label>' . $this->t('Notify specific users:') . '</label>',
+      // aria-live="polite" announces new fields to screen readers when
+      // "Add another user" fires. <p> replaces the unassociated <label>.
+      '#prefix' => '<div id="notify-users-wrapper" aria-live="polite"><p class="fieldset__label fieldset__label--group">' . $this->t('Notify specific users:') . '</p>',
       '#suffix' => '</div>',
     ];
 
@@ -178,7 +186,9 @@ class CommunityManagerUserCreationForm extends FormBase {
       $form['notify']['notify_users']['user_' . $i] = [
         '#type' => 'entity_autocomplete',
         '#target_type' => 'user',
-        '#title' => $this->t('User'),
+        // Numbered labels give screen reader users positional context when
+        // multiple fields exist.
+        '#title' => $this->t('User @num', ['@num' => $i + 1]),
         '#title_display' => 'invisible',
         '#selection_handler' => 'mukurtu_manager_users',
         '#required' => FALSE,
@@ -187,7 +197,7 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $form['notify']['notify_users']['add_more'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Add another'),
+      '#value' => $this->t('Add another user'),
       '#submit' => ['::addMoreNotifyUser'],
       '#ajax' => [
         'callback' => '::addMoreNotifyUserCallback',
