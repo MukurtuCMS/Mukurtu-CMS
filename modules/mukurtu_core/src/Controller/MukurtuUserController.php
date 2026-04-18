@@ -60,6 +60,13 @@ class MukurtuUserController extends ControllerBase {
           '@message' => $e->getMessage(),
         ]);
       }
+
+      // Prompt the approving user to also add the new member to communities.
+      $add_url = Url::fromRoute('mukurtu_protocol.community_manager_create_user')->toString();
+      \Drupal::messenger()->addStatus($this->t(
+        '@name has been approved. <a href="@url">Add them to a community</a>.',
+        ['@name' => $user->getDisplayName(), '@url' => $add_url]
+      ));
     }
 
     $redirect = \Drupal::request()->headers->get('referer') ?: Url::fromRoute('view.mukurtu_people.page_1')->toString();
@@ -72,11 +79,31 @@ class MukurtuUserController extends ControllerBase {
     $response = new AjaxResponse();
 
     if ($user) {
-      // Community managers cannot block administrators or Mukurtu managers.
       $account = $this->currentUser();
       if (!$account->hasPermission('administer users')) {
+        // Community managers cannot block administrators or Mukurtu managers.
         $protected = array_intersect(self::PROTECTED_ROLES, $user->getRoles());
         if (!empty($protected)) {
+          $response->addCommand(new MessageCommand('You do not have permission to block this user.', NULL, ['type' => 'error']));
+          return $response;
+        }
+
+        // Community managers may only block users who share one of their
+        // managed communities.
+        $current_user = User::load($account->id());
+        $cm_community_ids = [];
+        foreach (Og::getMemberships($current_user) as $m) {
+          if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
+            $cm_community_ids[] = $m->getGroupId();
+          }
+        }
+        $target_community_ids = [];
+        foreach (Og::getMemberships($user) as $m) {
+          if ($m->getGroupBundle() === 'community') {
+            $target_community_ids[] = $m->getGroupId();
+          }
+        }
+        if (empty(array_intersect($cm_community_ids, $target_community_ids))) {
           $response->addCommand(new MessageCommand('You do not have permission to block this user.', NULL, ['type' => 'error']));
           return $response;
         }

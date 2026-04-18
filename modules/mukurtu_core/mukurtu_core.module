@@ -131,12 +131,33 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
         ];
       }
       elseif ($is_site_admin || !$target_is_protected) {
-        $operations['block_user'] = [
-          'title' => t('Block User'),
-          'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
-          'weight' => 100,
-          'attributes' => ['class' => ['use-ajax']],
-        ];
+        // Community managers may only block users who share one of their
+        // managed communities; site admins can block anyone.
+        $can_block = $is_site_admin;
+        if (!$can_block) {
+          // $current_user is already loaded above via the OG membership check.
+          $cm_community_ids = [];
+          foreach (\Drupal\og\Og::getMemberships($current_user) as $m) {
+            if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
+              $cm_community_ids[] = $m->getGroupId();
+            }
+          }
+          $target_community_ids = [];
+          foreach (\Drupal\og\Og::getMemberships($entity) as $m) {
+            if ($m->getGroupBundle() === 'community') {
+              $target_community_ids[] = $m->getGroupId();
+            }
+          }
+          $can_block = !empty(array_intersect($cm_community_ids, $target_community_ids));
+        }
+        if ($can_block) {
+          $operations['block_user'] = [
+            'title' => t('Block User'),
+            'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+            'weight' => 100,
+            'attributes' => ['class' => ['use-ajax']],
+          ];
+        }
       }
     }
   }
