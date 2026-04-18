@@ -4,10 +4,12 @@ mukurtu-gin-custom:
     base:
       css/mukurtu-gin-custom.css: {}
   js:
+    js/mukurtu-gin-custom.js: {}
     js/mukurtu-tagify-focus.js: {}
   dependencies:
     - core/drupal
     - core/once
+    - toolbar/toolbar
 
 entity-browser-toggle:
   version: 1.x
