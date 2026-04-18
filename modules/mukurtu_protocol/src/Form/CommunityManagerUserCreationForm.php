@@ -33,8 +33,10 @@ class CommunityManagerUserCreationForm extends FormBase {
     // Fetch the current user.
     $currentUser = User::load(\Drupal::currentUser()->id());
 
-    // Fetch the roles.
+    // Fetch the role manager.
     $roleManager = \Drupal::service("og.role_manager");
+
+    // Fetch community roles.
     $rolesRaw = $roleManager->getRolesByBundle('community', 'community');
 
     $roles = [];
@@ -45,6 +47,15 @@ class CommunityManagerUserCreationForm extends FormBase {
       // 'community-member'.
       if ($roleValue->getName() != "non-member" && $roleValue->getName() != 'member') {
         $roles[$roleValue->getName()] = $this->t($roleValue->getLabel());
+      }
+    }
+
+    // Fetch protocol roles (same filter pattern as community roles).
+    $protocolRolesRaw = $roleManager->getRolesByBundle('protocol', 'protocol');
+    $protocolRoles = [];
+    foreach ($protocolRolesRaw as $roleValue) {
+      if ($roleValue->getName() !== 'non-member' && $roleValue->getName() !== 'member') {
+        $protocolRoles[$roleValue->getName()] = $this->t($roleValue->getLabel());
       }
     }
 
@@ -62,6 +73,23 @@ class CommunityManagerUserCreationForm extends FormBase {
     // Put communities in ascending alphabetical order.
     asort($communities);
 
+    // Get protocols where the current user has 'manage members' permission.
+    $protocolMemberships = array_filter(
+      Og::getMemberships($currentUser),
+      fn ($m) => $m->getGroupBundle() === 'protocol'
+    );
+    $stewardMemberships = array_filter($protocolMemberships, fn ($m) => $m->hasPermission('manage members'));
+    $stewardProtocols = array_filter(array_map(fn ($m) => $m->getGroup(), $stewardMemberships));
+
+    // Group protocols by parent community ID.
+    $protocolsByCommunity = [];
+    /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
+    foreach ($stewardProtocols as $protocol) {
+      foreach ($protocol->getCommunities() as $parentCommunity) {
+        $protocolsByCommunity[$parentCommunity->id()][$protocol->id()] = $protocol;
+      }
+    }
+
     // Build the form.
     $form['info'] = [
       '#markup' => $this->t("This web page allows community administrators to register new users. Users' email addresses and usernames must be unique."),
@@ -69,10 +97,10 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $form['email'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Email'),
-      '#description' => $this->t('A valid email address. All emails from the system will be sent to this address. The email address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by email.'),
+      '#title' => $this->t('Email address'),
+      '#description' => $this->t('The email address is not made public. It will only be used to contact the user about their account or for opted-in notifications.'),
       '#default_value' => "",
-      '#required' => TRUE,
+      '#required' => FALSE,
     ];
 
     $form['username'] = [
@@ -83,25 +111,74 @@ class CommunityManagerUserCreationForm extends FormBase {
       '#required' => TRUE,
     ];
 
-    $form['table'] = [
-      '#type' => 'table',
-      '#caption' => $this->t('Select communities and roles for the new user.'),
-      '#header' => [
-        $this->t('Communities'),
-        $this->t('Roles'),
-      ]
+    $form['pass'] = [
+      '#type' => 'password_confirm',
+      '#description' => $this->t('Leave blank to allow the user to set their own password via a password reset email.'),
+      '#required' => FALSE,
     ];
 
-    // Make the data for checkboxes in the form.
-    foreach ($communities as $id => $community) {
-      $form['table'][$id]['communities'] = [
-        '#type' => 'item',
-        '#title' => $this->t($community),
+    $form['field_display_name'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Display Name'),
+      '#description' => $this->t('Optional. If no display name is provided, your username will be displayed instead.'),
+      '#default_value' => '',
+      '#required' => FALSE,
+    ];
+
+    $form['status'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Status'),
+      '#options' => [1 => $this->t('Active'), 0 => $this->t('Blocked')],
+      '#default_value' => 1,
+    ];
+
+    $form['notify'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Notify user of new account'),
+      '#default_value' => 1,
+    ];
+
+    $form['membership'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+    ];
+
+    foreach ($communities as $communityId => $communityName) {
+      $form['membership'][$communityId] = [
+        '#type' => 'details',
+        '#title' => $this->t($communityName),
+        '#open' => FALSE,
       ];
-      $form['table'][$id]['roles'] = [
+
+      $form['membership'][$communityId]['community_roles'] = [
         '#type' => 'checkboxes',
+        '#title' => $this->t('Community Roles'),
         '#options' => $roles,
       ];
+
+      if (!empty($protocolsByCommunity[$communityId])) {
+        $communityMemberSelector = ':input[name="membership[' . $communityId . '][community_roles][community_member]"]';
+
+        $form['membership'][$communityId]['protocols'] = [
+          '#type' => 'container',
+          '#tree' => TRUE,
+          '#states' => ['visible' => [$communityMemberSelector => ['checked' => TRUE]]],
+        ];
+
+        /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
+        foreach ($protocolsByCommunity[$communityId] as $protocolId => $protocol) {
+          $form['membership'][$communityId]['protocols'][$protocolId] = [
+            '#type' => 'details',
+            '#title' => $this->t($protocol->getName()),
+            '#open' => FALSE,
+          ];
+          $form['membership'][$communityId]['protocols'][$protocolId]['protocol_roles'] = [
+            '#type' => 'checkboxes',
+            '#title' => $this->t('Protocol Roles'),
+            '#options' => $protocolRoles,
+          ];
+        }
+      }
     }
 
     $form['actions'] = [
@@ -121,43 +198,63 @@ class CommunityManagerUserCreationForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-    $results = $form_state->getValues();
-    $username = $results['username'];
-    $email = $results['email'];
+    $values = $form_state->getValues();
+    $username = $values['username'];
+    $email = $values['email'];
 
     $user = User::create();
     $user->setUsername($username);
-    $user->setEmail($email);
-    $user->activate();
+
+    if (!empty($email)) {
+      $user->setEmail($email);
+    }
+
+    if (!empty($values['field_display_name'])) {
+      $user->set('field_display_name', $values['field_display_name']);
+    }
+
+    if (!empty($values['pass'])) {
+      $user->setPassword($values['pass']);
+    }
+
+    if ((int) $values['status'] === 1) {
+      $user->activate();
+    }
+    else {
+      $user->block();
+    }
+
     $user->save();
 
-    _user_mail_notify('status_activated', $user);
-
-    $results = $results['table'];
+    if (!empty($values['notify'])) {
+      _user_mail_notify('status_activated', $user);
+    }
 
     $entityTypeManager = \Drupal::service("entity_type.manager");
 
-    // Track communities and roles.
-    foreach ($results as $id => $result) {
-      $roles = [];
-      $roleNames = [];
+    // Process community memberships and roles.
+    foreach ($values['membership'] as $communityId => $communityData) {
+      $communityRoles = array_keys(array_filter($communityData['community_roles']));
 
-      $roles = array_filter($result['roles']);
+      if (!empty($communityRoles)) {
+        /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
+        $community = $entityTypeManager->getStorage('community')->load($communityId);
+        $community->addMember($user, $communityRoles);
+      }
 
-      if (!empty($roles)) {
-        foreach ($roles as $name => $label) {
-          array_push($roleNames, $name);
+      // Process protocol memberships under this community.
+      foreach ($communityData['protocols'] ?? [] as $protocolId => $protocolData) {
+        $protocolRoles = array_keys(array_filter($protocolData['protocol_roles']));
+
+        if (!empty($protocolRoles)) {
+          /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
+          $protocol = $entityTypeManager->getStorage('protocol')->load($protocolId);
+          $protocol->addMember($user, $protocolRoles);
         }
-
-        // Load the community entity.
-        $community = $entityTypeManager->getStorage('community')->load($id);
-
-        // Add new user to community with their selected roles.
-        $community->addMember($user, $roleNames);
       }
     }
 
-    $this->messenger()->addMessage($this->t('A welcome message with further instructions has been emailed to the new user <a href=":url">%name</a>.', [':url' => $user->toUrl()->toString(), '%name' => $user->getAccountName()]));
+    $this->messenger()->addMessage($this->t('The new user account <a href=":url">%name</a> has been created.', [':url' => $user->toUrl()->toString(), '%name' => $user->getAccountName()]));
   }
 
   /**
@@ -178,22 +275,23 @@ class CommunityManagerUserCreationForm extends FormBase {
       $form_state->setErrorByName('username', $this->t('The username @name is already taken.', ['@name' => $username]));
     }
 
-    // Check that email is unique.
-    $result = \Drupal::entityQuery('user')
-      ->condition('mail', $email)
-      ->accessCheck(FALSE)
-      ->execute();
+    // Only validate email if one was provided.
+    if (!empty($email)) {
+      // Check that email is unique.
+      $result = \Drupal::entityQuery('user')
+        ->condition('mail', $email)
+        ->accessCheck(FALSE)
+        ->execute();
 
-    if ($result) {
-      $form_state->setErrorByName('email', $this->t('The email address @email is already taken.', ['@email' => $email]));
-    }
+      if ($result) {
+        $form_state->setErrorByName('email', $this->t('The email address @email is already taken.', ['@email' => $email]));
+      }
 
-    // Check that email is valid.
-    $emailValidator = \Drupal::service("email.validator");
-    $email = $form_state->getValue('email');
-
-    if (!$emailValidator->isValid($email)) {
-      $form_state->setErrorByName('email', $this->t('Please enter an email address.'));
+      // Check that email is valid.
+      $emailValidator = \Drupal::service("email.validator");
+      if (!$emailValidator->isValid($email)) {
+        $form_state->setErrorByName('email', $this->t('The email address @email is not valid.', ['@email' => $email]));
+      }
     }
   }
 }
