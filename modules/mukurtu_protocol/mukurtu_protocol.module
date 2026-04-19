@@ -17,6 +17,7 @@ use Drupal\node\NodeInterface;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Url;
 use Drupal\og\Og;
 
@@ -733,4 +734,35 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
       }
     }
   }
+}
+
+/**
+ * Implements hook_entity_access().
+ *
+ * Prevents deleting an OG community membership when the user still belongs to
+ * any protocols within that community.
+ */
+function mukurtu_protocol_entity_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($operation !== 'delete' || $entity->getEntityTypeId() !== 'og_membership') {
+    return AccessResult::neutral();
+  }
+
+  /** @var \Drupal\og\Entity\OgMembership $entity */
+  $group = $entity->getGroup();
+  if (!$group instanceof CommunityInterface) {
+    return AccessResult::neutral();
+  }
+
+  $member = $entity->getOwner();
+  if (!$member) {
+    return AccessResult::neutral();
+  }
+
+  foreach ($group->getProtocols() as $protocol) {
+    if ($protocol->getMembership($member)) {
+      return AccessResult::forbidden()->setReason(t('Cannot remove @user from the community while they belong to a protocol within it. Remove them from all protocols first.', ['@user' => $member->getDisplayName()]));
+    }
+  }
+
+  return AccessResult::neutral();
 }
