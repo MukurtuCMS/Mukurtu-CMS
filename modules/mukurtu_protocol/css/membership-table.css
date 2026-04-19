@@ -1,0 +1,66 @@
+/* Membership table — community and protocol add forms */
+
+.membership-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.membership-table th,
+.membership-table td {
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Role columns: center-align checkboxes */
+.membership-table th:not(:first-child):not(:last-child),
+.membership-table td:not(:first-child):not(:last-child) {
+  text-align: center;
+}
+
+/* Role header labels: wrap and constrain width so columns stay narrow */
+.membership-table th:not(:first-child):not(:last-child) {
+  max-width: 6rem;
+  font-size: 0.85em;
+  word-break: break-word;
+}
+
+/* User column: take remaining space */
+.membership-table td:first-child {
+  white-space: nowrap;
+}
+
+.membership-table td:first-child small {
+  color: #666;
+  font-size: 0.85em;
+}
+
+/* Remove button: compact and subtle */
+.membership-table .button--small {
+  font-size: 0.8em;
+  padding: 0.15rem 0.5rem;
+  min-height: unset;
+}
+
+/* Add-member row: search field + button side by side */
+.membership-add-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.membership-add-row .form-item {
+  flex: 1 1 20rem;
+  margin: 0;
+}
+
+.membership-add-row .form-submit {
+  flex-shrink: 0;
+  align-self: flex-end;
+}

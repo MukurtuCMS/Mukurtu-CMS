@@ -3,12 +3,10 @@
 namespace Drupal\mukurtu_protocol\Form;
 
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\mukurtu_protocol\Entity\Protocol;
-use Drupal\entity_browser\Element\EntityBrowserElement;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\ReplaceCommand;
 
 /**
  * Form controller for Protocol creation forms.
@@ -67,11 +65,43 @@ class ProtocolAddForm extends EntityForm {
   }
 
   /**
+   * Role definitions: machine name => label.
+   */
+  protected static function getRoles(): array {
+    return [
+      'protocol_member'           => t('Member'),
+      'protocol_affiliate'        => t('Affiliate'),
+      'contributor'               => t('Contributor'),
+      'curator'                   => t('Curator'),
+      'community_record_steward'  => t('CR Steward'),
+      'language_contributor'      => t('Lang. Contributor'),
+      'language_steward'          => t('Lang. Steward'),
+      'protocol_steward'          => t('Protocol Steward'),
+    ];
+  }
+
+  /**
+   * Role descriptions shown below the table header.
+   */
+  protected static function getRoleDescriptions(): array {
+    return [
+      'protocol_member'           => t('Can view content but cannot add or edit.'),
+      'protocol_affiliate'        => t('Can view content but cannot add or edit. A designation for community partners.'),
+      'contributor'               => t('Can create, edit and delete their own digital heritage items, person records, place records, and media assets.'),
+      'curator'                   => t('Can create, edit and delete their own collections and upload media assets.'),
+      'community_record_steward'  => t('Can add community records to content, as well as edit and delete their community records.'),
+      'language_contributor'      => t('Can add, edit and delete their own dictionary words and word lists.'),
+      'language_steward'          => t('Can add, edit and delete ALL dictionary words and word lists, and add media assets.'),
+      'protocol_steward'          => t('Can manage protocol membership, add/edit/delete ALL content and media assets, and manage Local Contexts projects.'),
+    ];
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $community = NULL) {
     $this->setModuleHandler($this->moduleHandler);
-    /** @var \Drupal\Core\Session\AccountInterface $currentUser */
+    /** @var \Drupal\user\UserInterface $currentUser */
     $currentUser = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
     // Set the community relationship.
@@ -91,7 +121,6 @@ class ProtocolAddForm extends EntityForm {
     ];
 
     // Sharing setting.
-    // @todo Need to pull these options from field def.
     $form['field_access_mode'] = [
       '#type' => 'radios',
       '#title' => $this->t('Cultural Protocol Type'),
@@ -125,267 +154,184 @@ class ProtocolAddForm extends EntityForm {
       '#default_value' => 'none',
     ];
 
-    // I don't like that every role's form element is hardcoded, however,
-    // given that each one has unique helper text, I think it's inevitable.
+    // Seed the member list on first load with the current user as protocol steward.
+    if ($form_state->get('members') === NULL) {
+      $form_state->set('members', [
+        $currentUser->id() => ['entity' => $currentUser, 'roles' => ['protocol_steward']],
+      ]);
+      // Store the community for use in static AJAX callbacks.
+      $form_state->set('protocol_community', $community);
+    }
 
-    // Protocol members.
-    $form['protocol_member_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Protocol members'),
-      '#description' => $this->t('Protocol members can view content but cannot add or edit content.'),
-    ];
-    $form['protocol_member'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'protocol-member',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-member">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
+    $form['membership_wrapper'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
     ];
 
-    // Protocol affiliates.
-    $form['protocol_affiliate_item'] = [
+    $form['membership_wrapper']['membership_label'] = [
       '#type' => 'item',
-      '#title' => $this->t('Protocol affiliates'),
-      '#description' => $this->t('Protocol affiliates can view content but cannot add or edit. This is a designation for community partners that mirrors the community affiliate role.'),
-    ];
-    $form['protocol_affiliate'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'protocol-affiliate',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#default_value' => [],
-      '#prefix' => '<div id="role-protocol-affiliate">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
+      '#title' => $this->t('Protocol membership'),
+      '#description' => $this->t('Add protocol members and assign their roles. A member may hold multiple roles.'),
     ];
 
-    // Contributors.
-    $form['protocol_contributor_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Contributors'),
-      '#description' => $this->t('Contributors can create, edit and delete their own digital heritage items, person records, place records, and media assets.'),
-    ];
-    $form['contributor'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'contributor',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#default_value' => [],
-      '#prefix' => '<div id="role-contributor">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
+    $form['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
+
+    $form['membership_wrapper']['member_table'] = static::buildMembershipTable($form_state);
+
+    $form['membership_wrapper']['add_row'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['membership-add-row']],
     ];
 
-    // Curators.
-    $form['protocol_curator_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Curators'),
-      '#description' => $this->t('Curators can create, edit and delete their own collections and upload media assets.'),
-    ];
-    $form['curator'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'curator',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#default_value' => [],
-      '#prefix' => '<div id="role-curator">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
+    // Use the Mukurtu user selection handler to restrict to community members.
+    $selection_settings = ['include_anonymous' => FALSE];
+    if ($community) {
+      $selection_settings['group'] = $this->entity;
+    }
+
+    $form['membership_wrapper']['add_row']['user_search'] = [
+      '#type' => 'entity_autocomplete',
+      '#target_type' => 'user',
+      '#title' => $this->t('Add a member'),
+      '#placeholder' => $this->t('Search by name or email…'),
+      '#selection_handler' => $community ? 'mukurtu_user_selection' : 'default:user',
+      '#selection_settings' => $selection_settings,
+      '#autocreate' => FALSE,
     ];
 
-    // Community record stewards.
-    $form['protocol_community_record_steward_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Community record stewards'),
-      '#description' => $this->t('Community record stewards can add community records to content, as well as edit and delete their community records.'),
-    ];
-    $form['community_record_steward'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'community-record-steward',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#default_value' => [],
-      '#prefix' => '<div id="role-community-record-steward">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
+    $form['membership_wrapper']['add_row']['add_member'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add'),
+      '#validate' => [[static::class, 'membershipNoValidate']],
+      '#submit' => [[static::class, 'addMemberSubmit']],
+      '#limit_validation_errors' => [],
     ];
 
-    // Language contributors.
-    $form['protocol_language_contributor_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Language contributors'),
-      '#description' => $this->t('Language contributors can add, edit and delete their own dictionary words and word lists.'),
-    ];
-    $form['language_contributor'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'language-contributor',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#default_value' => [],
-      '#prefix' => '<div id="role-language-contributor">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
-    ];
-
-    // Language stewards.
-    $form['protocol_language_steward_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Language stewards'),
-      '#description' => $this->t('Language stewards can add, edit and delete ALL dictionary words and word lists,and add media assets.'),
-    ];
-    $form['language_steward'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'language-steward',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#default_value' => [],
-      '#prefix' => '<div id="role-language-steward">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
-    ];
-
-    // Protocol stewards.
-    $form['protocol_steward_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Protocol stewards'),
-      '#description' => $this->t('Protocol stewards can manage protocol membership, add edit and delete ALL content and media assets, manage the look and feel of the protocol page, and manage Local Contexts projects.'),
-    ];
-    $defaultStatus = "<ul>";
-    $defaultStatus .= "<li>{$currentUser->getAccountName()} ({$currentUser->getEmail()})</li>";
-    $defaultStatus .= "</ul>";
-    $form['protocol_steward'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'protocol-steward',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#default_value' => [$currentUser],
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#widget_context' => ['group' => $this->entity],
-      '#prefix' => '<div id="role-protocol-steward">',
-      '#suffix' => $defaultStatus . '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
-    ];
+    $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 
     return $form;
   }
 
   /**
-   * Keep default value for entity browser up to date.
+   * Build collapsible role description list.
    */
-  public static function updateDefaultValues(&$element, FormStateInterface $form_state, &$complete_form) {
-    $element['#default_value'] = $element['#value']['entities'] ?? $element['#default_value'];
-    return $element;
-  }
-
-  /**
-   * Render API callback: Processes the entity browser element.
-   */
-  public static function processEntityBrowser(&$element, FormStateInterface $form_state, &$complete_form) {
-    $trigger = $form_state->getTriggeringElement();
-    $element['#default_value'] = $element['#value']['entities'] ?? $element['#default_value'];
-    $element['entity_ids']['#default_value'] = $trigger['#value'] ?? $element['entity_ids']['#default_value'];
-    $element['entity_ids']['#ajax'] = [
-      'callback' => [get_called_class(), 'updateCallback'],
-      'wrapper' => "role-{$element['#id']}",
-      'event' => 'entity_browser_value_updated',
-    ];
-    return $element;
-  }
-
-  /**
-   * AJAX callback: Re-renders the Entity Browser.
-   */
-  public static function updateCallback(array &$form, FormStateInterface $form_state) {
-    $trigger = $form_state->getTriggeringElement();
-    $parents = $trigger['#array_parents'];
-    $role = $parents[0];
-    $value = $form_state->getValue($role);
-    $status = "<ul>";
-    foreach ($value['entities'] as $user) {
-      $status .= "<li>{$user->getAccountName()} ({$user->getEmail()})</li>";
+  protected static function buildRoleDescriptions(): array {
+    $items = [];
+    foreach (static::getRoleDescriptions() as $role_id => $description) {
+      $label = static::getRoles()[$role_id];
+      $items[] = ['#markup' => '<strong>' . $label . '</strong>: ' . $description];
     }
-    $status .= "</ul>";
+    return [
+      '#type' => 'details',
+      '#title' => t('Role descriptions'),
+      '#open' => FALSE,
+      'list' => [
+        '#theme' => 'item_list',
+        '#items' => $items,
+      ],
+    ];
+  }
 
-    unset($form[$role]['#default_value']);
-    unset($form[$role]['entity_ids']['#default_value']);
-    $form[$role]['#suffix'] = $status . '</div>';
-    $response = new AjaxResponse();
-    $roleID = str_replace('_', '-', $role);
-    $response->addCommand(new ReplaceCommand("#role-{$roleID}", $form[$role]));
-    return $response;
+  /**
+   * Build the inline membership table render array.
+   */
+  protected static function buildMembershipTable(FormStateInterface $form_state): array {
+    $roles = static::getRoles();
+
+    $header = [t('User')];
+    foreach ($roles as $label) {
+      $header[] = $label;
+    }
+    $header[] = '';
+
+    $table = [
+      '#type' => 'table',
+      '#header' => $header,
+      '#empty' => t('No members added yet.'),
+      '#attributes' => ['class' => ['membership-table']],
+    ];
+
+    foreach ($form_state->get('members') ?? [] as $uid => $data) {
+      /** @var \Drupal\user\UserInterface $member */
+      $member = $data['entity'];
+
+      $row = [];
+      $row['user'] = [
+        '#markup' => $member->getDisplayName() . ' <small>(' . $member->getEmail() . ')</small>',
+      ];
+
+      foreach ($roles as $role_id => $label) {
+        $row[$role_id] = [
+          '#type' => 'checkbox',
+          '#title' => $label,
+          '#title_display' => 'invisible',
+          '#default_value' => in_array($role_id, $data['roles']),
+        ];
+      }
+
+      $row['remove'] = [
+        '#type' => 'submit',
+        '#value' => t('Remove'),
+        '#name' => 'remove_member_' . $uid,
+        '#validate' => [[static::class, 'membershipNoValidate']],
+        '#submit' => [[static::class, 'removeMemberSubmit']],
+        '#limit_validation_errors' => [],
+        '#attributes' => ['class' => ['button--danger', 'button--small']],
+      ];
+
+      $table[$uid] = $row;
+    }
+
+    return $table;
+  }
+
+  /**
+   * Validation stub that suppresses all validation for membership buttons.
+   */
+  public static function membershipNoValidate(array &$form, FormStateInterface $form_state): void {}
+
+  /**
+   * Submit handler: add a user to the member list.
+   */
+  public static function addMemberSubmit(array &$form, FormStateInterface $form_state): void {
+    $raw = $form_state->getUserInput();
+    $input = $raw['membership_wrapper']['add_row']['user_search'] ?? NULL;
+
+    $uid = NULL;
+    if (is_numeric($input) && $input > 0) {
+      $uid = (int) $input;
+    }
+    elseif (is_string($input) && $input !== '') {
+      $uid = EntityAutocomplete::extractEntityIdFromAutocompleteInput($input);
+    }
+
+    if ($uid) {
+      $members = $form_state->get('members') ?? [];
+      if (!isset($members[$uid])) {
+        $user = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
+        if ($user) {
+          $members[$uid] = ['entity' => $user, 'roles' => ['protocol_member']];
+          $form_state->set('members', $members);
+        }
+      }
+    }
+    $form_state->setValue(['membership_wrapper', 'add_row', 'user_search'], NULL);
+    $user_input = $form_state->getUserInput();
+    $user_input['membership_wrapper']['add_row']['user_search'] = '';
+    $form_state->setUserInput($user_input);
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * Submit handler: remove a user from the member list.
+   */
+  public static function removeMemberSubmit(array &$form, FormStateInterface $form_state): void {
+    $trigger = $form_state->getTriggeringElement();
+    $uid = substr($trigger['#name'], strlen('remove_member_'));
+    $members = $form_state->get('members') ?? [];
+    unset($members[$uid]);
+    $form_state->set('members', $members);
+    $form_state->setRebuild(TRUE);
   }
 
   /**
@@ -429,19 +375,20 @@ class ProtocolAddForm extends EntityForm {
     $entity->setSharingSetting($form_state->getValue('field_access_mode'));
     $entity->setMembershipDisplay($form_state->getValue('field_membership_display'));
 
-    // Grab the memberships.
-    $roles = ['protocol_steward', 'protocol_member', 'protocol_affiliate', 'curator', 'contributor', 'language_steward', 'language_contributor', 'community_record_steward'];
-    foreach ($roles as $role) {
-      $members = $form_state->getValue($role);
-      $users = !empty($members['entities']) ? $members['entities'] : [];
-      foreach ($users as $user) {
-        if (!isset($this->members[$user->id()])) {
-          $this->members[$user->id()] = ['entity' => $user, 'roles' => []];
-        }
+    $role_keys = array_keys(static::getRoles());
+    $stored_members = $form_state->get('members') ?? [];
+    $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
 
-        if (!in_array($role, $this->members[$user->id()]['roles'])) {
-          $this->members[$user->id()]['roles'][] = $role;
+    foreach ($stored_members as $uid => $data) {
+      $roles = [];
+      $user_row = $table_values[$uid] ?? [];
+      foreach ($role_keys as $role) {
+        if (!empty($user_row[$role])) {
+          $roles[] = $role;
         }
+      }
+      if (!isset($this->members[$uid])) {
+        $this->members[$uid] = ['entity' => $data['entity'], 'roles' => $roles];
       }
     }
 
