@@ -266,3 +266,26 @@ function mukurtu_protocol_update_40004(): void {
     $config->set('hidden', $hidden);
   }
 }
+
+/**
+ * Re-order protocol roles in the members/add form.
+ */
+function mukurtu_protocol_update_40007(): void {
+  $weights = [
+    'protocol-protocol-protocol_member'          => 1,
+    'protocol-protocol-protocol_affiliate'       => 2,
+    'protocol-protocol-contributor'              => 3,
+    'protocol-protocol-curator'                  => 4,
+    'protocol-protocol-community_record_steward' => 5,
+    'protocol-protocol-language_contributor'     => 6,
+    'protocol-protocol-language_steward'         => 7,
+    'protocol-protocol-protocol_steward'         => 8,
+  ];
+
+  foreach ($weights as $id => $weight) {
+    $config = \Drupal::configFactory()->getEditable("og.og_role.$id");
+    if (!$config->isNew()) {
+      $config->set('weight', $weight)->save();
+    }
+  }
+}

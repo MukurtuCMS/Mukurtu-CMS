@@ -5,7 +5,7 @@ dependencies:
     - mukurtu_protocol
 id: protocol-protocol-community_record_steward
 label: 'Community Record Steward'
-weight: 9
+weight: 5
 is_admin: null
 group_type: protocol
 group_bundle: protocol
