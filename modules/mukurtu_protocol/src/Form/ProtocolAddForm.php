@@ -69,13 +69,13 @@ class ProtocolAddForm extends EntityForm {
    */
   protected static function getRoles(): array {
     return [
-      'protocol_member'           => t('Member'),
-      'protocol_affiliate'        => t('Affiliate'),
+      'protocol_member'           => t('Protocol member'),
+      'protocol_affiliate'        => t('Protocol affiliate'),
       'contributor'               => t('Contributor'),
       'curator'                   => t('Curator'),
-      'community_record_steward'  => t('CR Steward'),
-      'language_contributor'      => t('Lang. Contributor'),
-      'language_steward'          => t('Lang. Steward'),
+      'community_record_steward'  => t('Community record steward'),
+      'language_contributor'      => t('Language contributor'),
+      'language_steward'          => t('Language Steward'),
       'protocol_steward'          => t('Protocol Steward'),
     ];
   }
@@ -85,14 +85,14 @@ class ProtocolAddForm extends EntityForm {
    */
   protected static function getRoleDescriptions(): array {
     return [
-      'protocol_member'           => t('Can view content but cannot add or edit.'),
-      'protocol_affiliate'        => t('Can view content but cannot add or edit. A designation for community partners.'),
-      'contributor'               => t('Can create, edit and delete their own digital heritage items, person records, place records, and media assets.'),
-      'curator'                   => t('Can create, edit and delete their own collections and upload media assets.'),
-      'community_record_steward'  => t('Can add community records to content, as well as edit and delete their community records.'),
-      'language_contributor'      => t('Can add, edit and delete their own dictionary words and word lists.'),
-      'language_steward'          => t('Can add, edit and delete ALL dictionary words and word lists, and add media assets.'),
-      'protocol_steward'          => t('Can manage protocol membership, add/edit/delete ALL content and media assets, and manage Local Contexts projects.'),
+      'protocol_member'           => t('View content but cannot create or edit.'),
+      'protocol_affiliate'        => t('View content but cannot create or edit. This is a designation for community partners that mirrors the community affiliate role.'),
+      'contributor'               => t('Create, edit, and delete their own digital heritage items, person records, place records, and media assets.'),
+      'curator'                   => t('Create, edit, and delete their own collections and media assets.'),
+      'community_record_steward'  => t('Add community records to content, as well as edit and delete their community records.'),
+      'language_contributor'      => t('Create, edit, and delete their own dictionary words and word lists.'),
+      'language_steward'          => t('Create, edit, and delete ALL dictionary words and word lists, and media assets.'),
+      'protocol_steward'          => t('Manage protocol membership, create, edit, and delete ALL content and media assets, and manage Local Contexts projects.'),
     ];
   }
 
@@ -170,8 +170,8 @@ class ProtocolAddForm extends EntityForm {
 
     $form['membership_wrapper']['membership_label'] = [
       '#type' => 'item',
-      '#title' => $this->t('Protocol membership'),
-      '#description' => $this->t('Add protocol members and assign their roles. A member may hold multiple roles.'),
+      '#title' => $this->t('Protocol members'),
+      '#description' => $this->t('Add members of the parent community to this protocol. A member may hold multiple roles.'),
     ];
 
     $form['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
