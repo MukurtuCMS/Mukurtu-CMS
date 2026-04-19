@@ -176,8 +176,6 @@ class ProtocolAddForm extends EntityForm {
 
     $form['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
 
-    $form['membership_wrapper']['member_table'] = static::buildMembershipTable($form_state);
-
     $form['membership_wrapper']['add_row'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['membership-add-row']],
@@ -207,7 +205,46 @@ class ProtocolAddForm extends EntityForm {
       '#limit_validation_errors' => [],
     ];
 
+    $form['membership_wrapper']['member_table'] = static::buildMembershipTable($form_state);
+
     $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
+
+    // Pass users to JS for client-side autocomplete. When a community is set,
+    // restrict to its active members; otherwise fall back to all active users.
+    $suggestions = [];
+    if ($community) {
+      $memberships = \Drupal::entityTypeManager()
+        ->getStorage('og_membership')
+        ->loadByProperties([
+          'entity_type' => $community->getEntityTypeId(),
+          'entity_id' => $community->id(),
+          'state' => \Drupal\og\OgMembershipInterface::STATE_ACTIVE,
+        ]);
+      foreach ($memberships as $membership) {
+        $member = $membership->getOwner();
+        if ($member && $member->id() > 0) {
+          $suggestions[] = [
+            'value' => $member->getDisplayName() . ' (' . $member->id() . ')',
+            'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')',
+          ];
+        }
+      }
+    }
+    else {
+      $uids = $this->entityTypeManager->getStorage('user')->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('status', 1)
+        ->condition('uid', 0, '<>')
+        ->sort('name')
+        ->execute();
+      foreach ($this->entityTypeManager->getStorage('user')->loadMultiple($uids) as $uid => $u) {
+        $suggestions[] = [
+          'value' => $u->getDisplayName() . ' (' . $uid . ')',
+          'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
+        ];
+      }
+    }
+    $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
 
     return $form;
   }

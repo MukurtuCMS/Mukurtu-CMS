@@ -73,6 +73,8 @@ class CommunityAddForm extends ContentEntityForm {
       '#description' => $this->t('Add community members and assign their roles. A member may hold multiple roles.'),
     ];
 
+    $form['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
+
     $form['membership_wrapper']['add_row'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['membership-add-row']],
@@ -99,7 +101,59 @@ class CommunityAddForm extends ContentEntityForm {
 
     $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 
+    // Pass all active users to JS for client-side autocomplete.
+    $uids = $this->entityTypeManager->getStorage('user')->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('status', 1)
+      ->condition('uid', 0, '<>')
+      ->sort('name')
+      ->execute();
+    $suggestions = [];
+    foreach ($this->entityTypeManager->getStorage('user')->loadMultiple($uids) as $uid => $u) {
+      $suggestions[] = [
+        'value' => $u->getDisplayName() . ' (' . $uid . ')',
+        'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
+      ];
+    }
+    $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
+
     return $form;
+  }
+
+  /**
+   * Role descriptions shown below the table header.
+   */
+  protected static function getRoleDescriptions(): array {
+    return [
+      'community_member'    => t('Can view community content according to cultural protocol settings.'),
+      'community_affiliate' => t('A designation for community partners. Can view community content according to cultural protocol settings.'),
+      'community_manager'   => t('Can manage community membership, create cultural protocols, and edit community settings.'),
+    ];
+  }
+
+  /**
+   * Build collapsible role description list.
+   */
+  protected static function buildRoleDescriptions(): array {
+    $roles = [
+      'community_member'    => t('Member'),
+      'community_affiliate' => t('Affiliate'),
+      'community_manager'   => t('Manager'),
+    ];
+    $items = [];
+    foreach (static::getRoleDescriptions() as $role_id => $description) {
+      $label = $roles[$role_id];
+      $items[] = ['#markup' => '<strong>' . $label . '</strong>: ' . $description];
+    }
+    return [
+      '#type' => 'details',
+      '#title' => t('Role descriptions'),
+      '#open' => FALSE,
+      'list' => [
+        '#theme' => 'item_list',
+        '#items' => $items,
+      ],
+    ];
   }
 
   /**

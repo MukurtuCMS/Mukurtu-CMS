@@ -47,8 +47,8 @@
 
 /* Add-member row: search field + button side by side */
 .membership-add-row {
-  display: flex;
-  align-items: flex-end;
+  display: flex !important;
+  align-items: flex-end !important;
   gap: 0.75rem;
   flex-wrap: wrap;
   margin-top: 0.5rem;
@@ -60,7 +60,9 @@
   margin: 0;
 }
 
-.membership-add-row .form-submit {
+.membership-add-row input[type="submit"],
+.membership-add-row button[type="submit"] {
   flex-shrink: 0;
   align-self: flex-end;
+  margin-bottom: 0;
 }
