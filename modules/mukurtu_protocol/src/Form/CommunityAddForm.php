@@ -70,7 +70,7 @@ class CommunityAddForm extends ContentEntityForm {
     $form['membership_wrapper']['membership_label'] = [
       '#type' => 'item',
       '#title' => $this->t('Community members'),
-      '#description' => $this->t('Add existing users to the community.'),
+      '#description' => $this->t('Add existing users to the community. Protocol membership will be managed next.'),
     ];
 
     $form['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
@@ -170,7 +170,7 @@ class CommunityAddForm extends ContentEntityForm {
     foreach ($roles as $label) {
       $header[] = $label;
     }
-    $header[] = '';
+    $header[] = ['data' => t('Actions'), 'class' => ['visually-hidden']];
 
     $table = [
       '#type' => 'table',
@@ -182,10 +182,11 @@ class CommunityAddForm extends ContentEntityForm {
     foreach ($form_state->get('members') ?? [] as $uid => $data) {
       /** @var \Drupal\user\UserInterface $member */
       $member = $data['entity'];
+      $name = $member->getDisplayName();
 
       $row = [];
       $row['user'] = [
-        '#markup' => $member->getDisplayName() . ' <small>(' . $member->getEmail() . ')</small>',
+        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
       ];
 
       foreach ($roles as $role_id => $label) {
@@ -194,6 +195,7 @@ class CommunityAddForm extends ContentEntityForm {
           '#title' => $label,
           '#title_display' => 'invisible',
           '#default_value' => in_array($role_id, $data['roles']),
+          '#attributes' => ['aria-label' => t('@role for @name', ['@role' => $label, '@name' => $name])],
         ];
       }
 
@@ -204,7 +206,10 @@ class CommunityAddForm extends ContentEntityForm {
         '#validate' => [[static::class, 'membershipNoValidate']],
         '#submit' => [[static::class, 'removeMemberSubmit']],
         '#limit_validation_errors' => [],
-        '#attributes' => ['class' => ['button--danger', 'button--small']],
+        '#attributes' => [
+          'class' => ['button--danger', 'button--small'],
+          'aria-label' => t('Remove @name', ['@name' => $name]),
+        ],
       ];
 
       $table[$uid] = $row;

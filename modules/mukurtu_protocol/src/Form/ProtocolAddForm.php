@@ -279,7 +279,7 @@ class ProtocolAddForm extends EntityForm {
     foreach ($roles as $label) {
       $header[] = $label;
     }
-    $header[] = '';
+    $header[] = ['data' => t('Actions'), 'class' => ['visually-hidden']];
 
     $table = [
       '#type' => 'table',
@@ -291,10 +291,11 @@ class ProtocolAddForm extends EntityForm {
     foreach ($form_state->get('members') ?? [] as $uid => $data) {
       /** @var \Drupal\user\UserInterface $member */
       $member = $data['entity'];
+      $name = $member->getDisplayName();
 
       $row = [];
       $row['user'] = [
-        '#markup' => $member->getDisplayName() . ' <small>(' . $member->getEmail() . ')</small>',
+        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
       ];
 
       foreach ($roles as $role_id => $label) {
@@ -303,6 +304,7 @@ class ProtocolAddForm extends EntityForm {
           '#title' => $label,
           '#title_display' => 'invisible',
           '#default_value' => in_array($role_id, $data['roles']),
+          '#attributes' => ['aria-label' => t('@role for @name', ['@role' => $label, '@name' => $name])],
         ];
       }
 
@@ -313,7 +315,10 @@ class ProtocolAddForm extends EntityForm {
         '#validate' => [[static::class, 'membershipNoValidate']],
         '#submit' => [[static::class, 'removeMemberSubmit']],
         '#limit_validation_errors' => [],
-        '#attributes' => ['class' => ['button--danger', 'button--small']],
+        '#attributes' => [
+          'class' => ['button--danger', 'button--small'],
+          'aria-label' => t('Remove @name', ['@name' => $name]),
+        ],
       ];
 
       $table[$uid] = $row;
