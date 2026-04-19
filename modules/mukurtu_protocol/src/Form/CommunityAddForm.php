@@ -69,8 +69,8 @@ class CommunityAddForm extends ContentEntityForm {
 
     $form['membership_wrapper']['membership_label'] = [
       '#type' => 'item',
-      '#title' => $this->t('Community membership'),
-      '#description' => $this->t('Add community members and assign their roles. A member may hold multiple roles.'),
+      '#title' => $this->t('Community members'),
+      '#description' => $this->t('Add existing users to the community.'),
     ];
 
     $form['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
@@ -125,9 +125,9 @@ class CommunityAddForm extends ContentEntityForm {
    */
   protected static function getRoleDescriptions(): array {
     return [
-      'community_member'    => t('Can view community content according to cultural protocol settings.'),
-      'community_affiliate' => t('A designation for community partners. Can view community content according to cultural protocol settings.'),
-      'community_manager'   => t('Can manage community membership, create cultural protocols, and edit community settings.'),
+      'community_member'    => t('View the community page and be added to protocols within the community'),
+      'community_affiliate' => t('View the community page and be added to protocols within the community. This is a designation for community partners.'),
+      'community_manager'   => t('Manage community membership and create new protocols. View the community page and be added to protocols within the community.'),
     ];
   }
 
@@ -136,9 +136,9 @@ class CommunityAddForm extends ContentEntityForm {
    */
   protected static function buildRoleDescriptions(): array {
     $roles = [
-      'community_member'    => t('Member'),
-      'community_affiliate' => t('Affiliate'),
-      'community_manager'   => t('Manager'),
+      'community_member'    => t('Community member'),
+      'community_affiliate' => t('Community affiliate'),
+      'community_manager'   => t('Community manager'),
     ];
     $items = [];
     foreach (static::getRoleDescriptions() as $role_id => $description) {
