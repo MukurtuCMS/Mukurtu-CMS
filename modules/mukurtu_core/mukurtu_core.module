@@ -118,26 +118,30 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
     if ($can_manage) {
       $is_site_admin = $account->hasPermission('administer users');
 
-      // Pre-compute community IDs for community managers (reused below).
+      // Site admins bypass the OG membership check above, so $current_user
+      // may not be loaded yet.
+      if (!isset($current_user)) {
+        $current_user = \Drupal\user\Entity\User::load($account->id());
+      }
+
+      // Pre-compute community IDs for all users (reused below).
       $cm_community_ids = [];
-      $target_community_ids = [];
-      if (!$is_site_admin) {
-        // $current_user is already loaded above via the OG membership check.
-        foreach (\Drupal\og\Og::getMemberships($current_user) as $m) {
-          if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
-            $cm_community_ids[] = $m->getGroupId();
-          }
+      foreach (\Drupal\og\Og::getMemberships($current_user) as $m) {
+        if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
+          $cm_community_ids[] = $m->getGroupId();
         }
-        foreach (\Drupal\og\Og::getMemberships($entity) as $m) {
-          if ($m->getGroupBundle() === 'community') {
-            $target_community_ids[] = $m->getGroupId();
-          }
+      }
+      $target_community_ids = [];
+      foreach (\Drupal\og\Og::getMemberships($entity) as $m) {
+        if ($m->getGroupBundle() === 'community') {
+          $target_community_ids[] = $m->getGroupId();
         }
       }
 
-      // Only show "Add to Community" when there is at least one managed
-      // community the target has not yet joined.
-      if ($is_site_admin || !empty(array_diff($cm_community_ids, $target_community_ids))) {
+      // Show "Add to Community" unless the target is already in every community
+      // the current user manages. If the current user manages no communities,
+      // always show (the form handles further scoping).
+      if (empty($cm_community_ids) || !empty(array_diff($cm_community_ids, $target_community_ids))) {
         $operations['add_to_community'] = [
           'title' => t('Add to Community'),
           'url' => Url::fromRoute('mukurtu_protocol.add_user_to_community', ['user' => $entity->id()]),
