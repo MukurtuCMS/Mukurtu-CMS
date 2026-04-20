@@ -116,12 +116,35 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       }
     }
     if ($can_manage) {
-      $operations['add_to_community'] = [
-        'title' => t('Add to Community'),
-        'url' => Url::fromRoute('mukurtu_protocol.add_user_to_community', ['user' => $entity->id()]),
-        'weight' => 90,
-      ];
       $is_site_admin = $account->hasPermission('administer users');
+
+      // Pre-compute community IDs for community managers (reused below).
+      $cm_community_ids = [];
+      $target_community_ids = [];
+      if (!$is_site_admin) {
+        // $current_user is already loaded above via the OG membership check.
+        foreach (\Drupal\og\Og::getMemberships($current_user) as $m) {
+          if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
+            $cm_community_ids[] = $m->getGroupId();
+          }
+        }
+        foreach (\Drupal\og\Og::getMemberships($entity) as $m) {
+          if ($m->getGroupBundle() === 'community') {
+            $target_community_ids[] = $m->getGroupId();
+          }
+        }
+      }
+
+      // Only show "Add to Community" when there is at least one managed
+      // community the target has not yet joined.
+      if ($is_site_admin || !empty(array_diff($cm_community_ids, $target_community_ids))) {
+        $operations['add_to_community'] = [
+          'title' => t('Add to Community'),
+          'url' => Url::fromRoute('mukurtu_protocol.add_user_to_community', ['user' => $entity->id()]),
+          'weight' => 90,
+        ];
+      }
+
       $target_is_protected = !empty(array_intersect(
         \Drupal\mukurtu_core\Controller\MukurtuUserController::PROTECTED_ROLES,
         $entity->getRoles()
@@ -138,23 +161,7 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       elseif ($is_site_admin || !$target_is_protected) {
         // Community managers may only block users who share one of their
         // managed communities; site admins can block anyone.
-        $can_block = $is_site_admin;
-        if (!$can_block) {
-          // $current_user is already loaded above via the OG membership check.
-          $cm_community_ids = [];
-          foreach (\Drupal\og\Og::getMemberships($current_user) as $m) {
-            if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
-              $cm_community_ids[] = $m->getGroupId();
-            }
-          }
-          $target_community_ids = [];
-          foreach (\Drupal\og\Og::getMemberships($entity) as $m) {
-            if ($m->getGroupBundle() === 'community') {
-              $target_community_ids[] = $m->getGroupId();
-            }
-          }
-          $can_block = !empty(array_intersect($cm_community_ids, $target_community_ids));
-        }
+        $can_block = $is_site_admin || !empty(array_intersect($cm_community_ids, $target_community_ids));
         if ($can_block) {
           $operations['block_user'] = [
             'title' => t('Block User'),
