@@ -116,6 +116,11 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       }
     }
     if ($can_manage) {
+      $operations['add_to_community'] = [
+        'title' => t('Add to Community'),
+        'url' => Url::fromRoute('mukurtu_protocol.add_user_to_community', ['user' => $entity->id()]),
+        'weight' => 90,
+      ];
       $is_site_admin = $account->hasPermission('administer users');
       $target_is_protected = !empty(array_intersect(
         \Drupal\mukurtu_core\Controller\MukurtuUserController::PROTECTED_ROLES,
