@@ -226,7 +226,7 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $user->save();
 
-    if (!empty($values['notify'])) {
+    if (!empty($values['notify']) && !empty($email)) {
       _user_mail_notify('status_activated', $user);
     }
 
