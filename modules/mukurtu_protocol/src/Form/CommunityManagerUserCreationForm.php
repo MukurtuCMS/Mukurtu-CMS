@@ -255,6 +255,10 @@ class CommunityManagerUserCreationForm extends FormBase {
     }
 
     $this->messenger()->addMessage($this->t('The new user account <a href=":url">%name</a> has been created.', [':url' => $user->toUrl()->toString(), '%name' => $user->getAccountName()]));
+
+    if (empty($email)) {
+      $this->messenger()->addMessage($this->t('No email address was provided, so a notification email has not been sent to the new user.'));
+    }
   }
 
   /**
