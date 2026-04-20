@@ -311,6 +311,10 @@ function mukurtu_notifications_notify_new_account_created(User $new_user, array 
     'uids' => [],
   ];
   foreach ($notify_uids as $uid) {
+    $notify_user = User::load($uid);
+    if (!$notify_user || empty($notify_user->getEmail())) {
+      continue;
+    }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, (int) $uid);
   }
 
