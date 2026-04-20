@@ -289,3 +289,13 @@ function mukurtu_protocol_update_40006(): void {
   $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($data)->save(TRUE);
 }
+
+/**
+ * Replace core block/unblock VBO actions with community-manager-scoped versions.
+ */
+function mukurtu_protocol_update_40007(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $config_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($data)->save(TRUE);
+}

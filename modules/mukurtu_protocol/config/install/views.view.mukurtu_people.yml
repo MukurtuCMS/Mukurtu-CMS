@@ -82,9 +82,9 @@ display:
           force_selection_info: false
           selected_actions:
             0:
-              action_id: user_block_user_action
+              action_id: mukurtu_block_user_action
             1:
-              action_id: user_unblock_user_action
+              action_id: mukurtu_unblock_user_action
         name:
           id: name
           table: users_field_data
