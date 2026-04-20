@@ -231,6 +231,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     $user->setUsername($username);
     $user->setEmail($email);
     $user->activate();
+    $user->addRole('authenticated');
     $user->save();
 
     _user_mail_notify('status_activated', $user);
