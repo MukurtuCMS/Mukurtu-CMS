@@ -88,4 +88,31 @@ class FormHooks {
       }
     }
   }
+
+  /**
+   * Removes message_digest notification actions from the user admin bulk form.
+   *
+   * These come from message_digest_ui optional config and should not be
+   * exposed in Mukurtu's user management UI.
+   */
+  #[Hook('form_alter')]
+  public function formAlterRemoveNotificationBulkActions(array &$form, FormStateInterface $form_state, string $form_id): void {
+    if (!str_starts_with($form_id, 'views_form_user_admin_people_') &&
+        !str_starts_with($form_id, 'views_form_mukurtu_people_')) {
+      return;
+    }
+
+    $actions_to_remove = [
+      'message_digest_interval.email_user.immediate',
+      'message_digest_interval.email_user.daily',
+      'message_digest_interval.email_user.weekly',
+    ];
+
+    if (isset($form['header']['user_bulk_form']['action']['#options'])) {
+      foreach ($actions_to_remove as $action_id) {
+        unset($form['header']['user_bulk_form']['action']['#options'][$action_id]);
+      }
+    }
+  }
+
 }
