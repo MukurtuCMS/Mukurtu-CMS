@@ -69,7 +69,6 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
 
     $roles = Role::loadMultiple($entity->getRoles());
     unset($roles[RoleInterface::ANONYMOUS_ID]);
-    unset($roles[RoleInterface::AUTHENTICATED_ID]);
     $users_roles = array_map(fn(RoleInterface $role) => $role->label(), $roles);
     asort($users_roles);
     $row['roles']['data'] = [
