@@ -187,10 +187,27 @@ function mukurtu_protocol_update_40001(): void {
 }
 
 /**
+ * Update community and protocol featured content to use featured view mode.
+ */
+function mukurtu_protocol_update_40002(): void {
+  $configs = [
+    'core.entity_view_display.community.community.full',
+    'core.entity_view_display.protocol.protocol.default',
+  ];
+
+  foreach ($configs as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    $config->set('content.field_featured_content.label', 'hidden');
+    $config->set('content.field_featured_content.settings.view_mode', 'featured');
+    $config->save();
+  }
+}
+
+/*
  * Replace the Views-based browse by community block with the custom block plugin
  * on existing landing page nodes so sub-communities are filtered out.
  */
-function mukurtu_protocol_update_40002(): void {
+function mukurtu_protocol_update_40003(): void {
   $node_storage = \Drupal::entityTypeManager()->getStorage('node');
 
   $nids = $node_storage->getQuery()
@@ -210,17 +227,18 @@ function mukurtu_protocol_update_40002(): void {
 
     foreach ($sections as $section) {
       foreach ($section->getComponents() as $component) {
-        $config = $component->getConfiguration();
-        if (($config['id'] ?? '') === 'views_block:browse_by_community-community_browse_block') {
-          $component->setConfiguration([
-            'id' => 'mukurtu_browse_by_community',
-            'label' => $config['label'] ?? 'Browse by Community',
-            'label_display' => $config['label_display'] ?? '0',
-            'provider' => 'mukurtu_protocol',
-            'context_mapping' => $config['context_mapping'] ?? [],
-          ]);
-          $changed = TRUE;
+        if ($component->getPluginId() !== 'views_block:browse_by_community-community_browse_block') {
+          continue;
         }
+        $config = $component->get('configuration') ?? [];
+        $component->setConfiguration([
+          'id' => 'mukurtu_browse_by_community',
+          'label' => $config['label'] ?? 'Browse by Community',
+          'label_display' => $config['label_display'] ?? '0',
+          'provider' => 'mukurtu_protocol',
+          'context_mapping' => $config['context_mapping'] ?? [],
+        ]);
+        $changed = TRUE;
       }
     }
 
@@ -230,10 +248,10 @@ function mukurtu_protocol_update_40002(): void {
     }
   }
 }
-/**    
+/**
  * Remove orphaned community_type field from community browse view display.
  */
-function mukurtu_protocol_update_40003(): void {
+function mukurtu_protocol_update_40004(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.community.community.browse');
 
   $content = $config->get('content');
@@ -246,5 +264,31 @@ function mukurtu_protocol_update_40003(): void {
   if (!isset($hidden['community_type'])) {
     $hidden['community_type'] = TRUE;
     $config->set('hidden', $hidden);
+  }
+}
+
+/**
+ * Reorder protocol and community roles to match the creation forms.
+ */
+function mukurtu_protocol_update_40005(): void {
+  $role_weights = [
+    'protocol-protocol-protocol_member' => 1,
+    'protocol-protocol-protocol_affiliate' => 2,
+    'protocol-protocol-contributor' => 3,
+    'protocol-protocol-curator' => 4,
+    'protocol-protocol-community_record_steward' => 5,
+    'protocol-protocol-language_contributor' => 6,
+    'protocol-protocol-language_steward' => 7,
+    'protocol-protocol-protocol_steward' => 8,
+    'community-community-community_member' => 1,
+    'community-community-community_affiliate' => 2,
+    'community-community-community_manager' => 3,
+  ];
+
+  foreach ($role_weights as $role_id => $weight) {
+    $config = \Drupal::configFactory()->getEditable("og.og_role.$role_id");
+    if (!$config->isNew()) {
+      $config->set('weight', $weight)->save();
+    }
   }
 }

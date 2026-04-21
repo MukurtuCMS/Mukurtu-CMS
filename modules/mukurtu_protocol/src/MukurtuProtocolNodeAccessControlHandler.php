@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
@@ -27,16 +28,22 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
     }
 
     // For an empty protocol set, default to owner only for everything.
+    // The decision depends on entity fields, so carry entity as cache dep.
     if (empty($entity->getProtocols())) {
       if ($entity->getOwnerId() == $account->id()) {
-        return parent::checkAccess($entity, $operation, $account);
+        return parent::checkAccess($entity, $operation, $account)
+          ->addCacheableDependency($entity);
       }
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()->addCacheableDependency($entity);
     }
 
-    // For non-members we can deny immediately.
+    // For non-members we can deny immediately. Depends on entity protocols and
+    // account memberships; tag with entity and user:{id} so membership changes
+    // (Community::addMember) or protocol field changes invalidate this result.
     if (!$entity->isProtocolSetMember($account)) {
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()
+        ->addCacheableDependency($entity)
+        ->addCacheTags(["user:{$account->id()}"]);
     }
 
     switch ($operation) {
@@ -79,7 +86,7 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
 
         // Protocols are very opinionated, neutral is not good enough for
         // update/delete, allowed is required.
-        return $result->isNeutral() ? AccessResult::forbidden() : $result;
+        return $result->isNeutral() ? AccessResult::forbidden()->addCacheableDependency($entity) : $result;
     }
 
     // Unknown operation, no opinion.
@@ -108,10 +115,17 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
      */
     $memberships = Og::getMemberships($account);
 
+    // Accumulate membership cache deps so role changes auto-invalidate, and
+    // tag with user:{id} so new memberships (Community::addMember) do too.
+    $cacheability = new CacheableMetadata();
+    $cacheability->addCacheTags(["user:{$account->id()}"]);
+
     foreach ($memberships as $membership) {
       if ($membership->getGroupEntityType() !== 'protocol') {
         continue;
       }
+
+      $cacheability->addCacheableDependency($membership);
 
       // Account must be permitted to use the protocol on content.
       if (!$membership->hasPermission("apply protocol")) {
@@ -120,10 +134,11 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
 
       // Account must have create permission for the given type.
       if ($membership->hasPermission("create $entity_bundle content")) {
-        return AccessResult::allowedIf($bundleCheckResult->isAllowed());
+        return AccessResult::allowedIf($bundleCheckResult->isAllowed())
+          ->addCacheableDependency($cacheability);
       }
     }
-    return AccessResult::forbidden();
+    return AccessResult::forbidden()->addCacheableDependency($cacheability);
   }
 
 }
