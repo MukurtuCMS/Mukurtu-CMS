@@ -1,8 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-name: Genres
-vid: genres
-description: null
-weight: 0
-new_revision: false

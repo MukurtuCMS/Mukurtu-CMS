@@ -1,9 +1,0 @@
-{
-  "name": "geolocation-google-maps",
-  "license": "GPL-2.0",
-  "description": "Geolocation google module",
-  "private": true,
-  "devDependencies": {
-    "@types/googlemaps": "^3.30.4"
-  }
-}

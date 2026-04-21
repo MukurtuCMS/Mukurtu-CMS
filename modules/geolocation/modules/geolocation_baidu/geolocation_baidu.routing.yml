@@ -1,7 +1,0 @@
-geolocation_baidu.settings:
-  path: '/admin/config/services/geolocation/baidu_maps'
-  defaults:
-    _form:  '\Drupal\geolocation_baidu\Form\BaiduMapsSettings'
-    _title: 'Baidu Maps settings'
-  requirements:
-    _permission: 'configure geolocation'

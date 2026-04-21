@@ -1,4 +1,0 @@
-administer extlink:
-  title: 'Administer External Links'
-  description: 'Administer External Links'
-  restrict access: TRUE

@@ -1,5 +1,0 @@
-geolocation_leaflet.nominatim_settings:
-  route_name: geolocation_leaflet.nominatim_settings
-  title: 'Nominatim geocoding settings'
-  parent: system.admin_config_services
-  description: 'Configure Nominatim base URL and email.'

@@ -1,6 +1,0 @@
-display_mode_form:
-  js:
-    js/display_mode_form.js: {}
-  dependencies:
-    - core/jquery
-    - core/drupal.dialog

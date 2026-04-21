@@ -1,5 +1,0 @@
-services:
-  config_pages.commands:
-    class: \Drupal\config_pages\Drush\Commands\ConfigPagesCommands
-    tags:
-      - { name: drush.command }

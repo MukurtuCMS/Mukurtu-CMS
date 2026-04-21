@@ -1,3 +1,0 @@
-views.filter.geolocation_search_api_filter_boundary:
-  type: views.filter.geolocation_filter_boundary
-  label: 'Geolocation Boundary Filter'

@@ -1,8 +1,0 @@
-services:
-  plugin.manager.layout_builder_restriction:
-    class: Drupal\layout_builder_restrictions\Plugin\LayoutBuilderRestrictionManager
-    arguments: ['@container.namespaces', '@cache.discovery', '@module_handler', '@config.factory']
-  layout_builder_restrictions.route_subscriber:
-    class: Drupal\layout_builder_restrictions\Routing\RouteSubscriber
-    tags:
-      - { name: event_subscriber }

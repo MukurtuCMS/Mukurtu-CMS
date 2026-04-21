@@ -1,7 +1,0 @@
-geolocation.data_provider.geolocation_address_field_provider:
-  type: geolocation_data_provider
-  label: 'Address field'
-  mapping:
-    geocoder:
-      type: string
-      label: 'Geocoder plugin ID'

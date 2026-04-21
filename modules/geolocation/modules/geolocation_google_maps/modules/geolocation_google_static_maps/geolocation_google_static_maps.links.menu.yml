@@ -1,5 +1,0 @@
-geolocation_google_static_maps.settings:
-  route_name: geolocation_google_static_maps.settings
-  title: 'Google Static Maps API settings'
-  parent: system.admin_config_services
-  description: 'Configure Google Static Maps URL secret et. al.'

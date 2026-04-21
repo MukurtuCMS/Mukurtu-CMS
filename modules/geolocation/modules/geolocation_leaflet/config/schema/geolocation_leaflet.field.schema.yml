@@ -1,7 +1,0 @@
-field.widget.settings.geolocation_leaflet:
-  type: geolocation.field.widget.map.base
-  label: 'Geolocation Leaflet Widget settings'
-  mapping:
-    leaflet_settings:
-      type: geolocation.map_provider.leaflet
-      label: 'Leaflet settings.'

@@ -1,5 +1,0 @@
-geolocation_yandex.settings:
-  route_name: geolocation_yandex.settings
-  title: 'Yandex Maps settings'
-  parent: system.admin_config_services
-  description: 'Configure Yandex Maps settings.'

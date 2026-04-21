@@ -1,6 +1,0 @@
-administer dashboards:
-  title: 'Administer dashboards'
-  description: 'Configure dashboards.'
-
-permission_callbacks:
-  - Drupal\dashboards\DashboardsPermissions::permissions

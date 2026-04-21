@@ -1,5 +1,0 @@
-services:
-  search_api_test_db.event_listener:
-    class: Drupal\search_api_test_db\EventListener
-    tags:
-      - { name: event_subscriber }

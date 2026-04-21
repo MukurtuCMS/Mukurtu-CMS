@@ -1,7 +1,0 @@
-twig_tweak_test.test:
-  path: 'twig-tweak-test'
-  defaults:
-    _title: 'Twig Tweak Test'
-    _controller: '\Drupal\twig_tweak_test\Controller\TwigTweakTestController::build'
-  requirements:
-    _permission: 'access content'

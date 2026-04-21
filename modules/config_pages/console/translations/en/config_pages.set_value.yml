@@ -1,5 +1,0 @@
-description: 'Config pages set value command.'
-options: {}
-arguments: {}
-messages:
-  success: 'Config pages set value command.'

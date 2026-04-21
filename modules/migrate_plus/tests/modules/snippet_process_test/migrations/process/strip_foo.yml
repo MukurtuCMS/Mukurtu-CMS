@@ -1,5 +1,0 @@
-- plugin: str_replace
-  search: foo
-  replace: ' '
-- plugin: callback
-  callable: trim

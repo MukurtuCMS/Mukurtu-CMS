@@ -1,3 +1,0 @@
-plugin.plugin_configuration.search_api_solr_connector.solr_36:
-  type: plugin.plugin_configuration.search_api_solr_connector.standard
-  label: 'Search API Solr 3.6 connector settings'

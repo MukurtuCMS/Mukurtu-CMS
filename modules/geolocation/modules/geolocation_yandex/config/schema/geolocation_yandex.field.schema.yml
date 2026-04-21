@@ -1,7 +1,0 @@
-field.widget.settings.geolocation_yandex:
-  type: geolocation.field.widget.map.base
-  label: 'Geolocation Yandex Map Widget settings'
-  mapping:
-    yandex_settings:
-      type: geolocation.map_provider.yandex
-      label: 'Yandex Maps settings.'

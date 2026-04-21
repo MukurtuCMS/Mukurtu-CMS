@@ -1,9 +1,0 @@
-{
-  "name": "drupal/geolocation_gpx",
-  "type": "drupal-module",
-  "description": "GPX file field type, widget & formatter.",
-  "license": "GPL-2.0-or-later",
-  "require": {
-    "sibyx/phpgpx": "^1.1"
-  }
-}

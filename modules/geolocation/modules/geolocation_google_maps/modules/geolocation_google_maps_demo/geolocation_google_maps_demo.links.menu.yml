@@ -1,6 +1,0 @@
-geolocation_google_maps_demo.googlegeocoder_widget:
-  title: 'GoogleGeocoder widget'
-  description: 'Geolocation field widget'
-  route_name: geolocation_google_maps_demo.googlegeocoder_widget
-  weight: 110
-  menu_name: geolocation-demo

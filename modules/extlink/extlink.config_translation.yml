@@ -1,5 +1,0 @@
-extlink.settings:
-  title: 'External Links Settings'
-  base_route_name: extlink_admin.settings
-  names:
-    - extlink.settings

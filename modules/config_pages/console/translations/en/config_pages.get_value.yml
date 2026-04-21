@@ -1,5 +1,0 @@
-description: 'Config pages get value command.'
-options: {}
-arguments: {}
-messages:
-  success: 'Config pages get value command.'

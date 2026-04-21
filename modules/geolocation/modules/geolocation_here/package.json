@@ -1,9 +1,0 @@
-{
-  "name": "geolocation-here-maps",
-  "license": "GPL-2.0",
-  "description": "Geolocation here maps module",
-  "private": true,
-  "devDependencies": {
-    "@types/heremaps": "^3.0.12"
-  }
-}

@@ -1,7 +1,0 @@
-cpgfv
-cpsfv
-interfaceget
-linkit
-mysettings
-nodequeue
-vasia

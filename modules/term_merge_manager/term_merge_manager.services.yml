@@ -1,6 +1,0 @@
-services:
-  term_merge_manager.default:
-    class: Drupal\term_merge_manager\EventSubscriber\DefaultSubscriber
-    arguments: ['@module_handler', '@path_alias.manager', '@config.factory']
-    tags:
-      - { name: event_subscriber }

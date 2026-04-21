@@ -1,6 +1,0 @@
-# Define default links for this module.
-geolocation_google_maps.settings:
-  route_name: geolocation_google_maps.settings
-  title: 'Google Maps API settings'
-  parent: system.admin_config_services
-  description: 'Configure Google Maps API key, default geocoder and optional parameters like libraries.'

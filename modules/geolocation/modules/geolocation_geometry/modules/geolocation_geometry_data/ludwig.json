@@ -1,8 +1,0 @@
-{
-  "require": {
-    "gasparesganga/php-shapefile": {
-      "version": "v3.4.0",
-      "url": "https://github.com/gasparesganga/php-shapefile/archive/v3.4.0.zip"
-    }
-  }
-}

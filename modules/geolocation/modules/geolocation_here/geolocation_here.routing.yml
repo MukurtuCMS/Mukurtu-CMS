@@ -1,7 +1,0 @@
-geolocation_here.settings:
-  path: '/admin/config/services/geolocation/here_maps'
-  defaults:
-    _form:  '\Drupal\geolocation_here\Form\HereMapsSettings'
-    _title: 'HERE Maps settings'
-  requirements:
-    _permission: 'configure geolocation'

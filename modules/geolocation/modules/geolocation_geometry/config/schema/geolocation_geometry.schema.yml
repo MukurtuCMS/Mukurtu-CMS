@@ -1,7 +1,0 @@
-field.formatter.settings.geolocation_geometry:
-  type: field.formatter.settings.geolocation_map
-  label: 'Geolocation Geometry Formatter'
-  mapping:
-    data_provider_settings:
-      label: 'Data provider settings'
-      type: geolocation.data_provider.geolocation_geometry

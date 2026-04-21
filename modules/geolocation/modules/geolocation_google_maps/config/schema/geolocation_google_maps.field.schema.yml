@@ -1,7 +1,0 @@
-field.widget.settings.geolocation_googlegeocoder:
-  type: geolocation.field.widget.map.base
-  label: 'Geolocation Google Geocoder Widget settings'
-  mapping:
-    google_map_settings:
-      type: geolocation.map_provider.google_maps
-      label: 'Google Maps settings.'

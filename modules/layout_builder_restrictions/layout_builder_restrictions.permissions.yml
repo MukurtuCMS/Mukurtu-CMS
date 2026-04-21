@@ -1,4 +1,0 @@
-configure layout builder restrictions:
-  title: 'Configure layout builder restrictions'
-  description: 'Allows access to configuration for layout builder restrictions.'
-  restrict access: true

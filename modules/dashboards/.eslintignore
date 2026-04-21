@@ -1,2 +1,0 @@
-# Exclude the 'chart.js' library from eslint validation.
-js/es/

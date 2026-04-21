@@ -1,3 +1,0 @@
-geolocation.data_provider.geofield:
-  type: geolocation_data_provider
-  label: 'Geofield'

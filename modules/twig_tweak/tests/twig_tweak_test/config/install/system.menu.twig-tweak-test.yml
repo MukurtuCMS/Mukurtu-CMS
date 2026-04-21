@@ -1,7 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-id: twig-tweak-test
-label: 'Twig tweak test'
-description: ''
-locked: false

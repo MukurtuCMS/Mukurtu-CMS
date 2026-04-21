@@ -1,4 +1,0 @@
-id: test_server
-backend: search_api_db
-backend_config:
-  database: 'default:default'
