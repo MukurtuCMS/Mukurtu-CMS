@@ -73,6 +73,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     // Put communities in ascending alphabetical order.
     asort($communities);
 
+<<<<<<< HEAD
     // Get protocols where the current user has 'manage members' permission.
     $protocolMemberships = array_filter(
       Og::getMemberships($currentUser),
@@ -87,6 +88,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     foreach ($stewardProtocols as $protocol) {
       foreach ($protocol->getCommunities() as $parentCommunity) {
         $protocolsByCommunity[$parentCommunity->id()][$protocol->id()] = $protocol;
+=======
     // Get protocols grouped by community, for the user's managed communities.
     $protocolStorage = \Drupal::entityTypeManager()->getStorage('protocol');
     $protocolsByCommunity = [];
@@ -105,6 +107,7 @@ class CommunityManagerUserCreationForm extends FormBase {
           'label' => $community->getName(),
           'protocols' => $communityProtocols,
         ];
+>>>>>>> main
       }
     }
 
