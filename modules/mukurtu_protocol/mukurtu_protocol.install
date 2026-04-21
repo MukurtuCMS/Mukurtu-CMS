@@ -298,6 +298,7 @@ function mukurtu_protocol_update_40007(): void {
   $config_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
   $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($data)->save(TRUE);
+}
 
 /** 
  * Reorder protocol and community roles to match the creation forms.
