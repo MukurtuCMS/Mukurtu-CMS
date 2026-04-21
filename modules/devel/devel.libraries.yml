@@ -1,0 +1,14 @@
+devel:
+  css:
+    theme:
+      css/devel.css: {}
+
+devel-toolbar:
+  css:
+    component:
+      css/devel.toolbar.css: {}
+
+devel-table-filter:
+  js: {}
+  dependencies:
+    - system/drupal.system.modules

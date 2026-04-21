@@ -1,0 +1,12 @@
+name: Media Entity Soundcloud
+type: module
+description: Media entity soundcloud provider.
+core_version_requirement: ^9.3 || ^10 || ^11
+package: Media
+dependencies:
+  - drupal:media
+
+# Information added by Drupal.org packaging script on 2024-07-22
+version: '3.2.0'
+project: 'media_entity_soundcloud'
+datestamp: 1721634158

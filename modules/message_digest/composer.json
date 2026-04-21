@@ -1,0 +1,12 @@
+{
+  "name": "drupal/message_digest",
+  "description": "Message digest",
+  "type": "drupal-module",
+  "license": "GPL-2.0+",
+  "require": {
+    "drupal/message_subscribe": "^1.0 || ^2.0"
+  },
+  "require-dev": {
+    "drupal/token": "^1.0"
+  }
+}

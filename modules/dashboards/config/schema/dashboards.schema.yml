@@ -1,0 +1,43 @@
+dashboards.settings:
+  type: config_object
+  label: 'Dashboard settings'
+  mapping:
+    alpha:
+      type: integer
+      label: 'Alpha'
+    shades:
+      type: integer
+      label: 'Shades'
+    colormap:
+      type: string
+      label: 'Colormap'
+
+dashboards.dashboard.*:
+  type: config_entity
+  label: 'Dashboard'
+  mapping:
+    id:
+      type: string
+      label: 'Machine Name'
+    admin_label:
+      type: string
+      label: 'Admin Label'
+    category:
+      type: string
+      label: 'Category'
+    frontend:
+      type: boolean
+      label: 'Frontend'
+    weight:
+      type: integer
+      label: 'Weight'
+    sections:
+      type: sequence
+      sequence:
+        type: layout_builder.section
+
+dashboards.dashboard.*.third_party.layout_builder_restrictions:
+  type: sequence
+  label: 'Layout Builder Restrictions plugin configuration'
+  sequence:
+    - type: layout_builder_restrictions.[%key]

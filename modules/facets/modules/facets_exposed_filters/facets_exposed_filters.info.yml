@@ -1,0 +1,16 @@
+name: 'Facets Exposed Filters'
+type: module
+description: 'Add Facets directly from Views as exposed filters.'
+core_version_requirement: ^10.1 || ^11
+package: Search
+configure: entity.facets_facet.collection
+dependencies:
+  - search_api:search_api
+  - facets:facets
+  - drupal:views
+  - better_exposed_filters:better_exposed_filters
+
+# Information added by Drupal.org packaging script on 2025-10-17
+version: '3.0.2'
+project: 'facets'
+datestamp: 1760700683

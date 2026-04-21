@@ -1,0 +1,265 @@
+# Schema for configuration files of the Search API Solr module.
+
+search_api.index.*.third_party.search_api_solr:
+  type: mapping
+  label: 'Search API Solr index settings'
+  mapping:
+    finalize:
+      type: boolean
+      label: 'Finalize index before first search'
+    commit_before_finalize:
+      type: boolean
+      label: 'Wait for commit before first finalization'
+    commit_after_finalize:
+      type: boolean
+      label: 'Wait for commit after last finalization'
+    debug_finalize:
+      type: boolean
+      label: 'Log debug messages for finalization'
+    highlighter:
+      type: mapping
+      label: 'highlighter settings'
+      mapping:
+        maxAnalyzedChars:
+          type: integer
+          label: 'Specifies the number of characters into a document that Solr should look for suitable snippets.'
+        fragmenter:
+          type: string
+          label: 'Specifies a text snippet generator for highlighted text.'
+        usePhraseHighlighter:
+          type: boolean
+          label: 'If set to true, Solr will highlight phrase queries (and other advanced position-sensitive queries) accurately.'
+        highlightMultiTerm:
+          type: boolean
+          label: 'If set to true, Solr will highlight wildcard queries (and other MultiTermQuery subclasses).'
+        preserveMulti:
+          type: boolean
+          label: 'If true, multi-valued fields will return all values in the order they were saved in the index.'
+        regex:
+          type: mapping
+          mapping:
+            slop:
+              type: float
+              label: 'When using the regex fragmenter (hl.fragmenter=regex), this parameter defines the factor by which the fragmenter can stray from the ideal fragment size (given by hl.fragsize) to accommodate a regular expression.'
+            pattern:
+              type: string
+              label: 'Specifies the regular expression for fragmenting. This could be used to extract sentences.'
+            maxAnalyzedChars:
+              type: integer
+              label: 'Instructs Solr to analyze only this many characters from a field when using the regex fragmenter (after which, the fragmenter produces fixed-sized fragments).'
+        highlight:
+          type: mapping
+          mapping:
+            mergeContiguous:
+              type: boolean
+              label: 'Instructs Solr to collapse contiguous fragments into a single fragment.'
+            requireFieldMatch:
+              type: boolean
+              label: 'If set to true, highlights terms only if they appear in the specified field.'
+            snippets:
+              type: integer
+              label: 'Specifies maximum number of highlighted snippets to generate per field.'
+            fragsize:
+              type: integer
+              label: 'Specifies the size, in characters, of fragments to consider for highlighting.'
+    mlt:
+      type: mapping
+      label: 'mlt settings'
+      mapping:
+        mintf:
+          type: integer
+          label: 'Specifies the Minimum Term Frequency, the frequency below which terms will be ignored in the source document.'
+        mindf:
+          type: integer
+          label: 'Specifies the Minimum Document Frequency, the frequency at which words will be ignored which do not occur in at least this many documents.'
+        maxdf:
+          type: integer
+          label: 'Specifies the Maximum Document Frequency, the frequency at which words will be ignored which occur in more than this many documents.'
+        maxdfpct:
+          type: integer
+          label: 'Specifies the Maximum Document Frequency using a relative ratio to the number of documents in the index. The argument must be an integer between 0 and 100. For example 75 means the word will be ignored if it occurs in more than 75 percent of the documents in the index.'
+        minwl:
+          type: integer
+          label: 'Sets the minimum word length below which words will be ignored.'
+        maxwl:
+          type: integer
+          label: 'Sets the maximum word length above which words will be ignored.'
+        maxqt:
+          type: integer
+          label: 'Sets the maximum number of query terms that will be included in any generated query.'
+        maxntp:
+          type: integer
+          label: 'Sets the maximum number of tokens to parse in each example document field that is not stored with TermVector support.'
+        boost:
+          type: boolean
+          label: 'Specifies if the query will be boosted by the interesting term relevance.'
+        interestingTerms:
+          type: string
+          label: 'Controls how the MoreLikeThis component presents the "interesting" terms (the top TF/IDF terms) for the query. Supports three settings. The setting "list" lists the terms. The setting "none" lists no terms. The setting "details" lists the terms along with the boost value used for each term. Unless mlt.boost=true, all terms will have boost=1.0.'
+    term_modifiers:
+      type: mapping
+      label: 'term modifiers'
+      mapping:
+        slop:
+          type: integer
+          label: 'The distance referred to here is the number of term movements needed to match the specified phrase.'
+        fuzzy:
+          type: integer
+          label: 'Damerau-Levenshtein Distance or Edit Distance for fuzzy searches.'
+        fuzzy_analyzer:
+          type: boolean
+          label: 'Run analyzers in parallel to fuzzy searches.'
+    advanced:
+      type: mapping
+      label: 'advanced settings'
+      mapping:
+        index_prefix:
+          type: string
+          label: 'The prefix for the Solr index'
+        collection:
+          type: string
+          label: 'If the server uses a Solr Cloud connector, this setting overwrites the configured default collection if set.'
+        timezone:
+          type: string
+          label: 'Forces a time zone to be set for every query targeting this index.'
+    multilingual:
+      type: mapping
+      label: 'multilingual settings'
+      mapping:
+        limit_to_content_language:
+          type: boolean
+          label: 'Limit to current content language'
+        include_language_independent:
+          type: boolean
+          label: 'Include languages independent content in search results'
+        use_language_undefined_as_fallback_language:
+          type: boolean
+          label: 'Index language fallback fulltext fields using "language undefined"'
+        specific_languages:
+          type: sequence
+          label: 'Specific Languages'
+          sequence:
+            type: string
+        use_universal_collation:
+          type: boolean
+          label: 'Use universal UTF-8 collation'
+search_api_solr.solr_configs:
+  type: mapping
+  mapping:
+    searchComponents:
+      type: sequence
+      nullable: true
+      sequence:
+        type: mapping
+        mapping:
+          name:
+            type: string
+            label: 'The search component name'
+          class:
+            type: string
+            label: 'The search component class'
+          lst:
+            type: search_api_solr.list
+            nullable: true
+          str:
+            type: search_api_solr.scalar_values
+            nullable: true
+
+search_api_solr.list:
+  type: sequence
+  sequence:
+    type: mapping
+    mapping:
+      name:
+        type: string
+        label: 'name'
+      str:
+        type: search_api_solr.scalar_values
+      int:
+        type: search_api_solr.scalar_values
+      float:
+        type: search_api_solr.scalar_values
+      bool:
+        type: search_api_solr.scalar_values
+
+search_api_solr.scalar_values:
+  type: sequence
+  sequence:
+    type: mapping
+    mapping:
+      name:
+        type: string
+        label: 'property name'
+        nullable: true
+      VALUE:
+        type: string
+        label: 'property value'
+
+field.formatter.settings.solr_highlighted_string:
+  type: mapping
+  label: 'Highlighted plain text (Search API Solr)'
+  mapping:
+    prefix:
+      type: string
+      label: 'Prefix'
+    suffix:
+      type: string
+      label: 'Suffix'
+    strict:
+      type: boolean
+      label: 'Strict'
+
+field.formatter.settings.solr_highlighted_text_default:
+  type: mapping
+  label: 'Highlighted text (Search API Solr)'
+  mapping:
+    prefix:
+      type: string
+      label: 'Prefix'
+    suffix:
+      type: string
+      label: 'Suffix'
+    strict:
+      type: boolean
+      label: 'Strict'
+
+plugin.plugin_configuration.search_api_tracker.index_parallel:
+  type: plugin.plugin_configuration.search_api_tracker.default
+  label: "Index parallel tracker"
+
+plugin.plugin_configuration.search_api_datasource.solr_document:
+  type: mapping
+  label: "Solr document datasource configuration"
+  mapping:
+    id_field:
+      type: string
+      label: "ID field"
+    request_handler:
+      type: string
+      label: "Request handler"
+    default_query:
+      type: string
+      label: "Default query"
+    label_field:
+      type: string
+      label: "Label field"
+    language_field:
+      type: string
+      label: "Language field"
+    url_field:
+      type: string
+      label: "URL field"
+
+plugin.plugin_configuration.search_api_datasource.solr_multisite_document:
+  type: plugin.plugin_configuration.search_api_datasource.solr_document
+  label: "Solr multisite document datasource configuration"
+  mapping:
+    target_index:
+      type: string
+      label: "Targeted index"
+    target_index_machine_name:
+      type: string
+      label: "Targeted index"
+    target_hash:
+      type: string
+      label: "Targeted site hash"

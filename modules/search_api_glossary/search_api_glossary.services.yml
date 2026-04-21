@@ -1,0 +1,4 @@
+services:
+  search_api_glossary.helper:
+    class: Drupal\search_api_glossary\Service\GlossaryHelper
+    arguments: ["@config.factory", "@module_handler"]

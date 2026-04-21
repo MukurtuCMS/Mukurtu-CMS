@@ -1,0 +1,120 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - search_api_solr
+    - language
+  config:
+    - language.entity.zh-hant
+id: text_zh-hant_7_0_0
+label: 'Traditional Chinese Text Field'
+minimum_solr_version: 7.0.0
+field_type_language_code: zh-hant
+domains: { }
+field_type:
+  name: text_zh_hant
+  class: solr.TextField
+  positionIncrementGap: 100
+  storeOffsetsWithPositions: true
+  analyzers:
+    -
+      type: index
+      tokenizer:
+        class: solr.ICUTokenizerFactory
+      filters:
+        -
+          class: solr.CJKBigramFilterFactory
+          han: true
+          hiragana: false
+          katakana: false
+          hangul: false
+          outputUnigrams: false
+        -
+          class: solr.CJKWidthFilterFactory
+        -
+          class: solr.LowerCaseFilterFactory
+    -
+      type: query
+      tokenizer:
+        class: solr.ICUTokenizerFactory
+      filters:
+        -
+          class: solr.CJKBigramFilterFactory
+          han: true
+          hiragana: false
+          katakana: false
+          hangul: false
+          outputUnigrams: false
+        -
+          class: solr.CJKWidthFilterFactory
+        -
+          class: solr.LowerCaseFilterFactory
+spellcheck_field_type:
+  name: text_spell_zh_hant
+  class: solr.TextField
+  positionIncrementGap: 100
+  storeOffsetsWithPositions: true
+  analyzer:
+    tokenizer:
+      class: solr.ICUTokenizerFactory
+    filters:
+      -
+        class: solr.CJKBigramFilterFactory
+        han: true
+        hiragana: false
+        katakana: false
+        hangul: false
+        outputUnigrams: false
+      -
+        class: solr.CJKWidthFilterFactory
+      -
+        class: solr.LowerCaseFilterFactory
+collated_field_type:
+  name: collated_zh_hant
+  class: solr.ICUCollationField
+  locale: zh-hant
+  strength: primary
+  caseLevel: false
+solr_configs:
+  searchComponents:
+    -
+      name: spellcheck
+      class: solr.SpellCheckComponent
+      lst:
+        -
+          name: spellchecker
+          str:
+            -
+              name: name
+              VALUE: zh_hant
+            -
+              name: field
+              VALUE: spellcheck_zh_hant
+            -
+              name: classname
+              VALUE: solr.DirectSolrSpellChecker
+            -
+              name: distanceMeasure
+              VALUE: internal
+            -
+              name: accuracy
+              VALUE: '0.5'
+            -
+              name: maxEdits
+              VALUE: '1'
+            -
+              name: minPrefix
+              VALUE: '1'
+            -
+              name: maxInspections
+              VALUE: '5'
+            -
+              name: minQueryLength
+              VALUE: '1'
+            -
+              name: maxQueryFrequency
+              VALUE: '0.01'
+            -
+              name: onlyMorePopular
+              VALUE: 'true'
+text_files: { }

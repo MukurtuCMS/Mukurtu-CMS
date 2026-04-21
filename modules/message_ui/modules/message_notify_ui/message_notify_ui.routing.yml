@@ -1,0 +1,9 @@
+entity.message.notify_form:
+  path: '/message/{message}/notify'
+  defaults:
+    _entity_form: message.notify
+    _title: 'Send Message'
+  requirements:
+    _permission: 'send message through the ui'
+  options:
+    _admin_route: TRUE

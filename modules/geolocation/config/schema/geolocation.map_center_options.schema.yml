@@ -1,0 +1,62 @@
+plugin.plugin_configuration.geolocation.map_center_option.fixed_value:
+  type: geolocation.map_center_option_settings
+  label: 'Fixed Coordinates'
+  mapping:
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        latitude:
+          type: float
+          label: 'Latitude'
+        longitude:
+          type: float
+          label: 'Longitude'
+
+plugin.plugin_configuration.geolocation.map_center_option.fit_bounds:
+  type: geolocation.map_center_option_settings
+  label: 'Fit Locations'
+  mapping:
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        reset_zoom:
+          type: boolean
+          label: 'Reset zoom'
+        min_zoom:
+          type: integer
+          label: 'Min zoom'
+
+plugin.plugin_configuration.geolocation.map_center_option.fixed_boundaries:
+  type: geolocation.map_center_option_settings
+  label: 'Fixed boundaries'
+  mapping:
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        south:
+          type: string
+          label: 'South'
+        west:
+          type: string
+          label: 'West'
+        north:
+          type: string
+          label: 'North'
+        east:
+          type: string
+          label: 'East'
+
+plugin.plugin_configuration.geolocation.map_center_option.ipstack:
+  type: geolocation.map_center_option_settings
+  label: 'IpStack'
+  mapping:
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        access_key:
+          type: string
+          label: 'Access key'

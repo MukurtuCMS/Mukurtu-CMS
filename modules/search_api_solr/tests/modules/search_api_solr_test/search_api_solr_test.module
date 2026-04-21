@@ -1,0 +1,3 @@
+<?php
+
+$_search_api_solr_test_index_fallback_test = FALSE;

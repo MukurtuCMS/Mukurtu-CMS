@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * Includes some custom code to assist with testing readonly_field_widget.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Implements hook_entity_field_access().
+ */
+function readonly_field_widget_test_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, ?FieldItemListInterface $items = NULL) {
+
+  // Nobody can update the restricted field.
+  if ($operation == 'edit' && $field_definition->getName() == 'field_restricted_text') {
+    return AccessResult::forbidden();
+  }
+
+  // Only admins can view the text on the restricted field.
+  if ($operation == 'view' && $field_definition->getName() == 'field_restricted_text' && !$account->hasPermission('admin')) {
+    return AccessResult::forbidden();
+  }
+
+  return AccessResult::neutral();
+}

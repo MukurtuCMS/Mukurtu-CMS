@@ -1,0 +1,67 @@
+body.cke_editable_themed {
+  color: var(--gin-color-text);
+
+  &.gin--dark-mode {
+    background-color: var(--gin-bg-layer2);
+  }
+}
+
+a {
+  color: var(--gin-color-primary);
+}
+
+.cke_panel_grouptitle {
+  color: var(--gin-color-title);
+  background: var(--gin-bg-layer2);
+}
+
+.cke_panel_listItem.cke_selected a,
+.cke_panel_listItem a:hover,
+.cke_panel_listItem a:focus,
+.cke_panel_listItem a:active {
+  background-color: var(--gin-color-primary-light);
+}
+
+.cke_editable {
+  line-height: 1.5;
+}
+
+/* CKE Context Menu */
+.cke_panel_block {
+  border-color: var(--gin-border-color-form-element);
+  border-radius: var(--gin-border-m);
+
+  .cke_menu {
+    .cke_menubutton_icon {
+      background-color: var(--gin-bg-app);
+      .cke_button_icon {
+        .gin--dark-mode & {
+          filter: invert(1);
+        }
+      }
+    }
+    .cke_menubutton_label {
+      color: var(--gin-color-text);
+    }
+    .cke_menubutton_shortcut {
+      color: var(--gin-color-text-light);
+    }
+
+    a {
+      &:hover,
+      &:focus,
+      &:active {
+        background-color: var(--gin-color-primary-light);
+
+        .cke_menubutton_icon {
+          background-color: var(--gin-color-primary-light);
+        }
+      }
+    }
+  }
+}
+
+// Include quote style
+body.cke_editable_themed {
+  @import "../base/_quotation.scss";
+}

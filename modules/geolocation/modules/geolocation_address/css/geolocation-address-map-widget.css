@@ -1,0 +1,8 @@
+.geolocation-map-control.geolocation-address button.address-button {
+  background-color: #1e90ff;
+  font-size: 14px;
+}
+
+.geolocation-map-control.geolocation-address button.address-button::before {
+  content: none;
+}

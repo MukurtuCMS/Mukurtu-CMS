@@ -1,0 +1,18 @@
+dependencies:
+  config:
+    - field.storage.node.field_dob
+    - node.type.people
+  module:
+    - datetime
+id: node.people.field_dob
+field_name: field_dob
+entity_type: node
+bundle: people
+label: 'Date of Birth'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

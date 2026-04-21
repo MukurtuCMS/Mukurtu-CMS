@@ -1,0 +1,28 @@
+here_maps:
+  header: true
+  remote: http://developer.here.com/
+  version: '1.0'
+  license:
+    name: Proprietary
+    url: https://developer.here.com/terms-and-conditions
+    gpl-compatible: no
+  js:
+    'https://js.api.here.com/v3/3.0/mapsjs-core.js': { type: external, minified: true }
+    'https://js.api.here.com/v3/3.0/mapsjs-service.js': { type: external, minified: true }
+    'https://js.api.here.com/v3/3.0/mapsjs-mapevents.js': { type: external, minified: true }
+    'https://js.api.here.com/v3/3.0/mapsjs-ui.js': { type: external, minified: true }
+
+geolocation.here:
+  version: 8.x-3.x
+  dependencies:
+    - core/drupalSettings
+    - geolocation/geolocation.api
+    - geolocation_here/here_maps
+  js:
+    js/geolocation-here-api.js: {}
+
+commonmap.here:
+  js:
+    js/geolocation-common-map-here.js: {}
+  dependencies:
+    - geolocation/geolocation.commonmap

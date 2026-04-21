@@ -1,0 +1,15 @@
+genpass_test.user_hook_form:
+  path: '/genpass_test/user_hook_forms'
+  defaults:
+    _form: '\Drupal\genpass_test\Form\UserHookForm'
+    _title: 'Testing hook_genpass_user_forms'
+  requirements:
+    _permission: 'administer users'
+
+genpass_test.user_hook_alter_form:
+  path: '/genpass_test/user_hook_forms_alter'
+  defaults:
+    _form: '\Drupal\genpass_test\Form\UserHookAlterForm'
+    _title: 'Testing hook_genpass_user_forms_alter'
+  requirements:
+    _permission: 'administer users'

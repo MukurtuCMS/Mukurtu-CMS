@@ -1,0 +1,95 @@
+.modules-tabs {
+  background: transparent;
+  border: 0 none;
+}
+
+.modules-tabs__pane, .modules-tabs__menu, .modules-tabs__menu-item {
+  background: var(--gin-bg-layer);
+}
+
+.modules-tabs__pane {
+  padding-block: var(--gin-spacing-l) 0;
+  padding-inline: var(--gin-spacing-l);
+  border-inline-start: 1px solid var(--gin-border-color);
+}
+
+.modules-tabs__pane table tr.enabling {
+  background: var(--gin-bg-green-light);
+}
+
+.modules-tabs__menu-item {
+  border-block-start: 1px solid var(--gin-border-color);
+}
+
+.modules-tabs__menu-item.tab__new {
+  border-block-end: 1px solid var(--gin-border-color);
+}
+
+.modules-tabs__menu-item.disabled {
+  background-color: transparent;
+  border-block-start-color: var(--gin-border-color);
+  border-block-end-color: transparent;
+}
+
+.modules-tabs__menu-item.suggest,
+.modules-tabs__menu-item a:hover,
+.modules-tabs__menu-item a:focus,
+.modules-tabs__menu-item a:active {
+  background: var(--gin-bg-item-hover);
+}
+
+.modules-tabs__menu-item.is-selected a,
+.modules-tabs__menu-item.is-selected a:hover,
+.modules-tabs__menu-item.is-selected a:focus,
+.modules-tabs__menu-item.is-selected a:active {
+  background: var(--gin-bg-layer);
+}
+
+.modules-tabs__menu-item ul.enabling {
+  color: var(--gin-color-green);
+}
+
+#module-filter-update-status-form .table-filter {
+  float: none;
+  text-align: start;
+}
+
+#module-filter-update-status-form .table-filter .winnow-input {
+  width: 100%;
+}
+
+#module-filter-update-status-form .table-filter .winnow-clear {
+  width: 44px;
+}
+
+#module-filter-update-status-form .table-filter .winnow-clear:after {
+  inset-block-start: 10px;
+  inset-inline-end: var(--gin-spacing-xs);
+}
+
+#module-filter-update-status-form .table-filter input.form-search {
+  width: 100%;
+  padding: var(--gin-spacing-m);
+}
+
+#module-filter-update-status-form .table-filter .form-type--search {
+  margin-block-start: 0;
+  margin-block-end: var(--gin-spacing-xs);
+}
+
+.system-modules-uninstall .winnow-input {
+  width: 100%;
+}
+
+.module-filter-status {
+  margin-inline-start: -1em;
+}
+
+.modules-tabs .module-filter-status {
+  margin-inline-start: 0;
+}
+
+.system-modules td details a {
+  color: var(--gin-color-primary);
+}
+

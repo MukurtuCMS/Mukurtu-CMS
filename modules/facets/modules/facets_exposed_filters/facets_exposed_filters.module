@@ -1,0 +1,191 @@
+<?php
+
+/**
+ * @file
+ * Contains facets_exposed_filters.module.
+ */
+
+use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\search_api\Entity\Index;
+use Drupal\search_api\Plugin\views\query\SearchApiQuery;
+use Drupal\search_api\Query\QueryInterface;
+use Drupal\views\Plugin\Block\ViewsExposedFilterBlock;
+use Drupal\views\Plugin\views\filter\FilterPluginBase;
+use Drupal\views\ViewExecutable;
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function facets_exposed_filters_views_data_alter(array &$data) {
+  /** @var \Drupal\search_api\IndexInterface $index */
+  foreach (Index::loadMultiple() as $index) {
+    $fields = $index->getFields();
+    foreach ($fields as $field) {
+      // @todo Ensure the field has as least one query type.
+      $indexed_fields[$field->getFieldIdentifier()] = $field->getLabel() . ' (' . $field->getPropertyPath() . ')';
+      $data['search_api_index_' . $index->id()]['facets_' . $field->getFieldIdentifier()] = [
+        'title' => $field->getLabel() . ' (' . $field->getFieldIdentifier() . ')',
+        'help' => t('Facets enabled filter. Available options will narrow down based on resultset.', ['@label' => $field->getLabel() . ' (' . $field->getFieldIdentifier() . ')']),
+        'filter' => [
+          'id' => 'facets_filter',
+          'search_api_field_label' => $field->getLabel(),
+          'search_api_field_identifier' => $field->getFieldIdentifier(),
+        ],
+        'group' => t('Facets'),
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_search_api_query_alter().
+ */
+function facets_exposed_filters_search_api_query_alter(QueryInterface $query) {
+  $view = $query->getOption('search_api_view');
+  if (!$view || (!$view->exposed_widgets && isset($view->display_handler) && !$view->display_handler->getOption('exposed_block'))) {
+    return;
+  }
+
+  $query_search_api_facets_options = [];
+  // Add all facets_filter filters to the search api query as facet.
+  foreach ($view->filter as $filter) {
+    if ($filter->getPluginId() == "facets_filter") {
+      $configuration = $filter->getConfiguration();
+      $field_identifier = $configuration["search_api_field_identifier"];
+
+      $query_search_api_facets_options[$field_identifier] = [
+        'field' => $field_identifier,
+        'limit' => $filter->options["facet"]["hard_limit"] ?? 0,
+        'operator' => $filter->options["facet"]["query_operator"],
+        'min_count' => $filter->options["facet"]["min_count"],
+        'missing' => FALSE,
+        // @todo Investigate if this property (query_type) is used.
+        'query_type' => 'search_api_string',
+      ];
+    }
+  }
+  if ($query_search_api_facets_options) {
+    $options = &$query->getOptions();
+    $options['search_api_facets'] = $query_search_api_facets_options;
+  }
+}
+
+/**
+ * Callback to remove validation to ensure non-existing values are allowed.
+ */
+function facets_exposed_filters_remove_validation($element, $form) {
+  // Because facet options get limited while filtering, we need to allow values
+  // which are not in the options list.
+  unset($element["#needs_validation"]);
+  return $element;
+}
+
+/**
+ * Implements hook_views_post_execute().
+ */
+function facets_exposed_filters_views_post_execute(ViewExecutable $view) {
+  // Skip if no exposed widgets are present and we are not using exposed block.
+  if (!$view->exposed_widgets && !$view->display_handler->getOption('exposed_block')) {
+    return;
+  }
+
+  $query = $view->getQuery();
+  // If query is not instance off SearchApiQuery, not supported.
+  if (!$query instanceof SearchApiQuery) {
+    return;
+  }
+  $search_api_results = $query->getSearchApiResults();
+  $search_api_facets = $search_api_results->getExtraData('search_api_facets');
+  $view->facets_query_post_execute = TRUE;
+
+  // If we have facet results, attach them. If no results are returned, we still
+  // need to rerender, as there can still be active filters (without results).
+  if ($search_api_facets) {
+    // Attach facet results to views, so we can use them in FacetsFilter.
+    foreach ($view->filter as $search_api_id => $filter) {
+      if ($filter->getPluginId() == 'facets_filter') {
+        $configuration = $filter->getConfiguration();
+        if (isset($search_api_facets[$configuration["search_api_field_identifier"]])) {
+          $view->filter[$search_api_id]->facet_results = $search_api_facets[$configuration["search_api_field_identifier"]];
+        }
+      }
+    }
+  }
+
+  // Re-render views exposed form with the facet results now available.
+  $exposed_form = $view->display_handler->getPlugin('exposed_form');
+  $view->exposed_widgets = $exposed_form->renderExposedForm();
+}
+
+/**
+ * Implements hook_views_filters_summary_info_alter().
+ */
+function facets_exposed_filters_views_filters_summary_info_alter(array &$info, FilterPluginBase $filter) {
+  if ($filter->getPluginId() === 'facets_filter') {
+    $values = [];
+    foreach ($filter->value as $raw_value) {
+      if ($facet_summary_item = facets_exposed_filters_get_nested_summary_value($filter->facet_results, $raw_value)) {
+        $values[] = $facet_summary_item;
+      }
+    }
+    $info['value'] = $values;
+  }
+}
+
+/**
+ * Helper function for hierarchical values.
+ */
+function facets_exposed_filters_get_nested_summary_value($results, $raw_value) {
+  foreach ($results as $result) {
+    if ($result->getRawValue() == $raw_value) {
+      return [
+        'id' => $result->getRawValue(),
+        'raw' => $result->getRawValue(),
+        'value' => $result->getDisplayValue(),
+      ];
+    }
+    // Nested check for hierarchy support.
+    if ($facet_summary_item = facets_exposed_filters_get_nested_summary_value($result->getChildren(), $raw_value)) {
+      return $facet_summary_item;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Helper function to retrieve (and set) processed facets.
+ */
+function facets_exposed_filters_get_processed_facet($view_id, $display_id, $filter_id, $processed_facet = NULL) {
+  $facet_results = &drupal_static(__FUNCTION__);
+  if ($processed_facet) {
+    $facet_results[$view_id][$display_id][$filter_id] = $processed_facet;
+  }
+  if (isset($facet_results[$view_id][$display_id][$filter_id])) {
+    return $facet_results[$view_id][$display_id][$filter_id];
+  }
+  return NULL;
+}
+
+/**
+ * Implements hook_block_build_alter().
+ */
+function facets_exposed_filters_block_build_alter(array &$build, BlockPluginInterface $block) {
+  // Exposed filter blocks can be placed on any page. We need to ensure that the
+  // view is executed when the block is rendered and has Facet filters.
+  if ($block instanceof ViewsExposedFilterBlock) {
+    $view = $block->getViewExecutable();
+    $view->initHandlers();
+    foreach ($view->filter as $filter) {
+      if ($filter->getPluginId() == "facets_filter") {
+        $filter_id = $filter->options["id"];
+        $display = $view->current_display;
+        $processed_facet = facets_exposed_filters_get_processed_facet($view->id(), $display, $filter_id);
+        if (!$processed_facet) {
+          // The facet has not been processed.
+          $view->execute($display);
+        }
+        break;
+      }
+    }
+  }
+}

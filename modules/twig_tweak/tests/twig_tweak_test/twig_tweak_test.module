@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Twig Tweak test module.
+ */
+
+use Drupal\block\BlockInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
+use Drupal\file\FileInterface;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
+use Twig\TwigTest;
+
+/**
+ * Implements hook_page_bottom().
+ */
+function twig_tweak_test_page_bottom(): void {
+  Drupal::service('messenger')->addMessage('Hello world!');
+}
+
+/**
+ * Implements hook_theme().
+ */
+function twig_tweak_test_theme(): array {
+  return ['twig_tweak_test' => ['variables' => []]];
+}
+
+/**
+ * Prepares variables for twig-tweak-test template.
+ */
+function template_preprocess_twig_tweak_test(array &$vars): void {
+  $vars['node'] = Node::load(1);
+}
+
+/**
+ * Implements hook_block_access().
+ *
+ * @see \Drupal\Tests\twig_tweak\Kernel\RegionViewBuilderTest
+ */
+function twig_tweak_test_block_access(BlockInterface $block): AccessResultInterface {
+  $result = AccessResult::forbiddenIf($block->id() == 'private_block');
+  $result->cachePerUser();
+  $result->addCacheTags(['tag_for_' . $block->id()]);
+  $result->setCacheMaxAge(123);
+  return $result;
+}
+
+/**
+ * Implements hook_node_access().
+ *
+ * @see \Drupal\Tests\twig_tweak\Kernel\EntityViewBuilderTest
+ * @see \Drupal\Tests\twig_tweak\Kernel\EntityFormViewBuilderTest
+ */
+function twig_tweak_test_node_access(NodeInterface $node): AccessResultInterface {
+  $result = AccessResult::forbiddenIf($node->getTitle() == 'Private node');
+  $result->addCacheTags(['tag_from_' . __FUNCTION__]);
+  $result->cachePerUser();
+  // That doesn't make much sense since node form is uncacheable by default.
+  // @see https://www.drupal.org/project/drupal/issues/3395157
+  $result->setCacheMaxAge(50);
+  return $result;
+}
+
+/**
+ * Implements hook_file_access().
+ *
+ * @see \Drupal\Tests\twig_tweak\Kernel\ImageViewBuilderTest
+ */
+function twig_tweak_test_file_access(FileInterface $file): AccessResultInterface {
+  $is_public = parse_url($file->getFileUri(), PHP_URL_SCHEME) == 'public';
+  $result = AccessResult::allowedIf($is_public);
+  $result->cachePerUser();
+  $result->addCacheTags(['tag_for_' . $file->getFileUri()]);
+  $result->setCacheMaxAge(70);
+  return $result;
+}
+
+/**
+ * Implements hook_twig_tweak_functions_alter().
+ */
+function twig_tweak_test_twig_tweak_functions_alter(array &$functions) {
+  $functions[] = new TwigFunction('foo', function (string $value): string {
+    return "-=$value=-";
+  });
+}
+
+/**
+ * Implements hook_twig_tweak_filters_alter().
+ */
+function twig_tweak_test_twig_tweak_filters_alter(array &$filters) {
+  $filters[] = new TwigFilter('bar', function (string $input): string {
+    return str_replace('foo', 'bar', $input);
+  });
+}
+
+/**
+ * Implements hook_twig_tweak_tests_alter().
+ */
+function twig_tweak_test_twig_tweak_tests_alter(array &$tests) {
+  $tests[] = new TwigTest('ok', function ($input): bool {
+    return $input == 'ok';
+  });
+}

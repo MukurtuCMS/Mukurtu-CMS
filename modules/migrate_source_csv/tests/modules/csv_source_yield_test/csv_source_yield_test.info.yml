@@ -1,0 +1,10 @@
+name: Source plugin using yield
+type: module
+package: Testing
+dependencies:
+  - drupal:migrate
+
+# Information added by Drupal.org packaging script on 2026-02-23
+version: '8.x-3.8'
+project: 'migrate_source_csv'
+datestamp: 1771859181

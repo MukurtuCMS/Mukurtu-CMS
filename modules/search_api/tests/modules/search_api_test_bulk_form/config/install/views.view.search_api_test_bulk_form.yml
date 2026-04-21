@@ -1,0 +1,69 @@
+id: search_api_test_bulk_form
+module: views
+base_table: search_api_index_test_index
+base_field: search_api_id
+display:
+  default:
+    display_plugin: default
+    id: default
+    display_options:
+      query:
+        type: search_api_query
+      pager:
+        type: none
+      style:
+        type: table
+        options:
+          columns:
+            search_api_bulk_form: search_api_bulk_form
+            aggregated_field: aggregated_field
+      row:
+        type: fields
+      fields:
+        search_api_bulk_form:
+          id: search_api_bulk_form
+          table: search_api_index_test_index
+          field: search_api_bulk_form
+          action_title: Action
+          include_exclude: include
+          selected_actions:
+            - search_api_test_bulk_form_entity_test
+            - search_api_test_bulk_form_entity_test_string_id
+          plugin_id: search_api_bulk_form
+        search_api_id:
+          id: search_api_id
+          table: search_api_index_test_index
+          field: search_api_id
+          plugin_id: standard
+      sorts:
+        search_api_id:
+          id: search_api_id
+          table: search_api_index_test_index
+          field: search_api_id
+          order: ASC
+          plugin_id: search_api
+      title: 'Search API Bulk Form'
+    cache_metadata:
+      max-age: 0
+      contexts:
+        - entity_test_view_grants
+        - 'languages:language_interface'
+      tags:
+        - 'config:search_api.index.test_index'
+  page:
+    display_plugin: page
+    id: page
+    display_options:
+      path: search-api-test-bulk-form
+    cache_metadata:
+      max-age: 0
+      contexts:
+        - entity_test_view_grants
+        - 'languages:language_interface'
+      tags:
+        - 'config:search_api.index.test_index'
+dependencies:
+  config:
+    - search_api.index.test_index
+  module:
+    - search_api

@@ -1,0 +1,8 @@
+{
+  "name": "drupal/admin_theme",
+  "description": "Enable the administration theme on more paths than possible with Drupal's default administration page.",
+  "type": "drupal-module",
+  "keywords": ["drupal"],
+  "homepage": "https://www.drupal.org/project/admin_theme",
+  "license": "GPL-2.0-or-later"
+}

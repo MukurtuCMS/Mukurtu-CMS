@@ -1,0 +1,5 @@
+message_subscribe.admin_settings:
+  route_name: message_subscribe.admin_settings
+  title: 'Message subscribe settings'
+  description: 'Administer message subscribe'
+  parent: message.main_settings

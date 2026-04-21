@@ -1,0 +1,226 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to an undefined method Drupal\\\\Core\\\\Form\\\\FormInterface\\:\\:getEntity\\(\\)\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^Call to method getComponents\\(\\) on an unknown class GeometryCollection\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^Call to method isEmpty\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^Call to method out\\(\\) on an unknown class Geometry\\.$#"
+			count: 2
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^Class Geometry not found\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^Class GeometryCollection not found\\.$#"
+			count: 2
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$component contains unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$geo_collection contains unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$geo_collection contains unknown class GeometryCollection\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^PHPDoc tag @var with type Drupal\\\\Core\\\\Entity\\\\EntityForm is not subtype of native type Drupal\\\\Core\\\\Entity\\\\ContentEntityFormInterface\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^PHPDoc tag @var with type GeometryCollection is not subtype of native type Geometry&GeometryCollection\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^Call to method first\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_field/src/Plugin/Field/FieldFormatter/FileGeocodeFormatter.php
+
+		-
+			message: "#^PHPDoc tag @var with type Drupal\\\\Component\\\\Plugin\\\\PluginBase is not subtype of native type Drupal\\\\geocoder\\\\ProviderInterface\\.$#"
+			count: 1
+			path: modules/geocoder_field/src/Plugin/Field/FieldFormatter/FileGeocodeFormatter.php
+
+		-
+			message: "#^Access to property \\$components on an unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Geocoder/Provider/AbstractGeometryProvider.php
+
+		-
+			message: "#^Class Geometry not found\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Geocoder/Provider/AbstractGeometryProvider.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder_geofield\\\\Geocoder\\\\Provider\\\\AbstractGeometryProvider\\:\\:geocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 2
+			path: modules/geocoder_geofield/src/Geocoder/Provider/AbstractGeometryProvider.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$geometry contains unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Geocoder/Provider/AbstractGeometryProvider.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder_geofield\\\\Geocoder\\\\Provider\\\\GeometryProviderInterface\\:\\:geocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 2
+			path: modules/geocoder_geofield/src/Geocoder/Provider/GeometryProviderInterface.php
+
+		-
+			message: "#^Call to method out\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Plugin/Field/FieldFormatter/GeoPhpGeocodeFormatter.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$collection contains unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Plugin/Field/FieldFormatter/GeoPhpGeocodeFormatter.php
+
+		-
+			message: "#^Call to method getCentroid\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Plugin/Field/FieldFormatter/ReverseGeocodeGeofieldFormatter.php
+
+		-
+			message: "#^Call to method x\\(\\) on an unknown class Point\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Plugin/Field/FieldFormatter/ReverseGeocodeGeofieldFormatter.php
+
+		-
+			message: "#^Call to method y\\(\\) on an unknown class Point\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Plugin/Field/FieldFormatter/ReverseGeocodeGeofieldFormatter.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$centroid contains unknown class Point\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Plugin/Field/FieldFormatter/ReverseGeocodeGeofieldFormatter.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$geom contains unknown class Geometry\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Plugin/Field/FieldFormatter/ReverseGeocodeGeofieldFormatter.php
+
+		-
+			message: "#^Cannot call method out\\(\\) on string\\.$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Plugin/Geocoder/Dumper/Geohash.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\ConfigurableProviderUsingHandlerWithAdapterBase\\:\\:doGeocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/ConfigurableProviderUsingHandlerWithAdapterBase.php
+
+		-
+			message: "#^PHPDoc tag @var with type Drupal\\\\Component\\\\Plugin\\\\PluginBase is not subtype of native type Drupal\\\\geocoder\\\\ProviderInterface\\.$#"
+			count: 1
+			path: src/Entity/GeocoderProvider.php
+
+		-
+			message: "#^Call to method isEmpty\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Geocoder.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\Geocoder\\:\\:geocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/Geocoder.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\GeocoderInterface\\:\\:geocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/GeocoderInterface.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\Plugin\\\\Geocoder\\\\Provider\\\\Mapbox\\:\\:doGeocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Geocoder/Provider/Mapbox.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\Plugin\\\\Geocoder\\\\Provider\\\\Random\\:\\:doGeocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Geocoder/Provider/Random.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\ProviderBase\\:\\:doGeocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/ProviderBase.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\ProviderBase\\:\\:geocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/ProviderBase.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\ProviderBase\\:\\:process\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/ProviderBase.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\ProviderInterface\\:\\:geocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/ProviderInterface.php
+
+		-
+			message: "#^Call to an undefined method Drupal\\\\Core\\\\Entity\\\\EntityDisplayRepositoryInterface\\:\\:renderRoot\\(\\)\\.$#"
+			count: 2
+			path: src/ProviderPluginManager.php
+
+		-
+			message: "#^Method Drupal\\\\geocoder\\\\ProviderUsingHandlerBase\\:\\:doGeocode\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/ProviderUsingHandlerBase.php
+
+		-
+			message: "#^Call to method first\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: tests/src/Kernel/ProviderTest.php
+
+		-
+			message: "#^\\\\Drupal calls should be avoided in classes, use dependency injection instead$#"
+			count: 2
+			path: modules/geocoder_geofield/src/Geocoder/Dumper/Geometry.php
+
+		-
+			message: "#^\\\\Drupal calls should be avoided in classes, use dependency injection instead$#"
+			count: 1
+			path: modules/geocoder_geofield/src/Geocoder/Provider/AbstractGeometryProvider.php
+
+		-
+			message: "#^\\\\Drupal calls should be avoided in classes, use dependency injection instead$#"
+			count: 1
+			path: src/Plugin/Geocoder/Provider/Random.php
+
+		-
+			message: "#^Call to an undefined method Drupal\\\\Core\\\\Entity\\\\EntityInterface\\:\\:get\\(\\)\\.$#"
+			count: 4
+			path: modules/geocoder_field/geocoder_field.module
+
+		-
+			message: "#^Call to an undefined method Drupal\\\\Core\\\\Entity\\\\EntityInterface\\:\\:set\\(\\)\\.$#"
+			count: 1
+			path: modules/geocoder_field/geocoder_field.module

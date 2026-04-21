@@ -1,0 +1,5 @@
+edit_filter:
+  js:
+    js/edit-filter.js: {}
+  dependencies:
+    - core/jquery

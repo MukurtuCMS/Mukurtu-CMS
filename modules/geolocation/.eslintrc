@@ -1,0 +1,12 @@
+{
+  "extends": "eslint:recommended",
+  "globals": {
+    "google": true,
+    "L": true
+  },
+  "rules": {
+    "max-nested-callbacks": [1, 6],
+    "no-mutable-exports": 0,
+    "no-unused-vars": 0
+  }
+}

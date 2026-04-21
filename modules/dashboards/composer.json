@@ -1,0 +1,26 @@
+{
+  "name": "drupal/dashboards",
+  "type": "drupal-module",
+  "description": "Dashboards based on Layout Builder.",
+  "keywords": [
+    "Drupal"
+  ],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/dashboards",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/dashboards",
+    "source": "https://git.drupalcode.org/project/dashboards"
+  },
+  "require": {
+    "drupal/core": "^9.4 || ^10 || ^11",
+    "laminas/laminas-feed": "^2.17"
+  },
+  "suggest": {
+    "drupal/layout_builder_restrictions": "Manage which fields & layouts are available in Layout Builder.",
+    "drupal/matomo": "Reports site visitor analytics to a Matomo instance.",
+    "drupal/matomo_reporting_api": "Allows to retrieve reports from the Matomo API.",
+    "drupal/webform": "Enables the creation of webforms and questionnaires.",
+    "drupal/statistics": "Logs how many times content is viewed."
+  }
+}

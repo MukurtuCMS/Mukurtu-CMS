@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.entity_test_mulrev_changed.search_result
+id: entity_test_mulrev_changed.item.search_result
+targetEntityType: entity_test_mulrev_changed
+bundle: item
+mode: search_result
+content:
+  search_api_excerpt:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }

@@ -1,0 +1,10 @@
+.item-list .field--widget-term-reference-tree li,
+.block .field--widget-term-reference-tree li,
+.field--widget-term-reference-tree li {
+  margin-block: var(--gin-spacing-xs);
+}
+
+.no-term-reference-tree-button {
+  visibility: hidden;
+}
+

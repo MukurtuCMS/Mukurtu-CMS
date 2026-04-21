@@ -1,0 +1,20 @@
+{#
+/**
+ * @file
+ * Default theme implementation for an 'input' #type form element.
+ *
+ * Available variables:
+ * - attributes: A list of HTML attributes for the input element.
+ * - children: Optional additional rendered elements.
+ *
+ * @see template_preprocess_input()
+ *
+ * @ingroup themeable
+ */
+#}
+{% set classes =[
+  attributes.type != 'submit' and  attributes.type != 'radio' ? 'form-element',
+  attributes.type == 'radio' ? 'form-boolean--type-radio'
+]
+%}
+<input{{ glb_classes(attributes.addClass(classes)) }}/>{{ children }}

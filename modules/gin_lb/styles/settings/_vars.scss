@@ -1,0 +1,44 @@
+$offcanvasTitleHeight: 4.5em;
+$offcanvasPadding: 1.25em;
+$borderDefault: 6px;
+$lbEdit: #1a8ef7;
+$lbRegion: #e5e5e5;
+
+$breakpointTiny: 420px;
+$breakpointXSmall: 588px;
+$breakpointSmall: 768px;
+$breakpointMedium: 976px;
+$breakpointLarge: 1024px;
+$breakpointWide: 1280px;
+$breakpointBig: 1440px;
+
+$topBar: 39px;
+$contentHeaderSpacer: 52px;
+$toolbarWidth: 80px;
+$toolbarOpenWidth: 240px;
+$subToolbarWidth: 260px;
+$sidebarSmallWidth: 300px;
+$sidebarWidth: 360px;
+$borderSmall: 4px;
+$borderDefault: 6px;
+$borderMedium: 8px;
+$borderBig: 12px;
+
+$iconFill: "787878";
+$iconActiveFill: "003cc5";
+
+$basic-easing: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+$fancy-easing: cubic-bezier(0.19, 1, 0.22, 1);
+$transition: 0.15s $fancy-easing;
+$transition--fast: 0.3s $fancy-easing;
+
+$colorAppBackground: #fbfbff; //#f5f7fb;
+$colorAppBackgroundShadow: #f5f5f9;
+$colorDarkAppBackground: #1b1b1d;
+$ginPrimary: #0550e6; //0136fd;
+$ginPrimaryDark: #080090;
+
+$mixColor: $ginPrimary;
+
+$ginPrimaryHover: mix(black, $ginPrimary, 15%);
+$ginPrimaryActive: mix(black, $ginPrimary, 25%);

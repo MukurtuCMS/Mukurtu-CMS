@@ -1,0 +1,45 @@
+name: 'Facets demo'
+type: module
+description: 'A full working example setup with Facets Exposed Filters and suggested contrib modules'
+package: Facets
+core_version_requirement: '^9.4 || ^10 || ^11'
+dependencies:
+  - facets:facets
+  - facets:facets_exposed_filters
+  - search_api:search_api
+  - search_api:search_api_db
+  - better_exposed_filters:better_exposed_filters
+  - views_ajax_history:views_ajax_history
+  - views_filters_summary:views_filters_summary
+  - default_content:default_content
+default_content:
+  node:
+    - 5e2f420f-f3f5-446a-8483-a47ac26aab5e
+    - 5eeddc7c-9ca3-467a-a031-35efd316dd9b
+    - 7badaf6b-a482-49bf-b781-80dd528ecad7
+    - 8f9bfbc0-dd44-4b17-8bdd-66b82a01ce18
+    - 39c27897-6bdd-4b35-b589-c8387e52f761
+    - 0165e1d5-2ed1-4acb-9f8e-558c0a47b2d9
+    - 555f8029-f626-46d9-82f4-cbc75eb7e9eb
+    - a864ffef-8b44-4ecc-a852-7d411744850b
+    - fa57080d-21f0-4584-b041-bfeb76b34194
+    - f2f08f5b-afe0-425e-a7b8-82e7a3ee46ec
+    - 6c6b8c76-2378-4374-8074-84f7a283b6e8
+  taxonomy_term:
+    - 2ff12607-1ab0-47a2-b4a5-558ff0ec81be
+    - 4eda267e-f891-41cf-9d38-39ec882a036b
+    - 7a176814-a275-451f-a86d-8569c6551e50
+    - 9e62e5d8-feed-4d1b-9236-e11e438ff122
+    - 834bbe41-fef2-426b-ba3e-acbdf3a528cb
+    - 90450be1-0802-4d4a-b725-cb0cf15c131f
+    - 5860084d-277e-4725-b237-0745a13033fc
+    - cc499d5d-647a-4bd1-9f69-239871d4e3ac
+    - e580fd9a-a514-4a2e-ab29-b4e1d5032281
+    - ea68b084-6925-4c2a-a0ec-ff351066e445
+    - ec10de10-a351-41e5-a258-ce8359f67578
+    - eefe7709-9848-4a7f-9a78-fb5b6f179942
+
+# Information added by Drupal.org packaging script on 2025-10-17
+version: '3.0.2'
+project: 'facets'
+datestamp: 1760700683

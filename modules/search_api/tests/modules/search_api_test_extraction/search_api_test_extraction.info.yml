@@ -1,0 +1,12 @@
+type: module
+name: 'Field values extraction search test'
+description: 'Provides a setup for testing field values extraction.'
+package: Testing
+dependencies:
+  - drupal:entity_test
+hidden: true
+
+# Information added by Drupal.org packaging script on 2025-11-01
+version: '8.x-1.40'
+project: 'search_api'
+datestamp: 1762030918

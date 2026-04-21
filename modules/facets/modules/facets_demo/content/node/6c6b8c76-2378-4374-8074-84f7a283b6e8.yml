@@ -1,0 +1,58 @@
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 6c6b8c76-2378-4374-8074-84f7a283b6e8
+  bundle: movie
+  default_langcode: en
+  depends:
+    cc499d5d-647a-4bd1-9f69-239871d4e3ac: taxonomy_term
+    834bbe41-fef2-426b-ba3e-acbdf3a528cb: taxonomy_term
+    ec10de10-a351-41e5-a258-ce8359f67578: taxonomy_term
+default:
+  revision_uid:
+    -
+      target_id: 1
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  title:
+    -
+      value: 'Hot Shots!'
+  created:
+    -
+      value: 1738334423
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en
+  body:
+    -
+      value: "<p>Topper Harley, a top gun fighter pilot, is recalled to serve on the SS Essess. Topper's mission is to destroy Saddam Hussein's nuclear plants. Unfortunately, Topper is psychologically imbalanced and is sure to crack under pressure.</p>"
+      format: basic_html
+      summary: ''
+  field_country_of_origin:
+    -
+      entity: cc499d5d-647a-4bd1-9f69-239871d4e3ac
+  field_genre:
+    -
+      entity: 834bbe41-fef2-426b-ba3e-acbdf3a528cb
+    -
+      entity: ec10de10-a351-41e5-a258-ce8359f67578
+  field_imdb_rating:
+    -
+      value: '6.7'
+  field_release_date:
+    -
+      value: '1991-07-31'

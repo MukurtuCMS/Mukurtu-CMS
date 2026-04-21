@@ -1,0 +1,110 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  logger.channel.search_api:
+    parent: logger.channel_base
+    arguments: ['search_api']
+
+  paramconverter.search_api:
+    class: Drupal\search_api\ParamConverter\SearchApiConverter
+    arguments: ['@entity_type.manager', '@entity.repository', '@tempstore.shared', '@current_user']
+    tags:
+      - { name: paramconverter, priority: 10 }
+    lazy: true
+
+  search_api.indexing_batch_helper:
+    class: Drupal\search_api\Utility\IndexingBatchHelper
+    arguments:
+      - '@lock'
+      - '@string_translation'
+      - '@config.factory'
+      - '@datetime.time'
+      - '@messenger'
+      - '@logger.channel.search_api'
+
+  plugin.manager.search_api.backend:
+    class: Drupal\search_api\Backend\BackendPluginManager
+
+  plugin.manager.search_api.data_type:
+    class: Drupal\search_api\DataType\DataTypePluginManager
+
+  plugin.manager.search_api.datasource:
+    class: Drupal\search_api\Datasource\DatasourcePluginManager
+
+  plugin.manager.search_api.display:
+    class: Drupal\search_api\Display\DisplayPluginManager
+  Drupal\search_api\Display\DisplayPluginManagerInterface: '@plugin.manager.search_api.display'
+
+  plugin.manager.search_api.parse_mode:
+    class: Drupal\search_api\ParseMode\ParseModePluginManager
+
+  plugin.manager.search_api.processor:
+    class: Drupal\search_api\Processor\ProcessorPluginManager
+
+  plugin.manager.search_api.tracker:
+    class: Drupal\search_api\Tracker\TrackerPluginManager
+
+  search_api.config_readonly.event_subscriber:
+    class: Drupal\search_api\Form\ReadOnlyFormSubscriber
+
+  search_api.data_type_helper:
+    class: Drupal\search_api\Utility\DataTypeHelper
+  Drupal\search_api\Utility\DataTypeHelperInterface: '@search_api.data_type_helper'
+
+  search_api.entity_datasource.task_manager:
+    class: Drupal\search_api\Plugin\search_api\datasource\ContentEntityTaskManager
+
+  search_api.entity_datasource.tracking_manager:
+    class: Drupal\search_api\Plugin\search_api\datasource\ContentEntityTrackingManager
+
+  search_api.fields_helper:
+    class: Drupal\search_api\Utility\FieldsHelper
+  Drupal\search_api\Utility\FieldsHelperInterface: '@search_api.fields_helper'
+
+  search_api.index_task_manager:
+    class: Drupal\search_api\Task\IndexTaskManager
+  Drupal\search_api\Task\IndexTaskManagerInterface: '@search_api.index_task_manager'
+
+  search_api.plugin_helper:
+    class: Drupal\search_api\Utility\PluginHelper
+  Drupal\search_api\Utility\PluginHelperInterface: '@search_api.plugin_helper'
+
+  search_api.post_request_indexing:
+    class: Drupal\search_api\Utility\PostRequestIndexing
+    tags:
+      - { name: needs_destruction }
+  Drupal\search_api\Utility\PostRequestIndexingInterface: '@search_api.post_request_indexing'
+
+  search_api.query_helper:
+    class: Drupal\search_api\Utility\QueryHelper
+  Drupal\search_api\Utility\QueryHelperInterface: '@search_api.query_helper'
+
+  search_api.server_task_manager:
+    class: Drupal\search_api\Task\ServerTaskManager
+  Drupal\search_api\Task\ServerTaskManagerInterface: '@search_api.server_task_manager'
+
+  search_api.task_manager:
+    class: Drupal\search_api\Task\TaskManager
+  Drupal\search_api\Task\TaskManagerInterface: '@search_api.task_manager'
+
+  search_api.theme_switcher:
+    class: Drupal\search_api\Utility\ThemeSwitcher
+  Drupal\search_api\Utility\ThemeSwitcherInterface: '@search_api.theme_switcher'
+
+  search_api.tracking_helper:
+    class: Drupal\search_api\Utility\TrackingHelper
+  Drupal\search_api\Utility\TrackingHelperInterface: '@search_api.tracking_helper'
+
+  search_api.vbo_view_data_provider:
+    class: Drupal\search_api\Contrib\ViewsBulkOperationsEventSubscriber
+
+  Drupal\search_api\Hook\ContentEntityDatasourceHooks:
+    class: Drupal\search_api\Hook\ContentEntityDatasourceHooks
+
+  Drupal\search_api\Hook\SearchApiHooks:
+    class: Drupal\search_api\Hook\SearchApiHooks
+
+  Drupal\search_api\Hook\SearchApiViewsHooks:
+    class: Drupal\search_api\Hook\SearchApiViewsHooks

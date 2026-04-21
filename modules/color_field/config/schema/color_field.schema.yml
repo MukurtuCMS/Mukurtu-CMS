@@ -1,0 +1,161 @@
+# Schema for the configuration files of the color field module.
+
+field.storage_settings.color_field_type:
+  type: mapping
+  mapping:
+    format:
+      type: label
+      label: 'Format'
+
+field.field_settings.color_field_type:
+  type: mapping
+  mapping:
+    opacity:
+      type: integer
+      label: 'Display opacity'
+
+field.value.color_field_type:
+  type: mapping
+  mapping:
+    color:
+      type: string
+      label: 'The hex color code'
+    opacity:
+      type: float
+      label: 'The opacity'
+
+field.formatter.settings.color_field_formatter_text:
+  type: mapping
+  label: 'Color text format settings'
+  mapping:
+    format:
+      type: label
+      label: 'Format'
+    opacity:
+      type: boolean
+      label: 'Display opacity'
+
+field.formatter.settings.color_field_formatter_swatch:
+  type: mapping
+  label: 'Color swatch format settings'
+  mapping:
+    shape:
+      type: label
+      label: 'Shape'
+    width:
+      type: label
+      label: 'Width'
+    height:
+      type: label
+      label: 'Height'
+    opacity:
+      type: boolean
+      label: 'Display opacity'
+    data_attribute:
+      type: boolean
+      label: 'Use data attribute'
+
+field.formatter.settings.color_field_formatter_swatch_options:
+  type: field.formatter.settings.color_field_formatter_swatch
+
+field.formatter.settings.color_field_formatter_css:
+  type: mapping
+  label: 'Color CSS declaration format settings'
+  mapping:
+    selector:
+      type: label
+      label: 'Selector'
+    property:
+      type: label
+      label: 'Property'
+    important:
+      type: label
+      label: 'Important'
+    opacity:
+      type: boolean
+      label: 'Display opacity'
+    advanced:
+      type: boolean
+      label: 'Advanced'
+    css:
+      type: text
+      label: 'Custom CSS Declaration'
+
+field.widget.settings.color_field_widget_default:
+  type: mapping
+  label: 'Color default format settings'
+  mapping:
+    placeholder_color:
+      type: label
+      label: 'Color placeholder'
+    placeholder_opacity:
+      type: label
+      label: 'Opacity placeholder'
+
+field.widget.settings.color_field_widget_html5:
+  type: mapping
+  label: 'Color HTML5 widget settings'
+  mapping:
+    show_extra:
+      type: boolean
+      label: 'Show extra'
+
+field.widget.settings.color_field_widget_box:
+  type: mapping
+  label: 'Color boxes format settings'
+  mapping:
+    default_colors:
+      type: label
+      label: 'Default colors'
+
+field.widget.settings.color_field_widget_grid:
+  type: mapping
+  label: 'Color grid format settings'
+  mapping:
+    cell_width:
+      type: label
+      label: 'Cell width'
+    cell_height:
+      type: label
+      label: 'Height width'
+    cell_margin:
+      type: label
+      label: 'Cell margin'
+    box_width:
+      type: label
+      label: 'Box width'
+    box_height:
+      type: label
+      label: 'Box height'
+    columns:
+      type: label
+      label: 'Columns number'
+
+field.widget.settings.color_field_widget_spectrum:
+  type: mapping
+  label: 'Color spectrum format settings'
+  mapping:
+    show_input:
+      type: label
+      label: 'Show Input'
+    show_palette:
+      type: label
+      label: 'Show Palette'
+    palette:
+      type: label
+      label: 'Color Palette'
+    show_palette_only:
+      type: label
+      label: 'Show Palette Only'
+    show_buttons:
+      type: label
+      label: 'Show Buttons'
+    cancel_text:
+      type: label
+      label: 'Cancel button text'
+    choose_text:
+      type: label
+      label: 'Choose button text'
+    allow_empty:
+      type: label
+      label: 'Allow Empty'

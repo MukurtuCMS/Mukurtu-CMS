@@ -1,0 +1,24 @@
+/**
+ * @file
+ * Styles for the iFrame Display Plugin.
+ */
+
+.entity-browser-iframe-container iframe {
+  /* IFrame is rendered as inline element by default and thus have a line height
+  which can add unwanted vertical space around it. */
+  display: block;
+  position: relative;
+  z-index: 501;
+  /* Remove the border on our iframe element. */
+  border: none;
+}
+
+.entity-browser-iframe-container .ajax-progress-fullscreen,
+.entity-browser-iframe-container .ajax-progress--fullscreen {
+  position: absolute;
+  z-index: 500;
+}
+
+.entity-browser-iframe-container {
+  position: relative;
+}

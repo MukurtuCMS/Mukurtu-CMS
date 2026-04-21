@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - flag
+    - options
+id: flagging.message_digest
+field_name: message_digest
+entity_type: flagging
+type: list_string
+settings:
+  allowed_values: {  }
+  allowed_values_function: 'message_digest_allowed_values_callback'
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

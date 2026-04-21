@@ -1,0 +1,52 @@
+<p>Provides a geo-location field for storing and managing geographic data, enabling the integration of maps, geocoding and location-based functionalities. It supports all geo-types (points, lines, polygons, multi types geometries), and integrates with various Js Mapping Libraries (Google Maps, Leaflet, etc.) </p>
+<h3><a style="padding: 10px 0;" class="action-button" href="https://www.geodemocracy.com/drupal_geofield_stack_demo/web" target="_blank" rel="nofollow">> 👉 LIVE DEMO <
+</a></h3>
+<br>
+<h2><b>Widgets (Data Input)</b></h2>
+<p><b>Latitude and  Longitude</b><br>
+  Supports entering data as both Decimal Degrees (122.340932) and Degrees-Minutes-Seconds (-123° 49' 55.2" W).</p>
+<p><b>Well Known Text (WKT)</b><br>
+  A textarea for direct WKT input</p>
+<p><b>Bounding Box</b><br>
+  Four text fields where lat / lon can be entered</p>
+<p><b>Geocode from another field</b><br>
+  There is native integrations with the Geocoder module (<a href="http://drupal.org/project/geocoder" rel="nofollow">http://drupal.org/project/geocoder</a>).
+  This allows you to use data from one field to populate your geofield automatically.</p>
+<h2><b>Formatters (Data Output)</b></h2>
+<p><b>Latitude and Longitude</b><br>
+  Supports display as both Decimal Degrees (122.340932) and Degrees-Minutes-Seconds (-123° 49' 55.2" W)</p>
+<p><b>Well Known Text (WKT)</b></p>
+<p><b>Google Maps and Leaflet Maps (OpenLayers only for D7) </b><br>
+  Display your data on a map, integrating other Drupal Geofield Mapping modules (see below).</p>
+<h2><b>Installation</b></h2>
+<p><i>For Drupal 7 version all you need to do is install the <a href="http://drupal.org/project/geophp" rel="nofollow">Drupal GeoPHP module</a>, which is required by geofield.</i></p>
+<hr>
+<h3><b>Drupal 9 & 10, and GeoPHP library dependency</b></h3>
+<p>Since <strong>8.x-1.0-alpha2</strong> version, this module is not depending on Drupal GeoPHP module anymore.<br>
+  <b>The Drupal 8 & 9 version of Geofield module needs to be installed <a href="https://www.drupal.org/docs/develop/using-composer/using-composer-to-manage-drupal-site-dependencies" target="_blank" rel="nofollow">using Composer</a></b>, it means simply running the following command from your project root (where the main composer.json file is sited):</p>
+<p><b>$ composer require 'drupal/geofield'</b></p>
+<p>This process will also download the required <a href="https://github.com/phayes/geoPHP" title="GeoPHP library" target="_blank" rel="nofollow">GeoPHP library</a> dependency (that will be sited in the /vendor folder).</p>
+<p>For further information, see <a href="https://www.drupal.org/docs/extending-drupal/installing-drupal-modules" target="_blank" rel="nofollow">Installing Drupal Modules]</a>.</p>
+</p>
+<hr>
+<h2><b>Configuration</b></h2>
+Once enabled the module it will be possible to add a "Geofield" field type to
+any entity type/bundle and then choose the preferred widget or formatter.
+<h2><b>Advanced Mapping and Geocoding with Geofield</b></h2>
+Geofield perfectly matches and extends itself with its dependent most adopted third party modules, such as:
+<ul><li><b><a href="https://www.drupal.org/project/geofield_map" title="Geofield Map" target="_blank" rel="nofollow">Geofield Map</a></b>: an advanced, complete and easy-to-use Geo Mapping solution that lets you manage the Geofield with an interactive Map both in back-end and in the front-end</li>
+  <li><b><a href="https://www.drupal.org/project/leaflet" rel="nofollow">Leaflet</a></b>: Drupal advanced integration with the Leaflet JS mapping library. Advanced features for creating and editing Points and Geometries Layers (Linestring, Polygon) so as for managing Leaflet Views styles and Formatters;</li>
+  <li><b><a href="https://www.drupal.org/project/geocoder" rel="nofollow">Geocoder</a></b>: Most advanced, complete and easy to use solution to process Geocode and Reverse Geocode operations on Drupal Entities;</li>
+  <li><b><a href="https://www.drupal.org/project/address" rel="nofollow">Address Field</a></b>: Holds internationally compatible postal addresses based on xNAL. Compatible with Geocoder;</li>
+  <li><b><a href="https://www.drupal.org/project/search_api_location" rel="nofollow">Search API Location</a></b>: Adds geospatial-based searching to the <a href="/project/search_api" rel="nofollow">Search API</a> module;</li>
+  <li>and many others (created in the wild by the Drupal community) ...</li>
+</ul><h2><b>Resources</b></h2>
+<ul><li><a href="https://www.drupal.org/node/1089574" rel="nofollow">Documentation for Drupal 7</a> (incomplete and outdated)</li>
+  <li><a href="https://git.drupalcode.org/project/geofield/-/blob/7.x-1.x/README.txt" target="_blank" rel="nofollow">README.txt for Drupal 7</a></li>
+  <li><a href="https://git.drupalcode.org/project/geofield/-/blob/8.x-1.x/README.md" target="_blank" rel="nofollow">README.md for Drupal 9 & 10</a></li>
+  <li>Book: <a href="http://shop.oreilly.com/product/0636920021230.do" rel="nofollow">Mapping with Drupal (7)</a></li>
+  <li>Slideshare Presentation by <a href="https://www.drupal.org/u/itamair" target="_blank" rel="nofollow">itamair</a>: <a href="https://www.slideshare.net/italomairo/how-to-turn-drupal-8-into-an-advanced-web-gis-20-application-with-the-geofield-mapping-stack" target="_blank" rel="nofollow">How to turn Drupal 8 into an advanced Web GIS 2.0 application with the Geofield Mapping stack</a></li>
+  <li>Slideshare Presentation by <a href="https://www.drupal.org/u/itamair" target="_blank" rel="nofollow">itamair</a>: <a href="https://www.slideshare.net/italomairo/drupal-8-geofield-mapping-stack-from-basic-to-advanced" target="_blank" rel="nofollow">Drupal 8 Geofield Mapping Stack: from Basic to Advanced</a></li>
+</ul><h2><b>Credits</b></h2>
+<p>Thanks to all <a href="http://drupal.org/node/1087170/committers" rel="nofollow">contributing developers</a> of the Geofidld module (so as many others who have helped with bug fixing and documentation).</p>
+<p>A special thanks to the following organization for sponsoring the development of initial Geofield for Drupal 7 version: <a href="http://www.highwire.org" rel="nofollow">HighWire Press</a>, <a href="http://www.phase2technology.com/" rel="nofollow">Phase 2</a>, and <a href="http://www.geoscienceworld.org/" rel="nofollow">GeoScienceWorld</a></p>

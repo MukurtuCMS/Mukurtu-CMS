@@ -1,0 +1,46 @@
+#coffee-form {
+  padding: var(--gin-spacing-xxs);
+  background: #000;
+  border-radius: var(--gin-border-l);
+
+  #coffee-form-inner,
+  #coffee-q {
+    color: var(--gin-color-title);
+    background: var(--gin-bg-layer);
+    border-radius: var(--gin-border-m);
+  }
+
+  #coffee-results {
+    a {
+      color: var(--gin-color-title);
+      border-radius: var(--gin-border-m);
+
+      .description {
+        color: var(--gin-color-text-light);
+        padding-block-start: var(--gin-spacing-xxs);
+      }
+
+      &:hover,
+      &.ui-state-active {
+        background: var(--gin-color-primary);
+
+        &, .description {
+          color: var(--gin-color-button-text);
+        }
+
+        .description {
+          opacity: .9;
+        }
+      }
+    }
+  }
+
+  .ui-autocomplete {
+    background: transparent;
+    box-shadow: none;
+
+    .ui-menu-item-wrapper {
+      padding: var(--gin-spacing-m);
+    }
+  }
+}

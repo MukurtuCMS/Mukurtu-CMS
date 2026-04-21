@@ -1,0 +1,9 @@
+langcode: en
+status: false
+dependencies:
+  module:
+    - message 
+id: message.foo
+label: 'Foo'
+targetEntityType: message
+cache: true

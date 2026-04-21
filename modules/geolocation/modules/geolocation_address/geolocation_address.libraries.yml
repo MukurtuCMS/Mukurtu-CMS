@@ -1,0 +1,10 @@
+geolocation_address.widget:
+  version: 8.x-2.x
+  css:
+    theme:
+      css/geolocation-address-map-widget.css: {}
+  js:
+    js/geolocation-address-map-widget.js: {}
+  dependencies:
+      - geolocation/geolocation.map
+      - geolocation/geolocation.widget.api

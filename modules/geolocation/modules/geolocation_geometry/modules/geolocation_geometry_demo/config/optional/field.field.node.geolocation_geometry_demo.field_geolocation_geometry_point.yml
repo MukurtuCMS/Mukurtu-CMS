@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_geolocation_geometry_point
+    - node.type.geolocation_geometry_demo
+  module:
+    - geolocation_geometry
+  enforced:
+    module:
+      - geolocation_geometry_demo
+id: node.geolocation_geometry_demo.field_geolocation_geometry_point
+field_name: field_geolocation_geometry_point
+entity_type: node
+bundle: geolocation_geometry_demo
+label: 'Geolocation Geometry Point'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geolocation_geometry_point

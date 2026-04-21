@@ -1,0 +1,156 @@
+<?php
+
+/**
+ * @file
+ * Update hooks for the facets_exposed_filters module.
+ */
+
+/**
+ * Migrate exposed filter facets to real views filters (#3446781).
+ */
+function facets_exposed_filters_update_8001() {
+
+  $config_factory = \Drupal::configFactory();
+
+  // Find all facets that have the hierarchy enabled, but do not use the
+  // hierarchy processor.
+  foreach ($config_factory->listAll('views.view.') as $view_config_name) {
+    $view = $config_factory->getEditable($view_config_name);
+    $base_field = $view->get('base_field');
+    // Views not using search_api_id as base field are not using search_api.
+    if ($base_field !== 'search_api_id') {
+      continue;
+    }
+    $displays = $view->get('display');
+    foreach ($displays as $display_id => $display) {
+
+      if (isset($display['display_options']['filters'])) {
+
+        foreach ($display['display_options']['filters'] as $filter_id => $filter) {
+          if ($filter['plugin_id'] !== 'facets_filter') {
+            continue;
+          }
+          if (is_array($filter['facet'])) {
+            // Already migrated.
+            continue;
+          }
+
+          $facet_config = $config_factory->get('facets.facet.' . $filter['facet']);
+          unset($filter['facet']);
+
+          $filter['field'] = 'facets_' . $facet_config->get('field_identifier');
+
+          $processor_configs = [];
+
+          foreach ($facet_config->get('processor_configs') as $processor_id => $processor_config) {
+            if ($processor_id === 'url_processor_handler') {
+              continue;
+            }
+            $processor_configs[$processor_id] = $processor_config;
+            unset($processor_configs[$processor_id]['processor_id']);
+          }
+
+          $filter['facet'] = [
+            'query_operator' => $facet_config->get('query_operator'),
+            'min_count' => $facet_config->get('min_count'),
+            'show_numbers' => $facet_config->get('min_count') ?: 1,
+            'processor_configs' => $processor_configs,
+          ];
+
+          if ($facet_config->get('use_hierarchy')) {
+            $filter['hierarchy'] = TRUE;
+            $filter['facet']['hierarchy'] = $facet_config->get('hierarchy')['type'];
+            $filter['facet']['expand_hierarchy'] = (bool) $facet_config->get('expand_hierarchy');
+          }
+          else {
+            $filter['hierarchy'] = FALSE;
+            unset($filter['facet']['processor_configs']['hierarchy_processor']);
+          }
+
+          $displays[$display_id]['display_options']['filters'][$filter_id] = $filter;
+        }
+      }
+
+    }
+    $view->set('display', $displays);
+    $view->save();
+  }
+
+  // Remove facet source for all facets using views_exposed_filter widget and
+  // switch them to checkboxes instead, as backup for failures.
+  foreach ($config_factory->listAll('facets.facet.') as $facet_id) {
+    $facet = $config_factory->getEditable($facet_id);
+    if ($facet->get('widget')['type'] == 'views_exposed_filter') {
+      $facet->set('facet_source_id', NULL);
+      $facet->set('widget', [
+        'type' => 'checkbox',
+        'config' => [
+          'show_numbers' => TRUE,
+          'soft_limit' => 0,
+          'show_reset_link' => FALSE,
+          'reset_text' => 'Show all',
+          'hide_reset_when_no_selection' => FALSE,
+          'soft_limit_settings' => [
+            'show_less_label' => 'Show less',
+            'show_more_label' => 'Show more',
+          ],
+        ],
+      ]);
+      $facet->save();
+    }
+  }
+
+  // Reset all facet sources URL processor from views_exposed_filters to
+  // query_string.
+  foreach ($config_factory->listAll('facets.facet_source.') as $facet_source_id) {
+    $facet_source = $config_factory->getEditable($facet_source_id);
+    if ($facet_source->get('url_processor') == 'views_exposed_filters') {
+      $facet_source->set('url_processor', 'query_string');
+      $facet_source->save();
+    }
+  }
+
+}
+
+
+
+/**
+ * 3544226: Fix schema validation for Facets exposed filters.
+ */
+function facets_exposed_filters_update_8002() {
+
+  $config_factory = \Drupal::configFactory();
+  foreach ($config_factory->listAll('views.view.') as $view_config_name) {
+    $view = $config_factory->getEditable($view_config_name);
+    $base_field = $view->get('base_field');
+    // Views not using search_api_id as base field are not using search_api.
+    if ($base_field !== 'search_api_id') {
+      continue;
+    }
+    $displays = $view->get('display');
+    $changed = FALSE;
+    foreach ($displays as $display_id => $display) {
+
+      if (isset($display['display_options']['filters'])) {
+
+        foreach ($display['display_options']['filters'] as $filter_id => $filter) {
+          if ($filter['plugin_id'] !== 'facets_filter') {
+            continue;
+          }
+
+          // Add processor_id to processor_configs on all facet filters.
+          foreach($filter['facet']['processor_configs'] as $processor_config_id => $processor_configs) {
+            $filter['facet']['processor_configs'][$processor_config_id]['processor_id'] = $processor_config_id;
+            $changed = TRUE;
+          }
+          $displays[$display_id]['display_options']['filters'][$filter_id] = $filter;
+        }
+      }
+    }
+
+    if($changed) {
+      $view->set('display', $displays);
+      $view->save();
+    }
+  }
+}

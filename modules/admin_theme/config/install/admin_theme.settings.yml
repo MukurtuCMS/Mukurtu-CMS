@@ -1,0 +1,2 @@
+paths: '/dummy-path-needed-until-core-issue-2930364-is-fixed'
+exclude_paths: '/dummy-path-needed-until-core-issue-2930364-is-fixed'

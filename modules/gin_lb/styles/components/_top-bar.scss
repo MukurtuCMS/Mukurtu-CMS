@@ -1,0 +1,29 @@
+.gin--navigation-top-bar .gin-lb--form-actions {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  margin-top:  0 !important;
+  margin-bottom: 0 !important;
+  gap: var(--gin-spacing-xs);
+
+  & .glb-form-type--checkbox {
+    margin-right: var(--gin-spacing-xs) !important;
+  }
+}
+
+.gin--navigation-top-bar .gin-lb--form-actions .glb-form-item, .gin--navigation-top-bar .gin-lb--form-actions .glb-button {
+  margin: 0 !important;
+}
+
+.gin--navigation-top-bar button,
+.gin-secondary-toolbar input[type=submit],
+.gin--navigation-top-bar input[type=submit],
+.gin--navigation-top-bar .local-actions__item a {
+  font-size: var(--gin-font-size-xs) !important;
+  font-weight: var(--gin-font-weight-bold) !important;
+  padding-block: calc(var(--gin-spacing-xs) - var(--gin-spacing-xxxs)) !important;
+  padding-inline: var(--gin-spacing-s) !important;
+  margin-block: 0 !important;
+  box-shadow: none !important;
+}

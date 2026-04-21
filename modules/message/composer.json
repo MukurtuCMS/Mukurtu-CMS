@@ -1,0 +1,11 @@
+{
+  "name": "drupal/message",
+  "description": "Message",
+  "license": "GPL-2.0-or-later",
+  "type": "drupal-module",
+  "require": {},
+  "require-dev": {
+    "drupal/token": "^1.14"
+  },
+  "minimum-stability": "dev"
+}

@@ -1,0 +1,88 @@
+geolocation.yandex:
+  version: 8.x-3.x
+  dependencies:
+    - core/drupalSettings
+    - geolocation/geolocation.api
+    - geolocation_yandex/yandex_maps
+  js:
+    js/geolocation-yandex-api.js: {}
+
+commonmap.yandex:
+  js:
+    js/geolocation-common-map-yandex.js: {}
+  dependencies:
+    - geolocation/geolocation.commonmap
+
+# Yandex widget API.
+widget.api.yandex:
+  version: 8.x-3.x
+  js:
+    js/geolocation-widget-yandex-api.js: {}
+  dependencies:
+    - geolocation/geolocation.widget.api
+    - geolocation_yandex/geolocation.yandex
+
+widget.yandex:
+  version: 8.x-3.x
+  js:
+    js/geolocation-yandex-widget.js: {}
+  dependencies:
+    - geolocation/geolocation.widget
+    - geolocation_yandex/widget.api.yandex
+
+#
+# Map Features
+#
+
+# Clusterer
+mapfeature.yandex_clusterer:
+  js:
+    js/MapFeature/clusterer.js: {}
+  dependencies:
+  - geolocation_yandex/geolocation.yandex
+
+#
+# Map Features - Controls
+#
+
+# Control Zoom
+mapfeature.yandex_control_zoom:
+  js:
+    js/MapFeature/control-zoom.js: {}
+  dependencies:
+  - geolocation_yandex/geolocation.yandex
+
+# Control Search
+mapfeature.yandex_control_search:
+  js:
+    js/MapFeature/control-search.js: {}
+  dependencies:
+  - geolocation_yandex/geolocation.yandex
+
+# Control Type
+mapfeature.yandex_control_type:
+  js:
+    js/MapFeature/control-type.js: {}
+  dependencies:
+  - geolocation_yandex/geolocation.yandex
+
+# Control Geolocation
+mapfeature.yandex_control_geolocation:
+  js:
+    js/MapFeature/control-geolocation.js: {}
+  dependencies:
+  - geolocation_yandex/geolocation.yandex
+
+# Control Traffic
+mapfeature.yandex_control_traffic:
+  js:
+    js/MapFeature/control-traffic.js: {}
+  dependencies:
+  - geolocation_yandex/geolocation.yandex
+
+# Balloon
+mapfeature.yandex_balloon:
+  js:
+    js/MapFeature/balloon.js: {}
+  dependencies:
+  - geolocation_yandex/geolocation.yandex

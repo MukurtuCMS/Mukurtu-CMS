@@ -1,0 +1,7 @@
+geolocation_yandex.settings:
+  path: '/admin/config/services/geolocation/yandex_maps'
+  defaults:
+    _form:  '\Drupal\geolocation_yandex\Form\YandexMapsSettings'
+    _title: 'Yandex Maps settings'
+  requirements:
+    _permission: 'configure geolocation'

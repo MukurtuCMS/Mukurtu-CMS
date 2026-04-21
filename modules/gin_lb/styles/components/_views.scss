@@ -1,0 +1,25 @@
+.glb-views-exposed-form.glb-views-exposed-form,
+.views-displays {
+  display: flex;
+  overflow: hidden;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.75em;
+  border: 1px solid var(--gin-border-color-layer2);
+  border-radius: $borderDefault;
+  background: var(--gin-bg-layer);
+  box-shadow:
+    20px 20px 40px rgba(226, 229, 236, 0.98),
+    -16px -16px 24px #fbfbff;
+
+  .glb-button {
+    margin-bottom: 1.5em !important;
+  }
+
+  .glb-form-item {
+    margin: 0.75em 0.5em 0 0;
+  }
+}

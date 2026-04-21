@@ -1,0 +1,127 @@
+:where(*),
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) {
+  .gin-breadcrumb {
+    padding: 0;
+    color: var(--gin-color-text);
+    font-size: 0.79rem;
+
+    .gin-breadcrumb-wrapper {
+      min-width: 1px; // Fixes ellipsis with flex overfloating issue.
+    }
+
+    .gin-breadcrumb__list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      width: auto;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      padding-inline-start: var(--gin-spacing-xxs);
+      margin-block-start: 0;
+      margin-inline-start: calc(var(--gin-spacing-xxs) * -1);
+    }
+
+    .gin-breadcrumb__item,
+    .gin-breadcrumb__link,
+    .gin-breadcrumb__text {
+      display: inline;
+      font-weight: var(--gin-font-weight-normal);
+      color: var(--gin-color-text-light);
+      line-height: 1.5rem;
+      text-decoration: none;
+      vertical-align: middle;
+    }
+
+    .gin-breadcrumb__item {
+      font-size: 0;
+    }
+
+    .gin-breadcrumb__item + .gin-breadcrumb__item::before {
+      content: "/";
+      opacity: .3;
+      font-size: var(--gin-font-size-xs);
+      vertical-align: middle;
+      display: inline-block;
+      padding: 0 .5em;
+      background: none;
+
+      @media (forced-colors: active) {
+        opacity: 1;
+      }
+    }
+
+    .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link {
+      position: relative;
+      padding-inline-start: 1.75em;
+
+      &::before {
+        content: "";
+        display: inline-block;
+        position: absolute;
+        inset-block-start: calc(50% - 1px);
+        inset-inline-start: 0;
+        width: var(--gin-icon-size-toolbar-secondary);
+        height: var(--gin-icon-size-toolbar-secondary);
+        transform: translateY(-50%);
+        background-color: var(--gin-icon-color);
+        mask-image: icon('backtosite');
+        mask-size: 100% 100%;
+        mask-position: center center;
+
+        // forced color style for breadcrumbs
+        @media (forced-colors: active) {
+          background: linktext;
+        }
+      }
+
+      &:hover::before {
+        background-color: var(--gin-color-primary);
+
+        @media (forced-colors: active) {
+          background: linktext;
+        }
+      }
+    }
+
+    .gin-breadcrumb__item:first-of-type + .gin-breadcrumb__item::before {
+      content: "";
+      opacity: .3;
+      border-inline-end: 1px solid var(--gin-color-text);
+      width: 1px;
+      height: 20px;
+      padding-inline-start: .75em;
+      padding-inline-end: 0;
+      margin-inline-end: .75em;
+
+      @media (forced-colors: active) {
+        opacity: 1;
+      }
+    }
+
+    .gin-breadcrumb__link,
+    .gin-breadcrumb__text {
+      font-size: var(--gin-font-size-xs);
+      line-height: 2; // make sure we have enough room for focus ring
+      border-radius: var(--gin-border-xxs);
+
+      &, em {
+        &, &:link, &:visited {
+          font-weight: var(--gin-font-weight-normal);
+          color: var(--gin-color-text-light);
+        }
+      }
+
+      em {
+        font-style: italic;
+      }
+    }
+
+    .gin-breadcrumb__link {
+      &:hover {
+        &, em {
+          color: var(--gin-color-primary-hover);
+        }
+      }
+    }
+  }
+}

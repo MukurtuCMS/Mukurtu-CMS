@@ -1,0 +1,26 @@
+core_version_requirement: ^10.3 || ^11
+type: module
+name: Geolocation
+description: 'Provides a simple geolocation field type to store and display location data (lat, lng).'
+package: Geolocation
+dependencies:
+  - drupal:field
+  - jquery_ui:jquery_ui
+  - jquery_ui_autocomplete:jquery_ui_autocomplete
+simplytest_dependencies:
+  - geolocation_demo
+  - geolocation_google_maps
+  - geolocation_google_maps_demo
+  - geolocation_leaflet
+  - geolocation_leaflet_demo
+test_dependencies:
+  - geolocation:geolocation_demo
+  - geolocation:geolocation_google_maps
+  - geolocation:geolocation_google_maps_demo
+  - geolocation:geolocation_leaflet
+  - geolocation:geolocation_leaflet_demo
+
+# Information added by Drupal.org packaging script on 2024-10-20
+version: '8.x-3.14'
+project: 'geolocation'
+datestamp: 1729420967

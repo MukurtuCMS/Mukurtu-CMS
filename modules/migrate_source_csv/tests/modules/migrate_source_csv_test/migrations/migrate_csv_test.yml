@@ -1,0 +1,32 @@
+id: migrate_csv_test
+migration_tags:
+  - CSV
+label: 'CSV file migration'
+source:
+  plugin: csv
+  path: /artifacts/people.csv
+  ids: [id]
+process:
+  type:
+    plugin: default_value
+    default_value: people
+  title:
+    plugin: concat
+    source:
+      - first_name
+      - last_name
+    delimiter: ' '
+  field_first_name: first_name
+  field_last_name: last_name
+  field_email: email
+  field_ip_address: ip_address
+  field_dob:
+    plugin: format_date
+    from_format: m/d/Y
+    to_format: Y-m-d
+    source: date_of_birth
+destination:
+  plugin: 'entity:node'
+migration_dependencies:
+  required: {  }
+  optional: {  }

@@ -1,0 +1,138 @@
+<?php
+
+/**
+ * @file
+ * helper.theme
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\gin\GinSettings;
+
+/**
+ * Accent color element.
+ */
+function _gin_accent_radios($element) {
+  $options = array_keys($element['#options']);
+
+  foreach ($options as $values) {
+    $element[$values]['#attributes']['data-gin-accent'] = $element[$values]['#return_value'];
+  }
+
+  return $element;
+}
+
+/**
+ * Toolbar element.
+ */
+function _gin_toolbar_radios($element) {
+  $options = array_keys($element['#options']);
+
+  $element['#attributes']['class'][] = 'toolbar-option';
+
+  foreach ($options as $values) {
+    $element[$values]['#attributes']['class'][] = 'toolbar-option__' . $element[$values]['#return_value'];
+    $element[$values]['#attributes']['data-gin-toolbar'] = $element[$values]['#return_value'];
+  }
+
+  return $element;
+}
+
+/**
+ * Implements helper function _gin_user_form_submit().
+ */
+function _gin_user_form_submit(&$form, FormStateInterface $form_state) {
+  /** @var \Drupal\Core\Session\AccountInterface $account */
+  $account = $form_state->getBuildInfo()['callback_object']->getEntity();
+
+  $enabledUserOverrides = $form_state->getValue('enable_user_settings');
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  if ($enabledUserOverrides) {
+    $user_settings = [
+      'enable_darkmode' => $form_state->getValue('enable_darkmode'),
+      'preset_accent_color' => $form_state->getValue('preset_accent_color'),
+      'accent_color' => $form_state->getValue('accent_color'),
+      'classic_toolbar' => $form_state->getValue('classic_toolbar'),
+      'preset_focus_color' => $form_state->getValue('preset_focus_color'),
+      'focus_color' => $form_state->getValue('focus_color'),
+      'high_contrast_mode' => (bool) $form_state->getValue('high_contrast_mode'),
+      'layout_density' => $form_state->getValue('layout_density'),
+      'show_description_toggle' => $form_state->getValue('show_description_toggle'),
+      'sticky_action_buttons' => $form_state->getValue('sticky_action_buttons'),
+    ];
+    $settings->setAll($user_settings, $account);
+  }
+  else {
+    $settings->clear($account);
+  }
+
+  // Clear render cache to ensure the correct
+  // templates are loaded for our toolbar options.
+  \Drupal::service('cache.render')->deleteAll();
+}
+
+/**
+ * Helper function for check if Gin is active.
+ */
+function _gin_is_active() {
+  $theme_handler = \Drupal::service('theme_handler')->listInfo();
+
+  // Check if set as frontend theme.
+  $frontend_theme_name = \Drupal::config('system.theme')->get('default');
+
+  // Check if base themes are set.
+  if (isset($theme_handler[$frontend_theme_name]->base_themes)) {
+    $frontend_base_themes = $theme_handler[$frontend_theme_name]->base_themes;
+  }
+
+  // Add theme name to base theme array.
+  $frontend_base_themes[$frontend_theme_name] = $frontend_theme_name;
+
+  // Check if set as admin theme.
+  $admin_theme_name = \Drupal::config('system.theme')->get('admin');
+
+  // Admin theme will have no value if it is set to use the default theme.
+  if ($admin_theme_name && isset($theme_handler[$admin_theme_name]->base_themes)) {
+    $admin_base_themes = $theme_handler[$admin_theme_name]->base_themes;
+    $admin_base_themes[$admin_theme_name] = $admin_theme_name;
+  }
+  else {
+    $admin_base_themes = $frontend_base_themes;
+  }
+
+  $base_themes = array_merge($admin_base_themes, $frontend_base_themes);
+  $gin_activated = array_key_exists('gin', $base_themes);
+
+  return $gin_activated;
+}
+
+/**
+ * Helper function for check if a module is active.
+ */
+function _gin_module_is_active($module) {
+  $module_handler = \Drupal::service('module_handler');
+
+  // Check if Navigation module is active.
+  $check_module = $module_handler->moduleExists($module);
+
+  if ($check_module) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Helper function for check for the module version installed.
+ */
+function _gin_module_version($module) {
+  $extensionList = \Drupal::service('extension.list.module');
+  $extension_info = $extensionList->getExtensionInfo($module);
+
+  if (!empty($extension_info['version'])) {
+    return $extension_info['version'];
+  }
+
+  // Module not found or version unavailable.
+  return FALSE;
+}

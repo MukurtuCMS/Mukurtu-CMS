@@ -1,0 +1,316 @@
+[data-gin-accent] {
+  --gin-color-primary: rgb(var(--gin-color-primary-rgb));
+  --gin-color-primary-light: rgba(var(--gin-color-primary-rgb), .15);
+  --gin-bg-app: rgb(var(--gin-bg-app-rgb));
+  --gin-bg-layer-rgb: 255, 255, 255;
+  --gin-bg-item: rgba(var(--gin-color-primary-rgb), .05);
+  --gin-bg-item-hover: rgba(var(--gin-color-primary-rgb), .1);
+  --gin-color-primary-light-hover: rgba(var(--gin-color-primary-rgb), .2);
+  --gin-color-primary-light-active: rgba(var(--gin-color-primary-rgb), .3);
+  --gin-shadow-primary-light: rgba(var(--gin-color-primary-rgb), .45);
+}
+
+.gin--dark-mode[data-gin-accent],
+.gin--dark-mode [data-gin-accent] {
+  --gin-bg-item-hover: rgba(var(--gin-color-primary-rgb), .08);
+  --gin-bg-app-rgb: 27, 27, 29;
+  --gin-bg-layer-rgb: 42, 42, 45;
+}
+
+[data-gin-accent=blue] {
+  --gin-color-primary-rgb: 5, 80, 230;
+  --gin-color-primary-light-rgb: 205, 220, 250;
+  --gin-color-primary-hover: #0444c4;
+  --gin-color-primary-active: #043cad;
+  --gin-bg-app-rgb: 248, 250, 254;
+  --gin-bg-header: #e1eafc;
+  --gin-color-sticky-rgb: 235, 241, 253;
+}
+
+[data-gin-accent=light_blue] {
+  --gin-color-primary-rgb: 47, 109, 208;
+  --gin-color-primary-light-rgb: 213, 226, 246;
+  --gin-color-primary-hover: #285db1;
+  --gin-color-primary-active: #23529c;
+  --gin-bg-app-rgb: 249, 251, 254;
+  --gin-bg-header: #e6edf9;
+  --gin-color-sticky-rgb: 238, 243, 251;
+}
+
+[data-gin-accent=dark_purple] {
+  --gin-color-primary-rgb: 67, 0, 191;
+  --gin-color-primary-light-rgb: 217, 204, 242;
+  --gin-color-primary-hover: #3900a2;
+  --gin-color-primary-active: #32008f;
+  --gin-bg-app-rgb: 249, 247, 253;
+  --gin-bg-header: #e8e0f7;
+  --gin-color-sticky-rgb: 240, 235, 250;
+  --gin-color-primary-light-hover: rgba(var(--gin-color-primary-rgb), .2);
+  --gin-color-primary-light-active: rgba(var(--gin-color-primary-rgb), .25);
+  --gin-shadow-primary-light: rgba(var(--gin-color-primary-rgb), .4);
+  --gin-bg-item-hover: rgba(var(--gin-color-primary-rgb), .08);
+}
+
+[data-gin-accent=purple] {
+  --gin-color-primary-rgb: 91, 0, 255;
+  --gin-color-primary-light-rgb: 222, 204, 255;
+  --gin-color-primary-hover: #4d00d9;
+  --gin-color-primary-active: #4400bf;
+  --gin-bg-app-rgb: 250, 247, 255;
+  --gin-bg-header: #ebe0ff;
+  --gin-color-sticky-rgb: 242, 235, 255;
+  --gin-color-primary-light-hover: rgba(var(--gin-color-primary-rgb), .2);
+  --gin-color-primary-light-active: rgba(var(--gin-color-primary-rgb), .25);
+  --gin-shadow-primary-light: rgba(var(--gin-color-primary-rgb), .4);
+  --gin-bg-item-hover: rgba(var(--gin-color-primary-rgb), .08);
+}
+
+[data-gin-accent=teal] {
+  --gin-color-primary-rgb: 16, 133, 127;
+  --gin-color-primary-light-rgb: 207, 231, 229;
+  --gin-color-primary-hover: #0e716c;
+  --gin-color-primary-active: #0c645f;
+  --gin-bg-app-rgb: 248, 251, 251;
+  --gin-bg-header: #e2f0f0;
+  --gin-color-sticky-rgb: 236, 245, 245;
+}
+
+[data-gin-accent=green] {
+  --gin-color-primary-rgb: 0, 135, 95;
+  --gin-color-primary-light-rgb: 204, 231, 223;
+  --gin-color-primary-hover: #007351;
+  --gin-color-primary-active: #006547;
+  --gin-bg-app-rgb: 247, 251, 250;
+  --gin-bg-header: #e0f1ec;
+  --gin-color-sticky-rgb: 235, 245, 242;
+}
+
+[data-gin-accent=red] {
+  --gin-color-primary-rgb: 216, 0, 47;
+  --gin-color-primary-light-rgb: 247, 204, 213;
+  --gin-color-primary-hover: #b80028;
+  --gin-color-primary-active: #a20023;
+  --gin-bg-app-rgb: 254, 247, 249;
+  --gin-bg-header: #fae0e6;
+  --gin-color-sticky-rgb: 252, 235, 238;
+}
+
+[data-gin-accent=orange] {
+  --gin-color-primary-rgb: 218, 99, 1;
+  --gin-color-primary-light-rgb: 248, 224, 204;
+  --gin-color-primary-hover: #b95401;
+  --gin-color-primary-active: #a44a01;
+  --gin-bg-app-rgb: 254, 250, 247;
+  --gin-bg-header: #fbece1;
+  --gin-color-sticky-rgb: 252, 243, 235;
+}
+
+[data-gin-accent=yellow] {
+  --gin-color-primary-rgb: 179, 122, 0;
+  --gin-color-primary-light-rgb: 240, 228, 204;
+  --gin-color-primary-hover: #986800;
+  --gin-color-primary-active: #865c00;
+  --gin-bg-app-rgb: 253, 251, 247;
+  --gin-bg-header: #f6efe0;
+  --gin-color-sticky-rgb: 249, 244, 235;
+}
+
+[data-gin-accent=pink] {
+  --gin-color-primary-rgb: 209, 47, 112;
+  --gin-color-primary-light-rgb: 246, 213, 226;
+  --gin-color-primary-hover: #b2285f;
+  --gin-color-primary-active: #9d2354;
+  --gin-bg-app-rgb: 254, 249, 251;
+  --gin-bg-header: #f9e6ee;
+  --gin-color-sticky-rgb: 251, 238, 244;
+}
+
+[data-gin-accent=neutral] {
+  --gin-color-primary-rgb: 17, 17, 17;
+  --gin-color-primary-light-rgb: 207, 207, 207;
+  --gin-color-primary-hover: #0e0e0e;
+  --gin-color-primary-active: #0d0d0d;
+  --gin-bg-app-rgb: 248, 248, 248;
+  --gin-bg-header: #e2e2e2;
+  --gin-color-sticky-rgb: 236, 236, 236;
+}
+
+[data-gin-accent=custom] {
+  --gin-color-primary-rgb: 17, 17, 17;
+  --gin-color-primary-light-rgb: 207, 207, 207;
+  --gin-color-primary-hover: #0e0e0e;
+  --gin-color-primary-active: #0d0d0d;
+  --gin-bg-app-rgb: 248, 248, 248;
+  --gin-bg-header: #e2e2e2;
+  --gin-color-sticky-rgb: 236, 236, 236;
+}
+
+.gin--dark-mode[data-gin-accent=blue],
+.gin--dark-mode [data-gin-accent=blue] {
+  --gin-color-primary-rgb: 144, 174, 239;
+  --gin-color-primary-light-rgb: 62, 68, 84;
+  --gin-color-primary-hover: #9bb6f1;
+  --gin-color-primary-active: #a1baf1;
+  --gin-bg-header: #373b45;
+}
+
+.gin--dark-mode[data-gin-accent=claro_blue],
+.gin--dark-mode [data-gin-accent=claro_blue] {
+  --gin-color-primary-rgb: 115, 145, 216;
+  --gin-color-primary-light-rgb: 57, 63, 79;
+  --gin-color-primary-hover: #819cdc;
+  --gin-color-primary-active: #88a2de;
+  --gin-bg-header: #333742;
+}
+
+.gin--dark-mode[data-gin-accent=light_blue],
+.gin--dark-mode [data-gin-accent=light_blue] {
+  --gin-color-primary-rgb: 130, 191, 232;
+  --gin-color-primary-light-rgb: 60, 72, 82;
+  --gin-color-primary-hover: #8fc5ea;
+  --gin-color-primary-active: #95c9eb;
+  --gin-bg-header: #353d44;
+}
+
+.gin--dark-mode[data-gin-accent=dark_purple],
+.gin--dark-mode [data-gin-accent=dark_purple] {
+  --gin-color-primary-rgb: 173, 143, 232;
+  --gin-color-primary-light-rgb: 68, 62, 82;
+  --gin-color-primary-hover: #b59aea;
+  --gin-color-primary-active: #b9a0eb;
+  --gin-bg-header: #3a3744;
+}
+
+.gin--dark-mode[data-gin-accent=purple],
+.gin--dark-mode [data-gin-accent=purple] {
+  --gin-color-primary-rgb: 219, 165, 239;
+  --gin-color-primary-light-rgb: 77, 67, 84;
+  --gin-color-primary-hover: #dfaef1;
+  --gin-color-primary-active: #e0b3f1;
+  --gin-bg-header: #403945;
+}
+
+.gin--dark-mode[data-gin-accent=teal],
+.gin--dark-mode [data-gin-accent=teal] {
+  --gin-color-primary-rgb: 0, 234, 208;
+  --gin-color-primary-light-rgb: 34, 80, 78;
+  --gin-color-primary-hover: #1aecd5;
+  --gin-color-primary-active: #26edd7;
+  --gin-bg-header: #254241;
+}
+
+.gin--dark-mode[data-gin-accent=green],
+.gin--dark-mode [data-gin-accent=green] {
+  --gin-color-primary-rgb: 107, 212, 161;
+  --gin-color-primary-light-rgb: 55, 76, 68;
+  --gin-color-primary-hover: #7ad8aa;
+  --gin-color-primary-active: #81daaf;
+  --gin-bg-header: #323f3c;
+}
+
+.gin--dark-mode[data-gin-accent=red],
+.gin--dark-mode [data-gin-accent=red] {
+  --gin-color-primary-rgb: 236, 137, 137;
+  --gin-color-primary-light-rgb: 81, 61, 63;
+  --gin-color-primary-hover: #ee9595;
+  --gin-color-primary-active: #ef9b9b;
+  --gin-bg-header: #423639;
+}
+
+.gin--dark-mode[data-gin-accent=orange],
+.gin--dark-mode [data-gin-accent=orange] {
+  --gin-color-primary-rgb: 247, 149, 118;
+  --gin-color-primary-light-rgb: 83, 63, 60;
+  --gin-color-primary-hover: #f8a084;
+  --gin-color-primary-active: #f8a58b;
+  --gin-bg-header: #443736;
+}
+
+.gin--dark-mode[data-gin-accent=yellow],
+.gin--dark-mode [data-gin-accent=yellow] {
+  --gin-color-primary-rgb: 241, 201, 112;
+  --gin-color-primary-light-rgb: 82, 74, 58;
+  --gin-color-primary-hover: #f2ce7e;
+  --gin-color-primary-active: #f3d185;
+  --gin-bg-header: #433e35;
+}
+
+.gin--dark-mode[data-gin-accent=pink],
+.gin--dark-mode [data-gin-accent=pink] {
+  --gin-color-primary-rgb: 231, 157, 163;
+  --gin-color-primary-light-rgb: 80, 65, 69;
+  --gin-color-primary-hover: #e9a7ac;
+  --gin-color-primary-active: #ebacb1;
+  --gin-bg-header: #42383c;
+}
+
+.gin--dark-mode[data-gin-accent=neutral],
+.gin--dark-mode [data-gin-accent=neutral] {
+  --gin-color-primary-rgb: 255, 255, 255;
+  --gin-color-primary-light-rgb: 85, 85, 87;
+  --gin-color-primary-hover: white;
+  --gin-color-primary-active: white;
+  --gin-bg-header: #454547;
+}
+
+.gin--dark-mode[data-gin-accent=custom],
+.gin--dark-mode [data-gin-accent=custom] {
+  --gin-color-primary-rgb: 255, 255, 255;
+  --gin-color-primary-light-rgb: 85, 85, 87;
+  --gin-color-primary-hover: white;
+  --gin-color-primary-active: white;
+  --gin-bg-header: #454547;
+}
+
+@media (forced-colors: none) {
+  .gin--high-contrast-mode {
+    --gin-bg-app: #d9dbde;
+    --gin-color-text: rgba(0, 0, 0, .8);
+    --gin-color-text-light: rgba(0, 0, 0, .8);
+    --gin-icon-color: rgba(0, 0, 0, .8);
+    --gin-color-focus: rgba(0, 0, 0, .8);
+    --gin-border-color: rgba(0, 0, 0, .8);
+    --gin-border-color-secondary: rgba(0, 0, 0, .6);
+    --gin-border-color-layer: rgba(0, 0, 0, .6);
+    --gin-border-color-layer2: rgba(0, 0, 0, .8);
+    --gin-border-color-table: rgba(0, 0, 0, .8);
+    --gin-border-color-table-header: rgba(0, 0, 0, .8);
+    --gin-border-color-form-element: rgba(0, 0, 0, .8);
+  }
+
+  .gin--dark-mode .gin--high-contrast-mode {
+    --gin-bg-app: #000;
+    --gin-color-text: rgba(255, 255, 255, .8);
+    --gin-color-text-light: rgba(255, 255, 255, .8);
+    --gin-icon-color: rgba(255, 255, 255, .8);
+    --gin-color-focus: rgba(255, 255, 255, .8);
+    --gin-border-color: rgba(255, 255, 255, .8);
+    --gin-border-color-secondary: rgba(255, 255, 255, .6);
+    --gin-border-color-layer: rgba(255, 255, 255, .6);
+    --gin-border-color-layer2: rgba(255, 255, 255, .8);
+    --gin-border-color-table: rgba(255, 255, 255, .8);
+    --gin-border-color-table-header: rgba(255, 255, 255, .8);
+    --gin-border-color-form-element: rgba(255, 255, 255, .8);
+  }
+}
+
+[data-gin-focus=green] {
+  --gin-color-focus: rgba(8, 163, 144, .6);
+}
+
+[data-gin-focus=claro] {
+  --gin-color-focus: rgba(38, 167, 105, .6);
+}
+
+[data-gin-focus=orange] {
+  --gin-color-focus: rgba(236, 124, 87, .6);
+}
+
+[data-gin-focus=dark] {
+  --gin-color-focus: var(--gin-color-focus-neutral-rgb);
+}
+
+[data-gin-focus=accent] {
+  --gin-color-focus: rgba(var(--gin-color-primary-rgb), .6);
+}
+

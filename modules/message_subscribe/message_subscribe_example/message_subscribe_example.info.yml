@@ -1,0 +1,20 @@
+name: Message Subscribe Example
+type: module
+description: "Comprehensive example of Message, Message Notify, and Message Subscribe."
+core_version_requirement: ^10.2 || ^11 || ^12
+package: Message
+dependencies:
+  - message:message
+  - message_ui:message_ui
+  - message_ui:message_notify_ui
+  - message_notify:message_notify
+  - message_subscribe:message_subscribe
+  - message_subscribe:message_subscribe_ui
+  - token:token
+  - drupal:node
+  - drupal:comment
+
+# Information added by Drupal.org packaging script on 2026-01-15
+version: '2.1.0'
+project: 'message_subscribe'
+datestamp: 1768443554

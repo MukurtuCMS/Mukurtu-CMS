@@ -1,0 +1,52 @@
+search_api_solr.solr_cache.*:
+  type: config_entity
+  label: 'Solr Cache Config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    minimum_solr_version:
+      type: string
+      label: 'The minimum version the Solr server'
+    environments:
+      type: sequence
+      sequence:
+        type: string
+    cache:
+      type: mapping
+      mapping:
+        name:
+          type: string
+          label: 'The Solr cache name'
+        class:
+          type: string
+          label: 'The Solr cache class'
+        size:
+          type: integer
+          label: 'The Solr cache size'
+          nullable: true
+        initialSize:
+          type: integer
+          label: 'The initial Solr cache size'
+          nullable: true
+        autowarmCount:
+          type: integer
+          label: 'The autowarm Solr cache size'
+          nullable: true
+        showItems:
+          type: integer
+          label: 'showItems'
+          nullable: true
+        regenerator:
+          type: string
+          label: 'The regenerator class'
+          nullable: true
+    solr_configs:
+      type: mapping
+      nullable: true
+      mapping:
+        query:
+          type: search_api_solr.scalar_values

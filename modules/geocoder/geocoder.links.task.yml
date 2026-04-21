@@ -1,0 +1,9 @@
+geocoder.settings:
+  title: "Configuration"
+  route_name: geocoder.settings
+  base_route: geocoder.settings
+
+entity.geocoder_provider.collection:
+  title: "Providers"
+  route_name: entity.geocoder_provider.collection
+  base_route: geocoder.settings

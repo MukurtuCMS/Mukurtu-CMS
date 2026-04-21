@@ -1,0 +1,171 @@
+.glb-form-wrapper {
+  .cke {
+    .cke_inner,
+    .cke_wysiwyg_frame,
+    .cke_wysiwyg_div {
+      .gin--dark-mode & {
+        background: var(--gin-bg-layer2) !important;
+      }
+    }
+
+    &.cke_chrome {
+      border-color: var(--gin-border-color-form-element) !important;
+      border-radius: $borderDefault !important;
+    }
+
+    .cke_inner {
+      border-radius: $borderDefault !important;
+    }
+
+    .cke_top {
+      border-bottom: 1px solid var(--gin-border-color) !important;
+      border-radius: #{$borderDefault - 1} #{$borderDefault - 1} 0 0 !important;
+      background: var(--gin-bg-layer) !important;
+
+      .gin--dark-mode & {
+        background: var(--gin-bg-layer2) !important;
+      }
+    }
+
+    .cke_bottom {
+      border-radius: 0 0 #{$borderDefault - 1} #{$borderDefault - 1} !important;
+      background: var(--gin-bg-layer3) !important;
+    }
+
+    .cke_contents {
+      padding-right: 8px !important;
+      padding-left: 8px !important;
+    }
+
+    .cke_path_empty:only-child::after {
+      background: transparent !important;
+    }
+
+    .cke_combo {
+      &::after {
+        border-right: 1px solid var(--gin-border-color) !important;
+      }
+    }
+
+    .cke_combo_text {
+      color: var(--gin-color-text) !important;
+    }
+
+    .cke_combo_on a.cke_combo_button,
+    .cke_combo_off a.cke_combo_button:hover,
+    .cke_combo_off a.cke_combo_button:focus,
+    .cke_combo_off a.cke_combo_button:active {
+      border: 1px solid var(--gin-bg-layer2) !important;
+      background: var(--gin-bg-app) !important;
+    }
+
+    a.cke_path_item,
+    span.cke_path_empty {
+      color: var(--gin-color-text-light) !important;
+    }
+
+    a.cke_button {
+      border-radius: 3px !important;
+    }
+
+    a.cke_button_on {
+      background: none !important;
+    }
+
+    a.cke_button_off {
+      &:hover,
+      &:focus,
+      &:active {
+        border: 1px solid var(--gin-border-color-layer2) !important;
+        background: var(--gin-bg-item-hover) !important;
+      }
+    }
+
+    .cke_button {
+      span {
+        .gin--dark-mode & {
+          filter: invert(1) !important;
+        }
+      }
+    }
+
+    &.cke_panel {
+      border: 0 none !important;
+      background-color: var(--gin-bg-app) !important;
+    }
+  }
+
+  .cke.cke_chrome.cke_focus {
+    border-color: transparent !important;
+  }
+
+  .cke.cke_chrome:hover,
+  .cke:hover .cke_contents,
+  .cke:hover .cke_top,
+  .cke:hover .cke_bottom {
+    border-color: var(--gin-color-text) !important;
+
+    .gin--dark-mode & {
+      border-color: var(--gin-border-color-layer2) !important;
+    }
+  }
+
+  .cke:hover .cke_top {
+    &,
+    .gin--dark-mode & {
+      border-bottom-color: var(--gin-border-color) !important;
+    }
+  }
+
+  .cke.cke_chrome.cke_focus:hover,
+  .cke.cke_focus .cke_contents,
+  .cke.cke_focus .cke_top,
+  .cke.cke_focus .cke_bottom,
+  .error + .cke.cke_chrome.cke_focus:hover,
+  .error + .cke.cke_focus .cke_contents,
+  .error + .cke.cke_focus .cke_top,
+  .error + .cke.cke_focus .cke_bottom {
+    border-color: var(--gin-color-text) !important;
+  }
+
+  .cke_top,
+  .cke.cke_chrome.cke_focus:hover .cke_top,
+  .cke.cke_focus .cke_top,
+  .error + .cke.cke_focus .cke_top,
+  .error + .cke.cke_chrome.cke_focus:hover .cke_top {
+    border-bottom: 1px solid var(--gin-border-color) !important;
+  }
+
+  .cke textarea.cke_source {
+    background-color: transparent !important;
+  }
+
+  body .cke_notification_info {
+    padding: 0.5em !important;
+    opacity: 1 !important;
+    border: 0 none !important;
+    border-radius: $borderDefault !important;
+    background: var(--gin-bg-layer4) !important;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.15),
+      20px 20px 40px rgba(0, 0, 0, 0.12) !important;
+
+    .cke_notification_message {
+      color: var(--gin-color-text) !important;
+    }
+
+    .cke_notification_close {
+      top: 4px !important;
+      right: 4px !important;
+      background: var(--gin-color-text) !important;
+      mask-image: icon("close") !important;
+      mask-position: center center !important;
+      mask-repeat: no-repeat !important;
+      mask-size: 12px 12px !important;
+    }
+  }
+
+  .filter-tips {
+    color: var(--gin-color-text-light) !important;
+  }
+}

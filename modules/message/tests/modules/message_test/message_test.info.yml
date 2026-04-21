@@ -1,0 +1,12 @@
+name: 'Message test'
+type: module
+description: 'Support module for message testing.'
+package: Testing
+dependencies:
+  - drupal:views
+  - message:message
+
+# Information added by Drupal.org packaging script on 2025-02-16
+version: '8.x-1.8'
+project: 'message'
+datestamp: 1739744269

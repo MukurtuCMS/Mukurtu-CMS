@@ -1,0 +1,23 @@
+uuid: 59a9c32d-d54a-4406-82f7-342860e55a76
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.message.field_published
+    - message.template.publish_node
+id: message.publish_node.field_published
+field_name: field_published
+entity_type: message
+bundle: publish_node
+label: Published
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Published
+  off_label: Unpublished
+field_type: boolean

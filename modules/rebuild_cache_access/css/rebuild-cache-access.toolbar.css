@@ -1,0 +1,42 @@
+/**
+ * @file
+ * Styling for rebuild-cache-access toolbar module.
+ */
+
+.toolbar .toolbar-tray-vertical .edit-rebuild-cache-access-toolbar {
+  padding: 1em;
+  text-align: right; /* LTR */
+}
+
+[dir="rtl"] .toolbar .toolbar-tray-vertical .edit-rebuild-cache-access-toolbar {
+  text-align: left;
+}
+
+.toolbar .toolbar-tray-horizontal .edit-rebuild-cache-access-toolbar {
+  float: right; /* LTR */
+}
+
+[dir="rtl"] .toolbar .toolbar-tray-horizontal .edit-rebuild-cache-access-toolbar {
+  float: left;
+}
+
+.toolbar .toolbar-tray-horizontal .toolbar-menu {
+  float: left; /* LTR */
+}
+
+[dir="rtl"] .toolbar .toolbar-tray-horizontal .toolbar-menu {
+  float: right;
+}
+
+.toolbar .toolbar-bar .toolbar-icon-rebuild-cache-access::before {
+  background-image: url(../icons/recycle.svg);
+}
+
+.toolbar-bar .toolbar-icon-rebuild-cache-access:active::before,
+.toolbar-bar .toolbar-icon-rebuild-cache-access.is-active::before {
+  background-image: url(../icons/recycle.svg);
+}
+
+.toolbar-horizontal .toolbar-horizontal-item-hidden {
+  display: none;
+}

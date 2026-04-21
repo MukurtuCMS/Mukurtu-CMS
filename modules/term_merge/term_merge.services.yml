@@ -1,0 +1,9 @@
+services:
+  term_merge.term_merger:
+    class: Drupal\term_merge\TermMerger
+    arguments: ['@entity_type.manager', '@term_reference_change.migrator', '@event_dispatcher']
+
+  term_merge.access_checker:
+    class: Drupal\term_merge\Access\MergeAccess
+    tags:
+      - { name: access_check, applies_to: _term_merge_access_check }

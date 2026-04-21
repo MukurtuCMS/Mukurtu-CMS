@@ -1,0 +1,19 @@
+gin_lb.settings:
+  type: config_object
+  label: 'Gin Layout Builder settings'
+  mapping:
+    toastify_loading:
+      type: string
+      label: 'Define how to load Toastify.'
+    enable_preview_regions:
+      type: boolean
+      label: 'Enable regions preview by default.'
+    hide_discard_button:
+      type: boolean
+      label: 'Hide "discard changes" button.'
+    hide_revert_button:
+      type: boolean
+      label: 'Hide "revert" button.'
+    save_behavior:
+      type: string
+      label: 'Stay on edit or forward to entity view.'

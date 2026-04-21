@@ -1,0 +1,5 @@
+geolocation_baidu.settings:
+  route_name: geolocation_baidu.settings
+  title: 'Baidu Maps settings'
+  parent: system.admin_config_services
+  description: 'Configure Baidu Maps settings.'

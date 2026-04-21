@@ -1,0 +1,22 @@
+services:
+  access_check.search_api_solr_admin:
+    class: Drupal\search_api_solr_admin\Access\SolrAdminAccessCheck
+    arguments: ['@current_user']
+    tags:
+      - { name: access_check, applies_to: _search_api_solr_admin_access_check }
+
+  access_check.search_api_solr_admin_cloud:
+    class: Drupal\search_api_solr_admin\Access\SolrAdminCloudAccessCheck
+    arguments: ['@current_user']
+    tags:
+      - { name: access_check, applies_to: _search_api_solr_admin_cloud_access_check }
+
+  access_check.search_api_solr_admin_trusted_context_supported:
+    class: Drupal\search_api_solr_admin\Access\SolrAdminTrustedContextSupportedAccessCheck
+    arguments: ['@current_user']
+    tags:
+      - { name: access_check, applies_to: _search_api_solr_admin_trusted_context_supported_access_check }
+
+  search_api_solr_admin.command_helper:
+    class: Drupal\search_api_solr_admin\Utility\SolrAdminCommandHelper
+    arguments: ['@entity_type.manager', '@module_handler', '@event_dispatcher', '@search_api_solr.configset_controller', '@file_system', '@messenger']

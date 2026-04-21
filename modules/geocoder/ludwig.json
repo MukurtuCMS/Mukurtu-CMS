@@ -1,0 +1,40 @@
+{
+    "require": {
+        "davedevelopment/stiphle": {
+            "version": "0.9.4",
+            "url": "https://github.com/davedevelopment/stiphle/archive/0.9.4.zip"
+        },
+        "willdurand/geocoder": {
+            "version": "4.6.0",
+            "url": "https://github.com/geocoder-php/php-common/archive/4.6.0.zip"
+        },
+        "clue/stream-filter": {
+            "version": "v1.6.0",
+            "url": "https://github.com/clue/stream-filter/archive/v1.6.0.zip"
+        },
+        "php-http/message-factory": {
+            "version": "1.1.0",
+            "url": "https://github.com/php-http/message-factory/archive/1.1.0.zip"
+        },
+        "php-http/message": {
+            "version": "1.14.0",
+            "url": "https://github.com/php-http/message/archive/1.14.0.zip"
+        },
+        "psr/http-client": {
+            "version": "1.0.2",
+            "url": "https://github.com/php-fig/http-client/archive/1.0.2.zip"
+        },
+        "php-http/promise": {
+            "version": "1.1.0",
+            "url": "https://github.com/php-http/promise/archive/1.1.0.zip"
+        },
+        "php-http/httplug": {
+            "version": "2.4.0",
+            "url": "https://github.com/php-http/httplug/archive/2.4.0.zip"
+        },
+        "php-http/guzzle7-adapter": {
+            "version": "v1.0.0",
+            "url": "https://github.com/php-http/guzzle7-adapter/archive/refs/tags/1.0.0.zip"
+        }
+    }
+}

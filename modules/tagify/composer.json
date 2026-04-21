@@ -1,0 +1,25 @@
+{
+    "name": "drupal/tagify",
+    "description": "Integration with the Tagify JavaScript library.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://drupal.org/project/tagify",
+    "authors": [
+        {
+            "name": "David Galeano",
+            "homepage": "https://www.drupal.org/u/gxleano"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/tagify",
+        "source": "https://git.drupalcode.org/project/tagify"
+    },
+    "require": {
+        "drupal/core": "^8.8 || ^9 || ^10 || ^11"
+    },
+    "require-dev": {
+        "drupal/better_exposed_filters": "^7.0",
+        "drupal/facets": "^2.0",
+        "drupal/search_api": "^1.31"
+    }
+}

@@ -1,0 +1,15 @@
+name: 'Search API Solr Log'
+type: module
+description: 'Logs system events using Solr.'
+core_version_requirement: ^10.2 || ^11.0
+package: 'search_api'
+configure: 'search_api_solr_log.settings'
+dependencies:
+  - facets:facets_exposed_filters
+  - search_api_solr:search_api_solr
+  - views:views
+
+# Information added by Drupal.org packaging script on 2025-04-23
+version: '4.3.10'
+project: 'search_api_solr'
+datestamp: 1745426381

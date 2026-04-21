@@ -1,0 +1,7 @@
+services:
+  search_api_solr_admin.commands:
+    class: Drupal\search_api_solr_admin\Commands\SearchApiSolrAdminCommands
+    arguments:
+      - '@search_api_solr_admin.command_helper'
+    tags:
+      - { name: drush.command }

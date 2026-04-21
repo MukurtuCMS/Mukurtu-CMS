@@ -1,0 +1,5 @@
+search_api_solr_log.clear_logs:
+  route_name: 'search_api_solr_log.clear_logs'
+  title: 'Clear'
+  appears_on:
+    - view.search_api_solr_log.overview

@@ -1,0 +1,53 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the DB Search Defaults module.
+ */
+
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
+use Drupal\search_api\IndexListBuilder;
+
+/**
+ * Implements hook_requirements().
+ */
+function search_api_db_defaults_requirements($phase) {
+  $requirements = [];
+
+  if ($phase == 'install') {
+    // In case this is installed at the same time as the Search API module
+    // itself, the class autoloader will not be able to find the
+    // \Drupal\search_api\IndexListBuilder class on its own. Load it manually.
+    if (!class_exists(IndexListBuilder::class)) {
+      $search_api_path = \Drupal::service('extension.list.module')->getPath('search_api');
+      require_once $search_api_path . '/src/IndexListBuilder.php';
+    }
+
+    $severity_error = DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.2',
+      fn () => RequirementSeverity::Error,
+      fn () => REQUIREMENT_ERROR,
+    );
+    $errors = IndexListBuilder::checkDefaultsModuleCanBeInstalled();
+    foreach ($errors as $type => $error) {
+      $requirements["search_api_db_defaults:$type"] = [
+        'severity' => $severity_error,
+        'description' => $error,
+      ];
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ */
+function search_api_db_defaults_install() {
+  // Clear the display plugin cache after installation so the plugin for the new
+  // view (display) gets found.
+  \Drupal::service('plugin.manager.search_api.display')
+    ->clearCachedDefinitions();
+}

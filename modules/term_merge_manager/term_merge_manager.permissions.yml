@@ -1,0 +1,41 @@
+add term merge into entities:
+  title: 'Create new Term merge into entities'
+
+administer term merge into entities:
+  title: 'Administer Term merge into entities'
+  description: 'Allow to access the administration form to configure Term merge into entities.'
+  restrict access: true
+
+delete term merge into entities:
+  title: 'Delete Term merge into entities'
+
+edit term merge into entities:
+  title: 'Edit Term merge into entities'
+
+view published term merge into entities:
+  title: 'View published Term merge into entities'
+
+view unpublished term merge into entities:
+  title: 'View unpublished Term merge into entities'
+add term merge from entities:
+  title: 'Create new Term merge from entities'
+
+administer term merge from entities:
+  title: 'Administer Term merge from entities'
+  description: 'Allow to access the administration form to configure Term merge from entities.'
+  restrict access: true
+
+delete term merge from entities:
+  title: 'Delete Term merge from entities'
+
+edit term merge from entities:
+  title: 'Edit Term merge from entities'
+
+view published term merge from entities:
+  title: 'View published Term merge from entities'
+
+view unpublished term merge from entities:
+  title: 'View unpublished Term merge from entities'
+
+view term merged manager messages:
+  title: 'View merged messages'

@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - geolocation_geometry
+    - node
+  enforced:
+    module:
+      - geolocation_geometry_demo
+id: node.field_geolocation_geometry_point
+field_name: field_geolocation_geometry_point
+entity_type: node
+type: geolocation_geometry_point
+settings: {  }
+module: geolocation_geometry
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

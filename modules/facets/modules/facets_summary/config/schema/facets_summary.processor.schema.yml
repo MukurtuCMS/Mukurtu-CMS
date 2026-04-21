@@ -1,0 +1,24 @@
+plugin.plugin_configuration.facets_summary_processor.show_summary:
+  type: mapping
+
+plugin.plugin_configuration.facets_summary_processor.show_count:
+  type: mapping
+
+plugin.plugin_configuration.facets_summary_processor.show_text_when_empty:
+  type: mapping
+  label: 'No results behavior'
+  mapping:
+    text:
+      type: text_format
+      label: 'The text to show when there is no current search'
+
+plugin.plugin_configuration.facets_summary_processor.reset_facets:
+  type: mapping
+  label: 'Reset facets link'
+  mapping:
+    link_text:
+      type: label
+      label: 'The text to show for the reset link.'
+    position:
+      type: string
+      label: 'Position of the reset link.'

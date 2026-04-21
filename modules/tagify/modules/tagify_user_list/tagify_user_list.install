@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * @file
+ * Provides integration with Tagify.
+ */
+
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+
+/**
+ * Set default values for new settings in Tagify User List widgets.
+ */
+function tagify_user_list_update_8001(): string {
+  $changedCount = 0;
+
+  foreach (EntityFormDisplay::loadMultiple() as $formDisplay) {
+    $changed = FALSE;
+
+    foreach ($formDisplay->getComponents() as $fieldName => $component) {
+      if (!isset($component['type']) || $component['type'] !== 'tagify_user_list_entity_reference_autocomplete_widget') {
+        continue;
+      }
+
+      $component['settings']['show_info_label'] = 1;
+      $component['settings']['info_label'] = '[user:mail]';
+
+      $formDisplay->setComponent($fieldName, $component);
+      $changed = TRUE;
+      $changedCount++;
+    }
+
+    if ($changed) {
+      $formDisplay->save();
+    }
+  }
+
+  return sprintf('Updated %d Tagify User List widgets.', $changedCount);
+}
+
+/**
+ * Sets default 'image' and 'image_style' settings for Tagify User List widgets.
+ */
+function tagify_user_list_update_8002(): string {
+  $changedCount = 0;
+
+  foreach (EntityFormDisplay::loadMultiple() as $formDisplay) {
+    $changed = FALSE;
+
+    foreach ($formDisplay->getComponents() as $fieldName => $component) {
+      if (!isset($component['type']) || $component['type'] !== 'tagify_user_list_entity_reference_autocomplete_widget') {
+        continue;
+      }
+      if (isset($component['settings']['image'])) {
+        continue;
+      }
+
+      $component['settings']['image'] = 'user_picture';
+      $component['settings']['image_style'] = 'thumbnail';
+      $formDisplay->setComponent($fieldName, $component);
+      $changed = TRUE;
+      $changedCount++;
+    }
+
+    if ($changed) {
+      $formDisplay->save();
+    }
+  }
+
+  return sprintf('Updated %d Tagify User List widgets.', $changedCount);
+}

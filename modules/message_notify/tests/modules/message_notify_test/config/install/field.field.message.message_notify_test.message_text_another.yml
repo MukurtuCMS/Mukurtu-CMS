@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.message.message_text_another
+    - message.template.message_notify_test
+id: message.message_notify_test.message_text_another
+field_name: message_text_another
+entity_type: message
+bundle: message_notify_test
+label: 'Message text'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

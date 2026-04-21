@@ -1,0 +1,31 @@
+@keyframes glb-throbber {
+  0% {
+    transform: rotateZ(0);
+  }
+  100% {
+    transform: rotateZ(360deg);
+  }
+}
+
+.ajax-progress-throbber,
+.ajax-progress-throbber .throbber {
+  position: relative;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.layout-builder .ajax-progress-throbber::before {
+  position: absolute;
+  top: 0.5em;
+  left: 0.5em;
+  display: block;
+  width: 1.125em;
+  height: 1.125em;
+  content: "";
+  -webkit-animation: glb-throbber 0.75s linear infinite;
+  animation: glb-throbber 0.75s linear infinite;
+  border: 2px solid var(--gin-color-primary);
+  border-right: 2px dotted transparent;
+  border-radius: 50%;
+}

@@ -1,0 +1,387 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - search_api_solr
+    - language
+  config:
+    - language.entity.ru
+id: text_ru_6_0_0
+label: 'Russian Text Field'
+minimum_solr_version: 6.0.0
+custom_code: ''
+field_type_language_code: ru
+domains: {}
+field_type:
+  name: text_ru
+  class: solr.TextField
+  positionIncrementGap: 100
+  storeOffsetsWithPositions: true
+  analyzers:
+    -
+      type: index
+      tokenizer:
+        class: solr.StandardTokenizerFactory
+      filters:
+        -
+          class: solr.WordDelimiterFilterFactory
+          catenateNumbers: 0
+          generateNumberParts: 0
+          protected: protwords_ru.txt
+          splitOnCaseChange: 1
+          generateWordParts: 1
+          preserveOriginal: 1
+          catenateAll: 0
+          catenateWords: 0
+        -
+          class: solr.LowerCaseFilterFactory
+        -
+          class: solr.StopFilterFactory
+          ignoreCase: true
+          words: stopwords_ru.txt
+        -
+          class: solr.SnowballPorterFilterFactory
+          language: Russian
+          protected: protwords_ru.txt
+        -
+          class: solr.RemoveDuplicatesTokenFilterFactory
+    -
+      type: query
+      tokenizer:
+        class: solr.StandardTokenizerFactory
+      filters:
+        -
+          class: solr.WordDelimiterFilterFactory
+          catenateNumbers: 0
+          generateNumberParts: 0
+          protected: protwords_ru.txt
+          splitOnCaseChange: 1
+          generateWordParts: 1
+          preserveOriginal: 1
+          catenateAll: 0
+          catenateWords: 0
+        -
+          class: solr.LowerCaseFilterFactory
+        -
+          class: solr.SynonymFilterFactory
+          synonyms: synonyms_ru.txt
+          expand: true
+          ignoreCase: true
+        -
+          class: solr.StopFilterFactory
+          ignoreCase: true
+          words: stopwords_ru.txt
+        -
+          class: solr.SnowballPorterFilterFactory
+          language: Russian
+          protected: protwords_ru.txt
+        -
+          class: solr.RemoveDuplicatesTokenFilterFactory
+unstemmed_field_type:
+  name: text_unstemmed_ru
+  class: solr.TextField
+  positionIncrementGap: 100
+  storeOffsetsWithPositions: true
+  analyzers:
+    -
+      type: index
+      tokenizer:
+        class: solr.StandardTokenizerFactory
+      filters:
+        -
+          class: solr.WordDelimiterFilterFactory
+          catenateNumbers: 0
+          generateNumberParts: 0
+          protected: protwords_ru.txt
+          splitOnCaseChange: 1
+          generateWordParts: 1
+          preserveOriginal: 1
+          catenateAll: 0
+          catenateWords: 0
+        -
+          class: solr.LowerCaseFilterFactory
+        -
+          class: solr.StopFilterFactory
+          ignoreCase: true
+          words: stopwords_ru.txt
+        -
+          class: solr.RemoveDuplicatesTokenFilterFactory
+    -
+      type: query
+      tokenizer:
+        class: solr.StandardTokenizerFactory
+      filters:
+        -
+          class: solr.WordDelimiterFilterFactory
+          catenateNumbers: 0
+          generateNumberParts: 0
+          protected: protwords_ru.txt
+          splitOnCaseChange: 1
+          generateWordParts: 1
+          preserveOriginal: 1
+          catenateAll: 0
+          catenateWords: 0
+        -
+          class: solr.LowerCaseFilterFactory
+        -
+          class: solr.SynonymFilterFactory
+          synonyms: synonyms_ru.txt
+          expand: true
+          ignoreCase: true
+        -
+          class: solr.StopFilterFactory
+          ignoreCase: true
+          words: stopwords_ru.txt
+        -
+          class: solr.RemoveDuplicatesTokenFilterFactory
+collated_field_type:
+  name: collated_ru
+  class: solr.ICUCollationField
+  locale: ru
+  strength: primary
+  caseLevel: false
+solr_configs:
+  searchComponents:
+    -
+      name: spellcheck
+      class: solr.SpellCheckComponent
+      lst:
+        -
+          name: spellchecker
+          str:
+            -
+              name: name
+              VALUE: ru
+            -
+              name: field
+              VALUE: spellcheck_ru
+            -
+              name: classname
+              VALUE: solr.DirectSolrSpellChecker
+            -
+              name: distanceMeasure
+              VALUE: internal
+            -
+              name: accuracy
+              VALUE: '0.5'
+            -
+              name: maxEdits
+              VALUE: '2'
+            -
+              name: minPrefix
+              VALUE: '1'
+            -
+              name: maxInspections
+              VALUE: '5'
+            -
+              name: minQueryLength
+              VALUE: '4'
+            -
+              name: maxQueryFrequency
+              VALUE: '0.01'
+            -
+              name: thresholdTokenFrequency
+              VALUE: '.01'
+            -
+              name: onlyMorePopular
+              VALUE: 'true'
+    -
+      name: suggest
+      class: solr.SuggestComponent
+      lst:
+        -
+          name: suggester
+          str:
+            -
+              name: name
+              VALUE: ru
+            -
+              name: indexPath
+              VALUE: ./ru
+            -
+              name: lookupImpl
+              VALUE: AnalyzingInfixLookupFactory
+            -
+              name: dictionaryImpl
+              VALUE: DocumentDictionaryFactory
+            -
+              name: field
+              VALUE: twm_suggest
+            -
+              name: suggestAnalyzerFieldType
+              VALUE: text_ru
+            -
+              name: contextField
+              VALUE: sm_context_tags
+            -
+              name: buildOnCommit
+              VALUE: 'false'
+            -
+              name: buildOnStartup
+              VALUE: 'false'
+text_files:
+  stopwords: |
+    и
+    в
+    во
+    не
+    что
+    он
+    на
+    я
+    с
+    со
+    как
+    а
+    то
+    все
+    она
+    так
+    его
+    но
+    да
+    ты
+    к
+    у
+    же
+    вы
+    за
+    бы
+    по
+    только
+    ее
+    мне
+    было
+    вот
+    от
+    меня
+    еще
+    нет
+    о
+    из
+    ему
+    теперь
+    когда
+    даже
+    ну
+    вдруг
+    ли
+    если
+    уже
+    или
+    ни
+    быть
+    был
+    него
+    до
+    вас
+    нибудь
+    опять
+    уж
+    вам
+    сказал
+    ведь
+    там
+    потом
+    себя
+    ничего
+    ей
+    может
+    они
+    тут
+    где
+    есть
+    надо
+    ней
+    для
+    мы
+    тебя
+    их
+    чем
+    была
+    сам
+    чтоб
+    без
+    будто
+    человек
+    чего
+    раз
+    тоже
+    себе
+    под
+    жизнь
+    будет
+    ж
+    тогда
+    кто
+    этот
+    говорил
+    того
+    потому
+    этого
+    какой
+    совсем
+    ним
+    здесь
+    этом
+    один
+    почти
+    мой
+    тем
+    чтобы
+    нее
+    кажется
+    сейчас
+    были
+    куда
+    зачем
+    сказать
+    всех
+    никогда
+    сегодня
+    можно
+    при
+    наконец
+    два
+    об
+    другой
+    хоть
+    после
+    над
+    больше
+    тот
+    через
+    эти
+    нас
+    про
+    всего
+    них
+    какая
+    много
+    разве
+    сказала
+    три
+    эту
+    моя
+    впрочем
+    хорошо
+    свою
+    этой
+    перед
+    иногда
+    лучше
+    чуть
+    том
+    нельзя
+    такой
+    им
+    более
+    всегда
+    конечно
+    всю
+    между
+  synonyms: |
+    drupal, durpal
+  nouns: |
+  protwords: |
+  accents: |

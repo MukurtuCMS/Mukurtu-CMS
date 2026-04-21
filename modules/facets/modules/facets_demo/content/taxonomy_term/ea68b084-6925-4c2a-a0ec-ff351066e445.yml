@@ -1,0 +1,28 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: ea68b084-6925-4c2a-a0ec-ff351066e445
+  bundle: genres
+  default_langcode: en
+  depends:
+    2ff12607-1ab0-47a2-b4a5-558ff0ec81be: taxonomy_term
+default:
+  status:
+    -
+      value: true
+  name:
+    -
+      value: Cyberpunk
+  weight:
+    -
+      value: 0
+  parent:
+    -
+      entity: 2ff12607-1ab0-47a2-b4a5-558ff0ec81be
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en

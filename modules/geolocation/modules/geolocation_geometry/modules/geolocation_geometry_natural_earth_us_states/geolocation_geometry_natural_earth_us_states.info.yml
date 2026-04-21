@@ -1,0 +1,12 @@
+name: Geolocation - Geometry Data - Natural Earth - US States
+type: module
+description: US States - Import data from http://www.naturalearthdata.com/
+core_version_requirement: ^10.3 || ^11
+package: Geolocation
+dependencies:
+  - geolocation_geometry_data
+
+# Information added by Drupal.org packaging script on 2024-10-20
+version: '8.x-3.14'
+project: 'geolocation'
+datestamp: 1729420967

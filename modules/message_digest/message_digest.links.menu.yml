@@ -1,0 +1,5 @@
+message_digest.intervals:
+  title: 'Message digest intervals'
+  description: 'Manage digest intervals'
+  parent: message.main_settings
+  route_name: entity.message_digest_interval.collection

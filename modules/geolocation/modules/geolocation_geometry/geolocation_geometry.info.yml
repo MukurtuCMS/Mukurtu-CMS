@@ -1,0 +1,12 @@
+name: Geolocation - Geometry
+type: module
+description: Provide geometry based fields and integration
+core_version_requirement: ^10.3 || ^11
+package: Geolocation
+dependencies:
+  - geolocation
+
+# Information added by Drupal.org packaging script on 2024-10-20
+version: '8.x-3.14'
+project: 'geolocation'
+datestamp: 1729420967

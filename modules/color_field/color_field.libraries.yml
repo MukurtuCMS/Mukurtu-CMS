@@ -1,0 +1,64 @@
+color-field-widget-box:
+  remote: https://github.com/targoo/color_field_widget_box
+  version: 1.0.0
+  js:
+    js/color_field_widget_box.js: {}
+    js/color_field_widget_box.jquery.js: {}
+  css:
+    component:
+      css/color_field_widget_box.css: {}
+  license:
+    name: MIT
+    url: https://github.com/targoo/color_field_widget_box/LICENSE-MIT
+    gpl-compatible: true
+  dependencies:
+    - core/jquery
+    - core/drupalSettings
+    - core/once
+
+color-field-widget-spectrum:
+  remote: https://github.com/bgrins/spectrum
+  version: 1.6.0
+  js:
+    /libraries/spectrum/spectrum.js: {}
+    js/color_field_widget_spectrum.jquery.js: {}
+  css:
+    component:
+      /libraries/spectrum/spectrum.css: {}
+      css/color_field_widget_spectrum.css: {}
+  license:
+    name: MIT
+    url: https://github.com/bgrins/spectrum/blob/master/LICENSE
+    gpl-compatible: true
+  dependencies:
+    - core/jquery
+    - core/drupalSettings
+    - core/once
+
+color-field-widget-grid:
+  remote: https://github.com/recurser/jquery-simple-color
+  version: 1.2.1
+  js:
+    /libraries/jquery-simple-color/jquery.simple-color.min.js: {}
+    js/color_field_widget_grid.jquery.js: {}
+  css:
+    component:
+      css/color_field_widget_grid.css: {}
+  license:
+    name: MIT
+    url: https://github.com/bgrins/spectrum/blob/master/LICENSE
+    gpl-compatible: true
+  dependencies:
+    - core/jquery
+    - core/drupalSettings
+    - core/once
+
+color-field-formatter-swatch:
+  css:
+    component:
+      css/color_field_formatter_swatch.css: {}
+
+color-field-formatter-swatch-options:
+  css:
+    component:
+      css/color_field_formatter_swatch_options.css: {}

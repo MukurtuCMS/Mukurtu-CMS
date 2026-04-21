@@ -1,0 +1,112 @@
+################
+# Includes
+#
+# Additional configuration can be provided through includes.
+# One advantage of include files is that if they are updated upstream, the changes affect all pipelines using that include.
+#
+# Includes can be overridden by re-declaring anything provided in an include, here in gitlab-ci.yml
+# https://docs.gitlab.com/ee/ci/yaml/includes.html#override-included-configuration-values
+################
+
+include:
+  ################
+  # DrupalCI includes:
+  # As long as you include this, any future includes added by the Drupal Association will be accessible to your pipelines automatically.
+  # View these include files at https://git.drupalcode.org/project/gitlab_templates/
+  ################
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+
+################
+# Pipeline configuration variables
+#
+# These are the variables provided to the Run Pipeline form that a user may want to override.
+#
+# Docs at https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.variables.yml
+################
+variables:
+  COMPOSER_ROOT_VERSION: '1.x-dev'
+  _PHPUNIT_CONCURRENT: '1'
+  _CSPELL_FLAGWORDS: please
+  _CSPELL_IGNORE_PATHS: ./phpcs.xml
+  # Use these to test against other versions of Drupal:
+#  OPT_IN_TEST_PREVIOUS_MINOR: '1'
+#  OPT_IN_TEST_PREVIOUS_MAJOR: '1'
+#  OPT_IN_TEST_NEXT_MINOR: '1'
+#  OPT_IN_TEST_NEXT_MAJOR: '1'
+  # Use this to test against the maximum supported PHP version.
+#  OPT_IN_TEST_MAX_PHP: '1'
+  # Use this to test against other database systems.
+#  OPT_IN_TEST_POSTGRES: '1'
+#  OPT_IN_TEST_SQLITE: '1'
+
+# Overrides for the "phpunit" job.
+phpunit:
+  variables:
+    SYMFONY_DEPRECATIONS_HELPER: "ignoreFile=$CI_PROJECT_DIR/.ignored-deprecations.txt"
+
+# Add support for running tests with Postgres.
+.opt-in-postgres-rule: &opt-in-postgres-rule
+  if: '$OPT_IN_TEST_POSTGRES != "1"'
+  when: never
+
+composer (postgres):
+  extends: .composer-base
+  rules:
+    - *opt-in-postgres-rule
+    - when: always
+  variables:
+    _TARGET_DB_VERSION: $CORE_PGSQL_MIN
+    _TARGET_DB_TYPE: $POSTGRESQL
+
+phpunit (postgres):
+  extends: phpunit
+  services:
+    - !reference [ .with-database ]
+    - !reference [ .with-chrome ]
+  rules:
+    - *opt-in-postgres-rule
+    - !reference [ .skip-phpunit-rule ]
+    - !reference [ .phpunit-tests-exist-rule ]
+    - when: on_success
+  needs:
+    - "composer (postgres)"
+  variables:
+    SYMFONY_DEPRECATIONS_HELPER: "disabled"
+    _TARGET_DB_VERSION: $CORE_PGSQL_MIN
+    _TARGET_DB_TYPE: $POSTGRESQL
+
+# Add support for running tests with SQLite.
+.opt-in-sqlite-rule: &opt-in-sqlite-rule
+  if: '$OPT_IN_TEST_SQLITE != "1"'
+  when: never
+
+composer (sqlite):
+  extends: .composer-base
+  rules:
+    - *opt-in-sqlite-rule
+    - when: always
+  variables:
+    _TARGET_DB_VERSION: $CORE_SQLITE_MIN
+    _TARGET_DB_TYPE: $SQLITE
+
+phpunit (sqlite):
+  extends: phpunit
+  services:
+    - !reference [ .with-database ]
+    - !reference [ .with-chrome ]
+  rules:
+    - *opt-in-sqlite-rule
+    - !reference [ .skip-phpunit-rule ]
+    - !reference [ .phpunit-tests-exist-rule ]
+    - when: on_success
+  needs:
+    - "composer (sqlite)"
+  variables:
+    SYMFONY_DEPRECATIONS_HELPER: "disabled"
+    _TARGET_DB_VERSION: $CORE_SQLITE_MIN
+    _TARGET_DB_TYPE: $SQLITE

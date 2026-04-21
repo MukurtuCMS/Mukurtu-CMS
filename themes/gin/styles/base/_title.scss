@@ -1,0 +1,98 @@
+.block-page-title-block {
+  &:last-child {
+    margin-block-end: 0;
+  }
+}
+
+.page-title {
+  font-size: var(--gin-font-size-h1);
+  font-weight: var(--gin-font-weight-bold);
+  line-height: normal;
+  letter-spacing: -.05em;
+  color: var(--gin-color-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-inline-end: .25em;
+  max-width: 90%;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: font-size 0.25s ease;
+  }
+
+  @include mq(large) {
+    .region-sticky--is-sticky & {
+      font-size: var(--gin-font-size-h3);
+    }
+  }
+
+  &__language {
+    display: block;
+    font-size: var(--gin-font-size-xs);
+    font-weight: var(--gin-font-weight-normal);
+    letter-spacing: normal;
+    color: var(--gin-color-text);
+  }
+
+  &--is-translation + .shortcut-action .shortcut-action__icon {
+    inset-block-start: -3px;
+  }
+}
+
+.shortcut-action {
+  position: relative;
+  align-self: center;
+  margin-inline-start: 0;
+  border-radius: var(--gin-border-m);
+
+  &__icon {
+    position: relative;
+    inset-block-start: 3px;
+    background: var(--gin-icon-color);
+    mask-image: icon('shortcut');
+    mask-size: 75% 75%;
+    mask-position: center center;
+    mask-repeat: no-repeat;
+
+    @include mq(large) {
+      inset-block-start: var(--gin-spacing-xxs);
+      mask-size: 85% 85%;
+    }
+
+    .gin--edit-form & {
+      inset-block-start: 3px;
+    }
+  }
+
+  &:hover &__icon {
+    opacity: 1;
+    background: var(--gin-color-primary);
+  }
+
+  &--remove {
+    .shortcut-action__icon {
+      mask-image: icon('shortcut-filled');
+      background: var(--gin-color-primary);
+    }
+
+    &:hover .shortcut-action__icon {
+      opacity: 1;
+      background: var(--gin-color-disabled);
+    }
+  }
+
+  &__message {
+    z-index: 2;
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 100%;
+    min-width: 120px;
+    pointer-events: none;
+    white-space: nowrap;
+    padding: var(--gin-spacing-xs);
+    margin-block-start: calc(var(--gin-spacing-xxs) * -1);
+    color: var(--gin-color-contextual-text);
+    background: var(--gin-color-contextual);
+    border-radius: var(--gin-border-xs);
+  }
+}

@@ -1,0 +1,3 @@
+plugin.plugin_configuration.search_api_solr_connector.basic_auth_test:
+  type: plugin.plugin_configuration.search_api_solr_connector.basic_auth
+  label: 'Search API Solr basic authentication connector settings'

@@ -1,0 +1,13 @@
+name: Geolocation - Google Maps API - Demo
+type: module
+description: Example views and pages for some more common use cases
+core_version_requirement: ^10.3 || ^11
+package: Geolocation
+dependencies:
+  - geolocation:geolocation_demo
+  - geolocation:geolocation_google_maps
+
+# Information added by Drupal.org packaging script on 2024-10-20
+version: '8.x-3.14'
+project: 'geolocation'
+datestamp: 1729420967

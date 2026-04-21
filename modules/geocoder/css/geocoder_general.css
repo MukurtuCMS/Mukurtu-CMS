@@ -1,0 +1,31 @@
+/* line 2, ../sass/geocoder_general.scss */
+table#edit-third-party-settings-geocoder-field-plugins .form-item input.error {
+  outline: solid red thin;
+}
+
+/* line 7, ../sass/geocoder_general.scss */
+table.geocode-plugins-list thead th .options-field-description {
+  text-transform: none;
+  font-size: 0.95em;
+  font-weight: normal;
+}
+/* line 12, ../sass/geocoder_general.scss */
+table.geocode-plugins-list tr {
+  border-bottom-color: lightgray;
+}
+/* line 15, ../sass/geocoder_general.scss */
+table.geocode-plugins-list tr td .form-item {
+  margin: 0 !important;
+}
+/* line 17, ../sass/geocoder_general.scss */
+table.geocode-plugins-list tr td .form-item label {
+  font-weight: normal !important;
+}
+/* line 20, ../sass/geocoder_general.scss */
+table.geocode-plugins-list tr td .form-item input.error {
+  outline: solid red thin;
+}
+/* line 23, ../sass/geocoder_general.scss */
+table.geocode-plugins-list tr td .form-item input[type="checkbox"] {
+  margin: 12px 0;
+}

@@ -1,0 +1,30 @@
+entity.message_digest_interval.collection:
+  path: '/admin/config/message/message-digest'
+  defaults:
+    _entity_list: 'message_digest_interval'
+    _title: 'Digest intervals'
+  requirements:
+    _permission: 'administer message digest'
+entity.message_digest_interval.add_form:
+  path: '/admin/config/message/message-digest/interval/add'
+  defaults:
+    _title: 'Add digest interval'
+    _entity_form: message_digest_interval.add
+  requirements:
+    _entity_create_access: message_digest_interval
+
+entity.message_digest_interval.edit_form:
+  path: '/admin/config/message/message-digest/manage/{message_digest_interval}'
+  defaults:
+    _title: 'Edit digest interval'
+    _entity_form: message_digest_interval.edit
+  requirements:
+    _entity_access: message_digest_interval.update
+
+entity.message_digest_interval.delete_form:
+  path: '/admin/config/message/message-digest/manage/{message_digest_interval}/delete'
+  defaults:
+    _title: 'Delete digest interval'
+    _entity_form: message_digest_interval.delete
+  requirements:
+    _entity_access: message_digest_interval.delete

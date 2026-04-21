@@ -1,0 +1,275 @@
+.ui-dialog:not(.ui-dialog-off-canvas) {
+  max-width: $breakpointWide;
+  border: 0 none !important;
+  border-radius: var(--gin-border-m);
+  background: var(--gin-bg-layer);
+
+  @media (forced-colors: active) {
+    border: 1px solid buttonBorder !important;
+  }
+
+  // Dialog without title
+  .ui-dialog-content:first-of-type {
+    border-start-start-radius: var(--gin-border-m);
+    border-start-end-radius: var(--gin-border-m);
+  }
+
+  // Node actions placement
+  .layout-region-node-actions {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: var(--gin-spacing-m);
+    inset-block-start: auto;
+    inset-inline-end: auto;
+  }
+
+  // Show meta full width
+  .layout-region-node-secondary {
+    width: 100%;
+  }
+
+  // Views exposed form override for dialog
+  .views-exposed-form.views-exposed-form,
+  .views-displays {
+    border: 1px solid var(--gin-border-color-layer);
+  }
+}
+
+@include mq($to: small) {
+  .ui-dialog:not(.ui-dialog-off-canvas) {
+    min-width: 92%;
+    max-width: 92%;
+  }
+}
+
+.ui-dialog {
+  position: absolute;
+  inset-block-start: 0;
+  // Don't migrate to logical CSS
+  // as otherwise it will break
+  // jQuery UI's dialog placement
+  left: 0;
+  font-family: var(--gin-font);
+  outline: none;
+
+  &,
+  &:focus,
+  &:focus:active,
+  &:focus:hover {
+    box-shadow: var(--gin-shadow-l1);
+  }
+
+  .ui-dialog-titlebar {
+    line-height: 1.2;
+    padding: var(--gin-spacing-m) var(--gin-spacing-l);
+    background: $colorDarkAppBackground;
+    border: 0 none;
+    border-radius: var(--gin-border-m) var(--gin-border-m) 0 0;
+    position: relative;
+
+    @media (forced-colors: active) {
+      border-block-end: 1px solid buttonBorder;
+    }
+  }
+
+  .ui-dialog-title {
+    font-size: var(--gin-font-size-l);
+    font-weight: var(--gin-font-weight-normal);
+    color: #fff;
+    width: 100%;
+    padding-inline-end: var(--gin-spacing-xl);
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .ui-dialog-content {
+    color: var(--gin-color-text);
+  }
+
+  .ui-dialog-content:not(:has(+ .ui-widget-content.ui-dialog-buttonpane)) {
+    border-end-start-radius: var(--gin-border-m);
+    border-end-end-radius: var(--gin-border-m);
+  }
+
+  .ui-widget-content.ui-dialog-buttonpane {
+    padding: var(--gin-spacing-s) var(--gin-spacing-l);
+    border-block-start: 1px solid var(--gin-border-color-layer);
+    border-end-start-radius: var(--gin-border-m);
+    border-end-end-radius: var(--gin-border-m);
+    background: var(--gin-bg-app);
+
+    .button {
+      font-family: var(--gin-font);
+      font-size: var(--gin-font-size-s);
+      font-weight: var(--gin-font-weight-semibold);
+      padding-block: calc(var(--gin-spacing-s) - 2px);
+      padding-inline: var(--gin-spacing-m);
+      margin-block: 0;
+      height: auto;
+
+      &:last-of-type {
+        margin-inline-end: 0;
+      }
+    }
+  }
+
+  .ui-widget-content.ui-dialog-buttonpane,
+  [data-drupal-selector*="-remove-form"] {
+    .button.button--danger {
+      border-color: var(--gin-color-danger) !important;
+    }
+  }
+
+  .ui-dialog-buttonset {
+    margin-block-start: 0;
+  }
+
+  .ui-dialog-titlebar-close {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    width: 2rem;
+    height: 2rem;
+    opacity: .8;
+    margin: 0 var(--gin-spacing-m);
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+
+    .ui-icon-closethick {
+      width: 100%;
+      height: 100%;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      margin: 0;
+      transform: none;
+      background: #fff;
+      mask-image: icon('close');
+      mask-size: var(--gin-icon-size-close) var(--gin-icon-size-close);
+      mask-repeat: no-repeat;
+      mask-position: center center;
+
+      @media (forced-colors: active) {
+        background: linktext;
+      }
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .ui-widget-content.ui-dialog-content {
+    padding-inline: var(--gin-spacing-l);
+    background: var(--gin-bg-layer);
+  }
+
+  .gin-layer-wrapper {
+    margin-block-end: var(--gin-spacing-l);
+  }
+
+  .gin-confirm-form {
+    margin-block-start: var(--gin-spacing-m);
+    margin-block-end: var(--gin-spacing-s);
+  }
+
+  &.token-tree-dialog {
+    max-width: none;
+    z-index: 505;
+  }
+}
+
+.erl-overlay,
+.layout-paragraphs-dialog {
+  position: fixed !important;
+  inset-block-start: 50% !important;
+  inset-inline-start: 50% !important;
+  width: calc(100% - var(--gin-spacing-xl)) !important;
+  transform: translate(-50%, -50%);
+
+  @include mq(large) {
+    width: calc(100% - var(--gin-spacing-xxxl)) !important;
+  }
+}
+
+ul.paragraphs-add-dialog-list {
+  margin: var(--gin-spacing-l) 0;
+}
+
+.ui-widget-overlay {
+  opacity: .9;
+  background: var(--gin-bg-layer2);
+}
+
+.views-ui-dialog {
+  .views-offset-bottom {
+    border-block-start: 1px solid var(--gin-border-color);
+
+    @media (forced-colors: active) {
+      border-block-start: none;
+    }
+  }
+}
+
+.ui-widget-content a {
+  color: var(--gin-color-primary);
+}
+
+// Off canvas dialog.
+.ui-widget.ui-dialog.ui-dialog-off-canvas {
+  --gin-offcanvas-active: var(--gin-color-primary);
+  background: #444;
+  border: 0 none;
+  box-shadow: 0 0 48px rgba(0, 0, 0, .075);
+
+  .ui-dialog-titlebar {
+    background: $colorDarkAppBackground;
+    border-radius: 0;
+  }
+
+  .ui-resizable-w {
+    border: 0 none;
+    background-color: transparent;
+  }
+
+  .fieldset {
+    color: var(--gin-color-text);
+  }
+
+  #drupal-off-canvas {
+    .button--primary[type=submit] {
+      background: var(--gin-offcanvas-active);
+    }
+  }
+}
+
+// Scroll
+.ui-dialog .ui-widget-content.ui-dialog-content {
+  overflow: auto;
+}
+
+// Webform Off canvas
+.ui-dialog.webform-off-canvas .ui-widget-content.ui-dialog-content {
+  background: var(--gin-bg-layer);
+}
+
+// Token
+table.treetable {
+  tr.branch {
+    background-color: transparent;
+  }
+}
+
+.ui-dialog .gin-layer-wrapper {
+  margin-block: var(--gin-spacing-l);
+}
+
+// Removes spacing from views dialog
+.views-ui-dialog.views-ui-dialog > .ui-dialog-content {
+  padding: 0;
+}
+
+#drupal-modal .gin-sticky-form-actions.form-actions {
+  display: none;
+}

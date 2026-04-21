@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - entity_test
+id: entity_test_mulrev_changed.search_result
+label: 'Search result'
+targetEntityType: entity_test_mulrev_changed
+cache: true

@@ -1,0 +1,204 @@
+// Unknown
+.upgrade-status-counter__status-icon--not-scanned:before,
+.upgrade-status-summary tr.not-scanned > td.status-info:before {
+  background-image: none;
+  background-color: var(--gin-color-text);
+  mask-image: icon('info');
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: 20px 20px;
+}
+
+// Checked
+.system-status-counter__status-icon--checked:before,
+.admin-dblog .dblog-info .icon,
+.admin-dblog .dblog-notice .icon,
+.system-status-report__status-icon--checked .details-title:before,
+.details .system-status-report__status-icon--checked:before,
+.claro-details .system-status-report__status-icon--checked:before,
+.color-checked .system-status-report__status-title:before,
+.upgrade-status-counter__status-icon--checked:before,
+.upgrade-status-error-list tr.no-known-error > td.status-info:before,
+.upgrade-status-summary tr.no-known-error > td.status-info:before,
+#checked + .claro-details__wrapper--system-status-report .system-status-report__status-title:before {
+  background-image: none;
+  background-color: var(--gin-color-green);
+  mask-image: icon('status');
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: 20px 20px;
+}
+
+// Warning
+.system-status-counter__status-icon--warning:before,
+.admin-dblog .dblog-warning .icon,
+.system-status-report__status-icon--warning .details-title:before,
+.details .system-status-report__status-icon--warning:before,
+.claro-details .system-status-report__status-icon--warning:before,
+.upgrade-status-counter__status-icon--warning:before,
+.upgrade-status-error-list tr.known-warnings > td.status-info:before,
+.upgrade-status-summary tr.known-warnings > td.status-info:before {
+  background-image: none;
+  background-color: var(--gin-color-warning);
+  mask-image: icon('warning');
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: 20px 20px;
+}
+
+// Error
+.system-status-counter__status-icon--error:before,
+.admin-dblog .dblog-error .icon,
+.admin-dblog .dblog-critical .icon,
+.admin-dblog .dblog-alert .icon,
+.admin-dblog .dblog-emergency .icon,
+.system-status-report__status-icon--error .details-title:before,
+.details .system-status-report__status-icon--error:before,
+.claro-details .system-status-report__status-icon--error:before,
+.upgrade-status-counter__status-icon--error:before,
+.upgrade-status-error-list tr.known-errors > td.status-info:before,
+.upgrade-status-summary tr.known-errors > td.status-info:before {
+  background-image: none;
+  background-color: var(--gin-color-danger);
+  mask-image: icon('error');
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: 20px 20px;
+}
+
+.system-status-counter,
+.upgrade-status-counter {
+  height: auto;
+  padding: var(--gin-spacing-m) 0;
+  background: var(--gin-bg-layer);
+  border-radius: var(--gin-border-m);
+
+  &__status-title {
+    padding-inline-start: 0;
+  }
+
+  &__status-icon {
+    background-color: transparent;
+    border-inline-end: 0 none;
+    box-shadow: none;
+
+    &--checked:before,
+    &--warning:before,
+    &--error:before {
+      mask-position: center 16px;
+      mask-size: 32px 32px;
+    }
+  }
+
+  &__title-count {
+    font-weight: var(--gin-font-weight-semibold);
+    color: var(--gin-color-title);
+    text-transform: none;
+  }
+}
+
+.system-status-general-info {
+  &__header {
+    margin-block-end: var(--gin-spacing-xs);
+  }
+
+  &__items {
+    border-block-end: 0 none;
+  }
+
+  &__item {
+    padding: var(--gin-spacing-m);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  &__item-title {
+    font-size: var(--gin-font-size);
+    font-weight: var(--gin-font-weight-semibold);
+    color: var(--gin-color-title);
+  }
+
+  &__sub-item-title {
+    font-weight: var(--gin-font-weight-bold);
+
+    &:after {
+      content: ":\00a0";
+    }
+  }
+
+  &__item-icon {
+    &--d8:before,
+    &--drupal:before {
+      mask-image: icon('drupal');
+    }
+
+    &--clock:before {
+      mask-image: icon('clock');
+    }
+
+    &--server:before {
+      mask-image: icon('server');
+    }
+
+    &--php:before {
+      mask-image: icon('php');
+    }
+
+    &--database:before {
+      mask-image: icon('database');
+    }
+
+    &:before {
+      background-image: none;
+      background-color: var(--gin-color-primary);
+      mask-repeat: no-repeat;
+      mask-position: center center;
+      mask-size: 32px 32px;
+    }
+  }
+
+  &__run-cron {
+    &.button {
+      margin: 0;
+    }
+  }
+}
+
+.cron-description__run-cron {
+  margin-block-start: var(--gin-spacing-m);
+}
+
+.system-status-report {
+  margin-block-start: var(--gin-spacing-l);
+
+  &-counters &-counters__item {
+    border: 1px solid var(--gin-border-color-layer);
+    box-shadow: var(--gin-shadow-l1);
+  }
+
+  &__status-title {
+    font-weight: var(--gin-font-weight-semibold);
+    color: var(--gin-color-title) !important;
+  }
+}
+
+.color-checked .system-status-report__status-title,
+#checked + .claro-details__wrapper--system-status-report .system-status-report__status-title {
+  &:before {
+    content: "";
+    position: absolute;
+    inset-block-start: 1em;
+    inset-inline-start: 10px;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin-inline-end: 10px;
+  }
+}
+
+.system-status-report__status-title .details-title:before,
+.details .system-status-report__status-icon:before,
+.claro-details .system-status-report__status-icon:before {
+  width: 24px;
+  height: 24px;
+}

@@ -1,0 +1,80 @@
+entity.config_pages_type.collection:
+  path: '/admin/structure/config_pages/types'
+  defaults:
+    _entity_list: 'config_pages_type'
+    _title: 'Config Pages Types'
+  requirements:
+    _permission: 'administer config_pages types'
+
+config_pages.add_form:
+  path: '/admin/structure/config_pages/{config_pages_type}/edit'
+  defaults:
+    _controller: '\Drupal\config_pages\Controller\ConfigPagesController::classInit'
+    _title_callback: 'Drupal\config_pages\Controller\ConfigPagesController::getAddFormTitle'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _custom_access: '\Drupal\config_pages\Controller\ConfigPagesController::access'
+
+entity.config_pages_type.delete_form:
+  path: '/admin/structure/config_pages/types/manage/{config_pages_type}/delete'
+  defaults:
+    _entity_form: 'config_pages_type.delete'
+    _title: 'Delete'
+  requirements:
+    _entity_access: 'config_pages_type.delete'
+  options:
+    _admin_route: TRUE
+
+entity.config_pages.canonical:
+  path: '/admin/structure/config_pages/{config_pages}'
+  defaults:
+    _entity_form: 'config_pages.edit'
+    _title: 'Config Pages'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _entity_access: 'config_pages.update'
+
+config_pages.type_add:
+  path: '/admin/structure/config_pages/types/add'
+  defaults:
+    _entity_form: 'config_pages_type.add'
+    _title: 'Add Config Page type'
+  requirements:
+    _permission: 'administer config_pages types'
+
+entity.config_pages_type.edit_form:
+  path: '/admin/structure/config_pages/types/manage/{config_pages_type}'
+  defaults:
+    _entity_form: 'config_pages_type.edit'
+    _title: 'Edit'
+  requirements:
+    _entity_access: 'config_pages_type.update'
+
+entity.config_pages.collection:
+  path: '/admin/structure/config_pages'
+  defaults:
+    _title: 'Config pages library'
+    _entity_list: 'config_pages'
+  requirements:
+    _permission: 'edit config_pages entity+access config_pages overview'
+
+route_callbacks:
+  - '\Drupal\config_pages\Routing\ConfigPagesRoutes::routes'
+
+entity.config_pages.clear_confirmation:
+  path: '/admin/structure/config_pages/{config_pages}/confirmPurge'
+  defaults:
+    _controller: '\Drupal\config_pages\Controller\ConfigPagesController::clearConfirmation'
+    _title: 'Purge all config page values'
+  requirements:
+    _permission: 'access config_pages clear values option'
+
+entity.config_pages.import_confirmation:
+  path: '/admin/structure/config_pages/{config_pages}/confirmImport/{imported_entity_id}'
+  defaults:
+    _controller: '\Drupal\config_pages\Controller\ConfigPagesController::importConfirmation'
+    _title: 'Import config page values'
+  requirements:
+    _permission: 'context import config_pages entity'

@@ -1,0 +1,24 @@
+.glb-canvas-form {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-right: -20px;
+  margin-left: -20px;
+
+  &__settings {
+    position: relative;
+    overflow: auto;
+    flex-grow: 1;
+    padding-right: 21px;
+    padding-left: 20px;
+  }
+
+  &__actions {
+    position: relative;
+    flex-grow: 0;
+    padding-left: 20px;
+    border-top: 1px solid var(--gin-border-color-layer);
+    background: var(--gin-bg-app);
+  }
+}

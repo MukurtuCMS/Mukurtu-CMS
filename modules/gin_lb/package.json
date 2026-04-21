@@ -1,0 +1,96 @@
+{
+  "name": "gin_lb",
+  "version": "1.0.0",
+  "description": "Frontend build task",
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "webpack --progress --mode development --config  webpack.config.dev.js --watch",
+    "build": "webpack -p --progress --mode production --config webpack.config.build.js",
+    "lint": "lint-staged",
+    "test": "jest-ci --coverage ./postcss-glb-classes-generator",
+    "lint-all": "eslint \"src/**/*.js\" --fix",
+    "pre-commit": "lint-staged"
+  },
+  "email": "christian.wiedemann@key-tec.de",
+  "author": "KEY-TEC",
+  "license": "MIT",
+  "homepage": "https://key-tec.de",
+  "keywords": [
+    "drupal",
+    "webpack",
+    "frontend",
+    "boilerplate"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.10.3",
+    "@babel/plugin-syntax-dynamic-import": "7.0.0",
+    "@babel/preset-env": "^7.10.3",
+    "autoprefixer": "^9.8.1",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.1.0",
+    "babel-minify-webpack-plugin": "^0.3.1",
+    "breakpoint-sass": "^2.7.1",
+    "clean-publish": "^2.1.0",
+    "clean-webpack-plugin": "^0.1.19",
+    "copy-webpack-plugin": "^6.0.2",
+    "css-loader": "^1.0.0",
+    "csscomb": "4.2.0",
+    "es6-promise": "^4.1.1",
+    "eslint": "^7.25.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-drupal-bundle": "^1.0.2",
+    "eslint-import-resolver-webpack": "0.10.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.2.1",
+    "expose-loader": "^0.7.5",
+    "file-loader": "^2.0.0",
+    "friendly-errors-webpack-plugin": "^1.7.0",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "husky": "1.1.2",
+    "jest": "^26.6.3",
+    "lint-staged": "7.3.0",
+    "mini-css-extract-plugin": "^0.4.1",
+    "sass": "^1.77.8",
+    "postcss": "^8.2.8",
+    "postcss-loader": "^4.2.0",
+    "sass-loader": "^8.0.0",
+    "simple-git-hooks": "^2.0.2",
+    "svg-inline-loader": "^0.8.0",
+    "svg-spritemap-webpack-plugin": "^3.5.6",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-fix-style-only-entries": "^0.4.0",
+    "webpack-merge": "^4.1.4",
+    "webpack-modernizr-loader": "^4.0.1",
+    "webpack-notifier": "^1.6.0"
+  },
+  "dependencies": {
+    "core-js": "^2.6.11",
+    "mdn-polyfills": "^5.20.0",
+    "modernizr": "^3.11.2",
+    "sass-glob-importer": "^1.0.1",
+    "normalize.css": "^8.0.0",
+    "postcss-selector-parser": "^6.0.4"
+  },
+  "lint-staged": {
+    "*.scss": [
+      "csscomb --tty-mode",
+      "git add"
+    ],
+    "*.js": [
+      "eslint --fix \"{,**,**/**}*.js\"",
+      "git add"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git.drupalcode.org/project/gin_lb"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "> 1%",
+    "ie > 10",
+    "iOS > 9"
+  ]
+}

@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies: {  }
+template: message_notify_test
+label: 'Message Notify Test'
+description: 'Message template for testing purposes.'
+text:
+  -
+    value: "<p>first partial</p>"
+    format: filtered_html
+  -
+    value: "<p>second partial</p>"
+    format: filtered_html
+data:
+  'token options':
+    clear: false
+  purge:
+    override: false
+    enabled: false
+    quota: null
+    days: null

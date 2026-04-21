@@ -1,0 +1,10 @@
+drupal.tagify_facets.tagify-widget:
+  js:
+    js/tagify-widget.js: {}
+  dependencies:
+    - core/jquery
+    - core/once
+    - core/drupal
+    - core/sortable
+    - facets/widget
+    - tagify/tagify

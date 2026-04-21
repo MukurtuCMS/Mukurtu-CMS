@@ -1,0 +1,8 @@
+services:
+  Drupal\token_module_test\Hook\TokenModuleTestHooks:
+    class: Drupal\token_module_test\Hook\TokenModuleTestHooks
+    autowire: true
+
+  Drupal\token_module_test\Hook\TokenModuleTestTokensHooks:
+    class: Drupal\token_module_test\Hook\TokenModuleTestTokensHooks
+    autowire: true

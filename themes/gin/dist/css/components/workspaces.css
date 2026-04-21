@@ -1,0 +1,7 @@
+tr.active-workspace {
+  color: var(--gin-color-primary-active);
+  font-size: var(--gin-font-size);
+  font-weight: var(--gin-font-weight-semibold);
+  background: var(--gin-bg-header);
+}
+

@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * @file
+ * toolbar.theme
+ */
+
+use Drupal\gin\GinSettings;
+use Drupal\gin\GinUserPicture;
+
+/**
+ * Implements hook_preprocess_menu().
+ */
+function gin_preprocess_menu(&$variables) {
+  if (isset($variables['theme_hook_original']) && strpos($variables['theme_hook_original'], 'menu__toolbar__') === 0) {
+    // Check if the admin_toolbar module is installed.
+    foreach ($variables['items'] as $key => $item) {
+      $gin_id = str_replace('.', '-', $key);
+      $variables['items'][$key]['gin_id'] = $gin_id;
+    }
+
+    // Move config & help menu items to end.
+    $to_move = ['system.admin_config', 'help.main'];
+    foreach ($to_move as $id) {
+      $index = array_search($id, array_keys($variables['items']));
+      if (is_numeric($index)) {
+        $variables['items'] += array_splice($variables['items'], $index, 1);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_menu__toolbar__gin().
+ */
+function gin_preprocess_menu__toolbar__gin(&$variables) {
+  // Get theme settings.
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  $logo_path = $settings->getDefault('logo.path');
+  $logo_default = $settings->getDefault('logo.use_default');
+  $variables['icon_default'] = $logo_default;
+
+  if (!$logo_default) {
+    $variables['icon_path'] = $logo_path;
+  }
+
+  // Expose Toolbar variant.
+  $variables['toolbar_variant'] = $settings->get('classic_toolbar');
+}
+
+/**
+ * Implements toolbar preprocess.
+ */
+function gin_preprocess_toolbar(&$variables) {
+  // The controller resolver does not support Closures at this time. For now,
+  // we use a wrapper function to load the service with dependencies.
+  // @see https://www.drupal.org/project/drupal/issues/3060638
+  $variables['user_picture'] = [
+    '#lazy_builder' => [
+      GinUserPicture::class . '::build',
+      [],
+    ],
+    '#create_placeholder' => TRUE,
+  ];
+
+  // Check if Navigation module is active.
+  if (_gin_module_is_active('navigation')) {
+    // Attach the new drupal navigation styles.
+    $variables['#attached']['library'][] = 'gin/core_navigation';
+    return;
+  }
+
+  // Expose Toolbar variant.
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  $variables['toolbar_variant'] = $settings->get('classic_toolbar');
+
+  switch ($variables['toolbar_variant']) {
+    case 'classic':
+      // Attach the classic toolbar styles.
+      $variables['#attached']['library'][] = 'gin/gin_classic_toolbar';
+      break;
+
+    case 'horizontal':
+      // Attach the horizontal toolbar styles.
+      $variables['#attached']['library'][] = 'gin/gin_horizontal_toolbar';
+      break;
+
+    case 'new':
+      // Attach the experimental drupal navigation styles.
+      $variables['#attached']['library'][] = 'gin/navigation';
+      break;
+
+    default:
+      // Attach toolbar styles.
+      $variables['#attached']['library'][] = 'gin/gin_toolbar';
+      break;
+  }
+}
+
+/**
+ * Implements toolbar preprocess.
+ */
+function gin_preprocess_toolbar__gin__secondary(&$variables) {
+  // Expose Toolbar variant.
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  $variables['toolbar_variant'] = $settings->get('classic_toolbar');
+
+  if ($variables['toolbar_variant'] !== 'classic' || _gin_module_is_active('navigation')) {
+    // Move Admin Toolbar Search to start.
+    $toolbar_search = array_search('administration_search', array_keys($variables['tabs']));
+    if (is_numeric($toolbar_search)) {
+      foreach ($variables['tabs'] as $key => $item) {
+        if ($key === 'administration_search') {
+          array_unshift($variables['tabs'], $variables['tabs'][$key]);
+          unset($variables['tabs'][$key]);
+        }
+      }
+    }
+  }
+
+  // Move user tab to end.
+  $toolbar_user = array_search('user', array_keys($variables['tabs']));
+  if (is_numeric($toolbar_user)) {
+    foreach ($variables['tabs'] as $key => $item) {
+      if ($key === 'user') {
+        $user_tab = $variables['tabs'][$key];
+        unset($variables['tabs'][$key]);
+        $variables['tabs'][$key] = $user_tab;
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+'execute solr admin task':
+  title: 'Execute Solr admin task'
+  description: 'Access to execute Solr administrative tasks.'
+
+'perform field analysis':
+  title: 'Perform field analysis'
+  description: 'Access to perform Solr field analysis.'

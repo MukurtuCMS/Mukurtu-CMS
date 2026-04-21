@@ -1,0 +1,31 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_subject
+    - field.field.message.create_comment.field_comment_reference
+    - field.field.message.create_comment.field_node_reference
+    - field.field.message.create_comment.field_published
+    - message.template.create_comment
+  module:
+    - layout_builder
+    - user
+third_party_settings:
+  layout_builder:
+    allow_custom: false
+    enabled: false
+id: message.create_comment.mail_subject
+targetEntityType: message
+bundle: create_comment
+mode: mail_subject
+content:
+  partial_0:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_comment_reference: true
+  field_node_reference: true
+  field_published: true
+  partial_1: true

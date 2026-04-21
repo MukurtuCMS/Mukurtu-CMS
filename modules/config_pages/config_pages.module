@@ -1,0 +1,209 @@
+<?php
+
+/**
+ * @file
+ * Module hooks.
+ */
+
+use Drupal\config_pages\Entity\ConfigPages;
+use Drupal\config_pages\Entity\ConfigPagesType;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Get context.
+ *
+ * @param string $type
+ *   Config_page type to get context.
+ *
+ * @return array
+ *   Return current context based on groups.
+ */
+function config_pages_context_get($type) {
+  $context = [];
+
+  $type = ConfigPagesType::load($type);
+
+  if (!$type) {
+    return $context;
+  }
+
+  $context = $type->getContextData();
+
+  return $context;
+}
+
+/**
+ * Helper function.
+ *
+ * @param string $type
+ *   Config page type to load.
+ * @param string $context
+ *   Context which should be used to load entity.
+ *
+ * @return \Drupal\config_pages\Entity\ConfigPages|null
+ *   Returns config page entity.
+ */
+function config_pages_config($type, $context = NULL) {
+  $config_page = ConfigPages::config($type, $context);
+  return $config_page;
+}
+
+/**
+ * Implements hook_help().
+ */
+function config_pages_help($route_name, RouteMatchInterface $route_match) {
+  if ($route_name === 'help.page.config_pages') {
+    $readme_content = file_get_contents(dirname(__FILE__) . '/README.md');
+    if (\Drupal::moduleHandler()->moduleExists('markdown')) {
+      // Use the Markdown filter to render the README.
+      $filter_manager = \Drupal::service('plugin.manager.filter');
+      $markdown_config = \Drupal::configFactory()->get('markdown.settings')->getRawData();
+      $markdown_settings = ['settings' => $markdown_config];
+      $filter = $filter_manager->createInstance('markdown', $markdown_settings);
+
+      return $filter->process($readme_content, 'en');
+    }
+    else {
+      return '<pre>' . $readme_content . '</pre>';
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function config_pages_form_field_storage_config_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  // Config pages is a specific type of entity so we want to remove it from
+  // select.
+  $element = &$form['settings']['target_type'];
+  if (!empty($element['#options'])) {
+    foreach ($element['#options'] as $key => $val) {
+      if (is_array($element['#options'][$key]) && isset($element['#options'][$key]['config_pages'])) {
+        unset($element['#options'][$key]['config_pages']);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function config_pages_theme() {
+  return [
+    'config_pages' => [
+      'render element' => 'elements',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function config_pages_theme_suggestions_config_pages(array $variables) {
+  $suggestions = [];
+
+  $config_page = $variables['elements']['#config_pages'];
+  $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
+
+  $suggestions[] = 'config_pages__' . $sanitized_view_mode;
+  $suggestions[] = 'config_pages__' . $config_page->bundle();
+  $suggestions[] = 'config_pages__' . $config_page->bundle() . '__' . $sanitized_view_mode;
+
+  return $suggestions;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for config_pages templates.
+ *
+ * Default template: config-pages.html.twig.
+ */
+function config_pages_preprocess_config_pages(array &$variables): void {
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $variables['config_pages'] = $variables['elements']['#config_pages'];
+
+  // Helpful $content variable for templates.
+  $variables += ['content' => []];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ */
+function config_pages_menu_links_discovered_alter(&$links) {
+  $config_pages_types = \Drupal::entityTypeManager()->getStorage('config_pages_type')->loadMultiple();
+
+  foreach ($config_pages_types as $page_type) {
+    if (!isset($page_type->menu)) {
+      continue;
+    }
+    $bundle = $page_type->getOriginalId();
+    $menu_path = $page_type->menu['path'];
+    $title = $page_type->label();
+    $parent_route_name = config_pages_find_parent_route_name($menu_path);
+    $description = !empty($page_type->menu['description']) ? $page_type->menu['description'] : '';
+    $weight = !empty($page_type->menu['weight']) ? $page_type->menu['weight'] : 0;
+
+    $links['config_pages.' . $bundle] = [
+      'title' => $title,
+      'description' => $description,
+      'parent' => $parent_route_name,
+      'route_name' => 'config_pages.' . $bundle,
+      'enabled' => TRUE,
+      'weight' => $weight,
+      'provider' => 'config_pages',
+    ];
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function config_pages_theme_suggestions_block(array $variables) {
+  $suggestions = [];
+
+  if ($variables['elements']['#plugin_id'] === 'config_pages_block') {
+    $suggestions[] = $variables['theme_hook_original'] . '__config_pages__' . $variables['elements']['#configuration']['config_page_type'];
+    $suggestions[] = $variables['theme_hook_original'] . '__config_pages__' . $variables['elements']['#configuration']['config_page_type'] . '__' . $variables['elements']['#configuration']['config_page_view_mode'];
+  }
+
+  return $suggestions;
+}
+
+/**
+ * Return parent route name or false.
+ *
+ * @param string $path
+ *   Full path.
+ *
+ * @return string|false
+ *   Route name or false.
+ */
+function config_pages_find_parent_route_name($path) {
+  $parent_path = substr($path, 0, strrpos($path, '/'));
+  return config_pages_get_route_name_from_path($parent_path);
+}
+
+/**
+ * Returns route name or false.
+ *
+ * @param string $path
+ *   Path.
+ *
+ * @return string|false
+ *   Route name or false.
+ */
+function config_pages_get_route_name_from_path($path) {
+  $path_validator = Drupal::service('path.validator');
+  $url_object = $path_validator->getUrlIfValidWithoutAccessCheck($path);
+
+  if ($url_object instanceof Url) {
+    return $url_object->getRouteName();
+  }
+  return FALSE;
+}

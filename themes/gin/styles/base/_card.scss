@@ -1,0 +1,43 @@
+.card {
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--gin-border-color-layer2);
+  border-radius: var(--gin-border-m);
+  box-shadow: none;
+  overflow: hidden;
+
+  .gin--dark-mode & {
+    box-shadow: none;
+  }
+
+  &-list {
+    margin-block-end: var(--gin-spacing-xl);
+  }
+
+  &__image {
+    img {
+      border-radius: var(--gin-border-m) var(--gin-border-m) 0 0;
+
+      @include mq(xsmall) {
+        border-radius: var(--gin-border-m) 0 0 var(--gin-border-m);
+      }
+    }
+  }
+
+  &__content-wrapper {
+    background-color: var(--gin-bg-layer);
+    border-radius: 0 0 var(--gin-border-xs) var(--gin-border-xs);
+
+    @include mq(xsmall) {
+      border-radius: 0 var(--gin-border-xs) var(--gin-border-xs) 0;
+    }
+
+    .gin--dark-mode & {
+      background-color: var(--gin-bg-layer2);
+    }
+  }
+
+  .heading-f {
+    color: var(--gin-color-title);
+  }
+}

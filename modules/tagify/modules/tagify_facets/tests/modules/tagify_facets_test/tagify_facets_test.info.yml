@@ -1,0 +1,17 @@
+name: 'Tagify facets test'
+type: module
+description: 'Support module for Tagify facets tests.'
+package: Testing
+core_version_requirement: ^8.8 || ^9 || ^10 || ^11
+dependencies:
+  - facets:facets
+  - search_api:search_api_db
+  - drupal:entity_test
+  - tagify:tagify_facets
+  - drupal:views
+  - drupal:block
+
+# Information added by Drupal.org packaging script on 2026-02-26
+version: '1.2.50'
+project: 'tagify'
+datestamp: 1772100009

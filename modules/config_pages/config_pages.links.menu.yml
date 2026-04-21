@@ -1,0 +1,19 @@
+entity.config_pages.collection:
+  title: 'Config pages'
+  route_name: entity.config_pages.collection
+  parent: system.admin_structure
+  description: 'Manage config pages.'
+entity.config_pages.collection_tab:
+  title: 'Config pages'
+  route_name: entity.config_pages.collection
+  base_route: entity.config_pages.collection
+  parent: entity.config_pages.collection
+entity.config_pages_type.collection:
+  title: 'Manage Config pages'
+  route_name: entity.config_pages_type.collection
+  parent: entity.config_pages.collection
+config_pages.type_add:
+  title: 'Add Config page'
+  route_name: config_pages.type_add
+  base_route: entity.config_pages.collection
+  parent: entity.config_pages.collection

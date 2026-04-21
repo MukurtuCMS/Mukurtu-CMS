@@ -1,0 +1,5 @@
+rebuild-cache-access-toolbar:
+  version: VERSION
+  css:
+    component:
+      css/rebuild-cache-access.toolbar.css: {}

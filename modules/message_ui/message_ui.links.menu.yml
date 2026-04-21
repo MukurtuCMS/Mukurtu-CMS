@@ -1,0 +1,5 @@
+message_ui.message_multiple_delete_form:
+  title: 'Message delete multiple'
+  description: 'Delete messages instances at once.'
+  parent: 'message.main_settings'
+  route_name: message_ui.message_multiple_delete_form

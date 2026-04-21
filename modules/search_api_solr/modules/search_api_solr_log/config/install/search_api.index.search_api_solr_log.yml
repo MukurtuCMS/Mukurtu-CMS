@@ -1,0 +1,159 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.server.search_api_solr_log_server
+  module:
+    - search_api_solr
+third_party_settings:
+  search_api_solr:
+    finalize: false
+    commit_before_finalize: false
+    commit_after_finalize: false
+    debug_finalize: false
+    highlighter:
+      maxAnalyzedChars: 51200
+      fragmenter: gap
+      usePhraseHighlighter: true
+      highlightMultiTerm: true
+      preserveMulti: false
+      regex:
+        slop: 0.5
+        pattern: blank
+        maxAnalyzedChars: 10000
+      highlight:
+        mergeContiguous: false
+        requireFieldMatch: false
+        snippets: 3
+        fragsize: 0
+    mlt:
+      mintf: 1
+      mindf: 1
+      maxdf: 0
+      maxdfpct: 0
+      minwl: 0
+      maxwl: 0
+      maxqt: 100
+      maxntp: 2000
+      boost: false
+      interestingTerms: none
+    term_modifiers:
+      slop: 3
+      fuzzy: 1
+      fuzzy_analyzer: true
+    advanced:
+      index_prefix: ''
+      collection: ''
+      timezone: ''
+    multilingual:
+      limit_to_content_language: false
+      include_language_independent: true
+      use_language_undefined_as_fallback_language: false
+      specific_languages: {  }
+      use_universal_collation: false
+id: search_api_solr_log
+name: 'Solr Log'
+description: ''
+read_only: true
+field_settings:
+  hostname:
+    label: Hostname
+    datasource_id: solr_document
+    property_path: ss_hostname
+    type: string
+  id:
+    label: Id
+    datasource_id: solr_document
+    property_path: id
+    type: string
+  index_id:
+    label: 'Index ID'
+    datasource_id: solr_document
+    property_path: index_id
+    type: string
+  location:
+    label: Location
+    datasource_id: solr_document
+    property_path: ss_location
+    type: string
+  message:
+    label: Message
+    datasource_id: solr_document
+    property_path: tus_message
+    type: text
+  message_en:
+    label: 'Message English'
+    datasource_id: solr_document
+    property_path: ts_X3b_en_message
+    type: text
+  message_string:
+    label: 'Message String'
+    datasource_id: solr_document
+    property_path: ss_message
+    type: string
+  referer:
+    label: Referer
+    datasource_id: solr_document
+    property_path: ss_referer
+    type: string
+  severity:
+    label: Severity
+    datasource_id: solr_document
+    property_path: its_severity
+    type: integer
+  site_hash:
+    label: 'Site Hash'
+    datasource_id: solr_document
+    property_path: ss_site_hash
+    type: string
+  tags:
+    label: Tags
+    datasource_id: solr_document
+    property_path: sm_tags
+    type: string
+  timestamp:
+    label: Timestamp
+    datasource_id: solr_document
+    property_path: timestamp
+    type: date
+  type:
+    label: Type
+    datasource_id: solr_document
+    property_path: ss_type
+    type: string
+  uid:
+    label: 'User ID'
+    datasource_id: solr_document
+    property_path: its_uid
+    type: integer
+  variables:
+    label: Variables
+    datasource_id: solr_document
+    property_path: zs_variables
+    type: string
+datasource_settings:
+  solr_document:
+    id_field: id
+    request_handler: ''
+    default_query: '*:*'
+    label_field: ''
+    language_field: ''
+    url_field: ''
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  auto_aggregated_fulltext_field: {  }
+  custom_value: {  }
+  entity_type: {  }
+  language_with_fallback: {  }
+  rendered_item: {  }
+  solr_date_range: {  }
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  cron_limit: 50
+  delete_on_fail: true
+  index_directly: false
+  track_changes_in_references: false
+server: search_api_solr_log_server

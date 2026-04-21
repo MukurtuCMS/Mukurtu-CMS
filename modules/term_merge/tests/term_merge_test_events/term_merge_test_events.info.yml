@@ -1,0 +1,13 @@
+name: 'Term Merge Test Events'
+type: module
+description: 'Helps to test events triggered in the term_merge module by creating event subscribers.'
+package: Testing
+dependencies:
+  - term_merge:term_merge
+core_version_requirement: ^9
+hidden: true
+
+# Information added by Drupal.org packaging script on 2025-07-09
+version: '2.0.0'
+project: 'term_merge'
+datestamp: 1752105251

@@ -1,0 +1,54 @@
+{
+    "name": "drupal/leaflet",
+    "description": "Integration with the Leaflet map scripting library.",
+    "type": "drupal-module",
+    "homepage": "https://www.drupal.org/project/leaflet",
+    "authors": [
+        {
+            "name": "Italo Mairo",
+            "homepage": "https://www.drupal.org/u/itamair",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Peter Vanhee (pvhee)",
+            "homepage": "https://www.drupal.org/u/pvhee",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Rik de Boer (RdeBoer)",
+            "homepage": "https://www.drupal.org/u/rdeboer",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Gabriel Carleton-Barnes (gcb)",
+            "homepage": "https://www.drupal.org/u/gcb",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Lev Tsypin (levelos)",
+            "homepage": "https://www.drupal.org/u/levelos",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Sean Larkin (seanberto)",
+            "homepage": "https://www.drupal.org/u/seanberto",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/leaflet",
+        "source": "https://git.drupalcode.org/project/leaflet"
+    },
+    "license": "GPL-2.0+",
+    "minimum-stability": "dev",
+    "repositories": {
+        "drupal": {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    },
+    "require": {
+        "drupal/core": "^10.3 || ^11",
+        "drupal/geofield": "^1.31 || ^10.3"
+    }
+}

@@ -1,0 +1,6 @@
+tagify_user_list.entity_autocomplete:
+  path: '/tagify_user_list_autocomplete/{target_type}/{selection_handler}/{selection_settings_key}'
+  defaults:
+    _controller: '\Drupal\tagify_user_list\Controller\TagifyUserListEntityAutocompleteController::handleAutocomplete'
+  requirements:
+    _access: 'TRUE'

@@ -1,0 +1,57 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - entity_test
+    - search_api
+  config:
+    - field.storage.entity_test_mulrevpub.field_tagify
+    - search_api.server.database
+id: test_entity
+name: 'Test entity'
+description: ''
+read_only: false
+field_settings:
+  field_tagify:
+    label: Tags
+    datasource_id: 'entity:entity_test_mulrevpub'
+    property_path: field_tagify
+    type: integer
+    dependencies:
+      config:
+        - field.storage.entity_test_mulrevpub.field_tagify
+  name:
+    label: Name
+    datasource_id: 'entity:entity_test_mulrevpub'
+    property_path: name
+    type: string
+    dependencies:
+      module:
+        - entity_test
+  status:
+    label: Published
+    datasource_id: 'entity:entity_test_mulrevpub'
+    property_path: status
+    type: boolean
+    dependencies:
+      module:
+        - entity_test
+datasource_settings:
+  'entity:entity_test_mulrevpub':
+    bundles:
+      default: true
+      selected: {}
+    languages:
+      default: true
+      selected: {}
+processor_settings:
+  add_url: {}
+  aggregated_field: {}
+  rendered_item: {}
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  index_directly: true
+  cron_limit: 50
+server: database

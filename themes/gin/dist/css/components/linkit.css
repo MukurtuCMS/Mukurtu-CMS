@@ -1,0 +1,5 @@
+.linkit-matcher-add-form .form-type--boolean .form-boolean,
+.linkit-attribute-add-form .form-type--boolean .form-boolean {
+  inset-block-start: var(--gin-spacing-xxs);
+}
+

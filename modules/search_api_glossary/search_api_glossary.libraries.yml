@@ -1,0 +1,5 @@
+drupal.search_api_glossary.facet_css:
+  version: VERSION
+  css:
+    theme:
+      css/search_api_glossary.facet.css: {}

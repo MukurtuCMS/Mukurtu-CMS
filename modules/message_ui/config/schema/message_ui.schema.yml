@@ -1,0 +1,42 @@
+# Schema for the configuration files of the message_ui module.
+
+message_ui.settings:
+  type: config_object
+  label: 'Field settings'
+  mapping:
+    update_tokens:
+      type: message_ui.update_tokens
+    show_preview:
+      type: boolean
+      label: 'Show Preview'
+    anonymous:
+      type: string
+      label: 'Anonymous'
+
+message_ui.update_tokens:
+  type: mapping
+  mapping:
+    update_tokens:
+      type: boolean
+      label: 'Update tokens'
+    how_to_act:
+      type: string
+      label: 'How to act'
+    how_to_update:
+      type: string
+      label: 'How to update'
+    number_items:
+      type: integer
+      label: 'Number Items'
+
+action.configuration.message_save_action:
+  type: action_configuration_default
+  label: 'Save message configuration'
+
+views.field.message_ui_contextual_links:
+  type: views_field
+  label: 'Provide contextual links for the message in the message view'
+  mapping:
+    text:
+      type: label
+      label: 'Text to display'

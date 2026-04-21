@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.shark
+  module:
+    - user
+id: node.shark.default
+targetEntityType: node
+bundle: shark
+mode: default
+content: {}
+hidden:
+  links: true

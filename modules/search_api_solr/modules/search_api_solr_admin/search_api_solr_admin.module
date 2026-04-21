@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * Solr Admin.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\search_api_solr\SolrBackendInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function search_api_solr_admin_theme($existing, $type, $theme, $path) {
+  return [
+    'solr_field_analysis' => [
+      'variables' => [
+        'data' => [],
+        'title' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function search_api_solr_admin_form_search_api_server_status_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\search_api\ServerInterface $server */
+  $server = $form['#server'];
+  $backend = $server->getBackend();
+  if ($backend instanceof SolrBackendInterface && $backend->getSolrConnector()->isCloud()) {
+    $form['actions']['delete_collection'] = [
+      '#type' => 'submit',
+      '#value' => t('Delete collection'),
+      '#button_type' => 'danger',
+      '#submit' => ['search_api_solr_admin_form_search_api_server_status_submit_delete_collection'],
+    ];
+  }
+}
+
+/**
+ * Submit handler.
+ *
+ * @param array $form
+ *   The form array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ *
+ * @see search_api_solr_admin_form_search_api_server_status_alter()
+ */
+function search_api_solr_admin_form_search_api_server_status_submit_delete_collection(array &$form, FormStateInterface $form_state) {
+  // Redirect to the "delete collection" form.
+  /** @var \Drupal\search_api\ServerInterface $server */
+  $server = $form['#server'];
+  $form_state->setRedirect('search_api_solr_admin.solr_delete_collection_form', ['search_api_server' => $server->id()]);
+}

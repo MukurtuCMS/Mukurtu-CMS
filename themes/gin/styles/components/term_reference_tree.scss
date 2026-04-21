@@ -1,0 +1,11 @@
+// Add some vertical margin between radio buttons
+.item-list .field--widget-term-reference-tree li,
+.block .field--widget-term-reference-tree li,
+.field--widget-term-reference-tree li {
+  margin-block: var(--gin-spacing-xs);
+}
+
+// Hide unnecessary disabled checkboxes
+.no-term-reference-tree-button {
+  visibility: hidden;
+}

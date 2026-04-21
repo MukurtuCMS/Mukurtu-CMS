@@ -1,0 +1,79 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.server.solr_search_server
+  module:
+    - search_api
+    - search_api_solr
+third_party_settings:
+  search_api_solr:
+    finalize: false
+    commit_before_finalize: false
+    commit_after_finalize: false
+    highlighter:
+      maxAnalyzedChars: 51200
+      fragmenter: regex
+      regex:
+        slop: 0.5
+        pattern: blank
+        maxAnalyzedChars: 10000
+      usePhraseHighlighter: true
+      highlightMultiTerm: true
+      preserveMulti: false
+      highlight:
+        mergeContiguous: false
+        requireFieldMatch: false
+        snippets: 3
+        fragsize: 0
+    multilingual:
+      limit_to_content_language: false
+      include_language_independent: true
+id: techproducts_cloud
+name: techproducts
+description: ''
+read_only: true
+field_settings:
+  cat:
+    label: Cat
+    datasource_id: solr_document
+    property_path: cat
+    type: string
+  id:
+    label: Id
+    datasource_id: solr_document
+    property_path: id
+    type: string
+  manu:
+    label: Manu
+    datasource_id: solr_document
+    property_path: manu
+    type: text
+datasource_settings:
+  solr_document:
+    id_field: id
+    request_handler: ''
+    default_query: '*:*'
+    label_field: ''
+    language_field: ''
+    url_field: ''
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  highlight:
+    highlight: server
+    highlight_partial: false
+    excerpt: true
+    excerpt_length: 256
+    exclude_fields: {  }
+    prefix: '<strong>'
+    suffix: '</strong>'
+    weights:
+      postprocess_query: 0
+  rendered_item: {  }
+tracker_settings:
+  default: {  }
+options:
+  index_directly: true
+  cron_limit: 50
+server: techproducts_cloud

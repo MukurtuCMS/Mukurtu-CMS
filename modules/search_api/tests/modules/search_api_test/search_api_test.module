@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Provides a fake search server and other help for testing purposes.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implement hook_node_grants().
+ */
+function search_api_test_node_grants(AccountInterface $account, $op) {
+  $grants = [];
+
+  if (\Drupal::state()->get('search_api_test_add_node_access_grant', FALSE)) {
+    $grants['search_api_test'] = [$account->id()];
+  }
+
+  return $grants;
+}
+
+/**
+ * Implement hook_node_access_records().
+ */
+function search_api_test_node_access_records(NodeInterface $node) {
+  $grants = [];
+
+  if (\Drupal::state()->get('search_api_test_add_node_access_grant', FALSE)) {
+    $grants[] = [
+      'realm' => 'search_api_test',
+      'gid' => $node->getOwnerId(),
+      'grant_view' => 1,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'langcode' => $node->language()->getId(),
+    ];
+  }
+
+  return $grants;
+}
+
+/**
+ * Implements hook_entity_access().
+ *
+ * @see \Drupal\Tests\search_api\Kernel\Processor\RoleAccessTest
+ */
+function search_api_test_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // When this switch is activated, ensure that access is controlled as a
+  // combination of the user's role and the label of the entity. If the name of
+  // the given role appears at all in the label of the entity, for any of the
+  // roles the user has access to, grant access, otherwise deny access.
+  if (\Drupal::state()->get('search_api_test_add_role_access_control', FALSE)) {
+    foreach ($account->getRoles() as $role) {
+      if (str_contains($entity->label(), $role)) {
+        return AccessResult::allowed();
+      }
+    }
+    return AccessResult::forbidden();
+  }
+
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_load() for "search_api_server".
+ */
+function search_api_test_search_api_server_load($servers) {
+  /** @var \Drupal\search_api\ServerInterface $server */
+  foreach ($servers as $server) {
+    if ($server->hasValidBackend()) {
+      $server->getBackend();
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for node.html.twig.
+ */
+function search_api_test_preprocess_node(&$variables) {
+  if (\Drupal::keyValue('search_api_test')->get('preprocess_node_error')) {
+    throw new \RuntimeException('search_api_test_preprocess_node');
+  }
+}

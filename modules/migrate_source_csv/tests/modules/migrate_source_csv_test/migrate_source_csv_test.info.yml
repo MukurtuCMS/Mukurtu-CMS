@@ -1,0 +1,13 @@
+name: Migrate Source CSV Test
+type: module
+package: Testing
+dependencies:
+  - drupal:migrate
+  - migrate_source_csv:migrate_source_csv
+  - drupal:node
+  - drupal:datetime
+
+# Information added by Drupal.org packaging script on 2026-02-23
+version: '8.x-3.8'
+project: 'migrate_source_csv'
+datestamp: 1771859181

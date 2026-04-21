@@ -1,0 +1,23 @@
+{
+  "name": "drupal/config_pages",
+  "type": "drupal-module",
+  "description": "ConfigPages module",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0-or-later",
+  "homepage": "http://drupal.org/project/config_pages",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "http://drupal.org/project/issues/config_pages",
+    "source": "http://cgit.drupalcode.org/config_pages"
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9"
+      }
+    }
+  },
+  "require": {
+    "drupal/core": "^8.5 | ^9 || ^10 || ^11"
+  }
+}

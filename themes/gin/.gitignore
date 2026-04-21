@@ -1,0 +1,25 @@
+# Ignore the node modules folder (created by 'npm install').
+node_modules
+
+# Ignore bower packages
+libraries
+
+# We absolutely don't want to have the .sass-cache in git.
+.sass-cache
+
+# Ignore .map files
+*.css.map
+*.js.map
+css/map
+
+# Ignore Mac files
+.DS_Store
+
+# Ignore domain file
+domain.json
+
+# Ignore npm debugs
+npm-debug.log
+
+# Ignore JetBrains`s IDE files
+.idea

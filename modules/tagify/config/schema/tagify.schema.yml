@@ -1,0 +1,66 @@
+field.widget.settings.tagify_entity_reference_autocomplete_widget:
+  type: field.widget.settings.tagify
+  label: 'Tagify entity reference widget'
+  mapping:
+    match_operator:
+      type: string
+      label: 'Autocomplete matching'
+    match_limit:
+      type: integer
+      label: 'Maximum number of autocomplete suggestions'
+    placeholder:
+      type: label
+      label: 'Placeholder'
+    suggestions_dropdown:
+      type: integer
+      label: 'Suggestions dropdown'
+    show_entity_id:
+      type: integer
+      label: 'Include entity Id'
+    show_info_label:
+      type: integer
+      label: 'Include info label'
+    cardinality:
+      type: integer
+      label: 'Field cardinality'
+    info_label:
+      type: string
+      label: 'Info label content'
+    identifier:
+      type: string
+      label: 'Field name'
+    parent_selection:
+      type: integer
+      label: 'Parent selection'
+
+better_exposed_filters.filter.bef_tagify:
+  label: 'Tagify'
+  type: better_exposed_filters_filter_widget
+
+field.widget.settings.tagify_select_widget:
+  type: field.widget.settings.tagify_select
+  label: 'Tagify select widget'
+  mapping:
+    match_operator:
+      type: string
+      label: 'Autocomplete matching'
+    match_limit:
+      type: integer
+      label: 'Maximum number of autocomplete suggestions'
+    placeholder:
+      type: label
+      label: 'Placeholder'
+    cardinality:
+      type: integer
+      label: 'Field cardinality'
+    identifier:
+      type: string
+      label: 'Field name'
+
+tagify.settings:
+  type: config_entity
+  label: 'Tagify settings'
+  mapping:
+    set_default_widget:
+      type: boolean
+      label: 'Set Tagify widget as default'

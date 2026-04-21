@@ -1,0 +1,9 @@
+{
+  "name": "geolocation-baidu-maps",
+  "license": "GPL-2.0",
+  "description": "Geolocation Baidu maps module",
+  "private": true,
+  "devDependencies": {
+    "@h21-map-types/baidu-map": "^2.0.8"
+  }
+}

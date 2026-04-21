@@ -1,0 +1,5 @@
+id: search_api_test_bulk_form_entity_test
+label: 'Search API test bulk form action: entity_test'
+type: entity_test
+plugin: search_api_test_bulk_form_entity_test
+configuration: {  }

@@ -1,0 +1,17 @@
+build:
+  assessment:
+    validate_codebase:
+      phplint:
+        halt-on-fail: false
+      phpcs:
+        sniff-all-files: true
+        halt-on-fail: false
+      # Static analysis for uses of @deprecated code.
+      phpstan:
+        halt-on-fail: false
+    testing:
+      run_tests.functional:
+        types: "PHPUnit-Functional"
+        testgroups: "dashboards"
+        suppress-deprecations: false
+        halt-on-fail: false

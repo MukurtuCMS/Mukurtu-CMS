@@ -1,0 +1,8 @@
+services:
+  logger.channel.config_translation_po:
+    parent: logger.channel_base
+    arguments: ['config_translation_po']
+
+  ctp.config_manager:
+    class: Drupal\config_translation_po\Services\CtpConfigManager
+    arguments: ['@config.storage', '@locale.storage', '@config.factory', '@config.typed', '@language_manager', '@locale.default.config.storage', '@config.manager']

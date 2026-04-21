@@ -1,0 +1,12 @@
+name: 'Message Notify'
+description: 'Message notify.'
+core_version_requirement: ^9 || ^10 || ^11
+package: Message
+dependencies:
+  - message:message
+type: module
+
+# Information added by Drupal.org packaging script on 2025-02-17
+version: '8.x-1.5'
+project: 'message_notify'
+datestamp: 1739804812

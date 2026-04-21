@@ -1,0 +1,39 @@
+services:
+
+  _defaults:
+    autowire: true
+
+  genpass.static_storage:
+    class: Drupal\genpass\ValidationInterlockHelper
+  Drupal\genpass\ValidationInterlockHelperInterface: '@genpass.static_storage'
+
+  # This service decorates the core password_generator service. To use this
+  # service, enable "Use Genpass as Core password generator" and then use
+  # the password_generator service. It is not recommended to use this service
+  # directly with the genpass.password_generator name, although it does work.
+  genpass.password_generator:
+    class: Drupal\genpass\GenpassPasswordGenerator
+    decorates: password_generator
+
+  # @todo Remove when minimum version is ^11.1, as it will then be automatic.
+  Drupal\genpass\Hook\FormAdminAlter:
+    class: Drupal\genpass\Hook\FormAdminAlter
+
+  # @todo Remove when minimum version is ^11.1, as it will then be automatic.
+  Drupal\genpass\Hook\FormAlter:
+    class: Drupal\genpass\Hook\FormAlter
+
+  # @todo Remove when minimum version is ^11.1, as it will then be automatic.
+  Drupal\genpass\Hook\Help:
+    class: Drupal\genpass\Hook\Help
+
+  # @todo Remove when minimum version is ^11.1, as it will then be automatic.
+  Drupal\genpass\Hook\UserForms:
+    class: Drupal\genpass\Hook\UserForms
+
+# All procedural hooks converted to OOP hooks.
+# @see https://www.drupal.org/node/3498595
+parameters:
+  genpass.skip_procedural_hook_scan: true
+  # @todo Remove when minimum version is ^11.2.
+  genpass.hooks_converted: true

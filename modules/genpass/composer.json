@@ -1,0 +1,25 @@
+{
+  "name": "drupal/genpass",
+  "description": "Great utility module which makes the password field optional (or hidden) on the add new user page (admin & registration). If the password field is not set during registration, the system will generate a password. You can optionally display this password at the time it's created.",
+  "type": "drupal-module",
+  "homepage": "http://drupal.org/project/genpass",
+  "authors": [
+    {
+      "name": "starbow",
+      "homepage": "https://www.drupal.org/u/starbow",
+      "role": "contributor"
+    },
+    {
+      "name": "Kris77",
+      "homepage": "https://www.drupal.org/u/kris77",
+      "role": "contributor"
+    }
+  ],
+  "support": {
+    "issues": "http://drupal.org/project/issues/genpass",
+    "irc": "irc://irc.freenode.org/drupal-contribute",
+    "source": "https://git.drupalcode.org/project/genpass"
+  },
+  "license": "GPL-2.0-or-later",
+  "minimum-stability": "dev"
+}

@@ -1,0 +1,157 @@
+<?php
+
+/**
+ * @file
+ * theme.theme
+ */
+
+use Drupal\gin\GinContentFormHelper;
+use Drupal\gin\GinSettings;
+
+/**
+ * Implements hook_theme().
+ */
+function gin_theme() {
+  // Check if Navigation module is active.
+  if (_gin_module_is_active('navigation')) {
+    $items['navigation_menu'] = [
+      'template' => 'navigation/navigation-menu',
+      'preprocess functions' => ['gin_preprocess_navigation'],
+      'variables' => [
+        'icon_path' => NULL,
+        'path' => \Drupal::service('extension.list.theme')->getPath('gin'),
+      ],
+    ];
+  }
+  else {
+    $items['navigation'] = [
+      'template' => 'navigation/navigation--gin',
+      'preprocess functions' => ['gin_preprocess_navigation'],
+      'variables' => [
+        'icon_path' => NULL,
+        'path' => \Drupal::service('extension.list.theme')->getPath('gin'),
+        'menu_middle' => [],
+        'menu_top' => [],
+        'menu_bottom' => [],
+      ],
+    ];
+
+    $items['menu_region__top'] = [
+      'template' => 'navigation/menu-region--top',
+      'variables' => [
+        'links' => [],
+        'title' => NULL,
+        'menu_name' => NULL,
+      ],
+    ];
+
+    $items['menu_region__middle'] = [
+      'template' => 'navigation/menu-region--middle',
+      'base hook' => 'menu',
+      'variables' => [
+        'menu_name' => NULL,
+        'items' => [],
+        'attributes' => [],
+        'title' => NULL,
+      ],
+    ];
+
+    // Check if help is enabled.
+    $help_enabled = _gin_module_is_active('help');
+
+    $items['menu_region__bottom'] = [
+      'template' => 'navigation/menu-region--bottom',
+      'variables' => [
+        'help_enabled' => $help_enabled,
+        'items' => [],
+        'title' => NULL,
+        'menu_name' => NULL,
+        'path' => \Drupal::service('extension.list.theme')->getPath('gin'),
+      ],
+    ];
+  }
+
+  return $items;
+}
+
+/**
+ * Implements page_alter().
+ */
+function gin_theme_suggestions_page_alter(&$suggestions, $variables) {
+  $path = \Drupal::requestStack()->getCurrentRequest()->getPathInfo();
+
+  if ($path != '/') {
+    $path = trim($path, '/');
+    $arg = str_replace(["/", '-'], ['_', '_'], $path);
+    $suggestions[] = 'page__' . $arg;
+  }
+
+  // The node page template is required to use the node content form.
+  if (\Drupal::classResolver(GinContentFormHelper::class)->isContentForm()
+    && !in_array('page__node', $suggestions)) {
+    $suggestions[] = 'page__node';
+  }
+}
+
+/**
+ * Implements toolbar_alter().
+ */
+function gin_theme_suggestions_toolbar_alter(array &$suggestions, array $variables) {
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+
+  $suggestions[] = 'toolbar__gin';
+
+  // Only if Classic Toolbar is disabled.
+  if ($settings->get('classic_toolbar') !== 'classic' || _gin_module_is_active('navigation')) {
+    if ($variables['element']['#attributes']['id'] === 'toolbar-administration-secondary') {
+      $suggestions[] = 'toolbar__gin__secondary';
+    }
+  }
+}
+
+/**
+ * Implements menu_alter().
+ */
+function gin_theme_suggestions_menu_alter(array &$suggestions, array $variables) {
+  if (isset($variables['theme_hook_original']) && strpos($variables['theme_hook_original'], 'menu__toolbar__') === 0) {
+    $suggestions[] = 'menu__toolbar__gin';
+  }
+}
+
+/**
+ * Implements top_bar_alter().
+ */
+function gin_theme_suggestions_top_bar_alter(array &$suggestions, array $variables) {
+  $suggestions[] = 'top_bar__gin';
+}
+
+/**
+ * Implements form_alter().
+ */
+function gin_theme_suggestions_form_alter(array &$suggestions, array $variables) {
+  $suggestions[] = 'form__' . str_replace('-', '_', $variables['element']['#id']);
+}
+
+/**
+ * Implements table_alter().
+ */
+function gin_theme_suggestions_table_alter(array &$suggestions, array $variables): void {
+  if (empty($variables['attributes']['class'])) {
+    return;
+  }
+
+  if (is_array($variables['attributes']['class']) && in_array('field-multiple-table', $variables['attributes']['class'])) {
+    $suggestions[] = 'table__simple';
+  }
+}
+
+/**
+ * Implements views_view_field_alter() for status field.
+ */
+function gin_theme_suggestions_views_view_field_alter(array &$suggestions, array $variables) {
+  $field_name = $variables['field']->field;
+  if ($field_name == 'status') {
+    $suggestions[] = 'views_view_field__' . $field_name;
+  }
+}

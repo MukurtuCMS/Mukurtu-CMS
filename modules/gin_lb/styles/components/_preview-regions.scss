@@ -1,0 +1,36 @@
+#toolbar-item-display-options::before {
+  mask-image: icon("eye") !important;
+}
+.glb-toolbar-menu-preview {
+  padding: 0 10px;
+}
+
+.glb-preview-regions--enable {
+  .layout-builder__region {
+    position: relative;
+    &::after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      content: "";
+      pointer-events: none;
+      border: 1px dashed var(--gin-border-color-form-element);
+    }
+
+    .layout-builder__region-label {
+      position: absolute;
+      z-index: 1;
+      top: -19px;
+      right: 0;
+      display: block;
+      height: 20px;
+      padding: 0 4px 0 4px !important;
+      color: #fff;
+      background: var(--gin-border-color-form-element);
+      font-size: 12px !important;
+      line-height: 20px !important;
+    }
+  }
+}

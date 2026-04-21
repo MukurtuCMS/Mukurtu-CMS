@@ -1,0 +1,5 @@
+services:
+  cache_context.eb_dummy:
+    class: Drupal\entity_browser_test\Cache\Context\DummyCacheContext
+    tags:
+      - { name: cache.context}

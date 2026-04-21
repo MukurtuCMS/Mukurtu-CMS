@@ -1,0 +1,26 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 7a176814-a275-451f-a86d-8569c6551e50
+  bundle: genres
+  default_langcode: en
+default:
+  status:
+    -
+      value: true
+  name:
+    -
+      value: Fantasy
+  weight:
+    -
+      value: 6
+  parent:
+    -
+      target_id: 0
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en

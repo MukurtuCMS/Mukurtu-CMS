@@ -1,0 +1,6 @@
+services:
+  admin_theme.admin_context:
+    class: \Drupal\admin_theme\Routing\AdminThemeAdminContext
+    decorates: router.admin_context
+    arguments: ['@admin_theme.admin_context.inner', '@plugin.manager.condition', '@config.factory']
+    public: false

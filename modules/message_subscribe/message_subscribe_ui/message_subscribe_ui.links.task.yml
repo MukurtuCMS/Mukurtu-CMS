@@ -1,0 +1,9 @@
+message_subscribe_ui.tab:
+  route_name: message_subscribe_ui.tab
+  base_route: entity.user.canonical
+  title: Subscriptions
+  weight: 12
+
+message_subscribe_ui.tab.flag:
+  class: \Drupal\Core\Menu\LocalTaskDefault
+  deriver: \Drupal\message_subscribe_ui\Plugin\Derivative\MessageSubscribeUiLocalTask

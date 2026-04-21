@@ -1,0 +1,246 @@
+/**
+ * @file
+ * Toolbar link styles.
+ */
+
+ .toolbar-link {
+  position: relative;
+  padding-block: 10px;
+  padding-inline: 0;
+  color: var(--color-gray-800);
+  text-decoration: none;
+  flex-grow: 1;
+  font-weight: 700;
+  border-radius: var(--space-xs);
+  line-height: 1.2;
+  background: none;
+  border: none;
+
+  &:hover {
+    z-index: 20;
+    color: var(--gin-color-primary-hover);
+    background-color: var(--gin-color-primary-light);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 1px var(--gin-color-focus-border), 0 0 0 4px var(--gin-color-focus);
+  }
+
+  // Gin Custom start ---------------------
+  // &:focus {
+  //   outline: 4px solid var(--color-focus);
+  //   outline-offset: -4px;
+  //   z-index: 10;
+  // }
+  // Gin Custom end ------------------------
+
+  & + .toolbar-menu__item--has-dropdown > button {
+    margin-inline-start: 4px;
+  }
+}
+
+/**
+ * Specific styles when toolbar-link is a button that toggles a submenu or
+ * content.
+ */
+button.toolbar-link {
+  border: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  cursor: pointer;
+  text-align: start;
+
+  /* Chevron styles. */
+  &:not(.toolbar-link--sidebar-toggle)::after {
+    display: block;
+    block-size: var(--space-s);
+    inline-size: var(--space-s);
+    mask-size: var(--space-s);
+    mask-repeat: no-repeat;
+    mask-position: center center;
+    background-color: var(--color-gray-500);
+    // Gin Custom start ---------------------
+    mask-image: icon('chevron-down');
+    // mask-image: url(../../assets/icons/chevron-down.svg);
+    // Gin Custom end ------------------------
+    content: "";
+    margin-inline-start: auto;
+  }
+
+  &:hover::after,
+  &:focus::after {
+    background-color: var(--color-blue-700);
+  }
+
+  & + a {
+    margin-inline-end: var(--space-xl);
+  }
+}
+
+/* Chevron styles when the item is expanded. */
+.toolbar-menu__item--expanded.toolbar-menu__item--has-dropdown > button::after {
+  transform: rotate(180deg);
+}
+
+/* Sidebar collapsed styles.*/
+html:not(.admin-toolbar-expanded) {
+  & .toolbar-link {
+    padding-inline: 10px;
+    padding-block: 10px;
+    flex-grow: unset;
+    flex-basis: 100%;
+    // Gin Custom start ---------------------
+    // justify-content: center;
+    // Gin Custom end ------------------------
+  }
+
+  /* Specific styles for the title duplicated for the flyout. */
+  & .toolbar-menu__item--to-title > .toolbar-link {
+    display: flex;
+    align-items: center;
+    font-weight: var(--gin-font-weight-semibold);
+
+    &:hover {
+      color: var(--gin-color-primary-hover);
+    }
+
+    &:focus {
+      color: var(--gin-color-primary-active);
+      background-color: var(--gin-color-primary-light-hover);
+    }
+  }
+
+  /* Hide the chevron when toolbar collapsed. */
+  .toolbar-menu__item--has-dropdown.toolbar-menu__item--level-1,
+  .toolbar-menu__item--to-title {
+    > button.toolbar-link::after {
+      content: unset;
+    }
+  }
+}
+
+.toolbar-link--sidebar-toogle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+
+  &:hover,
+  &:focus {
+    background-color: var(--color-gray-050);
+  }
+}
+
+.toolbar-link--has-icon {
+  display: flex;
+  align-items: center;
+
+  & span {
+    opacity: 1;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: opacity .4s ease;
+    }
+  }
+
+  &::before {
+    // --icon: url(../../assets/icons/basic.svg); /* Default icon, aka --basic */
+    content: '';
+    width: 20px;
+    height: 20px;
+    display: block;
+    background-color: var(--color-gray-800);
+    mask-repeat: no-repeat;
+    mask-position: center center;
+    mask-size: 100% auto;
+    mask-image: var(--icon);
+  }
+}
+
+.admin-toolbar-expanded .toolbar-link--has-icon::before {
+  margin-inline-end: 10px;
+}
+
+.current > .toolbar-link--has-icon::before {
+  background-color: var(--color-blue-600);
+}
+
+// Gin Custom start ---------------------
+// .toolbar-link--system-themes-page::before {
+//   --icon: url(../../assets/icons/appearance.svg);
+// }
+
+// .toolbar-link--blocks::before {
+//   --icon: url(../../assets/icons/blocks.svg);
+// }
+
+// .toolbar-link--bookmarks::before {
+//   --icon: url(../../assets/icons/bookmarks.svg);
+// }
+
+// .toolbar-link--system-admin-config::before {
+//   --icon: url(../../assets/icons/config.svg);
+// }
+
+// .toolbar-link--content::before {
+//   --icon: url(../../assets/icons/content.svg);
+// }
+
+// .toolbar-link--create::before {
+//   --icon: url(../../assets/icons/create.svg);
+// }
+
+// .toolbar-link--system-modules-list::before {
+//   --icon: url(../../assets/icons/extend.svg);
+// }
+
+// .toolbar-link--files::before {
+//   --icon: url(../../assets/icons/files.svg);
+// }
+
+// .toolbar-link--help::before {
+//   --icon: url(../../assets/icons/help.svg);
+// }
+
+// .toolbar-link--media::before {
+//   --icon: url(../../assets/icons/media.svg);
+// }
+
+// .toolbar-link--entity-user-collection::before {
+//   --icon: url(../../assets/icons/people.svg);
+// }
+
+// .toolbar-link--system-admin-reports::before {
+//   --icon: url(../../assets/icons/reports.svg);
+// }
+
+// .toolbar-link--system-admin-structure::before {
+//   --icon: url(../../assets/icons/structure.svg);
+// }
+
+// .toolbar-link--sidebar-toggle[aria-expanded=true]::before {
+//   --icon: url(../../assets/icons/toggle-collapse.svg);
+// }
+
+// .toolbar-link--sidebar-toggle[aria-expanded=false]::before {
+//   --icon: url(../../assets/icons/toggle-expand.svg);
+// }
+
+// .toolbar-link--user::before {
+//   --icon: url(../../assets/icons/user.svg);
+// }
+// Gin Custom end ------------------------
+
+/* Visually-hidden button text. */
+.toolbar-link__action {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}

@@ -1,0 +1,16 @@
+name: 'Facets summary (Experimental)'
+type: module
+description: 'Exposes a Facets block summary showing the current search.'
+core_version_requirement: ^10.1 || ^11
+package: Search
+configure: entity.facets_facet.collection
+dependencies:
+  - facets:facets
+test_dependencies:
+  - search_api:search_api
+  - drupal:views
+
+# Information added by Drupal.org packaging script on 2025-10-17
+version: '3.0.2'
+project: 'facets'
+datestamp: 1760700683

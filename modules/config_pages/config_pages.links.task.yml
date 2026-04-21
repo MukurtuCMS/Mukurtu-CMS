@@ -1,0 +1,19 @@
+entity.config_pages.collection:
+  title: 'Config pages'
+  route_name: entity.config_pages.collection
+  base_route: entity.config_pages.collection
+entity.config_pages_type.collection:
+  title: 'Config pages settings'
+  route_name: entity.config_pages_type.collection
+  base_route: entity.config_pages.collection
+
+entity.config_pages.canonical:
+  title: Edit
+  route_name: entity.config_pages.canonical
+  base_route: entity.config_pages.canonical
+
+# Default tab for config page type editing.
+entity.config_pages_type.edit_form:
+  title: 'Edit'
+  route_name: entity.config_pages_type.edit_form
+  base_route: entity.config_pages_type.edit_form

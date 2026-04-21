@@ -1,0 +1,5 @@
+message_digest.interval_add:
+  route_name: entity.message_digest_interval.add_form
+  title: 'Add digest interval'
+  appears_on:
+    - entity.message_digest_interval.collection

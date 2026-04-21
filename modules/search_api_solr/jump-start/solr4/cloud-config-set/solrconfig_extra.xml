@@ -1,0 +1,167 @@
+<searchComponent name="spellcheck" class="solr.SpellCheckComponent">
+    <lst name="spellchecker">
+      <str name="name">nl</str>
+      <str name="field">spellcheck_nl</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">en</str>
+      <str name="field">spellcheck_en</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">fi</str>
+      <str name="field">spellcheck_fi</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">fr</str>
+      <str name="field">spellcheck_fr</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">de</str>
+      <str name="field">spellcheck_de</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">el</str>
+      <str name="field">spellcheck_el</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">it</str>
+      <str name="field">spellcheck_it</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">und</str>
+      <str name="field">spellcheck_und</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">ru</str>
+      <str name="field">spellcheck_ru</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">es</str>
+      <str name="field">spellcheck_es</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  
+    <lst name="spellchecker">
+      <str name="name">uk</str>
+      <str name="field">spellcheck_uk</str>
+      <str name="classname">solr.DirectSolrSpellChecker</str>
+      <str name="distanceMeasure">internal</str>
+      <float name="accuracy">0.5</float>
+      <float name="maxQueryFrequency">0.01</float>
+      <float name="thresholdTokenFrequency">0.01</float>
+      <int name="maxEdits">2</int>
+      <int name="minPrefix">1</int>
+      <int name="maxInspections">5</int>
+      <int name="minQueryLength">4</int>
+      <bool name="onlyMorePopular">true</bool>
+    </lst>
+  </searchComponent>
+<statsCache class="org.apache.solr.search.stats.LRUStatsCache" />

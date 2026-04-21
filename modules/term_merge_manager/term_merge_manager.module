@@ -1,0 +1,106 @@
+<?php
+
+/**
+ * @file
+ * Reapply term merge actions on presave.
+ */
+
+use Drupal\taxonomy\Entity\Term;
+use Drupal\term_merge_manager\Entity\TermMergeFrom;
+use Drupal\term_merge_manager\Entity\TermMergeInto;
+
+/**
+ * Hook into and probably rename the term.
+ *
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function term_merge_manager_taxonomy_term_presave(Term $entity) {
+  $name = $entity->getName();
+  $vid = $entity->bundle();
+
+  $from = TermMergeFrom::loadByVidName($vid, $name);
+
+  // Leave if there is no merge entry.
+  if ($from === FALSE) {
+    return TRUE;
+  }
+
+  // There is an entry so we rewrite this.
+  // Instead of creating a new term, the already existing one get updated.
+  $intoid = $from->getIntoId();
+  $into = $from->getIntoName();
+
+  // Leave if from and into is the same - could happen on some renames.
+  if ($name == $into) {
+
+    // Clean up not required action.
+    $from->delete();
+    if (\Drupal::currentUser()->hasPermission('view term merged manager messages')) {
+      \Drupal::messenger()->addMessage(t('There was a merge action with the same name "@name" - got cleaned up', ['@name' => $name]));
+    }
+
+    return TRUE;
+  }
+
+  /** @var \Drupal\taxonomy\Entity\Term $entityinto */
+  $entityinto = Term::load($intoid);
+
+  $entity->setOriginalId($intoid);
+  $entity->setName($into);
+  $entity->set('tid', $intoid);
+  $entity->original = $entityinto;
+
+  // Drupal\Core\Entity\EntityStorageException: Update existing 'taxonomy_term'
+  // entity while changing the ID is not supported.
+  // Due this it's a bit tricky to keep the fields from the into term.
+  $fields = $entityinto->getFieldDefinitions();
+  foreach ($fields as $field_name => $field) {
+    if (!stristr($field_name, 'field_') && !in_array($field_name, ['description'])) {
+      continue;
+    }
+
+    $entity->set($field_name, $entityinto->get($field_name)->getValue());
+  }
+
+  if (\Drupal::currentUser()->hasPermission('view term merged manager messages')) {
+    \Drupal::messenger()->addMessage(t('There is a merge action - so we merged "@name" into "@into"', [
+      '@name' => $name,
+      '@into' => $into,
+    ]));
+  }
+
+  return TRUE;
+}
+
+/**
+ * Implements hook_taxonomy_term_delete().
+ *
+ * Delete existing merge actions on term delete.
+ */
+function term_merge_manager_taxonomy_term_delete($term) {
+  $tid = $term->get('tid')->value;
+
+  if (empty($tid)) {
+    // Something is wrong.
+    return FALSE;
+  }
+
+  $id = TermMergeInto::loadIdByTid($tid);
+  if (empty($id)) {
+    return FALSE;
+  }
+
+  $term = TermMergeInto::load($id);
+  if (is_object($term)) {
+    $term->delete();
+  }
+
+  $from = TermMergeFrom::loadByMergeId($id);
+  if (!empty($from) && is_array($from)) {
+    foreach ($from as $id) {
+      TermMergeFrom::load($id)->delete();
+    }
+  }
+
+  return TRUE;
+}

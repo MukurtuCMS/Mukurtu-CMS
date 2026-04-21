@@ -1,0 +1,21 @@
+dashboards.edit:
+  route_name: entity.dashboard.edit_form
+  title: "Edit"
+  base_route: entity.dashboard.canonical
+
+dashboards.layout:
+  route_name: layout_builder.dashboards.view
+  title: "Default Dashboard"
+  weight: -10
+  base_route: entity.dashboard.canonical
+
+dashboard.view:
+  route_name: entity.dashboard.canonical
+  title: "View"
+  weight: -20
+  base_route: entity.dashboard.canonical
+
+dashboard.permissions:
+  title: "Permissions"
+  route_name: entity.dashboard.entity_permissions_form
+  base_route: entity.dashboard.canonical

@@ -1,0 +1,427 @@
+.paragraphs-tabs-wrapper {
+  .gin-table-scroll-wrapper {
+    overflow: initial;
+  }
+
+  tr {
+    &:hover, &:focus {
+      .gin--dark-mode &, & {
+        background-color: inherit;
+      }
+    }
+  }
+
+  .paragraphs-subform {
+    margin-block-start: 0;
+    margin-inline-end: var(--gin-spacing-m);
+  }
+
+  .field-multiple-table {
+    > tbody {
+      display: block;
+    }
+
+    > thead {
+      display: block;
+
+      > tr {
+        display: flex;
+
+        th:first-child {
+          &.field-label {
+            display: flex;
+            width: 100%;
+            padding-inline-end: 0;
+          }
+
+          .paragraphs-actions {
+            margin-inline: auto 0;
+          }
+        }
+
+        .tabledrag-hide {
+          display: inline-flex;
+          align-items: center;
+          margin: 0 auto;
+        }
+      }
+    }
+
+    .draggable {
+      display: flex;
+      align-items: center;
+      position: relative;
+      flex-wrap: nowrap;
+      flex-direction: row;
+      padding: var(--gin-spacing-m) var(--gin-spacing-xs);
+      margin-block-start: var(--gin-spacing-m);
+      border: 1px solid var(--gin-border-color-table);
+      border-radius: var(--gin-border-m);
+      box-shadow: 4px 4px 10px var(--gin-bg-layer2);
+
+      // Current draggable item
+      &.drag {
+        background-color: var(--gin-bg-warning-light);
+      }
+
+      // Flag Changes
+      &.drag-previous > .tabledrag-cell {
+        position: relative;
+
+        &::before {
+          content: "";
+          display: block;
+          position: absolute;
+          inset-block-start: var(--gin-spacing-xs);
+          inset-inline-start: 0;
+          width: 4px;
+          height: calc(100% - var(--gin-spacing-m));
+          background: var(--gin-color-warning);
+          border-radius: var(--gin-border-xxs);
+        }
+      }
+
+      td {
+        padding: var(--gin-spacing-xxs);
+      }
+
+      > td {
+        position: relative;
+        display: table-cell;
+        flex: 0 0 auto;
+
+        &:nth-child(2) {
+          flex: 1 0 0;
+          min-width: 0;
+        }
+      }
+
+      .has-multiple-fields-remove-button {
+        width: 100%;
+        padding-inline-end: 0 !important;
+      }
+
+      .tabledrag-handle::after {
+        mask-image: icon('drag-dots');
+        mask-repeat: no-repeat;
+        mask-position: center center;
+        mask-size: 16px 16px;
+      }
+
+      .tabledrag-changed {
+        display: none;
+      }
+
+      // Highlight current paragraph.
+      &:hover,
+      &:focus-within {
+        position: relative;
+        border: 1px solid var(--gin-color-text);
+        box-shadow: 0 0 0 1px var(--gin-color-text);
+      }
+    }
+  }
+
+  .paragraph-type-label {
+    font-size: var(--gin-font-size);
+    font-weight: var(--gin-font-weight-heavy) !important;
+    font-style: normal;
+    color: var(--gin-color-title);
+    position: static;
+    border: 0 none;
+    padding-inline-start: 0;
+  }
+
+  .paragraphs-subform {
+    .paragraph-type-label {
+      font-size: var(--gin-font-size-s);
+    }
+  }
+
+  .paragraph-type-add-modal,
+  .field--widget-paragraphs .paragraphs-dropbutton-wrapper {
+    margin-inline-end: var(--gin-spacing-xs);
+  }
+}
+
+.js {
+  .field--widget-paragraphs,
+  .field--widget-paragraphs-previewer {
+    .field-multiple-table {
+      display: block;
+    }
+  }
+}
+
+td .claro-details {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.paragraph {
+  .contextual {
+    display: none;
+  }
+}
+
+.paragraphs-subform {
+  .form-item,
+  .field--type-text-with-summary .form-item,
+  .field--widget-text-textarea .form-item {
+    margin-block-end: var(--gin-spacing-l);
+  }
+
+  .field-multiple-table.draggable-table {
+    .tabledrag-handle::after {
+      margin-block-start: 0;
+    }
+  }
+}
+
+.paragraphs-add-wrapper,
+.paragraphs-dropbutton-wrapper {
+  .button--small {
+    margin-block: var(--gin-spacing-xs);
+  }
+
+  &.button--small {
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.paragraphs-dropdown-toggle {
+  position: relative;
+  margin: var(--gin-spacing-xs) 0;
+  background: none;
+
+  &::after {
+    content: "";
+    display: block;
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: 100%;
+    height: 100%;
+    background-image: none;
+    background-color: var(--gin-color-text-light);
+    mask-image: icon('more');
+    mask-repeat: no-repeat;
+    mask-position: center center;
+    mask-size: 16px 16px;
+  }
+
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: var(--gin-color-primary-light);
+    border: 0 none;
+
+    &::after {
+      background-color: var(--gin-color-primary);
+    }
+  }
+}
+
+.field--widget-paragraphs .paragraphs-tabs-wrapper .field-multiple-table tr[class*="paragraph-type--"] {
+  margin-block-start: var(--gin-spacing-m);
+}
+
+html.js .field--widget-entity-reference-paragraphs,
+html.js .field--widget-paragraphs {
+  .draggable .tabledrag-handle {
+    &::after {
+      position: relative;
+      inset-inline-start: 0;
+      padding: 0;
+      margin-inline-start: 0;
+    }
+  }
+}
+
+.js .paragraphs-collapsed-description::after,
+.js .draggable:hover .paragraphs-collapsed-description::after {
+  inset-block-start: 2px;
+  background: var(--gin-bg-layer2);
+}
+
+.paragraphs-collapsed-description::after,
+.draggable:hover .paragraphs-collapsed-description::after {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, var(--gin-bg-layer) 100%);
+}
+
+.js .field--widget-paragraphs .paragraphs-dropbutton-wrapper .dropbutton-multiple {
+  padding: var(--gin-spacing-xs);
+}
+
+html.js .field--widget-paragraphs .paragraphs-dropbutton-wrapper .dropbutton-multiple {
+  .dropbutton-widget {
+    margin-inline-end: var(--gin-spacing-xs);
+  }
+}
+
+html.js .field--widget-paragraphs th .paragraphs-actions .paragraphs-dropdown {
+  inset-block-start: 0;
+  inset-inline-end: var(--gin-spacing-xxs);
+}
+
+.paragraphs-dropdown-actions {
+  color: var(--gin-color-button-text);
+  background: var(--gin-bg-layer3);
+  border: 0 none;
+  border-radius: var(--gin-border-xs);
+  box-shadow: var(--gin-shadow-l2);
+
+  .paragraphs-dropdown-action.button {
+    font-size: var(--gin-font-size-xs);
+    padding: var(--gin-spacing-xs) var(--gin-spacing-m);
+    margin: 0;
+    border: 0 none !important;
+  }
+}
+
+.js .paragraph-type-title {
+  align-self: center;
+}
+
+html.js .paragraph-type-icon {
+  padding: var(--gin-spacing-xxs);
+  margin-inline-end: var(--gin-spacing-xs);
+}
+
+.js .paragraph-top {
+  grid-template-columns: auto auto 1fr auto;
+}
+
+.paragraphs-icon-changed {
+  background-size: auto;
+  height: 32px;
+  width: 32px;
+}
+
+// Darkmode overrides
+.gin--dark-mode {
+  .paragraphs-tabs-wrapper .field-multiple-table .draggable {
+    background: var(--gin-bg-layer2);
+    box-shadow: none;
+  }
+
+  .paragraphs-dropdown-actions {
+    background: var(--gin-bg-layer2);
+    border-color: var(--gin-border-color);
+    box-shadow: 0 2px 6px 0 var(--gin-bg-app);
+  }
+
+  .paragraph-type-icon {
+    background-color: var(--gin-color-primary);
+  }
+
+  .paragraphs-type-icon {
+    box-shadow: inset 0 0 0 10px var(--gin-bg-layer);
+    background-color: #fff;
+  }
+}
+
+.js .paragraphs-description .summary-content {
+  color: var(--gin-color-text);
+}
+
+// Drag & Drop
+.paragraphs-dragdrop {
+  &__list {
+    --dnd-item-ghost-border: var(--gin-color-primary);
+    --dnd-item-ghost-bg: var(--gin-bg-item-hover);
+  }
+
+  &__item {
+    padding-block: var(--gin-spacing-xs);
+    background-color: var(--gin-bg-layer3);
+    border-radius: var(--gin-border-m);
+  }
+
+  &__icon {
+    inset-block-start: var(--gin-spacing-xxxs);
+  }
+}
+
+.js .paragraph-type-add-modal-button:hover {
+  background: var(--gin-color-primary);
+}
+
+.paragraphs-dragdrop__label--field {
+  text-transform: none;
+}
+
+// Classic Paragraphs
+.field--widget-entity-reference-paragraphs {
+  // Ugly addressing the title, but let's go
+  > div > .form-wrapper > strong {
+    display: block;
+    margin-block-start: var(--gin-spacing-xl);
+  }
+
+  // No Paragraph added yet text
+  // No dedicated classes so targeting the element as good as possible
+  .form-wrapper .form-wrapper > em {
+    display: block;
+    padding: var(--gin-spacing-m) 0;
+  }
+
+  // Add buttons
+  .form-actions {
+    align-items: center;
+
+    .dropbutton-multiple {
+      margin-inline-end: var(--gin-spacing-xs);
+
+      // Support different paragraphs versions
+      .placeholder,
+      ~ .placeholder {
+        margin-inline-start: var(--gin-spacing-xxs);
+      }
+    }
+  }
+
+  tr.draggable .tabledrag-handle::after {
+    inset-inline-start: 8px;
+  }
+}
+
+.toolbar-fixed .is-horizontal .paragraphs-tabs {
+  padding: var(--gin-spacing-xs) var(--gin-spacing-m) !important;
+  background-color: var(--gin-bg-layer3);
+  border-radius: var(--gin-border-s);
+
+  &:first-of-type {
+    z-index: 100;
+    inset-block-start: calc(var(--gin-toolbar-y-offset) + var(--gin-height-sticky));
+  }
+
+  .tabs__tab {
+    float: inline-start;
+    margin-inline-end: var(--gin-spacing-m);
+
+    a {
+      display: block;
+      padding: var(--gin-spacing-xs) 0;
+      color: var(--gin-color-text);
+    }
+
+    &.is-active {
+      a {
+        color: var(--gin-color-primary);
+
+        &::after {
+          pointer-events: none;
+          content: "";
+          position: absolute;
+          inset-block-end: 0;
+          inset-inline-start: 0;
+          display: block;
+          width: 100%;
+          border-block-end: 2px solid var(--gin-color-primary);
+        }
+      }
+    }
+  }
+}

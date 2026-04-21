@@ -1,0 +1,61 @@
+geocoder.settings:
+  path: "/admin/config/system/geocoder"
+  defaults:
+    _form: '\Drupal\geocoder\Form\SettingsForm'
+    _title: "Geocoder configuration"
+  requirements:
+    _permission: "administer site configuration"
+
+geocoder.api.geocode:
+  path: "/geocoder/api/geocode"
+  defaults:
+    _controller: '\Drupal\geocoder\Controller\GeocoderApiEnpoints::geocode'
+    _title: "Geocode"
+  methods: [GET]
+  requirements:
+    _permission: "access geocoder api endpoints"
+  options:
+    no_cache: TRUE
+
+geocoder.api.reverse_geocode:
+  path: "/geocoder/api/reverse_geocode"
+  defaults:
+    _controller: '\Drupal\geocoder\Controller\GeocoderApiEnpoints::reverseGeocode'
+    _title: "Reverse Geocode"
+  methods: [GET]
+  requirements:
+    _permission: "access geocoder api endpoints"
+  options:
+    no_cache: TRUE
+
+entity.geocoder_provider.collection:
+  path: "/admin/config/system/geocoder/geocoder-provider"
+  defaults:
+    _entity_list: "geocoder_provider"
+    _title: "Geocoder providers"
+  requirements:
+    _permission: "administer site configuration"
+
+entity.geocoder_provider.add_form:
+  path: "/admin/config/system/geocoder/geocoder-provider/add/{geocoder_provider_id}"
+  defaults:
+    _entity_form: "geocoder_provider.add"
+    _title: "Add a Geocoder provider"
+  requirements:
+    _permission: "administer site configuration"
+
+entity.geocoder_provider.edit_form:
+  path: "/admin/config/system/geocoder/geocoder-provider/manage/{geocoder_provider}"
+  defaults:
+    _entity_form: "geocoder_provider.edit"
+    _title: "Edit a Geocoder provider"
+  requirements:
+    _permission: "administer site configuration"
+
+entity.geocoder_provider.delete_form:
+  path: "/admin/config/system/geocoder/geocoder-provider/manage/{geocoder_provider}/delete"
+  defaults:
+    _entity_form: "geocoder_provider.delete"
+    _title: "Delete a Geocoder provider"
+  requirements:
+    _permission: "administer site configuration"

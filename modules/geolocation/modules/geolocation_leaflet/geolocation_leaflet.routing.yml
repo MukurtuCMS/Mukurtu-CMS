@@ -1,0 +1,7 @@
+geolocation_leaflet.nominatim_settings:
+  path: '/admin/config/services/geolocation/nominatim'
+  defaults:
+    _form:  '\Drupal\geolocation_leaflet\Form\NominatimGeocodingSettings'
+    _title: 'Nominatim geocoding settings'
+  requirements:
+    _permission: 'configure geolocation'

@@ -1,0 +1,7 @@
+geolocation_google_maps_demo.googlegeocoder_widget:
+  path: '/geolocation-demo/widgets/googlegeocoder'
+  defaults:
+    _form: '\Drupal\geolocation_google_maps_demo\Form\GooglegeocoderWidget'
+    _title: 'Google Geocoder Widget'
+  requirements:
+    _permission: 'access content'

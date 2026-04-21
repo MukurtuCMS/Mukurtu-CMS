@@ -1,0 +1,48 @@
+layout_1:
+  label: 'Dashboard: 2 and one column'
+  path: templates/layouts
+  template: layouts--1
+  category: 'Dashboards'
+  class: '\Drupal\dashboards\Layouts\SectionLayout'
+  icon_map:
+    - [one, three]
+    - [two, three]
+  library: dashboards/layouts
+  regions:
+    one:
+      label: Left Top
+    two:
+      label: Left Bottom
+    three:
+      label: Right
+
+layout_2:
+  label: 'Dashboard: 3 columns'
+  path: templates/layouts
+  template: layouts--2
+  category: 'Dashboards'
+  icon_map:
+    - [one, two, three]
+  library: dashboards/layouts
+  regions:
+    one:
+      label: Left
+    two:
+      label: Middle
+    three:
+      label: Right
+
+layout_3:
+  label: 'Dashboard: 2 Columns'
+  path: templates/layouts
+  template: layouts--3
+  category: 'Dashboards'
+  class: '\Drupal\dashboards\Layouts\SectionLayout'
+  icon_map:
+    - [one, two]
+  library: dashboards/layouts
+  regions:
+    one:
+      label: Left
+    two:
+      label: Right

@@ -1,0 +1,429 @@
+/* Tagify component */
+
+.tagify {
+  --tag-inset-shadow-size: 1.5em !important;
+  --tag-border-radius: 1rem !important;
+  --tag-pad: 0.5rem 0.3em !important;
+
+  align-items: center !important;
+  width: 100%;
+  padding: 0 !important;
+}
+
+.tagify.form-element--api-entity-autocomplete-tagify,
+.tagify.form-element--type-select,
+.tagify.form-element--type-select-multiple {
+  background-image: url("data:image/svg+xml,%3csvg width='40' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 1C3.46.827-.188 5.787 1.313 10.068c1.176 4.384 6.993 6.417 10.637 3.7.326-.39.565.276.846.442l3.74 3.739 1.413-1.414-4.35-4.35c2.811-3.468 1.15-9.247-3.062-10.71A7.003 7.003 0 008 1zm0 2c3.242-.123 5.849 3.42 4.777 6.477-.842 3.132-4.994 4.58-7.6 2.65-2.745-1.73-2.9-6.125-.285-8.044A5.006 5.006 0 018 3z' fill='%23868686'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: 100% 50%;
+}
+
+.tagify.tagify--loading.form-element--api-entity-autocomplete-tagify,
+.tagify.tagify--loading.form-element--type-select,
+.tagify.tagify--loading.form-element--type-select-multiple {
+  background-image: none;
+}
+
+/* Tagify component focus */
+
+.page-wrapper .tagify :focus,
+.ui-dialog .tagify :focus {
+  box-shadow: none;
+}
+
+.tagify.form-element:hover {
+  box-shadow: inset 0 0 0 var(--input-border-size)
+    var(--input--hover-border-color);
+}
+
+.tagify.form-element--type-select-multiple:focus-within,
+.tagify.form-element--type-select:focus-within,
+.tagify.form-element--api-entity-autocomplete-tagify:focus-within {
+  box-shadow:
+    0 0 0 2px var(--color-white),
+    0 0 0 5px var(--color-focus),
+    inset 0 0 0 var(--input-border-size) var(--input--hover-border-color) !important;
+}
+
+.tagify__tag:focus div::before,
+.tagify__tag:hover:not([readonly]) div::before {
+  --tag-bg-inset: -1px;
+
+  border-radius: 2rem;
+}
+
+#tagify__tag-remove-button:focus {
+  box-shadow: var(--focus-box-shadow);
+}
+
+/* Remove button */
+
+#tagify__tag-remove-button {
+  margin-right: 0.5rem;
+  margin-left: 0.3rem;
+  color: #dedfe4;
+  background: #55565b;
+}
+
+#tagify__tag-remove-button:hover {
+  color: #fff;
+  background: var(--tag-remove-btn-bg--hover);
+}
+
+.tagify__tag__removeBtn:hover > .tagify__tag:hover {
+  background: #c77777;
+}
+
+.tagify__tag__removeBtn:hover + div {
+  opacity: 0.5;
+}
+
+/* Loading spinner */
+
+.tagify--loading .tagify__input::after {
+  right: 5px;
+  width: 17px;
+  height: 17px;
+  border: 2px solid var(--gin-bg-input);
+  border-top: 2px solid #003eccff;
+  border-radius: 50%;
+}
+
+/* Loading text */
+
+.tagify--loading-text {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  max-width: 100%;
+  margin-bottom: 0.15rem;
+  color: var(--color-link);
+  font-size: var(--font-size-xxs);
+  font-weight: bold;
+  line-height: calc(18rem / 16);
+}
+
+.tagify--loading .tagify--loading-text.hidden {
+  display: block;
+}
+
+/* Tag */
+
+.tagify__tag {
+  margin-inline: 8px 0;
+  height: 32px;
+  transition: none !important;
+}
+
+.tagify__tag > div {
+  display: flex;
+  align-items: center;
+}
+
+.tagify__tag-text {
+  margin-left: 0.5rem;
+  user-select: none;
+  font-size: 14px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 151.523%;
+}
+
+.tagify__tag-text-with-entity-id {
+  font-size: 14px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 151.523%;
+}
+
+/* Tag entity id chip */
+
+.tagify__tag_with-entity-id {
+  display: inline-block;
+  margin-right: 0.5rem;
+  text-align: center;
+  color: #55565b;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  line-height: 1.4rem;
+}
+
+.tagify__tag-entity-id {
+  background-color: white;
+}
+
+/* Tag info label chip */
+
+.tagify__tag__info-label-wrap {
+  display: inline-block;
+  margin-left: 0.5rem;
+  text-align: center;
+  color: #55565b;
+  border-radius: 1rem;
+  background-color: white;
+  font-size: 0.8rem;
+  line-height: 1.4rem;
+}
+
+#tagify__tag-items.tagify__tag_with-info-label {
+  padding: 4px;
+}
+
+.tagify__tag-info-label-image {
+  display: flex;
+}
+
+.tagify__tag-entity-id,
+.tagify__tag-info-label {
+  padding: 0.5rem;
+  font-size: 11px;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Suggestions dropdown */
+
+.tagify__dropdown__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: unset !important;
+}
+
+.tagify__tag .tagify__tag-info-label-image img,
+.tagify__tag .tagify__tag-info-label-image svg,
+.tagify__dropdown__item .tagify__tag-info-label-image img,
+.tagify__dropdown__item .tagify__tag-info-label-image svg {
+  width: 20px;
+  height: 20px;
+  transition: 0.12s ease-out;
+  white-space: normal;
+  object-fit: cover;
+  border-radius: 50%;
+  background: silver;
+}
+
+/* Tagify select element */
+
+.tagify.form-select {
+  cursor: default;
+}
+
+.tagify.form-select.form-element--type-select-multiple,
+.tagify.form-select.form-element--type-select {
+  z-index: 1;
+  padding-inline-end: calc(2rem - var(--input-border-size));
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 9'%3e%3cpath fill='none' stroke-width='1.5' d='M1 1l6 6 6-6' stroke='%23545560'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: 100% 50%;
+  background-size: 2.75rem 0.5625rem; /* w: 14px + (2 * 15px), h: 9px */
+}
+
+.tagify.form-select.form-element--type-select-multiple:focus-within,
+.tagify.form-select.form-element--type-select:focus-within {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 9'%3e%3cpath fill='none' stroke-width='1.5' d='M1 1l6 6 6-6' stroke='%23003ecc'/%3e%3c/svg%3e");
+}
+
+/* Tagify single value select element (Editable) */
+
+.tagify.form-select.form-element--type-select
+  .tagify__tag--editable
+  #tagify__tag-remove-button {
+  margin-right: 0.5rem;
+  background: none;
+}
+
+.tagify.form-select.form-element--type-select
+  .tagify__tag--editable
+  .tagify__tag-entity-id {
+  transition: 0.13s ease-out;
+  background: #d3e2e2;
+}
+
+.tagify.form-select.form-element--type-select
+  .tagify__tag--editable
+  .tagify__tag-text {
+  margin-left: 0.5rem;
+}
+
+.tagify.form-select.form-element--type-select.tagify--hasMaxTags
+  .tagify__input {
+  visibility: collapse;
+}
+
+/* Suggestions footer */
+
+.tagify__dropdown__footer {
+  font-size: 0.8em;
+}
+
+/* No matching suggestions */
+
+.tagify--dropdown-item-no-match {
+  display: grid;
+  grid-template-columns: 1fr auto !important;
+  align-items: center;
+  padding: var(--tagify-dd-item-pad);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.tagify--dropdown-item-no-match p {
+  grid-column: 1;
+  font-size: 0.8em;
+}
+
+.tagify--dropdown-item-no-match .tagify--value {
+  grid-column: 2;
+  font-size: 0.9em;
+}
+
+.field--widget-tagify-entity-reference-autocomplete-widget,
+.field--widget-tagify-select-widget {
+  position: relative;
+}
+
+/* Required validation in hidden input */
+.tagify + input.tagify-widget,
+.tagify + textarea.tagify-widget {
+  position: absolute !important;
+  z-index: -1;
+  left: 0 !important;
+  width: 100%;
+  transform: none !important;
+  opacity: 0;
+}
+
+/* Required validation in hidden select */
+select.tagify-select-widget {
+  position: absolute !important;
+  z-index: 0;
+  left: 0 !important;
+  float: left;
+  width: 100%;
+  height: 0;
+  opacity: 0;
+}
+
+/* Fix tag styling in mobile */
+@media screen and (max-width: 600px) {
+  .tagify__tag {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 86%;
+  }
+
+  .tagify__tag > div {
+    justify-content: space-between;
+    max-width: 90%;
+  }
+
+  .tagify__tag-text,
+  .tagify__tag-info-label {
+    white-space: nowrap !important;
+  }
+
+  .tagify__tag__info-label-wrap {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tagify__dropdown__item-highlighted {
+    overflow: hidden;
+    white-space: nowrap !important;
+    text-overflow: ellipsis;
+  }
+
+  .tagify__dropdown__item {
+    align-items: center;
+    justify-content: space-between;
+    white-space: unset !important;
+  }
+}
+
+/* Experience Builder integration */
+.experience-builder-container .tagify {
+  border: unset;
+  background-color: #fff;
+}
+.experience-builder-container .tagify + input,
+.tagify + textarea {
+  display: none;
+}
+
+.experience-builder-container
+  .tagify.rt-TextFieldInput:where(:disabled, :read-only) {
+  -webkit-text-fill-color: unset;
+}
+
+.experience-builder-container
+  .tagify-widget.rt-TextFieldRoot:where(.rt-r-size-2),
+.experience-builder-container
+  .tagify-user-list-widget.rt-TextFieldRoot:where(.rt-r-size-2) {
+  --text-field-height: unset;
+  --text-field-padding: unset;
+}
+
+.experience-builder-container .tagify__tag {
+  height: 30px;
+}
+
+.tagify__tag-text .tagify__tag-text-parent {
+  font-weight: normal;
+}
+
+.tagify__tag-text .tagify__tag-text-child {
+  font-size: 0.9rem;
+}
+
+/* Group suggestions */
+
+.tagify__dropdown__itemsGroup {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.tagify__dropdown__itemsGroup .dropdown_group {
+  padding: 0.2rem 0.4rem;
+  color: #032788;
+  font-size: 0.9rem;
+}
+
+.tagify__dropdown__itemsGroup .tagify__dropdown__item {
+  padding: 0.5rem 1rem;
+}
+
+.tagify__dropdown__item--parent {
+  padding: 0.2rem 0.4rem !important;
+  cursor: pointer;
+}
+
+.tagify__dropdown__item--parent .dropdown_group {
+  padding: 0;
+}
+
+.tagify__dropdown__item--parent:hover,
+.tagify__dropdown__item--parent.tagify__dropdown__item--active {
+  background: #032788;
+}
+
+.tagify__dropdown__item--parent:hover .dropdown_group,
+.tagify__dropdown__item--parent.tagify__dropdown__item--active .dropdown_group {
+  color: #fff;
+  font-weight: 600;
+}
+
+.tagify.form-element--api-entity-autocomplete-tagify-hierarchical-term-list:focus-within {
+  box-shadow:
+    0 0 0 2px var(--color-white),
+    0 0 0 5px var(--color-focus),
+    inset 0 0 0 var(--input-border-size) var(--input--hover-border-color) !important;
+}
+
+.tagify.form-element--api-entity-autocomplete-tagify-hierarchical-term-list {
+  background-image: url("data:image/svg+xml,%3csvg width='40' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 1C3.46.827-.188 5.787 1.313 10.068c1.176 4.384 6.993 6.417 10.637 3.7.326-.39.565.276.846.442l3.74 3.739 1.413-1.414-4.35-4.35c2.811-3.468 1.15-9.247-3.062-10.71A7.003 7.003 0 008 1zm0 2c3.242-.123 5.849 3.42 4.777 6.477-.842 3.132-4.994 4.58-7.6 2.65-2.745-1.73-2.9-6.125-.285-8.044A5.006 5.006 0 018 3z' fill='%23868686'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: 100% 50%;
+}

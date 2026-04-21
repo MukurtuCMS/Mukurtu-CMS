@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Test hook implementations for the message digest module.
+ */
+
+use Drupal\message_notify\Plugin\Notifier\MessageNotifierInterface;
+use Drupal\user\UserInterface;
+
+/**
+ * Implements hook_message_digest_aggregate_alter().
+ */
+function message_digest_test_message_digest_aggregate_alter(array &$context, UserInterface $account, MessageNotifierInterface $notifier) {
+  // Set a state variable to verify this has been called.
+  \Drupal::state()->set(__FUNCTION__, TRUE);
+}
+
+/**
+ * Implements hook_message_digest_view_mode_alter().
+ */
+function message_digest_test_message_digest_view_mode_alter(array &$context, MessageNotifierInterface $notifer, UserInterface $account) {
+  // Set a state variable to verify this has been called.
+  \Drupal::state()->set(__FUNCTION__, TRUE);
+
+  // If set to do so, remove the given view mode.
+  if ($view_mode = \Drupal::state()->get('message_digest_test_remove_view_mode', FALSE)) {
+    unset($context['view_modes'][$view_mode]);
+  }
+}

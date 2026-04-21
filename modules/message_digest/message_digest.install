@@ -1,0 +1,241 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks for the Message Digest module.
+ */
+
+use Drupal\Core\Config\Entity\ConfigEntityType;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\message_digest\Entity\MessageDigestInterval;
+use Drupal\message_digest\Form\MessageDigestIntervalForm;
+use Drupal\message_digest\MessageDigestIntervalListBuilder;
+
+/**
+ * Implements hook_schema().
+ *
+ * Add the message_digest table.
+ */
+function message_digest_schema() {
+  $schema['message_digest'] = [
+    'description' => 'Storage of all sent messages for use in message digests',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Numeric message notification ID.',
+      ],
+      'mid' => [
+        'description' => 'The message ID of the originating message.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ],
+      'entity_type' => [
+        'description' => 'The entity type the message pertains to. This is used for grouping digests.',
+        'type' => 'varchar',
+        'length' => EntityTypeInterface::ID_MAX_LENGTH,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'entity_id' => [
+        'description' => 'The entity ID the message should be grouped with.',
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => 128,
+      ],
+      'receiver' => [
+        'description' => 'The user ID of the acting user.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ],
+      'notifier' => [
+        'description' => 'The notification method used to send the notification.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'sent' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'Boolean for whether the message has already been sent in a digest or not.',
+      ],
+      'timestamp' => [
+        'description' => 'When the message instance was recorded.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'aggregate' => ['timestamp', 'sent', 'notifier'],
+      'sent' => ['receiver', 'notifier'],
+      'mid' => ['mid'],
+    ],
+  ];
+  return $schema;
+}
+
+/**
+ * Adds indexes to the message_digest table.
+ */
+function message_digest_update_8100() {
+  $spec = [
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Numeric message notification ID.',
+      ],
+      'mid' => [
+        'description' => 'The message ID of the originating message.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ],
+      'entity_type' => [
+        'description' => 'The entity type the message pertains to. This is used for grouping digests.',
+        'type' => 'varchar',
+        'length' => EntityTypeInterface::ID_MAX_LENGTH,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'entity_id' => [
+        'description' => 'The entity ID the message should be grouped with.',
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => 128,
+      ],
+      'receiver' => [
+        'description' => 'The user ID of the acting user.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ],
+      'notifier' => [
+        'description' => 'The notification method used to send the notification.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'sent' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'Boolean for whether the message has already been sent in a digest or not.',
+      ],
+      'timestamp' => [
+        'description' => 'When the message instance was recorded.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ],
+    ],
+  ];
+
+  $schema = \Drupal::database()->schema();
+  if (!$schema->indexExists('message_digest', 'aggregate')) {
+    $schema->addIndex('message_digest', 'aggregate', ['timestamp', 'sent', 'notifier'], $spec);
+  }
+  if (!$schema->indexExists('message_digest', 'sent')) {
+    $schema->addIndex('message_digest', 'sent', ['receiver', 'notifier'], $spec);
+  }
+}
+
+/**
+ * Converts hard-coded intervals to config entities.
+ */
+function message_digest_update_8101() {
+  // Install the new entity type.
+  $config_entity = new ConfigEntityType([
+    'id' => 'message_digest_interval',
+    'label' => new TranslatableMarkup('Message digest interval'),
+    'config_prefix' => 'interval',
+    'admin_permission' => 'administer message digest',
+    'entity_keys' => [
+      'id' => 'id',
+      'label' => 'label',
+      'langcode' => 'langcode',
+    ],
+    'config_export' => [
+      'id',
+      'label',
+      'interval',
+      'langcode',
+      'description',
+    ],
+    'handlers' => [
+      'form' => [
+        'add' => MessageDigestIntervalForm::class,
+        'edit' => MessageDigestIntervalForm::class,
+      ],
+      'list_builder' => MessageDigestIntervalListBuilder::class,
+    ],
+    'links' => [
+      'add-form' => '/admin/config/message/message-digest/interval/add',
+      'edit-form' => '/admin/config/message/message-digest/manage/{message_digest_interval}',
+    ],
+  ]);
+  \Drupal::entityDefinitionUpdateManager()->installEntityType($config_entity);
+
+  // Installs the message digest daily and weekly intervals.
+  $config = MessageDigestInterval::create([
+    'id' => 'daily',
+    'label' => 'Daily',
+    'description' => 'Sends messages in 1 day intervals.',
+    'interval' => '1 day',
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => [],
+  ]);
+  $config->save();
+
+  $config = MessageDigestInterval::create([
+    'id' => 'weekly',
+    'label' => 'Weekly',
+    'description' => 'Sends messages in 1 week intervals.',
+    'interval' => '1 week',
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => [],
+  ]);
+  $config->save();
+
+}
+
+/**
+ * Add unique index to mid field.
+ */
+function message_digest_update_8102() {
+  $schema = \Drupal::database()->schema();
+  if (!$schema->indexExists('message_digest', 'mid')) {
+    $schema->addUniqueKey('message_digest', 'mid', ['mid']);
+  }
+}
+
+/**
+ * Issue 3060135 Add index on {message_digest}.mid, drop unique key if present.
+ */
+function message_digest_update_8103() {
+  $schema = \Drupal::database()->schema();
+  $message_digest_schema = message_digest_schema();
+  $spec = $message_digest_schema['message_digest'];
+  $schema->dropUniqueKey('message_digest', 'mid');
+  $schema->addIndex('message_digest', 'mid', ['mid'], $spec);
+}

@@ -1,0 +1,39 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.geolocation_geometry_demo.field_geolocation_geometry_point
+    - field.field.node.geolocation_geometry_demo.field_geolocation_geometry_polyg
+    - node.type.geolocation_geometry_demo
+  module:
+    - geolocation_geometry
+    - text
+    - user
+  enforced:
+    module:
+      - geolocation_geometry_demo
+id: node.geolocation_geometry_demo.default
+targetEntityType: node
+bundle: geolocation_geometry_demo
+mode: default
+content:
+  field_geolocation_geometry_point:
+    weight: 102
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: geolocation_geometry_wkt
+    region: content
+  field_geolocation_geometry_polyg:
+    weight: 103
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: geolocation_geometry_wkt
+    region: content
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden: {  }

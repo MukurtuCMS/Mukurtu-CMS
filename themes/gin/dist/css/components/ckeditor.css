@@ -1,0 +1,158 @@
+.gin--dark-mode .cke.cke .cke_inner,
+.gin--dark-mode .cke.cke .cke_wysiwyg_frame,
+.gin--dark-mode .cke.cke .cke_wysiwyg_div {
+  background: var(--gin-bg-layer2);
+}
+
+.cke.cke.cke_chrome {
+  width: 100% !important;
+  border-color: var(--gin-border-color-form-element);
+  border-radius: var(--gin-border-m);
+}
+
+.cke.cke .cke_inner {
+  border-radius: var(--gin-border-m);
+}
+
+.cke.cke .cke_top {
+  background: var(--gin-bg-layer);
+  border-block-end: 1px solid var(--gin-border-color);
+  border-radius: calc(var(--gin-border-m) - 1px) calc(var(--gin-border-m) - 1px) 0 0;
+}
+
+.gin--dark-mode .cke.cke .cke_top {
+  background: var(--gin-bg-layer2);
+}
+
+.cke.cke .cke_bottom {
+  background: var(--gin-bg-layer3);
+  border-radius: 0 0 calc(var(--gin-border-m) - 1px) calc(var(--gin-border-m) - 1px);
+}
+
+.cke.cke .cke_contents {
+  padding-inline: var(--gin-spacing-xs);
+}
+
+.cke.cke .cke_path_empty:only-child::after {
+  background: transparent;
+}
+
+.cke.cke .cke_combo::after {
+  border-inline-end: 1px solid var(--gin-border-color);
+}
+
+.cke.cke .cke_combo_text {
+  color: var(--gin-color-text);
+}
+
+.cke.cke .cke_combo_on a.cke_combo_button,
+.cke.cke .cke_combo_off a.cke_combo_button:hover,
+.cke.cke .cke_combo_off a.cke_combo_button:focus,
+.cke.cke .cke_combo_off a.cke_combo_button:active {
+  background: var(--gin-bg-app);
+  border: 1px solid var(--gin-bg-layer2);
+}
+
+.cke.cke a.cke_path_item,
+.cke.cke span.cke_path_empty {
+  color: var(--gin-color-text-light);
+}
+
+.cke.cke a.cke_button {
+  border-radius: 3px;
+}
+
+.cke.cke a.cke_button_on {
+  background: none;
+}
+
+.cke.cke a.cke_button_off:hover, .cke.cke a.cke_button_off:focus, .cke.cke a.cke_button_off:active {
+  background: var(--gin-bg-item-hover);
+  border: 1px solid var(--gin-border-color-layer2);
+}
+
+.gin--dark-mode .cke.cke .cke_button span {
+  filter: invert(1);
+}
+
+.cke.cke.cke_panel {
+  background-color: var(--gin-bg-app);
+  border: 0 none;
+}
+
+.cke.cke_chrome.cke_focus,
+.cke.cke_chrome:hover,
+.cke:hover .cke_contents,
+.cke:hover .cke_top,
+.cke:hover .cke_bottom {
+  border-color: var(--gin-color-text);
+}
+
+.gin--dark-mode .cke.cke_chrome.cke_focus,
+.gin--dark-mode .cke.cke_chrome:hover,
+.gin--dark-mode .cke:hover .cke_contents,
+.gin--dark-mode .cke:hover .cke_top,
+.gin--dark-mode .cke:hover .cke_bottom {
+  border-color: var(--gin-border-color-layer2);
+}
+
+.cke:hover .cke_top, .gin--dark-mode .cke:hover .cke_top {
+  border-block-end-color: var(--gin-border-color);
+}
+
+.cke.cke_chrome.cke_focus:hover,
+.cke.cke_focus .cke_contents,
+.cke.cke_focus .cke_top,
+.cke.cke_focus .cke_bottom,
+.error + .cke.cke_chrome.cke_focus:hover,
+.error + .cke.cke_focus .cke_contents,
+.error + .cke.cke_focus .cke_top,
+.error + .cke.cke_focus .cke_bottom {
+  border-color: var(--gin-color-text);
+}
+
+.cke_top,
+.cke.cke_chrome.cke_focus:hover .cke_top,
+.cke.cke_focus .cke_top,
+.error + .cke.cke_focus .cke_top,
+.error + .cke.cke_chrome.cke_focus:hover .cke_top {
+  border-block-end: 1px solid var(--gin-border-color);
+}
+
+.cke textarea.cke_source {
+  padding: var(--gin-spacing-s) var(--gin-spacing-xs);
+  color: var(--gin-color-text);
+  background-color: transparent;
+}
+
+body .cke_notification_info {
+  opacity: 1;
+  padding: var(--gin-spacing-xs);
+  background: var(--gin-bg-layer4);
+  border: 0 none;
+  border-radius: var(--gin-border-m);
+  box-shadow: var(--gin-shadow-l1);
+}
+
+body .cke_notification_info .cke_notification_message {
+  color: var(--gin-color-text);
+}
+
+body .cke_notification_info .cke_notification_close {
+  inset-block-start: var(--gin-spacing-xxs);
+  inset-inline-end: var(--gin-spacing-xxs);
+  background: var(--gin-color-text);
+  -webkit-mask-image: url("../../media/sprite.svg#close-view");
+          mask-image: url("../../media/sprite.svg#close-view");
+  -webkit-mask-position: center center;
+          mask-position: center center;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-size: 12px 12px;
+          mask-size: 12px 12px;
+}
+
+.filter-tips {
+  color: var(--gin-color-text-light);
+}
+

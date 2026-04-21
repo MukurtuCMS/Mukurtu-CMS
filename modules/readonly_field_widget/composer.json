@@ -1,0 +1,12 @@
+{
+    "name": "drupal/readonly_field_widget",
+    "type": "drupal-module",
+    "description": "Provides a field widget which can display the field formatter version of a field on the edit form.",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "homepage": "https://www.drupal.org/project/readonly_field_widget",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/readonly_field_widget",
+        "source": "https://git.drupalcode.org/project/readonly_field_widget"
+    }
+}

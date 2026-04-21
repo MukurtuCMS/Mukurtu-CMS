@@ -1,0 +1,386 @@
+<?php
+
+/**
+ * @file
+ * Provide address integration where due.
+ */
+
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\WidgetInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\geolocation\Plugin\Field\FieldWidget\GeolocationMapWidgetBase;
+use Drupal\geolocation_address\Plugin\migrate\field\Location;
+
+/**
+ * Implements hook_geolocation_field_map_widget_alter().
+ */
+function geolocation_address_geolocation_field_map_widget_alter(&$element, $context) {
+  /** @var \Drupal\geolocation\Plugin\Field\FieldWidget\GeolocationMapWidgetBase $widget */
+  $widget = $context['widget'];
+
+  /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
+  $field_definition = $context['field_definition'];
+
+  $settings = geolocation_address_get_widget_settings($widget);
+
+  if (empty($settings['enable'])) {
+    return;
+  }
+
+  $address_label = t('Address');
+  /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $all_field_definitions */
+  $all_field_definitions = Drupal::service('entity_field.manager')->getFieldDefinitions(
+    $field_definition->getTargetEntityTypeId(),
+    $field_definition->getTargetBundle()
+  );
+
+  foreach ($all_field_definitions as $single_field_definition) {
+    if ($single_field_definition->getName() == $settings['address_field']) {
+      $address_label = $single_field_definition->getLabel();
+    }
+  }
+
+  $element['#attached'] = BubbleableMetadata::mergeAttachments(
+    empty($element['#attached']) ? [] : $element['#attached'],
+    [
+      'library' => [
+        'geolocation_address/geolocation_address.widget',
+      ],
+      'drupalSettings' => [
+        'geolocation' => [
+          'addressIntegration' => [
+            $element['widget']['#field_name'] => [
+              'geocoder' => $settings['geocoder'],
+              'settings' => $settings['settings'],
+              'address_field' => $settings['address_field'],
+              'sync_mode' => $settings['sync_mode'],
+              'direction' => $settings['direction'],
+              'ignore' => $settings['ignore'],
+            ],
+          ],
+        ],
+      ],
+    ]
+  );
+
+  $element['#attributes'] = BubbleableMetadata::mergeAttachments(
+    empty($element['#attributes']) ? [] : $element['#attributes'],
+    ['data-address-integration' => $element['widget']['#field_name']]
+  );
+
+  if ($settings['sync_mode'] == 'manual') {
+    if (empty($element['map'])) {
+      return;
+    }
+
+    $element['map']['#controls']['geolocation_address'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => [
+          'geolocation-map-control',
+          'geolocation-address',
+        ],
+      ],
+    ];
+    if (!empty($element['#address_settings']['button_position'])) {
+      $element['map']['#controls']['geolocation_address']['#attributes']['data-control-position'] = $element['#address_settings']['button_position'];
+    }
+
+    $element['map']['#controls']['geolocation_address']['address_pull'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'button',
+      '#attributes' => [
+        'class' => [
+          'address-button',
+          'address-button-pull',
+        ],
+        'title' => t('Pull all address from %address onto map', ['%address' => $address_label]),
+      ],
+      '#value' => t('Pull from %address', ['%address' => $address_label]),
+    ];
+
+    if ($settings['direction'] == 'duplex') {
+      $element['map']['#controls']['geolocation_address']['address_push'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'button',
+        '#attributes' => [
+          'class' => [
+            'address-button',
+            'address-button-push',
+          ],
+          'title' => t('Push current location data to %address', ['%address' => $address_label]),
+        ],
+        '#value' => t('Push to %address', ['%address' => $address_label]),
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_field_widget_third_party_settings_form().
+ */
+function geolocation_address_field_widget_third_party_settings_form(WidgetInterface $widget, FieldDefinitionInterface $field_definition, $form_mode, $form, FormStateInterface $form_state) {
+  if (!($widget instanceof GeolocationMapWidgetBase)) {
+    return [];
+  }
+
+  /** @var \Drupal\geolocation_google_maps\Plugin\Field\FieldWidget\GeolocationGoogleWidget $widget */
+
+  $field_storage_definition = $field_definition->getFieldStorageDefinition();
+
+  $form_parent_name = 'fields[' . $field_definition->getName() . '][settings_edit_form][third_party_settings][geolocation_address]';
+
+  $settings = geolocation_address_get_widget_settings($widget);
+  if (!empty($form_state->getTriggeringElement()['#name']) && $form_state->getTriggeringElement()['#name'] == $form_parent_name . '[geocoder]') {
+    $settings['geocoder'] = $form_state->getTriggeringElement()['#value'];
+  }
+
+  /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $all_field_definitions */
+  $all_field_definitions = Drupal::service('entity_field.manager')->getFieldDefinitions($field_definition->getTargetEntityTypeId(), $field_definition->getTargetBundle());
+
+  $address_fields = [];
+  foreach ($all_field_definitions as $single_field_definition) {
+    if (
+      $single_field_definition->getType() == 'address'
+      && ($single_field_definition->getFieldStorageDefinition()->getCardinality() == $field_storage_definition->getCardinality())
+    ) {
+      $address_fields[$single_field_definition->getName()] = $single_field_definition->getLabel();
+    }
+  }
+
+  if (empty($address_fields)) {
+    return [];
+  }
+
+  /** @var \Drupal\geolocation\GeocoderManager $geocoder_manager */
+  $geocoder_manager = Drupal::service('plugin.manager.geolocation.geocoder');
+
+  $geocoder_options = [];
+  foreach ($geocoder_manager->getDefinitions() as $geocoder_id => $geocoder_definition) {
+    if (empty($geocoder_definition['locationCapable'])) {
+      continue;
+    }
+    if (
+      $settings['direction'] == 'duplex'
+      && empty($geocoder_definition['reverseCapable'])
+    ) {
+      continue;
+    }
+    $geocoder_options[$geocoder_id] = $geocoder_definition['name'];
+  }
+
+  if (empty($geocoder_options)) {
+    return [];
+  }
+
+  $element = [
+    '#type' => 'details',
+    '#title' => t('Address integration'),
+    '#open' => TRUE,
+  ];
+
+  $element['enable'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Enable address integration'),
+    '#default_value' => $settings['enable'],
+  ];
+
+  $element['address_field'] = [
+    '#type' => 'select',
+    '#title' => t('Select address field'),
+    '#options' => $address_fields,
+    '#default_value' => $settings['address_field'],
+    '#states' => [
+      'visible' => [
+        ':input[name="' . $form_parent_name . '[enable]"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+
+  $element['geocoder'] = [
+    '#type' => 'select',
+    '#options' => $geocoder_options,
+    '#title' => t('Geocoder plugin'),
+    '#default_value' => $settings['geocoder'],
+    '#ajax' => [
+      'callback' => [
+        get_class($geocoder_manager), 'addGeocoderSettingsFormAjax',
+      ],
+      'wrapper' => 'geolocation-address-geocoder-plugin-settings',
+      'effect' => 'fade',
+    ],
+    '#states' => [
+      'visible' => [
+        ':input[name="' . $form_parent_name . '[enable]"]' => [
+          'checked' => TRUE,
+        ],
+      ],
+    ],
+  ];
+
+  if (!empty($settings['geocoder'])) {
+    $geocoder_plugin = $geocoder_manager->getGeocoder(
+      $settings['geocoder'],
+      $settings['settings']
+    );
+  }
+  elseif (current(array_keys($geocoder_options))) {
+    $geocoder_plugin = $geocoder_manager->getGeocoder(current(array_keys($geocoder_options)));
+  }
+
+  if (!empty($geocoder_plugin)) {
+    $geocoder_settings_form = $geocoder_plugin->getOptionsForm();
+    if ($geocoder_settings_form) {
+      $element['settings'] = $geocoder_settings_form;
+    }
+  }
+
+  if (empty($element['settings'])) {
+    $element['settings'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'span',
+      '#value' => t("No settings available."),
+    ];
+  }
+
+  $element['settings'] = array_replace_recursive($element['settings'], [
+    '#type' => 'container',
+    '#prefix' => '<div id="geolocation-address-geocoder-plugin-settings">',
+    '#suffix' => '</div>',
+    '#flatten' => TRUE,
+    '#states' => [
+      'visible' => [
+        ':input[name="' . $form_parent_name . '[enable]"]' => ['checked' => TRUE],
+      ],
+    ],
+  ]);
+
+  $element['sync_mode'] = [
+    '#type' => 'radios',
+    '#title' => t('Synchronization'),
+    '#default_value' => $settings['sync_mode'],
+    '#options' => [
+      'auto' => t('Automatically'),
+      'manual' => t('Manually by push&pull buttons'),
+    ],
+    '#states' => [
+      'visible' => [
+        ':input[name="' . $form_parent_name . '[enable]"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+
+  $control_positions = $widget->getMapProvider()::getControlPositions();
+  if ($control_positions) {
+    $element['button_position'] = [
+      '#type' => 'select',
+      '#title' => t('Button position'),
+      '#options' => $control_positions,
+      '#default_value' => $settings['button_position'],
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $form_parent_name . '[enable]"]' => ['checked' => TRUE],
+          ':input[name="' . $form_parent_name . '[sync_mode]"]' => ['value' => 'manual'],
+        ],
+      ],
+    ];
+  }
+
+  $element['direction'] = [
+    '#type' => 'radios',
+    '#title' => t('Direction'),
+    '#default_value' => $settings['direction'],
+    '#options' => [
+      'duplex' => t('Full Duplex | Address <> Geolocation'),
+      'one_way' => t('One Way | Address > Geolocation'),
+    ],
+    '#states' => [
+      'visible' => [
+        ':input[name="' . $form_parent_name . '[enable]"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+
+  $element['ignore'] = [
+    '#type' => 'checkboxes',
+    '#title' => t('Ignore address elements'),
+    '#default_value' => array_keys(array_filter($settings['ignore'])),
+    '#options' => [
+      'organization' => 'organization',
+      'address-line1' => 'address-line1',
+      'address-line2' => 'address-line2',
+      'locality' => 'locality',
+      'administrative-area' => 'administrative-area',
+      'postal-code' => 'postal-code',
+    ],
+    '#states' => [
+      'visible' => [
+        ':input[name="' . $form_parent_name . '[enable]"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_widget_settings_summary_alter().
+ */
+function geolocation_address_field_widget_settings_summary_alter(&$summary, $context) {
+  /** @var \Drupal\geolocation\Plugin\Field\FieldWidget\GeolocationMapWidgetBase $widget */
+  $widget = $context['widget'];
+
+  if (!($widget instanceof GeolocationMapWidgetBase)) {
+    return;
+  }
+
+  $settings = geolocation_address_get_widget_settings($widget);
+  if (!empty($settings['enable'])) {
+    $summary[] = t('Syncing with %field address field', ['%field' => $settings['address_field']]);
+  }
+
+}
+
+/**
+ * Returns geolocation_address third party settings of a widget.
+ *
+ * @param \Drupal\Core\Field\WidgetInterface $widget
+ *   The widget.
+ *
+ * @return array
+ *   The widget settings including defaults.
+ */
+function geolocation_address_get_widget_settings(WidgetInterface $widget) {
+  $settings = $widget->getThirdPartySettings('geolocation_address');
+
+  // Backwards compatibility if the third party settings have the
+  // geocoder_settings key but not settings.
+  if (isset($settings['geocoder_settings']) && !isset($settings['settings'])) {
+    $settings['settings'] = $settings['geocoder_settings'];
+    unset($settings['geocoder_settings']);
+  }
+
+  return $settings + [
+    'enable' => FALSE,
+    'address_field' => NULL,
+    'geocoder' => NULL,
+    'settings' => [],
+    'sync_mode' => 'auto',
+    'direction' => 'duplex',
+    'button_position' => NULL,
+    'ignore' => [],
+  ];
+}
+
+/**
+ * Implements hook_migrate_field_info_alter().
+ */
+function geolocation_address_migrate_field_info_alter(&$definitions) {
+  // When geolocation and also address modules are present, we can migrate both
+  // the geological locations and also the addresses into their own field.
+  if (!empty($definitions['location'])) {
+    $definitions['location']['class'] = Location::class;
+    $definitions['location']['provider'] = 'geolocation_address';
+  }
+}

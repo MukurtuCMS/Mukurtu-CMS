@@ -1,0 +1,413 @@
+name: Jump Start Config-Sets
+
+env:
+  NEXT_MODULE_VERSION: 4.3.10
+
+on:
+    push:
+
+    pull_request:
+
+    schedule:
+        - cron: '0 8 * * *' # run at 08:00 UTC
+
+jobs:
+    generate-config-sets:
+        runs-on: ubuntu-24.04
+
+        name: Generate Solr jump-start config-sets
+
+        env:
+          COMPOSER_MEMORY_LIMIT: -1
+          SEARCH_API_SOLR_JUMP_START_CONFIG_SET: 1
+
+        steps:
+            - name: Setup sqlite
+              run: |
+                sudo apt-get update
+                sudo apt-get install sqlite3 libsqlite3-dev
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: 8.3
+                extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl, gd, iconv, json, simplexml
+                ini-values: memory_limit=256M,post_max_size=256M
+                coverage: none
+
+            - name: Checkout drupal
+              uses: actions/checkout@v4
+              with:
+                repository: drupal/drupal
+                ref: 10.4.x
+                path: drupal
+
+            - name: Checkout search_api_solr
+              uses: actions/checkout@v4
+              with:
+                path: search_api_solr
+                fetch-depth: 0
+
+            - name: Tag search_api_solr
+              run: |
+                cd search_api_solr
+                git tag ${{ env.NEXT_MODULE_VERSION }}
+
+            - name: Install dependencies
+              run: |
+                cd drupal
+                php -v
+                composer config repositories.search_api_solr '{"type": "vcs", "url": "../search_api_solr"}'
+                composer require drupal/search_api_solr:${{ env.NEXT_MODULE_VERSION }} drush/drush drupal/drush_language --no-interaction
+
+            - name: Install drupal
+              run: |
+                cd drupal
+                vendor/bin/drush si minimal --db-url=sqlite://sites/default/files/db.sqlite --yes
+                vendor/bin/drush en drush_language --yes
+                vendor/bin/drush language-add ar
+                vendor/bin/drush language-add bg
+                vendor/bin/drush language-add ca
+                vendor/bin/drush language-add cs
+                vendor/bin/drush language-add cy
+                vendor/bin/drush language-add da
+                vendor/bin/drush language-add de
+                vendor/bin/drush language-add el
+                vendor/bin/drush language-add es
+                vendor/bin/drush language-add et
+                vendor/bin/drush language-add fa
+                vendor/bin/drush language-add fi
+                vendor/bin/drush language-add fr
+                vendor/bin/drush language-add ga
+                vendor/bin/drush language-add hi
+                vendor/bin/drush language-add hr
+                vendor/bin/drush language-add hu
+                vendor/bin/drush language-add id
+                vendor/bin/drush language-add it
+                vendor/bin/drush language-add ja
+                vendor/bin/drush language-add ko
+                vendor/bin/drush language-add lv
+                vendor/bin/drush language-add nb
+                vendor/bin/drush language-add nl
+                vendor/bin/drush language-add nn
+                vendor/bin/drush language-add pl
+                vendor/bin/drush language-add pt-pt
+                vendor/bin/drush language-add pt-br
+                vendor/bin/drush language-add ro
+                vendor/bin/drush language-add ru
+                vendor/bin/drush language-add sk
+                vendor/bin/drush language-add sr
+                vendor/bin/drush language-add sv
+                vendor/bin/drush language-add th
+                vendor/bin/drush language-add tr
+                vendor/bin/drush language-add uk
+                vendor/bin/drush language-add zh-hans
+                vendor/bin/drush language-add zh-hant
+                vendor/bin/drush en search_api_solr_legacy,config --yes
+                vendor/bin/drush cim --partial --source=modules/contrib/search_api_solr/jump-start/drupal_configs --yes
+
+            - name: Generate config-sets
+              run: |
+                cd drupal
+                vendor/bin/drush -v solr-gsc solr_36 config.zip 3.6
+                rm ../search_api_solr/jump-start/solr3/config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr3/config-set config.zip
+                vendor/bin/drush -v solr-gsc solr config.zip 4.5
+                rm ../search_api_solr/jump-start/solr4/config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr4/config-set config.zip
+                vendor/bin/drush -v solr-gsc solr config.zip 5
+                rm ../search_api_solr/jump-start/solr5/config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr5/config-set config.zip
+                vendor/bin/drush -v solr-gsc solr config.zip 6
+                rm ../search_api_solr/jump-start/solr6/config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr6/config-set config.zip
+                vendor/bin/drush -v solr-gsc solr config.zip 7
+                rm ../search_api_solr/jump-start/solr7/config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr7/config-set config.zip
+                vendor/bin/drush -v solr-gsc solr config.zip 8
+                rm ../search_api_solr/jump-start/solr8/config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr8/config-set config.zip
+                vendor/bin/drush -v solr-gsc solr config.zip 9.8
+                rm ../search_api_solr/jump-start/solr9/config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr9/config-set config.zip
+                vendor/bin/drush -v solr-gsc solr_cloud config.zip 4.5
+                rm ../search_api_solr/jump-start/solr4/cloud-config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr4/cloud-config-set config.zip
+                vendor/bin/drush -v solr-gsc solr_cloud config.zip 5
+                rm ../search_api_solr/jump-start/solr5/cloud-config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr5/cloud-config-set config.zip
+                vendor/bin/drush -v solr-gsc solr_cloud config.zip 6
+                rm ../search_api_solr/jump-start/solr6/cloud-config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr6/cloud-config-set config.zip
+                vendor/bin/drush -v solr-gsc solr_cloud config.zip 7
+                rm ../search_api_solr/jump-start/solr7/cloud-config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr7/cloud-config-set config.zip
+                vendor/bin/drush -v solr-gsc solr_cloud config.zip 8
+                rm ../search_api_solr/jump-start/solr8/cloud-config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr8/cloud-config-set config.zip
+                vendor/bin/drush -v solr-gsc solr_cloud config.zip 9.8
+                rm ../search_api_solr/jump-start/solr9/cloud-config-set/*
+                unzip -o -d ../search_api_solr/jump-start/solr9/cloud-config-set config.zip
+
+            - uses: actions/upload-artifact@v4
+              with:
+                name: jump-start-config-sets
+                path: search_api_solr/jump-start
+
+    run-tests:
+        runs-on: ubuntu-24.04
+
+        needs: generate-config-sets
+
+        continue-on-error: ${{ matrix.experimental }}
+
+        strategy:
+            matrix:
+                drupal: ['10.4', '11.1']
+                solr: ['4', '5', '6', '7', '8', '9']
+                php: ['8.3', '8.4']
+                solarium: ['solarium/solarium:"dev-master as 6.3.99"']
+                experimental: [false]
+                include:
+                  - drupal: '10.4'
+                    solr: '8'
+                    php: '8.2'
+                    solarium: 'solarium/solarium'
+                    experimental: false
+
+        name: Drupal ${{ matrix.drupal }}, Solr ${{ matrix.solr }}, PHP ${{ matrix.php }}
+
+        env:
+          COMPOSER_MEMORY_LIMIT: -1
+
+        steps:
+            - name: Setup sqlite
+              run: |
+                sudo apt-get update
+                sudo apt-get install sqlite3 libsqlite3-dev
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: ${{ matrix.php }}
+                extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl, gd, iconv, json, simplexml
+                ini-values: memory_limit=256M,post_max_size=256M
+                coverage: none
+
+            - uses: actions/download-artifact@v4
+              with:
+                name: jump-start-config-sets
+                path: solr
+
+            - name: Start Solr ${{ matrix.solr }}
+              run: |
+                cd solr/solr${{ matrix.solr }}
+                cat docker-compose.yml
+                docker compose up -d
+
+            - name: Checkout drupal
+              uses: actions/checkout@v4
+              with:
+                repository: drupal/drupal
+                ref: ${{ matrix.drupal }}.x
+                path: drupal
+
+            - name: Checkout search_api_solr
+              uses: actions/checkout@v4
+              with:
+                path: search_api_solr
+                fetch-depth: 0
+
+            - name: Tag search_api_solr
+              run: |
+                cd search_api_solr
+                git tag ${{ env.NEXT_MODULE_VERSION }}
+
+            - name: Install dependencies
+              run: |
+                cd drupal
+                php -v
+                composer config platform.php ${{ matrix.php }}.0
+                composer config repositories.search_api_solr '{"type": "vcs", "url": "../search_api_solr"}'
+                composer install --no-interaction
+                composer require ${{ matrix.solarium }} drupal/search_api_solr:${{ env.NEXT_MODULE_VERSION }} --no-interaction
+                # search_api was installed as dependency above. This is a required check! Now switch to the latest dev version.
+                composer require drupal/search_api:1.x-dev --no-interaction
+                composer require \
+                  drupal/search_api_autocomplete:1.x-dev \
+                  drupal/search_api_spellcheck:4.0.x-dev \
+                  drupal/facets:3.0.x-dev \
+                  drupal/better_exposed_filters \
+                  drupal/devel \
+                  drupal/search_api_location:1.x-dev \
+                  drupal/geofield \
+                  drush/drush \
+                  monolog/monolog \
+                  --no-interaction
+                # cd modules/contrib/search_api
+                # wget https://www.drupal.org/files/issues/2022-11-04/3318187-19--fix_views_filter_regressions.patch
+                # patch -p1 < 3318187-19--fix_views_filter_regressions.patch
+                # cd -
+
+            - name: Create Solr collections
+              run: |
+                docker ps
+                docker exec solr${{ matrix.solr }}-solr${{ matrix.solr }}-1 wait-for-solr.sh
+                docker exec solr${{ matrix.solr }}-solr${{ matrix.solr }}-1 bin/solr create -c techproducts -d server/solr/configsets/sample_techproducts_configs/conf -n sample_techproducts_configs
+                docker exec solr${{ matrix.solr }}-solr${{ matrix.solr }}-1 bash -c "bin/post -c techproducts example/exampledocs/*.xml"
+                docker exec solr${{ matrix.solr }}-solr${{ matrix.solr }}-1 bin/solr create -c checkpoints
+
+            - name: Run tests
+              env:
+                SOLR_INDEX_WAIT: 4
+                SOLR_CLOUD: true
+                SYMFONY_DEPRECATIONS_HELPER: disabled
+              run: |
+                cp search_api_solr/tests/github.phpunit.xml drupal/core/phpunit.xml.dist
+                cd drupal
+                php -S localhost:8888 >& /dev/null &
+                vendor/bin/drush si standard --db-url=sqlite://sites/default/files/db.sqlite --yes
+                vendor/bin/drush en search_api_solr_admin,search_api_solr_devel,search_api_solr_legacy,search_api_solr_log,search_api_spellcheck,search_api_solr_autocomplete,facets,search_api_location --yes
+                vendor/bin/phpunit -c core --group search_api_solr --exclude-group not_drupal${{ matrix.drupal }},not_solr${{ matrix.solr }} modules/contrib/search_api_solr
+                vendor/bin/drush cim --partial --source=modules/contrib/search_api_solr/jump-start/drupal_configs --yes
+                vendor/bin/drush -v solr-gsc solr_cloud test-config-generation.zip
+                vendor/bin/drush -v cron
+
+    run-legacy-tests:
+      runs-on: ubuntu-24.04
+
+      needs: generate-config-sets
+
+      continue-on-error: ${{ matrix.experimental }}
+
+      strategy:
+        matrix:
+          drupal: ['10.4']
+          solr: ['3']
+          php: ['8.2', '8.3', '8.4']
+          experimental: [false]
+
+      name: Drupal ${{ matrix.drupal }}, Solr ${{ matrix.solr }}, PHP ${{ matrix.php }}
+
+      env:
+        COMPOSER_MEMORY_LIMIT: -1
+
+      steps:
+        - name: Setup sqlite
+          run: |
+            sudo apt-get update
+            sudo apt-get install sqlite3 libsqlite3-dev
+
+        - name: Setup PHP
+          uses: shivammathur/setup-php@v2
+          with:
+            php-version: ${{ matrix.php }}
+            extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl, gd, iconv, json, simplexml
+            ini-values: memory_limit=256M,post_max_size=256M
+            coverage: none
+
+        - uses: actions/download-artifact@v4
+          with:
+            name: jump-start-config-sets
+            path: solr
+
+        - name: Start Solr ${{ matrix.solr }}
+          run: |
+            cd solr/solr${{ matrix.solr }}
+            docker compose up -d
+
+        - name: Checkout drupal
+          uses: actions/checkout@v4
+          with:
+            repository: drupal/drupal
+            ref: ${{ matrix.drupal }}.x
+            path: drupal
+
+        - name: Checkout search_api_solr
+          uses: actions/checkout@v4
+          with:
+            path: search_api_solr
+            fetch-depth: 0
+
+        - name: Tag search_api_solr
+          run: |
+            cd search_api_solr
+            git tag ${{ env.NEXT_MODULE_VERSION }}
+
+        - name: Install dependencies
+          run: |
+            cd drupal
+            php -v
+            composer config platform.php ${{ matrix.php }}.0
+            composer config repositories.search_api_solr '{"type": "vcs", "url": "../search_api_solr"}'
+            composer require drupal/search_api_solr:${{ env.NEXT_MODULE_VERSION }} --no-interaction
+            # search_api was installed as dependency above. This is a required check! Now switch to the latest dev version.
+            composer require drupal/search_api:1.x-dev --no-interaction            
+            composer require \
+              drupal/search_api_autocomplete:1.x-dev \
+              drupal/search_api_spellcheck:4.0.x-dev \
+              drupal/facets:3.0.x-dev drupal/devel \
+              drupal/search_api_location:1.x-dev \
+              drupal/geofield drush/drush \
+              monolog/monolog \
+              --no-interaction
+            # cd modules/contrib/search_api
+            # wget https://www.drupal.org/files/issues/2022-11-04/3318187-19--fix_views_filter_regressions.patch
+            # patch -p1 < 3318187-19--fix_views_filter_regressions.patch
+            # cd -
+
+        - name: Run legacy tests
+          env:
+            SOLR_INDEX_WAIT: 4
+            SOLR_CLOUD: false
+            SYMFONY_DEPRECATIONS_HELPER: disabled
+          run: |
+            cp search_api_solr/tests/github.phpunit.xml drupal/core/phpunit.xml.dist
+            cd drupal
+            php -S localhost:8888 >& /dev/null &
+            vendor/bin/drush si standard --db-url=sqlite://sites/default/files/db.sqlite --yes
+            vendor/bin/drush en search_api_solr_admin,search_api_solr_devel,search_api_solr_legacy --yes
+            vendor/bin/phpunit -v -c core --group search_api_solr_legacy --exclude-group not_drupal${{ matrix.drupal }},not_solr${{ matrix.solr }} modules/contrib/search_api_solr/modules/search_api_solr_legacy
+            vendor/bin/drush cim --partial --source=modules/contrib/search_api_solr/jump-start/drupal_configs --yes
+            vendor/bin/drush -v solr-gsc solr_36 test-config-generation.zip
+            vendor/bin/drush -v cron
+
+    push-config-sets:
+        runs-on: ubuntu-latest
+
+        name: Push updated Solr jump-start config-sets
+
+        needs: [run-tests, run-legacy-tests]
+
+        steps:
+            - name: Checkout search_api_solr
+              uses: actions/checkout@v4
+              with:
+                path: search_api_solr
+                fetch-depth: 0
+
+            - name: Remove old config-sets
+              run: |
+                cd search_api_solr/jump-start
+                rm -rf *
+
+            - uses: actions/download-artifact@v4
+              with:
+                name: jump-start-config-sets
+                path: search_api_solr/jump-start
+
+            - name: Commit new config-sets
+              run: |
+                cd search_api_solr
+                git config --local user.email "action@github.com"
+                git config --local user.name "GitHub Action"
+                git pull
+                git add *
+                git commit -m "Solr jump-start config-set change" || echo "Nothing to update"
+
+            - name: Push config-sets
+              uses: ad-m/github-push-action@master
+              with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                directory: search_api_solr
+                branch: ${{ github.ref }}

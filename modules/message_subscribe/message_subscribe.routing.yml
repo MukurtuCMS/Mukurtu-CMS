@@ -1,0 +1,7 @@
+message_subscribe.admin_settings:
+  path: /admin/config/message/message-subscribe
+  defaults:
+    _title: 'Message subscribe settings'
+    _form: \Drupal\message_subscribe\Form\MessageSubscribeAdminSettings
+  requirements:
+    _permission: 'administer message subscribe'

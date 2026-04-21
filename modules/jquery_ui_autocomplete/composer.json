@@ -1,0 +1,6 @@
+{
+  "require": {
+    "drupal/jquery_ui": "^1.7",
+    "drupal/jquery_ui_menu": "^2.1"
+  }
+}

@@ -1,0 +1,11 @@
+name: 'Redirect module tests'
+type: module
+description: 'Support module for redirect testing.'
+package: Testing
+dependencies:
+  - drupal:redirect
+
+# Information added by Drupal.org packaging script on 2025-08-28
+version: '8.x-1.12'
+project: 'redirect'
+datestamp: 1756419165

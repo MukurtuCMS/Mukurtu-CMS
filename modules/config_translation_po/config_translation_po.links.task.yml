@@ -1,0 +1,16 @@
+config_translation_po.translate_page:
+  route_name: config_translation.mapper_list
+  base_route: config_translation.mapper_list
+  title: Translate
+
+config_translation_po.translate_import:
+  route_name: config_translation_po.import_config_form
+  base_route: config_translation.mapper_list
+  title: Import
+  weight: 20
+
+config_translation_po.translate_export:
+  route_name: config_translation_po.export_config_form
+  base_route: config_translation.mapper_list
+  title: Export
+  weight: 30

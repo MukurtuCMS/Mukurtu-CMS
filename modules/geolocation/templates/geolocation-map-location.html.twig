@@ -1,0 +1,14 @@
+<div {{ attributes }} typeof="Place">
+  <span property="geo" typeof="GeoCoordinates">
+    <meta property="latitude" content="{{ coordinates.lat }}" />
+    <meta property="longitude" content="{{ coordinates.lng }}" />
+  </span>
+
+  {% if title is not empty %}
+    <h2 class="location-title" property="name">{{ title }}</h2>
+  {% endif %}
+
+  {% if children is not empty %}
+    <div class="location-content">{{ children }}</div>
+  {% endif %}
+</div>

@@ -1,0 +1,108 @@
+.toolbar-bar .toolbar-item.toolbar-menu-administration-dashboard::before {
+  background-image: url("../images/dashboard.svg");
+}
+
+/* Gin Admin Theme icon */
+.toolbar .toolbar-bar .toolbar-icon.toolbar-menu-administration-dashboard::before {
+  -webkit-mask-image: url(../images/dashboard.svg);
+  mask-image: url(../images/dashboard.svg);
+}
+
+@keyframes pulse-throbber {
+  0% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(0.5);
+    opacity: 0.2;
+  }
+}
+
+.dashboard-layout-builder-form span[data-big-pipe-placeholder-id],
+.dashboards-container span[data-big-pipe-placeholder-id] {
+  position: relative;
+  display: block;
+  width: 6px;
+  height: 30px;
+  margin: 20px auto;
+  animation: pulse-throbber 0.2s infinite;
+  animation-delay: 0.06667s;
+  animation-direction: alternate;
+  background: rebeccapurple;
+}
+
+.dashboard-layout-builder-form span[data-big-pipe-placeholder-id]::before,
+.dashboard-layout-builder-form span[data-big-pipe-placeholder-id]::after,
+.dashboards-container span[data-big-pipe-placeholder-id]::before,
+.dashboards-container span[data-big-pipe-placeholder-id]::after {
+  position: absolute;
+  top: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  content: "";
+  animation: pulse-throbber 0.2s infinite;
+  animation-direction: alternate;
+  background: rebeccapurple;
+}
+
+.dashboard-layout-builder-form span[data-big-pipe-placeholder-id]::before,
+.dashboards-container span[data-big-pipe-placeholder-id]::before {
+  left: -12px;
+}
+
+.dashboard-layout-builder-form span[data-big-pipe-placeholder-id]::after,
+.dashboards-container span[data-big-pipe-placeholder-id]::after {
+  left: 12px;
+  animation-delay: 0.13333s;
+}
+
+.layout--twocol-section.layout--twocol-section--50-50 {
+  display: flex;
+  flex-wrap: unset;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.button.dashboard-button {
+  margin: 1.5rem 1.5rem;
+}
+
+.dashboard-gin-panel.panel .views-exposed-form {
+  border: none;
+  box-shadow: none;
+}
+
+.dashboard-gin-panel.panel .views-table th {
+  border-radius: 0;
+}
+
+html.dashboard .toolbar .toolbar-bar .home-toolbar-tab {
+  display: block;
+}
+
+.gin-layer-wrapper .gin-layer-wrapper {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.gin-layer-wrapper .gin-layer-wrapper .gin-table-scroll-wrapper {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.gin-layer-wrapper .panel__content,
+.gin-layer-wrapper .panel__description {
+  padding: var(--gin-spacing-m);
+}
+
+.gin-layer-wrapper .panel__content .status-report-card,
+.gin-layer-wrapper .panel__description .status-report-card {
+  text-align: center;
+}
+
+.dashboard-gin-panel.panel.card {
+  padding: var(--space-s);
+}

@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * @file
+ * Contains install hooks for facets searchbox widget.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function facets_searchbox_widget_theme($existing, $type, $theme, $path) {
+  return [
+    'facets_item_list__searchbox_checkbox' => [
+      'variables' => [
+        'facet' => NULL,
+        'items' => [],
+        'title' => '',
+        'list_type' => 'ul',
+        'wrapper_attributes' => [],
+        'attributes' => [],
+        'empty' => NULL,
+        'context' => [],
+      ],
+    ],
+    'facets_item_list__searchbox_links' => [
+      'variables' => [
+        'facet' => NULL,
+        'items' => [],
+        'title' => '',
+        'list_type' => 'ul',
+        'wrapper_attributes' => [],
+        'attributes' => [],
+        'empty' => NULL,
+        'context' => [],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for facets summary item list templates.
+ *
+ * Default template: facets--item-list.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - items: An array of items to be displayed in the list. Each item can be
+ *     either a string or a render array. If #type, #theme, or #markup
+ *     properties are not specified for child render arrays, they will be
+ *     inherited from the parent list, allowing callers to specify larger
+ *     nested lists without having to explicitly specify and repeat the
+ *     render properties for all nested child lists.
+ *   - title: A title to be prepended to the list.
+ *   - list_type: The type of list to return (e.g. "ul", "ol").
+ *   - wrapper_attributes: HTML attributes to be applied to the list wrapper.
+ *
+ * @see https://www.drupal.org/node/1842756
+ */
+function facets_searchbox_widget_preprocess_facets_item_list__searchbox_checkbox(array &$variables) {
+  template_preprocess_item_list($variables);
+}
+
+/**
+ * Prepares variables for facets summary item list templates.
+ *
+ * Default template: facets--item-list.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - items: An array of items to be displayed in the list. Each item can be
+ *     either a string or a render array. If #type, #theme, or #markup
+ *     properties are not specified for child render arrays, they will be
+ *     inherited from the parent list, allowing callers to specify larger
+ *     nested lists without having to explicitly specify and repeat the
+ *     render properties for all nested child lists.
+ *   - title: A title to be prepended to the list.
+ *   - list_type: The type of list to return (e.g. "ul", "ol").
+ *   - wrapper_attributes: HTML attributes to be applied to the list wrapper.
+ *
+ * @see https://www.drupal.org/node/1842756
+ */
+function facets_searchbox_widget_preprocess_facets_item_list__searchbox_links(array &$variables) {
+  template_preprocess_item_list($variables);
+}

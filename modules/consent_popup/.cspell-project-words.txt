@@ -1,0 +1,8 @@
+
+# List of words excluded from cspell validation for the project.
+
+calado
+cookiename
+daniela
+javali
+kallado

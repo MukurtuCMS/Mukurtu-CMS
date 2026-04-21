@@ -1,0 +1,33 @@
+div.color_field__swatch input[type="checkbox"],
+div.color_field__swatch input[type="radio"] {
+  display: none;
+}
+div.color_field__swatch input[type="checkbox"]:checked + label span,
+div.color_field__swatch input[type="radio"]:checked + label span {
+  transform: scale(1.25);
+  border: 1px solid #373737;
+}
+div.color_field__swatch label {
+  display: inline-block;
+  cursor: pointer;
+}
+div.color_field__swatch label:hover span {
+  transform: scale(1.35);
+}
+div.color_field__swatch label span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.2s ease-in-out;
+}
+div.color_field__swatch span.color_field__swatch--circle {
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+}
+div.color_field__swatch span.color_field__swatch--parallelogram {
+  -webkit-transform: skew(20deg);
+  -moz-transform: skew(20deg);
+  -o-transform: skew(20deg);
+  transform: skew(20deg);
+}

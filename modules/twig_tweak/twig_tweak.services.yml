@@ -1,0 +1,45 @@
+services:
+  twig_tweak.twig_extension:
+    class: Drupal\twig_tweak\TwigTweakExtension
+    arguments: ['@module_handler', '@theme.manager']
+    tags:
+      - { name: twig.extension }
+
+  twig_tweak.block_view_builder:
+    class: Drupal\twig_tweak\View\BlockViewBuilder
+    arguments: ['@plugin.manager.block', '@context.repository', '@context.handler', '@current_user', '@request_stack', '@current_route_match', '@title_resolver']
+
+  twig_tweak.region_view_builder:
+    class: Drupal\twig_tweak\View\RegionViewBuilder
+    arguments: ['@entity_type.manager', '@config.factory', '@request_stack', '@title_resolver']
+
+  twig_tweak.entity_view_builder:
+    class: Drupal\twig_tweak\View\EntityViewBuilder
+    arguments: ['@entity_type.manager', '@entity.repository']
+
+  twig_tweak.entity_form_view_builder:
+    class: Drupal\twig_tweak\View\EntityFormViewBuilder
+    arguments: ['@entity.form_builder']
+
+  twig_tweak.field_view_builder:
+    class: Drupal\twig_tweak\View\FieldViewBuilder
+    arguments: ['@entity.repository']
+
+  twig_tweak.menu_view_builder:
+    class: Drupal\twig_tweak\View\MenuViewBuilder
+    arguments: ['@menu.link_tree']
+
+  twig_tweak.image_view_builder:
+    class: Drupal\twig_tweak\View\ImageViewBuilder
+    arguments: ['@image.factory']
+
+  twig_tweak.url_extractor:
+    class: Drupal\twig_tweak\UrlExtractor
+    arguments: ['@entity_type.manager', '@file_url_generator']
+
+  twig_tweak.uri_extractor:
+    class: Drupal\twig_tweak\UriExtractor
+    arguments: ['@entity_type.manager']
+
+  twig_tweak.cache_metadata_extractor:
+    class: Drupal\twig_tweak\CacheMetadataExtractor

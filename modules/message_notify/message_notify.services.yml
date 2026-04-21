@@ -1,0 +1,11 @@
+services:
+  message_notify.sender:
+    class: Drupal\message_notify\MessageNotifier
+    arguments: ['@plugin.message_notify.notifier.manager']
+  plugin.message_notify.notifier.manager:
+    class: Drupal\message_notify\Plugin\Notifier\Manager
+    parent: default_plugin_manager
+    arguments: ['@service_container']
+  logger.channel.message_notify:
+    parent: logger.channel_base
+    arguments: ['message_notify']

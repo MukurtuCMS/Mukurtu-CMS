@@ -1,0 +1,53 @@
+services:
+  plugin.manager.search_api_solr.connector:
+    class: Drupal\search_api_solr\SolrConnector\SolrConnectorPluginManager
+    parent: default_plugin_manager
+
+  search_api_solr.config_subscriber:
+    class: Drupal\search_api_solr\EventSubscriber\ConfigSubscriber
+    arguments: ['@config.installer']
+    tags:
+      - {name: event_subscriber}
+
+  search_api_solr.search_api_subscriber:
+    class: Drupal\search_api_solr\EventSubscriber\SearchApiSubscriber
+    arguments: []
+    tags:
+      - { name: event_subscriber }
+
+  search_api_solr.local_action_access_check:
+    class: Drupal\search_api_solr\Access\LocalActionAccessCheck
+    arguments: ['@current_user']
+    tags:
+      - { name: access_check, applies_to: _search_api_solr_local_action_access_check }
+
+  solr_document.factory:
+    class: Drupal\search_api_solr\SolrDocumentFactory
+    arguments: ['@typed_data_manager']
+
+  solr_field.manager:
+    class: Drupal\search_api_solr\SolrFieldManager
+    arguments: ['@cache.discovery', '@entity_type.manager', '@logger.channel.search_api']
+
+  solr_multisite_document.factory:
+    class: Drupal\search_api_solr\SolrMultisiteDocumentFactory
+    arguments: ['@typed_data_manager']
+
+  solr_multisite_field.manager:
+    class: Drupal\search_api_solr\SolrMultisiteFieldManager
+    arguments: ['@cache.discovery', '@entity_type.manager', '@logger.channel.search_api']
+
+  solarium.query_helper:
+    class: Solarium\Core\Query\Helper
+
+  search_api_solr.streaming_expression_query_helper:
+    class: Drupal\search_api_solr\Utility\StreamingExpressionQueryHelper
+    arguments: ['@request_stack', '@module_handler', '@plugin.manager.search_api.parse_mode']
+
+  search_api_solr.configset_controller:
+    class: Drupal\search_api_solr\Controller\SolrConfigSetController
+    arguments: ['@extension.list.module']
+
+  search_api_solr.command_helper:
+    class: Drupal\search_api_solr\Utility\SolrCommandHelper
+    arguments: ['@entity_type.manager', '@module_handler', '@event_dispatcher', '@search_api_solr.configset_controller']

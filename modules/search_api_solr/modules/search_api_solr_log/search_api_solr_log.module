@@ -1,0 +1,15 @@
+<?php
+
+use Drupal\search_api_solr_log\Logger\SolrLogger;
+
+/**
+ * Implements hook_cron().
+ */
+function search_api_solr_log_cron(): void {
+  $config = \Drupal::config('search_api_solr_log.settings');
+  try {
+    SolrLogger::delete($config->get('days_to_keep') ?? 14);
+  } catch (\Exception $e) {
+    // Do nothing.
+  }
+}

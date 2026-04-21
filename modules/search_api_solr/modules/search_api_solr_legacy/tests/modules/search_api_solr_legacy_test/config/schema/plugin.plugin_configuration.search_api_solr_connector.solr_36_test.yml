@@ -1,0 +1,3 @@
+plugin.plugin_configuration.search_api_solr_connector.solr_36_test:
+  type: plugin.plugin_configuration.search_api_solr_connector.solr_36
+  label: 'Solr 3.6 test connector settings'

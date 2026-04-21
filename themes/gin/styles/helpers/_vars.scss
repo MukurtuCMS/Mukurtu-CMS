@@ -1,0 +1,37 @@
+$breakpointTiny: 420px;
+$breakpointXSmall: 588px;
+$breakpointSmall: 768px;
+$breakpointMedium: 976px;
+$breakpointLarge: 1024px;
+$breakpointWide: 1280px;
+$breakpointBig: 1440px;
+
+$breakpoints: (
+  tiny: $breakpointTiny,
+  xsmall: $breakpointXSmall,
+  small: $breakpointSmall,
+  medium: $breakpointMedium,
+  large: $breakpointLarge,
+  wide: $breakpointWide,
+  ultra: $breakpointBig,
+);
+
+$ginLayoutDensity: (
+  small: .625,
+  medium: .75,
+  default: 1,
+);
+
+$ginSpacings: (
+  xxs: 4px,
+  xs: 8px,
+  s: 12px,
+  m: 16px,
+  l: 24px,
+  xl: 32px,
+  xxl: 48px,
+  xxxl: 64px,
+);
+
+$colorDarkAppBackground: #1B1B1D;
+$colorDarkLayerBackground: #2A2A2D;

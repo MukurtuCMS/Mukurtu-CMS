@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Test IEF Content'
+type: ief_content
+description: 'Test content type for problem with inconsistent state of inline entity form entity browser field widget.'
+help: ''
+new_revision: false
+preview_mode: 1
+display_submitted: true

@@ -1,0 +1,166 @@
+<?php
+
+/**
+ * @file
+ * breadcrumb.theme
+ */
+
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
+
+/**
+ * Breadcrumb.
+ */
+function gin_preprocess_breadcrumb(&$variables) {
+  if (empty($variables['breadcrumb'])) {
+    return;
+  }
+
+  $cacheability = new CacheableMetadata();
+  $cacheability->addCacheContexts(['route']);
+
+  $entity = _gin_get_route_entity();
+  $route_name = \Drupal::routeMatch()->getRouteName();
+
+  if ($entity !== NULL) {
+    $url = $entity->toUrl();
+    $entity_type_id = $entity->getEntityTypeId();
+    $operation_label = _gin_get_route_entity_operation_label($route_name, $entity);
+
+    $url_access = $url->access(NULL, TRUE);
+    $cacheability->addCacheableDependency($url_access);
+
+    // Media handling.
+    if ($entity_type_id === 'media') {
+      $media_config = \Drupal::config('media.settings');
+      $cacheability->addCacheableDependency($media_config);
+
+      if (!$media_config->get('standalone_url')) {
+        $url = Url::fromRoute('<front>');
+      }
+    }
+
+    // Custom block handling (a custom block cannot be viewed standalone).
+    if ($entity_type_id === 'block_content') {
+      $url = Url::fromRoute('<front>');
+    }
+  }
+
+  // Back to site item.
+  foreach ($variables['breadcrumb'] as $key => $item) {
+    if ($key === 0) {
+      $variables['breadcrumb'][$key]['text'] = t('Back to site');
+      $variables['breadcrumb'][$key]['attributes']['title'] = t('Return to site content');
+
+      if (isset($url, $url_access) && $url_access->isAllowed()) {
+        // Link to the canonical route of the entity.
+        $variables['breadcrumb'][$key]['url'] = $url;
+      }
+      else {
+        // Let escapeAdmin override the return URL.
+        $variables['breadcrumb'][$key]['attributes']['data'] = 'data-gin-toolbar-escape-admin';
+      }
+    }
+    elseif (isset($url) && $item['url'] === $url->setAbsolute(FALSE)->toString()) {
+      // Remove as we already have the back to site link set.
+      unset($variables['breadcrumb'][$key]);
+    }
+  }
+
+  // Adjust breadcrumb for nodes: unset all items, except home link.
+  if ($entity instanceof NodeInterface) {
+    foreach ($variables['breadcrumb'] as $key => $item) {
+      if ($key > 0) {
+        unset($variables['breadcrumb'][$key]);
+      }
+    }
+  }
+
+  // Adjust breadcrumb for entities.
+  if (isset($operation_label)) {
+    // Add bundle info.
+    $variables['breadcrumb'][] = [
+      'text' => $operation_label,
+      'url' => '',
+    ];
+  }
+
+  // Node add: Fix Drupal 9 issue.
+  if ($route_name === 'node.add') {
+    foreach ($variables['breadcrumb'] as $key => $item) {
+      if ($variables['breadcrumb'][$key]['text'] == '') {
+        unset($variables['breadcrumb'][$key]);
+      }
+    }
+  }
+
+  $cacheability->applyTo($variables);
+}
+
+/**
+ * Helper function to extract the entity for the supplied route.
+ *
+ * @return null|\Drupal\Core\Entity\ContentEntityInterface
+ *   Returns the content entity.
+ */
+function _gin_get_route_entity() {
+  $route_match = \Drupal::routeMatch();
+  // Entity will be found in the route parameters.
+  if (($route = $route_match->getRouteObject()) && ($parameters = $route->getOption('parameters'))) {
+    // Determine if the current route represents an entity.
+    foreach ($parameters as $name => $options) {
+      if (isset($options['type']) && strpos($options['type'], 'entity:') === 0) {
+        $entity = $route_match->getParameter($name);
+        if ($entity instanceof ContentEntityInterface && $entity->hasLinkTemplate('canonical')) {
+          return $entity;
+        }
+
+        // Since entity was found, no need to iterate further.
+        return NULL;
+      }
+    }
+  }
+}
+
+/**
+ * Helper function to extract the entity operation label for the supplied route.
+ *
+ * @return null|string
+ *   Returns the label.
+ */
+function _gin_get_route_entity_operation_label(string $route_name, EntityInterface $entity) {
+  $entity_type = $entity->getEntityType();
+  $type_label = $entity_type->getSingularLabel();
+  $bundle_key = $entity_type->getKey('bundle');
+
+  if ($bundle_key && $bundle_entity = $entity->get($bundle_key)->entity) {
+    $type_label = $bundle_entity->label();
+  }
+
+  if ($entity_type->id() === 'user') {
+    $type_label = 'account';
+  }
+
+  $operation_labels = [
+    '#entity.(?<entityTypeId>.+).canonical#' => t('View @bundle', ['@bundle' => $type_label]),
+    '#entity.(?<entityTypeId>.+).delete_form#' => t('Delete @bundle', ['@bundle' => $type_label]),
+    '#entity.(?<entityTypeId>.+).delete_multiple_form#' => t('Delete @bundle', ['@bundle' => $type_label]),
+    '#entity.(?<entityTypeId>.+).edit_form#' => t('Edit @bundle', ['@bundle' => $type_label]),
+    '#entity.(?<entityTypeId>.+).add_form#' => t('Add @bundle', ['@bundle' => $type_label]),
+    '#entity.(?<entityTypeId>.+).add_page#' => t('Add @bundle', ['@bundle' => $type_label]),
+    '#entity.(?<entityTypeId>.+).reset_form#' => t('Reset @bundle', ['@bundle' => $type_label]),
+    '#entity.(?<entityTypeId>.+).cancel_form#' => t('Cancel @bundle', ['@bundle' => $type_label]),
+    '#entity.(?<entityTypeId>.+).clone_form#' => t('Clone @bundle', ['@bundle' => $type_label]),
+  ];
+
+  foreach ($operation_labels as $regex => $label) {
+    if (preg_match($regex, $route_name)) {
+      return $label;
+    }
+  }
+
+  return NULL;
+}

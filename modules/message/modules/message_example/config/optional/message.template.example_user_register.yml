@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies: {  }
+template: example_user_register
+label: 'Example - User register'
+description: 'Working upon creation of a user.'
+text:
+  - value: "<p><a href='[message:user-url]'>@{message:user-name}</a> registered.</p>\r\n"
+  - format: 'basic_html'
+data:
+  'token options':
+    clear: 0
+  purge:
+    override: 0
+    enabled: 0
+    quota: ''
+    days: ''

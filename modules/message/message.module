@@ -1,0 +1,264 @@
+<?php
+
+/**
+ * @file
+ * API functions to manipulate messages.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\message\Entity\MessageTemplate;
+use Drupal\message\MessagePurgeInterface;
+
+/**
+ * Implements hook_help().
+ */
+function message_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.message':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Message module provides the core of the message stack. It provides a  message entity type that can be subtyped into one or more message_types, a special multi-value message_text field, a message view and some permissions and configuration settings. For more information, see the <a href=":message-documentation">online documentation for the message stack</a>.', [':message-documentation' => 'https://www.drupal.org/node/2180145']) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('General') . '</dt>';
+      $output .= '<dd>' . t('There are three main use cases for the message stack.') . '</dd>';
+      $output .= '<dt>' . t('Logging and Displaying System Events') . '</dt>';
+      $output .= '<dd>' . t('The basic use case for the message stack is <em>a tool for logging and displaying system events</em>. The events may be user initiated (e.g. a page is created) or system initiated. User-initiated events are sometimes called activity streams. The <a href=":news_feed">News Feed at Facebook</a> is a an example of an activity stream and Google has launched its own tool for tracking changes to files and folders in Google Drive.', [':news_feed' => 'https://en.wikipedia.org/wiki/List_of_Facebook_features#News_Feed']) . '</dd>';
+      $output .= '<dt>' . t('Notifying users when messages are generated') . '</dt>';
+      $output .= '<dd>' . t('A second major use case is to <em>notify recipients when messages are generated</em>. This functionality is provided by the <a href=":message-notify"> Message Notify</a> module which provides a method for sending a message via a notifier plugin. Message Notify  comes with plugins for email and SMS and may be extended to other transport mechanisms as required. Message Notify includes an example module that demonstrates the usage of notifier plugins. The module also provides hook support for the Rules module, which may be an option for site builders who are familiar with the Rules module or who do not want to use Message Notify methods directly in their code.', [':message-notify' => 'https://www.drupal.org/project/message_notify']) . '</dd>';
+      $output .= '<dt>' . t('Notifying users who subscribe to certain content') . '</dt>';
+      $output .= '<dd>' . t('The third major use case is where <em>users who subscribe to content will be notified when events occur that involve that content</em>. This use case is implemented through the <a href=":message-subscribe"> Message Subscribe</a> module, which in turn leverages the Flag module, which provides subscribe functionality to users.', [':message-subscribe' => 'https://www.drupal.org/project/message_subscribe']) . '</dd>';
+      $output .= '</dl>';
+      break;
+
+    default:
+      $output = '';
+      break;
+  }
+
+  return $output;
+}
+
+/**
+ * Implements hook_entity_delete().
+ *
+ * Handles messages deletion when referenced entities are being deleted.
+ */
+function message_entity_delete(EntityInterface $entity) {
+  $type = $entity->getEntityType()->id();
+  if ($type == 'message') {
+    // Why not message?
+    return;
+  }
+
+  $types = \Drupal::config('message.settings')->get('delete_on_entity_delete');
+
+  if (!$types || !in_array($type, $types)) {
+    return;
+  }
+
+  // List of messages to delete.
+  $deletable_mids = [];
+  // List of messages that might be deleted;
+  // Messages with references to fields with multiple cardinality will be stored
+  // in $check_mids in order to check if the entity being deleted is the last
+  // one referenced by a given field.
+  // Keyed by message ID, pointing to array of the relevant field names.
+  $check_mids = [];
+
+  /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface[] $fields */
+  $fields = \Drupal::entityTypeManager()->getStorage('field_storage_config')->loadMultiple();
+
+  // Search for fields in which messages referenced the deleted entity.
+  foreach ($fields as $field) {
+    if ($field->getTargetEntityTypeId() != 'message') {
+      // This field isn't used in any message.
+      continue;
+    }
+
+    // Only delete messages due to referenced entity or referenced taxonomy term
+    // deletion.
+    if ($field->getType() != 'entity_reference') {
+      continue;
+    }
+
+    // Only delete references if the referenced entity is the correct type.
+    if ($field->getSetting('target_type') != $entity->getEntityTypeId()) {
+      continue;
+    }
+
+    $query = \Drupal::entityQuery('message');
+    $results = $query
+      // No access check since this is to remove messages related to an entity
+      // that is being removed. Keeping the messages makes no sense in this
+      // context, regardless of whether the user deleting the parent entity
+      // has access to them or not.
+      ->accessCheck(FALSE)
+      ->condition($field->getName(), $entity->id())
+      ->execute();
+
+    if (empty($results)) {
+      continue;
+    }
+
+    if ($field->getCardinality() == 1) {
+      $deletable_mids = array_merge($deletable_mids, $results);
+    }
+    else {
+      foreach ($results as $id) {
+        $check_mids[$id][] = $field->getName();
+      }
+    }
+  }
+  $deletable_mids = array_values($deletable_mids);
+
+  // Check messages with multiple cardinality references; Only delete such
+  // messages if the entity being deleted is the last one referenced by the
+  // message.
+  if ($check_mids) {
+    $queue_set = [];
+    $count = 0;
+    $num_mids = count($check_mids);
+    foreach ($check_mids as $id => $field_names) {
+      // If it already qualified for deletion based on one field, there's no
+      // need to check multi-valued fields.
+      if (!in_array($id, $deletable_mids)) {
+        $queue_set[$id] = $field_names;
+      }
+      if ($queue_set && ($count % MessagePurgeInterface::MESSAGE_DELETE_SIZE == 0 || $count == $num_mids)) {
+        \Drupal::queue('message_check_delete')->createItem($queue_set);
+        $queue_set = [];
+      }
+      $count++;
+    }
+  }
+
+  if ($deletable_mids) {
+    $num_items = ceil(count($deletable_mids) / MessagePurgeInterface::MESSAGE_DELETE_SIZE);
+    for ($i = 0; $i < $num_items; $i++) {
+      $queue_set = array_slice($deletable_mids, $i * MessagePurgeInterface::MESSAGE_DELETE_SIZE, MessagePurgeInterface::MESSAGE_DELETE_SIZE);
+      \Drupal::queue('message_delete')->createItem($queue_set);
+    }
+  }
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * Fetch all message templates and purge old messages.
+ */
+function message_cron() {
+  /** @var \Drupal\message\MessagePurgeOrchestrator $purge_orchestrator */
+  $purge_orchestrator = \Drupal::service('message.purge_orchestrator');
+  $purge_orchestrator->purgeAllTemplateMessages();
+}
+
+/**
+ * Usort callback; Order the form elements by their weight.
+ */
+function message_order_text_weight($a, $b) {
+  if ($a['_weight'] == $b['_weight']) {
+    return 0;
+  }
+
+  return ($a['_weight'] < $b['_weight']) ? -1 : 1;
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function message_entity_extra_field_info() {
+  $extra = [];
+
+  /** @var \Drupal\message\Entity\MessageTemplate[] $bundles */
+  $bundles = MessageTemplate::loadMultiple();
+  foreach ($bundles as $bundle) {
+
+    foreach (array_keys($bundle->getText()) as $delta) {
+
+      if (!is_int($delta)) {
+        // The get text holds also the translated text. Since we hold only need
+        // the number of partials we don't need to include delta of texts.
+        continue;
+      }
+
+      $params = ['%number' => $delta];
+      $extra['message'][$bundle->id()]['display']['partial_' . $delta] = [
+        'label' => t('Partial %number', $params),
+        'description' => t('Holds the partial text at position %number', $params),
+        'weight' => 0,
+      ];
+    }
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function message_theme() {
+  return [
+    'message' => [
+      'render element' => 'elements',
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for message templates.
+ *
+ * Default template: message.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An array of elements to display in view mode.
+ *   - message: The message object.
+ *   - view_mode: View mode; e.g., 'full', 'teaser', etc.
+ */
+function template_preprocess_message(array &$variables) {
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+
+  // Provide a distinct $teaser boolean.
+  $variables['teaser'] = $variables['view_mode'] == 'teaser';
+  $variables['message'] = $variables['elements']['#message'];
+
+  /** @var \Drupal\message\MessageInterface $message */
+  $message = $variables['message'];
+  $variables['date'] = \Drupal::service('renderer')->render($variables['elements']['created']);
+  unset($variables['elements']['created']);
+  $variables['author_name'] = \Drupal::service('renderer')->render($variables['elements']['uid']);
+  unset($variables['elements']['uid']);
+
+  // The 'page' variable is set to TRUE in two occasions:
+  // - The view mode is 'full' and we are on the 'message.view' route.
+  // - The message is in preview and view mode is either 'full' or 'default'.
+  $variables['page'] = ($variables['view_mode'] == 'full' || $variables['view_mode'] == 'default');
+
+  // Helpful $content variable for templates.
+  $variables += ['content' => []];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function message_theme_suggestions_message(array $variables) {
+  $suggestions = [];
+
+  /** @var \Drupal\message\MessageInterface $message */
+  $message = $variables['elements']['#message'];
+  $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
+
+  $suggestions[] = 'message__' . $sanitized_view_mode;
+  $suggestions[] = 'message__' . $message->bundle();
+  $suggestions[] = 'message__' . $message->bundle() . '__' . $sanitized_view_mode;
+  $suggestions[] = 'message__' . $message->id();
+  $suggestions[] = 'message__' . $message->id() . '__' . $sanitized_view_mode;
+
+  return $suggestions;
+}

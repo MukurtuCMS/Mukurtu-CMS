@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * Contains update functions for Layout Builder Restrictions by Region.
+ */
+
+/**
+ * Relocate 'whitelisted_' and 'blacklisted' to 'allowlisted' and 'denylisted'.
+ */
+function layout_builder_restrictions_by_region_update_8201(&$sandbox) {
+  // When upgrading to 2.14, configuration for 'whitelisted_blocks'
+  // is relocated to 'allowlisted_blocks' and 'blacklisted_blocks' to'
+  // 'denylisted_blocks'. See #3179983.
+  $config_factory = \Drupal::configFactory();
+
+  if (!isset($sandbox['count'])) {
+    $sandbox['ids'] = $config_factory->listAll('core.entity_view_display.');
+    $sandbox['count'] = count($sandbox['ids']);
+  }
+
+  $ids = array_splice($sandbox['ids'], 0, 50);
+  foreach ($ids as $id) {
+    $display = $config_factory->getEditable($id);
+    if ($display->get('third_party_settings.layout_builder_restrictions')) {
+      $allowed_blocks_by_category_whitelisted = $display->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction_by_region.whitelisted_blocks');
+      $allowed_blocks_by_category_blacklisted = $display->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction_by_region.blacklisted_blocks');
+      $display
+        ->clear('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction_by_region.whitelisted_blocks')
+        ->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction_by_region.allowlisted_blocks', $allowed_blocks_by_category_whitelisted)
+        ->clear('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction_by_region.blacklisted_blocks')
+        ->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction_by_region.denylisted_blocks', $allowed_blocks_by_category_blacklisted)
+        ->save();
+    }
+  }
+
+  $sandbox['#finished'] = empty($sandbox['ids']) ? 1 : ($sandbox['count'] - count($sandbox['ids'])) / $sandbox['count'];
+}

@@ -1,0 +1,31 @@
+{#
+/**
+ * @file
+ * Default theme implementation to list message templates available for adding messages.
+ *
+ * This list is displayed on the Add message admin page.
+ *
+ * Available variables:
+ * - templates: A list of message templates, each with the following properties:
+ *   - add_link: Link to create a message of this template.
+ *   - description: Description of this template of message.
+ *
+ * @todo: add @see template_preprocess_message_add_list()
+ *
+ * @ingroup themeable
+ */
+#}
+{% if templates is not empty %}
+  <ul class="admin-list">
+    {% for template in templates %}
+      <li class="clearfix"><span class="label">{{ template.add_link }}</span><div class="description">{{ template.description }}</div></li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>
+    {% set create_message = path('message.template_add') %}
+    {% trans %}
+    You have not created any message templates yet. Go to the <a href="{{ create_message }}">message template creation page</a> to add a new message template.
+    {% endtrans %}
+  </p>
+{% endif %}

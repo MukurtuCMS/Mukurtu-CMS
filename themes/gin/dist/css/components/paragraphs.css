@@ -1,0 +1,397 @@
+.paragraphs-tabs-wrapper .gin-table-scroll-wrapper {
+  overflow: initial;
+}
+
+.gin--dark-mode .paragraphs-tabs-wrapper tr:hover, .paragraphs-tabs-wrapper tr:hover, .gin--dark-mode .paragraphs-tabs-wrapper tr:focus, .paragraphs-tabs-wrapper tr:focus {
+  background-color: inherit;
+}
+
+.paragraphs-tabs-wrapper .paragraphs-subform {
+  margin-block-start: 0;
+  margin-inline-end: var(--gin-spacing-m);
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table > tbody {
+  display: block;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table > thead {
+  display: block;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table > thead > tr {
+  display: flex;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table > thead > tr th:first-child.field-label {
+  display: flex;
+  width: 100%;
+  padding-inline-end: 0;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table > thead > tr th:first-child .paragraphs-actions {
+  margin-inline: auto 0;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table > thead > tr .tabledrag-hide {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  padding: var(--gin-spacing-m) var(--gin-spacing-xs);
+  margin-block-start: var(--gin-spacing-m);
+  border: 1px solid var(--gin-border-color-table);
+  border-radius: var(--gin-border-m);
+}
+
+[dir="ltr"] .paragraphs-tabs-wrapper .field-multiple-table .draggable {
+  box-shadow: 4px 4px 10px var(--gin-bg-layer2);
+}
+
+[dir="rtl"] .paragraphs-tabs-wrapper .field-multiple-table .draggable {
+  box-shadow: -4px 4px 10px var(--gin-bg-layer2);
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable.drag {
+  background-color: var(--gin-bg-warning-light);
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable.drag-previous > .tabledrag-cell {
+  position: relative;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable.drag-previous > .tabledrag-cell::before {
+  content: "";
+  display: block;
+  position: absolute;
+  inset-block-start: var(--gin-spacing-xs);
+  inset-inline-start: 0;
+  width: 4px;
+  height: calc(100% - var(--gin-spacing-m));
+  background: var(--gin-color-warning);
+  border-radius: var(--gin-border-xxs);
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable td {
+  padding: var(--gin-spacing-xxs);
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable > td {
+  position: relative;
+  display: table-cell;
+  flex: 0 0 auto;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable > td:nth-child(2) {
+  flex: 1 0 0;
+  min-width: 0;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable .has-multiple-fields-remove-button {
+  width: 100%;
+  padding-inline-end: 0 !important;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable .tabledrag-handle::after {
+  -webkit-mask-image: url("../../media/sprite.svg#drag-dots-view");
+          mask-image: url("../../media/sprite.svg#drag-dots-view");
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+          mask-position: center center;
+  -webkit-mask-size: 16px 16px;
+          mask-size: 16px 16px;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable .tabledrag-changed {
+  display: none;
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .draggable:hover, .paragraphs-tabs-wrapper .field-multiple-table .draggable:focus-within {
+  position: relative;
+  border: 1px solid var(--gin-color-text);
+  box-shadow: 0 0 0 1px var(--gin-color-text);
+}
+
+.paragraphs-tabs-wrapper .paragraph-type-label {
+  font-size: var(--gin-font-size);
+  font-weight: var(--gin-font-weight-heavy) !important;
+  font-style: normal;
+  color: var(--gin-color-title);
+  position: static;
+  border: 0 none;
+  padding-inline-start: 0;
+}
+
+.paragraphs-tabs-wrapper .paragraphs-subform .paragraph-type-label {
+  font-size: var(--gin-font-size-s);
+}
+
+.paragraphs-tabs-wrapper .paragraph-type-add-modal,
+.paragraphs-tabs-wrapper .field--widget-paragraphs .paragraphs-dropbutton-wrapper {
+  margin-inline-end: var(--gin-spacing-xs);
+}
+
+.js .field--widget-paragraphs .field-multiple-table,
+.js .field--widget-paragraphs-previewer .field-multiple-table {
+  display: block;
+}
+
+td .claro-details {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.paragraph .contextual {
+  display: none;
+}
+
+.paragraphs-subform .form-item,
+.paragraphs-subform .field--type-text-with-summary .form-item,
+.paragraphs-subform .field--widget-text-textarea .form-item {
+  margin-block-end: var(--gin-spacing-l);
+}
+
+.paragraphs-subform .field-multiple-table.draggable-table .tabledrag-handle::after {
+  margin-block-start: 0;
+}
+
+.paragraphs-add-wrapper .button--small,
+.paragraphs-dropbutton-wrapper .button--small {
+  margin-block: var(--gin-spacing-xs);
+}
+
+.paragraphs-add-wrapper.button--small,
+.paragraphs-dropbutton-wrapper.button--small {
+  padding: 0;
+  margin: 0;
+}
+
+.paragraphs-dropdown-toggle {
+  position: relative;
+  margin: var(--gin-spacing-xs) 0;
+  background: none;
+}
+
+.paragraphs-dropdown-toggle::after {
+  content: "";
+  display: block;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  height: 100%;
+  background-image: none;
+  background-color: var(--gin-color-text-light);
+  -webkit-mask-image: url("../../media/sprite.svg#more-view");
+          mask-image: url("../../media/sprite.svg#more-view");
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+          mask-position: center center;
+  -webkit-mask-size: 16px 16px;
+          mask-size: 16px 16px;
+}
+
+.paragraphs-dropdown-toggle:hover, .paragraphs-dropdown-toggle:active, .paragraphs-dropdown-toggle:focus {
+  background-color: var(--gin-color-primary-light);
+  border: 0 none;
+}
+
+.paragraphs-dropdown-toggle:hover::after, .paragraphs-dropdown-toggle:active::after, .paragraphs-dropdown-toggle:focus::after {
+  background-color: var(--gin-color-primary);
+}
+
+.field--widget-paragraphs .paragraphs-tabs-wrapper .field-multiple-table tr[class*=paragraph-type--] {
+  margin-block-start: var(--gin-spacing-m);
+}
+
+html.js .field--widget-entity-reference-paragraphs .draggable .tabledrag-handle::after,
+html.js .field--widget-paragraphs .draggable .tabledrag-handle::after {
+  position: relative;
+  inset-inline-start: 0;
+  padding: 0;
+  margin-inline-start: 0;
+}
+
+.js .paragraphs-collapsed-description::after,
+.js .draggable:hover .paragraphs-collapsed-description::after {
+  inset-block-start: 2px;
+  background: var(--gin-bg-layer2);
+}
+
+[dir="ltr"] .paragraphs-collapsed-description::after,
+[dir="ltr"] .draggable:hover .paragraphs-collapsed-description::after {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, var(--gin-bg-layer) 100%);
+}
+
+[dir="rtl"] .paragraphs-collapsed-description::after,
+[dir="rtl"] .draggable:hover .paragraphs-collapsed-description::after {
+  background: linear-gradient(-90deg, rgba(255, 255, 255, 0) 0%, var(--gin-bg-layer) 100%);
+}
+
+.js .field--widget-paragraphs .paragraphs-dropbutton-wrapper .dropbutton-multiple {
+  padding: var(--gin-spacing-xs);
+}
+
+html.js .field--widget-paragraphs .paragraphs-dropbutton-wrapper .dropbutton-multiple .dropbutton-widget {
+  margin-inline-end: var(--gin-spacing-xs);
+}
+
+html.js .field--widget-paragraphs th .paragraphs-actions .paragraphs-dropdown {
+  inset-block-start: 0;
+  inset-inline-end: var(--gin-spacing-xxs);
+}
+
+.paragraphs-dropdown-actions {
+  color: var(--gin-color-button-text);
+  background: var(--gin-bg-layer3);
+  border: 0 none;
+  border-radius: var(--gin-border-xs);
+  box-shadow: var(--gin-shadow-l2);
+}
+
+.paragraphs-dropdown-actions .paragraphs-dropdown-action.button {
+  font-size: var(--gin-font-size-xs);
+  padding: var(--gin-spacing-xs) var(--gin-spacing-m);
+  margin: 0;
+  border: 0 none !important;
+}
+
+.js .paragraph-type-title {
+  align-self: center;
+}
+
+html.js .paragraph-type-icon {
+  padding: var(--gin-spacing-xxs);
+  margin-inline-end: var(--gin-spacing-xs);
+}
+
+.js .paragraph-top {
+  grid-template-columns: auto auto 1fr auto;
+}
+
+.paragraphs-icon-changed {
+  background-size: auto;
+  height: 32px;
+  width: 32px;
+}
+
+.gin--dark-mode .paragraphs-tabs-wrapper .field-multiple-table .draggable {
+  background: var(--gin-bg-layer2);
+  box-shadow: none;
+}
+
+.gin--dark-mode .paragraphs-dropdown-actions {
+  background: var(--gin-bg-layer2);
+  border-color: var(--gin-border-color);
+  box-shadow: 0 2px 6px 0 var(--gin-bg-app);
+}
+
+.gin--dark-mode .paragraph-type-icon {
+  background-color: var(--gin-color-primary);
+}
+
+.gin--dark-mode .paragraphs-type-icon {
+  box-shadow: inset 0 0 0 10px var(--gin-bg-layer);
+  background-color: #fff;
+}
+
+.js .paragraphs-description .summary-content {
+  color: var(--gin-color-text);
+}
+
+.paragraphs-dragdrop__list {
+  --dnd-item-ghost-border: var(--gin-color-primary);
+  --dnd-item-ghost-bg: var(--gin-bg-item-hover);
+}
+
+.paragraphs-dragdrop__item {
+  padding-block: var(--gin-spacing-xs);
+  background-color: var(--gin-bg-layer3);
+  border-radius: var(--gin-border-m);
+}
+
+.paragraphs-dragdrop__icon {
+  inset-block-start: var(--gin-spacing-xxxs);
+}
+
+.js .paragraph-type-add-modal-button:hover {
+  background: var(--gin-color-primary);
+}
+
+.paragraphs-dragdrop__label--field {
+  text-transform: none;
+}
+
+.field--widget-entity-reference-paragraphs > div > .form-wrapper > strong {
+  display: block;
+  margin-block-start: var(--gin-spacing-xl);
+}
+
+.field--widget-entity-reference-paragraphs .form-wrapper .form-wrapper > em {
+  display: block;
+  padding: var(--gin-spacing-m) 0;
+}
+
+.field--widget-entity-reference-paragraphs .form-actions {
+  align-items: center;
+}
+
+.field--widget-entity-reference-paragraphs .form-actions .dropbutton-multiple {
+  margin-inline-end: var(--gin-spacing-xs);
+}
+
+.field--widget-entity-reference-paragraphs .form-actions .dropbutton-multiple .placeholder,
+.field--widget-entity-reference-paragraphs .form-actions .dropbutton-multiple ~ .placeholder {
+  margin-inline-start: var(--gin-spacing-xxs);
+}
+
+.field--widget-entity-reference-paragraphs tr.draggable .tabledrag-handle::after {
+  inset-inline-start: 8px;
+}
+
+.toolbar-fixed .is-horizontal .paragraphs-tabs {
+  padding: var(--gin-spacing-xs) var(--gin-spacing-m) !important;
+  background-color: var(--gin-bg-layer3);
+  border-radius: var(--gin-border-s);
+}
+
+.toolbar-fixed .is-horizontal .paragraphs-tabs:first-of-type {
+  z-index: 100;
+  inset-block-start: calc(var(--gin-toolbar-y-offset) + var(--gin-height-sticky));
+}
+
+.toolbar-fixed .is-horizontal .paragraphs-tabs .tabs__tab {
+  float: inline-start;
+  margin-inline-end: var(--gin-spacing-m);
+}
+
+.toolbar-fixed .is-horizontal .paragraphs-tabs .tabs__tab a {
+  display: block;
+  padding: var(--gin-spacing-xs) 0;
+  color: var(--gin-color-text);
+}
+
+.toolbar-fixed .is-horizontal .paragraphs-tabs .tabs__tab.is-active a {
+  color: var(--gin-color-primary);
+}
+
+.toolbar-fixed .is-horizontal .paragraphs-tabs .tabs__tab.is-active a::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  display: block;
+  width: 100%;
+  border-block-end: 2px solid var(--gin-color-primary);
+}
+

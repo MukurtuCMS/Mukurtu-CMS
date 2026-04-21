@@ -1,0 +1,7 @@
+layout_builder_restrictions.restriction_plugin_config_form:
+  path: '/admin/config/content/layout-builder-restrictions'
+  defaults:
+    _form: '\Drupal\layout_builder_restrictions\Form\RestrictionPluginConfigForm'
+    _title: 'Layout Builder Restrictions Configuration'
+  requirements:
+    _permission: 'configure layout builder restrictions'

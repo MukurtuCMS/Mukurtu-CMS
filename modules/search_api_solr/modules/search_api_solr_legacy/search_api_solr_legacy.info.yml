@@ -1,0 +1,12 @@
+type: module
+name: 'Search API Solr Legacy'
+description: 'Add support for older unsupported Solr versions (3.6, >=4.5, 5.x).'
+package: Search
+core_version_requirement: ^10.2 || ^11.0
+dependencies:
+  - search_api_solr:search_api_solr
+
+# Information added by Drupal.org packaging script on 2025-04-23
+version: '4.3.10'
+project: 'search_api_solr'
+datestamp: 1745426381

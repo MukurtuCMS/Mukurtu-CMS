@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_geometry_data_geometry
+    - taxonomy.vocabulary.germany_zip_codes
+  module:
+    - geolocation_geometry_data
+  enforced:
+    module:
+      - geolocation_geometry_germany_zip_codes
+id: taxonomy_term.germany_zip_codes.field_geometry_data_geometry
+field_name: field_geometry_data_geometry
+entity_type: taxonomy_term
+bundle: germany_zip_codes
+label: Geometry
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geolocation_geometry_geometry

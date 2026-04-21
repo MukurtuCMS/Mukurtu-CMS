@@ -1,0 +1,23 @@
+search_api_solr_admin.solr_upload_configset_form:
+  route_name: 'search_api_solr_admin.solr_upload_configset_form'
+  title: 'Upload Configset'
+  appears_on:
+    - entity.search_api_server.canonical
+
+search_api_solr_admin.solr_reload_collection_form:
+  route_name: 'search_api_solr_admin.solr_reload_collection_form'
+  title: 'Reload Collection'
+  appears_on:
+    - entity.search_api_server.canonical
+
+search_api_solr_admin.solr_reload_core_form:
+  route_name: 'search_api_solr_admin.solr_reload_core_form'
+  title: 'Reload Core'
+  appears_on:
+    - entity.search_api_server.canonical
+
+search_api_solr_admin.field_analysis:
+  route_name: search_api_solr_admin.field_analysis
+  title: 'Field Analysis'
+  appears_on:
+    - entity.search_api_server.canonical

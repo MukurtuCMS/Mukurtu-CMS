@@ -1,0 +1,131 @@
+views.field.geofield_proximity_field:
+  type: views.field.numeric
+  label: 'Geofield Proximity Field'
+
+views.filter.geofield_proximity_filter:
+  type: views_filter
+  label: 'Geofield proximity filter'
+  mapping:
+    expose:
+      type: mapping
+      mapping:
+        placeholder:
+          type: string
+        min_placeholder:
+          type: string
+        max_placeholder:
+          type: string
+    units:
+      type: string
+    exposed_units:
+      type: boolean
+    source:
+      type: string
+    source_configuration:
+      type: mapping
+      mapping:
+        exposed_summary:
+          type: boolean
+        origin:
+          type: mapping
+          mapping:
+            lat:
+              type: string
+            lon:
+              type: string
+        origin_hidden_flag:
+          type: boolean
+        origin_summary_flag:
+          type: boolean
+        origin_address:
+          type: string
+        plugins:
+          type: sequence
+          sequence:
+            type: mapping
+            mapping:
+              checked:
+                type: boolean
+              weight:
+                type: integer
+        use_autocomplete:
+          type: boolean
+        settings:
+          type: mapping
+          mapping:
+            autocomplete:
+              type: mapping
+              mapping:
+                min_terms:
+                  type: integer
+                delay:
+                  type: integer
+                address_format:
+                  type: string
+
+views.filter_value.geofield_proximity_filter:
+  type: views.field.numeric
+  label: 'Geofield Proximity Filter'
+  mapping:
+    operator:
+      type: string
+    units:
+      type: string
+    exposed_units:
+      type: boolean
+    min:
+      type: integer
+    max:
+      type: integer
+    value:
+      type: integer
+    source:
+      type: string
+    source_configuration:
+      type: mapping
+      mapping:
+        exposed_summary:
+          type: boolean
+
+views.sort.geofield_proximity_sort:
+  type: views_sort
+  label: 'Geofield Proximity Sort'
+  mapping:
+    units:
+      type: string
+    source:
+      type: string
+    source_configuration:
+      type: mapping
+      mapping:
+        source_proximity_filter:
+          type: string
+
+views.argument.geofield_proximity_argument:
+  type: views_argument
+  label: 'Geofield Proximity Argument'
+
+views.filter_value.geofield_rectangular_boundary_filter:
+  type: views.field.numeric
+  label: 'Geofield Rectangular Boundary Filter'
+  mapping:
+    value:
+      type: mapping
+      label: 'Value'
+      mapping:
+        lat_north_east:
+          type: string
+          label: 'North East Latitude'
+        lon_north_east:
+          type: string
+          label: 'North East Longitude'
+        lat_south_west:
+          type: string
+          label: 'South West Latitude'
+        lon_south_west:
+          type: string
+          label: 'North East Longitude'
+
+views.argument.geofield_rectangular_boundary_argument:
+  type: views_argument
+  label: 'Geofield Rectangular Boundary Argument'

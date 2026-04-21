@@ -1,0 +1,50 @@
+.ief-entity-table .ief-row-form {
+  border: 1px solid var(--gin-border-color);
+}
+
+.ief-entity-table .ief-row-form:hover {
+  background: transparent;
+}
+
+.ief-entity-table .ief-row-form td {
+  padding-block-end: 0;
+}
+
+.ief-entity-table .ief-row-form .form-item {
+  margin-block: var(--gin-spacing-density-s);
+}
+
+.ief-form > .form-wrapper > .form-wrapper:last-of-type {
+  background: var(--gin-bg-layer2);
+  padding: 0 var(--gin-spacing-m);
+  margin-block: 0;
+  margin-inline: calc(var(--gin-spacing-m) * -1);
+}
+
+.ief-form.ief-form-bottom {
+  border: 1px solid var(--gin-border-color);
+}
+
+.ief-form.ief-form-bottom .fieldset__wrapper {
+  margin-block-end: 0;
+}
+
+/* Fixes for 'Inline entity form - Complex' widgets inside paragraphs */
+
+.paragraphs-tabs-wrapper .field-multiple-table .ief-entity-table .draggable {
+  display: table-row;
+  /* The .draggable padding is not applied because of display: table-row */
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .ief-entity-table .draggable.drag-previous > .tabledrag-cell::before {
+  inset-inline-start: var(--gin-spacing-xs);
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .ief-entity-table .draggable .tabledrag-cell-content__item {
+  padding-inline-start: var(--gin-spacing-s);
+}
+
+.paragraphs-tabs-wrapper .field-multiple-table .ief-entity-operations {
+  display: flex;
+}
+

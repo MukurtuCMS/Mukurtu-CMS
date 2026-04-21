@@ -1,0 +1,4 @@
+services:
+  plugin.manager.geolocation.geometrydata:
+    class: Drupal\geolocation_geometry_data\GeolocationGeometryDataManager
+    parent: default_plugin_manager

@@ -1,0 +1,229 @@
+// Toolbar Variables
+:root {
+  --gin-toolbar-height: 39px;
+  --gin-toolbar-secondary-height: 48px;
+  --gin-scroll-offset: 72px;
+  --gin-toolbar-y-offset: var(--gin-toolbar-height);
+  --gin-toolbar-x-offset: 0px; // Needs px to work in calc() functions.
+  --gin-sticky-offset: 0px; // Needs px to work in calc() functions.
+
+  @include mq(large) {
+    --gin-toolbar-secondary-height: 64px;
+    --gin-icon-size-toolbar: 16px;
+    --gin-scroll-offset: 200px;
+
+    .gin--edit-form {
+      --gin-sticky-offset: var(--gin-height-sticky);
+    }
+  }
+}
+
+.toolbar-fixed.toolbar-tray-open:not(.toolbar-vertical) {
+  @include mq(medium) {
+    --gin-toolbar-y-offset: 78px;
+  }
+}
+
+.gin--edit-form {
+  --ginStickyOffset: var(--ginStickyHeight);
+}
+
+.region-breadcrumb {
+  margin-block-start: var(--gin-spacing-m);
+}
+
+// Toolbar
+.toolbar .toolbar-bar {
+  position: fixed;
+  inset-inline-start: 0;
+  width: 100%;
+  background: #100f10;
+  box-shadow: none;
+}
+
+.toolbar .toolbar-menu,
+.toolbar-horizontal .menu-item > .toolbar-menu,
+.toolbar-horizontal .toolbar-tray .menu-item--expanded.menu-item--expanded,
+.toolbar .toolbar-tray {
+  background-color: var(--gin-bg-layer);
+}
+
+.toolbar-horizontal .toolbar-tray .toolbar-toggle-orientation {
+  border-inline-start: 1px solid var(--gin-border-color);
+}
+
+.toolbar-tray-horizontal {
+  ul {
+    li {
+      &.menu-item {
+        .menu-item {
+          border-block-end: 1px solid var(--gin-border-color);
+        }
+      }
+    }
+  }
+}
+
+// admin_toolbar 3.3.1 fix
+.toolbar-tray-horizontal .toolbar-menu .level-1 > .toolbar-box a {
+  padding-inline-end: 2.25em;
+}
+
+.toolbar-tray-horizontal .toolbar-menu .level-1 > .toolbar-box .toolbar-icon.toolbar-handle {
+  inset-block-start: .75rem;
+}
+
+.toolbar-tray-horizontal .level-1 .menu-item--expanded > .toolbar-box a {
+  width: 100%;
+}
+
+.toolbar-tray a,
+.toolbar-tray span,
+.toolbar .toolbar-menu .toolbar-menu a,
+.toolbar .toolbar-menu .toolbar-menu span {
+  color: var(--gin-color-text);
+
+  &:hover {
+    color: var(--gin-color-title);
+  }
+}
+
+.toolbar .toolbar-tray .menu-item--active-trail > .toolbar-box a,
+.toolbar .toolbar-tray .menu-item > .toolbar-icon.is-active,
+.toolbar .toolbar-tray .menu-item > .toolbar-box > .toolbar-icon.is-active,
+.toolbar .toolbar-tray a.is-active {
+  color: var(--gin-color-primary);
+  font-weight: var(--gin-font-weight-bold);
+  background-color: transparent;
+
+  &::before {
+    background: var(--gin-color-primary);
+  }
+}
+
+.toolbar .toolbar-tray .menu-item:hover > .toolbar-icon,
+.toolbar .toolbar-tray .toolbar-menu > li:hover > a {
+  color: var(--gin-color-primary-hover);
+  background-color: var(--gin-bg-item-hover);
+
+  &::before {
+    background: var(--gin-color-primary);
+  }
+}
+
+// Inline Edit toggle
+#toolbar-bar.toolbar-bar.js-settings-tray-edit-mode {
+  background: #100f10;
+
+  .toolbar-icon.toolbar-icon-edit.toolbar-item {
+    &,
+    &.is-active,
+    &:focus {
+      background: var(--gin-color-primary);
+    }
+
+    &:hover,
+    &.is-active:hover {
+      background: var(--gin-color-primary-hover);
+
+      &::before {
+        background: #fff;
+      }
+    }
+  }
+}
+
+.toolbar-tray-horizontal a:focus,
+.toolbar-box a:focus,
+.toolbar .toolbar-icon.toolbar-handle:focus {
+  background-color: var(--gin-bg-layer2);
+}
+
+.toolbar-tray-horizontal .menu-item:hover {
+  background-color: transparent;
+}
+
+.toolbar-menu__trigger,
+.toolbar .menu-item-title,
+.menu-item-sub-title {
+  display: none !important;
+}
+
+.gin--dark-mode .toolbar .toolbar-toggle-orientation {
+  background-color: var(--gin-bg-layer2);
+}
+
+.gin--classic-toolbar {
+  .page-wrapper__node-edit-form .layout-region-node-secondary {
+    padding-block-start: var(--gin-toolbar-y-offset); // 39px;
+  }
+
+  table.sticky-header {
+    @include mq(large) {
+      margin-block-start: 0;
+    }
+  }
+}
+
+.toolbar-menu .menu-item > span {
+  padding-inline-start: 2.75em;
+}
+
+// Home icon
+.toolbar .toolbar-bar .toolbar-icon-admin-toolbar-tools-help {
+  width: auto;
+  height: 100%;
+  text-indent: -999em;
+
+  &:before {
+    mask-size: 20px 20px;
+  }
+
+  @include mq(medium) {
+    &:before {
+      inset-inline-start: var(--gin-spacing-m);
+    }
+  }
+}
+
+#toolbar-item-administration-tray {
+  .toolbar-logo {
+    img {
+      @include mq(large) {
+        max-height: 21px;
+      }
+    }
+  }
+}
+
+.toolbar-tray-horizontal ul li.menu-item--expanded ul li.menu-item--expanded,
+.toolbar-tray-horizontal .toolbar-menu:not(:first-child) li.menu-item--expanded > a:focus {
+  position: relative;
+
+  &:before {
+    inset-block-start: var(--gin-spacing-s);
+    inset-inline-end: var(--gin-spacing-s);
+  }
+}
+
+#admin-toolbar-search-tab .form-item {
+  &::before {
+    inset-block-start: 6px;
+    inset-inline-start: 26px;
+  }
+}
+
+#admin-toolbar-search-input {
+  padding-inline-start: var(--gin-spacing-xl);
+}
+
+// Drupal 10.1 Toolbar loading overrides
+#toolbar-item-administration-tray,
+.toolbar-loading #toolbar-item-administration-tray {
+  border-block-end: 1px solid var(--gin-border-color);
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+
+  .toolbar-lining {
+    background-color: var(--gin-bg-layer);
+  }
+}

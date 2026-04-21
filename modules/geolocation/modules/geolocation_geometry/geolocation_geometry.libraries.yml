@@ -1,0 +1,33 @@
+wicket:
+  remote: https://github.com/arthur-e/Wicket
+  version: 1.x
+  license:
+    name: GNU General Public License version 3, GPLv3
+    url: http://www.gnu.org/licenses/gpl.html
+    gpl-compatible: true
+  js:
+    https://cdn.rawgit.com/arthur-e/Wicket/master/wicket.js: { type: external }
+
+wicket-leaflet:
+  remote: https://github.com/arthur-e/Wicket
+  version: 1.x
+  license:
+    name: GNU General Public License version 3, GPLv3
+    url: http://www.gnu.org/licenses/gpl.html
+    gpl-compatible: true
+  js:
+    https://cdn.rawgit.com/arthur-e/Wicket/master/wicket-leaflet.js: { type: external }
+  dependencies:
+    - geolocation_geometry/wicket
+
+wicket-googlemaps:
+  remote: https://github.com/arthur-e/Wicket
+  version: 1.x
+  license:
+    name: GNU General Public License version 3, GPLv3
+    url: http://www.gnu.org/licenses/gpl.html
+    gpl-compatible: true
+  js:
+    https://cdn.rawgit.com/arthur-e/Wicket/master/wicket-gmap3.js: { type: external }
+  dependencies:
+    - geolocation_geometry/wicket

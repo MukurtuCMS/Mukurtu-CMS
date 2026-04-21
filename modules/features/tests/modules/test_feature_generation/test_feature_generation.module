@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Main hooks for Test feature generation module.
+ */
+
+use Drupal\test_feature_generation\Plugin\FeaturesGeneration\FeaturesGenerationArchiveAlter;
+use Drupal\test_feature_generation\Plugin\FeaturesGeneration\FeaturesGenerationWriteAlter;
+
+/**
+ * Implements hook_element_plugin_alter()
+ */
+function test_feature_generation_features_generation_info_alter(array &$definitions) {
+  $definitions['write']['class'] = FeaturesGenerationWriteAlter::class;
+  $definitions['archive']['class'] = FeaturesGenerationArchiveAlter::class;
+}

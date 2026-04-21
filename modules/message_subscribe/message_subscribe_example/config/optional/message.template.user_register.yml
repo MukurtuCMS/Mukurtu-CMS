@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies: {  }
+template: user_register
+label: 'User registered'
+description: 'User registered.'
+text:
+  -
+    value: "[message:field_user:entity:account-name] registered\r\n"
+    format: plain_text
+  -
+    value: "<h2>[message:field_user:entity:account-name] registered</h2>\r\n\r\n<p>username: [message:field_user:entity:account-name]<br />\r\nurl:&nbsp;[message:field_user:entity:url]<br />\r\ntimestamp: [message:field_user:entity:created]</p>\r\n"
+    format: basic_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

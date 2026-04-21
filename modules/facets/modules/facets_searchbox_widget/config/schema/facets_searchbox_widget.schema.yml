@@ -1,0 +1,4 @@
+facet.widget.config.searchbox_checkbox:
+  type: facet.widget.config.checkbox
+facet.widget.config.searchbox_links:
+  type: facet.widget.config.links

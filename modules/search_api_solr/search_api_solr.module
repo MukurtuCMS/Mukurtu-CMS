@@ -1,0 +1,823 @@
+<?php
+
+/**
+ * @file
+ * Implement hooks.
+ */
+
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+use Drupal\search_api\Entity\Server;
+use Drupal\search_api\IndexInterface;
+use Drupal\search_api\SearchApiException;
+use Drupal\search_api\ServerInterface;
+use Drupal\search_api_solr\Form\IndexAddSolrDocumentFieldsForm;
+use Drupal\search_api_solr\Form\IndexSolrMultisiteCloneForm;
+use Drupal\search_api_solr\Form\IndexSolrMultisiteUpdateForm;
+use Drupal\search_api_solr\SolrBackendInterface;
+use Drupal\search_api_solr\Utility\Utility;
+use Laminas\Stdlib\ArrayUtils;
+
+/**
+ * Implements hook_help().
+ */
+function search_api_solr_help($route_name, RouteMatchInterface $route_match) {
+  if ($route_name === 'search_api.overview') {
+    // Included because we need the REQUIREMENT_* constants.
+    include_once DRUPAL_ROOT . '/core/includes/install.inc';
+    \Drupal::moduleHandler()->loadInclude('search_api_solr', 'install');
+    $messenger = \Drupal::messenger();
+    $reqs = search_api_solr_requirements('runtime');
+    foreach ($reqs as $req) {
+      if (isset($req['description'])) {
+        $type = $req['severity'] == REQUIREMENT_ERROR ? MessengerInterface::TYPE_ERROR :
+          ($req['severity'] == REQUIREMENT_WARNING ? MessengerInterface::TYPE_WARNING : MessengerInterface::TYPE_STATUS);
+        $messenger->addMessage($req['description'], $type);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * Used to execute an optimization operation on all enabled Solr servers once a
+ * day.
+ *
+ * @throws \Drupal\Component\Plugin\Exception\PluginException
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\search_api\SearchApiException
+ * @throws \Drupal\search_api_solr\SearchApiSolrException
+ */
+function search_api_solr_cron() {
+  $document_counts = [];
+  $end_of_day = FALSE;
+  $request_time = \Drupal::time()->getRequestTime();
+  // 86400 seconds are one day. We use slightly less here to allow for some
+  // variation in the request time of the cron run, so that the time of day will
+  // (more or less) stay the same.
+  if ($request_time - \Drupal::state()->get('search_api_solr.last_optimize') > 86340) {
+    \Drupal::state()->set('search_api_solr.last_optimize', $request_time);
+    // Delete "cached" endpoint data and schema_parts once a day. We keep
+    // these in states instead of a caches because we might need to
+    // access this data even if Solr is temporarily not reachable and
+    // caches have been cleared or Solr itself is used as caching backend.
+    \Drupal::state()->delete('search_api_solr.endpoint.data');
+    \Drupal::state()->delete('search_api_solr.endpoint.schema_parts');
+
+    $end_of_day = TRUE;
+  }
+
+  foreach (search_api_solr_get_servers(TRUE) as $server) {
+    /** @var \Drupal\search_api_solr\SolrBackendInterface $backend */
+    $backend = $server->getBackend();
+    try {
+      $connector = $backend->getSolrConnector();
+      $is_drupal_only_writeable[$server->id()] = FALSE;
+      $last_update_on_server[$server->id()] = 0;
+
+      if ($indexes = $server->getIndexes(['status' => TRUE])) {
+        $document_counts[$server->id()] = $backend->getDocumentCounts();
+        $is_drupal_only_writeable[$server->id()] = TRUE;
+        $optimized = FALSE;
+
+        foreach ($indexes as $index) {
+          if ($backend->finalizeIndex($index)) {
+            /** @var \Drupal\search_api\Backend\BackendPluginBase $backend */
+            $backend->getLogger()->info('Cron finalized Solr server @server.', ['@server' => $server->label()]);
+          }
+          $is_drupal_only_writeable[$server->id()] &= !Utility::hasIndexJustSolrDocumentDatasource($index);
+          $last_update = \Drupal::state()->get('search_api_solr.' . $index->id() . '.last_update', 0);
+          if ($last_update > $last_update_on_server[$server->id()]) {
+            $last_update_on_server[$server->id()] = $last_update;
+          }
+          if (!$optimized && $end_of_day && $backend->isOptimizeEnabled()) {
+            $endpoint = $backend->getCollectionEndpoint($index);
+            $connector->optimize($endpoint);
+            $optimized = TRUE;
+            /** @var \Drupal\search_api\Backend\BackendPluginBase $backend */
+            $backend->getLogger()
+              ->info('Optimized Solr server @server.', ['@server' => $server->label()]);
+          }
+        }
+      }
+
+      if (
+        $is_drupal_only_writeable[$server->id()] &&
+        \Drupal::state()->get('search_api_solr.' . $server->id() . '.last_build', 0) < $last_update_on_server[$server->id()] &&
+        // @todo Add config option for pause between suggester builds.
+        \Drupal::state()->get('search_api_solr.' . $server->id() . '.last_build', 0) < ($request_time - 1800)
+      ) {
+        $suggester = TRUE;
+
+        foreach ($backend->getDisabledRequestHandlers() as $disabledRequestHandler) {
+          if (str_starts_with($disabledRequestHandler, 'request_handler_suggest_')) {
+            $suggester = FALSE;
+            break;
+          }
+        }
+
+        if ($suggester) {
+          $query = $connector->getSuggesterQuery();
+          $query->addParam('suggest.buildAll', TRUE);
+          $connector->fireAndForget($query);
+        }
+
+        \Drupal::state()->set('search_api_solr.' . $server->id() . '.last_build', $request_time);
+      }
+    }
+    catch (SearchApiException $e) {
+      /** @var \Drupal\search_api\Backend\BackendPluginBase $backend */
+      \Drupal\Core\Utility\Error::logException($backend->getLogger(), $e, '%type while maintaining Solr server @server: @message in %function (line %line of %file).', ['@server' => $server->label()]);
+    }
+  }
+
+  $search_all_rows = [];
+  foreach ($document_counts as $server_id => $counts) {
+    $search_all_rows[$server_id]['#total'] = Utility::normalizeMaxRows($counts['#total']);
+    unset($counts['#total']);
+    foreach ($counts as $site_hash => $index_doc_counts) {
+      foreach ($index_doc_counts as $index_id => $count) {
+        $search_all_rows[$server_id][$site_hash][$index_id] = Utility::normalizeMaxRows($count);
+      }
+    }
+  }
+  \Drupal::state()->set('search_api_solr.search_all_rows', $search_all_rows);
+}
+
+/**
+ * Get the default third party settings of an index for Solr.
+ *
+ * @return array
+ *   Third party settings array.
+ */
+function search_api_solr_default_index_third_party_settings() {
+  return [
+    'finalize' => FALSE,
+    'commit_before_finalize' => FALSE,
+    'commit_after_finalize' => FALSE,
+    'debug_finalize' => FALSE,
+    'highlighter' => [
+      'maxAnalyzedChars' => 51200,
+      'fragmenter' => 'gap',
+      'usePhraseHighlighter' => TRUE,
+      'highlightMultiTerm' => TRUE,
+      'preserveMulti' => FALSE,
+      'regex' => [
+        'slop' => 0.5,
+        'pattern' => 'blank',
+        'maxAnalyzedChars' => 10000,
+      ],
+      'highlight' => [
+        'mergeContiguous' => FALSE,
+        'requireFieldMatch' => FALSE,
+        'snippets' => 3,
+        'fragsize' => 0,
+      ],
+    ],
+    'mlt' => [
+      'mintf' => 1,
+      'mindf' => 1,
+      'maxdf' => 0,
+      'maxdfpct' => 0,
+      'minwl' => 0,
+      'maxwl' => 0,
+      'maxqt' => 100,
+      'maxntp' => 2000,
+      'boost' => FALSE,
+      'interestingTerms' => 'none',
+    ],
+    'term_modifiers' => [
+      'slop' => 3,
+      'fuzzy' => 1,
+      'fuzzy_analyzer' => TRUE,
+    ],
+    'advanced' => [
+      'index_prefix' => '',
+      'collection' => '',
+      'timezone' => '',
+    ],
+    'multilingual' => [
+      'limit_to_content_language' => FALSE,
+      'include_language_independent' => TRUE,
+      'use_language_undefined_as_fallback_language' => FALSE,
+      'specific_languages' => [],
+      'use_universal_collation' => FALSE,
+    ],
+  ];
+}
+
+/**
+ * Merges the default third party settings to those of an index for Solr.
+ *
+ * @param array $third_party_settings
+ *   Third party settings array.
+ *
+ * @return array
+ *   Third party settings array.
+ */
+function search_api_solr_merge_default_index_third_party_settings(array $third_party_settings) {
+  return ArrayUtils::merge(search_api_solr_default_index_third_party_settings(), $third_party_settings, TRUE);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function search_api_solr_form_search_api_index_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // We need to restrict by form ID here because this function is also called
+  // via hook_form_BASE_FORM_ID_alter (which is wrong, e.g. in the case of the
+  // form ID search_api_field_config).
+  if (in_array($form_id, ['search_api_index_form', 'search_api_index_edit_form'])) {
+    if (isset($form['server'])) {
+      $form['server']['#element_validate'][] = 'search_api_solr_form_search_api_index_form_validate_server';
+    }
+
+    $settings = [];
+    /** @var \Drupal\Core\Entity\EntityFormInterface $form_object */
+    $form_object = $form_state->getFormObject();
+    /** @var \Drupal\search_api\IndexInterface $index */
+    $index = $form_object->getEntity();
+    if (!$index->isNew()) {
+      $settings = $index->getThirdPartySettings('search_api_solr');
+    }
+    $settings = search_api_solr_merge_default_index_third_party_settings($settings);
+
+    $form['third_party_settings']['search_api_solr'] = [
+      '#tree' => TRUE,
+      '#type' => 'details',
+      '#title' => t('Solr specific index options'),
+      '#collapsed' => TRUE,
+      '#states' => [
+        'visible' => [
+          ':input[name="server"]' => _search_api_solr_visibility(),
+        ],
+      ],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['finalize'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Finalize index before first search'),
+      '#description' => t('If enabled, other modules could hook in to apply "finalizations" to the index after updates or deletions happend to index items.'),
+      '#default_value' => $settings['finalize'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['commit_before_finalize'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Wait for commit before first finalization'),
+      '#description' => t('If enabled, Solr will be be forced to flush all commits before any "finalizations" will be applied.'),
+      '#default_value' => $settings['commit_before_finalize'],
+      '#states' => [
+        'invisible' => [
+          ':input[name="third_party_settings[search_api_solr][finalize]"]' => [
+            'checked' => FALSE,
+          ],
+        ],
+      ],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['commit_after_finalize'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Wait for commit after last finalization'),
+      '#description' => t('If enabled, Solr will be be forced to flush all commits after the last "finalizations" have been applied.'),
+      '#default_value' => $settings['commit_after_finalize'],
+      '#states' => [
+        'invisible' => [
+          ':input[name="third_party_settings[search_api_solr][finalize]"]' => [
+            'checked' => FALSE,
+          ],
+        ],
+      ],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['debug_finalize'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Log debug messages for finalization'),
+      '#description' => t('If enabled, log debug messages for "finalizations".'),
+      '#default_value' => $settings['debug_finalize'],
+      '#states' => [
+        'invisible' => [
+          ':input[name="third_party_settings[search_api_solr][finalize]"]' => [
+            'checked' => FALSE,
+          ],
+        ],
+      ],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['multilingual'] = [
+      '#type' => 'details',
+      '#title' => t('Multilingual'),
+      '#tree' => TRUE,
+    ];
+
+    $form['third_party_settings']['search_api_solr']['multilingual']['limit_to_content_language'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Limit to current content language.'),
+      '#description' => t('Limit all search results for custom queries or search pages not managed by Views to current content language if no language is specified in the query.'),
+      '#default_value' => $settings['multilingual']['limit_to_content_language'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['multilingual']['include_language_independent'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Include language independent content in search results.'),
+      '#description' => t('This option will include content without a language assigned in the results of custom queries or search pages not managed by Views. For example, if you search for English content, but have an article with language of "undefined", you will see those results as well. If you disable this option, you will only see content that matches the language.'),
+      '#default_value' => $settings['multilingual']['include_language_independent'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['multilingual']['use_language_undefined_as_fallback_language'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Index language fallback fulltext fields using "language undefined".'),
+      '#description' => t('By default, fulltext fields of a language added by the Search API "language with fallback" field will be indexed using a corresponding language-specific fulltext field. That might lead to bad results if you for example define English as Fallback for Japanese. Using this option, the language undefinded fulltext field will be used for all fallback languages. Unless you do custom searches, it is recommended that you also enable "Include language independent content in search results" above.'),
+      '#default_value' => $settings['multilingual']['use_language_undefined_as_fallback_language'],
+    ];
+
+    $langcode_options = [];
+    foreach (\Drupal::languageManager()->getLanguages() as $language) {
+      $langcode_options[$language->getId()] = $language->getName();
+    }
+
+    $form['third_party_settings']['search_api_solr']['multilingual']['specific_languages'] = [
+      '#type' => 'checkboxes',
+      '#title' => t('Languages to index using language-specific fields'),
+      '#description' => t('Selected languages will use language-specific fields when a values gets indexed. Others will use the language-unspecific default. If nothing is selected, all translations will be indexed using language-specific fields.'),
+      '#options' => $langcode_options,
+      '#default_value' => $settings['multilingual']['specific_languages'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['multilingual']['use_universal_collation'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Use universal UTF-8 collation.'),
+      '#description' => t('By default, language-specific collations are used. That provides the best collation results. But to save index disk space you can use a universal UTF-8 collation.'),
+      '#default_value' => $settings['multilingual']['use_universal_collation'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter'] = [
+      '#tree' => TRUE,
+      '#type' => 'details',
+      '#title' => t('Highlighter'),
+      '#collapsed' => TRUE,
+      '#description' => t('If "Retrieve result data from Solr" and "Highlight retrieved data" are selected for the Solr backend on the server edit page, these highlighting settings will be used.'),
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['maxAnalyzedChars'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('maxAnalyzedChars'),
+      '#description' => t('Specifies the number of characters into a document that Solr should look for suitable snippets.'),
+      '#default_value' => $settings['highlighter']['maxAnalyzedChars'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['fragmenter'] = [
+      '#type' => 'select',
+      '#options' => ['gap' => 'gap', 'regex' => 'regex'],
+      '#title' => t('fragmenter'),
+      '#description' => t('Specifies a text snippet generator for highlighted text. The standard fragmenter is gap, which creates fixed-sized fragments with gaps for multi-valued fields. Another option is regex, which tries to create fragments that resemble a specified regular expression. This parameter accepts per-field overrdes.'),
+      '#default_value' => $settings['highlighter']['fragmenter'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['regex'] = [
+      '#tree' => TRUE,
+      '#type' => 'details',
+      '#title' => t('regex'),
+      '#collapsed' => FALSE,
+      '#states' => [
+        'invisible' => [
+          'select[name="third_party_settings[search_api_solr][highlighter][fragmenter]"]' => [
+            'value' => 'gap',
+          ],
+        ],
+      ],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['regex']['slop'] = [
+      '#type' => 'number',
+      '#step' => .1,
+      '#min' => 0,
+      '#title' => t('regex.slop'),
+      '#description' => t('When using the regex fragmenter, this parameter defines the factor by which the fragmenter can stray from the ideal fragment size (given by fragsize) to accommodate a regular expression. For instance, a slop of 0.2 with fragsize=100 should yield fragments between 80 and 120 characters in length. It is usually good to provide a slightly smaller fragsize value when using the regex fragmenter.'),
+      '#default_value' => $settings['highlighter']['regex']['slop'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['regex']['pattern'] = [
+      '#type' => 'textfield',
+      '#title' => t('regex.pattern'),
+      '#description' => t('Specifies the regular expression for fragmenting. This could be used to extract sentences.'),
+      '#default_value' => $settings['highlighter']['regex']['pattern'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['regex']['maxAnalyzedChars'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('regex.maxAnalyzedChars'),
+      '#description' => t('Instructs Solr to analyze only this many characters from a field when using the regex fragmenter (after which, the fragmenter produces fixed-sized fragments). Applying a complicated regex to a huge field is computationally expensive.'),
+      '#default_value' => $settings['highlighter']['regex']['maxAnalyzedChars'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['usePhraseHighlighter'] = [
+      '#type' => 'checkbox',
+      '#title' => t('usePhraseHighlighter'),
+      '#description' => t('If set, Solr will highlight phrase queries (and other advanced position-sensitive queries) accurately. If false, the parts of the phrase will be highlighted everywhere instead of only when it forms the given phrase.'),
+      '#default_value' => $settings['highlighter']['usePhraseHighlighter'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['highlightMultiTerm'] = [
+      '#type' => 'checkbox',
+      '#title' => t('highlightMultiTerm'),
+      '#description' => t('If set, Solr will highlight wildcard queries (and other MultiTermQuery subclasses). If false, they will not be highlighted at all.'),
+      '#default_value' => $settings['highlighter']['highlightMultiTerm'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['preserveMulti'] = [
+      '#type' => 'checkbox',
+      '#title' => t('preserveMulti'),
+      '#description' => t('If set, multi-valued fields will return all values in the order they were saved in the index. If false, only values that match the highlight request will be returned.'),
+      '#default_value' => $settings['highlighter']['preserveMulti'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['highlight']['mergeContiguous'] = [
+      '#type' => 'checkbox',
+      '#title' => t('mergeContiguous'),
+      '#description' => t('Instructs Solr to collapse contiguous fragments into a single fragment. A value of true indicates contiguous fragments will be collapsed into single fragment. This parameter accepts per-field overrides. The default value, false, is also the backward-compatible setting.'),
+      '#default_value' => $settings['highlighter']['highlight']['mergeContiguous'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['highlight']['requireFieldMatch'] = [
+      '#type' => 'checkbox',
+      '#title' => t('requireFieldMatch'),
+      '#description' => t('If set, highlights terms only if they appear in the specified field. If not set, terms are highlighted in all requested fields regardless of which field matched the query.'),
+      '#default_value' => $settings['highlighter']['highlight']['requireFieldMatch'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['highlight']['snippets'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('snippets'),
+      '#description' => t('Specifies maximum number of highlighted snippets to generate per field. It is possible for any number of snippets from zero to this value to be generated. This parameter accepts per-field overrides.'),
+      '#default_value' => $settings['highlighter']['highlight']['snippets'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['highlighter']['highlight']['fragsize'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('fragsize'),
+      '#description' => t('Specifies the size, in characters, of fragments to consider for highlighting. 0 indicates that no fragmenting should be considered and the whole field value should be used. This parameter accepts per-field overrides.'),
+      '#default_value' => $settings['highlighter']['highlight']['fragsize'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt'] = [
+      '#tree' => TRUE,
+      '#type' => 'details',
+      '#title' => t('MLT (MoreLikeThis)'),
+      '#collapsed' => TRUE,
+      '#description' => t('If a Search API MoreLikeThis block is configured for this index, these settings will be used.'),
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['mintf'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('mintf'),
+      '#description' => t('Specifies the Minimum Term Frequency, the frequency below which terms will be ignored in the source document.'),
+      '#default_value' => $settings['mlt']['mintf'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['mindf'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('mindf'),
+      '#description' => t('Specifies the Minimum Document Frequency, the frequency at which words will be ignored which do not occur in at least this many documents.'),
+      '#default_value' => $settings['mlt']['mindf'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['maxdf'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('maxdf'),
+      '#description' => t('Specifies the Maximum Document Frequency, the frequency at which words will be ignored which occur in more than this many documents.'),
+      '#default_value' => $settings['mlt']['maxdf'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['maxdfpct'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#max' => 100,
+      '#title' => t('maxdfpct'),
+      '#description' => t('Specifies the Maximum Document Frequency using a relative ratio to the number of documents in the index. The argument must be an integer between 0 and 100. For example 75 means the word will be ignored if it occurs in more than 75 percent of the documents in the index.'),
+      '#default_value' => $settings['mlt']['maxdfpct'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['minwl'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('minwl'),
+      '#description' => t('Sets the minimum word length below which words will be ignored.'),
+      '#default_value' => $settings['mlt']['minwl'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['maxwl'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('maxwl'),
+      '#description' => t('Sets the maximum word length above which words will be ignored.'),
+      '#default_value' => $settings['mlt']['maxwl'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['maxqt'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('maxqt'),
+      '#description' => t('Sets the maximum number of query terms that will be included in any generated query.'),
+      '#default_value' => $settings['mlt']['maxqt'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['maxntp'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('maxntp'),
+      '#description' => t('Sets the maximum number of tokens to parse in each example document field that is not stored with TermVector support.'),
+      '#default_value' => $settings['mlt']['maxntp'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['boost'] = [
+      '#type' => 'checkbox',
+      '#title' => t('boost'),
+      '#description' => t('Specifies if the query will be boosted by the interesting term relevance.'),
+      '#default_value' => $settings['mlt']['boost'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['mlt']['interestingTerms'] = [
+      '#type' => 'select',
+      '#options' => [
+        'none' => t('none'),
+        'list' => t('list'),
+        'details' => t('details'),
+      ],
+      '#title' => t('interestingTerms'),
+      '#description' => t('Controls how the MoreLikeThis component presents the "interesting" terms (the top TF/IDF terms) for the query. Supports three settings. The setting "list" lists the terms. The setting "none" lists no terms. The setting "details" lists the terms along with the boost value used for each term. Unless mlt.boost=true, all terms will have boost=1.0.'),
+      '#default_value' => $settings['mlt']['interestingTerms'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['term_modifiers'] = [
+      '#tree' => TRUE,
+      '#type' => 'details',
+      '#title' => t('Term modifiers'),
+      '#collapsed' => TRUE,
+      '#description' => t('Solr supports a variety of term modifiers that add flexibility or precision, as needed, to searches. The Search API Solr provides additional Search API Parse Mode Plugins that make use of these modifiers.'),
+    ];
+
+    $form['third_party_settings']['search_api_solr']['term_modifiers']['slop'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => t('Proximity search distance (aka "slop")'),
+      '#description' => t('A proximity search looks for terms that are within a specific distance from one another. The distance referred to here is the number of term movements needed to match the specified phrase. Used by the "Phrase search with sloppiness" and "Multiple words with sloppiness" query parsers.'),
+      '#default_value' => $settings['term_modifiers']['slop'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['term_modifiers']['fuzzy'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#max' => 2,
+      '#title' => t('Fuzzy search distance'),
+      '#description' => t('Fuzzy searches discover terms that are similar to a specified term without necessarily being an exact match. The distance parameter specifies the maximum number of edits allowed, between 0 and 2. Used by the "Multiple words with fuzziness" query parser.'),
+      '#default_value' => $settings['term_modifiers']['fuzzy'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['term_modifiers']['fuzzy_analyzer'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Fuzzy analyzer'),
+      '#description' => t('Fuzzy searches turn off field anlyzers by default. This option querys the analyzed fields withoput fuzziness in parallel.'),
+      '#default_value' => $settings['term_modifiers']['fuzzy_analyzer'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['advanced'] = [
+      '#tree' => TRUE,
+      '#type' => 'details',
+      '#title' => t('Advanced'),
+    ];
+
+    $form['third_party_settings']['search_api_solr']['advanced']['index_prefix'] = [
+      '#type' => 'textfield',
+      '#title' => t('Index prefix'),
+      '#description' => t("By default, the index ID in the Solr server is the same as the index's machine name in Drupal. This setting will let you specify an additional prefix. Only use alphanumeric characters and underscores. Since changing the prefix makes the currently indexed data inaccessible, you should not change this variable when no data is indexed."),
+      '#default_value' => $settings['advanced']['index_prefix'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['advanced']['collection'] = [
+      '#type' => 'textfield',
+      '#title' => t('Collection'),
+      '#description' => t("If the server uses a Solr Cloud connector, this setting overwrites the configured default collection if set."),
+      '#default_value' => $settings['advanced']['collection'],
+    ];
+
+    $form['third_party_settings']['search_api_solr']['advanced']['timezone'] = [
+      '#type' => 'select',
+      '#title' => t('Time zone'),
+      '#description' => t("For correct date calculations the time zone to use is sent to the Solr server. By default the individual time zone of the current user will be used. If not available the site's default time zone will be used as fallback. But by setting a time zone here you can force a time zone for every query targeting this index."),
+      '#default_value' => $settings['advanced']['timezone'],
+      '#options' => \Drupal\Core\Datetime\TimeZoneFormHelper::getOptionsList(TRUE),
+    ];
+  }
+}
+
+/**
+ * Form validation.
+ *
+ * @param array $element
+ *   The form element.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ * @param array $form
+ *   The form array.
+ *
+ * @throws \Drupal\search_api\SearchApiException
+ */
+function search_api_solr_form_search_api_index_form_validate_server(array &$element, FormStateInterface $form_state, array $form) {
+  if ($server = Server::load($form_state->getValue('server'))) {
+    if ($server->getBackend() instanceof SolrBackendInterface) {
+      /** @var \Drupal\Core\Entity\EntityFormInterface $form_object */
+      $form_object = $form_state->getFormObject();
+      $this_index = $form_object->getEntity();
+      $indexes = $server->getIndexes();
+      $index_count = 0;
+      foreach ($indexes as $index) {
+        if ($index->status()) {
+          if (!$this_index->isNew() && ($this_index->id() == $index->id())) {
+            continue;
+          }
+          ++$index_count;
+        }
+      }
+      if ($index_count > 0 && $form_state->getValue('status')) {
+        \Drupal::messenger()->addWarning(
+          t("You're storing multiple indexes on the same Solr index (aka core). Take care if you use advanced Solr features like spell checking, suggesters, terms, autocomplete and others directly, because they aren't aware of these multiple indexes by default. Use Search API family modules like Autocomplete module instead which will help you to avoid issues.")
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function search_api_solr_form_search_api_index_fields_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\Core\Entity\EntityFormInterface $form_object */
+  $form_object = $form_state->getFormObject();
+  /** @var \Drupal\search_api\IndexInterface $index */
+  $index = $form_object->getEntity();
+
+  if (Utility::hasIndexSolrDatasources($index)) {
+    $form['add-all-document-fields'] = [
+      '#type' => 'link',
+      '#title' => t('Add new Solr Document fields'),
+      '#url' => $index->toUrl('add-solr-document-fields'),
+      '#attributes' => [
+        'class' => [
+          'use-ajax',
+          'button',
+          'button-action',
+          'button--primary',
+          'button--small',
+        ],
+        'data-dialog-type' => 'modal',
+        'data-dialog-options' => Json::encode([
+          'width' => '90%',
+        ]),
+      ],
+      '#weight' => -10,
+    ];
+  }
+}
+
+/**
+ * Implements hook_views_data_alter().
+ *
+ * Remove fields from solr_document datasources from the views data. Datasource
+ * fields that have been added to the index would be duplicated in the Views Add
+ * fields list. Fields that aren't added to the index can't be displayed.
+ */
+function search_api_solr_views_data_alter(array &$data) {
+  // @todo check for a search_api based view first.
+  foreach ($data as $key => $fields) {
+    if (preg_match('/search_api_datasource_(.+)_solr_document/', $key)) {
+      unset($data[$key]);
+    }
+  }
+}
+
+/**
+ * Re-install all default Solr Field Types from their yml files.
+ */
+function search_api_solr_install_missing_field_types() {
+  \Drupal::moduleHandler()->loadInclude('search_api_solr', 'install');
+  search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Get all Search API servers that use a Solr backend.
+ *
+ * @param bool $only_active
+ *   Whether to only return active servers or all.
+ *
+ * @return \Drupal\search_api\ServerInterface[]
+ *   The servers.
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\search_api\SearchApiException
+ */
+function search_api_solr_get_servers($only_active = TRUE) {
+  $solr_servers = [];
+  $storage = \Drupal::entityTypeManager()->getStorage('search_api_server');
+  /** @var \Drupal\search_api\ServerInterface[] $servers */
+  $servers = $only_active ? $storage->loadByProperties(['status' => TRUE]) :
+    $storage->loadMultiple();
+  foreach ($servers as $server) {
+    if (
+      $server->hasValidBackend() &&
+      $server->getBackend() instanceof SolrBackendInterface
+    ) {
+      $solr_servers[$server->id()] = $server;
+    }
+  }
+  return $solr_servers;
+}
+
+/**
+ * Implements hook_entity_operation().
+ *
+ * Adds an operation to Solr servers to directly generate and download a config.
+ *
+ * @throws \Drupal\search_api\SearchApiException
+ */
+function search_api_solr_entity_operation(EntityInterface $entity) {
+  $operations = [];
+  if (
+    $entity instanceof ServerInterface &&
+    $entity->getBackend() instanceof SolrBackendInterface
+  ) {
+    $operations['get_config_zip'] = [
+      'title' => t('Get config.zip'),
+      'url' => Url::fromRoute('solr_configset.config_zip', ['search_api_server' => $entity->id()]),
+      'weight' => 50,
+    ];
+  }
+  elseif ($entity instanceof IndexInterface) {
+    if (
+      $entity->isServerEnabled() &&
+      $entity->getServerInstance()->getBackend() instanceof SolrBackendInterface &&
+      !$entity->isValidDatasource('solr_multisite_document')
+    ) {
+      $operations['clone_for_multisite'] = [
+        'title' => t('Clone for Multisite'),
+        'url' => Url::fromRoute('entity.search_api_index.solr_multisite_clone_form', ['search_api_index' => $entity->id()]),
+        'weight' => 50,
+      ];
+    }
+    elseif ($entity->isValidDatasource('solr_multisite_document')) {
+      $operations['update_for_multisite'] = [
+        'title' => t('Update for Multisite'),
+        'url' => Url::fromRoute('entity.search_api_index.solr_multisite_update_form', ['search_api_index' => $entity->id()]),
+        'weight' => 50,
+      ];
+    }
+  }
+  return $operations;
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function search_api_solr_entity_type_alter(array &$entity_types) {
+  /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
+  $entity_types['search_api_index']->setClass(\Drupal\search_api_solr\Entity\Index::class);
+  $entity_types['search_api_index']->setFormClass('solr_multisite_clone', IndexSolrMultisiteCloneForm::class);
+  $entity_types['search_api_index']->setFormClass('solr_multisite_update', IndexSolrMultisiteUpdateForm::class);
+  $entity_types['search_api_index']->setFormClass('add_solr_document_fields', IndexAddSolrDocumentFieldsForm::class);
+  $entity_types['search_api_index']->setLinkTemplate('add-solr-document-fields', '/admin/config/search/search-api/index/{search_api_index}/fields/add/solr-document');
+}
+
+/**
+ * Returns visibility state status values.
+ *
+ * @return array
+ *   Options array.
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\search_api\SearchApiException
+ *
+ * @see \search_api_solr_form_search_api_index_form_alter
+ */
+function _search_api_solr_visibility() {
+  $valid_option = [];
+  $servers = search_api_solr_get_servers(FALSE);
+  foreach ($servers as $server) {
+    $valid_option[] = [
+      'value' => $server->id(),
+    ];
+  }
+  return $valid_option;
+}

@@ -1,0 +1,77 @@
+.paragraphs-badge {
+  display: inline-block;
+  margin: 3px 0;
+  padding: 0.15em 0.3em;
+  cursor: default;
+  text-align: center;
+  vertical-align: baseline;
+  white-space: nowrap;
+  color: #fff;
+  border-radius: 4px;
+  background: #787878;
+  font-size: 90%;
+  line-height: 1;
+}
+.paragraphs-badge:empty {
+  display: none;
+}
+
+.js .paragraphs-description .paragraphs-content-wrapper,
+.js .paragraphs-description .paragraphs-plugin-wrapper {
+  position: relative;
+  overflow: hidden;
+  height: 1.538em;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  line-height: 1.538em;
+}
+.js .paragraphs-description .summary-plugin-label::after {
+  content: ": ";
+}
+.js .paragraphs-description .summary-content {
+  color: #666;
+}
+.js .paragraphs-description .summary-plugin {
+  display: inline-block;
+  padding-right: 5px;
+  color: #888;
+  font-size: 0.7rem;
+}
+.js .paragraphs-description .summary-plugin:not(:last-child) {
+  border-right: 2px solid #e5e3de;
+}
+.js .paragraphs-description .summary-plugin:not(:first-child) {
+  padding: 0 5px;
+}
+.js .behavior-active .paragraphs-expanded-description .paragraphs-plugin-wrapper,
+.js .behavior-active .paragraphs-content {
+  display: none;
+}
+.js .behavior-active .paragraphs-behavior {
+  display: block;
+}
+.js .content-active .paragraphs-expanded-description .paragraphs-content-wrapper {
+  display: none;
+}
+
+.paragraph-formatter {
+  display: grid;
+  grid-template-rows: auto;
+  grid-template-columns: auto 1fr;
+  grid-gap: 5px 5px;
+  align-items: center;
+}
+.paragraph-formatter .paragraph-info {
+  grid-row: 1/span 1;
+  grid-column: 1/2;
+}
+.paragraph-formatter .paragraph-summary {
+  grid-row: 2/span 1;
+  grid-column: 1/2;
+}
+@media (min-width: 600px) {
+  .paragraph-formatter .paragraph-summary {
+    grid-row: 1/span 1;
+    grid-column: 2/2;
+  }
+}

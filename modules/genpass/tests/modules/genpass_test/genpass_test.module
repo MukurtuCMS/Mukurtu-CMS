@@ -1,0 +1,248 @@
+<?php
+
+/**
+ * @file
+ * Provides alter hook and functions for altering its behaviour for testing.
+ */
+
+declare(strict_types=1);
+
+use Drupal\genpass\GenpassInterface;
+use Drupal\genpass\Hook\FormAlter;
+
+/**
+ * Implements hook_genpass_character_sets_alter().
+ */
+function genpass_test_genpass_character_sets_alter(array &$character_sets) {
+  $state = &genpass_test_charset_static_state();
+
+  // Increment call count.
+  $state['call_count']++;
+
+  // Alter the character sets as configured.
+  switch ($state['alter_mode']) {
+    case 'too_short':
+      // Alter the character sets to make it too short for anything useful.
+      $character_sets['lower_letters'] = 'abcd';
+      unset($character_sets['upper_letters']);
+      unset($character_sets['digits']);
+      unset($character_sets['special']);
+      break;
+
+    case 'not_array':
+      $character_sets = implode(',', $character_sets);
+      break;
+
+    default:
+      // Do not alter the character sets.
+      break;
+  }
+}
+
+/**
+ * Set the charset alter mode.
+ *
+ * @param string $mode
+ *   The valid mode to change to: default, too_short, not_array.
+ *
+ * @throws \InvalidArgumentException
+ *   In the event that the given parameter is invalid.
+ */
+function genpass_test_charset_set_alter_mode(string $mode = 'default'): void {
+  // Reset the internal state when changing modes.
+  $state = &genpass_test_charset_static_state(TRUE);
+
+  switch ($mode) {
+    case 'default':
+    case 'too_short':
+    case 'not_array':
+      $state['alter_mode'] = $mode;
+      break;
+
+    default:
+      throw new \InvalidArgumentException('Not a valid testing alter mode.');
+
+  }
+}
+
+/**
+ * Return the number of times the charset alter hook has been called.
+ *
+ * @return int
+ *   The number of times charset hook_alter has been called.
+ */
+function genpass_test_charset_get_alter_count(): int {
+  $state = &genpass_test_charset_static_state();
+
+  return $state['call_count'];
+}
+
+/**
+ * Private state for altering charset testing parameters.
+ *
+ * @param bool $reset
+ *   Set to TRUE to reset state to default.
+ *
+ * @return array
+ *   The state array as it exists, or reset to default state (by reference).
+ */
+function &genpass_test_charset_static_state(bool $reset = FALSE): array {
+  static $state = FALSE;
+
+  if ($reset || $state == FALSE) {
+    $state = [
+      'alter_mode' => 'default',
+      'call_count' => 0,
+    ];
+  }
+
+  return $state;
+}
+
+/**
+ * Implements hook_genpass_user_forms().
+ */
+function genpass_test_genpass_user_forms() {
+  // Provide a custom form id.
+  return [
+    'genpass_test_user_hook_form' => [
+      'genpass_mode' => GenpassInterface::PASSWORD_RESTRICTED,
+      'genpass_admin_mode' => GenpassInterface::PASSWORD_ADMIN_SHOW,
+      'genpass_display' => GenpassInterface::PASSWORD_DISPLAY_NONE,
+      'genpass_password_field' => [
+        ['fields_wrapper', 'credential_pass'],
+      ],
+      'genpass_notify_item' => [
+        // @todo Should be able to set this to FALSE and it be used. At present
+        // it would be considered empty and set to default value.
+        'does_not_exist',
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_genpass_user_forms_alter().
+ */
+function genpass_test_genpass_user_forms_alter(array &$form_ids) {
+  $state = &genpass_test_userform_static_state();
+
+  // Increment call count.
+  $state['call_count']++;
+
+  // Alter the user forms as configured.
+  switch ($state['alter_mode']) {
+    case 'remove_default_notify':
+      // Remove the notify location information.
+      $form_ids['user_register_form']['genpass_notify_item'] = ['does_not_exist'];
+      break;
+
+    case 'remove_default_locations':
+      // Remove both notify and password field locators for a default form.
+      $form_ids['user_register_form']['genpass_password_field'] = ['does_not_exist'];
+      $form_ids['user_register_form']['genpass_notify_item'] = ['does_not_exist'];
+      break;
+
+    case 'remove_default_form':
+      // Remove the entire form.
+      unset($form_ids['user_register_form']);
+      break;
+
+    case 'add_custom_form':
+      // Add in the test form id.
+      $form_ids['genpass_test_user_hook_alter_form'] = [
+        'genpass_mode' => GenpassInterface::PASSWORD_RESTRICTED,
+        'genpass_admin_mode' => GenpassInterface::PASSWORD_ADMIN_SHOW,
+        'genpass_display' => GenpassInterface::PASSWORD_DISPLAY_NONE,
+        'genpass_password_field' => [
+          ['fields_wrapper_too', 'credential_pass_too'],
+        ],
+        'genpass_notify_item' => [
+          ['other_wrap', 'inner_wrap', 'inform_tick'],
+        ],
+      ];
+      break;
+
+    // @todo Should this be something to guard against and thus test?
+    case 'not_array':
+      $form_ids = 'invalid_string_return';
+      break;
+
+    default:
+      // Do not alter the userforms.
+      break;
+  }
+}
+
+/**
+ * Set the userform alter mode.
+ *
+ * Valid modes are: default, remove_default_notify, remove_default_locations,
+ * remove_default_form, or add_custom_form.
+ *
+ * @param string $mode
+ *   The valid mode to change to valid modes.
+ *
+ * @throws \Exception
+ *   If the 'not_array' mode is given since this is not implemented.
+ * @throws \InvalidArgumentException
+ *   In the event the given mode is not valid.
+ */
+function genpass_test_userform_set_alter_mode(string $mode = 'default'): void {
+  // Reset the internal state when changing modes.
+  $state = &genpass_test_userform_static_state(TRUE);
+
+  switch ($mode) {
+    case 'default':
+    case 'remove_default_notify':
+    case 'remove_default_locations':
+    case 'remove_default_form':
+    case 'add_custom_form':
+      $state['alter_mode'] = $mode;
+      break;
+
+    case 'not_array':
+      throw new \Exception('Not implemented.');
+
+    default:
+      throw new \InvalidArgumentException('Not a valid testing alter mode.');
+
+  }
+
+  // Reset static cache so that form_alter will use latest information.
+  \Drupal::service(FormAlter::class)->loadUserFormsInfo(TRUE);
+}
+
+/**
+ * Return the number of times the userform alter hook has been called.
+ *
+ * @return int
+ *   The number of times userform hook_alter has been called.
+ */
+function genpass_test_userform_get_alter_count(): int {
+  $state = &genpass_test_userform_static_state();
+
+  return $state['call_count'];
+}
+
+/**
+ * Private state for altering userform testing parameters.
+ *
+ * @param bool $reset
+ *   Set to TRUE to reset state to default.
+ *
+ * @return array
+ *   The state array as it exists, or reset to default state (by reference).
+ */
+function &genpass_test_userform_static_state(bool $reset = FALSE): array {
+  static $state = FALSE;
+
+  if ($reset || $state == FALSE) {
+    $state = [
+      'alter_mode' => 'default',
+      'call_count' => 0,
+    ];
+  }
+
+  return $state;
+}

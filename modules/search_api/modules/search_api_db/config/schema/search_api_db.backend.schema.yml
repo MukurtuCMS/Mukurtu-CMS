@@ -1,0 +1,26 @@
+plugin.plugin_configuration.search_api_backend.search_api_db:
+  type: mapping
+  label: 'Search API DB settings'
+  mapping:
+    database:
+      type: 'string'
+      label: 'Name of the database we are connecting to'
+    min_chars:
+      type: 'integer'
+      label: 'Minimum length of indexed words'
+    matching:
+      type: 'string'
+      label: 'The matching mode – "words", "prefix" or "partial"'
+    phrase:
+      type: 'string'
+      label: 'The phrase indexing mode – "disabled" or "bigram"'
+    autocomplete:
+      type: mapping
+      label: Autocomplete configuration
+      mapping:
+        suggest_suffix:
+          type: boolean
+          label: Suggest suffix
+        suggest_words:
+          type: boolean
+          label: Suggest words

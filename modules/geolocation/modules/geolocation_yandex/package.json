@@ -1,0 +1,12 @@
+{
+  "name": "geolocation-yandex-maps",
+  "license": "GPL-2.0",
+  "description": "Geolocation yandex maps module",
+  "private": true,
+  "devDependencies": {
+    "@types/yandex-maps": "^2.1.2"
+  },
+  "dependencies": {
+    "@types/yandex-maps": "^2.1.5"
+  }
+}

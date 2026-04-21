@@ -1,0 +1,16 @@
+plugin.plugin_configuration.search_api_solr_connector.solr_cloud:
+  type: plugin.plugin_configuration.search_api_solr_connector.standard
+  label: 'Search API Solr standard connector settings for Solr cloud'
+  mapping:
+    checkpoints_collection:
+      type: string
+      label: 'The collection where topic checkpoints are stored'
+    stats_cache:
+      type: string
+      label: 'StatsCache'
+    distrib:
+      type: boolean
+      label: 'Distribute queries across all nodes'
+    context:
+      type: string
+      label: 'hostContext'

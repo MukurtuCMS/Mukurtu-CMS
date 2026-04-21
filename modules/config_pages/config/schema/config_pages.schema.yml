@@ -1,0 +1,69 @@
+# Schema for the configuration files of the Custom Block module.
+
+config_pages.type.*:
+  type: config_entity
+  label: 'Config page type settings'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    token:
+      type: boolean
+      label: 'Token'
+    context:
+      type: mapping
+      label: 'Context'
+      mapping:
+        show_warning:
+          type: boolean
+          label: 'Show warning'
+        group:
+          type: sequence
+          label: 'Context status'
+          sequence:
+            type: boolean
+        fallback:
+          type: mapping
+          label: 'Fallback'
+          mapping:
+            language:
+              type: string
+              label: 'Language'
+    menu:
+      type: mapping
+      label: 'Menu'
+      mapping:
+        path:
+          type: string
+          label: 'Path'
+        weight:
+          type: integer
+          label: 'Weight'
+        description:
+          type: text
+          label: 'Description'
+
+block.settings.config_pages_block:
+  type: block_settings
+  label: 'ConfigPages Block settings'
+  mapping:
+    config_page_type:
+      type: string
+      label: 'ConfigPage type to show'
+    config_page_view_mode:
+      type: string
+      label: 'view mode for ConfigPage to show'
+
+condition.plugin.config_pages_values_access:
+  type: condition.plugin
+  label: 'ConfigPage field value'
+  mapping:
+    config_page_field:
+      type: string
+    operator:
+      type: string
+    condition_value:
+      type: string

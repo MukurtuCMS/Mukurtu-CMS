@@ -1,0 +1,149 @@
+# Configuration file for PHPStan static code checking, see https://phpstan.org .
+# PHPStan is triggered on Drupal CI in commit-code-check.sh.
+includes:
+  - phar://phpstan.phar/conf/bleedingEdge.neon
+
+parameters:
+  level: 1
+
+  fileExtensions:
+    - sh
+
+  paths:
+    - .
+
+  excludePaths:
+    - search_api.behat.inc
+
+  ignoreErrors:
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    - "#^Unsafe usage of new static#"
+
+    # Ignore common errors for now.
+    - "#Drupal calls should be avoided in classes, use dependency injection instead#"
+
+    # Specific errors we don't want to or cannot fix.
+
+    - # Tests in Drupal 10 still use PHPUnit 9 which does not support
+      # attributes.
+      # @todo Remove once we depend on Drupal 11.0+.
+      message: "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\RunTestsInSeparateProcesses does not exist\\.$#"
+      reportUnmatched: false
+
+    - # The enum was newly introduced in Drupal 11.2.
+      # @todo Remove once we depend on Drupal 11.2+.
+      message: "#^Access to constant Error on an unknown class Drupal\\\\Core\\\\Extension\\\\Requirement\\\\RequirementSeverity\\.#"
+      path: modules/search_api_db/search_api_db_defaults/search_api_db_defaults.install
+      reportUnmatched: false
+
+    - # OOP hooks were not introduced until Drupal 11.1.
+      # @todo Remove once we depend on Drupal 11.1+.
+      message: "#^Attribute class Drupal\\\\Core\\\\Hook\\\\Attribute\\\\(Legacy)?Hook does not exist\\.$#"
+      paths:
+        - search_api.module
+        - search_api.views_hooks.inc
+        - src/Hook/
+      reportUnmatched: false
+
+    - # Since we don't depend on the VBO module, it isn't available for PhpStan.
+      message: "#^\\QParameter $event of method Drupal\\search_api\\Contrib\\ViewsBulkOperationsEventSubscriber::provideViewData() has invalid type Drupal\\views_bulk_operations\\ViewsBulkOperationsEvent.\\E#"
+      count: 1
+      path: src/Contrib/ViewsBulkOperationsEventSubscriber.php
+
+    - # The $original property is used throughout Drupal but not actually
+      # defined.
+      # @todo Remove once #3495424 is resolved (and we depend on Drupal 11.2+).
+      message: "#^Access to an undefined property Drupal\\\\search_api\\\\Entity\\\\Index::\\$original\\.#"
+      count: 1
+      path: src/Entity/Index.php
+
+    - # The entity type attributes were not introduced until Drupal 11.1.
+      # @todo Remove once we depend on Drupal 11.1+.
+      message: "#^Attribute class Drupal\\\\Core\\\\Entity\\\\Attribute\\\\(Config|Content)EntityType does not exist\\.$#"
+      paths:
+        - src/Entity/Index.php
+        - src/Entity/Server.php
+        - src/Entity/Task.php
+      reportUnmatched: false
+
+    - # The argument is commented out for BC reasons until Drupal 12. PhpStan
+      # apparently does not understand that syntax.
+      message: "#^Method Drupal\\\\Core\\\\Config\\\\Entity\\\\ConfigEntityListBuilder::getDefaultOperations\\(\\) invoked with 2 parameters, 1 required\\.$#"
+      path: src/IndexListBuilder.php
+      reportUnmatched: false
+
+    - # Checking for a class from a contrib module we don't depend on. As this
+      # is just used in an "instanceof" check, there is no actual danger here.
+      message: "#^Class Drupal\\\\external_entities\\\\Entity\\\\Query\\\\External\\\\Query not found.#"
+      count: 1
+      path: src/Plugin/search_api/datasource/ContentEntity.php
+
+    - # Method will never be called in the context of that class.
+      message: "#^Call to an undefined method Drupal\\\\search_api\\\\Plugin\\\\views\\\\filter\\\\SearchApiBoolean::operatorValues\\(\\).$#"
+      path: src/Plugin/views/filter/SearchApiFilterTrait.php
+      reportUnmatched: false
+
+    - # Method will never be called in the context of that class.
+      message: "#^Call to an undefined static method Drupal\\\\views\\\\Plugin\\\\views\\\\filter\\\\BooleanOperator::opSimple\\(\\).$#"
+      count: 1
+      path: src/Plugin/views/filter/SearchApiFilterTrait.php
+
+    - # Method will never be called in the context of that class.
+      message: "#^Call to an undefined static method Drupal\\\\views\\\\Plugin\\\\views\\\\filter\\\\FilterPluginBase::opSimple\\(\\).$#"
+      count: 1
+      path: src/Plugin/views/filter/SearchApiFilterTrait.php
+
+    - # Method has different number of parameters depending on class, but
+      # passing $field unnecessarily is harmless.
+      message: "#^Method Drupal\\\\views\\\\Plugin\\\\views\\\\filter\\\\InOperator::opSimple\\(\\) invoked with 1 parameter, 0 required.$#"
+      path: src/Plugin/views/filter/SearchApiFilterTrait.php
+
+    - # Method doesn't exist on all classes that use the trait. But since this
+      # just calls the parent method, the method itself won't be called for
+      # those classes.
+      message: "#^Call to an undefined static method Drupal\\\\rest\\\\Plugin\\\\views\\\\row\\\\DataEntityRow::getEntityType\\(\\).$#"
+      count: 1
+      path: src/Plugin/views/SearchApiHandlerTrait.php
+
+    - # Unfortunately, PhpStan is not good enough to correctly deduce the type
+      # of variable. (If we change to an array, it then fails on validating the
+      # individual array elements, so nothing gained there.)
+      message: "/^The \"#pre_render\" render array value expects an array of callbacks/"
+      count: 1
+      path: src/Processor/FieldsProcessorPluginBase.php
+
+    - # This is the base class for other plugin managers, so not really possible
+      # (nor reasonable) to add the cache backend information there.
+      message: "#^Missing cache backend declaration for performance.$#"
+      count: 1
+      path: src/SearchApiPluginManager.php
+
+    - # The class was newly introduced in Drupal 11.2.
+      # @todo Remove once we depend on Drupal 11.2+.
+      message: "#^Call to static method createBundle\\(\\) on an unknown class Drupal\\\\entity_test\\\\EntityTestHelper\\.#"
+      paths:
+        - tests/src/Functional/ExampleContentTrait.php
+        - tests/src/Kernel/Index/IndexChangesTest.php
+      reportUnmatched: false
+
+    - # No idea what's happening there, why it can't find the trait it is
+      # currently checking?
+      message: "#^Access to property \\$container on an unknown class#"
+      path: tests/src/Unit/Processor/TestItemsTrait.php
+
+    - # No idea what's happening there, why it can't find the trait it is
+      # currently checking?
+      message: "#^Call to method \\w+\\(\\) on an unknown class#"
+      path: tests/src/Unit/Processor/TestItemsTrait.php
+
+    - # This undefined method is part of the backwardsCompatibleCall.
+      message: "#^Call to an undefined method Drupal\\\\search_api\\\\Entity\\\\Index\\:\\:getOriginal\\(\\)\\.$#"
+      count: 1
+      path: src/Entity/Index.php
+      reportUnmatched: false
+
+    - # This undefined method is part of the backwardsCompatibleCall.
+      message: "#^Call to an undefined method Drupal\\\\search_api\\\\Entity\\\\Server\\:\\:getOriginal\\(\\)\\.$#"
+      count: 1
+      path: src/Entity/Server.php
+      reportUnmatched: false

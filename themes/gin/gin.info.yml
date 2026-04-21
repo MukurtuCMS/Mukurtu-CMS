@@ -1,0 +1,164 @@
+name: Gin
+type: theme
+base theme: claro
+description: 'Admin theme with a strong focus on improving the Editorial Experience. Learn more about Gin’s <a href="https://www.drupal.org/docs/contributed-themes/gin-admin-theme/specific-settings-within-gin" target="_blank">Settings</a> and how to customize Gin in our <a href="https://www.drupal.org/docs/contributed-themes/gin-admin-theme/custom-theming" target="_blank">Custom theming guide</a>.'
+core_version_requirement: ^11.2
+
+# These dependencies will not allow the installation of Gin at all if gin_toolbar is not activated.
+# A bit harsh, so we'll continue to just rely on the composer requirement for now.
+# dependencies:
+#   - drupal:gin_toolbar
+#   - drupal:link
+
+libraries:
+  - claro/global-styling
+  - gin/gin
+
+libraries-override:
+  # Gin overrides: replace
+  media_library/view:
+    js:
+      js/media_library.view.js: js/overrides/media_library.view.js
+
+  core/drupal.tableselect:
+    js:
+      misc/tableselect.js: js/overrides/tableselect.js
+
+  core/drupal.tabledrag:
+    js:
+      misc/tabledrag.js: js/overrides/tabledrag.js
+
+  # Gin overrides: disable
+  # needed override to overcome dialog styling issues
+  claro/claro.drupal.dialog:
+    css:
+      theme:
+        css/components/dialog.css: false
+
+  core/drupal.dialog.off_canvas:
+    css:
+      base:
+        misc/dialog/off-canvas.base.css: false
+        misc/dialog/off-canvas.css: false
+        misc/dialog/off-canvas.theme.css: false
+
+  claro/global-styling:
+    css:
+      layout:
+        css/layout/local-actions.css: false
+      theme:
+        css/theme/colors.css: false
+
+  core/drupal.tableheader:
+    js:
+      misc/tableheader.js: false
+    css:
+      component:
+        css/components/sticky-header.module.css: false
+        misc/components/sticky-header.module.css: false
+
+libraries-extend:
+  core/drupal.message:
+    - gin/messages
+  core/drupal.tableselect:
+    - gin/tableselect
+  core/drupal.tableheader:
+    - gin/tableheader
+  core/drupal.autocomplete:
+    - gin/autocomplete
+  core/ckeditor:
+    - gin/ckeditor
+  ckeditor/ckeditor:
+    - gin/ckeditor
+  core/ckeditor5:
+    - gin/ckeditor5
+  core/drupal.dialog:
+    - gin/dialog
+  core/drupal.ajax:
+    - gin/ajax
+  core/drupal.dropbutton:
+    - gin/dropbutton
+  media/media_embed_ckeditor_theme:
+    - gin/gin_media_embed_ckeditor_theme
+  media_library/view:
+    - gin/media_library
+  media_library/widget:
+    - gin/media_library
+  contextual/drupal.contextual-links:
+    - gin/contextual_links
+  autosave_form/drupal.autosave_form:
+    - gin/autosave
+  chosen/drupal.chosen:
+    - gin/chosen
+  dropzonejs/widget:
+    - gin/dropzonejs
+  entity_browser/entity_browser:
+    - gin/entity_browser
+  entity_browser/tabs:
+    - gin/entity_browser
+  entity_browser/entity_list:
+    - gin/entity_browser
+  entity_browser/entity_reference:
+    - gin/entity_browser
+  linkit/linkit.admin:
+    - gin/linkit
+  module_filter/modules.tabs:
+    - gin/module_filter
+  module_filter/update.status:
+    - gin/module_filter
+  module_filter/modules:
+    - gin/module_filter
+  upgrade_status/upgrade_status.admin:
+    - gin/upgrade_status
+  webform/webform.filter:
+    - gin/webform
+  webform_ui/webform_ui:
+    - gin/webform
+    - gin/webform_ui
+  webform/webform.element.help:
+    - gin/webform
+  webform/webform.element.details.toggle:
+    - gin/webform
+  webform/webform.form.tabs:
+    - gin/webform
+  workbench/workbench.toolbar:
+   - gin/workbench
+  paragraphs/drupal.paragraphs.widget:
+    - gin/paragraphs
+  entity_reference_layout/erl_widget:
+    - gin/entity_reference_layout
+    - gin/layout_paragraphs
+  layout_paragraphs/layout_paragraphs_widget:
+    - gin/layout_paragraphs
+  layout_paragraphs/builder:
+    - gin/layout_paragraphs2
+  responsive_preview/drupal.responsive-preview:
+    - gin/responsive_preview
+  workspaces/drupal.workspaces.overview:
+    - gin/workspaces
+
+ckeditor_stylesheets:
+  - dist/css/theme/accent.css
+  - dist/css/theme/variables.css
+  - dist/css/theme/ckeditor.css
+
+ckeditor5-stylesheets: false
+
+# Regions
+regions:
+  header: 'Header'
+  pre_content: 'Pre-content'
+  breadcrumb: Breadcrumb
+  highlighted: Highlighted
+  help: Help
+  content: Content
+  page_top: 'Page top'
+  page_bottom: 'Page bottom'
+  sidebar_first: 'First sidebar'
+regions_hidden:
+  - sidebar_first
+
+# Information added by Drupal.org packaging script on 2026-01-16
+version: '5.0.12'
+project: 'gin'
+datestamp: 1768553530

@@ -1,0 +1,33 @@
+message_subscribe.settings:
+  type: config_object
+  label: 'Message Subscribe settings'
+  mapping:
+    use_queue:
+      type: boolean
+      label: 'Use the queue to process messages'
+    notify_own_actions:
+      type: boolean
+      label: 'Notify author of their own submissions'
+    flag_prefix:
+      type: string
+      label: 'The prefix that will be used to identify subscription flags'
+    debug_mode:
+      type: boolean
+      label: 'Enable debugging mode for verbose logging'
+    default_notifiers:
+      type: sequence
+      label: 'Message notifiers that will be added to every subscription'
+      sequence:
+        type: string
+        label: 'Message notifier'
+    range:
+      type: integer
+      label: 'The maximum number of subscribers to get in a batch'
+
+flag.flag.*.third_party.message_subscribe_ui:
+  type: mapping
+  label: 'Message subscribe settings'
+  mapping:
+    view_name:
+      type: string
+      label: 'View name'

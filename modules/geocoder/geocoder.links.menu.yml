@@ -1,0 +1,13 @@
+geocoder.settings:
+  title: "Geocoder"
+  description: "Configure the Geocoder module and manage Geocoder providers."
+  route_name: geocoder.settings
+  weight: 10
+  parent: system.admin_config_system
+
+geocoder.providers:
+  title: "Providers"
+  description: "Configure and manage Geocoder providers."
+  route_name: entity.geocoder_provider.collection
+  weight: 0
+  parent: geocoder.settings

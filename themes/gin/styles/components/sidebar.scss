@@ -1,0 +1,180 @@
+#gin-sidebar-draggable {
+  cursor: ew-resize;
+  z-index: 104;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  padding: 0;
+  display: block;
+  width: 2px;
+  height: 100%;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: var(--gin-transition-fast);
+  }
+
+  &:hover {
+    background-color: var(--gin-border-color-table);
+  }
+
+  &:active {
+    background-color: var(--gin-border-color);
+  }
+}
+
+.layout-region-node-secondary {
+  @media (prefers-reduced-motion: no-preference) {
+    transition: transform var(--gin-transition-fast);
+  }
+
+  @include mq($to: medium) {
+    --gin-sidebar-width: var(--gin-sidebar-small-width);
+  }
+
+  // Fixes the flickering happening on smaller devices.
+  @include mq($to: large) {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+body[data-meta-sidebar=closed] {
+  --gin-sidebar-offset: 0px;
+
+  .layout-region-node-secondary {
+    transform: translateX(var(--gin-sidebar-width));
+    visibility: hidden;
+  }
+}
+
+// RTL handling.
+[dir=rtl] body[data-meta-sidebar=closed] .layout-region-node-secondary {
+  /*rtl:ignore*/
+  transform: translateX(calc(var(--gin-sidebar-width) * -1));
+}
+
+body[data-meta-sidebar=open] {
+  .layout-region-node-secondary {
+    @include mq($to: large) {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) {
+  .meta-sidebar {
+    &__close {
+      cursor: pointer;
+      background: transparent;
+      height: 32px;
+      width: 32px;
+      border-radius: var(--gin-border-m);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition: background var(--gin-transition-fast);
+      }
+
+      &::before {
+        content: "";
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        mask-repeat: no-repeat;
+        mask-position: center center;
+        background-color: var(--gin-icon-color);
+      }
+
+      &:hover, &:focus {
+        background-color: var(--gin-color-primary-light);
+
+        &::before {
+          background-color: var(--gin-color-primary);
+        }
+      }
+
+      &.is-active {
+        background-color: var(--gin-color-primary-light-hover);
+
+        &::before {
+          background-color: var(--gin-color-primary-active);
+        }
+      }
+    }
+
+    &__trigger {
+      cursor: pointer;
+      background: transparent;
+      display: block;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--gin-border-m);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition: background var(--gin-transition-fast);
+      }
+
+      &::before {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        content: "";
+        mask-repeat: no-repeat;
+        mask-position: center center;
+        background-color: var(--gin-icon-color);
+        mask-image: icon('sidebar');
+        mask-size: var(--gin-icon-size-sidebar-toggle) var(--gin-icon-size-sidebar-toggle);
+        border-radius: 50%;
+      }
+
+      &:hover, &:focus, &.is-active, &.is-active:hover {
+        background-color: var(--gin-color-primary-light);
+
+        &::before {
+          background-color: var(--gin-color-primary);
+        }
+      }
+
+      &.is-active {
+        background-color: var(--gin-bg-item-hover);
+      }
+    }
+
+    &__close {
+      z-index: 104;
+      position: absolute;
+      inset-block-start: 18px;
+      inset-inline-end: var(--gin-spacing-m);
+
+      @include mq(large) {
+        display: none;
+      }
+
+      &::before {
+        mask-image: icon('close');
+        mask-size: 16px 16px;
+      }
+    }
+
+    &__overlay {
+      z-index: 102;
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      background: var(--gin-bg-layer2);
+
+      body[data-meta-sidebar=open] & {
+        opacity: .9;
+        visibility: visible;
+      }
+
+      @include mq(large) {
+        display: none;
+      }
+    }
+  }
+}

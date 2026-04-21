@@ -1,0 +1,21 @@
+leaflet-markercluster:
+  remote: https://github.com/Leaflet/Leaflet.markercluster
+  version: 1.5.3
+  license:
+    name: MIT-License
+    url: https://github.com/Leaflet/Leaflet.markercluster/blob/master/MIT-LICENCE.txt
+    gpl-compatible: true
+  js:
+    js/leaflet_markercluster/dist/leaflet.markercluster.js: {}
+  css:
+    component:
+      js/leaflet_markercluster/dist/MarkerCluster.css: {}
+      js/leaflet_markercluster/dist/MarkerCluster.Default.css: {}
+  dependencies:
+    - leaflet/leaflet
+
+leaflet-markercluster-drupal:
+  js:
+    leaflet_markercluster.drupal.js: {}
+  dependencies:
+    - leaflet/leaflet-drupal

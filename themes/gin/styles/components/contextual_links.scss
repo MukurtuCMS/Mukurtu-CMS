@@ -1,0 +1,111 @@
+.contextual {
+  z-index: 100;
+
+  .trigger {
+    width: 32px !important;
+    height: 32px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .15);
+    border-radius: 50%;
+    box-sizing: border-box;
+
+    // Icon
+    &::before {
+      content: "";
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-start: 50%;
+      transform: translate(-50%, -50%);
+      display: block;
+      width: .75rem;
+      height: .75rem;
+      mask-image: icon('media-edit');
+      mask-size: var(--gin-spacing-s) var(--gin-spacing-s);
+      mask-position: 100% 100%;
+      background: var(--gin-color-primary);
+    }
+
+    &,
+    &:hover,
+    &:focus {
+      background: var(--gin-bg-layer3);
+      border: 1px solid var(--gin-border-color-layer2);
+    }
+
+    &:hover,
+    &:focus {
+      box-shadow: 0 0 0 1px var(--gin-color-focus-border),
+                  0 0 0 4px var(--gin-color-focus);
+    }
+  }
+
+  // Open trigger
+  &.open .trigger {
+    border-radius: 50%;
+    border-block-end: 0 none;
+  }
+}
+
+.contextual-region .contextual {
+  // Contextual Link list
+  .contextual-links {
+    inset-block-start: var(--gin-spacing-xxs);
+    padding: .5em;
+    margin: 0;
+    min-width: 120px;
+    background: var(--gin-bg-layer3);
+    border: 0 none;
+    border-radius: var(--gin-border-l);
+    box-shadow: var(--gin-shadow-l2);
+
+    li {
+      background: transparent;
+
+      a {
+        font-family: var(--gin-font);
+        color: var(--gin-color-primary);
+        line-height: 1;
+        white-space: nowrap;
+        padding: var(--gin-spacing-xs) var(--gin-spacing-m);
+        margin: 0;
+        background: transparent;
+        border-radius: var(--gin-border-s);
+
+        &:hover, &:active {
+          color: var(--gin-color-button-text);
+          background: var(--gin-color-primary);
+        }
+
+        &:focus {
+          outline: none;
+          box-shadow: 0 0 0 1px var(--gin-color-focus-border),
+                      0 0 0 4px var(--gin-color-focus);
+        }
+      }
+    }
+
+    // Throbber
+    .ajax-progress-throbber {
+      inset-block-start: .125rem;
+      background: var(--gin-color-primary);
+      border-radius: 50%;
+
+      &::before {
+        inset-block-start: var(--gin-spacing-xxs);
+        inset-inline-start: var(--gin-spacing-xxs);
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid var(--gin-color-button-text);
+        border-inline-end: 2px dotted transparent;
+      }
+    }
+  }
+}
+
+.no-touchevents .contextual-region .contextual {
+  .contextual-links li a {
+    &:hover, &:active {
+      color: var(--gin-color-button-text);
+      background: var(--gin-color-primary);
+    }
+  }
+}

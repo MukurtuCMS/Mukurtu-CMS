@@ -1,0 +1,43 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Database\\Query\\ExtendableInterface\:\:orderByHeader\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: modules/redirect_404/src/SqlRedirectNotFoundStorage.php
+
+		-
+			message: '#^Call to method getPath\(\) of internal class Drupal\\Core\\Extension\\ExtensionList from outside its root namespace Drupal\.$#'
+			identifier: method.internalClass
+			count: 1
+			path: redirect.install
+
+		-
+			message: '#^Access to an undefined property Drupal\\path_alias\\PathAliasInterface\:\:\$original\.$#'
+			identifier: property.notFound
+			count: 1
+			path: redirect.module
+
+		-
+			message: '#^Access to an undefined property Drupal\\Core\\Field\\FieldItemListInterface\<Drupal\\Core\\Field\\FieldItemInterface\>\:\:\$options\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Entity/Redirect.php
+
+		-
+			message: '#^\\Drupal calls should be avoided in classes, use dependency injection instead$#'
+			identifier: globalDrupalDependencyInjection.useDependencyInjection
+			count: 1
+			path: src/EventSubscriber/RedirectRequestSubscriber.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\link\\LinkItemInterface\:\:\$url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Plugin/Validation/Constraint/SourceLinkTypeConstraint.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\BrowserKit\\AbstractBrowser\:\:getClient\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/src/Functional/GlobalRedirectTest.php

@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * @file
+ * settings.theme
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\gin\GinSettings;
+
+/**
+ * Custom theme settings.
+ */
+function gin_form_system_theme_settings_alter(&$form, FormStateInterface $form_state, $form_id = NULL) {
+  // Work-around for a core bug affecting admin themes. See issue #943212.
+  if (isset($form_id)) {
+    return;
+  }
+
+  /*
+   * //////////////////////////
+   * Move default theme settings to bottom.
+   * * //////////////////////////
+   */
+  $form['logo']['#weight'] = 97;
+  $form['favicon']['#open'] = FALSE;
+  $form['favicon']['#weight'] = 98;
+  $form['theme_settings']['#open'] = FALSE;
+  $form['theme_settings']['#weight'] = 99;
+
+  /*
+   * //////////////////////////
+   * General settings.
+   * * ////////////////////////
+   */
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+
+  $form['custom_settings'] = [
+    '#type' => 'details',
+    '#open' => TRUE,
+    '#title' => t('Settings'),
+  ] + $settings->getSettingsForm();
+
+  // Allow user settings.
+  $form['custom_settings']['show_user_theme_settings'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Users can override Gin settings'),
+    '#description' => t('Expose the admin theme settings to users.'),
+    '#default_value' => $settings->getDefault('show_user_theme_settings'),
+  ];
+
+  /*
+   * //////////////////////////
+   * Logo settings.
+   * * ////////////////////////
+   */
+  if (isset($form['logo']['settings']['logo_upload']['#upload_validators']['file_validate_extensions'])) {
+    $form['logo']['settings']['logo_upload']['#upload_validators'] = ['file_validate_extensions' => ['png gif jpg jpeg apng svg']];
+  }
+
+  // Upgrade path:
+  // Move settings to new fields.
+  if ($settings->getDefault('icon_default') === FALSE) {
+    $form['logo']['default_logo']['#default_value'] = FALSE;
+    $form['logo']['settings']['logo_path']['#default_value'] = $settings->getDefault('icon_path');
+    $form['#submit'][] = '_gin_form_system_theme_settings_form_submit';
+  }
+
+  // Attach custom library.
+  $form['#attached']['library'][] = 'gin/settings';
+}
+
+/**
+ * Cleanup settings.
+ */
+function _gin_form_system_theme_settings_form_submit(&$form, FormStateInterface $form_state) {
+  $config = \Drupal::configFactory()->getEditable('gin.settings');
+  $config->clear('icon_path')
+    ->clear('icon_default')
+    ->save();
+}

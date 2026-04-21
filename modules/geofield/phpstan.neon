@@ -1,0 +1,12 @@
+# Configuration file for PHPStan static code checking, see https://phpstan.org.
+
+includes:
+  - phar://phpstan.phar/conf/bleedingEdge.neon
+  - phpstan-baseline.neon
+
+parameters:
+  level: 2
+  paths:
+    - .
+  ignoreErrors:
+    - "#^Unsafe usage of new static#"

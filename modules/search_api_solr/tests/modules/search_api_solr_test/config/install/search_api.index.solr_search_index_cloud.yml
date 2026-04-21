@@ -1,0 +1,160 @@
+id: solr_search_index_cloud
+name: 'Test index'
+description: 'An index used for testing'
+read_only: false
+field_settings:
+  id:
+    label: ID
+    type: integer
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: id
+  name:
+    label: Name
+    type: text
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: name
+    boost: 5.0
+  created:
+    label: Authored on
+    type: date
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: created
+  changed:
+    label: Updated on
+    type: date
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: changed
+  body:
+    label: Body
+    type: text
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: body
+  body_unstemmed:
+    label: Body
+    type: solr_text_unstemmed
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: body
+  body_spellcheck:
+    label: Body
+    type: solr_text_spellcheck
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: body
+  body_suggest:
+    label: Body
+    type: solr_text_suggester
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: body
+  type:
+    label: Type
+    type: string
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: type
+  keywords:
+    label: Keywords
+    type: string
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: keywords
+  category:
+    label: Category
+    type: string
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: category
+  category_edge:
+    label: Category Edge Ngram
+    type: 'solr_text_custom:edge'
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: category
+  category_edge_string:
+    label: Category Edge Ngram String
+    type: 'solr_text_custom:edgestring'
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: category
+  category_ngram:
+    label: Category Ngram
+    type: 'solr_text_custom:ngram'
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: category
+  category_ngram_string:
+    label: Category Ngram String
+    type: 'solr_text_custom:ngramstring'
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: category
+  width:
+    label: Width
+    type: decimal
+    datasource_id: 'entity:entity_test_mulrev_changed'
+    property_path: width
+processor_settings:
+  add_url:
+    weights:
+      preprocess_index: -30
+  aggregated_field:
+    weights:
+      add_properties: 20
+  highlight:
+    highlight: server
+    highlight_partial: false
+    excerpt: true
+    excerpt_length: 256
+    exclude_fields: {  }
+    prefix: '<strong>'
+    suffix: '</strong>'
+    weights:
+      postprocess_query: 0
+  rendered_item:
+    weights:
+      add_properties: 0
+      pre_index_save: -10
+options:
+  cron_limit: -1
+  index_directly: false
+datasource_settings:
+  'entity:entity_test_mulrev_changed': {  }
+tracker_settings:
+  'index_parallel': { }
+server: solr_search_server_cloud
+status: true
+langcode: en
+dependencies:
+  config:
+    - field.field.entity_test_mulrev_changed.article.body
+    - field.field.entity_test_mulrev_changed.article.keywords
+    - field.field.entity_test_mulrev_changed.article.category
+    - field.field.entity_test_mulrev_changed.article.width
+    - field.field.entity_test_mulrev_changed.item.body
+    - field.field.entity_test_mulrev_changed.item.keywords
+    - field.field.entity_test_mulrev_changed.item.category
+    - field.field.entity_test_mulrev_changed.item.width
+    - field.storage.entity_test_mulrev_changed.body
+    - field.storage.entity_test_mulrev_changed.keywords
+    - field.storage.entity_test_mulrev_changed.category
+    - field.storage.entity_test_mulrev_changed.width
+    - search_api.server.solr_search_server
+  module:
+    - entity_test
+third_party_settings:
+  search_api_solr:
+    finalize: false
+    commit_before_finalize: false
+    commit_after_finalize: false
+    highlighter:
+      maxAnalyzedChars: 51200
+      fragmenter: regex
+      regex:
+        slop: 0.5
+        pattern: blank
+        maxAnalyzedChars: 10000
+      usePhraseHighlighter: true
+      highlightMultiTerm: true
+      preserveMulti: false
+      highlight:
+        mergeContiguous: false
+        requireFieldMatch: false
+        snippets: 3
+        fragsize: 0
+    advanced:
+      index_prefix: 'index_prefix'
+    multilingual:
+      limit_to_content_language: false
+      include_language_independent: false
+      specific_languages: {}

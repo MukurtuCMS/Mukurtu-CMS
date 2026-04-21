@@ -1,0 +1,268 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - search_api_solr
+    - language
+  config:
+    - language.entity.th
+id: text_th_7_0_0
+label: 'Thai Text Field'
+minimum_solr_version: 7.0.0
+custom_code: ''
+field_type_language_code: th
+domains: {}
+field_type:
+  name: text_th
+  class: solr.TextField
+  positionIncrementGap: 100
+  storeOffsetsWithPositions: true
+  analyzers:
+    -
+      type: index
+      tokenizer:
+        class: solr.ThaiTokenizerFactory
+      filters:
+        -
+          class: solr.CJKWidthFilterFactory
+        -
+          class: solr.LowerCaseFilterFactory
+        -
+          class: solr.StopFilterFactory
+          ignoreCase: true
+          words: stopwords_th.txt
+    -
+      type: query
+      tokenizer:
+        class: solr.ThaiTokenizerFactory
+      filters:
+        -
+          class: solr.CJKWidthFilterFactory
+        -
+          class: solr.LowerCaseFilterFactory
+        -
+          class: solr.StopFilterFactory
+          ignoreCase: true
+          words: stopwords_th.txt
+spellcheck_field_type:
+  name: text_spell_th
+  class: solr.TextField
+  positionIncrementGap: 100
+  storeOffsetsWithPositions: true
+  analyzer:
+    tokenizer:
+      class: solr.StandardTokenizerFactory
+    filters:
+      -
+        class: solr.CJKWidthFilterFactory
+      -
+        class: solr.StopFilterFactory
+        ignoreCase: true
+        words: stopwords_th.txt
+collated_field_type:
+  name: collated_th
+  class: solr.ICUCollationField
+  locale: th
+  strength: primary
+  caseLevel: false
+solr_configs:
+  searchComponents:
+    -
+      name: spellcheck
+      class: solr.SpellCheckComponent
+      lst:
+        -
+          name: spellchecker
+          str:
+            -
+              name: name
+              VALUE: th
+            -
+              name: field
+              VALUE: spellcheck_th
+            -
+              name: classname
+              VALUE: solr.DirectSolrSpellChecker
+            -
+              name: distanceMeasure
+              VALUE: internal
+            -
+              name: accuracy
+              VALUE: '0.5'
+            -
+              name: maxEdits
+              VALUE: '2'
+            -
+              name: minPrefix
+              VALUE: '1'
+            -
+              name: maxInspections
+              VALUE: '5'
+            -
+              name: minQueryLength
+              VALUE: '4'
+            -
+              name: maxQueryFrequency
+              VALUE: '0.01'
+            -
+              name: thresholdTokenFrequency
+              VALUE: '.01'
+            -
+              name: onlyMorePopular
+              VALUE: 'true'
+    -
+      name: suggest
+      class: solr.SuggestComponent
+      lst:
+        -
+          name: suggester
+          str:
+            -
+              name: name
+              VALUE: th
+            -
+              name: indexPath
+              VALUE: ./th
+            -
+              name: lookupImpl
+              VALUE: AnalyzingInfixLookupFactory
+            -
+              name: dictionaryImpl
+              VALUE: DocumentDictionaryFactory
+            -
+              name: field
+              VALUE: twm_suggest
+            -
+              name: suggestAnalyzerFieldType
+              VALUE: text_th
+            -
+              name: contextField
+              VALUE: sm_context_tags
+            -
+              name: buildOnCommit
+              VALUE: 'false'
+            -
+              name: buildOnStartup
+              VALUE: 'false'
+text_files:
+  stopwords: |
+    ไว้
+    ไม่
+    ไป
+    ได้
+    ให้
+    ใน
+    โดย
+    แห่ง
+    แล้ว
+    และ
+    แรก
+    แบบ
+    แต่
+    เอง
+    เห็น
+    เลย
+    เริ่ม
+    เรา
+    เมื่อ
+    เพื่อ
+    เพราะ
+    เป็นการ
+    เป็น
+    เปิดเผย
+    เปิด
+    เนื่องจาก
+    เดียวกัน
+    เดียว
+    เช่น
+    เฉพาะ
+    เคย
+    เข้า
+    เขา
+    อีก
+    อาจ
+    อะไร
+    ออก
+    อย่าง
+    อยู่
+    อยาก
+    หาก
+    หลาย
+    หลังจาก
+    หลัง
+    หรือ
+    หนึ่ง
+    ส่วน
+    ส่ง
+    สุด
+    สําหรับ
+    ว่า
+    วัน
+    ลง
+    ร่วม
+    ราย
+    รับ
+    ระหว่าง
+    รวม
+    ยัง
+    มี
+    มาก
+    มา
+    พร้อม
+    พบ
+    ผ่าน
+    ผล
+    บาง
+    น่า
+    นี้
+    นํา
+    นั้น
+    นัก
+    นอกจาก
+    ทุก
+    ที่สุด
+    ที่
+    ทําให้
+    ทํา
+    ทาง
+    ทั้งนี้
+    ทั้ง
+    ถ้า
+    ถูก
+    ถึง
+    ต้อง
+    ต่างๆ
+    ต่าง
+    ต่อ
+    ตาม
+    ตั้งแต่
+    ตั้ง
+    ด้าน
+    ด้วย
+    ดัง
+    ซึ่ง
+    ช่วง
+    จึง
+    จาก
+    จัด
+    จะ
+    คือ
+    ความ
+    ครั้ง
+    คง
+    ขึ้น
+    ของ
+    ขอ
+    ขณะ
+    ก่อน
+    ก็
+    การ
+    กับ
+    กัน
+    กว่า
+    กล่าว
+  synonyms: |
+    drupal, durpal
+  nouns: |
+  protwords: |
+  accents: |

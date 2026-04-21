@@ -1,0 +1,32 @@
+entity.taxonomy_vocabulary.merge_form:
+  path: '/admin/structure/taxonomy/manage/{taxonomy_vocabulary}/merge'
+  defaults:
+    _form: 'Drupal\term_merge\Form\MergeTerms'
+    _title_callback: 'Drupal\term_merge\Form\MergeTerms::titleCallback'
+  requirements:
+    _permission: 'merge taxonomy terms'
+    _term_merge_access_check: 'TRUE'
+  options:
+    _admin_route: TRUE
+
+entity.taxonomy_vocabulary.merge_target:
+  path: '/admin/structure/taxonomy/manage/{taxonomy_vocabulary}/merge/target'
+  defaults:
+    _form: 'Drupal\term_merge\Form\MergeTermsTarget'
+    _title_callback: 'Drupal\term_merge\Form\MergeTermsTarget::titleCallback'
+  requirements:
+    _permission: 'merge taxonomy terms'
+    _term_merge_access_check: 'TRUE'
+  options:
+    _admin_route: TRUE
+
+entity.taxonomy_vocabulary.merge_confirm:
+  path: '/admin/structure/taxonomy/manage/{taxonomy_vocabulary}/merge/confirm'
+  defaults:
+    _form: 'Drupal\term_merge\Form\MergeTermsConfirm'
+    _title_callback: 'Drupal\term_merge\Form\MergeTermsConfirm::titleCallback'
+  requirements:
+    _permission: 'merge taxonomy terms'
+    _term_merge_access_check: 'TRUE'
+  options:
+    _admin_route: TRUE

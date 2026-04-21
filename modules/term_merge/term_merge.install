@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the term_merge module.
+ */
+
+/**
+ * Enable the term_reference_change module.
+ */
+function term_merge_update_8100() {
+  \Drupal::service('module_installer')->install(['term_reference_change'], TRUE);
+}

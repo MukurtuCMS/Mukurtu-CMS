@@ -1,0 +1,9 @@
+.facet-slider {
+  margin-top: 40px;
+}
+
+.facet-slider.ui-slider-float .ui-slider-tip {
+  top: -30px;
+  visibility: visible;
+  opacity: 1;
+}

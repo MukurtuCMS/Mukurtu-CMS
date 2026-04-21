@@ -1,0 +1,7 @@
+services:
+  solr3:
+    image: kshaner/solr:3.6.2
+    ports:
+      - "8983:8983"
+    volumes:
+      - ./config-set:/opt/apache-solr-3.6.2/example/solr/conf

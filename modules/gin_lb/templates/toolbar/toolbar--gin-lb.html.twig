@@ -1,0 +1,89 @@
+{#
+/**
+ * @file
+ * Include toolbar.html.twig template from Gin.
+ */
+#}
+{# JS fix #}
+{% include '@gin/navigation/fix-toolbar-js-error.html.twig' ignore missing with {
+  toolbar_variant,
+  core_navigation,
+} %}
+
+{% if not core_navigation %}
+  {% include '@gin/navigation/toolbar--gin.html.twig' ignore missing %}
+{% endif %}
+
+<div class="gin-secondary-toolbar gin-secondary-toolbar--frontend" data-offset-top>
+  <div class="gin-secondary-toolbar__layout-container">
+    <div class="gin-breadcrumb-wrapper">
+      <div class="region-breadcrumb">
+        <nav class="gin-breadcrumb" role="navigation"
+             aria-labelledby="system-breadcrumb">
+          <h2 id="system-breadcrumb"
+              class="visually-hidden">{{ 'Breadcrumb'|t }}</h2>
+          <ol class="gin-breadcrumb__list">
+            <li class="gin-breadcrumb__item">
+              {% if entity_edit_url and entity_title %}
+                <a class="gin-breadcrumb__link gin-back-to-admin"
+                   href="{{ entity_edit_url }}">{{ 'Edit %title'|t({ '%title': entity_title }) }}</a>
+              {% else %}
+                <a class="gin-breadcrumb__link gin-back-to-admin"
+                   href="{{ path('system.admin_content') }}">{{ 'Back to Administration'|t }}</a>
+              {% endif %}
+            </li>
+            {% if entity_view_url and entity_title %}
+              <li class="gin-breadcrumb__item">
+                <a class="gin-breadcrumb__link"
+                   href="{{ entity_view_url }}">{{ 'View %title'|t({ '%title': entity_title }) }}</a>
+              </li>
+            {% endif %}
+            {{ toolbar_links }}
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <div class="toolbar-secondary toolbar"
+         id="toolbar-administration-secondary">
+      <div id="toolbar-bar" class="toolbar-bar">
+        {{ toolbar_tabs }}
+        <div class="toolbar-tab">
+          <div
+            class="toolbar-icon trigger toolbar-item"
+            id="toolbar-item-display-options"
+            data-toolbar-tray="toolbar-item-shortcuts-tray"
+            role="button">{{ 'Display options'|t }}
+          </div>
+          <div data-toolbar-tray="toolbar-item-display-options"
+               class="toolbar-tray">
+            <nav>
+              <h3
+                class="toolbar-tray-name visually-hidden">{{ 'Display options'|t }}</h3>
+              <ul class="toolbar-menu">
+                <li>
+                  {{ preview_region }}
+                </li>
+                <li>{{ preview_content }}</li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div{{ glb_classes(create_attribute().addClass('region region-sticky')) }}>
+      <div
+        class="gin-sticky form-wrapper glb-region-sticky__items__inner form-wrapper">
+        <input data-drupal-selector="edit-submit" type="submit" name="op"
+               value="{{ 'Save'|t }}"
+               class="glb-primary-save js-glb-primary-save glb-button glb-button--primary form-submit">
+        <a href="#toggle-sidebar" class="meta-sidebar__trigger trigger"
+           data-gin-tooltip role="button"
+           title="{{ 'Hide sidebar panel'|t }}" aria-controls="gin_sidebar"
+           aria-expanded="true"><span
+            class="visually-hidden">{{ 'Hide sidebar panel'|t }}</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+{{ toolbar_bottom }}

@@ -1,0 +1,55 @@
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 8f9bfbc0-dd44-4b17-8bdd-66b82a01ce18
+  bundle: movie
+  default_langcode: en
+  depends:
+    cc499d5d-647a-4bd1-9f69-239871d4e3ac: taxonomy_term
+    2ff12607-1ab0-47a2-b4a5-558ff0ec81be: taxonomy_term
+default:
+  revision_uid:
+    -
+      target_id: 1
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  title:
+    -
+      value: 'Avengers: Infinity War'
+  created:
+    -
+      value: 1738324677
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en
+  body:
+    -
+      value: '<p>The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos before his blitz of devastation and ruin puts an end to the universe.</p>'
+      format: basic_html
+      summary: ''
+  field_country_of_origin:
+    -
+      entity: cc499d5d-647a-4bd1-9f69-239871d4e3ac
+  field_genre:
+    -
+      entity: 2ff12607-1ab0-47a2-b4a5-558ff0ec81be
+  field_imdb_rating:
+    -
+      value: '8.4'
+  field_release_date:
+    -
+      value: '2018-04-25'

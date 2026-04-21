@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.jet
+  module:
+    - user
+id: node.jet.default
+targetEntityType: node
+bundle: jet
+mode: default
+content: {}
+hidden:
+  links: true

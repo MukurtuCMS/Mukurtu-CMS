@@ -1,0 +1,10 @@
+rebuild_cache_access.rebuild_cache:
+  path: '/rebuild-cache-access/rebuild-cache'
+  defaults:
+    _controller: '\Drupal\rebuild_cache_access\Controller\RebuildCacheAccessController::rebuildCache'
+    _title: 'Rebuild cache'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _permission: 'rebuild cache access'
+    _csrf_token: 'TRUE'

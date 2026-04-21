@@ -1,0 +1,13 @@
+type: module
+name: 'Solr Legacy Test'
+description: 'Support module for Solr legacy search tests.'
+package: 'Search API'
+dependencies:
+  - search_api_solr:search_api_solr
+core_version_requirement: ^9.2 || ^10.0
+hidden: true
+
+# Information added by Drupal.org packaging script on 2025-04-23
+version: '4.3.10'
+project: 'search_api_solr'
+datestamp: 1745426381

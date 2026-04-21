@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - field
+    - message
+id: message.message_text_another
+field_name: message_text_another
+entity_type: message
+type: string_long
+settings:
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

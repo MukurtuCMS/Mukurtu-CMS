@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies: {  }
+template: publish_node
+label: 'Publish node'
+description: 'Node was published.'
+text:
+  -
+    value: '[message:field_node_reference:entity:title] published'
+    format: plain_text
+  -
+    value: "<h2>[message:field_node_reference:entity:content-type:name] published</h2>\r\n\r\n<p>Title: [message:field_node_reference:entity:title]<br />\r\nAuthor:&nbsp;[message:field_node_reference:entity:author]<br />\r\nTimestamp:&nbsp;[message:field_node_reference:entity:created]</p>\r\n\r\n<p>[message:field_node_reference:entity:summary] ...</p>\r\n\r\n<p>Read more:&nbsp;[message:field_node_reference:entity:url]</p>\r\n"
+    format: basic_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

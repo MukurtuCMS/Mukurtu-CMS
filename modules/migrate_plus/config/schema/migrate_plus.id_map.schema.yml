@@ -1,0 +1,9 @@
+# Schema for the migrate id map plugins.
+
+migrate_plus.id_map.*:
+  type: migrate_id_map
+  label: 'Default Id Map'
+
+migrate_plus.id_map.sql:
+  type: migrate_id_map
+  label: 'Sql'

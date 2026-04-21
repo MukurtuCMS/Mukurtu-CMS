@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for the message_subscribe_email module.
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * Change message subscription to the new views and create a new field.
+ */
+function message_subscribe_email_install() {
+  // Add the `message_subscribe_email` field to the user form.
+  /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
+  $display = \Drupal::service('entity_display.repository')
+    ->getFormDisplay('user', 'user');
+
+  if (!$display->getComponent('message_subscribe_email')) {
+    $settings = [
+      'type' => 'boolean_checkbox',
+      'weight' => 25,
+      'settings' => [
+        'display_label' => TRUE,
+      ],
+      'third_party_settings' => [],
+    ];
+    $display->setComponent('message_subscribe_email', $settings);
+    $display->save();
+  }
+
+  // Update the UI to use the email views.
+  $flags = [
+    // Flag name => view name + display.
+    'subscribe_node' => 'subscribe_node_email:default',
+    'subscribe_term' => 'subscribe_taxonomy_term_email:default',
+    'subscribe_user' => 'subscribe_user_email:default',
+    // Setup OG in case it exists.
+    'subscribe_og' => 'subscribe_node_email:default',
+  ];
+  foreach ($flags as $flag_id => $view_name) {
+    if ($flag = \Drupal::service('flag')->getFlagById($flag_id)) {
+      // Verify this hasn't been already overridden.
+      $existing = $flag->getThirdPartySetting('message_subscribe_ui', 'view_name');
+      if (!$existing || ($existing == str_replace('_email', '', $view_name))) {
+        $flag->setThirdPartySetting('message_subscribe_ui', 'view_name', $view_name);
+        $flag->save();
+      }
+    }
+  }
+}

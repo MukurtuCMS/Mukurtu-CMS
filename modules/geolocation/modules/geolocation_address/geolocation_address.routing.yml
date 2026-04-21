@@ -1,0 +1,15 @@
+geolocation_address.geocoder.geocode:
+  path: '/geolocation/address/geocoder/geocode'
+  defaults:
+    _controller: 'Drupal\geolocation_address\Controller\GeocoderController:geocode'
+    _title: 'Geolocation Address Widget Geocode'
+  requirements:
+    _permission: 'access content'
+
+geolocation_address.geocoder.reverse:
+  path: '/geolocation/address/geocoder/reverse'
+  defaults:
+    _controller: 'Drupal\geolocation_address\Controller\GeocoderController:reverse'
+    _title: 'Geolocation Address Widget Reverse'
+  requirements:
+    _permission: 'access content'

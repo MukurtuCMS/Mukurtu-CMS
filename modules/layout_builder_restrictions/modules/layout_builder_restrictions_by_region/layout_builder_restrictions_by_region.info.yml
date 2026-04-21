@@ -1,0 +1,13 @@
+name: Layout Builder Restrictions By Region
+core_version_requirement: ^10 || ^11
+description: 'Restricts layouts and blocks per layout region'
+type: module
+package: 'Layout Builder'
+dependencies:
+  - drupal:layout_builder
+  - layout_builder_restrictions:layout_builder_restrictions
+
+# Information added by Drupal.org packaging script on 2025-07-17
+version: '3.0.4'
+project: 'layout_builder_restrictions'
+datestamp: 1752762017

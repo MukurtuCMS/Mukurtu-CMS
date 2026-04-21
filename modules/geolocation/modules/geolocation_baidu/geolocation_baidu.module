@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Baidu Maps hooks.
+ */
+
+/**
+ * Implements hook_library_info_build().
+ */
+function geolocation_baidu_library_info_build() {
+  /** @var \Drupal\geolocation_baidu\Plugin\geolocation\MapProvider\Baidu $baidu */
+  $baidu = Drupal::service('plugin.manager.geolocation.mapprovider')->getMapProvider('baidu');
+
+  $libraries = [];
+  $libraries['baidu_maps'] = [
+    'version' => '1.x',
+    'js' => [
+      $baidu->getApiUrl() => [
+        'type' => 'external',
+      ],
+    ],
+  ];
+
+  return $libraries;
+}

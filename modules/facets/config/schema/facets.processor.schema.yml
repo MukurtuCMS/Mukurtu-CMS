@@ -1,0 +1,224 @@
+plugin.plugin_configuration.facets_hierarchy.*:
+  type: mapping
+
+plugin.plugin_configuration.facets_processor.url_processor_handler:
+  type: mapping
+  label: 'URL handler'
+
+plugin.plugin_configuration.facets_processor.hierarchy_processor:
+  type: mapping
+  label: 'Build hierarchy tree'
+
+plugin.plugin_configuration.facets_processor.hide_inactive_siblings_processor:
+  type: mapping
+  label: 'Hide inactive siblings'
+
+plugin.plugin_configuration.facets_processor.hide_non_narrowing_result_processor:
+  type: mapping
+  label: 'Hide non-narrowing results'
+
+plugin.plugin_configuration.facets_processor.count_widget_widget_order:
+  type: mapping
+  label: 'Count widget order'
+  mapping:
+    sort:
+      type: string
+      label: sort order
+
+plugin.plugin_configuration.facets_processor.display_value_widget_order:
+  type: mapping
+  label: 'Display value widget order'
+  mapping:
+    sort:
+      type: string
+      label: sort order
+
+plugin.plugin_configuration.facets_processor.translate_entity:
+  type: mapping
+  label: 'Translate entity'
+  mapping:
+    sort:
+      type: boolean
+      label: translate entity
+
+plugin.plugin_configuration.facets_processor.term_weight_widget_order:
+  type: mapping
+  label: 'Display term widget order'
+  mapping:
+    sort:
+      type: string
+      label: sort order
+
+plugin.plugin_configuration.facets_processor.exclude_specified_items:
+  type: mapping
+  label: 'Exclude specified items'
+  mapping:
+    exclude:
+      type: string
+      label: Exclude
+    regex:
+      type: boolean
+      label: Regex
+    invert:
+      type: boolean
+      label: Invert
+
+plugin.plugin_configuration.facets_processor.raw_value_widget_order:
+  type: mapping
+  label: 'Raw value widget order'
+  mapping:
+    sort:
+      type: string
+      label: sort order
+
+plugin.plugin_configuration.facets_processor.active_widget_order:
+  type: mapping
+  label: 'Active widget order'
+  mapping:
+    sort:
+      type: string
+      label: sort order
+
+plugin.plugin_configuration.facets_processor.count_widget_order:
+  type: mapping
+  label: 'Active widget order'
+  mapping:
+    sort:
+      type: string
+      label: sort order
+
+plugin.plugin_configuration.facets_processor.count_limit:
+  type: mapping
+  label: 'Count limit widget'
+  mapping:
+    minimum_items:
+      type: integer
+      label: 'Mimimum amount of items to show.'
+    maximum_items:
+      type: integer
+      label: 'Maximum amount of items to show.'
+
+plugin.plugin_configuration.facets_processor.boolean_item:
+  type: mapping
+  label: 'Boolean processor'
+  mapping:
+    on_value:
+      type: label
+      label: 'On value'
+    off_value:
+      type: label
+      label: 'Off value'
+
+plugin.plugin_configuration.facets_processor.combine_processor:
+  type: sequence
+  label: 'Combine facets processor'
+  sequence:
+    type: mapping
+    label: Mapping for a processor
+    mapping:
+      combine:
+        type: boolean
+        label: 'Combine this facet'
+      mode:
+        type: string
+        label: 'Combination mode'
+
+plugin.plugin_configuration.facets_processor.dependent_processor:
+  type: sequence
+  label: 'Dependent facet processor'
+  sequence:
+    type: mapping
+    label: Mapping for a processor
+    mapping:
+      enable:
+        type: boolean
+        label: 'Enable for this facet'
+      condition:
+        type: string
+        label: 'Type of condition'
+      values:
+        type: label
+        label: 'The value of the condition'
+      negate:
+        type: boolean
+        label: 'Should the condition be negated'
+
+plugin.plugin_configuration.facets_processor.show_siblings_processor:
+  type: mapping
+  label: 'Show siblings processor'
+  mapping:
+    show_parent_siblings:
+      type: boolean
+      label: 'Show parents'
+
+plugin.plugin_configuration.facets_processor.date_item:
+  type: mapping
+  label: 'Date item processor'
+  mapping:
+    date_display:
+      type: string
+      label: 'Date display'
+    granularity:
+      type: integer
+      label: 'Granularity'
+    date_format:
+      type: string
+      label: 'Date format'
+    hierarchy:
+      type: boolean
+      label: 'Hierarchy'
+
+plugin.plugin_configuration.facets_processor.granularity_item:
+  type: mapping
+  label: 'Granular item processor'
+  mapping:
+    granularity:
+      type: integer
+      label: 'Granularity'
+    min_value:
+      type: integer
+      label: 'Minimum value'
+    max_value:
+      type: integer
+      label: 'Maximum value'
+    include_lower:
+      type: boolean
+      label: 'Include lower bounds'
+    include_upper:
+      type: boolean
+      label: 'Include upper bounds'
+    include_edges:
+      type: boolean
+      label: 'Include first lower and last upper bound'
+
+plugin.plugin_configuration.facets_processor.replace:
+  type: mapping
+  label: 'Settings for facet replacement processor'
+  mapping:
+    replacements:
+      type: text
+      label: 'Replacement values'
+
+plugin.plugin_configuration.facets_processor.hide_active_items_processor:
+  type: mapping
+  label: 'Hide active items'
+
+plugin.plugin_configuration.facets_processor.hide_1_result_facet:
+  type: mapping
+  label: 'Hide facet with 1 result'
+
+plugin.plugin_configuration.facets_processor.list_item:
+  type: mapping
+  label: 'List item label'
+
+plugin.plugin_configuration.facets_processor.show_only_deepest_level_items_processor:
+  type: mapping
+  label: 'Show only deepest item levels'
+
+plugin.plugin_configuration.facets_processor.translate_entity_aggregated_fields:
+  type: mapping
+  label: 'Transform entity ID in aggregated field to label'
+
+plugin.plugin_configuration.facets_processor.uid_to_username_callback:
+  type: mapping
+  label: 'Transform UID to user name'

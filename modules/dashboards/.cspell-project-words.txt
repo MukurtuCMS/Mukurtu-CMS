@@ -1,0 +1,17 @@
+# List of words excluded from cspell validation for the project Dashboards.
+# Mostly contains custom names: variables, modules, users, etc...
+drow
+fullmer
+matomo
+nshades
+phplint
+rlmumford
+Seifert
+UNIXTIME
+webform
+blockbasic
+daycount
+totalcount
+
+# 'views.view.test_comment_count.yml': Binary identifier used for key.
+MQNAY

@@ -1,0 +1,11 @@
+services:
+  config_pages.config_pages_get_value:
+    class: Drupal\config_pages\Command\GetValueCommand
+    arguments: ['@logger.factory']
+    tags:
+      - { name: drupal.command }
+  config_pages.config_pages_set_value:
+    class: Drupal\config_pages\Command\SetValueCommand
+    arguments: ['@logger.factory']
+    tags:
+      - { name: drupal.command }

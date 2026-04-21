@@ -1,0 +1,16 @@
+{
+    "name": "drupal/message_notify",
+    "description": "Notification framework for the Message module",
+    "type": "drupal-module",
+    "license": "GPL-2.0+",
+    "homepage": "https://drupal.org/project/message_notify",
+    "support": {
+        "issues": "https://drupal.org/project/issues/message_notify",
+        "irc": "irc://irc.freenode.org/drupal",
+        "source": "https://cgit.drupalcode.org/message_notify"
+    },
+    "require": {
+      "drupal/message": "^1.0"
+    },
+    "minimum-stability": "dev"
+}

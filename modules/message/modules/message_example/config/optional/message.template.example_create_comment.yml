@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies: {  }
+template: example_create_comment
+label: 'Example - Create comment'
+description: 'A user created comment.'
+text:
+  - value: "<p><a href='[message:user-url]'>[message:user-name]</a>&nbsp;<a href='[message:comment-url]'>commented</a> on&nbsp;[message:node-title]</p>\r\n <p>[message:node-render]</p>\r\n"
+  - format: 'basic_html'
+data:
+  'token options':
+    clear: 0
+  purge:
+    override: 0
+    enabled: 0
+    quota: ''
+    days: ''

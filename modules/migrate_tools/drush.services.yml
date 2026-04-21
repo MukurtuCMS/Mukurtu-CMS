@@ -1,0 +1,13 @@
+services:
+  migrate_tools.commands:
+    class: Drupal\migrate_tools\Drush\Commands\MigrateToolsCommands
+    arguments:
+      - '@plugin.manager.migration'
+      - '@date.formatter'
+      - '@entity_type.manager'
+      - '@keyvalue'
+      - '@datetime.time'
+      - '@string_translation'
+      - '@migrate_tools.migration_drush_command_progress'
+    tags:
+      - { name: drush.command }

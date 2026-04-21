@@ -1,0 +1,128 @@
+# Schema for the configuration files of the geofield module.
+
+field.storage_settings.geofield:
+  type: mapping
+  label: 'Geofield Settings'
+  mapping:
+    backend:
+      type: string
+      label: 'Backend storage'
+
+field.field_settings.geofield:
+  label: 'Geofield settings'
+  type: mapping
+  mapping:
+    backend:
+      type: string
+      label: 'Backend storage'
+
+field.value.geofield:
+  type: mapping
+  label: 'Default'
+  mapping:
+    value:
+      type: text
+      label: 'Value'
+    geo_type:
+      type: string
+      label: 'Geo type'
+    lat:
+      type: float
+      label: 'Lat'
+    lon:
+      type: float
+      label: 'Lon'
+    left:
+      type: float
+      label: 'Left'
+    top:
+      type: float
+      label: 'Top'
+    right:
+      type: float
+      label: 'Right'
+    bottom:
+      type: float
+      label: 'Bottom'
+    geohash:
+      type: string
+      label: 'Geohash'
+    latlon:
+      type: string
+      label: 'LatLon'
+
+entity_view_display.field.geofield_default:
+  type: entity_field_view_display_base
+  label: 'Geofield default display format settings'
+  mapping:
+    settings:
+      sequence:
+        type: string
+
+entity_form_display.field.geofield_default:
+  type: entity_field_form_display_base
+  label: 'Geofield default display format settings'
+  mapping:
+    settings:
+      type: sequence
+      label: 'Settings'
+      sequence:
+        type: string
+
+entity_form_display.field.geofield_latlon:
+  type: entity_field_form_display_base
+  label: 'Geofield Lat Lon display format settings'
+  mapping:
+    settings:
+      type: sequence
+      label: 'Settings'
+      sequence:
+        type: string
+
+entity_form_display.field.geofield_bbox:
+  type: entity_field_form_display_base
+  label: 'Geofield Bounding box display format settings'
+  mapping:
+    settings:
+      type: sequence
+      label: 'Settings'
+      sequence:
+        type: string
+
+field.widget.settings.geofield_default:
+  type: mapping
+  label: 'Geofield (WKT) settings'
+  mapping:
+    geometry_validation:
+      type: boolean
+      label: 'Enable Geometry Validation'
+
+field.widget.settings.geofield_latlon:
+  type: mapping
+  label: 'Latitude/Longitude settings'
+  mapping:
+    html5_geolocation:
+      type: boolean
+      label: 'Use HTML5 Geolocation to set default values'
+
+field.formatter.settings.geofield_default:
+  type: mapping
+  label: 'Geofield default display format settings'
+  mapping:
+    output_format:
+      type: string
+      label: 'Output format'
+    output_escape:
+      type: boolean
+      label: 'Escape output'
+
+field.formatter.settings.geofield_latlon:
+  type: mapping
+  label: 'Geofield LatLon display format settings'
+  mapping:
+    output_format:
+      type: string
+      label: 'Output format'
+    output_escape:
+      type: boolean
+      label: 'Output escape'

@@ -1,0 +1,7 @@
+views.argument_default.config_pages_current_context:
+  type: mapping
+  label: 'Current context for ConfigPages'
+  mapping:
+    config_page_type:
+      type: string
+      label: 'ConfigPage type'

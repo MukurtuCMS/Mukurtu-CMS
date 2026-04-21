@@ -1,0 +1,9 @@
+gin_lb.gin_lb_settings_form:
+  path: '/admin/config/gin_lb/settings'
+  defaults:
+    _form: '\Drupal\gin_lb\Form\SettingsForm'
+    _title: 'Gin Layout Builder Settings'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

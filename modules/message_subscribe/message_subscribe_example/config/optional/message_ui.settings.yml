@@ -1,0 +1,7 @@
+update_tokens:
+  update_tokens: false
+  how_to_act: update_when_added
+  number_items: 250
+  how_to_update: update_with_item
+show_preview: true
+anonymous: Anonymous

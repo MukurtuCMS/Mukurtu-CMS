@@ -1,0 +1,7 @@
+/vendor
+/web
+composer.lock
+.idea
+.DS_Store
+/.editorconfig
+/.gitattributes

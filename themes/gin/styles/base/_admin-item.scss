@@ -1,0 +1,92 @@
+.admin-list {
+  padding: var(--gin-spacing-s) 0;
+}
+
+.admin-item {
+  position: relative;
+  padding-block: var(--gin-spacing-density-s);
+  padding-inline: var(--gin-spacing-l) calc(var(--gin-spacing-xs) + var(--gin-spacing-xl));
+  margin: var(--gin-spacing-l) var(--gin-spacing-s);
+
+  &--panel {
+    margin-block: 0;
+    margin-inline: calc(var(--gin-spacing-l) * -1);
+  }
+
+  &:not(:last-child) {
+    border-block-end: 0 none;
+
+    &::after {
+      content: "";
+      opacity: .75;
+      display: block;
+      position: absolute;
+      inset-inline-start: calc(var(--gin-spacing-s) * -1);
+      inset-block-end: calc(var(--gin-spacing-s) * -1);
+      width: calc(100% + var(--gin-spacing-l));
+      height: 1px;
+      border-block-end: 1px solid var(--gin-border-color-table);
+    }
+  }
+
+  &:first-child {
+    margin-block-start: 0;
+  }
+
+  &:last-child {
+    margin-block-end: 0;
+  }
+
+  &__title {
+    font-size: var(--gin-font-size);
+    font-weight: var(--gin-font-weight-semibold);
+  }
+
+  &__description {
+    font-size: var(--gin-font-size-s);
+    color: var(--gin-color-text-light);
+  }
+
+  .admin-item__link {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    text-indent: -999em;
+
+    &::before {
+      inset-inline-end: var(--gin-spacing-m);
+      inset-inline-start: auto;
+      inset-block-start: 50%;
+      transform: translateY(-50%) unquote("/*! rtl:append scaleX(-1) */");
+      background-image: none;
+      background-color: var(--gin-color-primary);
+      mask-image: icon('handle');
+      mask-size: 1em 1em;
+      mask-repeat: no-repeat;
+      mask-position: center center;
+
+      @media (forced-colors: active) {
+        background-color: linktext;
+      }
+    }
+
+    &:hover,
+    &:focus {
+      background: var(--gin-color-primary-light);
+      border-radius: var(--gin-border-m);
+
+      ~ .admin-item__title,
+      ~ .admin-item__description {
+        color: var(--gin-color-primary);
+      }
+    }
+
+    &:focus {
+      box-shadow: inset 0 0 0 1px var(--gin-color-focus-border), inset 0 0 0 4px var(--gin-color-focus);
+    }
+  }
+}

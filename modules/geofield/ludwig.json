@@ -1,0 +1,9 @@
+{
+  "require": {
+    "itamair/geophp": {
+      "version": "v1.5",
+      "url": "https://github.com/itamair/geoPHP/archive/refs/tags/1.5.zip",
+      "disable_warnings": "TRUE"
+    }
+  }
+}

@@ -1,0 +1,103 @@
+.ui-dialog {
+  position: fixed;
+  z-index: 101;
+  top: 0;
+  right: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+  margin: 0;
+  border-left: 1px solid var(--gin-border-color-layer);
+  background: var(--gin-bg-layer);
+  -webkit-box-shadow: 0 0 48px rgba(0, 0, 0, 0.075);
+  box-shadow: 0 0 48px rgba(0, 0, 0, 0.075);
+  font-family:
+    Inter,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Oxygen-Sans,
+    Ubuntu,
+    Cantarell,
+    "Helvetica Neue",
+    sans-serif;
+  font-size: 16px;
+  line-height: 1em;
+  -webkit-overflow-scrolling: touch;
+  .ui-corner-all.ui-dialog-titlebar-close {
+    position: absolute;
+    width: 20px;
+  }
+  .ui-widget-content.ui-dialog-content {
+    overflow: auto;
+    padding: 1em;
+    background: #fff;
+  }
+  &:not(.ui-dialog-off-canvas) {
+    overflow: visible;
+  }
+  .ui-icon-closethick {
+    width: 24px;
+    height: 24px;
+    background-color: #fff !important;
+  }
+
+  p {
+    margin: 1em 0;
+  }
+
+  &-titlebar {
+    position: relative !important;
+    height: $offcanvasTitleHeight !important;
+    color: #fff !important;
+    background: #1b1b1d !important;
+  }
+
+  &-title {
+    margin-top: 1em !important;
+    margin-bottom: 1em !important;
+    padding-right: 20px;
+    color: #fff !important;
+    text-shadow: none !important;
+    font-size: 1.231em !important;
+    font-weight: 500 !important;
+  }
+}
+
+.ui-dialog-content,
+.ui-dialog-off-canvas .ui-dialog-titlebar {
+  color: var(--gin-color-text) !important;
+  background: var(--gin-bg-layer) !important;
+}
+
+.ui-dialog-off-canvas {
+  .ui-dialog-title {
+    color: var(--gin-color-title) !important;
+  }
+  .ui-icon-closethick {
+    background-color: var(--gin-color-text) !important;
+  }
+}
+
+#drupal-off-canvas:not(.drupal-off-canvas-reset).ui-dialog-content,
+#drupal-off-canvas-wrapper .ui-dialog-content {
+  box-sizing: border-box;
+  width: calc(100%) !important;
+  height: calc(100% - #{$offcanvasTitleHeight}) !important;
+  padding-right: $offcanvasPadding !important;
+  padding-left: $offcanvasPadding !important;
+  & div {
+    color: var(--gin-color-text);
+  }
+}
+
+.ui-dialog-off-canvas #drupal-off-canvas:not(.drupal-off-canvas-reset),
+#drupal-off-canvas-wrapper .ui-dialog-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 0 !important;
+}
+
+#drupal-modal form > .form-actions {
+  display: none;
+}

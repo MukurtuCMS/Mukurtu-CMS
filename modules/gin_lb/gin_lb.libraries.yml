@@ -1,0 +1,81 @@
+gin_lb:
+  version: VERSION
+  css:
+    theme:
+      dist/css/gin_lb.css: { minified: true }
+
+gin_lb_10:
+  version: VERSION
+  css:
+    theme:
+      dist/css/gin_lb_10.css: { minified: true }
+  dependencies:
+    - gin_lb/gin_lb
+
+olivero:
+  version: VERSION
+  css:
+    theme:
+      dist/css/olivero.css: { minified: true }
+  dependencies:
+    - gin_lb/gin_lb
+
+gin_lb_init:
+  version: VERSION
+  js:
+    assets/js/gin_lb_lb.js: {}
+  dependencies:
+    - core/jquery
+    - core/once
+    - core/drupal
+    - gin/tooltip
+    - gin/sidebar
+
+offcanvas:
+  version: VERSION
+  js:
+    assets/js/gin_lb_offcanvas.js: {}
+  dependencies:
+    - core/jquery
+    - core/once
+    - core/drupal
+
+preview:
+  version: VERSION
+  js:
+    assets/js/gin_lb_preview_regions.js: {}
+  dependencies:
+    - core/once
+    - core/drupal
+
+toolbar:
+  version: VERSION
+  js:
+    assets/js/gin_lb_toolbar.js: {}
+  dependencies:
+    - core/once
+    - core/drupal
+
+gin_lb_toastify:
+  version: VERSION
+  js:
+    assets/js/gin_lb_toastify.js: {}
+  dependencies:
+    - core/jquery
+    - core/once
+    - core/drupal
+
+toastify_cdn:
+  version: VERSION
+  js:
+    //cdn.jsdelivr.net/npm/toastify-js: { type: external }
+  css:
+    theme:
+      //cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css: { type: external }
+
+toastify_composer:
+  css:
+    component:
+      /libraries/toastify-js/src/toastify.css: {}
+  js:
+    /libraries/toastify-js/src/toastify.js: {}

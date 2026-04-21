@@ -1,0 +1,58 @@
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 7badaf6b-a482-49bf-b781-80dd528ecad7
+  bundle: movie
+  default_langcode: en
+  depends:
+    cc499d5d-647a-4bd1-9f69-239871d4e3ac: taxonomy_term
+    5860084d-277e-4725-b237-0745a13033fc: taxonomy_term
+    7a176814-a275-451f-a86d-8569c6551e50: taxonomy_term
+default:
+  revision_uid:
+    -
+      target_id: 1
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  title:
+    -
+      value: 'The Neverending Story'
+  created:
+    -
+      value: 1738322885
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en
+  body:
+    -
+      value: '<p>A troubled boy dives into a wondrous fantasy world through the pages of a mysterious book.</p>'
+      format: basic_html
+      summary: ''
+  field_country_of_origin:
+    -
+      entity: cc499d5d-647a-4bd1-9f69-239871d4e3ac
+  field_genre:
+    -
+      entity: 5860084d-277e-4725-b237-0745a13033fc
+    -
+      entity: 7a176814-a275-451f-a86d-8569c6551e50
+  field_imdb_rating:
+    -
+      value: '7.3'
+  field_release_date:
+    -
+      value: '1984-06-20'

@@ -1,0 +1,4 @@
+# Ignore Leaflet Js library, but not the dist folder
+js/leaflet/*
+!js/leaflet/dist
+

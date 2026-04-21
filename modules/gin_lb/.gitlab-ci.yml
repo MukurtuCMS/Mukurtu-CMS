@@ -1,0 +1,13 @@
+# https://git.drupalcode.org/project/gitlab_templates/
+
+variables:
+  # There is currently only compiled CSS files in the module.
+  SKIP_STYLELINT: "1"
+
+include:
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'

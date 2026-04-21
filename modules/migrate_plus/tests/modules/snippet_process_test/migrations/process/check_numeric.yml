@@ -1,0 +1,6 @@
+- plugin: callback
+  callable: is_numeric
+- plugin: skip_on_empty
+  method: process
+- plugin: default_value
+  default_value: unreachable

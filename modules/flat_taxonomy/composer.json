@@ -1,0 +1,6 @@
+{
+  "name": "drupal/flat_taxonomy",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "description": "Provide a new option in vocabulary creation/edition form to enforce it to be flat."
+}

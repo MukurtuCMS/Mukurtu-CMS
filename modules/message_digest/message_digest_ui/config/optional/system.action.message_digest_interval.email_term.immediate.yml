@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - message_digest_ui
+  flag:
+    - email_term
+id: message_digest_interval.email_term.immediate
+label: 'Send notifications immediately'
+type: taxonomy_term
+plugin: 'message_digest_interval:email_term:immediate'
+configuration:
+  flag_id: email_term
+  value: '0'

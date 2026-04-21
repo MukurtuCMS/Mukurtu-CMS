@@ -1,0 +1,8 @@
+.project
+.buildpath
+.settings
+.idea
+nbproject
+composer.lock
+InMemoriamOfPinkPony.rip
+/tests/run_tests.sh

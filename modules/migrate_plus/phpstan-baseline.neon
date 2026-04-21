@@ -1,0 +1,6 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Access to an undefined property Drupal\\\\migrate_plus\\\\Entity\\\\Migration\\:\\:\\$idMap\\.$#"
+			count: 1
+			path: src/Entity/Migration.php

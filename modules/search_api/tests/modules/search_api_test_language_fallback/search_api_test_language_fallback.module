@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Provides a language fallback for tests.
+ */
+
+/**
+ * Implements hook_language_fallback_candidates_alter().
+ */
+function search_api_test_language_fallback_language_fallback_candidates_alter(array &$candidates, array $context) {
+  $attempted_langcode = $context['langcode'];
+  $candidates = [$attempted_langcode => $attempted_langcode];
+  if ($attempted_langcode === 'fr') {
+    $candidates['es'] = 'es';
+  }
+}

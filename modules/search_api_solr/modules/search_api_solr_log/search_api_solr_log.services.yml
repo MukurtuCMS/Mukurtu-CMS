@@ -1,0 +1,12 @@
+services:
+  logger.solr:
+    class: Drupal\search_api_solr_log\Logger\SolrLogger
+    arguments: ['@logger.log_message_parser', '@solarium.query_helper']
+    tags:
+      - { name: logger }
+      - { name: backend_overridable }
+
+  search_api_solr_log.kernel_subscriber:
+    class: Drupal\search_api_solr_log\EventSubscriber\EventSubscriber
+    tags:
+      - { name: event_subscriber }

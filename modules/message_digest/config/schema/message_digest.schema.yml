@@ -1,0 +1,16 @@
+message_digest.interval.*:
+  type: config_entity
+  label: 'Message digest interval'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    description:
+      type: text
+      label: 'Description'
+    interval:
+      type: string
+      label: 'Digest interval'

@@ -1,0 +1,6 @@
+.block-disabled {
+  &:not(:hover) {
+    opacity: .6;
+    background: transparent;
+  }
+}

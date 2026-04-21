@@ -1,0 +1,26 @@
+/**
+ * @file
+ * Tooltip styles.
+ */
+
+ .tooltip,
+ .cloned-tooltip {
+   position: absolute;
+   inset-block-start: var(--space-xs);
+   inset-inline-start: 100%;
+   background-color: var(--gin-tooltip-bg);
+   color: white;
+   padding: 0.25rem var(--space-xs);
+   border-radius: var(--space-xs);
+   font-size: var(--font-size-xxs);
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.08em;
+   line-height: var(--space-m);
+   z-index: 601;
+ }
+
+ /* Hide the origin value of the Tooltip if the Admin toolbar is expanded. */
+ html:not(.admin-toolbar-expanded) .toolbar-menu__item--level-1:not(.toolbar-menu__item--has-dropdown) .toolbar-link span {
+   display: none;
+ }

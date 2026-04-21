@@ -1,0 +1,6 @@
+gin_lb.gin_lb_settings_form:
+  title: 'Gin Layout Builder Settings'
+  route_name: gin_lb.gin_lb_settings_form
+  description: 'Configure the settings of Gin Layout Builder.'
+  parent: system.admin_config_ui
+  weight: 99

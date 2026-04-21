@@ -1,0 +1,16 @@
+name: Read-only Field Widget Test
+type: module
+description: Helper module for testing the Readonly Field Widget module
+core: 8.x
+core_version_requirement: ^8 || ^9 || ^10 || ^11
+package : Testing
+dependencies:
+  - drupal:readonly_field_widget
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:field_ui
+
+# Information added by Drupal.org packaging script on 2025-08-07
+version: '2.1.0'
+project: 'readonly_field_widget'
+datestamp: 1754564083

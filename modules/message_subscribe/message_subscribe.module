@@ -1,0 +1,117 @@
+<?php
+
+/**
+ * @file
+ * Subscribe API for the Message and Message notify modules.
+ */
+
+use Drupal\message\MessageInterface;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
+
+/**
+ * Implements hook_message_subscribe_get_subscribers().
+ */
+function message_subscribe_message_subscribe_get_subscribers(MessageInterface $message, array $subscribe_options = [], array $context = []) {
+  $uids = [];
+
+  $subscribe_options += [
+    'last uid' => 0,
+    'range' => FALSE,
+  ];
+
+  // Determine if a range is needed for the query.
+  $range = $subscribe_options['range'];
+
+  $debug = \Drupal::config('message_subscribe.settings')->get('debug_mode');
+  $debug && \Drupal::logger('message_subscribe')->debug(
+    'Gathering ALL subscriptions for @context',
+    ['@context' => "\n\n" . print_r($context, TRUE)]
+  );
+
+  // Query all the entity IDs inside the given flags. We don't use
+  // flag_get_content_flags() as we want to get all the flaggings of an
+  // entity-type in a single query.
+  $query = \Drupal::database()->select('flagging', 'fc')
+    ->fields('fc', ['flag_id', 'uid', 'entity_id', 'uid']);
+  $query->condition('fc.uid', $subscribe_options['last uid'], '>');
+  $query->orderBy('fc.uid', 'ASC');
+
+  $flagging_condition = $query->orConditionGroup();
+
+  // Find the users that subscribed to each context.
+  foreach ($context as $entity_type => $entity_ids) {
+    if (!$entity_ids) {
+      continue;
+    }
+
+    // Get all flags on given entity type.
+    if (!$flags = \Drupal::service('message_subscribe.subscribers')->getFlags($entity_type)) {
+      continue;
+    }
+
+    $debug && \Drupal::logger('message_subscribe')->debug(
+      'Using flags @flags for @entity_type @entity_ids',
+      [
+        '@flags' => implode(', ', array_keys($flags)),
+        '@entity_type' => $entity_type,
+        '@entity_ids' => implode(', ', $entity_ids),
+      ]
+    );
+
+    $entity_type_condition = $query->andConditionGroup();
+    $entity_type_condition->condition('fc.entity_type', $entity_type);
+    $entity_type_condition->condition('fc.entity_id', $entity_ids, 'IN');
+    $entity_type_condition->condition('fc.flag_id', array_keys($flags), 'IN');
+    $flagging_condition->condition($entity_type_condition);
+  }
+
+  // If none of the subscription types ended up being valid, then no users
+  // should be returned.
+  if (count($flagging_condition->conditions()) < 1) {
+    return [];
+  }
+
+  $query->condition($flagging_condition);
+
+  if ($range) {
+    $user_query = \Drupal::database()->select('flagging', 'fc')
+      ->distinct()
+      ->fields('fc', ['uid']);
+    $user_query->condition($flagging_condition);
+    $user_query->condition('fc.uid', $subscribe_options['last uid'], '>');
+    $user_query->orderBy('fc.uid');
+    $user_query->range(0, $range);
+
+    // If we're not notifying blocked users, we need to take this into account
+    // in this query so that the range is accurate.
+    if (empty($subscribe_options['notify blocked users'])) {
+      $user_query->join('users_field_data', 'users', 'users.uid = fc.uid');
+      $user_query->condition('users.status', '1');
+    }
+    $users = $user_query->execute()->fetchCol();
+
+    // Limit the flagging results to only this subset of users.
+    if (!empty($users)) {
+      $query->condition('fc.uid', $users, 'IN');
+    }
+  }
+
+  $result = $query->execute();
+
+  foreach ($result as $row) {
+    $debug && \Drupal::logger('message_subscribe')->debug(
+      'Subscriber row flag_id: @flag_id user: @uid',
+      ['@flag_id' => $row->flag_id, '@uid' => $row->uid]
+    );
+    $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : new DeliveryCandidate([], [], $row->uid);
+    // Register the flag name.
+    $uids[$row->uid]->addFlag($row->flag_id);
+  }
+
+  $debug && \Drupal::logger('message_subscribe')->debug(
+    'Found @count recipients.',
+    ['@count' => count($uids)]
+  );
+
+  return $uids;
+}

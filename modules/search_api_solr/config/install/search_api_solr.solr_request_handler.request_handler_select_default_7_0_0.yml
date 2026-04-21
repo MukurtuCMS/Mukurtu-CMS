@@ -1,0 +1,43 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - search_api_solr
+id: request_handler_select_default_7_0_0
+label: 'Select'
+minimum_solr_version: 7.0.0
+environments: {}
+recommended: true
+request_handler:
+  name: /select
+  class: solr.SearchHandler
+  lst:
+    -
+      name: defaults
+      str:
+        -
+          name: defType
+          VALUE: lucene
+        -
+          name: df
+          VALUE: id
+        -
+          name: echoParams
+          VALUE: explicit
+        -
+          name: omitHeader
+          VALUE: 'true'
+        -
+          name: timeAllowed
+          VALUE: '${solr.selectSearchHandler.timeAllowed:-1}'
+        -
+          name: spellcheck
+          VALUE: 'false'
+  arr:
+    -
+      name: last-components
+      str:
+        -
+          VALUE: spellcheck
+        -
+          VALUE: elevator

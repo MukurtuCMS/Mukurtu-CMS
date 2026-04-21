@@ -1,0 +1,100 @@
+@font-face {
+  font-family: "Geolocation Google Places API icon font";
+  src: url("../font/geolocation-google-places-icon-font.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.geolocation-geocoder-item::before {
+  display: inline-block;
+  padding-right: 5px;
+  content: "\0051";
+  vertical-align: bottom;
+  font-family: "Geolocation Google Places API icon font", Helvetica, sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  line-height: inherit;
+}
+
+.geolocation-geocoder-item.bar:before {
+  content: "\0041";
+}
+.geolocation-geocoder-item.bike:before {
+  content: "\0042";
+}
+.geolocation-geocoder-item.bookmark:before {
+  content: "\0043";
+}
+.geolocation-geocoder-item.bus-station:before {
+  content: "\0044";
+}
+.geolocation-geocoder-item.crosshairs:before {
+  content: "\0045";
+}
+.geolocation-geocoder-item.route::before,
+.geolocation-geocoder-item.directions:before {
+  content: "\0046";
+}
+.geolocation-geocoder-item.fence:before {
+  content: "\0047";
+}
+.geolocation-geocoder-item.guidepost:before {
+  content: "\0048";
+}
+.geolocation-geocoder-item.heart:before {
+  content: "\0049";
+}
+.geolocation-geocoder-item.establishment::before,
+.geolocation-geocoder-item.home:before {
+  content: "\004a";
+}
+.geolocation-geocoder-item.hotel:before {
+  content: "\004b";
+}
+.geolocation-geocoder-item.locate:before {
+  content: "\004c";
+}
+.geolocation-geocoder-item.other-1:before {
+  content: "\004d";
+}
+.geolocation-geocoder-item.other-2:before {
+  content: "\004e";
+}
+.geolocation-geocoder-item.partly_cloudy:before {
+  content: "\004f";
+}
+.geolocation-geocoder-item.person:before {
+  content: "\0050";
+}
+.geolocation-geocoder-item.place:before {
+  content: "\0051";
+}
+.geolocation-geocoder-item.rate_review:before {
+  content: "\0052";
+}
+.geolocation-geocoder-item.search:before {
+  content: "\0053";
+}
+.geolocation-geocoder-item.share:before {
+  content: "\0054";
+}
+.geolocation-geocoder-item.star:before {
+  content: "\0055";
+}
+.geolocation-geocoder-item.suitecase:before {
+  content: "\0056";
+}
+.geolocation-geocoder-item.point_of_interest::before,
+.geolocation-geocoder-item.terrain:before {
+  content: "\0057";
+}
+.geolocation-geocoder-item.time:before {
+  content: "\0058";
+}
+.geolocation-geocoder-item.traffic:before {
+  content: "\0059";
+}
+.geolocation-geocoder-item.transit_station::before,
+.geolocation-geocoder-item.train-station:before {
+  content: "\005a";
+}

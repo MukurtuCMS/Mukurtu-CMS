@@ -1,0 +1,12 @@
+{#
+/**
+ * Specific variables:
+ * - items: an array of components with class, name, and label string properties.
+ */
+#}
+<span class="features-item-list">
+{% for item in items %}
+  {% set class = item.class ? 'features-item ' ~ item.class : 'features-item' %}
+  <span class="{{ class }}" title="{{ item.name }}">{{ item.label }}</span>
+{% endfor %}
+</span>

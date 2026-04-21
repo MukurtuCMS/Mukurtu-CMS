@@ -1,0 +1,4 @@
+services:
+  tagify_user_list.autocomplete_matcher:
+    class: Drupal\tagify_user_list\TagifyUserListEntityAutocompleteMatcher
+    parent: tagify.autocomplete_matcher

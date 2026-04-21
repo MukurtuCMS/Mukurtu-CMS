@@ -1,0 +1,111 @@
+.webform-filter-form {
+  margin-block-end: var(--gin-spacing-xl);
+
+  > .container-inline {
+     margin-block: 0;
+  }
+
+  .details-wrapper {
+    margin-block-start: 0;
+    margin-block-end: var(--gin-spacing-xs);
+  }
+
+  // Followed by a title
+  + div:not(.gin-layer-wrapper) {
+    // @extend h3;
+    margin-block-end: var(--gin-spacing-s);
+  }
+}
+
+.webform-ui-element-type-change-form {
+  .gin-layer-wrapper {
+    padding: 0;
+  }
+}
+
+.webform-element-help {
+  color: var(--gin-color-text);
+  background: transparent;
+  border-color: var(--gin-color-text);
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: var(--gin-color-primary);
+    border-color: var(--gin-color-primary);
+    background-color: transparent;
+  }
+}
+
+.ui-tooltip.ui-widget {
+  font-size: var(--gin-font-size-s);
+  color: var(--gin-color-text);
+  padding: var(--gin-spacing-m);
+  background: var(--gin-bg-layer3);
+  box-shadow:  20px 20px 60px rgba(0, 0, 0, .2);
+  border: 0 none;
+  border-radius: 6px;
+
+  hr {
+    margin: var(--gin-spacing-xs) 0;
+  }
+}
+
+.webform-details-toggle-state {
+  color: var(--gin-color-primary);
+}
+
+.webform-ui-elements-table {
+  tr.webform-ui-element-type-webform_actions {
+    td {
+      border-block: none;
+      background: none;
+    }
+  }
+}
+
+.webform-tabs.ui-tabs {
+  .ui-tabs-nav {
+    border-block-end: 0 none;
+
+    .ui-tabs-active.ui-state-active a {
+      border: 2px solid var(--gin-color-primary);
+      border-radius: var(--gin-border-m);
+    }
+  }
+}
+
+.webform-bulk-form[data-drupal-selector*=-bulk-form] {
+  > .container-inline {
+    margin-block-start: calc(var(--gin-spacing-xxs) * -1);
+    margin-block-end: var(--gin-spacing-l);
+  }
+
+  td:first-child > .form-type-checkbox {
+    margin-block: 0;
+  }
+}
+
+.webform-ajax-messages {
+  inset-inline-start: var(--gin-offset-x);
+  inset-block-end: var(--gin-spacing-s);
+  margin-inline-start: var(--gin-spacing-m);
+
+  .messages--info,
+  .messages--status,
+  .messages--warning,
+  .messages--error {
+    display: inline-block;
+  }
+}
+
+.webform-edit-form {
+  .tabledrag-toggle-weight-wrapper {
+    float: end;
+    margin-block-start: calc(var(--gin-spacing-s) * -1);
+
+    button {
+      position: static;
+    }
+  }
+}

@@ -1,0 +1,7 @@
+message_subscribe_email.settings:
+  type: config_object
+  label: 'Message Subscribe Email settings'
+  mapping:
+    flag_prefix:
+      type: string
+      label: 'The prefix that will be used to identify email subscription flags.'

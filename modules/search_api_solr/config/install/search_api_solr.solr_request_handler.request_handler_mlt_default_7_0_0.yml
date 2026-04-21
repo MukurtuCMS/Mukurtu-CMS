@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - search_api_solr
+id: request_handler_mlt_default_7_0_0
+label: 'More Like This'
+minimum_solr_version: 7.0.0
+environments: {}
+recommended: true
+request_handler:
+  name: /mlt
+  class: solr.MoreLikeThisHandler
+  lst:
+    -
+      name: defaults
+      str:
+        -
+          name: mlt.mintf
+          VALUE: '1'
+        -
+          name: mlt.mindf
+          VALUE: '1'
+        -
+          name: mlt.match.include
+          VALUE: 'false'
+        -
+          name: timeAllowed
+          VALUE: '${solr.mlt.timeAllowed:2000}'

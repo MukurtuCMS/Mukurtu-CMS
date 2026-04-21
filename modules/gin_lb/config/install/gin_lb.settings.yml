@@ -1,0 +1,5 @@
+toastify_loading: 'cdn'
+enable_preview_regions: false
+hide_discard_button: true
+hide_revert_button: true
+save_behavior: 'stay'

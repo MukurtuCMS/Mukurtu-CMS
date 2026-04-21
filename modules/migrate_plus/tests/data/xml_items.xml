@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items>
+  <item id="1" parity="odd">
+    <values>
+      <value>Value 1</value>
+    </values>
+  </item>
+  <item id="2" parity="even">
+    <values>
+      <value>Value 2</value>
+    </values>
+  </item>
+  <item id="3" parity="odd">
+    <values>
+      <value>Value 3</value>
+    </values>
+  </item>
+  <item id="4">
+    <condition special="true"/>
+    <values>
+      <value>Special value</value>
+    </values>
+  </item>
+  <item id="5" imposter="true">
+    <values>
+      <value>Imposter value 4!</value>
+    </values>
+  </item>
+</items>

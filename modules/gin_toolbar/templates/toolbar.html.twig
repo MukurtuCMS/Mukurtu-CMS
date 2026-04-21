@@ -1,0 +1,17 @@
+{#
+/**
+ * @file
+ * Include toolbar.html.twig template from Gin.
+ */
+#}
+{% if core_navigation %}
+  {% if secondary_toolbar_frontend %}
+    {% include '@gin/navigation/toolbar--gin--secondary.html.twig' ignore missing %}
+  {% endif %}
+{% else %}
+  {% include '@gin/navigation/toolbar--gin.html.twig' ignore missing %}
+
+  {% if secondary_toolbar_frontend and toolbar_variant != 'classic' %}
+    {% include '@gin_toolbar/toolbar--gin--secondary--frontend.html.twig' ignore missing %}
+  {% endif %}
+{% endif %}

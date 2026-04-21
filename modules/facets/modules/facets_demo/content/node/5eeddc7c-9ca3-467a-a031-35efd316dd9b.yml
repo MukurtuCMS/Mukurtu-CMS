@@ -1,0 +1,55 @@
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 5eeddc7c-9ca3-467a-a031-35efd316dd9b
+  bundle: movie
+  default_langcode: en
+  depends:
+    cc499d5d-647a-4bd1-9f69-239871d4e3ac: taxonomy_term
+    90450be1-0802-4d4a-b725-cb0cf15c131f: taxonomy_term
+default:
+  revision_uid:
+    -
+      target_id: 1
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  title:
+    -
+      value: Hackers
+  created:
+    -
+      value: 1738323002
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en
+  body:
+    -
+      value: '<p>Teenage hackers discover a criminal conspiracy with plans to use a computer virus that will capsize five oil tankers.</p>'
+      format: basic_html
+      summary: ''
+  field_country_of_origin:
+    -
+      entity: cc499d5d-647a-4bd1-9f69-239871d4e3ac
+  field_genre:
+    -
+      entity: 90450be1-0802-4d4a-b725-cb0cf15c131f
+  field_imdb_rating:
+    -
+      value: '6.2'
+  field_release_date:
+    -
+      value: '1995-09-15'

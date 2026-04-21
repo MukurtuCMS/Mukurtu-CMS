@@ -1,0 +1,105 @@
+.action-link {
+  color: var(--gin-color-primary);
+  background: transparent;
+  border-radius: var(--gin-border-s);
+
+  &:hover {
+    color: var(--gin-color-primary-hover);
+    background: var(--gin-bg-item-hover);
+  }
+
+  &:focus {
+    color: var(--gin-color-primary-active);
+    background: var(--gin-color-primary-light-hover);
+  }
+
+  &.action-link--extrasmall {
+    font-size: var(--gin-font-size-xxs);
+  }
+
+  &:before {
+    background-image: none;
+    background: var(--gin-color-primary) !important;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+  }
+
+  &--icon-plus:hover:before,
+  &--icon-ex:hover::before,
+  &--icon-checkmark:hover:before,
+  &--icon-show:hover::before,
+  &--icon-cog:hover::before,
+  &--icon-hide:hover::before,
+  &--icon-show:before,
+  &--icon-hide:before {
+    background-image: none;
+    background-color: var(--gin-color-primary);
+  }
+
+  &--icon-plus:before {
+    mask-image: icon('add');
+  }
+
+  &--icon-checkmark:before {
+    mask-image: icon('checkmark');
+  }
+
+  &--icon-show:before {
+    mask-image: icon('show');
+  }
+
+  &--icon-hide:before {
+    mask-image: icon('hide');
+  }
+
+  &--icon-cog::before {
+    mask-image: icon('config');
+  }
+
+  &--icon-ex::before {
+    mask-image: icon('remove');
+  }
+
+  &--icon-key::before {
+    mask-image: icon('devel');
+  }
+
+  &--icon-questionmark::before {
+    mask-image: icon('help');
+  }
+}
+
+.action-link--icon-trash.action-link--danger,
+.button.button--danger,
+a.button.button--danger {
+  color: var(--gin-color-danger);
+  box-shadow: 0 1px 2px var(--gin-color-danger-lightest);
+  min-height: 0;
+
+  &::before {
+    display: none;
+  }
+
+  &,
+  &:hover,
+  &:focus,
+  &:active {
+    border-color: var(--gin-color-danger) !important;
+  }
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: var(--gin-bg-layer);
+    background-color: var(--gin-color-danger);
+  }
+}
+
+// Primary danger button
+.button--primary.button--danger,
+a.button--primary.button--danger,
+#edit-submit.button.button--danger {
+  color: var(--gin-bg-layer);
+  background-color: var(--gin-color-danger);
+}

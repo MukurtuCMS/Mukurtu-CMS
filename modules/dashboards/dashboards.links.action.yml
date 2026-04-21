@@ -1,0 +1,13 @@
+dashboards.new:
+  route_name: entity.dashboard.add_form
+  title: "New dashboard"
+  weight: 1
+  appears_on:
+    - entity.dashboard.collection
+
+dashboards.override:
+  route_name: layout_builder.dashboards_override.view
+  title: "Personalize"
+  weight: 1
+  appears_on:
+    - entity.dashboard.canonical

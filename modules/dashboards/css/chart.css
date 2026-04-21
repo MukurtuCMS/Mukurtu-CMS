@@ -1,0 +1,5 @@
+[data-app="chart"] canvas {
+  max-width: 100%;
+  margin: 1.5rem 0.75rem;
+  padding: 1em 40px 1em 24px;
+}

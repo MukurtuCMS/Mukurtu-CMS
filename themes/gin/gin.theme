@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ * gin.theme
+ */
+
+use Composer\Autoload\ClassLoader;
+
+/**
+ * Load include files which contain additional theming logic.
+ */
+_gin_include_theme_includes();
+
+/**
+ * Helper function to include all theme includes.
+ *
+ * We know, this is ugly, but we need to load all theme includes to make sure
+ * they are registered.
+ *
+ * @see https://www.drupal.org/project/gin/issues/3554265
+ */
+function _gin_include_theme_includes(): void {
+  static $included;
+  if (!isset($included)) {
+    $included = TRUE;
+    $loader = new ClassLoader();
+    $loader->addPsr4("Drupal\\gin\\", __DIR__ . "/src");
+    $loader->register();
+    foreach (glob(__DIR__ . '/includes/*.theme') as $file) {
+      include_once $file;
+    }
+  }
+}
+
+/**
+ * Set Gin CSS on top of all other CSS files.
+ */
+function gin_css_alter(&$css, $assets) {
+  // Use anything greater than 100 to have it load after the theme
+  // as CSS_AGGREGATE_THEME is set to 100.
+  // Let's be on the safe side and assign a high number to it.
+  $base_css = \Drupal::service('extension.list.theme')->getPath('gin') . '/dist/css/base/gin.css';
+
+  if (isset($css[$base_css])) {
+    $css[$base_css]['group'] = 200;
+  }
+
+  // The gin-custom.css file should be loaded just after our gin.css file.
+  $custom_css = 'public://gin-custom.css';
+  if (isset($css[$custom_css])) {
+    $css[$custom_css]['group'] = 201;
+  }
+}

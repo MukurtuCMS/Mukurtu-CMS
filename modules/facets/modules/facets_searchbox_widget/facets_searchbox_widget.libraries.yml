@@ -1,0 +1,11 @@
+searchbox:
+  js:
+    js/searchbox.js: { attributes: { defer: true } }
+  css:
+    component:
+      css/searchbox.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery
+    - core/once

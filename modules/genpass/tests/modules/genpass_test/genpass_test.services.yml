@@ -1,0 +1,11 @@
+services:
+
+  _defaults:
+    autowire: true
+
+  # Decorate the decorated genpass password_generator.
+  genpass_test.password_generator:
+    class: Drupal\genpass_test\TestGenpassPasswordGenerator
+    decorates: genpass.password_generator
+    arguments:
+      $cache: '@cache.default'

@@ -1,0 +1,351 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method Drupal\\\\geofield\\\\GeoPHP\\\\GeoPHPInterface\\:\\:load\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/GeoPHP/GeoPHPInterface.php
+
+		-
+			message: "#^Method Drupal\\\\geofield\\\\GeoPHP\\\\GeoPHPWrapper\\:\\:load\\(\\) has invalid return type Geometry\\.$#"
+			count: 1
+			path: src/GeoPHP/GeoPHPWrapper.php
+
+		-
+			message: "#^Call to method out\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldFormatter/GeofieldDefaultFormatter.php
+
+		-
+			message: "#^Call to method centroid\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldFormatter/LatLonFormatter.php
+
+		-
+			message: "#^Call to method getGeomType\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldFormatter/LatLonFormatter.php
+
+		-
+			message: "#^Call to method x\\(\\) on an unknown class Point\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldFormatter/LatLonFormatter.php
+
+		-
+			message: "#^Call to method y\\(\\) on an unknown class Point\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldFormatter/LatLonFormatter.php
+
+		-
+			message: "#^Parameter \\$point of method Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldFormatter\\\\LatLonFormatter\\:\\:getDmsComponents\\(\\) has invalid type Point\\.$#"
+			count: 2
+			path: src/Plugin/Field/FieldFormatter/LatLonFormatter.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$bottom\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$geo_type\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$geohash\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$lat\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$latlon\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$left\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$lon\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$right\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$top\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\geofield\\\\Plugin\\\\Field\\\\FieldType\\\\GeofieldItem\\:\\:\\$value\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Call to method geometryType\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Call to method getBBox\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Call to method getCentroid\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Call to method getX\\(\\) on an unknown class Point\\.$#"
+			count: 2
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Call to method getY\\(\\) on an unknown class Point\\.$#"
+			count: 2
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Call to method isEmpty\\(\\) on an unknown class Geometry\\.$#"
+			count: 2
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Call to method out\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Class Geometry not found\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$centroid contains unknown class Point\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$geom contains unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$geometry contains unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Variable \\$backend_plugin in PHPDoc tag @var does not exist\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldType/GeofieldItem.php
+
+		-
+			message: "#^Call to method out\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldWidget/GeofieldBaseWidget.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$geom contains unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldWidget/GeofieldBaseWidget.php
+
+		-
+			message: "#^Variable \\$geom in PHPDoc tag @var does not exist\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldWidget/GeofieldBaseWidget.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\TypedData\\\\TypedDataInterface\\:\\:\\$value\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldWidget/GeofieldDefaultWidget.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\TypedData\\\\TypedDataInterface\\:\\:\\$value\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldWidget/GeofieldDmsWidget.php
+
+		-
+			message: "#^Variable \\$geofield_item in empty\\(\\) always exists and is not falsy\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldWidget/GeofieldDmsWidget.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\TypedData\\\\TypedDataInterface\\:\\:\\$value\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldWidget/GeofieldLatLonWidget.php
+
+		-
+			message: "#^Variable \\$geofield_item in empty\\(\\) always exists and is not falsy\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldWidget/GeofieldLatLonWidget.php
+
+		-
+			message: "#^Call to method out\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/GeofieldBackend/GeofieldBackendDefault.php
+
+		-
+			message: "#^Call to method out\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/GeofieldBackend/GeofieldBackendPostgis.php
+
+		-
+			message: "#^\\\\Drupal calls should be avoided in classes, use dependency injection instead$#"
+			count: 1
+			path: src/Plugin/GeofieldProximitySourceBase.php
+
+		-
+			message: """
+				#^PHPDoc tag @throws has invalid value \\(\\\\Drupal\\\\geofield\\\\Exception\\\\HaversineUnavailableException;
+				  If the haversine is unavailable, due to incorrect setup definitions\\.\\)\\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 165 on line 7$#
+			"""
+			count: 1
+			path: src/Plugin/GeofieldProximitySourceInterface.php
+
+		-
+			message: """
+				#^PHPDoc tag @throws has invalid value \\(\\\\Drupal\\\\geofield\\\\Exception\\\\InvalidPointException;
+				  If the proximity cannot be created, due to incorrect point coordinates
+				  definition\\.\\)\\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 284 on line 12$#
+			"""
+			count: 1
+			path: src/Plugin/GeofieldProximitySourceInterface.php
+
+		-
+			message: """
+				#^PHPDoc tag @throws has invalid value \\(\\\\Drupal\\\\geofield\\\\Exception\\\\ProximityUnavailableException;
+				  If any other case the proximity value cannot be created correctly\\.\\)\\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 457 on line 16$#
+			"""
+			count: 1
+			path: src/Plugin/GeofieldProximitySourceInterface.php
+
+		-
+			message: "#^Access to an undefined property Symfony\\\\Component\\\\Validator\\\\Constraint\\:\\:\\$message\\.$#"
+			count: 1
+			path: src/Plugin/Validation/Constraint/GeoConstraintValidator.php
+
+		-
+			message: "#^Call to method out\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: src/Plugin/migrate/process/GeoField.php
+
+		-
+			message: "#^Class Geometry not found\\.$#"
+			count: 1
+			path: src/Plugin/migrate/process/GeoField.php
+
+		-
+			message: "#^Variable \\$source_plugin in PHPDoc tag @var does not match assigned variable \\$values\\.$#"
+			count: 1
+			path: src/Plugin/views/argument/GeofieldProximityArgument.php
+
+		-
+			message: "#^Call to an undefined method Drupal\\\\views\\\\Plugin\\\\views\\\\query\\\\QueryPluginBase\\:\\:addWhere\\(\\)\\.$#"
+			count: 1
+			path: src/Plugin/views/filter/GeofieldProximityFilter.php
+
+		-
+			message: "#^Call to an undefined method Drupal\\\\views\\\\Plugin\\\\views\\\\query\\\\QueryPluginBase\\:\\:addWhereExpression\\(\\)\\.$#"
+			count: 3
+			path: src/Plugin/views/filter/GeofieldProximityFilter.php
+
+		-
+			message: "#^Variable \\$identifier in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: src/Plugin/views/filter/GeofieldProximityFilter.php
+
+		-
+			message: "#^Variable \\$source_plugin in PHPDoc tag @var does not exist\\.$#"
+			count: 2
+			path: src/Plugin/views/filter/GeofieldProximityFilter.php
+
+		-
+			message: "#^Variable \\$units_description in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: src/Plugin/views/filter/GeofieldProximityFilter.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemListInterface\\:\\:\\$bottom\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemListInterface\\:\\:\\$geo_type\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemListInterface\\:\\:\\$geohash\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemListInterface\\:\\:\\$lat\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemListInterface\\:\\:\\$left\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemListInterface\\:\\:\\$lon\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemListInterface\\:\\:\\$right\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemListInterface\\:\\:\\$top\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Call to method geometryType\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Call to method getBBox\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Call to method getCentroid\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Call to method out\\(\\) on an unknown class Geometry\\.$#"
+			count: 1
+			path: tests/src/Kernel/GeofieldItemTest.php
+
+		-
+			message: "#^Call to method x\\(\\) on an unknown class Point\\.$#"
+			count: 2
+			path: src/Plugin/Field/FieldFormatter/LatLonFormatter.php
+
+		-
+			message: "#^Call to method y\\(\\) on an unknown class Point\\.$#"
+			count: 2
+			path: src/Plugin/Field/FieldFormatter/LatLonFormatter.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$geom contains unknown class Point\\.$#"
+			count: 1
+			path: src/Plugin/Field/FieldFormatter/LatLonFormatter.php

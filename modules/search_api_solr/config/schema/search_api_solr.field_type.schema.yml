@@ -1,0 +1,591 @@
+search_api_solr.solr_field_type_char_filter:
+  type: mapping
+  mapping:
+    class:
+      type: string
+      label: 'The char filter class'
+      nullable: true
+    name:
+      type: string
+      label: 'The char filter name'
+      nullable: true
+    mapping:
+      type: string
+      label: 'The char filter mapping file name'
+      nullable: true
+    pattern:
+      type: string
+      label: 'The regular expression pattern to apply to the incoming text'
+      nullable: true
+    replacement:
+      type: string
+      label: 'The text to use to replace matching patterns'
+      nullable: true
+
+search_api_solr.solr_field_type_tokenizer:
+  type: mapping
+  mapping:
+    class:
+      type: string
+      label: 'The tokenizer class'
+      nullable: true
+    name:
+      type: string
+      label: 'The tokenizer name'
+      nullable: true
+    pattern:
+      type: string
+      label: 'SimplePatternSplitTokenizer::'
+      nullable: true
+    group:
+      type: integer
+      label: 'Specifies which regex group to extract as the token(s)'
+      nullable: true
+    maxDeterminizedStates:
+      type: integer
+      label: 'The limit on total state count for the determined automaton computed from the regexp'
+      nullable: true
+    mode:
+      type: string
+      label: 'JapaneseTokenizerFactory::'
+      nullable: true
+    sentenceModel:
+      type: string
+      label: 'OpenNLPTokenizerFactory::sentenceModel'
+      nullable: true
+    tokenizerModel:
+      type: string
+      label: 'OpenNLPTokenizerFactory::tokenizerModel'
+      nullable: true
+    maxTokenLength:
+      type: integer
+      label: 'Solr ignores tokens that exceed the number of characters specified by maxTokenLength'
+      nullable: true
+    minGramSize:
+      type: integer
+      label: 'The minimum n-gram size, must be > 0'
+      nullable: true
+    maxGramSize:
+      type: integer
+      label: 'The maximum n-gram size, must be >= minGramSize'
+      nullable: true
+    rulefile:
+      type: string
+      label: ' a comma-separated list of code:rulefile pairs in the following format: four-letter ISO 15924 script code, followed by a colon, then a resource path'
+      nullable: true
+    delimiter:
+      type: string
+      label: 'You can specify the file path delimiter and replace it with a delimiter you provide'
+      nullable: true
+    replace:
+      type: string
+      label: 'Specifies the delimiter character Solr uses in the tokenized output'
+      nullable: true
+    rule:
+      type: string
+      label: 'Specifies how to define whitespace for the purpose of tokenization'
+      nullable: true
+
+search_api_solr.solr_field_type_filter:
+  type: mapping
+  mapping:
+    class:
+      type: string
+      label: 'The filter class'
+      nullable: true
+    name:
+      type: string
+      label: 'The filter name'
+      nullable: true
+    catenateNumbers:
+      type: integer
+      label: 'WordDelimiterGraphFilter:: WordDelimiterFilter::catenateNumbers'
+      nullable: true
+    generateNumberParts:
+      type: integer
+      label: 'WordDelimiterGraphFilter:: WordDelimiterFilter::generateNumberParts'
+      nullable: true
+    protected:
+      type: string
+      label: 'ProtectedTermFilter:: WordDelimiterGraphFilter:: WordDelimiterFilter:: SnowballPorterFilter::protected'
+      nullable: true
+    splitOnCaseChange:
+      type: integer
+      label: 'WordDelimiterGraphFilter:: WordDelimiterFilter::splitOnCaseChange'
+      nullable: true
+    splitOnNumerics:
+      type: integer
+      label: 'WordDelimiterGraphFilter:: WordDelimiterFilter::splitOnNumerics'
+      nullable: true
+    generateWordParts:
+      type: integer
+      label: 'WordDelimiterGraphFilter:: WordDelimiterFilter::generateWordParts'
+      nullable: true
+    preserveOriginal:
+      # ASCIIFoldingFilter and EdgeNGramFilterFactory expect a boolean
+      type: integer
+      label: 'WordDelimiterGraphFilter:: ASCIIFoldingFilter:: EdgeNGramFilterFactory:: WordDelimiterFilter::preserveOriginal'
+      nullable: true
+    catenateAll:
+      type: integer
+      label: 'WordDelimiterGraphFilter:: WordDelimiterFilter::catenateAll'
+      nullable: true
+    catenateWords:
+      type: integer
+      label: 'WordDelimiterGraphFilter:: WordDelimiterFilter::catenateWords'
+      nullable: true
+    stemEnglishPossessive:
+      type: integer
+      label: 'WordDelimiterGraphFilter:: WordDelimiterFilter::stemEnglishPossessive'
+      nullable: true
+    min:
+      type: integer
+      label: 'LengthFilter::min'
+      nullable: true
+    max:
+      type: integer
+      label: 'LengthFilter::max'
+      nullable: true
+    dictionary:
+      type: string
+      label: 'OpenNLPLemmatizerFilter:: HunspellStemFilter:: MorfologikFilterFactory:: DictionaryCompoundWordTokenFilter::dictionary'
+      nullable: true
+    lemmatizerModel:
+      type: string
+      label: 'OpenNLPLemmatizerFilter::lemmatizerModel'
+      nullable: true
+    affix:
+      type: string
+      label: 'HunspellStemFilter::affix'
+      nullable: true
+    strictAffixParsing:
+      type: boolean
+      label: 'HunspellStemFilter::strictAffixParsing'
+      nullable: true
+    minWordSize:
+      type: integer
+      label: 'DictionaryCompoundWordTokenFilter::minWordSize'
+      nullable: true
+    minSubwordSize:
+      type: integer
+      label: 'DictionaryCompoundWordTokenFilter::minSubwordSize'
+      nullable: true
+    maxSubwordSize:
+      type: integer
+      label: 'DictionaryCompoundWordTokenFilter::maxSubwordSize'
+      nullable: true
+    onlyLongestMatch:
+      type: boolean
+      label: 'DictionaryCompoundWordTokenFilter::onlyLongestMatch'
+      nullable: true
+    ignoreCase:
+      type: boolean
+      label: 'ElisionFilter:: SynonymGraphFilter:: SuggestStopFilter:: StopFilter:: ProtectedTermFilter:: HunspellStemFilter:: KeepWordFilter:: StopFilter:: CommonGramsFilter:: SynonymFilter::ignoreCase'
+      nullable: true
+    wrappedFilters:
+      type: string
+      label: 'ProtectedTermFilter::wrappedFilters'
+      nullable: true
+    types:
+      type: string
+      label: 'WordDelimiterGraphFilter:: TypeTokenFilter::types'
+      nullable: true
+    useWhitelist:
+      type: boolean
+      label: 'TypeTokenFilter::useWhitelist'
+      nullable: true
+    enablePositionIncrements:
+      type: boolean
+      label: 'JapanesePartOfSpeechStopFilter:: TypeTokenFilter:: StopFilter:: LengthFilter:: KeepWordFilter::enablePositionIncrements'
+      nullable: true
+    words:
+      type: string
+      label: 'SuggestStopFilter:: KeepWordFilter:: CommonGramsFilter:: StopFilter::words'
+      nullable: true
+    format:
+      type: string
+      label: 'SynonymGraphFilter:: SuggestStopFilter:: StopFilter:: CommonGramsFilter::format'
+      nullable: true
+    wordset:
+      type: string
+      label: 'SuggestStopFilter::wordset'
+      nullable: true
+    snowball:
+      type: string
+      label: 'SuggestStopFilter::snowball'
+      nullable: true
+    language:
+      type: string
+      label: 'SnowballPorterFilter::language'
+      nullable: true
+    synonyms:
+      type: string
+      label: 'SynonymGraphFilter:: SynonymFilter::synonyms'
+      nullable: true
+    expand:
+      type: boolean
+      label: 'SynonymGraphFilter:: SynonymFilter:: ManagedSynonymFilter::expand'
+      nullable: true
+    tokenizerFactory:
+      type: string
+      label: 'SynonymGraphFilter::tokenizerFactory'
+      nullable: true
+    analyzer:
+      type: string
+      label: 'SynonymGraphFilter::analyzer'
+      nullable: true
+    managed:
+      type: string
+      label: 'ManagedSynonymGraphFilter:: ManagedStopFilter::managed'
+      nullable: true
+    articles:
+      type: string
+      label: 'ElisionFilter::articles'
+      nullable: true
+    minGramSize:
+      type: integer
+      label: 'NGramFilter:: EdgeNGramFilter::minGramSize'
+      nullable: true
+    maxGramSize:
+      type: integer
+      label: 'NGramFilter:: EdgeNGramFilter::maxGramSize'
+      nullable: true
+    languageSet:
+      type: string
+      label: 'BeiderMorseFilter::languageSet'
+      nullable: true
+    nameType:
+      type: string
+      label: 'BeiderMorseFilter::nameType'
+      nullable: true
+    ruleType:
+      type: string
+      label: 'BeiderMorseFilter::ruleType'
+      nullable: true
+    concat:
+      type: boolean
+      label: 'BeiderMorseFilter::concat'
+      nullable: true
+    han:
+      type: boolean
+      label: 'CJKBigramFilterFactory::han'
+      nullable: true
+    hiragana:
+      type: boolean
+      label: 'CJKBigramFilterFactory::hiragana'
+      nullable: true
+    katakana:
+      type: boolean
+      label: 'CJKBigramFilterFactory::katakana'
+      nullable: true
+    hangul:
+      type: boolean
+      label: 'CJKBigramFilterFactory::hangul'
+      nullable: true
+    outputUnigrams:
+      type: boolean
+      label: 'ShingleFilter:: CJKBigramFilterFactory::outputUnigrams'
+      nullable: true
+    outputUnigramsIfNoShingles:
+      type: boolean
+      label: 'ShingleFilter::outputUnigramsIfNoShingles'
+      nullable: true
+    inject:
+      type: boolean
+      label: 'PhoneticFilter:: DoubleMetaphoneFilter:: DaitchMokotoffSoundexFilter::inject'
+      nullable: true
+    maxCodeLength:
+      type: integer
+      label: 'PhoneticFilter:: DoubleMetaphoneFilter::maxCodeLength'
+      nullable: true
+    encoder:
+      type: string
+      label: 'PhoneticFilter::encoder'
+      nullable: true
+    separator:
+      type: string
+      label: 'FingerprintFilter::separator'
+      nullable: true
+    maxOutputTokenSize:
+      type: integer
+      label: 'FingerprintFilter::maxOutputTokenSize'
+      nullable: true
+    filter:
+      type: string
+      label: 'ICUNormalizer2Filter:: ICUFoldingFilter::filter'
+      nullable: true
+    mode:
+      type: string
+      label: 'ICUNormalizer2Filter::mode'
+      nullable: true
+    id:
+      type: string
+      label: 'ICUTransformFilter::id'
+      nullable: true
+    maxTokenCount:
+      type: integer
+      label: 'LimitTokenCountFilter::maxTokenCount'
+      nullable: true
+    consumeAllTokens:
+      type: boolean
+      label: 'LimitTokenPositionFilter:: LimitTokenOffsetFilter:: LimitTokenCountFilter::consumeAllTokens'
+      nullable: true
+    maxStartOffset:
+      type: integer
+      label: 'LimitTokenOffsetFilter::maxStartOffset'
+      nullable: true
+    maxTokenPosition:
+      type: integer
+      label: 'LimitTokenPositionFilter::maxTokenPosition'
+      nullable: true
+    payload:
+      type: float
+      label: 'NumericPayloadTokenFilter::payload'
+      nullable: true
+    typeMatch:
+      type: string
+      label: 'NumericPayloadTokenFilter::typeMatch'
+      nullable: true
+    pattern:
+      type: string
+      label: 'PatternReplaceFilter::pattern'
+      nullable: true
+    replacement:
+      type: string
+      label: 'PatternReplaceFilter::replacement'
+      nullable: true
+    replace:
+      type: string
+      label: 'PatternReplaceFilter::replace'
+      nullable: true
+    withOriginal:
+      type: boolean
+      label: 'ReversedWildcardFilter::withOriginal'
+      nullable: true
+    maxPosAsterisk:
+      type: integer
+      label: 'ReversedWildcardFilter::maxPosAsterisk'
+      nullable: true
+    maxPosQuestion:
+      type: integer
+      label: 'ReversedWildcardFilter::maxPosQuestion'
+      nullable: true
+    maxFractionAsterisk:
+      type: float
+      label: 'ReversedWildcardFilter::maxFractionAsterisk'
+      nullable: true
+    minTrailing:
+      type: integer
+      label: 'ReversedWildcardFilter::minTrailing'
+      nullable: true
+    minShingleSize:
+      type: integer
+      label: 'ShingleFilter::minShingleSize'
+      nullable: true
+    maxShingleSize:
+      type: integer
+      label: 'ShingleFilter::maxShingleSize'
+      nullable: true
+    tokenSeparator:
+      type: string
+      label: 'ShingleFilter::tokenSeparator'
+      nullable: true
+    updateOffsets:
+      type: boolean
+      label: 'TrimFilter::updateOffsets'
+      nullable: true
+    prefix:
+      type: string
+      label: 'TypeAsSynonymFilter::prefix'
+      nullable: true
+    posTaggerModel:
+      type: string
+      label: 'OpenNLPPOSFilter::posTaggerModel'
+      nullable: true
+    normalizeKanji:
+      type: boolean
+      label: 'JapaneseIterationMarkCharFilter::normalizeKanji'
+      nullable: true
+    normalizeKana:
+      type: boolean
+      label: 'JapaneseIterationMarkCharFilter::normalizeKana'
+      nullable: true
+    tags:
+      type: string
+      label: 'JapanesePartOfSpeechStopFilter::tags'
+      nullable: true
+    minimumLength:
+      type: integer
+      label: 'JapaneseKatakanaStemFilter::minimumLength'
+      nullable: true
+    variant:
+      type: string
+      label: 'NorwegianLightStemFilter:: NorwegianMinimalStemFilter::variant'
+      nullable: true
+    haircut:
+      type: string
+      label: 'SerbianNormalizationFilter::haircut'
+      nullable: true
+
+search_api_solr.solr_field_type_analyzer:
+  type: mapping
+  mapping:
+    type:
+      nullable: true
+      type: string
+      label: 'The analyzer type'
+    charFilter:
+      nullable: true
+      type: search_api_solr.solr_field_type_char_filter
+    charFilters:
+      nullable: true
+      type: sequence
+      sequence:
+        type: search_api_solr.solr_field_type_char_filter
+    tokenizer:
+      nullable: true
+      type: search_api_solr.solr_field_type_tokenizer
+    tokenizers:
+      nullable: true
+      type: sequence
+      sequence:
+        type: search_api_solr.solr_field_type_tokenizer
+    filter:
+      nullable: true
+      type: search_api_solr.solr_field_type_filter
+    filters:
+      nullable: true
+      type: sequence
+      sequence:
+        type: search_api_solr.solr_field_type_filter
+
+search_api_solr.solr_common_field_type:
+  type: mapping
+  mapping:
+    name:
+      type: string
+      label: 'The Solr field name'
+    class:
+      type: string
+      label: 'The Solr field type'
+    positionIncrementGap:
+      type: integer
+      label: 'Solr field attribute positionIncrementGap'
+    storeOffsetsWithPositions:
+      type: boolean
+      label: 'Solr field attribute storeOffsetsWithPositions'
+      nullable: true
+    analyzer:
+      type: search_api_solr.solr_field_type_analyzer
+      nullable: true
+    analyzers:
+      type: sequence
+      nullable: true
+      sequence:
+        type: search_api_solr.solr_field_type_analyzer
+    similarity:
+      type: mapping
+      nullable: true
+      mapping:
+        class:
+          type: string
+          label: 'The similarity class'
+        str:
+          type: search_api_solr.scalar_values
+        int:
+          type: search_api_solr.scalar_values
+        float:
+          type: search_api_solr.scalar_values
+
+search_api_solr.solr_field_type.*:
+  type: config_entity
+  label: 'Solr Field Type Config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    minimum_solr_version:
+      type: string
+      label: 'The minimum version the Solr server'
+    custom_code:
+      type: string
+      label: 'Custom Code targeted by this Solr Field Type'
+    field_type_language_code:
+      type: string
+      label: 'The language targeted by this Solr Field Type'
+    domains:
+      type: sequence
+      sequence:
+        type: string
+    field_type:
+      type: search_api_solr.solr_common_field_type
+    unstemmed_field_type:
+      type: search_api_solr.solr_common_field_type
+      nullable: true
+    spellcheck_field_type:
+      type: mapping
+      nullable: true
+      mapping:
+        name:
+          type: string
+          label: 'The Solr field name'
+        class:
+          type: string
+          label: 'The Solr field type'
+        positionIncrementGap:
+          type: integer
+          label: 'Solr field attribute positionIncrementGap'
+        storeOffsetsWithPositions:
+          type: boolean
+          label: 'Solr field attribute storeOffsetsWithPositions'
+          nullable: true
+        analyzer:
+          type: search_api_solr.solr_field_type_analyzer
+    collated_field_type:
+      type: mapping
+      nullable: true
+      mapping:
+        name:
+          type: string
+          label: 'The Solr collate field name'
+        class:
+          type: string
+          label: 'The Solr collate field type'
+        locale:
+          type: string
+          label: 'The Solr collate language'
+        strength:
+          type: string
+          label: 'The Solr collate strength'
+        caseLevel:
+          type: boolean
+          label: 'The Solr collate caseLevel'
+    solr_configs:
+      type: search_api_solr.solr_configs
+    text_files:
+      type: mapping
+      mapping:
+        stopwords:
+          type: string
+          label: 'Stop words'
+        protwords:
+          type: string
+          label: 'Protected words'
+        accents:
+          type: string
+          label: 'Accent char mapping'
+        synonyms:
+          type: string
+          label: 'Synonym words'
+        nouns:
+          type: string
+          label: 'Nouns'
+        stoptags:
+          type: string
+          label: 'Stop tags'
+        pos:
+          type: string
+          label: 'Part of Speech'

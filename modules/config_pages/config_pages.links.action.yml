@@ -1,0 +1,5 @@
+config_pages_type_add:
+  route_name: config_pages.type_add
+  title: 'Add config page'
+  appears_on:
+    - entity.config_pages_type.collection

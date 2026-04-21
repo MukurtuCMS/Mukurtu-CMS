@@ -1,0 +1,493 @@
+.media-library {
+  &-item &-edit__link,
+  &-item &-item__edit,
+  &-item &-item__edit.button,
+  &-item &-item__remove,
+  &-item &-item__remove.button {
+    border-color: var(--gin-border-color) !important;
+
+    &:link,
+    &:hover,
+    &:focus,
+    &:active,
+    &:not(:hover):not(:checked) {
+      border-color: transparent !important;
+    }
+
+    &:hover,
+    &:focus,
+    &:active {
+      box-shadow: 0 0 0 1px var(--gin-color-focus-border),
+                  0 0 0 4px var(--gin-color-focus) !important;
+    }
+
+    &,
+    &:hover,
+    &:focus,
+    &:active {
+      width: 32px;
+      height: 32px;
+      margin: var(--gin-spacing-xs);
+      background-color: white;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, .15);
+      box-sizing: border-box;
+    }
+  }
+
+  &-item &-edit__link,
+  &-item &-item__edit {
+    inset-block-start: .625rem;
+    inset-inline-end: 3.125rem;
+    background-image: icon('media-edit');
+    background-size: .75rem .75rem;
+  }
+
+  &-item &-item__remove,
+  &-item &-item__remove.button {
+    background-image: icon('media-remove');
+    background-size: .75rem .75rem;
+  }
+}
+
+
+
+.media-library-item {
+  background: none;
+
+  svg,
+  img {
+    @include color-pattern;
+  }
+
+  &--grid {
+    border-radius: var(--gin-border-xl);
+
+    &::before,
+    &.is-hover::before,
+    &.checked::before,
+    &.is-focus::before {
+      display: none;
+    }
+
+    // User is dragging item.
+    &.sortable-chosen {
+      background: var(--gin-bg-layer);
+      box-shadow: 0 0 48px rgba(0, 0, 0, 0.075) !important;
+      outline: none;
+
+      // Hide remove button on ghost.
+      .media-library-item__remove {
+        display: none;
+      }
+    }
+
+    // Show where to drag to.
+    &.sortable-ghost {
+      border: 2px dashed var(--gin-border-color);
+    }
+  }
+
+  &__content {
+    display: flex;
+    height: 100%;
+
+    article {
+      width: 100%;
+    }
+  }
+
+  &__click-to-select-trigger {
+    overflow: inherit;
+  }
+
+  &__name {
+    color: var(--gin-color-text);
+    word-break: break-all;
+    text-overflow: initial;
+    white-space: initial;
+    overflow: visible;
+    margin: 0;
+  }
+
+  &__attributes {
+    position: static;
+    padding: var(--gin-spacing-xs);
+    background: none;
+  }
+
+  // Hide Claro outline, we use Gin's instead
+  &:focus &__preview-wrapper {
+    box-shadow: none;
+  }
+
+  & &__preview {
+    position: relative;
+    padding-block-end: 100%;
+    border: 1px solid var(--gin-border-color);
+    border-radius: var(--gin-border-xl);
+    overflow: hidden;
+
+    .field {
+      svg,
+      img {
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-start: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+
+  &.is-hover &__preview {
+    border-color: var(--gin-color-text);
+    box-shadow: 0 0 0 2px var(--gin-color-text);
+  }
+
+  &.checked &__preview,
+  &.is-active &__preview {
+    border-color: var(--gin-color-primary);
+    box-shadow: 0 0 0 2px var(--gin-color-primary);
+  }
+
+  &__click-to-select-checkbox .form-boolean {
+    width: 29px;
+    height: 29px;
+    border-radius: var(--gin-border-xs);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .15);
+
+    &,
+    .gin--dark-mode & {
+      border-radius: var(--gin-border-xs);
+
+      &:not(:checked) {
+        background-color: white;
+      }
+
+      &:not(:hover):not(:checked) {
+        border-color: transparent !important;
+      }
+
+      &:focus {
+        box-shadow: 0 0 0 1px var(--gin-color-focus-border), 0 0 0 4px var(--gin-color-focus) !important;
+      }
+
+      &:checked {
+        background-color: var(--gin-color-primary);
+        border-color: var(--gin-color-primary);
+        box-shadow: none;
+      }
+    }
+  }
+
+  .form-item {
+    margin: var(--gin-spacing-xs);
+  }
+
+  // Drupal 9.2 Throbber Fix
+  .ajax-progress {
+    transform: translateY(-50%);
+  }
+}
+
+.media-library-views-form {
+  flex-wrap: initial;
+  flex-direction: column;
+}
+
+fieldset.media-library-widget {
+  .media-library-widget__toggle-weight {
+    font-size: var(--gin-font-size-xxs);
+    line-height: 1;
+    padding: var(--gin-spacing-xs);
+  }
+
+  .media-library {
+    &-edit__link,
+    &-item .media-library-item__edit,
+    &-item .media-library-item__remove,
+    &-item .media-library-item__remove.button {
+      margin: var(--gin-spacing-xs);
+    }
+  }
+}
+
+.media-library-widget-empty-text {
+  color: var(--gin-color-text-light);
+  margin-block: 0 calc(var(--gin-spacing-xs) * -1);
+  margin-inline: 0;
+}
+
+.media-library-open-button {
+  margin-block-start: 0;
+}
+
+.media-library-add-form {
+  &__preview {
+    background: var(--gin-bg-app);
+  }
+
+  &__input-wrapper {
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+
+    .form-item--upload {
+      margin-block-start: 0;
+      margin-inline-end: 0;
+    }
+
+    .dropzone-enable {
+      .button {
+        margin: 0;
+      }
+    }
+  }
+}
+
+.media-library-menu {
+  border-color: var(--gin-border-color);
+  background-color: var(--gin-bg-app);
+
+  &__link {
+    color: var(--gin-color-text);
+    text-shadow: none;
+    border-color: var(--gin-border-color);
+    background-color: transparent;
+
+    &:active,
+    &:hover,
+    &:focus,
+    &.active,
+    &:hover:focus,
+    &.active:hover,
+    &.active:focus {
+      color: var(--gin-color-primary);
+      text-shadow: none;
+      background-color: var(--gin-bg-layer);
+      border-inline-end: 0 none;
+      border-block-end: 1px solid var(--gin-border-color);
+      box-shadow: none;
+    }
+
+    &.active::before {
+      border-inline-start-color: var(--gin-color-primary);
+    }
+
+    &:focus::after {
+      border: var(--gin-border-xs) solid var(--gin-color-focus);
+    }
+  }
+}
+
+.media-library-view {
+  .view-header {
+    padding: var(--gin-spacing-m);
+    color: var(--gin-color-text);
+    text-decoration: none;
+    background: var(--gin-bg-layer3);
+    border-radius: var(--gin-border-m);
+    box-shadow: var(--gin-shadow-l1);
+  }
+
+  .views-form {
+    background: transparent !important;
+  }
+}
+
+.media-library-wrapper {
+  margin-block-start: 0;
+  margin-inline: calc(var(--gin-spacing-m) * -1);
+
+  .views-display-link {
+    position: relative;
+    color: var(--gin-color-text);
+    text-decoration: none;
+    background-image: none;
+    white-space: nowrap;
+
+    &::before {
+      content: "";
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      position: absolute;
+      inset-inline-start: 0;
+      inset-block-start: 1px;
+      background-color: var(--gin-color-text);
+    }
+
+    &.is-active {
+      color: var(--gin-color-primary);
+
+      &::before {
+        background-color: var(--gin-color-primary);
+      }
+    }
+  }
+
+  .views-display-link-widget {
+    &::before {
+      mask-image: icon('grid');
+    }
+  }
+
+  .views-display-link-widget_table {
+    &::before {
+      mask-image: icon('list');
+    }
+  }
+}
+
+.media-library-content {
+  border-inline-start: 0 none;
+  border-color: var(--gin-border-color);
+}
+
+.media-library-select-all {
+  color: var(--gin-color-title);
+  padding-block: 0 var(--gin-spacing-m);
+  padding-inline: var(--gin-spacing-m);
+  margin-inline-start: 0;
+  margin-block-start: 0;
+  background: var(--gin-bg-layer);
+  border-block-end: 1px solid var(--gin-border-color-table-header);
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+.views-field-thumbnail__target-id {
+  img {
+    vertical-align: middle;
+  }
+}
+
+// UI Dialog overrode
+.ui-dialog {
+  .views-exposed-form,
+  .views-form {
+    .gin--dark-mode & {
+      background: var(--gin-bg-layer2);
+    }
+  }
+}
+
+.media-library-widget-modal .media-library-item--grid {
+  @include mq(ultra) {
+    width: 20%;
+  }
+}
+
+.media-library-widget-modal .ui-dialog-buttonpane {
+  flex-direction: column;
+
+  .form-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    white-space: nowrap;
+    margin-block-start: 0;
+
+    .button:not(:last-child) {
+      margin-inline-end: var(--gin-spacing-xs);
+    }
+  }
+
+  .media-library-selected-count {
+    flex-grow: 1;
+    margin-block-end: var(--gin-spacing-s);
+  }
+
+  @include mq(xsmall) {
+    flex-direction: row;
+
+    .media-library-selected-count {
+      margin-block-end: 0;
+      margin-inline-start: 0;
+    }
+  }
+}
+
+.js-media-library-widget {
+  .fieldset__label {
+    margin-block-end: 0;
+  }
+
+  .media-library-selection {
+    margin-block-start: 0;
+  }
+}
+
+.media-library-selection .media-library-item--grid {
+  @include mq(wide) {
+    width: 20%;
+  }
+}
+
+// Sidebar override
+.layout-region-node-secondary .media-library-selection .media-library-item--grid {
+  width: auto;
+}
+
+.field--name-field-media {
+  &.field--widget-entity-reference-autocomplete {
+    fieldset.form-item {
+      padding-block: var(--gin-spacing-xl) var(--gin-spacing-m);
+      padding-inline: calc(var(--gin-spacing-l) - var(--gin-spacing-xxs));
+      border: 1px solid var(--gin-border-color);
+
+      > legend {
+        font-weight: var(--gin-font-weight-heavy);
+        position: relative;
+        inset-block-start: calc(var(--gin-spacing-l) - var(--gin-spacing-xxs));
+        transform: translateY(50%);
+
+        &::before {
+          content: "";
+          display: block;
+          width: 100%;
+          height: 1px;
+          position: absolute;
+          inset-block-start: calc((var(--gin-spacing-l) - var(--gin-spacing-xxs)) * -1);
+          inset-inline-start: 0;
+          background: var(--gin-border-color);
+        }
+      }
+
+      > .form-item {
+        h4 {
+          margin-block-end: 0;
+        }
+      }
+    }
+  }
+}
+
+.media-library-selected-count {
+  color: var(--gin-color-text-light);
+}
+
+.media-library-new-widget {
+  .fieldset__label {
+    margin-block-end: 0;
+  }
+
+  .label {
+    font-size: var(--gin-font-size-l);
+    font-weight: var(--gin-font-weight-bold);
+    color: var(--gin-color-title);
+    margin-block-start: 0;
+  }
+
+  .description {
+    font-size: var(--gin-font-size-s);
+    color: var(--gin-color-text-light);
+  }
+
+  .form-type--entity-autocomplete {
+    margin-block: var(--gin-spacing-s);
+  }
+}

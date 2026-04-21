@@ -1,0 +1,113 @@
+.glb-pager {
+  // Default Claro styles.
+  &.pager {
+    margin-top: 1em !important;
+    margin-bottom: 1em !important;
+
+    ul {
+      padding-left: 0 !important;
+      list-style-image: none !important;
+    }
+  }
+
+  .pager__items {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    margin: 1em 0 !important;
+    list-style: none !important;
+    text-align: center !important;
+    font-weight: bold !important;
+  }
+
+  .pager__item {
+    display: inline-block !important;
+    margin-right: 0.25em !important;
+    margin-left: 0.25em !important;
+    vertical-align: top !important;
+  }
+
+  .pager__link,
+  .pager__item--current {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    min-width: 2em !important;
+    height: 2em !important;
+    padding-right: 0.5em !important;
+    padding-left: 0.5em !important;
+    text-decoration: none !important;
+    border-radius: 1em !important;
+    line-height: 1 !important;
+  }
+
+  .pager__item--first .pager__link::before,
+  .pager__item--previous .pager__link::before,
+  .pager__item--next .pager__link::after,
+  .pager__item--last .pager__link::after {
+    position: relative !important;
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    content: "" !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+  }
+
+  .pager__item--mini {
+    margin-right: 0.5em !important;
+    margin-left: 0.5em !important;
+  }
+
+  // Gin styles.
+
+  .pager__link {
+    color: var(--gin-color-text) !important;
+    background-color: transparent !important;
+  }
+
+  .pager__link.is-active,
+  .pager__item--current {
+    color: var(--gin-bg-app) !important;
+    background: var(--gin-color-primary) !important;
+  }
+
+  .pager__link:hover,
+  .pager__link.is-active:hover {
+    color: var(--gin-color-button-text) !important;
+    background: var(--gin-color-primary-hover) !important;
+  }
+
+  .pager__item--first .pager__link::before {
+    mask-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M11 17l-5-5 5-5M18 17l-5-5 5-5'/%3e%3c/svg%3e") !important;
+  }
+
+  .pager__item--previous .pager__link::before {
+    mask-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M15 18l-6-6 6-6'/%3e%3c/svg%3e") !important;
+  }
+
+  .pager__item--next .pager__link::after {
+    mask-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M9 18l6-6-6-6'/%3e%3c/svg%3e") !important;
+  }
+
+  .pager__item--last .pager__link::after {
+    mask-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M13 17l5-5-5-5M6 17l5-5-5-5'/%3e%3c/svg%3e") !important;
+  }
+
+  .pager__item--first .pager__link,
+  .pager__item--previous .pager__link,
+  .pager__item--next .pager__link,
+  .pager__item--last .pager__link {
+    &::before,
+    &::after {
+      background: var(--gin-color-text-light) !important;
+    }
+
+    &:hover::before,
+    &:hover::after {
+      background: var(--gin-bg-app) !important;
+    }
+  }
+}

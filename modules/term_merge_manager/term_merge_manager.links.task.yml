@@ -1,0 +1,33 @@
+## Term merge into routing definition
+#term_merge_into.settings_tab:
+#  route_name: term_merge_into.settings
+#  title: 'Settings'
+#  base_route: term_merge_into.settings
+
+entity.term_merge_into.canonical:
+  route_name: entity.term_merge_into.canonical
+  base_route: entity.term_merge_into.canonical
+  title: 'View'
+
+entity.term_merge_into.delete_form:
+  route_name:  entity.term_merge_into.delete_form
+  base_route:  entity.term_merge_into.canonical
+  title: Delete
+  weight: 10
+
+# Term merge from routing definition
+#term_merge_from.settings_tab:
+#  route_name: term_merge_from.settings
+#  title: 'Settings'
+#  base_route: term_merge_from.settings
+
+entity.term_merge_from.canonical:
+  route_name: entity.term_merge_from.canonical
+  base_route: entity.term_merge_from.canonical
+  title: 'View'
+
+entity.term_merge_from.delete_form:
+  route_name:  entity.term_merge_from.delete_form
+  base_route:  entity.term_merge_from.canonical
+  title: Delete
+  weight: 10

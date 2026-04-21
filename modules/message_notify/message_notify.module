@@ -1,0 +1,95 @@
+<?php
+
+/**
+ * @file
+ * Module file for Message notify.
+ */
+
+use Drupal\Core\Entity\Entity\EntityViewMode;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function message_notify_help($route_name, RouteMatchInterface $route_match) {
+  $output = '';
+  switch ($route_name) {
+    case 'help.page.message_notify':
+      $output .= '<h3>' . t('About Message Notify Module') . '</h3>';
+      $output .= '<p>' . t('The Message Notify module provides a flexible way to send notifications to users using different delivery methods such as email and SMS.') . '</p>';
+      $output .= '<h3>' . t('Usage') . '</h3>';
+      $output .= '<p>' . t('To send messages via the Message Notify module, follow these steps:') . '</p>';
+      $output .= '<ol>';
+      $output .= '<li>' . t('Enable the Message Notify module.') . '</li>';
+      $output .= '<li>' . t('Configure the module settings, including delivery methods, templates, and notification triggers.') . '</li>';
+      $output .= '<li>' . t('Use the available plugins for sending messages via email, SMS, or other delivery methods.') . '</li>';
+      $output .= '</ol>';
+      $output .= '<h3>' . t('Customization') . '</h3>';
+      $output .= '<p>' . t('Message Notify allows customization through "View modes." You can customize which message-text fields will be rendered and delivered to users. To customize message rendering, follow these steps:') . '</p>';
+      $output .= '<ol>';
+      $output .= '<li>' . t('Create or modify view modes for messages, specifying the fields and their display order.') . '</li>';
+      $output .= '<li>' . t('Use the created view modes when sending notifications to control the content and appearance of your messages.') . '</li>';
+      $output .= '</ol>';
+      $output .= '<h3>' . t('Creating Nodes') . '</h3>';
+      $output .= '<p>' . t('To create nodes in Drupal, follow these steps:') . '</p>';
+      $output .= '<ol>';
+      $output .= '<li>' . t('Navigate to the Content creation page in the Drupal admin interface.') . '</li>';
+      $output .= '<li>' . t('Choose the content type for your node and fill in the required fields.') . '</li>';
+      $output .= '<li>' . t('Save the node to create it.') . '</li>';
+      $output .= '</ol>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_mail().
+ *
+ * Set's the message subject and body as configured.
+ */
+function message_notify_mail($key, &$message, $params) {
+  $message['subject'] = $params['mail_subject'];
+  $message['body'][] = $params['mail_body'];
+}
+
+/**
+ * Implements hook_entity_bundle_create().
+ *
+ * We cannot easily set the the visibility of extra fields, so we set the
+ * bundle settings upon creation of new message bundle.
+ */
+function message_notify_entity_bundle_create($entity_type_id, $bundle) {
+  if ($entity_type_id != 'message') {
+    return;
+  }
+
+  // Do nothing if these view modes are not yet available.
+  if (!EntityViewMode::load('message.mail_body') || !EntityViewMode::load('message.mail_subject')) {
+    return;
+  }
+
+  // If this bundle is being created from a .yml file, ignore.
+  if (\Drupal::isConfigSyncing()) {
+    return;
+  }
+
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_display');
+  /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $default */
+  $default = \Drupal::service('entity_display.repository')
+    ->getViewDisplay($entity_type_id, $bundle);
+
+  // Setup the subject/title display mode if it doesn't exist.
+  if (!$storage->load($entity_type_id . '.' . $bundle . '.mail_subject')) {
+    $display = $default->createCopy('mail_subject');
+    $display->set('content', ['partial_0' => ['weight' => 0]]);
+    $display->set('hidden', ['partial_1' => TRUE]);
+    $display->save();
+  }
+
+  // Setup the body display if it doesn't exist.
+  if (!$storage->load($entity_type_id . '.' . $bundle . '.mail_body')) {
+    $display = $default->createCopy('mail_body');
+    $display->set('content', ['partial_1' => ['weight' => 0]]);
+    $display->set('hidden', ['partial_0' => TRUE]);
+    $display->save();
+  }
+}

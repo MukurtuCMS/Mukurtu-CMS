@@ -1,0 +1,44 @@
+<aside class="admin-toolbar" id="admin-toolbar" data-drupal-admin-styles>
+  {# This lil' div will get the Drupal.displace() attributes added to it via JS. #}
+  <div class="admin-toolbar__displace-placeholder"></div>
+
+  {% set title_menu = 'admin-toolbar-title' %}
+
+  {# @todo - We should get rid of this ID below. #}
+  <nav id="menu-builder" class="admin-toolbar__content" aria-labelledby="{{ title_menu }}">
+    <h3 id="{{ title_menu }}" class="visually-hidden">{{ 'Administrative toolbar content'|t }}</h3>
+
+    <div class="admin-toolbar__header">
+      <div class="navigation-menu-wrapper menu--logo admin-toolbar__logo">
+        <ul class="toolbar-menu" data-once="toolbar-menu" aria-labelledby="menu--logo">
+          <li class="toolbar-menu__item toolbar-menu__item--level-1">
+            {% if icon_path %}
+              <a class="toolbar-link" href="{{ path('<front>') }}">
+                <img alt="{{ 'Home'|t }}" src="{{ file_url(icon_path) }}" loading="eager" />
+              </a>
+            {% else %}
+              <a href="{{ path('<front>') }}" class="toolbar-link toolbar-link--has-icon toolbar-link--gin-home">
+                <span>{{ 'Home'|t }}</span>
+              </a>
+            {% endif %}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    {{ menu_top }}
+    {% for section in menu_middle %}
+      {{ section }}
+    {% endfor %}
+  </nav>
+
+  {# @todo - This sticky menu should exist under the <nav> landmark element above. #}
+  <div class="admin-toolbar__sticky-section">
+    {{ menu_bottom }}
+  </div>
+</aside>
+<script>
+  if (localStorage.getItem('Drupal.navigation.sidebarExpanded') !== 'false') {
+    document.documentElement.classList.add('admin-toolbar-expanded');
+  }
+</script>

@@ -1,0 +1,10 @@
+action.configuration.message_digest_interval:*:*:
+  type: mapping
+  label: 'Digest action configuration'
+  mapping:
+    flag_id:
+      type: string
+      label: 'Flag ID'
+    value:
+      type: string
+      label: 'Digest interval plugin ID'

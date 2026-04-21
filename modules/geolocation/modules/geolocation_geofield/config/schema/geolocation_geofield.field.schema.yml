@@ -1,0 +1,7 @@
+field.formatter.settings.geolocation_geofield:
+  type: geolocation.field.formatter.map.base
+  label: 'Geolocation Geofield Map Formatter'
+  mapping:
+    data_provider_settings:
+      label: 'Data provider settings'
+      type: geolocation.data_provider.geofield

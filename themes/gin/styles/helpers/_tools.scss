@@ -1,0 +1,74 @@
+@import "svg-sprite";
+
+$html-font-size: 16px;
+
+@function stripUnit($value) {
+  @return $value / ($value * 0 + 1);
+}
+
+@function rem($pxValue) {
+  @return math.div(stripUnit($pxValue), stripUnit($html-font-size)) * 1rem;
+}
+
+@function capitalize($string) {
+  @return to-upper-case(str-slice($string, 1, 1)) + str-slice($string, 2);
+}
+
+@function icon($name) {
+  @return url(map-get($sprites, $name));
+}
+
+@mixin visually-hidden {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+  overflow: hidden;
+  height: 1px;
+  width: 1px;
+  word-wrap: normal;
+}
+
+@mixin color-pattern {
+  background-color: var(--gin-pattern-fallback);
+  background-image:
+    linear-gradient(-45deg, var(--gin-pattern) 25%, transparent 26%),
+    linear-gradient(-45deg, var(--gin-pattern) 25%, transparent 26%),
+    linear-gradient(135deg, var(--gin-pattern) 25%, transparent 26%),
+    linear-gradient(135deg, var(--gin-pattern) 25%, transparent 26%);
+  background-position:
+    0 0,
+    var(--gin-pattern-square) var(--gin-pattern-square),
+    var(--gin-pattern-square) var(--gin-pattern-square),
+    0 0;
+  background-size: calc(var(--gin-pattern-square) * 2) calc(var(--gin-pattern-square) * 2);
+
+  @media screen and (-ms-high-contrast: active) {
+    background: none;
+  }
+}
+
+@mixin custom-icon-button($name) {
+  all: unset;
+
+  background-color: white;
+  background-image: icon($name);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 15px 15px;
+
+  border-radius: 50%;
+  border-color: transparent !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+
+  color: transparent;
+  width: 29px;
+  height: 29px;
+  margin: var(--gin-spacing-s);
+
+  &:hover,
+  &:focus {
+    background-color: white;
+    border-color: var(--gin-color-primary) !important;
+    color: transparent;
+    cursor: pointer;
+  }
+}

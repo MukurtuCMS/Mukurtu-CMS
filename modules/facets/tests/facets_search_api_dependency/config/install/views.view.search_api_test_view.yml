@@ -1,0 +1,439 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.index.database_search_index
+  module:
+    - search_api
+id: search_api_test_view
+label: 'Search API Test Fulltext search view'
+module: views
+description: ''
+tag: ''
+base_table: search_api_index_database_search_index
+base_field: search_api_id
+display:
+  default:
+    id: default
+    display_title: Master
+    display_plugin: default
+    position: 0
+    display_options:
+      title: 'Fulltext test index'
+      fields:
+        search_api_id:
+          id: search_api_id
+          table: search_api_index_database_search_index
+          field: search_api_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: numeric
+          label: 'Entity ID'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          set_precision: false
+          precision: 0
+          decimal: .
+          separator: ','
+          format_plural: false
+          format_plural_string: !!binary MQNAY291bnQ=
+          prefix: ''
+          suffix: ''
+      pager:
+        type: full
+        options:
+          offset: 0
+          items_per_page: 10
+          total_pages: null
+          id: 0
+          tags:
+            next: 'next ›'
+            previous: '‹ previous'
+            first: '« first'
+            last: 'last »'
+          expose:
+            items_per_page: false
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 20, 40, 60'
+            items_per_page_options_all: false
+            items_per_page_options_all_label: '- All -'
+            offset: false
+            offset_label: Offset
+          quantity: 9
+      exposed_form:
+        type: basic
+        options:
+          submit_button: Search
+          reset_button: false
+          reset_button_label: Reset
+          exposed_sorts_label: 'Sort by'
+          expose_sort_order: true
+          sort_asc_label: Asc
+          sort_desc_label: Desc
+      access:
+        type: none
+        options: {  }
+      cache:
+        type: none
+        options: {  }
+      empty: {  }
+      sorts:
+        search_api_id:
+          id: search_api_id
+          table: search_api_index_database_search_index
+          field: search_api_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: ASC
+          expose:
+            label: ''
+            field_identifier: search_api_id
+          exposed: false
+      arguments:
+        search_api_datasource:
+          id: search_api_datasource
+          table: search_api_index_database_search_index
+          field: search_api_datasource
+          plugin_id: search_api
+          break_phrase: true
+        type:
+          id: type
+          table: search_api_index_database_search_index
+          field: type
+          plugin_id: search_api
+          break_phrase: false
+          not: true
+        keywords:
+          id: keywords
+          table: search_api_index_database_search_index
+          field: keywords
+          plugin_id: search_api
+          break_phrase: true
+      filters:
+        search_api_fulltext:
+          id: search_api_fulltext
+          table: search_api_index_database_search_index
+          field: search_api_fulltext
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_fulltext
+          operator: and
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: search_api_fulltext_op
+            label: 'Fulltext search'
+            description: ''
+            use_operator: true
+            operator: search_api_fulltext_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: search_api_fulltext
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          min_length: 3
+          fields: {  }
+        id:
+          id: id
+          table: search_api_index_database_search_index
+          field: id
+          relationship: none
+          admin_label: ''
+          plugin_id: search_api_numeric
+          operator: '='
+          group: 1
+          exposed: true
+          expose:
+            operator_id: id_op
+            label: ''
+            description: ''
+            use_operator: true
+            operator: id_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: id
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+          is_grouped: false
+        created:
+          id: created
+          table: search_api_index_database_search_index
+          field: created
+          relationship: none
+          admin_label: ''
+          plugin_id: search_api_date
+          operator: '='
+          group: 1
+          exposed: true
+          expose:
+            operator_id: created_op
+            label: ''
+            description: ''
+            use_operator: true
+            operator: created_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: created
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+          is_grouped: false
+        keywords:
+          id: keywords
+          table: search_api_index_database_search_index
+          field: keywords
+          relationship: none
+          admin_label: ''
+          plugin_id: search_api_string
+          operator: '='
+          group: 1
+          exposed: true
+          expose:
+            operator_id: keywords_op
+            label: ''
+            description: ''
+            use_operator: true
+            operator: keywords_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: keywords
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+          is_grouped: false
+        search_api_language:
+          id: search_api_language
+          table: search_api_index_database_search_index
+          field: search_api_language
+          relationship: none
+          admin_label: ''
+          plugin_id: search_api_language
+          operator: in
+          group: 1
+          exposed: true
+          expose:
+            operator_id: language_op
+            label: ''
+            description: ''
+            use_operator: true
+            operator: language_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: language
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+          is_grouped: false
+      style:
+        type: default
+      row:
+        type: search_api
+        options:
+          view_modes:
+            'entity:entity_test':
+              article: default
+              page: default
+      query:
+        type: search_api_query
+        options:
+          skip_access: true
+      relationships: {  }
+      header:
+        result:
+          id: result
+          table: views
+          field: result
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: result
+          content: 'Displaying @total search results'
+      footer: {  }
+      display_extenders: {  }
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+      tags:
+        - 'config:search_api.index.database_search_index'
+  block_1:
+    id: block_1
+    display_title: Block
+    display_plugin: block
+    position: 3
+    display_options:
+      defaults:
+        use_ajax: false
+      use_ajax: true
+      display_extenders: {  }
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+      tags:
+        - 'config:search_api.index.database_search_index'
+  block_1_sapi_tag:
+    id: block_1_sapi_tag
+    display_title: 'Block Search API cache tag'
+    display_plugin: block
+    position: 4
+    display_options:
+      cache:
+        type: search_api_tag
+        options: {  }
+      defaults:
+        cache: false
+        use_ajax: false
+      use_ajax: true
+      display_extenders: {  }
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+      tags:
+        - 'config:search_api.index.database_search_index'
+  page_1:
+    id: page_1
+    display_title: Page
+    display_plugin: page
+    position: 1
+    display_options:
+      display_extenders: {  }
+      path: search-api-test-fulltext
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+      tags:
+        - 'config:search_api.index.database_search_index'
+  page_2_sapi_tag:
+    id: page_2_sapi_tag
+    display_title: 'Page Search API cache tag'
+    display_plugin: page
+    position: 2
+    display_options:
+      cache:
+        type: search_api_tag
+        options: {  }
+      defaults:
+        cache: false
+      display_extenders: {  }
+      path: search-api-test-fulltext-cache-tag
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+      tags:
+        - 'config:search_api.index.database_search_index'
+  page_2_sapi_time:
+    id: page_2_sapi_time
+    display_title: 'Page Search API cache time'
+    display_plugin: page
+    position: 2
+    display_options:
+      cache:
+        type: search_api_time
+        options:
+          results_lifespan: 21600
+          results_lifespan_custom: 0
+          output_lifespan: 518400
+          output_lifespan_custom: 0
+      defaults:
+        cache: false
+      display_extenders: {  }
+      path: search-api-test-fulltext-cache-time
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+      tags:
+        - 'config:search_api.index.database_search_index'

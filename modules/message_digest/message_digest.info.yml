@@ -1,0 +1,14 @@
+name: 'Message Digest'
+description: 'Daily or weekly digest emails for the Message module'
+type: module
+package: Message
+core_version_requirement: ^9 || ^10 || ^11
+dependencies:
+  - message_notify:message_notify
+test_dependencies:
+  - token:token
+
+# Information added by Drupal.org packaging script on 2024-09-20
+version: '8.x-1.5'
+project: 'message_digest'
+datestamp: 1726863864

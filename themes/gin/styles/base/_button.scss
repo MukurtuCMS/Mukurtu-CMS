@@ -1,0 +1,147 @@
+.button,
+.project__action_button,
+.dropbutton__item:first-of-type > *,
+.dropbutton__toggle {
+  font-size: var(--gin-font-size-s);
+  font-weight: var(--gin-font-weight-semibold);
+  color: var(--gin-color-primary);
+  background-color: transparent;
+  box-shadow: none;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: var(--gin-transition);
+  }
+
+  @include mq(wide) {
+    font-size: var(--gin-font-size);
+  }
+
+  &:hover {
+    background-color: var(--gin-color-primary-hover);
+  }
+
+  &:active, &:focus {
+    background-color: var(--gin-color-primary-active);
+  }
+
+  &:hover, &:active, &:focus {
+    color: var(--gin-color-button-text);
+  }
+}
+
+.button,
+.button:not(:focus),
+.form-actions .button,
+.project__action_button,
+.action-link--icon-trash.action-link {
+  font-size: var(--gin-font-size-s);
+  padding-block: calc(var(--gin-spacing-s) - 2px);
+  padding-inline: var(--gin-spacing-m);
+  border: 2px solid var(--gin-color-primary) !important;
+  border-radius: var(--gin-border-m);
+  box-shadow: 0 1px 2px var(--gin-color-primary-light);
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: var(--gin-transition);
+  }
+
+  &:hover {
+    background-color: var(--gin-color-primary-hover);
+    border-color: var(--gin-color-primary-hover) !important;
+  }
+
+  &:active, &:focus {
+    border-color: var(--gin-color-primary-active) !important;
+  }
+
+  &:hover, &:active, &:focus, &:hover:focus {
+    color: var(--gin-color-button-text);
+  }
+}
+
+.form-actions .button {
+  margin-inline-end: var(--gin-spacing-xs);
+}
+
+.button.button--small {
+  font-size: var(--gin-font-size-xxs);
+  padding-block: calc(var(--gin-spacing-xxs) + 2px);
+  padding-inline: var(--gin-spacing-s);
+  border-radius: var(--gin-border-s);
+}
+
+.button.button--extrasmall {
+  font-size: var(--gin-font-size-xxs);
+  padding-block: var(--gin-spacing-xxs);
+  padding-inline: var(--gin-spacing-s);
+  border-radius: var(--gin-border-s);
+}
+
+#edit-submit.form-submit,
+.button--primary,
+.button--primary:not(:focus),
+.ief-entity-submit {
+  background: var(--gin-color-primary);
+  box-shadow: .1em .25em .5em var(--gin-color-primary-light);
+
+  &:hover {
+    background-color: var(--gin-color-primary-hover);
+  }
+
+  &:active, &:focus {
+    background-color: var(--gin-color-primary-active);
+  }
+
+  &, &:hover, &:active, &:focus {
+    color: var(--gin-color-button-text);
+  }
+}
+
+a.button:hover,
+a.button:active {
+  color: var(--gin-color-button-text);
+}
+
+a.button--primary:hover,
+a.button--primary:active,
+a.button--primary:focus,
+a.button--primary:focus:hover {
+  .gin--dark-mode & {
+    color: var(--gin-bg-app);
+  }
+}
+
+.button.button:disabled, .button.button.is-disabled {
+  &, &:hover, &:active, &:focus {
+    color: var(--gin-color-disabled);
+    background: transparent;
+    border: 2px solid var(--gin-color-disabled-border) !important;
+    box-shadow: none;
+  }
+}
+
+.button.button--primary:disabled, .button.button--primary.is-disabled {
+  &, &:hover, &:active, &:focus {
+    color: var(--gin-color-disabled);
+    background-color: var(--gin-color-disabled-bg);
+  }
+}
+
+.action-link.action-link--icon-trash {
+  line-height: 1;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+
+  &, &:hover, &:active, &:focus, &:focus:hover {
+    border: 2px solid var(--gin-color-danger) !important;
+  }
+}
+
+// Autocomplete field remove button
+.multiple-fields-remove-button.button {
+  border: 0 none !important;
+  mask-image: icon('remove');
+  mask-size: 16px 16px;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+}

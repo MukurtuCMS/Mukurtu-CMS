@@ -1,0 +1,18 @@
+blockquote {
+  font-size: var(--gin-font-size-quote);
+  position: relative;
+  padding-inline-start: var(--gin-spacing-l);
+  margin: var(--gin-spacing-m);
+
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--gin-color-primary);
+    border-radius: 2px;
+  }
+}

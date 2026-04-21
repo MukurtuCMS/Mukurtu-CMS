@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.message.field_published
+    - message.template.example_create_comment
+id: message.example_create_comment.field_published
+field_name: field_published
+entity_type: message
+bundle: example_create_comment
+label: Published
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings: {  }
+third_party_settings: {  }
+field_type: boolean

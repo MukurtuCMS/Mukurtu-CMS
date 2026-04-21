@@ -1,0 +1,4 @@
+services:
+  flat_taxonomy.taxonomy_flattener:
+    class: Drupal\flat_taxonomy\Flattener
+    arguments: ['@entity_type.manager']

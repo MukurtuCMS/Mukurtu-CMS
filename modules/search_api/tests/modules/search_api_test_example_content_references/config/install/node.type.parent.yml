@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+name: Parent
+type: parent
+description: 'Parent node type that references other types.'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: true

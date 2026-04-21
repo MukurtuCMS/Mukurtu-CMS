@@ -1,0 +1,18 @@
+<ruleset name="dashboards">
+  <description>PHP CS Configuration.</description>
+  <file>.</file>
+  <arg name="extensions" value="css,inc,install,module,php,profile,test,theme" />
+  <rule ref="Drupal" />
+  <rule ref="DrupalPractice" />
+
+  <rule ref="Drupal.Commenting">
+    <exclude name="Drupal.Commenting.DocComment.MissingShort" />
+    <!-- TagsNotGrouped has false positives for @code/@endcode. See
+        https://www.drupal.org/node/2502837 -->
+    <exclude name="Drupal.Commenting.DocComment.TagsNotGrouped" />
+    <!-- We have to document hooks in a non-standard way in order to be
+        informative -->
+    <exclude name="Drupal.Commenting.HookComment.HookParamDoc" />
+    <exclude name="Drupal.Commenting.HookComment.HookReturnDoc" />
+  </rule>
+</ruleset>

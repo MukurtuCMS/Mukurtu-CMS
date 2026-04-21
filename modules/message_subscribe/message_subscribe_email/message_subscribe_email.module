@@ -1,0 +1,168 @@
+<?php
+
+/**
+ * @file
+ * Code for the  message subscribe email feature.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\flag\FlagInterface;
+
+/**
+ * Implements hook_flag_action_access().
+ */
+function message_subscribe_email_flag_action_access($action, FlagInterface $flag, AccountInterface $account, ?EntityInterface $flaggable = NULL) {
+  // The 'unflag' action is always allowed here, so only check 'flag'.
+  $prefix = \Drupal::config('message_subscribe_email.settings')->get('flag_prefix') . '_';
+  if ($action === 'flag' && $flaggable && $flaggable->id() && strpos($flag->id(), $prefix) === 0) {
+    /** @var \Drupal\flag\FlagServiceInterface $flag_service */
+    $flag_service = \Drupal::service('flag');
+    $request = \Drupal::request();
+    $sid = $request->hasSession() ? $request->getSession()->get('flag.session_id') : NULL;
+
+    // If the user is anonymous, force a session and session ID.
+    // Copied from FlagService::populateFlaggerDefaults() and
+    // FlagService::ensureSession().
+    if (empty($sid) && $account === NULL) {
+      $account = \Drupal::currentUser();
+    }
+    if (empty($sid) && $account->isAnonymous()) {
+      // @todo when https://www.drupal.org/node/2865991 is resolved,
+      // use force start session API.
+      if (!$request->hasSession()) {
+        /** @var \Symfony\Component\HttpFoundation\Session\SessionInterface $session */
+        $session = \Drupal::service('session');
+        $request->setSession($session);
+        $session->start();
+      }
+
+      $session = $request->getSession();
+      if ($session->has('flag.session_id')) {
+        $sid = $session->get('flag.session_id');
+      }
+      else {
+        // Generate a persistent session id.
+        $sid = $flag_service->getAnonymousSessionId();
+        $session->set('flag.session_id', $sid);
+      }
+
+    }
+
+    // Get the other flags on that same content.
+    /** @var \Drupal\flag\FlaggingInterface[] $user_flaggings */
+    $user_flaggings = $flag_service->getAllEntityFlaggings($flaggable, $account, $sid);
+    $user_flags = [];
+    foreach ($user_flaggings as $flagging) {
+      $user_flags[$flagging->getFlagId()] = $flagging;
+    }
+
+    // Find the corresponding subscribe_* flag.
+    $name = str_replace($prefix, '', $flag->id());
+    $subscribe_prefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
+
+    // Disable access to the flag when the subscribe flag is unflagged.
+    return AccessResult::forbiddenIf(empty($user_flags[$subscribe_prefix . $name]));
+  }
+}
+
+/**
+ * Implements hook_message_subscribe_get_subscribers_alter().
+ *
+ * Filters out subscribes to show only email subscribers.
+ */
+function message_subscribe_email_message_subscribe_get_subscribers_alter(array &$uids, array $values) {
+  if (empty($uids)) {
+    // Nobody is subscribed to the content.
+    return;
+  }
+
+  /** @var \Drupal\flag\FlagInterface[] $flags */
+  if (!$flags = \Drupal::service('message_subscribe_email.manager')->getFlags()) {
+    // No subscribe email related flags.
+    return;
+  }
+
+  $debug = \Drupal::config('message_subscribe.settings')->get('debug_mode');
+
+  $flag_ids = [];
+  foreach ($flags as $flag) {
+    $flag_ids[] = $flag->id();
+  }
+  $debug && \Drupal::logger('message_subscribe_email')->debug(
+    'Gathering email subscriptions for context: @context',
+    ['@context' => "\n\n" . print_r($values['context'], TRUE)]
+  );
+  $debug && \Drupal::logger('message_subscribe_email')->debug(
+    'Gathering email subscriptions using flags: @flags for users: @uids',
+    [
+      '@flags' => implode(', ', $flag_ids),
+      '@uids' => implode(', ', array_keys($uids)),
+    ]
+  );
+
+  $all_email_subscribers = [];
+  foreach ($values['context'] as $entity_type => $entity_ids) {
+    if (empty($entity_ids)) {
+      continue;
+    }
+
+    $query = \Drupal::database()->select('flagging', 'f');
+    $result = $query->fields('f', ['uid'])
+      ->condition('flag_id', $flag_ids, 'IN')
+      ->condition('uid', array_keys($uids), 'IN')
+      // Ensure to grab the correct flagging.
+      ->condition('entity_type', $entity_type)
+      ->condition('entity_id', $entity_ids, 'IN')
+      ->groupBy('uid')
+      ->execute()
+      ->fetchAllAssoc('uid');
+
+    $all_email_subscribers = array_merge($all_email_subscribers, array_keys($result));
+  }
+
+  $debug && \Drupal::logger('message_subscribe_email')->debug('Found email subscribers @subscribers', ['@subscribers' => implode(', ', $all_email_subscribers)]);
+
+  /** @var \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface $delivery_candidate */
+  foreach ($uids as $uid => $delivery_candidate) {
+    // If email flags aren't already set, get them from database.
+    if (!array_intersect($delivery_candidate->getFlags(), $flag_ids)) {
+      if (!in_array($uid, $all_email_subscribers)) {
+        $debug && \Drupal::logger('message_subscribe_email')->debug('Removing EMAIL notifier for user @uid', ['@uid' => $uid]);
+        $delivery_candidate->removeNotifier('email');
+      }
+      else {
+        // Ensure the email notifier is set for email subscribers.
+        $debug && \Drupal::logger('message_subscribe_email')->debug('Adding EMAIL notifier for user @uid', ['@uid' => $uid]);
+        $delivery_candidate->addNotifier('email');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function message_subscribe_email_form_message_subscribe_admin_settings_alter(array &$form, FormStateInterface $form_state) {
+  // Add the email prefix settings.
+  $form['message_subscribe_email_flag_prefix'] = [
+    '#type' => 'textfield',
+    '#title' => t('Email flag prefix'),
+    '#description' => t('The prefix that will be used to identify email subscription flags.'),
+    '#default_value' => \Drupal::configFactory()->getEditable('message_subscribe_email.settings')->get('flag_prefix'),
+    '#required' => TRUE,
+  ];
+  $form['#submit'][] = 'message_subscribe_email_message_subscribe_admin_settings_form_submit';
+}
+
+/**
+ * Submit callback.
+ */
+function message_subscribe_email_message_subscribe_admin_settings_form_submit(array $form, FormStateInterface $form_state) {
+  \Drupal::configFactory()
+    ->getEditable('message_subscribe_email.settings')
+    ->set('flag_prefix', $form_state->getValue('message_subscribe_email_flag_prefix'))
+    ->save();
+}

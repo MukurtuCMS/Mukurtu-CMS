@@ -1,0 +1,15 @@
+name: 'Facets Exposed Filters test'
+type: module
+description: 'Provides config for Facets exposed filters test.'
+package: 'Testing'
+hidden: true
+dependencies:
+  - search_api:search_api
+  - search_api:search_api_test_db
+  - drupal:views
+core_version_requirement: ^10.1 || ^11
+
+# Information added by Drupal.org packaging script on 2025-10-17
+version: '3.0.2'
+project: 'facets'
+datestamp: 1760700683

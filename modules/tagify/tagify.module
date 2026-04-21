@@ -1,0 +1,121 @@
+<?php
+
+/**
+ * @file
+ * Provides integration with Tagify libraries.
+ */
+
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\WidgetInterface;
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function tagify_library_info_alter(&$libraries, $module) {
+  if ($module === 'tagify') {
+    // In case that the libraries are included locally, use those instead of the
+    // CDN.
+    // @see https://www.drupal.org/node/3099614
+    $library_file_finder = Drupal::service('library.libraries_directory_file_finder');
+    $current_libraries = [
+      'tagify' => [
+        'js' => 'tagify/dist/tagify.js',
+        'css' => 'tagify/dist/tagify.css',
+      ],
+      'tagify_polyfils' => [
+        'js' => 'tagify/dist/tagify.polyfills.min.js',
+      ],
+    ];
+    foreach ($current_libraries as $current_library_id => $current_library_type) {
+      if (isset($libraries[$current_library_id])) {
+        foreach ($current_library_type as $library_type_id => $current_library_file) {
+          $path = $library_file_finder->find($current_library_file);
+          if ($path) {
+            if ($library_type_id === 'css') {
+              $libraries[$current_library_id][$library_type_id]['component'] = [
+                '/' . $path => [],
+              ];
+            }
+            else {
+              $libraries[$current_library_id][$library_type_id] = [
+                '/' . $path => ['minified' => TRUE],
+              ];
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Strip dashes prefixed to taxonomy labels.
+ *
+ * Implements hook_options_list_alter().
+ */
+function tagify_options_list_alter(array &$options, array $context): void {
+  if (!isset($context['fieldDefinition']) || !$context['fieldDefinition'] instanceof FieldDefinitionInterface) {
+    return;
+  }
+  $targetType = $context['fieldDefinition']->getFieldStorageDefinition()->getSetting('target_type');
+  if (empty($context['widget']) || !$context['widget'] instanceof WidgetInterface) {
+    return;
+  }
+  $provider = $context['widget']->getPluginDefinition()['provider'];
+
+  if ($provider === 'tagify' && $targetType === 'taxonomy_term') {
+    _tagify_process_options($options);
+  }
+}
+
+/**
+ * Implements hook_field_info_alter().
+ *
+ * Change the default widget for fields of type 'entity_reference'.
+ */
+function tagify_field_info_alter(&$info): void {
+  $config = \Drupal::config('tagify.settings');
+  $suggested = $config->get('set_default_widget');
+  if (isset($info['entity_reference']) && $suggested) {
+    $info['entity_reference']['default_widget'] = 'tagify_entity_reference_autocomplete_widget';
+  }
+}
+
+/**
+ * Process options recursively.
+ *
+ * Strip dashes prefixed to taxonomy labels.
+ */
+function _tagify_process_options(&$options) {
+  foreach ($options as $key => $value) {
+    if (is_array($value)) {
+      _tagify_process_options($options[$key]);
+    }
+    else {
+      $options[$key] = ltrim($value, '-');
+    }
+  }
+}
+
+/**
+ * Determines whether the active theme is Gin, or a sub-theme of Gin.
+ */
+function _tagify_is_gin_theme_active(): bool {
+  $theme = Drupal::getContainer()->get('theme.manager')->getActiveTheme();
+  return $theme->getName() === 'gin' ||
+    isset($theme->getBaseThemeExtensions()['gin']);
+}
+
+/**
+ * Determines whether the active theme is Claro, or a sub-theme of Claro.
+ */
+function _tagify_is_claro_theme_active(): bool {
+  $theme = Drupal::getContainer()->get('theme.manager')->getActiveTheme();
+  // If the active theme is Gin, return false.
+  if ($theme->getName() === 'gin' ||
+    isset($theme->getBaseThemeExtensions()['gin'])) {
+    return FALSE;
+  }
+
+  return $theme->getName() === 'claro' || isset($theme->getBaseThemeExtensions()['claro']);
+}

@@ -1,0 +1,17 @@
+name: Blazy
+type: module
+description: "Provides media lazy loading."
+core_version_requirement: '>=9.4'
+package: Blazy
+dependencies:
+  - drupal:filter
+  - drupal:media
+
+test_dependencies:
+  - drupal:responsive_image
+  - drupal:views
+
+# Information added by Drupal.org packaging script on 2026-01-10
+version: '3.0.17'
+project: 'blazy'
+datestamp: 1768032944

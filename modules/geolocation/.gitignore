@@ -1,0 +1,7 @@
+# Ignore node_modules folder created when installing core's JavaScript
+# dependencies.
+node_modules
+
+# Ignore package-lock.json that is automatically created when adding
+# dependencies by users of NPMv5.
+package-lock.json

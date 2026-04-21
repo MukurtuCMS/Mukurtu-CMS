@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Twig tweak test'
+format: twig_tweak_test
+weight: 0
+filters:
+  filter_html:
+    id: filter_html
+    provider: filter
+    status: true
+    weight: 0
+    settings:
+      allowed_html: '<b>'
+      filter_html_help: true
+      filter_html_nofollow: false

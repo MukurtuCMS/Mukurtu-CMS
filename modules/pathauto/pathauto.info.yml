@@ -1,0 +1,18 @@
+name : 'Pathauto'
+description : 'Provides a mechanism for modules to automatically generate aliases for the content they manage.'
+core_version_requirement: ^10 || ^11
+type: module
+
+dependencies:
+- drupal:path
+- token:token
+
+configure: entity.pathauto_pattern.collection
+
+recommends:
+- redirect:redirect
+
+# Information added by Drupal.org packaging script on 2025-10-07
+version: '8.x-1.14'
+project: 'pathauto'
+datestamp: 1759838099

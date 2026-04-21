@@ -1,0 +1,14 @@
+type: module
+name: 'Search API Test Solr search'
+description: 'Support module for Search API Solr search tests.'
+package: Testing
+dependencies:
+  - drupal:language
+  - search_api:search_api_test_example_content
+  - search_api_solr:search_api_solr
+hidden: true
+
+# Information added by Drupal.org packaging script on 2025-04-23
+version: '4.3.10'
+project: 'search_api_solr'
+datestamp: 1745426381

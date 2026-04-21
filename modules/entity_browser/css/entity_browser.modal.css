@@ -1,0 +1,16 @@
+/**
+ * @file
+ * Styles for entity browser modal.
+ */
+
+/** IFrame is rendered as inline element by default and thus have a line height
+    which can trigger vertical scrollbar on a parent ui-dialog-content wrapper
+    element. */
+.entity-browser-modal-iframe {
+  display: block;
+}
+
+/** Prevent div wrapper to have height bigger then dialog content height. */
+.entity-browser-modal .ui-dialog-content > * {
+  max-height: 100%;
+}

@@ -1,0 +1,12 @@
+name: 'Search API location test module'
+type: module
+description: 'Helper for location search test.  Declares search index "location" data type.'
+package: Testing
+dependencies:
+  - search_api:search_api
+hidden: true
+
+# Information added by Drupal.org packaging script on 2025-11-01
+version: '8.x-1.40'
+project: 'search_api'
+datestamp: 1762030918

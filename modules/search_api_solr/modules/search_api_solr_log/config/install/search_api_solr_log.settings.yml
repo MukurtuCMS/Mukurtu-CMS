@@ -1,0 +1,4 @@
+days_to_keep: 14
+commit: auto
+tags: {  }
+site_hash: true

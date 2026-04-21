@@ -1,0 +1,50 @@
+plugin.plugin_configuration.geolocation.map_feature.geolocation_marker_scroll_to_id:
+  type: geolocation.map_feature_settings
+  label: 'Scroll to ID'
+  mapping:
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        scroll_target_id:
+          type: string
+          label: 'Anchor'
+
+plugin.plugin_configuration.geolocation.map_feature.geolocation_shapes:
+  type: geolocation.map_feature_settings
+  label: 'Draw Shapes'
+  mapping:
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        remove_markers:
+          type: boolean
+          label: 'Remove markers'
+        polyline:
+          type: boolean
+          label: 'Draw polyline'
+        polyline_title:
+          type: string
+          label: 'Polyline title'
+        strokeColor:
+          type: string
+          label: 'Stroke Color'
+        strokeOpacity:
+          type: float
+          label: 'Stroke Opacity'
+        strokeWidth:
+          type: string
+          label: 'Stroke width'
+        polygon:
+          type: boolean
+          label: 'Draw polygon'
+        polygon_title:
+          type: string
+          label: 'Polygon title'
+        fillColor:
+          type: string
+          label: 'Fill Color'
+        fillOpacity:
+          type: float
+          label: 'Fill Opacity'

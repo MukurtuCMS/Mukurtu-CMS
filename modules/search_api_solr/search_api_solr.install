@@ -1,0 +1,2336 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Search API Solr module.
+ */
+
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Config\Entity\ConfigEntityType;
+use Drupal\Core\Config\FileStorage;
+use Drupal\Core\Config\InstallStorage;
+use Drupal\Core\Config\StorageInterface;
+use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
+use Drupal\search_api_solr\Controller\SolrConfigSetController;
+use Drupal\search_api_solr\SearchApiSolrConflictingEntitiesException;
+use Drupal\search_api_solr\SearchApiSolrException;
+use Drupal\search_api_solr\Utility\Utility as SearchApiSolrUtility;
+use Solarium\Client;
+
+/**
+ * Implements hook_requirements().
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\search_api\SearchApiException
+ */
+function search_api_solr_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'install') {
+    if (!class_exists('\Solarium\Core\Client\Request')) {
+      $requirements['search_api_solr_library'] = [
+        'description' => t('Solr search requires the solarium/solarium library.'),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+  }
+  elseif ($phase === 'runtime') {
+    // @todo Warn if autocomplete uses an implementation that is not suitable
+    //   for multiple indexes per core. But we need the possibility to turn that
+    //   off if the user acknowledged it because it might really be the desired
+    //   feature.
+    $servers = search_api_solr_get_servers();
+    $module_extension_list = \Drupal::service('extension.list.module');
+    foreach ($servers as $server_id => $server) {
+      if ($server->status()) {
+        /** @var \Drupal\search_api_solr\SolrBackendInterface $backend */
+        $backend = $server->getBackend();
+        $connector = $backend->getSolrConnector();
+        $configuration = $backend->getConfiguration();
+        if ($backend->isAvailable() && $connector->pingCore()) {
+          if (!$backend->isNonDrupalOrOutdatedConfigSetAllowed()) {
+            $config_set_controller = new SolrConfigSetController($module_extension_list);
+            $config_set_controller->setServer($server);
+            $new_config_set = [];
+            try {
+              // The freshly generated files.
+              $new_config_set = $config_set_controller->getConfigFiles();
+            }
+            catch (\Exception $e) {
+              $requirements['search_api_solr_schema_' . $server_id . '_modifications']['title'] = t('Solr Server %server', ['%server' => $server->label()]);
+              $requirements['search_api_solr_schema_' . $server_id . '_modifications']['value'] = t('Schema could not be generated');
+              $requirements['search_api_solr_schema_' . $server_id . '_modifications']['severity'] = REQUIREMENT_ERROR;
+
+              if ($e instanceof SearchApiSolrConflictingEntitiesException) {
+                $requirements['search_api_solr_schema_' . $server_id . '_modifications']['description'] = t(
+                  'Some enabled parts of the configuration conflict with others: @conflicts', [
+                    '@conflicts' => new FormattableMarkup(str_replace('core_issue_2919648_workaround', $server_id, $e), []),
+                  ]
+                );
+              }
+              else {
+                $requirements['search_api_solr_schema_' . $server_id . '_modifications']['description'] = t(
+                  'The config-set for the Solr server <a href=":url">@server</a> could not be generated.', [
+                    ':url' => $server->toUrl('canonical')->toString(),
+                    '@server' => $server->label(),
+                  ]
+                );
+              }
+            }
+
+            if (!empty($new_config_set)) {
+              try {
+                $server_files_list = SearchApiSolrUtility::getServerFiles($server);
+              }
+              catch (SearchApiSolrException $e) {
+                $server_files_list = [];
+              }
+              // The files that are already on the server.
+              $server_file_names = array_keys($server_files_list);
+              $new_config_file_names = array_keys($new_config_set);
+              $extra_release_files = array_diff($new_config_file_names, $server_file_names);
+              if (!empty($extra_release_files)) {
+                $requirements['search_api_solr_schema_' . $server_id . '_modifications']['title'] = t('Solr Server %server', ['%server' => $server->label()]);
+                $requirements['search_api_solr_schema_' . $server_id . '_modifications']['value'] = t('Schema incomplete');
+                $requirements['search_api_solr_schema_' . $server_id . '_modifications']['severity'] = REQUIREMENT_WARNING;
+                $requirements['search_api_solr_schema_' . $server_id . '_modifications']['description'] = t(
+                  'There are some files missing in the Solr server schema <a href=":url">@server</a>: @files. An updated config.zip should be downloaded and deployed to your Solr server.', [
+                    ':url' => $server->toUrl('canonical')->toString(),
+                    '@server' => $server->label(),
+                    '@files' => implode(', ', $extra_release_files),
+                  ]
+                );
+              }
+              foreach ($new_config_set as $new_file_name => $new_file_body) {
+                if (stripos(strrev($new_file_name), 'lmx.') === 0) {
+                  $exception = FALSE;
+                  try {
+                    $server_file_data = $connector->getFile($new_file_name);
+                    $server_file_body = $server_file_data->getBody();
+                  }
+                  catch (SearchApiSolrException $e) {
+                    $server_file_body = '';
+                    $exception = $e;
+                  }
+
+                  [
+                    $version_number_server,
+                    $xml_server,
+                  ] = SearchApiSolrUtility::normalizeXml($server_file_body);
+                  [
+                    $version_number_new,
+                    $xml_new,
+                  ] = SearchApiSolrUtility::normalizeXml($new_file_body);
+                  if (strcmp($xml_server, $xml_new) !== 0) {
+                    if ($version_number_server !== $version_number_new) {
+                      $requirements['search_api_solr_schema_' . $server_id . '_modifications']['title'] = t('Solr Server %server', ['%server' => $server->label()]);
+                      $requirements['search_api_solr_schema_' . $server_id . '_modifications']['value'] = t('Schema not up to date');
+                      $requirements['search_api_solr_schema_' . $server_id . '_modifications']['severity'] = REQUIREMENT_ERROR;
+                      $requirements['search_api_solr_schema_' . $server_id . '_modifications']['description'] = t(
+                        'There are some configuration elements missing in the Solr server schema <a href=":url">@server</a>. This is likely due to using an outdated version of either Drupal or Solr. The recommended version is: @version. An updated config.zip should be downloaded and deployed to your Solr server.', [
+                          ':url' => $server->toUrl('canonical')->toString(),
+                          '@server' => $server->label(),
+                          '@version' => $version_number_new,
+                        ]
+                      );
+                      break;
+                    }
+                    elseif ($version_number_server === $version_number_new && !$connector->isJumpStartConfigSet()) {
+                      $requirements['search_api_solr_schema_' . $server_id . '_modifications']['title'] = t('Solr Server %server', ['%server' => $server->label()]);
+                      $requirements['search_api_solr_schema_' . $server_id . '_modifications']['severity'] = REQUIREMENT_WARNING;
+                      if (!$exception) {
+                        $requirements['search_api_solr_schema_' . $server_id . '_modifications']['value'] = t('Schema modified');
+                        $requirements['search_api_solr_schema_' . $server_id . '_modifications']['description'] = t(
+                          'Your config-set contains manually added customizations. Be aware that these will be lost when the config-set needs to be regenerated.', []);
+                      }
+                      else {
+                        $requirements['search_api_solr_schema_' . $server_id . '_modifications']['value'] = t('Schema validation');
+                        $requirements['search_api_solr_schema_' . $server_id . '_modifications']['description'] = t(
+                          'File %filename could not be fetched from Solr server for validation: @message', [
+                            '%filename' => $new_file_name,
+                            '@message' => $exception->getMessage(),
+                          ]);
+                      }
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+
+            if ($indexes = $server->getIndexes()) {
+              foreach ($indexes as $index) {
+                $endpoint = $backend->getCollectionEndpoint($index);
+                if ($connector->pingEndpoint($endpoint)) {
+                  if (!$configuration['suppress_missing_languages']) {
+                    $stats = $backend->getSchemaLanguageStatistics($endpoint);
+                    if ($missing_languages = array_filter($stats, function ($state) {
+                      return !$state;
+                    })) {
+                      $requirements['search_api_solr_schema_' . $server_id . $endpoint->getKey() . '_languages'] = [
+                        'title' => t('Solr Server %server', ['%server' => $server->label()]),
+                        'value' => t('Schema incomplete'),
+                        'severity' => REQUIREMENT_WARNING,
+                        'description' => t('There are some language-specific field types missing in schema of index <a href=":index_url">@index</a> on server <a href=":server_url">@server</a>: %missing. These languages will use the language-undefined fallback field type. In case of language variations like "de-at" the fallback will be the non-variation language "de" if it exists. You can suppress this warning by checking the corresponding checkbox in the advanced section on the server <a href=":server_edit_url">edit page</a>. But before doing this you should whether the missing language-specific field type exists or not. If it is available and you get this warning you simply need to generate and deploy a new Solr config-set.', [
+                          ':index_url' => $index->toUrl('canonical')
+                            ->toString(),
+                          '@index' => $index->label(),
+                          ':server_url' => $server->toUrl('canonical')
+                            ->toString(),
+                          '@server' => $server->label(),
+                          '%missing' => implode(', ', array_keys($missing_languages)),
+                          ':server_edit_url' => $server->toUrl('edit-form')
+                            ->toString(),
+                        ]),
+                      ];
+                    }
+                  }
+                }
+                else {
+                  $requirements['search_api_solr_' . $server_id . $endpoint->getKey() . '_endpoint'] = [
+                    'title' => t('Solr Server %server', ['%server' => $server->label()]),
+                    'value' => t('Endpoint not reachable'),
+                    'description' => \Drupal::translation()
+                      ->translate('The endpoint for Index %index on Solr server <a href=":url">@server</a> could not be reached.',
+                        [
+                          '%index' => $index->label(),
+                          ':url' => Url::fromRoute('entity.search_api_server.canonical', ['search_api_server' => $server_id])
+                            ->toString(),
+                          '@server' => $server->label(),
+                        ]),
+                    'severity' => REQUIREMENT_ERROR,
+                  ];
+                }
+              }
+            }
+          }
+        }
+        else {
+          $requirements['search_api_solr_' . $server_id . '_modifications'] = [
+            'title' => t('Solr Server %server', ['%server' => $server->label()]),
+            'value' => t('Solr not reachable'),
+            'description' => t('Solr server <a href=":url">@server</a> is not reachable.', [
+              ':url' => $server->toUrl('canonical')->toString(),
+              '@server' => $server->label(),
+            ]),
+            'severity' => REQUIREMENT_ERROR,
+          ];
+        }
+      }
+    }
+
+    $filename = __DIR__ . '/composer.json';
+    $composer = json_decode(file_get_contents($filename), TRUE);
+    if (
+      !preg_match('/([0123456789.]+)/', $composer['require']['solarium/solarium'], $matches) ||
+      !Client::checkMinimal($matches[1])
+    ) {
+      $requirements['search_api_solr_solarium'] = [
+        'title' => t('Solarium library'),
+        'value' => t('Solarium library'),
+        'description' => t('Solarium @version is too old! Version required: @required', ['@version' => Client::getVersion(), '@required' => $matches[1] ?? t('Error reading composer.json')]),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_uninstall().
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\search_api\SearchApiException
+ */
+function search_api_solr_uninstall() {
+  \Drupal::state()->delete('search_api_solr.last_optimize');
+  \Drupal::state()->delete('search_api_solr.endpoint.data');
+  \Drupal::state()->delete('search_api_solr.site_hash');
+  \Drupal::state()->delete('search_api_solr.search_all_rows');
+  foreach (search_api_solr_get_servers() as $server) {
+    foreach ($server->getIndexes() as $index) {
+      \Drupal::state()
+        ->delete('search_api_solr.' . $index->id() . '.last_update');
+    }
+    \Drupal::state()
+      ->delete('search_api_solr.' . $server->id() . '.schema_parts');
+  }
+}
+
+/**
+ * Gets all backend configs for active Solr servers.
+ *
+ * @param string $pattern
+ *   Pattern to filter the backend configs.
+ *
+ * @return array
+ *   All backend configs for active Solr servers keyed by server name.
+ */
+function search_api_solr_update_helper_get_backend_configs($pattern = 'solr') {
+  $config_factory = \Drupal::configFactory();
+  $backend_configs = [];
+  foreach ($config_factory->listAll('search_api.server.') as $server_name) {
+    $server = $config_factory->get($server_name);
+    // Covers search_api_solr_multilingual, too.
+    if (strpos($server->get('backend'), $pattern) !== FALSE) {
+      $backend_configs[$server_name] = $server->get('backend_config');
+    }
+  }
+  return $backend_configs;
+}
+
+/**
+ * Saves a modified backend config for a given Solr server.
+ *
+ * @param string $server_name
+ *   Name of the solr server.
+ * @param array $backend_config
+ *   Solr backend configuration.
+ * @param bool $trusted_data
+ *   Boolean to indicate if the data is trusted.
+ */
+function search_api_solr_update_helper_save_backend_config($server_name, array $backend_config, $trusted_data = TRUE) {
+  \Drupal::configFactory()->getEditable($server_name)
+    ->set('backend_config', $backend_config)
+    ->save($trusted_data);
+}
+
+/**
+ * Gets all index third party settings for Solr servers.
+ *
+ * @param string $pattern
+ *   Pattern to filter the server configs.
+ *
+ * @return array
+ *   All backend configs for active Solr servers keyed by server name.
+ */
+function search_api_solr_update_helper_get_index_third_party_settings($pattern = 'solr') {
+  $backend_configs = search_api_solr_update_helper_get_backend_configs($pattern);
+  $indexes = search_api_solr_update_helper_get_indexes($pattern);
+  $index_third_party_settings = [];
+  foreach ($indexes as $index_id => $index) {
+    $config_id = 'search_api.server.' . $index->get('server');
+    if (isset($backend_configs[$config_id])) {
+      // This index belongs to a Solr server.
+      $index_third_party_settings[$index_id] = $index->get('third_party_settings.search_api_solr');
+    }
+  }
+  return $index_third_party_settings;
+}
+
+/**
+ * Saves a modified backend config for a given Solr server.
+ *
+ * @param string $index_id
+ *   Id of the solr index.
+ * @param array $third_party_settings
+ *   Third party settings array.
+ * @param bool $trusted_data
+ *   Boolean to indicate if the data is trusted.
+ */
+function search_api_solr_update_helper_save_index_third_party_settings($index_id, array $third_party_settings, $trusted_data = TRUE) {
+  \Drupal::configFactory()->getEditable($index_id)
+    ->set('third_party_settings.search_api_solr', $third_party_settings)
+    ->save($trusted_data);
+}
+
+/**
+ * Gets all index settings for Solr servers.
+ *
+ * @param string $pattern
+ *   Pattern to filter the index configs.
+ *
+ * @return array
+ *   All index configs for Solr servers keyed by index name.
+ */
+function search_api_solr_update_helper_get_indexes($pattern = 'solr') {
+  $backend_configs = search_api_solr_update_helper_get_backend_configs($pattern);
+  $config_factory = \Drupal::configFactory();
+  $indexes = [];
+  foreach ($config_factory->listAll('search_api.index.') as $index_id) {
+    $index = $config_factory->get($index_id);
+    $config_id = 'search_api.server.' . $index->get('server');
+    if (isset($backend_configs[$config_id])) {
+      // This index belongs to a Solr server.
+      $indexes[$index_id] = $index;
+    }
+  }
+  return $indexes;
+}
+
+/**
+ * Saves a modified index config.
+ *
+ * @param string $index_id
+ *   Id of the Solr Index.
+ * @param array $settings
+ *   Settings array.
+ * @param bool $trusted_data
+ *   Boolean to indicate if the data is trusted.
+ */
+function search_api_solr_update_helper_save_indexes($index_id, array $settings, $trusted_data = TRUE) {
+  \Drupal::configFactory()->getEditable($index_id)
+    ->setData($settings)
+    ->save($trusted_data);
+}
+
+/**
+ * Gets all solr field type configs.
+ *
+ * @return array
+ *   All solr field type configs.
+ */
+function search_api_solr_update_helper_get_field_type_configs() {
+  $config_factory = \Drupal::configFactory();
+  $field_type_configs = [];
+  foreach ($config_factory->listAll('search_api_solr.solr_field_type.') as $field_type_name) {
+    $field_type_configs[$field_type_name] = $config_factory->get($field_type_name)
+      ->getRawData();
+  }
+  return $field_type_configs;
+}
+
+/**
+ * Saves a modified solr field type config.
+ *
+ * @param string $field_type_name
+ *   The field type config name.
+ * @param array $field_type_config
+ *   The field type config.
+ * @param bool $trusted_data
+ *   Boolean to indicate if the data is trusted.
+ */
+function search_api_solr_update_helper_save_field_type_config($field_type_name, array $field_type_config, $trusted_data = TRUE) {
+  \Drupal::configFactory()->getEditable($field_type_name)
+    ->setData($field_type_config)
+    ->save($trusted_data);
+}
+
+/**
+ * Helper function to install all new configs.
+ *
+ * @param string $directory
+ *   The configs directory.
+ */
+function search_api_solr_update_helper_install_configs($directory = InstallStorage::CONFIG_OPTIONAL_DIRECTORY) {
+  /** @var \Drupal\Core\Config\ConfigInstallerInterface $config_installer */
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'search_api_solr');
+
+  $optional_install_path = \Drupal::moduleHandler()
+    ->getModule('search_api_solr')
+    ->getPath() . '/' . $directory;
+  if (is_dir($optional_install_path)) {
+    // Install any optional config the module provides.
+    $storage = new FileStorage($optional_install_path, StorageInterface::DEFAULT_COLLECTION);
+    $config_installer->installOptionalConfig($storage);
+  }
+
+  $restrict_by_dependency = [
+    'module' => 'search_api_solr',
+  ];
+  $config_installer->installOptionalConfig(NULL, $restrict_by_dependency);
+}
+
+/**
+ * Replace installed field type config with module version.
+ *
+ * @param string $field_type_name
+ *   The field type config name.
+ * @param string $path
+ *   The config path.
+ */
+function search_api_solr_update_helper_replace_field_type($field_type_name, $path = 'optional') {
+  $filename = __DIR__ . '/config/' . $path . '/' . $field_type_name . '.yml';
+  $field_type_config = Yaml::decode(file_get_contents($filename));
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $name => $config) {
+    if ($name === $field_type_name) {
+      search_api_solr_update_helper_save_field_type_config($field_type_name, ['uuid' => $config['uuid']] + $field_type_config);
+      break;
+    }
+  }
+}
+
+/**
+ * Split Solr paths stored in configurations into server and core parts.
+ */
+function search_api_solr_update_8001() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    $parts = explode('/', $backend_config['path']);
+    if (count($parts) > 2) {
+      $backend_config['core'] = array_pop($parts);
+      $backend_config['path'] = implode('/', $parts);
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+}
+
+/**
+ * Convert http_user and http_pass to username and password config for Solarium.
+ */
+function search_api_solr_update_8002() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    $backend_config['username'] = $backend_config['http_user'];
+    $backend_config['password'] = $backend_config['http_pass'];
+    unset($backend_config['http_user'], $backend_config['http_pass']);
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+}
+
+/**
+ * Add default timeout settings to existing configs.
+ */
+function search_api_solr_update_8003() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    $backend_config['timeout'] = 5;
+    $backend_config['index_timeout'] = 5;
+    $backend_config['optimize_timeout'] = 10;
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+}
+
+/**
+ * Migrate existing backend configurations to the basic auth connector plugin.
+ */
+function search_api_solr_update_8004() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    $backend_config['connector'] = 'basic_auth';
+    $backend_config['connector_config'] = [];
+    foreach ([
+      'scheme',
+      'host',
+      'port',
+      'path',
+      'core',
+      'timeout',
+      'index_timeout',
+      'optimize_timeout',
+      'solr_version',
+      'http_method',
+      'username',
+      'password',
+    ] as $key) {
+      $backend_config['connector_config'][$key] = $backend_config[$key];
+      unset($backend_config[$key]);
+    }
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+}
+
+/**
+ * Add commit_within settings to existing connector configs.
+ */
+function search_api_solr_update_8005() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    $backend_config['connector_config']['commit_within'] = 1000;
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+}
+
+/**
+ * Add autocomplete settings to existing configs.
+ */
+function search_api_solr_update_8006() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    $backend_config['suggest_suffix'] = TRUE;
+    $backend_config['suggest_corrections'] = TRUE;
+    $backend_config['suggest_words'] = FALSE;
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+}
+
+/**
+ * Remove old autocomplete settings in existing configs.
+ */
+function search_api_solr_update_8007() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    unset($backend_config['autocorrect_spell']);
+    unset($backend_config['autocorrect_suggest_words']);
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+}
+
+/**
+ * Remove obsolete settings in existing configs.
+ */
+function search_api_solr_update_8008() {
+  $config_factory = \Drupal::configFactory();
+  foreach ($config_factory->listAll('search_api_solr.settings.') as $setting) {
+    $config = $config_factory->getEditable($setting);
+    $data = $config->getRawData();
+    unset($data['autocomplete_max_occurrences']);
+    unset($data['http_get_max_length']);
+    $config->setData($data);
+    $config->save(TRUE);
+  }
+}
+
+/**
+ * Install Solr Field Types.
+ */
+function search_api_solr_update_8200() {
+  // 8.x-1.x to 8.x-2.x migration path is obsolete and therefore removed. Just
+  // install the latest field types.
+  \Drupal::entityDefinitionUpdateManager()
+    ->installEntityType(new ConfigEntityType([
+      'id' => 'solr_field_type',
+      'label' => new TranslatableMarkup('Solr Field Type'),
+      'handlers' => [
+        'list_builder' => 'Drupal\search_api_solr\Controller\SolrFieldTypeListBuilder',
+        'form' => [
+          'add' => 'Drupal\search_api_solr\Form\SolrFieldTypeForm',
+          'edit' => 'Drupal\search_api_solr\Form\SolrFieldTypeForm',
+          'delete' => 'Drupal\search_api_solr\Form\SolrFieldTypeDeleteForm',
+        ],
+      ],
+      'config_prefix' => 'solr_field_type',
+      'admin_permission' => 'administer search_api',
+      'entity_keys' => [
+        'id' => 'id',
+        'label' => 'label',
+        'uuid' => 'uuid',
+      ],
+      'links' => [
+        'edit-form' => '/admin/config/search/search-api/solr_field_type/{solr_field_type}',
+        'delete-form' => '/admin/config/search/search-api/solr_field_type/{solr_field_type}/delete',
+        'disable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_field_type/{solr_field_type}/disable',
+        'enable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_field_type/{solr_field_type}/enable',
+        'collection' => '/admin/config/search/search-api/server/{search_api_server}/solr_field_type',
+      ],
+    ]));
+
+  search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Fix suggester field type.
+ */
+function search_api_solr_update_8201() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['solr_configs']) && !empty($field_type_config['solr_configs']['searchComponents'])) {
+      foreach ($field_type_config['solr_configs']['searchComponents'] as &$component) {
+        if ($component['name'] === 'suggest') {
+          foreach ($component['lst'] as &$lst) {
+            foreach ($lst['str'] as &$entry) {
+              if ($entry['name'] === 'field') {
+                $entry['VALUE'] = 'twm_suggest';
+                search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Enable support for targeted domains for all backends and add custom codes.
+ */
+function search_api_solr_update_8202() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (!isset($backend_config['domain'])) {
+      if (isset($backend_config['sasm_domain'])) {
+        $backend_config['domain'] = $backend_config['sasm_domain'];
+        unset($backend_config['sasm_domain']);
+      }
+      else {
+        $backend_config['domain'] = 'generic';
+      }
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!isset($field_type_config['custom_code'])) {
+      $field_type_config['custom_code'] = '';
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+}
+
+/**
+ * Removed search_api_solr_update_8203().
+ */
+
+/**
+ * Enable phrase suggestions support.
+ */
+function search_api_solr_update_8204() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (!isset($backend_config['suggest_phrases'])) {
+      $backend_config['suggest_phrases'] = FALSE;
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+}
+
+/**
+ * Drop never implemented word suggestions support.
+ */
+function search_api_solr_update_8205() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (isset($backend_config['suggest_words'])) {
+      unset($backend_config['suggest_words']);
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+}
+
+/**
+ * Remove obsolete autocomplete settings.
+ */
+function search_api_solr_update_8206() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    unset($backend_config['suggest_suffix']);
+    unset($backend_config['suggest_corrections']);
+    unset($backend_config['suggest_phrases']);
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+}
+
+/**
+ * Fix language undefined field types.
+ */
+function search_api_solr_update_8207() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (strpos($field_type_name, 'text_und') === 0) {
+      $save = FALSE;
+      if (!empty($field_type_config['field_type']) && !empty($field_type_config['field_type']['analyzers'])) {
+        foreach ($field_type_config['field_type']['analyzers'] as &$component) {
+          foreach ($component['filters'] as &$filter) {
+            foreach ($filter as &$entry) {
+              if ($entry['class'] === 'solr.SnowballPorterFilterFactory') {
+                unset($entry);
+                $save = TRUE;
+              }
+            }
+          }
+        }
+      }
+      if ($save) {
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+}
+
+/**
+ * Enable new highlighter.
+ */
+function search_api_solr_update_8208() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (isset($backend_config['excerpt'])) {
+      unset($backend_config['excerpt']);
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('search_api_solr.standard_highlighter');
+  $data = $config->getRawData();
+  unset($data['excerpt']);
+  $data['highlight']['snippets'] = 3;
+  $data['highlight']['fragsize'] = 0;
+  $config->setData($data);
+  $config->save(TRUE);
+}
+
+/**
+ * Removed search_api_solr_update_8209().
+ */
+
+/**
+ * Removed search_api_solr_update_8210().
+ */
+
+/**
+ * Add default finalize timeout settings to existing configs.
+ */
+function search_api_solr_update_8211() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (!isset($backend_config['finalize_timeout'])) {
+      $backend_config['finalize_timeout'] = 30;
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+}
+
+/**
+ * Configure highlighter individually per index and remove global config.
+ */
+function search_api_solr_update_8212() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('search_api_solr.standard_highlighter');
+  $data = $config->getRawData();
+
+  foreach (search_api_solr_update_helper_get_index_third_party_settings() as $index_id => $third_party_settings) {
+    if (!isset($third_party_settings['highlighter'])) {
+      $third_party_settings['highlighter'] = $data;
+      search_api_solr_update_helper_save_index_third_party_settings($index_id, $third_party_settings);
+    }
+  }
+
+  $config->delete();
+}
+
+/**
+ * Configure index prefixes individually per server and index.
+ */
+function search_api_solr_update_8213() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('search_api_solr.settings');
+  $data = $config->getRawData();
+
+  foreach (search_api_solr_update_helper_get_index_third_party_settings() as $index_id => $third_party_settings) {
+    if (!isset($third_party_settings['advanced']) || !isset($third_party_settings['advanced']['index_prefix'])) {
+      $prefix = 'index_prefix_' . $index_id;
+      $third_party_settings['advanced']['index_prefix'] = $data[$prefix] ?? '';
+      unset($data[$prefix]);
+      search_api_solr_update_helper_save_index_third_party_settings($index_id, $third_party_settings);
+    }
+  }
+
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (!isset($backend_config['server_prefix'])) {
+      $backend_config['server_prefix'] = $data['index_prefix'] ?? '';
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+  unset($data['index_prefix']);
+
+  $config->setData($data);
+  $config->save(TRUE);
+}
+
+/**
+ * Migrate Solr backends to the new unified Solr backend.
+ */
+function search_api_solr_update_8300() {
+  $config_factory = \Drupal::configFactory();
+  foreach ($config_factory->listAll('search_api_solr.solr_field_type.m_') as $field_type_name) {
+    $config_factory->getEditable($field_type_name)->delete();
+  }
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    unset($field_type_config['managed_schema']);
+    search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+  }
+
+  foreach ($config_factory->listAll('search_api.server.') as $server_name) {
+    $server = $config_factory->getEditable($server_name);
+    $backend_config = $server->get('backend_config');
+    switch ($server->get('backend')) {
+      case 'search_api_solr':
+        $backend_config['sasm_limit_search_page_to_content_language'] = FALSE;
+        $backend_config['sasm_search_page_include_language_independent'] = TRUE;
+        break;
+
+      case 'search_api_solr_multilingual':
+      case 'search_api_solr_multilingual_managed_schema':
+        unset($backend_config['sasm_language_unspecific_fallback_on_schema_issues']);
+        $server->set('backend', 'search_api_solr');
+        break;
+
+      case 'search_api_solr_any_schema':
+        $backend_config['sasm_limit_search_page_to_content_language'] = FALSE;
+        $backend_config['sasm_search_page_include_language_independent'] = TRUE;
+        $server->set('backend', 'search_api_solr');
+        break;
+
+      default:
+        continue(2);
+    }
+    $dependencies = $server->get('dependencies');
+    $dependencies['module'] = ['search_api_solr'];
+    $server
+      ->set('backend_config', $backend_config)
+      ->set('dependencies', $dependencies)
+      ->save(TRUE);
+  }
+
+  foreach ($config_factory->listAll('search_api.index.') as $index_name) {
+    $index = $config_factory->getEditable($index_name);
+    $field_settings = $index->get('field_settings');
+    foreach ($field_settings as &$field_setting) {
+      if ('solr_string_doc_values' === $field_setting['type']) {
+        $field_setting['type'] = 'string';
+      }
+    }
+
+    $index->set('field_settings', $field_settings)->save(TRUE);
+  }
+}
+
+/**
+ * Field types clean-up.
+ */
+function search_api_solr_update_8301() {
+  $config_factory = \Drupal::configFactory();
+  foreach ($config_factory->listAll('search_api.index.') as $index_name) {
+    $index = $config_factory->getEditable($index_name);
+    $field_settings = $index->get('field_settings');
+    foreach ($field_settings as &$field_setting) {
+      if ('solr_text_ngram' === $field_setting['type']) {
+        $field_setting['type'] = 'solr_text_custom:edge';
+      }
+      if ('solr_string_ngram' === $field_setting['type']) {
+        $field_setting['type'] = 'solr_text_custom:edgestring';
+      }
+      if ('solr_text_phonetic' === $field_setting['type']) {
+        $field_setting['type'] = 'solr_text_custom:phonetic';
+      }
+    }
+
+    $index->set('field_settings', $field_settings)->save(TRUE);
+  }
+}
+
+/**
+ * Re-install language-specific field types to enable the new spellcheckers.
+ */
+function search_api_solr_update_8302() {
+  $config_factory = \Drupal::configFactory();
+  foreach ($config_factory->listAll('search_api_solr.solr_field_type.text_') as $field_type_name) {
+    if (preg_match('/^search_api_solr\.solr_field_type\.text_[a-z]{2}[_-]{1}/', $field_type_name)) {
+      $config_factory->getEditable($field_type_name)->delete();
+    }
+  }
+}
+
+/**
+ * Remove obsolete setting in config.
+ */
+function search_api_solr_update_8303() {
+  // Obsolete because of search_api_solr_update_8304().
+}
+
+/**
+ * Convert site_hash from setting to state.
+ */
+function search_api_solr_update_8304() {
+  $config_factory = \Drupal::configFactory();
+  $settings = $config_factory->getEditable('search_api_solr.settings');
+  \Drupal::state()
+    ->set('search_api_solr.site_hash', $settings->get('site_hash') ?? '');
+  $settings->delete();
+
+  foreach ($config_factory->listAll('search_api.server.') as $server_name) {
+    $server = $config_factory->getEditable($server_name);
+    $backend_config = $server->get('backend_config');
+    $backend_config['optimize'] = FALSE;
+    $server->set('backend_config', $backend_config)->save(TRUE);
+  }
+}
+
+/**
+ * Add Dutch nouns and improve stemming for Dutch language.
+ */
+function search_api_solr_update_8305() {
+  $nouns = '';
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (strpos($field_type_name, 'text_nl') !== FALSE) {
+      $save = FALSE;
+
+      if (!empty($field_type_config['field_type']) && !empty($field_type_config['field_type']['analyzers'])) {
+        foreach ($field_type_config['field_type']['analyzers'] as &$component) {
+          foreach ($component['filters'] as &$filter) {
+            if ($filter['class'] === 'solr.SnowballPorterFilterFactory') {
+              if ($filter['language'] === 'Dutch') {
+                $filter['language'] = 'Kp';
+                $save = TRUE;
+              }
+            }
+          }
+        }
+      }
+
+      if (!empty($field_type_config['text_files'])) {
+        if (empty($field_type_config['text_files']['nouns']) || $field_type_config['text_files']['nouns'] == PHP_EOL) {
+          if (!$nouns) {
+            // We always use this hardcoded source file to have valid one for
+            // different domains created by users, example:
+            // text_nl_scientific_6_0_0.
+            $filename = __DIR__ . '/config/optional/search_api_solr.solr_field_type.text_nl_7_0_0.yml';
+            $nouns = Yaml::decode(file_get_contents($filename));
+          }
+          $field_type_config['text_files']['nouns'] = $nouns['text_files']['nouns'];
+          $save = TRUE;
+        }
+      }
+      if ($save) {
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+}
+
+/**
+ * Replace deprecated Solr filters by their successors for Solr 7.
+ */
+function search_api_solr_update_8306() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (
+      version_compare($field_type_config['minimum_solr_version'], '7.0.0', '>=') &&
+      !empty($field_type_config['field_type']) &&
+      !empty($field_type_config['field_type']['analyzers'])
+    ) {
+      foreach ($field_type_config['field_type']['analyzers'] as &$component) {
+        foreach ($component['filters'] as &$filter) {
+          switch ($filter['class']) {
+            case 'solr.WordDelimiterFilterFactory':
+              $filter['class'] = 'solr.WordDelimiterGraphFilterFactory';
+              break;
+
+            case 'solr.SynonymFilterFactory':
+              $filter['class'] = 'solr.SynonymGraphFilterFactory';
+              break;
+
+            case 'solr.StopFilterFactory':
+              unset($filter['enablePositionIncrements']);
+              break;
+          }
+        }
+      }
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+}
+
+/**
+ * Avoid redundant text files in generated Solr config files.
+ */
+function search_api_solr_update_8307() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (
+      strpos($field_type_name, 'text_phonetic') !== FALSE ||
+      strpos($field_type_name, 'text_edge_und') !== FALSE ||
+      strpos($field_type_name, 'text_ngram_und') !== FALSE
+    ) {
+      $dependency = str_replace([
+        'text_phonetic',
+        'text_edge_und',
+        'text_ngram_und',
+      ], ['text', 'text_und', 'text_und'], $field_type_name);
+      if (!isset($field_type_config['dependencies']['config']) || !in_array($dependency, $field_type_config['dependencies']['config'])) {
+        $field_type_config['dependencies']['config'][] = $dependency;
+      }
+      if (!empty($field_type_config['field_type']) && !empty($field_type_config['field_type']['analyzers'])) {
+        foreach ($field_type_config['field_type']['analyzers'] as &$component) {
+          if (!empty($component['charFilters'])) {
+            foreach ($component['charFilters'] as &$charFilter) {
+              if ($charFilter['class'] === 'solr.MappingCharFilterFactory') {
+                $charFilter['mapping'] = 'accents_' . $field_type_config['field_type_language_code'] . '.txt';
+              }
+            }
+          }
+          foreach ($component['filters'] as &$filter) {
+            if (
+              $filter['class'] === 'solr.WordDelimiterFilterFactory' ||
+              $filter['class'] === 'solr.WordDelimiterGraphFilterFactory'
+            ) {
+              $filter['protected'] = 'protwords_' . $field_type_config['field_type_language_code'] . '.txt';
+            }
+            elseif ($filter['class'] === 'solr.DictionaryCompoundWordTokenFilterFactory') {
+              $filter['dictionary'] = 'nouns_' . $field_type_config['field_type_language_code'] . '.txt';
+            }
+            elseif ($filter['class'] === 'solr.StopFilterFactory') {
+              $filter['words'] = 'stopwords_' . $field_type_config['field_type_language_code'] . '.txt';
+            }
+            elseif (
+              $filter['class'] === 'solr.SynonymFilterFactory' ||
+              $filter['class'] === 'solr.SynonymGraphFilterFactory'
+            ) {
+              $filter['synonyms'] = 'synonyms_' . $field_type_config['field_type_language_code'] . '.txt';
+            }
+          }
+        }
+      }
+      if (!empty($field_type_config['text_files'])) {
+        $field_type_config['text_files'] = [];
+      }
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+}
+
+/**
+ * Configure multilingual features individually per index.
+ */
+function search_api_solr_update_8308() {
+  $settings = [];
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    \Drupal::state()->delete('sasm.' . $server_name . '.schema_parts');
+    $settings[$server_name] = [
+      'limit_to_content_language' => FALSE,
+      'include_language_independent' => TRUE,
+    ];
+    if (isset($backend_config['sasm_limit_search_page_to_content_language'])) {
+      $settings[$server_name]['limit_to_content_language'] = $backend_config['sasm_limit_search_page_to_content_language'];
+      unset($backend_config['sasm_limit_search_page_to_content_language']);
+    }
+    if (isset($backend_config['sasm_search_page_include_language_independent'])) {
+      $settings[$server_name]['include_language_independent'] = $backend_config['sasm_search_page_include_language_independent'];
+      unset($backend_config['sasm_search_page_include_language_independent']);
+    }
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+
+  $indexes = search_api_solr_update_helper_get_indexes();
+  foreach (search_api_solr_update_helper_get_index_third_party_settings() as $index_id => $third_party_settings) {
+    if (!isset($third_party_settings['multilingual']) || !isset($third_party_settings['multilingual']['limit_to_content_language'])) {
+      $third_party_settings['multilingual']['limit_to_content_language'] = $settings['search_api.server.' . $indexes[$index_id]->get('server')]['limit_to_content_language'];
+    }
+    if (!isset($third_party_settings['multilingual']) || !isset($third_party_settings['multilingual']['include_language_independent'])) {
+      $third_party_settings['multilingual']['include_language_independent'] = $settings['search_api.server.' . $indexes[$index_id]->get('server')]['include_language_independent'];
+    }
+    search_api_solr_update_helper_save_index_third_party_settings($index_id, $third_party_settings);
+  }
+}
+
+/**
+ * Solarium 5 adjustments.
+ *
+ * Warning! If you have overwritten the connection settings, don't forget to
+ * adjust the 'path'. See the release notes for details.
+ */
+function search_api_solr_update_8309() {
+  // Remove the V1 API endpoint from the path.
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    $backend_config['connector_config']['path'] = preg_replace('@/solr$@', '/', $backend_config['connector_config']['path']);
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+
+  // Reset the states.
+  \Drupal::state()->delete('search_api_solr.endpoint.data');
+}
+
+/**
+ * Enable language-specific collations.
+ */
+function search_api_solr_update_8310() {
+  $valid_icu_locales = [
+    'ar',
+    'cs',
+    'da',
+    'de',
+    'el',
+    'en',
+    'es',
+    'fi',
+    'fr',
+    'it',
+    'ja',
+    'nl',
+    'pl',
+    'ru',
+    'sk',
+    'uk',
+    'br',
+    'be',
+    'zh',
+    'tr',
+    'th',
+    'sl',
+    'ro',
+    'pt',
+    'mk',
+    'is',
+    'hr',
+    'bg',
+    'af',
+    'yi',
+    'vi',
+    'sv',
+    'sr',
+    'sq',
+    'si',
+    'pa',
+    'or',
+    'nn',
+    'ne',
+    'my',
+    'mt',
+    'lt',
+    'ln',
+    'ko',
+    'id',
+    'hu',
+    'hi',
+    'he',
+    'fa',
+    'et',
+    'am',
+  ];
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (empty($field_type_config['collated_field_type'])) {
+      if (
+        !in_array($field_type_config['field_type_language_code'], $valid_icu_locales) ||
+        empty($field_type_config['spellcheck_field_type'])
+      ) {
+        continue;
+      }
+
+      $field_type_config['collated_field_type'] = [
+        'name' => 'collated_' . $field_type_config['field_type_language_code'],
+        'class' => 'solr.ICUCollationField',
+        'locale' => $field_type_config['field_type_language_code'],
+        'strength' => 'primary',
+        'caseLevel' => FALSE,
+      ];
+    }
+
+    search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+  }
+}
+
+/**
+ * Add the Polish diacritics to the language configs.
+ *
+ * Unset the obsolete min and max parameters from the CJKWidthFilter of the
+ * spellchecker (mainly for Japanese).
+ */
+function search_api_solr_update_8311() {
+  $accents = <<<ACCENTS
+# Ą => A
+"\u0104" => "A"
+# Ć => C
+"\u0106" => "C"
+# Ę => E
+"\u0118" => "E"
+# Ł => L
+"\u0141" => "L"
+# Ń => N
+"\u0143" => "N"
+# Ś => S
+"\u015a" => "S"
+# Ź => Z
+"\u0179" => "Z"
+# Ż => Z
+"\u017b" => "Z"
+
+ACCENTS;
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['text_files']['accents'])) {
+      if ('pl' === $field_type_config['field_type_language_code']) {
+        continue;
+      }
+      if (strpos($field_type_config['text_files']['accents'], '\u0104') !== FALSE) {
+        continue;
+      }
+      $field_type_config['text_files']['accents'] = $field_type_config['text_files']['accents'] . $accents;
+    }
+
+    if (!empty($field_type_config['spellcheck_field_type']) && !empty($field_type_config['spellcheck_field_type']['analyzers'])) {
+      foreach ($field_type_config['spellcheck_field_type']['analyzers'] as &$component) {
+        if (!empty($component['filters'])) {
+          foreach ($component['filters'] as &$filter) {
+            if ('solr.CJKWidthFilterFactory' === $filter['class']) {
+              unset($filter['min']);
+              unset($filter['max']);
+            }
+          }
+        }
+      }
+    }
+
+    search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+  }
+}
+
+/**
+ * Add language-specific unstemmed field types.
+ */
+function search_api_solr_update_8312() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['custom_code'])) {
+      continue;
+    }
+
+    if (!isset($field_type_config['unstemmed_field_type'])) {
+      $temp_field_type = $field_type_config['field_type'];
+      $stemmer_removed = FALSE;
+
+      if (!empty($temp_field_type['analyzers'])) {
+        foreach ($temp_field_type['analyzers'] as &$component) {
+          if (!empty($component['filters'])) {
+            foreach ($component['filters'] as $key => &$filter) {
+              if ('solr.SnowballPorterFilterFactory' === $filter['class'] || strpos($filter['class'], 'Stem')) {
+                unset($component['filters'][$key]);
+                $stemmer_removed = TRUE;
+              }
+            }
+          }
+        }
+      }
+
+      if ($stemmer_removed) {
+        $temp_field_type['name'] = 'text_unstemmed_' . $field_type_config['field_type_language_code'];
+        $field_type_config['unstemmed_field_type'] = $temp_field_type;
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+}
+
+/**
+ * Distinguish between simplified and traditional Chinese.
+ */
+function search_api_solr_update_8313() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if ('zh-hans' === $field_type_config['field_type_language_code']) {
+      if (!empty($field_type_config['field_type'])) {
+        foreach ($field_type_config['field_type'] as &$components) {
+          if (is_array($components)) {
+            foreach ($components as &$analyzers) {
+              if ('org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer' !== $analyzers['tokenizer']['class']) {
+                $analyzers['tokenizer']['class'] = 'org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer';
+              }
+              foreach ($analyzers['filters'] as $key => $filter) {
+                if ('solr.CJKBigramFilterFactory' === $filter['class']) {
+                  unset($analyzers['filters'][$key]);
+                }
+              }
+            }
+          }
+        }
+      }
+      if (!empty($field_type_config['spellcheck_field_type'])) {
+        foreach ($field_type_config['spellcheck_field_type'] as &$components) {
+          if (is_array($components) && 'org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer' !== $components['tokenizer']['class']) {
+            $components['tokenizer']['class'] = 'org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer';
+          }
+        }
+      }
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+}
+
+/**
+ * Enable language-unspecific collation.
+ */
+function search_api_solr_update_8314() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (
+      empty($field_type_config['collated_field_type']) &&
+      !empty($field_type_config['spellcheck_field_type']) &&
+      LanguageInterface::LANGCODE_NOT_SPECIFIED == $field_type_config['field_type_language_code']
+    ) {
+      $field_type_config['collated_field_type'] = [
+        'name' => 'collated_' . $field_type_config['field_type_language_code'],
+        'class' => 'solr.ICUCollationField',
+        'locale' => 'en',
+        'strength' => 'primary',
+        'caseLevel' => FALSE,
+      ];
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+}
+
+/**
+ * Avoid Solr exceptions.
+ *
+ * Avoid Solr exceptions when multilingual spell checking by using unified
+ * analyzer.
+ */
+function search_api_solr_update_8315() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['spellcheck_field_type'])) {
+      if (!in_array($field_type_config['field_type_language_code'], [
+        'und',
+        'ja',
+        'th',
+        'zh-hans',
+        'zh-hant',
+      ])) {
+        unset($field_type_config['spellcheck_field_type']);
+      }
+      if (!empty($field_type_config['solr_configs']) && !empty($field_type_config['solr_configs']['searchComponents'])) {
+        foreach ($field_type_config['solr_configs']['searchComponents'] as &$component) {
+          if ('spellcheck' === $component['name']) {
+            if (isset($component['lst']) && is_array($component['lst'])) {
+              foreach ($component['lst'] as &$lst) {
+                if ('spellchecker' === $lst['name']) {
+                  $lst['str'][] = [
+                    'name' => 'onlyMorePopular',
+                    'VALUE' => 'true',
+                  ];
+                }
+              }
+            }
+          }
+        }
+      }
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+}
+
+/**
+ * Use Ukrainian lemmatization instead of Russian SnowballPorterFilterFactory.
+ */
+function search_api_solr_update_8316() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (
+      'uk' === $field_type_config['field_type_language_code'] &&
+      !empty($field_type_config['field_type'])
+    ) {
+      foreach ($field_type_config['field_type'] as &$components) {
+        if (is_array($components)) {
+          foreach ($components as &$analyzers) {
+            if (is_array($analyzers)) {
+              foreach ($analyzers['filters'] as &$filter) {
+                if ('solr.SnowballPorterFilterFactory' === $filter['class']) {
+                  $filter['class'] = 'solr.MorfologikFilterFactory';
+                  unset($filter['language']);
+                  unset($filter['protected']);
+                  $filter['dictionary'] = 'org/apache/lucene/analysis/uk/ukrainian.dict';
+                }
+              }
+            }
+          }
+        }
+      }
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+}
+
+/**
+ * Replace erroneous Swedish default field type.
+ */
+function search_api_solr_update_8317() {
+  $filename = __DIR__ . '/config/optional/search_api_solr.solr_field_type.text_sv_7_0_0.yml';
+  $sv = Yaml::decode(file_get_contents($filename));
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if ('search_api_solr.solr_field_type.text_sv_7_0_0' === $field_type_name) {
+      search_api_solr_update_helper_save_field_type_config($field_type_name, ['uuid' => $field_type_config['uuid']] + $sv);
+      break;
+    }
+  }
+}
+
+/**
+ * Replace solr.MorphologikFilterFactory by solr.MorfologikFilterFactory.
+ */
+function search_api_solr_update_8318() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['field_type'])) {
+      $save = FALSE;
+      foreach ($field_type_config['field_type'] as &$components) {
+        if (is_array($components)) {
+          foreach ($components as &$analyzers) {
+            if (is_array($analyzers)) {
+              foreach ($analyzers['filters'] as &$filter) {
+                if ('solr.MorphologikFilterFactory' === $filter['class']) {
+                  $filter['class'] = 'solr.MorfologikFilterFactory';
+                  $filter['dictionary'] = 'org/apache/lucene/analysis/uk/ukrainian.dict';
+                  $save = TRUE;
+                }
+              }
+            }
+          }
+        }
+      }
+      if ($save) {
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+}
+
+/**
+ * Fix Solr 6 Czech Field Type and improve spellcheckers.
+ */
+function search_api_solr_update_8319() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    $save = FALSE;
+    if (!empty($field_type_config['field_type'])) {
+      $save = FALSE;
+      foreach ($field_type_config['field_type'] as &$components) {
+        if (is_array($components)) {
+          foreach ($components as &$analyzers) {
+            if (is_array($analyzers)) {
+              foreach ($analyzers['filters'] as &$filter) {
+                if ('solr.RemoveDuplicatesTokenFilterFactor' === $filter['class']) {
+                  $filter['class'] = 'solr.RemoveDuplicatesTokenFilterFactory';
+                  $save = TRUE;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    if ($save) {
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+}
+
+/**
+ * Fix 2.x to 3.0 upgrade path of spellcheck components.
+ */
+function search_api_solr_update_8320() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    $save = FALSE;
+    if (isset($field_type_config['spellcheck_field_type']) && empty($field_type_config['spellcheck_field_type'])) {
+      unset($field_type_config['spellcheck_field_type']);
+      $save = TRUE;
+    }
+    if (!empty($field_type_config['solr_configs']) && !empty($field_type_config['solr_configs']['searchComponents'])) {
+      foreach ($field_type_config['solr_configs']['searchComponents'] as &$component) {
+        if ('spellcheck' === $component['name']) {
+          if (isset($component['lst']) && is_array($component['lst'])) {
+            foreach ($component['lst'] as $key => &$lst) {
+              if ('spellchecker' === $lst['name']) {
+                if (isset($lst['str']) && is_array($lst['str'])) {
+                  foreach ($lst['str'] as $str) {
+                    if ('onlyMorePopular' === $str['name']) {
+                      continue 2;
+                    }
+                  }
+                  $lst['str'][] = [
+                    'name' => 'onlyMorePopular',
+                    'VALUE' => 'true',
+                  ];
+                  $save = TRUE;
+                }
+              }
+              if ('str' === $key) {
+                // A previously erroneous implementation of
+                // search_api_solr_update_8315() added that entry which needs to
+                // be removed now.
+                unset($component['lst']['str']);
+                $save = TRUE;
+              }
+            }
+          }
+        }
+      }
+    }
+    if ($save) {
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+}
+
+/**
+ * Fix Chinese Field Types.
+ */
+function search_api_solr_update_8321() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['field_type'])) {
+      $save = FALSE;
+      if ('zh-hans' === $field_type_config['field_type_language_code']) {
+        $field_type_config['label'] = 'Simplified Chinese Text Field';
+        foreach ($field_type_config['field_type'] as &$components) {
+          if (is_array($components)) {
+            foreach ($components as &$analyzers) {
+              if ('org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer' === $analyzers['tokenizer']['class']) {
+                $analyzers['tokenizer']['class'] = 'solr.HMMChineseTokenizerFactory';
+                $analyzers['filters'] = [
+                  ['class' => 'solr.CJKWidthFilterFactory'],
+                  [
+                    'class' => 'solr.StopFilterFactory',
+                    'words' => 'org/apache/lucene/analysis/cn/smart/stopwords.txt',
+                  ],
+                  ['class' => 'solr.PorterStemFilterFactory'],
+                  ['class' => 'solr.LowerCaseFilterFactory'],
+                ];
+                $save = TRUE;
+              }
+            }
+          }
+        }
+        if (!empty($field_type_config['spellcheck_field_type'])) {
+          foreach ($field_type_config['spellcheck_field_type'] as &$analyzer) {
+            if (is_array($analyzer)) {
+              if ('org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer' === $analyzer['tokenizer']['class']) {
+                $analyzer['tokenizer']['class'] = 'solr.HMMChineseTokenizerFactory';
+                $analyzer['filters'] = [
+                  ['class' => 'solr.CJKWidthFilterFactory'],
+                  ['class' => 'solr.LowerCaseFilterFactory'],
+                ];
+                $save = TRUE;
+              }
+            }
+          }
+        }
+        if (!isset($field_type_config['unstemmed_field_type'])) {
+          $field_type_config['unstemmed_field_type'] = [
+            'name' => 'text_unstemmed_zh_hans',
+            'class' => 'solr.TextField',
+            'positionIncrementGap' => 100,
+            'analyzers' => [
+              [
+                'type' => 'index',
+                'tokenizer' => [
+                  'class' => 'solr.HMMChineseTokenizerFactory',
+                ],
+                'filters' => [
+                  ['class' => 'solr.CJKWidthFilterFactory'],
+                  [
+                    'class' => 'solr.StopFilterFactory',
+                    'words' => 'org/apache/lucene/analysis/cn/smart/stopwords.txt',
+                  ],
+                  ['class' => 'solr.LowerCaseFilterFactory'],
+                ],
+              ],
+            ],
+          ];
+          $save = TRUE;
+        }
+      }
+      elseif ('zh-hant' === $field_type_config['field_type_language_code']) {
+        $field_type_config['label'] = 'Traditional Chinese Text Field';
+        foreach ($field_type_config['field_type'] as &$components) {
+          if (is_array($components)) {
+            foreach ($components as &$analyzers) {
+              if ('org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer' === $analyzers['tokenizer']['class']) {
+                $analyzers['tokenizer']['class'] = 'solr.ICUTokenizerFactory';
+                $analyzers['filters'] = [
+                  [
+                    'class' => 'solr.CJKBigramFilterFactory',
+                    'han' => TRUE,
+                    'hiragana' => FALSE,
+                    'katakana' => FALSE,
+                    'hangul' => FALSE,
+                    'outputUnigrams' => FALSE,
+                  ],
+                  ['class' => 'solr.CJKWidthFilterFactory'],
+                  ['class' => 'solr.LowerCaseFilterFactory'],
+                ];
+                $save = TRUE;
+              }
+            }
+          }
+        }
+        if (!empty($field_type_config['spellcheck_field_type'])) {
+          foreach ($field_type_config['spellcheck_field_type'] as &$analyzer) {
+            if (is_array($analyzer)) {
+              if ('org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer' === $analyzer['tokenizer']['class']) {
+                $analyzer['tokenizer']['class'] = 'solr.ICUTokenizerFactory';
+                $analyzer['filters'] = [
+                  [
+                    'class' => 'solr.CJKBigramFilterFactory',
+                    'han' => TRUE,
+                    'hiragana' => FALSE,
+                    'katakana' => FALSE,
+                    'hangul' => FALSE,
+                    'outputUnigrams' => FALSE,
+                  ],
+                  ['class' => 'solr.CJKWidthFilterFactory'],
+                  ['class' => 'solr.LowerCaseFilterFactory'],
+                ];
+                $save = TRUE;
+              }
+            }
+          }
+        }
+      }
+      if ($save) {
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+}
+
+/**
+ * Fix Thai and Turkish Field Types.
+ */
+function search_api_solr_update_8322() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['field_type'])) {
+      $save = FALSE;
+      if ('th' === $field_type_config['field_type_language_code']) {
+        if (!empty($field_type_config['spellcheck_field_type']['analyzer']['filters'])) {
+          foreach ($field_type_config['spellcheck_field_type']['analyzer']['filters'] as &$filter) {
+            if ('stopwords_th.txty' === $filter['words']) {
+              $filter['words'] = 'stopwords_th.txt';
+              $save = TRUE;
+            }
+          }
+        }
+      }
+      if ('tr' === $field_type_config['field_type_language_code']) {
+        foreach ($field_type_config['field_type'] as &$components) {
+          if (is_array($components)) {
+            foreach ($components as &$analyzers) {
+              if (is_array($analyzers)) {
+                foreach ($analyzers['filters'] as &$filter) {
+                  if ('stopwords_tr.tx' === $filter['words']) {
+                    $filter['words'] = 'stopwords_tr.txt';
+                    $save = TRUE;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      if ($save) {
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+}
+
+/**
+ * Fix path to ukrainian.dict for Solr 8.2.0.
+ */
+function search_api_solr_update_8323() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['field_type'])) {
+      if ('uk' === $field_type_config['field_type_language_code']) {
+        $save = FALSE;
+        foreach ($field_type_config['field_type'] as &$components) {
+          if (is_array($components)) {
+            foreach ($components as &$analyzers) {
+              if (is_array($analyzers)) {
+                foreach ($analyzers['filters'] as &$filter) {
+                  if ('solr.MorfologikFilterFactory' === $filter['class']) {
+                    $filter['dictionary'] = 'ua/net/nlp/ukrainian.dict';
+                    $save = TRUE;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ($save) {
+          search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Install new Norwegian configs if required.
+ */
+function search_api_solr_update_8324() {
+  // search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Fix the Polish phonetic field type.
+ */
+function search_api_solr_update_8325() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['field_type'])) {
+      $save = FALSE;
+      if ('text_phonetic_pl_7_0_0' === $field_type_config['id']) {
+        foreach ($field_type_config['field_type'] as &$components) {
+          if (is_array($components)) {
+            foreach ($components as &$analyzers) {
+              if (is_array($analyzers) && 'query' === $analyzers['type']) {
+                foreach ($analyzers['filters'] as &$filter) {
+                  if ('solr.WordDelimiterGraphFilterFactory' === $filter['class'] && 'protwords_de.txt' === $filter['protected']) {
+                    $filter['protected'] = 'protwords_pl.txt';
+                    $save = TRUE;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ($save) {
+          search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Replace the StempelPolishStemFilterFactory by the MorfologikFilterFactory.
+ */
+function search_api_solr_update_8326() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (!empty($field_type_config['field_type'])) {
+      if ('pl' === $field_type_config['field_type_language_code']) {
+        $save = FALSE;
+        foreach ($field_type_config['field_type'] as &$components) {
+          if (is_array($components)) {
+            foreach ($components as &$analyzers) {
+              if (is_array($analyzers)) {
+                foreach ($analyzers['filters'] as &$filter) {
+                  if ('solr.StempelPolishStemFilterFactory' === $filter['class']) {
+                    $filter['class'] = 'solr.MorfologikFilterFactory';
+                    $save = TRUE;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ($save) {
+          search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Update the Portuguese, Portugal config locale from 'pt' to 'pt-pt'.
+ */
+function search_api_solr_update_8327() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_config) {
+    if (!empty($field_type_config['field_type'])) {
+      if ('pt' === $field_type_config['field_type_language_code']) {
+        $config_factory = \Drupal::configFactory();
+        $config = $config_factory->getEditable('search_api_solr.solr_field_type.text_pt_7_0_0.yml');
+        $config->delete();
+      }
+    }
+  }
+  // search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Install Solr Cache Configs.
+ */
+function search_api_solr_update_8328() {
+  // search_api_solr_update_helper_install_configs();
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (!isset($backend_config['environment'])) {
+      $backend_config['environment'] = 'default';
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+}
+
+/**
+ * Install Solr Request Handler Configs.
+ */
+function search_api_solr_update_8329() {
+  // search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Install Solr Request Dispatcher Configs.
+ */
+function search_api_solr_update_8330() {
+  // search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Install Solr Cache, Request Handler, Request Dispatcher config entity types.
+ */
+function search_api_solr_update_8331() {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+
+  if ($manager->getEntityType('solr_cache') === NULL) {
+    $manager->installEntityType(new ConfigEntityType([
+      'id' => 'solr_cache',
+      'label' => new TranslatableMarkup('Solr Cache'),
+      'handlers' => [
+        'list_builder' => 'Drupal\search_api_solr\Controller\SolrCacheListBuilder',
+        'form' => [],
+      ],
+      'config_prefix' => 'solr_cache',
+      'admin_permission' => 'administer search_api',
+      'entity_keys' => [
+        'id' => 'id',
+        'label' => 'label',
+        'uuid' => 'uuid',
+        'disabled' => 'disabled_caches',
+      ],
+      'links' => [
+        'disable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_cache/{solr_cache}/disable',
+        'enable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_cache/{solr_cache}/enable',
+        'collection' => '/admin/config/search/search-api/server/{search_api_server}/solr_cache',
+      ],
+    ]));
+  }
+
+  if ($manager->getEntityType('solr_request_dispatcher') === NULL) {
+    $manager->installEntityType(new ConfigEntityType([
+      'id' => 'solr_request_dispatcher',
+      'label' => new TranslatableMarkup('Solr Request Dispatcher'),
+      'handlers' => [
+        'list_builder' => 'Drupal\search_api_solr\Controller\SolrRequestDispatcherListBuilder',
+        'form' => [],
+      ],
+      'config_prefix' => 'solr_request_dispatcher',
+      'admin_permission' => 'administer search_api',
+      'entity_keys' => [
+        'id' => 'id',
+        'label' => 'label',
+        'uuid' => 'uuid',
+        'disabled' => 'disabled_request_dispatchers',
+      ],
+      'links' => [
+        'disable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_request_dispatcher/{solr_request_dispatcher}/disable',
+        'enable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_request_dispatcher/{solr_request_dispatcher}/enable',
+        'collection' => '/admin/config/search/search-api/server/{search_api_server}/solr_request_dispatcher',
+      ],
+    ]));
+  }
+
+  if ($manager->getEntityType('solr_request_handler') === NULL) {
+    $manager->installEntityType(new ConfigEntityType([
+      'id' => 'solr_request_handler',
+      'label' => new TranslatableMarkup('Solr Request Handler'),
+      'handlers' => [
+        'list_builder' => 'Drupal\search_api_solr\Controller\SolrRequestHandlerListBuilder',
+        'form' => [],
+      ],
+      'config_prefix' => 'solr_request_handler',
+      'admin_permission' => 'administer search_api',
+      'entity_keys' => [
+        'id' => 'id',
+        'label' => 'label',
+        'uuid' => 'uuid',
+        'disabled' => 'disabled_request_handlers',
+      ],
+      'links' => [
+        'disable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_request_handler/{solr_request_handler}/disable',
+        'enable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_request_handler/{solr_request_handler}/enable',
+        'collection' => '/admin/config/search/search-api/server/{search_api_server}/solr_request_handler',
+      ],
+    ]));
+  }
+
+  // For people who upgrade from 8.x-1.x using core >= 8.7.
+  if ($manager->getEntityType('solr_field_type') === NULL) {
+    $manager->installEntityType(new ConfigEntityType([
+      'id' => 'solr_field_type',
+      'label' => new TranslatableMarkup('Solr Field Type'),
+      'handlers' => [
+        'list_builder' => 'Drupal\search_api_solr\Controller\SolrFieldTypeListBuilder',
+        'form' => [
+          'add' => 'Drupal\search_api_solr\Form\SolrFieldTypeForm',
+          'edit' => 'Drupal\search_api_solr\Form\SolrFieldTypeForm',
+          'delete' => 'Drupal\search_api_solr\Form\SolrFieldTypeDeleteForm',
+        ],
+      ],
+      'config_prefix' => 'solr_field_type',
+      'admin_permission' => 'administer search_api',
+      'entity_keys' => [
+        'id' => 'id',
+        'label' => 'label',
+        'uuid' => 'uuid',
+        'disabled' => 'disabled_field_types',
+      ],
+      'links' => [
+        'edit-form' => '/admin/config/search/search-api/solr_field_type/{solr_field_type}',
+        'delete-form' => '/admin/config/search/search-api/solr_field_type/{solr_field_type}/delete',
+        'disable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_field_type/{solr_field_type}/disable',
+        'enable-for-server' => '/admin/config/search/search-api/server/{search_api_server}/solr_field_type/{solr_field_type}/enable',
+        'collection' => '/admin/config/search/search-api/server/{search_api_server}/solr_field_type',
+      ],
+    ]));
+  }
+  else {
+    $entity_type = $manager->getEntityType('solr_field_type');
+    $entity_keys = $entity_type->get('entity_keys');
+    $entity_keys['disabled'] = 'disabled_field_types';
+    $entity_type->set('entity_keys', $entity_keys);
+    $links = $entity_type->get('links');
+    $links['disable-for-server'] = '/admin/config/search/search-api/server/{search_api_server}/solr_field_type/{solr_field_type}/disable';
+    $links['enable-for-server'] = '/admin/config/search/search-api/server/{search_api_server}/solr_field_type/{solr_field_type}/enable';
+    $entity_type->set('links', $links);
+    $manager->updateEntityType($entity_type);
+  }
+
+  // search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Adds missing solr.ElisionFilterFactory to text_fr field query analyzer.
+ */
+function search_api_solr_update_8332() {
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (strpos($field_type_name, 'search_api_solr.solr_field_type.text_fr') === 0) {
+      foreach ($field_type_config['field_type']['analyzers'] as $key => $analyzer) {
+        if ($analyzer['type'] === 'index') {
+          $index_analyzer = $analyzer;
+        }
+        if ($analyzer['type'] === 'query') {
+          $query_analyzer = $analyzer;
+          $query_analyzer_key = $key;
+        }
+      }
+      // Retrieve the filter position in the index analyzer:
+      foreach ($index_analyzer['filters'] as $filter_position => $filter) {
+        if ($filter['class'] === 'solr.ElisionFilterFactory') {
+          $elision_filter_position = $filter_position;
+        }
+      }
+      $proceed_update = TRUE;
+      foreach ($query_analyzer['filters'] as $filter_position => $filter) {
+        if ($filter['class'] === 'solr.ElisionFilterFactory') {
+          $proceed_update = FALSE;
+        }
+      }
+      // Adds the filter to the query if it isn't already in it:
+      if ($proceed_update) {
+        array_splice($query_analyzer['filters'], $elision_filter_position, 0, [['class' => 'solr.ElisionFilterFactory']]);
+        $field_type_config['field_type']['analyzers'][$query_analyzer_key] = $query_analyzer;
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+}
+
+/**
+ * Remove obsolete states and fix pt-pt and pt-br Solr field types.
+ */
+function search_api_solr_update_8401() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    \Drupal::state()
+      ->delete('search_api_solr.' . $server_name . '.schema_parts');
+  }
+
+  foreach (['br', 'pt'] as $locale) {
+    search_api_solr_update_helper_replace_field_type('search_api_solr.solr_field_type.text_pt-' . $locale . '_7_0_0');
+  }
+}
+
+/**
+ * Set index_single_documents_fallback_count to default.
+ */
+function search_api_solr_update_8402() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (!isset($backend_config['index_single_documents_fallback_count'])) {
+      $backend_config['index_single_documents_fallback_count'] = 10;
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+}
+
+/**
+ * Solve German umlaut edge cases for plural forms.
+ */
+function search_api_solr_update_8403() {
+  // Covered search_api_solr_update_8407().
+}
+
+/**
+ * Migrate skip_schema_check configuration from server to connector plugin.
+ */
+function search_api_solr_update_8404() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    $backend_config['connector_config']['skip_schema_check'] = $backend_config['skip_schema_check'];
+    unset($backend_config['skip_schema_check']);
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+}
+
+/**
+ * Make fallback field type cardinality configurable.
+ */
+function search_api_solr_update_8405() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    // BC: the hardcoded fallback was 'multiple'.
+    $backend_config['fallback_multiple'] = TRUE;
+    search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+  }
+}
+
+/**
+ * Make term modifiers configurable.
+ */
+function search_api_solr_update_8406() {
+  foreach (search_api_solr_update_helper_get_index_third_party_settings() as $index_id => $third_party_settings) {
+    if (!isset($third_party_settings['term_modifiers'])) {
+      $third_party_settings['term_modifiers'] = [
+        // BC.
+        'slop' => 10000000,
+        'fuzzy' => 2,
+      ];
+      search_api_solr_update_helper_save_index_third_party_settings($index_id, $third_party_settings);
+    }
+  }
+}
+
+/**
+ * Solve German synonyms.
+ */
+function search_api_solr_update_8407() {
+  foreach (['6_0_0', '7_0_0', 'scientific_6_0_0', 'scientific_7_0_0'] as $version) {
+    search_api_solr_update_helper_replace_field_type('search_api_solr.solr_field_type.text_de_' . $version);
+  }
+}
+
+/**
+ * Improved Japanese field type.
+ */
+function search_api_solr_update_8408() {
+  // Covered search_api_solr_update_8409().
+}
+
+/**
+ * Add Hungarian field type.
+ */
+function search_api_solr_update_8409() {
+  // search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Allow to turn off the distrib parameter for Solr Cloud.
+ */
+function search_api_solr_update_8410() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (!isset($backend_config['connector_config']['distrib']) && (strpos($backend_config['connector'], 'solr_cloud') === 0)) {
+      $backend_config['connector_config']['distrib'] = TRUE;
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+}
+
+/**
+ * Handle American and British synonyms and Māori macrons.
+ */
+function search_api_solr_update_8411() {
+  foreach (['6_0_0', '7_0_0'] as $version) {
+    search_api_solr_update_helper_replace_field_type('search_api_solr.solr_field_type.text_en_' . $version);
+  }
+}
+
+/**
+ * Add support for hostContext parameter for Solr Cloud.
+ */
+function search_api_solr_update_8412() {
+  foreach (search_api_solr_update_helper_get_backend_configs() as $server_name => $backend_config) {
+    if (!isset($backend_config['connector_config']['context']) && (strpos($backend_config['connector'], 'solr_cloud') === 0)) {
+      $backend_config['connector_config']['context'] = 'solr';
+      search_api_solr_update_helper_save_backend_config($server_name, $backend_config);
+    }
+  }
+}
+
+/**
+ * Add fulltext string field type.
+ */
+function search_api_solr_update_8413() {
+  // search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Configure language-specific field usage individually per index.
+ */
+function search_api_solr_update_8414() {
+  foreach (search_api_solr_update_helper_get_index_third_party_settings() as $index_id => $third_party_settings) {
+    if (!isset($third_party_settings['multilingual']) || !isset($third_party_settings['multilingual']['specific_languages'])) {
+      $third_party_settings['multilingual']['specific_languages'] = [];
+      search_api_solr_update_helper_save_index_third_party_settings($index_id, $third_party_settings);
+    }
+  }
+}
+
+/**
+ * Offer language undefined as fallback language.
+ */
+function search_api_solr_update_8415() {
+  foreach (search_api_solr_update_helper_get_index_third_party_settings() as $index_id => $third_party_settings) {
+    if (!isset($third_party_settings['multilingual']) || !isset($third_party_settings['multilingual']['use_language_undefined_as_fallback_language'])) {
+      $third_party_settings['multilingual']['use_language_undefined_as_fallback_language'] = FALSE;
+      search_api_solr_update_helper_save_index_third_party_settings($index_id, $third_party_settings);
+    }
+  }
+}
+
+/**
+ * Configurable language-specific collations.
+ */
+function search_api_solr_update_8416() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (
+      $field_type_config['field_type_language_code'] === LanguageInterface::LANGCODE_NOT_SPECIFIED &&
+      !empty($field_type_config['collated_field_type'])
+    ) {
+      $field_type_config['collated_field_type']['locale'] = NULL;
+      search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+    }
+  }
+
+  foreach (search_api_solr_update_helper_get_index_third_party_settings() as $index_id => $third_party_settings) {
+    if (!isset($third_party_settings['multilingual']) || !isset($third_party_settings['multilingual']['use_universal_collation'])) {
+      $third_party_settings['multilingual']['use_universal_collation'] = FALSE;
+      search_api_solr_update_helper_save_index_third_party_settings($index_id, $third_party_settings);
+    }
+  }
+}
+
+/**
+ * Adds missing solr.FlattenGraphFilterFactory to index analyzers.
+ */
+function search_api_solr_update_8417() {
+  // Moved to search_api_solr_update_8419().
+}
+
+/**
+ * Replace WhitespaceTokenizer with StandardTokenizer.
+ */
+function search_api_solr_update_8418() {
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (str_starts_with($field_type_name, 'search_api_solr.solr_field_type.text_')) {
+      $save = FALSE;
+
+      foreach (['field_type', 'unstemmed_field_type'] as $field_type) {
+        if (array_key_exists($field_type, $field_type_config) && isset($field_type_config[$field_type]['analyzers'])) {
+          foreach ($field_type_config[$field_type]['analyzers'] as $key => $analyzer) {
+            if ($analyzer['tokenizer']['class'] === 'solr.WhitespaceTokenizerFactory') {
+              $field_type_config[$field_type]['analyzers'][$key]['tokenizer']['class'] = 'solr.StandardTokenizerFactory';
+              $save = TRUE;
+            }
+          }
+        }
+      }
+
+      if ($save) {
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+}
+
+/**
+ * Adds missing solr.FlattenGraphFilterFactory to index analyzers.
+ */
+function search_api_solr_update_8419() {
+
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (str_starts_with($field_type_name, 'search_api_solr.solr_field_type.text_')) {
+      foreach (['field_type', 'unstemmed_field_type'] as $field_type) {
+        if (array_key_exists($field_type, $field_type_config) && isset($field_type_config[$field_type]['analyzers'])) {
+          $graph_filter_position = -1;
+          $index_analyzer = NULL;
+          $index_analyzer_key = -1;
+          foreach ($field_type_config[$field_type]['analyzers'] as $key => $analyzer) {
+            if ($analyzer['type'] === 'index') {
+              $index_analyzer = $analyzer;
+              $index_analyzer_key = $key;
+              break;
+            }
+          }
+
+          if ($index_analyzer) {
+            // Retrieve the filter position in the index analyzer:
+            foreach ($index_analyzer['filters'] as $filter_position => $filter) {
+              if ($filter['class'] === 'solr.WordDelimiterGraphFilterFactory') {
+                $graph_filter_position = $filter_position;
+              }
+              if ($graph_filter_position >= 0 && $filter['class'] === 'solr.FlattenGraphFilterFactory') {
+                if ($filter_position > $graph_filter_position) {
+                  continue 2;
+                }
+              }
+            }
+            // Adds the filter to the query if it isn't already in it.
+            if ($graph_filter_position >= 0) {
+              array_splice($index_analyzer['filters'], $graph_filter_position + 1, 0, [['class' => 'solr.FlattenGraphFilterFactory']]);
+              $field_type_config[$field_type]['analyzers'][$index_analyzer_key] = $index_analyzer;
+              search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Add Solr 9 configs, don't build suggesters on commit, add offsets for unified highlighter.
+ */
+function search_api_solr_update_8420() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (str_starts_with($field_type_name, 'search_api_solr.solr_field_type.text_')) {
+      $save = FALSE;
+
+      foreach (['field_type', 'unstemmed_field_type', 'spellcheck_field_type'] as $field_type) {
+        if (isset($field_type_config[$field_type]['positionIncrementGap']) && !isset($field_type_config[$field_type]['storeOffsetsWithPositions'])) {
+          $field_type_config[$field_type]['storeOffsetsWithPositions'] = TRUE;
+          $save = TRUE;
+        }
+      }
+
+      if (!empty($field_type_config['solr_configs']) && !empty($field_type_config['solr_configs']['searchComponents'])) {
+        foreach ($field_type_config['solr_configs']['searchComponents'] as &$component) {
+          if ($component['name'] === 'suggest') {
+            foreach ($component['lst'] as &$lst) {
+              foreach ($lst['str'] as &$entry) {
+                if ($entry['name'] === 'buildOnCommit') {
+                  $entry['VALUE'] = 'false';
+                  $save = TRUE;
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if ($save) {
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+
+  // search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Install new Korean configs.
+ */
+function search_api_solr_update_8421() {
+  search_api_solr_update_helper_install_configs();
+}
+
+/**
+ * Build suggesters in dedicated directories per language.
+ */
+function search_api_solr_update_8422() {
+  foreach (search_api_solr_update_helper_get_field_type_configs() as $field_type_name => $field_type_config) {
+    if (str_starts_with($field_type_name, 'search_api_solr.solr_field_type.text_')) {
+      $save = FALSE;
+
+      if (!empty($field_type_config['solr_configs']) && !empty($field_type_config['solr_configs']['searchComponents'])) {
+        foreach ($field_type_config['solr_configs']['searchComponents'] as &$component) {
+          if ($component['name'] === 'suggest') {
+            foreach ($component['lst'] as &$lst) {
+              $name = '.';
+              foreach ($lst['str'] as &$entry) {
+                if ($entry['name'] === 'name') {
+                  $name = $entry['VALUE'];
+                }
+                if ($entry['name'] === 'indexPath') {
+                  break(2);
+                }
+              }
+              $lst['str'][] = [
+                'name' => 'indexPath',
+                'VALUE' => './' . $name,
+              ];
+              $save = TRUE;
+            }
+          }
+        }
+      }
+
+      if ($save) {
+        search_api_solr_update_helper_save_field_type_config($field_type_name, $field_type_config);
+      }
+    }
+  }
+}

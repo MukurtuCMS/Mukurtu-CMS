@@ -1,0 +1,16 @@
+field.field_settings.geolocation_gpx_file:
+  type: field.field_settings.file
+
+field.storage_settings.geolocation_gpx_file:
+  type: field.storage_settings.file
+
+field.widget.settings.geolocation_gpx_file:
+  type: field.widget.settings.file_generic
+
+field.formatter.settings.geolocation_gpx_file:
+  type: field.formatter.settings.geolocation_map
+  label: 'Geolocation GPX File Formatter'
+  mapping:
+    data_provider_settings:
+      label: 'Data provider settings'
+      type: geolocation.data_provider.geolocation_gpx

@@ -1,0 +1,32 @@
+@function icon($name) {
+  @return url(map-get($sprites, $name));
+}
+
+@mixin visually-hidden {
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  width: 1px;
+  height: 1px;
+  word-wrap: normal;
+}
+
+@mixin hr-after {
+  ::after {
+    width: 100%;
+    margin-right: -20px;
+    margin-left: -20px;
+    content: "";
+    border-bottom: 1px solid blue;
+  }
+}
+
+@mixin hr-before {
+  ::after {
+    width: 100%;
+    margin-right: -20px;
+    margin-left: -20px;
+    content: "";
+    border-bottom: 1px solid blue;
+  }
+}

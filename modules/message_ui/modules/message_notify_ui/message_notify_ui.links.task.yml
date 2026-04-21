@@ -1,0 +1,5 @@
+message.message_notify:
+  route_name:  entity.message.notify_form
+  base_route:  entity.message.canonical
+  title: Notify
+  weight: 30

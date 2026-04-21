@@ -1,0 +1,192 @@
+:where(*),
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) {
+  .gin-sticky-form-actions {
+    display: flex;
+    gap: var(--gin-spacing-xs);
+
+    > * {
+      margin-inline: 0 !important;
+    }
+
+    // Hide if no items are present.
+    [data-drupal-selector="edit-status"]:empty,
+    .gin-more-actions:has(> .gin-more-actions__menu:empty) {
+      display: none;
+    }
+
+    .gin-more-actions {
+      position: relative;
+
+      &__menu {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        inset-block-start: 100%;
+        inset-inline-end: 0;
+        min-width: 152px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        padding: var(--gin-spacing-xs);
+        background-color: var(--gin-bg-layer3);
+        border-radius: var(--gin-border-l);
+        box-sizing: border-box;
+        box-shadow: var(--gin-shadow-l2);
+
+        @media (prefers-reduced-motion: no-preference) {
+          transition: opacity var(--gin-transition-fast);
+        }
+
+        // Increase order.
+        .action-link.action-link,
+        a:not(.button--danger):not(.action-link--danger),
+        .button.button {
+          font-size: var(--gin-font-size-xs);
+          font-weight: var(--gin-font-weight-semibold);
+          line-height: 1;
+          text-align: start;
+          text-decoration: none;
+          width: 100%;
+          max-width: 240px;
+          padding-block: var(--gin-spacing-xs);
+          padding-inline: var(--gin-spacing-s);
+          margin: 0 !important;
+          border: 0 !important;
+          border-radius: var(--gin-border-s);
+          box-shadow: none;
+          box-sizing: border-box;
+        }
+
+        a:not(.button--danger):not(.action-link--danger),
+        .action-link:not(.action-link--danger) {
+          &:hover,
+          &:active {
+            color: var(--gin-color-button-text);
+            background-color: var(--gin-color-primary);
+
+            &::before {
+              background-color: var(--gin-bg-layer) !important;
+            }
+          }
+        }
+
+        .action-link--danger:hover:focus {
+          border: none !important;
+        }
+
+        // Fix throbber position
+        > * + .ajax-progress--throbber {
+          z-index: 1;
+          position: absolute;
+          right: var(--gin-spacing-xxxs);
+          top: var(--gin-spacing-m);
+        }
+      }
+
+      &__trigger {
+        cursor: pointer;
+        background: transparent;
+        display: block;
+        height: 32px;
+        width: 32px;
+        margin-inline: calc(var(--gin-spacing-xxs) * -1);
+        border-radius: var(--gin-border-m);
+
+        @media (prefers-reduced-motion: no-preference) {
+          transition: background var(--gin-transition-fast);
+        }
+
+        &::before {
+          display: inline-block;
+          width: 100%;
+          height: 100%;
+          content: "";
+          mask-repeat: no-repeat;
+          mask-position: center center;
+          background-color: var(--gin-icon-color);
+          mask-image: icon('more');
+          mask-size: var(--gin-icon-size-toolbar-secondary) var(--gin-icon-size-toolbar-secondary);
+          border-radius: 50%;
+        }
+
+        &:hover, &:focus {
+          background-color: var(--gin-color-primary-light);
+
+          &::before {
+            background-color: var(--gin-color-primary);
+          }
+        }
+
+        &.is-active {
+          background-color: var(--gin-color-primary-light-hover);
+
+          &::before {
+            background-color: var(--gin-color-primary-active);
+          }
+        }
+      }
+
+      &__trigger[aria-expanded="true"] {
+        ~ .gin-more-actions__menu {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        // Hide tooltip
+        ~ .gin-tooltip {
+          visibility: hidden;
+          opacity: 0;
+          transition: none !important;
+        }
+      }
+    }
+  }
+
+  // Hide actions if we preprocessed them.
+  .gin-sticky-form-actions--preprocessed ~ .layout-container form.gin--has-sticky-form-actions .gin-sticky-form-actions {
+    @include visually-hidden;
+    position: fixed !important;
+    inset-block-start: 0;
+  }
+
+  // Hide trigger in dialogs.
+  .ui-dialog-content .gin-more-actions__trigger {
+    display: none;
+  }
+
+  // Gutenberg alignment.
+  .edit-post-header .gin-sticky-form-actions {
+    margin-block-start: 0;
+  }
+}
+
+@keyframes gin-pseudo-throbber {
+  0% {
+    background-size: 8px 8px;
+    background-position: 16px 18px;
+  }
+  50% {
+    background-size: 32px 32px;
+    background-position: 4px 14px;
+  }
+  100% {
+    background-size: 8px 8px;
+    background-position: 16px 18px;
+  }
+}
+
+[data-drupal-selector="gin-sticky-edit-save"],
+[data-drupal-selector="gin-sticky-edit-preview"],
+[data-drupal-selector="gin-sticky-edit-delete"] {
+  background-repeat: no-repeat;
+  background-position: var(--gin-spacing-xs) center;
+}
+
+body:has([data-drupal-selector="edit-save"] + .ajax-progress) :where([data-drupal-selector="gin-sticky-edit-save"]),
+body:has([data-drupal-selector="edit-preview"] + .ajax-progress) :where([data-drupal-selector="gin-sticky-edit-preview"]),
+body:has([data-drupal-selector="edit-delete"] + .ajax-progress) :where([data-drupal-selector="gin-sticky-edit-delete"]) {
+  padding-left: var(--gin-spacing-xl);
+  background-image: icon('loader');
+  animation: gin-pseudo-throbber 1s linear infinite;
+}

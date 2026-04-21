@@ -1,0 +1,48 @@
+:where(*) .gin-tooltip,
+:where(*) .gin-tooltip-navigation,
+:where(*) .cloned-gin-tooltip-navigation,
+:where(*) .admin-toolbar__tooltip,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-tooltip,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-tooltip-navigation,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .cloned-gin-tooltip-navigation,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .admin-toolbar__tooltip {
+  z-index: 601;
+  position: absolute;
+  inset-block-start: var(--space-xs);
+  padding: var(--gin-spacing-xs) var(--gin-spacing-s);
+  font-size: var(--gin-font-size-xxs);
+  font-weight: var(--gin-font-weight-semibold);
+  font-variation-settings: initial;
+  white-space: nowrap;
+  color: white;
+  background-color: var(--gin-tooltip-bg);
+  box-shadow: var(--gin-shadow-l2);
+  border-radius: var(--gin-border-s);
+}
+
+:where(*) .gin-tooltip,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-tooltip {
+  visibility: hidden;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :where(*) .gin-tooltip,
+  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-tooltip {
+    transition: var(--gin-transition-fast);
+  }
+}
+
+:where(*) [data-gin-tooltip]:hover + .gin-tooltip,
+:where(*) [data-gin-tooltip]:focus + .gin-tooltip,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) [data-gin-tooltip]:hover + .gin-tooltip,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) [data-gin-tooltip]:focus + .gin-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+:where(*) html:not(.admin-toolbar-expanded) .toolbar-menu__item--level-1:not(.toolbar-menu__item--has-dropdown) .toolbar-link span,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) html:not(.admin-toolbar-expanded) .toolbar-menu__item--level-1:not(.toolbar-menu__item--has-dropdown) .toolbar-link span {
+  display: none;
+}
+

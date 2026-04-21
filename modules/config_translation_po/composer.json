@@ -1,0 +1,13 @@
+{
+    "name": "drupal/config_translation_po",
+    "type": "drupal-module",
+    "description": "Configuration Translations to po file",
+    "keywords": ["Drupal"],
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://www.drupal.org/project/config_translation_po",
+    "minimum-stability": "dev",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/config_translation_po",
+        "source": "https://git.drupalcode.org/project/config_translation_po"
+    }
+}

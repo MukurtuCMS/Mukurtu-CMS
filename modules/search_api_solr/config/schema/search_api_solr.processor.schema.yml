@@ -1,0 +1,66 @@
+plugin.plugin_configuration.search_api_processor.double_quote_workaround:
+  type: search_api.fields_processor_configuration
+  label: 'Double quote workaround processor configuration'
+  mapping:
+    replacement:
+      type: string
+      label: 'Replacement'
+
+plugin.plugin_configuration.search_api_processor.solr_boost_more_recent:
+  type: search_api.fields_processor_configuration
+  label: 'Boost more recent processor configuration'
+  mapping:
+    boosts:
+      type: sequence
+      label: 'Field-specific boosts'
+      orderby: key
+      sequence:
+        type: mapping
+        nullable: true
+        mapping:
+          boost:
+            type: float
+            label: 'boost'
+          resolution:
+            type: string
+            label: 'resolution'
+          m:
+            type: string
+            label: 'm'
+          a:
+            type: float
+            label: 'a'
+          b:
+            type: float
+            label: 'b'
+          support_future_dates:
+            type: boolean
+            label: 'Support future dates'
+
+plugin.plugin_configuration.search_api_processor.solr_regex_replace:
+  type: search_api.fields_processor_configuration
+  label: 'Regex Replace'
+  mapping:
+    regexes:
+      type: sequence
+      label: 'List of regexes'
+      sequence:
+        type: string
+        label: 'regex'
+    replacements:
+      type: sequence
+      label: 'List of replacements'
+      sequence:
+        type: string
+        label: 'replacement'
+    preserve_original:
+      type: boolean
+      label: 'Preserve original'
+
+search_api.property_configuration.dummy_field:
+  type: mapping
+  label: 'Dummy field'
+  mapping:
+    dummy_value:
+      type: string
+      label: 'Default dummy value'

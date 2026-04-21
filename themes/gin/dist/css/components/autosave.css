@@ -1,0 +1,7 @@
+#autosave-notification {
+  font-size: var(--gin-font-size-s);
+  inset-block-end: var(--gin-spacing-xs);
+  inset-inline-end: var(--gin-spacing-xs);
+  border-radius: var(--gin-border-xs);
+}
+

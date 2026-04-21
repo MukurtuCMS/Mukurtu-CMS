@@ -1,0 +1,12 @@
+dashboards.collection:
+  title: 'Dashboards'
+  route_name: entity.dashboard.collection
+  parent: system.admin_structure
+  description: 'Administer dashboard.'
+  weight: 2
+dashboards.dashboards_settings_form:
+  title: 'Dashboards Settings'
+  route_name: dashboards.dashboards_settings_form
+  description: 'Configuration settings form for the Dashboards module.'
+  parent: system.admin_config_system
+  weight: 99

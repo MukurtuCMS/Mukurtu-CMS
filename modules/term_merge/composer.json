@@ -1,0 +1,21 @@
+{
+    "name": "drupal/term_merge",
+    "type": "drupal-module",
+    "description": "Allows users to merge taxonomy terms in the same vocabulary together.",
+    "homepage": "https://www.drupal.org/project/term_merge",
+    "authors": [
+        {
+            "name": "legolasbo",
+            "homepage": "https://www.drupal.org/u/legolasbo"
+        },
+        {
+            "name": "daniel_j",
+            "homepage":"https://www.drupal.org/u/daniel_j"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/term_merge",
+        "source": "https://git.drupal.org/project/term_merge.git"
+    },
+    "license": "GPL-2.0-or-later"
+}

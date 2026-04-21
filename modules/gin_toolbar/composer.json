@@ -1,0 +1,31 @@
+{
+    "name": "drupal/gin_toolbar",
+    "type": "drupal-module",
+    "description": "Gin Toolbar for Frontend use",
+    "keywords": ["Drupal"],
+    "license": "GPL-2.0+",
+    "homepage": "https://www.drupal.org/project/gin_toolbar",
+    "minimum-stability": "dev",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/gin_toolbar",
+        "source": "http://cgit.drupalcode.org/gin_toolbar"
+    },
+    "authors": [
+        {
+            "name": "Sascha Eggenberger (saschaeggi)",
+            "homepage": "https://www.drupal.org/u/saschaeggi",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {},
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/saschaeggi"
+        },
+        {
+            "type": "other",
+            "url": "https://paypal.me/saschaeggi"
+        }
+    ]
+}

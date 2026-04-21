@@ -1,0 +1,119 @@
+geolocation.field.formatter.map.base:
+  type: mapping
+  label: 'Geolocation Map Formatter Base'
+  mapping:
+    set_marker:
+      type: boolean
+      label: 'Set marker at map center'
+    show_label:
+      type: boolean
+      label: 'Show title as label'
+    data_provider:
+      type: geolocation.data_provider.geolocation
+      label: 'Data provider'
+    common_map:
+      type: boolean
+      label: 'Display results on a common map'
+    show_delta_label:
+      type: boolean
+      label: 'Show delta marker label'
+    use_overridden_map_settings:
+      type: boolean
+      label: 'Use overridden map settings.'
+    title:
+      type: string
+      label: 'Title'
+    info_text:
+      type: text_format
+      label: 'Info Text'
+    replacement_patterns:
+      type: mapping
+      label: 'Replacement patterns'
+      mapping:
+        token_geolocation:
+          type: mapping
+          mapping:
+            token_items:
+              type: string
+              label: 'Token items'
+    centre:
+      type: sequence
+      label: 'Center option settings'
+      sequence:
+        type: plugin.plugin_configuration.geolocation.map_center_option.[%key]
+        label: 'The settings for a map center option'
+    map_provider_id:
+      type: string
+      label: 'Map provider ID'
+    map_provider_settings:
+      type: geolocation.map_provider.[%parent.map_provider_id]
+      label: 'Map provider settings'
+
+field.formatter.settings.geolocation_map:
+  type: geolocation.field.formatter.map.base
+  label: 'Geolocation Map Formatter'
+  mapping:
+    data_provider_settings:
+      label: 'Data provider settings'
+      type: geolocation.data_provider.geolocation_field_provider
+
+field.formatter.settings.geolocation_token:
+  type: mapping
+  label: 'Geolocation Token Formatter'
+  mapping:
+    tokenized_text:
+      type: text_format
+      label: 'Tokenized text'
+    token_help:
+      type: mapping
+      label: 'Token help'
+      mapping:
+        token_items:
+          type: string
+          label: 'Token items'
+
+geolocation.field.widget.map.base:
+  type: mapping
+  label: 'Geolocation Widget Base'
+  mapping:
+    auto_client_location:
+      type: string
+      label: 'Automatically use client location'
+    auto_client_location_marker:
+      type: string
+      label: 'Automatically set marker as well'
+    allow_override_map_settings:
+      type: integer
+      label: 'Allow override map settings.'
+    hide_textfield_form:
+      type: boolean
+      label: 'Hide textfields'
+    centre:
+      type: sequence
+      label: 'Center option settings'
+      sequence:
+        type: plugin.plugin_configuration.geolocation.map_center_option.[%key]
+        label: 'The settings for a map center option'
+
+field.value.geolocation:
+  type: mapping
+  label: 'Default value'
+  mapping:
+    lat:
+      type: text
+      label: 'Latitude'
+    lng:
+      type: text
+      label: 'Longitude'
+    lat_sin:
+      type: text
+      label: 'Support value'
+    lat_cos:
+      type: text
+      label: 'Support value'
+    lng_rad:
+      type: text
+      label: 'Support value'
+    data:
+      type: sequence
+      label: 'Catchall'

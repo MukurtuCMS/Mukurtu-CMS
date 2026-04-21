@@ -1,0 +1,7 @@
+services:
+  message_digest.manager:
+    class: Drupal\message_digest\DigestManager
+    arguments: ['@database', '@plugin.message_notify.notifier.manager', '@entity_type.manager', '@module_handler', '@message_digest.formatter', '@plugin.manager.mail', '@queue']
+  message_digest.formatter:
+    class: Drupal\message_digest\DigestFormatter
+    arguments: ['@entity_type.manager', '@renderer']

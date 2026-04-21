@@ -1,0 +1,12 @@
+type: module
+name: 'Search API node indexing test'
+description: 'Test module for testing indexing of nodes in Search API.'
+package: Testing
+dependencies:
+  - search_api:search_api_db
+hidden: true
+
+# Information added by Drupal.org packaging script on 2025-11-01
+version: '8.x-1.40'
+project: 'search_api'
+datestamp: 1762030918

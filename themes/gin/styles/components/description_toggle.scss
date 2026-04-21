@@ -1,0 +1,87 @@
+// Base wrapper
+.help-icon {
+  display: flex;
+}
+
+// Size of svg + border added by claro
+.help-icon__description-toggle {
+  all: unset;
+  flex-shrink: 0;
+  margin-block: .1rem 0;
+  margin-inline: .3rem var(--gin-spacing-m);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+
+  &:before {
+    background-color: var(--gin-icon-color);
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    mask-image: icon('help');
+    mask-repeat: no-repeat;
+    mask-position: center center;
+    mask-size: 100% 100%;
+  }
+
+  &:hover:before {
+    background-color: var(--gin-color-primary);
+  }
+}
+
+.form-type--checkbox,
+.form-type--radio {
+  > .help-icon__element-has-description {
+    display: flex;
+    align-items: normal;
+
+    > label {
+      margin-inline-start: 6px;
+    }
+  }
+}
+
+// Detail summary
+.field-group-details.help-icon__description-container .help-icon__description-toggle {
+  margin-block-start: 0;
+}
+
+// Fieldgroup adjustments
+fieldset:not(.fieldgroup) {
+  .help-icon {
+    > .fieldset__legend .fieldset__label {
+      padding-inline-end: 0;
+    }
+  }
+}
+
+.field-group-fieldset >,
+fieldset.media-library-widget,
+.field--type-datetime fieldset {
+  .help-icon {
+    > .help-icon__description-toggle {
+      margin-block-start: 1rem;
+    }
+  }
+
+  .fieldset__description {
+    padding-inline-start: var(--gin-spacing-m);
+
+    @include mq(small) {
+      padding-inline-start: var(--gin-spacing-l);
+    }
+  }
+}
+
+// System Modules Search fields
+.system-modules .table-filter .form-type--search,
+.system-modules-uninstall .table-filter .form-type--search {
+  position: relative;
+
+  .help-icon__description-toggle {
+    position: absolute;
+    inset-inline-end: calc(var(--gin-spacing-xs) * -1);
+    inset-block-start: var(--gin-spacing-m);
+  }
+}

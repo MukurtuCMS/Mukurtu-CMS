@@ -1,0 +1,13 @@
+type: module
+name: Migrate Plus
+description: 'Enhancements to core migration support'
+package: Migration
+core_version_requirement: '^10.5 || ^11'
+php: 8.2
+dependencies:
+  - drupal:migrate
+
+# Information added by Drupal.org packaging script on 2026-01-23
+version: '6.0.10'
+project: 'migrate_plus'
+datestamp: 1769180624

@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * @file
+ * Contains media_entity_soundcloud.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+
+/**
+ * Implements hook_help().
+ */
+function media_entity_soundcloud_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the media_entity_soundcloud module.
+    case 'help.page.media_entity_soundcloud':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Soundcloud integration for the Media Entity module.') . '</p>';
+      $output .= '<h3>' . t('Installation') . '</h3>';
+      $output .= '<p>
+                    <ol>
+                      <li>Enable the media and media_entity_soundcloud module.</li>
+                      <li>Go to <strong>/admin/structure/media </strong>and click Add media type to create a new
+                      bundle.</li>
+                      <li>Under <strong>Media source </strong> select Soundcloud.</li>
+                      <li>Save the bundle.</li>
+                    </ol>
+                  </p>';
+      $output .= '<h3>' . t('Configuration') . '</h3>';
+      $output .= '<p>
+                    <ol>
+                      <li>Go to the <strong> Manage display </strong>section for the media bundle.</li>
+                      <li>For the source fqield selected, select <strong> Soundcloud embed </strong> under <strong>Format</strong>.</li>
+                      <li>Click on the settings icon to configure the embedded player.</li>
+                      <li>Save.</li>
+                    </ol>
+                  </p>';
+      $output .= '<h3>' . t('Player configuration') . '</h3>';
+      $output .= '<p>
+                    <ol>
+                      <li>Type: Visual or Classic.</li>
+                      <li>Options: Autoplay, Hide related, Show comments, Show user, Show reposts.</li>
+                      <li>Width and height.</li>
+                    </ol>
+                  </p>';
+      return $output;
+    default:
+  }
+}
+/**
+ * Implements hook_theme().
+ */
+function media_entity_soundcloud_theme($existing, $type, $theme, $path) {
+  return [
+    'media_soundcloud_embed' => [
+      'variables' => [
+        'source_id' => NULL,
+        'secret_token' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'type' => NULL,
+        'color' => NULL,
+        'options' => [],
+        'title' => NULL,
+      ],
+      'file' => 'media_entity_soundcloud.theme.inc',
+    ],
+  ];
+}

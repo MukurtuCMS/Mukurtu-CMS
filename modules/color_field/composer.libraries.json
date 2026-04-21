@@ -1,0 +1,56 @@
+{
+    "name": "drupal/color_field",
+    "description": "Provides a color field type to store the color value and opacity",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "homepage": "https://drupal.org/project/color_field",
+    "authors": [
+        {
+            "name": "targoo",
+            "homepage": "https://www.drupal.org/user/431910",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Nick Dickinson-Wilde",
+            "homepage": "https://www.drupal.org/user/nickdickinsonwilde",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/color_field",
+        "source": "https://git.drupalcode.org/project/color_field"
+    },
+    "require": {
+        "bgrins/spectrum": "*",
+        "recurser/jquery-simple-color": "*"
+    },
+    "repositories": {
+        "bgrins/spectrum": {
+            "type": "package",
+            "package": {
+                "name": "bgrins/spectrum",
+                "version": "1.8.0",
+                "type": "drupal-library",
+                "dist": {
+                    "url": "https://github.com/bgrins/spectrum/archive/refs/tags/1.8.0.zip",
+                    "type": "zip"
+                },
+                "license": "MIT"
+            }
+        },
+        "recurser/jquery-simple-color": {
+            "type": "package",
+            "package": {
+                "name": "recurser/jquery-simple-color",
+                "version": "v1.2.3",
+                "type": "drupal-library",
+                "dist": {
+                    "url": "https://github.com/recurser/jquery-simple-color/archive/refs/tags/v1.2.3.zip",
+                    "type": "zip"
+                },
+                "license": "MIT"
+            }
+        }
+    }
+}

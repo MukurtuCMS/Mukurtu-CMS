@@ -1,0 +1,46 @@
+plugin.plugin_configuration.geolocation.location.first_row:
+  type: geolocation.location_settings
+  label: 'First row'
+
+plugin.plugin_configuration.geolocation.location.ipstack:
+  type: geolocation.location_settings
+  label: 'IpStack'
+  mapping:
+    settings:
+      type: mapping
+      label: 'IPStack settings'
+      mapping:
+        access_key:
+          type: string
+          label: 'Access key'
+
+plugin.plugin_configuration.geolocation.location.views_boundary_argument:
+  type: geolocation.location_settings
+  label: 'Views Boundary Argument'
+
+plugin.plugin_configuration.geolocation.location.views_entity_argument:
+  type: geolocation.location_settings
+  label: 'Views Entity Argument'
+
+plugin.plugin_configuration.geolocation.location.views_proximity_filter:
+  type: geolocation.location_settings
+  label: 'Views Proximity Filter'
+
+plugin.plugin_configuration.geolocation.location.views_proximity_argument:
+  type: geolocation.location_settings
+  label: 'Views Proximity Argument'
+
+plugin.plugin_configuration.geolocation.location.fixed_value:
+  type: geolocation.location_settings
+  label: 'Fixed coordinates'
+  mapping:
+    settings:
+      type: mapping
+      label: 'Fixed value settings'
+      mapping:
+        latitude:
+          type: string
+          label: 'Latitude'
+        longitude:
+          type: string
+          label: 'Longitude'

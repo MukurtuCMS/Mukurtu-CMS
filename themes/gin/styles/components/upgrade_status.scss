@@ -1,0 +1,73 @@
+.drupal-upgrade-status-summary-form tr.known-errors,
+.upgrade-status-error-list tr.rector-covered,
+.upgrade-status-next-step-collaborate tr,
+.upgrade-status-error-list tr.no-known-error,
+.upgrade-status-next-step-relax tr,
+.upgrade-status-summary-environment tr.no-known-error {
+  color: var(--gin-color-text);
+}
+
+.upgrade-status-summary > summary {
+  background-color: transparent;
+  border-block-end: 1px solid transparent;
+}
+
+.upgrade-status-summary tr.not-scanned > td.status-info,
+.upgrade-status-error-list tr.no-known-error > td.status-info,
+.upgrade-status-summary tr.no-known-error > td.status-info,
+.upgrade-status-error-list tr.known-warnings > td.status-info,
+.upgrade-status-summary tr.known-warnings > td.status-info,
+.upgrade-status-error-list tr.known-errors > td.status-info,
+.upgrade-status-summary tr.known-errors > td.status-info {
+  position: relative;
+  background-image: none;
+
+  &:before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    position: absolute;
+    inset-inline-start: var(--gin-spacing-xs);
+    margin-block-start: 2px;
+  }
+}
+
+.upgrade-status-counter__status-icon--not-scanned:before {
+  mask-size: 24px 24px;
+}
+
+.upgrade-status-summary .select-all,
+.upgrade-status-summary th.project-label, .upgrade-status-summary th.requirement-label {
+  border-inline-start: var(--gin-border-m) solid var(--gin-bg-header);
+}
+
+.upgrade-status-error-list tr.rector-covered,
+.upgrade-status-next-step-collaborate tr,
+.upgrade-status-error-list tr.no-known-error,
+.upgrade-status-next-step-relax tr,
+.upgrade-status-summary-environment tr.no-known-error {
+  background-color: transparent;
+}
+
+.upgrade-status-summary > summary,
+.upgrade-status-summary-environment > summary {
+  background-color: transparent;
+  border-block-end: 0 none;
+}
+
+// Passed
+.drupal-upgrade-status-summary-form tr.no-known-error {
+  color: var(--gin-color-green);
+}
+
+// Warning
+.upgrade-status-next-step-remove tr,
+.drupal-upgrade-status-summary-form tr.known-warnings {
+  color: var(--gin-color-warning);
+}
+
+// Error
+.drupal-upgrade-status-summary-form tr.known-errors {
+  color: var(--gin-color-danger);
+}

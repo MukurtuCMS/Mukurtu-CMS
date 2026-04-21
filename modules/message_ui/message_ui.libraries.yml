@@ -1,0 +1,9 @@
+message_ui.message:
+  version: VERSION
+  js:
+    js/message_ui.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - core/drupal.form

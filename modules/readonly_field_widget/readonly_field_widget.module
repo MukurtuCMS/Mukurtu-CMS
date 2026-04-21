@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for the readonly_field_widget module.
+ */
+
+use Drupal\Core\Entity\EntityFormInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\readonly_field_widget\Plugin\Field\FieldWidget\ReadonlyFieldWidget;
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function readonly_field_widget_field_widget_info_alter(array &$info) {
+  // Let the readonly field widget be useable on all field types.
+  $formatters = \Drupal::service('plugin.manager.field.formatter')->getDefinitions();
+  $field_types = [];
+  foreach ($formatters as $formatter) {
+    $field_types = array_merge($field_types, $formatter['field_types']);
+  }
+
+  $info['readonly_field_widget']['field_types'] = array_unique($field_types);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function readonly_field_widget_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  // Check that this is an entity form.
+  $form_object = $form_state->getFormObject();
+  if ($form_object instanceof EntityFormInterface) {
+
+    $entity = $form_object->getEntity();
+
+    // Set access to readonly widget items based on their view access.
+    $storage = $form_state->getStorage();
+    if ($entity instanceof FieldableEntityInterface && isset($storage['form_display'])) {
+      /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
+      $form_display = $storage['form_display'];
+    }
+    else {
+      return;
+    }
+    foreach ($form_display->getComponents() as $name => $options) {
+      $widget = $form_display->getRenderer($name);
+      if ($widget instanceof ReadonlyFieldWidget) {
+        $items = $entity->get($name);
+        $items->filterEmptyItems();
+        $form[$name]['#access'] = $items->access('view');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function readonly_field_widget_theme_suggestions_alter(array &$suggestions, array $variables, $hook) {
+  if ($hook !== 'field') {
+    return;
+  }
+
+  // 'field' template is already in the suggestions array, but core overrides it
+  // for node titles, which collides with readonly_field_widget behavior. Make
+  // 'field' the last template for titles when readonly is configured for it.
+  $parents = [];
+  if (isset($variables['element']['#parents'])) {
+    $parents = $variables['element']['#parents'];
+  }
+  $field_name = $variables['element']['#field_name'];
+  if (in_array('readonly_field', $parents) && $field_name == 'title') {
+    $suggestions[] = 'field';
+  }
+}

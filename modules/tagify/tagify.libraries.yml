@@ -1,0 +1,55 @@
+default:
+  js:
+    js/tagify.js: {}
+  css:
+    component:
+      css/tagify.css: {}
+  dependencies:
+    - core/jquery
+    - core/once
+    - core/drupal
+    - core/drupalSettings
+    - core/drupal.debounce
+    - core/sortable
+    - tagify/tagify
+    - tagify/tagify_polyfils
+
+gin:
+  css:
+    component:
+      css/gin.css: {}
+  dependencies:
+    - tagify/default
+
+claro:
+  css:
+    component:
+      css/claro.css: {}
+  dependencies:
+    - tagify/default
+
+tagify:
+  remote: https://github.com/yairEO/tagify
+  version: 4.35.4
+  license:
+    name: MIT
+    url: https://github.com/yairEO/tagify/blob/master/LICENSE
+    gpl-compatible: true
+  js:
+    //cdnjs.cloudflare.com/ajax/libs/tagify/4.35.4/tagify.min.js:
+      { type: external, minified: true }
+  css:
+    component:
+      //cdnjs.cloudflare.com/ajax/libs/tagify/4.35.4/tagify.min.css:
+        { type: external, minified: true }
+
+tagify_polyfils:
+  remote: https://github.com/yairEO/tagify
+  version: 4.35.4
+  license:
+    name: MIT
+    url: https://github.com/yairEO/tagify/blob/master/LICENSE
+    gpl-compatible: true
+  js:
+    //cdnjs.cloudflare.com/ajax/libs/tagify/4.35.4/tagify.polyfills.min.js:
+      { type: external, minified: true }

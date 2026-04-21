@@ -1,0 +1,9 @@
+message.template_add:
+  route_name: message.template_add
+  base_route: message.template_add
+  title: 'View'
+
+entity.message_template.edit_form:
+  title: 'Edit'
+  route_name: entity.message_template.edit_form
+  base_route: entity.message_template.edit_form

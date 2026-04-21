@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * @file
+ * Update hooks for the facets summary module.
+ */
+
+use Drupal\Core\Config\Entity\ConfigEntityUpdater;
+use Drupal\facets_summary\Entity\FacetsSummary;
+use Drupal\facets_summary\FacetsSummaryInterface;
+use Drupal\facets_summary\Plugin\facets_summary\processor\ResetFacetsProcessor;
+
+/**
+ * Convert summaries on Search Api facet sources to use the display plugin.
+ */
+function facets_summary_update_8001() {
+  /** @var \Drupal\facets_summary\FacetsSummaryInterface[] $entities */
+  $entities = FacetsSummary::loadMultiple();
+  foreach ($entities as $entity) {
+    $facetSourceId = $entity->getFacetSourceId();
+    $old_ids = ['views_page', 'views_block', 'views_rest'];
+
+    foreach ($old_ids as $id) {
+      if (strpos($facetSourceId, $id) !== FALSE) {
+        $new_id = str_replace($id . ':', 'search_api:' . $id . '__', $facetSourceId);
+        $entity->setFacetSourceId($new_id);
+        $entity->save();
+      }
+    }
+  }
+}
+
+/**
+ * Set reset link position default value for all existing Facet summary.
+ */
+function facets_summary_update_8002(&$sandbox = NULL) {
+  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'facets_summary', function ($facets_summary) {
+    $update = FALSE;
+
+    if ($facets_summary instanceof FacetsSummaryInterface) {
+      $processor_settings = $facets_summary->getProcessorConfigs();
+
+      if (isset($processor_settings['reset_facets'])) {
+        $processor_settings['reset_facets']['settings']['position'] = ResetFacetsProcessor::POSITION_BEFORE;
+        $facets_summary->addProcessor($processor_settings['reset_facets']);
+        $update = TRUE;
+      }
+    }
+
+    return $update;
+  });
+}
+
+/**
+ * Replace facet source rendered processor by facet summary property.
+ */
+function facets_summary_update_8003(&$sandbox = NULL) {
+  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'facets_summary', function ($facets_summary) {
+    $update = FALSE;
+
+    if ($facets_summary instanceof FacetsSummaryInterface) {
+      $processor_settings = $facets_summary->getProcessorConfigs();
+
+      if (isset($processor_settings['hide_when_not_rendered'])) {
+        $facets_summary->setOnlyVisibleWhenFacetSourceIsVisible(TRUE);
+        $facets_summary->removeProcessor('hide_when_not_rendered');
+        $update = TRUE;
+      }
+    }
+
+    return $update;
+  });
+}

@@ -1,0 +1,19 @@
+.facets-widget-searchbox_checkbox .facets-widget-searchbox {
+  margin-bottom: 1rem;
+}
+
+.facets-widget-searchbox_links .facets-widget-searchbox {
+  margin-bottom: 1rem;
+}
+
+.facets-widget-searchbox_links .facet-item--expanded .facets-widget-searchbox,
+.facets-widget-searchbox_links
+  .facet-item--expanded
+  .facets-widget-searchbox-no-result {
+  display: none;
+}
+
+.facets-widget-searchbox-no-result.hide,
+.hide-if-no-result.hide {
+  display: none;
+}

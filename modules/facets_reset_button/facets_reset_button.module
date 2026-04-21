@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Module file for facets reset button.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function facets_reset_button_theme($existing, $type, $theme, $path) {
+  return [
+    'facets_reset_button' => [
+      'variables' => ['link' => NULL],
+    ],
+  ];
+}

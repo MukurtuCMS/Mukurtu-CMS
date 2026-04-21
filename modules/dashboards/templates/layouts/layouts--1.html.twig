@@ -1,0 +1,21 @@
+<section {{ attributes.addClass('layouts-dashboards-1', 'layouts-dashboards') }}>
+  <div class="drow">
+    {% if content.one %}
+    <div {{ region_attributes.one }}>
+      {{ content.one }}
+    </div>
+    {% endif %}
+    {% if content.two %}
+    <div {{ region_attributes.two }}>
+      {{ content.two }}
+    </div>
+    {% endif %}
+  </div>
+  {% if content.three %}
+  <div class="drow">
+    <div {{ region_attributes.three }}>
+      {{ content.three }}
+    </div>
+  </div>
+  {% endif %}
+</section>

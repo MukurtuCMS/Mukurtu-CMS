@@ -1,0 +1,31 @@
+# Message UI permissions.
+bypass message access control:
+  title: Bypass message access control
+  description: Grant to the user the permission to apply CRUD option on any messages. Grant this permission to trusty users!
+
+update tokens:
+  title: Manage the message tokens
+  description: Grant to the user the permission to update the tokens of the message - manually or automatically with a checkbox
+
+view any message template:
+  title: View any message template
+  description: Allowing to view message from any message template
+
+edit any message template:
+  title: Edit any message template
+  description: Allowing to edit message from any message template
+
+create any message template:
+  title: Create any message template
+  description: Allowing to create message from any message template
+
+delete any message template:
+  title: Delete any message template
+  description: Allowing to delete message from any message template
+
+permission_callbacks:
+  - \Drupal\message_ui\MessagePermissions::messageTemplatePermissions
+
+delete multiple messages:
+  title: 'Delete multiple messages'
+  description: 'Allow user to delete multiple messages'

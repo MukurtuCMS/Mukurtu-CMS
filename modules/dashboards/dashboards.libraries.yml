@@ -1,0 +1,29 @@
+chart:
+  version: 1.x
+  css:
+    theme:
+      css/chart.css: {}
+  js:
+    js/es/chart.js: {}
+  dependencies:
+    - core/drupal.dialog.ajax
+
+layouts:
+  version: 1.x
+  css:
+    theme:
+      css/layouts.css: {}
+
+core:
+  version: 1.x
+  css:
+    theme:
+      css/dashboard.css: {}
+  dependencies:
+    - core/drupalSettings
+
+admin_list:
+  version: 1.x
+  css:
+    component:
+      css/admin-list.css: {}

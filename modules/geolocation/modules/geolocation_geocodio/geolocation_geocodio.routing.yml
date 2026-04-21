@@ -1,0 +1,7 @@
+geolocation_geocodio.settings:
+  path: '/admin/config/services/geolocation/geocodio'
+  defaults:
+    _form:  '\Drupal\geolocation_geocodio\Form\GeocodioSettings'
+    _title: 'Geocodio settings'
+  requirements:
+    _permission: 'configure geolocation'

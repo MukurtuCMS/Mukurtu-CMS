@@ -1,0 +1,11 @@
+name: Facets Reset Button
+description: Create new block to shown button for clean all facets filters.
+type: module
+core_version_requirement: ^9 || ^10 || ^11
+dependencies:
+  - facets:facets
+
+# Information added by Drupal.org packaging script on 2025-03-03
+version: '1.0.4'
+project: 'facets_reset_button'
+datestamp: 1740975195

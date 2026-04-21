@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - message
+id: message_save_action
+label: 'Save message'
+type: message
+plugin: message_save_action
+configuration: {  }

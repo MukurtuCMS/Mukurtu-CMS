@@ -1,0 +1,14 @@
+name: 'Config Translation PO'
+type: module
+description: 'Configuration Translations to PO file'
+core_version_requirement: ^9.3 || ^10 || ^11
+package: 'configuration'
+
+dependencies:
+  - drupal:locale
+  - drupal:config_translation
+
+# Information added by Drupal.org packaging script on 2024-11-27
+version: '1.0.1'
+project: 'config_translation_po'
+datestamp: 1732743224

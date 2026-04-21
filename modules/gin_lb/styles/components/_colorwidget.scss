@@ -1,0 +1,73 @@
+.colorwidget .glb-form-radios {
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-top: 0.5em;
+}
+
+.colorwidget .glb-form-type--radio .glb-form-item__label {
+  position: absolute !important;
+  z-index: 1 !important;
+  top: 100% !important;
+  left: -10px !important;
+  display: none !important;
+  visibility: hidden !important;
+  padding: 0.5em !important;
+  -webkit-transform: translateX(-50%) !important;
+  transform: translateX(-50%) !important;
+  color: #eee !important;
+  border-radius: 4px !important;
+  background: #222330 !important;
+}
+.colorwidget .glb-form-type--radio:hover .glb-form-item__label {
+  display: block !important;
+  visibility: visible !important;
+}
+
+.colorwidget .glb-form-type--radio {
+  position: relative !important;
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+  border-radius: 50% !important;
+}
+
+.colorwidget .glb-form-type--radio input {
+  width: 32px !important;
+  height: 32px !important;
+  margin-right: 0.5em !important;
+  cursor: pointer !important;
+  transform: translateY(0) !important;
+  border-color: #d4d4d8 !important;
+}
+
+.colorwidget .glb-form-type--radio input:checked {
+  border-color: transparent !important;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px #222330 !important;
+}
+.colorwidget .glb-form-type--radio input.color-css--transparent {
+  background: linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.1) 25%,
+      transparent 25%,
+      transparent 75%,
+      rgba(0, 0, 0, 0.1) 75%,
+      rgba(0, 0, 0, 0.1) 0
+    ),
+    linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.1) 25%,
+      transparent 25%,
+      transparent 75%,
+      rgba(0, 0, 0, 0.1) 75%,
+      rgba(0, 0, 0, 0.1) 0
+    ),
+    white !important;
+  background-position:
+    0 0,
+    5px 5px !important;
+  background-size:
+    10px 10px,
+    10px 10px !important;
+}

@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Helper module for token tests.
+ */
+
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\token_module_test\Hook\TokenModuleTestHooks;
+use Drupal\node\NodeInterface;
+use Drupal\token_module_test\Hook\TokenModuleTestTokensHooks;
+
+/**
+ * Implements hook_page_attachments().
+ */
+#[LegacyHook]
+function token_module_test_page_attachments() {
+  \Drupal::service(TokenModuleTestHooks::class)->pageAttachments();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave for Node entities.
+ */
+#[LegacyHook]
+function token_module_test_node_presave(NodeInterface $node) {
+  \Drupal::service(TokenModuleTestHooks::class)->nodePresave($node);
+}
+
+/**
+ * Implements hook_token_info()
+ */
+#[LegacyHook]
+function token_module_test_token_info() {
+  return \Drupal::service(TokenModuleTestTokensHooks::class)->tokenInfo();
+}

@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * @file
+ * Admin Theme Hook Implementations.
+ */
+
+use Drupal\Core\Form\FormState;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter() for system_themes_admin_form.
+ *
+ * @see admin_theme_form_system_themes_form_alter_submit()
+ */
+function admin_theme_form_system_themes_admin_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Include paths.
+  $paths = \Drupal::configFactory()->getEditable('admin_theme.settings')->get('paths');
+  /** @var \Drupal\Core\Condition\ConditionInterface $condition */
+  $condition = \Drupal::service('plugin.manager.condition')->createInstance('request_path', ['pages' => $paths]);
+  $form_state->set(['conditions', 'admin_theme_request_path'], $condition);
+
+  $form['admin_theme']['admin_theme_request_path'] = $condition->buildConfigurationForm([], $form_state);
+  $form['admin_theme']['admin_theme_request_path']['#tree'] = TRUE;
+  $form['admin_theme']['admin_theme_request_path']['#type'] = 'fieldset';
+  $form['admin_theme']['admin_theme_request_path']['#title'] = t('Include');
+  unset($form['admin_theme']['admin_theme_request_path']['negate']);
+
+  // Exclude paths.
+  $paths = \Drupal::configFactory()->getEditable('admin_theme.settings')->get('exclude_paths');
+  /** @var \Drupal\Core\Condition\ConditionInterface $condition */
+  $condition = \Drupal::service('plugin.manager.condition')->createInstance('request_path', ['pages' => $paths]);
+  $form_state->set(['conditions', 'admin_theme_exclude_path'], $condition);
+
+  $form['admin_theme']['admin_theme_exclude_path'] = $condition->buildConfigurationForm([], $form_state);
+  $form['admin_theme']['admin_theme_exclude_path']['#tree'] = TRUE;
+  $form['admin_theme']['admin_theme_exclude_path']['#type'] = 'fieldset';
+  $form['admin_theme']['admin_theme_exclude_path']['#title'] = t('Exclude');
+  unset($form['admin_theme']['admin_theme_exclude_path']['negate']);
+
+  $form['#submit'][] = 'admin_theme_form_system_themes_form_alter_submit';
+}
+
+/**
+ * Form submission handler for system_themes_admin_form.
+ *
+ * @see admin_theme_form_system_themes_admin_form_alter()
+ */
+function admin_theme_form_system_themes_form_alter_submit($form, FormStateInterface $form_state) {
+  // Include paths.
+  $condition = $form_state->get(['conditions', 'admin_theme_request_path']);
+  $condition_values = (new FormState())->setValues($form_state->getValue('admin_theme_request_path'));
+
+  $condition->submitConfigurationForm($form, $condition_values);
+  $condition_configuration = $condition->getConfiguration();
+
+  \Drupal::configFactory()->getEditable('admin_theme.settings')
+    ->set('paths', $condition_configuration['pages'])
+    ->save();
+
+  // Exclude paths.
+  $condition = $form_state->get(['conditions', 'admin_theme_exclude_path']);
+  $condition_values = (new FormState())->setValues($form_state->getValue('admin_theme_exclude_path'));
+
+  $condition->submitConfigurationForm($form, $condition_values);
+  $condition_configuration = $condition->getConfiguration();
+
+  \Drupal::configFactory()->getEditable('admin_theme.settings')
+    ->set('exclude_paths', $condition_configuration['pages'])
+    ->save();
+
+  \Drupal::service('router.builder')->setRebuildNeeded();
+}

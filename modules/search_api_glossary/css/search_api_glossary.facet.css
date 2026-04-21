@@ -1,0 +1,57 @@
+/**
+ * @file
+ * Facet styles for the Search API Glossary module.
+ */
+.block-facets ul {
+  overflow: hidden;
+}
+
+.block-facets .glossaryaz {
+  list-style: none;
+  text-align: center;
+  float: left;
+  margin: 1%;
+  width: 5%;
+  height: 5%;
+  min-width: 4em;
+  min-height: 4em;
+  text-transform: capitalize;
+  line-height: 4em;
+  font-weight: bold;
+  padding: 0;
+  font-family: sans-serif;
+  font-size: 1.1em;
+}
+
+.block-facets .glossaryaz.no-results {
+  background: #eaeaea;
+  border: 0 none;
+  color: #aaaaaa;
+}
+
+.block-facets .glossaryaz.yes-results {
+  background: #00a6ed;
+  border: 0 none;
+  color: #ffffff;
+}
+
+.block-facets .glossaryaz.yes-results a {
+  border: 0 none;
+  color: #ffffff;
+  display: block;
+}
+
+.block-facets .glossaryaz.yes-results a.is-inactive:hover {
+  background: #ffb400;
+  color: #ffffff;
+}
+
+.block-facets .glossaryaz.is-active {
+  background: #f6511d;
+  border: 0 none;
+}
+
+.block-facets .glossaryaz.is-active a {
+  border: 0 none;
+  color: #ffffff;
+}

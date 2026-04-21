@@ -1,0 +1,5 @@
+services:
+  plugin.manager.message_notify_ui_sender_settings_form:
+    class: Drupal\message_notify_ui\MessageNotifyUiSenderSettingsFormManager
+    parent: default_plugin_manager
+    arguments: ['@string_translation']

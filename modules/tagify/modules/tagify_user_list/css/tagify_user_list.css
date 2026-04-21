@@ -1,0 +1,122 @@
+/* Suggestions items */
+:root {
+  --tagify-dd-item-pad: .5em .7em;
+}
+
+.tagify__dropdown.users-list .tagify__dropdown__item {
+  display: grid;
+  grid-template-areas: "avatar name"
+  "avatar info_label";
+  grid-template-columns: auto 1fr;
+  gap: 0 1em;
+}
+
+.tagify__dropdown.users-list .tagify__dropdown__item:hover .tagify__dropdown__item__avatar-wrap {
+  transform: scale(1.1);
+}
+
+.tagify__dropdown.users-list .tagify__dropdown__item__avatar-wrap {
+  overflow: hidden;
+  grid-area: avatar;
+  width: 30px;
+  height: 30px;
+  transition: .1s ease-out;
+  border-radius: 50%;
+  background: #eee;
+}
+
+.tagify__dropdown.users-list img {
+  width: 100%;
+  vertical-align: top;
+}
+
+.tagify__dropdown.users-list header.tagify__dropdown__item > div,
+.tagify__dropdown.users-list .tagify__dropdown__item strong {
+  grid-area: name;
+  align-self: center;
+  width: 100%;
+}
+
+.tagify__dropdown.users-list span {
+  grid-area: info_label;
+  width: 100%;
+  opacity: .6;
+  font-size: .9em;
+}
+
+.tagify__dropdown.users-list .tagify__dropdown__count {
+  padding: 0.5rem;
+  color: #000;
+  border-bottom: 1px solid #ddd;
+  background-color: #fff;
+  font-weight: 400;
+}
+
+/* Tags items */
+.tagify__tag {
+  white-space: nowrap;
+}
+
+.tagify__tag img {
+  width: 100%;
+  vertical-align: top;
+  pointer-events: none;
+}
+
+.tagify__tag .tagify__tag__avatar-wrap {
+  width: 20px;
+  height: 20px;
+  transition: .12s ease-out;
+  white-space: normal;
+  border-radius: 50%;
+  background: silver;
+}
+
+.tagify__dropdown__item-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tagify__dropdown-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.tagify__dropdown__item .tagify__dropdown__item__avatar-wrap {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
+}
+
+.tagify.form-element--api-entity-autocomplete-tagify-user-list:focus-within {
+  box-shadow: 0 0 0 2px var(--color-white),
+  0 0 0 5px var(--color-focus),
+  inset 0 0 0 var(--input-border-size) var(--input--hover-border-color) !important;
+}
+
+.tagify.form-element--api-entity-autocomplete-tagify-user-list {
+  background-image: url("data:image/svg+xml,%3csvg width='40' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 1C3.46.827-.188 5.787 1.313 10.068c1.176 4.384 6.993 6.417 10.637 3.7.326-.39.565.276.846.442l3.74 3.739 1.413-1.414-4.35-4.35c2.811-3.468 1.15-9.247-3.062-10.71A7.003 7.003 0 008 1zm0 2c3.242-.123 5.849 3.42 4.777 6.477-.842 3.132-4.994 4.58-7.6 2.65-2.745-1.73-2.9-6.125-.285-8.044A5.006 5.006 0 018 3z' fill='%23868686'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: 100% 50%;
+}
+
+.tagify.tagify--loading.form-element--api-entity-autocomplete-tagify-user-list {
+  background-image: none;
+}
+
+/* Loading text */
+
+.tagify--loading-text {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  max-width: 100%;
+  margin-bottom: 0.15rem;
+  color: var(--color-link);
+  font-size: var(--font-size-xxs);
+  font-weight: bold;
+  line-height: calc(18rem / 16);
+}
+
+.tagify--loading .tagify--loading-text.hidden {
+  display: block;
+}

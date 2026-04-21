@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * paragraphs.theme
+ */
+
+/**
+ * Implements hook_preprocess_HOOK() for paragraphs operations dropbutton.
+ */
+function gin_preprocess_links__dropbutton__operations__paragraphs(&$variables) {
+  $variables['attributes']['class'][] = 'dropbutton--small';
+}

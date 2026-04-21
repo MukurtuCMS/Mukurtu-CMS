@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.geolocation_us_states.field_geometry_data_geometry
+    - taxonomy.vocabulary.geolocation_us_states
+  module:
+    - geolocation_geometry
+  enforced:
+    module:
+      - geolocation_geometry_natural_earth_us_states
+id: taxonomy_term.geolocation_us_states.default
+targetEntityType: taxonomy_term
+bundle: geolocation_us_states
+mode: default
+content:
+  field_geometry_data_geometry:
+    weight: 0
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: geolocation_geometry_wkt
+    region: content
+hidden:
+  description: true

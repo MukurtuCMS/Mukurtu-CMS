@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.migrate_example_producer.migrate_example_wine_region
+    - node.type.migrate_example_producer
+  module:
+    - text
+    - user
+id: node.migrate_example_producer.teaser
+targetEntityType: node
+bundle: migrate_example_producer
+mode: teaser
+content: {  }
+hidden:
+  migrate_example_wine_region: true

@@ -1,0 +1,170 @@
+:where(*) .gin-breadcrumb,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb {
+  padding: 0;
+  color: var(--gin-color-text);
+  font-size: .79rem;
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb-wrapper,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb-wrapper {
+  min-width: 1px;
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__list,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding-inline-start: var(--gin-spacing-xxs);
+  margin-block-start: 0;
+  margin-inline-start: calc(var(--gin-spacing-xxs) * -1);
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__item,
+:where(*) .gin-breadcrumb .gin-breadcrumb__link,
+:where(*) .gin-breadcrumb .gin-breadcrumb__text,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__text {
+  display: inline;
+  font-weight: var(--gin-font-weight-normal);
+  color: var(--gin-color-text-light);
+  line-height: 1.5rem;
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__item,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item {
+  font-size: 0;
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__item + .gin-breadcrumb__item::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item + .gin-breadcrumb__item::before {
+  content: "/";
+  opacity: .3;
+  font-size: var(--gin-font-size-xs);
+  vertical-align: middle;
+  display: inline-block;
+  padding: 0 .5em;
+  background: none;
+}
+
+@media (forced-colors: active) {
+  :where(*) .gin-breadcrumb .gin-breadcrumb__item + .gin-breadcrumb__item::before,
+  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item + .gin-breadcrumb__item::before {
+    opacity: 1;
+  }
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link {
+  position: relative;
+  padding-inline-start: 1.75em;
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link::before {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  inset-block-start: calc(50% - 1px);
+  inset-inline-start: 0;
+  width: var(--gin-icon-size-toolbar-secondary);
+  height: var(--gin-icon-size-toolbar-secondary);
+  transform: translateY(-50%);
+  background-color: var(--gin-icon-color);
+  -webkit-mask-image: url("../../media/sprite.svg#backtosite-view");
+          mask-image: url("../../media/sprite.svg#backtosite-view");
+  -webkit-mask-size: 100% 100%;
+          mask-size: 100% 100%;
+  -webkit-mask-position: center center;
+          mask-position: center center;
+}
+
+@media (forced-colors: active) {
+  :where(*) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link::before,
+  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link::before {
+    background: linktext;
+  }
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link:hover::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link:hover::before {
+  background-color: var(--gin-color-primary);
+}
+
+@media (forced-colors: active) {
+  :where(*) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link:hover::before,
+  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item:first-of-type .gin-breadcrumb__link:hover::before {
+    background: linktext;
+  }
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__item:first-of-type + .gin-breadcrumb__item::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item:first-of-type + .gin-breadcrumb__item::before {
+  content: "";
+  opacity: .3;
+  border-inline-end: 1px solid var(--gin-color-text);
+  width: 1px;
+  height: 20px;
+  padding-inline-start: .75em;
+  padding-inline-end: 0;
+  margin-inline-end: .75em;
+}
+
+@media (forced-colors: active) {
+  :where(*) .gin-breadcrumb .gin-breadcrumb__item:first-of-type + .gin-breadcrumb__item::before,
+  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__item:first-of-type + .gin-breadcrumb__item::before {
+    opacity: 1;
+  }
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__link,
+:where(*) .gin-breadcrumb .gin-breadcrumb__text,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__text {
+  font-size: var(--gin-font-size-xs);
+  line-height: 2;
+  border-radius: var(--gin-border-xxs);
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__link, :where(*) .gin-breadcrumb .gin-breadcrumb__link:link, :where(*) .gin-breadcrumb .gin-breadcrumb__link:visited, :where(*) .gin-breadcrumb .gin-breadcrumb__link em, :where(*) .gin-breadcrumb .gin-breadcrumb__link em:link, :where(*) .gin-breadcrumb .gin-breadcrumb__link em:visited,
+:where(*) .gin-breadcrumb .gin-breadcrumb__text,
+:where(*) .gin-breadcrumb .gin-breadcrumb__text:link,
+:where(*) .gin-breadcrumb .gin-breadcrumb__text:visited,
+:where(*) .gin-breadcrumb .gin-breadcrumb__text em,
+:where(*) .gin-breadcrumb .gin-breadcrumb__text em:link,
+:where(*) .gin-breadcrumb .gin-breadcrumb__text em:visited,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link:link,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link:visited,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link em,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link em:link,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link em:visited,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__text,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__text:link,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__text:visited,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__text em,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__text em:link,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__text em:visited {
+  font-weight: var(--gin-font-weight-normal);
+  color: var(--gin-color-text-light);
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__link em,
+:where(*) .gin-breadcrumb .gin-breadcrumb__text em,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link em,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__text em {
+  font-style: italic;
+}
+
+:where(*) .gin-breadcrumb .gin-breadcrumb__link:hover, :where(*) .gin-breadcrumb .gin-breadcrumb__link:hover em,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link:hover,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-breadcrumb .gin-breadcrumb__link:hover em {
+  color: var(--gin-color-primary-hover);
+}
+

@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.flagging.message_digest
+    - flag.flag.email_user
+  module:
+    - options
+id: flagging.email_user.message_digest
+field_name: message_digest
+entity_type: flagging
+bundle: email_user
+label: 'Notification interval'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: 'message_digest_default_value_callback'
+settings: {  }
+field_type: list_string

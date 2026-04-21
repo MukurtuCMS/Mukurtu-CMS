@@ -1,0 +1,8 @@
+services:
+  term_reference_change.migrator:
+    class: Drupal\term_reference_change\ReferenceMigrator
+    arguments: ['@term_reference_change.reference_finder']
+
+  term_reference_change.reference_finder:
+    class: Drupal\term_reference_change\ReferenceFinder
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@entity_field.manager']

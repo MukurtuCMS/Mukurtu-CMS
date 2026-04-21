@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_geometry_data_description
+    - node.type.unesco_world_heritage
+  module:
+    - text
+  enforced:
+    module:
+      - geolocation_geometry_world_heritage
+id: node.unesco_world_heritage.field_geometry_data_description
+field_name: field_geometry_data_description
+entity_type: node
+bundle: unesco_world_heritage
+label: Description
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long

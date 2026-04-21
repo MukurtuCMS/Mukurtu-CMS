@@ -1,0 +1,41 @@
+search_api_solr.solr_request_handler.*:
+  type: config_entity
+  label: 'Solr Request Handler Config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    minimum_solr_version:
+      type: string
+      label: 'The minimum version the Solr server'
+    environments:
+      type: sequence
+      sequence:
+        type: string
+    recommended:
+      type: boolean
+    request_handler:
+      type: mapping
+      mapping:
+        name:
+          type: string
+          label: 'The Solr cache name'
+        class:
+          type: string
+          label: 'The Solr request handler class'
+        startup:
+          type: string
+          label: 'The startup behaviour'
+          nullable: true
+        lst:
+          type: search_api_solr.list
+          nullable: true
+        arr:
+          type: search_api_solr.list
+          nullable: true
+    solr_configs:
+      type: search_api_solr.solr_configs
+      nullable: true

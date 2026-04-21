@@ -1,0 +1,46 @@
+// Components
+@import "base/body";
+@import "base/color-overrides";
+
+:where(*),
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) {
+  @import "base/regions";
+  @import "base/layers";
+  @import "base/title";
+  @import "base/extend";
+  @import "base/claro_improvements";
+  @import "base/views";
+  @import "base/table";
+  @import "base/tabledrag";
+  @import "base/form";
+  @import "base/button";
+  @import "base/dropbutton";
+  @import "base/action-link";
+  @import "base/pager";
+  @import "base/help";
+  @import "base/system-report";
+  @import "base/messages";
+  @import "base/field-ui";
+  @import "base/card";
+  @import "base/elements";
+  @import "base/admin-item";
+  @import "base/focus";
+  @import "base/system-modules";
+  @import "base/system-diff";
+  @import "base/update";
+  @import "base/status-report";
+  @import "base/divider";
+  @import "base/progress";
+  @import "base/insert";
+  @import "base/system-themes";
+  @import "base/panel";
+  @import "base/blocks";
+  @import "base/batch";
+  @import "base/maxlength";
+  @import "base/local-actions";
+  @import "base/tour";
+  @import "base/quotation";
+  @import "base/image-preview";
+  @import "base/permissions";
+  @import "base/taxonomy";
+}

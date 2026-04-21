@@ -1,0 +1,30 @@
+
+table#edit-third-party-settings-geocoder-field-plugins .form-item input.error {
+  outline: solid red thin;
+}
+
+table.geocode-plugins-list {
+  thead th .options-field-description {
+    text-transform: none;
+    font-size: 0.95em;
+    font-weight: normal;
+  }
+  tr {
+    border-bottom-color: lightgray;
+    td {
+      .form-item {
+        margin: 0 !important;
+        label {
+          font-weight: normal !important;
+        }
+        input.error {
+          outline: solid red thin;
+        }
+        input[type="checkbox"] {
+          margin: 12px 0;
+        }
+      }
+    }
+  }
+
+}

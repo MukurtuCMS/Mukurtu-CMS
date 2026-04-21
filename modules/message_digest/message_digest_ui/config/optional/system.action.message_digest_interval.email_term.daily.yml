@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - message_digest_ui
+  flag:
+    - email_term
+  config:
+    - message_digest.interval.weekly
+id: message_digest_interval.email_term.daily
+label: 'Send notifications daily'
+type: taxonomy_term
+plugin: 'message_digest_interval:email_term:daily'
+configuration:
+  flag_id: email_term
+  value: 'message_digest:daily'

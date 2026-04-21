@@ -1,0 +1,69 @@
+search_api_solr_admin.solr_upload_configset_form:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr-admin/upload-configset'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  defaults:
+    _form: '\Drupal\search_api_solr_admin\Form\SolrUploadConfigsetForm'
+    _title: 'Upload Configset'
+  requirements:
+    _search_api_solr_admin_cloud_access_check: 'TRUE'
+    _search_api_solr_admin_trusted_context_supported_access_check: 'TRUE'
+    _permission: 'execute solr admin task'
+
+search_api_solr_admin.solr_reload_collection_form:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr-admin/reload-collection'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  defaults:
+    _form: '\Drupal\search_api_solr_admin\Form\SolrReloadCoreForm'
+    _title: 'Reload Collection'
+  requirements:
+    _search_api_solr_admin_cloud_access_check: 'TRUE'
+    _permission: 'execute solr admin task'
+
+search_api_solr_admin.solr_reload_core_form:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr-admin/reload-core'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  defaults:
+    _form: '\Drupal\search_api_solr_admin\Form\SolrReloadCoreForm'
+    _title: 'Reload Core'
+  requirements:
+    _search_api_solr_admin_access_check: 'TRUE'
+    _permission: 'execute solr admin task'
+
+search_api_solr_admin.solr_delete_collection_form:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr-admin/delete-collection'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  defaults:
+    _form: '\Drupal\search_api_solr_admin\Form\SolrDeleteCollectionForm'
+    _title: 'Delete Collection'
+  requirements:
+    _search_api_solr_admin_cloud_access_check: 'TRUE'
+    _permission: 'execute solr admin task'
+
+search_api_solr_admin.field_analysis:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr-admin/field-analysis'
+  defaults:
+    _form: '\Drupal\search_api_solr_admin\Form\SolrFieldAnalysisForm'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _search_api_solr_local_action_access_check: 'TRUE'
+    _permission: 'perform field analysis'

@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * Implements hook_migration_plugins_alter().
+ */
+function term_merge_migration_plugins_alter(array &$migrations) {
+  if ($migrations['d7_user_role']['process']['permissions'][0]['plugin'] ?? NULL === 'static_map') {
+    $migrations['d7_user_role']['process']['permissions'][0]['map']['merge terms'] = 'merge taxonomy terms';
+  }
+}

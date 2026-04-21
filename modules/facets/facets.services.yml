@@ -1,0 +1,54 @@
+services:
+  plugin.manager.facets.query_type:
+    class: Drupal\facets\QueryType\QueryTypePluginManager
+    parent: default_plugin_manager
+  plugin.manager.facets.widget:
+    class: Drupal\facets\Widget\WidgetPluginManager
+    parent: default_plugin_manager
+  plugin.manager.facets.facet_source:
+    class: Drupal\facets\FacetSource\FacetSourcePluginManager
+    parent: default_plugin_manager
+  plugin.manager.facets.processor:
+    class: Drupal\facets\Processor\ProcessorPluginManager
+    arguments: ['@container.namespaces', '@cache.discovery', '@module_handler', '@string_translation']
+  plugin.manager.facets.url_processor:
+    class: Drupal\facets\UrlProcessor\UrlProcessorPluginManager
+    parent: default_plugin_manager
+  plugin.manager.facets.hierarchy:
+    class: Drupal\facets\Hierarchy\HierarchyPluginManager
+    parent: default_plugin_manager
+  facets.manager:
+    class: Drupal\facets\FacetManager\DefaultFacetManager
+    arguments:
+      - '@plugin.manager.facets.query_type'
+      - '@plugin.manager.facets.facet_source'
+      - '@plugin.manager.facets.processor'
+      - '@entity_type.manager'
+      - '@current_route_match'
+  facets.utility.date_handler:
+    class: Drupal\facets\Utility\FacetsDateHandler
+    arguments:
+      - '@date.formatter'
+  facets.utility.url_generator:
+    class: Drupal\facets\Utility\FacetsUrlGenerator
+    arguments:
+      - '@plugin.manager.facets.url_processor'
+      - '@entity_type.manager'
+  facets.configuration_subscriber:
+    class: Drupal\facets\EventSubscriber\ConfigurationSubscriber
+    arguments: ['@plugin.manager.block']
+    tags:
+      - { name: event_subscriber }
+  facets.search_api_subscriber:
+    class: Drupal\facets\EventSubscriber\SearchApiSubscriber
+    arguments: ['@facets.manager']
+    tags:
+      - { name: event_subscriber }
+  facets.language_switcher_links_alterer:
+    class: Drupal\facets\LanguageSwitcherLinksAlterer
+    arguments: ['@language_manager', '@cache.default', '@entity_type.manager', '@plugin.manager.facets.url_processor']
+  cache_context.facets_filter:
+    class: Drupal\facets\Cache\Context\FacetsFilterCacheContext
+    arguments: ['@request_stack']
+    tags:
+      - { name: cache.context }

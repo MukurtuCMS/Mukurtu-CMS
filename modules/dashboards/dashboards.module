@@ -1,0 +1,193 @@
+<?php
+
+/**
+ * @file
+ * Contains dashboards.module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Template\Attribute;
+use Drupal\dashboards\Form\FormAlter;
+
+/**
+ * Implements hook_help().
+ */
+function dashboards_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+
+    case 'help.page.dashboards':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Place dashboards with layout builder functionality.') . '</p>';
+      $output .= '<p>';
+      $output .= t('Visit the <a href=":project_link">Dashboards project page</a> on Drupal.org for more information.', [
+        ':project_link' => 'https://www.drupal.org/project/dashboards',
+      ]);
+      $output .= '</p>';
+
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dashboards_theme() {
+  return [
+    'dashboards_admin_list' => [
+      'variables' => [
+        'attributes' => new Attribute(),
+        'list' => [],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements preprocess_admin_list().
+ */
+function dashboards_preprocess_dashboards_admin_list(&$variables) {
+  $variables['#attached']['library'][] = 'dashboards/admin_list';
+  foreach ($variables['list'] as $key => $item) {
+    $variables['list'][$key]['link_attributes'] = new Attribute([
+      'href' => $variables['list'][$key]['url']->toString(),
+      'title' => $variables['list'][$key]['title'],
+    ]);
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function dashboards_theme_registry_alter(&$info) {
+  if (
+    \Drupal::theme()->getActiveTheme()->getName() == 'gin'
+    || in_array('gin', array_keys(\Drupal::theme()->getActiveTheme()->getBaseThemeExtensions()))
+  ) {
+    $info['dashboards_admin_list']['theme path'] = \Drupal::moduleHandler()->getModule("dashboards")->getPath();
+    $info['dashboards_admin_list']['path'] = \Drupal::moduleHandler()->getModule("dashboards")->getPath() . '/templates/gin';
+  }
+}
+
+/**
+ * Implements hook_toolbar().
+ */
+function dashboards_toolbar() {
+  $items['dashboards'] = [
+    '#cache' => [
+      'tags' => [
+        'config:dashboard_list',
+      ],
+      'contexts' => [
+        'user.permissions',
+      ],
+    ],
+  ];
+
+  $entityTypeManager = \Drupal::entityTypeManager();
+
+  /**
+   * @var \Drupal\dashboards\Entity\DashboardStorage
+   */
+  $storage = $entityTypeManager->getStorage('dashboard');
+  $boards = $storage->loadMultipleOrderedByWeight();
+  foreach ($boards as $key => $board) {
+    if (!$board->access('view', \Drupal::currentUser())) {
+      unset($boards[$key]);
+    }
+  }
+  if (count($boards) == 0) {
+    return $items;
+  }
+  $boards = array_values($boards);
+  $links = [];
+  foreach ($boards as $board) {
+    $links[] = [
+      'title' => $board->label(),
+      'url' => $board->toUrl('canonical'),
+    ];
+  }
+
+  $first_board = reset($boards);
+  $items['dashboards'] += [
+    '#type' => 'toolbar_item',
+    'tab' => [
+      '#type' => 'link',
+      '#title' => t('Dashboards'),
+      '#url' => $first_board->toUrl(),
+      '#attributes' => [
+        'class' => ['toolbar-icon', 'toolbar-menu-administration-dashboard'],
+      ],
+    ],
+    'tray' => [
+      '#heading' => t('Dashboards'),
+      'dashboards' => [
+        '#theme' => 'links__toolbar_dashboards',
+        '#links' => $links,
+        '#attributes' => [
+          'class' => ['toolbar-menu'],
+        ],
+      ],
+    ],
+    '#weight' => 150,
+    '#attached' => [
+      'library' => ['dashboards/core'],
+    ],
+  ];
+
+  return $items;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for the entity view display edit form.
+ */
+function dashboards_form_dashboard_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!\Drupal::service('module_handler')->moduleExists('layout_builder_restrictions')) {
+    return;
+  }
+  \Drupal::classResolver(FormAlter::class)->alterEntityViewDisplayFormAllowedBlockCategories($form, $form_state, $form_id);
+  \Drupal::classResolver(FormAlter::class)->alterEntityViewDisplayForm($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function dashboards_preprocess_block(&$variables) {
+  if (
+    isset($variables['attributes']) &&
+    isset($variables['attributes']['class']) &&
+    in_array('dashboard-gin-panel', $variables['attributes']['class'])
+  ) {
+    $variables['title_attributes'] = ['class' => ['panel__title']];
+    $variables['content'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['panel__content']],
+      'content' => $variables['content'],
+    ];
+
+    $active_theme = \Drupal::theme()->getActiveTheme();
+    $base_themes = (array) $active_theme->getBaseThemeExtensions();
+
+    if ($active_theme->getName() === 'gin'|| array_key_exists('gin', $base_themes)) {
+      $variables['attributes']['class'][] = 'gin-layer-wrapper';
+    }
+    elseif ($active_theme->getName() === 'claro' || array_key_exists('claro', $base_themes)) {
+      $variables['attributes']['class'][] = 'card';
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function dashboards_preprocess_html(&$variables) {
+  $route = \Drupal::routeMatch()->getRouteName();
+  if (!is_null($route)) {
+    if (strpos($route, "entity.dashboard") === 0) {
+      $variables['html_attributes']['class'] = 'dashboard';
+    }
+  }
+}

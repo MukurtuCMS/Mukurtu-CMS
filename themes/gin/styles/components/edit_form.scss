@@ -1,0 +1,299 @@
+// Node layout
+.gin--edit-form {
+  // Has sidebar, save the space
+  @include mq(large) {
+    padding-inline-end: var(--gin-sidebar-offset);
+
+    .dialog-off-canvas-main-canvas {
+      @media (prefers-reduced-motion: no-preference) {
+        transition: padding-inline-start var(--gin-transition-fast);
+      }
+    }
+
+    // If off-canvas dialog is shown
+    &.js-off-canvas-dialog-open {
+      padding-inline-end: 0;
+
+      // Hide sidebar when off-canvas is shown
+      .layout-region.layout-region-node-secondary {
+        visibility: hidden;
+        opacity: 0;
+      }
+    }
+  }
+
+  // Hide delete Tab
+  .tabs [data-drupal-link-system-path*="/delete"] {
+    display: none;
+  }
+
+  // Hide edit secondary toolbar item
+  .gin-secondary-toolbar .toolbar-secondary .toolbar-bar .contextual-toolbar-tab {
+    display: none;
+  }
+
+  .layout-node-form {
+    overflow: inherit;
+    display: block;
+  }
+
+  .layout-region-node-main,
+  .layout-region-node-secondary
+  .layout-region-node-footer {
+    float: none;
+  }
+
+  .layout-region-node-main,
+  .layout-region-node-footer {
+    width: 100%;
+    padding-inline-end: 0;
+
+    @include mq(large) {
+      flex-basis: 40%;
+      flex-shrink: 1;
+      flex-grow: 1;
+      min-width: 0;
+    }
+  }
+
+  .page-wrapper__node-edit-form {
+    .region-sticky {
+      @include mq($to: large) {
+        #edit-actions {
+          width: 100%;
+        }
+
+        #edit-gin-actions {
+          flex-grow: 1;
+        }
+      }
+    }
+
+    .block-page-title-block {
+      @include mq(1730px) {
+        width: 100%;
+      }
+
+      .page-title {
+        @include mq(large) {
+          width: auto;
+          margin: 0;
+          overflow: hidden;
+        }
+      }
+    }
+
+    .block-local-tasks-block,
+    .block-system-main-block,
+    .messages-list,
+    .node-form,
+    .node-confirm-form,
+    .admin-list,
+    .help {
+      width: 100%;
+      max-width: $breakpointWide;
+      margin-inline: auto;
+      box-sizing: border-box;
+    }
+
+    .layout-region-node-secondary {
+      z-index: 103;
+      width: var(--gin-sidebar-width);
+      min-width: var(--gin-sidebar-min-width);
+      max-width: var(--gin-sidebar-max-width);
+      height: calc(100% - var(--gin-toolbar-y-offset));
+      position: fixed;
+      inset-block-start: var(--gin-toolbar-y-offset);
+      inset-inline-end: 0;
+      margin: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background:var(--gin-bg-layer);
+      border-inline-start: 1px solid var(--gin-border-color-layer);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition: all var(--gin-transition-fast);
+      }
+
+      .gin--dark-mode & {
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .gin-sidebar {
+        .form-actions {
+          margin: 0;
+
+          .action-link {
+            margin-block-start: var(--gin-spacing-xs);
+            margin-block-end: 0;
+          }
+        }
+      }
+
+      .field--name-revision-log,
+      .field--name-revision-log-message {
+        margin-block-start: var(--gin-spacing-s);
+      }
+
+      .accordion {
+        background: none;
+        border: 0 none;
+        box-shadow: none;
+      }
+
+      .entity-meta {
+        $sidebarSpacer: 1.5rem;
+
+        &__header {
+          color: var(--gin-color-text);
+          padding: var(--gin-spacing-m) #{$sidebarSpacer};
+          background-color: var(--gin-bg-layer);
+          border: 0 none;
+
+          @include mq($to: medium) {
+            padding-block-start: calc(var(--gin-spacing-l) - var(--gin-spacing-xxs));
+            padding-inline-end: var(--gin-spacing-l);
+          }
+
+          .form-type--item,
+          .form-item__label {
+            font-size: var(--gin-font-size-s);
+          }
+
+          .form-item {
+            margin-block: var(--gin-spacing-xxs);
+          }
+        }
+
+        &__title {
+          color: var(--gin-color-title);
+          font-weight: var(--gin-font-weight-semibold);
+          text-shadow: none;
+        }
+
+        &__revision {
+          margin-block-start: var(--gin-spacing-m);
+        }
+
+        &__last-saved,
+        &__author {
+          margin-block: var(--gin-spacing-xxs);
+
+          &,
+          .form-item__label {
+            font-size: var(--gin-font-size-s);
+          }
+        }
+
+        > .accordion__item {
+          margin: 0;
+          border: 0 none;
+          border-block-end: 1px solid var(--gin-border-color-layer);
+          border-radius: 0;
+
+          .gin--dark-mode & {
+            border-color: var(--gin-border-color);
+          }
+
+          > .claro-details__summary {
+            font-size: var(--gin-font-size-s);
+            display: block;
+            padding-inline-start: #{$sidebarSpacer + 1.5rem};
+
+            .details-title {
+              position: static;
+              padding-inline-start: 0;
+            }
+
+            &::before {
+              inset-block-start: var(--gin-spacing-xl);
+              inset-inline-start: $sidebarSpacer;
+            }
+
+            &:focus::after {
+              border-radius: 6px;
+            }
+          }
+
+          .claro-details__content {
+            margin-inline: $sidebarSpacer;
+
+            .claro-details__wrapper {
+              margin: var(--gin-spacing-l);
+            }
+          }
+
+          .redirect-table__path {
+            width: 47%;
+          }
+
+          .form-type--entity-autocomplete .claro-autocomplete {
+            width: 100%;
+          }
+
+          .form-datetime-wrapper {
+            .form-items-inline {
+              display: flex;
+              flex-wrap: wrap;
+
+              @include mq(tiny) {
+                flex-wrap: nowrap;
+              }
+
+              @include mq(large, wide) {
+                flex-wrap: wrap;
+              }
+            }
+
+            .form-type--date {
+              display: block;
+              flex-basis: 100%;
+              flex-grow: 1;
+
+              @include mq(tiny) {
+                flex-basis: 50%;
+              }
+
+              @include mq(large, wide) {
+                flex-basis: 100%;
+              }
+
+              &:first-of-type {
+                @include mq(tiny) {
+                  margin-inline-end: var(--gin-spacing-xs);
+                }
+
+                @include mq(large, wide) {
+                  margin-inline-end: 0;
+                }
+              }
+
+              &:nth-of-type(2) {
+                flex-basis: 134px;
+              }
+
+              .form-element {
+                min-width: 0;
+                width: 100%;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .revision-current {
+    background-color: var(--gin-color-primary-light-active);
+  }
+
+  .field--name-title .form-element {
+    font-size: var(--gin-font-size-h3);
+    font-weight: 475;
+    line-height: normal;
+    letter-spacing: -0.025em;
+    width: 100%;
+    padding-block: var(--gin-spacing-s);
+  }
+}

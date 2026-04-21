@@ -1,0 +1,6 @@
+services:
+  search_api_solr_legacy.search_api_solr_subscriber:
+    class: Drupal\search_api_solr_legacy\EventSubscriber\SearchApiSolrSubscriber
+    arguments: ['@extension.list.module']
+    tags:
+      - { name: event_subscriber }

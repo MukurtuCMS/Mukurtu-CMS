@@ -1,0 +1,58 @@
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 39c27897-6bdd-4b35-b589-c8387e52f761
+  bundle: movie
+  default_langcode: en
+  depends:
+    cc499d5d-647a-4bd1-9f69-239871d4e3ac: taxonomy_term
+    ea68b084-6925-4c2a-a0ec-ff351066e445: taxonomy_term
+    2ff12607-1ab0-47a2-b4a5-558ff0ec81be: taxonomy_term
+default:
+  revision_uid:
+    -
+      target_id: 1
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  title:
+    -
+      value: 'Ready Player One'
+  created:
+    -
+      value: 1738322440
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en
+  body:
+    -
+      value: '<p>When the creator of a virtual reality called the OASIS dies, he makes a posthumous challenge to all OASIS users to find his Easter Egg, which will give the finder his fortune and control of his world.</p>'
+      format: basic_html
+      summary: ''
+  field_country_of_origin:
+    -
+      entity: cc499d5d-647a-4bd1-9f69-239871d4e3ac
+  field_genre:
+    -
+      entity: ea68b084-6925-4c2a-a0ec-ff351066e445
+    -
+      entity: 2ff12607-1ab0-47a2-b4a5-558ff0ec81be
+  field_imdb_rating:
+    -
+      value: '7.4'
+  field_release_date:
+    -
+      value: '2018-03-28'

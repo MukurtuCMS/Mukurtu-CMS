@@ -1,0 +1,13 @@
+name: Tagify
+type: module
+description: Makes entity reference fields more user-friendly using <a href="https://github.com/yairEO/tagify">Tagify</a>.
+package: User interface
+core_version_requirement: ^8.8 || ^9 || ^10 || ^11
+configure: tagify.settings
+dependencies:
+  - drupal:taxonomy
+
+# Information added by Drupal.org packaging script on 2026-02-26
+version: '1.2.50'
+project: 'tagify'
+datestamp: 1772100009

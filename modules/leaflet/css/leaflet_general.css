@@ -1,0 +1,26 @@
+/* line 1, ../sass/leaflet_general.scss */
+.leaflet-warning {
+  color: red;
+}
+
+/**
+ * Styles for leaflet views AJAX popup.
+ */
+/* line 8, ../sass/leaflet_general.scss */
+.leaflet-ajax-popup {
+  height: 140px;
+  width: 180px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url("../assets/spin.gif");
+}
+
+/* line 16, ../sass/leaflet_general.scss */
+.leaflet-container {
+  z-index: 1;
+}
+
+/* line 21, ../sass/leaflet_general.scss */
+.leaflet-widget-input.readonly {
+  color: gray;
+}

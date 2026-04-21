@@ -1,0 +1,4 @@
+services:
+  logger.channel.rebuild_cache_access:
+    parent: logger.channel_base
+    arguments: ['rebuild_cache_access']

@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * modules.theme
+ */
+
+use Composer\Semver\Semver;
+
+/**
+ * Implements hook_preprocess_HOOK() for project_browser_main_app.
+ */
+function gin_preprocess_project_browser_main_app(&$variables): void {
+  // Attach project browser library if version is <2.0.0-alpha10.
+  $version = _gin_module_version('project_browser');
+  if ($version && !Semver::satisfies($version, '>=2-alpha10')) {
+    $variables['#attached']['library'][] = 'gin/project_browser';
+  }
+}

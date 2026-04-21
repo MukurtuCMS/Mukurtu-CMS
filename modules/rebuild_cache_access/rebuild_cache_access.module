@@ -1,0 +1,93 @@
+<?php
+
+/**
+ * @file
+ * This module adds a 'Rebuild Cache' permission and button to the toolbar.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\rebuild_cache_access\ToolbarHandler;
+
+/**
+ * Implements hook_toolbar().
+ */
+function rebuild_cache_access_toolbar() {
+
+  return \Drupal::service('class_resolver')
+    ->getInstanceFromDefinition(ToolbarHandler::class)
+    ->toolbar();
+}
+
+/**
+ * Implements hook_help().
+ */
+function rebuild_cache_access_help($route_name, RouteMatchInterface $route_match) {
+
+  switch ($route_name) {
+    case 'help.page.rebuild_cache_access':
+
+      $text = file_get_contents(dirname(__FILE__) . "/README.md");
+
+      if (!\Drupal::moduleHandler()->moduleExists('markdown')) {
+        return '<pre>' . $text . '</pre>';
+      }
+      else {
+        // Use the Markdown filter to render the README.
+        $filter_manager = \Drupal::service('plugin.manager.filter');
+        $settings = \Drupal::configFactory()
+          ->get('markdown.settings')
+          ->getRawData();
+        $config = ['settings' => $settings];
+        $filter = $filter_manager->createInstance('markdown', $config);
+        return $filter->process($text, 'en');
+      }
+  }
+
+  return NULL;
+}
+
+/**
+ * Implements hook_block_alter().
+ */
+function rebuild_cache_access_block_alter(&$definitions) {
+  if (isset($definitions['rebuild_cache_access_navigation'])) {
+
+    // Allow in Core Navigation layout.
+    $definitions['rebuild_cache_access_navigation']['allow_in_navigation'] = TRUE;
+
+    // Prevent use in the generic block UI.
+    $definitions['rebuild_cache_access_navigation']['_block_ui_hidden'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_modules_installed().
+ */
+function rebuild_cache_access_modules_installed($modules, $is_syncing) : void {
+
+  // If the module is getting enabled, install the rebuild cache block.
+  if (!$is_syncing && in_array('navigation', $modules)) {
+    _rebuild_cache_access_install_navigation_block();
+  }
+}
+
+/**
+ * Adds the rebuild cache action block to the Navigation layout.
+ */
+function _rebuild_cache_access_install_navigation_block(): void {
+  $data = [
+    'delta' => 3,
+    'configuration' => [
+      'id' => 'rebuild_cache_access_navigation',
+      'label' => t('Rebuild cache'),
+      'provider' => 'rebuild_cache_access',
+      'label_display' => 0,
+      'context_mapping' => [],
+    ],
+  ];
+
+  // Use the action to add a new block to Navigation.
+  /** @var \Drupal\Core\Config\Action\ConfigActionManager $manager */
+  $manager = \Drupal::service('plugin.manager.config_action');
+  $manager->applyAction('addNavigationBlock', 'navigation.block_layout', $data);
+}

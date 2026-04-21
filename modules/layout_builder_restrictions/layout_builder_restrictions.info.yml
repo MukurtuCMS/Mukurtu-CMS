@@ -1,0 +1,13 @@
+name: Layout Builder Restrictions
+core_version_requirement: ^10 || ^11
+description: 'Manage which fields & layouts are available in Layout Builder'
+type: module
+package: 'Layout Builder'
+configure: layout_builder_restrictions.restriction_plugin_config_form
+dependencies:
+  - drupal:layout_builder
+
+# Information added by Drupal.org packaging script on 2025-07-17
+version: '3.0.4'
+project: 'layout_builder_restrictions'
+datestamp: 1752762017

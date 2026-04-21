@@ -1,0 +1,139 @@
+[data-gin-accent] {
+  --gin-color-primary: rgb(var(--gin-color-primary-rgb));
+  --gin-color-primary-light: rgba(var(--gin-color-primary-rgb), .15);
+  --gin-bg-app: rgb(var(--gin-bg-app-rgb));
+  --gin-bg-layer-rgb: 255, 255, 255;
+  --gin-bg-item: rgba(var(--gin-color-primary-rgb), .05);
+  --gin-bg-item-hover: rgba(var(--gin-color-primary-rgb), .1);
+  --gin-color-primary-light-hover: rgba(var(--gin-color-primary-rgb), .2);
+  --gin-color-primary-light-active: rgba(var(--gin-color-primary-rgb), .3);
+  --gin-shadow-primary-light: rgba(var(--gin-color-primary-rgb), .45);
+}
+
+.gin--dark-mode[data-gin-accent],
+.gin--dark-mode [data-gin-accent] {
+  --gin-bg-item-hover: rgba(var(--gin-color-primary-rgb), .08);
+  --gin-bg-app-rgb: #{color.red($colorDarkAppBackground)}, #{color.green($colorDarkAppBackground)}, #{color.blue($colorDarkAppBackground)};
+  --gin-bg-layer-rgb: #{color.red($colorDarkLayerBackground)}, #{color.green($colorDarkLayerBackground)}, #{color.blue($colorDarkLayerBackground)};
+}
+
+// Light mode
+$ginColors: (
+  blue: #0550e6,
+  light_blue: #2f6dd0,
+  dark_purple: #4300bf,
+  purple: #5b00ff,
+  teal: #10857f,
+  green: #00875f,
+  red: #d8002f,
+  orange: #da6301,
+  yellow: #b37a00,
+  pink: #d12f70,
+  neutral: #111111,
+  custom: #111111,
+);
+
+@each $name, $color in $ginColors {
+  [data-gin-accent=#{'' + $name}] {
+    $bgColor: mix(white, $color, 97%);
+    $lightColor: mix(white, $color, 80%);
+    $stickyColor: mix(white, $color, 92%);
+
+    --gin-color-primary-rgb: #{color.red($color)}, #{color.green($color)}, #{color.blue($color)};
+    --gin-color-primary-light-rgb: #{color.red($lightColor)}, #{color.green($lightColor)}, #{color.blue($lightColor)};
+    --gin-color-primary-hover: #{mix(black, $color, 15%)};
+    --gin-color-primary-active: #{mix(black, $color, 25%)};
+    --gin-bg-app-rgb: #{color.red($bgColor)}, #{color.green($bgColor)}, #{color.blue($bgColor)};
+    --gin-bg-header: #{mix(white, $color, 88%)};
+    --gin-color-sticky-rgb: #{color.red($stickyColor)}, #{color.green($stickyColor)}, #{color.blue($stickyColor)};
+
+    @if $name == dark_purple or $name == purple {
+      --gin-color-primary-light-hover: rgba(var(--gin-color-primary-rgb), .2);
+      --gin-color-primary-light-active: rgba(var(--gin-color-primary-rgb), .25);
+      --gin-shadow-primary-light: rgba(var(--gin-color-primary-rgb), .4);
+      --gin-bg-item-hover: rgba(var(--gin-color-primary-rgb), .08);
+    }
+  }
+}
+
+// Dark mode
+$ginDarkmodeColors: (
+  blue: #90aeef,
+  claro_blue: #7391d8,
+  light_blue: #82bfe8,
+  dark_purple: #ad8fe8,
+  purple: #dba5ef,
+  teal: #00ead0,
+  green: #6bd4a1,
+  red: #ec8989,
+  orange: #f79576,
+  yellow: #f1c970,
+  pink: #e79da3,
+  neutral: #ffffff,
+  custom: #ffffff,
+);
+
+@each $name, $color in $ginDarkmodeColors {
+  $lightColor: mix(#2A2A2D, $color, 80%);
+
+  .gin--dark-mode[data-gin-accent=#{'' + $name}],
+  .gin--dark-mode [data-gin-accent=#{'' + $name}] {
+    --gin-color-primary-rgb: #{color.red($color)}, #{color.green($color)}, #{color.blue($color)};
+    --gin-color-primary-light-rgb: #{color.red($lightColor)}, #{color.green($lightColor)}, #{color.blue($lightColor)};
+    --gin-color-primary-hover: #{mix(white, $color, 10%)};
+    --gin-color-primary-active: #{mix(white, $color, 15%)};
+    --gin-bg-header: #{mix(#2A2A2D, $color, 87.5%)};
+  }
+}
+
+// High contrast mode
+@media (forced-colors: none) {
+  .gin--high-contrast-mode {
+    $highContrastMode: rgba(0, 0, 0, .8);
+
+    --gin-bg-app: #d9dbde;
+    --gin-color-text: #{$highContrastMode};
+    --gin-color-text-light: #{$highContrastMode};
+    --gin-icon-color: #{$highContrastMode};
+    --gin-color-focus: #{$highContrastMode};
+    --gin-border-color: #{$highContrastMode};
+    --gin-border-color-secondary: rgba(0, 0, 0, .6);
+    --gin-border-color-layer: rgba(0, 0, 0, .6);
+    --gin-border-color-layer2: #{$highContrastMode};
+    --gin-border-color-table: #{$highContrastMode};
+    --gin-border-color-table-header: #{$highContrastMode};
+    --gin-border-color-form-element: #{$highContrastMode};
+
+    .gin--dark-mode & {
+      $highContrastMode: rgba(255, 255, 255, .8);
+
+      --gin-bg-app: #000;
+      --gin-color-text: #{$highContrastMode};
+      --gin-color-text-light: #{$highContrastMode};
+      --gin-icon-color: #{$highContrastMode};
+      --gin-color-focus: #{$highContrastMode};
+      --gin-border-color: #{$highContrastMode};
+      --gin-border-color-secondary: rgba(255, 255, 255, .6);
+      --gin-border-color-layer: rgba(255, 255, 255, .6);
+      --gin-border-color-layer2: #{$highContrastMode};
+      --gin-border-color-table: #{$highContrastMode};
+      --gin-border-color-table-header: #{$highContrastMode};
+      --gin-border-color-form-element: #{$highContrastMode};
+    }
+  }
+}
+
+// Focus
+$ginFocusColors: (
+  green: rgba(8, 163, 144, .6), //= #08a390
+  claro: rgba(38, 167, 105, .6), //= #26a769
+  orange: rgba(236, 124, 87, .6), //= #ec7c57
+  dark: var(--gin-color-focus-neutral-rgb),
+  accent: rgba(var(--gin-color-primary-rgb), .6),
+);
+
+@each $name, $color in $ginFocusColors {
+  [data-gin-focus=#{'' + $name}] {
+    --gin-color-focus: #{$color};
+  }
+}

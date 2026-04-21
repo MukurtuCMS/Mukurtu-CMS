@@ -1,0 +1,11 @@
+services:
+  twig_tweak.validate:
+    class: Drupal\twig_tweak\Command\ValidateCommand
+    arguments: ['@twig']
+    tags:
+      - { name: console.command }
+  twig_tweak.debug:
+    class: Drupal\twig_tweak\Command\DebugCommand
+    arguments: ['@twig']
+    tags:
+      - { name: console.command }

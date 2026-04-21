@@ -1,0 +1,15 @@
+name: 'Entity browser test'
+type: module
+description: 'Support module for the Entity browser module tests.'
+package: Testing
+dependencies:
+  - entity_browser:entity_browser
+  - drupal:file
+  - drupal:user
+  - drupal:node
+  - drupal:views
+
+# Information added by Drupal.org packaging script on 2025-09-04
+version: '8.x-2.15'
+project: 'entity_browser'
+datestamp: 1756969162

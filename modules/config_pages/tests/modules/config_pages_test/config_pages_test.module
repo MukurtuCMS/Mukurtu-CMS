@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Test module for Config Pages access control.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function config_pages_test_config_pages_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // Deny all access for testing purposes.
+  if ($operation === 'update' && $entity->bundle() === 'test_access_type') {
+    return AccessResult::forbidden('Access denied by test module for security testing.');
+  }
+  return AccessResult::neutral();
+}

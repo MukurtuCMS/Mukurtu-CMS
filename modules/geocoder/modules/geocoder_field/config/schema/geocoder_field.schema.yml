@@ -1,0 +1,48 @@
+# Schema for Geocoder Field module.
+
+field.field.*.*.*.third_party.geocoder_field:
+  type: mapping
+  label: "Geocoder Field field settings"
+  mapping:
+    method:
+      type: string
+      label: "Geocode method/action: geocode or reverse_geocode"
+    weight:
+      type: integer
+      label: "Weight"
+    field:
+      type: string
+      label: 'Field to geocode to or from depending on the "method" in use.'
+    skip_not_empty_value:
+      type: boolean
+      label: "Skip Geocode/Reverse Geocode if target value is not empty"
+    disabled:
+      type: boolean
+      label: "Disable field"
+    hidden:
+      type: boolean
+      label: "Hide field"
+    providers:
+      type: sequence
+      label: "Geocoding providers"
+      sequence:
+        type: string
+    dumper:
+      type: string
+      label: "Output format"
+    delta_handling:
+      type: string
+      label: "Multi-value input handling"
+    failure:
+      type: mapping
+      label: "Geocoding failure settings"
+      mapping:
+        handling:
+          type: string
+          label: "Handling of geocoding failure"
+        status_message:
+          type: boolean
+          label: "Display a status message in case of failure"
+        log:
+          type: boolean
+          label: "Log the failure"

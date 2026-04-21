@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Provides integration with Tagify libraries.
+ */
+
+/**
+ * Alter a tagify autocomplete match.
+ *
+ * @param string|null $label
+ *   The matched label. Set to NULL to exclude the match.
+ * @param string|null $info_label
+ *   The extra information to be shown aside the entity label.
+ * @param array $context
+ *   An array of context data. The following keys are always available:
+ *     - entity: The entity object.
+ *     - info_label: The info label, but without token replacement.
+ *
+ * @throws \GuzzleHttp\Exception\GuzzleException
+ * @throws \JsonException
+ */
+function tagify_iconify_icons_tagify_autocomplete_match_alter(?string &$label, ?string &$info_label, array $context): void {
+  // Override the info label with svg icon.
+  if (str_contains($context['info_label'] ?? '', ':icon')) {
+    $iconify_service = Drupal::service('iconify_icons.iconify_service');
+    // Take 'Icon name (collection name)', match the collection name from
+    // inside the parentheses.
+    // @see \Drupal\Core\Entity\Element\EntityAutocomplete::extractEntityIdFromAutocompleteInput
+    if (preg_match('/(.+\\s)\\(([^\\)]+)\\)/', $info_label, $matches)) {
+      $info_label = $iconify_service->generateSvgIcon(trim($matches[2]), trim($matches[1]));
+    }
+  }
+}

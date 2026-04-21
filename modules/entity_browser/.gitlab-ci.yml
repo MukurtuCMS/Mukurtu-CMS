@@ -1,0 +1,24 @@
+# Use the DrupalCI templates.
+include:
+  ################
+  # DrupalCI includes:
+  # As long as you include this, any future includes added by the Drupal Association will be accessible to your pipelines automatically.
+  # View these include files at https://git.drupalcode.org/project/gitlab_templates/
+  ################
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+
+#
+# Start custom overrides.
+#
+variables:
+  # Broaden test coverage.
+  OPT_IN_TEST_PREVIOUS_MINOR: 1
+  OPT_IN_TEST_PREVIOUS_MAJOR: 1
+  KUBERNETES_CPU_REQUEST: 8
+  _CONCURRENCY_THREADS: 16
+  _PHPUNIT_CONCURRENT: 1

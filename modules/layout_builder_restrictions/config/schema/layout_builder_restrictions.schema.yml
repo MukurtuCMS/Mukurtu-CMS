@@ -1,0 +1,64 @@
+core.entity_view_display.*.*.*.third_party.layout_builder_restrictions:
+  type: sequence
+  label: 'Layout Builder Restrictions plugin configuration'
+  sequence:
+    type: layout_builder_restrictions.[%key]
+
+layout_builder_restrictions.entity_view_mode_restriction:
+  type: mapping
+  label: 'Per-view-mode Layout Builder Restrictions settings'
+  mapping:
+    allowed_layouts:
+      type: sequence
+      label: 'Allowed layouts'
+      sequence:
+        type: string
+        label: 'Layout ID'
+    denylisted_blocks:
+      type: sequence
+      label: 'Denylisted blocks by category'
+      sequence:
+        type: sequence
+        label: 'Denylisted blocks'
+        sequence:
+          type: string
+          label: 'Block ID'
+    allowlisted_blocks:
+      type: sequence
+      label: 'Allowlisted blocks by category'
+      sequence:
+        type: sequence
+        label: 'Allowlisted blocks'
+        sequence:
+          type: string
+          label: 'Block ID'
+    restricted_categories:
+      type: sequence
+      label: 'Categories which disallow all blocks'
+      sequence:
+        type: string
+        label: 'Category ID'
+
+
+layout_builder_restrictions.allowed_block_categories:
+  type: sequence
+  label: 'Categories which have no block restrictions'
+  sequence:
+    type: string
+    label: 'Category machine name'
+
+layout_builder_restrictions.plugins:
+  type: config_object
+  label: 'Weighting and active status of Layout Builder Restrictions plugins'
+  mapping:
+    plugin_config:
+      type: sequence
+      sequence:
+        type: mapping
+        mapping:
+          enabled:
+            type: boolean
+            label: 'Is the plugin enabled'
+          weight:
+            type: integer
+            label: 'The relative order of the plugin'

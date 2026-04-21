@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - entity_browser_ief_test
+    - node
+  enforced:
+    module:
+      - entity_browser_ief_test
+id: node.field_nodes
+field_name: field_nodes
+entity_type: node
+type: entity_reference
+settings:
+  target_type: node
+module: entity_browser_ief_test
+locked: false
+cardinality: -1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false

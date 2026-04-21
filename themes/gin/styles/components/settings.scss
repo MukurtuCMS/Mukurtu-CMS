@@ -1,0 +1,343 @@
+// Settings: Custom accent color selector.
+[data-drupal-selector="edit-preset-accent-color"] {
+  .form-radios {
+    display: flex;
+    flex-wrap: wrap;
+    margin-block-start: var(--gin-spacing-xs);
+
+    .form-item--preset-accent-color {
+      position: relative;
+
+      input {
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        inset-block-start: var(--gin-spacing-m);
+        margin-inline-end: var(--gin-spacing-xs);
+        border-color: transparent;
+
+        &,
+        .gin--dark-mode & {
+          background-color: var(--gin-color-primary);
+        }
+
+        &:hover {
+          box-shadow: none;
+        }
+
+        &:hover,
+        &:focus,
+        &:focus:hover,
+        &:checked {
+          border-color: var(--gin-color-primary);
+        }
+
+        &:focus:checked,
+        &:focus,
+        &:checked {
+          background-color: var(--gin-color-primary);
+          box-shadow: inset 0 0 0 2px var(--gin-bg-layer),
+                      inset 0 0 0 4px var(--gin-color-primary);
+        }
+
+        // Custom
+        &[data-gin-accent="custom"] {
+          background-color: #fff;
+          background-image: url(~settings/custom-color.jpg);
+          background-size: 100%;
+          background-repeat: no-repeat;
+          border-color: var(--gin-border-color);
+
+          &:checked {
+            background-color: #fff;
+            border-color: var(--gin-border-color);
+            border-width: 1px;
+          }
+        }
+      }
+
+      .form-item__label {
+        display: none;
+        visibility: hidden;
+        z-index: 1;
+        position: absolute;
+        inset-block-start: 100%;
+        inset-inline-start: -10px;
+        padding: var(--gin-spacing-xs);
+        color: var(--gin-color-contextual-text);
+        background: var(--gin-color-contextual);
+        border-radius: var(--gin-border-xs);
+        transform: translateX(-50%);
+      }
+
+      &:hover .form-item__label,
+      input:active ~ .form-item__label,
+      input:focus ~ .form-item__label {
+        display: block;
+        visibility: visible;
+      }
+    }
+  }
+}
+
+// Groups
+[data-drupal-selector="edit-accent-group"],
+[data-drupal-selector="edit-focus-group"] {
+  .form-type--color,
+  .form-type--textfield {
+    float: inline-start;
+    margin: 0;
+    margin-block-end: var(--gin-spacing-xs);
+  }
+
+  .form-type--color {
+    margin-inline-end: var(--gin-spacing-xs);
+  }
+
+  .fieldset__description {
+    clear: both;
+  }
+}
+
+// Darkmode
+[data-drupal-selector="edit-enable-darkmode"] {
+  .form-radios {
+    display: inline-flex;
+    flex-wrap: wrap;
+    padding: 0 var(--gin-spacing-xxs);
+    border: 1px solid var(--gin-border-color-form-element);
+    border-radius: var(--gin-spacing-xl);
+
+    .gin--dark-mode & {
+      background: var(--gin-bg-layer2);
+    }
+
+    .form-type--radio {
+      margin-block: 0;
+      margin-inline-start: 0;
+    }
+
+    .form-item__label {
+      display: inline-block;
+      padding: .375rem var(--gin-spacing-m);
+      margin: var(--gin-spacing-xxs) 0;
+      border: 2px solid transparent;
+      border-radius: var(--gin-border-xl);
+      box-sizing: border-box;
+
+      &:hover {
+        color: var(--gin-color-primary);
+        background: var(--gin-color-primary-light-hover);
+      }
+    }
+
+    input {
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: 0;
+      border: 0;
+
+      &:active + .form-item__label,
+      &:focus + .form-item__label {
+        box-shadow: 0 0 0 1px var(--gin-color-focus-border),
+                    0 0 0 4px var(--gin-color-focus);
+      }
+
+      &:checked + .form-item__label {
+        color: var(--gin-color-button-text);
+        background: var(--gin-color-primary);
+      }
+    }
+  }
+}
+
+// Settings with images.
+[data-drupal-selector="edit-classic-toolbar"],
+[data-drupal-selector="edit-layout-density"] {
+  .form-radios {
+    display: flex;
+    flex-wrap: wrap;
+    margin-block-start: var(--gin-spacing-xs);
+
+    .form-item {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      width: 140px;
+      margin: 0;
+      margin-inline-end: var(--gin-spacing-s);
+
+      input {
+        cursor: pointer;
+        position: static;
+        width: 140px;
+        height: 100px;
+        margin-inline-start: 0;
+        border-radius: var(--gin-border-l);
+        transform: none;
+
+        &
+        &:focus {
+          border-color: var(--gin-color-text);
+          box-shadow: none;
+        }
+
+        &:checked {
+          border-color: var(--gin-color-primary);
+          box-shadow: inset 0 0 0 1px var(--gin-color-primary);
+        }
+
+        &:focus {
+          box-shadow: 0 0 0 3px var(--gin-color-focus);
+        }
+
+        &:checked:focus {
+          box-shadow: inset 0 0 0 1px var(--gin-color-primary),
+                      0 0 0 3px var(--gin-color-focus);
+        }
+
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .form-item__label {
+        font-size: var(--gin-font-size-xxs);
+        display: block;
+        margin-block-start: var(--gin-spacing-xs);
+        margin-block-end: var(--gin-spacing-m);
+      }
+    }
+  }
+}
+
+// Settings: Toolbar selector.
+[data-drupal-selector="edit-classic-toolbar"] {
+  // Set warning if core navigation module is active.
+  &.gin-core-navigation--is-active {
+    position: relative;
+
+    #edit-classic-toolbar {
+      position: relative;
+      opacity: .5;
+
+      &::before {
+        content: '';
+        z-index: 2;
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-start: 0;
+        cursor: not-allowed;
+      }
+    }
+
+    .fieldset__description {
+      pointer-events: none;
+      position: absolute;
+      inset-block-start: 3.5rem;
+      inset-inline-start: 2rem;
+      display: flex;
+      align-items: center;
+      gap: var(--gin-spacing-xs);
+      color: var(--gin-color-warning);
+      background-color: var(--gin-bg-warning);
+      padding:  var(--gin-spacing-xs) var(--gin-spacing-s);
+      border-radius: var(--gin-border-s);
+
+      &:before {
+        content: '';
+        display: block;
+        width: 1em;
+        height: 1em;
+        background-color: var(--gin-color-warning-light);
+        mask-image: icon('warning');
+        mask-repeat: no-repeat;
+        mask-position: center left;
+      }
+
+      .form-item__warning {
+        display: none;
+      }
+    }
+  }
+
+  .form-radios .form-item input {
+    // Standard: Sidebar
+    &[data-gin-toolbar=vertical] {
+      background-image: url(~settings/toolbar_sidebar.png);
+
+      .gin--dark-mode & {
+        background-image: url(~settings/toolbar_sidebar_darkmode.png);
+      }
+    }
+
+    // New Drupal Navigation
+    &[data-gin-toolbar=new] {
+      background-image: url(~settings/toolbar_new.png);
+
+      .gin--dark-mode & {
+        background-image: url(~settings/toolbar_new_darkmode.png);
+      }
+    }
+
+    // Minimal
+    &[data-gin-toolbar=horizontal] {
+      background-image: url(~settings/toolbar_minimal.png);
+
+      .gin--dark-mode & {
+        background-image: url(~settings/toolbar_minimal_darkmode.png);
+      }
+    }
+
+    // Classic/Legacy
+    &[data-gin-toolbar=classic] {
+      background-image: url(~settings/toolbar_legacy.png);
+
+      .gin--dark-mode & {
+        background-image: url(~settings/toolbar_legacy_darkmode.png);
+      }
+    }
+  }
+}
+
+// Settings: Layout density.
+[data-drupal-selector="edit-layout-density"] {
+  .form-radios .form-item input {
+    // Default
+    &[data-drupal-selector=edit-layout-density-default] {
+      background-image: url(~settings/layout_density_default.png);
+
+      .gin--dark-mode & {
+        background-image: url(~settings/layout_density_default_darkmode.png);
+      }
+    }
+
+    // Medium
+    &[data-drupal-selector=edit-layout-density-medium] {
+      background-image: url(~settings/layout_density_medium.png);
+
+      .gin--dark-mode & {
+        background-image: url(~settings/layout_density_default_darkmode.png);
+      }
+    }
+
+    // Small
+    &[data-drupal-selector=edit-layout-density-small] {
+      background-image: url(~settings/layout_density_small.png);
+
+      .gin--dark-mode & {
+        background-image: url(~settings/layout_density_small_darkmode.png);
+      }
+    }
+  }
+}
+
+input[data-gin-toolbar="new"] + label .gin-new-flag {
+  position: absolute;
+  inset-block-start: -100px;
+  inset-inline-end: var(--gin-spacing-xs);
+}

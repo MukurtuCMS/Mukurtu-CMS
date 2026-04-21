@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ * Dummy module for for testing how other modules will interact with message UI.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\message\MessageInterface;
+
+/**
+ * Implements hook_message_message_ui_access_control().
+ */
+function message_ui_test_message_message_ui_access_control(MessageInterface $message, $op, AccountInterface $account) {
+  return AccessResult::allowedIf($message->{$op});
+}
+
+/**
+ * Implements hook_message_message_ui_create_access_control().
+ */
+function message_ui_test_message_message_ui_create_access_control($template, AccountInterface $account) {
+  // The tests expect an allowed result when creating.
+  return AccessResult::allowed();
+}

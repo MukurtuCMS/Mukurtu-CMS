@@ -1,0 +1,48 @@
+views.filter.facets_filter:
+  type: views_filter
+  label: 'Facets filter'
+  mapping:
+    hierarchy:
+      type: boolean
+      label: 'Show hierarchy'
+    label_display:
+      type: string
+    facet:
+      type: mapping
+      mapping:
+        expand_hierarchy:
+          type: boolean
+          label: 'Expand hierarchy'
+        hierarchy:
+          type: string
+          label: 'Hierarchy type'
+        query_operator:
+          type: string
+          label: 'Query operator'
+        hard_limit:
+          type: integer
+          label: 'Hard limit'
+        min_count:
+          type: integer
+          label: 'Minimum count'
+        show_numbers:
+          type: boolean
+          label: 'Show the amount of results'
+        processor_configs:
+          type: sequence
+          label: 'Processor settings'
+          sequence:
+            type: mapping
+            label: 'A processor'
+            mapping:
+              processor_id:
+                type: string
+                label: 'The plugin ID of the processor'
+              weights:
+                type: sequence
+                label: 'The processor''s weights for the different processing stages'
+                sequence:
+                  type: integer
+                  label: 'The processor''s weight for this stage'
+              settings:
+                type: plugin.plugin_configuration.facets_processor.[%parent.processor_id]

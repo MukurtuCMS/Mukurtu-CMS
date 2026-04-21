@@ -1,0 +1,4 @@
+- plugin: get
+  source: some_field
+- plugin: default_value
+  default_value: default value

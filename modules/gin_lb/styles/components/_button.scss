@@ -1,0 +1,168 @@
+.glb-button {
+  display: inline-block !important;
+  margin: 1em 0.75em 1em 0 !important;
+  padding: calc(1em - 1px) calc(1.5em - 1px) !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  color: var(--gin-color-primary) !important;
+  border: 1px solid transparent !important;
+  border-radius: 2px !important;
+  // color: var(--gin-color-primary-active);
+  background-color: transparent !important;
+  box-shadow: none !important;
+  font-family:
+    Inter,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Oxygen-Sans,
+    Ubuntu,
+    Cantarell,
+    "Helvetica Neue",
+    sans-serif !important;
+  font-size: 1em !important;
+  font-weight: 700 !important;
+  line-height: 1em !important;
+  appearance: none !important;
+  -webkit-font-smoothing: antialiased;
+
+  &:hover {
+    background-color: var(--gin-color-primary-hover) !important;
+  }
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: var(--gin-color-button-text);
+  }
+}
+
+.glb-button,
+.glb-button:not(:focus),
+.form-actions .glb-button,
+.glb-action-link--icon-trash.glb-action-link {
+  padding: calc(1em - 2px) calc(1.5em - 2px) !important;
+  // background: var(--gin-color-primary-light-hover);
+  border: 2px solid var(--gin-color-primary) !important;
+  // border: 2px solid transparent !important;
+  border-radius: $borderDefault !important;
+  box-shadow: 0 1px 2px var(--gin-color-primary-light) !important;
+  // box-shadow: 0 1px 2px var(--gin-color-primary-lightShadow);
+  font-size: 16px !important;
+  .gin--dark-mode & {
+    box-shadow: 0 2px 18px var(--gin-shadow-button) !important;
+  }
+
+  &:hover {
+    border-color: var(--gin-color-primary-hover) !important;
+    background-color: var(--gin-color-primary-hover) !important;
+  }
+
+  &:active,
+  &:focus {
+    border-color: var(--gin-color-primary-active) !important;
+    background-color: var(--gin-color-primary-active) !important;
+  }
+
+  &:hover,
+  &:active,
+  &:focus,
+  &:hover:focus {
+    color: var(--gin-color-button-text) !important;
+  }
+}
+
+.glb-button.button--small {
+  padding: 0.5em 1em !important;
+}
+
+.glb-button.button--extrasmall {
+  padding: 0.25em 0.75em !important;
+}
+
+.glb-button--primary,
+.glb-button--primary:not(:focus) {
+  filter: drop-shadow(0 6px 10px var(--gin-color-primary-light)) !important;
+  background: var(--gin-color-primary) !important;
+  box-shadow:
+    0 0.125em 0.25em var(--gin-color-primary-light-active),
+    0.1em 0.25em 0.5em var(--gin-color-primary-light),
+    -0.25em -0.5em 1em var(--gin-bg-app) !important;
+
+  &:hover {
+    background-color: var(--gin-color-primary-hover) !important;
+  }
+
+  &:active,
+  &:focus {
+    background-color: var(--gin-color-primary-active) !important;
+  }
+
+  &,
+  &:hover,
+  &:active,
+  &:focus {
+    color: var(--gin-color-button-text) !important;
+  }
+}
+
+a.glb-button:hover,
+a.glb-button:active {
+  color: var(--gin-color-button-text) !important;
+}
+
+a.glb-button--primary:hover,
+a.glb-button--primary:active,
+a.glb-button--primary:focus,
+a.glb-button--primary:focus:hover {
+  .gin--dark-mode & {
+    color: var(--gin-bg-app) !important;
+  }
+}
+
+.glb-button.glb-button:disabled,
+.glb-button.glb-button.is-disabled {
+  &,
+  &:hover,
+  &:active,
+  &:focus {
+    border: 2px solid var(--gin-color-disabled) !important;
+  }
+
+  .gin--dark-mode & {
+    color: var(--gin-color-disabled) !important;
+    background-color: var(--gin-bg-layer2) !important;
+  }
+}
+
+.glb-action-link.glb-action-link--icon-trash {
+  box-sizing: border-box !important;
+  min-height: 48px !important;
+  padding: calc(0.75em - 1px) calc(1.5em - 2px) !important;
+
+  &,
+  &:hover,
+  &:active,
+  &:focus,
+  &:focus:hover {
+    border: 2px solid var(--gin-color-danger) !important;
+    // border: 2px solid transparent !important;
+  }
+}
+
+.inline-block-create-button {
+  @extend .glb-button;
+
+  background: none !important;
+
+  // Fix plus icon.
+  #drupal-off-canvas-wrapper &::before {
+    position: inherit !important;
+    padding-inline-end: 24px !important;
+  }
+}
+
+.glb-button.js-hide {
+  display: none !important;
+}

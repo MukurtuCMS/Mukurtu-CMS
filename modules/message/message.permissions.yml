@@ -1,0 +1,11 @@
+administer message templates:
+  title: Administer message templates
+  description: Administer message templates that can be used to log an event.
+
+administer messages:
+  title: Administer messages
+  description: Administer message entries through the backend.
+
+overview messages:
+  title: Overview messages
+  description: Grant permission to view the messages in the site.

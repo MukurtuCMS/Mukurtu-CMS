@@ -1,0 +1,48 @@
+id: test_node_index
+name: 'Test node index'
+description: 'An index of node entities used for testing'
+read_only: false
+field_settings:
+  status:
+    label: Published
+    datasource_id: 'entity:node'
+    property_path: status
+    type: boolean
+    dependencies:
+      module:
+        - node
+  title:
+    label: Title
+    datasource_id: 'entity:node'
+    property_path: title
+    type: string
+    dependencies:
+      module:
+        - node
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  rendered_item: {  }
+options:
+  cron_limit: -1
+  index_directly: false
+datasource_settings:
+  'entity:node':
+    bundles:
+      default: true
+      selected: {  }
+    languages:
+      default: true
+      selected: {  }
+tracker_settings:
+  default:
+    indexing_order: fifo
+server: database_search_server
+status: true
+langcode: en
+dependencies:
+  config:
+    - search_api.server.database_search_server
+  module:
+    - node
+    - search_api

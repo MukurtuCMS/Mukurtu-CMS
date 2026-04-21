@@ -1,0 +1,149 @@
+<?php
+
+/**
+ * @file
+ * page.theme
+ */
+
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\gin\GinSettings;
+use Drupal\node\Entity\Node;
+
+/**
+ * Implements hook_preprocess_HOOK() for page.
+ */
+function gin_preprocess_page(&$variables) {
+  // Required for allowing subtheming Gin.
+  $activeThemeName = \Drupal::theme()->getActiveTheme()->getName();
+  $variables['active_admin_theme'] = $activeThemeName;
+  $variables['active_core_navigation'] = _gin_module_is_active('navigation');
+
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+
+  // Expose Toolbar variant.
+  $variables['toolbar_variant'] = $settings->get('classic_toolbar');
+
+  // Expose Route name.
+  $variables['route_name'] = \Drupal::routeMatch()->getRouteName();
+
+  if (preg_match('#entity\.(?<entity_type_id>.+)\.canonical#', $variables['route_name'], $matches)) {
+    $entity = \Drupal::request()->attributes->get($matches['entity_type_id']);
+
+    if ($entity instanceof EntityInterface && $entity->hasLinkTemplate('edit-form') && $entity->access('update')) {
+      $variables['entity_title'] = $entity->label();
+      $variables['entity_edit_url'] = $entity->toUrl('edit-form');
+    }
+  }
+
+  // Get form actions.
+  if ($form_actions = _gin_form_actions()) {
+    if (_gin_module_is_active('navigation')) {
+      $variables['gin_form_actions'] = '';
+    }
+    else {
+      $variables['gin_form_actions'] = $form_actions;
+    }
+    $variables['gin_form_actions_class'] = 'gin-sticky-form-actions--preprocessed';
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for page_attachments.
+ */
+function gin_page_attachments_alter(&$page) {
+  // Are we relevant?
+  $gin_activated = _gin_is_active();
+
+  if ($gin_activated) {
+    // Attach the init script.
+    $page['#attached']['library'][] = 'gin/gin_init';
+
+    // Attach breadcrumb styles.
+    $page['#attached']['library'][] = 'gin/breadcrumb';
+
+    // Attach accent library.
+    $page['#attached']['library'][] = 'gin/gin_accent';
+
+    // Attach sticky library.
+    $page['#attached']['library'][] = 'gin/sticky';
+
+    // Attach Drupal.once for older Drupal versions.
+    $drupal_version = (float) Drupal::VERSION;
+    if ($drupal_version < 9.3) {
+      $page['#attached']['library'][] = 'gin/once';
+    }
+
+    // Custom CSS file.
+    if (file_exists('public://gin-custom.css')) {
+      $page['#attached']['library'][] = 'gin/gin_custom_css';
+    }
+
+    // Expose settings to JS.
+    // Get theme settings.
+    $settings = \Drupal::classResolver(GinSettings::class);
+    $page['#attached']['drupalSettings']['gin']['darkmode'] = $settings->get('enable_darkmode');
+    $page['#attached']['drupalSettings']['gin']['darkmode_class'] = 'gin--dark-mode';
+    $page['#attached']['drupalSettings']['gin']['preset_accent_color'] = $settings->get('preset_accent_color');
+    $page['#attached']['drupalSettings']['gin']['accent_color'] = $settings->get('accent_color');
+    $page['#attached']['drupalSettings']['gin']['preset_focus_color'] = $settings->get('preset_focus_color');
+    $page['#attached']['drupalSettings']['gin']['focus_color'] = $settings->get('focus_color');
+    $page['#attached']['drupalSettings']['gin']['highcontrastmode'] = $settings->get('high_contrast_mode');
+    $page['#attached']['drupalSettings']['gin']['highcontrastmode_class'] = 'gin--high-contrast-mode';
+    $page['#attached']['drupalSettings']['gin']['toolbar_variant'] = $settings->get('classic_toolbar');
+    $page['#attached']['drupalSettings']['gin']['show_user_theme_settings'] = $settings->get('show_user_theme_settings');
+
+    // Expose stylesheets to JS.
+    $basethemeurl = '/' . \Drupal::service('extension.list.theme')->getPath('gin');
+    $page['#attached']['drupalSettings']['gin']['variables_css_path'] = $basethemeurl . '/dist/css/theme/variables.css';
+    $page['#attached']['drupalSettings']['gin']['accent_css_path'] = $basethemeurl . '/dist/css/theme/accent.css';
+    $page['#attached']['drupalSettings']['gin']['ckeditor_css_path'] = $basethemeurl . '/dist/css/theme/ckeditor.css';
+
+    $page['#attached']['html_head'][] = [
+      [
+        '#tag' => 'script',
+        '#attributes' => [
+          'type' => 'application/json',
+          'id' => 'gin-setting-darkmode',
+        ],
+        '#value' => new FormattableMarkup('{ "ginDarkmode": "@value" }', ['@value' => $settings->get('enable_darkmode') ?? 'unknown']),
+      ],
+      'gin_darkmode',
+    ];
+
+  }
+}
+
+/**
+ * Page title.
+ */
+function gin_preprocess_page_title(&$variables) {
+  if (preg_match('/entity\.node\..*/', \Drupal::routeMatch()->getRouteName(), $matches)) {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node instanceof Node) {
+      if ($node->isDefaultTranslation() && !in_array($matches[0], [
+        'entity.node.content_translation_add',
+        'entity.node.delete_form',
+      ])) {
+        $variables['title'] = $node->getTitle();
+      }
+      elseif ($matches[0] === 'entity.node.edit_form') {
+        $variables['title_attributes']['class'][] = 'page-title--is-translation';
+        $args = [
+          '@title' => $node->getTitle(),
+          '@language' => $node->language()->getName(),
+        ];
+        $variables['title'] = t('@title <span class="page-title__language">(@language translation)</span>', $args);
+      }
+    }
+  }
+}
+
+/**
+ * Node revisions.
+ */
+function gin_preprocess_page__node__revisions(&$page) {
+  // Attach the init script.
+  $page['#attached']['library'][] = 'gin/revisions';
+}

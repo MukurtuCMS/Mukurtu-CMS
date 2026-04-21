@@ -1,0 +1,16 @@
+services:
+  gin_lb.twig:
+    class: Drupal\gin_lb\TwigExtension\GinLbExtension
+    tags:
+      - { name: twig.extension }
+  gin_lb.layout_choose_controller_alter:
+    class: Drupal\gin_lb\EventSubscriber\LayoutBuilderBrowserEventSubscriber
+    arguments: [ '@module_handler' ]
+    tags:
+      - { name: event_subscriber }
+  gin_lb.context_validator:
+    class: Drupal\gin_lb\Service\ContextValidator
+    arguments:
+      - '@theme.manager'
+      - '@current_route_match'
+      - '@module_handler'

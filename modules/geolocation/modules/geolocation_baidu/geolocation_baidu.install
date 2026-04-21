@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * @file
+ * Handle requirements.
+ */
+
+use Drupal\Core\Url;
+
+/**
+ * {@inheritdoc}
+ *
+ * Implements hook_requirements().
+ */
+function geolocation_baidu_requirements($phase) {
+  $requirements = [];
+  if ($phase == 'runtime') {
+    $requirements['geolocation_baidu_api_key'] = [
+      'title' => t('Geolocation - Baidu Maps Key'),
+      'value' => t('Baidu Maps ID & Code set'),
+      'description' => t('A Baidu Maps key is set in the <a href=":geolocation_baidu_settings_url">Geolocation settings</a>.', [':geolocation_baidu_settings_url' => Url::fromRoute('geolocation_baidu.settings')->toString()]),
+      'severity' => REQUIREMENT_OK,
+    ];
+
+    if (empty(\Drupal::config('baidu_maps.settings')->get('key'))) {
+      $requirements['geolocation_baidu_api_key']['value'] = t('Baidu maps key missing');
+      $requirements['geolocation_baidu_api_key']['description'] = t('A Baidu maps key is missing in the <a href=":geolocation_baidu_settings_url">Geolocation settings</a>.', [':geolocation_baidu_settings_url' => Url::fromRoute('geolocation_baidu.settings')->toString()]);
+      $requirements['geolocation_baidu_api_key']['severity'] = REQUIREMENT_WARNING;
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function geolocation_baidu_uninstall() {
+  Drupal::configFactory()->getEditable('baidu_maps.settings')->delete();
+}

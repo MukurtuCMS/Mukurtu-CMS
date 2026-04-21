@@ -1,0 +1,7 @@
+views.style.facets_serializer:
+  type: views.style.serializer
+  label: 'Facets serializer'
+  mapping:
+    show_facets:
+      type:  boolean
+      label: 'Show facets'

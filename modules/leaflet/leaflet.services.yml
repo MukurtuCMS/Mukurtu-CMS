@@ -1,0 +1,12 @@
+services:
+  cache.leaflet:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin }
+    factory: cache_factory:get
+    arguments: [ leaflet ]
+
+  leaflet.service:
+      class: Drupal\leaflet\LeafletService
+      arguments: ['@current_user', '@geofield.geophp', '@module_handler', '@link_generator', '@stream_wrapper_manager', '@request_stack', '@cache.leaflet', '@file_url_generator']
+  Drupal\leaflet\LeafletService: '@leaflet.service'

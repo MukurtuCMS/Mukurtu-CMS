@@ -1,0 +1,7 @@
+taxonomy.vocabulary.*.third_party.flat_taxonomy:
+  type: mapping
+  label: 'Flat'
+  mapping:
+    flat:
+      type: text
+      label: 'Flat'

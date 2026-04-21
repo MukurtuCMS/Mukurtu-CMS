@@ -1,0 +1,86 @@
+/**
+ * @file
+ * The modern aspect ratio for IMG, IFRAME, DIV, SVG.
+ *
+ * @see https://caniuse.com/?search=aspect-ratio
+ * @see https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio
+ * @see https://developer.mozilla.org/en-US/docs/Web/CSS/@media/aspect-ratio
+ */
+
+@supports (aspect-ratio: 1 / 1) {
+
+  /* Reset padding hack */
+  .media.media--ratio:not(.media--ratio--fluid) {
+    padding-bottom: 0;
+  }
+
+  .media--ratio:not(.b-bg),
+  .media.media--ratio:not(.media--ratio--fluid, .b-bg) {
+    height: auto;
+  }
+
+  .media--ratio:not(.media--ratio--fluid) .media__element,
+  .media--ratio:not(.media--ratio--fluid) svg {
+    position: static;
+    height: auto;
+  }
+
+  /* Audio */
+  .media.media--ratio .media__element ~ audio {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(50%);
+    width: 100%;
+  }
+
+  /* 1:1 ratio */
+  .b-bg.media--ratio--11,
+  .media--ratio--11 .media__element,
+  .media--ratio--11 svg {
+    aspect-ratio: 1/1;
+  }
+
+  /* 3:2 ratio */
+  .b-bg.media--ratio--32,
+  .media--ratio--32 .media__element,
+  .media--ratio--32 svg {
+    aspect-ratio: 3/2;
+  }
+
+  /* 4:3 ratio */
+  .b-bg.media--ratio--43,
+  .media--ratio--43 .media__element,
+  .media--ratio--43 svg {
+    aspect-ratio: 4/3;
+  }
+
+  /* 8:5 ratio */
+  .b-bg.media--ratio--85,
+  .media--ratio--85 .media__element,
+  .media--ratio--85 svg {
+    aspect-ratio: 8/5;
+  }
+
+  /* 9:16 ratio */
+  .b-bg.media--ratio--916,
+  .media--ratio--916 .media__element,
+  .media--ratio--916 svg {
+    aspect-ratio: 9/16;
+  }
+
+  /* 16:9 ratio */
+  .b-bg.media--ratio--169,
+  .media--ratio--169 .media__element,
+  .media--ratio--169 svg {
+    aspect-ratio: 16/9;
+  }
+
+  /* 21:9 ratio */
+  .b-bg.media--ratio--219,
+  .media--ratio--219 .media__element,
+  .media--ratio--219 svg {
+    aspect-ratio: 21/9;
+  }
+
+}

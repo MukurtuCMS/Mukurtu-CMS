@@ -1,0 +1,649 @@
+<?php
+
+/**
+ * @file
+ * gin_toolbar.module
+ */
+
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+use Drupal\gin\GinNavigation;
+use Drupal\gin\GinSettings;
+use Drupal\gin\GinUserPicture;
+use Drupal\gin_toolbar\Render\Element\GinToolbar;
+
+/**
+ * Implements hook_preprocess_HOOK() for html.
+ */
+function gin_toolbar_preprocess_html(&$variables) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  // Get theme settings.
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  $toolbar = $settings->get('classic_toolbar');
+
+  // Set accent color.
+  $variables['attributes']['data-gin-accent'] = $settings->get('preset_accent_color');
+
+  // Set focus color.
+  $variables['attributes']['data-gin-focus'] = $settings->get('preset_focus_color');
+
+  // High contrast mode.
+  if ($settings->get('high_contrast_mode')) {
+    $variables['attributes']['class'][] = 'gin--high-contrast-mode';
+  }
+
+  // Only add gin--classic-toolbar class if user has permission.
+  if (
+    !\Drupal::currentUser()->hasPermission('access toolbar') &&
+    !\Drupal::currentUser()->hasPermission('access navigation')
+  ) {
+    return;
+  }
+
+  // Only check for new Drupal navigation if we are not in a maintenance page.
+  if (isset($variables['page']['#theme']) && $variables['page']['#theme'] === 'maintenance_page') {
+    // Gin's custom styling for the maintenance page.
+    $variables['#attached']['library'][] = 'gin/maintenance_page';
+
+    // Get theme settings.
+    /** @var \Drupal\gin\GinSettings $settings */
+    $settings = \Drupal::classResolver(GinSettings::class);
+
+    // Expose settings to JS.
+    $variables['#attached']['drupalSettings']['gin']['darkmode'] = $settings->get('enable_darkmode');
+    $variables['#attached']['drupalSettings']['gin']['darkmode_class'] = 'gin--dark-mode';
+    $variables['#attached']['drupalSettings']['gin']['preset_accent_color'] = $settings->get('preset_accent_color');
+    $variables['#attached']['drupalSettings']['gin']['accent_color'] = $settings->get('accent_color');
+    $variables['#attached']['drupalSettings']['gin']['preset_focus_color'] = $settings->get('preset_focus_color');
+    $variables['#attached']['drupalSettings']['gin']['focus_color'] = $settings->get('focus_color');
+    $variables['#attached']['drupalSettings']['gin']['highcontrastmode'] = $settings->get('high_contrast_mode');
+    $variables['#attached']['drupalSettings']['gin']['highcontrastmode_class'] = 'gin--high-contrast-mode';
+
+    return;
+  }
+
+  // Check if Navigation module is active.
+  if (_gin_toolbar_module_is_active('navigation')) {
+    $variables['attributes']['class'][] = 'gin--core-navigation';
+    return;
+  }
+
+  // Check for new Drupal navigation.
+  if ($toolbar === 'new') {
+    /** @var \Drupal\gin\GinNavigaton $navigation */
+    $navigation = \Drupal::classResolver(GinNavigation::class);
+
+    // Get new navigation.
+    $variables['page_top']['navigation'] = $navigation->getNavigationStructure();
+    // Get active trail.
+    $variables['#attached']['drupalSettings']['active_trail_paths'] = $navigation->getNavigationActiveTrail();
+    // Set toolbar class.
+    $variables['attributes']['class'][] = 'gin--navigation';
+  }
+  else {
+    // Set toolbar class.
+    $variables['attributes']['class'][] = 'gin--' . $toolbar . '-toolbar';
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for page_attachments.
+ */
+function gin_toolbar_page_attachments_alter(&$page) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  // Attach the base library.
+  $page['#attached']['library'][] = 'gin/gin_base';
+
+  // Attach accent overrides CSS.
+  $page['#attached']['library'][] = 'gin/gin_accent';
+
+  // Attach the init script.
+  $page['#attached']['library'][] = 'gin/gin_init';
+
+  // Attach custom Gin overrides.
+  if (file_exists('public://gin-custom.css')) {
+    $page['#attached']['library'][] = 'gin/gin_custom_css';
+  }
+
+  // Get theme settings.
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+
+  // Inject enable darkmode.
+  $page['#attached']['html_head'][] = [
+    [
+      '#tag' => 'script',
+      '#attributes' => [
+        'type' => 'application/json',
+        'id' => 'gin-setting-darkmode',
+      ],
+      '#value' => new FormattableMarkup('{ "ginDarkmode": "@value" }', ['@value' => $settings->get('enable_darkmode') ?? 'unknown']),
+    ],
+    'gin_darkmode',
+  ];
+
+  // Expose settings to JS.
+  $page['#attached']['drupalSettings']['gin']['darkmode'] = $settings->get('enable_darkmode');
+  $page['#attached']['drupalSettings']['gin']['darkmode_class'] = 'gin--dark-mode';
+  $page['#attached']['drupalSettings']['gin']['preset_accent_color'] = $settings->get('preset_accent_color');
+  $page['#attached']['drupalSettings']['gin']['accent_color'] = $settings->get('accent_color');
+  $page['#attached']['drupalSettings']['gin']['preset_focus_color'] = $settings->get('preset_focus_color');
+  $page['#attached']['drupalSettings']['gin']['focus_color'] = $settings->get('focus_color');
+  $page['#attached']['drupalSettings']['gin']['highcontrastmode'] = $settings->get('high_contrast_mode');
+  $page['#attached']['drupalSettings']['gin']['highcontrastmode_class'] = 'gin--high-contrast-mode';
+  $page['#attached']['drupalSettings']['gin']['toolbar_variant'] = $settings->get('classic_toolbar');
+
+  // Check if Navigation module is active.
+  if (_gin_toolbar_module_is_active('navigation')) {
+    // Attach the new drupal navigation styles.
+    $page['#attached']['library'][] = 'gin/core_navigation';
+    return;
+  }
+
+  switch ($settings->get('classic_toolbar')) {
+    case 'classic':
+      // Attach the classic toolbar styles.
+      $page['#attached']['library'][] = 'gin/gin_classic_toolbar';
+      break;
+
+    case 'horizontal':
+      // Attach the horizontal toolbar styles.
+      $page['#attached']['library'][] = 'gin/gin_horizontal_toolbar';
+      break;
+
+    case 'new':
+      // Attach the experimental drupal navigation styles.
+      $page['#attached']['library'][] = 'gin/navigation';
+      break;
+
+    default:
+      // Attach toolbar styles.
+      $page['#attached']['library'][] = 'gin/gin_toolbar';
+      break;
+  }
+}
+
+/**
+ * Attach libraries.
+ */
+function gin_toolbar_library_info_alter(&$libraries, $extension) {
+  if ($extension == 'core' && isset($libraries['drupal.dialog'])) {
+    $libraries['drupal.dialog']['dependencies'][] = 'claro/claro.drupal.dialog';
+    $libraries['drupal.dialog']['dependencies'][] = 'gin/dialog';
+  }
+
+  if ($extension == 'core' && isset($libraries['ckeditor'])) {
+    $libraries['ckeditor']['dependencies'][] = 'gin/gin_ckeditor';
+    $libraries['ckeditor']['dependencies'][] = 'gin/ckeditor';
+  }
+
+  if ($extension == 'core' && isset($libraries['drupal.ajax'])) {
+    $libraries['drupal.ajax']['dependencies'][] = 'claro/ajax';
+    $libraries['drupal.ajax']['dependencies'][] = 'gin/ajax';
+  }
+
+  if ($extension == 'media_library' && isset($libraries['widget'])) {
+    $libraries['widget']['dependencies'][] = 'claro/media_library.theme';
+    $libraries['widget']['dependencies'][] = 'gin/media_library';
+  }
+
+  if ($extension == 'media_library' && isset($libraries['view'])) {
+    $libraries['view']['dependencies'][] = 'claro/media_library.theme';
+    $libraries['view']['dependencies'][] = 'gin/media_library';
+  }
+
+  if ($extension == 'workbench' && isset($libraries['workbench.toolbar'])) {
+    $libraries['workbench.toolbar']['dependencies'][] = 'gin/workbench';
+  }
+
+  // Set weight on gin/dialog CSS so it loads after theme CSS (weight 99).
+  if ($extension == 'gin' && isset($libraries['dialog']['css']['theme'])) {
+    foreach ($libraries['dialog']['css']['theme'] as $file => &$options) {
+      $options['weight'] = 101;
+    }
+  }
+}
+
+/**
+ * Implements toolbar preprocess.
+ */
+function gin_toolbar_preprocess_toolbar(&$variables) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  // Use single `:` to make ControllerResolver get the class from definition.
+  // @see Drupal\Core\Controller\ControllerResolver->createController().
+  $variables['user_picture'] = [
+    '#lazy_builder' => [
+      GinUserPicture::class . ':build',
+      [],
+    ],
+    '#create_placeholder' => TRUE,
+  ];
+
+  // Expose Toolbar variant.
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  $variables['toolbar_variant'] = $settings->get('classic_toolbar');
+  $variables['secondary_toolbar_frontend'] = $settings->get('secondary_toolbar_frontend');
+  $variables['core_navigation'] = _gin_toolbar_module_is_active('navigation');
+
+  if ($variables['toolbar_variant'] !== 'classic' || $variables['core_navigation']) {
+    // Move Admin Toolbar Search to start.
+    $toolbar_search = array_search('administration_search', array_keys($variables['tabs']));
+    if (is_numeric($toolbar_search)) {
+      foreach ($variables['tabs'] as $key => $item) {
+        if ($key === 'administration_search') {
+          array_unshift($variables['tabs'], $variables['tabs'][$key]);
+          unset($variables['tabs'][$key]);
+        }
+      }
+    }
+
+    // Move user tab to end.
+    $toolbar_user = array_search('user', array_keys($variables['tabs']));
+    if (is_numeric($toolbar_user)) {
+      foreach ($variables['tabs'] as $key => $item) {
+        if ($key === 'user') {
+          $user_tab = $variables['tabs'][$key];
+          unset($variables['tabs'][$key]);
+          $variables['tabs'][$key] = $user_tab;
+        }
+      }
+    }
+  }
+
+  // Expose Route name.
+  $variables['route_name'] = \Drupal::routeMatch()->getRouteName();
+  // Cache by route name & route parameters.
+  $variables['#cache']['contexts'][] = 'route';
+
+  if (preg_match('#entity\.(?<entity_type_id>.+)\.(canonical|latest_version)#', $variables['route_name'], $matches)) {
+    $entity = \Drupal::request()->attributes->get($matches['entity_type_id']);
+    if ($entity instanceof EntityInterface && $entity->hasLinkTemplate('edit-form')) {
+      $url = $entity->toUrl('edit-form');
+      if ($url->access()) {
+        $variables['entity_title'] = $entity->label();
+        $variables['entity_edit_url'] = $url;
+      }
+    }
+  }
+
+  $contentUrl = Url::fromRoute('system.admin_content');
+  if ($contentUrl->access()) {
+    $variables['admin_content_url'] = $contentUrl;
+  }
+}
+
+/**
+ * Implements hook_preprocess_menu().
+ */
+function gin_toolbar_preprocess_menu(&$variables) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  if (isset($variables['theme_hook_original']) && strpos($variables['theme_hook_original'], 'menu__toolbar__') === 0) {
+    // Check if the admin_toolbar module is installed.
+    foreach ($variables['items'] as $key => $item) {
+      $gin_id = str_replace('.', '-', $key);
+      $variables['items'][$key]['gin_id'] = $gin_id;
+    }
+
+    // Move config & help menu items to end.
+    $to_move = ['system.admin_config', 'help.main'];
+    foreach ($to_move as $id) {
+      $index = array_search($id, array_keys($variables['items']));
+      if (is_numeric($index)) {
+        $variables['items'] += array_splice($variables['items'], $index, 1);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_menu__toolbar().
+ */
+function gin_toolbar_preprocess_menu__toolbar(&$variables) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  // Get theme configs.
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  $logo_path = $settings->getDefault('logo.path');
+  $logo_default = $settings->getDefault('logo.use_default');
+  $variables['icon_default'] = $logo_default;
+
+  if (!$logo_default) {
+    $variables['icon_path'] = $logo_path;
+  }
+
+  // Expose Toolbar variant.
+  $variables['toolbar_variant'] = $settings->get('classic_toolbar');
+}
+
+/**
+ * Implements hook_navigation().
+ */
+function gin_toolbar_preprocess_navigation(&$variables) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  // Get theme configs.
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  $logo_default = $settings->getDefault('logo.use_default');
+  $variables['icon_path'] = !$logo_default ? $settings->getDefault('logo.path') : '';
+  $variables['toolbar_variant'] = $settings->get('classic_toolbar');
+  $variables['core_navigation'] = _gin_toolbar_module_is_active('navigation');
+  $variables['is_backend'] = \Drupal::service('router.admin_context')->isAdminRoute();
+  $variables['secondary_toolbar_frontend'] = $settings->get('secondary_toolbar_frontend');
+  $variables['gin_secondary_toolbar'] = [
+    '#type' => 'toolbar',
+    '#access' => \Drupal::currentUser()->hasPermission('access toolbar') || \Drupal::currentUser()->hasPermission('access navigation'),
+    '#cache' => [
+      'keys' => ['toolbar_secondary'],
+      'contexts' => ['user.permissions'],
+    ],
+    '#attributes' => [
+      'id' => 'toolbar-administration-secondary',
+    ],
+  ];
+
+  if (!$logo_default) {
+    $variables['icon_path'] = $settings->getDefault('logo.path');
+  }
+}
+
+/**
+ * Implements hook_top_bar().
+ */
+function gin_toolbar_preprocess_top_bar(&$variables) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  $variables['#attached']['library'][] = 'gin/top_bar';
+}
+
+/**
+ * Implements hook_ckeditor_css_alter().
+ */
+function gin_toolbar_ckeditor_css_alter(array &$css) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  $css_files = ['variables', 'accent', 'ckeditor'];
+
+  foreach ($css_files as $file) {
+    $custom_css = \Drupal::service('extension.list.theme')->getPath('gin') . '/dist/css/theme/' . $file . '.css';
+    if (!in_array($custom_css, $css, TRUE) && file_exists($custom_css)) {
+      $css[] = $custom_css;
+    }
+  }
+}
+
+/**
+ * Implements hook_toolbar_alter().
+ */
+function gin_toolbar_toolbar_alter(&$items) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  // Move the User tab to the end; devel uses 999 so up it.
+  $items['user']['#weight'] = 1000;
+
+  $items['administration']['tray']['toolbar_administration']['#pre_render'] = [
+    [
+      GinToolbar::class,
+      'preRenderTray',
+    ],
+  ];
+}
+
+/**
+ * Adds toolbar-specific attributes to the menu link tree.
+ *
+ * @param \Drupal\Core\Menu\MenuLinkTreeElement[] $tree
+ *   The menu link tree to manipulate.
+ *
+ * @return \Drupal\Core\Menu\MenuLinkTreeElement[]
+ *   The manipulated menu link tree.
+ */
+function gin_toolbar_tools_menu_navigation_links(array $tree) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return $tree;
+  }
+
+  foreach ($tree as $element) {
+    if ($element->subtree) {
+      gin_toolbar_tools_menu_navigation_links($element->subtree);
+    }
+    $link = $element->link;
+    // Get the non-localized title to make the icon class.
+    $definition = $link->getPluginDefinition();
+    $element->options['attributes']['class'][] = 'toolbar-icon';
+    $string = strtolower(str_replace(['.', ' ', '_'], ['-', '-', '-'], $definition['id']));
+    $element->options['attributes']['class'][] = Html::cleanCssIdentifier('toolbar-icon-' . $string);
+    $element->options['attributes']['title'] = $link->getDescription();
+  }
+  return $tree;
+}
+
+/**
+ * Implements form_alter_HOOK() for some major form changes.
+ */
+function gin_toolbar_form_alter(&$form, $form_state, $form_id) {
+  // Are we relevant?
+  if (!_gin_toolbar_gin_is_active()) {
+    return;
+  }
+
+  // Node edit preview form.
+  if (strpos($form_id, 'node_preview_form_select') !== FALSE) {
+    $form['#attributes']['class'][] = 'gin-layout-container';
+  }
+}
+
+/**
+ * Implements hook_help().
+ */
+function gin_toolbar_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the gin_toolbar module.
+    case 'help.page.gin_toolbar':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('This module changes the layout of the administration menu, and is actively compatible with <a href="@href" target="_blank">Gin Admin</a>.', ['@href' => 'https://www.drupal.org/project/gin']) . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function gin_toolbar_theme() {
+  $items = [];
+
+  if (!_gin_toolbar_module_is_active('navigation')) {
+    $items['navigation'] = [
+      'template' => 'navigation/navigation--gin',
+      'preprocess functions' => ['gin_toolbar_preprocess_navigation'],
+      'variables' => [
+        'icon_path' => NULL,
+        'path' => \Drupal::service('extension.list.theme')->getPath('gin'),
+        'menu_middle' => [],
+        'menu_top' => [],
+        'menu_bottom' => [],
+      ],
+    ];
+  }
+
+  $items['menu_region__top'] = [
+    'template' => 'navigation/menu-region--top',
+    'variables' => [
+      'links' => [],
+      'title' => NULL,
+      'menu_name' => NULL,
+    ],
+  ];
+
+  $items['menu_region__middle'] = [
+    'template' => 'navigation/menu-region--middle',
+    'base hook' => 'menu',
+    'variables' => [
+      'menu_name' => NULL,
+      'items' => [],
+      'attributes' => [],
+      'title' => NULL,
+    ],
+  ];
+
+  // Check if help is enabled.
+  $help_enabled = _gin_toolbar_module_is_active('help');
+
+  $items['menu_region__bottom'] = [
+    'template' => 'navigation/menu-region--bottom',
+    'variables' => [
+      'help_enabled' => $help_enabled,
+      'items' => [],
+      'title' => NULL,
+      'menu_name' => NULL,
+      'path' => \Drupal::service('extension.list.theme')->getPath('gin'),
+    ],
+  ];
+
+  $items['container__administration_menu'] = [
+    'template' => 'container--administration-menu',
+    'base hook' => 'container',
+    'render element' => 'container',
+  ];
+
+  return $items;
+}
+
+/**
+ * Registry alter().
+ */
+function gin_toolbar_theme_registry_alter(&$theme_registry) {
+  $templates_path = \Drupal::service('extension.list.module')->getPath('gin_toolbar') . '/templates';
+
+  $theme_registry['toolbar']['path'] = $templates_path;
+  $theme_registry['toolbar__gin']['path'] = $templates_path;
+  $theme_registry['menu__toolbar']['path'] = $templates_path;
+  if (!_gin_toolbar_module_is_active('navigation')) {
+    $theme_registry['navigation']['path'] = $templates_path;
+  }
+  $theme_registry['navigation__gin']['path'] = $templates_path;
+  $theme_registry['top_bar']['path'] = $templates_path;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function gin_toolbar_theme_suggestions_container_alter(&$suggestions, array $variables) {
+  if (isset($variables['element']['administration_menu'])) {
+    $suggestions[] = 'container__administration_menu';
+  }
+}
+
+/**
+ * Helper function for check if Gin is active.
+ */
+function _gin_toolbar_gin_is_active() {
+  static $gin_activated;
+
+  if (!isset($gin_activated)) {
+    // Check if permissions are given.
+    if (
+      !\Drupal::currentUser()->hasPermission('access toolbar') &&
+      !\Drupal::currentUser()->hasPermission('access navigation')
+    ) {
+      $gin_activated = FALSE;
+    }
+    else {
+      $logged_in = \Drupal::currentUser()->isAuthenticated();
+      $theme_handler = \Drupal::service('theme_handler')->listInfo();
+
+      // Check if set as frontend theme.
+      $frontend_theme_name = \Drupal::config('system.theme')->get('default');
+
+      // Check if base themes are set.
+      if (isset($theme_handler[$frontend_theme_name]->base_themes)) {
+        $frontend_base_themes = $theme_handler[$frontend_theme_name]->base_themes;
+      }
+
+      // Add theme name to base theme array.
+      $frontend_base_themes[$frontend_theme_name] = $frontend_theme_name;
+
+      // Check if set as admin theme.
+      $admin_theme_name = \Drupal::config('system.theme')->get('admin');
+
+      // Admin theme will have no value if is set to use the default theme.
+      if ($admin_theme_name && isset($theme_handler[$admin_theme_name]->base_themes)) {
+        $admin_base_themes = $theme_handler[$admin_theme_name]->base_themes;
+        $admin_base_themes[$admin_theme_name] = $admin_theme_name;
+      }
+      else {
+        $admin_base_themes = $frontend_base_themes;
+      }
+
+      // Check if Gin is activated in the frontend.
+      if ($logged_in) {
+        $gin_activated = array_key_exists('gin', $admin_base_themes);
+      }
+      else {
+        $gin_activated = array_key_exists('gin', $frontend_base_themes);
+      }
+    }
+  }
+  return $gin_activated;
+}
+
+/**
+ * Helper function for check if a module is active.
+ */
+function _gin_toolbar_module_is_active($module) {
+  static $modules = [];
+  if (!isset($modules[$module])) {
+    $module_handler = \Drupal::service('module_handler');
+    // Check if Navigation module is active.
+    $modules[$module] = $module_handler->moduleExists($module);
+  }
+  return $modules[$module];
+}
+
+/**
+ * Implements hook_requirements_alter().
+ */
+function gin_toolbar_requirements_alter(array &$requirements) {
+  if (isset($requirements['toolbar'])) {
+    unset($requirements['toolbar']);
+  }
+}

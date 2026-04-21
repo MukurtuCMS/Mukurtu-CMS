@@ -1,0 +1,166 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for the Message Digest module.
+ */
+
+use Drupal\Core\Database\Database;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function message_digest_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the message_digest module.
+    case 'help.page.message_digest':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Message Digest is a plugin to the Message module which adds the ability to send email messages in a digest format every day or week, rather than on demand.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * Aggregate, format and and queue digests for sending.
+ */
+function message_digest_cron() {
+  /** @var \Drupal\message_digest\DigestManagerInterface $digest_manager */
+  $digest_manager = \Drupal::service('message_digest.manager');
+
+  // Process message digests.
+  $digest_manager->processDigests();
+
+  // Cleanup old messages.
+  $digest_manager->cleanupOldMessages();
+}
+
+/**
+ * Implements hook_mail().
+ */
+function message_digest_mail($key, &$message, $params) {
+  if ($key === 'digest') {
+    $title = \Drupal::config('system.site')->get('name');
+    if (!empty($params['entity_type']) && !empty($params['entity_id'])) {
+      /** @var \Drupal\Core\Entity\EntityInterface $entity */
+      $entity = \Drupal::entityTypeManager()->getStorage($params['entity_type'])->load($params['entity_id']);
+      if (!empty($entity)) {
+        $title = $entity->label();
+      }
+      else {
+        $message['send'] = FALSE;
+      }
+    }
+    $message['subject'] = t('@title message digest', ['@title' => $title]);
+    $message['body'][] = $params['body'];
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function message_digest_theme() {
+  return [
+    'message_digest' => [
+      'render element' => 'elements',
+    ],
+    'message_digest_rows' => [
+      'render element' => 'elements',
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for individual messages in a digest.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - 'elements': An associative array containing renderable rows.
+ */
+function template_preprocess_message_digest_rows(array &$variables) {
+  $elements = $variables['elements'];
+  foreach (Element::children($elements) as $key) {
+    $variables['rows'][$key] = $elements[$key];
+  }
+  $variables['message'] = $elements['#message'];
+}
+
+/**
+ * Prepares messages to be concatenated into a digest.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - 'elements': An associative array containing renderable messages to be
+ *     condensed into a digest.
+ */
+function template_preprocess_message_digest(array &$variables) {
+  $elements = $variables['elements'];
+  foreach (Element::children($elements) as $key) {
+    $variables['messages'][$key] = $elements[$key];
+  }
+}
+
+/**
+ * Implements hook_entity_predelete().
+ *
+ * Cleans up any references to the entity that is being deleted.
+ */
+function message_digest_entity_predelete(EntityInterface $entity) {
+  switch ($entity->getEntityTypeId()) {
+    case 'message':
+      Database::getConnection()
+        ->delete('message_digest')
+        ->condition('mid', $entity->id())
+        ->execute();
+      break;
+
+    case 'user':
+      Database::getConnection()
+        ->delete('message_digest')
+        ->condition('receiver', $entity->id())
+        ->execute();
+      break;
+  }
+}
+
+/**
+ * Implements callback_allowed_values_function().
+ */
+function message_digest_allowed_values_callback(FieldStorageDefinitionInterface $definition, FieldableEntityInterface $entity = NULL, &$cacheable = NULL) {
+  // Always add an 'immediate' option.
+  $values = [
+    t('Send immediately'),
+  ];
+  /** @var \Drupal\message_notify\Plugin\Notifier\Manager $notifier_manager */
+  $notifier_manager = \Drupal::service('plugin.message_notify.notifier.manager');
+  foreach ($notifier_manager->getDefinitions() as $plugin_id => $plugin_definition) {
+    /** @var \Drupal\message_notify\Plugin\Notifier\MessageNotifierInterface $notifier */
+    $notifier = $notifier_manager->createInstance($plugin_id, []);
+    if ($notifier instanceof DigestInterface) {
+      $values[$plugin_id] = $plugin_definition['title'];
+    }
+  }
+  return $values;
+}
+
+/**
+ * Default value callback for message_digest field.
+ */
+function message_digest_default_value_callback(FieldableEntityInterface $entity, FieldDefinitionInterface $definition) {
+  $value = '0';
+  if (\Drupal::currentUser()->id()) {
+    $account = \Drupal::entityTypeManager()
+      ->getStorage('user')
+      ->load(\Drupal::currentUser()->id());
+    $value = $account->message_digest->value ?: '0';
+  }
+  return [['value' => $value]];
+}

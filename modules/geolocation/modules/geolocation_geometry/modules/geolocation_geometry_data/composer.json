@@ -1,0 +1,9 @@
+{
+  "name": "drupal/geolocation_geometry_data",
+  "type": "drupal-module",
+  "description": "Import and provide geometry data.",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "gasparesganga/php-shapefile": "^3.4"
+  }
+}

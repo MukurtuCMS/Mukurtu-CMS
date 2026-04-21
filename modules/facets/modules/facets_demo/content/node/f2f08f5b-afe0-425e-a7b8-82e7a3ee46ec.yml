@@ -1,0 +1,58 @@
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: f2f08f5b-afe0-425e-a7b8-82e7a3ee46ec
+  bundle: movie
+  default_langcode: en
+  depends:
+    cc499d5d-647a-4bd1-9f69-239871d4e3ac: taxonomy_term
+    2ff12607-1ab0-47a2-b4a5-558ff0ec81be: taxonomy_term
+    4eda267e-f891-41cf-9d38-39ec882a036b: taxonomy_term
+default:
+  revision_uid:
+    -
+      target_id: 1
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  title:
+    -
+      value: 'Star Wars: Episode V - The Empire Strikes Back'
+  created:
+    -
+      value: 1738334388
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en
+  body:
+    -
+      value: '<p>After the Empire overpowers the Rebel Alliance, Luke Skywalker begins training with Jedi Master Yoda, while Darth Vader and bounty hunter Boba Fett pursue his friends across the galaxy.</p>'
+      format: basic_html
+      summary: ''
+  field_country_of_origin:
+    -
+      entity: cc499d5d-647a-4bd1-9f69-239871d4e3ac
+  field_genre:
+    -
+      entity: 2ff12607-1ab0-47a2-b4a5-558ff0ec81be
+    -
+      entity: 4eda267e-f891-41cf-9d38-39ec882a036b
+  field_imdb_rating:
+    -
+      value: '8.7'
+  field_release_date:
+    -
+      value: '1980-06-18'

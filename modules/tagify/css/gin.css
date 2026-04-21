@@ -1,0 +1,261 @@
+:root {
+  --tagify-dd-color-primary: var(--gin-bg-layer3);
+  --tagify-dd-bg-color: var(--gin-bg-layer2);
+}
+
+.tagify.form-element--api-entity-autocomplete-tagify-user-list:focus,
+.tagify.form-element--type-select-multiple:focus,
+.tagify.form-element--type-select:focus,
+.tagify.form-element--api-entity-autocomplete-tagify-user-list:focus-within,
+.tagify.form-element--type-select-multiple:focus-within,
+.tagify.form-element--type-select:focus-within {
+  box-shadow:
+    0 0 0 1px var(--gin-color-focus-border),
+    0 0 0 4px var(--gin-color-focus) !important;
+}
+
+.tagify.form-element--api-entity-autocomplete-tagify:focus,
+.tagify.form-element--type-select-multiple:focus,
+.tagify.form-element--type-select:focus,
+.tagify.form-element--api-entity-autocomplete-tagify:focus-within,
+.tagify.form-element--type-select-multiple:focus-within,
+.tagify.form-element--type-select:focus-within {
+  box-shadow:
+    0 0 0 1px var(--gin-color-focus-border),
+    0 0 0 4px var(--gin-color-focus) !important;
+}
+
+#tagify__tag-remove-button:focus {
+  box-shadow:
+    0 0 0 1px var(--gin-color-focus-border),
+    0 0 0 4px var(--gin-color-focus);
+}
+
+.tagify__dropdown__item--active {
+  background: var(--gin-color-primary) !important;
+}
+
+.tagify__tag:focus div::before,
+.tagify__tag:hover:not([readonly]) div::before {
+  --tag-bg: var(--gin-color-primary-light-hover) !important;
+}
+
+/* Loading spinner */
+.tagify--loading .tagify__input::after {
+  right: 5px;
+  width: 17px;
+  height: 17px;
+  border: 2px solid var(--gin-bg-input);
+  border-top: 2px solid var(--gin-color-primary);
+  border-radius: 50%;
+}
+
+.tagify--loading-text {
+  color: var(--gin-color-primary);
+}
+
+.tagify.form-select.form-element--type-select
+  .tagify__tag--editable
+  .tagify__tag__info-label-wrap,
+.tagify__tag--editable .tagify__tag-entity-id {
+  color: var(--gin-color-text);
+  background: var(--gin-color-primary-light-hover) !important;
+}
+
+.tagify.form-select.form-element--type-select
+  .tagify__tag--editable
+  > div::before {
+  box-shadow: 0 0 0 2px var(--gin-color-primary-light-hover) inset !important;
+}
+
+.tagify.form-element--api-entity-autocomplete-tagify-hierarchical-term-list:focus,
+.tagify.form-element--api-entity-autocomplete-tagify-hierarchical-term-list:focus-within {
+  box-shadow:
+    0 0 0 1px var(--gin-color-focus-border),
+    0 0 0 4px var(--gin-color-focus) !important;
+}
+
+.tagify__dropdown__itemsGroup .dropdown_group {
+  color: var(--gin-color-primary) !important;
+}
+
+.tagify__dropdown__item--parent {
+  padding: 0.2rem 0.4rem !important;
+  cursor: pointer;
+}
+
+.tagify__dropdown__item--parent .dropdown_group {
+  padding: 0;
+}
+
+.tagify__dropdown__item--parent:hover,
+.tagify__dropdown__item--parent.tagify__dropdown__item--active {
+  background: var(--gin-color-primary) !important;
+}
+
+.tagify__dropdown__item--parent:hover .dropdown_group,
+.tagify__dropdown__item--parent.tagify__dropdown__item--active .dropdown_group {
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* Gin dark mode */
+.gin--dark-mode .tagify {
+  --tag-text-color--edit: var(--gin-color-text);
+  --tag-remove-btn-color: var(--gin-color-text);
+  --tag-text-color: var(--gin-color-text);
+  --tag-bg: var(--gin-bg-layer);
+  --placeholder-color: var(--gin-color-text-light);
+  --placeholder-color-focus: var(--gin-color-text);
+}
+
+.gin--dark-mode .tagify__tag:hover > #tagify__tag-remove-button {
+  color: #55565b;
+  background: #dedfe4;
+}
+
+.gin--dark-mode .tagify__dropdown__item--active {
+  color: var(--gin-color-primary-hover) !important;
+  background-color: var(--gin-bg-item-hover) !important;
+}
+
+.gin--dark-mode .tagify__dropdown__item--parent:hover,
+.gin--dark-mode .tagify__dropdown__item--parent.tagify__dropdown__item--active {
+  background: var(--gin-color-primary-hover) !important;
+}
+
+.gin--dark-mode .tagify__dropdown__item--parent:hover .dropdown_group,
+.gin--dark-mode
+  .tagify__dropdown__item--parent.tagify__dropdown__item--active
+  .dropdown_group {
+  color: var(--gin-color-text) !important;
+  font-weight: 600;
+}
+
+.gin--dark-mode #tagify__tag-remove-button:hover {
+  background: #c77777 !important;
+}
+
+.gin--dark-mode .tagify__dropdown.users-list .tagify__dropdown__count {
+  color: var(--gin-color-text);
+  border-bottom: 1px solid #55565b;
+  background-color: var(--gin-bg-layer);
+}
+
+.gin--dark-mode .tagify__tag-entity-id,
+.gin--dark-mode #tagify__tag__entity-id-wrap,
+.gin--dark-mode #tagify__tag__info-label-wrap {
+  color: var(--gin-color-text);
+  background-color: #55565b;
+}
+
+.gin--dark-mode #tagify__tag-items .tagify__tag__info-label-wrap {
+  transition: none;
+}
+
+.gin--dark-mode .tagify__tag:hover > #tagify__tag-items .tagify__tag-entity-id,
+.gin--dark-mode
+  .tagify__tag:hover
+  > #tagify__tag-items
+  .tagify__tag__info-label-wrap {
+  color: #55565b;
+  background-color: var(--gin-color-text);
+}
+
+.gin--dark-mode
+  .tagify.form-select.form-element--type-select
+  .tagify__tag--editable
+  #tagify__tag-remove-button {
+  background: none !important;
+}
+
+.gin--dark-mode
+  .tagify.form-select.form-element--type-select.tagify__tag--editable.tagify__tag:hover
+  > #tagify__tag-items
+  .tagify__tag-entity-id,
+.gin--dark-mode
+  .tagify.form-select.form-element--type-select
+  .tagify__tag--editable.tagify__tag:hover
+  > #tagify__tag-items
+  .tagify__tag__info-label-wrap {
+  color: var(--gin-color-text);
+}
+
+.gin--dark-mode .tagify.form-select.form-element--type-select {
+  padding-inline-end: calc(2rem - var(--input-border-size));
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 9'%3e%3cpath fill='none' stroke-width='1.5' d='M1 1l6 6 6-6' stroke='%23545560'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: 100% 50%;
+  background-size: 2.75rem 0.5625rem; /* w: 14px + (2 * 15px), h: 9px */
+}
+
+.gin--dark-mode
+  .tagify.form-select.form-element--type-select-multiple:focus-within,
+.gin--dark-mode .tagify.form-select.form-element--type-select:focus-within {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 9'%3e%3cpath fill='none' stroke-width='1.5' d='M1 1l6 6 6-6' stroke='%238e929c'/%3e%3c/svg%3e");
+}
+
+.gin--dark-mode .tagify.form-select.form-element--type-select[disabled] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 9'%3e%3cpath fill='none' stroke-width='1.5' d='M1 1l6 6 6-6' stroke='%238e929c'/%3e%3c/svg%3e");
+}
+
+/* Fix tag styling in mobile */
+@media screen and (max-width: 600px) {
+  .tagify__tag {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 86%;
+  }
+
+  .tagify__tag > div {
+    justify-content: space-between;
+    max-width: 90%;
+  }
+
+  .tagify__tag-text,
+  .tagify__tag-info-label {
+    white-space: nowrap !important;
+  }
+
+  .tagify__tag__info-label-wrap {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tagify__dropdown__item-highlighted {
+    overflow: hidden;
+    white-space: nowrap !important;
+    text-overflow: ellipsis;
+  }
+
+  .tagify__dropdown__item {
+    align-items: center;
+    justify-content: space-between;
+    white-space: unset !important;
+  }
+}
+
+/* Fix tag styling in gin sidebar */
+#gin_sidebar .tagify__tag > div {
+  max-width: 85%;
+}
+
+#gin_sidebar .tagify__tag > div > * {
+  white-space: nowrap;
+}
+
+#gin_sidebar .tagify__tag {
+  max-width: 85%;
+}
+
+/* Fix dropdown suggestions overflow in gin sidebar */
+.tagify__dropdown--gin-sidebar .tagify__dropdown__item-highlighted,
+.tagify__dropdown--gin-sidebar .dropdown_group {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}

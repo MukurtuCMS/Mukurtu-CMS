@@ -1,0 +1,27 @@
+geofield_general:
+  version: 1.x
+  css:
+    component:
+      css/geofield_general.css: {}
+
+geolocation:
+  version: 1.x
+  js:
+    js/geolocation.js: {}
+  dependencies:
+    - core/jquery
+    - core/once
+
+proximity_origin_summary_update:
+  version: 1.x
+  js:
+    js/proximity_origin_summary_update.js: {}
+  dependencies:
+    - core/jquery
+    - core/once
+geofield-icon:
+  css:
+    theme:
+      css/geofield-icon.css: {}
+  dependencies:
+    - field_ui/drupal.field_ui.manage_fields

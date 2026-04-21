@@ -1,0 +1,30 @@
+# cspell: project specific dictionary
+
+# Project name.
+Genpass
+genpass
+
+# Internal variable names or references.
+changepass
+intf
+nottext
+userform
+userforms
+
+# English spelling vs American.
+behaviour
+initialise
+sanitise
+sanitised
+
+# Nouns.
+freenode
+starbow
+
+# Should be in Drupal-dictionary.
+Formstate
+Validatable
+
+# Not the full alphabet on purpose.
+abcdefghijkmnopqrstuvwxyz
+ABCDEFGHJKLMNPQRSTUVWXYZ

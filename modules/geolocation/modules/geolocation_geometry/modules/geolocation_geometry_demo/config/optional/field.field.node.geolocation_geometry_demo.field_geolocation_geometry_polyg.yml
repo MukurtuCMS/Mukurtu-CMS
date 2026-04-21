@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_geolocation_geometry_polyg
+    - node.type.geolocation_geometry_demo
+  module:
+    - geolocation_geometry
+  enforced:
+    module:
+      - geolocation_geometry_demo
+id: node.geolocation_geometry_demo.field_geolocation_geometry_polyg
+field_name: field_geolocation_geometry_polyg
+entity_type: node
+bundle: geolocation_geometry_demo
+label: 'Geolocation Geometry Polygon'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geolocation_geometry_polygon

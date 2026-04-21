@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_subject
+    - field.field.message.create_node.field_node_reference
+    - field.field.message.create_node.field_published
+    - message.template.create_node
+  module:
+    - user
+third_party_settings: {  }
+id: message.create_node.mail_subject
+targetEntityType: message
+bundle: create_node
+mode: mail_subject
+content:
+  partial_0:
+    weight: 0
+    region: content
+hidden:
+  field_node_reference: true
+  field_published: true
+  partial_1: true

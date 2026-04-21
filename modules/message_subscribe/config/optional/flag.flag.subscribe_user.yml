@@ -1,0 +1,29 @@
+id: subscribe_user
+label: Users
+bundles: {  }
+entity_type: user
+dependencies:
+  module:
+    - user
+global: false
+weight: 0
+status: false
+flag_short: Subscribe
+flag_long: ''
+flag_message: 'You are now subscribed to this item.'
+unflag_short: Unsubscribe
+unflag_long: ''
+unflag_message: 'You are no longer subscribed to this item.'
+unflag_denied_text: ''
+flag_type: 'entity:user'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links:
+    full: full
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  extra_permissions:
+    owner: '0'
+  show_on_profile: false
+linkTypeConfig: {  }

@@ -1,0 +1,6 @@
+services:
+  search_api_solr_test.search_api_subscriber:
+    class: Drupal\search_api_solr_test\EventSubscriber\SearchApiSubscriber
+    arguments: []
+    tags:
+      - { name: event_subscriber }

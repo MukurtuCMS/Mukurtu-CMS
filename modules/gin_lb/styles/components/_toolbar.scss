@@ -1,0 +1,102 @@
+body[data-meta-sidebar="open"] .glb-sidebar {
+  transform: translateX(0);
+}
+.gin-secondary-toolbar--frontend .glb-region-sticky__items__inner {
+  margin: 0 !important;
+}
+.gin--horizontal-toolbar.glb-body {
+  .gin-secondary-toolbar--frontend {
+    top: var(--gin-toolbar-height);
+  }
+}
+
+.glb-sidebar {
+  position: fixed;
+  transform: translateX(var(--gin-sidebar-width));
+  z-index: 101;
+  top: var(--drupal-displace-offset-top) !important;
+  right: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: var(--gin-sidebar-width);
+  height: calc(100% - var(--drupal-displace-offset-top));
+  margin: 0;
+  transition: all var(--gin-transition-fast);
+  color: var(--gin-color-text);
+  border-left: 1px solid var(--gin-border-color-layer);
+  background: var(--gin-bg-layer);
+  font-family:
+    Inter,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Oxygen-Sans,
+    Ubuntu,
+    Cantarell,
+    "Helvetica Neue",
+    sans-serif;
+  font-size: 16px;
+  line-height: 1em;
+  -webkit-overflow-scrolling: touch;
+
+  &__content {
+    padding-left: 1.3rem;
+  }
+
+  .gin--dark-mode & {
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .gin--vertical-toolbar & {
+    top: var(--gin-toolbar-secondary-height) !important;
+    height: calc(100% - var(--gin-toolbar-secondary-height)) !important;
+  }
+
+  .gin--horizontal-toolbar & {
+    top: calc(
+      var(--drupal-displace-offset-top) + var(--gin-toolbar-secondary-height)
+    ) !important;
+    height: calc(
+      100% - var(--drupal-displace-offset-top) - var(--gin-toolbar-secondary-height)
+    ) !important;
+  }
+
+  .form-actions {
+    margin: 0;
+    .action-link {
+      margin-top: var(--gin-spacing-xs);
+      margin-bottom: 0;
+    }
+  }
+
+  &--processed {
+    opacity: 1;
+  }
+
+  &__title {
+    flex-grow: 1;
+  }
+
+  &__titlebar {
+    margin-top: 1.25em !important;
+    margin-bottom: 1.25em !important;
+    color: var(--gin-color-title) !important;
+    text-shadow: none !important;
+    font-size: 1.231em !important;
+    font-weight: 500 !important;
+  }
+
+  .form-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+  }
+
+  .glb-form-item-toggle-content-preview {
+    padding-right: 1.25em;
+  }
+}

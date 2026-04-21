@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * @file
+ * Provides hooks for gin_lb_plus module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\NodeInterface;
+use Drupal\Core\Url;
+use Drupal\gin_lb\HookHandler\FormAlter;
+
+/**
+ * Implements hook_theme().
+ */
+function gin_lb_plus_theme(): array {
+  return [
+    'gin_lb_plus_icon' => [
+      'variables' => [
+        'uri' => NULL,
+        'icon_type' => NULL,
+        'plugin_id' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'svg' => NULL,
+        'alt' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function gin_lb_plus_page_attachments(array &$attachments):void {
+  $gin_lb_context_validator = \Drupal::service('gin_lb.context_validator');
+
+  if ($gin_lb_context_validator->isLayoutBuilderRoute() && $gin_lb_context_validator->isValidTheme()) {
+    $attachments['#attached']['library'][] = 'gin_lb_plus/core';
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function gin_lb_plus_form_alter(
+  array &$form,
+  FormStateInterface $form_state,
+  string $form_id,
+):void {
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if (
+    $node instanceof NodeInterface &&
+    $form_id === 'node_' . $node->bundle() . '_layout_builder_form') {
+    $add_template_to_library_url = Url::fromRoute(
+      'section_library.add_template_to_library',
+      [
+        'section_storage_type' => 'overrides',
+        'section_storage' => $node->getEntityTypeId() . '.' . $node->id(),
+        'delta' => 1,
+      ],
+      [
+        'attributes' => [
+          'class' => [
+            'glb-button gin-lb-plus-button',
+            'use-ajax',
+          ],
+          'data-dialog-type' => 'dialog',
+          'data-dialog-renderer' => 'off_canvas',
+        ],
+      ]
+    );
+    $form['actions']['add_to_library'] = [
+      '#type' => 'link',
+      '#weight' => 10,
+      '#url' => $add_template_to_library_url,
+      '#title' => ['#markup' => '<div class="gin-lb-plus-button__icon"></div>' . t('Add to library')],
+      '#access' => $add_template_to_library_url->access(),
+    ];
+
+    if (isset($form['actions']['move_sections'])) {
+      $form['actions']['move_sections']['#attributes']['class'][] = 'glb-button gin-lb-plus-button';
+    }
+  }
+  if (
+    in_array($form_id, [
+      'section_library_add_template_to_library',
+      'section_library_add_section_to_library',
+    ])) {
+    $form['#after_build'][] = [FormAlter::class, 'afterBuildAttachGinLbForm'];
+    $form['#gin_lb_form'] = TRUE;
+    $form['#attributes']['class'][] = 'glb-form';
+  }
+}
+
+/**
+ * Implements hook_preprocess_gin_lb_plus_icon().
+ */
+function gin_lb_plus_preprocess_gin_lb_plus_icon(array &$variables):void {
+  $uri = $variables['uri'];
+  $type = $variables['icon_type'];
+  if ($uri === NULL) {
+    $filename = $type === 'block' ? 'block-empty-icon.svg' : 'section-empty-icon.svg';
+    $img_path = \Drupal::service('extension.list.module')->getPath('gin_lb_plus') . '/images/' . $filename;
+    $variables['uri'] = \Drupal::service('file_url_generator')->generateString($img_path);
+  }
+}

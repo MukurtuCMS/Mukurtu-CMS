@@ -1,0 +1,28 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: eefe7709-9848-4a7f-9a78-fb5b6f179942
+  bundle: genres
+  default_langcode: en
+  depends:
+    834bbe41-fef2-426b-ba3e-acbdf3a528cb: taxonomy_term
+default:
+  status:
+    -
+      value: true
+  name:
+    -
+      value: Satire
+  weight:
+    -
+      value: 0
+  parent:
+    -
+      entity: 834bbe41-fef2-426b-ba3e-acbdf3a528cb
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en

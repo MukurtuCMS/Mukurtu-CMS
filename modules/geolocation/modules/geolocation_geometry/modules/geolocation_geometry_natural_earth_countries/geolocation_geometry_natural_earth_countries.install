@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Geolocation Geometry country import.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function geolocation_geometry_natural_earth_countries_install() {
+  /** @var \Drupal\geolocation_geometry_data\GeolocationGeometryDataManager $geometry_data_manager */
+  $geometry_data_manager = \Drupal::service('plugin.manager.geolocation.geometrydata');
+  return $geometry_data_manager->executeGemeotryDataBatch($geometry_data_manager->getGemeotryDataBatch('natural_earth_countries'));
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function geolocation_geometry_natural_earth_countries_uninstall() {
+  $taxonomy_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+  $taxonomy_storage->delete($taxonomy_storage->loadByProperties(['vid' => 'geolocation_geometry_countries']));
+}

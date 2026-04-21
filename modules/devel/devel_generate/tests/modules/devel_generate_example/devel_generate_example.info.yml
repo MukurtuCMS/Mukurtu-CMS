@@ -1,0 +1,12 @@
+name: 'Devel Generate Example'
+type: module
+description: 'Create an example of a Devel Generate plugin type for testing purposes.'
+package: Testing
+configure: admin/config/development/generate
+tags:
+  - developer
+
+# Information added by Drupal.org packaging script on 2025-11-27
+version: '5.5.0'
+project: 'devel'
+datestamp: 1764211207

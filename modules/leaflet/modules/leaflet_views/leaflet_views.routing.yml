@@ -1,0 +1,10 @@
+leaflet_views.ajax_popup:
+  path: '/leaflet-ajax-popup/{entity_type}/{entity}/{view_mode}/{langcode}'
+  defaults:
+    _controller: '\Drupal\leaflet_views\Controller\LeafletAjaxPopupController::popupBuild'
+  requirements:
+    _custom_access: '\Drupal\leaflet_views\Controller\LeafletAjaxPopupController::accessCheck'
+  options:
+    parameters:
+      entity:
+        type: entity:{entity_type}

@@ -1,0 +1,6 @@
+facets_reset_button:
+  version: VERSION
+  js:
+    js/facets_reset_button.js: {}
+  dependencies:
+    - core/jquery

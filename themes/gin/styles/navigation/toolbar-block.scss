@@ -1,0 +1,29 @@
+/**
+ * @file
+ * Toolbar block styles.
+ */
+
+ .toolbar-block__title {
+  padding-inline: 5px 10px;
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+  color: var(--color-gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-block: var(--space-l) var(--space-s);
+}
+
+/* Add extra space when the title is hidden. */
+.toolbar-block__title.visually-hidden + .toolbar-block__content {
+  margin-block-start: var( --space-l);
+}
+
+/* Temporarily hide titles on collapse. */
+html:not(.admin-toolbar-expanded) {
+  & .admin-toolbar__content .admin-toolbar__item,
+  & .admin-toolbar__sticky-section {
+    & .toolbar-block__title {
+      display: none;
+    }
+  }
+}

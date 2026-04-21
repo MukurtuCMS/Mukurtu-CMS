@@ -1,0 +1,5 @@
+layout_builder_restrictions.admin_config:
+  title: 'Layout Builder Restrictions'
+  route_name: layout_builder_restrictions.restriction_plugin_config_form
+  parent: system.admin_config_content
+  description: 'Manage which Layout Builder Restrictions plugins run, and in which order.'

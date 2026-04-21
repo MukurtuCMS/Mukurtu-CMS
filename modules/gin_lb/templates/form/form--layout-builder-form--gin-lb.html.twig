@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Theme override for a 'form' element.
+ *
+ * Available variables
+ * - attributes: A list of HTML attributes for the wrapper element.
+ * - children: The child elements of the form.
+ *
+ * @see template_preprocess_form()
+ */
+#}
+<div id="gin_sidebar" class="glb-sidebar layout-region">
+  <span class="gin-sidebar-draggable" id="gin-sidebar-draggable"></span>
+  <div class="glb-sidebar__content">
+  <div class="glb-sidebar__titlebar">
+    <div class="glb-sidebar__title">{{ "Layout builder setting"|t }}</div>
+  </div>
+  <form{{ attributes }}>
+    {{ children }}
+  </form>
+  </div>
+</div>

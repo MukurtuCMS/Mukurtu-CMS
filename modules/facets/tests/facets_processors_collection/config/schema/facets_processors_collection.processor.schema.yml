@@ -1,0 +1,11 @@
+plugin.plugin_configuration.facets_processor.fpc_build_processor:
+  type: mapping
+
+plugin.plugin_configuration.facets_processor.fpc_post_query_processor:
+  type: mapping
+
+plugin.plugin_configuration.facets_processor.fpc_sort_processor:
+  type: mapping
+
+plugin.plugin_configuration.facets_processor.fpc_sort_random_processor:
+  type: mapping

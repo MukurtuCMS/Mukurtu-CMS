@@ -1,0 +1,68 @@
+{
+  "name": "gin",
+  "version": "3.1.0",
+  "description": "Frontend build tools",
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "webpack --progress --config  webpack.config.dev.js --watch",
+    "build": "webpack --progress --config webpack.config.build.js"
+  },
+  "email": "hello@saschaeggenberger.com",
+  "author": "Sascha Eggenberger",
+  "license": "MIT",
+  "homepage": "https://sascha.is",
+  "keywords": [
+    "drupal",
+    "webpack",
+    "gin",
+    "frontend"
+  ],
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.13.8",
+    "@babel/plugin-syntax-dynamic-import": "7.0.0",
+    "@babel/preset-env": "^7.13.9",
+    "autoprefixer": "^10.4.0",
+    "babel-eslint": "10.0.1",
+    "babel-loader": "^8.2.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "css-loader": "^5.2.7",
+    "dotenv-webpack": "^7.0.1",
+    "es6-promise": "^4.1.1",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-import-resolver-webpack": "0.13.0",
+    "eslint-plugin-import": "2.19.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.2",
+    "expose-loader": "^3.1.0",
+    "file-loader": "^5.0.2",
+    "img-loader": "^4.0.0",
+    "mini-css-extract-plugin": "^0.11.3",
+    "postcss-loader": "^6.2.1",
+    "postcss-perfectionist": "^2.3.9",
+    "postcss-rtlcss": "^3.5.2",
+    "raw-loader": "^4.0.2",
+    "sass-loader": "^12.3.0",
+    "sass-resources-loader": "^2.2.4",
+    "svg-inline-loader": "^0.8.2",
+    "svg-spritemap-webpack-plugin": "^4.4.0",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.26.3",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-middleware": "^7.4.2",
+    "webpack-merge": "^5.7.3",
+    "webpack-notifier": "^1.13.0",
+    "webpack-remove-empty-scripts": "^0.7.1"
+  },
+  "dependencies": {
+    "core-js": "^3.9.1",
+    "postcss": "^8.4.47",
+    "postcss-rtl-logical-properties": "^1.0.7",
+    "sass": "^1.44.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git.drupalcode.org/project/gin"
+  }
+}

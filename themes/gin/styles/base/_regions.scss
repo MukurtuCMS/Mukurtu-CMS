@@ -1,0 +1,221 @@
+.region-sticky {
+  position: sticky;
+  inset-block-start: var(--gin-toolbar-y-offset);
+  z-index: 101;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  min-height: var(--gin-height-sticky);
+  background: var(--gin-bg-app);
+  box-sizing: border-box;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: var(--gin-transition);
+  }
+
+  .gin--edit-form & {
+    inset-block-start: calc(var(--gin-toolbar-y-offset) - var(--gin-spacing-xxl) - var(--gin-spacing-xxs));
+    padding-block-start: var(--gin-spacing-m);
+
+    @include mq(large) {
+      inset-block-start: var(--gin-toolbar-y-offset);
+      padding-block-start: var(--gin-spacing-s);
+    }
+  }
+
+  &-watcher {
+    position: sticky;
+    inset-block-start: -1px;
+    height: 0;
+  }
+
+  &--is-sticky {
+    opacity: .95;
+    background: var(--gin-bg-app);
+
+    @supports (backdrop-filter: blur()) {
+      opacity: .999;
+      background: rgba(var(--gin-bg-app-rgb), .8);
+      backdrop-filter: blur(12px);
+    }
+
+    .gin--high-contrast-mode & {
+      background: var(--gin-bg-app);
+      backdrop-filter: none;
+    }
+  }
+
+  @include mq(large) {
+    inset-block-start: -1px;
+    padding: var(--gin-spacing-s) 0;
+    height: var(--gin-height-sticky);
+    margin-block-end: 0;
+
+    .gin--navigation &,
+    .gin--vertical-toolbar &,
+    .gin--horizontal-toolbar &,
+    .gin--classic-toolbar & {
+      inset-block-start: var(--gin-toolbar-y-offset);
+    }
+  }
+
+  &__items {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    width: auto;
+    height: 100%;
+    flex-grow: 1;
+
+    @include mq(small) {
+      .settings-tray-editable {
+        flex-shrink: 0;
+      }
+    }
+
+    &__inner {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+
+      @include mq(large) {
+        flex-wrap: nowrap;
+        align-items: center;
+        margin-block-end: 0;
+
+        .block-page-title-block {
+          margin: 0;
+        }
+      }
+    }
+
+    .block-page-title-block {
+      flex-grow: 1;
+      align-self: center;
+      display: flex;
+      margin: 0;
+      min-width: 0;
+
+      .page-title {
+        align-self: center;
+        margin: 0;
+      }
+    }
+
+    .gin-sticky-form-actions {
+      display: flex;
+      width: auto;
+      margin-block-start: 0;
+
+      @include mq(large) {
+        padding-inline-start: var(--gin-spacing-l);
+      }
+    }
+
+    [id*="block-gin-local-actions"] + .gin-sticky-form-actions {
+      padding-inline-start: var(--gin-spacing-xs);
+    }
+  }
+}
+
+.content-header {
+  padding-block: 0;
+  background-color: transparent;
+  overflow: initial;
+
+  // Normalize whitespace if empty.
+  @include mq(small) {
+    &:not(:has(.layout-container *)) {
+      margin-block-start: calc(var(--gin-spacing-m) * -1);
+    }
+  }
+}
+
+.sticky-shadow {
+  @include mq(large) {
+    z-index: 98;
+    position: relative;
+    pointer-events: none;
+    height: 40px;
+    margin-block: calc(var(--gin-spacing-xxxl) * -1) var(--gin-spacing-l);
+    margin-inline: auto;
+    box-shadow: 0 10px 20px -16px rgba(0, 0, 0, .4);
+
+    .gin--dark-mode & {
+      box-shadow: none;
+    }
+  }
+
+  @include mq(large) {
+    position: sticky;
+    inset-block-start: calc(var(--gin-toolbar-y-offset) + (var(--gin-height-sticky) - 40px));
+    width: calc(100% - min(10vw, 96px) + var(--gin-spacing-l));
+
+    .gin--edit-form & {
+      max-width: 1300px;
+    }
+  }
+}
+
+.page-wrapper {
+  @include mq(large) {
+    margin-block-start: 1px; // fix for inset-block-start: auto;
+  }
+}
+
+.toolbar-tray-open:not(.toolbar-vertical) .layout-container,
+body:not(.toolbar-tray-open) .layout-container {
+  margin-inline: var(--gin-spacing-m);
+
+  @include mq(small) {
+    margin-inline: var(--gin-spacing-xl);
+  }
+
+  @include mq(medium) {
+    margin-inline: m#{i}n(5vw, var(--gin-spacing-xxl));
+
+    .layout-container {
+      margin-inline: 0;
+    }
+  }
+}
+
+.gin-sticky-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+
+  @include mq(large) {
+    flex-wrap: nowrap;
+    width: max-content;
+  }
+
+  .form-actions {
+    margin: 0;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .field--name-status {
+    display: flex;
+    align-items: center;
+    margin-inline-end: var(--gin-spacing-xs);
+
+    .form-item__label {
+      font-size: 0.8125rem;
+
+      @include mq($to: tiny) {
+        display: none;
+      }
+    }
+
+    .form-type--checkbox {
+      margin-block: var(--gin-spacing-xs);
+    }
+  }
+}

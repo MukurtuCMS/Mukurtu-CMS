@@ -1,0 +1,120 @@
+{# @cspell:ignore doremi #}
+{% set image_attributes = {style: 'width: 30px; height: 30px;'} %}
+<style>
+  main {
+    background-color: lightyellow;
+    padding: 15px;
+    border: double 3px darkgrey;
+  }
+  .tt-test > div {
+    margin: 15px auto;
+    padding: 10px;
+    outline: solid 2px dodgerblue;
+    max-width: 1200px;
+    background-color: white;
+  }
+  .tt-test > div::before {
+    content: attr(class);
+    font-weight: bold;
+    display: block;
+    font-style: italic;
+    border-bottom: solid 1px dodgerblue;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    color: dodgerblue;
+  }
+</style>
+<div class="tt-test">
+  <div class="tt-view-default">{{ drupal_view('twig_tweak_test') }}</div>
+  <div class="tt-view-page_1">{{ drupal_view('twig_tweak_test', 'page_1') }}</div>
+  <div class="tt-view-page_1-with-argument">{{ drupal_view('twig_tweak_test', 'page_1', 1) }}</div>
+  <div class="tt-view-result">{{ drupal_view_result('twig_tweak_test', 'page_1')|length }}</div>
+  <div class="tt-block">{{ drupal_block('system_branding_block', {use_site_name: false}, false) }}</div>
+  <div class="tt-block-with-wrapper">{{ drupal_block('system_branding_block', {label: 'Branding'}) }}</div>
+  <div class="tt-region">{{ drupal_region('highlighted') }}</div>
+  <div class="tt-entity-default">{{ drupal_entity('node', 1) }}</div>
+  <div class="tt-entity-teaser">{{ drupal_entity('node', 1, 'teaser') }}</div>
+  <div class="tt-entity-uuid">{{ drupal_entity('node', 'ad1b902a-344f-41d1-8c61-a69f0366dbfa') }}</div>
+  <div class="tt-entity-uuid-missing">{{ drupal_entity('node', 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz') }}</div>
+  <div class="tt-entity-add-form">{{ drupal_entity_form('node', values={type: 'page'}) }}</div>
+  <div class="tt-entity-edit-form">{{ drupal_entity_form('node', 1) }}</div>
+  <div class="tt-field">{{ drupal_field('body', 'node', 1) }}</div>
+  <div class="tt-menu-default">{{ drupal_menu('twig-tweak-test') }}</div>
+  <div class="tt-menu-level">{{ drupal_menu('twig-tweak-test', 2) }}</div>
+  <div class="tt-menu-depth">{{ drupal_menu('twig-tweak-test', 1, 1) }}</div>
+  <div class="tt-form">{{ drupal_form('Drupal\\system\\Form\\CronForm') }}</div>
+  <div class="tt-image-by-fid">{{ drupal_image(1, attributes=image_attributes) }}</div>
+  <div class="tt-image-by-uri">{{ drupal_image('public://image-test.png', attributes=image_attributes) }}</div>
+  <div class="tt-image-by-uuid">{{ drupal_image('b2c22b6f-7bf8-4da4-9de5-316e93487518', attributes=image_attributes) }}</div>
+  <div class="tt-image-with-style">{{ drupal_image(1, 'thumbnail', image_attributes) }}</div>
+  <div class="tt-image-with-responsive-style">{{ drupal_image(1, 'example', image_attributes, true) }}</div>
+  <div class="tt-token">{{ drupal_token('site:name') }}</div>
+  <div class="tt-token-data">{{ drupal_token('node:title', {'node': node}) }}</div>
+  <div class="tt-config">{{ drupal_config('user.settings', 'anonymous') }}</div>
+  <div class="tt-title">{{ drupal_title() }}</div>
+  <div class="tt-url">
+    <div data-case="default">{{ drupal_url('node/1', {absolute: true}) }}</div>
+    <div data-case="with-langcode">{{ drupal_url('node/1', {absolute: true, langcode: 'ru'}) }}</div>
+    <div data-case="external">{{ drupal_url('https://example.com/node?foo=bar', {query: {page: 1}, fragment: 'here'}) }}</div>
+  </div>
+  <div class="tt-link">{{ drupal_link('Edit', 'node/1/edit', {absolute: true}) }}</div>
+  <div class="tt-link-html">{% set link_text %}<b>Edit</b>{% endset %}{{ drupal_link(link_text, 'node/1/edit', {absolute: true}) }}</div>
+  <div class="tt-messages">{{ drupal_messages() }}</div>
+  <div class="tt-breadcrumb">{{ drupal_breadcrumb() }}</div>
+  <div class="tt-link-access">{{ drupal_link('Administration', 'admin', {absolute: true}, true) }}</div>
+  <div class="tt-contextual-links">{{ drupal_contextual_links('node:node=1') }}</div>
+  <div class="tt-token-replace">{{ 'Site name: [site:name]'|token_replace }}</div>
+  <div class="tt-preg-replace">{{ 'FOO'|preg_replace('/(foo)/i', '$1-bar') }}</div>
+  <div class="tt-image-style">{{ 'public://images/ocean.jpg'|image_style('thumbnail') }}</div>
+  <div class="tt-transliterate">{{ 'Привет!'|transliterate('ru') }}</div>
+  <div class="tt-check-markup">{{ '<b>bold</b> <strong>strong</strong>'|check_markup('twig_tweak_test') }}</div>
+  <div class="tt-format-size">{{ 12345|format_size }}</div>
+  <div class="tt-truncate">{{ 'Hello world!'|truncate(10, true, true) }}</div>
+  <div class="tt-with">{{ {'#markup':'Example'}|with('#prefix', '<b>')|with('#suffix', '</b>') }}</div>
+  <div class="tt-with-nested">{{ {alpha: {beta: {gamma: 123}}}|with(['alpha', 'beta', 'gamma'], 456)|json_encode|replace({'"':''}) }}</div>
+  <div class="tt-data-uri-svg">
+    <img src="{{ '<svg xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" fill="lime"/></svg>'|data_uri('image/svg+xml') }}" alt="{{ 'Rectangle'|t }}" style="height: 50px;"/>
+  </div>
+  <div class="tt-data-uri-iframe">
+    <iframe src="{{ '<h1>Hello world!</h1>'|data_uri('text/html', {charset: 'UTF-8'}) }}"></iframe>
+  </div>
+  <div class="tt-children">
+    {%-
+      set build = {
+        're': {'#markup': 're'},
+        '#sol':  {'#markup': '#sol'},
+        'mi': {'#markup': 'mi'},
+        '#fa': {'#markup': '#fa'},
+        'do':  {'#markup': 'do', '#weight': -10},
+      }
+    -%}
+    {%- for value in build|children(true) -%}
+      {{- value -}}
+    {%- endfor -%}
+  </div>
+  <div class="tt-node-view">{{ node|view }}</div>
+  <div class="tt-field-list-view">{{ node.title|view }}</div>
+  <div class="tt-field-item-view">{{ node.title[0]|view }}</div>
+  <div class="tt-file-uri-from-image-field">{{ node.field_image|file_uri }}</div>
+  <div class="tt-file-uri-from-image-field-delta">{{ node.field_image[0]|file_uri }}</div>
+  {% set media_uri = node.field_media|file_uri %}
+  <div class="tt-file-uri-from-media-field">{{ media_uri }}</div>
+  {% if media_uri is not null %}
+    <div class="tt-image-style-from-file-uri-from-media-field">{{ media_uri|image_style('thumbnail') }}</div>xxxxxx
+  {% endif %}
+  <div class="tt-file-url-from-uri">{{ 'public://image-test.png'|file_url }}</div>
+  <div class="tt-file-url-from-uri-absolute">{{ 'public://image-test.png'|file_url(false) }}</div>
+  <div class="tt-file-url-from-image-field">{{ node.field_image|file_url }}</div>
+  <div class="tt-file-url-from-image-field-delta">{{ node.field_image[0]|file_url }}</div>
+  <div class="tt-file-url-from-media-field">{{ node.field_media|file_url }}</div>
+  <div class="tt-entity-url">{{ node|entity_url(options={fragment: 'test'}) }}</div>
+  <div class="tt-entity-url-absolute">{{ node|entity_url(options={absolute: true}) }}</div>
+  <div class="tt-entity-url-edit-form">{{ node|entity_url('edit-form') }}</div>
+  <div class="tt-entity-link">{{ node|entity_link }}</div>
+  <div class="tt-entity-link-absolute">{{ node|entity_link('Example', options={absolute: true}) }}</div>
+  <div class="tt-entity-link-edit-form">{{ node|entity_link('Edit', 'edit-form') }}</div>
+  <div class="tt-translation">{{ (node|translation).title.value }}</div>
+  <div class="tt-functions_alter">{{ foo('bar') }}</div>
+  <div class="tt-filters_alter">{{ 'foo'|bar }}</div>
+  <div class="tt-tests_alter">{{ 'ok' is ok ? 'Yes' : 'No' }}</div>
+</div>

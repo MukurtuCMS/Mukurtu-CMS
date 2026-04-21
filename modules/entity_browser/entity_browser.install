@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Update hooks for the Entity browser module.
+ */
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function entity_browser_update_last_removed() {
+  return 8201;
+}

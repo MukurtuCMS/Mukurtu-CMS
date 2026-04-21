@@ -1,0 +1,207 @@
+.erl-field .layout-radio-item.active {
+  background: transparent;
+}
+
+.erl-field .erl-disabled-items,
+.erl-field .erl-disabled-items.form-item.form-wrapper {
+  padding: var(--gin-spacing-m);
+  margin-block-end: -6rem;
+  background: #f1f1f3;
+  border-radius: var(--gin-border-m);
+}
+
+.gin--dark-mode .erl-field .erl-disabled-items,
+.gin--dark-mode .erl-field .erl-disabled-items.form-item.form-wrapper {
+  background: var(--gin-bg-layer2);
+}
+
+.erl-field .erl-disabled-items, .erl-field .erl-disabled-items:hover, .erl-field .erl-disabled-items:active,
+.erl-field .erl-disabled-items.form-item.form-wrapper,
+.erl-field .erl-disabled-items.form-item.form-wrapper:hover,
+.erl-field .erl-disabled-items.form-item.form-wrapper:active {
+  border: 0 none;
+}
+
+.erl-field .erl-disabled-items .fieldset__label,
+.erl-field .erl-disabled-items.form-item.form-wrapper .fieldset__label {
+  padding-block: var(--gin-spacing-m) var(--gin-spacing-l);
+  padding-inline: 0;
+}
+
+.erl-field .erl-disabled-items__description,
+.erl-field .erl-disabled-items.form-item.form-wrapper__description {
+  font-size: var(--gin-font-size-s);
+  color: #999;
+}
+
+.erl-disabled-items > .fieldset__wrapper {
+  margin: 0;
+}
+
+.erl-field .erl-add-content:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.erl-field .erl-actions .erl-edit, .erl-field .erl-actions .erl-edit:hover,
+.erl-field .erl-actions .erl-remove,
+.erl-field .erl-actions .erl-remove:hover {
+  box-shadow: none;
+  border-color: transparent !important;
+  border-radius: 50%;
+}
+
+.erl-field .erl-add-section,
+.erl-field .erl-add-content--single button {
+  position: static;
+  display: block;
+  width: 100%;
+  color: var(--gin-color-primary);
+  line-height: 1.3;
+  background: var(--gin-bg-item-hover);
+  padding-block: var(--gin-spacing-m) 34px;
+  padding-inline: var(--gin-spacing-m);
+  border: 1px dashed var(--gin-color-primary);
+  border-radius: var(--gin-border-m);
+  transform: none;
+}
+
+.erl-field .erl-add-section, .erl-field .erl-add-section:hover, .erl-field .erl-add-section:active,
+.erl-field .erl-add-content--single button,
+.erl-field .erl-add-content--single button:hover,
+.erl-field .erl-add-content--single button:active {
+  text-decoration: none;
+}
+
+.erl-field .erl-add-section:hover, .erl-field .erl-add-section:active,
+.erl-field .erl-add-content--single button:hover,
+.erl-field .erl-add-content--single button:active {
+  color: var(--gin-color-primary-hover);
+  background: var(--gin-color-primary-light);
+}
+
+.erl-field .erl-item:last-of-type > .erl-add-content--single {
+  opacity: 1;
+}
+
+.erl-field .erl-add-content--single button .icon {
+  margin-inline-end: var(--gin-spacing-xs);
+}
+
+.erl-field .layout-radio-item > div {
+  display: flex;
+  align-items: center;
+}
+
+.erl-field .layout-radio-item .form-item {
+  margin-inline-start: var(--gin-spacing-xs);
+}
+
+.erl-field .layout-radio-item.active {
+  outline: var(--gin-border-xs) solid var(--gin-color-focus);
+}
+
+.erl-layout-region:hover button.erl-add-content__toggle {
+  opacity: 1;
+}
+
+.erl-overlay .erl-form {
+  overflow-x: hidden;
+  overflow-y: visible;
+  max-height: 85vh !important;
+}
+
+.erl-overlay.erl-loading div.loading {
+  border-radius: 6px;
+}
+
+.gin--dark-mode .erl-overlay.erl-loading div.loading {
+  background: rgba(0, 0, 0, .3);
+}
+
+.erl-disabled-wrapper .erl-item {
+  border-color: #fff;
+}
+
+.erl-disabled-wrapper .erl-item:not(:last-of-type) {
+  margin-block-end: var(--gin-spacing-m);
+}
+
+.erl-disabled-wrapper .erl-disabled-items__description {
+  inset-block-start: var(--gin-spacing-m);
+}
+
+.erl-item label.paragraph-type-label,
+.erl-item label.paragraph-type--label {
+  margin: -1px;
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-start: 50%;
+  border: 0 none;
+  font-style: normal;
+  color: var(--gin-color-text-light);
+  opacity: .75;
+}
+
+[dir="ltr"] .erl-item label.paragraph-type-label,
+[dir="ltr"] .erl-item label.paragraph-type--label {
+  transform: translate(-50%);
+}
+
+[dir="rtl"] .erl-item label.paragraph-type-label,
+[dir="rtl"] .erl-item label.paragraph-type--label {
+  transform: translate(50%);
+}
+
+.erl-item .layout-controls {
+  opacity: 1;
+  position: absolute;
+  inset-inline-start: var(--gin-spacing-xxs);
+  inset-block-start: var(--gin-spacing-xs);
+}
+
+.erl-item .paragraph .field {
+  line-height: 1.5;
+  margin: .5em 0;
+}
+
+.erl-item .paragraph .field--name-field-title {
+  font-weight: var(--gin-font-weight-heavy);
+}
+
+.erl-item .paragraph .field--type-image {
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.erl-item .paragraph .field--name-field-paragraphs {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.erl-item .paragraph .field--name-field-paragraphs .field__item {
+  flex-basis: 100%;
+  margin-inline-end: var(--gin-spacing-xs);
+}
+
+.erl-item .erl-actions {
+  visibility: visible;
+  position: absolute;
+  inset-inline-end: var(--gin-spacing-xxs);
+  inset-block-start: var(--gin-spacing-xs);
+}
+
+.erl-layout.erl-item.form-wrapper:hover > button.erl-add-content__toggle, .erl-layout.erl-item.form-wrapper:hover > button.layout-paragraphs-add-content__toggle {
+  opacity: 1;
+}
+
+.erl-layout.erl-item.form-wrapper .erl-actions input.erl-edit,
+.erl-layout.erl-item.form-wrapper .erl-actions input.erl-remove {
+  opacity: .75;
+}
+
+.erl-layout.erl-item.form-wrapper .erl-actions input.erl-edit:hover,
+.erl-layout.erl-item.form-wrapper .erl-actions input.erl-remove:hover {
+  opacity: 1;
+}
+

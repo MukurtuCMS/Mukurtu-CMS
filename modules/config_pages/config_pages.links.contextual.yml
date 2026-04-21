@@ -1,0 +1,4 @@
+config_pages_configure:
+  title: 'Configure ConfigPage'
+  route_name: 'config_pages.add_form'
+  group: 'config_pages_type'

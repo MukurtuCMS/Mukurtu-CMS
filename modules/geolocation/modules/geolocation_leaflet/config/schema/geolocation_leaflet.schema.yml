@@ -1,0 +1,146 @@
+geolocation.map_provider.leaflet:
+  type: geolocation_map_provider
+  label: 'Leaflet settings'
+  mapping:
+    zoom:
+      type: string
+      label: 'Zoom level'
+    height:
+      type: string
+      label: 'Height value'
+    width:
+      type: string
+      label: 'Width value'
+    minZoom:
+      type: string
+      label: 'MinZoom level'
+    maxZoom:
+      type: string
+      label: 'MaxZoom level'
+    maxBounds:
+      label: 'Max Bounds'
+      type: mapping
+      mapping:
+        north_east_bound:
+          label: 'North East Bound'
+          type: mapping
+          mapping:
+            lat:
+              type: float
+              label: 'Latitude'
+            lng:
+              type: float
+              label: 'Longitude'
+        south_west_bound:
+          label: 'South West Bound'
+          type: mapping
+          mapping:
+            lat:
+              type: float
+              label: 'Latitude'
+            lng:
+              type: float
+              label: 'Longitude'
+    crs:
+      type: string
+      label: 'CRS'
+    preferCanvas:
+      type: boolean
+      label: 'Prefer Canvas'
+    zoomSnap:
+      type: integer
+      label: 'Zoom Snap'
+    zoomDelta:
+      type: integer
+      label: 'Zoom Snap'
+    trackResize:
+      type: boolean
+      label: 'Track Resize'
+    boxZoom:
+      type: boolean
+      label: 'Box Zoom'
+    doubleClickZoom:
+      type: boolean
+      label: 'Double Click Zoom'
+    dragging:
+      type: boolean
+      label: 'Dragging'
+    zoomAnimation:
+      type: boolean
+      label: 'Zoom Animation'
+    zoomAnimationThreshold:
+      type: integer
+      label: 'Zoom Animation Threshold'
+    fadeAnimation:
+      type: boolean
+      label: 'fade Animation'
+    markerZoomAnimation:
+      type: boolean
+      label: 'Marker Zoom Animation'
+    inertia:
+      type: boolean
+      label: 'Inertia'
+    inertiaDeceleration:
+      type: integer
+      label: 'Zoom Animation Threshold'
+    easeLinearity:
+      type: float
+      label: 'Ease Linearity'
+    worldCopyJump:
+      type: boolean
+      label: 'World Copy Jump'
+    maxBoundsViscosity:
+      type: float
+      label: 'Max Bound Viscosity'
+    keyboard:
+      type: boolean
+      label: 'Keyboard'
+    keyboardPanDelta:
+      type: integer
+      label: 'Keyboard Pan Delta'
+    scrollWheelZoom:
+      type: boolean
+      label: 'Scroll Wheel Zoom'
+    wheelDebounceTime:
+      type: integer
+      label: 'wheelDebounceTime'
+    wheelPxPerZoomLevel:
+      type: integer
+      label: 'wheelPxPerZoomLevel'
+    tap:
+      type: boolean
+      label: 'Tap'
+    tapTolerance:
+      type: integer
+      label: 'Tap Tolerance'
+    touchZoom:
+      type: boolean
+      label: 'Touch Zoom'
+    bounceAtZoomLimits:
+      type: boolean
+      label: 'Bounce At Zoom Limits'
+
+geolocation.geocoder.photon:
+  type: geolocation_geocoder
+  label: 'Photon geocoder'
+  mapping:
+    autocomplete_min_length:
+      type: integer
+      label: 'Autocomplete MinLength'
+    location_priority:
+      type: geolocation.element.input
+      label: 'Location Priority'
+    remove_duplicates:
+      type: boolean
+      label: 'Remove Duplicates'
+
+geolocation_leaflet.nominatim_settings:
+  type: config_object
+  label: 'Nominatim geocoding settings'
+  mapping:
+    nominatim_base_url:
+      type: string
+      label: 'Nominatim Base URL Override'
+    nominatim_email:
+      type: email
+      label: 'Custom Email for Nominatim Requests'

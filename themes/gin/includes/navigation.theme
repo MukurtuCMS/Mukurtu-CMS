@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * navigation.theme
+ */
+
+use Drupal\gin\GinSettings;
+
+/**
+ * Navigation alter().
+ */
+function gin_preprocess_navigation(&$variables) {
+  // Get theme configs.
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  $logo_default = $settings->getDefault('logo.use_default');
+  $variables['icon_path'] = !$logo_default ? $settings->getDefault('logo.path') : '';
+  $variables['toolbar_variant'] = $settings->get('classic_toolbar');
+  $variables['core_navigation'] = _gin_module_is_active('navigation');
+  $variables['is_backend'] = TRUE;
+
+  // Attach the new drupal navigation styles.
+  $variables['#attached']['library'][] = 'gin/core_navigation';
+
+  if (!_gin_module_is_active('navigation')) {
+    $variables['#attached']['library'][] = 'gin/core_navigation_without_topbar';
+  }
+}

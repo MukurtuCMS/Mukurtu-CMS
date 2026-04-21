@@ -1,0 +1,65 @@
+plugin.plugin_configuration.search_api_backend.search_api_solr:
+  type: mapping
+  label: 'Search API Solr settings'
+  mapping:
+    retrieve_data:
+      type: boolean
+      label: 'Retrieve result data from Solr'
+    highlight_data:
+      type: boolean
+      label: 'Highlight retrieved data'
+    site_hash:
+      type: boolean
+      label: 'Restrict searches to current site'
+    server_prefix:
+      type: string
+      label: 'The default prefix for Solr indexes on this backend'
+    domain:
+      type: string
+      label: 'The targeted content domain'
+    environment:
+      type: string
+      label: 'The targeted environment'
+    connector:
+      type: string
+      label: 'The connector plugin ID'
+    connector_config:
+      type: plugin.plugin_configuration.search_api_solr_connector.[%parent.connector]
+    optimize:
+      type: boolean
+      label: 'Optimize this backend'
+    fallback_multiple:
+      type: boolean
+      label: 'Fallback to mulltiple field type if cardinality could not be detected'
+    disabled_field_types:
+      type: sequence
+      label: 'Disabled Solr Field Types'
+      sequence:
+        type: string
+    disabled_caches:
+      type: sequence
+      label: 'Disabled Solr Caches'
+      sequence:
+        type: string
+    disabled_request_handlers:
+      type: sequence
+      label: 'Disabled Solr Request Handlers'
+      sequence:
+        type: string
+    disabled_request_dispatchers:
+      type: sequence
+      label: 'Disabled Solr Request Dispatchers'
+      sequence:
+        type: string
+    rows:
+      type: integer
+      label: 'The default result rows limit if no limit is set as query option'
+    index_single_documents_fallback_count:
+      type: integer
+      label: 'Limit the number of documents in songle document indexing fallback'
+    index_empty_text_fields:
+      type: boolean
+      label: 'Indexes a dummy value instead removing the field.'
+    suppress_missing_languages:
+      type: boolean
+      label: 'Suppress warnings about missing languages.'

@@ -1,0 +1,15 @@
+search_api_solr_log.settings:
+  path: '/admin/config/search/search-api-solr-log'
+  defaults:
+    _form: '\Drupal\search_api_solr_log\Form\LogSettingsForm'
+    _title: 'Solr Log settings'
+  requirements:
+    _permission: 'administer site configuration'
+
+search_api_solr_log.clear_logs:
+  path: '/admin/reports/search-api-solr-log/clear-logs'
+  defaults:
+    _form: '\Drupal\search_api_solr_log\Form\ClearLogConfirmForm'
+    _title: 'Confirm delete recent log messages'
+  requirements:
+    _permission: 'administer site configuration'

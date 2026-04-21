@@ -1,0 +1,7 @@
+views.field.entity_browser_select:
+  type: views_field
+  label: 'Entity Browser select'
+  mapping:
+    use_field_cardinality:
+      type: boolean
+      label: 'Use field cardinality'

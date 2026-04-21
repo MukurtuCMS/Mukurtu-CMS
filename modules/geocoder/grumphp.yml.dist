@@ -1,0 +1,19 @@
+parameters:
+  git_dir: .
+  bin_dir: vendor/bin
+  tasks:
+    phpcs:
+      standard: vendor/drupal/coder/coder_sniffer/Drupal/
+      ignore_patterns:
+        - build/
+        - vendor/
+      triggered_by:
+        - php
+        - module
+    securitychecker:
+        lockfile: ./composer.lock
+        format: ~
+        end_point: ~
+        timeout: ~
+        run_always: false
+

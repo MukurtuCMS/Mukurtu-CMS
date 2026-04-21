@@ -1,0 +1,19 @@
+{
+    "name": "drupal/message_ui",
+    "type": "drupal-module",
+    "description": "Message ui",
+    "keywords": ["Drupal"],
+    "homepage": "http://drupal.org/project/message_ui",
+    "minimum-stability": "dev",
+    "support": {
+      "issues": "http://drupal.org/project/issues/message_ui",
+      "source": "http://cgit.drupalcode.org/message_ui"
+    },
+    "require": {
+      "drupal/core": "^9 || ^10 || ^11",
+      "drupal/message": "^1"
+    },
+    "require-dev": {
+      "drupal/message_notify": "^1"
+    }
+  }

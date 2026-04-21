@@ -1,0 +1,116 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a toolbar menu.
+ *
+ * Available variables:
+ * - menu_name: The machine name of the menu.
+ * - items: A nested list of menu items. Each menu item contains:
+ *   - attributes: HTML attributes for the menu item.
+ *   - below: The menu item child items.
+ *   - title: The menu link title.
+ *   - path: The menu link path.
+ *   - localized_options: Menu link localized options.
+ *   - is_expanded: TRUE if the link has visible children within the current
+ *     menu tree.
+ *   - is_collapsed: TRUE if the link has children within the current menu tree
+ *     that are not currently visible.
+ *   - in_active_trail: TRUE if the link is in the active trail.
+ *
+ * @ingroup themeable
+ */
+#}
+{% import _self as menus %}
+
+{#
+  We call a macro which calls itself to render the full tree.
+  @see https://twig.symfony.com/doc/1.x/tags/macro.html
+#}
+{{ menus.menu_links(items, attributes, 0, false, menu_name, icon_default, icon_path, toolbar_variant) }}
+
+{% macro menu_links(items, attributes, menu_level, parent, menu_name, icon_default, icon_path, toolbar_variant) %}
+  {% import _self as menus %}
+  {% if items %}
+    {% if menu_level == 0  %}
+      <ul{{ attributes.addClass('toolbar-menu') }}>
+    {% else %}
+      <ul class="toolbar-menu">
+    {% endif %}
+    {% for item in items %}
+      {%
+        set classes = [
+          'menu-item',
+          item.is_expanded and item.below ? 'menu-item--expanded',
+          item.is_collapsed ? 'menu-item--collapsed',
+          item.in_active_trail ? 'menu-item--active-trail',
+          item.gin_id ? 'menu-item__' ~ item.gin_id
+        ]
+      %}
+
+      {# Add Home if it doesn't exist #}
+      {% if menu_level == 0 and loop.index == 1 and item.gin_id is not empty and item.gin_id != 'admin_toolbar_tools-help' %}
+        <li class="menu-item menu-item--expanded menu-item__tools">
+          {% if icon_default == false and icon_path != '' %}
+            <a href="{{ path('<front>') }}" class="toolbar-logo" data-drupal-link-system-path="<front>">
+              <img src="{{ file_url(icon_path) }}" class="toolbar-icon-home" alt="{{ 'Home'|t }}" />
+            </a>
+          {% else %}
+            <a href="{{ path('<front>') }}" class="toolbar-icon toolbar-icon-admin-toolbar-tools-help toolbar-icon-default" data-drupal-link-system-path="<front>">
+              {{ 'Home'|t }}
+            </a>
+          {% endif %}
+        </li>
+      {% endif %}
+
+      {# {% if menu_level == 0 and item.gin_id == 'help-main' %}
+        <li class="menu-item menu-item__spacer menu-item--no-link"></li>
+      {% endif %} #}
+
+      {# Add Menu Titles #}
+      {% if menu_level == 1 and loop.index == 1 %}
+        <li class="menu-item-title">
+          <h2 class="toolbar-menu__title">
+            <a href="{{ parent.url }}">{{ parent.title }}</a>
+          </h2>
+        </li>
+        {% if toolbar_variant == 'vertical' %}
+          <li class="menu-item">
+            <a href="{{ parent.url }}" class="toolbar-icon">{{ 'Overview'|t }}</a>
+          </li>
+        {% endif %}
+      {% elseif menu_level > 1 and loop.index == 1 %}
+        <li class="menu-item-title">
+          <h3 class="toolbar-menu__sub-title">
+            <a href="{{ parent.url }}">{{ parent.title }}</a>
+          </h3>
+        </li>
+        {% if toolbar_variant == 'vertical' %}
+          <li class="menu-item">
+            <a href="{{ parent.url }}" class="toolbar-icon">{{ 'Overview'|t }}</a>
+          </li>
+        {% endif %}
+      {% endif %}
+
+      <li{{ item.attributes.addClass(classes) }}>
+        {% if item.gin_id == 'admin_toolbar_tools-help' and icon_default == false and icon_path != '' %}
+          <a href="{{ path('<front>') }}" class="toolbar-logo" data-drupal-link-system-path="<front>">
+            <img src="{{ file_url(icon_path) }}" class="toolbar-icon-home" alt="{{ 'Home'|t }}" />
+          </a>
+        {% elseif item.gin_id == 'admin_toolbar_tools-help' %}
+          {{ link('Drupal', item.url, {'class': ['toolbar-icon-default']}) }}
+        {% else %}
+          {{ link(item.title, item.url, {'class': [item.in_active_trail ? 'is-active']}) }}
+        {% endif %}
+        {% if item.below %}
+          {{ menus.menu_links(item.below, attributes, menu_level + 1, item, menu_name, icon_default, icon_path, toolbar_variant) }}
+        {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if menu_level == 0 %}
+    {# Custom toggle for menu #}
+    <a href="#" class="toolbar-menu__trigger trigger" role="button" aria-pressed="false">{{ 'Close'|t }}</a>
+  {% endif %}
+{% endmacro %}

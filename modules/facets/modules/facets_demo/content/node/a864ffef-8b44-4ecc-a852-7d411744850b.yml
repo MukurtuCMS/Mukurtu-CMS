@@ -1,0 +1,61 @@
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: a864ffef-8b44-4ecc-a852-7d411744850b
+  bundle: movie
+  default_langcode: en
+  depends:
+    9e62e5d8-feed-4d1b-9236-e11e438ff122: taxonomy_term
+    cc499d5d-647a-4bd1-9f69-239871d4e3ac: taxonomy_term
+    e580fd9a-a514-4a2e-ab29-b4e1d5032281: taxonomy_term
+    7a176814-a275-451f-a86d-8569c6551e50: taxonomy_term
+default:
+  revision_uid:
+    -
+      target_id: 1
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  title:
+    -
+      value: 'The Lord of the Rings: The Fellowship of the Ring'
+  created:
+    -
+      value: 1738323170
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en
+  body:
+    -
+      value: '<p>A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.</p>'
+      format: basic_html
+      summary: ''
+  field_country_of_origin:
+    -
+      entity: 9e62e5d8-feed-4d1b-9236-e11e438ff122
+    -
+      entity: cc499d5d-647a-4bd1-9f69-239871d4e3ac
+    -
+      entity: e580fd9a-a514-4a2e-ab29-b4e1d5032281
+  field_genre:
+    -
+      entity: 7a176814-a275-451f-a86d-8569c6551e50
+  field_imdb_rating:
+    -
+      value: '8.9'
+  field_release_date:
+    -
+      value: '2001-12-19'

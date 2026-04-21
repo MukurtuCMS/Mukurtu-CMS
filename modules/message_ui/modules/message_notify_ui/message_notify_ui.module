@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * message_notify_ui.module
+ */
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * Extend the message entity type by providing form handlers.
+ */
+function message_notify_ui_entity_type_alter(array &$entity_types) {
+  if (!isset($entity_types['message'])) {
+    return;
+  }
+
+  /** @var \Drupal\Core\Config\Entity\ConfigEntityType[] $entity_types */
+  $entity_types['message']
+    ->setFormClass('notify', 'Drupal\message_notify_ui\Form\MessageNotifyForm')
+    ->setLinkTemplate('notify-form', '/message/{message}/notify');
+}

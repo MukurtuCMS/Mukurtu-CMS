@@ -1,0 +1,13 @@
+name: Generate Password
+description: Generates a decent password when adding a new user.
+core_version_requirement: ^10.3 || ^11
+type: module
+package: Administration
+configure: entity.user.admin_form
+dependencies:
+  - drupal:user
+
+# Information added by Drupal.org packaging script on 2026-03-26
+version: '2.1.4'
+project: 'genpass'
+datestamp: 1774499890

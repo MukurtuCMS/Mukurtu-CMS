@@ -1,0 +1,545 @@
+# Schema for the configuration files of the Leaflet module.
+
+field.widget.settings.leaflet_widget_default:
+  type: mapping
+  label: 'Leaflet widget settings'
+  mapping:
+    geometry_validation:
+      type: boolean
+      label: 'Enable Geometry Validation'
+    map:
+      type: mapping
+      label: 'Map'
+      mapping:
+        leaflet_map:
+          type: string
+          label: 'Leaflet map'
+        height:
+          type: integer
+          label: 'Height'
+        auto_center:
+          type: integer
+          label: 'Automatically center map'
+        map_position:
+          type: mapping
+          label: 'Map Position'
+          mapping:
+            force:
+              type: boolean
+              label: 'Force'
+            center:
+              type: mapping
+              label: 'Center'
+              mapping:
+                lat:
+                  type: float
+                  label: 'Lat'
+                lon:
+                  type: float
+                  label: 'Lon'
+            zoomControlPosition:
+              type: string
+              label: 'Position'
+            zoom:
+              type: integer
+              label: 'Zoom'
+            minZoom:
+              type: integer
+              label: 'Min zoom'
+            maxZoom:
+              type: integer
+              label: 'Max zoom'
+            zoomFiner:
+              type: integer
+              label: 'Zoom finer'
+        scroll_zoom_enabled:
+          type: integer
+          label: 'Scroll zoom enabled'
+    input:
+      type: mapping
+      label: 'Input'
+      mapping:
+        show:
+          type: boolean
+          label: 'Show'
+        readonly:
+          type: boolean
+          label: 'Read only'
+    toolbar:
+      type: mapping
+      label: 'Toolbar'
+      mapping:
+        position:
+          type: string
+          label: 'Position'
+        marker:
+          type: string
+          label: 'Marker'
+        drawMarker:
+          type: boolean
+          label: 'Draw marker'
+        drawPolyline:
+          type: boolean
+          label: 'Draw Polyline'
+        drawRectangle:
+          type: boolean
+          label: 'Draw Rectangle'
+        drawPolygon:
+          type: boolean
+          label: 'Draw Polygon'
+        drawCircle:
+          type: boolean
+          label: 'Draw Circle'
+        drawCircleMarker:
+          type: boolean
+          label: 'Draw Circle Marker'
+        drawText:
+          type: boolean
+          label: 'Draw Text'
+        editMode:
+          type: boolean
+          label: 'Edit Mode'
+        dragMode:
+          type: boolean
+          label: 'Drag Mode'
+        cutPolygon:
+          type: boolean
+          label: 'Cut Polygon'
+        removalMode:
+          type: boolean
+          label: 'Removal Mode'
+        rotateMode:
+          type: boolean
+          label: 'Rotate Mode'
+    reset_map:
+      type: mapping
+      label: 'Reset Map View'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    map_scale:
+      type: mapping
+      label: 'Map Scale Control'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    fullscreen:
+      type: mapping
+      label: 'Leaflet Fullscreen'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    path:
+      type: text
+      label: 'Path'
+    feature_properties:
+      type: mapping
+      label: 'Feature Additional Properties'
+      mapping:
+        values:
+          type: text
+          label: 'Values'
+    locate:
+      type: mapping
+      label: 'Locate User Position'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+        automatic:
+          type: boolean
+          label: 'Automatically locate user current position'
+    geocoder:
+      type: mapping
+      label: 'Geocoder'
+      mapping:
+        control:
+          type: boolean
+          label: 'Enable Geocoder map control'
+        settings:
+          type: mapping
+          label: 'Geocoder settings'
+          mapping:
+            set_marker:
+              type: boolean
+              label: 'Marker'
+            popup:
+              type: boolean
+              label: 'Popup'
+            autocomplete:
+              type: mapping
+              label: 'Autocomplete'
+              mapping:
+                placeholder:
+                  type: string
+                  label: 'Placeholder'
+                title:
+                  type: string
+                  label: 'Title'
+            position:
+              type: string
+              label: 'Position'
+            input_size:
+              type: integer
+              label: 'Input size'
+            providers:
+              type: sequence
+              label: 'Providers'
+              sequence:
+                type: mapping
+                label: 'Provider'
+                mapping:
+                  weight:
+                    type: integer
+                    label: 'Weight'
+                  checked:
+                    type: boolean
+                    label: 'Checked'
+            min_terms:
+              type: integer
+              label: 'Minimum terms'
+            delay:
+              type: integer
+              label: 'Delay'
+            zoom:
+              type: integer
+              label: 'Zoom'
+            options:
+              type: string
+              label: 'Options'
+    geojson_overlays:
+      type: mapping
+      label: GeoJSON Overlay
+      mapping:
+        sources:
+          type: mapping
+          label: Sources
+          mapping:
+            fields:
+              type: sequence
+              label: 'Field Sources'
+              sequence:
+                type: string
+                label: 'Field Source'
+        zoom_to_geojson:
+          type: boolean
+          label: 'Zoom to GeoJSON'
+        path:
+          type: text
+          label: 'GeoJSON Overlays Style'
+        snapping:
+          type: boolean
+          label: 'Snapping enabled'
+
+field.formatter.settings.leaflet_formatter_default:
+  type: mapping
+  label: 'Leaflet format settings'
+  mapping:
+    multiple_map:
+      type: boolean
+      label: 'Multiple map'
+    leaflet_map:
+      type: string
+      label: 'Leaflet Map Tiles Layer'
+    height:
+      type: integer
+      label: 'Map height'
+    height_unit:
+      type: string
+      label: 'Height unit'
+    hide_empty_map:
+      type: boolean
+      label: 'Hide empty map'
+    disable_wheel:
+      type: boolean
+      label: 'Disable wheel'
+    gesture_handling:
+      type: boolean
+      label: 'Gesture handling'
+    fitbounds_options:
+      type: text
+      label: 'FitBounds Options'
+    reset_map:
+      type: mapping
+      label: 'Reset Map View'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    map_scale:
+      type: mapping
+      label: 'Map Scale Control'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    locate:
+      type: mapping
+      label: 'Locate User Position'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+        automatic:
+          type: boolean
+          label: 'Automatically locate user current position'
+    leaflet_tooltip:
+      type: mapping
+      label: 'Leaflet Tooltip'
+      mapping:
+        value:
+          type: string
+          label: 'Tooltip Source'
+        options:
+          type: text
+          label: 'Tooltip Options'
+    # @TODO Keep this for backword compatibility with Leaflet < 2.x.
+    popup:
+      type: boolean
+      label: 'Leaflet Popup'
+    # @TODO Keep this for backword compatibility with Leaflet < 2.x.
+    popup_content:
+      type: text
+      label: 'Popup Content'
+    leaflet_popup:
+      type: mapping
+      label: 'Leaflet Popup'
+      mapping:
+        control:
+          type: string
+          label: 'Enable Leaflet Popup'
+        content:
+          type: text
+          label: 'Popup content'
+        options:
+          type: text
+          label: 'Popup Options'
+    map_position:
+      type: mapping
+      label: 'Map Position'
+      mapping:
+        force:
+          type: boolean
+          label: 'Force map center & zoom'
+        center:
+          type: mapping
+          label: 'Center'
+          mapping:
+            lat:
+              type: float
+              label: 'Latitude'
+            lon:
+              type: float
+              label: 'Longitude'
+        zoomControlPosition:
+          type: string
+          label: 'Position'
+        zoom:
+          type: integer
+          label: 'Zoom'
+        minZoom:
+          type: integer
+          label: 'Min zoom'
+        maxZoom:
+          type: integer
+          label: 'Max zoom'
+        zoomFiner:
+          type: integer
+          label: 'Zoom finer'
+    weight:
+      type: string
+      label: 'Weight'
+    icon:
+      type: mapping
+      label: 'Map icon'
+      mapping:
+        iconType:
+          type: string
+          label: 'Icon type'
+        iconUrl:
+          type: string
+          label: 'Icon URL'
+        shadowUrl:
+          type: string
+          label: 'Shadow URL'
+        className:
+          type: string
+          label: 'Icon class'
+        iconSize:
+          type: mapping
+          label: 'Icon size'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        iconAnchor:
+          type: mapping
+          label: 'Icon anchor'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        shadowSize:
+          type: mapping
+          label: 'Shadow anchor'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        shadowAnchor:
+          type: mapping
+          label: 'Shadow anchor'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        popupAnchor:
+          type: mapping
+          label: 'Popup anchor'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        html:
+          type: string
+          label: 'HTML'
+        html_class:
+          type: string
+          label: 'HTML class'
+        circle_marker_options:
+          type: string
+          label: 'Circle marker options'
+    leaflet_markercluster:
+      type: mapping
+      label: 'Leaflet Markercluster'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Marker Cluster Additional Options'
+        include_path:
+          type: boolean
+          label: 'Enable Markeclustering of Paths elements'
+    fullscreen:
+      type: mapping
+      label: 'Leaflet Fullscreen'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    path:
+      type: text
+      label: 'Path'
+    feature_properties:
+      type: mapping
+      label: 'Feature Additional Properties'
+      mapping:
+        values:
+          type: text
+          label: 'Values'
+    geocoder:
+      type: mapping
+      label: 'Geocoder'
+      mapping:
+        control:
+          type: boolean
+          label: 'Enable Geocoder map control'
+        settings:
+          type: mapping
+          label: 'Geocoder settings'
+          mapping:
+            popup:
+              type: boolean
+              label: 'Popup'
+            autocomplete:
+              type: mapping
+              label: 'Autocomplete'
+              mapping:
+                placeholder:
+                  type: string
+                  label: 'Placeholder'
+                title:
+                  type: string
+                  label: 'Title'
+            position:
+              type: string
+              label: 'Position'
+            input_size:
+              type: integer
+              label: 'Input size'
+            providers:
+              type: sequence
+              label: 'Providers'
+              sequence:
+                type: mapping
+                label: 'Provider'
+                mapping:
+                  weight:
+                    type: integer
+                    label: 'Weight'
+                  checked:
+                    type: boolean
+                    label: 'Checked'
+            min_terms:
+              type: integer
+              label: 'Minimum terms'
+            delay:
+              type: integer
+              label: 'Delay'
+            zoom:
+              type: integer
+              label: 'Zoom'
+            options:
+              type: string
+              label: 'Options'
+    map_lazy_load:
+      type: mapping
+      label: Map lazy load
+      mapping:
+        lazy_load:
+          type: boolean
+          label: Lazy load

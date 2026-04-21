@@ -1,0 +1,28 @@
+
+# Term merge into menu items definition
+entity.term_merge_into.collection:
+  title: 'Term merge into list'
+  route_name: entity.term_merge_into.collection
+  description: 'List Term merge into entities'
+  parent: system.admin_structure
+  weight: 100
+
+#term_merge_into.admin.structure.settings:
+#  title: 'Term merge into settings'
+#  description: 'Configure Term merge into entities'
+#  route_name: term_merge_into.settings
+#  parent: system.admin_structure
+
+# Term merge from menu items definition
+entity.term_merge_from.collection:
+  title: 'Term merge from list'
+  route_name: entity.term_merge_from.collection
+  description: 'List Term merge from entities'
+  parent: system.admin_structure
+  weight: 100
+
+#term_merge_from.admin.structure.settings:
+#  title: 'Term merge from settings'
+#  description: 'Configure Term merge from entities'
+#  route_name: term_merge_from.settings
+#  parent: system.admin_structure

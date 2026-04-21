@@ -1,0 +1,199 @@
+.gin-secondary-toolbar {
+  z-index: 102;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-block: var(--gin-spacing-xs);
+  margin-block-start: -1px;
+  height: var(--gin-toolbar-secondary-height);
+  border-block-end: 1px solid var(--gin-border-color-secondary);
+  box-sizing: border-box;
+
+  @include mq($breakpointMedium) {
+    padding: 10px 0;
+  }
+
+  &--frontend {
+    z-index: 501; /* on top of the Drupal world */
+    position: sticky;
+    inset-block-start: 0;
+    margin-block-start: 0;
+    height: var(--gin-toolbar-secondary-height);
+    background: rgba(#fff, .98);
+    border-block-end: 1px solid var(--gin-border-color-layer);
+    box-sizing: border-box;
+
+    @supports (backdrop-filter: blur()) {
+      opacity: .999; /* Fix Chrome issue with mask */
+      background: rgba(#fff, .8);
+      backdrop-filter: blur(12px);
+    }
+
+    .gin--dark-mode & {
+      background: rgba($colorDarkAppBackground, .98);
+
+      @supports (backdrop-filter: blur()) {
+        background: #{rgba(mix(black, $colorDarkAppBackground, 75%), .9)};
+      }
+    }
+
+    .gin--high-contrast-mode & {
+      background: var(--gin-bg-app);
+      backdrop-filter: none;
+    }
+  }
+
+  &__layout-container {
+    display: flex;
+    align-items: center;
+    min-width: 1px; // Fixes broken flex layout due to white-space: nowrap in breadcrumbs.
+    width: 100%;
+    margin: 0 var(--gin-spacing-m);
+
+    @include mq($breakpointSmall) {
+      margin: 0 var(--gin-spacing-xl);
+    }
+
+    @include mq($breakpointMedium) {
+      margin: 0 m#{i}n(5vw, var(--gin-spacing-xxl));
+    }
+  }
+}
+
+.gin-secondary-toolbar .toolbar-secondary {
+  display: none;
+
+  @include mq($breakpointMedium) {
+    display: block;
+
+    .toolbar-bar {
+      height: var(--gin-toolbar-height);
+      z-index: 102;
+
+      .toolbar-tab {
+        display: block;
+        position: relative;
+
+        &:hover, &:focus-within {
+          border-radius: var(--gin-border-s) var(--gin-border-s) 0 0;
+
+          > .toolbar-item,
+          > .toolbar-item.is-active {
+            color: var(--gin-color-title);
+
+            &:before {
+              background: var(--gin-color-title);
+            }
+          }
+
+          .toolbar-tray {
+            display: block;
+          }
+        }
+
+        .toolbar-item {
+          font-size: 0;
+          width: 32px;
+          height: 32px;
+          margin: 0;
+          border-radius: var(--gin-border-s) var(--gin-border-s) 0 0;
+        }
+
+        .toolbar-item,
+        .toolbar-item.is-active {
+          color: var(--gin-color-text-light);
+          background: none;
+          border: 0 none;
+
+          &::before {
+            background-color: var(--gin-color-title);
+          }
+        }
+
+        .toolbar-tray {
+          position: absolute;
+          inset-inline-start: auto;
+          inset-inline-end: 0;
+          width: 170px;
+          background-color: var(--gin-bg-layer3);
+          border-block-end: 0 none;
+          border-radius: var(--gin-border-l) 0 var(--gin-border-l) var(--gin-border-l);
+          box-shadow: var(--gin-shadow-l2);
+
+          .toolbar-icon {
+            &:before {
+              display: none;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Show expanded
+.gin-secondary-toolbar .toolbar-secondary {
+  @include mq($breakpointWide) {
+    .toolbar-bar {
+      .toolbar-tab {
+        margin-inline-start: -.25em;
+
+        .toolbar-item {
+          font-size: var(--gin-font-size-xs);
+          width: auto;
+          height: auto;
+          padding-inline-start: 2.875em;
+
+          &::before {
+            width: var(--gin-icon-size-toolbar-secondary);
+            height: var(--gin-icon-size-toolbar-secondary);
+            inset-block-start: 50%;
+            inset-inline-start: 12px;
+            transform: translateY(-50%);
+          }
+
+          .icon-user {
+            &__image {
+              width: 34px;
+              height: 34px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+//Main secondary nav
+.gin-secondary-toolbar #toolbar-administration {
+  @include mq($breakpointMedium) {
+    z-index: 502;
+    position: fixed;
+    inset-block-start: 0;
+    width: 100%;
+
+    &,
+    .toolbar-bar {
+      height: var(--gin-toolbar-height);
+      background: var(--gin-bg-layer);
+    }
+  }
+}
+
+.gin-breadcrumb-wrapper {
+  flex-grow: 1;
+  white-space: nowrap;
+  margin-inline-end: var(--gin-spacing-xl);
+}
+
+#toolbar-administration-secondary {
+  @include mq($breakpointMedium) {
+    .toolbar-bar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      border-block-end: none;
+    }
+  }
+}

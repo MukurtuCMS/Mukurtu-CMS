@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies: {  }
+template: update_node
+label: 'Update Node'
+description: 'Node was updated.'
+text:
+  -
+    value: "[message:field_node_reference:entity:title] updated\r\n"
+    format: plain_text
+  -
+    value: "<h2>[message:field_node_reference:entity:content-type:name] updated</h2>\r\n\r\n<p>Title: [message:field_node_reference:entity:title]<br />\r\nAuthor:&nbsp;[message:field_node_reference:entity:author]<br />\r\nTimestamp:&nbsp;[message:field_node_reference:entity:created]</p>\r\n\r\n<p>[message:field_node_reference:entity:summary] ...</p>\r\n\r\n<p>Read more:&nbsp;[message:field_node_reference:entity:url]</p>\r\n"
+    format: basic_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

@@ -1,0 +1,4 @@
+services:
+  gin_toolbar.active_trail:
+    class: Drupal\gin_toolbar\Menu\GinToolbarActiveTrail
+    arguments: ['@plugin.manager.menu.link', '@current_route_match', '@cache.menu', '@lock']

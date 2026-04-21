@@ -1,0 +1,40 @@
+:where(*),
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) {
+  .gin-tooltip,
+  .gin-tooltip-navigation,
+  .cloned-gin-tooltip-navigation,
+  .admin-toolbar__tooltip {
+    z-index: 601;
+    position: absolute;
+    inset-block-start: var(--space-xs);
+    padding: var(--gin-spacing-xs) var(--gin-spacing-s);
+    font-size: var(--gin-font-size-xxs);
+    font-weight: var(--gin-font-weight-semibold);
+    font-variation-settings: initial;
+    white-space: nowrap;
+    color: white;
+    background-color: var(--gin-tooltip-bg);
+    box-shadow: var(--gin-shadow-l2);
+    border-radius: var(--gin-border-s);
+  }
+
+  .gin-tooltip {
+    visibility: hidden;
+    opacity: 0;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: var(--gin-transition-fast);
+    }
+  }
+
+  [data-gin-tooltip]:hover + .gin-tooltip,
+  [data-gin-tooltip]:focus + .gin-tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  // Hide the origin value of the Tooltip if the Admin toolbar is expanded.
+  html:not(.admin-toolbar-expanded) .toolbar-menu__item--level-1:not(.toolbar-menu__item--has-dropdown) .toolbar-link span {
+    display: none;
+  }
+}

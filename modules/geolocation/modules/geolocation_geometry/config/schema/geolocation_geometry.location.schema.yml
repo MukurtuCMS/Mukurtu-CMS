@@ -1,0 +1,3 @@
+plugin.plugin_configuration.geolocation.location.geometry_views_proximity_filter:
+  type: geolocation.location_settings
+  label: 'Views Geo Proximity Filter'

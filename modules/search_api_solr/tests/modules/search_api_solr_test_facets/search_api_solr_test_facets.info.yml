@@ -1,0 +1,16 @@
+type: module
+name: 'Search API Test Solr search facets'
+description: 'Support module for Search API Solr search facets tests.'
+package: Testing
+dependencies:
+  - drupal:search_api_solr_test
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:views
+  - drupal:facets
+hidden: true
+
+# Information added by Drupal.org packaging script on 2025-04-23
+version: '4.3.10'
+project: 'search_api_solr'
+datestamp: 1745426381

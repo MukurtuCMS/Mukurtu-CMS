@@ -1,0 +1,162 @@
+<?php
+
+/**
+ * @file
+ * Contains the geofield.module.
+ */
+
+use Drupal\Core\Database\Database;
+use Drupal\Core\Field\FieldTypeCategoryManagerInterface;
+
+// cspell:ignore itamair
+// Ludwig's integration for 'classmap' type phayes/geophp library.
+if (\Drupal::hasService('ludwig.require_once')) {
+  $ludwig_require_once = \Drupal::service('ludwig.require_once');
+  $ludwig_require_once->requireOnce('itamair/geophp', 'geoPHP.inc', dirname(__FILE__));
+}
+
+/**
+ * Point feature constant.
+ *
+ * @var string
+ */
+const GEOFIELD_TYPE_POINT = 'POINT';
+
+/**
+ * Multipoint feature constant.
+ *
+ * @var string
+ */
+const GEOFIELD_TYPE_MULTIPOINT = 'MULTIPOINT';
+
+/**
+ * Linestring feature constant.
+ *
+ * @var string
+ */
+const GEOFIELD_TYPE_LINESTRING = 'LINESTRING';
+
+/**
+ * Multilinestring feature constant.
+ *
+ * @var string
+ */
+const GEOFIELD_TYPE_MULTILINESTRING = 'MULTILINESTRING';
+
+/**
+ * Polygon feature constant.
+ *
+ * @var string
+ */
+const GEOFIELD_TYPE_POLYGON = 'POLYGON';
+
+/**
+ * Multipolygon feature constant.
+ *
+ * @var string
+ */
+const GEOFIELD_TYPE_MULTIPOLYGON = 'MULTIPOLYGON';
+
+/* *
+ * Max length of geohashes (imposed by database column length).
+ */
+const GEOFIELD_GEOHASH_LENGTH = 16;
+
+/**
+ * Diameter of the Earth in kilometers.
+ */
+const GEOFIELD_KILOMETERS = 6371;
+
+/**
+ * Diameter of the Earth in meters.
+ */
+const GEOFIELD_METERS = 6371000;
+
+/**
+ * Diameter of the Earth in miles.
+ */
+const GEOFIELD_MILES = 3959;
+
+/**
+ * Diameter of the Earth in yards.
+ */
+const GEOFIELD_YARDS = 6975175;
+
+/**
+ * Diameter of the Earth in feet.
+ */
+const GEOFIELD_FEET = 20925525;
+
+/**
+ * Diameter of the Earth in nautical miles.
+ */
+const GEOFIELD_NAUTICAL_MILES = 3444;
+
+/**
+ * Implements hook_theme().
+ */
+function geofield_theme() {
+  return [
+    'geofield_dms' => [
+      'variables' => [
+        'components' => [],
+      ],
+    ],
+    'geofield_latlon' => [
+      'variables' => [
+        'lat' => 0,
+        'lon' => 0,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Returns options for radius of the Earth.
+ */
+function geofield_radius_options() {
+  return [
+    'GEOFIELD_KILOMETERS' => t('Kilometers'),
+    'GEOFIELD_METERS' => t('Meters'),
+    'GEOFIELD_MILES' => t('Miles'),
+    'GEOFIELD_YARDS' => t('Yards'),
+    'GEOFIELD_FEET' => t('Feet'),
+    'GEOFIELD_NAUTICAL_MILES' => t('Nautical Miles'),
+  ];
+}
+
+/**
+ * Build SQL query snippet for the haversine formula.
+ *
+ * @param array $options
+ *   The haversine options.
+ *   - origin_latitude - the origin latitude (in degrees).
+ *   - origin_longitude - the origin longitude (in degrees).
+ *   - earth_radius - the earth radius (see the constants at the top).
+ *   - destination_latitude - the db field with the latitude.
+ *   - destination_longitude - the db field with the longitude.
+ *
+ * @return string
+ *   The generated SQL query snippet for haversine formula.
+ */
+function geofield_haversine(array $options = []) {
+  $formula = '( :earth_radius * ACOS( LEAST(1, COS( RADIANS(:origin_latitude)) * COS( RADIANS(:destination_latitude) ) * COS( RADIANS(:destination_longitude) - RADIANS(:origin_longitude) ) + SIN( RADIANS(:origin_latitude) ) * SIN( RADIANS(:destination_latitude) ) ) ) )';
+
+  foreach ($options as $key => $field) {
+    if (is_numeric($field)) {
+      $formula = str_replace(':' . $key, $field, $formula);
+    }
+    else {
+      $formula = str_replace(':' . $key, Database::getConnection()->escapeField($field), $formula);
+    }
+  }
+
+  return $formula;
+}
+
+/*
+* Implements hook_field_type_category_info_alter().
+*/
+function geofield_field_type_category_info_alter(&$definitions) {
+  $definitions[FieldTypeCategoryManagerInterface::FALLBACK_CATEGORY]['libraries'][] = 'geofield/geofield-icon';
+}

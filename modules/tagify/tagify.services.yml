@@ -1,0 +1,13 @@
+services:
+  tagify.autocomplete_matcher:
+    class: Drupal\tagify\TagifyEntityAutocompleteMatcher
+    arguments:
+      - '@plugin.manager.entity_reference_selection'
+      - '@module_handler'
+      - '@entity_type.manager'
+      - '@token'
+      - '@tagify.hierarchical_term_manager'
+  tagify.hierarchical_term_manager:
+    class: Drupal\tagify\Services\TagifyHierarchicalTermManager
+    arguments:
+      - '@entity_type.manager'

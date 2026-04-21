@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="search_api_solr">
+  <description>PHP CodeSniffer configuration.</description>
+  <file>.</file>
+  <arg name="extensions" value="inc,install,module,php,profile,test,theme"/>
+
+  <!--Use Drupal code rule.-->
+  <rule ref="vendor/drupal/coder/coder_sniffer/Drupal"></rule>
+
+  <!--Use DrupalPractice code rule.-->
+  <rule ref="vendor/drupal/coder/coder_sniffer/DrupalPractice"></rule>
+
+  <rule ref="Drupal.NamingConventions.ValidFunctionName.ScopeNotCamelCaps">
+    <exclude-pattern>src/Utility/StreamingExpressionBuilder.php</exclude-pattern>
+  </rule>
+  <rule ref="Drupal.NamingConventions.ValidVariableName.LowerCamelName">
+    <exclude-pattern>src/Entity/SolrFieldType.php</exclude-pattern>
+    <exclude-pattern>src/Entity/SolrRequestHandler.php</exclude-pattern>
+    <exclude-pattern>src/Entity/SolrRequestDispatcher.php</exclude-pattern>
+  </rule>
+
+</ruleset>

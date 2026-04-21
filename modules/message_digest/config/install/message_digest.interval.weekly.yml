@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: weekly
+label: Weekly
+interval: '1 week'
+description: 'Sends messages in 1 week intervals.'

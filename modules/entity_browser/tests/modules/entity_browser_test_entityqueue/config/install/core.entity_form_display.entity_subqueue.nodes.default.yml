@@ -1,0 +1,38 @@
+uuid: cd2a6cf4-5051-475d-9381-726b78c9dc3a
+langcode: en
+status: true
+dependencies:
+  config:
+    - entity_browser.browser.widget_context_default_value
+    - entityqueue.entity_queue.nodes
+  module:
+    - entity_browser
+    - entity_browser_test
+id: entity_subqueue.nodes.default
+targetEntityType: entity_subqueue
+bundle: nodes
+mode: default
+content:
+  items:
+    type: entity_browser_entity_reference
+    weight: 5
+    settings:
+      entity_browser: widget_context_default_value
+      field_widget_display: label
+      field_widget_edit: true
+      field_widget_remove: true
+      selection_mode: selection_append
+      field_widget_replace: false
+      open: false
+      field_widget_display_settings: {  }
+    region: content
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: -10
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden: {  }

@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.indexed
+    - node.type.child
+  module:
+    - node
+id: node.child.indexed
+field_name: indexed
+entity_type: node
+bundle: child
+label: 'Indexed'
+description: 'This field is supposed to be indexed by Search API.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

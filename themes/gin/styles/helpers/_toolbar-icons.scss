@@ -1,0 +1,192 @@
+.toolbar-icon-workbench-content-tab::before,
+.toolbar-link--admin-toolbar-tools-help::before,
+.toolbar-button--icon--admin-toolbar-tools-help::before,
+.toolbar-button--icon--navigation-extra-tools-help::before {
+  --icon: #{icon('tool')};
+}
+
+.toolbar-icon-system-themes-page::before,
+.toolbar-link--system-themes-page::before,
+.toolbar-button--icon--system-themes-page::before {
+  --icon: #{icon('appearance')};
+}
+
+.toolbar-link--blocks::before,
+.toolbar-button--icon--navigation-blocks::before {
+  --icon: #{icon('blocks')};
+}
+
+.toolbar-link--bookmarks::before,
+.toolbar-button--icon--bookmarks::before {
+  --icon: #{icon('bookmarks')};
+}
+
+.toolbar-icon-shortcut::before,
+.toolbar-button--icon--shortcuts::before {
+  --icon: #{icon('shortcut')};
+}
+
+.toolbar-icon-system-admin-config::before,
+.toolbar-link--system-admin-config::before,
+.toolbar-button--icon--system-admin-config::before {
+  --icon: #{icon('config')};
+}
+
+.toolbar-icon-system-admin-content::before,
+.toolbar-link--content::before,
+.toolbar-button--icon--navigation-content::before {
+  --icon: #{icon('content')};
+}
+
+.toolbar-link--create::before,
+.toolbar-button--icon--navigation-create::before {
+  --icon: #{icon('create')};
+}
+
+.toolbar-button--icon--thin-pencil::before {
+  --icon: #{icon('edit')};
+}
+
+.toolbar-icon-system-modules-list::before,
+.toolbar-link--system-modules-list::before,
+.toolbar-button--icon--system-modules-list::before {
+  --icon: #{icon('extend-new')};
+}
+
+.toolbar-link--files::before,
+.toolbar-button--icon--navigation-files::before {
+  --icon: #{icon('files')};
+}
+
+.toolbar-icon-help-main::before,
+.toolbar-icon-help::before,
+.toolbar-link--help::before,
+.toolbar-button--icon--help::before {
+  --icon: #{icon('help')};
+}
+
+.toolbar-icon-commerce-admin-commerce::before,
+.toolbar-link--commerce-admin-commerce::before,
+.toolbar-button--icon--commerce-admin-commerce::before,
+.toolbar-icon-commerce-inbox::before,
+.toolbar-link---commerce-inbox::before,
+.toolbar-button--icon--commerce-inbox::before {
+  --icon: #{icon('commerce')};
+}
+
+.toolbar-link--media::before,
+.toolbar-button--icon--navigation-media::before {
+  --icon: #{icon('media')};
+}
+
+.toolbar-icon-entity-user-collection::before,
+.toolbar-link--entity-user-collection::before,
+.toolbar-button--icon--entity-user-collection::before {
+  --icon: #{icon('people-new')};
+}
+
+.toolbar-icon-system-admin-reports::before,
+.toolbar-link--system-admin-reports::before,
+.toolbar-button--icon--system-admin-reports::before {
+  --icon: #{icon('reports')};
+}
+
+.toolbar-icon-system-admin-structure::before,
+.toolbar-link--system-admin-structure::before,
+.toolbar-button--icon--system-admin-structure::before {
+  --icon: #{icon('structure')};
+}
+
+.toolbar-icon-entity-webform-collection::before,
+.toolbar-link--entity-webform-collection::before,
+.toolbar-button--icon--entity-webform-collection::before {
+  --icon: #{icon('webform')};
+}
+
+.toolbar-link--sidebar-toggle[aria-expanded=false]::before,
+.toolbar-link--sidebar-toggle[aria-expanded=true]::before,
+.toolbar-link--sidebar-toggle[aria-expanded=false]::before,
+.toolbar-link--sidebar-toggle[aria-expanded=true]::before {
+  --icon: #{icon('chevron-down')};
+}
+
+.toolbar-icon-user::before,
+.toolbar-link--user::before,
+.toolbar-button--icon--user::before,
+.toolbar-button--icon--navigation-user-links-user-wrapper::before {
+  --icon: #{icon('user')};
+}
+
+.toolbar-icon-announcements-feed-announcement::before,
+.toolbar-icon-announce::before,
+.toolbar-link--announcements-feed-announcement::before,
+.toolbar-button--icon--announcements-feed-announcement::before {
+  --icon: #{icon('announcement')};
+}
+
+.toolbar-icon-system-admin-group::before,
+.toolbar-link--system-admin-group::before,
+.toolbar-button--icon--system-admin-group::before {
+  --icon: #{icon('group')};
+}
+
+.toolbar-icon-tmgmt-admin-tmgmt::before,
+.toolbar-link--tmgmt-admin-tmgmt::before,
+.toolbar-icon-language::before,
+.toolbar-link--language::before,
+.toolbar-button--icon--tmgmt-admin-tmgmt::before,
+.toolbar-button--icon--language::before {
+  --icon: #{icon('tmgmt')};
+}
+
+.toolbar-icon-bat-admin::before,
+.toolbar-link--bat-admin::before,
+.toolbar-button--icon--bat-admin::before {
+  --icon: #{icon('bat')};
+}
+
+.toolbar-icon-menu::before,
+.toolbar-button--icon--burger::before {
+  --icon: #{icon('hamburger')};
+}
+
+.toolbar-icon-coffee::before,
+#toolbar-item-administration-search::before,
+#admin-toolbar-mobile-search-tab .toolbar-icon::before {
+  --icon: #{icon('search')};
+}
+
+.toolbar-icon-devel::before,
+.toolbar-button--icon--devel::before {
+  --icon: #{icon('devel')};
+}
+
+.toolbar-icon-rebuild-cache-access::before {
+  --icon: #{icon('rebuild-cache')};
+}
+
+.responsive-preview-icon::before {
+  --icon: #{icon('responsive-preview')};
+}
+
+.toolbar-icon-environment::before,
+.toolbar-button--icon--environment::before {
+  --icon: #{icon('server')};
+}
+
+.toolbar-icon-toggle-vertical::before,
+.toolbar-button--icon--back::before {
+  --icon: #{icon('nav-toggle-toleft')};
+}
+
+.toolbar-icon-toggle-horizontal::before {
+  --icon: #{icon('nav-toggle-totop')};
+}
+
+.toolbar-button--icon--cross::before {
+  --icon: #{icon('close')};
+}
+
+.toolbar-button--icon--navigation-trash {
+  --icon: #{icon('trash-module')};
+}

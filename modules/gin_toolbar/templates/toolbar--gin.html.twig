@@ -1,0 +1,9 @@
+{#
+/**
+ * @file
+ * Include toolbar--gin.html.twig template from Gin.
+ */
+#}
+{% if not core_navigation %}
+  {% include '@gin/navigation/toolbar--gin.html.twig' ignore missing %}
+{% endif %}

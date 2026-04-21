@@ -1,0 +1,9 @@
+name: Google Tag
+description: Sets up Google Tag
+type: module
+core_version_requirement: ^9.5 || ^10 || ^11
+configure: google_tag.settings_form
+# Information added by Drupal.org packaging script on 2025-08-25
+version: '2.0.9'
+project: 'google_tag'
+datestamp: 1756130986

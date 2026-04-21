@@ -1,0 +1,297 @@
+<?php
+
+/**
+ * @file
+ * Provides hooks for gin_lb module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Asset\AttachedAssetsInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\gin_lb\HookHandler\CssAlter;
+use Drupal\gin_lb\HookHandler\FormAlter;
+use Drupal\gin_lb\HookHandler\FormMediaLibraryAddFormAlter;
+use Drupal\gin_lb\HookHandler\FormMediaLibraryAddFormOembedAlter;
+use Drupal\gin_lb\HookHandler\FormMediaLibraryAddFormUploadAlter;
+use Drupal\gin_lb\HookHandler\Help;
+use Drupal\gin_lb\HookHandler\LibraryInfoAlter;
+use Drupal\gin_lb\HookHandler\PageAttachments;
+use Drupal\gin_lb\HookHandler\Preprocess;
+use Drupal\gin_lb\HookHandler\Theme;
+use Drupal\gin_lb\HookHandler\ThemeSuggestionsAlter;
+use Drupal\gin_lb\HookHandler\ThemeSuggestionsFormAlter;
+use Drupal\gin_lb\HookHandler\ViewsPreRender;
+use Drupal\views\ViewExecutable;
+
+/**
+ * Implements hook_css_alter().
+ */
+function gin_lb_css_alter(array &$css, AttachedAssetsInterface $assets, LanguageInterface $language): void {
+  /** @var \Drupal\gin_lb\HookHandler\CssAlter $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(CssAlter::class);
+  $instance->alter($css, $assets, $language);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function gin_lb_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  /** @var \Drupal\gin_lb\HookHandler\FormAlter $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(FormAlter::class);
+  $instance->alter($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for 'media_library_add_form'.
+ */
+function gin_lb_form_media_library_add_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  /** @var \Drupal\gin_lb\HookHandler\FormMediaLibraryAddFormAlter $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(FormMediaLibraryAddFormAlter::class);
+  $instance->alter($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for 'media_library_add_form_oembed'.
+ */
+function gin_lb_form_media_library_add_form_oembed_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  /** @var \Drupal\gin_lb\HookHandler\FormMediaLibraryAddFormOembedAlter $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(FormMediaLibraryAddFormOembedAlter::class);
+  $instance->alter($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for 'media_library_add_form_upload'.
+ */
+function gin_lb_form_media_library_add_form_upload_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  /** @var \Drupal\gin_lb\HookHandler\FormMediaLibraryAddFormUploadAlter $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(FormMediaLibraryAddFormUploadAlter::class);
+  $instance->alter($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_help().
+ */
+function gin_lb_help(string $route_name, RouteMatchInterface $route_match): array|string {
+  /** @var \Drupal\gin_lb\HookHandler\Help $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Help::class);
+  return $instance->help($route_name, $route_match);
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function gin_lb_library_info_alter(array &$libraries, string $extension): void {
+  if ($extension !== 'gin_lb') {
+    return;
+  }
+  /** @var \Drupal\gin_lb\HookHandler\LibraryInfoAlter $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(LibraryInfoAlter::class);
+  $instance->alter($libraries);
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function gin_lb_module_implements_alter(array &$implementations, string $hook): void {
+  if (!isset($implementations['gin_lb'])) {
+    return;
+  }
+
+  switch ($hook) {
+    case 'suggestions_alter':
+    case 'form_alter':
+    case 'preprocess':
+      $group = $implementations['gin_lb'];
+      unset($implementations['gin_lb']);
+      $implementations['gin_lb'] = $group;
+      break;
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function gin_lb_page_attachments(array &$attachments): void {
+  /** @var \Drupal\gin_lb\HookHandler\PageAttachments $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(PageAttachments::class);
+  $instance->attachments($attachments);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'field_multiple_value_form'.
+ */
+function gin_lb_preprocess_field_multiple_value_form(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessFieldMultipleValueForm($variables);
+}
+
+/**
+ * Implements template_preprocess_HOOK() for 'field_ui_table'.
+ */
+function gin_lb_preprocess_field_ui_table(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessTable($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'file_managed_file__gin_lb'.
+ */
+function gin_lb_preprocess_file_managed_file__gin_lb(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessFileManagedFileGinLb($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'form_element'.
+ */
+function gin_lb_preprocess_form_element(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessFormElement($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'html'.
+ */
+function gin_lb_preprocess_html(array &$variables): void {
+  // Ease update in case of error on update.php.
+  // @todo to remove on next major version.
+  // @phpstan-ignore-next-line
+  if (!\Drupal::getContainer()->has('gin_lb.context_validator')) {
+    return;
+  }
+
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessHtml($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'image_widget__gin_lb'.
+ */
+function gin_lb_preprocess_image_widget__gin_lb(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessImageWidgetGinLb($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'item_list__media_library_add_form_media_list'.
+ */
+function gin_lb_preprocess_item_list__media_library_add_form_media_list(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessItemListMediaLibraryAddFormMediaList($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'links__media_library_menu'.
+ */
+function gin_lb_preprocess_links__media_library_menu(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessLinksMediaLibraryMenu($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'media_library_item'.
+ */
+function gin_lb_preprocess_media_library_item(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessMediaLibraryItem($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'media_library_item__widget'.
+ */
+function gin_lb_preprocess_media_library_item__widget(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessMediaLibraryItemWidget($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'status_messages__gin_lb'.
+ */
+function gin_lb_preprocess_status_messages__gin_lb(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessStatusMessagesGinLb($variables);
+}
+
+/**
+ * Implements template_preprocess_HOOK() for 'table'.
+ */
+function gin_lb_preprocess_table(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessTable($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for 'toolbar__gin_lb'.
+ */
+function gin_lb_preprocess_toolbar__gin_lb(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessToolbarGinLb($variables);
+}
+
+/**
+ * Implements hook_preprocess() for 'top_bar'.
+ */
+function gin_lb_preprocess_top_bar(array &$variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\Preprocess $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Preprocess::class);
+  $instance->preprocessTopBar($variables);
+}
+
+/**
+ * Implements hook_theme().
+ */
+function gin_lb_theme(): array {
+  /** @var \Drupal\gin_lb\HookHandler\Theme $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(Theme::class);
+  return $instance->themes();
+}
+
+/**
+ * Implements hook_theme_suggestions_alter().
+ */
+function gin_lb_theme_suggestions_alter(array &$suggestions, array $variables, string $hook): void {
+  // Ease update in case of error on update.php.
+  // @todo to remove on next major version.
+  // @phpstan-ignore-next-line
+  if (!\Drupal::getContainer()->has('gin_lb.context_validator')) {
+    return;
+  }
+
+  /** @var \Drupal\gin_lb\HookHandler\ThemeSuggestionsAlter $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(ThemeSuggestionsAlter::class);
+  $instance->alter($suggestions, $variables, $hook);
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for 'form'.
+ */
+function gin_lb_theme_suggestions_form_alter(array &$suggestions, array $variables): void {
+  /** @var \Drupal\gin_lb\HookHandler\ThemeSuggestionsFormAlter $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(ThemeSuggestionsFormAlter::class);
+  $instance->alter($suggestions, $variables);
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function gin_lb_views_pre_render(ViewExecutable $view): void {
+  /** @var \Drupal\gin_lb\HookHandler\ViewsPreRender $instance */
+  $instance = \Drupal::service('class_resolver')->getInstanceFromDefinition(ViewsPreRender::class);
+  $instance->preRender($view);
+}

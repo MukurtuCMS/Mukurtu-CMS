@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Geolocation demo setup.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function geolocation_google_maps_demo_install() {
+  /** @var \Drupal\Core\Config\Config $config */
+  $config = \Drupal::service('config.factory')->getEditable('geolocation_google_maps.settings');
+  if (empty($config->get('google_map_api_key'))) {
+    $config->set('google_map_api_key', 'AIzaSyChy7jQvcJpTpIiupQhq4wacdVzdum3hvc')->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function geolocation_google_maps_demo_uninstall() {
+  /** @var \Drupal\Core\Config\Config $config */
+  $config = \Drupal::service('config.factory')->getEditable('geolocation_google_maps.settings');
+  if ($config->get('google_map_api_key') == 'AIzaSyChy7jQvcJpTpIiupQhq4wacdVzdum3hvc') {
+    $config->set('google_map_api_key', '')->save();
+  }
+}

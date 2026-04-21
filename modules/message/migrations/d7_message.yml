@@ -1,0 +1,25 @@
+id: d7_message
+label: Drupal 7 messages.
+migration_tags:
+  - Drupal 7
+source:
+  plugin: d7_message_source
+process:
+  mid: mid
+  template: type
+  created: timestamp
+  uid: uid
+  arguments: 
+    plugin: d7_message_arguments
+    source: 
+      - arguments
+  langcode: 
+    plugin: default_value
+    source: language
+    default_value: "und"
+destination:
+  plugin: entity:message
+migration_dependencies:
+  required:
+    - d7_message_template
+    - d7_user

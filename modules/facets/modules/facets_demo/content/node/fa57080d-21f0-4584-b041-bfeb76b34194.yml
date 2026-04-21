@@ -1,0 +1,58 @@
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: fa57080d-21f0-4584-b041-bfeb76b34194
+  bundle: movie
+  default_langcode: en
+  depends:
+    cc499d5d-647a-4bd1-9f69-239871d4e3ac: taxonomy_term
+    834bbe41-fef2-426b-ba3e-acbdf3a528cb: taxonomy_term
+    2ff12607-1ab0-47a2-b4a5-558ff0ec81be: taxonomy_term
+default:
+  revision_uid:
+    -
+      target_id: 1
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  title:
+    -
+      value: 'Back to the Future'
+  created:
+    -
+      value: 1738322683
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en
+  body:
+    -
+      value: '<p>Marty McFly, a 17-year-old high school student, is accidentally sent 30 years into the past in a time-traveling DeLorean invented by his close friend, the maverick scientist Doc Brown.</p>'
+      format: basic_html
+      summary: ''
+  field_country_of_origin:
+    -
+      entity: cc499d5d-647a-4bd1-9f69-239871d4e3ac
+  field_genre:
+    -
+      entity: 834bbe41-fef2-426b-ba3e-acbdf3a528cb
+    -
+      entity: 2ff12607-1ab0-47a2-b4a5-558ff0ec81be
+  field_imdb_rating:
+    -
+      value: '8.5'
+  field_release_date:
+    -
+      value: '1985-06-03'

@@ -1,0 +1,15 @@
+name: 'Entity browser entityqueue integration test'
+type: module
+description: 'Support module for Entity browser entityqueue integration test.'
+package: Testing
+dependencies:
+  - drupal:node
+  - drupal:views
+  - entityqueue:entityqueue
+  - entity_browser:entity_browser
+  - entity_browser_test:entity_browser_test
+
+# Information added by Drupal.org packaging script on 2025-09-04
+version: '8.x-2.15'
+project: 'entity_browser'
+datestamp: 1756969162

@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_geometry_data_geometry
+    - taxonomy.vocabulary.geolocation_provinces_of_canada
+  module:
+    - geolocation_geometry
+  enforced:
+    module:
+      - geolocation_geometry_open_canada_provinces
+id: taxonomy_term.geolocation_provinces_of_canada.field_geometry_data_geometry
+field_name: field_geometry_data_geometry
+entity_type: taxonomy_term
+bundle: geolocation_provinces_of_canada
+label: Geometry
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geolocation_geometry_geometry

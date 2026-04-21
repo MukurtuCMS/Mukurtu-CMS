@@ -1,0 +1,19 @@
+<div>
+  <h2>{{ title }}</h2>
+  <table>
+  {% for class, texts in data %}
+    <tr>
+      <th>{{ class }}</th>
+      {% for text in texts %}
+        <td>
+        {% if text.matches %}
+          <mark>{{ text.text }}</mark>
+        {% else %}
+          {{ text.text }}
+        {% endif %}
+        </td>
+      {% endfor %}
+    </tr>
+  {% endfor %}
+  </table>
+</div>

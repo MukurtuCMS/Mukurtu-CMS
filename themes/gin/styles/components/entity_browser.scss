@@ -1,0 +1,174 @@
+// Entity list in widget and browser selection.
+.entities-list {
+  &:not(.entities-list--single-item) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-gap: var(--gin-spacing-m);
+    margin-block-end: var(--gin-spacing-m);
+  }
+
+  &.entities-list--single-item .item-container {
+    max-width: 180px;
+  }
+
+  .item-container {
+    word-break: break-all;
+    position: relative;
+    margin: 0;
+    min-height: 80px;
+    border: 1px solid var(--gin-border-color);
+    border-radius: var(--gin-border-l);
+
+    .field__item {
+      border: 3px solid transparent;
+      border-radius: var(--gin-border-xl);
+      overflow: hidden;
+
+      &:hover,
+      &:focus {
+        border-color: var(--gin-color-primary) !important;
+        cursor: pointer;
+      }
+    }
+
+    &.label {
+      padding-block: var(--gin-spacing-s);
+      padding-inline: var(--gin-spacing-s) var(--gin-spacing-xxl);
+    }
+
+    img {
+      vertical-align: middle;
+    }
+
+    > .entity-browser-remove-selected-entity,
+    > .remove-button {
+      @include custom-icon-button('trash');
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-end: 0;
+    }
+
+    > .replace-button,
+    > .edit-button {
+      @include custom-icon-button('edit');
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-end: 2.6rem;
+    }
+  }
+}
+
+// Entity list in table views.
+table.entities-list {
+  &:not(.entities-list--single-item) {
+    display: block;
+  }
+
+  td {
+    height: auto;
+    padding: 10px 12px;
+  }
+}
+
+// Entity browser view in overlay
+.gin-entity-browser {
+  .entity-browser-form {
+    padding: 0;
+    border: 0 none;
+    box-shadow: none;
+
+    .page-wrapper > .layout-container {
+      margin: 0;
+    }
+
+    .views-view-grid {
+      .views-col {
+        position: relative;
+      }
+    }
+
+    .view-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-gap: var(--gin-spacing-m);
+      margin-block-end: var(--gin-spacing-m);
+    }
+
+    .views-row {
+      border: 1px solid var(--gin-border-color);
+      border-radius: calc(var(--gin-border-xl) + 2px);
+      position: relative;
+      .views-field-thumbnail__target-id {
+        &:hover,
+        &:focus {
+          cursor: pointer;
+          border-color: var(--gin-color-primary);
+        }
+      }
+
+      .views-field-name {
+        padding: var(--gin-spacing-xs);
+      }
+
+      .views-field-entity-browser-select {
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-start: 0;
+        margin: var(--gin-spacing-s);
+
+        .form-item {
+          margin: 0;
+        }
+      }
+    }
+
+    .media-info {
+      word-wrap: break-word;
+      font-size: var(--gin-font-size-s);
+    }
+
+    .views-field-thumbnail__target-id {
+      border: 3px solid transparent;
+      border-radius: var(--gin-border-xl);
+      overflow: hidden;
+
+      &:hover,
+      &:focus {
+        border-color: var(--gin-color-primary);
+      }
+    }
+
+    .entities-list {
+      border-block-start: var(--gin-border-xs) solid var(--gin-border-color-form-element);
+      padding-block-start: var(--gin-spacing-m);
+    }
+  }
+
+  .views-exposed-form {
+    box-shadow: none;
+  }
+}
+
+// Widget sorting.
+.field--widget-entity-browser-entity-reference {
+  .entities-list.sortable {
+
+    .item-container,
+    .field__item {
+      &:hover,
+      &:focus {
+        cursor: move;
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.eb-tabs {
+  margin-inline-start: var(--gin-spacing-xxs); // Fix for outline
+  margin-block-end: 0.75em;
+
+  ul {
+    border-block-end: none; // Remove superfluous bottom.
+  }
+}

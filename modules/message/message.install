@@ -1,0 +1,81 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the message module.
+ */
+
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_uninstall().
+ */
+function message_uninstall() {
+  // Delete all message settings variables.
+  \Drupal::configFactory()->getEditable('message.settings')->delete();
+}
+
+/**
+ * Fixes the typo in 'administer messages' permission.
+ */
+function message_update_8100() {
+  $entityTypeManager = \Drupal::service('entity_type.manager');
+  $roles = $entityTypeManager->getStorage('user_role')->loadMultiple();
+  foreach ($roles as $role) {
+    // cspell:ignore adminster
+    if ($role->hasPermission('adminster messages')) {
+      $role->revokePermission('adminster messages');
+      $role->grantPermission('administer messages');
+      $role->save();
+    }
+  }
+}
+
+/**
+ * Update message_delete_action plugin.
+ */
+function message_update_8102() {
+  $ids = \Drupal::entityQuery('action')
+    ->accessCheck(FALSE)
+    ->condition('plugin', 'message_delete_action')
+    ->execute();
+
+  foreach ($ids as $id) {
+    \Drupal::configFactory()
+      ->getEditable('system.action.' . $id)
+      ->set('plugin', 'entity:delete_action:message')
+      ->save();
+  }
+}
+
+/**
+ * Updates the message view path.
+ */
+function message_update_8105() {
+  $view = \Drupal::service('config.factory')->getEditable('views.view.message');
+  $view->set('display.page_1.display_options.path', 'admin/content/message');
+  $view->save();
+}
+
+/**
+ * Add new changed field definition.
+ */
+function message_update_8106() {
+  $changed = BaseFieldDefinition::create('changed')
+    ->setLabel(t('Changed'))
+    ->setDescription(t('The time that the message was last edited.'))
+    ->setTranslatable(TRUE);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('changed', 'message', 'message', $changed);
+  /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager */
+  $entity_type_manager = \Drupal::service('entity_type.manager');
+  $message_type = $entity_type_manager->getDefinition('message');
+
+  // Copies created timestamps to the new changed field.
+  \Drupal::database()
+    ->update($message_type->getDataTable())
+    ->isNull('changed')
+    ->expression('changed', 'created')
+    ->execute();
+}

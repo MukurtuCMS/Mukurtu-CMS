@@ -1,0 +1,10 @@
+parameters:
+	ignoreErrors:
+		-
+			message: """
+				#^Call to deprecated method clearCachedDefinitions\\(\\) of interface Drupal\\\\Core\\\\Asset\\\\LibraryDiscoveryInterface\\:
+				in drupal\\:11\\.1\\.0 and is removed from drupal\\:12\\.0\\.0\\. Use
+				LibraryDiscoveryCollector\\:\\:clear\\(\\) instead\\.$#
+			"""
+			count: 1
+			path: src/EventSubscriber/ExtlinkSettingsSaveEventSubscriber.php

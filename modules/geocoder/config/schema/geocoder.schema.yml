@@ -1,0 +1,388 @@
+# Schema for Geocoder module.
+
+geocoder.settings:
+  type: config_object
+  label: "Geocoder settings"
+  mapping:
+    geocoder_presave_disabled:
+      type: boolean
+      label: "Geocoder Presave Disabled"
+      description: "Check to globally disable Geocoding and Reverse Geocoding operations when inserting and updating entities (useful, for example, to temporary prevent geocoding operations during content migration)."
+    cache:
+      type: boolean
+      label: "Should we cache the results?"
+      description: "To prevent sending multiple times the same request, you can enable to cache to save temporarily the result of the geocode and reverse geocode in the cache."
+    queue:
+      type: boolean
+      label: 'Should we Queue the Geocode processes?'
+      description: 'Enable this to use Queue Worker ("Geocoder Field Queue Process") & Cron to process the geocoder data to reduce delays while saving the entity.'
+
+geocoder.geocoder_provider.*:
+  type: config_entity
+  label: "Geocoder provider"
+  mapping:
+    id:
+      type: string
+      label: "ID"
+    label:
+      type: label
+      label: "Label"
+    plugin:
+      type: string
+      label: "Plugin"
+    configuration:
+      type: geocoder_provider.configuration.[%parent.plugin]
+
+geocoder_provider.configuration.*:
+  type: geocoder_provider_configuration
+  label: "Geocoder provider configuration"
+
+geocoder_provider_configuration:
+  type: mapping
+  label: "Default Geocoder provider configuration"
+  mapping:
+    throttle:
+      type: geocoder_throttle_configuration
+      label: "Throttle"
+      nullable: true
+    geocoder:
+      type: mapping
+      label: "Geocoder Additional Options"
+      mapping:
+        locale:
+          type: string
+          label: "Locale"
+
+geocoder_throttle_configuration:
+  type: mapping
+  label: "Geocoder throttle configuration"
+  mapping:
+    period:
+      type: integer
+      label: "Period"
+      description: "Period of time for which the number of requests is limited, in seconds"
+    limit:
+      type: integer
+      label: "Limit"
+      description: "Maximum number of requests allowed for the given period"
+
+geocoder_provider.configuration.googlemaps:
+  type: geocoder_provider_configuration
+  label: "GoogleMaps arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "Google Geocoding API key"
+      description: '<div><a href="https://developers.google.com/maps/documentation/javascript/get-api-key#standard-auth" target="blank">Follow these steps to get an API key</a> - <b>Note: </b>This need to be an API Key without referrer restrictions. As working on server side API calls, this is not going to be exposed in clear on your browser</div>'
+    region:
+      type: string
+      nullable: true
+      label: "Region code for region biasing (optional)"
+      description: 'See <a href="https://developers.google.com/maps/documentation/javascript/geocoding#GeocodingRegionCodes" target="blank">Region code biasing</a>'
+
+geocoder_provider.configuration.googlemaps_business:
+  type: geocoder_provider_configuration
+  label: "GoogleMaps for Business arguments"
+  mapping:
+    clientId:
+      type: string
+      label: "Client ID"
+      description: '<a href="https://developers.google.com/maps/documentation/geocoding/get-api-key#client-id" target="blank">Authenticating your application using a client ID and digital signature</a>'
+    privateKey:
+      type: string
+      label: "Private key"
+      description: '<a href="https://developers.google.com/maps/documentation/geocoding/get-api-key#cryptographic_signing_keys" target="blank">Getting a private cryptographic key</a>'
+    apiKey:
+      type: string
+      nullable: true
+      label: "Google Geocoding API key (optional)"
+      description: '<a href="https://developers.google.com/maps/documentation/javascript/get-api-key#standard-auth" target="blank">Follow these steps to get an API key</a>'
+    region:
+      type: string
+      nullable: true
+      label: "Region code for region biasing (optional)"
+      description: 'See <a href="https://developers.google.com/maps/documentation/javascript/geocoding#GeocodingRegionCodes" target="blank">Region code biasing</a>'
+    channel:
+      type: string
+      nullable: true
+      label: "Channel (optional)"
+      description: 'See <a href="https://developers.google.com/maps/premium/reports/usage-reports#channels" target="blank">What are channels?</a>'
+
+geocoder_provider.configuration.arcgisonline:
+  type: geocoder_provider_configuration
+  label: "ArcGISOnline arguments"
+  mapping:
+    sourceCountry:
+      type: string
+      label: "Source country for country biasing (optional)"
+      nullable: true
+
+geocoder_provider.configuration.bingmaps:
+  type: geocoder_provider_configuration
+  label: "Bingmaps arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "API key"
+      description: '<a href="https://msdn.microsoft.com/en-us/library/ff428642.aspx" target="blank">Getting a Bing Maps API key</a>'
+
+geocoder_provider.configuration.geonames:
+  type: geocoder_provider_configuration
+  label: "Geonames arguments"
+  mapping:
+    username:
+      type: string
+      label: "Username"
+      description: 'Create a free user account at <a href="http://www.geonames.org/login" target="blank">www.geonames.org/login</a>'
+
+geocoder_provider.configuration.graphhopper:
+  type: geocoder_provider_configuration
+  label: "GraphHopper arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "API key"
+      description: '<a href="https://graphhopper.com/dashboard/#/register" target="blank">Getting a GraphHopper API key</a>'
+
+geocoder_provider.configuration.ipinfodb:
+  type: geocoder_provider_configuration
+  label: "IpInfoDb arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "API key"
+      description: 'Get an API key by creating a free account at <a href="https://www.ipinfodb.com/register" target="blank">www.ipinfodb.com/register</a>'
+    precision:
+      type: string
+      nullable: true
+      label: "Precision (optional)"
+      description: 'Either "city" or "country" (faster). Defaults to "city".'
+
+geocoder_provider.configuration.locationiq:
+  type: geocoder_provider_configuration
+  label: "LocationIQ arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "Access Token"
+      description: 'Get an Access Token by creating a free account at <a href="https://my.locationiq.com/register" target="blank">https://my.locationiq.com/register</a>'
+
+geocoder_provider.configuration.mapbox:
+  type: geocoder_provider_configuration
+  label: "Mapbox arguments"
+  mapping:
+    accessToken:
+      type: string
+      label: "Access Token"
+      description: '<a href="https://www.mapbox.com/signup/" target="blank">Get your free API key</a>'
+    country:
+      type: string
+      label: "Countries"
+      description: 'Limit results to one or more countries. Permitted values are <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2" target="blank">ISO 3166 alpha 2</a> country codes separated by commas.'
+      nullable: true
+    geocodingMode:
+      type: string
+      label: "Geocoding Mode"
+      description: 'Sets the endpoint by passing the mode. Use "mapbox.places" for temporary geocoding. To permanently store the data, use "mapbox.places-permanent" and contact Mapbox to enable this setting on your access token.</br>Check <a href="https://docs.mapbox.com/api/search/geocoding/#endpoints" target="_blank">Mapbox Endpoints documentation</a> for more info.'
+      nullable: true
+    location_type:
+      type: string
+      label: "Location type"
+      description: 'The location type. Check <a href="https://docs.mapbox.com/api/search/geocoding/#data-types" target="_blank">https://docs.mapbox.com/api/search/geocoding/#data-types</a> for all possible location types. Multiple location types can be separated by a comma.'
+      nullable: true
+    fuzzy_match:
+      type: boolean
+      label: "Fuzzy match"
+      description: "Specify whether the Geocoding API should attempt approximate, as well as exact, matching when performing searches (true, default), or whether it should opt out of this behavior and only attempt exact matching (false). For example, the default setting might return Washington, DC for a query of Washington, even though the query was misspelled."
+      nullable: true
+
+geocoder_provider.configuration.mapquest:
+  type: geocoder_provider_configuration
+  label: "MapQuest arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "API key"
+      description: '<a href="https://developer.mapquest.com/" target="blank">Get your free API key</a>'
+    licensed:
+      type: boolean
+      nullable: true
+      label: "Licensed"
+      description: "Whether to use MapQuest's licensed endpoints. Uncheck to use the open endpoints."
+
+geocoder_provider.configuration.maptiler:
+  type: geocoder_provider_configuration
+  label: "MapTiler arguments"
+  mapping:
+    key:
+      type: string
+      label: "API Key"
+      description: 'Access key from <a href="https://cloud.maptiler.com/">https://cloud.maptiler.com/</a>.'
+    bounds:
+      type: string
+      label: "Bounds"
+      description: 'Access key from <a href="https://cloud.maptiler.com/">https://cloud.maptiler.com/</a>.'
+
+geocoder_provider.configuration.maxmind:
+  type: geocoder_provider_configuration
+  label: "MaxMind arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "API key"
+    service:
+      type: string
+      nullable: true
+      label: "MaxMind service (optional)"
+      description: 'Can be either "a", "b", "f" or "e". Defaults to "f". See <a href="https://dev.maxmind.com/geoip/legacy/web-services/#Per-Service_URIs" target="blank">Services</a>'
+
+geocoder_provider.configuration.nominatim:
+  type: geocoder_provider_configuration
+  label: "Nominatim arguments"
+  mapping:
+    rootUrl:
+      type: string
+      label: "Root URL"
+      description: "Root URL of the nominatim server"
+    userAgent:
+      type: string
+      label: "User agent"
+      description: 'Value of the User-Agent header, for example "Drupal example.org". Replace "example.org" with your URL.'
+    referer:
+      type: string
+      label: "Referer"
+      description: 'Value of the Referer header, for example "https://example.org". Replace with your URL.'
+
+geocoder_provider.configuration.pelias:
+  type: geocoder_provider_configuration
+  label: "Pelias arguments"
+  mapping:
+    root:
+      type: string
+      label: "Root URL"
+      description: "Root URL of the pelias server"
+    version:
+      type: string
+      label: "Version"
+      description: "API version number"
+
+geocoder_provider.configuration.openrouteservice:
+  type: geocoder_provider_configuration
+  label: "Openrouteservice arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "API key"
+      description: 'Sign up for a free API key at <a href="https://openrouteservice.org/dev/#/signup" target="blank">openrouteservice.org/dev/#/signup</a>'
+
+geocoder_provider.configuration.opencage:
+  type: geocoder_provider_configuration
+  label: "OpenCage arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "API key"
+      description: 'Sign up for a free API key at <a href="https://opencagedata.com/users/sign_up" target="blank">opencagedata.com/users/sign_up</a>'
+
+geocoder_provider.configuration.tomtom:
+  type: geocoder_provider_configuration
+  label: "TomTom arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "API key"
+      description: '<a href="https://developer.tomtom.com/apps/myapps" target="blank">Request an evaluation API key</a>'
+
+geocoder_provider.configuration.file:
+  type: geocoder_provider_configuration
+  label: "File arguments"
+
+geocoder_provider.configuration.freegeoip:
+  type: geocoder_provider_configuration
+  label: "Freegeoip arguments"
+  mapping:
+    baseUrl:
+      type: string
+      label: "Base URL"
+      description: "URL of the FreeGeoIP API endpoint."
+
+geocoder_provider.configuration.geojsonfile:
+  type: geocoder_provider_configuration
+  label: "GeoJson File arguments"
+
+geocoder_provider.configuration.geoip:
+  type: geocoder_provider_configuration
+  label: "Geoip arguments"
+
+geocoder_provider.configuration.geoplugin:
+  type: geocoder_provider_configuration
+  label: "Geoplugin arguments"
+
+geocoder_provider.configuration.gpxfile:
+  type: geocoder_provider_configuration
+  label: "Gpx file arguments"
+
+geocoder_provider.configuration.hostip:
+  type: geocoder_provider_configuration
+  label: "Hostip arguments"
+
+geocoder_provider.configuration.kmlfile:
+  type: geocoder_provider_configuration
+  label: "Kml File arguments"
+
+geocoder_provider.configuration.openstreetmap:
+  type: geocoder_provider_configuration
+  label: "Openstreetmap arguments"
+  mapping:
+    rootUrl:
+      type: string
+      label: "Root URL"
+      description: "The URL representing the OpenStreetMap API endpoint."
+    userAgent:
+      type: string
+      label: "User agent"
+      description: 'Value of the User-Agent header, for example "Drupal example.org". Replace "example.org" with your URL.'
+    referer:
+      type: string
+      label: "Referer"
+      description: 'Value of the Referer header, for example "https://example.org". Replace with your URL.'
+
+geocoder_provider.configuration.photon:
+  type: geocoder_provider_configuration
+  label: "Photon arguments"
+  mapping:
+    rootUrl:
+      type: string
+      label: "Root URL"
+      description: "The URL representing the Photon API endpoint."
+
+geocoder_provider.configuration.random:
+  type: geocoder_provider_configuration
+  label: "Random arguments"
+
+geocoder_provider.configuration.yandex:
+  type: geocoder_provider_configuration
+  label: "Yandex arguments"
+  mapping:
+    apiKey:
+      type: string
+      label: "Yandex Geocoding API key"
+      description: '<a href="https://developer.tech.yandex.ru/" target="blank">Get your API key</a>'
+    toponym:
+      type: string
+      nullable: true
+      label: "Toponym"
+      description: "Only for reverse geocoding (optional)"
+
+geocoder_provider.configuration.azuremaps:
+  type: geocoder_provider_configuration
+  label: "AzureMaps arguments"
+  mapping:
+    subscriptionKey:
+      type: string
+      label: "Azure subscriptionKey"
+      description: '<a href="https://learn.microsoft.com/en-us/azure/api-management/api-management-subscriptions" target="blank">Subscriptions in Azure API Management</a>'
+
+geocoder_provider.configuration.banfrance:
+  type: geocoder_provider_configuration
+  label: "BAN France arguments"

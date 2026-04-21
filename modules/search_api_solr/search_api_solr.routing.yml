@@ -1,0 +1,356 @@
+search_api_solr.solr_config_files:
+  path: '/admin/config/search/search-api/server/{search_api_server}/files'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  defaults:
+    _form: '\Drupal\search_api_solr\Form\SolrConfigForm'
+  requirements:
+    _permission: 'administer search_api'
+    _custom_access: '\Drupal\search_api_solr\Form\SolrConfigForm::access'
+
+# SolrFieldType routing definition
+entity.solr_field_type.collection:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_field_type'
+  defaults:
+    _title: 'SolrFieldType Configuration'
+    _controller: '\Drupal\search_api_solr\Controller\SolrFieldTypeController::listing'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+entity.solr_field_type.add_form:
+  path: '/admin/config/search/search-api/solr_field_type/add'
+  defaults:
+    _entity_form: 'solr_field_type.add'
+    _title: 'Add SolrFieldType'
+  requirements:
+    _permission: 'administer search_api'
+
+entity.solr_field_type.edit_form:
+  path: '/admin/config/search/search-api/solr_field_type/{solr_field_type}'
+  defaults:
+    _entity_form: 'solr_field_type.edit'
+    _title: 'Edit SolrFieldType'
+  requirements:
+    _permission: 'administer search_api'
+
+entity.solr_field_type.delete_form:
+  path: '/admin/config/search/search-api/solr_field_type/{solr_field_type}/delete'
+  defaults:
+    _entity_form: 'solr_field_type.delete'
+    _title: 'Delete SolrFieldType'
+  requirements:
+    _permission: 'administer search_api'
+
+entity.solr_field_type.disable_for_server:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_field_type/{solr_field_type}/disable'
+  defaults:
+    _title: 'Disable SolrFieldType for server'
+    _controller: '\Drupal\search_api_solr\Controller\SolrFieldTypeController::disableOnServer'
+  requirements:
+    _permission: 'administer search_api'
+    _csrf_token: 'TRUE'
+  options:
+    _admin_route: true
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+      solr_field_type:
+        type: entity:solr_field_type
+
+entity.solr_field_type.enable_for_server:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_field_type/{solr_field_type}/enable'
+  defaults:
+    _title: 'Enable SolrFieldType for server'
+    _controller: '\Drupal\search_api_solr\Controller\SolrFieldTypeController::enableOnServer'
+  requirements:
+    _permission: 'administer search_api'
+    _csrf_token: 'TRUE'
+  options:
+    _admin_route: true
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+      solr_field_type:
+        type: entity:solr_field_type
+
+solr_configset.schema_extra_types:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_configset/schema-extra-types'
+  defaults:
+    _title: 'schema_extra_types.xml'
+    _controller: '\Drupal\search_api_solr\Controller\SolrConfigSetController::streamSchemaExtraTypesXml'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+solr_configset.schema_extra_fields:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_configset/schema-extra-fields'
+  defaults:
+    _title: 'schema_extra_fields.xml'
+    _controller: '\Drupal\search_api_solr\Controller\SolrConfigSetController::streamSchemaExtraFieldsXml'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+solr_configset.solrconfig_extra:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_configset/solrconfig-extra'
+  defaults:
+    _title: 'solrconfig_extra.xml'
+    _controller: '\Drupal\search_api_solr\Controller\SolrConfigSetController::streamSolrconfigExtraXml'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+solr_configset.solrconfig_query:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_configset/solrconfig-query'
+  defaults:
+    _title: 'solrconfig_query.xml'
+    _controller: '\Drupal\search_api_solr\Controller\SolrConfigSetController::streamSolrconfigQueryXml'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+solr_configset.solrconfig_requestdispatcher:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_cconfigset/solrconfig-requestdispatcher'
+  defaults:
+    _title: 'solrconfig_requestdispatcher.xml'
+    _controller: '\Drupal\search_api_solr\Controller\SolrConfigSetController::streamSolrconfigRequestDispatcherXml'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+solr_configset.config_zip:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_configset/config-zip'
+  defaults:
+    _title: 'config.zip'
+    _controller: '\Drupal\search_api_solr\Controller\SolrConfigSetController::streamConfigZip'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+solr_configset.current_config_zip:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_configset/current-config-zip'
+  defaults:
+    _title: 'current_config.zip'
+    _controller: '\Drupal\search_api_solr\Controller\SolrConfigSetController::streamCurrentConfigZip'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+# SolrCache routing definition
+entity.solr_cache.collection:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_cache'
+  defaults:
+    _title: 'SolrCache Configuration'
+    _controller: '\Drupal\search_api_solr\Controller\SolrCacheController::listing'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+entity.solr_cache.disable_for_server:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_cache/{solr_cache}/disable'
+  defaults:
+    _title: 'Disable SolrCache for server'
+    _controller: '\Drupal\search_api_solr\Controller\SolrCacheController::disableOnServer'
+  requirements:
+    _permission: 'administer search_api'
+    _csrf_token: 'TRUE'
+  options:
+    _admin_route: true
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+      solr_cache:
+        type: entity:solr_cache
+
+entity.solr_cache.enable_for_server:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_cache/{solr_cache}/enable'
+  defaults:
+    _title: 'Enable SolrCache for server'
+    _controller: '\Drupal\search_api_solr\Controller\SolrCacheController::enableOnServer'
+  requirements:
+    _permission: 'administer search_api'
+    _csrf_token: 'TRUE'
+  options:
+    _admin_route: true
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+      solr_cache:
+        type: entity:solr_cache
+
+# Solr RequestHandler routing definition
+entity.solr_request_handler.collection:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_request_handler'
+  defaults:
+    _title: 'SolrRequestHandler Configuration'
+    _controller: '\Drupal\search_api_solr\Controller\SolrRequestHandlerController::listing'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+entity.solr_request_handler.disable_for_server:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_request_handler/{solr_request_handler}/disable'
+  defaults:
+    _title: 'Disable SolrRequestHandler for server'
+    _controller: '\Drupal\search_api_solr\Controller\SolrRequestHandlerController::disableOnServer'
+  requirements:
+    _permission: 'administer search_api'
+    _csrf_token: 'TRUE'
+  options:
+    _admin_route: true
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+      solr_request_handler:
+        type: entity:solr_request_handler
+
+entity.solr_request_handler.enable_for_server:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_request_handler/{solr_request_handler}/enable'
+  defaults:
+    _title: 'Enable SolrRequestHandler for server'
+    _controller: '\Drupal\search_api_solr\Controller\SolrRequestHandlerController::enableOnServer'
+  requirements:
+    _permission: 'administer search_api'
+    _csrf_token: 'TRUE'
+  options:
+    _admin_route: true
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+      solr_request_handler:
+        type: entity:solr_request_handler
+
+# Solr RequestDispatcher routing definition
+entity.solr_request_dispatcher.collection:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_request_dispatcher'
+  defaults:
+    _title: 'SolrRequestDispatcher Configuration'
+    _controller: '\Drupal\search_api_solr\Controller\SolrRequestDispatcherController::listing'
+  options:
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+  requirements:
+    _permission: 'administer search_api'
+    _search_api_solr_local_action_access_check: 'TRUE'
+
+entity.solr_request_dispatcher.disable_for_server:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_request_dispatcher/{solr_request_dispatcher}/disable'
+  defaults:
+    _title: 'Disable SolrRequestDispatcher for server'
+    _controller: '\Drupal\search_api_solr\Controller\SolrRequestDispatcherController::disableOnServer'
+  requirements:
+    _permission: 'administer search_api'
+    _csrf_token: 'TRUE'
+  options:
+    _admin_route: true
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+      solr_request_dispatcher:
+        type: entity:solr_request_dispatcher
+
+entity.solr_request_dispatcher.enable_for_server:
+  path: '/admin/config/search/search-api/server/{search_api_server}/solr_request_dispatcher/{solr_request_dispatcher}/enable'
+  defaults:
+    _title: 'Enable SolrRequestDispatcher for server'
+    _controller: '\Drupal\search_api_solr\Controller\SolrRequestDispatcherController::enableOnServer'
+  requirements:
+    _permission: 'administer search_api'
+    _csrf_token: 'TRUE'
+  options:
+    _admin_route: true
+    parameters:
+      search_api_server:
+        type: entity:search_api_server
+        with_config_overrides: TRUE
+      solr_request_dispatcher:
+        type: entity:solr_request_dispatcher
+
+entity.search_api_index.solr_multisite_clone_form:
+  path: '/admin/config/search/search-api/index/{search_api_index}/solr_multisite_clone'
+  defaults:
+    _entity_form: 'search_api_index.solr_multisite_clone'
+  requirements:
+    _entity_access: 'search_api_index.edit'
+
+entity.search_api_index.solr_multisite_update_form:
+  path: '/admin/config/search/search-api/index/{search_api_index}/solr_multisite_update'
+  defaults:
+    _entity_form: 'search_api_index.solr_multisite_update'
+  requirements:
+    _entity_access: 'search_api_index.edit'
+
+entity.search_api_index.add_solr_document_fields:
+  path: '/admin/config/search/search-api/index/{search_api_index}/fields/add/solr-document'
+  options:
+    parameters:
+      search_api_index:
+        tempstore: TRUE
+        type: 'entity:search_api_index'
+  defaults:
+    _entity_form: 'search_api_index.add_solr_document_fields'
+  requirements:
+    _entity_access: 'search_api_index.fields'

@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.message.field_published
+    - message.template.create_node
+id: message.create_node.field_published
+field_name: field_published
+entity_type: message
+bundle: create_node
+label: Published
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Published
+  off_label: Unpublished
+field_type: boolean

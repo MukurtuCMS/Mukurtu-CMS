@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for geocoder.
+ */
+
+use Drupal\Core\Config\Entity\ConfigEntityType;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Utility\UpdateException;
+
+/**
+ * Adds geocoder_presave_disabled configuration and schema.
+ */
+function geocoder_update_8201() {
+  // Update geocoder configuration.
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('geocoder.settings');
+  $config->set('geocoder_presave_disabled', FALSE);
+  $config->save(TRUE);
+}
+
+/**
+ * Installs the new config entity type geocoder_provider.
+ */
+function geocoder_update_8301() {
+  $changeList = \Drupal::entityDefinitionUpdateManager()->getChangeList();
+
+  if (!array_key_exists('geocoder_provider', $changeList)) {
+    return 'Skipped. The new config entity type geocoder_provider is already installed.';
+  }
+
+  try {
+    \Drupal::entityDefinitionUpdateManager()->installEntityType(new ConfigEntityType([
+      'id' => 'geocoder_provider',
+      'label' => new TranslatableMarkup('Geocoder provider'),
+      'handlers' => [
+        'list_builder' => 'Drupal\geocoder\GeocoderProviderListBuilder',
+        'form' => [
+          'add' => 'Drupal\geocoder\Form\GeocoderProviderAddForm',
+          'edit' => 'Drupal\geocoder\Form\GeocoderProviderEditForm',
+          'delete' => 'Drupal\Core\Entity\EntityDeleteForm',
+        ],
+      ],
+      'config_prefix' => 'geocoder_provider',
+      'admin_permission' => 'administer site configuration',
+      'links' => [
+        'collection' => '/admin/config/system/geocoder/geocoder-provider',
+        'edit-form' => '/admin/config/system/geocoder/geocoder-provider/manage/{geocoder_provider}',
+        'delete-form' => '/admin/config/system/geocoder/geocoder-provider/manage/{geocoder_provider}/delete',
+      ],
+      'entity_keys' => [
+        'id' => 'id',
+        'label' => 'label',
+      ],
+      'config_export' => [
+        'id',
+        'label',
+        'plugin',
+        'configuration',
+      ],
+    ]));
+  }
+  catch (\Exception $exception) {
+    throw new UpdateException($exception->getMessage());
+  }
+  return 'Installed the new config entity type geocoder_provider.';
+}
+
+/**
+ * Adds queue configuration and schema.
+ */
+function geocoder_update_8302() {
+  // Update geocoder configuration.
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('geocoder.settings');
+  $config->set('queue', FALSE);
+  $config->save(TRUE);
+}

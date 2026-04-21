@@ -1,0 +1,10 @@
+name: 'Field Group Test'
+description: 'Test module for Field Group'
+package: Testing
+type: module
+hidden: TRUE
+
+# Information added by Drupal.org packaging script on 2025-04-23
+version: '4.0.0'
+project: 'field_group'
+datestamp: 1745408691

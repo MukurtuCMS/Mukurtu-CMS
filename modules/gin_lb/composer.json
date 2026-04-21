@@ -1,0 +1,13 @@
+{
+    "name": "drupal/gin_lb",
+    "description": "Layout Builder in Gin style.",
+    "license": "GPL-2.0-or-later",
+    "type": "drupal-module",
+    "require": {
+        "drupal/gin": "^5.0",
+        "drupal/gin_toolbar": "^3.0"
+    },
+    "conflict": {
+        "drupal/lb_claro": "*"
+    }
+}

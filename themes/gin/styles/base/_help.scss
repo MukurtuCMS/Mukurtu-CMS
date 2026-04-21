@@ -1,0 +1,16 @@
+.block-help-block {
+  font-size: var(--gin-font-size-s);
+  margin: 0;
+  margin-block-end: var(--gin-spacing-m);
+  max-width: 1024px;
+
+  p {
+    color: var(--gin-color-text-light);
+    margin: 0;
+  }
+}
+
+#edit-help {
+  font-size: var(--gin-font-size-s);
+  color: var(--gin-color-text-light);
+}

@@ -1,0 +1,34 @@
+:root {
+  --tagify-dd-color-primary: transparent;
+  --tagify-dd-bg-color: #edeff5;
+}
+
+.tagify__dropdown {
+  box-shadow: 0 2px 4px rgb(0, 0, 0, 0.1);
+}
+
+.tagify__dropdown__item--active {
+  color: #fff;
+  background: #003eccff !important;
+}
+
+.tagify__tag:focus div::before,
+.tagify__tag:hover:not([readonly]) div::before {
+  --tag-bg: rgb(0, 62, 204, 0.15) !important;
+}
+
+.tagify.form-select.form-element--type-select
+  .tagify__tag--editable
+  > div::before {
+  box-shadow: 0 0 0 2px rgb(0, 62, 204, 0.15) inset !important;
+}
+
+.tagify.form-select.form-element--type-select
+  .tagify__tag--editable
+  .tagify__tag-entity-id {
+  background: rgb(0, 62, 204, 0.15);
+}
+
+.tagify__dropdown__itemsGroup .dropdown_group {
+  color: #003eccff;
+}

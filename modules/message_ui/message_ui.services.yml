@@ -1,0 +1,9 @@
+services:
+  message_ui.field_display_manager:
+    class: Drupal\message_ui\MessageUIFieldDisplayManagerService
+    arguments:
+      - '@entity_type.manager'
+
+  plugin.manager.message_ui_views_contextual_links:
+    class: Drupal\message_ui\MessageUiViewsContextualLinksManager
+    parent: default_plugin_manager

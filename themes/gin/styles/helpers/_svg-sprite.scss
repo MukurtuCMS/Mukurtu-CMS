@@ -1,0 +1,476 @@
+$sprites: (
+    'checkmark': "../../media/sprite.svg#checkmark-view",
+    'hide': "../../media/sprite.svg#hide-view",
+    'remove': "../../media/sprite.svg#remove-view",
+    'show': "../../media/sprite.svg#show-view",
+    'trash': "../../media/sprite.svg#trash-view",
+    'asterisk': "../../media/sprite.svg#asterisk-view",
+    'checked': "../../media/sprite.svg#checked-view",
+    'toggle-unchecked': "../../media/sprite.svg#toggle-unchecked-view",
+    'add': "../../media/sprite.svg#add-view",
+    'calendar': "../../media/sprite.svg#calendar-view",
+    'circle': "../../media/sprite.svg#circle-view",
+    'close': "../../media/sprite.svg#close-view",
+    'drop': "../../media/sprite.svg#drop-view",
+    'drupal': "../../media/sprite.svg#drupal-view",
+    'gin': "../../media/sprite.svg#gin-view",
+    'handle': "../../media/sprite.svg#handle-view",
+    'loader': "../../media/sprite.svg#loader-view",
+    'more': "../../media/sprite.svg#more-view",
+    'sidebar': "../../media/sprite.svg#sidebar-view",
+    'tool': "../../media/sprite.svg#tool-view",
+    'grid': "../../media/sprite.svg#grid-view",
+    'list': "../../media/sprite.svg#list-view",
+    'media-edit': "../../media/sprite.svg#media-edit-view",
+    'media-remove': "../../media/sprite.svg#media-remove-view",
+    'error': "../../media/sprite.svg#error-view",
+    'info': "../../media/sprite.svg#info-view",
+    'question': "../../media/sprite.svg#question-view",
+    'status': "../../media/sprite.svg#status-view",
+    'warning': "../../media/sprite.svg#warning-view",
+    'announcement': "../../media/sprite.svg#announcement-view",
+    'block': "../../media/sprite.svg#block-view",
+    'blocks': "../../media/sprite.svg#blocks-view",
+    'bookmarks': "../../media/sprite.svg#bookmarks-view",
+    'chevron-down': "../../media/sprite.svg#chevron-down-view",
+    'create': "../../media/sprite.svg#create-view",
+    'extend-new': "../../media/sprite.svg#extend-new-view",
+    'files': "../../media/sprite.svg#files-view",
+    'media': "../../media/sprite.svg#media-view",
+    'people-new': "../../media/sprite.svg#people-new-view",
+    'first': "../../media/sprite.svg#first-view",
+    'last': "../../media/sprite.svg#last-view",
+    'next': "../../media/sprite.svg#next-view",
+    'prev': "../../media/sprite.svg#prev-view",
+    'clock': "../../media/sprite.svg#clock-view",
+    'database': "../../media/sprite.svg#database-view",
+    'php': "../../media/sprite.svg#php-view",
+    'server': "../../media/sprite.svg#server-view",
+    'drag-dots': "../../media/sprite.svg#drag-dots-view",
+    'drag-x': "../../media/sprite.svg#drag-x-view",
+    'drag-y': "../../media/sprite.svg#drag-y-view",
+    'drag': "../../media/sprite.svg#drag-view",
+    'sort-asc': "../../media/sprite.svg#sort-asc-view",
+    'sort-desc': "../../media/sprite.svg#sort-desc-view",
+    'sort': "../../media/sprite.svg#sort-view",
+    'backtosite': "../../media/sprite.svg#backtosite-view",
+    'devel': "../../media/sprite.svg#devel-view",
+    'rebuild-cache': "../../media/sprite.svg#rebuild-cache-view",
+    'responsive-preview': "../../media/sprite.svg#responsive-preview-view",
+    'search': "../../media/sprite.svg#search-view",
+    'shortcut-filled': "../../media/sprite.svg#shortcut-filled-view",
+    'shortcut': "../../media/sprite.svg#shortcut-view",
+    'user': "../../media/sprite.svg#user-view",
+    'appearance': "../../media/sprite.svg#appearance-view",
+    'bat': "../../media/sprite.svg#bat-view",
+    'commerce': "../../media/sprite.svg#commerce-view",
+    'config': "../../media/sprite.svg#config-view",
+    'content': "../../media/sprite.svg#content-view",
+    'edit': "../../media/sprite.svg#edit-view",
+    'extend': "../../media/sprite.svg#extend-view",
+    'fallback': "../../media/sprite.svg#fallback-view",
+    'group': "../../media/sprite.svg#group-view",
+    'hamburger': "../../media/sprite.svg#hamburger-view",
+    'help': "../../media/sprite.svg#help-view",
+    'local-tasks': "../../media/sprite.svg#local-tasks-view",
+    'nav-toggle-toleft': "../../media/sprite.svg#nav-toggle-toleft-view",
+    'nav-toggle-totop': "../../media/sprite.svg#nav-toggle-totop-view",
+    'people': "../../media/sprite.svg#people-view",
+    'reports': "../../media/sprite.svg#reports-view",
+    'structure': "../../media/sprite.svg#structure-view",
+    'tmgmt': "../../media/sprite.svg#tmgmt-view",
+    'trash-module': "../../media/sprite.svg#trash-module-view",
+    'webform': "../../media/sprite.svg#webform-view"
+);
+
+$sizes: (
+    'checkmark': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'hide': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'remove': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'show': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'trash': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'asterisk': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'checked': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'toggle-unchecked': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'add': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'calendar': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'circle': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'close': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'drop': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'drupal': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'gin': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'handle': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'loader': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'more': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'sidebar': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'tool': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'grid': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'list': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'media-edit': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'media-remove': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'error': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'info': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'question': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'status': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'warning': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'announcement': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'block': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'blocks': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'bookmarks': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'chevron-down': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'create': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'extend-new': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'files': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'media': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'people-new': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'first': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'last': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'next': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'prev': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'clock': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'database': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'php': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'server': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'drag-dots': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'drag-x': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'drag-y': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'drag': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'sort-asc': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'sort-desc': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'sort': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'backtosite': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'devel': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'rebuild-cache': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'responsive-preview': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'search': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'shortcut-filled': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'shortcut': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'user': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'appearance': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'bat': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'commerce': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'config': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'content': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'edit': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'extend': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'fallback': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'group': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'hamburger': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'help': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'local-tasks': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'nav-toggle-toleft': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'nav-toggle-totop': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'people': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'reports': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'structure': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'tmgmt': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'trash-module': (
+        'width': 24px,
+        'height': 24px
+    ),
+    'webform': (
+        'width': 24px,
+        'height': 24px
+    )
+);
+
+$variables: (
+    /* EMPTY */
+);
+
+// https://github.com/waldemarfm/sass-svg-uri/blob/v1.0.0/_svg-uri.scss
+@function sprite-str-replace($string, $search, $replace: '') {
+    $index: str-index($string, $search);
+
+    @if type-of($replace) == 'null' {
+        $replace: '';
+    }
+
+    @if ( $index ) {
+        @return str-slice($string, 1, $index - 1) + $replace + sprite-str-replace(str-slice($string, $index + str-length($search)), $search, $replace);
+    }
+
+    @return $string;
+}
+
+@function sprite-svg-uri($value) {
+    $output: $value;
+
+    $output: sprite-str-replace($output, '"', "'");
+    $output: sprite-str-replace($output, '<', '%3C');
+    $output: sprite-str-replace($output, '>', '%3E');
+    $output: sprite-str-replace($output, '&', '%26');
+    $output: sprite-str-replace($output, '#', '%23');
+
+    @return $output;
+}
+
+@mixin sprite($name, $user-variables: (), $include-size: false) {
+    $sprite: map-get($sprites, $name);
+
+    // Inject variables
+    $default-variables: map-get($variables, $name);
+    @if type-of($default-variables) == 'map' {
+        @each $key, $value in map-merge($default-variables, $user-variables) {
+            @if ( not map-has-key($default-variables, $key) ) {
+                @warn 'Sprite \'#{$name}\' does not support variable named \'#{$key}\'';
+            }
+
+            $sprite: sprite-str-replace($sprite, '___#{$key}___', sprite-svg-uri(quote(#{$value})));
+        }
+    } @else if type-of($user-variables) == 'map' {
+        @warn 'Sprite \'#{$name}\' does not contain any variables';
+    }
+
+    background: url($sprite) center no-repeat;
+
+    @if $include-size {
+        $size: map-get($sizes, $name);
+        @if $include-size == true {
+            background-size: map-get($size, width) map-get($size, height);
+        } @else if $include-size == 'box' {
+            width: map-get($size, width);
+            height: map-get($size, height);
+        }
+    }
+}

@@ -1,0 +1,340 @@
+<?php
+
+/**
+ * @file
+ * Contains Drupal\message_ui\message_ui.module.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+use Drupal\message\Entity\Message;
+use Drupal\message_ui\Plugin\QueueWorker\MessageArgumentsWorker;
+
+/**
+ * Implements hook_entity_insert().
+ */
+function message_ui_entity_insert(EntityInterface $entity) {
+  /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
+  if ($entity->getEntityTypeId() != 'field_config') {
+    return;
+  }
+
+  if ($entity->get('entity_type') != 'message') {
+    return;
+  }
+
+  // Prevent interruption of config sync.
+  if (\Drupal::isConfigSyncing()) {
+    return;
+  }
+  // A new field was attached to the message template. We will make sure it will
+  // appear in message form.
+  \Drupal::service('message_ui.field_display_manager')->SetFieldsDisplay($entity->get('bundle'));
+}
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ *
+ * Extend the message entity type's field by providing display handlers.
+ */
+function message_ui_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  // Alter the uid and created field to include display settings.
+  if ($entity_type->id() != 'message') {
+    return;
+  }
+
+  if (!empty($fields['uid'])) {
+    /** @var Drupal\Core\Field\BaseFieldDefinition $fields['uid'] */
+    $fields['uid']->setDisplayOptions('view', [
+      'label' => 'hidden',
+      'type' => 'author',
+      'weight' => 0,
+    ])
+      ->setDisplayOptions('form', [
+        'type' => 'entity_reference_autocomplete',
+        'weight' => 5,
+        '#group' => 'advanced',
+        'settings' => [
+          'match_operator' => 'CONTAINS',
+          'size' => '60',
+          'placeholder' => '',
+        ],
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setRequired(TRUE);
+  }
+  if (!empty($fields['created'])) {
+    $fields['created']->setDisplayOptions('view', [
+      'label' => 'hidden',
+      'type' => 'timestamp',
+      'weight' => 0,
+    ])
+      ->setDisplayOptions('form', [
+        'type' => 'datetime_timestamp',
+        'weight' => 10,
+      ])
+      ->setDisplayConfigurable('form', TRUE);
+  }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * Extend the message entity type by providing form handlers.
+ */
+function message_ui_entity_type_alter(array &$entity_types) {
+  if (!isset($entity_types['message'])) {
+    return;
+  }
+
+  /** @var \Drupal\Core\Config\Entity\ConfigEntityType[] $entity_types */
+  $entity_types['message']
+    ->setAccessClass('Drupal\message_ui\MessageAccessControlHandler')
+    ->setHandlerClass('view_builder', 'Drupal\message\MessageViewBuilder')
+    ->setFormClass('default', 'Drupal\message_ui\Form\MessageForm')
+    ->setFormClass('add', 'Drupal\message_ui\Form\MessageForm')
+    ->setFormClass('edit', 'Drupal\message_ui\Form\MessageForm')
+    ->setFormClass('delete', 'Drupal\message_ui\Form\MessageDeleteForm')
+    ->setLinkTemplate('canonical', '/message/{message}')
+    ->setLinkTemplate('edit-form', '/message/{message}/edit')
+    ->setLinkTemplate('delete-form', '/message/{message}/delete');
+}
+
+/**
+ * Implements hook_theme().
+ */
+function message_ui_theme() {
+  return [
+    'message_add_list' => [
+      'variables' => ['content' => NULL],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for list of available message templates.
+ *
+ * Default template: message-add-list.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - content: An array of message templates.
+ *
+ * @see message_add_page()
+ */
+function template_preprocess_message_add_list(array &$variables) {
+  $variables['templates'] = [];
+  if (!empty($variables['content'])) {
+    foreach ($variables['content'] as $template) {
+      $variables['templates'][$template->id()] = [
+        'template' => $template->id(),
+        'add_link' => Link::fromTextAndUrl($template->label(), new Url('message_ui.add', ['message_template' => $template->id()])),
+        'description' => [
+          '#markup' => $template->getDescription(),
+        ],
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function message_ui_form_message_system_settings_alter(&$form, FormStateInterface $form_state) {
+  $form['update_tokens'] = [
+    '#type' => 'fieldset',
+    '#itle' => t('Token update settings'),
+  ];
+
+  $message_ui_settings = \Drupal::config('message_ui.settings');
+
+  $form['update_tokens']['update_tokens_update_tokens'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Update messages arguments'),
+    '#description' => t('When editing a message template, the user can add or delete arguments. When this is checked, you can choose how to update to messages arguments.'),
+    '#default_value' => $message_ui_settings->get('update_tokens.update_tokens'),
+  ];
+
+  $form['update_tokens']['update_tokens_how_to_act'] = [
+    '#type' => 'select',
+    '#title' => t('Choose how to act'),
+    '#default_value' => $message_ui_settings->get('update_tokens.how_to_act'),
+    '#options' => [
+      'update_when_removed' => t('Update messages when tokens are removed'),
+      'update_when_added' => t('Update messages when tokens are added'),
+    ],
+    '#states' => [
+      'visible' => [
+        ':input[name="update_tokens_update_tokens"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+
+  $form['update_tokens']['update_tokens_how_to_update'] = [
+    '#type' => 'select',
+    '#title' => t('Choose how to update the messages'),
+    '#default_value' => $message_ui_settings->get('update_tokens.how_to_update'),
+    '#options' => [
+      'update_with_batch' => t('Update messages with batch API'),
+      'update_with_item' => t('Update messages with queue item'),
+    ],
+    '#states' => [
+      'visible' => [
+        ':input[name="update_tokens_update_tokens"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+
+  $form['update_tokens']['update_tokens_number_items'] = [
+    '#type' => 'textfield',
+    '#size' => '10',
+    '#title' => t('Items to process each time.'),
+    '#description' => t('Choose how much items to process each iteration.'),
+    '#default_value' => $message_ui_settings->get('update_tokens.number_items'),
+    '#states' => [
+      'visible' => [
+        ':input[name="update_tokens_update_tokens"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+
+  $form['message_ui_show_preview'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Show/hide preview'),
+    '#default_value' => $message_ui_settings->get('show_preview'),
+    '#description' => t('Show/hide the text of the message when editing an instance of the message.'),
+  ];
+
+  $form['#submit'][] = 'message_ui_form_message_system_settings_submit';
+}
+
+/**
+ * Submit handler for message_user_admin_settings.
+ *
+ * @param array $form
+ *   FAPI element.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state object.
+ */
+function message_ui_form_message_system_settings_submit(array $form, FormStateInterface $form_state) {
+
+  $form_values = $form_state->getValues();
+
+  $config = \Drupal::configFactory()->getEditable('message_ui.settings');
+  $config
+    ->set('update_tokens.update_tokens', $form_values['update_tokens_update_tokens'])
+    ->set('update_tokens.how_to_act', $form_values['update_tokens_how_to_act'])
+    ->set('update_tokens.how_to_update', $form_values['update_tokens_how_to_update'])
+    ->set('update_tokens.number_items', $form_values['update_tokens_number_items'])
+    ->set('show_preview', $form_values['message_ui_show_preview'])
+    ->save();
+}
+
+/**
+ * Implements hook_entity_update().
+ *
+ * Submit handler for updating the arguments number.
+ *
+ * When a message template is been edited, there could be a change in the
+ * arguments of the message - added or removed.
+ * If this has been defined, we need to update the arguments of the other
+ * messages. This will be achieved by in two steps:
+ * 1. Load an instance of the message from the same template
+ * 2. Count the number of the arguments and if there is a difference between the
+ *    number of the arguments from the old message to the current one - create
+ *    a batch or a queue and update the messages.
+ */
+function message_ui_entity_update(EntityInterface $entity) {
+  /** @var \Drupal\message\MessageInterface $entity */
+  $type = $entity->getEntityType()->id();
+
+  if ($type != 'message_template') {
+    return FALSE;
+  }
+
+  $query = \Drupal::entityQuery('message');
+  $result = $query
+    ->condition('template', $entity->getTemplate())
+    ->range(0, 1)
+    ->sort('mid', 'DESC')
+    ->accessCheck(FALSE)
+    ->execute();
+
+  // There is no messages of this template.
+  if (empty($result)) {
+    return FALSE;
+  }
+
+  $keys = array_keys($result);
+  $message = Message::load(reset($keys));
+
+  $new_arguments = MessageArgumentsWorker::getArguments($entity->getTemplate());
+
+  $old_arguments_number = count($message->getArguments());
+  $new_arguments_number = count($new_arguments);
+  $message_ui_settings_config = \Drupal::config('message_ui.settings');
+  $how_to_act = $message_ui_settings_config->get('update_tokens.how_to_act');
+
+  $update['when_added'] = $old_arguments_number < $new_arguments_number && $how_to_act == 'update_when_added';
+  $update['when_removed'] = $old_arguments_number > $new_arguments_number && $how_to_act == 'update_when_removed';
+
+  if (!($update['when_added'] || $update['when_removed'])) {
+    return FALSE;
+  }
+
+  $item_to_process = $message_ui_settings_config->get('update_tokens.number_items');
+  $how_to_update = $message_ui_settings_config->get('update_tokens.how_to_update');
+
+  if ($how_to_update == 'update_with_batch') {
+
+    // Get all the messages.
+    $query = \Drupal::entityQuery('message');
+    $result = $query
+      ->condition('template', $entity->getTemplate())
+      ->sort('mid', 'DESC')
+      ->accessCheck(FALSE)
+      ->execute();
+
+    $chunks = array_chunk(array_keys($result), $item_to_process);
+
+    // @todo Correct location for operations callback?
+    $operations = [];
+    foreach ($chunks as $chunk) {
+      $operations[] = [
+        '\Drupal\message_ui\Plugin\QueueWorker\MessageArgumentsWorker::argumentsUpdate',
+        [$chunk, $new_arguments],
+      ];
+    }
+
+    // @todo Correct location for finished callback?
+    // Set the batch.
+    $batch = [
+      'operations' => $operations,
+      'finished' => '\Drupal\message_ui\Plugin\QueueWorker\MessageArgumentsWorker::messageArgumentsUpdate',
+      'title' => t('Updating the messages arguments.'),
+      'init_message' => t('Start process messages.'),
+      'progress_message' => t('Processed @current out of @total.'),
+      'error_message' => t('Example Batch has encountered an error.'),
+    ];
+    batch_set($batch);
+    batch_process('admin/structure/messages');
+  }
+  elseif ($how_to_update == 'update_with_item') {
+    // Define the queue item data.
+    $data = [
+      'template' => $entity->getTemplate(),
+      'last_mid' => 0,
+      'new_arguments' => $new_arguments,
+      'item_to_process' => $item_to_process,
+    ];
+
+    // Set the queue worker.
+    $queue = \Drupal::queue('message_ui_arguments');
+    return $queue->createItem($data);
+  }
+
+  return NULL;
+}

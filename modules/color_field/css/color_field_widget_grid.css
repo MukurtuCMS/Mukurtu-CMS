@@ -1,0 +1,14 @@
+.simpleColorChooser {
+  z-index: 1;
+  max-width: 100%;
+}
+
+.js-color-field-widget-grid__color.required {
+  display: block !important;
+  overflow: hidden;
+  width: 0;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  border: none;
+}

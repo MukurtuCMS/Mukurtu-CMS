@@ -1,0 +1,52 @@
+parameters:
+  excludePaths:
+    - */bower_components/*
+    - */node_modules/*
+  # Ignore some type hint errors due to hooks that should not have typed hint
+  # parameters or return.
+  ignoreErrors:
+    - identifier: missingType.generics
+    - identifier: missingType.iterableValue
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    - "#^Unsafe usage of new static#"
+    -
+      message: '#Function [a-zA-Z0-9\\_]+\(\) has parameter \$[a-zA-Z0-9\\_]+ with no typehint specified\.#'
+      paths:
+        - *.inc
+        - *.install
+        - *.module
+        - *.profile
+        - *.theme
+    -
+      message: '#Function [a-zA-Z0-9\\_]+\(\) has parameter \$[a-zA-Z0-9\\_]+ with no value type specified in iterable type [a-zA-Z0-9\\_]+\.#'
+      paths:
+        - *.inc
+        - *.install
+        - *.module
+        - *.profile
+        - *.theme
+    -
+      message: '#Function [a-zA-Z0-9\\_]+\(\) has no return typehint specified\.#'
+      paths:
+        - *.inc
+        - *.install
+        - *.module
+        - *.profile
+        - *.theme
+    -
+      message: '#Parameter \#1 \$label of method Drupal\\Core\\TypedData\\DataDefinition\:\:setLabel\(\) expects string, Drupal\\Core\\StringTranslation\\TranslatableMarkup given\.#'
+      paths:
+        - *.inc
+        - *.install
+        - *.module
+        - *.profile
+        - *.theme
+    - '#expects string\|null, Drupal\\Core\\StringTranslation\\TranslatableMarkup given\.#'
+    - '#expects string, Drupal\\Core\\StringTranslation\\TranslatableMarkup given\.#'
+    - '#expects string, Drupal\\Core\\StringTranslation\\TranslatableMarkup\|string given\.#'
+    - '#should return array\<string\> but returns array\<int, Drupal\\Core\\StringTranslation\\TranslatableMarkup\>\.#'
+    - '#should return string but returns Drupal\\Core\\StringTranslation\\TranslatableMarkup\.#'
+    - '#Parameter \#1 \$field of method Drupal\\Core\\Entity\\Query\\QueryInterface::condition\(\) expects Drupal\\Core\\Condition\\ConditionInterface\|string, Drupal\\Core\\Entity\\Query\\ConditionInterface given\.#'
+  inferPrivatePropertyTypeFromConstructor: true
+  level: max
+  reportUnmatchedIgnoredErrors: false

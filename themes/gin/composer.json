@@ -1,0 +1,41 @@
+{
+    "name": "drupal/gin",
+    "description": "For a better Admin and Content Editor Experience.",
+    "type": "drupal-theme",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://www.drupal.org/project/gin",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/gin",
+        "source": "https://git.drupalcode.org/project/gin"
+    },
+    "authors": [
+        {
+            "name": "Sascha Eggenberger (saschaeggi)",
+            "homepage": "https://www.drupal.org/u/saschaeggi",
+            "role": "Maintainer"
+        }
+    ],
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/saschaeggi"
+        },
+        {
+            "type": "other",
+            "url": "https://paypal.me/saschaeggi"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/gin_toolbar": "^3.0"
+    },
+    "scripts": {
+        "phpcs": "phpcs -s --runtime-set ignore_warnings_on_exit 1 --runtime-set ignore_errors_on_exit 0 'web/modules/custom'"
+    }
+}

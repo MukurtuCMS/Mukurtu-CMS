@@ -1,0 +1,11 @@
+name: 'Test module for Layout Builder Restrictions'
+description: 'Support module for Layout Builder Restrictions testing.'
+package: Testing
+type: module
+dependencies:
+  - layout_builder_restrictions:layout_builder_restrictions
+
+# Information added by Drupal.org packaging script on 2025-07-17
+version: '3.0.4'
+project: 'layout_builder_restrictions'
+datestamp: 1752762017

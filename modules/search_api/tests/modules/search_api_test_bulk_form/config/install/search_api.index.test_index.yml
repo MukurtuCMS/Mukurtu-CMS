@@ -1,0 +1,25 @@
+id: test_index
+server: test_server
+field_settings:
+  aggregated_field:
+    label: 'Aggregated field'
+    property_path: aggregated_field
+    type: string
+    configuration:
+      type: union
+      fields:
+        - search_api_test/foo
+        - 'entity:entity_test/name'
+        - 'entity:entity_test_string_id/name'
+options:
+  index_directly: true
+datasource_settings:
+  search_api_test: {  }
+  'entity:entity_test': {  }
+  'entity:entity_test_string_id': {  }
+processor_settings: {  }
+tracker_settings:
+  default: {  }
+dependencies:
+  config:
+    - search_api.server.test_server

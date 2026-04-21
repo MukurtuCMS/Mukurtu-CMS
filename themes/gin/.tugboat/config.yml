@@ -1,0 +1,77 @@
+services:
+  php:
+    image: q0rban/tugboat-drupal:10
+    default: true
+    http: false
+    depends: mysql
+    commands:
+      # init: # prevents warning - Program sqlite3 not found.
+      #   - apt-get update
+      #   - apt-get install -y sqlite3
+      update: |
+        set -eux
+        # Check out a branch using the unique Tugboat ID for this repository, to
+        # ensure we don't clobber an existing branch.
+        git checkout -b $TUGBOAT_REPO_ID
+        # Set PHP LIMIT up to 512MB.
+        echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/my-php.ini
+        # Composer is hungry. You need a Tugboat project with a pretty sizeable
+        # chunk of memory.
+        export COMPOSER_MEMORY_LIMIT=-1
+        # This is an environment variable we added in the Dockerfile that
+        # provides the path to Drupal composer root (not the web root).
+        cd $DRUPAL_COMPOSER_ROOT
+        # We configure the Drupal project to use the checkout of the module as a
+        # Composer package repository.
+        composer config repositories.tugboat vcs $TUGBOAT_ROOT
+        # Require Gin Toolbar
+        composer require 'drupal/gin_toolbar:^1.0@beta'
+        # Require Gin Login
+        composer require 'drupal/gin_login:^2.1'
+        # Require Admin Toolbar
+        composer require 'drupal/admin_toolbar:^3.0'
+        # Require Project Browser
+        composer require 'drupal/project_browser:^1.0@beta'
+        # Now we can require Gin, specifing the branch name we created
+        # above that uses the $TUGBOAT_REPO_ID environment variable.
+        composer require drupal/gin:dev-$TUGBOAT_REPO_ID
+        # Install Drupal on the site.
+        # Use --db-url=mysql://tugboat:tugboat@mysql:3306/tugboat for mysql connection.
+        vendor/bin/drush \
+          --yes \
+          --db-url=sqlite://sites/default/files/db.sqlite \
+          --site-name="Live preview for ${TUGBOAT_PREVIEW_NAME}" \
+          --account-pass=admin \
+          site:install standard
+        # Set up the files directory permissions.
+        mkdir -p $DRUPAL_DOCROOT/sites/default/files
+        chgrp -R www-data $DRUPAL_DOCROOT/sites/default/files
+        chmod 2775 $DRUPAL_DOCROOT/sites/default/files
+        chmod -R g+w $DRUPAL_DOCROOT/sites/default/files
+        # Enable the theme.
+        vendor/bin/drush --yes theme:enable gin
+        vendor/bin/drush --yes config:set system.theme admin gin
+        # Enable admin_toolbar Module.
+        vendor/bin/drush --yes en admin_toolbar
+        # Enable gin_toolbar Module.
+        vendor/bin/drush --yes en gin_toolbar
+        # Enable gin_login Module.
+        vendor/bin/drush --yes en gin_login
+        # Enable project_browser Module.
+        vendor/bin/drush --yes en project_browser
+      build: |
+        set -eux
+        # Delete and re-check out this branch in case this is built from a Base Preview.
+        git branch -D $TUGBOAT_REPO_ID && git checkout -b $TUGBOAT_REPO_ID || true
+        export COMPOSER_MEMORY_LIMIT=-1
+        cd $DRUPAL_COMPOSER_ROOT
+        composer install --optimize-autoloader
+        # Update installed modules
+        composer update drupal/admin_toolbar
+        composer update drupal/gin_toolbar
+        composer update drupal/gin_login
+        composer update drupal/gin
+        vendor/bin/drush --yes updb
+        vendor/bin/drush cache:rebuild
+  mysql:
+    image: tugboatqa/mariadb

@@ -1,0 +1,6 @@
+services:
+
+  facets_events_test.event_listener:
+    class: Drupal\facets_events_test\EventListener
+    tags:
+      - { name: event_subscriber }

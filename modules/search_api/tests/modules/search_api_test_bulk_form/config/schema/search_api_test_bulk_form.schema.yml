@@ -1,0 +1,5 @@
+action.configuration.search_api_test_bulk_form_entity_test:
+  type: mapping
+
+action.configuration.search_api_test_bulk_form_entity_test_string_id:
+  type: mapping

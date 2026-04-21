@@ -1,0 +1,26 @@
+include:
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+variables:
+  CORE_PHP_MIN: '8.4'
+  OPT_IN_TEST_MAX_PHP: 1
+  OPT_IN_TEST_NEXT_MINOR: 1
+  OPT_IN_TEST_NEXT_MAJOR: 1
+  _CSPELL_WORDS: '"selfdoc", "Привет", "sqlq", "docblocks" '
+
+composer-lint: {allow_failure: false}
+eslint: {allow_failure: false}
+cspell: {allow_failure: false}
+phpcs: {allow_failure: false}
+phpstan: {allow_failure: true}
+phpstan (max PHP version): {allow_failure: true}
+phpstan (next minor): {allow_failure: true}
+phpstan (next major): {allow_failure: true}
+phpunit: {allow_failure: false}
+phpunit (max PHP version): {allow_failure: true}
+phpunit (next minor): {allow_failure: true}
+phpunit (next major): {allow_failure: true}

@@ -1,0 +1,58 @@
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 5e2f420f-f3f5-446a-8483-a47ac26aab5e
+  bundle: movie
+  default_langcode: en
+  depends:
+    9e62e5d8-feed-4d1b-9236-e11e438ff122: taxonomy_term
+    834bbe41-fef2-426b-ba3e-acbdf3a528cb: taxonomy_term
+    eefe7709-9848-4a7f-9a78-fb5b6f179942: taxonomy_term
+default:
+  revision_uid:
+    -
+      target_id: 1
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  title:
+    -
+      value: 'Monty Python and the Holy Grail'
+  created:
+    -
+      value: 1738322300
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en
+  body:
+    -
+      value: '<p>King Arthur and his Knights of the Round Table embark on a surreal, low-budget search for the Holy Grail, encountering many, very silly obstacles.</p>'
+      format: basic_html
+      summary: ''
+  field_country_of_origin:
+    -
+      entity: 9e62e5d8-feed-4d1b-9236-e11e438ff122
+  field_genre:
+    -
+      entity: 834bbe41-fef2-426b-ba3e-acbdf3a528cb
+    -
+      entity: eefe7709-9848-4a7f-9a78-fb5b6f179942
+  field_imdb_rating:
+    -
+      value: '8.2'
+  field_release_date:
+    -
+      value: '1975-06-27'

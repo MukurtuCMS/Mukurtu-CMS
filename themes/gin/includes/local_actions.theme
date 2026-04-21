@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * local_actions.theme
+ */
+
+/**
+ * Local actions preprocess.
+ */
+function gin_preprocess_menu_local_action(&$variables) {
+  // Are we displaying an edit form?
+  if (_gin_form_actions()) {
+    $classes = &$variables['link']['#options']['attributes']['class'];
+    $classes = array_filter($classes, function ($e) {
+      return $e != 'button--primary';
+    });
+  }
+}

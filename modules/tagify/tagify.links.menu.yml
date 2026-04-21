@@ -1,0 +1,5 @@
+tagify.settings:
+  title: 'Tagify Settings'
+  parent: system.admin_config_ui
+  description: 'Configure Tagify settings.'
+  route_name: tagify.settings

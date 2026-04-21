@@ -1,0 +1,11 @@
+{#
+/**
+ * @file
+ * Include navigation.html.twig template from Gin.
+ */
+#}
+{% if secondary_toolbar_frontend and core_navigation and not is_backend %}
+  {% include '@gin_toolbar/toolbar--gin--secondary--frontend.html.twig' ignore missing %}
+{% endif %}
+
+{% include '@gin/navigation/navigation.html.twig' ignore missing %}

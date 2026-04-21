@@ -1,0 +1,24 @@
+{
+  "name": "drupal/tagify",
+  "description": "Integration with the Tagify JavaScript library.",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "minimum-stability": "dev",
+  "repositories": {
+    "tagify": {
+      "type": "package",
+      "package": {
+        "name": "yaireo/tagify",
+        "version": "4.35.4",
+        "type": "drupal-library",
+        "dist": {
+          "url": "https://github.com/yaireo/tagify/archive/refs/tags/v4.35.4.zip",
+          "type": "zip"
+        }
+      }
+    }
+  },
+  "require": {
+    "yaireo/tagify": "^4.35"
+  }
+}

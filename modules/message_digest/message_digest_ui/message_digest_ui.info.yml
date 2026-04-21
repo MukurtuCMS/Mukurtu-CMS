@@ -1,0 +1,17 @@
+name: 'Message Digest UI'
+description: 'UI for Message Digest'
+core_version_requirement: ^9 || ^10 || ^11
+package: Message
+dependencies:
+  - message_digest:message_digest
+  # @todo generalize this to just message_subscribe_ui. It is hardcoded to
+  # email for now since that serves as a more actionable example, and the flags
+  # provided by that module are fielded here with message digest settings.
+  - message_subscribe:message_subscribe_email
+  - drupal:options
+type: module
+
+# Information added by Drupal.org packaging script on 2024-09-20
+version: '8.x-1.5'
+project: 'message_digest'
+datestamp: 1726863864

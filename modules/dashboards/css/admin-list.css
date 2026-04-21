@@ -1,0 +1,18 @@
+.admin-item-with-image {
+  display: flex;
+  gap: 30px;
+}
+
+.admin-item-with-image .image {
+  flex: 1 4;
+}
+
+.admin-item-with-image .image img {
+  /* The 'ginBorderDefault' value is provided by contrib theme 'gin'. */
+  /* stylelint-disable-next-line custom-property-pattern */
+  border-radius: var(--ginBorderDefault, 0);
+}
+
+.admin-item-with-image .content {
+  flex: 3 4;
+}

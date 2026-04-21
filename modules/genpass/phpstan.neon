@@ -1,0 +1,12 @@
+# Configuration file for PHPStan static code checking.
+includes:
+  - phar://phpstan.phar/conf/bleedingEdge.neon
+
+parameters:
+  level: 1
+  paths:
+    - .
+  ignoreErrors:
+    # @see drupal.org/docs/develop/development-tools/phpstan/handling-unsafe-usage-of-new-static
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    - "#^Unsafe usage of new static#"

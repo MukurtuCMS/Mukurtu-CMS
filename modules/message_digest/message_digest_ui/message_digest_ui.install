@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for the Message Digest UI module.
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * Adds the message_digest field to the email_* flags provided by the Message
+ * Subscribe Email module.
+ */
+function message_digest_ui_install() {
+  // Add the `message_digest` field to the user form.
+  $display = \Drupal::service('entity_display.repository')->getFormDisplay('user', 'user', 'default');
+  if (!$display->getComponent('message_digest')) {
+    $settings = [
+      'type' => 'options_select',
+      'settings' => [],
+    ];
+    $display->setComponent('message_digest', $settings);
+    $display->save();
+  }
+
+  // Add the `message_digest` field to flagging types.
+  $prefix = \Drupal::config('message_subscribe_email.settings')->get('flag_prefix');
+  foreach (['node', 'term', 'user'] as $name) {
+    $display = \Drupal::service('entity_display.repository')->getFormDisplay('flagging', $prefix . '_' . $name, 'default');
+    if (!$display->getComponent('message_digest')) {
+      $settings = [
+        'type' => 'options_select',
+        'weight' => 0,
+        'region' => 'content',
+        'settings' => [],
+        'third_party_settings' => [],
+      ];
+      $display->setComponent('message_digest', $settings);
+      $display->save();
+    }
+  }
+}

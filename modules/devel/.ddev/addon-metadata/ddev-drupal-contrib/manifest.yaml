@@ -1,0 +1,19 @@
+name: ddev-drupal-contrib
+repository: ddev/ddev-drupal-contrib
+version: 1.1.4
+install_date: "2025-10-11T13:46:41+02:00"
+project_files:
+    - commands/host/core-version
+    - commands/web/eslint
+    - commands/web/expand-composer-json
+    - commands/web/nightwatch
+    - commands/web/phpcbf
+    - commands/web/phpcs
+    - commands/web/phpstan
+    - commands/web/phpunit
+    - commands/web/poser
+    - commands/web/stylelint
+    - commands/web/symlink-project
+    - config.contrib.yaml
+global_files: []
+removal_actions: []

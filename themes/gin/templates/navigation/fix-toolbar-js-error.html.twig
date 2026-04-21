@@ -1,0 +1,20 @@
+{# @todo - Temporarily fix toolbar JS errors as toolbar is not present anymore. #}
+{% if toolbar_variant == 'new' or core_navigation %}
+  <div id="toolbar-administration" class="toolbar" height="0px" hidden>
+    <div class="toolbar-tab--toolbar-item-shortcuts" hidden>
+      <a id="toolbar-item-shortcuts" class="toolbar-item" data-toolbar-tray="toolbar-item-shortcuts-tray" hidden></a>
+      <div id="toolbar-item-shortcuts-tray" class="toolbar-tray" data-toolbar-tray="toolbar-item-shortcuts-tray" hidden></div>
+    </div>
+    <div class="toolbar-tab--toolbar-item-devel" hidden>
+      <a id="toolbar-item-devel" class="toolbar-item" data-toolbar-tray="toolbar-item-devel-tray" hidden></a>
+      <div id="toolbar-item-devel-tray" class="toolbar-tray" data-toolbar-tray="toolbar-item-devel-tray" hidden></div>
+    </div>
+    <div class="toolbar-tab--toolbar-item-user" hidden>
+      <a id="toolbar-item-user" class="toolbar-item" data-toolbar-tray="toolbar-item-user-tray" hidden></a>
+      <div id="toolbar-item-user-tray" class="toolbar-tray" data-toolbar-tray="toolbar-item-user-tray" hidden></div>
+    </div>
+    <div class="toolbar-toggle-orientation" hidden>
+      <button hidden></button>
+    </div>
+  </div>
+{% endif %}

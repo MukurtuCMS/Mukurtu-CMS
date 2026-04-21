@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Devel integration.
+ */
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function search_api_solr_devel_entity_type_alter(array &$entity_types) {
+  /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
+  foreach ($entity_types as $entity_type_id => $entity_type) {
+    if ($entity_type->hasLinkTemplate('devel-render') || $entity_type->hasLinkTemplate('devel-load')) {
+      $entity_type->setLinkTemplate('devel-solr', "/devel/$entity_type_id/{{$entity_type_id}}/solr");
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Define the 'local' links for the module
+message.settings_tab:
+  route_name: message_ui.message_settings
+  title: Settings
+  base_route: message_ui.message_settings
+
+message.view:
+  route_name: entity.message.canonical
+  base_route: entity.message.canonical
+  title: View
+
+message.page_edit:
+  route_name: entity.message.edit_form
+  base_route: entity.message.canonical
+  title: Edit
+
+message.delete_confirm:
+  route_name:  entity.message.delete_form
+  base_route:  entity.message.canonical
+  title: Delete
+  weight: 10

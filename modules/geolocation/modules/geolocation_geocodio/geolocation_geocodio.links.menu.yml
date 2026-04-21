@@ -1,0 +1,5 @@
+geolocation_geocodio.settings:
+  route_name: geolocation_geocodio.settings
+  title: 'Geocodio settings'
+  parent: system.admin_config_services
+  description: 'Configure Geocodio settings.'

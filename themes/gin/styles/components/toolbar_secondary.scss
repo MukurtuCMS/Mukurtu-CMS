@@ -1,0 +1,460 @@
+.gin-secondary-toolbar__layout-container *:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--gin-color-focus-border), 0 0 0 4px var(--gin-color-focus);
+}
+
+.gin-secondary-toolbar {
+  z-index: 102;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-block: var(--gin-spacing-xs);
+  margin-block-start: -1px;
+  height: var(--gin-toolbar-secondary-height);
+  border-block-end: 1px solid var(--gin-border-color-secondary);
+  box-sizing: border-box;
+
+  @include mq(medium) {
+    padding: 10px 0;
+  }
+
+  &--frontend {
+    z-index: 501; /* on top of the Drupal world */
+    position: sticky;
+    inset-block-start: 0;
+    margin-block-start: 0;
+    height: var(--gin-toolbar-secondary-height);
+    background: rgba(#fff, .98);
+    border-block-end: 1px solid var(--gin-border-color-layer);
+    box-sizing: border-box;
+
+    @supports (backdrop-filter: blur()) {
+      opacity: .999; /* Fix Chrome issue with mask */
+      background: rgba(#fff, .8);
+      backdrop-filter: blur(12px);
+    }
+
+    .gin--dark-mode & {
+      background: rgba($colorDarkAppBackground, .98);
+
+      @supports (backdrop-filter: blur()) {
+        background: #{rgba(mix(black, $colorDarkAppBackground, 75%), .9)};
+      }
+    }
+
+    .gin--high-contrast-mode & {
+      background: var(--gin-bg-app);
+      backdrop-filter: none;
+    }
+  }
+
+  .gin--edit-form & {
+    @include mq(ultra) {
+      position: relative;
+      inset-inline-start: calc(50% - var(--gin-spacing-xxl));
+      transform: translateX(-50%);
+    }
+  }
+
+  &__layout-container {
+    display: flex;
+    align-items: center;
+    min-width: 1px; // Fixes broken flex layout due to white-space: nowrap in breadcrumbs.
+    width: 100%;
+    margin: 0 var(--gin-spacing-m);
+
+    @include mq(small) {
+      margin: 0 var(--gin-spacing-xl);
+    }
+
+    @include mq(medium) {
+      margin: 0 m#{i}n(5vw, var(--gin-spacing-xxl));
+    }
+  }
+
+  .region-breadcrumb {
+    min-height: 1.25rem;
+  }
+}
+
+.gin-breadcrumb-wrapper {
+  flex-grow: 1;
+  white-space: nowrap;
+  margin-inline-end: var(--gin-spacing-xl);
+}
+
+.gin-back-to-admin {
+  font-family: var(--gin-font);
+  font-size: var(--gin-font-size-xs);
+  font-weight: var(--gin-font-weight-normal);
+  line-height: 2;
+  color: var(--gin-color-text-light);
+  text-decoration: none;
+  position: relative;
+  padding-inline-start: 2em;
+  border-block-end: 0 none;
+  border-radius: var(--gin-border-xxs);
+
+  &::before {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    width: var(--gin-icon-size-toolbar-secondary);
+    height: var(--gin-icon-size-toolbar-secondary);
+    transform: translateY(-50%);
+    background-color: var(--gin-icon-color);
+    mask-image: icon('backtosite');
+    mask-size: 100% 100%;
+    mask-position: center center;
+  }
+
+  &:hover {
+    color: var(--gin-color-primary-hover);
+
+    &::before {
+      background-color: var(--gin-color-primary-hover);
+    }
+  }
+}
+
+@include mq(medium) {
+  // Hide unused tabs
+  .toolbar .toolbar-bar {
+    background: transparent;
+    box-shadow: none !important; // fixes an RTL issue
+
+    .toolbar-tab {
+      &, .toolbar-menu__logo {
+        display: none;
+      }
+
+      &.toolbar-tab--toolbar-item-administration {
+        display: block;
+      }
+    }
+  }
+
+  .toolbar-tab--toolbar-item-administration {
+    > .toolbar-icon-menu {
+      display: none;
+    }
+  }
+
+  #toolbar-item-administration-tray {
+    display: block;
+    position: absolute;
+    inset-block-start: 0;
+  }
+}
+
+#toolbar-administration-secondary {
+  @include mq(medium) {
+    .toolbar-bar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      border-block-end: none;
+    }
+  }
+}
+
+.gin-secondary-toolbar .toolbar-secondary {
+  display: none;
+
+  @include mq(medium) {
+    display: block;
+
+    .toolbar-bar {
+      height: var(--gin-toolbar-height);
+      z-index: 102;
+
+      .toolbar-tab {
+        display: block;
+        position: relative;
+
+        &:hover, &:focus-within {
+          border-radius: var(--gin-border-s) var(--gin-border-s) 0 0;
+
+          > .toolbar-item,
+          > .toolbar-item.is-active {
+            color: var(--gin-color-title);
+
+            &:before {
+              background: var(--gin-color-title);
+            }
+          }
+
+          .toolbar-tray {
+            display: block;
+          }
+        }
+
+        .toolbar-item {
+          font-size: 0;
+          width: 32px;
+          height: 32px;
+          margin: 0;
+          border-radius: var(--gin-border-s) var(--gin-border-s) 0 0;
+
+          &::before {
+            inset-block-start: 0;
+            width: 2rem;
+
+            @include mq(wide) {
+              inset-inline-start: calc(var(--gin-spacing-xs) * -1);
+            }
+          }
+
+          &:focus {
+            border-radius: var(--gin-border-s);
+          }
+
+          &:focus ~ .toolbar-tray {
+            display: block;
+          }
+        }
+
+        .toolbar-item,
+        .toolbar-item.is-active {
+          color: var(--gin-color-text-light);
+          background: none;
+          border: 0 none;
+
+          &::before {
+            background-color: var(--gin-color-text-light);
+            filter: none;
+          }
+
+          &:hover,
+          &:focus {
+            color: var(--gin-color-title);
+            background: none;
+
+            &:has(+ .toolbar-tray) {
+              background: var(--gin-bg-layer3);
+            }
+
+            &::before {
+              background-color: var(--gin-color-title);
+            }
+          }
+
+          &:focus,
+          &:hover:focus {
+            box-shadow: 0 0 0 1px var(--gin-color-focus-border), 0 0 0 4px var(--gin-color-focus);
+          }
+        }
+
+        &:hover,
+        &:focus {
+          .trigger {
+            text-decoration: none;
+            background: var(--gin-bg-layer3);
+          }
+        }
+
+        .toolbar-tray {
+          position: absolute;
+          inset-inline-start: auto;
+          inset-inline-end: 0;
+          width: 170px;
+          background-color: var(--gin-bg-layer3);
+          border-block-end: 0 none;
+          border-radius: var(--gin-border-l) 0 var(--gin-border-l) var(--gin-border-l);
+          box-shadow: var(--gin-shadow-l2);
+
+          // Hide on toolbar loading
+          .toolbar-loading & {
+            opacity: 0;
+            visibility: hidden;
+          }
+
+          a {
+            color: var(--gin-color-primary);
+            padding: var(--gin-spacing-s) var(--gin-spacing-m);
+            border-radius: var(--gin-border-s);
+            font-size: var(--gin-font-size-xs);
+            font-weight: normal;
+
+            &:hover, &:active {
+              color: var(--gin-color-button-text);
+              background-color: var(--gin-color-primary);
+            }
+
+            // Has icon
+            &.action-link {
+              &::before {
+                background-color: var(--gin-color-primary);
+              }
+
+              &:hover::before {
+                background-color: var(--gin-color-button-text);
+              }
+            }
+          }
+
+          .toolbar-lining:not(:empty) {
+            padding: var(--gin-spacing-xs);
+          }
+
+          // Hide icons for custom modules
+          .toolbar-icon {
+            &:before {
+              display: none;
+            }
+          }
+        }
+
+        &.hidden {
+          display: none;
+        }
+      }
+
+      // Edit button
+      .toolbar-tab > .toolbar-icon-edit.toolbar-item {
+        &,
+        &:hover,
+        &:active,
+        &:focus,
+        &.is-active,
+        &.is-active:hover {
+          font-weight: var(--gin-font-weight-normal);
+          color: var(--gin-color-text-light);
+          background-color: transparent;
+
+          &::before {
+            background-image: none;
+            background-color: var(--gin-icon-color);
+          }
+        }
+      }
+
+      .toolbar-id--toolbar-icon-user {
+        @include mq(wide) {
+          margin-inline-end: -1.333em;
+        }
+
+        &:hover {
+          .icon-user {
+            box-shadow: 0 0 0 2px var(--gin-bg-app),
+                        0 0 0 5px var(--gin-bg-layer3);
+          }
+        }
+
+        .icon-user {
+          border: 1px solid var(--gin-border-color);
+          overflow: hidden;
+          margin-inline-start: var(--gin-spacing-m);
+          padding: 0;
+          line-height: 0;
+
+          &,
+          &:focus {
+            border-radius: 50%;
+          }
+
+          &__image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          &,
+          ~ .toolbar-tray {
+            @include mq(wide) {
+              margin-inline-end: 1.333em;
+            }
+          }
+        }
+      }
+
+      .toolbar-menu {
+        background-color: transparent;
+        float: unset;
+      }
+    }
+  }
+}
+
+// Show expanded
+.gin-secondary-toolbar .toolbar-secondary {
+  @include mq(wide) {
+    .toolbar-bar {
+      .toolbar-tab {
+        margin-inline-start: -.25em;
+
+        .toolbar-item {
+          font-size: var(--gin-font-size-xs);
+          width: auto;
+          height: auto;
+          padding-inline-start: 2.875em;
+
+          &::before {
+            width: var(--gin-icon-size-toolbar-secondary);
+            height: var(--gin-icon-size-toolbar-secondary);
+            inset-block-start: 50%;
+            inset-inline-start: 12px;
+            transform: translateY(-50%);
+          }
+
+          .icon-user {
+            &__image {
+              width: 34px;
+              height: 34px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+#toolbar-item-administration-search::before {
+  mask-size: var(--gin-icon-size-toolbar-secondary) var(--gin-icon-size-toolbar-secondary) !important;
+}
+
+#admin-toolbar-search-input {
+  line-height: 1; // FF fix
+  padding-block: 10px;
+  margin-inline-end: 12px;
+  font-size: var(--gin-font-size-xs);
+
+  &::placeholder {
+    color: var(--gin-color-disabled);
+    opacity: 1;
+
+    .gin--dark-mode & {
+      color: var(--gin-color-text-light);
+      opacity: .75;
+    }
+  }
+}
+
+#admin-toolbar-search-tab .js-form-item.form-item {
+  margin-block-start: 0;
+}
+
+.ui-autocomplete.admin-toolbar-search-autocomplete-list {
+  max-width: 320px;
+  border-radius: var(--gin-border-m);
+
+  .ui-menu-item-wrapper {
+    font-size: var(--gin-font-size-xs);
+  }
+}
+
+.announce-toolbar-tab {
+  > .ajax-progress {
+    position: absolute;
+    inset-block-start: 12px;
+    z-index: 999;
+    background-color: var(--gin-bg-layer);
+
+    .ajax-progress__throbber {
+      border-width: 2px;
+    }
+  }
+}

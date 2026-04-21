@@ -1,0 +1,30 @@
+id: email_og
+entity_type: node
+label: Email groups
+bundles: {  }
+flag_short: 'Send email'
+flag_long: ''
+flag_message: ''
+unflag_short: "Don't send email"
+unflag_long: ''
+unflag_message: ''
+unflag_denied_text: ''
+weight: 0
+status: false
+langcode: en
+dependencies:
+  module:
+    - og
+roles: null
+flag_type: entity:node
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links:
+    - full
+    - teaser
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  i18n: null
+  extra_permissions: { }
+linkTypeConfig: {  }

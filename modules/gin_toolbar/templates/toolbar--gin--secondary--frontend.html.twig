@@ -1,0 +1,26 @@
+<div class="gin-secondary-toolbar gin-secondary-toolbar--frontend" data-offset-top>
+  <div class="gin-secondary-toolbar__layout-container">
+    <div class="gin-breadcrumb-wrapper">
+      <div class="region-breadcrumb">
+        <nav class="gin-breadcrumb" role="navigation" aria-labelledby="gin-system-breadcrumb">
+          <h2 id="gin-system-breadcrumb" class="visually-hidden">{{ 'Breadcrumb'|t }}</h2>
+          <ol class="gin-breadcrumb__list">
+            <li class="gin-breadcrumb__item">
+              {% if entity_edit_url and entity_title %}
+                <a class="gin-breadcrumb__link gin-back-to-admin" href="{{ entity_edit_url }}">{{ 'Edit %title'|t({ '%title': entity_title }) }}</a>
+              {% elseif admin_content_url %}
+                {# Display a different link when not on an entity page, or it is inaccessible. #}
+                <a class="gin-breadcrumb__link gin-back-to-admin" href="{{ admin_content_url }}">{{ 'Back to Administration'|t }}</a>
+              {% endif %}
+            </li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+    {% if core_navigation %}
+      {{ gin_secondary_toolbar }}
+    {% else %}
+      {% include '@gin/navigation/toolbar--gin--secondary.html.twig' ignore missing %}
+    {% endif %}
+  </div>
+</div>

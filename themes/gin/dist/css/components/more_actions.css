@@ -1,0 +1,250 @@
+:where(*) .gin-sticky-form-actions,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions {
+  display: flex;
+  gap: var(--gin-spacing-xs);
+}
+
+:where(*) .gin-sticky-form-actions > *,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions > * {
+  margin-inline: 0 !important;
+}
+
+:where(*) .gin-sticky-form-actions [data-drupal-selector=edit-status]:empty,
+:where(*) .gin-sticky-form-actions .gin-more-actions:has(> .gin-more-actions__menu:empty),
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions [data-drupal-selector=edit-status]:empty,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions:has(> .gin-more-actions__menu:empty) {
+  display: none;
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions {
+  position: relative;
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-end: 0;
+  min-width: 152px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: var(--gin-spacing-xs);
+  background-color: var(--gin-bg-layer3);
+  border-radius: var(--gin-border-l);
+  box-sizing: border-box;
+  box-shadow: var(--gin-shadow-l2);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :where(*) .gin-sticky-form-actions .gin-more-actions__menu,
+  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu {
+    transition: opacity var(--gin-transition-fast);
+  }
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu .action-link.action-link,
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger),
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu .button.button,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu .action-link.action-link,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger),
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu .button.button {
+  font-size: var(--gin-font-size-xs);
+  font-weight: var(--gin-font-weight-semibold);
+  line-height: 1;
+  text-align: start;
+  text-decoration: none;
+  width: 100%;
+  max-width: 240px;
+  padding-block: var(--gin-spacing-xs);
+  padding-inline: var(--gin-spacing-s);
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: var(--gin-border-s);
+  box-shadow: none;
+  box-sizing: border-box;
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger):hover, :where(*) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger):active,
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu .action-link:not(.action-link--danger):hover,
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu .action-link:not(.action-link--danger):active,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger):hover,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger):active,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu .action-link:not(.action-link--danger):hover,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu .action-link:not(.action-link--danger):active {
+  color: var(--gin-color-button-text);
+  background-color: var(--gin-color-primary);
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger):hover::before, :where(*) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger):active::before,
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu .action-link:not(.action-link--danger):hover::before,
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu .action-link:not(.action-link--danger):active::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger):hover::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu a:not(.button--danger):not(.action-link--danger):active::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu .action-link:not(.action-link--danger):hover::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu .action-link:not(.action-link--danger):active::before {
+  background-color: var(--gin-bg-layer) !important;
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu .action-link--danger:hover:focus,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu .action-link--danger:hover:focus {
+  border: none !important;
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__menu > * + .ajax-progress--throbber,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu > * + .ajax-progress--throbber {
+  z-index: 1;
+  position: absolute;
+  top: var(--gin-spacing-m);
+}
+
+[dir="ltr"] :where(*) .gin-sticky-form-actions .gin-more-actions__menu > * + .ajax-progress--throbber,
+[dir="ltr"] :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu > * + .ajax-progress--throbber {
+  inset-inline-end: var(--gin-spacing-xxxs);
+}
+
+[dir="rtl"] :where(*) .gin-sticky-form-actions .gin-more-actions__menu > * + .ajax-progress--throbber,
+[dir="rtl"] :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__menu > * + .ajax-progress--throbber {
+  inset-inline-start: var(--gin-spacing-xxxs);
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__trigger,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger {
+  cursor: pointer;
+  background: transparent;
+  display: block;
+  height: 32px;
+  width: 32px;
+  margin-inline: calc(var(--gin-spacing-xxs) * -1);
+  border-radius: var(--gin-border-m);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :where(*) .gin-sticky-form-actions .gin-more-actions__trigger,
+  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger {
+    transition: background var(--gin-transition-fast);
+  }
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__trigger::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger::before {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  content: "";
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+          mask-position: center center;
+  background-color: var(--gin-icon-color);
+  -webkit-mask-image: url("../../media/sprite.svg#more-view");
+          mask-image: url("../../media/sprite.svg#more-view");
+  -webkit-mask-size: var(--gin-icon-size-toolbar-secondary) var(--gin-icon-size-toolbar-secondary);
+          mask-size: var(--gin-icon-size-toolbar-secondary) var(--gin-icon-size-toolbar-secondary);
+  border-radius: 50%;
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__trigger:hover, :where(*) .gin-sticky-form-actions .gin-more-actions__trigger:focus,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger:hover,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger:focus {
+  background-color: var(--gin-color-primary-light);
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__trigger:hover::before, :where(*) .gin-sticky-form-actions .gin-more-actions__trigger:focus::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger:hover::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger:focus::before {
+  background-color: var(--gin-color-primary);
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__trigger.is-active,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger.is-active {
+  background-color: var(--gin-color-primary-light-hover);
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__trigger.is-active::before,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger.is-active::before {
+  background-color: var(--gin-color-primary-active);
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__trigger[aria-expanded=true] ~ .gin-more-actions__menu,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger[aria-expanded=true] ~ .gin-more-actions__menu {
+  visibility: visible;
+  opacity: 1;
+}
+
+:where(*) .gin-sticky-form-actions .gin-more-actions__trigger[aria-expanded=true] ~ .gin-tooltip,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions .gin-more-actions__trigger[aria-expanded=true] ~ .gin-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  transition: none !important;
+}
+
+:where(*) .gin-sticky-form-actions--preprocessed ~ .layout-container form.gin--has-sticky-form-actions .gin-sticky-form-actions,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions--preprocessed ~ .layout-container form.gin--has-sticky-form-actions .gin-sticky-form-actions {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+  overflow: hidden;
+  height: 1px;
+  width: 1px;
+  word-wrap: normal;
+  position: fixed !important;
+  inset-block-start: 0;
+}
+
+:where(*) .ui-dialog-content .gin-more-actions__trigger,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .ui-dialog-content .gin-more-actions__trigger {
+  display: none;
+}
+
+:where(*) .edit-post-header .gin-sticky-form-actions,
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) .edit-post-header .gin-sticky-form-actions {
+  margin-block-start: 0;
+}
+
+@keyframes gin-pseudo-throbber {
+  0% {
+    background-size: 8px 8px;
+    background-position: 16px 18px;
+  }
+
+  50% {
+    background-size: 32px 32px;
+    background-position: 4px 14px;
+  }
+
+  100% {
+    background-size: 8px 8px;
+    background-position: 16px 18px;
+  }
+}
+
+[data-drupal-selector=gin-sticky-edit-save],
+[data-drupal-selector=gin-sticky-edit-preview],
+[data-drupal-selector=gin-sticky-edit-delete] {
+  background-repeat: no-repeat;
+  background-position: var(--gin-spacing-xs) center;
+}
+
+body:has([data-drupal-selector=edit-save] + .ajax-progress) :where([data-drupal-selector=gin-sticky-edit-save]),
+body:has([data-drupal-selector=edit-preview] + .ajax-progress) :where([data-drupal-selector=gin-sticky-edit-preview]),
+body:has([data-drupal-selector=edit-delete] + .ajax-progress) :where([data-drupal-selector=gin-sticky-edit-delete]) {
+  background-image: url("../../media/sprite.svg#loader-view");
+  animation: gin-pseudo-throbber 1s linear infinite;
+}
+
+[dir="ltr"] body:has([data-drupal-selector=edit-save] + .ajax-progress) :where([data-drupal-selector=gin-sticky-edit-save]),
+[dir="ltr"] body:has([data-drupal-selector=edit-preview] + .ajax-progress) :where([data-drupal-selector=gin-sticky-edit-preview]),
+[dir="ltr"] body:has([data-drupal-selector=edit-delete] + .ajax-progress) :where([data-drupal-selector=gin-sticky-edit-delete]) {
+  padding-inline-start: var(--gin-spacing-xl);
+}
+
+[dir="rtl"] body:has([data-drupal-selector=edit-save] + .ajax-progress) :where([data-drupal-selector=gin-sticky-edit-save]),
+[dir="rtl"] body:has([data-drupal-selector=edit-preview] + .ajax-progress) :where([data-drupal-selector=gin-sticky-edit-preview]),
+[dir="rtl"] body:has([data-drupal-selector=edit-delete] + .ajax-progress) :where([data-drupal-selector=gin-sticky-edit-delete]) {
+  padding-inline-end: var(--gin-spacing-xl);
+}
+

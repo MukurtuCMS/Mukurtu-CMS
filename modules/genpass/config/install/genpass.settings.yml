@@ -1,0 +1,5 @@
+genpass_length: 12
+genpass_mode: 2
+genpass_display: 0
+genpass_admin_mode: 1
+genpass_override_core: true

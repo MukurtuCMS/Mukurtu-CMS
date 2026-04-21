@@ -1,0 +1,13 @@
+name: Geocoder Field
+description: "Geocodes the content of a field and stores the result in other field and vice-versa."
+core_version_requirement: ^9.5 || ^10 || ^11
+type: module
+package: Geocoding
+dependencies:
+  - drupal:field
+  - geocoder:geocoder
+
+# Information added by Drupal.org packaging script on 2026-04-20
+version: '8.x-4.34'
+project: 'geocoder'
+datestamp: 1776679746

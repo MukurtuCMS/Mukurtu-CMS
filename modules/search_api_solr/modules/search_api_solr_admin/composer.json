@@ -1,0 +1,29 @@
+{
+    "name": "drupal/search_api_solr_admin",
+    "description": "Provides various Solr administration tasks.",
+    "type": "drupal-module",
+    "homepage": "https://www.drupal.org/project/search_api_solr",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Markus Kalkbrenner",
+            "homepage": "https://www.drupal.org/u/mkalkbrenner"
+        },
+        {
+            "name": "Other contributors",
+            "homepage": "https://www.drupal.org/node/982682/committers"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/search_api_solr",
+        "chat": "https://drupalchat.me/channel/search",
+        "source": "http://git.drupal.org/project/search_api_solr.git"
+    },
+    "extra": {
+        "drush": {
+            "services": {
+                "drush.services.yml": ">=9"
+            }
+        }
+    }
+}

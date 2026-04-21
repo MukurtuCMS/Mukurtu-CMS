@@ -1,0 +1,8 @@
+.geolocation-map-container.leaflet-container .leaflet-pane {
+  z-index: 90;
+}
+
+.geolocation-map-container.leaflet-container .leaflet-top,
+.geolocation-map-container.leaflet-container .leaflet-bottom {
+  z-index: 110;
+}

@@ -1,0 +1,26 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 2ff12607-1ab0-47a2-b4a5-558ff0ec81be
+  bundle: genres
+  default_langcode: en
+default:
+  status:
+    -
+      value: true
+  name:
+    -
+      value: Sci-Fi
+  weight:
+    -
+      value: 7
+  parent:
+    -
+      target_id: 0
+  revision_translation_affected:
+    -
+      value: true
+  path:
+    -
+      alias: ''
+      langcode: en

@@ -1,0 +1,80 @@
+<?php
+
+/**
+ * @file
+ * Provides install/uninstall for gin_lb module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Set new Toastify CDN config.
+ */
+function gin_lb_update_8001(): void {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('gin_lb.settings');
+  $config->set('toastify_cdn', 1);
+  $config->save(TRUE);
+}
+
+/**
+ * Set new Toastify loading and safe behavior config.
+ */
+function gin_lb_update_8002(): void {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('gin_lb.settings');
+  $toastify_loading = $config->get('toastify_cdn') ? 'cdn' : 'custom';
+  $config->clear('toastify_cdn');
+  $config->set('toastify_loading', $toastify_loading);
+  $config->set('safe_behavior', 'stay');
+  $config->save(TRUE);
+}
+
+/**
+ * Rename save_behavior variable and set hide_discard_revert_buttons.
+ */
+function gin_lb_update_8003(): void {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('gin_lb.settings');
+  $config->clear('safe_behavior');
+  $config->set('save_behavior', 'stay');
+  $hide_discard_revert_buttons = $config->get('hide_discard_revert_buttons') ?? TRUE;
+  $config->set('hide_discard_revert_buttons', $hide_discard_revert_buttons);
+  $config->save(TRUE);
+}
+
+/**
+ * Split configuration for "Discard Changes" and "Revert to defaults" buttons.
+ */
+function gin_lb_update_8004(): void {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('gin_lb.settings');
+  $hide_discard_revert_buttons = $config->get('hide_discard_revert_buttons') ?? TRUE;
+  $config->set('hide_discard_button', $hide_discard_revert_buttons);
+  $config->set('hide_revert_button', $hide_discard_revert_buttons);
+  $config->clear('hide_discard_revert_buttons');
+  $config->save(TRUE);
+}
+
+/**
+ * Ensure toastify_cdn and safe_behavior config keys no more exist.
+ */
+function gin_lb_update_8005(): void {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('gin_lb.settings');
+  $config->clear('toastify_cdn');
+  $config->clear('safe_behavior');
+  $config->save(TRUE);
+}
+
+/**
+ * Invalidate service container to make it aware of the new service.
+ */
+function gin_lb_update_8006(): void {
+  // @phpstan-ignore-next-line
+  if (!\Drupal::getContainer()->has('gin_lb.context_validator')) {
+    /** @var \Drupal\Core\DrupalKernelInterface $kernel */
+    $kernel = \Drupal::service('kernel');
+    $kernel->invalidateContainer();
+  }
+}

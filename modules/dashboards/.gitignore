@@ -1,0 +1,3 @@
+node_modules
+.codeclimate.yml
+.gitlab-ci.yml

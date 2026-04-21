@@ -1,0 +1,15 @@
+name: 'Message subscribe email'
+description: 'Provides email functionality for message subscribe.'
+core_version_requirement: ^10.2 || ^11 || ^12
+package: Message
+dependencies:
+  - message_subscribe:message_subscribe_ui
+  - flag:flag
+  - drupal:user
+  - drupal:views
+type: module
+
+# Information added by Drupal.org packaging script on 2026-01-15
+version: '2.1.0'
+project: 'message_subscribe'
+datestamp: 1768443554

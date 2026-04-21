@@ -1,0 +1,49 @@
+.modules-table-filter {
+  padding: 0;
+  border: 0 none;
+  box-shadow: none;
+}
+
+.package-listing {
+  margin-block-start: var(--gin-spacing-m);
+}
+
+.claro-details__summary {
+  padding-inline-start: 2.75rem;
+}
+
+.claro-details.claro-details--package-listing,
+.claro-details.module-list__module-details,
+.system-status-report .claro-details {
+  border: 1px solid var(--gin-border-color);
+  border-radius: var(--gin-border-m);
+}
+
+.claro-details__summary,
+.claro-details__summary.claro-details__summary--package-listing,
+.claro-details__summary.claro-details__summary--system-status-report {
+  color: var(--gin-color-text);
+  background-color: transparent;
+}
+
+.claro-details__wrapper,
+.claro-details__wrapper.claro-details__wrapper--package-listing,
+.claro-details__wrapper.claro-details__wrapper--system-status-report {
+  margin-block: var(--gin-spacing-m);
+  margin-inline: calc(var(--gin-spacing-l) - var(--gin-spacing-xxs));
+}
+
+.claro-details__wrapper--accordion,
+.claro-details__wrapper--accordion-item,
+.claro-details__wrapper--vertical-tabs-item {
+  margin: 0;
+}
+
+.claro-details__summary-summary {
+  color: var(--gin-color-text-light);
+  opacity: .8;
+}
+
+.module-list__module {
+  border-block-end: 1px solid var(--gin-border-color);
+}

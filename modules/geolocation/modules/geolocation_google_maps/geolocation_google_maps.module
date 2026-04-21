@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * @file
+ * Google Maps hooks.
+ */
+
+use Drupal\Core\Asset\AttachedAssetsInterface;
+use Drupal\geolocation_google_maps\GoogleMapsProviderBase;
+
+/**
+ * Implements hook_library_info_build().
+ */
+function geolocation_google_maps_library_info_build() {
+  $libraries = [];
+  $libraries['google'] = [
+    'version' => '1.x',
+    'js' => [
+      Drupal::service('plugin.manager.geolocation.mapprovider')->getMapProvider('google_maps')->getGoogleMapsApiUrl() => [
+        'type' => 'external',
+        'attributes' => [
+          'defer' => 'defer',
+          'async' => 'async',
+        ],
+      ],
+    ],
+    'dependencies' => [
+      'geolocation_google_maps/googlemapsapi',
+    ],
+  ];
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_js_alter().
+ */
+function geolocation_google_maps_js_alter(&$javascript, AttachedAssetsInterface $assets) {
+  if (!\Drupal::moduleHandler()->moduleExists('language')) {
+    return;
+  }
+
+  $config = \Drupal::config('geolocation_google_maps.settings');
+  if (!$config->get('use_current_language')) {
+    return;
+  }
+
+  if (!empty($config->get('google_maps_base_url'))) {
+    $google_url = $config->get('google_maps_base_url');
+  }
+  elseif ($config->get('china_mode')) {
+    $google_url = GoogleMapsProviderBase::$googleMapsApiUrlBaseChina;
+  }
+  else {
+    $google_url = GoogleMapsProviderBase::$googleMapsApiUrlBase;
+  }
+
+  foreach ($javascript as $key => $js) {
+    if (strpos($key, $google_url . GoogleMapsProviderBase::$googleMapsApiUrlPath) === 0 && strpos($key, 'language=') > 0) {
+      $javascript[$key]['data'] = Drupal::service('plugin.manager.geolocation.mapprovider')->getMapProvider('google_maps')->getGoogleMapsApiUrl();
+    }
+  }
+}

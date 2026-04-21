@@ -1,0 +1,20 @@
+{#
+/**
+ * @file
+ * Theme implementation to display a Leaflet map.
+ *
+ * This creates a placeholder for the map to be injected in.
+ *
+ * Available variables:
+ * - map_id
+ * - height
+ *
+ * Note: min-width is set so that a map will show when "Inline" is specified
+ * for the associated field label. This may of course be overridden. The default
+ * field label style is "Above" with a width of 100%.
+ *
+ * @ingroup themeable
+ *
+ */
+#}
+<div id="{{ map_id }}" {{ attributes }} style="min-width: 150px; {% if height is not empty %}height: {{ height }}{% endif %}"></div>

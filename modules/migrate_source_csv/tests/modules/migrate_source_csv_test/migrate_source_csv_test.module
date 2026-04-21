@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * Contains migrate_source_csv_test.module.
+ */
+
+/**
+ * Implements hook_migration_plugins_alter().
+ */
+function migrate_source_csv_test_migration_plugins_alter(&$definitions) {
+  $path = \Drupal::service('extension.list.module')->getPath('migrate_source_csv_test');
+  $definitions['migrate_csv_test']['source']['path'] = $path . $definitions['migrate_csv_test']['source']['path'];
+}

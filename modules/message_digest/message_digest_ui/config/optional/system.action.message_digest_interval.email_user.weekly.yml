@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - message_digest_ui
+  flag:
+    - email_user
+  config:
+    - message_digest.interval.weekly
+id: message_digest_interval.email_user.weekly
+label: 'Send notifications weekly'
+type: user
+plugin: 'message_digest_interval:email_user:weekly'
+configuration:
+  flag_id: email_user
+  value: 'message_digest:weekly'

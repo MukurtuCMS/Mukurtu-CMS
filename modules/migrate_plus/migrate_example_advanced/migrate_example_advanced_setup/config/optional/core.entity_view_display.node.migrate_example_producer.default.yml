@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.migrate_example_producer.migrate_example_wine_region
+    - node.type.migrate_example_producer
+  module:
+    - text
+    - user
+id: node.migrate_example_producer.default
+targetEntityType: node
+bundle: migrate_example_producer
+mode: default
+content:
+  migrate_example_wine_region:
+    weight: 102
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

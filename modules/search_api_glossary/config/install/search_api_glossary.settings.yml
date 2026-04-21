@@ -1,0 +1,4 @@
+group_prefix:
+  alpha: "A-Z"
+  numeric: "0-9"
+  special: "#"

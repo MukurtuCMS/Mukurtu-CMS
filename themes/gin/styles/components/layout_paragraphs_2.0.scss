@@ -1,0 +1,37 @@
+// Version 2.0
+.lpb-controls.is-layout {
+  background-color: var(--gin-color-contextual);
+}
+
+.lp-builder:not(.is-navigating) .js-lpb-component:hover,
+.lp-builder:not(.is-navigating) .js-lpb-component:focus-within {
+  outline: 2px solid var(--gin-color-primary);
+}
+
+.lp-builder:not(.is-navigating) .lpb-layout.js-lpb-component:hover,
+.lp-builder:not(.is-navigating) .lpb-layout.js-lpb-component:focus-within {
+  outline: 1px solid var(--gin-color-primary);
+}
+
+.lp-builder:not(.is-navigating) .js-lpb-component:hover .js-lpb-region:hover,
+.lp-builder:not(.is-navigating) .js-lpb-component:focus-within .js-lpb-region:focus-within {
+  outline: 1px dashed var(--gin-color-primary);
+}
+
+.js-lpb-component:hover .js-lpb-region,
+.js-lpb-component:focus-within .js-lpb-region {
+  outline: 1px dashed var(--gin-color-primary);
+}
+
+.lpb-component-list {
+  padding-block: var(--gin-spacing-l);
+}
+
+.layout-paragraphs-delete-component-form {
+  padding-block-start: var(--gin-spacing-l);
+  padding-block-end: var(--gin-spacing-s);
+}
+
+.layout-select__item input.form-boolean:checked + label.option {
+  outline: 2px solid var(--gin-color-primary);
+}

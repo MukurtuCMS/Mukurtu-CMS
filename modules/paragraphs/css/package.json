@@ -1,0 +1,22 @@
+{
+  "name": "paragraphs",
+  "license": "GPL-2.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "npm run lint && npm run sass",
+    "sass": "sass --style=expanded --no-source-map .:. && postcss *.css --replace --no-map",
+    "lint": "stylelint \"*.scss\""
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "postcss-cli": "^11.0.0",
+    "sass": "^1.82.0",
+    "stylelint": "^16.11.0",
+    "stylelint-config-standard-scss": "^14.0.0",
+    "stylelint-order": "^6.0.4",
+    "stylelint-selector-bem-pattern": "^4.0.1"
+  }
+}

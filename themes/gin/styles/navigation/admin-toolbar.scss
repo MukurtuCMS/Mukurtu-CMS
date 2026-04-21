@@ -1,0 +1,146 @@
+/**
+ * @file
+ * Admin Toolbar styles.
+ */
+
+/**
+ * Sidebar width is attached to the <body> element because it's used as a
+ * fallback value to the margin-inline-start property of the layout container.
+ */
+ body {
+  --sidebar-width: 64px;
+
+  .admin-toolbar-expanded & {
+    --sidebar-width: 264px;
+  }
+}
+
+/**
+ * This zero height div has the [data-offset-left] attribute for
+ * Drupal.displace() to measure. It purposefully does not have any transitions
+ * because we want Drupal.displace() to measure the width immediately
+ */
+ .admin-toolbar__displace-placeholder {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: var(--sidebar-width);
+}
+
+/**
+ * The Admin toolbar component.
+ */
+.admin-toolbar {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  border-inline-end: 1px solid #aaa;
+  background-color: white;
+  border-inline-end: 1px solid var(--color-gray-100);
+  font-size: var(--font-size-base);
+  inline-size: var(--sidebar-width);
+  position: fixed;
+  height: 100vh;
+  z-index: 501;
+  padding-inline: var(--space-xs);
+  padding-block-start: var(--space-xs);
+  overflow-y: scroll;
+
+  @media only screen and (max-height: 300px)  {
+    min-height: 20rem;
+  }
+
+  & ~ .dialog-off-canvas-main-canvas {
+    // Gin Custom start ---------------------
+    @include mq(medium) {
+      margin-inline-start: var(--drupal-displace-offset-left, var(--sidebar-width));
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition: margin-inline-start 0.2s linear;
+      }
+    }
+    // Gin Custom end ------------------------
+  }
+
+  .admin-toolbar-expanded & {
+    overflow-y: auto;
+  }
+
+  // Gin Custom start ---------------------
+  // *:focus {
+  //   outline: 4px solid var(--color-focus);
+  // }
+  // Gin Custom end ------------------------
+}
+
+/* @todo: Correct the class name with a BEM modifier. */
+.admin-toolbar-expanded .admin-toolbar {
+  /* Sticky section at the bottom */
+  & .admin-toolbar__sticky-section {
+    padding-inline: var(--space-xs);
+  }
+
+  & .admin-toolbar__content, /* Menu <nav> */
+  & .admin-toolbar__sticky-section {
+    & .admin-toolbar__item {
+      margin-inline: var(--space-xs);
+    }
+  }
+}
+
+.admin-toolbar__item {
+  flex: 1 0 100%;
+}
+
+.admin-toolbar__logo {
+  display: inline-block;
+  margin-block-start: var(--space-xs);
+  margin-inline-start: var(--space-xs);
+  border-radius: var(--space-xs);
+  overflow: hidden;
+
+  &:hover {
+    background-color: transparent;
+  }
+
+  &:focus {
+    outline: 4px solid var(--color-focus);
+  }
+
+  & img {
+    display: block;
+  }
+}
+
+/**
+ * Middle Content region.
+ * Region where most of the content will be printed.
+ */
+.admin-toolbar__content {
+  &:not(:last-child) {
+    margin-block-end: 20px;
+  }
+}
+
+/**
+ * Sticky bottom region.
+ * Region with less used items and button for collapse.
+ */
+.admin-toolbar__sticky-section {
+  background-color: white;
+  margin-block-start: auto;
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 40;
+  margin-inline: calc(var(--gin-spacing-xs) * -1);
+  width: calc(100% + var(--space-m));
+  border-block-start: 1px solid transparent;
+  box-sizing: inherit;
+  padding-block: var(--space-m);
+  padding-inline: var(--space-xs);
+
+  &.shadow {
+    box-shadow: 0px 0px 56px 0px rgba(0, 0, 0, 0.14);
+    border-color: var(--color-gray-100);
+  }
+}

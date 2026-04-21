@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for the Message Digest UI module.
+ */
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function message_digest_ui_module_implements_alter(&$implementations, $hook) {
+  // Ensure this module's implementation runs after message_subscribe_email.
+  if ($hook === 'message_subscribe_get_subscribers_alter') {
+    $digest = $implementations['message_digest_ui'];
+    unset($implementations['message_digest_ui']);
+    $implementations['message_digest_ui'] = $digest;
+  }
+}
+
+/**
+ * Implements hook_message_subscribe_get_subscribers_alter().
+ *
+ * Change notifier to the selected digest for users that have changed their
+ * notification interval.
+ */
+function message_digest_ui_message_subscribe_get_subscribers_alter(array &$uids, array $values) {
+  if (empty($uids)) {
+    // Nobody is subscribed to the content.
+    return;
+  }
+
+  // Find users that have selected a digest for notification interval on this
+  // flagging.
+  /** @var \Drupal\flag\FlagInterface[] $flags */
+  if (!$flags = \Drupal::service('message_subscribe_email.manager')->getFlags()) {
+    // No subscribe email related flags.
+    return;
+  }
+
+  $flag_ids = [];
+  foreach ($flags as $flag) {
+    $flag_ids[] = $flag->id();
+  }
+
+  $digest_mapping = [];
+  foreach ($values['context'] as $entity_type => $entity_ids) {
+    if (empty($entity_ids)) {
+      continue;
+    }
+
+    $query = \Drupal::entityTypeManager()->getStorage('flagging')->getQuery();
+    $result = $query->condition('flag_id', $flag_ids, 'IN')
+      ->condition('uid', array_keys($uids), 'IN')
+      // Ensure to grab the correct flagging.
+      ->condition('entity_type', $entity_type)
+      ->condition('entity_id', $entity_ids, 'IN')
+      ->sort('message_digest')
+      ->accessCheck(TRUE)
+      ->execute();
+
+    /** @var \Drupal\flag\FlaggingInterface[] $flaggings */
+    $flaggings = \Drupal::entityTypeManager()
+      ->getStorage('flagging')
+      ->loadMultiple($result);
+
+    // Construct a user to digest mapping.
+    foreach ($flaggings as $flagging) {
+      // If any of the results have a '0', then this message should be sent
+      // immediately.
+      if (is_null($flagging->message_digest) || !$flagging->message_digest->value) {
+        $digest_mapping[$flagging->getOwnerId()] = FALSE;
+      }
+      elseif (!isset($digest_mapping[$flagging->getOwnerId()])) {
+        $digest_mapping[$flagging->getOwnerId()] = $flagging->message_digest->value;
+      }
+    }
+  }
+
+  /** @var \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface $delivery_candidate */
+  foreach ($uids as $uid => $delivery_candidate) {
+    if (isset($digest_mapping[$uid]) && $digest_mapping[$uid]) {
+      $notifier = $digest_mapping[$uid];
+      // Completely replace all notifiers with the digest one.
+      $delivery_candidate->setNotifiers([$notifier]);
+    }
+  }
+}

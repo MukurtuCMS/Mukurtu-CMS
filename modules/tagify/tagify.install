@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * Update function for the tagify module.
+ */
+
+/**
+ * Update hook to set 'set_default_widget' to FALSE in tagify settings.
+ */
+function tagify_update_8001(): void {
+  $config = \Drupal::configFactory()->getEditable('tagify.settings');
+  $config->set('set_default_widget', FALSE)->save();
+}

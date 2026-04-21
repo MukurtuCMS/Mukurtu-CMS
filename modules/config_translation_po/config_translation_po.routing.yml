@@ -1,0 +1,15 @@
+config_translation_po.export_config_form:
+  path: '/admin/config/regional/config-translation/export'
+  defaults:
+    _form: '\Drupal\config_translation_po\Form\ExportConfigForm'
+    _title: 'Export Configuration Translations'
+  requirements:
+    _permission: 'translate interface'
+
+config_translation_po.import_config_form:
+  path: '/admin/config/regional/config-translation/import'
+  defaults:
+    _form: '\Drupal\config_translation_po\Form\ImportConfigForm'
+    _title: 'Import Configuration Translations'
+  requirements:
+    _permission: 'translate interface'

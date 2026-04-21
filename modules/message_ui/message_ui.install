@@ -1,0 +1,104 @@
+<?php
+
+/**
+ * @file
+ * message_ui.install
+ */
+
+/**
+ * Implements hook_install().
+ */
+function message_ui_install() {
+  drupal_flush_all_caches();
+
+  // Set the fields for the of the message form.
+  $templates = \Drupal::entityTypeManager()
+    ->getStorage('message_template')
+    ->loadMultiple();
+
+  /** @var \Drupal\message_ui\MessageUIFieldDisplayManagerServiceInterface $message_ui_field_display_manager */
+  $message_ui_field_display_manager = \Drupal::service('message_ui.field_display_manager');
+  foreach (array_keys($templates) as $template) {
+    $message_ui_field_display_manager->setFieldsDisplay($template);
+  }
+
+  $message_view = \Drupal::entityTypeManager()
+    ->getStorage('view')
+    ->load('message');
+
+  if (is_null($message_view)) {
+    return NULL;
+  }
+
+  $display = $message_view->get('display');
+
+  $display['default']['display_options']['fields']['message_ui_contextual_links'] = [
+    'id' => 'message_ui_contextual_links',
+    'table' => 'message',
+    'field' => 'message_ui_contextual_links',
+    'entity_type' => 'message',
+    'label' => 'Operations',
+  ];
+
+  $message_view->set('display', $display);
+  $message_view->save();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function message_ui_uninstall() {
+  // Removing the contextual links operations handler.
+  if ($entity = \Drupal::entityTypeManager()->getStorage('view')->load('message')) {
+    $display = $entity->get('display');
+    unset($display['default']['display_options']['fields']['message_ui_contextual_links']);
+    $entity->set('display', $display);
+    $entity->save();
+  }
+}
+
+/**
+ * Change message instance permission operation from edit to update.
+ */
+function message_ui_update_8101(&$sandbox) {
+  drupal_flush_all_caches();
+
+  $config_factory = \Drupal::configFactory();
+  foreach ($config_factory->listAll('message.template.') as $template_name) {
+    $template = $config_factory->get($template_name)->get('template');
+
+    foreach ($config_factory->listAll('user.role.') as $role_name) {
+      $role = $config_factory->getEditable($role_name);
+      $permissions = $role->get('permissions');
+      $index = array_search('edit ' . $template . ' message', $permissions);
+      if ($index !== FALSE) {
+        $permissions[$index] = 'update ' . $template . ' message';
+        sort($permissions);
+        $role->set('permissions', $permissions);
+        $role->save();
+      }
+    }
+  }
+
+  $message_view = \Drupal::entityTypeManager()
+    ->getStorage('view')
+    ->load('message');
+
+  if (is_null($message_view)) {
+    return NULL;
+  }
+
+  $display = $message_view->get('display');
+
+  $display['default']['display_options']['fields']['message_ui_contextual_links'] = [
+    'id' => 'message_ui_contextual_links',
+    'table' => 'message',
+    'field' => 'message_ui_contextual_links',
+    'entity_type' => 'message',
+    'label' => 'Operations',
+  ];
+
+  $message_view->set('display', $display);
+  $message_view->save();
+
+}

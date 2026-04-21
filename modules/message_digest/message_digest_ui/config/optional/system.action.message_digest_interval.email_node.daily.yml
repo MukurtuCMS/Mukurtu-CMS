@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - message_digest_ui
+  flag:
+    - email_node
+  config:
+    - message_digest.interval.daily
+id: message_digest_interval.email_node.daily
+label: 'Send notifications daily'
+type: node
+plugin: 'message_digest_interval:email_node:daily'
+configuration:
+  flag_id: email_node
+  value: 'message_digest:daily'

@@ -1,0 +1,10 @@
+admin_theme.settings:
+  type: config_object
+  label: 'Admin Theme settings'
+  mapping:
+    paths:
+      type: string
+      label: 'Use admin theme on these paths'
+    exclude_paths:
+      type: string
+      label: 'Do not use admin theme on these paths'

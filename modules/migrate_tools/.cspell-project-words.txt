@@ -1,0 +1,7 @@
+destid
+idlist
+mdis
+mmsg
+sourceid
+varchar
+

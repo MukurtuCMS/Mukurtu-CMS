@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - comment.type.comment
+    - field.storage.message.field_comment_reference
+    - message.template.create_comment
+id: message.create_comment.field_comment_reference
+field_name: field_comment_reference
+entity_type: message
+bundle: create_comment
+label: 'Comment reference'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:comment'
+  handler_settings:
+    target_bundles: { }
+    sort:
+      field: _none
+field_type: entity_reference

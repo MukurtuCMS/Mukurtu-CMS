@@ -1,0 +1,13 @@
+<div {{ attributes }} typeof="Place">
+  <span property="geo" typeof="GeoShape">
+    <meta property="polygon" content="{{ coordinates }}" />
+  </span>
+
+  {% if title is not empty %}
+    <h2 class="polygon-title" property="name">{{ title }}</h2>
+  {% endif %}
+
+  {% if children is not empty %}
+    <div class="polygon-content">{{ children }}</div>
+  {% endif %}
+</div>

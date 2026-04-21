@@ -1,0 +1,334 @@
+# Schema for the views style plugins.
+
+views.style.leaflet_map:
+  type: views_style
+  label: 'Leaflet map'
+  mapping:
+    grouping:
+      type: sequence
+      label: Overlays - Leaflet Grouping
+      sequence:
+        type: mapping
+        label: Grouping Sequence
+        mapping:
+          field:
+            type: string
+            label: Grouping Field
+          rendered:
+            type: boolean
+            label: Use rendered output to group rows
+          overlays_options:
+            type: mapping
+            label: Layers options
+            mapping:
+              disabled_overlays:
+                type: sequence
+                label: Disabled Layers
+                sequence:
+                  type: string
+                  label: Disabled Layer
+              hidden_overlays_controls:
+                type: sequence
+                label: Hidden Layers Controls
+                sequence:
+                  type: string
+                  label: Hidden Layer Control
+    data_source:
+      type: sequence
+      label: 'Data sources'
+      sequence:
+        type: string
+        label: 'Data source'
+    entity_source:
+      type: string
+      label: 'Entity source'
+    entity_source_submit:
+      type: string
+      label: 'Submit label for entity source'
+    name_field:
+      type: string
+      label: 'Simple Tooltip'
+    leaflet_tooltip:
+      type: mapping
+      label: 'Leaflet Tooltip'
+      mapping:
+        value:
+          type: string
+          label: 'Tooltip Source'
+        options:
+          type: text
+          label: 'Tooltip Options'
+    leaflet_popup:
+      type: mapping
+      label: 'Leaflet Popup'
+      mapping:
+        value:
+          type: string
+          label: 'Popup Source'
+        view_mode:
+          type: string
+          label: 'Popup Source View mode'
+        options:
+          type: text
+          label: 'Popup Options'
+    leaflet_map:
+      type: string
+      label: 'Leaflet map'
+    height:
+      type: string
+      label: 'Map height'
+    height_unit:
+      type: string
+      label: 'Height unit'
+    hide_empty_map:
+      type: boolean
+      label: 'Hide empty map'
+    disable_wheel:
+      type: boolean
+      label: 'Disable wheel'
+    gesture_handling:
+      type: boolean
+      label: 'Gesture handling'
+    fitbounds_options:
+      type: text
+      label: 'FitBounds Options'
+    reset_map:
+      type: mapping
+      label: 'Reset Map View'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    map_scale:
+      type: mapping
+      label: 'Map Scale Control'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    locate:
+      type: mapping
+      label: 'Locate User Position'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+        automatic:
+          type: boolean
+          label: 'Automatically locate user current position'
+    map_position:
+      type: mapping
+      label: 'Map position'
+      mapping:
+        force:
+          type: boolean
+          label: 'Force map center & zoom'
+        center:
+          type: mapping
+          label: 'Centre'
+          mapping:
+            lat:
+              type: float
+              label: 'Latitude'
+            lon:
+              type: float
+              label: 'Longitude'
+        zoomControlPosition:
+          type: string
+          label: 'Position'
+        zoom:
+          type: integer
+          label: 'Zoom'
+        minZoom:
+          type: integer
+          label: 'Minimum zoom'
+        maxZoom:
+          type: integer
+          label: 'Maximum zoom'
+        zoomFiner:
+          type: integer
+          label: 'Zoom finer'
+    weight:
+      type: string
+      label: 'Weight'
+    icon:
+      type: mapping
+      label: 'Map icon'
+      mapping:
+        iconType:
+          type: string
+          label: 'Icon type'
+        iconUrl:
+          type: string
+          label: 'Icon URL'
+        shadowUrl:
+          type: string
+          label: 'Shadow URL'
+        className:
+          type: string
+          label: 'Icon class'
+        iconSize:
+          type: mapping
+          label: 'Icon size'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        iconAnchor:
+          type: mapping
+          label: 'Icon anchor'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        shadowSize:
+          type: mapping
+          label: 'Shadow anchor'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        shadowAnchor:
+          type: mapping
+          label: 'Shadow anchor'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        popupAnchor:
+          type: mapping
+          label: 'Popup anchor'
+          mapping:
+            x:
+              type: string
+              label: 'Width'
+            y:
+              type: string
+              label: 'Height'
+        html:
+          type: string
+          label: 'HTML'
+        html_class:
+          type: string
+          label: 'HTML class'
+        circle_marker_options:
+          type: string
+          label: 'Circle marker options'
+    leaflet_markercluster:
+      type: mapping
+      label: 'Leaflet Markercluster'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        excluded:
+          type: text
+          label: 'Exclude flag'
+        options:
+          type: text
+          label: 'Marker Cluster Additional Options'
+        include_path:
+          type: boolean
+          label: 'Enable Markeclustering of Paths elements'
+    fullscreen:
+      type: mapping
+      label: 'Leaflet Fullscreen'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    path:
+      type: string
+      label: 'Path'
+    feature_properties:
+      type: mapping
+      label: 'Feature Additional Properties'
+      mapping:
+        values:
+          type: text
+          label: 'Values'
+    geocoder:
+      type: mapping
+      label: 'Geocoder'
+      mapping:
+        control:
+          type: boolean
+          label: 'Enable Geocoder map control'
+        settings:
+          type: mapping
+          label: 'Geocoder settings'
+          mapping:
+            popup:
+              type: boolean
+              label: 'Popup'
+            autocomplete:
+              type: mapping
+              label: 'Autocomplete'
+              mapping:
+                placeholder:
+                  type: string
+                  label: 'Placeholder'
+                title:
+                  type: string
+                  label: 'Title'
+            position:
+              type: string
+              label: 'Path'
+            input_size:
+              type: integer
+              label: 'Input size'
+            providers:
+              type: sequence
+              label: 'Providers'
+              sequence:
+                type: mapping
+                mapping:
+                  weight:
+                    type: string
+                    label: 'Weight'
+                  checked:
+                    type: integer
+                    label: 'Checked'
+            min_terms:
+              type: integer
+              label: 'Minimum terms'
+            delay:
+              type: integer
+              label: 'Delay'
+            zoom:
+              type: integer
+              label: 'Zoom'
+            options:
+              type: string
+              label: 'Options'
+    map_lazy_load:
+      type: mapping
+      label: Map lazy load
+      mapping:
+        lazy_load:
+          type: boolean
+          label: Lazy load

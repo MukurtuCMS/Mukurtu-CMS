@@ -1,0 +1,51 @@
+#entity.solr_field_type.add_form:
+#  route_name: 'entity.solr_field_type.add_form'
+#  title: 'Add SolrFieldType'
+#  appears_on:
+#    - entity.solr_field_type.collection
+solr_configset.schema_extra_types:
+  route_name: 'solr_configset.schema_extra_types'
+  title: 'Get schema_extra_types.xml'
+  appears_on:
+    - entity.solr_field_type.collection
+
+solr_configset.schema_extra_fields:
+  route_name: 'solr_configset.schema_extra_fields'
+  title: 'Get schema_extra_fields.xml'
+  appears_on:
+    - entity.solr_field_type.collection
+
+solr_configset.solrconfig_extra:
+  route_name: 'solr_configset.solrconfig_extra'
+  title: 'Get solrconfig_extra.xml'
+  appears_on:
+    - entity.solr_field_type.collection
+    - entity.solr_request_handler.collection
+
+solr_configset.solrconfig_query:
+  route_name: 'solr_configset.solrconfig_query'
+  title: 'Get solrconfig_query.xml'
+  appears_on:
+    - entity.solr_cache.collection
+
+solr_configset.solrconfig_requestdispatcher:
+  route_name: 'solr_configset.solrconfig_requestdispatcher'
+  title: 'Get solrconfig_requestdispatcher.xml'
+  appears_on:
+    - entity.solr_request_dispatcher.collection
+
+solr_configset.config_zip:
+  route_name: 'solr_configset.config_zip'
+  title: 'Get config.zip'
+  appears_on:
+    - entity.solr_field_type.collection
+    - entity.solr_cache.collection
+    - entity.solr_request_handler.collection
+    - entity.solr_request_dispatcher.collection
+    - entity.search_api_server.canonical
+
+solr_configset.current_config_zip:
+  route_name: 'solr_configset.current_config_zip'
+  title: 'Get current config.zip from Solr server'
+  appears_on:
+    - search_api_solr.solr_config_files

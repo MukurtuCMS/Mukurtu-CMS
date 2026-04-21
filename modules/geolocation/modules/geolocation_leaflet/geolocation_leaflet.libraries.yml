@@ -1,0 +1,362 @@
+leaflet:
+  header: true
+  remote: https://leafletjs.com/
+  version: '1.7.1'
+  license:
+    name: BSD 2-clause "Simplified" License
+    url: https://github.com/Leaflet/Leaflet/blob/master/LICENSE
+    gpl-compatible: true
+  css:
+    theme:
+      'https://unpkg.com/leaflet@1.8.0/dist/leaflet.css': { type: external, minified: true }
+  js:
+    'https://unpkg.com/leaflet@1.8.0/dist/leaflet.js': { type: external, minified: true }
+
+# Leaflet integration library.
+geolocation.leaflet:
+  version: 8.x-3.x
+  dependencies:
+    - core/drupalSettings
+    - geolocation_leaflet/leaflet
+    - geolocation/geolocation.api
+  js:
+    js/geolocation-leaflet-api.js: {}
+  css:
+    component:
+      'css/geolocation-leaflet.css': {}
+
+# Leaflet CommonMap.
+commonmap.leaflet:
+  js:
+    js/geolocation-common-map-leaflet.js: {}
+  dependencies:
+    - geolocation/geolocation.commonmap
+    - geolocation_leaflet/geolocation.leaflet
+
+# Leaflet widget API.
+widget.api.leaflet:
+  version: 8.x-3.x
+  js:
+    js/geolocation-widget-leaflet-api.js: {}
+  dependencies:
+    - geolocation/geolocation.widget.api
+    - geolocation_leaflet/geolocation.leaflet
+
+widget.leaflet:
+  version: 8.x-3.x
+  js:
+    js/geolocation-leaflet-maps-widget.js: {}
+  dependencies:
+    - geolocation/geolocation.widget
+    - geolocation_leaflet/widget.api.leaflet
+
+leaflet.draw:
+  header: true
+  remote: https://github.com/Leaflet/Leaflet.draw
+  version: '1.0.4'
+  license:
+    name: MIT-LICENSE
+    url: https://github.com/Leaflet/Leaflet.draw/blob/master/MIT-LICENSE.md
+    gpl-compatible: true
+  css:
+    component:
+      'https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css': { type: external, minified: true }
+  js:
+    'https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js': { type: external, minified: true }
+  dependencies:
+    - geolocation_leaflet/leaflet
+
+widget.leaflet.geojson:
+  version: 8.x-3.x
+  js:
+    js/geolocation-geometry-widget-leaflet.js: {}
+  dependencies:
+    - core/once
+    - core/jquery
+    - geolocation/geolocation.map
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet.draw
+
+# Photon geocoder function.
+geocoder.photon:
+  version: 8.x-3.x
+  js:
+    js/photon-geocoder.js: {}
+  dependencies:
+    - core/once
+    - core/jquery
+    - geolocation/geolocation.geocoder.api
+
+#
+# Map Features
+#
+
+# MarkerPopup support.
+mapfeature.leaflet_marker_popup:
+  js:
+    js/MapFeature/geolocation-marker-popup.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# MarkerClusterer support.
+leaflet.markerclusterer:
+  header: true
+  remote: https://github.com/Leaflet/Leaflet.markercluster
+  version: '1.4.1'
+  license:
+    name: MIT-LICENSE
+    url: https://github.com/Leaflet/Leaflet.markercluster/blob/master/MIT-LICENCE.txt
+    gpl-compatible: true
+  css:
+    component:
+      'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css': { type: external, minified: true }
+      'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css': { type: external, minified: true }
+  js:
+    'https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js': { type: external, minified: true }
+  dependencies:
+    - geolocation_leaflet/leaflet
+
+mapfeature.leaflet_marker_clusterer:
+  js:
+    js/MapFeature/geolocation-marker-clusterer.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet.markerclusterer
+
+# ClientLocationIndicator support.
+mapfeature.client_location_indicator:
+  js:
+    js/MapFeature/geolocation-client-location-indicator.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# MarkerIconAdjustment support.
+mapfeature.leaflet_marker_icon:
+  js:
+    js/MapFeature/geolocation-marker-icon.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# GestureHandling support
+leaflet.gesture-handling:
+  header: true
+  remote: https://github.com/elmarquis/Leaflet.GestureHandling/
+  version: '1.2.1'
+  license:
+    name: MIT
+    url: https://github.com/elmarquis/Leaflet.GestureHandling/blob/master/LICENSE
+    gpl-compatible: true
+  css:
+    component:
+      '//unpkg.com/leaflet-gesture-handling@1.2.1/dist/leaflet-gesture-handling.min.css': { type: external, minified: true }
+  js:
+    '//unpkg.com/leaflet-gesture-handling@1.2.1/dist/leaflet-gesture-handling.min.js': { type: external, minified: true }
+  dependencies:
+    - geolocation_leaflet/leaflet
+
+mapfeature.leaflet_gesture_handling:
+  js:
+    js/MapFeature/geolocation-gesture-handling.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet.gesture-handling
+
+# TileLayer support.
+leaflet-providers:
+  header: true
+  remote: https://github.com/leaflet-extras/leaflet-providers
+  version: '1.12.0'
+  license:
+    name: BSD 2-clause "Simplified" License
+    url: https://github.com/leaflet-extras/leaflet-providers/blob/master/license.md
+    gpl-compatible: true
+  js:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.12.0/leaflet-providers.min.js': { type: external, minified: true }
+  dependencies:
+    - geolocation_leaflet/leaflet
+
+mapfeature.leaflet_tile_layer:
+  js:
+    js/MapFeature/geolocation-tile-layer.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet-providers
+
+# TileLayer Overlay.
+mapfeature.leaflet_tile_layer_overlay:
+  js:
+    js/MapFeature/geolocation-tile-layer-overlay.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet-providers
+
+# CustomTileLayer.
+mapfeature.leaflet_custom_tile_layer:
+  js:
+    js/MapFeature/geolocation-custom-tile-layer.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# WMS support.
+leaflet.wms:
+  header: true
+  remote: https://github.com/heigeo/leaflet.wms
+  version: '0.2.0'
+  license:
+    name: MIT
+    url: https://github.com/heigeo/leaflet.wms/blob/gh-pages/LICENSE
+    gpl-compatible: true
+  js:
+    'https://cdn.jsdelivr.net/gh/heigeo/leaflet.wms@0.2.0/dist/leaflet.wms.min.js': { type: external, minified: true }
+  dependencies:
+    - geolocation_leaflet/leaflet
+
+mapfeature.leaflet_wms:
+  js:
+    js/MapFeature/geolocation-wms.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet.wms
+
+# DisableUserInteraction
+mapfeature.leaflet_disable_user_interaction:
+  js:
+    js/MapFeature/geolocation-disable-user-interaction.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# MaxBounds
+mapfeature.leaflet_max_bounds:
+  js:
+    js/MapFeature/geolocation-maxbounds.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# ZoomByMarker
+leaflet.bouncemarker:
+  header: true
+  remote: https://github.com/maximeh/leaflet.bouncemarker
+  version: '1.2'
+  license:
+    name: MIT
+    url: https://github.com/maximeh/leaflet.bouncemarker/blob/master/LICENSE.txt
+    gpl-compatible: true
+  js:
+    'https://cdn.jsdelivr.net/gh/maximeh/leaflet.bouncemarker@1.2/bouncemarker.js': { type: external, minified: true }
+  dependencies:
+    - geolocation_leaflet/leaflet
+
+mapfeature.leaflet_marker_zoom_and_animate:
+  js:
+    js/MapFeature/geolocation-marker-zoom-and-animate.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet.bouncemarker
+
+#
+# Map Features - Controls
+#
+
+# Control Attribution
+mapfeature.leaflet_control_attribution:
+  js:
+    js/MapFeature/geolocation-control-attribution.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# Control Zoom
+mapfeature.leaflet_control_zoom:
+  js:
+    js/MapFeature/geolocation-control-zoom.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# Control Scale
+mapfeature.leaflet_control_scale:
+  js:
+    js/MapFeature/geolocation-control-scale.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# Control Geocoder
+mapfeature.leaflet_control_geocoder:
+  js:
+    js/MapFeature/geolocation-control-geocoder.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation/geolocation.geocoder.api
+
+# Control Recenter
+mapfeature.leaflet_control_recenter:
+  css:
+    component:
+      css/geolocation-control-recenter.css: {}
+  js:
+    js/MapFeature/geolocation-control-recenter.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# Control Locate
+mapfeature.leaflet_control_locate:
+  css:
+    component:
+      css/geolocation-control-locate.css: {}
+  js:
+    js/MapFeature/geolocation-control-locate.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+
+# Control Fullscreen
+leaflet.fullscreen:
+  header: true
+  remote: https://github.com/Leaflet/Leaflet.fullscreen
+  version: '1.0.1'
+  license:
+    name: ISC License
+    url: https://github.com/Leaflet/Leaflet.fullscreen/blob/gh-pages/LICENSE
+    gpl-compatible: true
+  css:
+    component:
+      'https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css': { type: external}
+  js:
+    'https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js': { type: external, minified: true }
+  dependencies:
+    - geolocation_leaflet/leaflet
+
+mapfeature.leaflet_control_fullscreen:
+  js:
+    js/MapFeature/geolocation-control-fullscreen.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet.fullscreen
+
+# Control Tile layer
+mapfeature.leaflet_control_layer:
+  css:
+    component:
+      css/geolocation-control-layer.css: {}
+  js:
+    js/MapFeature/geolocation-control-layer.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet-providers
+
+leaflet.rotate:
+  header: true
+  remote: https://github.com/Raruto/leaflet-rotate
+  version: '0.1.1'
+  license:
+    name: GPL-3.0
+    url: https://github.com/Raruto/leaflet-rotate/blob/master/LICENSE
+    gpl-compatible: true
+  js:
+    'https://unpkg.com/leaflet-rotate@0.1.2/dist/leaflet-rotate-src.js': { type: external }
+  dependencies:
+    - geolocation_leaflet/leaflet
+
+mapfeature.leaflet_rotate:
+  js:
+    js/MapFeature/geolocation-leaflet-rotate.js: {}
+  dependencies:
+    - geolocation_leaflet/geolocation.leaflet
+    - geolocation_leaflet/leaflet.rotate

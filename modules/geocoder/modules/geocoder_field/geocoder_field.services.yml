@@ -1,0 +1,19 @@
+services:
+  geocoder_field.plugin.manager.field:
+    class: Drupal\geocoder_field\GeocoderFieldPluginManager
+    parent: default_plugin_manager
+    arguments:
+      ["@plugin.manager.geocoder.preprocessor", "@entity_field.manager"]
+    Drupal\geocoder_field\GeocoderFieldPluginManager: '@geocoder_field.plugin.manager.field'
+
+  plugin.manager.geocoder.preprocessor:
+    class: Drupal\geocoder_field\PreprocessorPluginManager
+    parent: default_plugin_manager
+    arguments: ["@country_manager"]
+  Drupal\geocoder_field\PreprocessorPluginManager: '@plugin.manager.geocoder.preprocessor'
+
+  geocoder_field.workspace_publishing_subscriber:
+    class: Drupal\geocoder_field\EventSubscriber\WorkspacePublishingSubscriber
+    arguments: ['@request_stack']
+    tags:
+      - { name: event_subscriber }

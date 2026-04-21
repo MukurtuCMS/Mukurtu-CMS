@@ -1,0 +1,26 @@
+{% set classes = [
+  'admin-list--panel',
+  'admin-list'
+] %}
+
+<dl {{ attributes.addClass(classes) }}>
+  {% for item in list %}
+  <div class="admin-item{% if item.image %} admin-item-with-image{% endif %}">
+    {% if item.image %}
+      <div class="image"><img src="{{ item.image }}" /></div>
+      <div class="content">
+    {% endif %}
+    <dt class="admin-item__title">
+      <a {{ item.link_attributes.addClass('admin-item__link') }}>{{ item.title }}</a>
+    </dt>
+    {% if item.description %}
+    <dd class="admin-item__description">
+      {{ item.description }}
+    </dd>
+    {% endif %}
+    {%if item.image %}
+      </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</dl>

@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * top_bar.theme
+ */
+
+/**
+ * Implements hook_preprocess_HOOK() for top_bar.
+ */
+function gin_preprocess_top_bar(array &$variables) {
+  if (!_gin_module_is_active('navigation')) {
+    return;
+  }
+
+  $block_manager = \Drupal::service('plugin.manager.block');
+
+  // Get local actions.
+  if ($plugin_block = $block_manager->createInstance('local_actions_block', [])) {
+    $block_content = $plugin_block->build();
+    $variables['gin_local_actions'] = \Drupal::service('renderer')->render($block_content);
+    $variables['#attached']['library'][] = 'gin/top_bar';
+  }
+
+  // Get form actions.
+  if ($form_actions = _gin_form_actions()) {
+    $variables['gin_form_actions'] = $form_actions;
+    $variables['gin_form_actions_class'] = 'gin-sticky-form-actions--preprocessed';
+    $variables['#attached']['library'][] = 'gin/top_bar';
+  }
+
+  // Get breadcrumb.
+  if ($plugin_block = $block_manager->createInstance('system_breadcrumb_block', [])) {
+    $block_content = $plugin_block->build();
+    $variables['gin_breadcrumbs'] = \Drupal::service('renderer')->render($block_content);
+    $variables['#attached']['library'][] = 'gin/top_bar';
+  }
+}

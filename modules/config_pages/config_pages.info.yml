@@ -1,0 +1,13 @@
+name: 'Config Pages'
+type: module
+description: 'Allows the creation of custom configuration entities.'
+package: Entity
+dependencies:
+  - drupal:text
+configure: entity.config_pages.collection
+core_version_requirement: ^8 || ^9 || ^10 || ^11
+
+# Information added by Drupal.org packaging script on 2026-03-06
+version: '8.x-2.22'
+project: 'config_pages'
+datestamp: 1772826246

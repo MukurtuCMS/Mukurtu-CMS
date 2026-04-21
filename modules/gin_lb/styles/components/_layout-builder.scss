@@ -1,0 +1,286 @@
+/**
+ * @file
+ * Styles for making layout builder look more like Claro.
+ */
+
+.layout-builder__add-section {
+  width: 100%;
+  margin-top: 1em;
+  margin-bottom: 1.5em;
+  text-align: center;
+}
+
+.layout-builder__link--add {
+  @extend .glb-button;
+}
+
+.layout-builder__link--configure {
+  position: absolute;
+  z-index: 1;
+  top: -19px;
+  left: 20px;
+  padding: 0 0.25em 0 0.25em;
+  padding-left: 20px;
+  color: var(--gin-border-color-form-element);
+  background: white;
+  font-size: 0.75em;
+  line-height: 19px;
+  &:hover::after {
+    z-index: -1;
+    content: "";
+    background-color: var(--gin-color-primary) !important;
+    background-image: icon("edit-section");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 17px 17px;
+  }
+  &::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 17px;
+    height: 17px;
+    content: "&amp;";
+    background-color: var(--gin-border-color-form-element);
+    mask-size: 17px 17px;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: icon("edit-section");
+  }
+
+  &:hover {
+    color: var(--gin-color-button-text) !important;
+    background: var(--gin-color-primary) !important;
+  }
+}
+
+.layout-builder__link {
+  text-decoration: none;
+  font-family:
+    Inter,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Oxygen-Sans,
+    Ubuntu,
+    Cantarell,
+    "Helvetica Neue",
+    sans-serif;
+}
+
+.layout-builder__link--remove {
+  position: absolute;
+  z-index: 2;
+  top: -18px;
+  left: 0;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  white-space: nowrap;
+  text-indent: -9999px;
+  background-color: var(--gin-border-color-form-element);
+  background-repeat: no-repeat;
+  background-position: center;
+  font-size: 0.889em;
+  mask-size: 17px 17px;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-image: icon("remove-section");
+  &:hover {
+    mask-image: none;
+    background-color: var(--gin-color-primary) !important;
+  }
+  &:hover::after {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 6px;
+    content: "";
+    background-image: icon("remove-section");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 17px 17px;
+  }
+}
+
+.layout-builder__layout {
+  margin-top: 1em;
+}
+
+.layout-builder__section {
+  position: relative;
+  &:not(.gin-lb--disable-section-focus):hover::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    content: "";
+    pointer-events: none;
+    border: 1px solid var(--gin-color-primary) !important;
+  }
+
+  &:hover {
+    .layout-builder__link--remove {
+      background-color: var(--gin-color-primary);
+    }
+    .layout-builder__link--configure {
+      color: var(--gin-color-primary);
+      &::after {
+        background-color: var(--gin-color-primary);
+      }
+    }
+  }
+}
+
+.layout-builder__section .ui-sortable-helper {
+  outline: 1px solid #f7f7f7;
+  background-color: #fff;
+}
+.layout-builder__section .ajax-progress-throbber {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  left: 0;
+}
+.layout-builder__section .ui-state-drop {
+  margin: 20px;
+  padding: 30px;
+  outline: 2px dotted #fedb60;
+  background-color: #ffd;
+}
+
+.layout-builder__add-block {
+  text-align: center;
+  background: transparent !important;
+}
+
+.layout-builder__message .messages {
+  background-repeat: no-repeat;
+}
+
+/* @todo Remove Umami specific styling in https://www.drupal.org/node/3043228. */
+.layout-builder__message .messages .messages__content {
+  background: none;
+}
+
+.layout-builder-block__content-preview-placeholder-label {
+  margin: 0;
+  padding: 1em;
+  text-align: center;
+  font-family:
+    Inter,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Oxygen-Sans,
+    Ubuntu,
+    Cantarell,
+    "Helvetica Neue",
+    sans-serif;
+  font-size: 1em;
+  line-height: 1.4;
+}
+
+.layout-builder--content-preview-disabled .layout-builder-block {
+  margin: 0;
+}
+
+.layout-builder-block {
+  cursor: move;
+  word-break: break-word;
+}
+
+#drupal-off-canvas:not(.drupal-off-canvas-reset),
+#drupal-off-canvas-wrapper {
+  & .layout-selection li {
+    position: relative;
+    display: block;
+    padding-bottom: 0;
+  }
+
+  & .layout-selection li a {
+    display: block;
+    border-bottom: 0;
+  }
+  & .layout-selection li::after {
+    position: absolute;
+    bottom: calc(var(--gin-spacing-s) * -1);
+    left: -2rem;
+    display: block;
+    width: calc(100% + 20px);
+    height: 1px;
+    content: "";
+    opacity: 0.75;
+    border-bottom: 1px solid var(--gin-border-color-table);
+  }
+  & .layout-selection li a svg {
+    display: inline-block;
+    margin-right: 0.5em;
+    vertical-align: middle;
+  }
+
+  & .layout-selection li a div {
+    display: inline-block;
+  }
+
+  & .inline-block-create-button {
+    display: block;
+    padding: 24px;
+    padding-left: 44px;
+    color: #eee;
+    border-bottom: 1px solid #333;
+    background: url("/core/misc/icons/bebebe/plus.svg") transparent 16px
+    no-repeat;
+    font-size: 16px;
+  }
+}
+
+.layout-builder__region-label,
+.layout-builder__section-label {
+  display: none;
+}
+
+.layout-builder--move-blocks-active .layout-builder__region-label {
+  display: block;
+}
+
+.layout-builder--move-blocks-active .layout-builder__section-label {
+  display: inline;
+}
+
+.layout__region-info {
+  padding: 0.5em;
+  text-align: left;
+  font-family:
+    BlinkMacSystemFont,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Oxygen-Sans,
+    Ubuntu,
+    Cantarell,
+    "Helvetica Neue",
+    sans-serif;
+}
+
+/* Highlight the name of each layout. */
+.layout-builder--content-preview-disabled [data-layout-label] {
+  position: relative;
+}
+
+.layout-builder--content-preview-disabled [data-layout-label]::before {
+  position: absolute;
+  z-index: 11;
+  top: 0;
+  right: 0;
+  padding: 0.5em 1.5em;
+  content: attr(data-layout-label);
+  color: #fff;
+  background-color: #13589a;
+  box-shadow: 0 0.125em 0.125em -0.125em #111;
+}

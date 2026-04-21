@@ -1,0 +1,21 @@
+id: d7_field_location
+label: Geolocation field storage for Location
+migration_tags:
+  - Drupal 7
+  - Configuration
+deriver: Drupal\geolocation_address\Plugin\migrate\D7LocationFieldDeriver
+source:
+  plugin: d7_field_location
+  constants:
+    status: true
+    langcode: und
+    type: geolocation
+process:
+  entity_type: entity_type
+  field_name: geolocation_field_name
+  type: constants/type
+  status: constants/status
+  langcode: constants/langcode
+  cardinality: cardinality
+destination:
+  plugin: entity:field_storage_config

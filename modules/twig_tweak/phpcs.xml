@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ruleset name="Twig Tweak">
+  <description>PHP CodeSniffer configuration for Twig Tweak module.</description>
+  <arg name="extensions" value="php, module, yml"/>
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice">
+    <!-- Dependencies are not injected for performance reason. -->
+    <exclude name="DrupalPractice.Objects.GlobalDrupal.GlobalDrupal"/>
+    <!-- False positives. -->
+    <exclude name="Drupal.Commenting.InlineComment.Empty"/>
+    <!-- The module does not provide change records. -->
+    <exclude name="Drupal.Semantics.FunctionTriggerError.TriggerErrorTextLayoutRelaxed"/>
+    <!-- Code examples have rather long lines. -->
+    <exclude name="Drupal.Files.LineLength.TooLong"/>
+    <!-- This requires changing method signatures which may cause BC break. -->
+    <exclude name="SlevomatCodingStandard.TypeHints.NullableTypeForNullDefaultValue.NullabilityTypeMissing"/>
+  </rule>
+</ruleset>

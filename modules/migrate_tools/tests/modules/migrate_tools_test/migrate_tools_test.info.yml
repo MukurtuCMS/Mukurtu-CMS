@@ -1,0 +1,12 @@
+type: module
+name: Migrate Tools Test
+description: 'Test module to test Migrate Tools.'
+package: Testing
+dependencies:
+  - drupal:migrate
+  - migrate_plus:migrate_plus
+
+# Information added by Drupal.org packaging script on 2025-12-31
+version: '6.1.3'
+project: 'migrate_tools'
+datestamp: 1767203939

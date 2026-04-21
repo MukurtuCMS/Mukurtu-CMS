@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * node.theme
+ */
+
+/**
+ * Implements hook_preprocess_HOOK() for node_edit_form.
+ */
+function gin_preprocess_node_edit_form(&$variables) {
+  $module_handler = \Drupal::service('module_handler');
+
+  // Check if Layout Paragraphs is active.
+  $layout_paragraphs = $module_handler->moduleExists('layout_paragraphs');
+  $variables['gin_layout_paragraphs'] = $layout_paragraphs;
+}

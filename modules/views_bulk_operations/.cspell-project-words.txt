@@ -1,0 +1,13 @@
+# Ignored Cspell words:
+graber
+grabias
+joelpittet
+joël
+marcin
+pittet
+preconfig
+preconfigurable
+preconfiguration
+preconfigure
+multipage
+npages

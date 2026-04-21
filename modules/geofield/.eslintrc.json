@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2017": true,
+    "node": true
+  },
+  "extends": [
+    "plugin:prettier/recommended",
+    "plugin:yml/recommended"
+  ],
+  "ignorePatterns": []
+}

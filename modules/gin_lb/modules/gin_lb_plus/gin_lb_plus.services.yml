@@ -1,0 +1,6 @@
+services:
+  gin_lb_plus.layout_choose_controller_alter:
+    class: Drupal\gin_lb_plus\EventSubscriber\LayoutBuilderBrowserEventSubscriber
+    arguments: ['@extension.list.module', '@file_url_generator']
+    tags:
+      - { name: event_subscriber }

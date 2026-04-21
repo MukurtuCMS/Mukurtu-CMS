@@ -1,0 +1,103 @@
+.geolocation-map-container {
+  width: 100%;
+  height: 300px;
+}
+
+.geolocation-map-container * {
+  box-sizing: unset;
+}
+
+.geolocation-context-popup {
+  position: absolute;
+  z-index: 1;
+  max-width: 256px;
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  font-family: Arial, sans-serif;
+}
+
+.geolocation-map-control {
+  display: none;
+  margin: 1em 0 0 1em;
+}
+
+.geolocation-map-control input,
+.geolocation-map-control input.form-autocomplete,
+.geolocation-map-control button {
+  height: 32px;
+  border-radius: 2px;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+}
+
+.geolocation-map-control input.form-autocomplete,
+.geolocation-map-control input {
+  z-index: 3;
+  box-sizing: content-box;
+  width: auto;
+  margin: 0;
+  padding: 0 1em;
+  text-overflow: ellipsis;
+  border: 0;
+  font-size: 14px;
+}
+
+.geolocation-map-control input.location:focus {
+  border-color: #156dfe;
+}
+
+.geolocation-map-control label,
+.geolocation-map-control .description {
+  display: none;
+}
+
+.geolocation-map-control .form-item {
+  margin: 0;
+}
+
+.geolocation-map-control button {
+  z-index: 2;
+  cursor: pointer;
+  color: #fff;
+  border: none;
+  font-size: 0;
+}
+
+.geolocation-map-control button::before {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 0 auto;
+  content: "";
+  background-size: contain;
+}
+
+.geolocation-map-control button.recenter {
+  background: #dd001e;
+}
+.geolocation-map-control button.recenter::before {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAa9JREFUeNrU1c8rg3EcwPGN2Q5cJC6EprjNj4NCKeWgFCkpB5SIi7lo4eCkUFycyMEfwMUOTH6ckCIHOYyDkJNSlh9ruzzeX32s2Z5nttlz8K3XDs+e5/P5Pt/v5/N9sjRNs5gpy2LyMD2BTf2Ew2Gj/x2oQS9aUSjPvMOPDfjwCO37IbvdHglgVetkkKAE0+jDPY5whg+UoRkNElzdt6vmGpvgayNCoVCsChwggDE4dO5RXPAiiFHkqOvRm2zTmXkBFlCNdpm50bhEJ1awiAdsJ9rkbHSjA4O/BI8sAkZwgjmZYFyCeuQiH8PYglftUQqVNgkn2vQSrGMIVSjHsmzyuFxLZlzgWFbgZ5kyduCRJbmV8lyVatlPoexVggG9N5iVwD2SdAmlcOMqhQQ3yNNL8IIZBFCLV/TjMCOdLOMUa2iS/fCnEa8Sb9EXYju5SCrpOs0Jq2MjSCd3GfXB0x+C18nbb5p1ms5LofiSSeCU3mhJIrBVSroRU3hOJoE6MYulo93SF3rDJfeoipvAXlx2g+PaKn3gkYfvpAnPUz2uE30PMvfB+dffZNMTfAowAA2eAOjeCmcEAAAAAElFTkSuQmCC);
+}
+
+.geolocation-map-control button.search,
+.geolocation-map-control button.locate {
+  background: #156dfe;
+}
+.geolocation-map-control button.locate::before {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AcVCg45w2bqzwAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAHjSURBVEjHxdY7aFZBEAXg75qIhTEaBU2tpBC7IBgfTSoxQiy0EcFCsRKfRcBCopWSgAgWNmIjdlaiSECwUMHGRtRGErSSCPGBIKKRscj+sFnun9xA0APL3T27s7PMnJ29IkLDNhgRUxExGRH9Te1WaI416VthbVOjKiIWml+Ng9iLbehO/Be8wkPcx6+lOujAYZxDzyKH/IgreNDUwUpcxz5Lw+3k6E9OljmoMFaz+Swms/G7ciMcw6XSa+ngKA4U3B3sxI2Mu4o9KQc5jmConYPuFPMcIxjFTE1IpnEqhTPHhZTDOWSaPZF03mqjhaZ7ImJ3al0ZX0XEzcJ2f2s+T/I99Kf+b+zA14YJ7sNENn6Ek9CZErou6byF99iFwDN8b7Pxegyk/gw2pP72JPPpKiKmFjndcTxpMzdck4MFVbTsqCJiIGX9FlYl/m26NFJJWChEW1N/HL3Z7R7Bz068SOSbLMl9abxYkj/jeVrfm/EvEz8vRI+LcnGm5rRDqXUVt/98sXai7h5sjIjXhZ4PZfPDGT+Y8acLm6cR0VH3HnyqUcQYLmfyy7EplY+zBT+v4JXVtMK1mno0iw/YkhW7zfNKwhzu4uI/Ldf/5cFZ1ifTEv4q2qlo2f4qfrTOhG9Njf4C0EWk9x5z6KYAAAAASUVORK5CYII=);
+}
+
+.geolocation-map-control button.search::before {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACIAAAAiCAYAAAA6RwvCAAABVUlEQVRYw+2YQRGEMAxFkVAJlYAEJCABCUhAQiWshJWABCRUAg7+XsrMTkibNDBdDvtnek0fSfqToQPQPeE8AuK5IDkBGAC8AESctQEIAHxXKTUIgB7ACr0CAHcrCIAJNm0A+ltALkAc2jWlKoKkcnCKCdCR0i3p4lNmroJwPRGEgC6VhGo2gaTXUQUhwEQryKsmUOaZU40WEOoTk8Eb3iTGYgGhcgaQmcRYL4N0BjHl+RnIeDuI1iFJ8EBivC0gm7bRCsGj1ktKIIGx6pohNjNZ9RYQnxliTgHRM1a/XrH4kIEZhEzstT0mgeTmBpJZzemJjgk65naTO9aAPvOFtavAWMqKdjHyhcxIW9quGRVVO2uh/lTr8fWMqbEw1cvzV/AlXXico2c884IgwZhADMY2STBNQDQwzUAkmKYgAoxvClKAGZqDMDBb89IwRjlI0/f/W+ID3tQLQPib2qQAAAAASUVORK5CYII=);
+}
+
+.geolocation-map-control button.clear {
+  background: #999;
+}
+.geolocation-map-control button.clear.disabled {
+  background: #bbb;
+}
+.geolocation-map-control button.clear::before {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADcAAAA3CAYAAACo29JGAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2hpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NTc3MiwgMjAxNC8wMS8xMy0xOTo0NDowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo3MEEyNTM1QjBBMjA2ODExODA4MzkzODI3MjczQzA3MCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDoyNzhDRDg3QTQ5MEExMUU0QTdGMkM1NzMyMDlBMjJBNSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoyNzhDRDg3OTQ5MEExMUU0QTdGMkM1NzMyMDlBMjJBNSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6NzBBMjUzNUIwQTIwNjgxMTgwODM5MzgyNzI3M0MwNzAiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6NzBBMjUzNUIwQTIwNjgxMTgwODM5MzgyNzI3M0MwNzAiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5jChSGAAAB2UlEQVR42tTaS07DQAwG4JANCSu4AuIstN3BJWFJyYaUy3ACRFclrAYPZKRplMfMxPbYln5VSh3JX9W6UZTCGFN42UL2kGpwXHou+7m3/vEh7Nv8V6sIaGFv/dydD3QNGw9mFAF9mBkCp2AagGOwM6BtejXzJRE4B3PV2MYaclAEDIFZz5U7QQuwCoUNt6V0YBRsiHPAViAwGjaGkwhMgk3hJAGTYXM4CcBVsCVcDLCWBgvB5QCiwEJxnEA0WAyOA4gKi8VRAtFhKTgKIAksFYcJJIOtwWEASWFrcWuA5DAMXAqQBYaFiwHecMEwcaHALy6YzcWfEK8qyB6ySTj3HfIIOWENUxa41UEeIIfcMApcCpAEZgv7a+nXNeSjf52qI+QO8kkxQEkEs7+95wWY+wCeILUWnIW9QLaB/ff9Eqql42JhpMCSGXbkBJaMMLsVbxe2KC6Q8Z6Hf23ZRvRnu/yKhRWcwBwwNmAuGAswJ4wcmBtGCpQAIwNKgZEAJcHQgdJgqMBsa5oDKBWGModk2Op5pMNWzaUBljyfFljSnJpg0cCQp/YkwWKAjXtCtlMECwFaz8417kaAkmFzwK73nG1LH6gBNgb8cbCx/zn7RqMI5gMbH2bzK8AAUThtyVYr9bAAAAAASUVORK5CYII=);
+}

@@ -1,0 +1,21 @@
+views.area.facets_summary_area:
+  type: views_area
+  label: 'Facets summary area'
+  mapping:
+    facet_summary:
+      type: string
+      label: 'Facet summary'
+    label_display:
+      type: boolean
+      label: 'Display block title'
+
+views.filter.facets_summary_filter:
+  type: views_filter
+  label: 'Facets summary filter'
+  mapping:
+    facet_summary:
+      type: string
+      label: 'Facet summary'
+    label_display:
+      type: boolean
+      label: 'Display block title'

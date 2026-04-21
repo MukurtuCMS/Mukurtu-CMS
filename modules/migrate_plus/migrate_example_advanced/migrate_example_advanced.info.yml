@@ -1,0 +1,14 @@
+type: module
+name: Migrate Example (Advanced)
+description: 'Specialized examples of Drupal 8+ migration.'
+package: Examples
+core_version_requirement: '^10.5 || ^11'
+dependencies:
+  - drupal:migrate
+  - migrate_plus:migrate_example_advanced_setup
+  - migrate_plus:migrate_plus
+
+# Information added by Drupal.org packaging script on 2026-01-23
+version: '6.0.10'
+project: 'migrate_plus'
+datestamp: 1769180624

@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for dashboards.module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function dashboards_uninstall() {
+  /** @var \Drupal\user\UserDataInterface $userData */
+  $userData = \Drupal::service('user.data');
+  $userData->delete('dashboards');
+
+  /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $manager */
+  $manager = \Drupal::service('entity_type.manager');
+  $boards = $manager->getStorage('dashboard')->loadMultiple();
+  $manager->getStorage('dashboard')->delete($boards);
+}

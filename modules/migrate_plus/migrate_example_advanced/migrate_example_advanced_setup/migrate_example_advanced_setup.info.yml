@@ -1,0 +1,17 @@
+type: module
+name: Migrate Advanced Example Setup
+description: 'Separate site configuration for the example from the actual migration.'
+package: Migration
+core_version_requirement: '^10.5 || ^11'
+hidden: true
+dependencies:
+  - drupal:comment
+  - drupal:image
+  - drupal:text
+  - drupal:taxonomy
+  - drupal:rest
+
+# Information added by Drupal.org packaging script on 2026-01-23
+version: '6.0.10'
+project: 'migrate_plus'
+datestamp: 1769180624

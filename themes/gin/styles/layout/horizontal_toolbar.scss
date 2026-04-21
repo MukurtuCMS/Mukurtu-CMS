@@ -1,0 +1,282 @@
+// Toolbar Variables
+:root {
+  --gin-toolbar-height: 39px;
+  --gin-toolbar-secondary-height: 48px;
+  --gin-scroll-offset: 72px;
+  --gin-toolbar-y-offset: var(--gin-toolbar-height);
+  --gin-toolbar-x-offset: 0px; // Needs px to work in calc() functions.
+  --gin-sticky-offset: 0px; // Needs px to work in calc() functions.
+
+  @include mq(medium) {
+    --gin-toolbar-height: 53px;
+    --gin-toolbar-secondary-height: 60px;
+    --gin-scroll-offset: 180px;
+    --gin-icon-size-toolbar: 18px;
+    --gin-sticky-offset: var(--gin-height-sticky);
+  }
+}
+
+.gin-secondary-toolbar--frontend {
+  inset-block-start: calc(var(--gin-toolbar-secondary-height) * -1);
+}
+
+// Toolbar
+.toolbar {
+  .toolbar-bar {
+    position: fixed;
+    inset-inline-start: 0;
+    width: 100%;
+    background: #100f10;
+    box-shadow: none;
+
+    @include mq(medium) {
+      display: flex;
+      background: none;
+    }
+
+    @include mq(medium) {
+      height: 0;
+    }
+
+    .toolbar-menu-administration {
+      > .toolbar-menu {
+        > .menu-item {
+          > .toolbar-icon,
+          > .toolbar-box > .toolbar-icon:not(.toolbar-handle) {
+            padding-block: 20px;
+            padding-inline-start: 3.25em;
+            padding-inline-end: 1.25em;
+            white-space: nowrap;
+
+            &::before {
+              inset-inline-start: 1em;
+            }
+          }
+
+          > .toolbar-box > .toolbar-icon:not(.toolbar-handle)::before {
+            inset-inline-start: var(--gin-spacing-s);
+          }
+        }
+      }
+    }
+
+    .toolbar-toggle-orientation {
+      display: none !important;
+    }
+  }
+}
+
+.toolbar-tray-vertical .toolbar-menu .level-1 > .toolbar-box .toolbar-icon.toolbar-handle {
+  width: 3rem;
+
+  &:before {
+    inset-inline-start: var(--gin-spacing-m);
+  }
+}
+
+.toolbar-tray-horizontal .level-1 .menu-item--expanded > .toolbar-box a {
+  width: 100%;
+}
+
+.toolbar-horizontal .toolbar-tray {
+  border-block-end: 0 none;
+}
+
+.toolbar .toolbar-menu,
+.toolbar-horizontal .menu-item > .toolbar-menu,
+.toolbar-horizontal .toolbar-tray .menu-item--expanded.menu-item--expanded,
+.toolbar .toolbar-tray {
+  background-color: var(--gin-bg-layer);
+}
+
+.toolbar-horizontal .toolbar-tray .toolbar-toggle-orientation {
+  border-inline-start: 1px solid var(--gin-border-color);
+}
+
+.toolbar-tray a,
+.toolbar-tray span,
+.toolbar .toolbar-menu .toolbar-menu a,
+.toolbar .toolbar-menu .toolbar-menu span {
+  color: var(--gin-color-text);
+
+  &:hover {
+    color: var(--gin-color-title);
+  }
+}
+
+.toolbar .toolbar-tray .menu-item--active-trail > .toolbar-box a,
+.toolbar .toolbar-tray .menu-item > .toolbar-icon.is-active,
+.toolbar .toolbar-tray .menu-item > .toolbar-box > .toolbar-icon.is-active,
+.toolbar .toolbar-tray a.is-active {
+  color: var(--gin-color-primary);
+  font-weight: var(--gin-font-weight-bold);
+  background-color: transparent;
+
+  &::before {
+    background: var(--gin-color-primary);
+  }
+}
+
+.toolbar .toolbar-tray .hover-intent > .toolbar-icon,
+.toolbar .toolbar-tray .hover-intent > .toolbar-box > .toolbar-icon:not(.toolbar-handle) {
+  color: var(--gin-color-primary-hover);
+  background-color: var(--gin-bg-item-hover);
+
+  &::before,
+  + .toolbar-handle::before {
+    background-color: var(--gin-color-primary);
+  }
+}
+
+.toolbar-tray-horizontal a:focus,
+.toolbar-box a:focus,
+.toolbar .toolbar-icon.toolbar-handle:focus {
+  background-color: var(--gin-bg-layer2);
+}
+
+.toolbar-menu__trigger,
+.toolbar .menu-item-title,
+.menu-item-sub-title {
+  display: none !important;
+}
+
+.gin--dark-mode .toolbar .toolbar-toggle-orientation {
+  background-color: var(--gin-bg-layer2);
+}
+
+.gin--classic-toolbar {
+  table.sticky-header {
+    @include mq(large) {
+      margin-block-start: 0;
+    }
+  }
+}
+
+#toolbar-item-administration-tray {
+  .toolbar-logo {
+    display: flex;
+    height: 100%;
+
+    + .toolbar-handle {
+      display: none;
+    }
+  }
+}
+
+.toolbar-tray-horizontal ul li.menu-item--expanded ul li.menu-item--expanded,
+.toolbar-tray-horizontal .toolbar-menu:not(:first-child) li.menu-item--expanded > a:focus {
+  position: relative;
+
+  &:before {
+    inset-block-start: 12px;
+    inset-inline-end: 12px;
+  }
+}
+
+.toolbar-tray-horizontal .menu-item:hover {
+  background-color: transparent;
+}
+
+.gin--horizontal-toolbar.gin--edit-form .page-wrapper__node-edit-form .layout-region-node-secondary {
+  @include mq(large) {
+    inset-block-start: var(--gin-toolbar-height);
+    height: calc(100% - var(--gin-toolbar-height));
+  }
+}
+
+// Main horizontal nav
+.gin--horizontal-toolbar #toolbar-administration {
+  @include mq(medium) {
+    z-index: 502;
+    position: fixed;
+    inset-block-start: 0;
+    width: 100%;
+
+    &,
+    .toolbar-bar {
+      height: var(--gin-toolbar-height);
+      background: var(--gin-bg-layer);
+    }
+  }
+
+  // align with content nicely
+  .toolbar-lining {
+    @include mq(medium) {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-inline-end: 0;
+    }
+  }
+
+  // home tab
+  .menu-item__tools,
+  .menu-item__admin_toolbar_tools-help {
+    @include mq(medium) {
+      margin-inline-start: calc(var(--gin-spacing-m) * -1);
+    }
+  }
+
+  // home logo
+  .toolbar-icon-admin-toolbar-tools-help {
+    width: auto;
+    height: 100%;
+    text-indent: -999em;
+
+    &:before {
+      mask-size: 20px 20px;
+    }
+
+    @include mq(medium) {
+      padding-inline-start: 2.875em;
+
+      &:before {
+        inset-block-start: -1px;
+        inset-inline-start: 14px;
+        width: 24px;
+        mask-size: 28px 28px;
+      }
+    }
+  }
+
+  // target fist level only
+  .toolbar-menu-administration {
+    @include mq(medium) {
+      margin-inline: m#{i}n(5vw, var(--gin-spacing-xxl));
+
+      > .toolbar-menu {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+      }
+    }
+
+    // Hover
+    .menu-item .menu-item:hover > .toolbar-icon {
+      color: var(--gin-color-primary-hover);
+      background: var(--gin-color-primary-light);
+    }
+
+    // Active
+    .menu-item> .toolbar-icon.is-active {
+      color: var(--gin-color-primary-active);
+      background: var(--gin-bg-item-hover);
+    }
+  }
+}
+
+// Drupal 10.1 Toolbar loading overrides
+#toolbar-item-administration-tray,
+.toolbar-loading #toolbar-item-administration-tray {
+  box-shadow: 0 0 4px rgba(0, 0, 0, .1),
+    0 2px 6px 2px rgba(0, 0, 0, .03);
+
+  .gin--dark-mode & {
+    box-shadow: 0 0 4px rgba(0, 0, 0, .3);
+  }
+}
+
+// Classes that hide submenus are not available until the toolbar has
+// initialized, so hide them until loading is complete.
+.toolbar-loading .menu-item--expanded > .toolbar-menu {
+  display: none;
+}

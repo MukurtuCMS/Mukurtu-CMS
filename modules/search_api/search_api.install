@@ -1,0 +1,428 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Search API module.
+ */
+
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Render\MarkupInterface;
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Database\DatabaseException;
+use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+use Drupal\search_api\Entity\Server;
+use Drupal\search_api\Hook\SearchApiHooks;
+
+/**
+ * Implements hook_schema().
+ */
+function search_api_schema() {
+  $schema['search_api_item'] = [
+    'description' => 'Stores the items which should be indexed for each index, and their state.',
+    'fields' => [
+      'index_id' => [
+        'description' => 'The ID of the index this item belongs to',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+      ],
+      'datasource' => [
+        'description' => 'The plugin ID of the datasource this item belongs to',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+      ],
+      'item_id' => [
+        'description' => 'The unique identifier of this item',
+        'type' => 'varchar',
+        'length' => 150,
+        'not null' => TRUE,
+      ],
+      'changed' => [
+        'description' => 'A timestamp indicating when the item was last changed',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'status' => [
+        'description' => 'Boolean indicating the indexing status: "1" if item needs to be indexed, "0" otherwise',
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+    ],
+    'indexes' => [
+      'indexing' => ['index_id', 'status', 'changed', 'item_id'],
+    ],
+    'primary key' => ['index_id', 'item_id'],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function search_api_uninstall() {
+  \Drupal::state()->delete('search_api_use_tracking_batch');
+  foreach (\Drupal::configFactory()->listAll('search_api.index.') as $index_id) {
+    \Drupal::state()->delete("search_api.index.$index_id.has_reindexed");
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function search_api_requirements($phase) {
+  if ($phase == 'runtime') {
+    [$severity_warning, $severity_error] = DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.2',
+      fn () => [RequirementSeverity::Warning, RequirementSeverity::Error],
+      fn () => [REQUIREMENT_WARNING, REQUIREMENT_ERROR],
+    );
+
+    $requirements = [];
+    $message = \Drupal::getContainer()->get(SearchApiHooks::class)->checkForSearchModule();
+    if ($message) {
+      $requirements += [
+        'search_api_core_search' => [
+          'title' => t('Search API'),
+          'value' => $message,
+          'severity' => $severity_warning,
+        ],
+      ];
+    }
+
+    /** @var \Drupal\search_api\ServerInterface[] $servers */
+    $servers = Server::loadMultiple();
+    $unavailable_servers = [];
+    foreach ($servers as $server) {
+      if ($server->status() && !$server->isAvailable()) {
+        $unavailable_servers[] = $server->label();
+      }
+    }
+    if (!empty($unavailable_servers)) {
+      $requirements += [
+        'search_api_server_unavailable' => [
+          'title' => t('Search API'),
+          'value' => \Drupal::translation()->formatPlural(
+            count($unavailable_servers),
+            'The search server "@servers" is currently not available',
+            'The following search servers are not available: @servers',
+            ['@servers' => implode(', ', $unavailable_servers)]
+          ),
+          'severity' => $severity_error,
+        ],
+      ];
+    }
+
+    $pending_tasks = \Drupal::getContainer()
+      ->get('search_api.task_manager')
+      ->getTasksCount();
+    if ($pending_tasks) {
+      $args['@link'] = '';
+      $url = Url::fromRoute('search_api.execute_tasks');
+      if ($url->access()) {
+        $link = new Link(t('Execute now'), $url);
+        $link = $link->toString();
+        $args['@link'] = $link;
+        $args['@link'] = new FormattableMarkup(' (@link)', $args);
+      }
+
+      $requirements['search_api_pending_tasks'] = [
+        'title' => t('Search API'),
+        'value' => \Drupal::translation()->formatPlural(
+          $pending_tasks,
+          'There is @count pending Search API task. @link',
+          'There are @count pending Search API tasks. @link',
+          $args
+        ),
+        'severity' => $severity_warning,
+      ];
+    }
+
+    return $requirements;
+  }
+  return [];
+}
+
+/**
+ * Adapts index config schema to remove an unnecessary layer for plugins.
+ */
+function search_api_update_8101() {
+  // This update function updates search indexes for the change from
+  // https://www.drupal.org/node/2656052.
+  $config_factory = \Drupal::configFactory();
+  $plugin_types = [
+    'processor',
+    'datasource',
+    'tracker',
+  ];
+
+  foreach ($config_factory->listAll('search_api.index.') as $index_id) {
+    $index = $config_factory->getEditable($index_id);
+    $changed = FALSE;
+
+    foreach ($plugin_types as $plugin_type) {
+      $property = $plugin_type . '_settings';
+      $plugins = $index->get($property);
+      foreach ($plugins as $id => $config) {
+        if (isset($config['plugin_id']) && isset($config['settings'])) {
+          $changed = TRUE;
+          $plugins[$id] = $config['settings'];
+        }
+      }
+      $index->set($property, $plugins);
+    }
+
+    if ($changed) {
+      // Mark the resulting configuration as trusted data. This avoids issues
+      // with future schema changes.
+      $index->save(TRUE);
+    }
+  }
+
+  return t('Index config schema updated.');
+}
+
+/**
+ * Removes unsupported cache plugins from Search API views.
+ */
+function search_api_update_8102() {
+  $config_factory = \Drupal::configFactory();
+  $changed = [];
+
+  foreach ($config_factory->listAll('views.view.') as $view_config_name) {
+    $view = $config_factory->getEditable($view_config_name);
+    $displays = $view->get('display');
+
+    if ($displays['default']['display_options']['query']['type'] === 'search_api_query') {
+      $change = FALSE;
+      foreach ($displays as $id => $display) {
+        if (in_array($display['display_options']['cache']['type'] ?? '', ['tag', 'time'])) {
+          $displays[$id]['display_options']['cache']['type'] = 'none';
+          $change = TRUE;
+        }
+      }
+
+      if ($change) {
+        $view->set('display', $displays);
+        // Mark the resulting configuration as trusted data. This avoids issues
+        // with future schema changes.
+        $view->save(TRUE);
+        $changed[] = $view->get('id');
+      }
+    }
+  }
+
+  if (!empty($changed)) {
+    return \Drupal::translation()->translate('Removed incompatible cache options for the following Search API-based views: @ids', ['@ids' => implode(', ', array_unique($changed))]);
+  }
+
+  return NULL;
+}
+
+/**
+ * Switches from the old "Node status" to the new "Entity status" processor.
+ */
+function search_api_update_8103() {
+  // This update function updates search indexes for the change from
+  // https://www.drupal.org/node/2491175.
+  $config_factory = \Drupal::configFactory();
+
+  foreach ($config_factory->listAll('search_api.index.') as $index_id) {
+    $index = $config_factory->getEditable($index_id);
+    $processors = $index->get('processor_settings');
+
+    if (isset($processors['node_status'])) {
+      $processors['entity_status'] = $processors['node_status'];
+      unset($processors['node_status']);
+      $index->set('processor_settings', $processors);
+      // Mark the resulting configuration as trusted data. This avoids issues
+      // with future schema changes.
+      $index->save(TRUE);
+    }
+  }
+
+  // Clear the processor plugin cache so that if anything else indirectly tries
+  // to update Search API-related configuration, the plugin helper gets the most
+  // up-to-date plugin definitions.
+  \Drupal::getContainer()
+    ->get('plugin.manager.search_api.processor')
+    ->clearCachedDefinitions();
+
+  return t('Switched from old "Node status" to new "Entity status" processor.');
+}
+
+/**
+ * Update Views to use the time-based cache plugin for Search API.
+ */
+function search_api_update_8104() {
+  $config_factory = \Drupal::configFactory();
+  $changed = [];
+
+  foreach ($config_factory->listAll('views.view.') as $view_config_name) {
+    $view = $config_factory->getEditable($view_config_name);
+    $displays = $view->get('display');
+
+    $updated = FALSE;
+    foreach ($displays as $id => $display) {
+      if (($display['display_options']['cache']['type'] ?? '') === 'search_api') {
+        $displays[$id]['display_options']['cache']['type'] = 'search_api_time';
+        $updated = TRUE;
+      }
+    }
+
+    if ($updated) {
+      $view->set('display', $displays);
+      // Mark the resulting configuration as trusted data. This avoids issues
+      // with future schema changes.
+      $view->save(TRUE);
+      $changed[] = $view->get('id');
+    }
+  }
+
+  if (!empty($changed)) {
+    return \Drupal::translation()->translate('The following views have been updated to use the time-based cache plugin: @ids', ['@ids' => implode(', ', array_unique($changed))]);
+  }
+
+  return NULL;
+}
+
+/**
+ * Update the configuration schema of the "Ignore characters" processor.
+ */
+function search_api_update_8105() {
+  // This update function updates search indexes for the change from
+  // https://www.drupal.org/node/3007933.
+  $config_factory = \Drupal::configFactory();
+
+  $changes = FALSE;
+  foreach ($config_factory->listAll('search_api.index.') as $index_id) {
+    $index = $config_factory->getEditable($index_id);
+    $processors = $index->get('processor_settings');
+
+    if (isset($processors['ignore_character'])) {
+      $classes = $processors['ignore_character']['strip']['character_sets'];
+      $classes = array_values(array_filter($classes));
+      $processors['ignore_character']['ignorable_classes'] = $classes;
+      unset($processors['ignore_character']['strip']);
+      $index->set('processor_settings', $processors);
+      // Mark the resulting configuration as trusted data. This avoids issues
+      // with future schema changes.
+      $index->save(TRUE);
+      $changes = TRUE;
+    }
+  }
+
+  if ($changes) {
+    return t('Updated the configuration schema of the "Ignore characters" processor.');
+  }
+  return NULL;
+}
+
+/**
+ * Remove remnants of the search_api_views_taxonomy module.
+ */
+function search_api_update_8106() {
+  try {
+    \Drupal::database()
+      ->delete('key_value')
+      ->condition('collection', 'system.schema')
+      ->condition('name', 'search_api_views_taxonomy')
+      ->execute();
+  }
+  catch (DatabaseException) {
+    // The admin might have done this already to get rid of the warning
+    // themselves. It's not really important enough to fail on this, in any
+    // case. In the worst case, the warning just remains. So, just ignore any
+    // exception. (Site could also use an alternate key/value store.)
+  }
+}
+
+/**
+ * Add a unique index to the task entity type's storage.
+ */
+function search_api_update_8107() {
+  // This function body was removed since it was out-dated.
+  // See search_api_update_8110().
+}
+
+/**
+ * Add configuration for boost factors.
+ */
+function search_api_update_8108() {
+  $settings = \Drupal::configFactory()->getEditable('search_api.settings');
+  $data = $settings->getRawData();
+  $data += [
+    'boost_factors' => [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0,
+      1.1,
+      1.2,
+      1.3,
+      1.4,
+      1.5,
+      2.0,
+      3.0,
+      5.0,
+      8.0,
+      13.0,
+      21.0,
+    ],
+  ];
+  $settings->setData($data)->save(TRUE);
+}
+
+/**
+ * Enable index entity references option by default on existing indexes.
+ */
+function search_api_update_8109(): MarkupInterface {
+  // This update function updates search indexes for the change from
+  // https://www.drupal.org/project/search_api/issues/3178307.
+  $config_factory = \Drupal::configFactory();
+
+  foreach ($config_factory->listAll('search_api.index.') as $index_id) {
+    $index = $config_factory->getEditable($index_id);
+    $options = $index->get('options');
+    $options['track_changes_in_references'] = TRUE;
+    $index->set('options', $options);
+
+    // Mark the resulting configuration as trusted data. This avoids issues
+    // with future schema changes.
+    $index->save(TRUE);
+  }
+
+  return t('Enabled "Track changes in referenced entities" on all existing search indexes.');
+}
+
+/**
+ * Remove the unique index from the task entity type's storage.
+ */
+function search_api_update_8110() {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $manager->getEntityType('search_api_task');
+  // Apparently, getEntityType() can return NULL under some circumstances.
+  if (!$entity_type) {
+    return;
+  }
+  // Do not bother resetting the storage schema handler in case it was not set
+  // in the first place.
+  $handler = $entity_type->getHandlerClass('storage_schema');
+  if (in_array($handler, [SqlContentEntityStorageSchema::class, NULL], TRUE)) {
+    return;
+  }
+  $entity_type->setHandlerClass('storage_schema', SqlContentEntityStorageSchema::class);
+  $manager->updateEntityType($entity_type);
+}

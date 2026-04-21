@@ -1,0 +1,13 @@
+core:
+  version: VERSION
+  css:
+    component:
+      css/gin-lb-plus.core.css: {}
+      css/gin-lb-plus.lb.css: {}
+      css/gin-lb-plus.link.css: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupal
+    - core/drupalSettings
+    - field_group/element.horizontal_tabs

@@ -1,0 +1,5 @@
+services:
+  term_merge_event_subscriber:
+    class: '\Drupal\term_merge_test_events\EventSubscriber\TermsMergedEventSubscriber'
+    tags:
+      - { name: event_subscriber }

@@ -1,0 +1,7 @@
+services:
+
+  search_api_test_events.event_listener:
+    class: Drupal\search_api_test_events\EventListener
+    arguments: ['@messenger']
+    tags:
+      - { name: event_subscriber }

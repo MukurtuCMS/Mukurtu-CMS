@@ -1,0 +1,15 @@
+name: 'Gin Layout Builder Plus'
+core: 8.x
+core_version_requirement: '^11'
+type: module
+description: 'Layout Builder extensions with for Gin Layout Builder.'
+package: 'User interface'
+dependencies:
+  - field_group:field_group
+  - gin_lb:gin_lb (>=2.0)
+  - section_library:section_library
+
+# Information added by Drupal.org packaging script on 2025-07-21
+version: '3.0.0-beta1'
+project: 'gin_lb'
+datestamp: 1753078114

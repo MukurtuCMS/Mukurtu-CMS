@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * @file
+ * Handle requirements.
+ */
+
+use Drupal\Core\Url;
+
+/**
+ * {@inheritdoc}
+ *
+ * Implements hook_requirements().
+ */
+function geolocation_yandex_requirements($phase) {
+  $requirements = [];
+  if ($phase == 'runtime') {
+    $requirements['geolocation_yandex_api_key'] = [
+      'title' => t('Geolocation - Yandex Maps API Key'),
+      'value' => t('Yandex Maps API key set'),
+      'description' => t('A Yandex Maps API key is set in the <a href=":geolocation_yandex_settings_url">Geolocation settings</a>.', [':geolocation_yandex_settings_url' => Url::fromRoute('geolocation_yandex.settings')->toString()]),
+      'severity' => REQUIREMENT_OK,
+    ];
+
+    if (empty(\Drupal::config('geolocation_yandex.settings')->get('api_key'))) {
+      $requirements['geolocation_yandex_api_key']['value'] = t('Yandex maps API key missing');
+      $requirements['geolocation_yandex_api_key']['description'] = t('A Yandex maps API key is missing in the <a href=":geolocation_yandex_settings_url">Geolocation settings</a>.', [':geolocation_yandex_settings_url' => Url::fromRoute('geolocation_yandex.settings')->toString()]);
+      $requirements['geolocation_yandex_api_key']['severity'] = REQUIREMENT_WARNING;
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Move settings to new configuration.
+ */
+function geolocation_yandex_update_8001(&$sandbox) {
+  $config_factory = \Drupal::configFactory();
+  $old_config = $config_factory->getEditable('yandex_maps.settings');
+  if (!$old_config) {
+    return;
+  }
+
+  $new_config = $config_factory->getEditable('geolocation_yandex.settings');
+  $new_config->set('api_key', $old_config->get('key'));
+  $new_config->save();
+  $old_config->delete();
+  return \Drupal::translation()->translate('Settings from old configuration moved to new one.');
+}
+
+/**
+ * Setting new config "packages" to "full".
+ */
+function geolocation_yandex_update_8002(&$sandbox) {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('geolocation_yandex.settings');
+  $config->set('packages', ['full']);
+  $config->save();
+}

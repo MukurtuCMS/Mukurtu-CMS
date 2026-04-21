@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Message notify example module.
+ */
+
+use Drupal\comment\Entity\Comment;
+use Drupal\message\Entity\Message;
+
+/**
+ * Implements hook_comment_insert().
+ *
+ * Send a message to the node author when a new comment is created.
+ */
+function message_notify_example_comment_insert(Comment $comment) {
+  // Get node where comment was posted.
+  $node = $comment->get('entity_id')->first()->get('entity')->getTarget()->getValue();
+  // Call message notify service.
+  $notifier = \Drupal::service('message_notify.sender');
+  // Create a message with node author as message creator.
+  $message = Message::create(['template' => 'example_create_comment', 'uid' => $node->getOwnerId()]);
+  $message->set('field_comment_reference', $comment);
+  $message->set('field_published', $comment->isPublished());
+  $message->save();
+  // Send message to message creator(in this case = node author).
+  $notifier->send($message);
+}

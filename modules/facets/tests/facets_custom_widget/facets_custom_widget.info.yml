@@ -1,0 +1,11 @@
+name: 'Facets custom widget'
+type: module
+description: 'Facets custom widget'
+package: 'Testing'
+hidden: true
+core_version_requirement: ^10.1 || ^11
+
+# Information added by Drupal.org packaging script on 2025-10-17
+version: '3.0.2'
+project: 'facets'
+datestamp: 1760700683

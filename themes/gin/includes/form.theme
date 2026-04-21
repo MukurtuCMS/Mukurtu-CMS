@@ -1,0 +1,186 @@
+<?php
+
+/**
+ * @file
+ * form.theme
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\gin\GinContentFormHelper;
+use Drupal\gin\GinDescriptionToggle;
+use Drupal\gin\GinPreRender;
+use Drupal\gin\GinSettings;
+
+/**
+ * Implements form_alter_HOOK() for some major form changes.
+ */
+function gin_form_alter(&$form, $form_state, $form_id) {
+  \Drupal::classResolver(GinContentFormHelper::class)->formAlter($form, $form_state, $form_id);
+
+  // User form (Login, Register or Forgot password).
+  if (strpos($form_id, 'user_login') !== FALSE || strpos($form_id, 'user_register') !== FALSE || strpos($form_id, 'user_pass') !== FALSE) {
+    $form['actions']['submit']['#attributes']['class'][] = 'button--primary';
+  }
+
+  // Bulk forms: update action & actions to small variants.
+  if (strpos($form_id, 'views_form') !== FALSE) {
+    if (isset($form['header'])) {
+      $bulk_form = current(preg_grep('/_bulk_form/', array_keys($form['header'])));
+
+      if (isset($form['header'][$bulk_form])) {
+        $form['header'][$bulk_form]['action']['#attributes']['class'][] = 'form-element--type-select--small';
+        $form['header'][$bulk_form]['actions']['submit']['#attributes']['class'][] = 'button--small';
+
+        // Remove double entry of submit button.
+        unset($form['actions']['submit']);
+      }
+    }
+  }
+
+  // Delete forms: alter buttons.
+  if (strpos($form_id, 'delete_form') !== FALSE) {
+    $form['actions']['submit']['#attributes']['class'][] = 'button--danger';
+    $form['actions']['cancel']['#attributes']['class'][] = 'button--secondary';
+  }
+}
+
+/**
+ * Implements form_user_form_alter().
+ */
+function gin_form_user_form_alter(&$form, FormStateInterface $form_state) {
+  // If new user account, don't show settings yet.
+  if ($form_state->getFormObject()->getEntity()->isNew()) {
+    return;
+  }
+
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+
+  if ($settings->allowUserOverrides()) {
+    // Inject the settings for the dark mode feature.
+    $form['gin_theme_settings'] = [
+      '#type' => 'details',
+      '#title' => t('Admin theme settings'),
+      '#open' => TRUE,
+      '#weight' => 90,
+    ];
+
+    /** @var \Drupal\Core\Session\AccountInterface $account */
+    $account = $form_state->getBuildInfo()['callback_object']->getEntity();
+    $form['gin_theme_settings']['enable_user_settings'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Enable overrides'),
+      '#description' => t("Enables default admin theme overrides."),
+      '#default_value' => $settings->userOverrideEnabled($account),
+      '#weight' => 0,
+    ];
+
+    $form['gin_theme_settings']['user_settings'] = [
+      '#type' => 'container',
+      '#states' => [
+        // Show if met.
+        'visible' => [
+          ':input[name="enable_user_settings"]' => ['checked' => TRUE],
+        ],
+      ],
+    ] + $settings->getSettingsForm($account);
+
+    // Attach custom library.
+    $form['#attached']['library'][] = 'gin/settings';
+
+    array_unshift($form['actions']['submit']['#submit'], '_gin_user_form_submit');
+  }
+}
+
+/**
+ * Implements template_preprocess_HOOK() for select.
+ */
+function gin_preprocess_select(&$variables) {
+  if (in_array('block-weight', $variables['attributes']['class'], TRUE)) {
+    $variables['attributes']['class'][] = 'form-element--extrasmall';
+  }
+}
+
+/**
+ * Implements template_preprocess_HOOK() for form_element.
+ */
+function gin_preprocess_form_element(&$variables) {
+  \Drupal::classResolver(GinDescriptionToggle::class)->preprocess($variables);
+}
+
+/**
+ * Implements template_preprocess_HOOK() for datetime_wrapper.
+ */
+function gin_preprocess_datetime_wrapper(&$variables) {
+  \Drupal::classResolver(GinDescriptionToggle::class)->preprocess($variables);
+}
+
+/**
+ * Implements template_preprocess_HOOK() for details.
+ */
+function gin_preprocess_details(&$variables) {
+  \Drupal::classResolver(GinDescriptionToggle::class)->preprocess($variables);
+}
+
+/**
+ * Implements template_preprocess_HOOK() for fieldset.
+ */
+function gin_preprocess_fieldset(&$variables) {
+  \Drupal::classResolver(GinDescriptionToggle::class)->preprocess($variables);
+}
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function gin_element_info_alter(&$info) {
+  if (array_key_exists('text_format', $info)) {
+    $info['text_format']['#pre_render'][] = [
+      GinPreRender::class,
+      'textFormat',
+    ];
+  }
+}
+
+/**
+ * Implements template_preprocess_HOOK() for text_format_wrapper.
+ */
+function gin_preprocess_text_format_wrapper(&$variables) {
+  /** @var \Drupal\gin\GinSettings $settings */
+  $settings = \Drupal::classResolver(GinSettings::class);
+  if ($settings->get('show_description_toggle') && !empty($variables['description'])) {
+    $variables['description_display'] = 'invisible';
+    $variables['description_toggle'] = TRUE;
+  }
+}
+
+/**
+ * Implements template_preprocess_inline_entity_form_entity_table() for forms.
+ */
+function gin_preprocess_inline_entity_form_entity_table(array &$variables) {
+  $variables['table']['#attached']['library'][] = 'gin/inline_entity_form';
+}
+
+/**
+ * Set and get the form actions of the current request.
+ *
+ * @param array|null $actions
+ *   If not NULL, the given actions will be remembered for the current request
+ *   so that they can be retrieved later when processing the page.
+ *
+ * @return array|null
+ *   If set, the previously stored actions, NULL otherwise.
+ */
+function _gin_form_actions(?array $actions = NULL): ?array {
+  static $preparedActions;
+  if ($actions !== NULL) {
+    $preparedActions = $actions;
+  }
+  return $preparedActions;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for checkbox_tree.
+ */
+function gin_preprocess_checkbox_tree(array &$variables) {
+  $variables['#attached']['library'][] = 'gin/term_reference_tree';
+}

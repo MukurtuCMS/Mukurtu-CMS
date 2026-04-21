@@ -1,0 +1,15 @@
+name: Dashboards matomo
+description: 'Components for core statistics.'
+package: Dashboards
+
+core_version_requirement: ^9.4 || ^10 || ^11
+type: module
+
+dependencies:
+  - matomo:matomo
+  - matomo_reporting_api:matomo_reporting_api
+
+# Information added by Drupal.org packaging script on 2026-03-30
+version: '2.1.11'
+project: 'dashboards'
+datestamp: 1774894673

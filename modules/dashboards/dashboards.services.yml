@@ -1,0 +1,23 @@
+services:
+  plugin.manager.dashboard:
+    class: Drupal\dashboards\Plugin\DashboardManager
+    parent: default_plugin_manager
+  theme.negotiator.dashboard:
+    class: Drupal\dashboards\Theme\ThemeNegotiator
+    arguments: ["@theme.manager", "@config.factory", "@current_user"]
+    tags:
+      - { name: theme_negotiator, priority: 1000 }
+  dashboards.cache:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin }
+    factory: cache_factory:get
+    arguments: [dashboards]
+  dashboards.views_preview:
+    class: '\Drupal\dashboards\EventSubscriber\ViewFormSubscriber'
+    tags:
+      - { name: "event_subscriber" }
+  dashboards.gin_decorator:
+    class: '\Drupal\dashboards\EventSubscriber\Decorator'
+    tags:
+      - { name: "event_subscriber" }

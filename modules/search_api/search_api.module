@@ -1,0 +1,256 @@
+<?php
+
+/**
+ * @file
+ * Provides a rich framework for creating searches.
+ */
+
+use Drupal\Core\Config\ConfigImporter;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\node\NodeInterface;
+use Drupal\search_api\Entity\Index;
+use Drupal\search_api\Hook\ContentEntityDatasourceHooks;
+use Drupal\search_api\Hook\SearchApiHooks;
+use Drupal\search_api\IndexInterface;
+use Drupal\views\ViewEntityInterface;
+
+// Load all theme functions.
+require_once __DIR__ . '/search_api.theme.inc';
+// Load Views hook implementations.
+require_once __DIR__ . '/search_api.views_hooks.inc';
+
+/**
+ * Implements hook_help().
+ */
+#[LegacyHook]
+function search_api_help($route_name): string|\Stringable|array|null {
+  return \Drupal::getContainer()->get(SearchApiHooks::class)->help($route_name);
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * This will first execute pending tasks (if there are any). After that, items
+ * will be indexed on all enabled indexes with a non-zero cron limit. Indexing
+ * will run for the time set in the cron_worker_runtime config setting
+ * (defaulting to 15 seconds), but will at least index one batch of items on
+ * each index.
+ */
+#[LegacyHook]
+function search_api_cron() {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->cron();
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function search_api_hook_info() {
+  // @todo Remove once we depend on Drupal 12.0+.
+  $hooks = [
+    'search_api_backend_info_alter',
+    'search_api_server_features_alter',
+    'search_api_datasource_info_alter',
+    'search_api_processor_info_alter',
+    'search_api_data_type_info_alter',
+    'search_api_parse_mode_info_alter',
+    'search_api_tracker_info_alter',
+    'search_api_displays_alter',
+    'search_api_field_type_mapping_alter',
+    'search_api_views_handler_mapping_alter',
+    'search_api_views_field_handler_mapping_alter',
+    'search_api_index_items_alter',
+    'search_api_items_indexed',
+    'search_api_query_alter',
+    // Unfortunately, it's not possible to add hook infos for hooks with
+    // "wildcards".
+    // 'search_api_query_TAG_alter',
+    'search_api_results_alter',
+    // 'search_api_results_TAG_alter',
+    'search_api_index_reindex',
+  ];
+  $info = [
+    'group' => 'search_api',
+  ];
+  return array_fill_keys($hooks, $info);
+}
+
+/**
+ * Implements hook_config_import_steps_alter().
+ */
+#[LegacyHook]
+function search_api_config_import_steps_alter(&$sync_steps, ConfigImporter $config_importer) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->configImportStepsAlter($sync_steps, $config_importer);
+}
+
+/**
+ * Implements hook_entity_insert().
+ *
+ * Note that this function implements tracking only on behalf of the "Content
+ * Entity" datasource defined in this module, not for entity-based datasources
+ * in general. Datasources defined by other modules still have to implement
+ * their own mechanism for tracking new/updated/deleted entities.
+ *
+ * @see \Drupal\search_api\Plugin\search_api\datasource\ContentEntityTrackingManager::entityInsert()
+ */
+#[LegacyHook]
+function search_api_entity_insert(EntityInterface $entity) {
+  \Drupal::getContainer()->get(ContentEntityDatasourceHooks::class)->entityInsert($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ *
+ * Note that this function implements tracking only on behalf of the "Content
+ * Entity" datasource defined in this module, not for entity-based datasources
+ * in general. Datasources defined by other modules still have to implement
+ * their own mechanism for tracking new/updated/deleted entities.
+ *
+ * Independent of datasources, however, this will also call
+ * \Drupal\search_api\Utility\TrackingHelper::trackReferencedEntityUpdate() to
+ * attempt to mark all items for reindexing that indirectly indexed changed
+ * fields of this entity.
+ *
+ * @see \Drupal\search_api\Plugin\search_api\datasource\ContentEntityTrackingManager::entityUpdate()
+ * @see \Drupal\search_api\Utility\TrackingHelper::trackReferencedEntityUpdate()
+ */
+#[LegacyHook]
+function search_api_entity_update(EntityInterface $entity) {
+  \Drupal::getContainer()->get(ContentEntityDatasourceHooks::class)->entityUpdate($entity);
+  \Drupal::getContainer()->get(SearchApiHooks::class)->entityUpdate($entity);
+}
+
+/**
+ * Implements hook_entity_delete().
+ *
+ * Note that this function implements tracking only on behalf of the "Content
+ * Entity" datasource defined in this module, not for entity-based datasources
+ * in general. Datasources defined by other modules still have to implement
+ * their own mechanism for tracking new/updated/deleted entities.
+ *
+ * Independent of datasources, however, this will also call
+ * \Drupal\search_api\Utility\TrackingHelper::trackReferencedEntityUpdate() to
+ * attempt to mark all items for reindexing that indirectly indexed any fields
+ * of this entity.
+ *
+ * @see \Drupal\search_api\Plugin\search_api\datasource\ContentEntityTrackingManager::entityDelete()
+ */
+#[LegacyHook]
+function search_api_entity_delete(EntityInterface $entity) {
+  \Drupal::getContainer()->get(ContentEntityDatasourceHooks::class)->entityDelete($entity);
+  \Drupal::getContainer()->get(SearchApiHooks::class)->entityDelete($entity);
+}
+
+/**
+ * Implements hook_node_access_records_alter().
+ *
+ * Marks the node and its comments changed for indexes that use the "Content
+ * access" processor.
+ */
+#[LegacyHook]
+function search_api_node_access_records_alter(array &$grants, NodeInterface $node) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->nodeAccessRecordsAlter($grants, $node);
+}
+
+/**
+ * Implements hook_theme().
+ */
+#[LegacyHook]
+function search_api_theme() {
+  return \Drupal::getContainer()->get(SearchApiHooks::class)->theme();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for type "search_api_index".
+ *
+ * Clears the Views row plugin cache, so our row plugin will become available
+ * for new indexes right away.
+ *
+ * @see search_api_views_plugins_row_alter()
+ */
+#[LegacyHook]
+function search_api_search_api_index_insert(Index $index) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->searchApiIndexInsert($index);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for type "search_api_index".
+ *
+ * Implemented on behalf of the "entity" datasource plugin.
+ *
+ * @see \Drupal\search_api\Plugin\search_api\datasource\ContentEntityTrackingManager::indexUpdate()
+ */
+#[LegacyHook]
+function search_api_search_api_index_update(IndexInterface $index) {
+  \Drupal::getContainer()->get(ContentEntityDatasourceHooks::class)->searchApiIndexUpdate($index);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for type "view".
+ */
+#[LegacyHook]
+function search_api_view_insert(ViewEntityInterface $view) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->viewInsert($view);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for type "view".
+ */
+#[LegacyHook]
+function search_api_view_presave(ViewEntityInterface $view) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->viewPresave($view);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for type "view".
+ */
+#[LegacyHook]
+function search_api_view_update(ViewEntityInterface $view) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->viewUpdate($view);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for type "view".
+ */
+#[LegacyHook]
+function search_api_view_delete(ViewEntityInterface $view) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->viewDelete($view);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for form "views_ui_edit_display_form".
+ */
+#[LegacyHook]
+function search_api_form_views_ui_edit_display_form_alter(&$form, FormStateInterface $form_state) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->viewsUiEditDisplayFormAlter($form, $form_state);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for views_exposed_form().
+ *
+ * Custom integration for facets. When a Views exposed filter is modified on a
+ * search results page it will lose any facets which have been already selected.
+ * This adds hidden fields for each facet so their values are retained.
+ */
+#[LegacyHook]
+function search_api_form_views_exposed_form_alter(&$form, FormStateInterface $form_state) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->viewsExposedFormAlter($form, $form_state);
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+#[LegacyHook]
+function search_api_entity_extra_field_info() {
+  return \Drupal::getContainer()->get(SearchApiHooks::class)->entityExtraFieldInfo();
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+#[LegacyHook]
+function search_api_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  \Drupal::getContainer()->get(SearchApiHooks::class)->entityView($build, $entity, $display, $view_mode);
+}

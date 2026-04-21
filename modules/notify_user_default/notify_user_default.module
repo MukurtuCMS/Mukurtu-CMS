@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Contains notify_user_default.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_help().
+ */
+function notify_user_default_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the notify_user_default module.
+    case 'help.page.notify_user_default':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Allows users to be notified on account creation by default') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function notify_user_default_form_user_register_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (isset($form['account']['notify'])) {
+    // Notify user by default on account creation.
+    $form['account']['notify']['#default_value'] = TRUE;
+  }
+}
