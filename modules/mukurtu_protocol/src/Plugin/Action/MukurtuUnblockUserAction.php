@@ -34,7 +34,18 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
     }
     if ($entity->status->value != 1) {
       $entity->set('status', TRUE);
-      $entity->save();
+      try {
+        $entity->save();
+      }
+      catch (\Throwable $e) {
+        // postSave() sends a notification email; if the user has no email
+        // address the mail system throws a TypeError. The DB write already
+        // completed, so we log and continue.
+        \Drupal::logger('mukurtu_protocol')->warning(
+          'Could not send activation email for user @uid: @message',
+          ['@uid' => $entity->id(), '@message' => $e->getMessage()]
+        );
+      }
     }
   }
 
