@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_core;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\user\RoleInterface;
 use Drupal\Core\Cache\CacheableMetadata;
@@ -71,17 +72,15 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     unset($roles[RoleInterface::ANONYMOUS_ID]);
     $users_roles = array_map(fn(RoleInterface $role) => $role->label(), $roles);
     asort($users_roles);
-    $row['roles']['data'] = [
-      '#theme' => 'item_list',
-      '#items' => $users_roles,
-    ];
+    $row['roles']['data']['#markup'] = implode(', ', $users_roles);
     $options = [
       'return_as_object' => TRUE,
     ];
-    $row['communities']['data'] = [
-      '#theme' => 'item_list',
-      '#items' => $this->getUserCommunities($entity),
-    ];
+    $community_links = array_map(
+      fn($community) => Link::fromTextAndUrl($community->getName(), $community->toUrl())->toString(),
+      $this->getUserCommunities($entity)
+    );
+    $row['communities']['data']['#markup'] = implode(', ', $community_links);
     $row['member_for']['data'] = $this->dateFormatter->formatTimeDiffSince($entity->getCreatedTime(), $options)->toRenderable();
     $last_access = $this->dateFormatter->formatTimeDiffSince($entity->getLastAccessedTime(), $options);
 
@@ -123,7 +122,7 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     foreach ($memberships as $membership) {
       $community = $membership->getGroup();
       if ($community) {
-        $communities[$community->id()] = $community->getTitle();
+        $communities[$community->id()] = $community;
       }
     }
     return $communities;
