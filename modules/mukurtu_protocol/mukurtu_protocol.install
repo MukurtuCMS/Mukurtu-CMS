@@ -298,4 +298,29 @@ function mukurtu_protocol_update_40007(): void {
   $config_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
   $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($data)->save(TRUE);
+
+/** 
+ * Reorder protocol and community roles to match the creation forms.
+ */
+function mukurtu_protocol_update_40008(): void {
+  $role_weights = [
+    'protocol-protocol-protocol_member' => 1,
+    'protocol-protocol-protocol_affiliate' => 2,
+    'protocol-protocol-contributor' => 3,
+    'protocol-protocol-curator' => 4,
+    'protocol-protocol-community_record_steward' => 5,
+    'protocol-protocol-language_contributor' => 6,
+    'protocol-protocol-language_steward' => 7,
+    'protocol-protocol-protocol_steward' => 8,
+    'community-community-community_member' => 1,
+    'community-community-community_affiliate' => 2,
+    'community-community-community_manager' => 3,
+  ];
+
+  foreach ($role_weights as $role_id => $weight) {
+    $config = \Drupal::configFactory()->getEditable("og.og_role.$role_id");
+    if (!$config->isNew()) {
+      $config->set('weight', $weight)->save();
+    }
+  }
 }

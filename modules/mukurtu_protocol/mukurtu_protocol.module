@@ -721,12 +721,25 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
   // Make roles field required on og forms.
   $form['roles']['widget']['#required'] = TRUE;
 
+  $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
+
   // Add validation to prevent users from being added to protocols without
   // adding them first to the protocol owning communities.
-  $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
   if ($group instanceof ProtocolInterface) {
-    // Only add the form validator if this form is in the protocol context.
     $form['#validate'][] = 'add_protocol_member_form_validate';
+  }
+
+  // Sort roles checkboxes by weight for both protocol and community forms.
+  if (($group instanceof ProtocolInterface || $group instanceof CommunityInterface) && !empty($form['roles']['widget']['#options'])) {
+    $role_storage = \Drupal::entityTypeManager()->getStorage('og_role');
+    $options = $form['roles']['widget']['#options'];
+    $weights = [];
+    foreach (array_keys($options) as $role_id) {
+      $role = $role_storage->load($role_id);
+      $weights[$role_id] = $role ? $role->getWeight() : 99;
+    }
+    asort($weights);
+    $form['roles']['widget']['#options'] = array_replace($weights, $options);
   }
 }
 

@@ -4848,10 +4848,7 @@ header {
 }
 .community__content .featured-content__heading,
 .protocol__content .featured-content__heading {
-  -webkit-margin-before: var(--v-space-l);
-  margin-block-start: var(--v-space-l);
-  -webkit-margin-after: var(--v-space-2xs);
-  margin-block-end: var(--v-space-2xs);
+  margin-block: var(--v-space-l) var(--v-space-2xs);
 }
 .community__content .field--name-field-featured-content,
 .protocol__content .field--name-field-featured-content {
