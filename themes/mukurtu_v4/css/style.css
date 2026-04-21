@@ -1,5 +1,6 @@
 /*! See https://eduardoboucas.github.io/include-media/ for detailed
-documentation on how to use @include media(). */ /*! Drupal visually-hidden CSS class that hides content from visual users and
+documentation on how to use @include media(). */
+/*! Drupal visually-hidden CSS class that hides content from visual users and
    shows content to screen reader users. */
 *,
 *::before,
@@ -7,6 +8,7 @@ documentation on how to use @include media(). */ /*! Drupal visually-hidden CSS 
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
+
 html {
   font-size: 100%;
   scroll-behavior: smooth;
@@ -17,6 +19,7 @@ html {
     scroll-behavior: initial;
   }
 }
+
 body {
   margin: 0;
   color: var(--brand-text-color);
@@ -26,45 +29,54 @@ body {
   text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
 }
+
 ul li,
 ol li {
   margin: 0;
   line-height: var(--line-height-base);
 }
+
 ul li {
   list-style-type: square;
 }
 ul li::marker {
   color: var(--accent-secondary);
 }
+
 p {
   margin-block: 0 var(--v-space-4xxs);
 }
+
 .field__item p:last-of-type {
   -webkit-margin-after: 0;
   margin-block-end: 0;
 }
+
 dl,
 dt,
 dd {
   margin: 0;
 }
+
 address {
   font-style: normal;
 }
+
 video,
 img {
   max-inline-size: 100%;
   block-size: auto;
   display: block;
 }
+
 video {
   inline-size: -webkit-max-content;
   inline-size: -moz-max-content;
   inline-size: max-content;
   max-block-size: 90vh;
-  background-color: #000;
+  background-color: black;
 }
+
 a {
   color: var(--brand-primary-dark);
   -webkit-text-decoration: underline solid 2px var(--brand-primary-dark);
@@ -96,17 +108,21 @@ a:active {
 .layout-container a {
   font-family: var(--font-display-face);
 }
+
 input:focus,
 select:focus {
   outline: var(--focus-color) solid 2px;
   outline-offset: 2px;
 }
+
 label {
   font-weight: 700;
 }
+
 .clipboard-item {
   position: relative;
 }
+
 .visually-hidden {
   position: absolute !important;
   overflow: hidden;
@@ -115,15 +131,19 @@ label {
   block-size: 0.063rem;
   word-wrap: normal;
 }
+
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
+
 [hidden] {
   display: none !important;
-} /*! See https://eduardoboucas.github.io/include-media/ for detailed
+}
+
+/*! See https://eduardoboucas.github.io/include-media/ for detailed
 documentation on how to use @include media(). */
 :root {
   --brand-primary: #138aab;
@@ -199,14 +219,15 @@ documentation on how to use @include media(). */
   --mukurtu-mejs-text-color: var(--brand-text-color);
   --mukurtu-dictionary-facets-pane-background-color: var(--brand-primary);
   --mukurtu-dictionary-facets-pane-contrast-color: var(--brand-secondary);
-  --mukurtu-dictionary-term-title-color: var(
-    --color-white
-  ); /*! These values change based on the selected color palette - see these
-at the top of the file. */
+  --mukurtu-dictionary-term-title-color: var(--color-white);
+  /*! These values change based on the selected color palette - see these
+  at the top of the file. */
   --mukurtu-community-membership-status-color: var(--brand-primary);
   --mukurtu-browse-by-background-color: var(--brand-primary);
   --mukurtu-browse-by-title-color: var(--brand-secondary);
-} /*! See palettes folder for the different color palettes.
+}
+
+/*! See palettes folder for the different color palettes.
 Those files are injected by Drupal so they shouldn't be bundled to style.css. */
 :root {
   --gutter-s: var(--v-space-3xs);
@@ -262,6 +283,7 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
     --layout-padding-full-width: var(--layout-padding-m);
   }
 }
+
 .layout--full-width-grid {
   display: grid;
   grid-template-columns: var(--grid-6col);
@@ -283,6 +305,7 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
       );
   }
 }
+
 .layout--full-width-grid-item {
   grid-column: 1/-1;
 }
@@ -291,9 +314,11 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
     grid-column: 2/-2;
   }
 }
+
 .layout__region--content > .block {
   padding-block: var(--v-separation);
 }
+
 div.palette-demo {
   position: relative;
   display: -webkit-box;
@@ -327,9 +352,11 @@ div.palette-demo .accent span {
   flex-direction: row;
   inline-size: 36px;
 }
+
 div.palette-demo--custom {
   display: none;
 }
+
 .palette-demo--blue-gold .brand-primary {
   background-color: #138aab;
 }
@@ -342,6 +369,7 @@ div.palette-demo--custom {
 .palette-demo--blue-gold .brand-secondary-accent {
   background-color: #f1b85a;
 }
+
 .palette-demo--red-bone .brand-primary {
   background-color: #ac143a;
 }
@@ -354,6 +382,7 @@ div.palette-demo--custom {
 .palette-demo--red-bone .brand-secondary-accent {
   background-color: #c9c2a8;
 }
+
 :root {
   --brand-primary: #ac143a;
   --brand-primary-dark: #9a1134;
@@ -372,6 +401,7 @@ div.palette-demo--custom {
   --mukurtu-collection-title-font-color: var(--text-color);
   --mukurtu-collection-pane-bg-color: var(--brand-light-accent);
 }
+
 :root {
   --brand-primary: #138aab;
   --brand-primary-dark: #107996;
@@ -392,6 +422,7 @@ div.palette-demo--custom {
   --mukurtu-collection-title-font-color: var(--color-white);
   --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
 }
+
 :root {
   --v-space-6xs: 0.25rem;
   --v-space-5xs: 0.5rem;
@@ -431,6 +462,7 @@ div.palette-demo--custom {
     --v-separation: var(--v-separation-xl);
   }
 }
+
 @font-face {
   font-family: BCSans;
   font-style: normal;
@@ -503,14 +535,16 @@ div.palette-demo--custom {
   --letter-spacing-negative-xxl: -0.02rem;
   --letter-spacing-label: 0.1rem;
 }
+
 :root {
   /*! --font-body-face: Georgia,
-   "Times New Roman",
-   Times,
-   serif; */
+     "Times New Roman",
+     Times,
+     serif; */
   --font-display-face: "BCSans", "Noto Sans", verdana, arial, sans-serif;
   --font-size-base: var(--font-size-small);
 }
+
 h1,
 h2,
 h3,
@@ -542,6 +576,7 @@ h6 a,
 .h6 a {
   color: var(--brand-primary);
 }
+
 h1,
 .h1,
 h2,
@@ -550,6 +585,7 @@ h3,
 .h3 {
   margin-block: var(--v-space-4xs) var(--v-space-4xs) / 2;
 }
+
 h4,
 .h4,
 h5,
@@ -558,30 +594,37 @@ h6,
 .h6 {
   margin-block: var(--v-space-4xs) / 2;
 }
+
 h1,
 .h1 {
   font-size: var(--font-size-heading-lg);
 }
+
 h2,
 .h2 {
   font-size: var(--font-size-heading-md);
 }
+
 h3,
 .h3 {
   font-size: var(--font-size-3xl);
 }
+
 h4,
 .h4 {
   font-size: var(--font-size-2xl);
 }
+
 h5,
 .h5 {
   font-size: var(--font-size-xl);
 }
+
 h6,
 .h6 {
   font-size: var(--font-size-l);
 }
+
 button,
 input[type="button"],
 input[type="submit"],
@@ -630,6 +673,7 @@ input[type="reset"]:disabled,
   color: var(--light-text-color);
   background: var(--brand-text-color);
 }
+
 .field__label {
   color: var(--brand-text-color);
   font-weight: var(--text-bold);
@@ -640,6 +684,7 @@ input[type="reset"]:disabled,
     font-size: var(--font-size-m);
   }
 }
+
 figure,
 figure.align-center {
   display: table;
@@ -658,26 +703,31 @@ figure.align-center figcaption {
   font-style: italic;
   line-height: var(--line-height-xs);
 }
+
 figure.align-center,
 .media.align-center {
   margin-block: var(--v-space-3xs);
   margin-inline: auto;
 }
+
 figure.align-left,
 .media.align-left {
   margin-block: var(--v-space-4xxs) var(--v-space-4xxs);
   margin-inline: 0 var(--v-space-3xs);
 }
+
 figure.align-right,
 .media.align-right {
   margin-block: var(--v-space-4xxs) var(--v-space-4xxs);
   margin-inline: var(--v-space-3xs) 0;
 }
+
 .page__logo a {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
 }
+
 .horizontal-tabs ul.horizontal-tabs-list a:focus {
   outline: 4px solid var(--focus-color);
 }
@@ -685,6 +735,7 @@ figure.align-right,
 .horizontal-tabs ul.horizontal-tabs-list li:not(.selected) a:focus {
   background-color: var(--color-white);
 }
+
 svg.ext,
 svg.mailto,
 svg.tel {
@@ -692,16 +743,19 @@ svg.tel {
   block-size: 1rem;
   fill: var(--brand-primary-dark);
 }
+
 a:not(.primary-nav__menu-link) svg.ext path,
 a:not(.primary-nav__menu-link) svg.mailto path,
 a:not(.primary-nav__menu-link) svg.tel path {
   stroke: var(--brand-primary-dark);
 }
+
 .mukurtu-footer a svg.ext path,
 .mukurtu-footer a svg.mailto path,
 .mukurtu-footer a svg.tel path {
   stroke: var(--footer-text-color);
 }
+
 .js-form-type-select,
 .select-wrapper {
   position: relative;
@@ -720,8 +774,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
   block-size: 0;
   border-style: solid;
   border-width: var(--v-space-5xs) var(--v-space-5xs) 0 var(--v-space-5xs);
-  border-color: var(--brand-primary-accent) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0)
-    rgba(0, 0, 0, 0);
+  border-color: var(--brand-primary-accent) transparent transparent transparent;
 }
 .js-form-type-select select,
 .js-form-type-select .form-select,
@@ -742,6 +795,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
   white-space: nowrap;
   font-weight: var(--text-bold);
 }
+
 .js-form-type-email input,
 .js-form-type-textfield input,
 .js-form-type-password input {
@@ -758,6 +812,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
   white-space: nowrap;
   font-weight: var(--text-bold);
 }
+
 .community__sidebar > .field,
 .protocol__sidebar > .field,
 .callout {
@@ -767,6 +822,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
   -webkit-border-before: 5px solid var(--brand-secondary);
   border-block-start: 5px solid var(--brand-secondary);
 }
+
 .splide__arrow--prev {
   inset-inline-start: -2em;
 }
@@ -784,6 +840,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .splide .splide__track--nav > .splide__list > .splide__slide.is-active {
   border: 3px solid var(--brand-primary);
 }
+
 .splide__wrapper {
   margin-block: var(--v-space-4xxs);
   display: grid;
@@ -814,6 +871,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
     grid-column: 2/-2;
   }
 }
+
 .multipage-carousel.splide:not(.is-overflow) .splide__list {
   -webkit-box-pack: center;
   -ms-flex-pack: center;
@@ -853,6 +911,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
   max-block-size: 100px;
   inline-size: auto;
 }
+
 .media-carousel .media {
   margin-block: 0 var(--v-space-s);
   margin-inline: auto;
@@ -865,6 +924,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .media-carousel .splide__slide:not(.is-active) {
   block-size: 0;
 }
+
 .thumbnail-carousel.splide:not(.is-overflow) .splide__list {
   -webkit-box-pack: center;
   -ms-flex-pack: center;
@@ -879,6 +939,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
   max-block-size: 100px;
   inline-size: auto;
 }
+
 #cboxClose {
   color: var(--light-text-color);
   background: var(--brand-primary-dark);
@@ -902,16 +963,20 @@ a:not(.primary-nav__menu-link) svg.tel path {
   color: var(--light-text-color);
   background: var(--brand-text-color);
 }
+
 #cboxTitle {
   color: var(--color-black);
 }
+
 .cboxPhoto {
   margin: var(--v-space-2xs);
 }
+
 .gslider audio {
   inline-size: 100%;
   block-size: 50px;
 }
+
 .media-asset--link {
   position: relative;
 }
@@ -959,14 +1024,17 @@ a:not(.primary-nav__menu-link) svg.tel path {
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
 }
+
 #javali-popup {
   inline-size: auto !important;
   max-inline-size: 1000px !important;
   border-radius: 5px;
 }
+
 .media:has(.mukurtu-content-warnings) {
   position: relative;
 }
+
 .mukurtu-content-warnings {
   position: absolute;
   inset-block-start: 0;
@@ -986,7 +1054,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
   -ms-flex-pack: center;
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.9);
-  color: #fff;
+  color: white;
   line-height: var(--line-height-xs);
   cursor: pointer;
   text-align: center;
@@ -1000,9 +1068,11 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .mukurtu-content-warnings.dismissed {
   display: none;
 }
+
 .splide__track--nav .mukurtu-content-warning {
   display: none;
 }
+
 .block-featured-content {
   padding-inline: var(--layout-padding);
   -webkit-padding-after: var(--v-space-s);
@@ -1013,6 +1083,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
     padding-inline: var(--layout-padding-m);
   }
 }
+
 .field--name-field-featured-content,
 .field--name-field-all-related-content .field__items {
   margin-block: var(--v-space-4xxs);
@@ -1359,15 +1430,18 @@ a:not(.primary-nav__menu-link) svg.tel path {
   .featured-item__title-link:hover {
   text-decoration: underline;
 }
+
 .form-item + .form-item {
   -webkit-margin-before: 1rem;
   margin-block-start: 1rem;
 }
+
 .form-actions,
 * + .form-wrapper {
   -webkit-margin-before: 2rem;
   margin-block-start: 2rem;
 }
+
 details.form-wrapper summary {
   font-weight: 700;
   font-size: 1.1em;
@@ -1376,6 +1450,7 @@ details.form-wrapper summary + div {
   -webkit-margin-start: 1.4ch;
   margin-inline-start: 1.4ch;
 }
+
 :has(> .user-register-form),
 :has(> .user-login-form),
 :has(> .user-pass) {
@@ -1403,6 +1478,7 @@ details.form-wrapper summary + div {
       );
   }
 }
+
 .user-register-form,
 .user-login-form,
 .user-pass {
@@ -1415,6 +1491,7 @@ details.form-wrapper summary + div {
     grid-column: 2/-2;
   }
 }
+
 .horizontal-card {
   padding-block: var(--v-space-2xs);
   display: grid;
@@ -1533,6 +1610,8 @@ details.form-wrapper summary + div {
   .field__item:not(:last-of-type)::after {
   content: ",";
 }
+
+/* stylelint-disable no-descending-specificity */
 :is(#extra-specificity-hack, .horizontal-tabs) {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
@@ -1745,6 +1824,7 @@ details.form-wrapper summary + div {
   -webkit-padding-before: var(--v-separation);
   padding-block-start: var(--v-separation);
 }
+
 .block--image-with-description {
   display: grid;
   grid-template-columns: 1fr;
@@ -1799,7 +1879,7 @@ details.form-wrapper summary + div {
 }
 .block--image-with-description--full * {
   color: var(--brand-primary-dark);
-  text-shadow: 1px 1px 0 hsla(0, 0%, 100%, 0.8);
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8);
 }
 .block--image-with-description--full.text-light * {
   color: var(--color-white);
@@ -1851,6 +1931,7 @@ details.form-wrapper summary + div {
   padding: var(--v-space-s);
   min-block-size: 600px;
 }
+
 .language-switcher__summary {
   cursor: pointer;
   font-size: 1.5em;
@@ -1866,6 +1947,7 @@ details.form-wrapper summary + div {
 .language-switcher__summary svg {
   block-size: 1em;
 }
+
 .language-switcher .links {
   position: absolute;
   background-color: var(--color-white);
@@ -1915,6 +1997,7 @@ details.form-wrapper summary + div {
   inset-block-start: 0;
   inset-inline-end: 20px;
 }
+
 .local-contexts-dialog {
   display: inline-block;
 }
@@ -2073,6 +2156,7 @@ details.form-wrapper summary + div {
 .local-contexts-dialog__project-link a {
   color: var(--brand-primary);
 }
+
 .local-contexts-label-group .project-title,
 .local-contexts-project .project-title {
   font-size: var(--font-size-s);
@@ -2084,11 +2168,13 @@ details.form-wrapper summary + div {
   border-block-end: 1px solid var(--brand-light);
   margin-block: 0 var(--v-space-5xs);
 }
+
 .local-contexts-project .local-contexts-projects-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--v-space-5xs);
 }
+
 .local-contexts-label-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2105,6 +2191,7 @@ details.form-wrapper summary + div {
 .local-contexts-label-group .project-title {
   grid-column: 1/-1;
 }
+
 .local-contexts-project,
 .field--name-field-local-contexts-labels-and-notices .field__item {
   background-color: var(--brand-light-accent);
@@ -2113,12 +2200,14 @@ details.form-wrapper summary + div {
   -webkit-margin-after: var(--v-space-4xxs);
   margin-block-end: var(--v-space-4xxs);
 }
+
 .field--name-field-local-contexts-projects .field__label,
 .field--name-field-local-contexts-labels-and-notices .field__label {
   -webkit-border-after: 4px solid var(--brand-secondary);
   border-block-end: 4px solid var(--brand-secondary);
   margin-block: 0 1rem;
 }
+
 .local-contexts-projects .description {
   -webkit-margin-after: var(--v-space-3xs);
   margin-block-end: var(--v-space-3xs);
@@ -2187,6 +2276,7 @@ details.form-wrapper summary + div {
   line-height: var(--line-height-s);
   color: var(--brand-text-color);
 }
+
 .local-tasks {
   display: grid;
   grid-template-columns: var(--grid-6col);
@@ -2253,6 +2343,7 @@ details.form-wrapper summary + div {
   list-style-type: none;
   display: inline-block;
 }
+
 .local-actions {
   display: grid;
   grid-template-columns: var(--grid-6col);
@@ -2300,6 +2391,7 @@ details.form-wrapper summary + div {
   padding-inline-end: var(--v-space-5xs);
   font-size: var(--font-size-l);
 }
+
 .media--audio {
   inline-size: 100%;
 }
@@ -2313,6 +2405,7 @@ details.form-wrapper summary + div {
 .media .field--name-field-media-audio-file {
   inline-size: 100%;
 }
+
 .media--image,
 .media--document,
 .media--audio,
@@ -2335,7 +2428,7 @@ details.form-wrapper summary + div {
 .media--document iframe,
 .media--audio iframe,
 .media--remote_video iframe {
-  background-color: #000;
+  background-color: black;
 }
 .media--image .button,
 .media--document .button,
@@ -2344,17 +2437,33 @@ details.form-wrapper summary + div {
   -webkit-margin-before: var(--v-space-5xs);
   margin-block-start: var(--v-space-5xs);
 }
+
 .media--remote_video .field[data-blazy] {
   min-inline-size: -webkit-min-content;
   min-inline-size: -moz-min-content;
   min-inline-size: min-content;
   inline-size: 100%;
 }
+
+/**
+ * @file
+ * Nav Primary.
+ *
+ * This is a refactored version of the primary navigation styles, inspired by
+ * Drupal's Olivero theme. It incorporates modern CSS practices and integrates
+ * with the Mukurtu V4 theme variables.
+ * To find menu grid placement, see _page.scss.
+ */
+/**
+ * @file
+ * Nav Primary.
+ */
 .primary-nav__menu {
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
   list-style: none;
 }
+
 .primary-nav__menu-item {
   -webkit-margin-after: var(--v-space-5xs);
   margin-block-end: var(--v-space-5xs);
@@ -2374,6 +2483,7 @@ details.form-wrapper summary + div {
   .primary-nav__menu-link--link,
 .primary-nav__menu-item.primary-nav__menu-item--has-children
   .primary-nav__menu-link--nolink {
+  /* Ensure that long text doesn't make the mobile expand button wrap. */
   -ms-flex-preferred-size: calc(100% - var(--v-space-s));
   flex-basis: calc(100% - var(--v-space-s));
 }
@@ -2381,6 +2491,7 @@ details.form-wrapper summary + div {
   .primary-nav__menu-link--nolink {
   line-height: 100%;
 }
+
 .primary-nav__menu-link {
   -webkit-box-flex: 1;
   -ms-flex-positive: 1;
@@ -2423,10 +2534,15 @@ details.form-wrapper summary + div {
   outline-offset: 2px;
   color: var(--brand-secondary-dark);
 }
+.primary-nav__menu-link--nolink,
+.primary-nav__menu-link--button,
+.primary-nav__menu-link--has-children {
+  /* stylelint-disable-next-line no-descending-specificity */
+}
 .primary-nav__menu-link--nolink:hover,
 .primary-nav__menu-link--button:hover,
 .primary-nav__menu-link--has-children:hover {
-  border-block-end-color: rgba(0, 0, 0, 0);
+  border-block-end-color: transparent;
 }
 .primary-nav__menu-link.is-active {
   border-block-end-color: var(--brand-secondary-accent);
@@ -2434,31 +2550,41 @@ details.form-wrapper summary + div {
 .primary-nav__menu-link.is-active:hover {
   border-block-end-color: var(--brand-secondary-dark);
 }
+
+/* stylelint-disable-next-line no-descending-specificity */
 .primary-nav__menu-link--button {
   position: relative;
   cursor: pointer;
   text-align: start;
   border: 0;
-  background: rgba(0, 0, 0, 0);
+  background: transparent;
   font-weight: normal;
+  /* Plus icon for mobile navigation. */
 }
 .primary-nav__menu-link--button:hover,
 .primary-nav__menu-link--button:focus,
 .primary-nav__menu-link--button:active {
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
 }
 .primary-nav__menu-link--button.primary-nav__menu-link--has-children {
   -webkit-padding-end: var(--v-space-s);
-  padding-inline-end: var(--v-space-s);
+  padding-inline-end: var(--v-space-s); /* Ensure text does not overlap icon. */
 }
 .primary-nav__menu-link--button.primary-nav__menu-link--has-children::before,
 .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
   position: absolute;
   inset-inline-end: 9px;
-  inset-block-start: calc(var(--v-space-5xs) + 17px);
+  inset-block-start: calc(
+    var(--v-space-5xs) + 17px
+  ); /* Visually align button with menu link text. */
   inline-size: 18px;
   block-size: 0;
   content: "";
+  /* Intentionally not using CSS logical properties. */
+  /*
+   * Using --brand-primary as --color--primary-50 is not defined in the
+   * theme.
+   */
   -webkit-border-before: solid 3px var(--brand-primary);
   border-block-start: solid 3px var(--brand-primary);
 }
@@ -2471,6 +2597,7 @@ details.form-wrapper summary + div {
 .primary-nav__menu-link--button.primary-nav__menu-link--has-children[aria-expanded="true"]::after {
   opacity: 0;
 }
+
 .primary-nav__menu-link-inner {
   position: relative;
   display: -webkit-inline-box;
@@ -2482,12 +2609,17 @@ details.form-wrapper summary + div {
   padding-block: var(--v-space-6xs);
   padding-inline: 0;
 }
+
+/*
+  Top level specific styles.
+*/
 .primary-nav__menu--level-1 {
   margin-block: 0;
   margin-inline: 0;
   padding-block: 0;
   padding-inline: 0;
 }
+
 .primary-nav__menu-link--level-1 {
   position: relative;
   display: -webkit-box;
@@ -2495,6 +2627,10 @@ details.form-wrapper summary + div {
   display: flex;
   letter-spacing: -1px;
 }
+
+/*
+  Secondary menu specific styles.
+*/
 .primary-nav__menu--level-2 {
   visibility: hidden;
   overflow: hidden;
@@ -2545,19 +2681,33 @@ details.form-wrapper summary + div {
     padding-inline-start: var(--v-space-s);
   }
 }
+
+/*
+ * Olivero doesn't officially support nested tertiary submenus, but this
+ * ensures that it doesn't break all the way.
+ *
+ * @see https://www.drupal.org/project/drupal/issues/3221399
+ */
 .primary-nav__menu--level-2 .primary-nav__menu-item--has-children {
   display: block;
 }
+
 .primary-nav__menu-link--level-2 {
   font-size: 16px;
   font-weight: normal;
   line-height: var(--v-space-6xs);
 }
+
 html:not(.js) .primary-nav__menu--level-2 {
   visibility: visible;
   max-block-size: none;
   opacity: 1;
 }
+
+/**
+ * @file
+ * Nav Button Mobile.
+ */
 .mobile-buttons {
   grid-column: -2/-1;
 }
@@ -2573,6 +2723,8 @@ html:not(.js) .primary-nav__menu--level-2 {
   );
   inset-inline-end: var(--v-space-xs);
 }
+
+/* Text that says "menu". */
 .mobile-nav-button__label {
   position: absolute;
   display: block;
@@ -2597,9 +2749,10 @@ html:not(.js) .primary-nav__menu--level-2 {
     color: var(--brand-primary);
   }
 }
+
 .mobile-nav-button {
   position: relative;
-  z-index: 505;
+  z-index: 505; /* Appear above mobile nav. */
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -2614,7 +2767,7 @@ html:not(.js) .primary-nav__menu--level-2 {
   padding: 0;
   cursor: pointer;
   border: none;
-  background: rgba(0, 0, 0, 0);
+  background: transparent;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -2622,16 +2775,16 @@ html:not(.js) .primary-nav__menu--level-2 {
 .mobile-nav-button:focus {
   outline: solid 2px var(--brand-primary-dark);
   outline-offset: 5px;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
 }
 .mobile-nav-button:hover,
 .mobile-nav-button:focus,
 .mobile-nav-button:active,
 .mobile-nav-button:focus-visible {
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
 }
 .mobile-nav-button:active {
-  color: inherit;
+  color: inherit; /* Override Safari's default UA styles. */
 }
 @media (min-width: 30rem) {
   .mobile-nav-button {
@@ -2641,6 +2794,7 @@ html:not(.js) .primary-nav__menu--level-2 {
     inline-size: auto;
   }
 }
+
 .mobile-nav-button__icon {
   position: relative;
   display: block;
@@ -2674,8 +2828,9 @@ html:not(.js) .primary-nav__menu--level-2 {
   -webkit-transform: translateY(5px);
   transform: translateY(5px);
 }
+
 .mobile-nav-button[aria-expanded="true"] .mobile-nav-button__icon {
-  border-block-start-color: rgba(0, 0, 0, 0);
+  border-block-start-color: transparent;
 }
 .mobile-nav-button[aria-expanded="true"] .mobile-nav-button__icon::before {
   -webkit-transform: translateY(-3px) rotate(-45deg);
@@ -2685,30 +2840,42 @@ html:not(.js) .primary-nav__menu--level-2 {
   -webkit-transform: translateY(-3px) rotate(45deg);
   transform: translateY(-3px) rotate(45deg);
 }
+
+/**
+ * @file
+ * Button that expands second level nav when clicked.
+ */
 .primary-nav__button-toggle {
   position: relative;
   overflow: hidden;
   inline-size: var(--v-space-2xs);
   block-size: var(--v-space-2xs);
   -webkit-margin-before: var(--v-space-5xs);
-  margin-block-start: var(--v-space-5xs);
+  margin-block-start: var(
+    --v-space-5xs
+  ); /* Visually align button with menu link text. */
   padding-block: 0;
   padding-inline: 0;
   cursor: pointer;
   text-indent: -999px;
   border: 0;
-  background: rgba(0, 0, 0, 0);
+  background: transparent;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  /* aria-hidden attribute is removed by JS. Button is non-functional
+     until JS is enabled.
+  */
 }
 .primary-nav__button-toggle:focus,
 .primary-nav__button-toggle:hover {
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
 }
 .primary-nav__button-toggle .icon--menu-toggle {
   position: absolute;
+  /* stylelint-disable-next-line liberty/use-logical-spec */
   top: 50%;
+  /* stylelint-disable-next-line liberty/use-logical-spec */
   left: 50%;
   inline-size: 16px;
   block-size: 16px;
@@ -2717,18 +2884,22 @@ html:not(.js) .primary-nav__menu--level-2 {
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   border-radius: 2px;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
 }
 .primary-nav__button-toggle .icon--menu-toggle::before,
 .primary-nav__button-toggle .icon--menu-toggle::after {
   position: absolute;
+  /* stylelint-disable-next-line liberty/use-logical-spec */
   top: 50%;
+  /* stylelint-disable-next-line liberty/use-logical-spec */
   left: 50%;
   inline-size: var(--v-space-4xxs);
   block-size: 0;
   content: "";
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
+  /* Intentionally not using CSS logical properties. */
+  /* stylelint-disable-next-line liberty/use-logical-spec */
   border-top: solid 3px var(--brand-primary);
 }
 .primary-nav__button-toggle .icon--menu-toggle::after {
@@ -2743,6 +2914,7 @@ html:not(.js) .primary-nav__menu--level-2 {
 .primary-nav__button-toggle[aria-hidden="true"] {
   pointer-events: none;
 }
+
 @media (min-width: 60rem) {
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle {
     -ms-flex-negative: 0;
@@ -2754,6 +2926,7 @@ html:not(.js) .primary-nav__menu--level-2 {
     margin: 0;
     -webkit-margin-end: var(--v-space-4xxs);
     margin-inline-end: var(--v-space-4xxs);
+    /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle:focus,
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle:hover {
@@ -2770,6 +2943,7 @@ html:not(.js) .primary-nav__menu--level-2 {
     outline-offset: 2px;
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle:active {
+    /* Necessary for Safari. */
     color: currentcolor;
   }
   body:not(.is-always-mobile-nav)
@@ -2782,7 +2956,7 @@ html:not(.js) .primary-nav__menu--level-2 {
     .icon--menu-toggle {
     size: 19px;
     border-radius: 4px;
-    background-color: rgba(0, 0, 0, 0);
+    background-color: transparent;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -2794,6 +2968,7 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-box-pack: center;
     -ms-flex-pack: center;
     justify-content: center;
+    /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav)
     .primary-nav__button-toggle
@@ -2809,21 +2984,42 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-transform: translateY(-50%) rotate(45deg);
     transform: translateY(-50%) rotate(45deg);
     opacity: 0.8;
+    /* stylelint-disable-next-line liberty/use-logical-spec */
     inset-block-start: auto;
+    /* stylelint-disable-next-line liberty/use-logical-spec */
     inset-inline-start: auto;
+    /* Intentionally not using CSS logical properties. */
+    /* stylelint-disable-next-line liberty/use-logical-spec */
     border-top: none;
+    /* stylelint-disable-next-line liberty/use-logical-spec */
     border-right: solid 2px var(--brand-primary);
+    /* stylelint-disable-next-line liberty/use-logical-spec */
     border-bottom: solid 2px var(--brand-primary);
-    background: rgba(0, 0, 0, 0);
+    background: transparent;
   }
 }
+
+/**
+ * @file
+ * Nav Primary (wide widths).
+ */
 @media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) {
+    /**
+     * Arrow is placed outside of submenu because the submenu has the
+     * `overflow: hidden` CSS rule applied.
+     */
+    /**
+     * When ensuring that long menus don't overflow viewport, we can give a
+     * little extra room when the toolbar is fixed (and is shorter).
+     */
+  }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link-inner {
     padding-inline: 0;
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-item {
     -ms-flex-wrap: nowrap;
-    flex-wrap: nowrap;
+    flex-wrap: nowrap; /* Ensure that sub navigation toggle button doesn't wrap underneath link. */
   }
   body:not(.is-always-mobile-nav)
     .primary-nav__menu-item.primary-nav__menu-item--has-children
@@ -2847,16 +3043,21 @@ html:not(.js) .primary-nav__menu--level-2 {
     content: "";
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
+    /*
+     * Using --brand-primary as --color-primary-50 is not defined in the
+     * theme.
+     */
     border: solid 2px var(--brand-primary);
     border-radius: 4px;
   }
   body:not(.is-always-mobile-nav)
     .primary-nav__menu-link--button.primary-nav__menu-link--has-children {
-    overflow: visible;
+    overflow: visible; /* Necessary to view icon in IE11 */
     -webkit-padding-end: 1rem;
     padding-inline-end: 1rem;
     -webkit-margin-end: var(--v-space-3xs);
     margin-inline-end: var(--v-space-3xs);
+    /* Chevron icon for desktop navigation. */
   }
   body:not(.is-always-mobile-nav)
     .primary-nav__menu-link--button.primary-nav__menu-link--has-children::before {
@@ -2871,8 +3072,8 @@ html:not(.js) .primary-nav__menu--level-2 {
     .primary-nav__menu-link--button.primary-nav__menu-link--has-children:focus,
   body:not(.is-always-mobile-nav)
     .primary-nav__menu-link--button.primary-nav__menu-link--has-children:hover {
-    border-block-end-color: rgba(0, 0, 0, 0);
-    background-color: rgba(0, 0, 0, 0);
+    border-block-end-color: transparent;
+    background-color: transparent;
   }
   body:not(.is-always-mobile-nav)
     .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
@@ -2905,7 +3106,7 @@ html:not(.js) .primary-nav__menu--level-2 {
     align-items: stretch;
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-item--level-1 {
-    position: relative;
+    position: relative; /* Anchor secondary menu */
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -2932,7 +3133,7 @@ html:not(.js) .primary-nav__menu--level-2 {
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu--level-2 {
     position: absolute;
-    z-index: 105;
+    z-index: 105; /* Appear above search container. */
     inset-block-start: 100%;
     inset-inline-start: 50%;
     visibility: hidden;
@@ -2941,6 +3142,10 @@ html:not(.js) .primary-nav__menu--level-2 {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
+    /*
+     * Ensure that long level-2 menus will never overflow viewport (focused
+     * elements should always be in viewport per accessibility guidelines).
+     */
     max-block-size: calc(
       100vh - var(--site-header-height-wide) -
         var(--drupal-displace-offset-top, 0px) -
@@ -2957,14 +3162,18 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-transform: translate(-50%, 20px);
     transform: translate(-50%, 20px);
     opacity: 0;
+    /*
+     * Using --brand-primary as --color-primary-50 is not defined in the
+     * theme.
+     */
     -webkit-border-before: solid var(--brand-primary) var(--v-space-5xs);
     border-block-start: solid var(--brand-primary) var(--v-space-5xs);
-    -webkit-border-end: solid 1px rgba(0, 0, 0, 0);
-    border-inline-end: solid 1px rgba(0, 0, 0, 0);
-    -webkit-border-after: solid 1px rgba(0, 0, 0, 0);
-    border-block-end: solid 1px rgba(0, 0, 0, 0);
-    -webkit-border-start: solid 1px rgba(0, 0, 0, 0);
-    border-inline-start: solid 1px rgba(0, 0, 0, 0);
+    -webkit-border-end: solid 1px transparent;
+    border-inline-end: solid 1px transparent; /* Transparent borders useful for Windows High Contrast mode. */
+    -webkit-border-after: solid 1px transparent;
+    border-block-end: solid 1px transparent;
+    -webkit-border-start: solid 1px transparent;
+    border-inline-start: solid 1px transparent;
     border-radius: 0 0 2px 2px;
     background: var(--brand-light);
     -webkit-box-shadow: 0 1px 36px rgba(0, 0, 0, 0.08);
@@ -3003,7 +3212,7 @@ html:not(.js) .primary-nav__menu--level-2 {
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-caret {
     position: absolute;
-    z-index: 105;
+    z-index: 105; /* Match level 2 menus. */
     inset-block-start: calc(100% - 6px);
     inset-inline-start: 50%;
     visibility: hidden;
@@ -3012,12 +3221,16 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-transform: translate(-50%, 20px);
     transform: translate(-50%, 20px);
     opacity: 0;
-    -webkit-border-end: solid 10px rgba(0, 0, 0, 0);
-    border-inline-end: solid 10px rgba(0, 0, 0, 0);
+    /*
+     * Using --brand-primary as --color-primary-50 is not defined in the
+     * theme.
+     */
+    -webkit-border-end: solid 10px transparent;
+    border-inline-end: solid 10px transparent;
     -webkit-border-after: solid 10px var(--brand-primary);
     border-block-end: solid 10px var(--brand-primary);
-    -webkit-border-start: solid 10px rgba(0, 0, 0, 0);
-    border-inline-start: solid 10px rgba(0, 0, 0, 0);
+    -webkit-border-start: solid 10px transparent;
+    border-inline-start: solid 10px transparent;
   }
   body:not(.is-always-mobile-nav)
     .primary-nav__menu-caret.is-active-menu-parent {
@@ -3035,6 +3248,11 @@ html:not(.js) .primary-nav__menu--level-2 {
     );
   }
 }
+
+/*
+ * Only apply transition styles to menu when JS is loaded. This
+ * works around https://bugs.chromium.org/p/chromium/issues/detail?id=332189
+ */
 @media (min-width: 60rem) {
   html.js body:not(.is-always-mobile-nav) .primary-nav__menu--level-2,
   html.js body:not(.is-always-mobile-nav) .primary-nav__menu-caret {
@@ -3057,13 +3275,20 @@ html:not(.js) .primary-nav__menu--level-2 {
       -webkit-transform 0.2s;
   }
 }
+
+/**
+ * @file
+ * Navigation in header.
+ */
 .header-nav {
   position: fixed;
-  z-index: 101;
+  z-index: 101; /* Appear above overlay and contextual links in header. */
   inset-block-start: 0;
   inset-inline-start: 100%;
   visibility: hidden;
   overflow: auto;
+  /* Ensure that header nav not use additional space and force system branding
+   * block text to unnecessarily wrap. */
   -ms-flex-preferred-size: max-content;
   flex-basis: max-content;
   inline-size: 100%;
@@ -3071,6 +3296,10 @@ html:not(.js) .primary-nav__menu--level-2 {
   block-size: 100%;
   padding-block: 0 var(--v-space-4xxs);
   padding-inline: var(--v-space-4xxs);
+  /* Create room for the "close" button. We cannot use margin because the
+   * mobile navigation needs to slide beneath the button, but we also cannot
+   * use padding because that would enable the button to scroll out of the
+   * viewport on short screens. */
   -webkit-border-before: solid var(--color-white)
     calc(var(--drupal-displace-offset-top, 0px) + var(--v-space-2xl));
   border-block-start: solid var(--color-white)
@@ -3078,13 +3307,18 @@ html:not(.js) .primary-nav__menu--level-2 {
   background-color: var(--color-white);
   -webkit-box-shadow: 0 0 72px rgba(0, 0, 0, 0.1);
   box-shadow: 0 0 72px rgba(0, 0, 0, 0.1);
+  /*
+   * Ensure top border has the same color as the background when in forced colors.
+   */
 }
 .header-nav.is-active {
   visibility: visible;
   -webkit-transform: translateX(
     calc(-100% - var(--drupal-displace-offset-right, 0px))
   );
-  transform: translateX(calc(-100% - var(--drupal-displace-offset-right, 0px)));
+  transform: translateX(
+    calc(-100% - var(--drupal-displace-offset-right, 0px))
+  ); /* LTR */
 }
 .header-nav.is-active:dir(rtl) {
   -webkit-transform: translateX(
@@ -3110,6 +3344,11 @@ html:not(.js) .primary-nav__menu--level-2 {
     border-block-start-color: canvas;
   }
 }
+
+/*
+ * Only apply transition styles when JS is loaded. This
+ * works around https://bugs.chromium.org/p/chromium/issues/detail?id=332189
+ */
 html.js .header-nav {
   -webkit-transition:
     visibility 0.2s,
@@ -3125,6 +3364,7 @@ html.js .header-nav {
     transform 0.2s,
     -webkit-transform 0.2s;
 }
+
 body:not(.is-always-mobile-nav) .header-nav {
   grid-column: 2/-1;
 }
@@ -3167,6 +3407,7 @@ body:not(.is-always-mobile-nav) .header-nav {
     grid-column: 3/-1;
   }
 }
+
 body.is-always-mobile-nav .header-nav::before {
   content: "";
   position: sticky;
@@ -3179,6 +3420,7 @@ body.is-always-mobile-nav .header-nav::before {
   z-index: 100;
   display: block;
 }
+
 .header-nav-overlay {
   position: fixed;
   z-index: 101;
@@ -3198,6 +3440,7 @@ body.is-always-mobile-nav .header-nav::before {
 .is-overlay-active .header-nav-overlay {
   display: block;
 }
+
 .menu__account-menu {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -3230,6 +3473,7 @@ body.is-always-mobile-nav .header-nav::before {
 .menu__account-menu a svg.ext path {
   stroke: var(--color-white);
 }
+
 .account-menu__menu-item {
   position: relative;
   list-style: none;
@@ -3300,8 +3544,9 @@ body.is-always-mobile-nav .header-nav::before {
   inline-size: 100%;
   background: var(--brand-primary-dark);
 }
+
 .account-menu__button-toggle {
-  background: rgba(0, 0, 0, 0);
+  background: transparent;
   padding: var(--v-space-6xs);
   cursor: pointer;
   display: -webkit-box;
@@ -3327,12 +3572,13 @@ body.is-always-mobile-nav .header-nav::before {
 }
 .account-menu__button-toggle:hover,
 .account-menu__button-toggle:focus {
-  background: rgba(0, 0, 0, 0);
+  background: transparent;
 }
 .account-menu__button-toggle:focus {
   outline: 2px solid var(--color-white);
   outline-offset: 2px;
 }
+
 .account-menu__toggle-icon {
   inline-size: 12px;
   block-size: 9px;
@@ -3350,17 +3596,19 @@ body.is-always-mobile-nav .header-nav::before {
   display: block;
   inline-size: 0;
   block-size: 0;
-  -webkit-border-start: 6px solid rgba(0, 0, 0, 0);
-  border-inline-start: 6px solid rgba(0, 0, 0, 0);
-  -webkit-border-end: 6px solid rgba(0, 0, 0, 0);
-  border-inline-end: 6px solid rgba(0, 0, 0, 0);
+  -webkit-border-start: 6px solid transparent;
+  border-inline-start: 6px solid transparent;
+  -webkit-border-end: 6px solid transparent;
+  border-inline-end: 6px solid transparent;
   -webkit-border-before: 6px solid currentcolor;
   border-block-start: 6px solid currentcolor;
 }
+
 .account-menu__button-toggle[aria-expanded="true"] .account-menu__toggle-icon {
   -webkit-transform: rotate(180deg);
   transform: rotate(180deg);
 }
+
 .account-menu__menu-link {
   color: var(--light-text-color);
   font-weight: var(--text-bold);
@@ -3405,19 +3653,25 @@ body.is-always-mobile-nav .header-nav::before {
 .account-menu__menu-link.account-menu__menu-link--level-2:focus::before {
   text-decoration: none;
 }
+
 :root {
+  /* Width of slide out navigation */
   --mobile-nav-width: 500px;
+  /* Header */
   --header-height-wide-when-fixed: 50px;
+  /* Layout helpers. */
   --max-width: 1350px;
-  --max-bg-color: 1570px;
+  --max-bg-color: 1570px; /* Width to which the background color extends to. */
   --content-left: 0px;
   --site-header-height-wide: 50px;
 }
+
 body.is-fixed {
   position: fixed;
   overflow: hidden;
   inline-size: 100%;
 }
+
 .vertical-card {
   --card-font-size: var(--font-size-s);
   -webkit-column-break-inside: avoid;
@@ -3449,6 +3703,7 @@ body.is-fixed {
 .vertical-card__eyebrow {
   font-weight: var(--text-bold);
 }
+
 .page__breadcrumbs {
   -webkit-box-shadow: inset 0 41px 18px -42px
     var(--mukurtu-breadcrumb-gradient-color);
@@ -3524,11 +3779,11 @@ body.is-fixed {
   -webkit-padding-start: var(--v-space-5xs);
   padding-inline-start: var(--v-space-5xs);
 }
+
 .footer {
   -webkit-margin-before: var(--v-space-m);
   margin-block-start: var(--v-space-m);
-  -webkit-padding-before: var(--v-space-xs);
-  padding-block-start: var(--v-space-xs);
+  padding-block: var(--v-space-xs);
   background-color: var(--footer-bg-color);
   color: var(--footer-text-color);
   display: grid;
@@ -3565,11 +3820,11 @@ body.is-fixed {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   gap: var(--v-space-s);
   padding-block: var(--v-space-s);
   width: 100%;
@@ -3578,7 +3833,7 @@ body.is-fixed {
   width: 100%;
   text-align: center;
   -webkit-margin-after: 0;
-          margin-block-end: 0;
+  margin-block-end: 0;
 }
 .footer .footer-text a {
   color: var(--footer-text-color);
@@ -3589,12 +3844,12 @@ body.is-fixed {
   display: flex;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
-  -ms-flex-direction: row;
-  flex-direction: row;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
   gap: var(--v-space-2xs);
-  -webkit-box-align: baseline;
-  -ms-flex-align: baseline;
-  align-items: baseline;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   -webkit-box-pack: center;
   -ms-flex-pack: center;
   justify-content: center;
@@ -3603,8 +3858,8 @@ body.is-fixed {
 }
 .footer .logo {
   -webkit-box-flex: 0;
-  -ms-flex: 0 1 33%;
-  flex: 0 1 33%;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -3629,25 +3884,25 @@ body.is-fixed {
   display: flex;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
-      -ms-flex-flow: row wrap;
-          flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
   -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   gap: 0.75rem 1.5rem;
   -webkit-margin-after: 0;
-          margin-block-end: 0;
+  margin-block-end: 0;
 }
 .footer .socials__item a {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   gap: 0.5ch;
   color: var(--footer-text-color);
   text-decoration: none;
@@ -3655,9 +3910,6 @@ body.is-fixed {
 .footer .socials__item a:hover {
   text-decoration: underline;
   text-decoration-thickness: 1px;
-  -ms-flex-align: center;
-  align-items: center;
-  gap: 1ch;
 }
 .footer .socials__item a:focus-visible {
   outline: var(--focus-color) solid 2px;
@@ -3669,10 +3921,10 @@ body.is-fixed {
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   -ms-flex-negative: 0;
-      flex-shrink: 0;
+  flex-shrink: 0;
 }
 .footer .socials__icon svg {
   block-size: 1.25rem;
@@ -3682,16 +3934,6 @@ body.is-fixed {
 }
 .footer .socials__label {
   font-size: 0.9em;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-  -ms-flex-flow: row wrap;
-  flex-flow: row wrap;
-  -webkit-box-pack: justify;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  gap: 2rem;
-  -webkit-margin-after: 0;
-  margin-block-end: 0;
 }
 .footer .footer-link-item a {
   color: var(--footer-text-color);
@@ -3704,9 +3946,6 @@ body.is-fixed {
 .footer .footer-link-item a:focus-visible {
   outline: var(--focus-color) solid 2px;
   outline-offset: 2px;
-.footer .socials__accounts {
-  -webkit-margin-before: var(--v-space-5xs);
-  margin-block-start: var(--v-space-5xs);
 }
 .footer .footer-bottom-row {
   display: -webkit-box;
@@ -3714,34 +3953,25 @@ body.is-fixed {
   display: flex;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
-      -ms-flex-flow: row wrap;
-          flex-flow: row wrap;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  gap: 0.75rem 1.5rem;
-  -ms-flex-direction: row;
-  flex-direction: row;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
   -webkit-box-pack: center;
   -ms-flex-pack: center;
   justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
   -webkit-margin-after: 0;
   margin-block-end: 0;
-}
-.footer .email {
-  -webkit-margin-after: none !important;
-  margin-block-end: none !important;
 }
 .footer .email a {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   gap: 0.5ch;
   color: var(--footer-text-color);
   text-decoration-color: var(--footer-text-color);
@@ -3758,11 +3988,11 @@ body.is-fixed {
   block-size: 1em;
   inline-size: auto;
   -ms-flex-negative: 0;
-      flex-shrink: 0;
+  flex-shrink: 0;
 }
 .footer .copyright-message {
   -webkit-margin-after: 0;
-          margin-block-end: 0;
+  margin-block-end: 0;
 }
 
 header {
@@ -3771,6 +4001,7 @@ header {
   align-items: center;
   padding-block: var(--v-space-4xxs);
 }
+
 .header {
   -webkit-box-pack: center;
   -ms-flex-pack: center;
@@ -3824,6 +4055,7 @@ header {
     inline-size: 100px;
   }
 }
+
 .grid:has(.views-row) {
   -webkit-column-count: 1;
   -moz-column-count: 1;
@@ -3853,6 +4085,7 @@ header {
     column-count: 3;
   }
 }
+
 .browse__default__header {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -4259,9 +4492,11 @@ header {
   -webkit-border-after: 5px solid var(--brand-secondary);
   border-block-end: 5px solid var(--brand-secondary);
 }
+
 .other-facets {
   display: none;
 }
+
 .collections {
   grid-column: 1/-1;
   display: grid;
@@ -4513,6 +4748,7 @@ header {
     -webkit-line-clamp: 3;
   }
 }
+
 .category-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -4541,6 +4777,7 @@ header {
   -ms-flex-direction: column;
   flex-direction: column;
 }
+
 .category-teaser a {
   text-decoration: none;
 }
@@ -4559,6 +4796,7 @@ header {
   text-align: center;
   padding: var(--v-space-4xxs);
 }
+
 .category-teaser:not(:has(.media--image)) a::before {
   content: "";
   display: block;
@@ -4569,6 +4807,7 @@ header {
   background-repeat: no-repeat;
   background-position: center;
 }
+
 .collection__header {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -4792,6 +5031,7 @@ header {
   -webkit-border-before: none;
   border-block-start: none;
 }
+
 .community-page-listing {
   padding-inline: var(--layout-padding);
 }
@@ -4800,6 +5040,7 @@ header {
     padding-inline: var(--layout-padding-m);
   }
 }
+
 .view-browse-by-community .community-page-browse {
   padding-inline: var(--layout-padding);
 }
@@ -4808,6 +5049,7 @@ header {
     padding-inline: var(--layout-padding-m);
   }
 }
+
 .communities {
   gap: var(--v-space-3xs);
   display: grid;
@@ -4825,12 +5067,13 @@ header {
     grid-gap: 10px var(--gutter);
   }
 }
+
 .communities__item {
   position: relative;
   list-style-type: none;
   border: 1px solid var(--brand-light-accent);
   block-size: 19rem;
-  background-color: #fff;
+  background-color: white;
 }
 .communities__item .field--name-name a {
   position: relative;
@@ -4897,10 +5140,12 @@ header {
   -o-object-fit: cover;
   object-fit: cover;
 }
+
 .community--browse--wrapper .community-page-browse {
   -webkit-padding-after: var(--v-space-s);
   padding-block-end: var(--v-space-s);
 }
+
 .community--full,
 .protocol--full {
   display: grid;
@@ -4933,6 +5178,7 @@ header {
   -o-object-fit: cover;
   object-fit: cover;
 }
+
 .community__content,
 .protocol__content {
   grid-area: content;
@@ -4971,6 +5217,7 @@ header {
   -webkit-padding-before: 0;
   padding-block-start: 0;
 }
+
 .community__sidebar,
 .protocol__sidebar {
   grid-area: sidebar;
@@ -4990,6 +5237,7 @@ header {
     margin-inline: 0;
   }
 }
+
 .dictionary .browse__main-content {
   display: block;
 }
@@ -5184,6 +5432,7 @@ header {
     grid-template-columns: 1fr 1fr;
   }
 }
+
 .dictionary-word__teaser-heading {
   background-color: var(--brand-primary-dark);
   padding-block: var(--v-space-4xxs);
@@ -5304,6 +5553,7 @@ header {
     flex-direction: row;
   }
 }
+
 .page-node-type-dictionary-word
   .full-node__content
   .field--name-field-word-entry
@@ -5353,8 +5603,7 @@ header {
   block-size: 0;
   border-style: solid;
   border-width: var(--v-space-3xs) 0 var(--v-space-3xs) var(--v-space-2xs);
-  border-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) rgba(0, 0, 0, 0)
-    var(--brand-primary-dark);
+  border-color: transparent transparent transparent var(--brand-primary-dark);
   z-index: -1;
 }
 .page-node-type-dictionary-word
@@ -5450,11 +5699,13 @@ header {
   -ms-flex-align: center;
   align-items: center;
 }
+
 .page-node-type-digital-heritage .layout-container .page__title {
   background: none;
   margin-block: var(--v-space-4xxs) var(--v-space-2xs);
   margin-inline: 0;
 }
+
 .full-node__grid {
   display: grid;
   grid-template-columns: var(--grid-6col);
@@ -5476,6 +5727,7 @@ header {
       );
   }
 }
+
 .full-node__main {
   grid-column: 1 / span 6;
 }
@@ -5671,6 +5923,10 @@ header {
   -webkit-border-after: none;
   border-block-end: none;
 }
+
+/* @file
+ * Styles for the landing page template.
+ */
 .layout--onecol .block-wrapper {
   -webkit-box-shadow: 0 12px 12px 0 var(--brand-light);
   box-shadow: 0 12px 12px 0 var(--brand-light);
@@ -5695,6 +5951,7 @@ header {
     padding-inline: var(--layout-padding-m);
   }
 }
+
 .local-contexts-directory__main-content {
   display: grid;
   grid-template-columns: var(--grid-6col);
@@ -5724,6 +5981,11 @@ header {
     grid-column: 2/-2;
   }
 }
+
+/* @file
+ * Styles for the layout builder.
+ */
+/* Make layout builder look closer to Gin */
 .glb-body {
   background-color: var(--gin-bg-app);
 }
@@ -5786,6 +6048,7 @@ header {
   background: var(--gin-bg-item-hover);
   color: var(--gin-color-primary-hover);
 }
+
 .layout-container main {
   display: block;
 }
@@ -5901,6 +6164,7 @@ header {
   color: var(--color-error-dark);
   background-color: var(--color-error-light);
 }
+
 .word-list .full-node__main {
   container-type: inline-size;
 }
