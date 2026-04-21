@@ -121,6 +121,9 @@
             },
             "drupal/search_api_glossary": {
                 "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch"
+            },
+            "drupal/message_digest_ui": {
+                "Fix null flag fatal error in DigestInterval::access()": "web/profiles/mukurtu/patches/message_digest_ui-digest-interval-null-flag.patch"
             }
         }
     }
