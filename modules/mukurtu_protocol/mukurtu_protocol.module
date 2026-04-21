@@ -699,6 +699,28 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
   }
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_protocol_form_og_membership_add_multiple_roles_action_form_alter(&$form, FormStateInterface $form_state) {
+  $form['roles']['#type'] = 'checkboxes';
+  unset($form['roles']['#multiple']);
+  $form['#validate'][] = 'mukurtu_protocol_og_add_roles_form_validate';
+  array_unshift($form['#submit'], 'mukurtu_protocol_og_add_roles_form_pre_submit');
+}
+
+function mukurtu_protocol_og_add_roles_form_validate(&$form, FormStateInterface $form_state) {
+  $roles = array_filter($form_state->getValue('roles'));
+  if (empty($roles)) {
+    $form_state->setErrorByName('roles', t('Please select at least one role.'));
+  }
+}
+
+function mukurtu_protocol_og_add_roles_form_pre_submit(&$form, FormStateInterface $form_state) {
+  $roles = array_filter($form_state->getValue('roles'));
+  $form_state->setValue('roles', $roles);
+}
+
 function add_protocol_member_form_validate(&$form, FormStateInterface $form_state)
 {
   $uid = isset($form_state->getValue('uid')[0]['target_id']) ? $form_state->getValue('uid')[0]['target_id'] : NULL;
