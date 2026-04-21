@@ -25,12 +25,6 @@ splide:
     theme:
       libraries/splide/splide.min.css: {}
 
-notify-form:
-  version: 1.x
-  css:
-    component:
-      css/mukurtu-notify-form.css: {}
-
 entity_browser_view_decoration:
   version: 1.x
   js:

@@ -5,7 +5,7 @@ dependencies:
     - mukurtu_protocol
 id: community-community-community_member
 label: 'Community Member'
-weight: 1
+weight: 15
 is_admin: null
 group_type: community
 group_bundle: community

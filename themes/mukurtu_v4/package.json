@@ -15,7 +15,7 @@
     "gulp-cli": "^2.3.0",
     "gulp-imagemin": "^7.1.0",
     "gulp-livereload": "^4.0.2",
-    "gulp-sass": "^6.0.1",
+    "gulp-sass": "^5.1.0",
     "gulp-sourcemaps": "^3.0.0",
     "imagemin-pngquant": "^9.0.2",
     "sass": "^1.86.0",

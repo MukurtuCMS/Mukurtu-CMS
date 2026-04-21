@@ -5,7 +5,7 @@ dependencies:
     - mukurtu_protocol
 id: protocol-protocol-protocol_member
 label: 'Protocol Member'
-weight: 1
+weight: 12
 is_admin: null
 group_type: protocol
 group_bundle: protocol

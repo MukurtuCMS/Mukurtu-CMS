@@ -87,24 +87,6 @@ class CommunityManagerUserCreationForm extends FormBase {
     foreach ($stewardProtocols as $protocol) {
       foreach ($protocol->getCommunities() as $parentCommunity) {
         $protocolsByCommunity[$parentCommunity->id()][$protocol->id()] = $protocol;
-    // Get protocols grouped by community, for the user's managed communities.
-    $protocolStorage = \Drupal::entityTypeManager()->getStorage('protocol');
-    $protocolsByCommunity = [];
-    foreach ($managerCommunities as $community) {
-      $communityProtocolIds = $protocolStorage->getQuery()
-        ->condition('field_communities', $community->id())
-        ->accessCheck(FALSE)
-        ->execute();
-      $communityProtocols = [];
-      foreach ($protocolStorage->loadMultiple($communityProtocolIds) as $protocol) {
-        $communityProtocols[$protocol->id()] = $protocol->getName();
-      }
-      asort($communityProtocols);
-      if (!empty($communityProtocols)) {
-        $protocolsByCommunity[$community->id()] = [
-          'label' => $community->getName(),
-          'protocols' => $communityProtocols,
-        ];
       }
     }
 
@@ -199,87 +181,6 @@ class CommunityManagerUserCreationForm extends FormBase {
       }
     }
 
-    $form['notify'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Notify other users'),
-      '#description' => $this->t('Optionally notify users about this new account.'),
-      '#open' => FALSE,
-      '#attached' => ['library' => ['mukurtu_core/notify-form']],
-    ];
-
-    $form['notify']['notify_all_managers'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Notify all Mukurtu Managers'),
-      '#default_value' => FALSE,
-    ];
-
-    if (!empty($communities)) {
-      $form['notify']['notify_communities'] = [
-        '#type' => 'checkboxes',
-        // Use the visible legend rendered by #type => 'checkboxes' as the
-        // group label so it is properly associated via <fieldset>/<legend>.
-        '#title' => $this->t('Notify all community managers in the following communities:'),
-        '#options' => $communities,
-        '#required' => FALSE,
-        '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
-      ];
-    }
-
-    if (!empty($protocolsByCommunity)) {
-      $form['notify']['notify_protocols'] = [
-        '#type' => 'container',
-        '#attributes' => ['class' => ['notify-protocols-wrapper']],
-      ];
-      $form['notify']['notify_protocols']['title'] = [
-        // Use <p> instead of <label> — this text labels the group visually
-        // but is not associated with a specific control. #title is not rendered
-        // on #type => 'container' elements, so #markup is required here.
-        '#markup' => '<p class="fieldset__label fieldset__label--group">' . $this->t('Notify all protocol stewards in the following protocols:') . '</p>',
-      ];
-      foreach ($protocolsByCommunity as $communityId => $data) {
-        $form['notify']['notify_protocols'][$communityId] = [
-          '#type' => 'checkboxes',
-          '#title' => $data['label'],
-          '#options' => $data['protocols'],
-          '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
-        ];
-      }
-    }
-
-    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
-
-    $form['notify']['notify_users'] = [
-      '#type' => 'container',
-      // aria-live="polite" announces new fields to screen readers when
-      // "Add another user" fires. <p> replaces the unassociated <label>.
-      '#prefix' => '<div id="notify-users-wrapper" aria-live="polite"><p class="fieldset__label fieldset__label--group">' . $this->t('Notify specific users:') . '</p>',
-      '#suffix' => '</div>',
-    ];
-
-    for ($i = 0; $i < $notifyUserCount; $i++) {
-      $form['notify']['notify_users']['user_' . $i] = [
-        '#type' => 'entity_autocomplete',
-        '#target_type' => 'user',
-        // Numbered labels give screen reader users positional context when
-        // multiple fields exist.
-        '#title' => $this->t('User @num', ['@num' => $i + 1]),
-        '#title_display' => 'invisible',
-        '#selection_handler' => 'mukurtu_manager_users',
-        '#required' => FALSE,
-      ];
-    }
-
-    $form['notify']['notify_users']['add_more'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Add another user'),
-      '#submit' => ['::addMoreNotifyUser'],
-      '#ajax' => [
-        'callback' => '::addMoreNotifyUserCallback',
-        'wrapper' => 'notify-users-wrapper',
-      ],
-      '#limit_validation_errors' => [],
-    ];
-
     $form['actions'] = [
       '#type' => 'actions',
     ];
@@ -358,52 +259,6 @@ class CommunityManagerUserCreationForm extends FormBase {
     if (empty($email)) {
       $this->messenger()->addMessage($this->t('No email address was provided, so a notification email has not been sent to the new user.'));
     }
-
-    // Resolve individual user selections.
-    $notifyUids = [];
-    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
-    for ($i = 0; $i < $notifyUserCount; $i++) {
-      $uid = $form_state->getValue(['notify_users', 'user_' . $i]);
-      if (!empty($uid)) {
-        $notifyUids[] = (int) $uid;
-      }
-    }
-
-    // Resolve group selections.
-    $allManagers = (bool) $form_state->getValue('notify_all_managers');
-    $communityIds = array_keys(array_filter($form_state->getValue('notify_communities') ?? []));
-    $protocolIds = [];
-    foreach ($form_state->getValue('notify_protocols') ?? [] as $groupValues) {
-      if (is_array($groupValues)) {
-        $protocolIds = array_merge($protocolIds, array_keys(array_filter($groupValues)));
-      }
-    }
-    $protocolIds = array_unique($protocolIds);
-
-    if (function_exists('mukurtu_notifications_resolve_notify_groups')) {
-      $groupUids = mukurtu_notifications_resolve_notify_groups($allManagers, $communityIds, $protocolIds);
-      $notifyUids = array_unique(array_merge($notifyUids, $groupUids));
-    }
-
-    if (!empty($notifyUids) && function_exists('mukurtu_notifications_notify_new_account_created')) {
-      mukurtu_notifications_notify_new_account_created($user, $notifyUids);
-    }
-  }
-
-  /**
-   * AJAX submit handler to add another user autocomplete field.
-   */
-  public function addMoreNotifyUser(array &$form, FormStateInterface $form_state): void {
-    $count = $form_state->get('notify_user_count') ?? 1;
-    $form_state->set('notify_user_count', $count + 1);
-    $form_state->setRebuild();
-  }
-
-  /**
-   * AJAX callback to return the updated notify_users container.
-   */
-  public function addMoreNotifyUserCallback(array &$form, FormStateInterface $form_state): array {
-    return $form['notify']['notify_users'];
   }
 
   /**

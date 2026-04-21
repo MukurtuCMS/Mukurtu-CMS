@@ -412,14 +412,3 @@ function mukurtu_core_update_40009(): void {
   $config_installer = \Drupal::service('config.installer');
   $config_installer->installDefaultConfig('module', 'mukurtu_core');
 }
-
-/**
- * Disable user_admin_people view so MukurtuUserListBuilder serves /admin/people.
- */
-function mukurtu_core_update_40010(): void {
-  $view = \Drupal::entityTypeManager()->getStorage('view')->load('user_admin_people');
-  if ($view && $view->status()) {
-    $view->setStatus(FALSE);
-    $view->save();
-  }
-}

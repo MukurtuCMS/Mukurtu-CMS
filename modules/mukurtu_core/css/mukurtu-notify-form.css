@@ -1,8 +1,0 @@
-/**
- * Styles for the new user notification form section.
- */
-
-/* Add gap between the checkbox input and its label text. */
-.notify-form-checkboxes input[type="checkbox"] {
-  margin-inline-end: .5rem;
-}
