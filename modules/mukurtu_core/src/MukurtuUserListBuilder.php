@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_core;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
 use Drupal\user\RoleInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\user\Entity\Role;
@@ -93,6 +94,19 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
       $row['access']['data']['#markup'] = t('never');
     }
     return $row + parent::buildRow($entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOperations(EntityInterface $entity) {
+    $operations = parent::getOperations($entity);
+    $operations['memberships'] = [
+      'title' => $this->t('Memberships'),
+      'url' => Url::fromRoute('mukurtu_protocol.user_memberships', ['user' => $entity->id()]),
+      'weight' => 20,
+    ];
+    return $operations;
   }
 
   protected function getUserCommunities($account) {
