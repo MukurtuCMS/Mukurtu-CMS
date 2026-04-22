@@ -47,9 +47,13 @@ function mukurtu_footer_update_40001(): void {
     return;
   }
 
-  // Read existing block plugin settings.
-  $block_settings = \Drupal::config('block.block.mukurtu_v4_mukurtu_footer')
-    ->get('settings') ?? [];
+  // Read existing block plugin settings from whichever block instance uses the
+  // mukurtu_footer plugin — avoids hardcoding the theme-specific block ID.
+  $block_storage = \Drupal::entityTypeManager()->getStorage('block');
+  $footer_blocks = $block_storage->loadByProperties(['plugin' => 'mukurtu_footer']);
+  $block_settings = $footer_blocks
+    ? reset($footer_blocks)->get('settings') ?? []
+    : [];
 
   // Build footer_logo paragraph entities from old fid array.
   $logo_paragraphs = [];

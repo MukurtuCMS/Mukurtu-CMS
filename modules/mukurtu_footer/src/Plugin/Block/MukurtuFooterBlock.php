@@ -65,6 +65,13 @@ class MukurtuFooterBlock extends BlockBase implements ContainerFactoryPluginInte
       return [];
     }
 
+    if (count($entities) > 1) {
+      \Drupal::logger('mukurtu_footer')->warning(
+        'Multiple mukurtu_footer block_content entities found (@count). Using the first one (id: @id). Delete extras at /admin/content/block-content.',
+        ['@count' => count($entities), '@id' => $footer->id()]
+      );
+    }
+
     // Resolve logo paragraph entities to renderable data.
     $logos = [];
     foreach ($footer->get('field_footer_logos') as $item) {

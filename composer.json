@@ -74,7 +74,6 @@
         "drush/drush": "^13",
         "sibyx/phpgpx": "@RC",
         "drupal/dashboards": "^2.1",
-        "drupal/default_content": "^2.0",
         "drupal/admin_theme": "^1.1",
         "drupal/config_translation_po": "^1.0",
         "geocoder-php/nominatim-provider": "*",

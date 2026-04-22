@@ -67,7 +67,7 @@
         <div class="logo">
           {% if logo.link_url %}
             <a href="{{ logo.link_url }}" target="_blank" rel="noopener noreferrer"
-               aria-label="{{ logo.alt ?: 'Logo'|t }}{% if logo.alt %} {% endif %}{{ '(opens in new tab)'|t }}">
+               aria-label="{{ (logo.alt ?: 'Logo'|t) ~ ' ' ~ '(opens in new tab)'|t }}">
               <img src="{{ logo.url }}" alt="" aria-hidden="true">
             </a>
           {% else %}
