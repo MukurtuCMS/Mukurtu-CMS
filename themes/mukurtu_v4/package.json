@@ -6,6 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "lint-staged": {
+    "components/**/*.scss": "prettier --write",
+    "components/**/*.js": "prettier --write"
+  },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
     "eslint": "^9.22.0",
@@ -22,7 +26,10 @@
     "stylelint": "^16.16.0",
     "stylelint-config-standard": "^37.0.0",
     "stylelint-config-standard-scss": "^14.0.0",
-    "stylelint-use-logical-spec": "^5.0.1"
+    "stylelint-use-logical-spec": "^5.0.1",
+    "prettier": "^3.0.0",
+    "lint-staged": "^15.0.0",
+    "husky": "^9.0.0"
   },
   "dependencies": {
     "@bcgov/bc-sans": "^2.1.0",

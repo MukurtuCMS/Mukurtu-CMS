@@ -1,0 +1,1 @@
+cd themes/mukurtu_v4 && npx lint-staged
