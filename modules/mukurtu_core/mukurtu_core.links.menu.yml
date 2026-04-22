@@ -85,8 +85,8 @@ mukurtu_core.my_account:
   title: 'My account'
   description: 'User account page'
   parent: mukurtu_dashboard
-  menu_name: dashboard-my-content
-  route_name: user.page
+  menu_name: dashboard-my-account
+  route_name: user.edit
 mukurtu_core.entity.menu.edit_form:
   title: 'Main navigation menu'
   description: 'Main navigation menu'

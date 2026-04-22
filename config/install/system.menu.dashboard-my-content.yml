@@ -1,7 +1,7 @@
 langcode: en
 status: true
 dependencies: {  }
-id: dashboard-my-content
-label: 'My content'
-description: 'Access users own content.'
+id: dashboard-my-account
+label: 'My Account'
+description: 'Access users own content and account information.'
 locked: false
