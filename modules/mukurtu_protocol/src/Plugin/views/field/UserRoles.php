@@ -35,7 +35,7 @@ class UserRoles extends FieldPluginBase {
     }
     sort($labels);
 
-    return empty($labels) ? '' : ['#markup' => implode(', ', array_map('htmlspecialchars', $labels))];
+    return empty($labels) ? ['#markup' => $this->t('None')] : ['#markup' => implode(', ', array_map('htmlspecialchars', $labels))];
   }
 
   public function query() {

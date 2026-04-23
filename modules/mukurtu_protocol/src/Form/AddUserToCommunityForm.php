@@ -212,15 +212,16 @@ class AddUserToCommunityForm extends FormBase {
       return $form;
     }
 
-    $header = [$this->t('Community')];
+    $header = [['data' => $this->t('Community'), 'scope' => 'col']];
     foreach ($roles as $role) {
-      $header[] = $role->getLabel();
+      $header[] = ['data' => $role->getLabel(), 'scope' => 'col'];
     }
 
     $form['memberships'] = [
-      '#type'   => 'table',
-      '#header' => $header,
-      '#empty'  => $this->t('No communities available.'),
+      '#type'    => 'table',
+      '#caption' => $this->t('Select community roles for @user', ['@user' => $user->getDisplayName()]),
+      '#header'  => $header,
+      '#empty'   => $this->t('No communities available.'),
     ];
 
     foreach ($communities as $cid => $community) {
@@ -230,7 +231,10 @@ class AddUserToCommunityForm extends FormBase {
       foreach ($roles as $role) {
         $form['memberships'][$cid][$role->id()] = [
           '#type'          => 'checkbox',
-          '#title'         => $role->getLabel(),
+          '#title'         => $this->t('@role for @community', [
+            '@role'      => $role->getLabel(),
+            '@community' => $community->getName(),
+          ]),
           '#title_display' => 'invisible',
           // Restore previously entered values if the user goes Back.
           '#default_value' => $form_state->get(['community_selections', $cid, $role->id()]) ?? 0,
@@ -255,15 +259,20 @@ class AddUserToCommunityForm extends FormBase {
     $protocol_rows = $form_state->get('protocol_rows');
     $roles = $this->getProtocolRoles();
 
-    $header = [$this->t('Community'), $this->t('Protocol')];
+    $header = [
+      ['data' => $this->t('Community'), 'scope' => 'col'],
+      ['data' => $this->t('Protocol'), 'scope' => 'col'],
+    ];
     foreach ($roles as $role) {
-      $header[] = $role->getLabel();
+      $header[] = ['data' => $role->getLabel(), 'scope' => 'col'];
     }
 
+    $target_user = User::load($form_state->get('target_uid'));
     $form['protocol_memberships'] = [
-      '#type'   => 'table',
-      '#header' => $header,
-      '#empty'  => $this->t('No protocols available for the selected communities.'),
+      '#type'    => 'table',
+      '#caption' => $this->t('Select protocol roles for @user', ['@user' => $target_user ? $target_user->getDisplayName() : '']),
+      '#header'  => $header,
+      '#empty'   => $this->t('No protocols available for the selected communities.'),
     ];
 
     foreach ($protocol_rows as $pid => $row) {
@@ -276,7 +285,11 @@ class AddUserToCommunityForm extends FormBase {
       foreach ($roles as $role) {
         $form['protocol_memberships'][$pid][$role->id()] = [
           '#type'          => 'checkbox',
-          '#title'         => $role->getLabel(),
+          '#title'         => $this->t('@role for @protocol (@community)', [
+            '@role'      => $role->getLabel(),
+            '@protocol'  => $row['protocol_name'],
+            '@community' => $row['community_name'],
+          ]),
           '#title_display' => 'invisible',
         ];
       }
