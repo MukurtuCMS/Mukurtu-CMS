@@ -4,4 +4,3 @@ mukurtu_drafts.your_drafts:
   parent: mukurtu_dashboard
   menu_name: dashboard-my-account
   route_name: mukurtu_drafts.your_drafts
-  
