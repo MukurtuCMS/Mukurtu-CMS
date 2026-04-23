@@ -37,7 +37,7 @@
       <ul class="menu__account-submenu">
     {% endif %}
     {% for item in items %}
-      {% if item.title != 'My account' %}
+      {% if item.url.routeName != 'user.edit' %}
       {% set item_classes = [
         'account-menu__menu-item',
         'account-menu__menu-item--level-' ~ (menu_level + 1),
