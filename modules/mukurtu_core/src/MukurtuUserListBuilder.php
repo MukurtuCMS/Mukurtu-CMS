@@ -63,7 +63,7 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
       '#theme' => 'username',
       '#account' => $entity,
     ];
-    $row['field_display_name']['data']['#markup'] = $entity->get('field_display_name')->value;
+    $row['field_display_name']['data']['#markup'] = $entity->get('field_display_name')->value ?? '—';
     $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('blocked');
 
     $roles = Role::loadMultiple($entity->getRoles());

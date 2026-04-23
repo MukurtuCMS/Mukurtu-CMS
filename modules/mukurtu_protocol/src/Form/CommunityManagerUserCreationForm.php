@@ -113,6 +113,7 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $form['pass'] = [
       '#type' => 'password_confirm',
+      '#title' => $this->t('Password'),
       '#description' => $this->t('Leave blank to allow the user to set their own password via a password reset email.'),
       '#required' => FALSE,
     ];
@@ -147,7 +148,7 @@ class CommunityManagerUserCreationForm extends FormBase {
       $form['membership'][$communityId] = [
         '#type' => 'details',
         '#title' => $this->t($communityName),
-        '#open' => FALSE,
+        '#open' => TRUE,
       ];
 
       $form['membership'][$communityId]['community_roles'] = [
@@ -163,6 +164,7 @@ class CommunityManagerUserCreationForm extends FormBase {
           '#type' => 'container',
           '#tree' => TRUE,
           '#states' => ['visible' => [$communityMemberSelector => ['checked' => TRUE]]],
+          '#description' => $this->t('Protocol roles are available after selecting the Community Member role above.'),
         ];
 
         /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
