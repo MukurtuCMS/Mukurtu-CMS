@@ -147,7 +147,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     foreach ($communities as $communityId => $communityName) {
       $form['membership'][$communityId] = [
         '#type' => 'details',
-        '#title' => $this->t($communityName),
+        '#title' => $communityName,
         '#open' => TRUE,
       ];
 
@@ -171,7 +171,7 @@ class CommunityManagerUserCreationForm extends FormBase {
         foreach ($protocolsByCommunity[$communityId] as $protocolId => $protocol) {
           $form['membership'][$communityId]['protocols'][$protocolId] = [
             '#type' => 'details',
-            '#title' => $this->t($protocol->getName()),
+            '#title' => $protocol->getName(),
             '#open' => FALSE,
           ];
           $form['membership'][$communityId]['protocols'][$protocolId]['protocol_roles'] = [
@@ -228,7 +228,7 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $user->save();
 
-    if (!empty($values['notify']) && !empty($email)) {
+    if (!empty($values['notify']) && !empty($email) && (int) $values['status'] === 1) {
       _user_mail_notify('status_activated', $user);
     }
 
@@ -242,16 +242,17 @@ class CommunityManagerUserCreationForm extends FormBase {
         /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
         $community = $entityTypeManager->getStorage('community')->load($communityId);
         $community->addMember($user, $communityRoles);
-      }
 
-      // Process protocol memberships under this community.
-      foreach ($communityData['protocols'] ?? [] as $protocolId => $protocolData) {
-        $protocolRoles = array_keys(array_filter($protocolData['protocol_roles']));
+        // Process protocol memberships under this community. Protocol membership
+        // requires community membership first, so this is intentionally nested.
+        foreach ($communityData['protocols'] ?? [] as $protocolId => $protocolData) {
+          $protocolRoles = array_keys(array_filter($protocolData['protocol_roles']));
 
-        if (!empty($protocolRoles)) {
-          /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
-          $protocol = $entityTypeManager->getStorage('protocol')->load($protocolId);
-          $protocol->addMember($user, $protocolRoles);
+          if (!empty($protocolRoles)) {
+            /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
+            $protocol = $entityTypeManager->getStorage('protocol')->load($protocolId);
+            $protocol->addMember($user, $protocolRoles);
+          }
         }
       }
     }

@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_core;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Link;
 use Drupal\user\RoleInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\user\Entity\Role;
@@ -80,7 +81,10 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     ];
     $row['communities']['data'] = [
       '#theme' => 'item_list',
-      '#items' => $this->getUserCommunities($entity),
+      '#items' => array_map(
+        fn($community) => Link::fromTextAndUrl($community->getName(), $community->toUrl()),
+        $this->getUserCommunities($entity)
+      ),
     ];
     $row['member_for']['data'] = $this->dateFormatter->formatTimeDiffSince($entity->getCreatedTime(), $options)->toRenderable();
     $last_access = $this->dateFormatter->formatTimeDiffSince($entity->getLastAccessedTime(), $options);
@@ -110,7 +114,7 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     foreach ($memberships as $membership) {
       $community = $membership->getGroup();
       if ($community) {
-        $communities[$community->id()] = $community->getTitle();
+        $communities[$community->id()] = $community;
       }
     }
     return $communities;
