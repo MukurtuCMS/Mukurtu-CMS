@@ -28,13 +28,13 @@
 #}
 {{ menus.menu_links(items, attributes, 0) }}
 
-{% macro menu_links(items, attributes, menu_level) %}
+{% macro menu_links(items, attributes, menu_level, submenu_id) %}
   {% import _self as menus %}
   {% if items %}
     {% if menu_level == 0 %}
       <ul class="menu__account-menu">
     {% else %}
-      <ul class="menu__account-submenu">
+      <ul class="menu__account-submenu"{% if submenu_id %} id="{{ submenu_id }}"{% endif %}>
     {% endif %}
     {% for item in items %}
       {% if item.url.routeName != 'user.edit' %}
@@ -61,17 +61,15 @@
             'data-drupal-selector': 'account-menu-submenu-toggle-button',
             'aria-controls': aria_id,
             'aria-expanded': 'false',
-            'title': '@title sub-menu'|t({'@title': item.title}),
             'type': 'button',
           }) %}
-          
+
           <button{{ toggle_button_attributes }}>
             <span class="visually-hidden">{{ '@title sub-menu'|t({'@title': item.title}) }}</span>
-            <span class="account-menu__toggle-icon"></span>
+            <span class="account-menu__toggle-icon" aria-hidden="true"></span>
           </button>
-          
-          {% set attributes = attributes.setAttribute('id', aria_id) %}
-          {{ menus.menu_links(item.below, attributes, menu_level + 1) }}
+
+          {{ menus.menu_links(item.below, attributes, menu_level + 1, aria_id) }}
         {% else %}
           {{ link(item.title, item.url, {'class': link_classes}) }}
         {% endif %}
