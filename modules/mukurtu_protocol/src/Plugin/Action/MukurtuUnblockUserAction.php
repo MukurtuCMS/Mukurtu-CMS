@@ -32,6 +32,9 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
     if (!$entity instanceof User) {
       return;
     }
+    if (!$this->access($entity, \Drupal::currentUser())) {
+      return;
+    }
     if ($entity->status->value != 1) {
       $entity->set('status', TRUE);
       try {
@@ -90,7 +93,11 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
    * {@inheritdoc}
    */
   public static function customAccess(AccountInterface $account, ViewExecutable $view): bool {
-    foreach (Og::getMemberships($account) as $m) {
+    $user = User::load($account->id());
+    if (!$user) {
+      return FALSE;
+    }
+    foreach (Og::getMemberships($user) as $m) {
       if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
         return TRUE;
       }

@@ -6,6 +6,8 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Link;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\Core\Ajax\MessageCommand;
@@ -28,18 +30,18 @@ class MukurtuUserController extends ControllerBase {
   public function access() {
     $account = $this->currentUser();
     if ($account->hasPermission('administer users')) {
-      return AccessResult::allowed();
+      return AccessResult::allowed()->cachePerPermissions();
     }
 
     // Also allow community managers (have 'manage members' in any community).
     $user = User::load($account->id());
     foreach (Og::getMemberships($user) as $membership) {
       if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
-        return AccessResult::allowed();
+        return AccessResult::allowed()->cachePerUser();
       }
     }
 
-    return AccessResult::forbidden();
+    return AccessResult::forbidden()->cachePerUser();
   }
 
   public function approveAjax($uid) {
@@ -62,14 +64,20 @@ class MukurtuUserController extends ControllerBase {
       }
 
       // Prompt the approving user to also add the new member to communities.
-      $add_url = Url::fromRoute('mukurtu_protocol.add_user_to_community', ['user' => $uid])->toString();
-      \Drupal::messenger()->addStatus($this->t(
-        '@name has been approved. <a href="@url">Add them to a community</a>.',
-        ['@name' => $user->getDisplayName(), '@url' => $add_url]
+      $add_url = Url::fromRoute('mukurtu_protocol.add_user_to_community', ['user' => $uid]);
+      $link = Link::fromTextAndUrl($this->t('Add them to a community'), $add_url)->toString();
+      $name = $user->getDisplayName();
+      \Drupal::messenger()->addStatus(Markup::create(
+        $this->t('@name has been approved.', ['@name' => $name]) . ' ' . $link . '.'
       ));
     }
 
-    $redirect = \Drupal::request()->headers->get('referer') ?: Url::fromRoute('view.mukurtu_people.page_1')->toString();
+    $request = \Drupal::request();
+    $referer = $request->headers->get('referer');
+    $fallback = Url::fromRoute('view.mukurtu_people.page_1')->toString();
+    $redirect = ($referer && str_starts_with($referer, $request->getSchemeAndHttpHost()))
+      ? $referer
+      : $fallback;
     $response->addCommand(new RedirectCommand($redirect));
     return $response;
   }
@@ -123,7 +131,12 @@ class MukurtuUserController extends ControllerBase {
       }
     }
 
-    $redirect = \Drupal::request()->headers->get('referer') ?: Url::fromRoute('view.mukurtu_people.page_1')->toString();
+    $request = \Drupal::request();
+    $referer = $request->headers->get('referer');
+    $fallback = Url::fromRoute('view.mukurtu_people.page_1')->toString();
+    $redirect = ($referer && str_starts_with($referer, $request->getSchemeAndHttpHost()))
+      ? $referer
+      : $fallback;
     $response->addCommand(new RedirectCommand($redirect));
     return $response;
   }
