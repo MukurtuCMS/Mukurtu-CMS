@@ -21,7 +21,7 @@ class UserCommunity extends FieldPluginBase {
     /** @var \Drupal\node\Entity\Node $node */
     if ($values->_entity instanceof MukurtuUser) {
       $communities = array_filter($values->_entity->getCommunities(), fn ($c) => $c->access('view'));
-      usort($communities, fn ($a, $b) => strcmp($a->getName(), $b->getName()));
+      uasort($communities, fn ($a, $b) => strcmp($a->getName(), $b->getName()));
 
       if (!empty($communities)) {
         $build = [];

@@ -16,7 +16,7 @@ class MukurtuUserController extends ControllerBase {
   use StringTranslationTrait;
 
   /**
-   * Roles that community managers cannot block.
+   * Roles that community managers cannot perform operations on.
    */
   const PROTECTED_ROLES = ['administrator', 'mukurtu_manager'];
 
