@@ -10,6 +10,7 @@ namespace Drupal\mukurtu_footer\Plugin\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
+use Drupal\Core\Logger\LoggerChannelTrait;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Utility\Token;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -27,6 +28,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class MukurtuFooterBlock extends BlockBase implements ContainerFactoryPluginInterface {
+
+  use LoggerChannelTrait;
 
   public function __construct(
     array $configuration,
@@ -62,11 +65,12 @@ class MukurtuFooterBlock extends BlockBase implements ContainerFactoryPluginInte
     $footer = reset($entities);
 
     if (!$footer) {
+      $this->getLogger('mukurtu_footer')->notice('No mukurtu_footer block_content entity found. Create one at /admin/content/block-content.');
       return [];
     }
 
     if (count($entities) > 1) {
-      \Drupal::logger('mukurtu_footer')->warning(
+      $this->getLogger('mukurtu_footer')->warning(
         'Multiple mukurtu_footer block_content entities found (@count). Using the first one (id: @id). Delete extras at /admin/content/block-content.',
         ['@count' => count($entities), '@id' => $footer->id()]
       );
@@ -140,6 +144,17 @@ class MukurtuFooterBlock extends BlockBase implements ContainerFactoryPluginInte
       $copyright = $this->token->replace($copyright, [], ['clear' => TRUE]);
     }
 
+    // Collect cache tags from paragraph entities so that editing a logo or
+    // social link invalidates the render cache without touching the parent.
+    $paragraph_tags = [];
+    foreach (['field_footer_logos', 'field_footer_social_links'] as $field_name) {
+      foreach ($footer->get($field_name) as $item) {
+        if ($item->entity) {
+          $paragraph_tags = array_merge($paragraph_tags, $item->entity->getCacheTags());
+        }
+      }
+    }
+
     return [
       '#theme'                 => 'mukurtu_footer',
       '#text_field'            => $text_field,
@@ -150,9 +165,13 @@ class MukurtuFooterBlock extends BlockBase implements ContainerFactoryPluginInte
       '#contact_email_address' => $footer->get('field_footer_contact_email')->value ?? '',
       '#copyright_message'     => $copyright,
       '#cache'                 => [
+        // block_content_list ensures the cache is invalidated if a new footer
+        // entity is created while an old render (including an empty one) is
+        // still cached. The entity and paragraph tags handle edit invalidation.
         'tags' => array_merge(
           ['block_content_list'],
           $footer->getCacheTags(),
+          $paragraph_tags,
         ),
       ],
     ];
