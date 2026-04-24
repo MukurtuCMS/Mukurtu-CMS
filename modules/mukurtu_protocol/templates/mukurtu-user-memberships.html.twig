@@ -65,9 +65,11 @@
           {% endfor %}
         {% endfor %}
 
-        {% if orphan_protocols is not empty %}
+      </tbody>
+      {% if orphan_protocols is not empty %}
+        <tbody>
           <tr>
-            <th colspan="4" scope="colgroup">{{ 'Other Cultural Protocol Memberships'|t }}</th>
+            <th colspan="4">{{ 'Other Cultural Protocol Memberships'|t }}</th>
           </tr>
           {% for protocol_item in orphan_protocols %}
             <tr>
@@ -77,8 +79,8 @@
               <td headers="col-protocol-roles">{{ protocol_item.roles|join(', ') ?: 'None'|t }}</td>
             </tr>
           {% endfor %}
-        {% endif %}
-      </tbody>
+        </tbody>
+      {% endif %}
     </table>
   {% endif %}
 </div>
