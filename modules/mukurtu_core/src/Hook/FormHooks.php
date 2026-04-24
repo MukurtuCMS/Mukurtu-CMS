@@ -93,7 +93,9 @@ class FormHooks {
    * Removes message_digest notification actions from the user admin bulk form.
    *
    * These come from message_digest_ui optional config and should not be
-   * exposed in Mukurtu's user management UI.
+   * exposed in Mukurtu's user management UI. This hook acts as a safety net
+   * alongside the composer patch and update hook 40004: if the patch fails to
+   * apply on a given environment the actions are still hidden from the UI.
    */
   #[Hook('form_alter')]
   public function formAlterRemoveNotificationBulkActions(array &$form, FormStateInterface $form_state, string $form_id): void {
