@@ -158,13 +158,16 @@ class CommunityManagerUserCreationForm extends FormBase {
       ];
 
       if (!empty($protocolsByCommunity[$communityId])) {
-        $communityMemberSelector = ':input[name="membership[' . $communityId . '][community_roles][community_member]"]';
+        $statesConditions = [];
+        foreach (array_keys($roles) as $roleName) {
+          $statesConditions[':input[name="membership[' . $communityId . '][community_roles][' . $roleName . ']"]'] = ['checked' => TRUE];
+        }
 
         $form['membership'][$communityId]['protocols'] = [
           '#type' => 'container',
           '#tree' => TRUE,
-          '#states' => ['visible' => [$communityMemberSelector => ['checked' => TRUE]]],
-          '#description' => $this->t('Protocol roles are available after selecting the Community Member role above.'),
+          '#states' => ['visible' => $statesConditions],
+          '#description' => $this->t('Protocol roles are available after selecting a community role above.'),
         ];
 
         /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
@@ -182,6 +185,8 @@ class CommunityManagerUserCreationForm extends FormBase {
         }
       }
     }
+
+    $form_state->set('formHasProtocols', !empty($protocolsByCommunity));
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -298,6 +303,36 @@ class CommunityManagerUserCreationForm extends FormBase {
       $emailValidator = \Drupal::service("email.validator");
       if (!$emailValidator->isValid($email)) {
         $form_state->setErrorByName('email', $this->t('The email address @email is not valid.', ['@email' => $email]));
+      }
+    }
+
+    $membership = $form_state->getValue('membership') ?? [];
+
+    // Require at least one community role to be selected.
+    $hasAnyCommunityRole = FALSE;
+    foreach ($membership as $communityData) {
+      if (!empty(array_filter($communityData['community_roles'] ?? []))) {
+        $hasAnyCommunityRole = TRUE;
+        break;
+      }
+    }
+    if (!$hasAnyCommunityRole) {
+      $form_state->setError($form['membership'], $this->t('Please assign the new user at least one community role.'));
+    }
+
+    // Require at least one protocol role when the form includes protocol sections.
+    if ($form_state->get('formHasProtocols')) {
+      $hasAnyProtocolRole = FALSE;
+      foreach ($membership as $communityData) {
+        foreach ($communityData['protocols'] ?? [] as $protocolData) {
+          if (!empty(array_filter($protocolData['protocol_roles'] ?? []))) {
+            $hasAnyProtocolRole = TRUE;
+            break 2;
+          }
+        }
+      }
+      if (!$hasAnyProtocolRole) {
+        $form_state->setError($form['membership'], $this->t('Please assign the new user at least one protocol role.'));
       }
     }
   }
