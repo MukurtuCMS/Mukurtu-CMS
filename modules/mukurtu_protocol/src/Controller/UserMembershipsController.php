@@ -6,6 +6,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
 use Drupal\og\Og;
 use Drupal\user\UserInterface;
 
@@ -77,7 +78,7 @@ class UserMembershipsController extends ControllerBase {
           ));
           $protocols_in_community[] = [
             'name' => $protocol->label(),
-            'url' => $protocol->toUrl()->toString($bubbleable_metadata),
+            'url' => $this->collectUrl($protocol->toUrl(), $bubbleable_metadata),
             'roles' => $protocol_roles,
           ];
           $assigned_protocol_ids[] = $protocol_id;
@@ -86,7 +87,7 @@ class UserMembershipsController extends ControllerBase {
 
       $communities[] = [
         'name' => $community->label(),
-        'url' => $community->toUrl()->toString($bubbleable_metadata),
+        'url' => $this->collectUrl($community->toUrl(), $bubbleable_metadata),
         'roles' => $community_roles,
         'protocols' => $protocols_in_community,
       ];
@@ -107,7 +108,7 @@ class UserMembershipsController extends ControllerBase {
       ));
       $orphan_protocols[] = [
         'name' => $protocol->label(),
-        'url' => $protocol->toUrl()->toString($bubbleable_metadata),
+        'url' => $this->collectUrl($protocol->toUrl(), $bubbleable_metadata),
         'roles' => $protocol_roles,
       ];
     }
@@ -120,6 +121,15 @@ class UserMembershipsController extends ControllerBase {
     ];
     $bubbleable_metadata->applyTo($build);
     return $build;
+  }
+
+  /**
+   * Generates a URL string and merges its cache metadata into $metadata.
+   */
+  protected function collectUrl(Url $url, BubbleableMetadata $metadata): string {
+    $generated = $url->toString(TRUE);
+    $metadata->addCacheableDependency($generated);
+    return $generated->getGeneratedUrl();
   }
 
 }
