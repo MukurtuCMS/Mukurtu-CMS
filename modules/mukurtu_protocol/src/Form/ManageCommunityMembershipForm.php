@@ -111,6 +111,8 @@ class ManageCommunityMembershipForm extends FormBase {
       return;
     }
 
+    $mukurtuMembershipManager = \Drupal::service('mukurtu_protocol.membership_manager');
+
     // Get all available roles for communities.
     $roleManager = \Drupal::service('og.role_manager');
     $allCommunityRoles = $roleManager->getRolesByBundle($community->getEntityTypeId(), $community->bundle());
@@ -129,27 +131,9 @@ class ManageCommunityMembershipForm extends FormBase {
 
       // First handle member/non-member.
       if ($roles['node-community-member'] === 0 || $roles['node-community-non-member'] !== 0) {
-        // Prevent removing a user from the community if they still belong to
-        // any protocols within this community. Protocol membership is scoped to
-        // community membership, so removing the community member first would
-        // leave the user in an inconsistent state.
-        $protocols = $community->getProtocols();
-        $inProtocol = FALSE;
-        foreach ($protocols as $protocol) {
-          if ($protocol->getMembership($account)) {
-            $inProtocol = TRUE;
-            break;
-          }
-        }
-
-        if ($inProtocol) {
-          \Drupal::messenger()->addWarning($this->t('Could not remove %user from the community because they still have protocol roles. Remove them from all protocols first.', ['%user' => $account->getDisplayName()]));
-          continue;
-        }
-
-        $community->removeMember($account);
+        $mukurtuMembershipManager->removeMember($community, $account);
       } else {
-        $community->addMember($account);
+        $mukurtuMembershipManager->addMember($community, $account);
 
         // Handle roles.
         $membership = Og::getMembership($community, $account, OgMembershipInterface::ALL_STATES);
