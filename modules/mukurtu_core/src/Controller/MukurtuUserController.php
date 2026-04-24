@@ -14,6 +14,11 @@ class MukurtuUserController extends ControllerBase {
   use StringTranslationTrait;
 
   /**
+   * Roles that community managers cannot perform operations on.
+   */
+  const PROTECTED_ROLES = ['administrator', 'mukurtu_manager'];
+
+  /**
    * Check if user can administer users.
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
