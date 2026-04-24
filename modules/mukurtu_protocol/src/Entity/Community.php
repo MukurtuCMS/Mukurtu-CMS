@@ -348,6 +348,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
    * {@inheritdoc}
    */
   public function removeMember(AccountInterface $account): MukurtuGroupInterface {
+    foreach ($this->getProtocols() as $protocol) {
+      if ($protocol->getMembership($account)) {
+        return $this;
+      }
+    }
+
     $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
     if ($membership) {
       $membership->delete();
