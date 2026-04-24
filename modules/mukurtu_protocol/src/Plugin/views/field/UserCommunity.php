@@ -22,6 +22,7 @@ class UserCommunity extends FieldPluginBase {
     if ($values->_entity instanceof MukurtuUser) {
       $communities = array_filter($values->_entity->getCommunities(), fn ($c) => $c->access('view'));
       uasort($communities, fn ($a, $b) => strcmp($a->getName(), $b->getName()));
+      $communities = array_values($communities);
 
       if (!empty($communities)) {
         $build = [];
