@@ -167,7 +167,12 @@ class CommunityManagerUserCreationForm extends FormBase {
           '#type' => 'container',
           '#tree' => TRUE,
           '#states' => ['visible' => $statesConditions],
-          '#description' => $this->t('Protocol roles are available after selecting a community role above.'),
+          '#prefix' => '<div aria-live="polite">',
+          '#suffix' => '</div>',
+        ];
+
+        $form['membership'][$communityId]['protocols']['hint'] = [
+          '#markup' => '<p>' . $this->t('Protocol roles are available after selecting a community role above.') . '</p>',
         ];
 
         /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
