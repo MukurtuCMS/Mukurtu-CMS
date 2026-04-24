@@ -70,6 +70,178 @@ class FormHooks {
         unset($form['account']['roles']['#options']['administrator']);
       }
     }
+
+    // Move display name field to sit directly below password in the account group.
+    if (isset($form['account']['pass'])) {
+      $form['account']['pass']['#weight'] = 0.0012;
+    }
+    if (isset($form['field_display_name'])) {
+      $form['account']['field_display_name'] = $form['field_display_name'];
+      $form['account']['field_display_name']['#weight'] = 0.0013;
+      unset($form['field_display_name']);
+    }
+
+    // Build community options and protocol options grouped by community (site-wide).
+    $communityOptions = [];
+    $protocolsByCommunity = [];
+    $entityTypeManager = \Drupal::entityTypeManager();
+    $protocolStorage = $entityTypeManager->getStorage('protocol');
+    $communityEntities = $entityTypeManager->getStorage('community')->loadMultiple();
+    foreach ($communityEntities as $community) {
+      $communityOptions[$community->id()] = $community->getName();
+      $communityProtocolIds = $protocolStorage->getQuery()
+        ->condition('field_communities', $community->id())
+        ->accessCheck(FALSE)
+        ->execute();
+      $communityProtocols = [];
+      foreach ($protocolStorage->loadMultiple($communityProtocolIds) as $protocol) {
+        $communityProtocols[$protocol->id()] = $protocol->getName();
+      }
+      asort($communityProtocols);
+      if (!empty($communityProtocols)) {
+        $protocolsByCommunity[$community->id()] = [
+          'label' => $community->getName(),
+          'protocols' => $communityProtocols,
+        ];
+      }
+    }
+    asort($communityOptions);
+    uasort($protocolsByCommunity, fn($a, $b) => strcmp($a['label'], $b['label']));
+
+    $form['notify'] = [
+      '#type' => 'details',
+      '#title' => t('Notify other users of new account'),
+      '#description' => t('Optionally send a notification to other users when the account is created.'),
+      '#open' => FALSE,
+      '#attached' => ['library' => ['mukurtu_core/notify-form']],
+    ];
+
+    $form['notify']['notify_all_managers'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Notify all Mukurtu Managers'),
+      '#default_value' => FALSE,
+    ];
+
+    if (!empty($communityOptions)) {
+      $form['notify']['notify_communities'] = [
+        '#type' => 'checkboxes',
+        // Use the visible legend rendered by #type => 'checkboxes' as the
+        // group label so it is properly associated via <fieldset>/<legend>.
+        '#title' => t('Notify all community managers in the following communities:'),
+        '#options' => $communityOptions,
+        '#required' => FALSE,
+        '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
+      ];
+    }
+
+    if (!empty($protocolsByCommunity)) {
+      $form['notify']['notify_protocols'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['notify-protocols-wrapper']],
+      ];
+      $form['notify']['notify_protocols']['title'] = [
+        // Use <p> instead of <label> — this text labels the group visually
+        // but is not associated with a specific control.
+        '#markup' => '<p class="fieldset__label fieldset__label--group">' . t('Notify all protocol stewards in the following protocols:') . '</p>',
+      ];
+
+      foreach ($protocolsByCommunity as $communityId => $data) {
+        $form['notify']['notify_protocols'][$communityId] = [
+          '#type' => 'checkboxes',
+          '#title' => $data['label'],
+          '#options' => $data['protocols'],
+          '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
+        ];
+      }
+    }
+
+    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+
+    $form['notify']['notify_users'] = [
+      '#type' => 'container',
+      // aria-live="polite" announces new fields to screen readers when
+      // "Add another user" fires. <p> replaces the unassociated <label>.
+      '#prefix' => '<div id="notify-users-wrapper" aria-live="polite"><p class="fieldset__label fieldset__label--group">' . t('Notify specific users:') . '</p>',
+      '#suffix' => '</div>',
+    ];
+
+    for ($i = 0; $i < $notifyUserCount; $i++) {
+      $form['notify']['notify_users']['user_' . $i] = [
+        '#type' => 'entity_autocomplete',
+        '#target_type' => 'user',
+        // Numbered labels give screen reader users positional context when
+        // multiple fields exist.
+        '#title' => t('User @num', ['@num' => $i + 1]),
+        '#title_display' => 'invisible',
+        '#selection_handler' => 'mukurtu_manager_users',
+        '#required' => FALSE,
+      ];
+    }
+
+    $form['notify']['notify_users']['add_more'] = [
+      '#type' => 'submit',
+      '#value' => t('Add another user'),
+      '#submit' => [[self::class, 'addMoreNotifyUser']],
+      '#ajax' => [
+        'callback' => [self::class, 'addMoreNotifyUserCallback'],
+        'wrapper' => 'notify-users-wrapper',
+      ],
+      '#limit_validation_errors' => [],
+    ];
+
+    $form['actions']['submit']['#submit'][] = [self::class, 'userRegisterNotifySubmit'];
+  }
+
+  /**
+   * Submit handler that sends notifications after a new user account is created.
+   */
+  public static function userRegisterNotifySubmit(array &$form, FormStateInterface $form_state): void {
+    // Resolve individual user selections from AJAX "Add another" fields.
+    $notifyUids = [];
+    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+    for ($i = 0; $i < $notifyUserCount; $i++) {
+      $uid = $form_state->getValue(['notify_users', 'user_' . $i]);
+      if (!empty($uid)) {
+        $notifyUids[] = (int) $uid;
+      }
+    }
+
+    // Resolve group selections.
+    $allManagers = (bool) $form_state->getValue('notify_all_managers');
+    $communityIds = array_keys(array_filter($form_state->getValue('notify_communities') ?? []));
+    $protocolIds = [];
+    foreach ($form_state->getValue('notify_protocols') ?? [] as $groupValues) {
+      if (is_array($groupValues)) {
+        $protocolIds = array_merge($protocolIds, array_keys(array_filter($groupValues)));
+      }
+    }
+    $protocolIds = array_unique($protocolIds);
+
+    if (function_exists('mukurtu_notifications_resolve_notify_groups')) {
+      $groupUids = mukurtu_notifications_resolve_notify_groups($allManagers, $communityIds, $protocolIds);
+      $notifyUids = array_unique(array_merge($notifyUids, $groupUids));
+    }
+
+    if (!empty($notifyUids) && function_exists('mukurtu_notifications_notify_new_account_created')) {
+      $new_user = $form_state->getFormObject()->getEntity();
+      mukurtu_notifications_notify_new_account_created($new_user, $notifyUids);
+    }
+  }
+
+  /**
+   * AJAX submit handler to add another user autocomplete field.
+   */
+  public static function addMoreNotifyUser(array &$form, FormStateInterface $form_state): void {
+    $count = $form_state->get('notify_user_count') ?? 1;
+    $form_state->set('notify_user_count', $count + 1);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * AJAX callback to return the updated notify_users container.
+   */
+  public static function addMoreNotifyUserCallback(array &$form, FormStateInterface $form_state): array {
+    return $form['notify']['notify_users'];
   }
 
   /**
@@ -87,5 +259,42 @@ class FormHooks {
         unset($form['account']['roles']['#options']['administrator']);
       }
     }
+
+    // Move display name field to sit directly below password in the account group.
+    if (isset($form['account']['pass'])) {
+      $form['account']['pass']['#weight'] = 0.0012;
+    }
+    if (isset($form['field_display_name'])) {
+      $form['account']['field_display_name'] = $form['field_display_name'];
+      $form['account']['field_display_name']['#weight'] = 0.0013;
+      unset($form['field_display_name']);
+    }
   }
+
+  /**
+   * Removes message_digest notification actions from the user admin bulk form.
+   *
+   * These come from message_digest_ui optional config and should not be
+   * exposed in Mukurtu's user management UI.
+   */
+  #[Hook('form_alter')]
+  public function formAlterRemoveNotificationBulkActions(array &$form, FormStateInterface $form_state, string $form_id): void {
+    if (!str_starts_with($form_id, 'views_form_user_admin_people_') &&
+        !str_starts_with($form_id, 'views_form_mukurtu_people_')) {
+      return;
+    }
+
+    $actions_to_remove = [
+      'message_digest_interval.email_user.immediate',
+      'message_digest_interval.email_user.daily',
+      'message_digest_interval.email_user.weekly',
+    ];
+
+    if (isset($form['header']['user_bulk_form']['action']['#options'])) {
+      foreach ($actions_to_remove as $action_id) {
+        unset($form['header']['user_bulk_form']['action']['#options'][$action_id]);
+      }
+    }
+  }
+
 }

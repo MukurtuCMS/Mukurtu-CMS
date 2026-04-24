@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_notifications module.
+ */
+
+use Drupal\Core\Config\FileStorage;
+
+/**
+ * Install new user account created message template and view displays.
+ */
+function mukurtu_notifications_update_40001(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $configs = [
+    'message.template.mukurtu_new_user_account_created',
+    'core.entity_view_display.message.mukurtu_new_user_account_created.mail_subject',
+    'core.entity_view_display.message.mukurtu_new_user_account_created.mail_body',
+  ];
+
+  foreach ($configs as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}
+
+/**
+ * Update new user account notification email body.
+ */
+function mukurtu_notifications_update_40002(): void {
+  $config = \Drupal::service('config.factory')->getEditable('message.template.mukurtu_new_user_account_created');
+  if ($config->isNew()) {
+    return;
+  }
+  $text = $config->get('text');
+  $text[1]['value'] = "<p>A new user account <a href=\"[message:field_user:entity:url]\">[message:field_user:entity:field_display_name] ([message:field_user:entity:account-name])</a> has been created. You may want to add them to more communities or protocols. <a href=\"[message:field_user:entity:url]\">Review their account</a>.</p>\r\n";
+  $config->set('text', $text)->save();
+}
+
+/**
+ * Attach field_user to the mukurtu_new_user_account_created message template.
+ */
+function mukurtu_notifications_update_40003(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'field.field.message.mukurtu_new_user_account_created.field_user',
+    $source->read('field.field.message.mukurtu_new_user_account_created.field_user')
+  );
+
+  // Rebuild entity type and field definitions so the new field is recognised.
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}

@@ -548,6 +548,14 @@ function mukurtu_core_views_data_alter(array &$data)
       ],
     ];
   }
+  if (isset($data['users'])) {
+    $data['users']['roles'] = [
+      'title' => t('Site roles'),
+      'field' => [
+        'id' => 'mukurtu_user_roles',
+      ],
+    ];
+  }
 }
 
 /**
