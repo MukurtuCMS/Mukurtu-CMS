@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol\Plugin\views\field;
 
+use Drupal\Component\Utility\Html;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\user\Entity\Role;
@@ -35,7 +36,7 @@ class UserRoles extends FieldPluginBase {
     }
     sort($labels);
 
-    return empty($labels) ? ['#markup' => $this->t('None')] : ['#markup' => implode(', ', array_map('htmlspecialchars', $labels))];
+    return empty($labels) ? ['#markup' => $this->t('None')] : ['#markup' => implode(', ', array_map([Html::class, 'escape'], $labels))];
   }
 
   public function query() {

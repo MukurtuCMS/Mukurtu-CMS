@@ -206,9 +206,11 @@ class AddUserToCommunityForm extends FormBase {
 
     if (empty($communities)) {
       $form['empty'] = [
-        '#markup' => '<p>' . $this->t('@user is already a member of all communities you manage.', [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('@user is already a member of all communities you manage.', [
           '@user' => $user->getDisplayName(),
-        ]) . '</p>',
+        ]),
       ];
       return $form;
     }
