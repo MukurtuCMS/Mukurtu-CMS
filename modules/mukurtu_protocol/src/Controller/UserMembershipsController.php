@@ -4,10 +4,14 @@ namespace Drupal\mukurtu_protocol\Controller;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\user\UserInterface;
 
+/**
+ * Controller for the user memberships page.
+ */
 class UserMembershipsController extends ControllerBase {
 
   public function content() {
@@ -33,6 +37,7 @@ class UserMembershipsController extends ControllerBase {
 
   protected function buildPage(UserInterface $user) {
     $all_memberships = Og::getMemberships($user);
+    $bubbleable_metadata = new BubbleableMetadata();
 
     $community_memberships = array_filter($all_memberships, fn($m) => $m->getGroupBundle() === 'community');
     $protocol_memberships_by_id = [];
@@ -72,7 +77,7 @@ class UserMembershipsController extends ControllerBase {
           ));
           $protocols_in_community[] = [
             'name' => $protocol->label(),
-            'url' => $protocol->toUrl()->toString(),
+            'url' => $protocol->toUrl()->toString($bubbleable_metadata),
             'roles' => $protocol_roles,
           ];
           $assigned_protocol_ids[] = $protocol_id;
@@ -81,7 +86,7 @@ class UserMembershipsController extends ControllerBase {
 
       $communities[] = [
         'name' => $community->label(),
-        'url' => $community->toUrl()->toString(),
+        'url' => $community->toUrl()->toString($bubbleable_metadata),
         'roles' => $community_roles,
         'protocols' => $protocols_in_community,
       ];
@@ -102,17 +107,19 @@ class UserMembershipsController extends ControllerBase {
       ));
       $orphan_protocols[] = [
         'name' => $protocol->label(),
-        'url' => $protocol->toUrl()->toString(),
+        'url' => $protocol->toUrl()->toString($bubbleable_metadata),
         'roles' => $protocol_roles,
       ];
     }
 
-    return [
+    $build = [
       '#theme' => 'mukurtu_user_memberships',
       '#communities' => $communities,
       '#orphan_protocols' => $orphan_protocols,
       '#user' => $user,
     ];
+    $bubbleable_metadata->applyTo($build);
+    return $build;
   }
 
 }

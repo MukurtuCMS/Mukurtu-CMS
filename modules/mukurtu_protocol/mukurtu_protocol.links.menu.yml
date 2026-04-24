@@ -98,6 +98,7 @@ mukurtu_protocol.protocol_create:
 mukurtu_protocol.my_memberships_dashboard:
   title: 'My memberships'
   description: 'View my community and protocol memberships.'
+  parent: mukurtu_dashboard
   menu_name: dashboard-my-content
   route_name: mukurtu_protocol.my_memberships
 

@@ -21,50 +21,60 @@
     <p>{{ 'You are not a member of any communities or cultural protocols.'|t }}</p>
   {% else %}
     <table class="views-table cols-4">
+      <caption>{{ 'Community and protocol memberships'|t }}</caption>
       <thead>
         <tr>
-          <th>{{ 'Community'|t }}</th>
-          <th>{{ 'Community Role(s)'|t }}</th>
-          <th>{{ 'Cultural Protocol'|t }}</th>
-          <th>{{ 'Protocol Role(s)'|t }}</th>
+          <th scope="col" id="col-community">{{ 'Community'|t }}</th>
+          <th scope="col" id="col-community-roles">{{ 'Community Role(s)'|t }}</th>
+          <th scope="col" id="col-protocol">{{ 'Cultural Protocol'|t }}</th>
+          <th scope="col" id="col-protocol-roles">{{ 'Protocol Role(s)'|t }}</th>
         </tr>
       </thead>
       <tbody>
         {% for item in communities %}
           {% set rowspan = item.protocols|length > 0 ? item.protocols|length : 1 %}
+          {% set community_cell_id = 'community-' ~ loop.index %}
           {% for protocol_item in item.protocols %}
             <tr>
               {% if loop.first %}
-                <td rowspan="{{ rowspan }}">
+                <td rowspan="{{ rowspan }}" id="{{ community_cell_id }}" headers="col-community">
                   <a href="{{ item.url }}">{{ item.name }}</a>
                 </td>
-                <td rowspan="{{ rowspan }}">
-                  {{ item.roles|join(', ') ?: '—' }}
+                <td rowspan="{{ rowspan }}" headers="col-community-roles {{ community_cell_id }}">
+                  {{ item.roles|join(', ') ?: 'None'|t }}
                 </td>
               {% endif %}
-              <td><a href="{{ protocol_item.url }}">{{ protocol_item.name }}</a></td>
-              <td>{{ protocol_item.roles|join(', ') ?: '—' }}</td>
+              <td headers="col-protocol {{ community_cell_id }}">
+                <a href="{{ protocol_item.url }}">{{ protocol_item.name }}</a>
+              </td>
+              <td headers="col-protocol-roles {{ community_cell_id }}">
+                {{ protocol_item.roles|join(', ') ?: 'None'|t }}
+              </td>
             </tr>
           {% else %}
             <tr>
-              <td><a href="{{ item.url }}">{{ item.name }}</a></td>
-              <td>{{ item.roles|join(', ') ?: '—' }}</td>
-              <td>—</td>
-              <td>—</td>
+              <td id="{{ community_cell_id }}" headers="col-community">
+                <a href="{{ item.url }}">{{ item.name }}</a>
+              </td>
+              <td headers="col-community-roles {{ community_cell_id }}">
+                {{ item.roles|join(', ') ?: 'None'|t }}
+              </td>
+              <td headers="col-protocol {{ community_cell_id }}">{{ 'None'|t }}</td>
+              <td headers="col-protocol-roles {{ community_cell_id }}">{{ 'None'|t }}</td>
             </tr>
           {% endfor %}
         {% endfor %}
 
         {% if orphan_protocols is not empty %}
           <tr>
-            <td colspan="4"><strong>{{ 'Other Cultural Protocol Memberships'|t }}</strong></td>
+            <th colspan="4" scope="colgroup">{{ 'Other Cultural Protocol Memberships'|t }}</th>
           </tr>
           {% for protocol_item in orphan_protocols %}
             <tr>
-              <td>—</td>
-              <td>—</td>
-              <td><a href="{{ protocol_item.url }}">{{ protocol_item.name }}</a></td>
-              <td>{{ protocol_item.roles|join(', ') ?: '—' }}</td>
+              <td headers="col-community">{{ 'None'|t }}</td>
+              <td headers="col-community-roles">{{ 'None'|t }}</td>
+              <td headers="col-protocol"><a href="{{ protocol_item.url }}">{{ protocol_item.name }}</a></td>
+              <td headers="col-protocol-roles">{{ protocol_item.roles|join(', ') ?: 'None'|t }}</td>
             </tr>
           {% endfor %}
         {% endif %}
