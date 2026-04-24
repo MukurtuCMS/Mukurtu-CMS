@@ -77,6 +77,7 @@ class AddUserToCommunityForm extends FormBase {
     $communities = [];
 
     if ($this->currentUser()->hasPermission('administer users')) {
+      // Admins see all communities; load all and filter to those the target isn't already in.
       foreach (\Drupal::entityTypeManager()->getStorage('community')->loadMultiple() as $c) {
         if (!$c->getMembership($target)) {
           $communities[$c->id()] = $c;

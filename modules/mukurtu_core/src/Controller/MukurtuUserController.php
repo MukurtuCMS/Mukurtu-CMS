@@ -22,6 +22,9 @@ class MukurtuUserController extends ControllerBase {
    */
   const PROTECTED_ROLES = ['administrator', 'mukurtu_manager'];
 
+  const PEOPLE_VIEW_ID = 'mukurtu_people';
+  const PEOPLE_DISPLAY_ID = 'page_1';
+
   /**
    * Check if user can administer users.
    * @return \Drupal\Core\Access\AccessResultInterface
@@ -74,7 +77,7 @@ class MukurtuUserController extends ControllerBase {
 
     $request = \Drupal::request();
     $referer = $request->headers->get('referer');
-    $fallback = Url::fromRoute('view.mukurtu_people.page_1')->toString();
+    $fallback = Url::fromRoute('view.' . self::PEOPLE_VIEW_ID . '.' . self::PEOPLE_DISPLAY_ID)->toString();
     $redirect = ($referer && str_starts_with($referer, $request->getSchemeAndHttpHost()))
       ? $referer
       : $fallback;
@@ -133,7 +136,7 @@ class MukurtuUserController extends ControllerBase {
 
     $request = \Drupal::request();
     $referer = $request->headers->get('referer');
-    $fallback = Url::fromRoute('view.mukurtu_people.page_1')->toString();
+    $fallback = Url::fromRoute('view.' . self::PEOPLE_VIEW_ID . '.' . self::PEOPLE_DISPLAY_ID)->toString();
     $redirect = ($referer && str_starts_with($referer, $request->getSchemeAndHttpHost()))
       ? $referer
       : $fallback;

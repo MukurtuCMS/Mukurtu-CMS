@@ -50,12 +50,12 @@ class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
     }
 
     if ($account->hasPermission('administer users')) {
-      return $return_as_object ? AccessResult::allowed() : TRUE;
+      return $return_as_object ? AccessResult::allowed()->cachePerPermissions() : TRUE;
     }
 
     // Community managers cannot block users with protected roles.
     if (array_intersect(MukurtuUserController::PROTECTED_ROLES, $object->getRoles())) {
-      return $return_as_object ? AccessResult::forbidden() : FALSE;
+      return $return_as_object ? AccessResult::forbidden()->cachePerUser() : FALSE;
     }
 
     // Community managers may only block users who share a managed community.
@@ -75,7 +75,8 @@ class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
     }
 
     $allowed = !empty(array_intersect($cm_community_ids, $target_community_ids));
-    return $return_as_object ? ($allowed ? AccessResult::allowed() : AccessResult::forbidden()) : $allowed;
+    $result = $allowed ? AccessResult::allowed() : AccessResult::forbidden();
+    return $return_as_object ? $result->cachePerUser() : $allowed;
   }
 
   /**
