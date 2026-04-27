@@ -24,3 +24,63 @@ function mukurtu_browse_update_40001() {
     }
   }
 }
+
+/**
+ * Remove active_widget_order facet processor from browse views and facets.
+ */
+function mukurtu_browse_update_40002() {
+  $config_factory = \Drupal::service('config.factory');
+
+  // Remove active_widget_order from facets embedded in Views filters.
+  $views = [
+    'views.view.mukurtu_browse' => [
+      'facets_community_title',
+      'facets_mukurtu_cultural_protocol_ids',
+      'facets_type',
+      'facets_name',
+      'facets_collections',
+      'facets_media_type',
+      'facets_name_1',
+    ],
+    'views.view.mukurtu_digital_heritage_browse' => [
+      'facets_name',
+      'facets_collections',
+      'facets_community_title',
+      'facets_mukurtu_cultural_protocol_ids',
+      'facets_name_1',
+      'facets_media_type',
+    ],
+  ];
+
+  foreach ($views as $view_id => $filter_ids) {
+    $config = $config_factory->getEditable($view_id);
+    $changed = FALSE;
+    foreach ($filter_ids as $filter_id) {
+      $key = "display.default.display_options.filters.$filter_id.facet.processor_configs";
+      $processor_configs = $config->get($key);
+      if (isset($processor_configs['active_widget_order'])) {
+        unset($processor_configs['active_widget_order']);
+        $config->set($key, $processor_configs);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->save();
+    }
+  }
+
+  // Remove active_widget_order from standalone facet config entities.
+  $facets = [
+    'facets.facet.map_category',
+    'facets.facet.digital_heritage_browse_category',
+  ];
+
+  foreach ($facets as $facet_id) {
+    $config = $config_factory->getEditable($facet_id);
+    $processor_configs = $config->get('processor_configs');
+    if (isset($processor_configs['active_widget_order'])) {
+      unset($processor_configs['active_widget_order']);
+      $config->set('processor_configs', $processor_configs)->save();
+    }
+  }
+}
