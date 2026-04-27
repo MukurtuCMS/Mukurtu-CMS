@@ -42,6 +42,19 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, \Drupa
   if (isset($element['entity_browser']['#prefix'])) {
     $element['entity_browser']['#prefix'] = '<p>' . t('Select a related person record.') . '</p>';
   }
+
+  $element['create_person_link'] = [
+    '#type' => 'link',
+    '#title' => t("Can't find the person? Create a new person record."),
+    '#url' => \Drupal\Core\Url::fromRoute('node.add', ['node_type' => 'person']),
+    '#attributes' => [
+      'class' => ['use-ajax', 'button', 'button--small', 'button--extrasmall'],
+      'data-dialog-type' => 'modal',
+      'data-dialog-options' => json_encode(['width' => 800]),
+    ],
+    '#attached' => ['library' => ['core/drupal.dialog.ajax']],
+    '#weight' => 10,
+  ];
 }
 
 /**
