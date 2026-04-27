@@ -1,0 +1,112 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.mukurtu_footer
+    - field.field.block_content.mukurtu_footer.body
+    - field.field.block_content.mukurtu_footer.field_footer_logos
+    - field.field.block_content.mukurtu_footer.field_footer_social_links
+    - field.field.block_content.mukurtu_footer.field_footer_other_links
+    - field.field.block_content.mukurtu_footer.field_footer_contact_email
+    - field.field.block_content.mukurtu_footer.field_footer_contact_email_label
+    - field.field.block_content.mukurtu_footer.field_footer_copyright
+  module:
+    - entity_reference_revisions
+    - link
+    - paragraphs
+    - text
+id: block_content.mukurtu_footer.default
+targetEntityType: block_content
+bundle: mukurtu_footer
+mode: default
+content:
+  info:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {}
+  body:
+    type: text_textarea_with_summary
+    weight: 1
+    region: content
+    settings:
+      rows: 5
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
+    third_party_settings: {}
+  field_footer_logos:
+    type: paragraphs
+    weight: 2
+    region: content
+    settings:
+      title: 'Logo'
+      title_plural: 'Logos'
+      edit_mode: open
+      closed_mode: summary
+      autocollapse: none
+      closed_mode_threshold: 0
+      add_mode: button
+      form_display_mode: default
+      default_paragraph_type: footer_logo
+      features: {}
+    third_party_settings: {}
+  field_footer_social_links:
+    type: paragraphs
+    weight: 3
+    region: content
+    settings:
+      title: 'Social link'
+      title_plural: 'Social links'
+      edit_mode: open
+      closed_mode: summary
+      autocollapse: none
+      closed_mode_threshold: 0
+      add_mode: button
+      form_display_mode: default
+      default_paragraph_type: footer_social_link
+      features: {}
+    third_party_settings: {}
+  field_footer_other_links:
+    type: link_default
+    weight: 4
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {}
+  field_footer_contact_email:
+    type: email_default
+    weight: 5
+    region: content
+    settings:
+      placeholder: ''
+      size: 60
+    third_party_settings: {}
+  field_footer_contact_email_label:
+    type: string_textfield
+    weight: 6
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {}
+  field_footer_copyright:
+    type: string_textfield
+    weight: 7
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {}
+  langcode:
+    type: language_select
+    weight: 8
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {}
+hidden: {}

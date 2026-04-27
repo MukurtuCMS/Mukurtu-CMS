@@ -1,0 +1,38 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.footer_logo.field_footer_logo_image
+    - field.field.paragraph.footer_logo.field_footer_logo_link
+    - paragraphs.paragraphs_type.footer_logo
+  module:
+    - image
+    - link
+id: paragraph.footer_logo.default
+targetEntityType: paragraph
+bundle: footer_logo
+mode: default
+content:
+  field_footer_logo_image:
+    type: image
+    label: hidden
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {}
+    weight: 0
+    region: content
+  field_footer_logo_link:
+    type: link
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: 'noopener noreferrer'
+      target: _blank
+    third_party_settings: {}
+    weight: 1
+    region: content
+hidden:
+  langcode: true

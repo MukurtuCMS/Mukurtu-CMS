@@ -920,3 +920,4 @@ function mukurtu_update_40004(): void {
     $config_factory->getEditable($action)->delete();
   }
 }
+
