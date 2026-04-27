@@ -24,3 +24,94 @@ function mukurtu_browse_update_40001() {
     }
   }
 }
+
+/**
+ * Remove active_widget_order and count_widget_order facet processors from browse views and facets.
+ */
+function mukurtu_browse_update_40002() {
+  $config_factory = \Drupal::service('config.factory');
+
+  // Remove sort processors and enable soft limit on facets embedded in Views filters.
+  $views = [
+    'views.view.mukurtu_browse' => [
+      'facets_community_title',
+      'facets_mukurtu_cultural_protocol_ids',
+      'facets_type',
+      'facets_name',
+      'facets_collections',
+      'facets_media_type',
+      'facets_name_1',
+    ],
+    'views.view.mukurtu_digital_heritage_browse' => [
+      'facets_name',
+      'facets_collections',
+      'facets_community_title',
+      'facets_mukurtu_cultural_protocol_ids',
+      'facets_name_1',
+      'facets_media_type',
+    ],
+  ];
+
+  foreach ($views as $view_id => $filter_ids) {
+    $config = $config_factory->getEditable($view_id);
+    $changed = FALSE;
+    foreach ($filter_ids as $filter_id) {
+      $processor_key = "display.default.display_options.filters.$filter_id.facet.processor_configs";
+      $processor_configs = $config->get($processor_key);
+      foreach (['active_widget_order', 'count_widget_order'] as $processor) {
+        if (isset($processor_configs[$processor])) {
+          unset($processor_configs[$processor]);
+          $config->set($processor_key, $processor_configs);
+          $changed = TRUE;
+        }
+      }
+
+      $soft_limit_key = "display.default.display_options.exposed_form.options.bef.filter.$filter_id.soft_limit";
+      if ($config->get($soft_limit_key) === 0) {
+        $config->set($soft_limit_key, 15);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->save();
+    }
+  }
+
+  // Remove sort processors from standalone facet config entities.
+  $facets = [
+    'facets.facet.map_category',
+    'facets.facet.digital_heritage_browse_category',
+  ];
+
+  foreach ($facets as $facet_id) {
+    $config = $config_factory->getEditable($facet_id);
+    $processor_configs = $config->get('processor_configs');
+    $changed = FALSE;
+    foreach (['active_widget_order', 'count_widget_order'] as $processor) {
+      if (isset($processor_configs[$processor])) {
+        unset($processor_configs[$processor]);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->set('processor_configs', $processor_configs)->save();
+    }
+  }
+}
+
+/**
+ * Add text-typed fields for keywords, category, people, and subject to enable
+ * fulltext search on taxonomy term names in the browse index.
+ */
+function mukurtu_browse_update_40003() {
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_browse');
+
+  $indexes = ['mukurtu_default_content_index'];
+  foreach ($indexes as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if ($index) {
+      $index->reindex();
+    }
+  }
+}

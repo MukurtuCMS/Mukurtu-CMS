@@ -177,11 +177,29 @@ field_settings:
       module:
         - node
         - taxonomy
+  name_text:
+    label: 'Category » Taxonomy term » Name (text)'
+    datasource_id: 'entity:node'
+    property_path: 'field_category:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
   name_1:
     label: 'Keywords » Taxonomy term » Name'
     datasource_id: 'entity:node'
     property_path: 'field_keywords:entity:name'
     type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  name_1_text:
+    label: 'Keywords » Taxonomy term » Name (text)'
+    datasource_id: 'entity:node'
+    property_path: 'field_keywords:entity:name'
+    type: text
     dependencies:
       module:
         - node
@@ -210,6 +228,15 @@ field_settings:
       module:
         - node
         - taxonomy
+  people_name_text:
+    label: 'People » Taxonomy term » Name (text)'
+    datasource_id: 'entity:node'
+    property_path: 'field_people:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
   status:
     label: Published
     datasource_id: 'entity:node'
@@ -225,6 +252,15 @@ field_settings:
     datasource_id: 'entity:node'
     property_path: 'field_subject:entity:name'
     type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  subject_name_text:
+    label: 'Subject » Taxonomy term » Name (text)'
+    datasource_id: 'entity:node'
+    property_path: 'field_subject:entity:name'
+    type: text
     dependencies:
       module:
         - node
@@ -341,9 +377,11 @@ processor_settings:
       - field_summary
       - field_traditional_knowledge
       - field_transcription
+      - name_1_text
+      - name_text
       - original_date
-      - people_name
-      - subject_name
+      - people_name_text
+      - subject_name_text
       - title
   language_with_fallback: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
@@ -367,7 +405,11 @@ processor_settings:
       - field_summary
       - field_traditional_knowledge
       - field_transcription
+      - name_1_text
+      - name_text
       - original_date
+      - people_name_text
+      - subject_name_text
       - title
     spaces: ''
     ignored: ._-
@@ -399,9 +441,13 @@ processor_settings:
       - mukurtu_cultural_protocol_ids
       - name
       - name_1
+      - name_1_text
+      - name_text
       - original_date
       - people_name
+      - people_name_text
       - subject_name
+      - subject_name_text
       - title
       - type
 tracker_settings:
