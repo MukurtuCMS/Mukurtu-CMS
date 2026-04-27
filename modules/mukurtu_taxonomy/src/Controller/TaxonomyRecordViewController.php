@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_taxonomy\Controller;
 
 use Drupal\Core\Block\BlockManagerInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\Routing\CacheableRedirectResponse;
+use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -90,14 +93,28 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   /**
    * Display the taxonomy term page.
    *
+   * If the term maps to exactly one accessible person record, redirects to
+   * that record instead of rendering the taxonomy term page.
+   *
    * @param \Drupal\taxonomy\TermInterface $taxonomy_term
    *   The taxonomy term.
    *
-   * @return array
-   *   The render array for the canonical taxonomy term page, complete with
-   *   taxonomy term information, taxonomy term records, and facets.
+   * @return array|\Drupal\Core\Routing\CacheableRedirectResponse
+   *   A redirect to the person record, or the full taxonomy term render array.
    */
-  public function build(TermInterface $taxonomy_term): array {
+  public function build(TermInterface $taxonomy_term): array|CacheableRedirectResponse {
+    $person = $this->getSinglePersonRecord($taxonomy_term);
+    if ($person) {
+      $url = $person->toUrl()->setAbsolute()->toString();
+      $response = new CacheableRedirectResponse($url);
+      $cache = new CacheableMetadata();
+      $cache->addCacheContexts(['user']);
+      $cache->addCacheableDependency($taxonomy_term);
+      $cache->addCacheableDependency($person);
+      $response->addCacheableDependency($cache);
+      return $response;
+    }
+
     $build = [];
     $allRecords = $this->getTaxonomyTermRecords($taxonomy_term);
 
@@ -184,6 +201,35 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       $communityLabels[] = $community->getName();
     }
     return implode(', ', $communityLabels);
+  }
+
+  /**
+   * Returns the single accessible person record for a term, or NULL.
+   *
+   * Only redirects when exactly one published, accessible person record has
+   * this term in field_other_names and the term's vocabulary is enabled for
+   * person records. Multiple matches return NULL so the taxonomy page is shown
+   * instead.
+   */
+  protected function getSinglePersonRecord(TermInterface $taxonomy_term): ?NodeInterface {
+    $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
+    if (!in_array($taxonomy_term->bundle(), $person_vocabularies)) {
+      return NULL;
+    }
+
+    $storage = $this->entityTypeManager()->getStorage('node');
+    $results = $storage->getQuery()
+      ->condition('type', 'person')
+      ->condition('field_other_names', $taxonomy_term->id())
+      ->condition('status', 1)
+      ->accessCheck(TRUE)
+      ->execute();
+
+    if (count($results) !== 1) {
+      return NULL;
+    }
+
+    return $storage->load(reset($results));
   }
 
   /**
