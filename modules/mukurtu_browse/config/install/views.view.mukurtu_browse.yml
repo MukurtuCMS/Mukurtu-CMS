@@ -478,12 +478,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
               count_widget_order:
                 processor_id: count_widget_order
                 weights:
@@ -547,12 +541,6 @@ display:
                 weights:
                   build: 50
                 settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
               count_widget_order:
                 processor_id: count_widget_order
                 weights:
@@ -623,12 +611,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
               count_widget_order:
                 processor_id: count_widget_order
                 weights:
@@ -694,12 +676,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
               count_widget_order:
                 processor_id: count_widget_order
                 weights:
@@ -765,12 +741,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
               count_widget_order:
                 processor_id: count_widget_order
                 weights:
@@ -841,12 +811,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
               count_widget_order:
                 processor_id: count_widget_order
                 weights:
@@ -912,12 +876,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
               count_widget_order:
                 processor_id: count_widget_order
                 weights:
