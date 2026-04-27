@@ -1,0 +1,31 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.mukurtu_footer
+    - field.storage.block_content.field_footer_social_links
+    - paragraphs.paragraphs_type.footer_social_link
+  module:
+    - entity_reference_revisions
+    - paragraphs
+id: block_content.mukurtu_footer.field_footer_social_links
+field_name: field_footer_social_links
+entity_type: block_content
+bundle: mukurtu_footer
+label: 'Social media links'
+description: 'Add links to social media profiles.'
+required: false
+translatable: false
+default_value: {}
+default_value_callback: ''
+settings:
+  handler: default:paragraph
+  handler_settings:
+    negate: 0
+    target_bundles:
+      footer_social_link: footer_social_link
+    target_bundles_drag_drop:
+      footer_social_link:
+        enabled: true
+        weight: 0
+field_type: entity_reference_revisions
