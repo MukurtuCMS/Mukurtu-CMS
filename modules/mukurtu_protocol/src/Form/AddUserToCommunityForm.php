@@ -376,6 +376,7 @@ class AddUserToCommunityForm extends FormBase {
     $protocol_selections = $form_state->getValue('protocol_memberships') ?? [];
     $this->saveProtocolMemberships($user, $protocol_selections);
 
+    // Todo: fetch this view name programmatically instead of hardcoding.
     $form_state->setRedirect('view.mukurtu_people.page_1');
   }
 
