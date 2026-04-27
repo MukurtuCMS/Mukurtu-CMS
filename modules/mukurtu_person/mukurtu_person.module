@@ -29,6 +29,22 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
 }
 
 /**
+ * Implements hook_field_widget_single_element_form_alter().
+ *
+ * Replaces the generic entity browser cardinality message on the related person
+ * field with a clearer prompt.
+ */
+function mukurtu_person_field_widget_single_element_form_alter(&$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context) {
+  $field_definition = $context['items']->getFieldDefinition();
+  if ($field_definition->getName() !== 'field_related_person' || $field_definition->getTargetBundle() !== 'related_person') {
+    return;
+  }
+  if (isset($element['entity_browser']['#prefix'])) {
+    $element['entity_browser']['#prefix'] = '<p>' . t('Select a related person record.') . '</p>';
+  }
+}
+
+/**
  * Implements hook_entity_field_storage_info().
  */
 function mukurtu_person_entity_field_storage_info(EntityTypeInterface $entity_type){
