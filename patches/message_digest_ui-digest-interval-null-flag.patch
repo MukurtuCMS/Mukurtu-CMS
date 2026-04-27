@@ -1,9 +1,10 @@
---- /tmp/DigestInterval.php.orig	2026-04-18 18:08:39
-+++ /Users/michael.wynne/ddev/mukurtu/web/modules/contrib/message_digest/message_digest_ui/src/Plugin/Action/DigestInterval.php	2026-04-18 18:08:51
+diff --git a/message_digest_ui/src/Plugin/Action/DigestInterval.php b/message_digest_ui/src/Plugin/Action/DigestInterval.php
+--- a/message_digest_ui/src/Plugin/Action/DigestInterval.php
++++ b/message_digest_ui/src/Plugin/Action/DigestInterval.php
 @@ -2,6 +2,7 @@
- 
+
  namespace Drupal\message_digest_ui\Plugin\Action;
- 
+
 +use Drupal\Core\Access\AccessResult;
  use Drupal\Core\Action\ActionBase;
  use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -22,7 +23,7 @@
 +    }
      $this->intervalPluginId = $configuration['value'];
    }
- 
+
 @@ -78,6 +87,9 @@
     * {@inheritdoc}
     */
@@ -33,8 +34,9 @@
      $result = $this->flag->actionAccess('flag', $account, $object);
      return $return_as_object ? $result : $result->isAllowed();
    }
---- /tmp/DigestIntervalActionDeriver.php.orig	2026-04-18 18:15:14
-+++ /Users/michael.wynne/ddev/mukurtu/web/modules/contrib/message_digest/message_digest_ui/src/Plugin/Derivative/DigestIntervalActionDeriver.php	2026-04-18 18:15:32
+diff --git a/message_digest_ui/src/Plugin/Derivative/DigestIntervalActionDeriver.php b/message_digest_ui/src/Plugin/Derivative/DigestIntervalActionDeriver.php
+--- a/message_digest_ui/src/Plugin/Derivative/DigestIntervalActionDeriver.php
++++ b/message_digest_ui/src/Plugin/Derivative/DigestIntervalActionDeriver.php
 @@ -5,6 +5,7 @@
  use Drupal\Component\Plugin\Derivative\DeriverBase;
  use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
@@ -45,7 +47,7 @@
  use Symfony\Component\DependencyInjection\ContainerInterface;
 @@ -31,13 +32,23 @@
    protected $subscribeManager;
- 
+
    /**
 +   * The flag service.
 +   *
@@ -66,7 +68,7 @@
      $this->messageNotifier = $message_notifier;
 +    $this->flagService = $flag_service;
    }
- 
+
    /**
 @@ -45,7 +56,8 @@
     */
@@ -77,7 +79,7 @@
 +      $container->get('flag')
      );
    }
- 
+
 @@ -61,6 +73,10 @@
        'email_user' => 'user',
      ];
