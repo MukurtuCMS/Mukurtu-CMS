@@ -4032,6 +4032,20 @@ header {
   -webkit-padding-after: var(--v-space-4xxs);
           padding-block-end: var(--v-space-4xxs);
 }
+.browse__main-content .browse-container .browse-facets .facets-soft-limit-link {
+  display: block;
+  padding-inline: var(--v-space-4xxs);
+  padding-block: var(--v-space-5xs);
+  font-size: var(--font-size-s);
+  color: var(--brand-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  min-block-size: 24px;
+}
+.browse__main-content .browse-container .browse-facets .facets-soft-limit-link:focus-visible {
+  outline: 3px solid var(--brand-secondary);
+  outline-offset: 2px;
+}
 .browse .pager__items {
   display: -webkit-box;
   display: -ms-flexbox;

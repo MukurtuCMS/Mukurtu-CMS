@@ -26,12 +26,12 @@ function mukurtu_browse_update_40001() {
 }
 
 /**
- * Remove active_widget_order facet processor from browse views and facets.
+ * Remove active_widget_order and count_widget_order facet processors from browse views and facets.
  */
 function mukurtu_browse_update_40002() {
   $config_factory = \Drupal::service('config.factory');
 
-  // Remove active_widget_order from facets embedded in Views filters.
+  // Remove sort processors and enable soft limit on facets embedded in Views filters.
   $views = [
     'views.view.mukurtu_browse' => [
       'facets_community_title',
@@ -56,11 +56,19 @@ function mukurtu_browse_update_40002() {
     $config = $config_factory->getEditable($view_id);
     $changed = FALSE;
     foreach ($filter_ids as $filter_id) {
-      $key = "display.default.display_options.filters.$filter_id.facet.processor_configs";
-      $processor_configs = $config->get($key);
-      if (isset($processor_configs['active_widget_order'])) {
-        unset($processor_configs['active_widget_order']);
-        $config->set($key, $processor_configs);
+      $processor_key = "display.default.display_options.filters.$filter_id.facet.processor_configs";
+      $processor_configs = $config->get($processor_key);
+      foreach (['active_widget_order', 'count_widget_order'] as $processor) {
+        if (isset($processor_configs[$processor])) {
+          unset($processor_configs[$processor]);
+          $config->set($processor_key, $processor_configs);
+          $changed = TRUE;
+        }
+      }
+
+      $soft_limit_key = "display.default.display_options.exposed_form.options.bef.filter.$filter_id.soft_limit";
+      if ($config->get($soft_limit_key) === 0) {
+        $config->set($soft_limit_key, 15);
         $changed = TRUE;
       }
     }
@@ -69,7 +77,7 @@ function mukurtu_browse_update_40002() {
     }
   }
 
-  // Remove active_widget_order from standalone facet config entities.
+  // Remove sort processors from standalone facet config entities.
   $facets = [
     'facets.facet.map_category',
     'facets.facet.digital_heritage_browse_category',
@@ -78,8 +86,14 @@ function mukurtu_browse_update_40002() {
   foreach ($facets as $facet_id) {
     $config = $config_factory->getEditable($facet_id);
     $processor_configs = $config->get('processor_configs');
-    if (isset($processor_configs['active_widget_order'])) {
-      unset($processor_configs['active_widget_order']);
+    $changed = FALSE;
+    foreach (['active_widget_order', 'count_widget_order'] as $processor) {
+      if (isset($processor_configs[$processor])) {
+        unset($processor_configs[$processor]);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
       $config->set('processor_configs', $processor_configs)->save();
     }
   }
