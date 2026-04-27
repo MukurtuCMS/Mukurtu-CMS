@@ -54,16 +54,6 @@ field_settings:
         - field.storage.node.field_article_category
       module:
         - taxonomy
-  node__field_article_category__uuid:
-    label: 'Category » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_article_category:entity:uuid'
-    type: text
-    dependencies:
-      config:
-        - field.storage.node.field_article_category
-      module:
-        - taxonomy
   node__field_article_keywords__name:
     label: 'Article Keywords'
     datasource_id: 'entity:node'
@@ -84,16 +74,6 @@ field_settings:
         - field.storage.node.field_article_keywords
       module:
         - taxonomy
-  node__field_article_keywords__uuid:
-    label: 'Keywords » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_article_keywords:entity:uuid'
-    type: text
-    dependencies:
-      config:
-        - field.storage.node.field_article_keywords
-      module:
-        - taxonomy
   node__field_category__name:
     label: Category
     datasource_id: 'entity:node'
@@ -107,15 +87,6 @@ field_settings:
     label: Category
     datasource_id: 'entity:node'
     property_path: 'field_category:entity:name'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
-  node__field_category__uuid:
-    label: 'Category » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_category:entity:uuid'
     type: text
     dependencies:
       module:
@@ -147,15 +118,6 @@ field_settings:
       module:
         - node
         - taxonomy
-  node__field_contributor__uuid:
-    label: 'Contributor » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_contributor:entity:uuid'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
   node__field_creator__name:
     label: Creator
     datasource_id: 'entity:node'
@@ -169,15 +131,6 @@ field_settings:
     label: Creator
     datasource_id: 'entity:node'
     property_path: 'field_creator:entity:name'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
-  node__field_creator__uuid:
-    label: 'Creator » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_creator:entity:uuid'
     type: text
     dependencies:
       module:
@@ -201,15 +154,6 @@ field_settings:
       module:
         - node
         - taxonomy
-  node__field_dictionary_word_language__uuid:
-    label: 'Language » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_dictionary_word_language:entity:uuid'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
   node__field_format__name:
     label: Format
     datasource_id: 'entity:node'
@@ -223,15 +167,6 @@ field_settings:
     label: Format
     datasource_id: 'entity:node'
     property_path: 'field_format:entity:name'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
-  node__field_format__uuid:
-    label: 'Format » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_format:entity:uuid'
     type: text
     dependencies:
       module:
@@ -255,15 +190,6 @@ field_settings:
       module:
         - node
         - taxonomy
-  node__field_keywords__uuid:
-    label: 'Keywords » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_keywords:entity:uuid'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
   node__field_language__name:
     label: Language
     datasource_id: 'entity:node'
@@ -277,15 +203,6 @@ field_settings:
     label: Language
     datasource_id: 'entity:node'
     property_path: 'field_language:entity:name'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
-  node__field_language__uuid:
-    label: 'Language » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_language:entity:uuid'
     type: text
     dependencies:
       module:
@@ -309,15 +226,6 @@ field_settings:
       module:
         - node
         - taxonomy
-  node__field_location__uuid:
-    label: 'Location » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_location:entity:uuid'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
   node__field_other_names__name:
     label: 'Other Names'
     datasource_id: 'entity:node'
@@ -331,15 +239,6 @@ field_settings:
     label: 'Other Names'
     datasource_id: 'entity:node'
     property_path: 'field_other_names:entity:name'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
-  node__field_other_names__uuid:
-    label: 'Other Names » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_other_names:entity:uuid'
     type: text
     dependencies:
       module:
@@ -363,15 +262,6 @@ field_settings:
       module:
         - node
         - taxonomy
-  node__field_people__uuid:
-    label: 'People » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_people:entity:uuid'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
   node__field_publisher__name:
     label: Publisher
     datasource_id: 'entity:node'
@@ -385,15 +275,6 @@ field_settings:
     label: Publisher
     datasource_id: 'entity:node'
     property_path: 'field_publisher:entity:name'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
-  node__field_publisher__uuid:
-    label: 'Publisher » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_publisher:entity:uuid'
     type: text
     dependencies:
       module:
@@ -417,15 +298,6 @@ field_settings:
       module:
         - node
         - taxonomy
-  node__field_subject__uuid:
-    label: 'Subject » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_subject:entity:uuid'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
   node__field_type__name:
     label: Type
     datasource_id: 'entity:node'
@@ -444,15 +316,6 @@ field_settings:
       module:
         - node
         - taxonomy
-  node__field_type__uuid:
-    label: 'Type » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_type:entity:uuid'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
   node__field_word_type__name:
     label: 'Word Type'
     datasource_id: 'entity:node'
@@ -466,15 +329,6 @@ field_settings:
     label: 'Word Type'
     datasource_id: 'entity:node'
     property_path: 'field_word_type:entity:name'
-    type: text
-    dependencies:
-      module:
-        - node
-        - taxonomy
-  node__field_word_type__uuid:
-    label: 'Word Type » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_word_type:entity:uuid'
     type: text
     dependencies:
       module:
@@ -549,53 +403,37 @@ processor_settings:
       - entity_type
       - node__field_article_category__name
       - node__field_article_category__name__text
-      - node__field_article_category__uuid
       - node__field_article_keywords__name
       - node__field_article_keywords__name__text
-      - node__field_article_keywords__uuid
       - node__field_category__name
       - node__field_category__name__text
-      - node__field_category__uuid
       - node__field_communities
       - node__field_contributor__name
       - node__field_contributor__name__text
-      - node__field_contributor__uuid
       - node__field_creator__name
       - node__field_creator__name__text
-      - node__field_creator__uuid
       - node__field_dictionary_word_language__name
       - node__field_dictionary_word_language__name__text
-      - node__field_dictionary_word_language__uuid
       - node__field_format__name
       - node__field_format__name__text
-      - node__field_format__uuid
       - node__field_keywords__name
       - node__field_keywords__name__text
-      - node__field_keywords__uuid
       - node__field_language__name
       - node__field_language__name__text
-      - node__field_language__uuid
       - node__field_location__name
       - node__field_location__name__text
-      - node__field_location__uuid
       - node__field_other_names__name
       - node__field_other_names__name__text
-      - node__field_other_names__uuid
       - node__field_people__name
       - node__field_people__name__text
-      - node__field_people__uuid
       - node__field_publisher__name
       - node__field_publisher__name__text
-      - node__field_publisher__uuid
       - node__field_subject__name
       - node__field_subject__name__text
-      - node__field_subject__uuid
       - node__field_type__name
       - node__field_type__name__text
-      - node__field_type__uuid
       - node__field_word_type__name
       - node__field_word_type__name__text
-      - node__field_word_type__uuid
       - node__title
     title: true
     alt: true
@@ -614,37 +452,21 @@ processor_settings:
     all_fields: false
     fields:
       - node__field_article_category__name__text
-      - node__field_article_category__uuid
       - node__field_article_keywords__name__text
-      - node__field_article_keywords__uuid
       - node__field_category__name__text
-      - node__field_category__uuid
       - node__field_contributor__name__text
-      - node__field_contributor__uuid
       - node__field_creator__name__text
-      - node__field_creator__uuid
       - node__field_dictionary_word_language__name__text
-      - node__field_dictionary_word_language__uuid
       - node__field_format__name__text
-      - node__field_format__uuid
       - node__field_keywords__name__text
-      - node__field_keywords__uuid
       - node__field_language__name__text
-      - node__field_language__uuid
       - node__field_location__name__text
-      - node__field_location__uuid
       - node__field_other_names__name__text
-      - node__field_other_names__uuid
       - node__field_people__name__text
-      - node__field_people__uuid
       - node__field_publisher__name__text
-      - node__field_publisher__uuid
       - node__field_subject__name__text
-      - node__field_subject__uuid
       - node__field_type__name__text
-      - node__field_type__uuid
       - node__field_word_type__name__text
-      - node__field_word_type__uuid
       - node__title
   language_with_fallback: {  }
   rendered_item: {  }
@@ -655,37 +477,21 @@ processor_settings:
     all_fields: true
     fields:
       - node__field_article_category__name__text
-      - node__field_article_category__uuid
       - node__field_article_keywords__name__text
-      - node__field_article_keywords__uuid
       - node__field_category__name__text
-      - node__field_category__uuid
       - node__field_contributor__name__text
-      - node__field_contributor__uuid
       - node__field_creator__name__text
-      - node__field_creator__uuid
       - node__field_dictionary_word_language__name__text
-      - node__field_dictionary_word_language__uuid
       - node__field_format__name__text
-      - node__field_format__uuid
       - node__field_keywords__name__text
-      - node__field_keywords__uuid
       - node__field_language__name__text
-      - node__field_language__uuid
       - node__field_location__name__text
-      - node__field_location__uuid
       - node__field_other_names__name__text
-      - node__field_other_names__uuid
       - node__field_people__name__text
-      - node__field_people__uuid
       - node__field_publisher__name__text
-      - node__field_publisher__uuid
       - node__field_subject__name__text
-      - node__field_subject__uuid
       - node__field_type__name__text
-      - node__field_type__uuid
       - node__field_word_type__name__text
-      - node__field_word_type__uuid
       - node__title
     spaces: ''
     ignored: ._-
@@ -700,53 +506,37 @@ processor_settings:
       - entity_type
       - node__field_article_category__name
       - node__field_article_category__name__text
-      - node__field_article_category__uuid
       - node__field_article_keywords__name
       - node__field_article_keywords__name__text
-      - node__field_article_keywords__uuid
       - node__field_category__name
       - node__field_category__name__text
-      - node__field_category__uuid
       - node__field_communities
       - node__field_contributor__name
       - node__field_contributor__name__text
-      - node__field_contributor__uuid
       - node__field_creator__name
       - node__field_creator__name__text
-      - node__field_creator__uuid
       - node__field_dictionary_word_language__name
       - node__field_dictionary_word_language__name__text
-      - node__field_dictionary_word_language__uuid
       - node__field_format__name
       - node__field_format__name__text
-      - node__field_format__uuid
       - node__field_keywords__name
       - node__field_keywords__name__text
-      - node__field_keywords__uuid
       - node__field_language__name
       - node__field_language__name__text
-      - node__field_language__uuid
       - node__field_location__name
       - node__field_location__name__text
-      - node__field_location__uuid
       - node__field_other_names__name
       - node__field_other_names__name__text
-      - node__field_other_names__uuid
       - node__field_people__name
       - node__field_people__name__text
-      - node__field_people__uuid
       - node__field_publisher__name
       - node__field_publisher__name__text
-      - node__field_publisher__uuid
       - node__field_subject__name
       - node__field_subject__name__text
-      - node__field_subject__uuid
       - node__field_type__name
       - node__field_type__name__text
-      - node__field_type__uuid
       - node__field_word_type__name
       - node__field_word_type__name__text
-      - node__field_word_type__uuid
       - node__title
 tracker_settings:
   default:
