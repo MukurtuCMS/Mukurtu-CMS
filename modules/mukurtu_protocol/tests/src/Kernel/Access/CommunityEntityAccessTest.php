@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_protocol\Kernel\Access;
 
@@ -8,14 +8,14 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
 use Drupal\mukurtu_protocol\Entity\Community;
+use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
 /**
  * Tests access to communities.
- *
- * @group mukurtu_protocol
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_protocol')]
 class CommunityEntityAccessTest extends KernelTestBase {
 
   /**
@@ -121,69 +121,69 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test access operations for a "Community only" community.
    */
-  public function testCommunityOnlyCommunity() {
+  public function testCommunityOnlyCommunity(): void {
     $this->community->setSharingSetting('community-only');
     $this->community->save();
 
     // Non-member.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
-    $this->assertEquals(FALSE, $this->community->access('view', $user));
-    $this->assertEquals(FALSE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertFalse($this->community->access('view', $user));
+    $this->assertFalse($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
 
     // Member.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
     $this->community->addMember($user);
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(FALSE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertFalse($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
 
     // Community Manager.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
     $this->community->addMember($user, ['community_manager']);
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(TRUE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertTrue($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
   }
 
   /**
    * Test access operations for a public community.
    */
-  public function testPublicCommunity() {
+  public function testPublicCommunity(): void {
     $this->community->setSharingSetting('public');
     $this->community->save();
 
     // Non-member.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(FALSE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertFalse($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
 
     // Member.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
     $this->community->addMember($user);
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(FALSE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertFalse($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
 
     // Community Manager.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
     $this->community->addMember($user, ['community_manager']);
-    $this->assertEquals(TRUE, $this->community->access('view', $user));
-    $this->assertEquals(TRUE, $this->community->access('update', $user));
-    $this->assertEquals(FALSE, $this->community->access('delete', $user));
+    $this->assertTrue($this->community->access('view', $user));
+    $this->assertTrue($this->community->access('update', $user));
+    $this->assertFalse($this->community->access('delete', $user));
   }
 
   /**
    * Test getName().
    */
-  public function testGetName()
+  public function testGetName(): void
   {
     $name = $this->randomString();
     $testCommunity = Community::create([
@@ -197,7 +197,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test setName().
    */
-  public function testSetName()
+  public function testSetName(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -212,7 +212,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test getDescription().
    */
-  public function testGetDescription()
+  public function testGetDescription(): void
   {
     $description = $this->randomString();
     $testCommunity = Community::create([
@@ -227,7 +227,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test setDescription().
    */
-  public function testSetDescription()
+  public function testSetDescription(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -241,24 +241,29 @@ class CommunityEntityAccessTest extends KernelTestBase {
 
   /**
    * Test getCommunityType().
+   *
+   * @todo Community::getCommunityType() uses ->value on an entity reference
+   *   field, which always returns NULL. It should use ->target_id. Fix in a
+   *   separate branch before implementing this test.
    */
-  public function testGetCommunityType()
-  {
-    // TODO
+  public function testGetCommunityType(): void {
+    $this->markTestIncomplete('getCommunityType() returns NULL due to ->value on entity reference field; requires production fix first.');
   }
 
   /**
    * Test setCommunityType().
+   *
+   * @todo Blocked by the same getCommunityType() bug — cannot assert the
+   *   round-trip until getCommunityType() is fixed to use ->target_id.
    */
-  public function testSetCommunityType()
-  {
-    // TODO
+  public function testSetCommunityType(): void {
+    $this->markTestIncomplete('Blocked by getCommunityType() bug; requires production fix first.');
   }
 
   /**
    * Test getSharingSetting().
    */
-  public function testGetSharingSetting()
+  public function testGetSharingSetting(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -272,7 +277,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test setSharingSetting().
    */
-  public function testSetSharingSetting()
+  public function testSetSharingSetting(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -287,7 +292,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test getCreatedTime().
    */
-  public function testGetCreatedTime()
+  public function testGetCreatedTime(): void
   {
     $createdTime = 1677537655;
     $testCommunity = Community::create([
@@ -303,7 +308,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test setCreatedTime().
    */
-  public function testSetCreatedTime()
+  public function testSetCreatedTime(): void
   {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
@@ -319,72 +324,76 @@ class CommunityEntityAccessTest extends KernelTestBase {
   /**
    * Test getParentCommunity().
    */
-  public function testGetParentCommunity() {
-    // TODO
+  public function testGetParentCommunity(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test getThumbnailImage().
    */
-  public function testGetThumbnailImage()
-  {
-    // TODO?
+  public function testGetThumbnailImage(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test setThumbnailImage().
    */
-  public function testSetThumbnailImage()
-  {
-    // TODO?
+  public function testSetThumbnailImage(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test getBannerImage().
    */
-  public function testGetBannerImage()
-  {
-    // TODO?
+  public function testGetBannerImage(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test setBannerImage().
    */
-  public function testSetBannerImage()
-  {
-    // TODO?
+  public function testSetBannerImage(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test getChildCommunities().
    */
-  public function testGetChildCommunities()
-  {
-    // TODO
+  public function testGetChildCommunities(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test isParentCommunity().
    */
-  public function testIsParentCommunity()
-  {
-    // TODO
+  public function testIsParentCommunity(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test isChildCommunity().
    */
-  public function testIsChildCommunity()
-  {
-    // TODO
+  public function testIsChildCommunity(): void {
+    $this->markTestIncomplete('TODO');
   }
 
   /**
    * Test getProtocols().
    */
-  public function testGetProtocols()
-  {
-    // TODO
+  public function testGetProtocols(): void {
+    $this->community->setSharingSetting('public');
+    $this->community->save();
+
+    $protocol = Protocol::create([
+      'name' => 'Test Protocol',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $protocol->save();
+
+    $protocols = $this->community->getProtocols();
+    $this->assertCount(1, $protocols);
+    $this->assertArrayHasKey($protocol->id(), $protocols);
   }
 
 }

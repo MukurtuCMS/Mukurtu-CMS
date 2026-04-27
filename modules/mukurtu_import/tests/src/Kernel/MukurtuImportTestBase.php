@@ -88,6 +88,7 @@ class MukurtuImportTestBase extends MigrateTestBase {
     'workflows',
     'migrate_source_csv',
     'mukurtu_import',
+    'mukurtu_migrate',
   ];
 
   /**
