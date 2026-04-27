@@ -77,6 +77,7 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles)
  * abandoned operation; plain row selections do not set this key.
  */
 function mukurtu_protocol_views_pre_render(\Drupal\views\ViewExecutable $view): void {
+  // Todo: fetch the display id programmatically instead of hardcoding it to page_1.
   if ($view->id() !== 'mukurtu_people' || $view->current_display !== 'page_1') {
     return;
   }
