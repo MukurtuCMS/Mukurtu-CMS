@@ -11,9 +11,6 @@ function mukurtu_search_install() {
 
 /**
  * Index taxonomy term names as fulltext for search (issue #622).
- *
- * @todo Follow Drupal docblock convention and add a @see link to the issue
- *   queue once a canonical URL is available for this update.
  */
 function mukurtu_search_update_40001() {
   mukurtu_search_rebuild_index();
