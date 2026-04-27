@@ -147,6 +147,33 @@ field_settings:
     dependencies:
       module:
         - node
+  language_name:
+    label: 'Language » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_language:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  location_name:
+    label: 'Location » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_location:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  publisher_name:
+    label: 'Publisher » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_publisher:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
@@ -377,10 +404,13 @@ processor_settings:
       - field_summary
       - field_traditional_knowledge
       - field_transcription
+      - language_name
+      - location_name
       - name_1_text
       - name_text
       - original_date
       - people_name_text
+      - publisher_name
       - subject_name_text
       - title
   language_with_fallback: {  }
@@ -405,10 +435,13 @@ processor_settings:
       - field_summary
       - field_traditional_knowledge
       - field_transcription
+      - language_name
+      - location_name
       - name_1_text
       - name_text
       - original_date
       - people_name_text
+      - publisher_name
       - subject_name_text
       - title
     spaces: ''
@@ -441,11 +474,14 @@ processor_settings:
       - mukurtu_cultural_protocol_ids
       - name
       - name_1
+      - language_name
+      - location_name
       - name_1_text
       - name_text
       - original_date
       - people_name
       - people_name_text
+      - publisher_name
       - subject_name
       - subject_name_text
       - title
