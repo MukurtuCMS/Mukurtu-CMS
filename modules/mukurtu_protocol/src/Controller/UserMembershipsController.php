@@ -15,15 +15,24 @@ use Drupal\user\UserInterface;
  */
 class UserMembershipsController extends ControllerBase {
 
+  /**
+   * Returns memberships page for the currently logged-in user.
+   */
   public function content() {
     $user = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
     return $this->buildPage($user);
   }
 
+  /**
+   * Returns memberships page for a given user.
+   */
   public function contentForUser(UserInterface $user) {
     return $this->buildPage($user);
   }
 
+  /**
+   * Access callback: allow own profile or users with 'administer users'.
+   */
   public function access(AccountInterface $account, UserInterface $user) {
     if ($account->id() == $user->id()) {
       return AccessResult::allowedIf($account->isAuthenticated())->cachePerUser();
@@ -31,6 +40,9 @@ class UserMembershipsController extends ControllerBase {
     return AccessResult::allowedIfHasPermission($account, 'administer users')->cachePerPermissions();
   }
 
+  /**
+   * Title callback returning the user's display name possessive.
+   */
   public function title(UserInterface $user) {
     $display_name = $user->get('field_display_name')->value ?: $user->getAccountName();
     return $this->t("@name's Memberships", ['@name' => $display_name]);

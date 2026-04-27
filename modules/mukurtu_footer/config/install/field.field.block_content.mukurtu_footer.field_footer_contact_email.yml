@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.mukurtu_footer
+    - field.storage.block_content.field_footer_contact_email
+id: block_content.mukurtu_footer.field_footer_contact_email
+field_name: field_footer_contact_email
+entity_type: block_content
+bundle: mukurtu_footer
+label: 'Contact email address'
+description: 'Leave empty to hide the contact email.'
+required: false
+translatable: true
+default_value: {}
+default_value_callback: ''
+settings: {}
+field_type: email

@@ -1,0 +1,36 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.footer_social_link.field_footer_social_platform
+    - field.field.paragraph.footer_social_link.field_footer_social_url
+    - paragraphs.paragraphs_type.footer_social_link
+  module:
+    - link
+    - options
+id: paragraph.footer_social_link.default
+targetEntityType: paragraph
+bundle: footer_social_link
+mode: default
+content:
+  field_footer_social_platform:
+    type: list_default
+    label: hidden
+    settings: {}
+    third_party_settings: {}
+    weight: 0
+    region: content
+  field_footer_social_url:
+    type: link
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: 'noopener noreferrer'
+      target: _blank
+    third_party_settings: {}
+    weight: 1
+    region: content
+hidden:
+  langcode: true
