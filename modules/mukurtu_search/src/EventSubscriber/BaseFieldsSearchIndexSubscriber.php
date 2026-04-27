@@ -70,14 +70,14 @@ class BaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
       $event->indexField($indexes, $field_id, 'field_communities:entity:name', $label, 'string');
     }
 
-    // Keywords.
-    if ($field_name == 'field_keywords' && $event->field_definition->getType() == 'entity_reference') {
-      $event->indexField($indexes, $field_id . "__name", 'field_keywords:entity:name', $label, 'string');
-    }
-
-    // Category.
-    if ($field_name == 'field_category' && $event->field_definition->getType() == 'entity_reference') {
-      $event->indexField($indexes, $field_id . "__name", 'field_category:entity:name', $label, 'string');
+    // Taxonomy reference fields: string for faceting, text for fulltext search.
+    // @todo Add unit tests covering the taxonomy branch (both __name and
+    //   __name__text are registered) and confirming field_communities is
+    //   unaffected by this handler.
+    if ($event->field_definition->getType() == 'entity_reference' &&
+        ($event->field_definition->getSetting('target_type') ?? '') == 'taxonomy_term') {
+      $event->indexField($indexes, $field_id . "__name", "{$field_name}:entity:name", $label, 'string');
+      $event->indexField($indexes, $field_id . "__name__text", "{$field_name}:entity:name", $label, 'text');
     }
   }
 

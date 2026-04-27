@@ -85,6 +85,10 @@ class FieldAvailableForIndexing extends Event {
         $index->addField($field);
 
         // Make text ignore case by default. We want strings to be excluded.
+        // @todo The ignorecase processor field list in mukurtu_browse_auto_index
+        //   also includes UUID text fields (e.g. node__field_keywords__uuid).
+        //   UUIDs are always lowercase so these entries are redundant and could
+        //   be cleaned up from the YAML and removed here via a future update hook.
         if ($type === 'text') {
           $processors = $index->getProcessors();
           if ($processors && isset($processors['ignorecase'])) {

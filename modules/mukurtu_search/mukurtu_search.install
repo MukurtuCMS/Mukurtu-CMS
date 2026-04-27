@@ -8,3 +8,16 @@
 function mukurtu_search_install() {
   mukurtu_search_rebuild_index();
 }
+
+/**
+ * Index taxonomy term names as fulltext for search (issue #622).
+ *
+ * @todo Follow Drupal docblock convention and add a @see link to the issue
+ *   queue once a canonical URL is available for this update.
+ */
+function mukurtu_search_update_40001() {
+  mukurtu_search_rebuild_index();
+  if ($index = \Drupal\search_api\Entity\Index::load('mukurtu_browse_auto_index')) {
+    $index->reindex();
+  }
+}
