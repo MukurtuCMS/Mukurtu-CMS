@@ -51,6 +51,7 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, \Drupa
       'class' => ['use-ajax', 'button', 'button--small', 'button--extrasmall'],
       'data-dialog-type' => 'modal',
       'data-dialog-options' => json_encode(['width' => 800]),
+      'aria-haspopup' => 'dialog',
     ],
     '#attached' => ['library' => ['core/drupal.dialog.ajax']],
     '#weight' => 10,
