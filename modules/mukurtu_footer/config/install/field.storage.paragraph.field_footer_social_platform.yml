@@ -1,0 +1,36 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - paragraphs
+id: paragraph.field_footer_social_platform
+field_name: field_footer_social_platform
+entity_type: paragraph
+type: list_string
+settings:
+  allowed_values:
+    - value: twitter
+      label: 'Twitter / X'
+    - value: facebook
+      label: Facebook
+    - value: instagram
+      label: Instagram
+    - value: youtube
+      label: YouTube
+    - value: linkedin
+      label: LinkedIn
+    - value: tiktok
+      label: TikTok
+    - value: bluesky
+      label: Bluesky
+    - value: mastodon
+      label: Mastodon
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: false
+indexes: {}
+persist_with_no_fields: false
+custom_storage: false
