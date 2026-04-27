@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.mukurtu_footer
+    - field.storage.block_content.field_footer_copyright
+id: block_content.mukurtu_footer.field_footer_copyright
+field_name: field_footer_copyright
+entity_type: block_content
+bundle: mukurtu_footer
+label: 'Copyright message'
+description: 'Use the token [current-date:html_year] for the current year. Leave empty to hide.'
+required: false
+translatable: true
+default_value:
+  - value: '© [current-date:html_year] Mukurtu CMS'
+default_value_callback: ''
+settings: {}
+field_type: string

@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_footer_logo_link
+    - paragraphs.paragraphs_type.footer_logo
+  module:
+    - link
+id: paragraph.footer_logo.field_footer_logo_link
+field_name: field_footer_logo_link
+entity_type: paragraph
+bundle: footer_logo
+label: 'Link URL (optional)'
+description: 'Wrap the logo in a link to this URL.'
+required: false
+translatable: true
+default_value: {}
+default_value_callback: ''
+settings:
+  link_type: 17
+  title: 0
+field_type: link

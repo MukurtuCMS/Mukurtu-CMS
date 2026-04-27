@@ -282,6 +282,22 @@
         .form-checkboxes > .form-item:last-child {
           padding-block-end: var(--v-space-4xxs);
         }
+
+        .facets-soft-limit-link {
+          display: block;
+          padding-inline: var(--v-space-4xxs);
+          padding-block: var(--v-space-5xs);
+          font-size: var(--font-size-s);
+          color: var(--brand-primary);
+          text-decoration: underline;
+          cursor: pointer;
+          min-block-size: 24px;
+
+          &:focus-visible {
+            outline: 3px solid var(--brand-secondary);
+            outline-offset: 2px;
+          }
+        }
       }
     }
   }

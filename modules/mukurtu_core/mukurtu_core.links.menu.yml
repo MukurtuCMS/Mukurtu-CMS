@@ -82,11 +82,11 @@ mukurtu_core.site_information_settings:
   menu_name: dashboard-site-settings
   route_name: system.site_information_settings
 mukurtu_core.my_account:
-  title: 'My account'
+  title: 'Manage my account'
   description: 'User account page'
   parent: mukurtu_dashboard
-  menu_name: dashboard-my-content
-  route_name: user.page
+  menu_name: dashboard-my-account
+  route_name: user.edit
 mukurtu_core.entity.menu.edit_form:
   title: 'Main navigation menu'
   description: 'Main navigation menu'
