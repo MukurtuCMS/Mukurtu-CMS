@@ -42,8 +42,8 @@ sections:
         uuid: 177c8838-ecba-43f7-9acb-813187ae16f3
         region: three
         configuration:
-          id: 'system_menu_block:dashboard-my-content'
-          label: 'My content'
+          id: 'system_menu_block:dashboard-my-account'
+          label: 'My account'
           label_display: visible
           provider: system
           context_mapping: {  }
