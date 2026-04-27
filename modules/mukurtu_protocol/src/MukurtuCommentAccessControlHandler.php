@@ -61,7 +61,7 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
         // No membership found; tag with user:{id} so this cached result is
         // invalidated if the user gains a protocol membership later.
         $cacheability->addCacheTags(["user:{$account->id()}"]);
-        break;
+        continue;
       }
       // Carry the membership so role changes auto-invalidate this result.
       $cacheability->addCacheableDependency($membership);
