@@ -86,6 +86,7 @@ function mukurtu_protocol_views_pre_render(\Drupal\views\ViewExecutable $view): 
   }
   $uid = \Drupal::currentUser()->id();
   // VBO tempstore key follows the convention: views_bulk_operations_{view_id}_{display_id}.
+  // Todo: fetch display id instead of hardcoding.
   $tempstore = \Drupal::service('tempstore.private')
     ->get('views_bulk_operations_mukurtu_people_page_1');
   $data = $tempstore->get((string) $uid);
