@@ -187,7 +187,7 @@ display:
                 select_all_none: false
                 select_all_none_nested: false
                 display_inline: false
-                soft_limit: 0
+                soft_limit: 15
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
               facets_mukurtu_cultural_protocol_ids:
@@ -206,7 +206,7 @@ display:
                 select_all_none: false
                 select_all_none_nested: false
                 display_inline: false
-                soft_limit: 0
+                soft_limit: 15
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
               facets_type:
@@ -225,7 +225,7 @@ display:
                 select_all_none: false
                 select_all_none_nested: false
                 display_inline: false
-                soft_limit: 0
+                soft_limit: 15
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
               facets_name:
@@ -244,7 +244,7 @@ display:
                 select_all_none: false
                 select_all_none_nested: false
                 display_inline: false
-                soft_limit: 0
+                soft_limit: 15
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
               facets_collections:
@@ -263,7 +263,7 @@ display:
                 select_all_none: false
                 select_all_none_nested: false
                 display_inline: false
-                soft_limit: 0
+                soft_limit: 15
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
               facets_media_type:
@@ -282,7 +282,7 @@ display:
                 select_all_none: false
                 select_all_none_nested: false
                 display_inline: false
-                soft_limit: 0
+                soft_limit: 15
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
               facets_name_1:
@@ -301,7 +301,7 @@ display:
                 select_all_none: false
                 select_all_none_nested: false
                 display_inline: false
-                soft_limit: 0
+                soft_limit: 15
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
       access:
@@ -478,12 +478,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
@@ -541,12 +535,6 @@ display:
                 weights:
                   build: 50
                 settings: {  }
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
@@ -611,12 +599,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
@@ -676,12 +658,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
@@ -741,12 +717,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
@@ -811,12 +781,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
@@ -876,12 +840,6 @@ display:
                 weights:
                   build: 100
                 settings: {  }
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
