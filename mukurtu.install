@@ -837,10 +837,21 @@ function mukurtu_update_40001() {
 }
 
 /**
+ * Fix Gin admin theme favicon path and mimetype (#1097).
+ */
+function mukurtu_update_40002() {
+  \Drupal::configFactory()
+    ->getEditable('gin.settings')
+    ->set('favicon.path', 'profiles/mukurtu/themes/mukurtu_v4/favicon.ico')
+    ->set('favicon.mimetype', 'image/x-icon')
+    ->save();
+}
+
+/**
  * Revert audio browse view mode to hide field_thumbnail; create
  * digital_heritage_sidebar view display for audio with thumbnail + player.
  */
-function mukurtu_update_40002(): void {
+function mukurtu_update_40003(): void {
   // Revert any field_thumbnail exposure in the browse view mode.
   $browse = \Drupal::configFactory()->getEditable(
     'core.entity_view_display.media.audio.browse'
@@ -898,7 +909,7 @@ function mukurtu_update_40002(): void {
  * Update digital heritage featured view mode to use digital_heritage_sidebar
  * for representative media so featured cards show thumbnail above audio player.
  */
-function mukurtu_update_40003(): void {
+function mukurtu_update_40004(): void {
   \Drupal::configFactory()
     ->getEditable('core.entity_view_display.node.digital_heritage.featured')
     ->set('content.field_representative_media.settings.view_mode', 'digital_heritage_sidebar')
@@ -909,7 +920,7 @@ function mukurtu_update_40003(): void {
  * Remove message_digest bulk actions for the email_user flag, which does not
  * exist in Mukurtu and caused fatal errors in Views bulk forms.
  */
-function mukurtu_update_40004(): void {
+function mukurtu_update_40005(): void {
   $config_factory = \Drupal::configFactory();
   $actions = [
     'system.action.message_digest_interval.email_user.daily',
