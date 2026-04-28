@@ -3,12 +3,10 @@
 namespace Drupal\mukurtu_protocol\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
-use Drupal\entity_browser\Element\EntityBrowserElement;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\ReplaceCommand;
 
 /**
  * Form controller for Community creation forms.
@@ -55,140 +53,218 @@ class CommunityAddForm extends ContentEntityForm {
     /** @var \Drupal\user\UserInterface $user */
     $user = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
-    // Community Members.
-    $form['community_member_item'] = [
+    // Seed the member list on first load with the current user as manager.
+    if ($form_state->get('members') === NULL) {
+      $form_state->set('members', [
+        $user->id() => ['entity' => $user, 'roles' => ['community_manager']],
+      ]);
+    }
+
+    $form['membership_wrapper'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#weight' => 1001,
+      '#access' => $this->isDefaultFormLangcode($form_state),
+    ];
+
+    $form['membership_wrapper']['membership_label'] = [
       '#type' => 'item',
       '#title' => $this->t('Community members'),
-      '#description' => $this->t('Community members can view the community page and be added to protocols within the community.'),
-      '#weight' => '1001',
-      '#access' => $this->isDefaultFormLangcode($form_state),
+      '#description' => $this->t('Add existing users to the community. Protocol membership will be managed next.'),
     ];
 
-    $form['community_member'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'community-member',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#prefix' => '<div id="role-community-member">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
-      '#weight' => '1002',
-      '#access' => $this->isDefaultFormLangcode($form_state),
+    $form['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
+
+    $form['membership_wrapper']['add_row'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['membership-add-row']],
     ];
 
-    // Community Affiliates.
-    $form['community_affiliate_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Community affiliates'),
-      '#description' => $this->t('Community affiliates can view the community page and be added to protocols within the community. This is a designation for community partners.'),
-      '#weight' => '1003',
-      '#access' => $this->isDefaultFormLangcode($form_state),
+    $form['membership_wrapper']['add_row']['user_search'] = [
+      '#type' => 'entity_autocomplete',
+      '#target_type' => 'user',
+      '#title' => $this->t('Add a member'),
+      '#placeholder' => $this->t('Search by name or email…'),
+      '#selection_settings' => ['include_anonymous' => FALSE],
+      '#autocreate' => FALSE,
     ];
 
-    $form['community_affiliate'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'community-affiliate',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#prefix' => '<div id="role-community-affiliate">',
-      '#suffix' => '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
-      '#weight' => '1004',
-      '#access' => $this->isDefaultFormLangcode($form_state),
+    $form['membership_wrapper']['add_row']['add_member'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add'),
+      '#validate' => [[static::class, 'membershipNoValidate']],
+      '#submit' => [[static::class, 'addMemberSubmit']],
+      '#limit_validation_errors' => [],
     ];
 
-    // Community Managers.
-    $form['community_manager_item'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Community managers'),
-      '#description' => $this->t('Community managers can manage community information and membership, and create new protocols.'),
-      '#weight' => '1005',
-      '#access' => $this->isDefaultFormLangcode($form_state),
-    ];
+    $form['membership_wrapper']['member_table'] = static::buildMembershipTable($form_state);
 
-    $defaultStatus = "<ul>";
-    $defaultStatus .= "<li>{$user->getAccountName()} ({$user->getEmail()})</li>";
-    $defaultStatus .= "</ul>";
+    $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 
-    $form['community_manager'] = [
-      '#type' => 'entity_browser',
-      '#id' => 'community-manager',
-      '#cardinality' => -1,
-      '#entity_browser' => 'mukurtu_community_and_protocol_user_browser',
-      '#default_value' => [$user],
-      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_EDIT,
-      '#prefix' => '<div id="role-community-manager">',
-      '#suffix' => $defaultStatus . '</div>',
-      '#process' => [
-        [get_called_class(), 'updateDefaultValues'],
-        [
-          '\Drupal\entity_browser\Element\EntityBrowserElement',
-          'processEntityBrowser',
-        ],
-        [get_called_class(), 'processEntityBrowser'],
-      ],
-      '#weight' => '1006',
-      '#access' => $this->isDefaultFormLangcode($form_state),
-    ];
+    // Pass all active users to JS for client-side autocomplete.
+    $uids = $this->entityTypeManager->getStorage('user')->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('status', 1)
+      ->condition('uid', 0, '<>')
+      ->sort('name')
+      ->execute();
+    $suggestions = [];
+    foreach ($this->entityTypeManager->getStorage('user')->loadMultiple($uids) as $uid => $u) {
+      $suggestions[] = [
+        'value' => $u->getDisplayName() . ' (' . $uid . ')',
+        'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
+      ];
+    }
+    $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
 
     return $form;
   }
 
   /**
-   * Keep default value for entity browser up to date.
+   * Role descriptions shown below the table header.
    */
-  public static function updateDefaultValues(&$element, FormStateInterface $form_state, &$complete_form) {
-    $element['#default_value'] = $element['#value']['entities'] ?? $element['#default_value'];
-    return $element;
-  }
-
-  /**
-   * Render API callback: Processes the entity browser element.
-   */
-  public static function processEntityBrowser(&$element, FormStateInterface $form_state, &$complete_form) {
-    $element['entity_ids']['#ajax'] = [
-      'callback' => [get_called_class(), 'updateCallback'],
-      'wrapper' => "role-{$element['#id']}",
-      'event' => 'entity_browser_value_updated',
+  protected static function getRoleDescriptions(): array {
+    return [
+      'community_member'    => t('View the community page and be added to protocols within the community'),
+      'community_affiliate' => t('View the community page and be added to protocols within the community. This is a designation for community partners.'),
+      'community_manager'   => t('Manage community membership and create new protocols. View the community page and be added to protocols within the community.'),
     ];
-    return $element;
   }
 
   /**
-   * AJAX callback: Re-renders the Entity Browser.
+   * Build collapsible role description list.
    */
-  public static function updateCallback(array &$form, FormStateInterface $form_state) {
-    $trigger = $form_state->getTriggeringElement();
-    $parents = $trigger['#array_parents'];
-    $role = $parents[0];
-    $value = $form_state->getValue($role);
-    $status = "<ul>";
-    foreach ($value['entities'] as $user) {
-      $status .= "<li>{$user->getAccountName()} ({$user->getEmail()})</li>";
+  protected static function buildRoleDescriptions(): array {
+    $roles = [
+      'community_member'    => t('Community member'),
+      'community_affiliate' => t('Community affiliate'),
+      'community_manager'   => t('Community manager'),
+    ];
+    $items = [];
+    foreach (static::getRoleDescriptions() as $role_id => $description) {
+      $label = $roles[$role_id];
+      $items[] = ['#markup' => '<strong>' . $label . '</strong>: ' . $description];
     }
-    $status .= "</ul>";
+    return [
+      '#type' => 'details',
+      '#title' => t('Role descriptions'),
+      '#open' => FALSE,
+      'list' => [
+        '#theme' => 'item_list',
+        '#items' => $items,
+      ],
+    ];
+  }
 
-    $form[$role]['#suffix'] = $status . '</div>';
-    $response = new AjaxResponse();
-    $roleID = str_replace('_', '-', $role);
-    $response->addCommand(new ReplaceCommand("#role-{$roleID}", $form[$role]));
-    return $response;
+  /**
+   * Build the inline membership table render array.
+   */
+  protected static function buildMembershipTable(FormStateInterface $form_state): array {
+    $roles = [
+      'community_member' => t('Member'),
+      'community_affiliate' => t('Affiliate'),
+      'community_manager' => t('Manager'),
+    ];
+
+    $header = [t('User')];
+    foreach ($roles as $label) {
+      $header[] = $label;
+    }
+    $header[] = ['data' => t('Actions'), 'class' => ['visually-hidden']];
+
+    $table = [
+      '#type' => 'table',
+      '#header' => $header,
+      '#empty' => t('No members added yet.'),
+      '#attributes' => ['class' => ['membership-table']],
+    ];
+
+    foreach ($form_state->get('members') ?? [] as $uid => $data) {
+      /** @var \Drupal\user\UserInterface $member */
+      $member = $data['entity'];
+      $name = $member->getDisplayName();
+
+      $row = [];
+      $row['user'] = [
+        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
+      ];
+
+      foreach ($roles as $role_id => $label) {
+        $row[$role_id] = [
+          '#type' => 'checkbox',
+          '#title' => $label,
+          '#title_display' => 'invisible',
+          '#default_value' => in_array($role_id, $data['roles']),
+          '#attributes' => ['aria-label' => t('@role for @name', ['@role' => $label, '@name' => $name])],
+        ];
+      }
+
+      $row['remove'] = [
+        '#type' => 'submit',
+        '#value' => t('Remove'),
+        '#name' => 'remove_member_' . $uid,
+        '#validate' => [[static::class, 'membershipNoValidate']],
+        '#submit' => [[static::class, 'removeMemberSubmit']],
+        '#limit_validation_errors' => [],
+        '#attributes' => [
+          'class' => ['button--danger', 'button--small'],
+          'aria-label' => t('Remove @name', ['@name' => $name]),
+        ],
+      ];
+
+      $table[$uid] = $row;
+    }
+
+    return $table;
+  }
+
+  /**
+   * Validation stub that suppresses all validation for membership buttons.
+   */
+  public static function membershipNoValidate(array &$form, FormStateInterface $form_state): void {}
+
+  /**
+   * Submit handler: add a user to the member list.
+   */
+  public static function addMemberSubmit(array &$form, FormStateInterface $form_state): void {
+    $raw = $form_state->getUserInput();
+    $input = $raw['membership_wrapper']['add_row']['user_search'] ?? NULL;
+
+    $uid = NULL;
+    if (is_numeric($input) && $input > 0) {
+      $uid = (int) $input;
+    }
+    elseif (is_string($input) && $input !== '') {
+      $uid = EntityAutocomplete::extractEntityIdFromAutocompleteInput($input);
+    }
+
+    if ($uid) {
+      $members = $form_state->get('members') ?? [];
+      if (!isset($members[$uid])) {
+        $user = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
+        if ($user) {
+          $members[$uid] = ['entity' => $user, 'roles' => ['community_member']];
+          $form_state->set('members', $members);
+        }
+      }
+    }
+    $form_state->setValue(['membership_wrapper', 'add_row', 'user_search'], NULL);
+    $user_input = $form_state->getUserInput();
+    $user_input['membership_wrapper']['add_row']['user_search'] = '';
+    $form_state->setUserInput($user_input);
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * Submit handler: remove a user from the member list.
+   */
+  public static function removeMemberSubmit(array &$form, FormStateInterface $form_state): void {
+    $trigger = $form_state->getTriggeringElement();
+    $uid = substr($trigger['#name'], strlen('remove_member_'));
+    $members = $form_state->get('members') ?? [];
+    unset($members[$uid]);
+    $form_state->set('members', $members);
+    $form_state->setRebuild(TRUE);
   }
 
   /**
@@ -198,19 +274,18 @@ class CommunityAddForm extends ContentEntityForm {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = parent::buildEntity($form, $form_state);
 
-    // Grab the memberships.
-    foreach (['community_manager', 'community_member', 'community_affiliate'] as $role) {
-      $members = $form_state->getValue($role);
-      $users = !empty($members['entities']) ? $members['entities'] : [];
-      foreach ($users as $user) {
-        if (!isset($this->members[$user->id()])) {
-          $this->members[$user->id()] = ['entity' => $user, 'roles' => []];
-        }
+    $stored_members = $form_state->get('members') ?? [];
+    $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
 
-        if (!in_array($role, $this->members[$user->id()]['roles'])) {
-          $this->members[$user->id()]['roles'][] = $role;
+    foreach ($stored_members as $uid => $data) {
+      $roles = [];
+      $user_row = $table_values[$uid] ?? [];
+      foreach (['community_member', 'community_affiliate', 'community_manager'] as $role) {
+        if (!empty($user_row[$role])) {
+          $roles[] = $role;
         }
       }
+      $this->members[$uid] = ['entity' => $data['entity'], 'roles' => $roles];
     }
 
     return $entity;
