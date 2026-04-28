@@ -41,8 +41,16 @@ class MukurtuManagerUserSelection extends UserSelection {
 
   /**
    * Returns UIDs of all users with Mukurtu management roles.
+   *
+   * Results are statically cached per request since this is called on every
+   * autocomplete keystroke.
    */
   protected function getPrivilegedUserIds(): array {
+    static $cached = NULL;
+    if ($cached !== NULL) {
+      return $cached;
+    }
+
     $uids = [];
 
     // Users with Drupal administrator or mukurtu_manager roles.
@@ -85,7 +93,8 @@ class MukurtuManagerUserSelection extends UserSelection {
       }
     }
 
-    return array_unique($uids);
+    $cached = array_unique($uids);
+    return $cached;
   }
 
 }
