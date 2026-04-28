@@ -70,6 +70,8 @@ class MukurtuDeleteOgMembershipAction extends ActionBase implements ContainerFac
     $group = $membership->getGroup();
 
     // Prevent removing a community member who still belongs to a child protocol.
+    // @todo Batch-load protocol memberships to avoid N+1 queries when this
+    //   action runs across many users in a single bulk operation.
     if ($group instanceof CommunityInterface) {
       $member = $membership->getOwner();
       if ($member) {

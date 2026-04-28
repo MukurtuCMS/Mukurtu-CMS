@@ -76,6 +76,10 @@ class MukurtuRemoveCommunityMembershipAction extends ViewsBulkOperationsActionBa
       }
 
       // Check if requesting user can modify this community's membership.
+      // The protocol-role guard (a user cannot be removed while enrolled in a
+      // child protocol) is enforced in execute(), not here, so that the row
+      // checkbox remains selectable and the admin receives an explicit warning
+      // rather than a silently disabled action.
       $membership = $community->getMembership($account);
       if ($membership && ($membership->hasPermission('administer group') || $membership->hasPermission('manage members'))) {
         return $return_as_object ? AccessResult::allowed() : TRUE;
