@@ -20,8 +20,8 @@ jobs:
       - name: Wait for Tugboat Preview
         id: wait-for-preview
         run: |
-          # Define the maximum wait time (5 minutes).
-          MAX_WAIT=300
+          # Define the maximum wait time (10 minutes).
+          MAX_WAIT=1200
           INTERVAL=30
           ELAPSED=0
           while [ $ELAPSED -lt $MAX_WAIT ]; do

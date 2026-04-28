@@ -30,13 +30,6 @@ mukurtu_core.add:
         type: entity:node_type
         with_config_overrides: TRUE
 
-mukurtu_core.people:
-  path: '/admin/people'
-  defaults:
-    _entity_list: 'user'
-    _title: 'People - All User Accounts'
-  requirements:
-    _permission: 'administer users'
 
 mukurtu_core.approve_user:
   path: '/user/{uid}/approve'

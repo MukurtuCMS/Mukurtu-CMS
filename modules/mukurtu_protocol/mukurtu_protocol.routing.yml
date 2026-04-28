@@ -1,3 +1,16 @@
+mukurtu_protocol.add_user_to_community:
+  path: '/user/{user}/add-to-community'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\AddUserToCommunityForm'
+    _title: 'Add to Community'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Form\AddUserToCommunityForm::access'
+    user: \d+
+  options:
+    _admin_route: TRUE
+    parameters:
+      user:
+        type: entity:user
 mukurtu_protocol.protocols_legacy_redirect:
   path: '/admin/protocols'
   defaults:

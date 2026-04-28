@@ -22,13 +22,20 @@ class UserCommunity extends FieldPluginBase {
     if ($values->_entity instanceof MukurtuUser) {
       $communities = array_filter($values->_entity->getCommunities(), fn ($c) => $c->access('view'));
       uasort($communities, fn ($a, $b) => strcmp($a->getName(), $b->getName()));
-      $links = array_map(fn ($c) => Link::fromTextAndUrl($c->getName(), $c->toUrl())->toString(), $communities);
+      $communities = array_values($communities);
 
-      if (!empty($links)) {
-        return ['#markup' => implode(', ', $links)];
+      if (!empty($communities)) {
+        $build = [];
+        foreach ($communities as $i => $community) {
+          if ($i > 0) {
+            $build[] = ['#markup' => ', '];
+          }
+          $build[] = Link::fromTextAndUrl($community->getName(), $community->toUrl())->toRenderable();
+        }
+        return $build;
       }
     }
-    return "";
+    return '';
   }
 
   public function query() {

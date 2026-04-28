@@ -117,6 +117,38 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
     }
     if ($can_manage) {
       $is_site_admin = $account->hasPermission('administer users');
+
+      // Site admins bypass the OG membership check above, so $current_user
+      // may not be loaded yet.
+      if (!isset($current_user)) {
+        $current_user = \Drupal\user\Entity\User::load($account->id());
+      }
+
+      // Pre-compute community IDs for all users (reused below).
+      $cm_community_ids = [];
+      foreach (\Drupal\og\Og::getMemberships($current_user) as $m) {
+        if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
+          $cm_community_ids[] = $m->getGroupId();
+        }
+      }
+      $target_community_ids = [];
+      foreach (\Drupal\og\Og::getMemberships($entity) as $m) {
+        if ($m->getGroupBundle() === 'community') {
+          $target_community_ids[] = $m->getGroupId();
+        }
+      }
+
+      // Show "Add to Community" unless the target is already in every community
+      // the current user manages. If the current user manages no communities,
+      // always show (the form handles further scoping).
+      if (empty($cm_community_ids) || !empty(array_diff($cm_community_ids, $target_community_ids))) {
+        $operations['add_to_community'] = [
+          'title' => t('Add to Community'),
+          'url' => Url::fromRoute('mukurtu_protocol.add_user_to_community', ['user' => $entity->id()]),
+          'weight' => 90,
+        ];
+      }
+
       $target_is_protected = !empty(array_intersect(
         \Drupal\mukurtu_core\Controller\MukurtuUserController::PROTECTED_ROLES,
         $entity->getRoles()
@@ -131,12 +163,17 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
         ];
       }
       elseif ($is_site_admin || !$target_is_protected) {
-        $operations['block_user'] = [
-          'title' => t('Block User'),
-          'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
-          'weight' => 100,
-          'attributes' => ['class' => ['use-ajax']],
-        ];
+        // Community managers may only block users who share one of their
+        // managed communities; site admins can block anyone.
+        $can_block = $is_site_admin || !empty(array_intersect($cm_community_ids, $target_community_ids));
+        if ($can_block) {
+          $operations['block_user'] = [
+            'title' => t('Block User'),
+            'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+            'weight' => 100,
+            'attributes' => ['class' => ['use-ajax']],
+          ];
+        }
       }
     }
   }
