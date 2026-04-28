@@ -299,21 +299,3 @@ function mukurtu_protocol_update_40005(): void {
 function mukurtu_protocol_update_40006(): void {
   \Drupal::service('router.builder')->rebuild();
 }
-
-/**
- * Replace og_membership_delete_action with the Mukurtu-aware equivalent in the
- * og_members_overview view so bulk delete respects the community/protocol
- * membership guard.
- */
-function mukurtu_protocol_update_40007(): void {
-  $config = \Drupal::configFactory()->getEditable('views.view.og_members_overview');
-  if ($config->isNew()) {
-    return;
-  }
-  $actions = $config->get('display.default.display_options.fields.og_membership_bulk_form.selected_actions');
-  $key = array_search('og_membership_delete_action', $actions ?? []);
-  if ($key !== FALSE) {
-    $actions[$key] = 'mukurtu_delete_og_membership_action';
-    $config->set('display.default.display_options.fields.og_membership_bulk_form.selected_actions', $actions)->save();
-  }
-}

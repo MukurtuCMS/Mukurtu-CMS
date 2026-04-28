@@ -6,6 +6,7 @@ use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgAccessInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -13,15 +14,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Deletes a group membership, blocking removal when community/protocol rules apply.
  *
- * Replaces og_membership_delete_action to respect Mukurtu's entity access
- * check that prevents removing a community member who still belongs to a child
- * protocol of that community.
- *
- * @Action(
- *   id = "mukurtu_delete_og_membership_action",
- *   label = @Translation("Delete the selected membership(s)"),
- *   type = "og_membership"
- * )
+ * Wired in as the implementation for og_membership_delete_action via
+ * hook_action_info_alter() so that bulk deletes on community member pages
+ * respect the rule that a user cannot be removed from a community while they
+ * still belong to one of its child protocols.
  */
 class MukurtuDeleteOgMembershipAction extends ActionBase implements ContainerFactoryPluginInterface {
 
@@ -71,13 +67,19 @@ class MukurtuDeleteOgMembershipAction extends ActionBase implements ContainerFac
       return;
     }
 
-    // Respect entity access — this catches the community/protocol membership
-    // guard in mukurtu_protocol_entity_access() that bulk delete would otherwise
-    // bypass by calling $membership->delete() directly.
-    if (!$membership->access('delete')) {
+    $group = $membership->getGroup();
+
+    // Prevent removing a community member who still belongs to a child protocol.
+    if ($group instanceof CommunityInterface) {
       $member = $membership->getOwner();
-      \Drupal::messenger()->addWarning($this->t('Could not remove %user from the community because they still have protocol roles. Remove them from all protocols first.', ['%user' => $member->getDisplayName()]));
-      return;
+      if ($member) {
+        foreach ($group->getProtocols() as $protocol) {
+          if ($protocol->getMembership($member)) {
+            \Drupal::messenger()->addWarning($this->t('Could not remove %user from the community because they still have protocol roles. Remove them from all protocols first.', ['%user' => $member->getDisplayName()]));
+            return;
+          }
+        }
+      }
     }
 
     $membership->delete();

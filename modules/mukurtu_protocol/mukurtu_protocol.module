@@ -20,6 +20,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Url;
 use Drupal\og\Og;
+use Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction;
 
 /**
  * @file
@@ -786,6 +787,19 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
         }
       }
     }
+  }
+}
+
+/**
+ * Implements hook_action_info_alter().
+ *
+ * Replaces OG's og_membership_delete_action class with a Mukurtu-aware
+ * version that blocks community member removal when the user still belongs
+ * to a child protocol. This avoids any view config or update hook dependency.
+ */
+function mukurtu_protocol_action_info_alter(array &$definitions): void {
+  if (isset($definitions['og_membership_delete_action'])) {
+    $definitions['og_membership_delete_action']['class'] = MukurtuDeleteOgMembershipAction::class;
   }
 }
 
