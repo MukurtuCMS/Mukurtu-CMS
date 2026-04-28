@@ -16,6 +16,8 @@ protocol-list:
   css:
     theme:
       css/protocol-list.css: {}
+  dependencies:
+    - core/base
 
 mukurtu-community-role-management:
   version: 1.x

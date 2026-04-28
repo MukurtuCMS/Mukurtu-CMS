@@ -412,3 +412,55 @@ function mukurtu_core_update_40009(): void {
   $config_installer = \Drupal::service('config.installer');
   $config_installer->installDefaultConfig('module', 'mukurtu_core');
 }
+
+/**
+ * Disable user_admin_people view so MukurtuUserListBuilder serves /admin/people.
+ */
+function mukurtu_core_update_40010(): void {
+  $view = \Drupal::entityTypeManager()->getStorage('view')->load('user_admin_people');
+  if ($view && $view->status()) {
+    $view->setStatus(FALSE);
+    $view->save();
+  }
+}
+
+/**
+ * Rename dashboard-my-content menu to dashboard-my-account and update the
+ * Mukurtu dashboard block to reference the new menu.
+ */
+function mukurtu_core_update_40011(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // Create the new dashboard-my-account menu if it doesn't exist yet.
+  $new_menu = $config_factory->getEditable('system.menu.dashboard-my-account');
+  if ($new_menu->isNew()) {
+    $new_menu
+      ->set('langcode', 'en')
+      ->set('status', TRUE)
+      ->set('dependencies', [])
+      ->set('id', 'dashboard-my-account')
+      ->set('label', 'My Account')
+      ->set('description', 'Access users own content and account information.')
+      ->set('locked', FALSE)
+      ->save();
+  }
+
+  // Update the dashboard block in the "three" region to reference the new menu.
+  $dashboard = $config_factory->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  $sections = $dashboard->get('sections');
+  foreach ($sections as $section_key => $section) {
+    foreach ($section['components'] ?? [] as $comp_key => $component) {
+      if (($component['configuration']['id'] ?? '') === 'system_menu_block:dashboard-my-content') {
+        $sections[$section_key]['components'][$comp_key]['configuration']['id'] = 'system_menu_block:dashboard-my-account';
+        $sections[$section_key]['components'][$comp_key]['configuration']['label'] = 'My account';
+      }
+    }
+  }
+  $dashboard->set('sections', $sections)->save();
+
+  // Delete the old dashboard-my-content menu.
+  $old_menu = $config_factory->getEditable('system.menu.dashboard-my-content');
+  if (!$old_menu->isNew()) {
+    $old_menu->delete();
+  }
+}
