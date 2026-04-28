@@ -1,3 +1,11 @@
+mukurtu_protocol.protocols_legacy_redirect:
+  path: '/admin/protocols'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\CommunitiesPageController::protocolsDashboardRedirect'
+    _title: ''
+  requirements:
+    _permission: 'access administration pages'
+
 mukurtu_protocol.community_manager_create_user:
   path: '/admin/communities/create-user'
   defaults:

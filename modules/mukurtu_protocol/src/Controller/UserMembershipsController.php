@@ -4,21 +4,35 @@ namespace Drupal\mukurtu_protocol\Controller;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
 use Drupal\og\Og;
 use Drupal\user\UserInterface;
 
+/**
+ * Controller for the user memberships page.
+ */
 class UserMembershipsController extends ControllerBase {
 
+  /**
+   * Returns memberships page for the currently logged-in user.
+   */
   public function content() {
     $user = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
     return $this->buildPage($user);
   }
 
+  /**
+   * Returns memberships page for a given user.
+   */
   public function contentForUser(UserInterface $user) {
     return $this->buildPage($user);
   }
 
+  /**
+   * Access callback: allow own profile or users with 'administer users'.
+   */
   public function access(AccountInterface $account, UserInterface $user) {
     if ($account->id() == $user->id()) {
       return AccessResult::allowedIf($account->isAuthenticated())->cachePerUser();
@@ -26,6 +40,9 @@ class UserMembershipsController extends ControllerBase {
     return AccessResult::allowedIfHasPermission($account, 'administer users')->cachePerPermissions();
   }
 
+  /**
+   * Title callback returning the user's display name possessive.
+   */
   public function title(UserInterface $user) {
     $display_name = $user->get('field_display_name')->value ?: $user->getAccountName();
     return $this->t("@name's Memberships", ['@name' => $display_name]);
@@ -33,6 +50,7 @@ class UserMembershipsController extends ControllerBase {
 
   protected function buildPage(UserInterface $user) {
     $all_memberships = Og::getMemberships($user);
+    $bubbleable_metadata = new BubbleableMetadata();
 
     $community_memberships = array_filter($all_memberships, fn($m) => $m->getGroupBundle() === 'community');
     $protocol_memberships_by_id = [];
@@ -72,7 +90,7 @@ class UserMembershipsController extends ControllerBase {
           ));
           $protocols_in_community[] = [
             'name' => $protocol->label(),
-            'url' => $protocol->toUrl()->toString(),
+            'url' => $this->collectUrl($protocol->toUrl(), $bubbleable_metadata),
             'roles' => $protocol_roles,
           ];
           $assigned_protocol_ids[] = $protocol_id;
@@ -81,7 +99,7 @@ class UserMembershipsController extends ControllerBase {
 
       $communities[] = [
         'name' => $community->label(),
-        'url' => $community->toUrl()->toString(),
+        'url' => $this->collectUrl($community->toUrl(), $bubbleable_metadata),
         'roles' => $community_roles,
         'protocols' => $protocols_in_community,
       ];
@@ -102,17 +120,28 @@ class UserMembershipsController extends ControllerBase {
       ));
       $orphan_protocols[] = [
         'name' => $protocol->label(),
-        'url' => $protocol->toUrl()->toString(),
+        'url' => $this->collectUrl($protocol->toUrl(), $bubbleable_metadata),
         'roles' => $protocol_roles,
       ];
     }
 
-    return [
+    $build = [
       '#theme' => 'mukurtu_user_memberships',
       '#communities' => $communities,
       '#orphan_protocols' => $orphan_protocols,
       '#user' => $user,
     ];
+    $bubbleable_metadata->applyTo($build);
+    return $build;
+  }
+
+  /**
+   * Generates a URL string and merges its cache metadata into $metadata.
+   */
+  protected function collectUrl(Url $url, BubbleableMetadata $metadata): string {
+    $generated = $url->toString(TRUE);
+    $metadata->addCacheableDependency($generated);
+    return $generated->getGeneratedUrl();
   }
 
 }

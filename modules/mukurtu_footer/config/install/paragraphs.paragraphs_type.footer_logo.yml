@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {}
+id: footer_logo
+label: 'Footer Logo'
+icon_uuid: null
+icon_default: null
+description: 'A logo image with an optional link URL for use in the Mukurtu Footer.'
+behavior_plugins: {}

@@ -5,7 +5,7 @@
 
 .footer {
   margin-block-start: var(--v-space-m);
-  padding-block-start: var(--v-space-xs);
+  padding-block: var(--v-space-xs);
   background-color: var(--footer-bg-color);
   color: var(--footer-text-color);
 
@@ -14,54 +14,92 @@
   .region {
     grid-column: 1 / -1;
 
-    @include include-media.media('>=2xl') {
+    @include include-media.media(">=2xl") {
       grid-column: 2 / -2;
     }
   }
 
+  // Block container — vertical stack, everything centered.
+  .mukurtu-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-s);
+    padding-block: var(--v-space-s);
+    inline-size: 100%;
+  }
+
+  // 1. Footer text — full width, centered.
+  .footer-text {
+    inline-size: 100%;
+    text-align: center;
+    margin-block-end: 0;
+
+    a {
+      color: var(--footer-text-color);
+    }
+  }
+
+  // 2. Logos — centered row, wraps if needed.
   .logos {
     display: flex;
-    flex-direction: row;
+    flex-flow: row wrap;
     gap: var(--v-space-2xs);
-    align-items: baseline;
+    align-items: center;
     justify-content: center;
     margin-block-end: 0;
   }
 
-  .logo {
-    flex: 0 1 33%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    img {
-      inline-size: auto;
-      max-block-size: 150px;
-    }
-  }
-
-  // @TODO: when form fields are updated to links, put icons as
-  // pseudoelements on a tags.
-
-  .twitter,
-  .facebook,
-  .instagram {
-    display: flex;
-    align-items: center;
-    gap: 1ch;
-
-    svg {
-      block-size: 1.5rem;
-    }
-  }
-
-  .socials {
+  // 3. Social + other links — single flex row, left to right.
+  .footer-links-row {
     display: flex;
     flex-flow: row wrap;
-    justify-content: space-between;
-    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
     margin-block-end: 0;
+  }
 
+  .socials__item {
+    a {
+      display: flex;
+      align-items: center;
+      gap: 0.5ch;
+      color: var(--footer-text-color);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+      }
+
+      &:focus-visible {
+        outline: var(--focus-color) solid 2px;
+        outline-offset: 2px;
+        text-decoration: none;
+      }
+    }
+  }
+
+  .socials__icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    svg {
+      block-size: 1.25rem;
+      inline-size: 1.25rem;
+      max-inline-size: 1.25rem;
+      max-block-size: 1.25rem;
+    }
+  }
+
+  .socials__label {
+    font-size: 0.9em;
+  }
+
+  .footer-link-item {
+    /* stylelint-disable-next-line no-descending-specificity */
     a {
       color: var(--footer-text-color);
       text-decoration-color: currentcolor;
@@ -70,34 +108,73 @@
       &:hover {
         text-decoration-color: var(--color-transparent);
       }
+
+      &:focus-visible {
+        outline: var(--focus-color) solid 2px;
+        outline-offset: 2px;
+      }
     }
   }
 
-  .socials__accounts {
-    margin-block-start: var(--v-space-5xs);
-  }
-
-  .email,
-  .copyright-message {
+  // 4. Contact email + copyright — single flex row at the bottom.
+  .footer-bottom-row {
     display: flex;
-    flex-direction: row;
+    flex-flow: row wrap;
     justify-content: center;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
     margin-block-end: 0;
   }
 
   .email {
-    margin-block-end: none !important;
-
-    // stylelint-disable no-descending-specificity
+    /* stylelint-disable-next-line no-descending-specificity */
     a {
+      display: flex;
+      align-items: center;
+      gap: 0.5ch;
       color: var(--footer-text-color);
       text-decoration-color: var(--footer-text-color);
       text-decoration-thickness: 1px;
 
       &:hover {
-        color: var(--footer-text-color);
         text-decoration-color: var(--color-transparent);
       }
+
+      &:focus-visible {
+        outline: var(--focus-color) solid 2px;
+        outline-offset: 2px;
+      }
+
+      svg {
+        block-size: 1em;
+        inline-size: auto;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .copyright-message {
+    margin-block-end: 0;
+  }
+
+  // .logo placed after all plain `a` selectors above to satisfy
+  // no-descending-specificity (a:focus-visible is more specific).
+  .logo {
+    flex: 0 1 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    a {
+      &:focus-visible {
+        outline: var(--focus-color) solid 2px;
+        outline-offset: 2px;
+      }
+    }
+
+    img {
+      inline-size: auto;
+      max-block-size: 150px;
     }
   }
 }

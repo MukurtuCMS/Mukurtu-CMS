@@ -29,9 +29,9 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
     }
 
     if ($operation == 'view') {
-      // Anybody can view an open protocol.
+      // Anybody can view an open protocol. Depends on entity fields.
       if ($entity->isOpen()) {
-        return AccessResult::allowed();
+        return AccessResult::allowed()->addCacheableDependency($entity);
       }
 
       // Users with an active membership in the protocol can view.
@@ -127,7 +127,9 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
       }
     }
 
-    return AccessResult::forbidden();
+    // Tag with user:{id} so Community::addMember() invalidates this cached
+    // forbidden when the user gains their first community membership.
+    return AccessResult::forbidden()->addCacheTags(["user:{$account->id()}"]);
   }
 
 }

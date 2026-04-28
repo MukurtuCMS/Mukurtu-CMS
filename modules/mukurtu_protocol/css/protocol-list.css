@@ -5,7 +5,7 @@
 /* Community rows */
 tr.community-row td {
   font-weight: bold;
-  border-top: 2px solid var(--gin-border-color, #ccc);
+  border-top: 2px solid var(--gin-border-color, #767676);
 }
 
 tr.community-row:first-child td {
@@ -38,9 +38,7 @@ tr.community-row .item-list li {
   padding: 0;
 }
 
-/* Inline name + operations button layout.
- * The operations button is last in the DOM (after the name) for screen reader
- * context, but moved visually to the left via order: -1. */
+/* Inline name + operations button layout. */
 .name-ops-wrapper {
   display: flex;
   align-items: center;
@@ -48,7 +46,6 @@ tr.community-row .item-list li {
 }
 
 .name-ops-wrapper .dropbutton-wrapper {
-  order: -1;
   margin: 0;
 }
 

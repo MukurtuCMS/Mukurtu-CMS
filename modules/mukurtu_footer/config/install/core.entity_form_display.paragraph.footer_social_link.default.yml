@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.footer_social_link.field_footer_social_platform
+    - field.field.paragraph.footer_social_link.field_footer_social_url
+    - paragraphs.paragraphs_type.footer_social_link
+  module:
+    - link
+    - options
+id: paragraph.footer_social_link.default
+targetEntityType: paragraph
+bundle: footer_social_link
+mode: default
+content:
+  field_footer_social_platform:
+    type: options_select
+    weight: 0
+    region: content
+    settings: {}
+    third_party_settings: {}
+  field_footer_social_url:
+    type: link_default
+    weight: 1
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: 'Display label (optional)'
+    third_party_settings: {}
+hidden:
+  created: true
+  status: true
