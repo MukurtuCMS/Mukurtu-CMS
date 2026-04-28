@@ -76,7 +76,14 @@ class FieldAvailableForIndexing extends Event {
     $indexes = is_array($index_ids) ? $index_ids : [$index_ids];
     foreach ($indexes as $index_id) {
       if ($index = Index::load($index_id)) {
-        $field = $index->getField($id) ?? new Field($index, $id);
+        // Skip fields already defined in the YAML to avoid unnecessary saves.
+        $existing = $index->getField($id);
+        if ($existing &&
+            $existing->getType() === $type &&
+            $existing->getPropertyPath() === $property_path) {
+          continue;
+        }
+        $field = $existing ?? new Field($index, $id);
         $field->setType($type);
         $field->setBoost($boost);
         $field->setDatasourceId("entity:{$this->entity_type_id}");
@@ -84,11 +91,9 @@ class FieldAvailableForIndexing extends Event {
         $field->setLabel($label);
         $index->addField($field);
 
-        // Make text ignore case by default. We want strings to be excluded.
-        // @todo The ignorecase processor field list in mukurtu_browse_auto_index
-        //   also includes UUID text fields (e.g. node__field_keywords__uuid).
-        //   UUIDs are always lowercase so these entries are redundant and could
-        //   be cleaned up from the YAML and removed here via a future update hook.
+        // Add text fields to the ignorecase processor. String fields are
+        // excluded — they are used for faceting and do not go through text
+        // processing.
         if ($type === 'text') {
           $processors = $index->getProcessors();
           if ($processors && isset($processors['ignorecase'])) {

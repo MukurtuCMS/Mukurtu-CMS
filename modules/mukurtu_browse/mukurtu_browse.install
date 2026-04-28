@@ -100,8 +100,12 @@ function mukurtu_browse_update_40002() {
 }
 
 /**
- * Add text-typed fields for keywords, category, people, and subject to enable
- * fulltext search on taxonomy term names in the browse index.
+ * Add text-typed taxonomy name fields to mukurtu_default_content_index.
+ *
+ * Adds parallel type:text fields for keywords, category, people, subject,
+ * language, location, and publisher so fulltext search on the browse page
+ * finds content by taxonomy term name. Existing type:string fields are
+ * preserved for faceting (issue #622).
  */
 function mukurtu_browse_update_40003() {
   $config_installer = \Drupal::service('config.installer');
