@@ -685,6 +685,27 @@ function mukurtu_protocol_form_protocol_add_form_alter(&$form, FormStateInterfac
 }
 
 /**
+ * Sorts a roles #options array by og_role weight.
+ *
+ * @param array $options
+ *   Associative array of role_id => label.
+ * @return array
+ *   The same options reordered by ascending weight.
+ */
+function _mukurtu_protocol_sort_role_options(array $options): array {
+  $roles = \Drupal::entityTypeManager()->getStorage('og_role')->loadMultiple(array_keys($options));
+  $weights = [];
+  foreach (array_keys($options) as $role_id) {
+    if (!isset($roles[$role_id])) {
+      \Drupal::logger('mukurtu_protocol')->warning('og_role @id not found; appending to end of roles list.', ['@id' => $role_id]);
+    }
+    $weights[$role_id] = isset($roles[$role_id]) ? $roles[$role_id]->getWeight() : 99;
+  }
+  asort($weights);
+  return array_replace($weights, $options);
+}
+
+/**
  * Implements hook_form_form_id_alter().
  */
 function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterface $form_state) {
@@ -701,15 +722,7 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
 
   // Sort roles checkboxes by weight for both protocol and community forms.
   if (($group instanceof ProtocolInterface || $group instanceof CommunityInterface) && !empty($form['roles']['widget']['#options'])) {
-    $role_storage = \Drupal::entityTypeManager()->getStorage('og_role');
-    $options = $form['roles']['widget']['#options'];
-    $weights = [];
-    foreach (array_keys($options) as $role_id) {
-      $role = $role_storage->load($role_id);
-      $weights[$role_id] = $role ? $role->getWeight() : 99;
-    }
-    asort($weights);
-    $form['roles']['widget']['#options'] = array_replace($weights, $options);
+    $form['roles']['widget']['#options'] = _mukurtu_protocol_sort_role_options($form['roles']['widget']['#options']);
   }
 }
 
@@ -721,6 +734,11 @@ function mukurtu_protocol_form_og_membership_add_multiple_roles_action_form_alte
   unset($form['roles']['#multiple']);
   $form['#validate'][] = 'mukurtu_protocol_og_add_roles_form_validate';
   array_unshift($form['#submit'], 'mukurtu_protocol_og_add_roles_form_pre_submit');
+
+  // Sort roles by weight to match the individual add-member form.
+  if (!empty($form['roles']['#options'])) {
+    $form['roles']['#options'] = _mukurtu_protocol_sort_role_options($form['roles']['#options']);
+  }
 }
 
 function mukurtu_protocol_og_add_roles_form_validate(&$form, FormStateInterface $form_state) {

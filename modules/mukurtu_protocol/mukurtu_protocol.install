@@ -292,3 +292,10 @@ function mukurtu_protocol_update_40005(): void {
     }
   }
 }
+
+/**
+ * Rebuild the router after protocol collection path change to /admin/communities-protocols.
+ */
+function mukurtu_protocol_update_40006(): void {
+  \Drupal::service('router.builder')->rebuild();
+}
