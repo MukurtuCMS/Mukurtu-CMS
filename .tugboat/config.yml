@@ -65,7 +65,7 @@ services:
           cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
           chown www-data:www-data web/sites/default/settings.php
           # Update composer dependencies.
-          # rm composer.lock
+          rm composer.lock
           composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
           # Install Drupal with the Mukurtu installation profile. Run as web
           # user to create files with the right permissions. Pass in the
