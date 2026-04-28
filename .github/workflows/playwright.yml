@@ -21,7 +21,7 @@ jobs:
         id: wait-for-preview
         run: |
           # Define the maximum wait time (10 minutes).
-          MAX_WAIT=600
+          MAX_WAIT=1200
           INTERVAL=30
           ELAPSED=0
           while [ $ELAPSED -lt $MAX_WAIT ]; do
