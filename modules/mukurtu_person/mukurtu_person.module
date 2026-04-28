@@ -1,6 +1,8 @@
 <?php
 
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\mukurtu_core\Entity\FormattedTextWithTitle;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\Entity\RelatedPerson;
@@ -34,7 +36,7 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
  * Replaces the generic entity browser cardinality message on the related person
  * field with a clearer prompt.
  */
-function mukurtu_person_field_widget_single_element_form_alter(&$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context) {
+function mukurtu_person_field_widget_single_element_form_alter(&$element, FormStateInterface $form_state, array $context) {
   $field_definition = $context['items']->getFieldDefinition();
   if ($field_definition->getName() !== 'field_related_person' || $field_definition->getTargetBundle() !== 'related_person') {
     return;
@@ -43,19 +45,22 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, \Drupa
     $element['entity_browser']['#prefix'] = '<p>' . t('Select a related person record.') . '</p>';
   }
 
-  $element['create_person_link'] = [
-    '#type' => 'link',
-    '#title' => t("Can't find the person? Create a new person record."),
-    '#url' => \Drupal\Core\Url::fromRoute('node.add', ['node_type' => 'person']),
-    '#attributes' => [
-      'class' => ['use-ajax', 'button', 'button--small', 'button--extrasmall'],
-      'data-dialog-type' => 'modal',
-      'data-dialog-options' => json_encode(['width' => 800]),
-      'aria-haspopup' => 'dialog',
-    ],
-    '#attached' => ['library' => ['core/drupal.dialog.ajax']],
-    '#weight' => 10,
-  ];
+  $create_url = Url::fromRoute('node.add', ['node_type' => 'person']);
+  if ($create_url->access()) {
+    $element['create_person_link'] = [
+      '#type' => 'link',
+      '#title' => t("Can't find the person? Create a new person record."),
+      '#url' => $create_url,
+      '#attributes' => [
+        'class' => ['use-ajax', 'button', 'button--small', 'button--extrasmall'],
+        'data-dialog-type' => 'modal',
+        'data-dialog-options' => json_encode(['width' => 800]),
+        'aria-haspopup' => 'dialog',
+      ],
+      '#attached' => ['library' => ['core/drupal.dialog.ajax']],
+      '#weight' => 10,
+    ];
+  }
 }
 
 /**
