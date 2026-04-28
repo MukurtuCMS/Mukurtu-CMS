@@ -70,13 +70,13 @@ class BaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
       $event->indexField($indexes, $field_id, 'field_communities:entity:name', $label, 'string');
     }
 
-    // Taxonomy reference fields: string for faceting, text for fulltext search.
-    // @todo Add unit tests covering the taxonomy branch (both __name and
-    //   __name__text are registered) and confirming field_communities is
-    //   unaffected by this handler.
+    // Taxonomy reference fields: text for fulltext search only. String (facet)
+    // fields for common taxonomy fields are defined explicitly in the index
+    // YAML to avoid exceeding MySQL's 64-index-per-table limit when many
+    // content types with unique taxonomy fields are present.
+    // @todo Add unit tests covering the taxonomy branch.
     if ($event->field_definition->getType() == 'entity_reference' &&
         ($event->field_definition->getSetting('target_type') ?? '') == 'taxonomy_term') {
-      $event->indexField($indexes, $field_id . "__name", "{$field_name}:entity:name", $label, 'string');
       $event->indexField($indexes, $field_id . "__name__text", "{$field_name}:entity:name", $label, 'text');
     }
   }
