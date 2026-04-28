@@ -8,3 +8,17 @@
 function mukurtu_search_install() {
   mukurtu_search_rebuild_index();
 }
+
+/**
+ * Reimport mukurtu_browse_auto_index config and reindex (issue #622).
+ *
+ * Replaces __uuid fields with __name (string) and __name__text (text) for
+ * all taxonomy reference fields, enabling fulltext search on term names while
+ * preserving string variants for faceting.
+ */
+function mukurtu_search_update_40001() {
+  mukurtu_search_rebuild_index();
+  if ($index = \Drupal\search_api\Entity\Index::load('mukurtu_browse_auto_index')) {
+    $index->reindex();
+  }
+}

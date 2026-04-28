@@ -38,7 +38,7 @@ class TaxonomyFieldSearchIndexSubscriber implements EventSubscriberInterface {
    *   Response event.
    */
   public function indexTaxonomyField(FieldAvailableForIndexing $event) {
-    $indexes = ['mukurtu_browse_auto_index', 'mukurtu_default_solr_index'];
+    $indexes = ['mukurtu_default_solr_index'];
     if ($event->entity_type_id == 'node' && $event->field_definition->getType() == 'entity_reference' && $event->field_definition->getSetting('target_type') == 'taxonomy_term') {
       $field_name = $event->field_definition->getName();
       $field_id = "{$event->entity_type_id}__{$field_name}__uuid";
