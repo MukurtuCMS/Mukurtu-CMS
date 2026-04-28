@@ -6,3 +6,5 @@ Pre-merge checklist:
 - [ ] I have updated or created CI/CD tests, if required.
 - [ ] I have updated from `main` and resolved any merge conflicts.
 - [ ] I have verified that all expected checks pass.
+- [ ] I have run the pr-expert-review skill and resolved all relevant issues.
+
