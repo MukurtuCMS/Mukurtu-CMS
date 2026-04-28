@@ -711,11 +711,11 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
   // Make roles field required on og forms.
   $form['roles']['widget']['#required'] = TRUE;
 
-  $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
-
   // Add validation to prevent users from being added to protocols without
   // adding them first to the protocol owning communities.
+  $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
   if ($group instanceof ProtocolInterface) {
+    // Only add the form validator if this form is in the protocol context.
     $form['#validate'][] = 'add_protocol_member_form_validate';
   }
 

@@ -48,7 +48,8 @@
   }
 
   .featured-content__heading {
-    margin-block: var(--v-space-l) var(--v-space-2xs);
+    margin-block-start: var(--v-space-l);
+    margin-block-end: var(--v-space-2xs);
   }
 
   .field--name-field-featured-content {

@@ -2,7 +2,6 @@
 
 namespace Drupal\mukurtu_protocol\Plugin\views\field;
 
-use Drupal\Core\Link;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\mukurtu_protocol\Entity\MukurtuUser;
@@ -21,11 +20,15 @@ class UserCommunity extends FieldPluginBase {
     /** @var \Drupal\node\Entity\Node $node */
     if ($values->_entity instanceof MukurtuUser) {
       $communities = array_filter($values->_entity->getCommunities(), fn ($c) => $c->access('view'));
-      uasort($communities, fn ($a, $b) => strcmp($a->getName(), $b->getName()));
-      $links = array_map(fn ($c) => Link::fromTextAndUrl($c->getName(), $c->toUrl())->toString(), $communities);
+      $names = array_map(fn ($c) => $c->getName(), $communities);
+      asort($names);
 
-      if (!empty($links)) {
-        return ['#markup' => implode(', ', $links)];
+      if (!empty($names)) {
+        return [
+          '#theme' => 'item_list',
+          '#list_type' => 'ul',
+          '#items' => $names,
+        ];
       }
     }
     return "";

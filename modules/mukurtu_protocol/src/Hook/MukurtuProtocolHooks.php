@@ -65,13 +65,6 @@ class MukurtuProtocolHooks {
           'items' => [],
         ],
       ],
-      'mukurtu_user_memberships' => [
-        'variables' => [
-          'communities' => [],
-          'orphan_protocols' => [],
-          'user' => NULL,
-        ],
-      ],
     ];
   }
 
