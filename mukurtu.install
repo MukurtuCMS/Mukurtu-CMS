@@ -905,3 +905,19 @@ function mukurtu_update_40003(): void {
     ->save();
 }
 
+/**
+ * Remove message_digest bulk actions for the email_user flag, which does not
+ * exist in Mukurtu and caused fatal errors in Views bulk forms.
+ */
+function mukurtu_update_40004(): void {
+  $config_factory = \Drupal::configFactory();
+  $actions = [
+    'system.action.message_digest_interval.email_user.daily',
+    'system.action.message_digest_interval.email_user.immediate',
+    'system.action.message_digest_interval.email_user.weekly',
+  ];
+  foreach ($actions as $action) {
+    $config_factory->getEditable($action)->delete();
+  }
+}
+
