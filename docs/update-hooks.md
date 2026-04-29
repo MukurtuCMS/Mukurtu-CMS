@@ -18,9 +18,11 @@ Sometimes changes are minor enough, or may affect common config changes that the
 
 ## Update hook placement
 
-Update hooks should be placed in the corresponding `/modules/module_name/module_name.install` file.
-If there isn't a clear module to use, include the hook in `/modules/mukurtu_core/mukurtu_core.install`.
-Do not place update hooks in `/mukurtu.install/`.
+- Update hooks should be placed in the corresponding `/modules/module_name/module_name.install` file.
+- If there isn't a clear module to use, include the hook in `/modules/mukurtu_core/mukurtu_core.install`.
+- Do not place update hooks in `mukurtu.install`.
+- Place hooks at the END of the document.
+- Make sure you don't accidentally duplicate a hook update number within the same file.
 
 ## Update hook naming
 
