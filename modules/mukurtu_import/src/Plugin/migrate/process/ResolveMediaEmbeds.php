@@ -111,7 +111,10 @@ class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPl
 
     $doc = new DOMDocument();
     $previous = libxml_use_internal_errors(TRUE);
-    $doc->loadHTML($value, LIBXML_HTML_NODEFDTD);
+    // Prefix with an XML encoding declaration so DOMDocument parses the input
+    // as UTF-8 rather than its default ISO-8859-1, which would corrupt any
+    // multi-byte characters (e.g. curly quotes, accented letters).
+    $doc->loadHTML('<?xml encoding="utf-8"?>' . $value, LIBXML_HTML_NODEFDTD);
     libxml_use_internal_errors($previous);
     $xpath = new DOMXPath($doc);
     $media_elements = $xpath->query(
@@ -182,7 +185,7 @@ class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPl
 
     if ($resolved) {
       $new_value = $doc->saveHTML();
-      $strip_these_tags = ['<html>', '</html>', '<body>', '</body>'];
+      $strip_these_tags = ['<?xml encoding="utf-8"?>', '<html>', '</html>', '<body>', '</body>'];
       $value = str_replace($strip_these_tags, '', $new_value);
     }
 
