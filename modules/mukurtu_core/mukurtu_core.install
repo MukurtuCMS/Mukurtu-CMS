@@ -464,3 +464,58 @@ function mukurtu_core_update_40011(): void {
     $old_menu->delete();
   }
 }
+
+/**
+ * Remove "Add Component" and child links from the account menu.
+ */
+function mukurtu_core_update_40012(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+
+  $ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('menu_name', 'account')
+    ->condition('title', 'Add Component')
+    ->execute();
+
+  foreach ($ids as $id) {
+    $parent = $storage->load($id);
+    if (!$parent) {
+      continue;
+    }
+    $child_ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('parent', 'menu_link_content:' . $parent->uuid())
+      ->execute();
+    foreach ($storage->loadMultiple($child_ids) as $child) {
+      $child->delete();
+    }
+    $parent->delete();
+  }
+}
+
+/**
+ * Reorder account menu: Create Content first (-1000), Dashboard second (-100).
+ *
+ * Matches by title in the account menu. Admins may have renamed these links,
+ * in which case this hook silently skips them — no manual follow-up needed
+ * since custom names imply intentional customization.
+ */
+function mukurtu_core_update_40013(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+
+  $weights = [
+    'Create Content' => -1000,
+    'Dashboard' => -100,
+  ];
+
+  foreach ($weights as $title => $weight) {
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('menu_name', 'account')
+      ->condition('title', $title)
+      ->execute();
+    foreach ($storage->loadMultiple($ids) as $link) {
+      $link->set('weight', $weight)->save();
+    }
+  }
+}
