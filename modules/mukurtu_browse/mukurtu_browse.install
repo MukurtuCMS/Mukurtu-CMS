@@ -98,3 +98,65 @@ function mukurtu_browse_update_40002() {
     }
   }
 }
+
+/**
+ * Add PDF extracted text fields to the content search index.
+ */
+function mukurtu_browse_update_40003() {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  $new_fields = [
+    'media_extracted_text' => [
+      'type' => 'text',
+      'property_path' => 'field_media_assets:entity:field_extracted_text',
+      'datasource_id' => 'entity:node',
+      'label' => 'Media Assets Extracted Text',
+    ],
+    'page_media_extracted_text' => [
+      'type' => 'text',
+      'property_path' => 'field_page_media_assets:entity:field_extracted_text',
+      'datasource_id' => 'entity:node',
+      'label' => 'Page Media Assets Extracted Text',
+    ],
+  ];
+
+  $index_changed = FALSE;
+  foreach ($new_fields as $field_id => $field_config) {
+    if (!$index->getField($field_id)) {
+      $field = new \Drupal\search_api\Item\Field($index, $field_id);
+      $field->setType($field_config['type']);
+      $field->setPropertyPath($field_config['property_path']);
+      $field->setDatasourceId($field_config['datasource_id']);
+      $field->setLabel($field_config['label']);
+      $index->addField($field);
+      $index_changed = TRUE;
+    }
+  }
+
+  // Register both fields with the ignorecase processor, which has all_fields: false.
+  $processors = $index->getProcessors();
+  if (isset($processors['ignorecase'])) {
+    $config = $processors['ignorecase']->getConfiguration();
+    $processor_changed = FALSE;
+    foreach (array_keys($new_fields) as $field_id) {
+      if (!in_array($field_id, $config['fields'])) {
+        $config['fields'][] = $field_id;
+        $processor_changed = TRUE;
+      }
+    }
+    if ($processor_changed) {
+      $processors['ignorecase']->setConfiguration($config);
+      $index->setProcessors($processors);
+      $index_changed = TRUE;
+    }
+  }
+
+  if ($index_changed) {
+    $index->save();
+  }
+
+  $index->reindex();
+}
