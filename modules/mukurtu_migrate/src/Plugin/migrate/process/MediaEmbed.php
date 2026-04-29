@@ -114,7 +114,9 @@ class MediaEmbed extends MigrationLookup {
     // JSON data as $value here. There is no harm here, as it will load, but
     // fail the xpath query.
     $doc = new DOMDocument();
-    $doc->loadHTML($value, LIBXML_HTML_NODEFDTD);
+    libxml_use_internal_errors(TRUE);
+    $doc->loadHTML('<?xml encoding="utf-8"?>' . $value, LIBXML_HTML_NODEFDTD);
+    libxml_use_internal_errors(FALSE);
     $xpath = new DOMXPath($doc);
     $scald_id_divs = $xpath->query("//div[@class='dnd-atom-wrapper']");
 
@@ -153,7 +155,7 @@ class MediaEmbed extends MigrationLookup {
 
     if ($scald_atom_replaced) {
       $new_value = $doc->saveHTML();
-      $strip_these_tags = ["<html>", "</html>", "<body>", "</body>"];
+      $strip_these_tags = ['<?xml encoding="utf-8"?>', "<html>", "</html>", "<body>", "</body>"];
       $value = str_replace($strip_these_tags, "", $new_value);
     }
 
