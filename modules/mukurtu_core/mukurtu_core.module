@@ -202,9 +202,15 @@ function mukurtu_core_form_user_login_form_alter(&$form, FormStateInterface $for
 
 /**
  * Custom submit handler to redirect to the front page on login.
+ *
+ * Only redirects when no ?destination parameter is present, so mid-session
+ * redirects (e.g. access-denied bounces) still land the user where they
+ * were headed.
  */
 function mukurtu_core_user_login_form_submit($form, FormStateInterface $form_state) {
-  $form_state->setRedirectUrl(Url::fromRoute('<front>'));
+  if (!\Drupal::request()->query->has('destination')) {
+    $form_state->setRedirectUrl(Url::fromRoute('<front>'));
+  }
 }
 
 /**
