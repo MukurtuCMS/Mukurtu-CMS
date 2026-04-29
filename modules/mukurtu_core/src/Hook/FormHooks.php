@@ -6,6 +6,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\Render\Element;
+use Drupal\og\Og;
+use Drupal\user\Entity\User;
 
 /**
  * Hook implementations for mukurtu_core forms.
@@ -81,12 +83,31 @@ class FormHooks {
       unset($form['field_display_name']);
     }
 
-    // Build community options and protocol options grouped by community (site-wide).
-    $communityOptions = [];
-    $protocolsByCommunity = [];
+    // The notify section is only useful to authenticated users with create
+    // access; skip it for anonymous self-registration.
+    $currentAccount = \Drupal::currentUser();
+    if ($currentAccount->isAnonymous()) {
+      return;
+    }
+
     $entityTypeManager = \Drupal::entityTypeManager();
     $protocolStorage = $entityTypeManager->getStorage('protocol');
-    $communityEntities = $entityTypeManager->getStorage('community')->loadMultiple();
+
+    // Site admins see all communities/protocols. Other privileged users (e.g.
+    // Mukurtu Managers) are limited to communities they actively manage so
+    // that community/protocol names aren't exposed beyond their membership.
+    if ($currentAccount->hasPermission('administer users')) {
+      $communityEntities = $entityTypeManager->getStorage('community')->loadMultiple();
+    }
+    else {
+      $userEntity = User::load($currentAccount->id());
+      $memberships = array_filter(Og::getMemberships($userEntity), fn($m) => $m->getGroupBundle() === 'community');
+      $managerMemberships = array_filter($memberships, fn($m) => $m->hasPermission('manage members'));
+      $communityEntities = array_filter(array_map(fn($m) => $m->getGroup(), $managerMemberships));
+    }
+
+    $communityOptions = [];
+    $protocolsByCommunity = [];
     foreach ($communityEntities as $community) {
       $communityOptions[$community->id()] = $community->getName();
       $communityProtocolIds = $protocolStorage->getQuery()
@@ -125,24 +146,25 @@ class FormHooks {
     if (!empty($communityOptions)) {
       $form['notify']['notify_communities'] = [
         '#type' => 'checkboxes',
-        // Use the visible legend rendered by #type => 'checkboxes' as the
-        // group label so it is properly associated via <fieldset>/<legend>.
         '#title' => t('Notify all community managers in the following communities:'),
         '#options' => $communityOptions,
         '#required' => FALSE,
-        '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
+        '#attributes' => ['class' => ['notify-form-checkboxes']],
       ];
     }
 
     if (!empty($protocolsByCommunity)) {
+      $protocols_label_id = 'notify-protocols-label';
       $form['notify']['notify_protocols'] = [
         '#type' => 'container',
-        '#attributes' => ['class' => ['notify-protocols-wrapper']],
+        '#attributes' => [
+          'class' => ['notify-protocols-wrapper'],
+          'role' => 'group',
+          'aria-labelledby' => $protocols_label_id,
+        ],
       ];
       $form['notify']['notify_protocols']['title'] = [
-        // Use <p> instead of <label> — this text labels the group visually
-        // but is not associated with a specific control.
-        '#markup' => '<p class="fieldset__label fieldset__label--group">' . t('Notify all protocol stewards in the following protocols:') . '</p>',
+        '#markup' => '<p id="' . $protocols_label_id . '" class="fieldset__label fieldset__label--group">' . t('Notify all protocol stewards in the following protocols:') . '</p>',
       ];
 
       foreach ($protocolsByCommunity as $communityId => $data) {
@@ -150,18 +172,17 @@ class FormHooks {
           '#type' => 'checkboxes',
           '#title' => $data['label'],
           '#options' => $data['protocols'],
-          '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
+          '#attributes' => ['class' => ['notify-form-checkboxes']],
         ];
       }
     }
 
     $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+    $users_label_id = 'notify-users-label';
 
     $form['notify']['notify_users'] = [
       '#type' => 'container',
-      // aria-live="polite" announces new fields to screen readers when
-      // "Add another user" fires. <p> replaces the unassociated <label>.
-      '#prefix' => '<div id="notify-users-wrapper" aria-live="polite"><p class="fieldset__label fieldset__label--group">' . t('Notify specific users:') . '</p>',
+      '#prefix' => '<div id="notify-users-wrapper" role="group" aria-labelledby="' . $users_label_id . '" aria-live="polite"><p id="' . $users_label_id . '" class="fieldset__label fieldset__label--group">' . t('Notify specific users:') . '</p>',
       '#suffix' => '</div>',
     ];
 
@@ -196,33 +217,8 @@ class FormHooks {
    * Submit handler that sends notifications after a new user account is created.
    */
   public static function userRegisterNotifySubmit(array &$form, FormStateInterface $form_state): void {
-    // Resolve individual user selections from AJAX "Add another" fields.
-    $notifyUids = [];
-    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
-    for ($i = 0; $i < $notifyUserCount; $i++) {
-      $uid = $form_state->getValue(['notify_users', 'user_' . $i]);
-      if (!empty($uid)) {
-        $notifyUids[] = (int) $uid;
-      }
-    }
-
-    // Resolve group selections.
-    $allManagers = (bool) $form_state->getValue('notify_all_managers');
-    $communityIds = array_keys(array_filter($form_state->getValue('notify_communities') ?? []));
-    $protocolIds = [];
-    foreach ($form_state->getValue('notify_protocols') ?? [] as $groupValues) {
-      if (is_array($groupValues)) {
-        $protocolIds = array_merge($protocolIds, array_keys(array_filter($groupValues)));
-      }
-    }
-    $protocolIds = array_unique($protocolIds);
-
-    if (function_exists('mukurtu_notifications_resolve_notify_groups')) {
-      $groupUids = mukurtu_notifications_resolve_notify_groups($allManagers, $communityIds, $protocolIds);
-      $notifyUids = array_unique(array_merge($notifyUids, $groupUids));
-    }
-
-    if (!empty($notifyUids) && function_exists('mukurtu_notifications_notify_new_account_created')) {
+    $notifyUids = mukurtu_notifications_extract_notify_uids($form_state);
+    if (!empty($notifyUids)) {
       $new_user = $form_state->getFormObject()->getEntity();
       mukurtu_notifications_notify_new_account_created($new_user, $notifyUids);
     }

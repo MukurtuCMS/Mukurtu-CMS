@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\node\Entity\Node;
 use Drupal\message\Entity\Message;
 use Drupal\Core\Entity\EntityInterface;
@@ -376,6 +377,43 @@ function mukurtu_notifications_resolve_notify_groups(bool $all_managers, array $
   }
 
   return array_values(array_unique($uids));
+}
+
+/**
+ * Extracts and resolves all notify UIDs from the shared notify form section.
+ *
+ * Reads notify_user_count, notify_users, notify_all_managers,
+ * notify_communities, and notify_protocols from form state, then delegates
+ * to mukurtu_notifications_resolve_notify_groups for group-based selections.
+ *
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state from a form that includes the shared notify section.
+ *
+ * @return array
+ *   Unique array of integer user IDs to notify.
+ */
+function mukurtu_notifications_extract_notify_uids(FormStateInterface $form_state): array {
+  $notifyUids = [];
+  $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+  for ($i = 0; $i < $notifyUserCount; $i++) {
+    $uid = $form_state->getValue(['notify_users', 'user_' . $i]);
+    if (!empty($uid)) {
+      $notifyUids[] = (int) $uid;
+    }
+  }
+
+  $allManagers = (bool) $form_state->getValue('notify_all_managers');
+  $communityIds = array_keys(array_filter($form_state->getValue('notify_communities') ?? []));
+  $protocolIds = [];
+  foreach ($form_state->getValue('notify_protocols') ?? [] as $groupValues) {
+    if (is_array($groupValues)) {
+      $protocolIds = array_merge($protocolIds, array_keys(array_filter($groupValues)));
+    }
+  }
+  $protocolIds = array_unique($protocolIds);
+
+  $groupUids = mukurtu_notifications_resolve_notify_groups($allManagers, $communityIds, $protocolIds);
+  return array_values(array_unique(array_merge($notifyUids, $groupUids)));
 }
 
 /**
