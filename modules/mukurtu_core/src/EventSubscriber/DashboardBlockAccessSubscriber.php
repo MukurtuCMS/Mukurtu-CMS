@@ -28,7 +28,7 @@ class DashboardBlockAccessSubscriber implements EventSubscriberInterface {
    * Denies rendering of role-restricted dashboard panels.
    */
   public function onBuildRender(SectionComponentBuildRenderArrayEvent $event): void {
-    $plugin_id = $event->getComponent()->getConfiguration()['id'] ?? '';
+    $plugin_id = $event->getPlugin()->getPluginId();
     $roles = $this->currentUser->getRoles();
 
     $allowed = match ($plugin_id) {
