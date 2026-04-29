@@ -44,7 +44,7 @@ class CommunityManagerUserCreationForm extends FormBase {
       // The correct 'member' role to include is the bundle-specific one,
       // 'community-member'.
       if ($roleValue->getName() != "non-member" && $roleValue->getName() != 'member') {
-        $roles[$roleValue->getName()] = $this->t($roleValue->getLabel());
+        $roles[$roleValue->getName()] = $roleValue->getLabel();
       }
     }
 
@@ -142,43 +142,42 @@ class CommunityManagerUserCreationForm extends FormBase {
     if (!empty($communities)) {
       $form['notify']['notify_communities'] = [
         '#type' => 'checkboxes',
-        // Use the visible legend rendered by #type => 'checkboxes' as the
-        // group label so it is properly associated via <fieldset>/<legend>.
         '#title' => $this->t('Notify all community managers in the following communities:'),
         '#options' => $communities,
         '#required' => FALSE,
-        '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
+        '#attributes' => ['class' => ['notify-form-checkboxes']],
       ];
     }
 
     if (!empty($protocolsByCommunity)) {
+      $protocols_label_id = 'notify-protocols-label';
       $form['notify']['notify_protocols'] = [
         '#type' => 'container',
-        '#attributes' => ['class' => ['notify-protocols-wrapper']],
+        '#attributes' => [
+          'class' => ['notify-protocols-wrapper'],
+          'role' => 'group',
+          'aria-labelledby' => $protocols_label_id,
+        ],
       ];
       $form['notify']['notify_protocols']['title'] = [
-        // Use <p> instead of <label> — this text labels the group visually
-        // but is not associated with a specific control. #title is not rendered
-        // on #type => 'container' elements, so #markup is required here.
-        '#markup' => '<p class="fieldset__label fieldset__label--group">' . $this->t('Notify all protocol stewards in the following protocols:') . '</p>',
+        '#markup' => '<p id="' . $protocols_label_id . '" class="fieldset__label fieldset__label--group">' . $this->t('Notify all protocol stewards in the following protocols:') . '</p>',
       ];
       foreach ($protocolsByCommunity as $communityId => $data) {
         $form['notify']['notify_protocols'][$communityId] = [
           '#type' => 'checkboxes',
           '#title' => $data['label'],
           '#options' => $data['protocols'],
-          '#attributes' => ['class' => ['notify-form-checkboxes'], 'style' => 'margin-inline-start: .5rem;'],
+          '#attributes' => ['class' => ['notify-form-checkboxes']],
         ];
       }
     }
 
     $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+    $users_label_id = 'notify-users-label';
 
     $form['notify']['notify_users'] = [
       '#type' => 'container',
-      // aria-live="polite" announces new fields to screen readers when
-      // "Add another user" fires. <p> replaces the unassociated <label>.
-      '#prefix' => '<div id="notify-users-wrapper" aria-live="polite"><p class="fieldset__label fieldset__label--group">' . $this->t('Notify specific users:') . '</p>',
+      '#prefix' => '<div id="notify-users-wrapper" role="group" aria-labelledby="' . $users_label_id . '" aria-live="polite"><p id="' . $users_label_id . '" class="fieldset__label fieldset__label--group">' . $this->t('Notify specific users:') . '</p>',
       '#suffix' => '</div>',
     ];
 
@@ -261,33 +260,8 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $this->messenger()->addMessage($this->t('A welcome message with further instructions has been emailed to the new user <a href=":url">%name</a>.', [':url' => $user->toUrl()->toString(), '%name' => $user->getAccountName()]));
 
-    // Resolve individual user selections.
-    $notifyUids = [];
-    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
-    for ($i = 0; $i < $notifyUserCount; $i++) {
-      $uid = $form_state->getValue(['notify_users', 'user_' . $i]);
-      if (!empty($uid)) {
-        $notifyUids[] = (int) $uid;
-      }
-    }
-
-    // Resolve group selections.
-    $allManagers = (bool) $form_state->getValue('notify_all_managers');
-    $communityIds = array_keys(array_filter($form_state->getValue('notify_communities') ?? []));
-    $protocolIds = [];
-    foreach ($form_state->getValue('notify_protocols') ?? [] as $groupValues) {
-      if (is_array($groupValues)) {
-        $protocolIds = array_merge($protocolIds, array_keys(array_filter($groupValues)));
-      }
-    }
-    $protocolIds = array_unique($protocolIds);
-
-    if (function_exists('mukurtu_notifications_resolve_notify_groups')) {
-      $groupUids = mukurtu_notifications_resolve_notify_groups($allManagers, $communityIds, $protocolIds);
-      $notifyUids = array_unique(array_merge($notifyUids, $groupUids));
-    }
-
-    if (!empty($notifyUids) && function_exists('mukurtu_notifications_notify_new_account_created')) {
+    $notifyUids = mukurtu_notifications_extract_notify_uids($form_state);
+    if (!empty($notifyUids)) {
       mukurtu_notifications_notify_new_account_created($user, $notifyUids);
     }
   }
