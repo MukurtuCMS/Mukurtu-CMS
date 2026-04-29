@@ -15,23 +15,39 @@ use Drupal\migrate\Row;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Resolves drupal-media embed tags using media name or filename attributes.
+ * Resolves media embed references in formatted text fields during import.
  *
- * During CSV import, users can reference media assets in formatted text fields
- * using human-readable identifiers instead of UUIDs:
+ * Three syntaxes are supported:
  *
- * By media entity name:
+ * 1. Full drupal-media tag with data-entity-name (resolves by media label):
  * @code
  * <drupal-media data-entity-type="media" data-entity-name="My Image" data-view-mode="default">
  * @endcode
  *
- * By source file filename:
+ * 2. Full drupal-media tag with data-entity-filename (resolves by source file
+ *    filename):
  * @code
  * <drupal-media data-entity-type="media" data-entity-filename="my-image.jpg" data-view-mode="default">
  * @endcode
  *
- * Both attributes are resolved to a proper data-entity-uuid and removed from
- * the tag before the content is saved.
+ * 3. Curly-brace shortcode (tries name first, then filename):
+ * @code
+ * {{media:My Image}}
+ * {{media:my-image.jpg}}
+ * @endcode
+ *
+ * 4. Square-bracket shortcode with optional attributes:
+ * @code
+ * [media name="My Image"]
+ * [media filename="my-image.jpg" view-mode="thumbnail" align="center"]
+ * @endcode
+ *
+ * Supported square-bracket attributes: name, filename, view-mode, align,
+ * caption, alt.
+ *
+ * All references are resolved to a proper data-entity-uuid and the temporary
+ * attributes/shortcodes are removed before the content is saved. Existing
+ * data-entity-uuid tags are passed through unchanged.
  *
  * @MigrateProcessPlugin(
  *   id = "mukurtu_resolve_media_embeds",
@@ -72,11 +88,23 @@ class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPl
       return $value;
     }
 
-    // Quick check: only parse HTML if there's a drupal-media tag with one of
-    // the custom lookup attributes present.
+    $has_drupal_media_attrs = str_contains($value, 'data-entity-name') || str_contains($value, 'data-entity-filename');
+    $has_shortcode = str_contains($value, '{{media:') || str_contains($value, '[media ');
+
+    if (!$has_drupal_media_attrs && !$has_shortcode) {
+      return $value;
+    }
+
+    if ($has_shortcode) {
+      $value = $this->convertShortcodes($value);
+    }
+
+    // After shortcode conversion, bail out if there is nothing for the DOM
+    // to resolve.
     if (
       !str_contains($value, 'data-entity-name') &&
-      !str_contains($value, 'data-entity-filename')
+      !str_contains($value, 'data-entity-filename') &&
+      !str_contains($value, 'data-entity-identifier')
     ) {
       return $value;
     }
@@ -86,7 +114,9 @@ class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPl
     $doc->loadHTML($value, LIBXML_HTML_NODEFDTD);
     libxml_use_internal_errors($previous);
     $xpath = new DOMXPath($doc);
-    $media_elements = $xpath->query('//drupal-media[@data-entity-name or @data-entity-filename]');
+    $media_elements = $xpath->query(
+      '//drupal-media[@data-entity-name or @data-entity-filename or @data-entity-identifier]'
+    );
 
     if ($media_elements->length === 0) {
       return $value;
@@ -128,6 +158,26 @@ class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPl
         $element->removeAttribute('data-entity-filename');
         $resolved = TRUE;
       }
+      elseif ($identifier = $element->getAttribute('data-entity-identifier')) {
+        // Try name first; fall back to filename only if nothing matched.
+        try {
+          $uuid = $this->resolveByName($identifier);
+          if ($uuid === NULL) {
+            $uuid = $this->resolveByFilename($identifier);
+          }
+        }
+        catch (MigrateException $e) {
+          $migrate_executable->saveMessage($e->getMessage());
+          continue;
+        }
+        if (!$uuid) {
+          $migrate_executable->saveMessage(sprintf('Could not find a media entity matching "%s".', $identifier));
+          continue;
+        }
+        $element->setAttribute('data-entity-uuid', $uuid);
+        $element->removeAttribute('data-entity-identifier');
+        $resolved = TRUE;
+      }
     }
 
     if ($resolved) {
@@ -135,6 +185,71 @@ class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPl
       $strip_these_tags = ['<html>', '</html>', '<body>', '</body>'];
       $value = str_replace($strip_these_tags, '', $new_value);
     }
+
+    return $value;
+  }
+
+  /**
+   * Convert shortcode syntax to intermediate drupal-media tags.
+   *
+   * Handles:
+   *   {{media:VALUE}} → data-entity-identifier (resolved by name then filename)
+   *   [media name="..." filename="..." view-mode="..." align="..." caption="..." alt="..."]
+   *
+   * @param string $value
+   *   The raw text value.
+   *
+   * @return string
+   *   The value with shortcodes replaced by drupal-media tags.
+   */
+  protected function convertShortcodes(string $value): string {
+    // {{media:VALUE}} shortcode.
+    $value = preg_replace_callback(
+      '/\{\{media:([^}]+)\}\}/i',
+      function (array $m): string {
+        $identifier = htmlspecialchars(trim($m[1]), ENT_QUOTES, 'UTF-8');
+        return '<drupal-media data-entity-type="media" data-entity-identifier="' . $identifier . '" data-view-mode="default">&nbsp;</drupal-media>';
+      },
+      $value
+    );
+
+    // [media attr="value" ...] shortcode.
+    $attr_map = [
+      'name'      => 'data-entity-name',
+      'filename'  => 'data-entity-filename',
+      'view-mode' => 'data-view-mode',
+      'align'     => 'data-align',
+      'caption'   => 'data-caption',
+      'alt'       => 'alt',
+    ];
+
+    $value = preg_replace_callback(
+      '/\[media\s+([^\]]+)\]/i',
+      function (array $m) use ($attr_map): string {
+        preg_match_all('/(\w[\w-]*)\s*=\s*(?:"([^"]*?)"|\'([^\']*?)\')/i', $m[1], $pairs, PREG_SET_ORDER);
+
+        $tag_attrs = ['data-entity-type="media"'];
+        $has_view_mode = FALSE;
+
+        foreach ($pairs as $pair) {
+          $key = strtolower($pair[1]);
+          $val = $pair[2] !== '' ? $pair[2] : $pair[3];
+          if (isset($attr_map[$key])) {
+            $tag_attrs[] = $attr_map[$key] . '="' . htmlspecialchars($val, ENT_QUOTES, 'UTF-8') . '"';
+            if ($key === 'view-mode') {
+              $has_view_mode = TRUE;
+            }
+          }
+        }
+
+        if (!$has_view_mode) {
+          $tag_attrs[] = 'data-view-mode="default"';
+        }
+
+        return '<drupal-media ' . implode(' ', $tag_attrs) . '>&nbsp;</drupal-media>';
+      },
+      $value
+    );
 
     return $value;
   }

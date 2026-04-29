@@ -206,6 +206,119 @@ class ImportFormattedTextMediaEmbedTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Tests that {{media:Name}} resolves via name lookup.
+   */
+  public function testCurlyBraceShortcodeByName(): void {
+    $data = [
+      ['nid', 'body'],
+      [$this->node->id(), 'See {{media:My Named Asset}} for details.'],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
+    $this->assertStringContainsString('data-entity-uuid="' . $this->mediaByName->uuid() . '"', $body);
+    $this->assertStringNotContainsString('{{media:', $body);
+  }
+
+  /**
+   * Tests that {{media:filename}} falls back to filename lookup when name fails.
+   */
+  public function testCurlyBraceShortcodeByFilename(): void {
+    // Use the filename as the shortcode value; no media entity has this as its
+    // name, so the plugin falls back to filename lookup.
+    $data = [
+      ['nid', 'body'],
+      [$this->node->id(), 'See {{media:filename-lookup.txt}} for details.'],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
+    $this->assertStringContainsString('data-entity-uuid="' . $this->mediaByFilename->uuid() . '"', $body);
+    $this->assertStringNotContainsString('{{media:', $body);
+  }
+
+  /**
+   * Tests [media name="..."] square-bracket shortcode.
+   */
+  public function testSquareBracketShortcodeByName(): void {
+    $data = [
+      ['nid', 'body'],
+      [$this->node->id(), 'See [media name="My Named Asset"] for details.'],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
+    $this->assertStringContainsString('data-entity-uuid="' . $this->mediaByName->uuid() . '"', $body);
+    $this->assertStringNotContainsString('[media ', $body);
+  }
+
+  /**
+   * Tests [media filename="..."] square-bracket shortcode.
+   */
+  public function testSquareBracketShortcodeByFilename(): void {
+    $data = [
+      ['nid', 'body'],
+      [$this->node->id(), '[media filename="filename-lookup.txt"]'],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
+    $this->assertStringContainsString('data-entity-uuid="' . $this->mediaByFilename->uuid() . '"', $body);
+    $this->assertStringNotContainsString('[media ', $body);
+  }
+
+  /**
+   * Tests that view-mode and align attributes survive the shortcode expansion.
+   */
+  public function testSquareBracketShortcodePreservesAttributes(): void {
+    $data = [
+      ['nid', 'body'],
+      [$this->node->id(), '[media name="My Named Asset" view-mode="thumbnail" align="center"]'],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
+    $this->assertStringContainsString('data-entity-uuid="' . $this->mediaByName->uuid() . '"', $body);
+    $this->assertStringContainsString('data-view-mode="thumbnail"', $body);
+    $this->assertStringContainsString('data-align="center"', $body);
+  }
+
+  /**
    * Tests that an unknown name leaves the tag unchanged and migration completes.
    */
   public function testUnknownNameLeavesTagUnchanged(): void {
