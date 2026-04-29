@@ -118,6 +118,7 @@ function mukurtu_browse_update_40003() {
       $index->reindex();
     }
   }
+}
 /*
  * Add PDF extracted text fields to the content search index.
  */
