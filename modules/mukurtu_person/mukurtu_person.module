@@ -1,6 +1,10 @@
 <?php
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\mukurtu_core\Entity\FormattedTextWithTitle;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\Entity\RelatedPerson;
@@ -26,6 +30,81 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
   if (isset($bundles['paragraph']['related_person'])) {
     $bundles['paragraph']['related_person']['class'] = RelatedPerson::class;
   }
+}
+
+/**
+ * Implements hook_field_widget_single_element_form_alter().
+ *
+ * Replaces the generic entity browser cardinality message on the related person
+ * field with a clearer prompt.
+ */
+function mukurtu_person_field_widget_single_element_form_alter(&$element, FormStateInterface $form_state, array $context) {
+  $field_definition = $context['items']->getFieldDefinition();
+  if ($field_definition->getName() !== 'field_related_person' || $field_definition->getTargetBundle() !== 'related_person') {
+    return;
+  }
+  if (isset($element['entity_browser']['#prefix'])) {
+    $element['entity_browser']['#prefix'] = '<p>' . t('Select a related person record.') . '</p>';
+  }
+
+  $create_url = Url::fromRoute('node.add', ['node_type' => 'person']);
+  if ($create_url->access()) {
+    $element['create_person_link'] = [
+      '#type' => 'link',
+      '#title' => t("Can't find the person? Create a new person record."),
+      '#url' => $create_url,
+      '#attributes' => [
+        'class' => ['use-ajax', 'button', 'button--small', 'button--extrasmall'],
+        'data-dialog-type' => 'modal',
+        'data-dialog-options' => json_encode(['width' => 800]),
+        'aria-haspopup' => 'dialog',
+      ],
+      '#attached' => ['library' => ['core/drupal.dialog.ajax']],
+      '#weight' => 10,
+    ];
+  }
+}
+
+/**
+ * Implements hook_form_node_person_form_alter().
+ *
+ * When the person creation form is opened in a modal (via the "create on the
+ * fly" link on the related person widget), override the save button to close
+ * the modal on success and show validation errors in-place rather than
+ * redirecting to the new node's view page.
+ */
+function mukurtu_person_form_node_person_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!\Drupal::request()->isXmlHttpRequest()) {
+    return;
+  }
+
+  $form['#prefix'] = '<div id="mukurtu-person-modal-form">';
+  $form['#suffix'] = '</div>';
+
+  if (isset($form['actions']['submit'])) {
+    $form['actions']['submit']['#ajax'] = [
+      'callback' => 'mukurtu_person_modal_save_callback',
+      'wrapper' => 'mukurtu-person-modal-form',
+      'progress' => ['type' => 'throbber'],
+    ];
+  }
+
+  // Preview has no useful behaviour inside a modal.
+  if (isset($form['actions']['preview'])) {
+    $form['actions']['preview']['#access'] = FALSE;
+  }
+}
+
+/**
+ * AJAX callback: close the modal on save, or return the form with errors.
+ */
+function mukurtu_person_modal_save_callback(array &$form, FormStateInterface $form_state) {
+  if ($form_state->getErrors()) {
+    return $form;
+  }
+  $response = new AjaxResponse();
+  $response->addCommand(new CloseModalDialogCommand());
+  return $response;
 }
 
 /**
