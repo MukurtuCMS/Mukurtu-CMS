@@ -342,6 +342,113 @@ class ImportFormattedTextMediaEmbedTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Tests that an ambiguous name logs a message and leaves the tag unchanged.
+   */
+  public function testAmbiguousNameLogsMessageAndLeavesTagUnchanged(): void {
+    // Create a second media entity with the same name to trigger ambiguity.
+    $file_dupe = File::create([
+      'uri' => 'public://name-lookup-dupe.txt',
+      'filename' => 'name-lookup-dupe.txt',
+      'uid' => $this->currentUser->id(),
+      'status' => 1,
+    ]);
+    $file_dupe->save();
+    $media_type = $this->entityTypeManager->getStorage('media_type')->loadMultiple();
+    $media_type = reset($media_type);
+    $source_field = $media_type->getSource()->getSourceFieldDefinition($media_type)->getName();
+    Media::create([
+      'bundle' => $media_type->id(),
+      'name' => 'My Named Asset',
+      $source_field => ['target_id' => $file_dupe->id()],
+      'uid' => $this->currentUser->id(),
+    ])->save();
+
+    $embed = '<drupal-media data-entity-type="media" data-entity-name="My Named Asset" data-view-mode="default">&nbsp;</drupal-media>';
+    $data = [
+      ['nid', 'body'],
+      [$this->node->id(), $embed],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
+    $this->assertStringNotContainsString('data-entity-uuid=', $body);
+    $this->assertStringContainsString('data-entity-name="My Named Asset"', $body);
+  }
+
+  /**
+   * Tests that an ambiguous filename logs a message and leaves the tag unchanged.
+   */
+  public function testAmbiguousFilenameLogsMessageAndLeavesTagUnchanged(): void {
+    // Create a second file with the same filename (different URI) and a media
+    // entity referencing it, so two media entities share the same filename.
+    $file_dupe = File::create([
+      'uri' => 'public://subdir/filename-lookup.txt',
+      'filename' => 'filename-lookup.txt',
+      'uid' => $this->currentUser->id(),
+      'status' => 1,
+    ]);
+    $file_dupe->save();
+    $media_type = $this->entityTypeManager->getStorage('media_type')->loadMultiple();
+    $media_type = reset($media_type);
+    $source_field = $media_type->getSource()->getSourceFieldDefinition($media_type)->getName();
+    Media::create([
+      'bundle' => $media_type->id(),
+      'name' => 'Duplicate Filename Asset',
+      $source_field => ['target_id' => $file_dupe->id()],
+      'uid' => $this->currentUser->id(),
+    ])->save();
+
+    $embed = '<drupal-media data-entity-type="media" data-entity-filename="filename-lookup.txt" data-view-mode="default">&nbsp;</drupal-media>';
+    $data = [
+      ['nid', 'body'],
+      [$this->node->id(), $embed],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
+    $this->assertStringNotContainsString('data-entity-uuid=', $body);
+    $this->assertStringContainsString('data-entity-filename="filename-lookup.txt"', $body);
+  }
+
+  /**
+   * Tests that an unresolvable {{media:}} shortcode leaves a data-entity-name
+   * tag (not the intermediate data-entity-identifier) and migration completes.
+   */
+  public function testUnresolvableCurlyBraceShortcodeLeavesSafeAttribute(): void {
+    $data = [
+      ['nid', 'body'],
+      [$this->node->id(), '{{media:Does Not Exist}}'],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
+    $this->assertStringNotContainsString('data-entity-uuid=', $body);
+    $this->assertStringNotContainsString('data-entity-identifier=', $body);
+    $this->assertStringContainsString('data-entity-name="Does Not Exist"', $body);
+  }
+
+  /**
    * Tests that an unknown name leaves the tag unchanged and migration completes.
    */
   public function testUnknownNameLeavesTagUnchanged(): void {

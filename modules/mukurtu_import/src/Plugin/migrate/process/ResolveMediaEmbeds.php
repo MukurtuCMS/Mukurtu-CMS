@@ -57,6 +57,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPluginInterface {
 
   /**
+   * Cached map of media type ID to source field name, built on first use.
+   *
+   * @var array<string, string>
+   */
+  protected array $sourceFieldNames = [];
+
+  /**
    * Constructs a ResolveMediaEmbeds object.
    */
   public function __construct(
@@ -171,10 +178,18 @@ class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPl
         }
         catch (MigrateException $e) {
           $migrate_executable->saveMessage($e->getMessage());
+          // Replace the intermediate attribute with data-entity-name so the
+          // stored tag is consistent with unresolved data-entity-name tags.
+          $element->setAttribute('data-entity-name', $identifier);
+          $element->removeAttribute('data-entity-identifier');
+          $resolved = TRUE;
           continue;
         }
         if (!$uuid) {
           $migrate_executable->saveMessage(sprintf('Could not find a media entity matching "%s".', $identifier));
+          $element->setAttribute('data-entity-name', $identifier);
+          $element->removeAttribute('data-entity-identifier');
+          $resolved = TRUE;
           continue;
         }
         $element->setAttribute('data-entity-uuid', $uuid);
@@ -319,20 +334,21 @@ class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPl
 
     $file_ids = array_values($file_ids);
     $media_storage = $this->entityTypeManager->getStorage('media');
-    $media_type_storage = $this->entityTypeManager->getStorage('media_type');
+
+    if (!$this->sourceFieldNames) {
+      foreach ($this->entityTypeManager->getStorage('media_type')->loadMultiple() as $media_type) {
+        $source_field_def = $media_type->getSource()->getSourceFieldDefinition($media_type);
+        if ($source_field_def) {
+          $this->sourceFieldNames[$media_type->id()] = $source_field_def->getName();
+        }
+      }
+    }
 
     $matches = [];
-    foreach ($media_type_storage->loadMultiple() as $media_type) {
-      $source_plugin = $media_type->getSource();
-      $source_field_def = $source_plugin->getSourceFieldDefinition($media_type);
-      if (!$source_field_def) {
-        continue;
-      }
-      $source_field_name = $source_field_def->getName();
-
+    foreach ($this->sourceFieldNames as $type_id => $source_field_name) {
       $results = $media_storage->getQuery()
         ->accessCheck(FALSE)
-        ->condition('bundle', $media_type->id())
+        ->condition('bundle', $type_id)
         ->condition($source_field_name, $file_ids, 'IN')
         ->execute();
 
