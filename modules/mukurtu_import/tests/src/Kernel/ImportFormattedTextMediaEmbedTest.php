@@ -319,6 +319,29 @@ class ImportFormattedTextMediaEmbedTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Tests that curly/smart quotes in [media] shortcode attributes are handled.
+   */
+  public function testSquareBracketShortcodeWithSmartQuotes(): void {
+    // Simulate a CSV editor that auto-converts straight quotes to curly quotes.
+    $embed = "[media name=\u{201C}My Named Asset\u{201D}]";
+    $data = [
+      ['nid', 'body'],
+      [$this->node->id(), $embed],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
+    $this->assertStringContainsString('data-entity-uuid="' . $this->mediaByName->uuid() . '"', $body);
+  }
+
+  /**
    * Tests that an unknown name leaves the tag unchanged and migration completes.
    */
   public function testUnknownNameLeavesTagUnchanged(): void {

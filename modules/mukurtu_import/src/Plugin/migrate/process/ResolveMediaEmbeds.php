@@ -229,7 +229,14 @@ class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPl
     $value = preg_replace_callback(
       '/\[media\s+([^\]]+)\]/i',
       function (array $m) use ($attr_map): string {
-        preg_match_all('/(\w[\w-]*)\s*=\s*(?:"([^"]*?)"|\'([^\']*?)\')/i', $m[1], $pairs, PREG_SET_ORDER);
+        // Normalize curly/smart quotes to straight quotes so CSV editors that
+        // auto-convert punctuation don't break attribute parsing.
+        $attrs_str = str_replace(
+          ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"],
+          ['"',        '"',        "'",         "'"],
+          $m[1]
+        );
+        preg_match_all('/(\w[\w-]*)\s*=\s*(?:"([^"]*?)"|\'([^\']*?)\')/i', $attrs_str, $pairs, PREG_SET_ORDER);
 
         $tag_attrs = ['data-entity-type="media"'];
         $has_view_mode = FALSE;
