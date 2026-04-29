@@ -201,11 +201,10 @@ function mukurtu_core_form_user_login_form_alter(&$form, FormStateInterface $for
 }
 
 /**
- * Custom submit handler to redirect to dashboard on login.
+ * Custom submit handler to redirect to the front page on login.
  */
 function mukurtu_core_user_login_form_submit($form, FormStateInterface $form_state) {
-  $url = Url::fromRoute('entity.dashboard.canonical', ['dashboard' => 'mukurtu_dashboard']);
-  $form_state->setRedirectUrl($url);
+  $form_state->setRedirectUrl(Url::fromRoute('<front>'));
 }
 
 /**
