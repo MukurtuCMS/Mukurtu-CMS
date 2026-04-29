@@ -132,7 +132,7 @@ function mukurtu_install() {
     'menu_name' => 'account',
     'description' => 'Dashboard',
     'expanded' => FALSE,
-    'weight' => -1000,
+    'weight' => -100,
   ])->save();
 
   // Create Content (parent)
@@ -142,7 +142,7 @@ function mukurtu_install() {
     'menu_name' => 'account',
     'description' => 'Create content',
     'expanded' => TRUE,
-    'weight' => -100,
+    'weight' => -1000,
   ]);
   $create_content_menu->save();
 

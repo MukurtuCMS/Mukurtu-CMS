@@ -492,3 +492,26 @@ function mukurtu_core_update_40012(): void {
     $parent->delete();
   }
 }
+
+/**
+ * Reorder account menu: Create Content first (-1000), Dashboard second (-100).
+ */
+function mukurtu_core_update_40013(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+
+  $weights = [
+    'Create Content' => -1000,
+    'Dashboard' => -100,
+  ];
+
+  foreach ($weights as $title => $weight) {
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('menu_name', 'account')
+      ->condition('title', $title)
+      ->execute();
+    foreach ($storage->loadMultiple($ids) as $link) {
+      $link->set('weight', $weight)->save();
+    }
+  }
+}
