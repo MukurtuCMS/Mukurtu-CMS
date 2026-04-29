@@ -6,3 +6,8 @@
 .notify-form-checkboxes input[type="checkbox"] {
   margin-inline-end: .5rem;
 }
+
+/* Indent grouped checkbox sets within the notify section. */
+.notify-form-checkboxes {
+  margin-inline-start: .5rem;
+}
