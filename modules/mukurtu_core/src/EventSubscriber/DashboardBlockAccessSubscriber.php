@@ -29,20 +29,23 @@ class DashboardBlockAccessSubscriber implements EventSubscriberInterface {
    */
   public function onBuildRender(SectionComponentBuildRenderArrayEvent $event): void {
     $plugin_id = $event->getPlugin()->getPluginId();
-    $roles = $this->currentUser->getRoles();
 
-    $allowed = match ($plugin_id) {
+    $restricted = [
       'system_menu_block:dashboard-migration' =>
-        in_array('administrator', $roles, TRUE),
+        in_array('administrator', $this->currentUser->getRoles(), TRUE),
       'system_menu_block:dashboard-site-settings' =>
-        !empty(array_intersect(['administrator', 'mukurtu_manager'], $roles)),
-      default => TRUE,
-    };
+        !empty(array_intersect(['administrator', 'mukurtu_manager'], $this->currentUser->getRoles())),
+    ];
 
-    if (!$allowed) {
-      $cacheability = new CacheableMetadata();
-      $cacheability->addCacheContexts(['user.roles']);
-      $event->addCacheableDependency($cacheability);
+    if (!array_key_exists($plugin_id, $restricted)) {
+      return;
+    }
+
+    $cacheability = new CacheableMetadata();
+    $cacheability->addCacheContexts(['user.roles']);
+    $event->addCacheableDependency($cacheability);
+
+    if (!$restricted[$plugin_id]) {
       $event->stopPropagation();
     }
   }
