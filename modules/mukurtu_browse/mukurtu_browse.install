@@ -190,6 +190,17 @@ function mukurtu_browse_update_40005() {
     return;
   }
 
+  // Add processors first via the entity so they are saved together with fields.
+  $processors = $index->getProcessors();
+  foreach (['mukurtu_multipage_page_index', 'mukurtu_community_record_flag'] as $processor_id) {
+    if (!isset($processors[$processor_id])) {
+      $processor_manager = \Drupal::service('plugin.manager.search_api.processor');
+      $processor = $processor_manager->createInstance($processor_id, ['#index' => $index]);
+      $processors[$processor_id] = $processor;
+    }
+  }
+  $index->setProcessors($processors);
+
   $new_fields = [
     'multipage_page_delta' => [
       'type' => 'integer',
@@ -205,7 +216,6 @@ function mukurtu_browse_update_40005() {
     ],
   ];
 
-  $index_changed = FALSE;
   foreach ($new_fields as $field_id => $field_config) {
     if (!$index->getField($field_id)) {
       $field = new \Drupal\search_api\Item\Field($index, $field_id);
@@ -214,31 +224,9 @@ function mukurtu_browse_update_40005() {
       $field->setDatasourceId($field_config['datasource_id']);
       $field->setLabel($field_config['label']);
       $index->addField($field);
-      $index_changed = TRUE;
     }
   }
 
-  // Register the processors with the index.
-  $config = \Drupal::configFactory()->getEditable('search_api.index.mukurtu_default_content_index');
-  $processor_settings = $config->get('processor_settings') ?? [];
-  $processors_changed = FALSE;
-
-  foreach (['mukurtu_multipage_page_index', 'mukurtu_community_record_flag'] as $processor_id) {
-    if (!isset($processor_settings[$processor_id])) {
-      $processor_settings[$processor_id] = [];
-      $processors_changed = TRUE;
-    }
-  }
-
-  if ($processors_changed) {
-    $config->set('processor_settings', $processor_settings)->save();
-  }
-
-  if ($index_changed) {
-    // Reload to pick up config changes before saving fields.
-    $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
-    $index->save();
-  }
-
+  $index->save();
   $index->reindex();
 }
