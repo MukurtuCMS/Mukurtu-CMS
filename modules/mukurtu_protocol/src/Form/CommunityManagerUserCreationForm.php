@@ -46,7 +46,7 @@ class CommunityManagerUserCreationForm extends FormBase {
       // The correct 'member' role to include is the bundle-specific one,
       // 'community-member'.
       if ($roleValue->getName() != "non-member" && $roleValue->getName() != 'member') {
-        $roles[$roleValue->getName()] = $this->t($roleValue->getLabel());
+        $roles[$roleValue->getName()] = $roleValue->getLabel();
       }
     }
 
@@ -81,13 +81,26 @@ class CommunityManagerUserCreationForm extends FormBase {
     $stewardMemberships = array_filter($protocolMemberships, fn ($m) => $m->hasPermission('manage members'));
     $stewardProtocols = array_filter(array_map(fn ($m) => $m->getGroup(), $stewardMemberships));
 
-    // Group protocols by parent community ID.
+    // Group protocols (as objects) by parent community ID, for the membership section.
     $protocolsByCommunity = [];
     /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
     foreach ($stewardProtocols as $protocol) {
       foreach ($protocol->getCommunities() as $parentCommunity) {
         $protocolsByCommunity[$parentCommunity->id()][$protocol->id()] = $protocol;
       }
+    }
+
+    // Build a label+name-indexed version for the notify section.
+    $protocolsByCommForNotify = [];
+    foreach ($protocolsByCommunity as $communityId => $protocols) {
+      $protocolNames = [];
+      foreach ($protocols as $protocolId => $protocol) {
+        $protocolNames[$protocolId] = $protocol->getName();
+      }
+      $protocolsByCommForNotify[$communityId] = [
+        'label' => $communities[$communityId] ?? '',
+        'protocols' => $protocolNames,
+      ];
     }
 
     // Build the form.
@@ -137,6 +150,80 @@ class CommunityManagerUserCreationForm extends FormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Notify user of new account'),
       '#default_value' => 1,
+    ];
+
+    $form['notify_others'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Notify other users'),
+      '#description' => $this->t('Optionally notify users about this new account.'),
+      '#open' => FALSE,
+      '#attached' => ['library' => ['mukurtu_core/notify-form']],
+    ];
+
+    if (!empty($communities)) {
+      $form['notify_others']['notify_communities'] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Notify all community managers in the following communities:'),
+        '#options' => $communities,
+        '#required' => FALSE,
+        '#attributes' => ['class' => ['notify-form-checkboxes']],
+      ];
+    }
+
+    if (!empty($protocolsByCommForNotify)) {
+      $protocols_label_id = 'notify-protocols-label';
+      $form['notify_others']['notify_protocols'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['notify-protocols-wrapper'],
+          'role' => 'group',
+          'aria-labelledby' => $protocols_label_id,
+        ],
+      ];
+      $form['notify_others']['notify_protocols']['title'] = [
+        '#markup' => '<p id="' . $protocols_label_id . '" class="fieldset__label fieldset__label--group">' . $this->t('Notify all protocol stewards in the following protocols:') . '</p>',
+      ];
+      foreach ($protocolsByCommForNotify as $communityId => $data) {
+        $form['notify_others']['notify_protocols'][$communityId] = [
+          '#type' => 'checkboxes',
+          '#title' => $data['label'],
+          '#options' => $data['protocols'],
+          '#attributes' => ['class' => ['notify-form-checkboxes']],
+        ];
+      }
+    }
+
+    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+    $users_label_id = 'notify-users-label';
+
+    $form['notify_others']['notify_users'] = [
+      '#type' => 'container',
+      '#prefix' => '<div id="notify-users-wrapper" role="group" aria-labelledby="' . $users_label_id . '" aria-live="polite"><p id="' . $users_label_id . '" class="fieldset__label fieldset__label--group">' . $this->t('Notify specific users:') . '</p>',
+      '#suffix' => '</div>',
+    ];
+
+    for ($i = 0; $i < $notifyUserCount; $i++) {
+      $form['notify_others']['notify_users']['user_' . $i] = [
+        '#type' => 'entity_autocomplete',
+        '#target_type' => 'user',
+        // Numbered labels give screen reader users positional context when
+        // multiple fields exist.
+        '#title' => $this->t('User @num', ['@num' => $i + 1]),
+        '#title_display' => 'invisible',
+        '#selection_handler' => 'mukurtu_manager_users',
+        '#required' => FALSE,
+      ];
+    }
+
+    $form['notify_others']['notify_users']['add_more'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add another user'),
+      '#submit' => ['::addMoreNotifyUser'],
+      '#ajax' => [
+        'callback' => '::addMoreNotifyUserCallback',
+        'wrapper' => 'notify-users-wrapper',
+      ],
+      '#limit_validation_errors' => [],
     ];
 
     $form['membership'] = [
@@ -272,6 +359,27 @@ class CommunityManagerUserCreationForm extends FormBase {
     if (empty($email)) {
       $this->messenger()->addMessage($this->t('No email address was provided, so a notification email has not been sent to the new user.'));
     }
+
+    $notifyUids = mukurtu_notifications_extract_notify_uids($form_state);
+    if (!empty($notifyUids)) {
+      mukurtu_notifications_notify_new_account_created($user, $notifyUids);
+    }
+  }
+
+  /**
+   * AJAX submit handler to add another user autocomplete field.
+   */
+  public function addMoreNotifyUser(array &$form, FormStateInterface $form_state): void {
+    $count = $form_state->get('notify_user_count') ?? 1;
+    $form_state->set('notify_user_count', $count + 1);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * AJAX callback to return the updated notify_users container.
+   */
+  public function addMoreNotifyUserCallback(array &$form, FormStateInterface $form_state): array {
+    return $form['notify_others']['notify_users'];
   }
 
   /**
