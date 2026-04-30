@@ -1,0 +1,13 @@
+mukurtu_search.settings:
+  type: config_object
+  label: 'Mukurtu search settings'
+  mapping:
+    backend:
+      type: string
+      label: 'Search backend'
+    collapse_multipage_pages:
+      type: boolean
+      label: 'Collapse multipage items to first page only by default'
+    collapse_community_records:
+      type: boolean
+      label: 'Hide community records by default'

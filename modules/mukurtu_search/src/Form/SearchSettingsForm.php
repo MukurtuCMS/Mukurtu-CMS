@@ -55,6 +55,25 @@ class SearchSettingsForm extends ConfigFormBase {
       '#default_value' => $backend,
     ];
 
+    $form['browse_display'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Browse and search display'),
+    ];
+
+    $form['browse_display']['collapse_multipage_pages'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Collapse multipage items to first page only'),
+      '#description' => $this->t('When enabled, only the first page of each multipage item appears in browse and search results. Users can override this with the <code>?mpi_collapse=0</code> URL parameter.'),
+      '#default_value' => $config->get('collapse_multipage_pages') ?? FALSE,
+    ];
+
+    $form['browse_display']['collapse_community_records'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Hide community records'),
+      '#description' => $this->t('When enabled, community records are hidden from browse and search results; only original records appear. Users can override this with the <code>?cr_collapse=0</code> URL parameter.'),
+      '#default_value' => $config->get('collapse_community_records') ?? FALSE,
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -66,6 +85,8 @@ class SearchSettingsForm extends ConfigFormBase {
 
     // backend.
     $config->set('backend', $form_state->getValue('backend'));
+    $config->set('collapse_multipage_pages', (bool) $form_state->getValue('collapse_multipage_pages'));
+    $config->set('collapse_community_records', (bool) $form_state->getValue('collapse_community_records'));
     $config->save();
 
     parent::submitForm($form, $form_state);

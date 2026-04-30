@@ -180,3 +180,65 @@ function mukurtu_browse_update_40004() {
 
   $index->reindex();
 }
+
+/**
+ * Add multipage page delta and community record flag fields to the content index.
+ */
+function mukurtu_browse_update_40005() {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  $new_fields = [
+    'multipage_page_delta' => [
+      'type' => 'integer',
+      'property_path' => 'multipage_page_delta',
+      'datasource_id' => 'entity:node',
+      'label' => 'Multipage page delta',
+    ],
+    'is_community_record' => [
+      'type' => 'boolean',
+      'property_path' => 'is_community_record',
+      'datasource_id' => 'entity:node',
+      'label' => 'Is community record',
+    ],
+  ];
+
+  $index_changed = FALSE;
+  foreach ($new_fields as $field_id => $field_config) {
+    if (!$index->getField($field_id)) {
+      $field = new \Drupal\search_api\Item\Field($index, $field_id);
+      $field->setType($field_config['type']);
+      $field->setPropertyPath($field_config['property_path']);
+      $field->setDatasourceId($field_config['datasource_id']);
+      $field->setLabel($field_config['label']);
+      $index->addField($field);
+      $index_changed = TRUE;
+    }
+  }
+
+  // Register the processors with the index.
+  $config = \Drupal::configFactory()->getEditable('search_api.index.mukurtu_default_content_index');
+  $processor_settings = $config->get('processor_settings') ?? [];
+  $processors_changed = FALSE;
+
+  foreach (['mukurtu_multipage_page_index', 'mukurtu_community_record_flag'] as $processor_id) {
+    if (!isset($processor_settings[$processor_id])) {
+      $processor_settings[$processor_id] = [];
+      $processors_changed = TRUE;
+    }
+  }
+
+  if ($processors_changed) {
+    $config->set('processor_settings', $processor_settings)->save();
+  }
+
+  if ($index_changed) {
+    // Reload to pick up config changes before saving fields.
+    $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+    $index->save();
+  }
+
+  $index->reindex();
+}

@@ -3,6 +3,7 @@
 use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
 use Drupal\node\NodeInterface;
 use Drupal\node\NodeTypeInterface;
+use Drupal\search_api\Plugin\views\query\SearchApiQuery;
 
 /**
  * Implements hook_theme().
@@ -92,6 +93,47 @@ function mukurtu_browse_preprocess_node(&$variables) {
     return;
   }
   $variables['content_type_label'] = $node_type->label();
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * Applies collapse filters for multipage item pages and community records
+ * when the corresponding admin setting is enabled. The site-wide default can
+ * be overridden per-request with the URL parameters mpi_collapse and
+ * cr_collapse (1 = collapse, 0 = expand).
+ */
+function mukurtu_browse_views_query_alter($view, $query) {
+  if (!$query instanceof SearchApiQuery) {
+    return;
+  }
+
+  $config = \Drupal::config('mukurtu_search.settings');
+  $req = \Drupal::request()->query;
+
+  $collapse_mpi = $req->has('mpi_collapse')
+    ? (bool) $req->get('mpi_collapse')
+    : (bool) ($config->get('collapse_multipage_pages') ?? FALSE);
+
+  $collapse_cr = $req->has('cr_collapse')
+    ? (bool) $req->get('cr_collapse')
+    : (bool) ($config->get('collapse_community_records') ?? FALSE);
+
+  if (!$collapse_mpi && !$collapse_cr) {
+    return;
+  }
+
+  $api_query = $query->getSearchApiQuery();
+  $index_fields = $api_query->getIndex()->getFields();
+
+  if ($collapse_mpi && isset($index_fields['multipage_page_delta'])) {
+    // Keep non-pages (delta -1) and first pages (delta 0); exclude delta >= 1.
+    $api_query->addCondition('multipage_page_delta', 1, '<');
+  }
+
+  if ($collapse_cr && isset($index_fields['is_community_record'])) {
+    $api_query->addCondition('is_community_record', FALSE);
+  }
 }
 
 /**

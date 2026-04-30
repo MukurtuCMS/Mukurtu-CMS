@@ -6,6 +6,8 @@ dependencies:
   module:
     - media
     - mukurtu_collection
+    - mukurtu_community_records
+    - mukurtu_multipage_items
     - mukurtu_protocol
     - node
     - search_api_glossary
@@ -211,6 +213,16 @@ field_settings:
       module:
         - media
         - node
+  is_community_record:
+    label: 'Is community record'
+    datasource_id: 'entity:node'
+    property_path: is_community_record
+    type: boolean
+  multipage_page_delta:
+    label: 'Multipage page delta'
+    datasource_id: 'entity:node'
+    property_path: multipage_page_delta
+    type: integer
   mukurtu_cultural_protocol_ids:
     label: 'Cultural Protocol IDs'
     datasource_id: 'entity:node'
@@ -439,6 +451,8 @@ processor_settings:
       - subject_name_text
       - title
   language_with_fallback: {  }
+  mukurtu_community_record_flag: {  }
+  mukurtu_multipage_page_index: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
   rendered_item: {  }
   tokenizer:
