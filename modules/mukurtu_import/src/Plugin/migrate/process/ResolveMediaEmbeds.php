@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Resolves media embed references in formatted text fields during import.
  *
- * Three syntaxes are supported:
+ * Four syntaxes are supported:
  *
  * 1. Full drupal-media tag with data-entity-name (resolves by media label):
  * @code
