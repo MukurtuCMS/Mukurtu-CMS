@@ -126,9 +126,8 @@ function mukurtu_browse_views_query_alter($view, $query) {
   $api_query = $query->getSearchApiQuery();
   $index_fields = $api_query->getIndex()->getFields();
 
-  if ($collapse_mpi && isset($index_fields['multipage_page_delta'])) {
-    // Keep non-pages (delta -1) and first pages (delta 0); exclude delta >= 1.
-    $api_query->addCondition('multipage_page_delta', 1, '<');
+  if ($collapse_mpi && isset($index_fields['is_additional_mpi_page'])) {
+    $api_query->addCondition('is_additional_mpi_page', FALSE);
   }
 
   if ($collapse_cr && isset($index_fields['is_community_record'])) {

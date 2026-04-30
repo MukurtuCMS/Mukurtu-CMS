@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_multipage_items\Plugin\search_api\processor;
 
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Attribute\SearchApiProcessor;
@@ -14,16 +15,16 @@ use Drupal\search_api\SearchApiException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Adds a field indicating a node's position within a multipage item.
+ * Adds a boolean field indicating whether a node is a non-first multipage page.
  *
- * Value is -1 for nodes that are not part of any multipage item, 0 for the
- * first page, and higher integers for subsequent pages. Filtering on
- * multipage_page_delta < 1 collapses results to first-page-only.
+ * is_additional_mpi_page is TRUE when the node appears at delta > 0 in any
+ * multipage item's field_pages. Filtering on is_additional_mpi_page = FALSE
+ * collapses results to first-page-only (non-pages and first pages are kept).
  */
 #[SearchApiProcessor(
   id: 'mukurtu_multipage_page_index',
   label: new TranslatableMarkup('Multipage page index'),
-  description: new TranslatableMarkup('Adds an integer field indicating whether a node is a multipage item page and its position (-1 = not a page, 0 = first page, 1+ = subsequent pages).'),
+  description: new TranslatableMarkup('Adds a boolean field that is TRUE for nodes that are non-first pages of a multipage item, FALSE otherwise.'),
   stages: [
     'add_properties' => 0,
   ],
@@ -35,6 +36,7 @@ class MultipagePageIndex extends ProcessorPluginBase {
     $plugin_id,
     array $plugin_definition,
     protected readonly Connection $database,
+    protected readonly EntityTypeManagerInterface $entityTypeManager,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -48,6 +50,7 @@ class MultipagePageIndex extends ProcessorPluginBase {
       $plugin_id,
       $plugin_definition,
       $container->get('database'),
+      $container->get('entity_type.manager'),
     );
   }
 
@@ -58,10 +61,10 @@ class MultipagePageIndex extends ProcessorPluginBase {
     $properties = [];
 
     if ($datasource && $datasource->getEntityTypeId() === 'node') {
-      $properties['multipage_page_delta'] = new ProcessorProperty([
-        'label' => $this->t('Multipage page delta'),
-        'description' => $this->t('Position of this node in a multipage item (-1 if not a page, 0 if first page, 1+ for subsequent pages).'),
-        'type' => 'integer',
+      $properties['is_additional_mpi_page'] = new ProcessorProperty([
+        'label' => $this->t('Is additional multipage item page'),
+        'description' => $this->t('TRUE if this node is a non-first page of a multipage item, FALSE otherwise.'),
+        'type' => 'boolean',
         'processor_id' => $this->getPluginId(),
       ]);
     }
@@ -85,24 +88,31 @@ class MultipagePageIndex extends ProcessorPluginBase {
     }
 
     $fields = $this->getFieldsHelper()
-      ->filterForPropertyPath($item->getFields(), $item->getDatasourceId(), 'multipage_page_delta');
+      ->filterForPropertyPath($item->getFields(), $item->getDatasourceId(), 'is_additional_mpi_page');
 
     if (empty($fields)) {
       return;
     }
 
-    $delta = $this->database->select('multipage_item__field_pages', 'f')
+    // Resolve table and column names dynamically, matching the pattern used in
+    // mukurtu_multipage_items_views_query_alter() to avoid hardcoding.
+    $mapping = $this->entityTypeManager->getStorage('multipage_item')->getTableMapping();
+    $table = $mapping->getFieldTableName('field_pages');
+    $col = $mapping->getColumnNames('field_pages')['target_id'];
+
+    $delta = $this->database->select($table, 'f')
       ->fields('f', ['delta'])
-      ->condition('f.field_pages_target_id', $entity->id())
+      ->condition('f.' . $col, $entity->id())
       ->orderBy('f.delta', 'ASC')
       ->range(0, 1)
       ->execute()
       ->fetchField();
 
-    $value = ($delta !== FALSE) ? (int) $delta : -1;
+    // TRUE only for non-first pages (delta > 0); non-pages and first pages are FALSE.
+    $is_additional = ($delta !== FALSE && (int) $delta > 0);
 
     foreach ($fields as $field) {
-      $field->addValue($value);
+      $field->addValue($is_additional);
     }
   }
 

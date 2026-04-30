@@ -230,3 +230,35 @@ function mukurtu_browse_update_40005() {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Replace multipage_page_delta (integer) with is_additional_mpi_page (boolean).
+ *
+ * The original integer field used a < 1 comparison which silently passed all
+ * items when the processor query found no rows. The boolean field mirrors the
+ * community record pattern and is unambiguous.
+ */
+function mukurtu_browse_update_40006() {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  // Remove the old integer field if present.
+  if ($index->getField('multipage_page_delta')) {
+    $index->removeField('multipage_page_delta');
+  }
+
+  // Add the replacement boolean field.
+  if (!$index->getField('is_additional_mpi_page')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'is_additional_mpi_page');
+    $field->setType('boolean');
+    $field->setPropertyPath('is_additional_mpi_page');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Is additional multipage item page');
+    $index->addField($field);
+  }
+
+  $index->save();
+  $index->reindex();
+}

@@ -213,16 +213,16 @@ field_settings:
       module:
         - media
         - node
+  is_additional_mpi_page:
+    label: 'Is additional multipage item page'
+    datasource_id: 'entity:node'
+    property_path: is_additional_mpi_page
+    type: boolean
   is_community_record:
     label: 'Is community record'
     datasource_id: 'entity:node'
     property_path: is_community_record
     type: boolean
-  multipage_page_delta:
-    label: 'Multipage page delta'
-    datasource_id: 'entity:node'
-    property_path: multipage_page_delta
-    type: integer
   mukurtu_cultural_protocol_ids:
     label: 'Cultural Protocol IDs'
     datasource_id: 'entity:node'
