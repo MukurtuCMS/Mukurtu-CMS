@@ -136,6 +136,81 @@ function mukurtu_browse_views_query_alter($view, $query) {
 }
 
 /**
+ * Implements hook_multipage_item_insert().
+ */
+function mukurtu_browse_multipage_item_insert($entity) {
+  _mukurtu_browse_reindex_mpi_pages($entity);
+}
+
+/**
+ * Implements hook_multipage_item_update().
+ */
+function mukurtu_browse_multipage_item_update($entity) {
+  _mukurtu_browse_reindex_mpi_pages($entity, $entity->original ?? NULL);
+}
+
+/**
+ * Implements hook_multipage_item_delete().
+ */
+function mukurtu_browse_multipage_item_delete($entity) {
+  _mukurtu_browse_reindex_mpi_pages($entity);
+}
+
+/**
+ * Marks all pages of an MPI for reindexing in Search API.
+ *
+ * When a multipage_item entity is saved with pre-existing nodes as pages, those
+ * nodes won't be automatically reindexed because they haven't changed. This
+ * ensures the is_additional_mpi_page processor field stays accurate.
+ */
+function _mukurtu_browse_reindex_mpi_pages($entity, $original = NULL) {
+  if (!$entity->hasField('field_pages')) {
+    return;
+  }
+
+  $node_ids = [];
+  foreach ($entity->field_pages as $item) {
+    if ($item->target_id) {
+      $node_ids[] = $item->target_id;
+    }
+  }
+
+  // Include any pages that were removed so they also get reindexed.
+  if ($original && $original->hasField('field_pages')) {
+    foreach ($original->field_pages as $item) {
+      if ($item->target_id) {
+        $node_ids[] = $item->target_id;
+      }
+    }
+  }
+
+  $node_ids = array_unique($node_ids);
+  if (empty($node_ids)) {
+    return;
+  }
+
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index || !$index->status()) {
+    return;
+  }
+
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $item_ids = [];
+  foreach ($node_ids as $node_id) {
+    $node = $node_storage->load($node_id);
+    if ($node) {
+      foreach ($node->getTranslationLanguages() as $langcode => $language) {
+        $item_ids[] = $node_id . ':' . $langcode;
+      }
+    }
+  }
+
+  if (!empty($item_ids)) {
+    $index->trackItemsUpdated('entity:node', $item_ids);
+  }
+}
+
+/**
  * Implements hook_preprocess_block().
  */
 function mukurtu_browse_preprocess_block(&$variables) {
