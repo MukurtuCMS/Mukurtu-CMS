@@ -348,7 +348,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
    * {@inheritdoc}
    */
   public function removeMember(AccountInterface $account): MukurtuGroupInterface {
-        // A user cannot be removed from a community while they belong to a child
+    // A user cannot be removed from a community while they belong to a child
     // protocol. Return early without removing — callers that need to surface
     // this condition should check getProtocols()/getMembership() themselves
     // before calling this method.
