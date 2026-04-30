@@ -380,6 +380,10 @@ class ImportFormattedTextMediaEmbedTest extends MukurtuImportTestBase {
     $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
     $this->assertStringNotContainsString('data-entity-uuid=', $body);
     $this->assertStringContainsString('data-entity-name="My Named Asset"', $body);
+
+    $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
+    $this->assertCount(1, $messages);
+    $this->assertStringContainsString('"My Named Asset" is ambiguous', $messages[0]->message);
   }
 
   /**
@@ -422,6 +426,10 @@ class ImportFormattedTextMediaEmbedTest extends MukurtuImportTestBase {
     $body = $this->entityTypeManager->getStorage('node')->load($this->node->id())->get('field_body')->value;
     $this->assertStringNotContainsString('data-entity-uuid=', $body);
     $this->assertStringContainsString('data-entity-filename="filename-lookup.txt"', $body);
+
+    $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
+    $this->assertCount(1, $messages);
+    $this->assertStringContainsString('"filename-lookup.txt" is ambiguous', $messages[0]->message);
   }
 
   /**
