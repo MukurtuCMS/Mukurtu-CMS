@@ -72,7 +72,7 @@ class SearchCollapseToggleBlock extends BlockBase implements ContainerFactoryPlu
       ],
       'link' => [
         '#type' => 'link',
-        '#title' => $collapse_mpi ? $this->t('All pages') : $this->t('First page only'),
+        '#title' => $collapse_mpi ? $this->t('Show all pages') : $this->t('First page only'),
         '#url' => Url::fromRoute('<current>', [], ['query' => $mpi_toggle_params]),
       ],
     ];
