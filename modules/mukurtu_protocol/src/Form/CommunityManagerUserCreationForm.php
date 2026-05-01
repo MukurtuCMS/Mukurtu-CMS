@@ -104,14 +104,10 @@ class CommunityManagerUserCreationForm extends FormBase {
     }
 
     // Build the form.
-    $form['info'] = [
-      '#markup' => $this->t("This web page allows community administrators to register new users. Users' email addresses and usernames must be unique."),
-    ];
-
     $form['email'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Email address'),
-      '#description' => $this->t('The email address is not made public. It will only be used to contact the user about their account or for opted-in notifications.'),
+      '#description' => $this->t('Email addresses must be unique. The email address is not made public. It will only be used to contact the user about their account or for opted-in notifications.'),
       '#default_value' => "",
       '#required' => FALSE,
     ];
@@ -119,14 +115,13 @@ class CommunityManagerUserCreationForm extends FormBase {
     $form['username'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Username'),
-      '#description' => $this->t("Several special characters are allowed, including space, period (.), hyphen (-), apostrophe ('), underscore (_), and the @ sign."),
+      '#description' => $this->t("Usernames must be unique. Several special characters are allowed, including space, period (.), hyphen (-), apostrophe ('), underscore (_), and the @ sign."),
       '#default_value' => "",
       '#required' => TRUE,
     ];
 
     $form['pass'] = [
       '#type' => 'password_confirm',
-      '#title' => $this->t('Password'),
       '#description' => $this->t('Leave blank to allow the user to set their own password via a password reset email.'),
       '#required' => FALSE,
     ];
