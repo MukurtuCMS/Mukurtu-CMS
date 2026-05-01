@@ -181,7 +181,7 @@ class FormHooks {
     $form['notify'] = [
       '#type' => 'details',
       '#title' => t('Notify other users of new account'),
-      '#description' => t('Optionally send a notification to other users when the account is created.'),
+      '#description' => t('You can choose to notify other users about the creation of this new account. This is useful if you think the user may need to be enrolled in additional communities and/or protocols. If you choose to notify other users, they will receive an email with the new account username and a link to the user profile.'),
       '#open' => FALSE,
       '#attached' => ['library' => ['mukurtu_core/notify-form']],
     ];
