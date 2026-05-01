@@ -282,7 +282,8 @@ class FormHooks {
     }
 
     $form['membership'] = [
-      '#type' => 'container',
+      '#type' => 'fieldset',
+      '#title' => t('Community and Protocol Membership'),
       '#tree' => TRUE,
     ];
 
@@ -313,7 +314,7 @@ class FormHooks {
           '#suffix' => '</div>',
         ];
         $form['membership'][$communityId]['protocols']['hint'] = [
-          '#markup' => '<p>' . t('Protocol roles are available after selecting a community role above.') . '</p>',
+          '#markup' => '<p>' . t('Select one or more protocol roles below.') . '</p>',
         ];
         foreach ($membershipProtocolsByCommunity[$communityId] as $protocolId => $protocolName) {
           $form['membership'][$communityId]['protocols'][$protocolId] = [
@@ -366,6 +367,12 @@ class FormHooks {
    *
    * If a community role is selected in a community that has protocols, at least
    * one protocol role must also be selected.
+   *
+   * This method is intentionally NOT registered on the admin user register form
+   * ($form['#validate']) because membership is optional there — an admin can
+   * create a user without assigning any community or protocol roles. It is kept
+   * here for symmetry with CommunityManagerUserCreationForm and in case stricter
+   * validation is needed on a future form that reuses the membership section.
    */
   public static function userRegisterMembershipValidate(array &$form, FormStateInterface $form_state): void {
     $membership = $form_state->getValue('membership') ?? [];
