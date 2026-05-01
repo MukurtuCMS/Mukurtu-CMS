@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_core\Hook;
 
+use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
@@ -13,6 +14,23 @@ use Drupal\user\Entity\User;
  * Hook implementations for mukurtu_core forms.
  */
 class FormHooks {
+
+  /**
+   * Implements hook_block_view_alter().
+   *
+   * Clears the Gin help block on the admin user register form so the generic
+   * Drupal core help text ("This web page allows administrators to register
+   * new users…") does not appear.
+   */
+  #[Hook('block_view_alter')]
+  public function blockViewAlter(array &$build, BlockPluginInterface $block): void {
+    if ($block->getPluginId() !== 'help_block') {
+      return;
+    }
+    if (\Drupal::routeMatch()->getRouteName() === 'entity.user.register_form') {
+      $build['content'] = [];
+    }
+  }
 
   /**
    * Implements hook_form_FORM_ID_alter() for 'language_content_settings_form'.
@@ -81,6 +99,32 @@ class FormHooks {
       $form['account']['field_display_name'] = $form['field_display_name'];
       $form['account']['field_display_name']['#weight'] = 0.0013;
       unset($form['field_display_name']);
+    }
+
+    if (isset($form['account']['mail'])) {
+      $form['account']['mail']['#description'] = t('Email addresses must be unique. The email address is not made public. It will only be used to contact the user about their account or for opted-in notifications.');
+    }
+    if (isset($form['account']['name'])) {
+      $form['account']['name']['#description'] = t("Usernames must be unique. Several special characters are allowed, including space, period (.), hyphen (-), apostrophe ('), underscore (_), and the @ sign.");
+    }
+    if (isset($form['account']['status'])) {
+      $form['account']['status']['#options'] = [1 => t('Active'), 0 => t('Blocked')];
+    }
+    if (isset($form['account']['roles']['#options'])) {
+      $desiredOrder = ['authenticated', 'mukurtu_roundtrip_manager', 'mukurtu_manager', 'administrator'];
+      $existing = $form['account']['roles']['#options'];
+      $reordered = [];
+      foreach ($desiredOrder as $rid) {
+        if (isset($existing[$rid])) {
+          $reordered[$rid] = $existing[$rid];
+        }
+      }
+      foreach ($existing as $rid => $label) {
+        if (!isset($reordered[$rid])) {
+          $reordered[$rid] = $label;
+        }
+      }
+      $form['account']['roles']['#options'] = $reordered;
     }
 
     // The notify section is only useful to authenticated users with create
