@@ -185,12 +185,10 @@ function mukurtu_core_page_attachments(array &$attachments) {
  *
  * Changes default form values at /admin/config/people/accounts:
  *  - Disables "Enable the personal contact form by default for new users"
- *  - Sets "Who can register accounts?" to "administrators only"
  */
 function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface $form_state, $form_id)
 {
   $form['contact']['contact_default_status']['#default_value'] = false;
-  $form['registration_cancellation']['user_register']['#default_value'] = 'admin_only';
 }
 
 /**
@@ -201,11 +199,16 @@ function mukurtu_core_form_user_login_form_alter(&$form, FormStateInterface $for
 }
 
 /**
- * Custom submit handler to redirect to dashboard on login.
+ * Custom submit handler to redirect to the front page on login.
+ *
+ * Only redirects when no ?destination parameter is present, so mid-session
+ * redirects (e.g. access-denied bounces) still land the user where they
+ * were headed.
  */
 function mukurtu_core_user_login_form_submit($form, FormStateInterface $form_state) {
-  $url = Url::fromRoute('entity.dashboard.canonical', ['dashboard' => 'mukurtu_dashboard']);
-  $form_state->setRedirectUrl($url);
+  if (!\Drupal::request()->query->has('destination')) {
+    $form_state->setRedirectUrl(Url::fromRoute('<front>'));
+  }
 }
 
 /**
