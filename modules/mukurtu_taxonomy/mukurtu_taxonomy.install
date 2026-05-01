@@ -24,6 +24,7 @@ function mukurtu_taxonomy_update_40001(): void {
     'location',
     'media_tag',
     'people',
+    'place_type',
     'publisher',
     'subject',
     'type',
