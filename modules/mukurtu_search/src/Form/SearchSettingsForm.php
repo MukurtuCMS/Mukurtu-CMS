@@ -44,6 +44,26 @@ class SearchSettingsForm extends ConfigFormBase {
 
     $link = \Drupal\Core\Link::createFromRoute($this->t('Search API Configuration'), 'search_api.overview')->toString();
 
+    $form['browse_display'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Default search result settings'),
+      '#description' => $this->t('These settings control the default results on all search and browse pages. Hiding pages and community records gives a cleaner results page, but makes those components less visible. This does not affect the actual search, indexing, or access, just what scope of content is displayed on the results page. Users can toggle these settings on and off on the search pages while they browse.'),
+    ];
+
+    $form['browse_display']['collapse_multipage_pages'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Only show the first page of multipage items in search results'),
+      '#description' => $this->t('When enabled, only the first page of each multipage item appears in browse and search results. Users can change this setting as they browse.'),
+      '#default_value' => $config->get('collapse_multipage_pages') ?? FALSE,
+    ];
+
+    $form['browse_display']['collapse_community_records'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Only show original records in search results, not community records'),
+      '#description' => $this->t('When enabled, community records are hidden from browse and search results; only original records appear. Users can change this setting as they browse.'),
+      '#default_value' => $config->get('collapse_community_records') ?? FALSE,
+    ];
+
     $form['backend'] = [
       '#title' => 'Search Backend',
       '#description' => $this->t('Select which Search API backend to use for search. Note that backends must be configured prior to use. See @link.', ['@link' => $link]),
@@ -53,26 +73,6 @@ class SearchSettingsForm extends ConfigFormBase {
         'solr' => $this->t('Search API Solr'),
       ],
       '#default_value' => $backend,
-    ];
-
-    $form['browse_display'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Default search result settings'),
-      '#description' => $this->t('These settings control the default results on all search and browse pages. Collapsing and hiding pages gives a cleaner results page. This does not affect the actual search, indexing, or access, just what scope of content is displayed on the results page. Users can toggle these settings on and off on the search pages while they browse.'),
-    ];
-
-    $form['browse_display']['collapse_multipage_pages'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Collapse multipage items to first page only'),
-      '#description' => $this->t('When enabled, only the first page of each multipage item appears in browse and search results. Users can override this with the <code>?mpi_collapse=0</code> URL parameter.'),
-      '#default_value' => $config->get('collapse_multipage_pages') ?? FALSE,
-    ];
-
-    $form['browse_display']['collapse_community_records'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Hide community records'),
-      '#description' => $this->t('When enabled, community records are hidden from browse and search results; only original records appear. Users can override this with the <code>?cr_collapse=0</code> URL parameter.'),
-      '#default_value' => $config->get('collapse_community_records') ?? FALSE,
     ];
 
     return parent::buildForm($form, $form_state);

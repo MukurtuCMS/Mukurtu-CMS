@@ -7,7 +7,7 @@ mukurtu_search.settings:
       label: 'Search backend'
     collapse_multipage_pages:
       type: boolean
-      label: 'Collapse multipage items to first page only by default'
+      label: 'Show only the first page of multipage items in search results by default'
     collapse_community_records:
       type: boolean
-      label: 'Hide community records by default'
+      label: 'Show only original records in search results by default, not community records'
