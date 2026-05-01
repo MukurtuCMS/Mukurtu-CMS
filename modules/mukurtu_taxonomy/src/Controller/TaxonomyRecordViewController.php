@@ -182,6 +182,17 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       ],
     ];
 
+    // When this term's vocabulary is person-records-enabled, this page could
+    // become a redirect if a person node is later created and linked via
+    // field_other_names. Tag the render so that creating or editing any person
+    // node invalidates this cache and re-runs the redirect check.
+    $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
+    if (in_array($taxonomy_term->bundle(), $person_vocabularies)) {
+      $cache = CacheableMetadata::createFromRenderArray($build);
+      $cache->addCacheTags(['node_list:person']);
+      $cache->applyTo($build);
+    }
+
     return $build;
   }
 
