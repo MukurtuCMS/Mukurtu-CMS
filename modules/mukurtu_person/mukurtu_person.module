@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AnnounceCommand;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -43,9 +44,8 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
   if ($field_definition->getName() !== 'field_related_person' || $field_definition->getTargetBundle() !== 'related_person') {
     return;
   }
-  if (isset($element['entity_browser']['#prefix'])) {
-    $element['entity_browser']['#prefix'] = '<p>' . t('Select a related person record.') . '</p>';
-  }
+  $existing_prefix = $element['entity_browser']['#prefix'] ?? '';
+  $element['entity_browser']['#prefix'] = '<p>' . t('Select a related person record.') . '</p>' . $existing_prefix;
 
   $create_url = Url::fromRoute('node.add', ['node_type' => 'person']);
   if ($create_url->access()) {
@@ -103,6 +103,7 @@ function mukurtu_person_modal_save_callback(array &$form, FormStateInterface $fo
     return $form;
   }
   $response = new AjaxResponse();
+  $response->addCommand(new AnnounceCommand(t('Person record created. Use the entity browser to select the new person.'), 'polite'));
   $response->addCommand(new CloseModalDialogCommand());
   return $response;
 }
