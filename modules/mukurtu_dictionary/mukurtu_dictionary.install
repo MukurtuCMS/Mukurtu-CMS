@@ -114,3 +114,52 @@ function mukurtu_dictionary_update_40004(): void {
 
   $config->save();
 }
+
+/**
+ * Add MPI and community record collapse fields to the dictionary index.
+ */
+function mukurtu_dictionary_update_40005(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if (!$index) {
+    return;
+  }
+
+  $processors = $index->getProcessors();
+  foreach (['mukurtu_multipage_page_index', 'mukurtu_community_record_flag'] as $processor_id) {
+    if (!isset($processors[$processor_id])) {
+      $processor_manager = \Drupal::service('plugin.manager.search_api.processor');
+      $processor = $processor_manager->createInstance($processor_id, ['#index' => $index]);
+      $processors[$processor_id] = $processor;
+    }
+  }
+  $index->setProcessors($processors);
+
+  $new_fields = [
+    'is_additional_mpi_page' => [
+      'type' => 'boolean',
+      'property_path' => 'is_additional_mpi_page',
+      'datasource_id' => 'entity:node',
+      'label' => 'Is additional multipage item page',
+    ],
+    'is_community_record' => [
+      'type' => 'boolean',
+      'property_path' => 'is_community_record',
+      'datasource_id' => 'entity:node',
+      'label' => 'Is community record',
+    ],
+  ];
+
+  foreach ($new_fields as $field_id => $field_config) {
+    if (!$index->getField($field_id)) {
+      $field = new \Drupal\search_api\Item\Field($index, $field_id);
+      $field->setType($field_config['type']);
+      $field->setPropertyPath($field_config['property_path']);
+      $field->setDatasourceId($field_config['datasource_id']);
+      $field->setLabel($field_config['label']);
+      $index->addField($field);
+    }
+  }
+
+  $index->save();
+  $index->reindex();
+}

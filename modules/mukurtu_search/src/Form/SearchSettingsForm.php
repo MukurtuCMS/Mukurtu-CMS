@@ -57,7 +57,8 @@ class SearchSettingsForm extends ConfigFormBase {
 
     $form['browse_display'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Browse and search display'),
+      '#title' => $this->t('Default search result settings'),
+      '#description' => $this->t('These settings control the default results on all search and browse pages. Collapsing and hiding pages gives a cleaner results page. This does not affect the actual search, indexing, or access, just what scope of content is displayed on the results page. Users can toggle these settings on and off on the search pages while they browse.'),
     ];
 
     $form['browse_display']['collapse_multipage_pages'] = [
