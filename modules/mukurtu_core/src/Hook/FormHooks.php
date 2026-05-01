@@ -27,7 +27,7 @@ class FormHooks {
     if ($block->getPluginId() !== 'help_block') {
       return;
     }
-    if (\Drupal::routeMatch()->getRouteName() === 'entity.user.register_form') {
+    if (\Drupal::routeMatch()->getRouteName() === 'user.admin_create') {
       $build['content'] = [];
     }
   }
@@ -101,6 +101,9 @@ class FormHooks {
       unset($form['field_display_name']);
     }
 
+    if (isset($form['account']['notify'])) {
+      unset($form['account']['notify']['#description']);
+    }
     if (isset($form['account']['mail'])) {
       $form['account']['mail']['#description'] = t('Email addresses must be unique. The email address is not made public. It will only be used to contact the user about their account or for opted-in notifications.');
     }
