@@ -30,16 +30,6 @@ field_settings:
     dependencies:
       module:
         - mukurtu_protocol
-  contributor:
-    label: 'Contributor (Dictionary Word)'
-    datasource_id: 'entity:node'
-    property_path: 'field_contributor:entity:name'
-    type: string
-    dependencies:
-      module:
-        - mukurtu_dictionary
-        - node
-        - taxonomy
   dictionary_fulltext:
     label: 'Dictionary Fulltext Content'
     property_path: aggregated_field
@@ -65,6 +55,8 @@ field_settings:
         - 'entity:node/field_summary'
         - 'entity:node/field_translation'
         - 'entity:node/field_word_origin'
+        - 'entity:node/field_contributor:entity:name'
+        - 'entity:node/field_location:entity:name'
   field_glossary_entry:
     label: 'Glossary Entry'
     datasource_id: 'entity:node'
@@ -96,16 +88,6 @@ field_settings:
     type: string
     dependencies:
       module:
-        - node
-        - taxonomy
-  location:
-    label: Location
-    datasource_id: 'entity:node'
-    property_path: 'field_location:entity:name'
-    type: string
-    dependencies:
-      module:
-        - mukurtu_dictionary
         - node
         - taxonomy
   mukurtu_cultural_protocol_ids:
@@ -247,11 +229,9 @@ processor_settings:
     all_fields: false
     fields:
       - community_title
-      - contributor
       - dictionary_fulltext
       - keyword
       - language
-      - location
       - title
       - type
       - word_lists

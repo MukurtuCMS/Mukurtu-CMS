@@ -123,18 +123,6 @@ function mukurtu_dictionary_update_40005(): void {
 
   $new_fields = [
     'mukurtu_dictionary_index' => [
-      'contributor' => [
-        'label' => 'Contributor (Dictionary Word)',
-        'datasource_id' => 'entity:node',
-        'property_path' => 'field_contributor:entity:name',
-        'type' => 'string',
-      ],
-      'location' => [
-        'label' => 'Location',
-        'datasource_id' => 'entity:node',
-        'property_path' => 'field_location:entity:name',
-        'type' => 'string',
-      ],
       'dictionary_fulltext' => [
         'label' => 'Dictionary Fulltext Content',
         'property_path' => 'aggregated_field',
@@ -160,6 +148,8 @@ function mukurtu_dictionary_update_40005(): void {
             'entity:node/field_summary',
             'entity:node/field_translation',
             'entity:node/field_word_origin',
+            'entity:node/field_contributor:entity:name',
+            'entity:node/field_location:entity:name',
           ],
         ],
       ],
