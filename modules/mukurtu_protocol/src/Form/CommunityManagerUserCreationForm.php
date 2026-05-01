@@ -278,7 +278,7 @@ class CommunityManagerUserCreationForm extends FormBase {
       }
     }
 
-    $form_state->set('formHasProtocols', !empty($protocolsByCommunity));
+    $form_state->set('communitiesWithProtocols', array_keys($protocolsByCommunity));
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -433,19 +433,25 @@ class CommunityManagerUserCreationForm extends FormBase {
       $form_state->setError($form['membership'], $this->t('Please assign the new user at least one community role.'));
     }
 
-    // Require at least one protocol role when the form includes protocol sections.
-    if ($form_state->get('formHasProtocols')) {
-      $hasAnyProtocolRole = FALSE;
-      foreach ($membership as $communityData) {
-        foreach ($communityData['protocols'] ?? [] as $protocolData) {
-          if (!empty(array_filter($protocolData['protocol_roles'] ?? []))) {
-            $hasAnyProtocolRole = TRUE;
-            break 2;
-          }
+    // For each community where the user is being given a role AND protocols
+    // exist, require at least one protocol role to be selected.
+    $communitiesWithProtocols = $form_state->get('communitiesWithProtocols') ?? [];
+    foreach ($communitiesWithProtocols as $communityId) {
+      $communityData = $membership[$communityId] ?? [];
+      if (empty(array_filter($communityData['community_roles'] ?? []))) {
+        // User isn't being added to this community — no protocol role required.
+        continue;
+      }
+      $hasProtocolRole = FALSE;
+      foreach ($communityData['protocols'] ?? [] as $protocolData) {
+        if (!empty(array_filter($protocolData['protocol_roles'] ?? []))) {
+          $hasProtocolRole = TRUE;
+          break;
         }
       }
-      if (!$hasAnyProtocolRole) {
-        $form_state->setError($form['membership'], $this->t('Please assign the new user at least one protocol role.'));
+      if (!$hasProtocolRole) {
+        $communityName = $form['membership'][$communityId]['#title'] ?? $communityId;
+        $form_state->setError($form['membership'][$communityId], $this->t('Please assign the new user at least one protocol role in %community.', ['%community' => $communityName]));
       }
     }
   }
