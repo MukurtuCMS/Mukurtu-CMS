@@ -7,25 +7,10 @@
 
 /**
  * Enable flat_taxonomy and mark all stock Mukurtu vocabularies as flat.
- *
- * NOTE: flat_taxonomy has since been removed from Mukurtu. This hook is
- * intentionally left as a no-op stub so sites that already ran it retain a
- * consistent schema version. New installs skip it. Sites that ran it and had
- * flat_taxonomy installed should run mukurtu_taxonomy_update_40002 to
- * uninstall it.
  */
 function mukurtu_taxonomy_update_40001(): void {
-  // Intentional no-op. flat_taxonomy is no longer part of Mukurtu CMS.
-}
-
-/**
- * Uninstall flat_taxonomy and remove its third-party settings from vocabularies.
- */
-function mukurtu_taxonomy_update_40002(): void {
-  $module_handler = \Drupal::service('module_handler');
-  if ($module_handler->moduleExists('flat_taxonomy')) {
-    \Drupal::service('module_installer')->uninstall(['flat_taxonomy']);
-  }
+  // Ensure the flat_taxonomy module is enabled.
+  \Drupal::service('module_installer')->install(['flat_taxonomy']);
 
   $vids = [
     'category',
@@ -46,14 +31,28 @@ function mukurtu_taxonomy_update_40002(): void {
   ];
 
   $vocabulary_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary');
+
   foreach ($vids as $vid) {
     $vocabulary = $vocabulary_storage->load($vid);
     if (!$vocabulary) {
       continue;
     }
-    if ($vocabulary->getThirdPartySetting('flat_taxonomy', 'flat') !== NULL) {
-      $vocabulary->unsetThirdPartySetting('flat_taxonomy', 'flat');
-      $vocabulary->save();
+    $vocabulary->setThirdPartySetting('flat_taxonomy', 'flat', 1);
+    $vocabulary->save();
+
+    // Strip any existing parent relationships on terms in this vocabulary so
+    // live data matches the enforced flat structure.
+    $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $tids = $term_storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('vid', $vid)
+      ->execute();
+
+    foreach ($term_storage->loadMultiple($tids) as $term) {
+      if (!empty($term->parent->target_id)) {
+        $term->parent = 0;
+        $term->save();
+      }
     }
   }
 }

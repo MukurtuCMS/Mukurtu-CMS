@@ -4,6 +4,7 @@ description: 'Provides the base Mukurtu taxonomies.'
 core_version_requirement: '^10 || ^11'
 package: 'Mukurtu CMS'
 dependencies:
+  - 'flat_taxonomy:flat_taxonomy'
   - 'drupal:media'
   - 'drupal:node'
   - 'drupal:taxonomy'
