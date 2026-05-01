@@ -238,7 +238,11 @@ class CommunityRecordFunctionsTest extends CommunityRecordTestBase {
     $cr->save();
 
     // Set a valid original record on an already-saved (non-new) entity so
-    // the URL access check inside the constraint is skipped.
+    // the URL access check inside the constraint is skipped (the validator
+    // calls continue when !$entity->isNew()). Testing the URL access branch
+    // (ValidOriginalRecordValidator line 61-69) requires resolving the
+    // mukurtu_community_records.add_new_record route in a kernel context,
+    // which is not straightforward; that branch is a known coverage gap.
     $cr->set('field_mukurtu_original_record', $or->id());
     $violations = $cr->validate();
 

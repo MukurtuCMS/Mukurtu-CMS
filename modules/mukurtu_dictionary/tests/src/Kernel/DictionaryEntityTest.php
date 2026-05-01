@@ -111,6 +111,16 @@ class DictionaryEntityTest extends DictionaryTestBase {
     $this->assertFalse($definitions['field_translation']->isRequired());
     $this->assertFalse($definitions['field_word_type']->isRequired());
     $this->assertFalse($definitions['field_source']->isRequired());
+    $this->assertFalse($definitions['field_coverage']->isRequired());
+    $this->assertFalse($definitions['field_coverage_description']->isRequired());
+    $this->assertFalse($definitions['field_location']->isRequired());
+    $this->assertFalse($definitions['field_media_assets']->isRequired());
+    $this->assertFalse($definitions['field_pronunciation']->isRequired());
+    $this->assertFalse($definitions['field_word_origin']->isRequired());
+    $this->assertFalse($definitions['field_related_content']->isRequired());
+    $this->assertFalse($definitions['field_thumbnail']->isRequired());
+    $this->assertFalse($definitions['field_local_contexts_projects']->isRequired());
+    $this->assertFalse($definitions['field_local_contexts_labels_and_notices']->isRequired());
   }
 
   /**
@@ -135,6 +145,18 @@ class DictionaryEntityTest extends DictionaryTestBase {
     $this->assertEquals(-1, $definitions['field_recording']->getFieldStorageDefinition()->getCardinality());
     $this->assertEquals(-1, $definitions['field_sample_sentences']->getFieldStorageDefinition()->getCardinality());
     $this->assertEquals(-1, $definitions['field_additional_word_entries']->getFieldStorageDefinition()->getCardinality());
+    $this->assertEquals(-1, $definitions['field_location']->getFieldStorageDefinition()->getCardinality());
+    $this->assertEquals(-1, $definitions['field_media_assets']->getFieldStorageDefinition()->getCardinality());
+    $this->assertEquals(-1, $definitions['field_related_content']->getFieldStorageDefinition()->getCardinality());
+    $this->assertEquals(-1, $definitions['field_local_contexts_projects']->getFieldStorageDefinition()->getCardinality());
+    $this->assertEquals(-1, $definitions['field_local_contexts_labels_and_notices']->getFieldStorageDefinition()->getCardinality());
+
+    // Single-value fields (not yet in the block above).
+    $this->assertEquals(1, $definitions['field_coverage']->getFieldStorageDefinition()->getCardinality());
+    $this->assertEquals(1, $definitions['field_coverage_description']->getFieldStorageDefinition()->getCardinality());
+    $this->assertEquals(1, $definitions['field_pronunciation']->getFieldStorageDefinition()->getCardinality());
+    $this->assertEquals(1, $definitions['field_word_origin']->getFieldStorageDefinition()->getCardinality());
+    $this->assertEquals(1, $definitions['field_thumbnail']->getFieldStorageDefinition()->getCardinality());
   }
 
   /**

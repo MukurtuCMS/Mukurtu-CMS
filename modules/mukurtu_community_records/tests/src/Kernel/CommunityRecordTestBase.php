@@ -79,7 +79,7 @@ abstract class CommunityRecordTestBase extends MukurtuKernelTestBase {
   }
 
   /**
-   * Build and save an unsaved 'page' node.
+   * Build and return an unsaved 'page' node.
    *
    * @param string $title
    *   The node title.
