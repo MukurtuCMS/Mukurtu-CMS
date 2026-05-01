@@ -324,6 +324,7 @@ class CommunityManagerUserCreationForm extends FormBase {
       $user->block();
     }
 
+    $user->addRole('authenticated');
     $user->save();
 
     if (!empty($values['notify']) && !empty($email) && (int) $values['status'] === 1) {
