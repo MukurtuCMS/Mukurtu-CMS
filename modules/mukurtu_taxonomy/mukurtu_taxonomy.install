@@ -4,3 +4,56 @@
  * @file
  * Install, update and uninstall functions for the mukurtu_taxonomy module.
  */
+
+/**
+ * Enable flat_taxonomy and mark all stock Mukurtu vocabularies as flat.
+ *
+ * NOTE: flat_taxonomy has since been removed from Mukurtu. This hook is
+ * intentionally left as a no-op stub so sites that already ran it retain a
+ * consistent schema version. New installs skip it. Sites that ran it and had
+ * flat_taxonomy installed should run mukurtu_taxonomy_update_40002 to
+ * uninstall it.
+ */
+function mukurtu_taxonomy_update_40001(): void {
+  // Intentional no-op. flat_taxonomy is no longer part of Mukurtu CMS.
+}
+
+/**
+ * Uninstall flat_taxonomy and remove its third-party settings from vocabularies.
+ */
+function mukurtu_taxonomy_update_40002(): void {
+  $module_handler = \Drupal::service('module_handler');
+  if ($module_handler->moduleExists('flat_taxonomy')) {
+    \Drupal::service('module_installer')->uninstall(['flat_taxonomy']);
+  }
+
+  $vids = [
+    'category',
+    'community_type',
+    'contributor',
+    'creator',
+    'format',
+    'interpersonal_relationship',
+    'keywords',
+    'language',
+    'location',
+    'media_tag',
+    'people',
+    'publisher',
+    'subject',
+    'type',
+    'word_type',
+  ];
+
+  $vocabulary_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary');
+  foreach ($vids as $vid) {
+    $vocabulary = $vocabulary_storage->load($vid);
+    if (!$vocabulary) {
+      continue;
+    }
+    if ($vocabulary->getThirdPartySetting('flat_taxonomy', 'flat') !== NULL) {
+      $vocabulary->unsetThirdPartySetting('flat_taxonomy', 'flat');
+      $vocabulary->save();
+    }
+  }
+}

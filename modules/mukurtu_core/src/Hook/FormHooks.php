@@ -182,6 +182,7 @@ class FormHooks {
 
     $form['notify']['notify_users'] = [
       '#type' => 'container',
+      '#tree' => TRUE,
       '#prefix' => '<div id="notify-users-wrapper" role="group" aria-labelledby="' . $users_label_id . '" aria-live="polite"><p id="' . $users_label_id . '" class="fieldset__label fieldset__label--group">' . t('Notify specific users:') . '</p>',
       '#suffix' => '</div>',
     ];

@@ -55,7 +55,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     $protocolRoles = [];
     foreach ($protocolRolesRaw as $roleValue) {
       if ($roleValue->getName() !== 'non-member' && $roleValue->getName() !== 'member') {
-        $protocolRoles[$roleValue->getName()] = $this->t($roleValue->getLabel());
+        $protocolRoles[$roleValue->getName()] = $roleValue->getLabel();
       }
     }
 
@@ -198,6 +198,7 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $form['notify_others']['notify_users'] = [
       '#type' => 'container',
+      '#tree' => TRUE,
       '#prefix' => '<div id="notify-users-wrapper" role="group" aria-labelledby="' . $users_label_id . '" aria-live="polite"><p id="' . $users_label_id . '" class="fieldset__label fieldset__label--group">' . $this->t('Notify specific users:') . '</p>',
       '#suffix' => '</div>',
     ];
@@ -331,23 +332,48 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     $entityTypeManager = \Drupal::service("entity_type.manager");
 
+    // Rebuild the current user's authorized community and protocol IDs to
+    // guard against crafted POST requests targeting unauthorized entities.
+    $currentUser = User::load(\Drupal::currentUser()->id());
+    $communityMemberships = array_filter(Og::getMemberships($currentUser), fn ($m) => $m->getGroupBundle() === 'community');
+    $managerMemberships = array_filter($communityMemberships, fn ($m) => $m->hasPermission('manage members'));
+    $authorizedCommunityIds = array_values(array_filter(array_map(fn ($m) => $m->getGroupId(), $managerMemberships)));
+
+    $protocolMemberships = array_filter(Og::getMemberships($currentUser), fn ($m) => $m->getGroupBundle() === 'protocol');
+    $stewardMemberships = array_filter($protocolMemberships, fn ($m) => $m->hasPermission('manage members'));
+    $authorizedProtocolIds = array_values(array_filter(array_map(fn ($m) => $m->getGroupId(), $stewardMemberships)));
+
     // Process community memberships and roles.
     foreach ($values['membership'] as $communityId => $communityData) {
+      if (!in_array($communityId, $authorizedCommunityIds)) {
+        continue;
+      }
+
       $communityRoles = array_keys(array_filter($communityData['community_roles']));
 
       if (!empty($communityRoles)) {
         /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
         $community = $entityTypeManager->getStorage('community')->load($communityId);
+        if (!$community) {
+          continue;
+        }
         $community->addMember($user, $communityRoles);
 
         // Process protocol memberships under this community. Protocol membership
         // requires community membership first, so this is intentionally nested.
         foreach ($communityData['protocols'] ?? [] as $protocolId => $protocolData) {
+          if (!in_array($protocolId, $authorizedProtocolIds)) {
+            continue;
+          }
+
           $protocolRoles = array_keys(array_filter($protocolData['protocol_roles']));
 
           if (!empty($protocolRoles)) {
             /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
             $protocol = $entityTypeManager->getStorage('protocol')->load($protocolId);
+            if (!$protocol) {
+              continue;
+            }
             $protocol->addMember($user, $protocolRoles);
           }
         }
