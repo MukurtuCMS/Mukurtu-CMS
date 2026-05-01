@@ -4,9 +4,7 @@ dependencies:
   config:
     - search_api.server.mukurtu_database_server
   module:
-    - mukurtu_community_records
     - mukurtu_dictionary
-    - mukurtu_multipage_items
     - mukurtu_protocol
     - node
     - search_api_glossary
@@ -47,16 +45,6 @@ field_settings:
     indexed_locked: true
     type_locked: true
     hidden: true
-  is_additional_mpi_page:
-    label: 'Is additional multipage item page'
-    datasource_id: 'entity:node'
-    property_path: is_additional_mpi_page
-    type: boolean
-  is_community_record:
-    label: 'Is community record'
-    datasource_id: 'entity:node'
-    property_path: is_community_record
-    type: boolean
   keyword:
     label: Keywords
     datasource_id: 'entity:node'
@@ -193,8 +181,6 @@ processor_settings:
     fields:
       - title
   language_with_fallback: {  }
-  mukurtu_community_record_flag: {  }
-  mukurtu_multipage_page_index: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
   rendered_item: {  }
   tokenizer:
