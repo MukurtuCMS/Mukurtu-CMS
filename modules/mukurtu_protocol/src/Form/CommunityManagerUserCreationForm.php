@@ -324,6 +324,10 @@ class CommunityManagerUserCreationForm extends FormBase {
       $user->block();
     }
 
+    // Explicitly store the authenticated role so it appears in the site's
+    // user administration lists, which read from the stored roles field rather
+    // than the computed getRoles() result.
+    $user->get('roles')->appendItem(['target_id' => 'authenticated']);
     $user->save();
 
     if (!empty($values['notify']) && !empty($email) && (int) $values['status'] === 1) {
