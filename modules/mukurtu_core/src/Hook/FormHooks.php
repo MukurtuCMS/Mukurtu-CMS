@@ -28,7 +28,7 @@ class FormHooks {
       return;
     }
     if (\Drupal::routeMatch()->getRouteName() === 'user.admin_create') {
-      $build['content'] = [];
+      $build = [];
     }
   }
 
@@ -155,6 +155,7 @@ class FormHooks {
 
     $communityOptions = [];
     $protocolsByCommunity = [];
+    $membershipProtocolsByCommunity = [];
     foreach ($communityEntities as $community) {
       $communityOptions[$community->id()] = $community->getName();
       $communityProtocolIds = $protocolStorage->getQuery()
@@ -171,6 +172,7 @@ class FormHooks {
           'label' => $community->getName(),
           'protocols' => $communityProtocols,
         ];
+        $membershipProtocolsByCommunity[$community->id()] = $communityProtocols;
       }
     }
     asort($communityOptions);
@@ -259,6 +261,77 @@ class FormHooks {
     ];
 
     $form['actions']['submit']['#submit'][] = [self::class, 'userRegisterNotifySubmit'];
+
+    // Membership section — community and protocol role assignment.
+    $roleManager = \Drupal::service('og.role_manager');
+
+    $communityRolesRaw = $roleManager->getRolesByBundle('community', 'community');
+    $communityRoles = [];
+    foreach ($communityRolesRaw as $roleValue) {
+      if ($roleValue->getName() !== 'non-member' && $roleValue->getName() !== 'member') {
+        $communityRoles[$roleValue->getName()] = $roleValue->getLabel();
+      }
+    }
+
+    $protocolRolesRaw = $roleManager->getRolesByBundle('protocol', 'protocol');
+    $protocolRoles = [];
+    foreach ($protocolRolesRaw as $roleValue) {
+      if ($roleValue->getName() !== 'non-member' && $roleValue->getName() !== 'member') {
+        $protocolRoles[$roleValue->getName()] = $roleValue->getLabel();
+      }
+    }
+
+    $form['membership'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+    ];
+
+    foreach ($communityOptions as $communityId => $communityName) {
+      $form['membership'][$communityId] = [
+        '#type' => 'details',
+        '#title' => $communityName,
+        '#open' => TRUE,
+      ];
+      $form['membership'][$communityId]['community_roles'] = [
+        '#type' => 'checkboxes',
+        '#title' => t('Community Roles'),
+        '#options' => $communityRoles,
+      ];
+
+      if (!empty($membershipProtocolsByCommunity[$communityId])) {
+        $statesConditions = [];
+        foreach (array_keys($communityRoles) as $roleName) {
+          $statesConditions[] = [
+            ':input[name="membership[' . $communityId . '][community_roles][' . $roleName . ']"]' => ['checked' => TRUE],
+          ];
+        }
+        $form['membership'][$communityId]['protocols'] = [
+          '#type' => 'container',
+          '#tree' => TRUE,
+          '#states' => ['visible' => $statesConditions],
+          '#prefix' => '<div aria-live="polite">',
+          '#suffix' => '</div>',
+        ];
+        $form['membership'][$communityId]['protocols']['hint'] = [
+          '#markup' => '<p>' . t('Protocol roles are available after selecting a community role above.') . '</p>',
+        ];
+        foreach ($membershipProtocolsByCommunity[$communityId] as $protocolId => $protocolName) {
+          $form['membership'][$communityId]['protocols'][$protocolId] = [
+            '#type' => 'details',
+            '#title' => $protocolName,
+            '#open' => FALSE,
+          ];
+          $form['membership'][$communityId]['protocols'][$protocolId]['protocol_roles'] = [
+            '#type' => 'checkboxes',
+            '#title' => t('Protocol Roles'),
+            '#options' => $protocolRoles,
+          ];
+        }
+      }
+    }
+
+    $form_state->set('membershipCommunitiesWithProtocols', array_keys($membershipProtocolsByCommunity));
+    $form['actions']['submit']['#submit'][] = [self::class, 'userRegisterMembershipSubmit'];
   }
 
   /**
@@ -286,6 +359,88 @@ class FormHooks {
    */
   public static function addMoreNotifyUserCallback(array &$form, FormStateInterface $form_state): array {
     return $form['notify']['notify_users'];
+  }
+
+  /**
+   * Validate handler for membership assignment on the admin user register form.
+   *
+   * If a community role is selected in a community that has protocols, at least
+   * one protocol role must also be selected.
+   */
+  public static function userRegisterMembershipValidate(array &$form, FormStateInterface $form_state): void {
+    $membership = $form_state->getValue('membership') ?? [];
+    $communitiesWithProtocols = $form_state->get('membershipCommunitiesWithProtocols') ?? [];
+
+    foreach ($communitiesWithProtocols as $communityId) {
+      $communityData = $membership[$communityId] ?? [];
+      if (empty(array_filter($communityData['community_roles'] ?? []))) {
+        continue;
+      }
+      $hasProtocolRole = FALSE;
+      foreach ($communityData['protocols'] ?? [] as $protocolData) {
+        if (!empty(array_filter($protocolData['protocol_roles'] ?? []))) {
+          $hasProtocolRole = TRUE;
+          break;
+        }
+      }
+      if (!$hasProtocolRole) {
+        $communityName = $form['membership'][$communityId]['#title'] ?? $communityId;
+        $form_state->setError(
+          $form['membership'][$communityId],
+          t('Please assign the new user at least one protocol role in %community.', ['%community' => $communityName])
+        );
+      }
+    }
+  }
+
+  /**
+   * Submit handler that assigns community and protocol memberships after a new
+   * user account is created via the admin user register form.
+   */
+  public static function userRegisterMembershipSubmit(array &$form, FormStateInterface $form_state): void {
+    $values = $form_state->getValues();
+    if (empty($values['membership'])) {
+      return;
+    }
+
+    $user = $form_state->getFormObject()->getEntity();
+    $entityTypeManager = \Drupal::entityTypeManager();
+
+    try {
+      foreach ($values['membership'] as $communityId => $communityData) {
+        $communityRoles = array_keys(array_filter($communityData['community_roles'] ?? []));
+        if (empty($communityRoles)) {
+          continue;
+        }
+        $community = $entityTypeManager->getStorage('community')->load($communityId);
+        if (!$community) {
+          continue;
+        }
+        $community->addMember($user, $communityRoles);
+
+        foreach ($communityData['protocols'] ?? [] as $protocolId => $protocolData) {
+          $protocolRoles = array_keys(array_filter($protocolData['protocol_roles'] ?? []));
+          if (empty($protocolRoles)) {
+            continue;
+          }
+          $protocol = $entityTypeManager->getStorage('protocol')->load($protocolId);
+          if (!$protocol) {
+            continue;
+          }
+          $protocol->addMember($user, $protocolRoles);
+        }
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_core')->error(
+        'Error assigning memberships for new user @name: @message',
+        ['@name' => $user->getAccountName(), '@message' => $e->getMessage()]
+      );
+      \Drupal::messenger()->addWarning(t(
+        'The account was created but some membership assignments may not have completed. Please review the memberships for <a href=":url">%name</a>.',
+        [':url' => $user->toUrl()->toString(), '%name' => $user->getAccountName()]
+      ));
+    }
   }
 
   /**
