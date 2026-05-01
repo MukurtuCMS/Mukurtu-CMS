@@ -188,3 +188,14 @@ function mukurtu_dictionary_update_40005(): void {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Re-apply MPI/CR collapse fields if the 40005 save failed.
+ *
+ * The 40005 hook ran (schema was bumped) but the index save may have failed
+ * because the install config briefly declared those modules as hard
+ * dependencies. This hook is idempotent and a no-op when 40005 succeeded.
+ */
+function mukurtu_dictionary_update_40006(): void {
+  mukurtu_dictionary_update_40005();
+}
