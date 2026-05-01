@@ -344,40 +344,52 @@ class CommunityManagerUserCreationForm extends FormBase {
     $authorizedProtocolIds = array_values(array_filter(array_map(fn ($m) => $m->getGroupId(), $stewardMemberships)));
 
     // Process community memberships and roles.
-    foreach ($values['membership'] as $communityId => $communityData) {
-      if (!in_array($communityId, $authorizedCommunityIds)) {
-        continue;
-      }
-
-      $communityRoles = array_keys(array_filter($communityData['community_roles']));
-
-      if (!empty($communityRoles)) {
-        /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
-        $community = $entityTypeManager->getStorage('community')->load($communityId);
-        if (!$community) {
+    try {
+      foreach ($values['membership'] as $communityId => $communityData) {
+        if (!in_array($communityId, $authorizedCommunityIds)) {
           continue;
         }
-        $community->addMember($user, $communityRoles);
 
-        // Process protocol memberships under this community. Protocol membership
-        // requires community membership first, so this is intentionally nested.
-        foreach ($communityData['protocols'] ?? [] as $protocolId => $protocolData) {
-          if (!in_array($protocolId, $authorizedProtocolIds)) {
+        $communityRoles = array_keys(array_filter($communityData['community_roles']));
+
+        if (!empty($communityRoles)) {
+          /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
+          $community = $entityTypeManager->getStorage('community')->load($communityId);
+          if (!$community) {
             continue;
           }
+          $community->addMember($user, $communityRoles);
 
-          $protocolRoles = array_keys(array_filter($protocolData['protocol_roles']));
-
-          if (!empty($protocolRoles)) {
-            /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
-            $protocol = $entityTypeManager->getStorage('protocol')->load($protocolId);
-            if (!$protocol) {
+          // Process protocol memberships under this community. Protocol membership
+          // requires community membership first, so this is intentionally nested.
+          foreach ($communityData['protocols'] ?? [] as $protocolId => $protocolData) {
+            if (!in_array($protocolId, $authorizedProtocolIds)) {
               continue;
             }
-            $protocol->addMember($user, $protocolRoles);
+
+            $protocolRoles = array_keys(array_filter($protocolData['protocol_roles']));
+
+            if (!empty($protocolRoles)) {
+              /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
+              $protocol = $entityTypeManager->getStorage('protocol')->load($protocolId);
+              if (!$protocol) {
+                continue;
+              }
+              $protocol->addMember($user, $protocolRoles);
+            }
           }
         }
       }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_protocol')->error('Error assigning memberships for new user @name: @message', [
+        '@name' => $user->getAccountName(),
+        '@message' => $e->getMessage(),
+      ]);
+      $this->messenger()->addWarning($this->t('The account was created but some membership assignments may not have completed. Please review the memberships for <a href=":url">%name</a>.', [
+        ':url' => $user->toUrl()->toString(),
+        '%name' => $user->getAccountName(),
+      ]));
     }
 
     $this->messenger()->addMessage($this->t('The new user account <a href=":url">%name</a> has been created.', [':url' => $user->toUrl()->toString(), '%name' => $user->getAccountName()]));
