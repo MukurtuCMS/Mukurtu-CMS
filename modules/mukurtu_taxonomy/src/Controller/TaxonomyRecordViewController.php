@@ -186,6 +186,10 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     // become a redirect if a person node is later created and linked via
     // field_other_names. Tag the render so that creating or editing any person
     // node invalidates this cache and re-runs the redirect check.
+    // Trade-off: node_list:person fires on every person node save, so bulk
+    // imports will invalidate all person-vocabulary term pages at once. This
+    // is acceptable for correctness; a term-scoped tag would require a custom
+    // cache tag strategy.
     $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
     if (in_array($taxonomy_term->bundle(), $person_vocabularies)) {
       $cache = CacheableMetadata::createFromRenderArray($build);
@@ -221,6 +225,10 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    * this term in field_other_names and the term's vocabulary is enabled for
    * person records. Multiple matches return NULL so the taxonomy page is shown
    * instead.
+   *
+   * Key edge cases worth covering in tests: vocabulary not enabled (NULL),
+   * zero matches (NULL), two or more matches (NULL), draft node excluded by
+   * status=1, inaccessible node excluded by accessCheck(TRUE).
    */
   protected function getSinglePersonRecord(TermInterface $taxonomy_term): ?NodeInterface {
     $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];

@@ -74,12 +74,20 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
  * redirecting to the new node's view page.
  */
 function mukurtu_person_form_node_person_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // isXmlHttpRequest() is the available signal for "opened via AJAX modal".
+  // Today the only XHR context for /node/add/person is the related-person
+  // widget link, but if another AJAX widget or Inline Entity Form ever loads
+  // this form via XHR it will also get the modal submit behavior below.
   if (!\Drupal::request()->isXmlHttpRequest()) {
     return;
   }
 
-  $form['#prefix'] = '<div id="mukurtu-person-modal-form">';
-  $form['#suffix'] = '</div>';
+  // Wrap the form so the AJAX callback can target it, preserving any prefix/
+  // suffix already set by other modules.
+  $existing_prefix = $form['#prefix'] ?? '';
+  $form['#prefix'] = '<div id="mukurtu-person-modal-form">' . $existing_prefix;
+  $existing_suffix = $form['#suffix'] ?? '';
+  $form['#suffix'] = $existing_suffix . '</div>';
 
   if (isset($form['actions']['submit'])) {
     $form['actions']['submit']['#ajax'] = [
@@ -103,6 +111,10 @@ function mukurtu_person_modal_save_callback(array &$form, FormStateInterface $fo
     return $form;
   }
   $response = new AjaxResponse();
+  // The announce message is intentionally generic. If the person's name should
+  // be included, retrieve it via $form_state->getFormObject()->getEntity()->label()
+  // and use t('@name created. Use the entity browser to select the new person.',
+  // ['@name' => $name]) — requires the entity to already be saved at this point.
   $response->addCommand(new AnnounceCommand(t('Person record created. Use the entity browser to select the new person.'), 'polite'));
   $response->addCommand(new CloseModalDialogCommand());
   return $response;
