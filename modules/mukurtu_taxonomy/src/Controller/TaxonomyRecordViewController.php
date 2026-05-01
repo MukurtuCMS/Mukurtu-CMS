@@ -12,7 +12,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\Routing\CacheableRedirectResponse;
+use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
 use Drupal\views\Views;
@@ -99,14 +99,14 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    * @param \Drupal\taxonomy\TermInterface $taxonomy_term
    *   The taxonomy term.
    *
-   * @return array|\Drupal\Core\Routing\CacheableRedirectResponse
+   * @return array|\Drupal\Core\Routing\TrustedRedirectResponse
    *   A redirect to the person record, or the full taxonomy term render array.
    */
-  public function build(TermInterface $taxonomy_term): array|CacheableRedirectResponse {
+  public function build(TermInterface $taxonomy_term): array|TrustedRedirectResponse {
     $person = $this->getSinglePersonRecord($taxonomy_term);
     if ($person) {
       $url = $person->toUrl()->setAbsolute()->toString();
-      $response = new CacheableRedirectResponse($url);
+      $response = new TrustedRedirectResponse($url);
       $cache = new CacheableMetadata();
       $cache->addCacheContexts(['user']);
       $cache->addCacheableDependency($taxonomy_term);
