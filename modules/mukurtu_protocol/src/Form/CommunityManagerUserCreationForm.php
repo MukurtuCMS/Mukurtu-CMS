@@ -248,7 +248,7 @@ class CommunityManagerUserCreationForm extends FormBase {
       if (!empty($protocolsByCommunity[$communityId])) {
         $statesConditions = [];
         foreach (array_keys($roles) as $roleName) {
-          $statesConditions[':input[name="membership[' . $communityId . '][community_roles][' . $roleName . ']"]'] = ['checked' => TRUE];
+          $statesConditions[] = [':input[name="membership[' . $communityId . '][community_roles][' . $roleName . ']"]' => ['checked' => TRUE]];
         }
 
         $form['membership'][$communityId]['protocols'] = [
