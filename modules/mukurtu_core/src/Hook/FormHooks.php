@@ -438,7 +438,7 @@ class FormHooks {
         }
       }
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
       \Drupal::logger('mukurtu_core')->error(
         'Error assigning memberships for new user @name: @message',
         ['@name' => $user->getAccountName(), '@message' => $e->getMessage()]

@@ -383,7 +383,7 @@ class CommunityManagerUserCreationForm extends FormBase {
         }
       }
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
       \Drupal::logger('mukurtu_protocol')->error('Error assigning memberships for new user @name: @message', [
         '@name' => $user->getAccountName(),
         '@message' => $e->getMessage(),
