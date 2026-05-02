@@ -127,6 +127,8 @@ field_settings:
         - 'entity:node/field_summary'
         - 'entity:node/field_translation'
         - 'entity:node/field_word_origin'
+        - 'entity:node/field_contributor:entity:name'
+        - 'entity:node/field_additional_word_entries:entity:field_contributor:entity:name'
   dictionary_browse_solr_keywords:
     label: Keywords
     datasource_id: 'entity:node'
@@ -175,7 +177,7 @@ field_settings:
   dictionary_browse_solr_word_type:
     label: 'Word Type'
     datasource_id: 'entity:node'
-    property_path: 'field_word_type:entity:name'
+    property_path: 'field_additional_word_entries:entity:field_word_type:entity:name'
     type: string
     dependencies:
       module:

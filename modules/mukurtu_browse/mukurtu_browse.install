@@ -263,3 +263,47 @@ function mukurtu_browse_update_40005(): void {
 
   $index->reindex();
 }
+
+/**
+ * Fix word type property path and add contributor to dictionary fulltext in browse index.
+ */
+function mukurtu_browse_update_40006(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  $changed = FALSE;
+
+  // Add missing contributor paths to the dictionary fulltext aggregated field.
+  $fulltext = $index->getField('dictionary_fulltext');
+  if ($fulltext) {
+    $config = $fulltext->getConfiguration();
+    $new_paths = [
+      'entity:node/field_contributor:entity:name',
+      'entity:node/field_additional_word_entries:entity:field_contributor:entity:name',
+    ];
+    foreach ($new_paths as $path) {
+      if (!in_array($path, $config['fields'])) {
+        $config['fields'][] = $path;
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $fulltext->setConfiguration($config);
+    }
+  }
+
+  // Fix word type property path to traverse through word entry paragraphs.
+  $word_type = $index->getField('word_type');
+  if ($word_type && $word_type->getPropertyPath() === 'field_word_type:entity:name') {
+    $word_type->setPropertyPath('field_additional_word_entries:entity:field_word_type:entity:name');
+    $changed = TRUE;
+  }
+
+  if ($changed) {
+    $index->save();
+  }
+
+  $index->reindex();
+}

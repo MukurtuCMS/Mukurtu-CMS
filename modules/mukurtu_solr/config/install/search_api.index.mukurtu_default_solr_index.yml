@@ -824,7 +824,7 @@ field_settings:
   node__field_word_type__name:
     label: 'Word Type'
     datasource_id: 'entity:node'
-    property_path: 'field_word_type:entity:name'
+    property_path: 'field_additional_word_entries:entity:field_word_type:entity:name'
     type: text
     dependencies:
       module:
@@ -833,7 +833,7 @@ field_settings:
   node__field_word_type__name__facet:
     label: 'Word Type Facet'
     datasource_id: 'entity:node'
-    property_path: 'field_word_type:entity:name'
+    property_path: 'field_additional_word_entries:entity:field_word_type:entity:name'
     type: string
     dependencies:
       module:
@@ -842,7 +842,7 @@ field_settings:
   node__field_word_type__uuid:
     label: 'Word Type » Taxonomy term » UUID'
     datasource_id: 'entity:node'
-    property_path: 'field_word_type:entity:uuid'
+    property_path: 'field_additional_word_entries:entity:field_word_type:entity:uuid'
     type: text
     dependencies:
       module:

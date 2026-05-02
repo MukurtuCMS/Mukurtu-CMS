@@ -56,6 +56,7 @@ field_settings:
         - 'entity:node/field_translation'
         - 'entity:node/field_word_origin'
         - 'entity:node/field_contributor:entity:name'
+        - 'entity:node/field_additional_word_entries:entity:field_contributor:entity:name'
         - 'entity:node/field_location:entity:name'
   field_glossary_entry:
     label: 'Glossary Entry'
@@ -151,7 +152,7 @@ field_settings:
   word_type:
     label: 'Word Type'
     datasource_id: 'entity:node'
-    property_path: 'field_word_type:entity:name'
+    property_path: 'field_additional_word_entries:entity:field_word_type:entity:name'
     type: string
     dependencies:
       module:
