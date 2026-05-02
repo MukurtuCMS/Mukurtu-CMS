@@ -1,7 +1,7 @@
 langcode: en
 status: true
 dependencies: {  }
-name: Place type
+name: 'Place type'
 vid: place_type
 description: null
 weight: 0

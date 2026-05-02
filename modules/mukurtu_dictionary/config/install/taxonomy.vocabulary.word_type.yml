@@ -6,3 +6,6 @@ vid: word_type
 description: null
 weight: 0
 new_revision: false
+third_party_settings:
+  flat_taxonomy:
+    flat: 1
