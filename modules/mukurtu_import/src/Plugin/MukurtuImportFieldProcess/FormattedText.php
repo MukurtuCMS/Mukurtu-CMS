@@ -32,6 +32,9 @@ class FormattedText extends MukurtuImportFieldProcessPluginBase {
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []): array {
     $multivalue_delimiter = $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER;
     $process = [];
+    $process[] = [
+      'plugin' => 'mukurtu_resolve_media_embeds',
+    ];
     if ($this->isMultiple($field_config)) {
       $process[] = [
         'plugin' => 'explode',
