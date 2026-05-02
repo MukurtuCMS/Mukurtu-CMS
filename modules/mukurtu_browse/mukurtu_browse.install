@@ -303,9 +303,8 @@ function mukurtu_browse_update_40006(): void {
 
   if ($changed) {
     $index->save();
+    $index->reindex();
   }
-
-  $index->reindex();
 }
 
 /**

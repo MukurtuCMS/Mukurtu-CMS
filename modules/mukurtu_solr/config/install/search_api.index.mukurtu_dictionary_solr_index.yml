@@ -130,6 +130,7 @@ field_settings:
         - 'entity:node/field_contributor:entity:name'
         - 'entity:node/field_additional_word_entries:entity:field_contributor:entity:name'
         - 'entity:node/field_additional_word_entries:entity:field_word_type:entity:name'
+        - 'entity:node/field_location:entity:name'
   dictionary_browse_solr_keywords:
     label: Keywords
     datasource_id: 'entity:node'
