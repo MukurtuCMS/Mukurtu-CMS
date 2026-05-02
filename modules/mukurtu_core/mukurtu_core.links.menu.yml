@@ -48,7 +48,7 @@ mukurtu_core.people:
   description: 'Manage users'
   parent: mukurtu_dashboard
   menu_name: dashboard-users
-  route_name: mukurtu_core.people
+  route_name: view.mukurtu_people.page_1
 mukurtu_core.create_user:
   title: 'Add user'
   description: 'Create a new user account.'
