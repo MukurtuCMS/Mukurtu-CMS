@@ -52,15 +52,15 @@ class SearchSettingsForm extends ConfigFormBase {
 
     $form['browse_display']['collapse_multipage_pages'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Only show the first page of multipage items in search results'),
-      '#description' => $this->t('When enabled, only the first page of each multipage item appears in browse and search results. Users can change this setting as they browse.'),
+      '#title' => $this->t('Show all multipage item pages in search results'),
+      '#description' => $this->t('When enabled, all pages of each multipage item appear in browse and search results. When disabled, only the first pages appear. Users can change this setting as they browse.'),
       '#default_value' => $config->get('collapse_multipage_pages') ?? TRUE,
     ];
 
     $form['browse_display']['collapse_community_records'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Only show original records in search results, not community records'),
-      '#description' => $this->t('When enabled, community records are hidden from browse and search results; only original records appear. Users can change this setting as they browse.'),
+      '#title' => $this->t('Show community records in search results'),
+      '#description' => $this->t('When enabled, community records are shown in browse and search results. When disabled, only the original records appear. Users can change this setting as they browse.'),
       '#default_value' => $config->get('collapse_community_records') ?? FALSE,
     ];
 
