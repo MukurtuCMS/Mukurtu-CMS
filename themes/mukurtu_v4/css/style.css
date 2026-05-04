@@ -1282,8 +1282,8 @@ a:not(.primary-nav__menu-link) svg.tel path {
 
 .ui-dialog {
   position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
+  top: 50vh !important;
+  left: 50vw !important;
   -webkit-transform: translate(-50%, -50%) !important;
           transform: translate(-50%, -50%) !important;
   margin: 0 !important;
