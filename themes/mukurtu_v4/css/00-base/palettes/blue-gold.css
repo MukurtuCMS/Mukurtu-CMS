@@ -12,10 +12,8 @@
   --mukurtu-mejs-background-color: var(--brand-light-accent);
   --mukurtu-mejs-time-rail-loaded-color: #e5e1e1;
   --mukurtu-mejs-time-rail-current-color: #d1cbcb;
-  --mukurtu-dictionary-word-label-background-color: var(
-    --mukurtu-view-row-divider-color
-  );
+  --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
   --mukurtu-collection-title-font-color: var(--color-white);
-  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
+  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg) ;
 }
 /*# sourceMappingURL=blue-gold.css.map */
