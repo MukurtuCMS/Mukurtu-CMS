@@ -58,6 +58,35 @@ field_settings:
       module:
         - node
         - taxonomy
+  dictionary_fulltext:
+    label: 'Dictionary Fulltext Content'
+    property_path: aggregated_field
+    type: text
+    configuration:
+      type: union
+      fields:
+        - 'entity:node/field_additional_word_entries:entity:field_alternate_spelling'
+        - 'entity:node/field_additional_word_entries:entity:field_definition'
+        - 'entity:node/field_additional_word_entries:entity:field_pronunciation'
+        - 'entity:node/field_additional_word_entries:entity:field_sample_sentences:entity:field_sentence'
+        - 'entity:node/field_additional_word_entries:entity:field_source'
+        - 'entity:node/field_additional_word_entries:entity:field_translation'
+        - 'entity:node/field_additional_word_entries:entity:field_word_entry_term'
+        - 'entity:node/field_additional_word_entries:entity:field_word_origin'
+        - 'entity:node/field_alternate_spelling'
+        - 'entity:node/field_coverage_description'
+        - 'entity:node/field_definition'
+        - 'entity:node/field_description'
+        - 'entity:node/field_pronunciation'
+        - 'entity:node/field_sample_sentences:entity:field_sentence'
+        - 'entity:node/field_source'
+        - 'entity:node/field_summary'
+        - 'entity:node/field_translation'
+        - 'entity:node/field_word_origin'
+        - 'entity:node/field_contributor:entity:name'
+        - 'entity:node/field_additional_word_entries:entity:field_contributor:entity:name'
+        - 'entity:node/field_word_type:entity:name'
+        - 'entity:node/field_additional_word_entries:entity:field_word_type:entity:name'
   field_coverage:
     label: 'Map Points'
     datasource_id: 'entity:node'
@@ -340,6 +369,15 @@ field_settings:
     dependencies:
       module:
         - node
+  word_type:
+    label: 'Word Type'
+    datasource_id: 'entity:node'
+    property_path: 'field_additional_word_entries:entity:field_word_type:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
 datasource_settings:
   'entity:node':
     bundles:
@@ -377,6 +415,7 @@ processor_settings:
       - community_title
       - contributor_name
       - creator_name
+      - dictionary_fulltext
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
@@ -416,6 +455,7 @@ processor_settings:
     fields:
       - contributor_name
       - creator_name
+      - dictionary_fulltext
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
@@ -438,6 +478,7 @@ processor_settings:
       - publisher_name
       - subject_name_text
       - title
+      - word_type
   language_with_fallback: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
   rendered_item: {  }
@@ -449,6 +490,7 @@ processor_settings:
     fields:
       - contributor_name
       - creator_name
+      - dictionary_fulltext
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
@@ -471,6 +513,7 @@ processor_settings:
       - publisher_name
       - subject_name_text
       - title
+      - word_type
     spaces: ''
     ignored: ._-
     overlap_cjk: 1
@@ -485,6 +528,7 @@ processor_settings:
       - community_title
       - contributor_name
       - creator_name
+      - dictionary_fulltext
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
@@ -515,6 +559,7 @@ processor_settings:
       - subject_name_text
       - title
       - type
+      - word_type
 tracker_settings:
   default:
     indexing_order: fifo
