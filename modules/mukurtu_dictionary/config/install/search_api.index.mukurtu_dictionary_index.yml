@@ -30,6 +30,36 @@ field_settings:
     dependencies:
       module:
         - mukurtu_protocol
+  dictionary_fulltext:
+    label: 'Dictionary Fulltext Content'
+    property_path: aggregated_field
+    type: text
+    configuration:
+      type: union
+      fields:
+        - 'entity:node/field_additional_word_entries:entity:field_alternate_spelling'
+        - 'entity:node/field_additional_word_entries:entity:field_definition'
+        - 'entity:node/field_additional_word_entries:entity:field_pronunciation'
+        - 'entity:node/field_additional_word_entries:entity:field_sample_sentences:entity:field_sentence'
+        - 'entity:node/field_additional_word_entries:entity:field_source'
+        - 'entity:node/field_additional_word_entries:entity:field_translation'
+        - 'entity:node/field_additional_word_entries:entity:field_word_entry_term'
+        - 'entity:node/field_additional_word_entries:entity:field_word_origin'
+        - 'entity:node/field_alternate_spelling'
+        - 'entity:node/field_coverage_description'
+        - 'entity:node/field_definition'
+        - 'entity:node/field_description'
+        - 'entity:node/field_pronunciation'
+        - 'entity:node/field_sample_sentences:entity:field_sentence'
+        - 'entity:node/field_source'
+        - 'entity:node/field_summary'
+        - 'entity:node/field_translation'
+        - 'entity:node/field_word_origin'
+        - 'entity:node/field_contributor:entity:name'
+        - 'entity:node/field_additional_word_entries:entity:field_contributor:entity:name'
+        - 'entity:node/field_word_type:entity:name'
+        - 'entity:node/field_additional_word_entries:entity:field_word_type:entity:name'
+        - 'entity:node/field_location:entity:name'
   field_glossary_entry:
     label: 'Glossary Entry'
     datasource_id: 'entity:node'
@@ -124,7 +154,7 @@ field_settings:
   word_type:
     label: 'Word Type'
     datasource_id: 'entity:node'
-    property_path: 'field_word_type:entity:name'
+    property_path: 'field_additional_word_entries:entity:field_word_type:entity:name'
     type: string
     dependencies:
       module:
@@ -179,6 +209,7 @@ processor_settings:
       preprocess_query: -20
     all_fields: false
     fields:
+      - dictionary_fulltext
       - title
   language_with_fallback: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
@@ -201,6 +232,7 @@ processor_settings:
     all_fields: false
     fields:
       - community_title
+      - dictionary_fulltext
       - keyword
       - language
       - title

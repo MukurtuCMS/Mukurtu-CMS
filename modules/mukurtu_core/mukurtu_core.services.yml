@@ -3,3 +3,8 @@ services:
     class: Drupal\mukurtu_core\Routing\RouteSubscriber
     tags:
       - { name: event_subscriber }
+  mukurtu_core.dashboard_block_access_subscriber:
+    class: Drupal\mukurtu_core\EventSubscriber\DashboardBlockAccessSubscriber
+    arguments: ['@current_user']
+    tags:
+      - { name: event_subscriber }
