@@ -12,7 +12,7 @@ documentation on how to use @include media(). */
 html {
   font-size: 100%;
   scroll-behavior: smooth;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 @media screen and (prefers-reduced-motion: reduce) {
   html {

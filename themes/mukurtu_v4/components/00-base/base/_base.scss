@@ -13,8 +13,10 @@ html {
   // Used for smoother scrolling by back-top.
   scroll-behavior: smooth;
 
-  // Disable horizontal scrolling.
-  overflow-x: hidden;
+  // Disable horizontal scrolling. overflow-x: clip (not hidden) is intentional —
+  // hidden creates a new containing block for position:fixed, which causes Drupal
+  // dialogs to center against the document height rather than the viewport.
+  overflow-x: clip;
 
   @media screen and (prefers-reduced-motion: reduce) {
     scroll-behavior: initial;
