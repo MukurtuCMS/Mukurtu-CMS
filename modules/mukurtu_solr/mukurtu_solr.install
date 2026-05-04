@@ -24,9 +24,40 @@ function mukurtu_solr_update_40001() {
 }
 
 /**
- * Add MPI and community record collapse fields to the Solr search indexes.
+ * Fix word type property paths in the default Solr index.
  */
 function mukurtu_solr_update_40002(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_solr_index');
+  if (!$index) {
+    return;
+  }
+
+  // Maps field ID to [old_path, new_path].
+  $field_path_updates = [
+    'node__field_word_type__name' => ['field_word_type:entity:name', 'field_additional_word_entries:entity:field_word_type:entity:name'],
+    'node__field_word_type__name__facet' => ['field_word_type:entity:name', 'field_additional_word_entries:entity:field_word_type:entity:name'],
+    'node__field_word_type__uuid' => ['field_word_type:entity:uuid', 'field_additional_word_entries:entity:field_word_type:entity:uuid'],
+  ];
+
+  $changed = FALSE;
+  foreach ($field_path_updates as $field_id => [$old_path, $new_path]) {
+    $field = $index->getField($field_id);
+    if ($field && $field->getPropertyPath() === $old_path) {
+      $field->setPropertyPath($new_path);
+      $changed = TRUE;
+    }
+  }
+
+  if ($changed) {
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Add MPI and community record collapse fields to the Solr search indexes.
+ */
+function mukurtu_solr_update_40003(): void {
   $module_handler = \Drupal::moduleHandler();
   $processor_manager = \Drupal::service('plugin.manager.search_api.processor');
 

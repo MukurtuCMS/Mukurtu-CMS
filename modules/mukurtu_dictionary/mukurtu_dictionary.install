@@ -116,12 +116,253 @@ function mukurtu_dictionary_update_40004(): void {
 }
 
 /**
+ * Add fulltext content, contributor, and location fields to dictionary search indexes.
+ */
+function mukurtu_dictionary_update_40005(): void {
+  $index_ids = ['mukurtu_dictionary_index', 'mukurtu_dictionary_solr_index'];
+
+  $new_fields = [
+    'mukurtu_dictionary_index' => [
+      'dictionary_fulltext' => [
+        'label' => 'Dictionary Fulltext Content',
+        'property_path' => 'aggregated_field',
+        'type' => 'text',
+        'configuration' => [
+          'type' => 'union',
+          'fields' => [
+            'entity:node/field_additional_word_entries:entity:field_alternate_spelling',
+            'entity:node/field_additional_word_entries:entity:field_definition',
+            'entity:node/field_additional_word_entries:entity:field_pronunciation',
+            'entity:node/field_additional_word_entries:entity:field_sample_sentences:entity:field_sentence',
+            'entity:node/field_additional_word_entries:entity:field_source',
+            'entity:node/field_additional_word_entries:entity:field_translation',
+            'entity:node/field_additional_word_entries:entity:field_word_entry_term',
+            'entity:node/field_additional_word_entries:entity:field_word_origin',
+            'entity:node/field_alternate_spelling',
+            'entity:node/field_coverage_description',
+            'entity:node/field_definition',
+            'entity:node/field_description',
+            'entity:node/field_pronunciation',
+            'entity:node/field_sample_sentences:entity:field_sentence',
+            'entity:node/field_source',
+            'entity:node/field_summary',
+            'entity:node/field_translation',
+            'entity:node/field_word_origin',
+            'entity:node/field_contributor:entity:name',
+            'entity:node/field_location:entity:name',
+          ],
+        ],
+      ],
+    ],
+    'mukurtu_dictionary_solr_index' => [
+      'dictionary_browse_solr_contributor' => [
+        'label' => 'Contributor (Dictionary Word)',
+        'datasource_id' => 'entity:node',
+        'property_path' => 'field_contributor:entity:name',
+        'type' => 'string',
+      ],
+      'dictionary_browse_solr_location' => [
+        'label' => 'Location',
+        'datasource_id' => 'entity:node',
+        'property_path' => 'field_location:entity:name',
+        'type' => 'string',
+      ],
+      'dictionary_browse_solr_fulltext' => [
+        'label' => 'Dictionary Fulltext Content',
+        'property_path' => 'aggregated_field',
+        'type' => 'text',
+        'configuration' => [
+          'type' => 'union',
+          'fields' => [
+            'entity:node/field_additional_word_entries:entity:field_alternate_spelling',
+            'entity:node/field_additional_word_entries:entity:field_definition',
+            'entity:node/field_additional_word_entries:entity:field_pronunciation',
+            'entity:node/field_additional_word_entries:entity:field_sample_sentences:entity:field_sentence',
+            'entity:node/field_additional_word_entries:entity:field_source',
+            'entity:node/field_additional_word_entries:entity:field_translation',
+            'entity:node/field_additional_word_entries:entity:field_word_entry_term',
+            'entity:node/field_additional_word_entries:entity:field_word_origin',
+            'entity:node/field_alternate_spelling',
+            'entity:node/field_coverage_description',
+            'entity:node/field_definition',
+            'entity:node/field_description',
+            'entity:node/field_pronunciation',
+            'entity:node/field_sample_sentences:entity:field_sentence',
+            'entity:node/field_source',
+            'entity:node/field_summary',
+            'entity:node/field_translation',
+            'entity:node/field_word_origin',
+          ],
+        ],
+      ],
+    ],
+  ];
+
+  foreach ($index_ids as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+    foreach ($new_fields[$index_id] as $field_id => $field_info) {
+      if ($index->getField($field_id)) {
+        continue;
+      }
+      $field = \Drupal::getContainer()
+        ->get('search_api.fields_helper')
+        ->createField($index, $field_id, $field_info);
+      $index->addField($field);
+    }
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Fix word type property path and add word entry contributor to fulltext.
+ */
+function mukurtu_dictionary_update_40006(): void {
+  $updates = [
+    'mukurtu_dictionary_index' => [
+      'fulltext_field' => 'dictionary_fulltext',
+      'word_type_field' => 'word_type',
+      'new_fulltext_paths' => [
+        'entity:node/field_additional_word_entries:entity:field_contributor:entity:name',
+      ],
+    ],
+    'mukurtu_dictionary_solr_index' => [
+      'fulltext_field' => 'dictionary_browse_solr_fulltext',
+      'word_type_field' => 'dictionary_browse_solr_word_type',
+      'new_fulltext_paths' => [
+        'entity:node/field_contributor:entity:name',
+        'entity:node/field_additional_word_entries:entity:field_contributor:entity:name',
+      ],
+    ],
+  ];
+
+  foreach ($updates as $index_id => $info) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+
+    $changed = FALSE;
+
+    // Add missing contributor paths to the fulltext aggregated field.
+    $fulltext = $index->getField($info['fulltext_field']);
+    if ($fulltext) {
+      $config = $fulltext->getConfiguration();
+      foreach ($info['new_fulltext_paths'] as $path) {
+        if (!in_array($path, $config['fields'])) {
+          $config['fields'][] = $path;
+          $changed = TRUE;
+        }
+      }
+      if ($changed) {
+        $fulltext->setConfiguration($config);
+      }
+    }
+
+    // Fix word type property path to traverse through word entry paragraphs.
+    $word_type = $index->getField($info['word_type_field']);
+    if ($word_type && $word_type->getPropertyPath() === 'field_word_type:entity:name') {
+      $word_type->setPropertyPath('field_additional_word_entries:entity:field_word_type:entity:name');
+      $changed = TRUE;
+    }
+
+    if ($changed) {
+      $index->save();
+      $index->reindex();
+    }
+  }
+}
+
+/**
+ * Add word type to dictionary fulltext aggregation.
+ */
+function mukurtu_dictionary_update_40007(): void {
+  $index_fulltext_map = [
+    'mukurtu_dictionary_index' => 'dictionary_fulltext',
+    'mukurtu_dictionary_solr_index' => 'dictionary_browse_solr_fulltext',
+  ];
+  $new_path = 'entity:node/field_additional_word_entries:entity:field_word_type:entity:name';
+
+  foreach ($index_fulltext_map as $index_id => $fulltext_field) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+    $field = $index->getField($fulltext_field);
+    if (!$field) {
+      continue;
+    }
+    $config = $field->getConfiguration();
+    if (!in_array($new_path, $config['fields'])) {
+      $config['fields'][] = $new_path;
+      $field->setConfiguration($config);
+      $index->save();
+      $index->reindex();
+    }
+  }
+}
+
+/**
+ * Add location to dictionary Solr index fulltext aggregation.
+ */
+function mukurtu_dictionary_update_40008(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_solr_index');
+  if (!$index) {
+    return;
+  }
+  $field = $index->getField('dictionary_browse_solr_fulltext');
+  if (!$field) {
+    return;
+  }
+  $new_path = 'entity:node/field_location:entity:name';
+  $config = $field->getConfiguration();
+  if (!in_array($new_path, $config['fields'])) {
+    $config['fields'][] = $new_path;
+    $field->setConfiguration($config);
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Add node-level word type to dictionary fulltext aggregation.
+ */
+function mukurtu_dictionary_update_40009(): void {
+  $index_fulltext_map = [
+    'mukurtu_dictionary_index' => 'dictionary_fulltext',
+    'mukurtu_dictionary_solr_index' => 'dictionary_browse_solr_fulltext',
+  ];
+  $new_path = 'entity:node/field_word_type:entity:name';
+
+  foreach ($index_fulltext_map as $index_id => $fulltext_field) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+    $field = $index->getField($fulltext_field);
+    if (!$field) {
+      continue;
+    }
+    $config = $field->getConfiguration();
+    if (!in_array($new_path, $config['fields'])) {
+      $config['fields'][] = $new_path;
+      $field->setConfiguration($config);
+      $index->save();
+      $index->reindex();
+    }
+  }
+}
+
+/**
  * Add MPI and community record collapse fields to the dictionary index.
  *
  * Each processor/field pair is added only if the providing module is enabled,
  * since MPI and community records are optional features enabled after install.
  */
-function mukurtu_dictionary_update_40005(): void {
+function mukurtu_dictionary_update_40010(): void {
   $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
   if (!$index) {
     return;
@@ -190,12 +431,12 @@ function mukurtu_dictionary_update_40005(): void {
 }
 
 /**
- * Re-apply MPI/CR collapse fields if the 40005 save failed.
+ * Re-apply MPI/CR collapse fields if the 40010 save failed.
  *
- * The 40005 hook ran (schema was bumped) but the index save may have failed
+ * The 40010 hook ran (schema was bumped) but the index save may have failed
  * because the install config briefly declared those modules as hard
- * dependencies. This hook is idempotent and a no-op when 40005 succeeded.
+ * dependencies. This hook is idempotent and a no-op when 40010 succeeded.
  */
-function mukurtu_dictionary_update_40006(): void {
-  mukurtu_dictionary_update_40005();
+function mukurtu_dictionary_update_40011(): void {
+  mukurtu_dictionary_update_40010();
 }
