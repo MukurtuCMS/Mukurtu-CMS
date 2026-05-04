@@ -59,7 +59,6 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
         'data-dialog-options' => json_encode([
           'width' => 800,
           'maxHeight' => '90vh',
-          'position' => ['my' => 'center', 'at' => 'center', 'of' => 'window'],
         ]),
         'aria-haspopup' => 'dialog',
       ],

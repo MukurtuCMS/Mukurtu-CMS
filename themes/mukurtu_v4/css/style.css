@@ -12,7 +12,7 @@ documentation on how to use @include media(). */
 html {
   font-size: 100%;
   scroll-behavior: smooth;
-  overflow-x: clip;
+  overflow-x: hidden;
 }
 @media screen and (prefers-reduced-motion: reduce) {
   html {
@@ -1278,6 +1278,20 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .field--name-field-featured-content h3 .featured-item__title-link:hover,
 .field--name-field-all-related-content .field__items h3 .featured-item__title-link:hover {
   text-decoration: underline;
+}
+
+.ui-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  -webkit-transform: translate(-50%, -50%) !important;
+          transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+}
+
+.ui-widget-overlay {
+  position: fixed !important;
+  inset: 0 !important;
 }
 
 .form-item + .form-item {

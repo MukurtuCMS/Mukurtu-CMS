@@ -1,0 +1,15 @@
+// jQuery UI dialogs lose viewport-relative positioning when overflow-x: hidden
+// is set on the html element (browsers treat it as the fixed containing block).
+// These rules restore viewport centering without touching global layout.
+.ui-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+}
+
+.ui-widget-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+}
