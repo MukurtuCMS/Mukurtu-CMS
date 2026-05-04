@@ -130,6 +130,16 @@ field_settings:
       module:
         - node
         - taxonomy
+  is_additional_mpi_page:
+    label: 'Is additional multipage item page'
+    datasource_id: 'entity:node'
+    property_path: is_additional_mpi_page
+    type: boolean
+  is_community_record:
+    label: 'Is community record'
+    datasource_id: 'entity:node'
+    property_path: is_community_record
+    type: boolean
 datasource_settings:
   'entity:node':
     bundles:
@@ -181,6 +191,8 @@ processor_settings:
     fields:
       - title
   language_with_fallback: {  }
+  mukurtu_community_record_flag: {  }
+  mukurtu_multipage_page_index: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
   rendered_item: {  }
   tokenizer:
