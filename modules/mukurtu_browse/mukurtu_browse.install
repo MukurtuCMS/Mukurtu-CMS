@@ -216,13 +216,19 @@ function mukurtu_browse_update_40005(): void {
           'entity:node/field_summary',
           'entity:node/field_translation',
           'entity:node/field_word_origin',
+          // field_location is intentionally excluded: it is already indexed as a
+          // standalone field for all content types in this index.
+          'entity:node/field_contributor:entity:name',
+          'entity:node/field_additional_word_entries:entity:field_contributor:entity:name',
+          'entity:node/field_word_type:entity:name',
+          'entity:node/field_additional_word_entries:entity:field_word_type:entity:name',
         ],
       ],
     ],
     'word_type' => [
       'label' => 'Word Type',
       'datasource_id' => 'entity:node',
-      'property_path' => 'field_word_type:entity:name',
+      'property_path' => 'field_additional_word_entries:entity:field_word_type:entity:name',
       'type' => 'string',
     ],
   ];
@@ -265,7 +271,7 @@ function mukurtu_browse_update_40005(): void {
 }
 
 /**
- * Fix word type property path and add contributor to dictionary fulltext in browse index.
+ * Ensure contributor paths are in dictionary fulltext and word type path is correct.
  */
 function mukurtu_browse_update_40006(): void {
   $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
@@ -275,13 +281,16 @@ function mukurtu_browse_update_40006(): void {
 
   $changed = FALSE;
 
-  // Add missing contributor paths to the dictionary fulltext aggregated field.
+  // These paths were added to 40005 after initial release; keep here for sites
+  // that ran 40005 before the fix landed.
   $fulltext = $index->getField('dictionary_fulltext');
   if ($fulltext) {
     $config = $fulltext->getConfiguration();
     $new_paths = [
       'entity:node/field_contributor:entity:name',
       'entity:node/field_additional_word_entries:entity:field_contributor:entity:name',
+      'entity:node/field_word_type:entity:name',
+      'entity:node/field_additional_word_entries:entity:field_word_type:entity:name',
     ];
     foreach ($new_paths as $path) {
       if (!in_array($path, $config['fields'])) {
@@ -294,7 +303,8 @@ function mukurtu_browse_update_40006(): void {
     }
   }
 
-  // Fix word type property path to traverse through word entry paragraphs.
+  // Correct path added in 40005 after initial release; fix any sites that ran
+  // the old version.
   $word_type = $index->getField('word_type');
   if ($word_type && $word_type->getPropertyPath() === 'field_word_type:entity:name') {
     $word_type->setPropertyPath('field_additional_word_entries:entity:field_word_type:entity:name');

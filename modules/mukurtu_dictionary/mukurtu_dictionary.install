@@ -306,6 +306,28 @@ function mukurtu_dictionary_update_40007(): void {
 }
 
 /**
+ * Add location to dictionary Solr index fulltext aggregation.
+ */
+function mukurtu_dictionary_update_40008(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_solr_index');
+  if (!$index) {
+    return;
+  }
+  $field = $index->getField('dictionary_browse_solr_fulltext');
+  if (!$field) {
+    return;
+  }
+  $new_path = 'entity:node/field_location:entity:name';
+  $config = $field->getConfiguration();
+  if (!in_array($new_path, $config['fields'])) {
+    $config['fields'][] = $new_path;
+    $field->setConfiguration($config);
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
  * Add node-level word type to dictionary fulltext aggregation.
  */
 function mukurtu_dictionary_update_40009(): void {
@@ -331,27 +353,5 @@ function mukurtu_dictionary_update_40009(): void {
       $index->save();
       $index->reindex();
     }
-  }
-}
-
-/**
- * Add location to dictionary Solr index fulltext aggregation.
- */
-function mukurtu_dictionary_update_40008(): void {
-  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_solr_index');
-  if (!$index) {
-    return;
-  }
-  $field = $index->getField('dictionary_browse_solr_fulltext');
-  if (!$field) {
-    return;
-  }
-  $new_path = 'entity:node/field_location:entity:name';
-  $config = $field->getConfiguration();
-  if (!in_array($new_path, $config['fields'])) {
-    $config['fields'][] = $new_path;
-    $field->setConfiguration($config);
-    $index->save();
-    $index->reindex();
   }
 }
