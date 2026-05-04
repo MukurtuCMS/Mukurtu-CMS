@@ -6,7 +6,6 @@ use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -60,45 +59,12 @@ class SearchCollapseToggleBlock extends BlockBase implements ContainerFactoryPlu
       ? (bool) $query_params['cr_collapse']
       : (bool) ($config->get('collapse_community_records') ?? FALSE);
 
-    $items = [];
-
-    // Multipage items toggle.
-    $mpi_toggle_params = array_merge($query_params, ['mpi_collapse' => $collapse_mpi ? 0 : 1]);
-    $items[] = [
-      '#type' => 'container',
-      '#attributes' => ['class' => ['search-collapse-toggle__item']],
-      'label' => [
-        '#markup' => $this->t('Multipage items:') . ' ',
-      ],
-      'link' => [
-        '#type' => 'link',
-        '#title' => $collapse_mpi ? $this->t('Show all pages') : $this->t('First page only'),
-        '#url' => Url::fromRoute('<current>', [], ['query' => $mpi_toggle_params]),
-      ],
-    ];
-
-    // Community records toggle.
-    $cr_toggle_params = array_merge($query_params, ['cr_collapse' => $collapse_cr ? 0 : 1]);
-    $items[] = [
-      '#type' => 'container',
-      '#attributes' => ['class' => ['search-collapse-toggle__item']],
-      'label' => [
-        '#markup' => $this->t('Community records:') . ' ',
-      ],
-      'link' => [
-        '#type' => 'link',
-        '#title' => $collapse_cr ? $this->t('Show community records') : $this->t('Hide community records'),
-        '#url' => Url::fromRoute('<current>', [], ['query' => $cr_toggle_params]),
-      ],
-    ];
-
     return [
-      '#type' => 'container',
-      '#attributes' => ['class' => ['search-collapse-toggle']],
-      'items' => $items,
-      '#cache' => [
-        'contexts' => ['url.query_args'],
-      ],
+      '#theme' => 'search_collapse_toggle',
+      '#show_all_pages' => !$collapse_mpi,
+      '#show_community_records' => !$collapse_cr,
+      '#attached' => ['library' => ['mukurtu_browse/search-collapse-toggle']],
+      '#cache' => ['contexts' => ['url.query_args']],
     ];
   }
 

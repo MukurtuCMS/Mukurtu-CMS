@@ -21,6 +21,12 @@ function mukurtu_browse_theme($existing, $type, $theme, $path) {
         'map_results' => NULL,
       ],
     ],
+    'search_collapse_toggle' => [
+      'variables' => [
+        'show_all_pages' => TRUE,
+        'show_community_records' => FALSE,
+      ],
+    ],
   ];
 }
 
@@ -354,7 +360,12 @@ function _mukurtu_browse_ensure_processor_on_index(
  * Implements hook_preprocess_block().
  */
 function mukurtu_browse_preprocess_block(&$variables) {
-  if (!isset($variables['plugin_id']) || !in_array($variables['plugin_id'], ['views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block', 'views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block'])) {
+  $browse_block_ids = [
+    'views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block',
+    'views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block',
+    'views_exposed_filter_block:mukurtu_dictionary-mukurtu_dictionary_block',
+  ];
+  if (!isset($variables['plugin_id']) || !in_array($variables['plugin_id'], $browse_block_ids)) {
     return;
   }
   if (isset($variables['content']['search_api_fulltext'])) {
@@ -363,4 +374,10 @@ function mukurtu_browse_preprocess_block(&$variables) {
   if (isset($variables['content']['sort_by'])) {
     $variables['content']['sort_by']['#weight'] = -10.8;
   }
+
+  // Inject the display options toggle between sort by and the first facet.
+  $toggle_plugin = \Drupal::service('plugin.manager.block')->createInstance('mukurtu_search_collapse_toggle');
+  $toggle = $toggle_plugin->build();
+  $toggle['#weight'] = -5;
+  $variables['content']['search_collapse_toggle'] = $toggle;
 }
