@@ -242,16 +242,6 @@ mukurtu_protocol.protocol_create:
   requirements:
     _permission: 'add protocol entities'
 
-mukurtu_protocol.my_memberships:
-  path: '/user/memberships'
-  defaults:
-    _controller: '\Drupal\mukurtu_protocol\Controller\UserMembershipsController::content'
-    _title: 'My Memberships'
-  options:
-    _admin_route: TRUE
-  requirements:
-    _user_is_logged_in: 'TRUE'
-
 mukurtu_protocol.user_memberships:
   path: '/user/{user}/memberships'
   defaults:
