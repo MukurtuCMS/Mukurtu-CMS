@@ -192,24 +192,42 @@ function _mukurtu_browse_reindex_mpi_pages($entity, $original = NULL) {
     return;
   }
 
-  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
-  if (!$index || !$index->status()) {
+  // Load each node and group translation item IDs by bundle so we can resolve
+  // the correct set of Search API indexes for each bundle.
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $item_ids_by_bundle = [];
+  foreach ($node_ids as $node_id) {
+    $node = $node_storage->load($node_id);
+    if (!$node) {
+      continue;
+    }
+    $bundle = $node->bundle();
+    foreach ($node->getTranslationLanguages() as $langcode => $language) {
+      $item_ids_by_bundle[$bundle][] = $node_id . ':' . $langcode;
+    }
+  }
+
+  if (empty($item_ids_by_bundle)) {
     return;
   }
 
-  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
-  $item_ids = [];
-  foreach ($node_ids as $node_id) {
-    $node = $node_storage->load($node_id);
-    if ($node) {
-      foreach ($node->getTranslationLanguages() as $langcode => $language) {
-        $item_ids[] = $node_id . ':' . $langcode;
+  // For each bundle, find all covering indexes and mark items for reindexing.
+  // Deduplicate by index ID to avoid double-tracking when multiple bundles
+  // resolve to the same index.
+  $index_item_ids = [];
+  foreach ($item_ids_by_bundle as $bundle => $item_ids) {
+    foreach (_mukurtu_browse_indexes_for_bundle($bundle) as $index) {
+      if ($index->status()) {
+        $index_item_ids[$index->id()]['index'] = $index;
+        $index_item_ids[$index->id()]['item_ids'] = array_unique(
+          array_merge($index_item_ids[$index->id()]['item_ids'] ?? [], $item_ids)
+        );
       }
     }
   }
 
-  if (!empty($item_ids)) {
-    $index->trackItemsUpdated('entity:node', $item_ids);
+  foreach ($index_item_ids as $entry) {
+    $entry['index']->trackItemsUpdated('entity:node', $entry['item_ids']);
   }
 }
 
