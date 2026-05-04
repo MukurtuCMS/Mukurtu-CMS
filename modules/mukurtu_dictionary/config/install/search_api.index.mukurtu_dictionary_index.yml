@@ -57,6 +57,7 @@ field_settings:
         - 'entity:node/field_word_origin'
         - 'entity:node/field_contributor:entity:name'
         - 'entity:node/field_additional_word_entries:entity:field_contributor:entity:name'
+        - 'entity:node/field_word_type:entity:name'
         - 'entity:node/field_additional_word_entries:entity:field_word_type:entity:name'
         - 'entity:node/field_location:entity:name'
   field_glossary_entry:

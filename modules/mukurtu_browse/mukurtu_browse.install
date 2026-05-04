@@ -328,3 +328,25 @@ function mukurtu_browse_update_40007(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Add node-level word type to dictionary fulltext aggregation in browse index.
+ */
+function mukurtu_browse_update_40008(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+  $field = $index->getField('dictionary_fulltext');
+  if (!$field) {
+    return;
+  }
+  $new_path = 'entity:node/field_word_type:entity:name';
+  $config = $field->getConfiguration();
+  if (!in_array($new_path, $config['fields'])) {
+    $config['fields'][] = $new_path;
+    $field->setConfiguration($config);
+    $index->save();
+    $index->reindex();
+  }
+}
