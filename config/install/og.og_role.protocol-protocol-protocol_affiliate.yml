@@ -5,7 +5,7 @@ dependencies:
     - mukurtu_protocol
 id: protocol-protocol-protocol_affiliate
 label: 'Protocol Affiliate'
-weight: 2
+weight: 14
 is_admin: null
 group_type: protocol
 group_bundle: protocol

@@ -464,3 +464,92 @@ function mukurtu_core_update_40011(): void {
     $old_menu->delete();
   }
 }
+
+/**
+ * Remove "Add Component" and child links from the account menu.
+ */
+function mukurtu_core_update_40012(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+
+  $ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('menu_name', 'account')
+    ->condition('title', 'Add Component')
+    ->execute();
+
+  foreach ($ids as $id) {
+    $parent = $storage->load($id);
+    if (!$parent) {
+      continue;
+    }
+    $child_ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('parent', 'menu_link_content:' . $parent->uuid())
+      ->execute();
+    foreach ($storage->loadMultiple($child_ids) as $child) {
+      $child->delete();
+    }
+    $parent->delete();
+  }
+}
+
+/**
+ * Reorder account menu: Create Content first (-1000), Dashboard second (-100).
+ *
+ * Matches by title in the account menu. Admins may have renamed these links,
+ * in which case this hook silently skips them — no manual follow-up needed
+ * since custom names imply intentional customization.
+ */
+function mukurtu_core_update_40013(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+
+  $weights = [
+    'Create Content' => -1000,
+    'Dashboard' => -100,
+  ];
+
+  foreach ($weights as $title => $weight) {
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('menu_name', 'account')
+      ->condition('title', $title)
+      ->execute();
+    foreach ($storage->loadMultiple($ids) as $link) {
+      $link->set('weight', $weight)->save();
+    }
+  }
+}
+
+/**
+ * Reorganize mukurtu_dashboard blocks: move admin panels to region three,
+ * recent content to region two, and update weights throughout.
+ */
+function mukurtu_core_update_40014(): void {
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  $sections = $config->get('sections');
+
+  // Map of component UUID => [region, weight] to apply.
+  $updates = [
+    '0d6f9095-ddc7-4e04-b102-a47eab86f9dc' => ['region' => 'two',   'weight' => 2],
+    '7ea8f4fe-f816-4b62-80ed-597ea6d8d39a' => ['region' => 'three', 'weight' => 8],
+    '4baf6b8d-6deb-4742-aac9-5a4ca97be575' => ['region' => 'one',   'weight' => 2],
+    '8e52ecf9-f13d-4974-b4e5-9ecff8af170a' => ['region' => 'one',   'weight' => 3],
+    '9c53fff8-81e9-481e-b21c-2000b83a178e' => ['region' => 'one',   'weight' => 4],
+    'bb1a29d8-00e8-4229-b1b0-20d69ca33db7' => ['region' => 'two',   'weight' => 6],
+    '0339943d-08c4-45a9-9f08-052ad308db5e' => ['region' => 'three', 'weight' => 6],
+    'a663f15a-8760-424c-9433-c3f97fa8b623' => ['region' => 'three', 'weight' => 7],
+    '02ce0aa5-8aec-43f3-b2e0-62d5dbf8efce' => ['region' => 'three', 'weight' => 5],
+    '58ca9634-095d-4720-9aed-76c640314ac4' => ['region' => 'one',   'weight' => 6],
+  ];
+
+  foreach ($sections as $section_key => $section) {
+    foreach ($section['components'] ?? [] as $uuid => $component) {
+      if (isset($updates[$uuid])) {
+        $sections[$section_key]['components'][$uuid]['region'] = $updates[$uuid]['region'];
+        $sections[$section_key]['components'][$uuid]['weight'] = $updates[$uuid]['weight'];
+      }
+    }
+  }
+
+  $config->set('sections', $sections)->save();
+}

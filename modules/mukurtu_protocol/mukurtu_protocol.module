@@ -17,8 +17,10 @@ use Drupal\node\NodeInterface;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Url;
 use Drupal\og\Og;
+use Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction;
 
 /**
  * @file
@@ -69,6 +71,33 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles)
 }
 
 /**
+ * Implements hook_views_pre_render().
+ *
+ * Clears stale VBO tempstore on the people list when a bulk action was
+ * started but never completed (the user navigated away from the action form).
+ * The presence of 'action_id' in the tempstore indicates a submitted-but-
+ * abandoned operation; plain row selections do not set this key.
+ */
+function mukurtu_protocol_views_pre_render(\Drupal\views\ViewExecutable $view): void {
+  // Todo: fetch the display id programmatically instead of hardcoding it to page_1.
+  if ($view->id() !== 'mukurtu_people' || $view->current_display !== 'page_1') {
+    return;
+  }
+  if (!\Drupal::request()->isMethod('GET')) {
+    return;
+  }
+  $uid = \Drupal::currentUser()->id();
+  // VBO tempstore key follows the convention: views_bulk_operations_{view_id}_{display_id}.
+  // Todo: fetch display id instead of hardcoding.
+  $tempstore = \Drupal::service('tempstore.private')
+    ->get('views_bulk_operations_mukurtu_people_page_1');
+  $data = $tempstore->get((string) $uid);
+  if (!empty($data['action_id'])) {
+    $tempstore->delete((string) $uid);
+  }
+}
+
+/**
  * Implements hook_views_data_alter().
  */
 function mukurtu_protocol_views_data_alter(array &$data)
@@ -79,6 +108,13 @@ function mukurtu_protocol_views_data_alter(array &$data)
       'title' => t('Communities'),
       'field' => [
         'id' => 'user_community',
+      ],
+    ];
+    // Add a plain-text roles field (no list markup).
+    $data['users']['roles_plain'] = [
+      'title' => t('Site Roles (plain)'),
+      'field' => [
+        'id' => 'user_roles_plain',
       ],
     ];
   }
@@ -711,11 +747,11 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
   // Make roles field required on og forms.
   $form['roles']['widget']['#required'] = TRUE;
 
-  $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
-
   // Add validation to prevent users from being added to protocols without
   // adding them first to the protocol owning communities.
+  $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
   if ($group instanceof ProtocolInterface) {
+    // Only add the form validator if this form is in the protocol context.
     $form['#validate'][] = 'add_protocol_member_form_validate';
   }
 
@@ -786,4 +822,48 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
       }
     }
   }
+}
+
+/**
+ * Implements hook_action_info_alter().
+ *
+ * Replaces OG's og_membership_delete_action class with a Mukurtu-aware
+ * version that blocks community member removal when the user still belongs
+ * to a child protocol. This avoids any view config or update hook dependency.
+ */
+function mukurtu_protocol_action_info_alter(array &$definitions): void {
+  if (isset($definitions['og_membership_delete_action'])) {
+    $definitions['og_membership_delete_action']['class'] = MukurtuDeleteOgMembershipAction::class;
+  }
+}
+
+/**
+ * Implements hook_entity_access().
+ *
+ * Prevents deleting an OG community membership when the user still belongs to
+ * any protocols within that community.
+ */
+function mukurtu_protocol_entity_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($operation !== 'delete' || $entity->getEntityTypeId() !== 'og_membership') {
+    return AccessResult::neutral();
+  }
+
+  /** @var \Drupal\og\Entity\OgMembership $entity */
+  $group = $entity->getGroup();
+  if (!$group instanceof CommunityInterface) {
+    return AccessResult::neutral();
+  }
+
+  $member = $entity->getOwner();
+  if (!$member) {
+    return AccessResult::neutral();
+  }
+
+  foreach ($group->getProtocols() as $protocol) {
+    if ($protocol->getMembership($member)) {
+      return AccessResult::forbidden()->setReason(t('Cannot remove @user from the community while they belong to a protocol within it. Remove them from all protocols first.', ['@user' => $member->getDisplayName()]));
+    }
+  }
+
+  return AccessResult::neutral();
 }
