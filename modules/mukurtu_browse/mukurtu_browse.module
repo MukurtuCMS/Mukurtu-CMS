@@ -111,9 +111,25 @@ function mukurtu_browse_preprocess_node(&$variables) {
  * when the corresponding admin setting is enabled. The site-wide default can
  * be overridden per-request with the URL parameters mpi_collapse and
  * cr_collapse (1 = collapse, 0 = expand).
+ *
+ * Collections pages always hide community records and additional MPI pages.
  */
 function mukurtu_browse_views_query_alter($view, $query) {
   if (!$query instanceof SearchApiQuery) {
+    return;
+  }
+
+  $api_query = $query->getSearchApiQuery();
+  $index_fields = $api_query->getIndex()->getFields();
+
+  // Collections pages never show community records or additional MPI pages.
+  if (in_array($view->id(), ['mukurtu_browse_collections', 'mukurtu_browse_collections_solr'])) {
+    if (isset($index_fields['is_additional_mpi_page'])) {
+      $api_query->addCondition('is_additional_mpi_page', TRUE, '<>');
+    }
+    if (isset($index_fields['is_community_record'])) {
+      $api_query->addCondition('is_community_record', TRUE, '<>');
+    }
     return;
   }
 
@@ -131,9 +147,6 @@ function mukurtu_browse_views_query_alter($view, $query) {
   if (!$collapse_mpi && !$collapse_cr) {
     return;
   }
-
-  $api_query = $query->getSearchApiQuery();
-  $index_fields = $api_query->getIndex()->getFields();
 
   if ($collapse_mpi && isset($index_fields['is_additional_mpi_page'])) {
     $api_query->addCondition('is_additional_mpi_page', TRUE, '<>');
