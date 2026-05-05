@@ -209,8 +209,10 @@ class ProtocolAddForm extends EntityForm {
 
     $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 
-    // Pass users to JS for client-side autocomplete. When a community is set,
-    // restrict to its active members; otherwise fall back to all active users.
+    // Pass users to JS for client-side autocomplete, excluding anyone already
+    // added to the membership table. When a community is set, restrict to its
+    // active members; otherwise fall back to all active users.
+    $already_added = array_keys($form_state->get('members') ?? []);
     $suggestions = [];
     if ($community) {
       $memberships = \Drupal::entityTypeManager()
@@ -222,7 +224,7 @@ class ProtocolAddForm extends EntityForm {
         ]);
       foreach ($memberships as $membership) {
         $member = $membership->getOwner();
-        if ($member && $member->id() > 0) {
+        if ($member && $member->id() > 0 && !in_array($member->id(), $already_added)) {
           $suggestions[] = [
             'value' => $member->getDisplayName() . ' (' . $member->id() . ')',
             'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')',
@@ -238,6 +240,9 @@ class ProtocolAddForm extends EntityForm {
         ->sort('name')
         ->execute();
       foreach ($this->entityTypeManager->getStorage('user')->loadMultiple($uids) as $uid => $u) {
+        if (in_array($uid, $already_added)) {
+          continue;
+        }
         $suggestions[] = [
           'value' => $u->getDisplayName() . ' (' . $uid . ')',
           'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
@@ -262,6 +267,7 @@ class ProtocolAddForm extends EntityForm {
       '#type' => 'details',
       '#title' => t('Role descriptions'),
       '#open' => FALSE,
+      '#attributes' => ['class' => ['role-descriptions']],
       'list' => [
         '#theme' => 'item_list',
         '#items' => $items,
@@ -404,6 +410,41 @@ class ProtocolAddForm extends EntityForm {
     ];
 
     return $actions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    parent::validateForm($form, $form_state);
+
+    $roles = array_keys(static::getRoles());
+    $stored_members = $form_state->get('members') ?? [];
+    $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
+    $missing = [];
+
+    foreach ($stored_members as $uid => $data) {
+      $row = $table_values[$uid] ?? [];
+      $has_role = FALSE;
+      foreach ($roles as $role) {
+        if (!empty($row[$role])) {
+          $has_role = TRUE;
+          break;
+        }
+      }
+      if (!$has_role) {
+        $missing[] = $data['entity']->getDisplayName();
+      }
+    }
+
+    if ($missing) {
+      $form_state->setError(
+        $form['membership_wrapper']['member_table'],
+        $this->t('All members must be assigned at least one role. Missing roles for: @names.', [
+          '@names' => implode(', ', $missing),
+        ])
+      );
+    }
   }
 
   /**

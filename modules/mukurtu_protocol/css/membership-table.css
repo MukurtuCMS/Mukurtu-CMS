@@ -66,3 +66,8 @@
   align-self: flex-end;
   margin-bottom: 0;
 }
+
+/* Role descriptions: match surrounding form text size */
+.role-descriptions summary {
+  font-size: 1rem;
+}

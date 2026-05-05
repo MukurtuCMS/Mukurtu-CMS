@@ -101,7 +101,9 @@ class CommunityAddForm extends ContentEntityForm {
 
     $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 
-    // Pass all active users to JS for client-side autocomplete.
+    // Pass all active users to JS for client-side autocomplete, excluding
+    // anyone already added to the membership table.
+    $already_added = array_keys($form_state->get('members') ?? []);
     $uids = $this->entityTypeManager->getStorage('user')->getQuery()
       ->accessCheck(FALSE)
       ->condition('status', 1)
@@ -110,6 +112,9 @@ class CommunityAddForm extends ContentEntityForm {
       ->execute();
     $suggestions = [];
     foreach ($this->entityTypeManager->getStorage('user')->loadMultiple($uids) as $uid => $u) {
+      if (in_array($uid, $already_added)) {
+        continue;
+      }
       $suggestions[] = [
         'value' => $u->getDisplayName() . ' (' . $uid . ')',
         'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
@@ -149,6 +154,7 @@ class CommunityAddForm extends ContentEntityForm {
       '#type' => 'details',
       '#title' => t('Role descriptions'),
       '#open' => FALSE,
+      '#attributes' => ['class' => ['role-descriptions']],
       'list' => [
         '#theme' => 'item_list',
         '#items' => $items,
@@ -265,6 +271,41 @@ class CommunityAddForm extends ContentEntityForm {
     unset($members[$uid]);
     $form_state->set('members', $members);
     $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    parent::validateForm($form, $form_state);
+
+    $roles = ['community_member', 'community_affiliate', 'community_manager'];
+    $stored_members = $form_state->get('members') ?? [];
+    $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
+    $missing = [];
+
+    foreach ($stored_members as $uid => $data) {
+      $row = $table_values[$uid] ?? [];
+      $has_role = FALSE;
+      foreach ($roles as $role) {
+        if (!empty($row[$role])) {
+          $has_role = TRUE;
+          break;
+        }
+      }
+      if (!$has_role) {
+        $missing[] = $data['entity']->getDisplayName();
+      }
+    }
+
+    if ($missing) {
+      $form_state->setError(
+        $form['membership_wrapper']['member_table'],
+        $this->t('All members must be assigned at least one role. Missing roles for: @names.', [
+          '@names' => implode(', ', $missing),
+        ])
+      );
+    }
   }
 
   /**
