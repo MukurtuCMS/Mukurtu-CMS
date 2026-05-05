@@ -295,6 +295,7 @@ class ProtocolAddForm extends EntityForm {
     ];
 
     $error_uids = $form_state->get('membership_role_errors') ?? [];
+    $current_uid = \Drupal::currentUser()->id();
 
     foreach ($form_state->get('members') ?? [] as $uid => $data) {
       /** @var \Drupal\user\UserInterface $member */
@@ -310,11 +311,13 @@ class ProtocolAddForm extends EntityForm {
       ];
 
       foreach ($roles as $role_id => $label) {
+        $locked = ($uid == $current_uid && $role_id === 'protocol_steward');
         $row[$role_id] = [
           '#type' => 'checkbox',
           '#title' => $label,
           '#title_display' => 'invisible',
-          '#default_value' => in_array($role_id, $data['roles']),
+          '#default_value' => $locked ? 1 : in_array($role_id, $data['roles']),
+          '#disabled' => $locked,
           '#attributes' => ['aria-label' => t('@role for @name', ['@role' => $label, '@name' => $name])],
         ];
       }
@@ -426,10 +429,16 @@ class ProtocolAddForm extends EntityForm {
     $roles = array_keys(static::getRoles());
     $stored_members = $form_state->get('members') ?? [];
     $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
+    $current_uid = $this->currentUser()->id();
     $missing_names = [];
     $missing_uids = [];
 
     foreach ($stored_members as $uid => $data) {
+      // The current user's protocol_steward checkbox is locked, so treat it
+      // as always checked when determining whether they have a role.
+      if ($uid == $current_uid) {
+        continue;
+      }
       $row = $table_values[$uid] ?? [];
       $has_role = FALSE;
       foreach ($roles as $role) {
@@ -453,6 +462,23 @@ class ProtocolAddForm extends EntityForm {
         ])
       );
     }
+
+    $has_steward = FALSE;
+    foreach ($stored_members as $uid => $data) {
+      $row = $table_values[$uid] ?? [];
+      // Current user's steward checkbox is locked, so count them directly.
+      if (!empty($row['protocol_steward']) || $uid == $current_uid) {
+        $has_steward = TRUE;
+        break;
+      }
+    }
+
+    if (!$has_steward) {
+      $form_state->setError(
+        $form['membership_wrapper']['membership_label'],
+        $this->t('At least one member must be assigned the Protocol steward role.')
+      );
+    }
   }
 
   /**
@@ -470,6 +496,8 @@ class ProtocolAddForm extends EntityForm {
     $stored_members = $form_state->get('members') ?? [];
     $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
 
+    $current_uid = $this->currentUser()->id();
+
     foreach ($stored_members as $uid => $data) {
       $roles = [];
       $user_row = $table_values[$uid] ?? [];
@@ -477,6 +505,10 @@ class ProtocolAddForm extends EntityForm {
         if (!empty($user_row[$role])) {
           $roles[] = $role;
         }
+      }
+      // The current user's steward checkbox is disabled and won't be submitted.
+      if ($uid == $current_uid && !in_array('protocol_steward', $roles)) {
+        $roles[] = 'protocol_steward';
       }
       if (!isset($this->members[$uid])) {
         $this->members[$uid] = ['entity' => $data['entity'], 'roles' => $roles];

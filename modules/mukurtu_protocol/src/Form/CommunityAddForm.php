@@ -186,6 +186,7 @@ class CommunityAddForm extends ContentEntityForm {
     ];
 
     $error_uids = $form_state->get('membership_role_errors') ?? [];
+    $current_uid = \Drupal::currentUser()->id();
 
     foreach ($form_state->get('members') ?? [] as $uid => $data) {
       /** @var \Drupal\user\UserInterface $member */
@@ -201,11 +202,13 @@ class CommunityAddForm extends ContentEntityForm {
       ];
 
       foreach ($roles as $role_id => $label) {
+        $locked = ($uid == $current_uid && $role_id === 'community_manager');
         $row[$role_id] = [
           '#type' => 'checkbox',
           '#title' => $label,
           '#title_display' => 'invisible',
-          '#default_value' => in_array($role_id, $data['roles']),
+          '#default_value' => $locked ? 1 : in_array($role_id, $data['roles']),
+          '#disabled' => $locked,
           '#attributes' => ['aria-label' => t('@role for @name', ['@role' => $label, '@name' => $name])],
         ];
       }
@@ -287,10 +290,16 @@ class CommunityAddForm extends ContentEntityForm {
     $roles = ['community_member', 'community_affiliate', 'community_manager'];
     $stored_members = $form_state->get('members') ?? [];
     $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
+    $current_uid = $this->currentUser()->id();
     $missing_names = [];
     $missing_uids = [];
 
     foreach ($stored_members as $uid => $data) {
+      // The current user's community_manager checkbox is locked, so treat it
+      // as always checked when determining whether they have a role.
+      if ($uid == $current_uid) {
+        continue;
+      }
       $row = $table_values[$uid] ?? [];
       $has_role = FALSE;
       foreach ($roles as $role) {
@@ -315,10 +324,12 @@ class CommunityAddForm extends ContentEntityForm {
       );
     }
 
+    $current_uid = $this->currentUser()->id();
     $has_manager = FALSE;
     foreach ($stored_members as $uid => $data) {
       $row = $table_values[$uid] ?? [];
-      if (!empty($row['community_manager'])) {
+      // Current user's manager checkbox is locked, so check form_state directly.
+      if (!empty($row['community_manager']) || $uid == $current_uid) {
         $has_manager = TRUE;
         break;
       }
@@ -342,6 +353,8 @@ class CommunityAddForm extends ContentEntityForm {
     $stored_members = $form_state->get('members') ?? [];
     $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
 
+    $current_uid = $this->currentUser()->id();
+
     foreach ($stored_members as $uid => $data) {
       $roles = [];
       $user_row = $table_values[$uid] ?? [];
@@ -349,6 +362,10 @@ class CommunityAddForm extends ContentEntityForm {
         if (!empty($user_row[$role])) {
           $roles[] = $role;
         }
+      }
+      // The current user's manager checkbox is disabled and won't be submitted.
+      if ($uid == $current_uid && !in_array('community_manager', $roles)) {
+        $roles[] = 'community_manager';
       }
       $this->members[$uid] = ['entity' => $data['entity'], 'roles' => $roles];
     }
