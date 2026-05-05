@@ -65,6 +65,7 @@ class CommunityAddForm extends ContentEntityForm {
       '#tree' => TRUE,
       '#weight' => 1001,
       '#access' => $this->isDefaultFormLangcode($form_state),
+      '#attributes' => ['id' => 'membership-wrapper'],
     ];
 
     $form['membership_wrapper']['membership_label'] = [
@@ -121,6 +122,7 @@ class CommunityAddForm extends ContentEntityForm {
       ];
     }
     $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
+    $form['#attached']['drupalSettings']['mukurtuMembership']['scrollToTable'] = (bool) $form_state->get('membership_scroll');
 
     return $form;
   }
@@ -266,6 +268,7 @@ class CommunityAddForm extends ContentEntityForm {
     $user_input = $form_state->getUserInput();
     $user_input['membership_wrapper']['add_row']['user_search'] = '';
     $form_state->setUserInput($user_input);
+    $form_state->set('membership_scroll', TRUE);
     $form_state->setRebuild(TRUE);
   }
 
@@ -278,6 +281,7 @@ class CommunityAddForm extends ContentEntityForm {
     $members = $form_state->get('members') ?? [];
     unset($members[$uid]);
     $form_state->set('members', $members);
+    $form_state->set('membership_scroll', TRUE);
     $form_state->setRebuild(TRUE);
   }
 

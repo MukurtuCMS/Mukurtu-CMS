@@ -166,6 +166,7 @@ class ProtocolAddForm extends EntityForm {
     $form['membership_wrapper'] = [
       '#type' => 'container',
       '#tree' => TRUE,
+      '#attributes' => ['id' => 'membership-wrapper'],
     ];
 
     $form['membership_wrapper']['membership_label'] = [
@@ -250,6 +251,7 @@ class ProtocolAddForm extends EntityForm {
       }
     }
     $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
+    $form['#attached']['drupalSettings']['mukurtuMembership']['scrollToTable'] = (bool) $form_state->get('membership_scroll');
 
     return $form;
   }
@@ -375,6 +377,7 @@ class ProtocolAddForm extends EntityForm {
     $user_input = $form_state->getUserInput();
     $user_input['membership_wrapper']['add_row']['user_search'] = '';
     $form_state->setUserInput($user_input);
+    $form_state->set('membership_scroll', TRUE);
     $form_state->setRebuild(TRUE);
   }
 
@@ -387,6 +390,7 @@ class ProtocolAddForm extends EntityForm {
     $members = $form_state->get('members') ?? [];
     unset($members[$uid]);
     $form_state->set('members', $members);
+    $form_state->set('membership_scroll', TRUE);
     $form_state->setRebuild(TRUE);
   }
 

@@ -1,6 +1,17 @@
 (function ($, Drupal, drupalSettings, once) {
   'use strict';
 
+  Drupal.behaviors.membershipScroll = {
+    attach(context) {
+      once('membership-scroll', 'body', context).forEach(() => {
+        if ((drupalSettings.mukurtuMembership || {}).scrollToTable) {
+          const el = document.getElementById('membership-wrapper');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    },
+  };
+
   Drupal.behaviors.membershipAutocomplete = {
     attach(context) {
       once('membership-autocomplete', '.membership-add-row .form-autocomplete', context).forEach((input) => {
