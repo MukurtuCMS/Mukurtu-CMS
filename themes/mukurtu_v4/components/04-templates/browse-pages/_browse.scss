@@ -271,12 +271,18 @@
         }
 
         // Display options toggle box — matches facet box styling.
+        // Rendered as a <fieldset> for a11y grouping; reset browser defaults.
         .search-collapse-toggle {
           background-color: var(--mukurtu-panel-pane-content-background-color);
           margin-block-start: 1rem;
           margin-block-end: var(--v-space-4xs);
+          border: none;
+          padding: 0;
+          min-inline-size: 0;
 
           &__header {
+            display: block;
+            width: 100%;
             background-color: var(--brand-primary-dark);
             color: var(--light-text-color);
             font-size: var(--font-size-m);
@@ -312,13 +318,13 @@
             border: 0;
           }
 
-          // Toggle switch track.
+          // Toggle switch track. Height ≥ 24px meets WCAG 2.5.8 target size.
           &__switch {
             display: inline-block;
             flex-shrink: 0;
             width: 36px;
-            height: 20px;
-            border-radius: 10px;
+            height: 24px;
+            border-radius: 12px;
             background-color: var(--color-greys-alpha-border);
             position: relative;
             transition: background-color 0.2s;
@@ -329,8 +335,8 @@
               position: absolute;
               inset-block-start: 2px;
               inset-inline-start: 2px;
-              width: 16px;
-              height: 16px;
+              width: 20px;
+              height: 20px;
               border-radius: 50%;
               background-color: var(--light-text-color);
               transition: inset-inline-start 0.2s;
@@ -345,13 +351,14 @@
             background-color: var(--brand-primary);
 
             &::after {
-              inset-inline-start: 18px;
+              inset-inline-start: 14px;
             }
           }
 
           // Focus ring on the visual switch for keyboard users.
+          // --brand-primary-dark achieves ≥ 3:1 contrast against page background (WCAG 1.4.11).
           &__input:focus-visible + .search-collapse-toggle__switch {
-            outline: 3px solid var(--brand-secondary);
+            outline: 3px solid var(--brand-primary-dark);
             outline-offset: 2px;
           }
 
@@ -383,8 +390,9 @@
           cursor: pointer;
           min-block-size: 24px;
 
+          // --brand-primary-dark achieves ≥ 3:1 contrast against page background (WCAG 1.4.11).
           &:focus-visible {
-            outline: 3px solid var(--brand-secondary);
+            outline: 3px solid var(--brand-primary-dark);
             outline-offset: 2px;
           }
         }

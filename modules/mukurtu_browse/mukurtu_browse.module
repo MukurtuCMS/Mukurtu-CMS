@@ -138,7 +138,7 @@ function mukurtu_browse_views_query_alter($view, $query) {
 
   $collapse_mpi = $req->has('mpi_collapse')
     ? (bool) $req->get('mpi_collapse')
-    : (bool) ($config->get('collapse_multipage_pages') ?? TRUE);
+    : (bool) ($config->get('collapse_multipage_pages') ?? FALSE);
 
   $collapse_cr = $req->has('cr_collapse')
     ? (bool) $req->get('cr_collapse')

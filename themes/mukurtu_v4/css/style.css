@@ -4026,8 +4026,13 @@ header {
           margin-block-start: 1rem;
   -webkit-margin-after: var(--v-space-4xs);
           margin-block-end: var(--v-space-4xs);
+  border: none;
+  padding: 0;
+  min-inline-size: 0;
 }
 .browse__main-content .browse-container .browse-facets .search-collapse-toggle__header {
+  display: block;
+  width: 100%;
   background-color: var(--brand-primary-dark);
   color: var(--light-text-color);
   font-size: var(--font-size-m);
@@ -4072,8 +4077,8 @@ header {
   -ms-flex-negative: 0;
       flex-shrink: 0;
   width: 36px;
-  height: 20px;
-  border-radius: 10px;
+  height: 24px;
+  border-radius: 12px;
   background-color: var(--color-greys-alpha-border);
   position: relative;
   -webkit-transition: background-color 0.2s;
@@ -4084,8 +4089,8 @@ header {
   position: absolute;
   inset-block-start: 2px;
   inset-inline-start: 2px;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background-color: var(--light-text-color);
   -webkit-transition: inset-inline-start 0.2s;
@@ -4095,10 +4100,10 @@ header {
   background-color: var(--brand-primary);
 }
 .browse__main-content .browse-container .browse-facets .search-collapse-toggle__input:checked + .search-collapse-toggle__switch::after {
-  inset-inline-start: 18px;
+  inset-inline-start: 14px;
 }
 .browse__main-content .browse-container .browse-facets .search-collapse-toggle__input:focus-visible + .search-collapse-toggle__switch {
-  outline: 3px solid var(--brand-secondary);
+  outline: 3px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .browse__main-content .browse-container .browse-facets .search-collapse-toggle__label {
@@ -4127,7 +4132,7 @@ header {
   min-block-size: 24px;
 }
 .browse__main-content .browse-container .browse-facets .facets-soft-limit-link:focus-visible {
-  outline: 3px solid var(--brand-secondary);
+  outline: 3px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .browse .pager__items {

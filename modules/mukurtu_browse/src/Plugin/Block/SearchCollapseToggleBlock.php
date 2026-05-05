@@ -53,7 +53,7 @@ class SearchCollapseToggleBlock extends BlockBase implements ContainerFactoryPlu
 
     $collapse_mpi = array_key_exists('mpi_collapse', $query_params)
       ? (bool) $query_params['mpi_collapse']
-      : (bool) ($config->get('collapse_multipage_pages') ?? TRUE);
+      : (bool) ($config->get('collapse_multipage_pages') ?? FALSE);
 
     $collapse_cr = array_key_exists('cr_collapse', $query_params)
       ? (bool) $query_params['cr_collapse']

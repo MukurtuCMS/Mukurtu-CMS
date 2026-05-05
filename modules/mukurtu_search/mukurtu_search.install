@@ -24,12 +24,12 @@ function mukurtu_search_update_40001() {
 }
 
 /**
- * Set default collapse settings: MPI collapse on, CR collapse off.
+ * Set default collapse settings: both off (preserves existing behaviour).
  */
 function mukurtu_search_update_40002(): void {
   $config = \Drupal::configFactory()->getEditable('mukurtu_search.settings');
   if ($config->get('collapse_multipage_pages') === NULL) {
-    $config->set('collapse_multipage_pages', TRUE);
+    $config->set('collapse_multipage_pages', FALSE);
   }
   if ($config->get('collapse_community_records') === NULL) {
     $config->set('collapse_community_records', FALSE);
