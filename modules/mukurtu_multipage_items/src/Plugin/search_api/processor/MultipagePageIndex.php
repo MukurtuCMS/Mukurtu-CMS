@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_multipage_items\Plugin\search_api\processor;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Attribute\SearchApiProcessor;
@@ -29,7 +30,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
     'add_properties' => 0,
   ],
 )]
-class MultipagePageIndex extends ProcessorPluginBase {
+class MultipagePageIndex extends ProcessorPluginBase implements ContainerFactoryPluginInterface {
 
   public function __construct(
     array $configuration,
