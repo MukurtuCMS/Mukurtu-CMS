@@ -54,14 +54,14 @@ class SearchSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Show all multipage item pages in search results'),
       '#description' => $this->t('When enabled, all pages of each multipage item appear in browse and search results. When disabled, only the first pages appear. Users can change this setting as they browse.'),
-      '#default_value' => $config->get('collapse_multipage_pages') ?? TRUE,
+      '#default_value' => !($config->get('collapse_multipage_pages') ?? TRUE),
     ];
 
     $form['browse_display']['collapse_community_records'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show community records in search results'),
       '#description' => $this->t('When enabled, community records are shown in browse and search results. When disabled, only the original records appear. Users can change this setting as they browse.'),
-      '#default_value' => $config->get('collapse_community_records') ?? FALSE,
+      '#default_value' => !($config->get('collapse_community_records') ?? FALSE),
     ];
 
     $form['backend'] = [
@@ -86,8 +86,8 @@ class SearchSettingsForm extends ConfigFormBase {
 
     // backend.
     $config->set('backend', $form_state->getValue('backend'));
-    $config->set('collapse_multipage_pages', (bool) $form_state->getValue('collapse_multipage_pages'));
-    $config->set('collapse_community_records', (bool) $form_state->getValue('collapse_community_records'));
+    $config->set('collapse_multipage_pages', !(bool) $form_state->getValue('collapse_multipage_pages'));
+    $config->set('collapse_community_records', !(bool) $form_state->getValue('collapse_community_records'));
     $config->save();
 
     parent::submitForm($form, $form_state);
