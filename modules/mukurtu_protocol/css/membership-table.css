@@ -71,3 +71,7 @@
 .role-descriptions summary {
   font-size: 1rem;
 }
+
+.role-descriptions .item-list {
+  font-size: var(--gin-font-size-s);
+}

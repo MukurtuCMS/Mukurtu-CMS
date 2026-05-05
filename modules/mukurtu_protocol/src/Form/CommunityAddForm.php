@@ -185,12 +185,17 @@ class CommunityAddForm extends ContentEntityForm {
       '#attributes' => ['class' => ['membership-table']],
     ];
 
+    $error_uids = $form_state->get('membership_role_errors') ?? [];
+
     foreach ($form_state->get('members') ?? [] as $uid => $data) {
       /** @var \Drupal\user\UserInterface $member */
       $member = $data['entity'];
       $name = $member->getDisplayName();
 
       $row = [];
+      if (in_array($uid, $error_uids)) {
+        $row['#attributes']['class'][] = 'error';
+      }
       $row['user'] = [
         '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
       ];
@@ -282,7 +287,8 @@ class CommunityAddForm extends ContentEntityForm {
     $roles = ['community_member', 'community_affiliate', 'community_manager'];
     $stored_members = $form_state->get('members') ?? [];
     $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
-    $missing = [];
+    $missing_names = [];
+    $missing_uids = [];
 
     foreach ($stored_members as $uid => $data) {
       $row = $table_values[$uid] ?? [];
@@ -294,16 +300,34 @@ class CommunityAddForm extends ContentEntityForm {
         }
       }
       if (!$has_role) {
-        $missing[] = $data['entity']->getDisplayName();
+        $missing_names[] = $data['entity']->getDisplayName();
+        $missing_uids[] = $uid;
       }
     }
 
-    if ($missing) {
+    if ($missing_names) {
+      $form_state->set('membership_role_errors', $missing_uids);
       $form_state->setError(
-        $form['membership_wrapper']['member_table'],
+        $form['membership_wrapper']['membership_label'],
         $this->t('All members must be assigned at least one role. Missing roles for: @names.', [
-          '@names' => implode(', ', $missing),
+          '@names' => implode(', ', $missing_names),
         ])
+      );
+    }
+
+    $has_manager = FALSE;
+    foreach ($stored_members as $uid => $data) {
+      $row = $table_values[$uid] ?? [];
+      if (!empty($row['community_manager'])) {
+        $has_manager = TRUE;
+        break;
+      }
+    }
+
+    if (!$has_manager) {
+      $form_state->setError(
+        $form['membership_wrapper']['membership_label'],
+        $this->t('At least one member must be assigned the Community manager role.')
       );
     }
   }
