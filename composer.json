@@ -59,7 +59,7 @@
         "drupal/migrate_tools": "^6.0",
         "drupal/og": "^1.x-dev",
         "drupal/paragraphs": "*",
-        "drupal/pathauto": "*",
+        "drupal/pathauto": "^1.14",
         "drupal/redirect": "*",
         "drupal/restui": "*",
         "drupal/search_api": "*",
