@@ -514,9 +514,7 @@ class ProtocolAddForm extends EntityForm {
       if ($uid == $current_uid && !in_array('protocol_steward', $roles)) {
         $roles[] = 'protocol_steward';
       }
-      if (!isset($this->members[$uid])) {
-        $this->members[$uid] = ['entity' => $data['entity'], 'roles' => $roles];
-      }
+      $this->members[$uid] = ['entity' => $data['entity'], 'roles' => $roles];
     }
 
     return $entity;

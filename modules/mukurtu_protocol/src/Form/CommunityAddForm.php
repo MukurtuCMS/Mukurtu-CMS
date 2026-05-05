@@ -169,9 +169,9 @@ class CommunityAddForm extends ContentEntityForm {
    */
   protected static function buildMembershipTable(FormStateInterface $form_state): array {
     $roles = [
-      'community_member' => t('Member'),
-      'community_affiliate' => t('Affiliate'),
-      'community_manager' => t('Manager'),
+      'community_member' => t('Community member'),
+      'community_affiliate' => t('Community affiliate'),
+      'community_manager' => t('Community manager'),
     ];
 
     $header = [t('User')];
