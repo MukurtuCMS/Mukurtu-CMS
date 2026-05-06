@@ -13,15 +13,17 @@ html {
   // Used for smoother scrolling by back-top.
   scroll-behavior: smooth;
 
-  // Disable horizontal scrolling.
-  overflow-x: hidden;
-
   @media screen and (prefers-reduced-motion: reduce) {
     scroll-behavior: initial;
   }
 }
 
 body {
+  // overflow-x: hidden must live on body, not html. Setting it on html
+  // propagates to the viewport and causes browsers (Chrome, Safari) to use
+  // the document as the containing block for position:fixed elements, which
+  // makes modal dialogs scroll with the page rather than staying viewport-fixed.
+  overflow-x: hidden;
   margin: 0;
   color: var(--brand-text-color);
   font-size: var(--font-size-base);
