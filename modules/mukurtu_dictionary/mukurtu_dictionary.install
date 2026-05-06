@@ -355,3 +355,88 @@ function mukurtu_dictionary_update_40009(): void {
     }
   }
 }
+
+/**
+ * Add MPI and community record collapse fields to the dictionary index.
+ *
+ * Each processor/field pair is added only if the providing module is enabled,
+ * since MPI and community records are optional features enabled after install.
+ */
+function mukurtu_dictionary_update_40010(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if (!$index) {
+    return;
+  }
+
+  $module_handler = \Drupal::moduleHandler();
+  $processor_manager = \Drupal::service('plugin.manager.search_api.processor');
+  $processors = $index->getProcessors();
+  $index_changed = FALSE;
+
+  $candidates = [
+    [
+      'module' => 'mukurtu_multipage_items',
+      'processor_id' => 'mukurtu_multipage_page_index',
+      'field_id' => 'is_additional_mpi_page',
+      'field' => [
+        'type' => 'boolean',
+        'property_path' => 'is_additional_mpi_page',
+        'datasource_id' => 'entity:node',
+        'label' => 'Is additional multipage item page',
+      ],
+    ],
+    [
+      'module' => 'mukurtu_community_records',
+      'processor_id' => 'mukurtu_community_record_flag',
+      'field_id' => 'is_community_record',
+      'field' => [
+        'type' => 'boolean',
+        'property_path' => 'is_community_record',
+        'datasource_id' => 'entity:node',
+        'label' => 'Is community record',
+      ],
+    ],
+  ];
+
+  foreach ($candidates as $candidate) {
+    if (!$module_handler->moduleExists($candidate['module'])) {
+      continue;
+    }
+
+    if (!isset($processors[$candidate['processor_id']])) {
+      $processor = $processor_manager->createInstance($candidate['processor_id'], ['#index' => $index]);
+      $processors[$candidate['processor_id']] = $processor;
+      $index_changed = TRUE;
+    }
+
+    if (!$index->getField($candidate['field_id'])) {
+      $cfg = $candidate['field'];
+      $field = new \Drupal\search_api\Item\Field($index, $candidate['field_id']);
+      $field->setType($cfg['type']);
+      $field->setPropertyPath($cfg['property_path']);
+      $field->setDatasourceId($cfg['datasource_id']);
+      $field->setLabel($cfg['label']);
+      $index->addField($field);
+      $index_changed = TRUE;
+    }
+  }
+
+  if (!$index_changed) {
+    return;
+  }
+
+  $index->setProcessors($processors);
+  $index->save();
+  $index->reindex();
+}
+
+/**
+ * Re-apply MPI/CR collapse fields if the 40010 save failed.
+ *
+ * The 40010 hook ran (schema was bumped) but the index save may have failed
+ * because the install config briefly declared those modules as hard
+ * dependencies. This hook is idempotent and a no-op when 40010 succeeded.
+ */
+function mukurtu_dictionary_update_40011(): void {
+  mukurtu_dictionary_update_40010();
+}
