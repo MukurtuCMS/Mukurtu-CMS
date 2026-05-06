@@ -3,6 +3,7 @@
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\AnnounceCommand;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -51,6 +52,37 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
 
   if (isset($element['current']['#prefix'])) {
     $element['current']['#prefix'] = '';
+  }
+
+  // Pass the host node ID to hook_views_query_alter so the entity browser can
+  // exclude it (preventing a person from selecting itself as a related person).
+  //
+  // Why TempStore: the entity browser fires on its own AJAX route
+  // (/entity-browser/modal/mukurtu_content_browser), so \Drupal::routeMatch()
+  // inside hook_views_query_alter reflects that route, not the person edit
+  // page. TempStore is the only reliable way to carry data across that
+  // request boundary.
+  //
+  // Known limitation: the stored value applies to ALL mukurtu_content_browser
+  // entity browser opens by this user within the TTL window, not only the one
+  // on this person form. Two guards limit the blast radius:
+  //   1. bundle='person' check in hook_views_query_alter — only person nodes
+  //      are ever excluded, never other content types.
+  //   2. 1-hour TTL — the value expires well before TempStore's 7-day default,
+  //      so a stale entry from an earlier edit session cannot persist.
+  // A fully scoped fix (per-form-build-ID key) is tracked in the backlog.
+  $form_object = $form_state->getFormObject();
+  if ($form_object instanceof ContentEntityFormInterface) {
+    $host = $form_object->getEntity();
+    if ($host->getEntityTypeId() === 'node' && !$host->isNew()) {
+      \Drupal::service('tempstore.private')
+        ->get('mukurtu_person')
+        ->set('related_person_exclude', [
+          'nid' => $host->id(),
+          'bundle' => $host->bundle(),
+          'time' => \Drupal::time()->getRequestTime(),
+        ]);
+    }
   }
 
   $create_url = Url::fromRoute('node.add', ['node_type' => 'person'], ['query' => ['mukurtu_modal' => '1']]);
@@ -141,12 +173,26 @@ function mukurtu_person_views_query_alter(ViewExecutable $view, QueryPluginBase 
     return;
   }
 
-  $node = \Drupal::routeMatch()->getParameter('node');
-  if (!$node || $node->bundle() !== 'person' || $node->isNew()) {
+  // Read the exclusion written by hook_field_widget_single_element_form_alter.
+  // See that hook for a full explanation of why TempStore is used here and
+  // what the known limitations are.
+  $data = \Drupal::service('tempstore.private')
+    ->get('mukurtu_person')
+    ->get('related_person_exclude');
+
+  if (!$data || empty($data['nid']) || empty($data['bundle']) || empty($data['time'])) {
+    return;
+  }
+  // Guard 1: only suppress person nodes, never other content types.
+  if ($data['bundle'] !== 'person') {
+    return;
+  }
+  // Guard 2: ignore values older than 1 hour (TempStore default TTL is 7 days).
+  if (\Drupal::time()->getRequestTime() - $data['time'] > 3600) {
     return;
   }
 
-  $query->addWhere('', 'node_field_data.nid', $node->id(), '<>');
+  $query->addWhere('', 'node_field_data.nid', $data['nid'], '<>');
 }
 
 /**
