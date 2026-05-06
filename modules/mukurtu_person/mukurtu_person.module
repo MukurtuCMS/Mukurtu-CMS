@@ -47,6 +47,10 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
   $existing_prefix = $element['entity_browser']['#prefix'] ?? '';
   $element['entity_browser']['#prefix'] = '<p>' . t('Select a related person record.') . '</p>' . $existing_prefix;
 
+  if (isset($element['current']['#prefix'])) {
+    $element['current']['#prefix'] = '<p>' . t('Select one person record.') . '</p>';
+  }
+
   $create_url = Url::fromRoute('node.add', ['node_type' => 'person']);
   if ($create_url->access()) {
     $element['create_person_link'] = [
