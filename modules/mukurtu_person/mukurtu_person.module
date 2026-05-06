@@ -3,12 +3,15 @@
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\AnnounceCommand;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\mukurtu_core\Entity\FormattedTextWithTitle;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\Entity\RelatedPerson;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
 
 /**
 * @file
@@ -49,6 +52,18 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
 
   if (isset($element['current']['#prefix'])) {
     $element['current']['#prefix'] = '';
+  }
+
+  // Store the host node ID in temp store so hook_views_query_alter can exclude
+  // it from the entity browser view, preventing self-selection.
+  $form_object = $form_state->getFormObject();
+  if ($form_object instanceof ContentEntityFormInterface) {
+    $host = $form_object->getEntity();
+    if ($host->getEntityTypeId() === 'node' && !$host->isNew()) {
+      \Drupal::service('tempstore.private')
+        ->get('mukurtu_person')
+        ->set('related_person_exclude_id', $host->id());
+    }
   }
 
   $create_url = Url::fromRoute('node.add', ['node_type' => 'person']);
@@ -125,6 +140,26 @@ function mukurtu_person_modal_save_callback(array &$form, FormStateInterface $fo
   $response->addCommand(new AnnounceCommand(t('Person record created. Use the entity browser to select the new person.'), 'polite'));
   $response->addCommand(new CloseModalDialogCommand());
   return $response;
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * Excludes the person node currently being edited from the mukurtu_content_browser
+ * view so a person record cannot select itself as a related person.
+ */
+function mukurtu_person_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  if ($view->id() !== 'mukurtu_content_browser' || $view->current_display !== 'entity_browser') {
+    return;
+  }
+
+  $exclude_id = \Drupal::service('tempstore.private')
+    ->get('mukurtu_person')
+    ->get('related_person_exclude_id');
+
+  if ($exclude_id) {
+    $query->addWhere('', 'node_field_data.nid', $exclude_id, '<>');
+  }
 }
 
 /**
