@@ -238,6 +238,7 @@ class ProtocolAddForm extends EntityForm {
     $form['membership_wrapper'] = [
       '#type' => 'container',
       '#tree' => TRUE,
+      '#weight' => 5,
       '#attributes' => ['id' => 'membership-wrapper'],
     ];
 
