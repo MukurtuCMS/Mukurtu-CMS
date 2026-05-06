@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\og\Og;
@@ -208,6 +209,21 @@ class ProtocolAddForm extends EntityForm {
       $form['field_communities']['#weight'] = 2;
       $form['field_description']['#weight'] = 3;
       $form['field_membership_display']['#weight'] = 4;
+
+      // Remove all entity form display fields not needed on the standalone form.
+      $standalone_allowed = [
+        'name',
+        'field_access_mode',
+        'field_communities',
+        'field_description',
+        'field_membership_display',
+        'actions',
+      ];
+      foreach (Element::children($form) as $key) {
+        if (!in_array($key, $standalone_allowed)) {
+          unset($form[$key]);
+        }
+      }
     }
 
     // Seed the member list on first load with the current user as protocol steward.
