@@ -308,8 +308,9 @@ function _mukurtu_browse_mpi_settings_submit(array &$form, FormStateInterface $f
 /**
  * Returns all Search API indexes whose entity:node datasource covers $bundle.
  *
- * When datasource bundles.default is TRUE, selected[] is an exclusion list.
- * When datasource bundles.default is FALSE, selected[] is an inclusion list.
+ * Note on confusing config convention:
+ * When datasource config's ['bundles']['default'] is TRUE, the bundles listed in ['bundles']['selected'] are NOT indexed.
+ * Likewise, when ['bundles']['default'] is FALSE, the bundles listed in ['bundles']['selected'] ARE indexed.
  *
  * @return \Drupal\search_api\Entity\Index[]
  */
