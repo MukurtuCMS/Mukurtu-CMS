@@ -194,6 +194,13 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
   }
 
   /**
+   * Suppresses the default add-form route — replaced by mukurtu_protocol.protocol_create.
+   */
+  protected function getAddFormRoute(EntityTypeInterface $entity_type): ?Route {
+    return NULL;
+  }
+
+  /**
    * Gets the collection route.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
