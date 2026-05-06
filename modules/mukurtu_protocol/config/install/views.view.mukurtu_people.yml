@@ -867,10 +867,10 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
-        roles_target_id:
-          id: roles_target_id
-          table: user__roles
-          field: roles_target_id
+        roles_filter:
+          id: roles_filter
+          table: users
+          field: roles
           relationship: none
           group_type: group
           admin_label: ''
@@ -880,11 +880,11 @@ display:
           group: 1
           exposed: true
           expose:
-            operator_id: roles_target_id_op
+            operator_id: roles_filter_op
             label: 'Site role'
             description: ''
             use_operator: false
-            operator: roles_target_id_op
+            operator: roles_filter_op
             operator_limit_selection: false
             operator_list: {  }
             identifier: role
