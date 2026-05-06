@@ -629,7 +629,10 @@ class ProtocolAddForm extends EntityForm {
    * Redirect to the owning community after save.
    */
   public function redirectToCommunity(array $form, FormStateInterface $form_state) {
-    $form_state->setRedirect('mukurtu_protocol.manage_community', ['group' => $this->community->id()]);
+    $community = $this->community ?? $form_state->get('protocol_community');
+    if ($community) {
+      $form_state->setRedirect('mukurtu_protocol.manage_community', ['group' => $community->id()]);
+    }
   }
 
 }
