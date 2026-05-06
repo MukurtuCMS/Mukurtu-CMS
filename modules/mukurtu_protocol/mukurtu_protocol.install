@@ -283,3 +283,13 @@ function mukurtu_protocol_update_40006(): void {
 function mukurtu_protocol_update_40007(): void {
   \Drupal::service('router.builder')->rebuild();
 }
+
+/**
+ * Add Communities filter to the core user_admin_people view (/admin/people).
+ */
+function mukurtu_protocol_update_40008(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $config_file = $module_path . '/config/install/views.view.user_admin_people.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($data)->save(TRUE);
+}
