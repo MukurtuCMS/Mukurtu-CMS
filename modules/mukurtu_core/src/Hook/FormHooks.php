@@ -112,7 +112,6 @@ class FormHooks {
     }
     if (isset($form['account']['status'])) {
       $form['account']['status']['#options'] = [1 => t('Active'), 'pending' => t('Pending'), 0 => t('Blocked')];
-      $form['account']['status']['#default_value'] = 'pending';
       array_unshift($form['#submit'], [static::class, 'userStatusPreSaveSubmit']);
       $form['#submit'][] = [static::class, 'userStatusPostSaveSubmit'];
     }
