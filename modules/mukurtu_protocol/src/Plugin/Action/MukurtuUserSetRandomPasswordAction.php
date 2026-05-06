@@ -30,7 +30,7 @@ class MukurtuUserSetRandomPasswordAction extends ActionBase implements Container
     array $configuration,
     $plugin_id,
     $plugin_definition,
-  ) {
+  ): static {
     return new static(
       $configuration,
       $plugin_id,
@@ -41,19 +41,22 @@ class MukurtuUserSetRandomPasswordAction extends ActionBase implements Container
 
   /**
    * {@inheritdoc}
+   *
+   * @return void
    */
-  public function execute($account = NULL) {
+  public function execute($account = NULL): void {
     if ($account !== FALSE && $account !== NULL) {
       $account->original = clone $account;
       $account->setPassword($this->passwordGenerator->generate());
       $account->save();
 
-      _user_mail_notify('password_reset', $account);
+      $sent = _user_mail_notify('password_reset', $account);
 
       $this->messenger()->addStatus($this->t(
-        'A password reset email has been sent to %name.', [
-          '%name' => $account->getDisplayName(),
-        ]
+        $sent
+          ? 'A password reset email has been sent to %name.'
+          : 'The password for %name has been reset.',
+        ['%name' => $account->getDisplayName()]
       ));
     }
   }
