@@ -283,3 +283,20 @@ function mukurtu_protocol_update_40006(): void {
 function mukurtu_protocol_update_40007(): void {
   \Drupal::service('router.builder')->rebuild();
 }
+
+/**
+ * Install "Manage roles" bulk actions for community and protocol members pages.
+ */
+function mukurtu_protocol_update_40008(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $action_ids = [
+    'mukurtu_manage_community_roles_action',
+    'mukurtu_manage_protocol_roles_action',
+  ];
+  foreach ($action_ids as $action_id) {
+    $config_path = $module_path . '/config/install/system.action.' . $action_id . '.yml';
+    $data = \Drupal\Core\Serialization\Yaml::decode(file_get_contents($config_path));
+    \Drupal::configFactory()->getEditable('system.action.' . $action_id)->setData($data)->save(TRUE);
+  }
+  \Drupal::service('router.builder')->rebuild();
+}

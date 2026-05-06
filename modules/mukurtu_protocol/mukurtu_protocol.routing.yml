@@ -168,6 +168,32 @@ mukurtu_protocol.protocol_members_list:
       group:
         type: entity:protocol
 
+mukurtu_protocol.community_manage_roles_form:
+  path: 'admin/communities/{group}/members/manage-roles'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\ManageCommunityBulkRolesForm'
+    _title: 'Manage roles'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuOgMembersOverviewController::access'
+  options:
+    _admin_route: TRUE
+    parameters:
+      group:
+        type: entity:community
+
+mukurtu_protocol.protocol_manage_roles_form:
+  path: 'admin/protocols/{group}/members/manage-roles'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\ManageProtocolBulkRolesForm'
+    _title: 'Manage roles'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuOgMembersOverviewController::access'
+  options:
+    _admin_route: TRUE
+    parameters:
+      group:
+        type: entity:protocol
+
 mukurtu_protocol.community_add_membership:
   path: 'admin/communities/{group}/members/add/{og_membership_type}'
   defaults:
