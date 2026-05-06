@@ -105,10 +105,14 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   public function build(TermInterface $taxonomy_term): array|TrustedRedirectResponse {
     $person = $this->getSinglePersonRecord($taxonomy_term);
     if ($person) {
-      $url = $person->toUrl()->setAbsolute()->toString();
+      $url = $person->toUrl()->toString();
+      $this->getLogger('mukurtu_taxonomy')->debug(
+        'Taxonomy term %label (tid %tid) redirected to person record nid %nid.',
+        ['%label' => $taxonomy_term->label(), '%tid' => $taxonomy_term->id(), '%nid' => $person->id()]
+      );
       $response = new TrustedRedirectResponse($url);
       $cache = new CacheableMetadata();
-      $cache->addCacheContexts(['user']);
+      $cache->addCacheContexts(['user.node_grants:view']);
       $cache->addCacheableDependency($taxonomy_term);
       $cache->addCacheableDependency($person);
       $response->addCacheableDependency($cache);
@@ -248,7 +252,8 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       return NULL;
     }
 
-    return $storage->load(reset($results));
+    $node = $storage->load(reset($results));
+    return ($node && $node->access('view')) ? $node : NULL;
   }
 
   /**

@@ -1280,42 +1280,6 @@ a:not(.primary-nav__menu-link) svg.tel path {
   text-decoration: underline;
 }
 
-.ui-dialog {
-  position: fixed !important;
-  top: 50vh !important;
-  left: 50vw !important;
-  -webkit-transform: translate(-50%, -50%) !important;
-          transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-  max-height: 90vh !important;
-  display: -webkit-box !important;
-  display: -ms-flexbox !important;
-  display: flex !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-box-direction: normal !important;
-      -ms-flex-direction: column !important;
-          flex-direction: column !important;
-}
-.ui-dialog .ui-dialog-titlebar {
-  -ms-flex-negative: 0;
-      flex-shrink: 0;
-}
-.ui-dialog .ui-dialog-content {
-  -webkit-box-flex: 1 !important;
-      -ms-flex: 1 1 auto !important;
-          flex: 1 1 auto !important;
-  overflow-y: auto !important;
-}
-.ui-dialog .ui-dialog-buttonpane {
-  -ms-flex-negative: 0;
-      flex-shrink: 0;
-}
-
-.ui-widget-overlay {
-  position: fixed !important;
-  inset: 0 !important;
-}
-
 .form-item + .form-item {
   -webkit-margin-before: 1rem;
           margin-block-start: 1rem;

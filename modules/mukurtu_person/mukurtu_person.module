@@ -3,7 +3,6 @@
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\AnnounceCommand;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
-use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -54,19 +53,7 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
     $element['current']['#prefix'] = '';
   }
 
-  // Store the host node ID in temp store so hook_views_query_alter can exclude
-  // it from the entity browser view, preventing self-selection.
-  $form_object = $form_state->getFormObject();
-  if ($form_object instanceof ContentEntityFormInterface) {
-    $host = $form_object->getEntity();
-    if ($host->getEntityTypeId() === 'node' && !$host->isNew()) {
-      \Drupal::service('tempstore.private')
-        ->get('mukurtu_person')
-        ->set('related_person_exclude_id', $host->id());
-    }
-  }
-
-  $create_url = Url::fromRoute('node.add', ['node_type' => 'person']);
+  $create_url = Url::fromRoute('node.add', ['node_type' => 'person'], ['query' => ['mukurtu_modal' => '1']]);
   if ($create_url->access()) {
     $element['create_person_link'] = [
       '#type' => 'link',
@@ -96,11 +83,12 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
  * redirecting to the new node's view page.
  */
 function mukurtu_person_form_node_person_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  // isXmlHttpRequest() is the available signal for "opened via AJAX modal".
-  // Today the only XHR context for /node/add/person is the related-person
-  // widget link, but if another AJAX widget or Inline Entity Form ever loads
-  // this form via XHR it will also get the modal submit behavior below.
-  if (!\Drupal::request()->isXmlHttpRequest()) {
+  // Require both an XHR request AND the mukurtu_modal query parameter set by
+  // our create-person link. The dual check scopes this to our specific modal
+  // entry point and prevents any other AJAX context (Inline Entity Form, etc.)
+  // that loads /node/add/person via XHR from silently inheriting modal behavior.
+  $request = \Drupal::request();
+  if (!$request->isXmlHttpRequest() || !$request->query->has('mukurtu_modal')) {
     return;
   }
 
@@ -153,13 +141,12 @@ function mukurtu_person_views_query_alter(ViewExecutable $view, QueryPluginBase 
     return;
   }
 
-  $exclude_id = \Drupal::service('tempstore.private')
-    ->get('mukurtu_person')
-    ->get('related_person_exclude_id');
-
-  if ($exclude_id) {
-    $query->addWhere('', 'node_field_data.nid', $exclude_id, '<>');
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if (!$node || $node->bundle() !== 'person' || $node->isNew()) {
+    return;
   }
+
+  $query->addWhere('', 'node_field_data.nid', $node->id(), '<>');
 }
 
 /**
