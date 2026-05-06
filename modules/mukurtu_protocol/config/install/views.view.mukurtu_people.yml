@@ -200,56 +200,6 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-        roles:
-          id: roles
-          table: users
-          field: roles
-          relationship: none
-          group_type: group
-          admin_label: ''
-          entity_type: user
-          plugin_id: mukurtu_user_roles
-          label: 'Site roles'
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
         roles_plain:
           id: roles_plain
           table: users
@@ -426,7 +376,7 @@ display:
           entity_type: user
           entity_field: created
           plugin_id: field
-          label: 'Member for'
+          label: 'Member since'
           exclude: false
           alter:
             alter_text: false
@@ -467,11 +417,89 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          type: timestamp_ago
+          click_sort_column: value
+          type: timestamp
           settings:
-            future_format: '@interval'
-            past_format: '@interval'
-            granularity: 2
+            date_format: medium
+            custom_date_format: ''
+            timezone: ''
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+        access:
+          id: access
+          table: users_field_data
+          field: access
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          entity_field: access
+          plugin_id: field
+          label: 'Last access'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: timestamp
+          settings:
+            date_format: medium
+            custom_date_format: ''
+            timezone: ''
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
         operations:
           id: operations
           table: users
@@ -482,7 +510,7 @@ display:
           entity_type: user
           plugin_id: entity_operations
           label: Operations
-          exclude: true
+          exclude: false
           alter:
             alter_text: false
             text: ''
@@ -523,6 +551,56 @@ display:
           empty_zero: false
           hide_alter_empty: true
           destination: true
+        roles:
+          id: roles
+          table: users
+          field: roles
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          plugin_id: mukurtu_user_roles
+          label: 'Site roles'
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
         mail:
           id: mail
           table: users_field_data
@@ -751,6 +829,82 @@ display:
                 title: Blocked
                 operator: '='
                 value: '0'
+        roles_target_id:
+          id: roles_target_id
+          table: user__roles
+          field: roles_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: user_roles
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: roles_target_id_op
+            label: 'Site role'
+            description: ''
+            use_operator: false
+            operator: roles_target_id_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: role
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        community_filter:
+          id: community_filter
+          table: users
+          field: communities
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: user_community_filter
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: community_filter_op
+            label: Communities
+            description: ''
+            use_operator: false
+            operator: community_filter_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: community
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
         default_langcode:
           id: default_langcode
           table: users_field_data
@@ -847,9 +1001,10 @@ display:
             views_bulk_operations_bulk_form: views_bulk_operations_bulk_form
             name: name
             field_display_name: field_display_name
-            communities: communities
-            created: created
             roles_plain: roles_plain
+            communities: communities
+            status: status
+            created: created
             access: access
             operations: operations
             mail: mail
@@ -874,8 +1029,22 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
+            roles_plain:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: priority-low
             communities:
               sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            status:
+              sortable: true
               default_sort_order: asc
               align: ''
               separator: ''
@@ -884,13 +1053,6 @@ display:
             created:
               sortable: true
               default_sort_order: desc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: priority-low
-            roles_plain:
-              sortable: false
-              default_sort_order: asc
               align: ''
               separator: ''
               empty_column: false
