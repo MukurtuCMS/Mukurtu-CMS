@@ -139,8 +139,8 @@ class CommunityManagerUserCreationForm extends FormBase {
     $form['status'] = [
       '#type' => 'radios',
       '#title' => $this->t('Status'),
-      '#options' => [1 => $this->t('Active'), 0 => $this->t('Blocked')],
-      '#default_value' => 1,
+      '#options' => [1 => $this->t('Active'), 'pending' => $this->t('Pending'), 0 => $this->t('Blocked')],
+      '#default_value' => 'pending',
     ];
 
     $form['notify'] = [
@@ -315,11 +315,18 @@ class CommunityManagerUserCreationForm extends FormBase {
       $user->setPassword($values['pass']);
     }
 
-    if ((int) $values['status'] === 1) {
+    $status_val = $values['status'];
+    if ($status_val == 1) {
       $user->activate();
+      $user->set('field_pending', 0);
+    }
+    elseif ($status_val === 'pending') {
+      $user->block();
+      $user->set('field_pending', 1);
     }
     else {
       $user->block();
+      $user->set('field_pending', 0);
     }
 
     // Explicitly store the authenticated role so it appears in the site's
@@ -328,7 +335,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     $user->get('roles')->appendItem(['target_id' => 'authenticated']);
     $user->save();
 
-    if (!empty($values['notify']) && !empty($email) && (int) $values['status'] === 1) {
+    if (!empty($values['notify']) && !empty($email) && $status_val == 1) {
       _user_mail_notify('status_activated', $user);
     }
 

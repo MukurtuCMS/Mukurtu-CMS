@@ -111,7 +111,10 @@ class FormHooks {
       $form['account']['name']['#description'] = t("Usernames must be unique. Several special characters are allowed, including space, period (.), hyphen (-), apostrophe ('), underscore (_), and the @ sign.");
     }
     if (isset($form['account']['status'])) {
-      $form['account']['status']['#options'] = [1 => t('Active'), 0 => t('Blocked')];
+      $form['account']['status']['#options'] = [1 => t('Active'), 'pending' => t('Pending'), 0 => t('Blocked')];
+      $form['account']['status']['#default_value'] = 'pending';
+      array_unshift($form['#submit'], [static::class, 'userStatusPreSaveSubmit']);
+      $form['#submit'][] = [static::class, 'userStatusPostSaveSubmit'];
     }
     if (isset($form['account']['roles']['#options'])) {
       $desiredOrder = ['authenticated', 'mukurtu_roundtrip_manager', 'mukurtu_manager', 'administrator'];
@@ -474,6 +477,51 @@ class FormHooks {
       $form['account']['field_display_name'] = $form['field_display_name'];
       $form['account']['field_display_name']['#weight'] = 0.0013;
       unset($form['field_display_name']);
+    }
+
+    if (isset($form['account']['status'])) {
+      $form['account']['status']['#options'] = [1 => t('Active'), 'pending' => t('Pending'), 0 => t('Blocked')];
+      // Pre-select "Pending" when editing a currently-pending user.
+      $entity = $form_state->getFormObject()->getEntity();
+      if (!$entity->get('status')->value
+        && $entity->hasField('field_pending')
+        && $entity->get('field_pending')->value) {
+        $form['account']['status']['#default_value'] = 'pending';
+      }
+      array_unshift($form['#submit'], [static::class, 'userStatusPreSaveSubmit']);
+      $form['#submit'][] = [static::class, 'userStatusPostSaveSubmit'];
+    }
+  }
+
+  /**
+   * Maps the "pending" radio value to status=0 before the entity is saved.
+   *
+   * Runs as the first submit handler so the entity builder sees status=0 for
+   * both Pending and Blocked selections.
+   */
+  public static function userStatusPreSaveSubmit(array $form, FormStateInterface &$form_state): void {
+    $val = $form_state->getValue(['account', 'status']);
+    $form_state->set('mukurtu_status_selection', $val);
+    if ($val === 'pending') {
+      // Map the virtual "pending" option to the underlying blocked status so
+      // the entity builder stores status=0. field_pending is set in the
+      // post-save handler below.
+      $form_state->setValue(['account', 'status'], 0);
+    }
+  }
+
+  /**
+   * Sets field_pending=1 on the saved entity when "Pending" was selected.
+   *
+   * Runs after the entity save so the entity ID is available.
+   */
+  public static function userStatusPostSaveSubmit(array $form, FormStateInterface $form_state): void {
+    if ($form_state->get('mukurtu_status_selection') === 'pending') {
+      $entity = $form_state->getFormObject()->getEntity();
+      if ($entity && $entity->hasField('field_pending')) {
+        $entity->set('field_pending', 1);
+        $entity->save();
+      }
     }
   }
 
