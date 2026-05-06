@@ -5,9 +5,9 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\mukurtu_protocol\Entity\Protocol;
+use Drupal\og\Og;
 
 /**
  * Form controller for Protocol creation forms.
@@ -117,27 +117,36 @@ class ProtocolAddForm extends EntityForm {
     $form = parent::buildForm($form, $form_state);
 
     if (!$community_param) {
-      // Suppress entity fields not used on this form.
-      $allowed = ['field_communities', 'name', 'field_access_mode', 'field_description', 'field_membership_display', 'actions'];
-      foreach (Element::children($form) as $key) {
-        if (!in_array($key, $allowed)) {
-          unset($form[$key]);
+      // Build a list of communities where the current user is a manager.
+      $community_options = [];
+      foreach (Og::getMemberships($currentUser) as $membership) {
+        if ($membership->getGroupEntityType() === 'community' &&
+            $membership->hasRole('community-community-community_manager')) {
+          $group = $membership->getGroup();
+          if ($group) {
+            $community_options[$group->id()] = $group->label();
+          }
         }
       }
 
-      // Rebuild the membership wrapper when the user selects a community.
-      $form['field_communities']['widget'][0]['target_id']['#ajax'] = [
-        'callback' => '::membershipWrapperCallback',
-        'wrapper' => 'membership-wrapper',
-        'event' => 'autocompleteclose',
+      $form['field_communities'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Community'),
+        '#options' => $community_options,
+        '#empty_option' => $this->t('- Select a community -'),
+        '#required' => TRUE,
+        '#ajax' => [
+          'callback' => '::membershipWrapperCallback',
+          'wrapper' => 'membership-wrapper',
+          'event' => 'change',
+        ],
       ];
 
       // Resolve the effective community from form state (persists across rebuilds)
-      // or from the just-submitted community field value.
+      // or from the just-submitted select value.
       $community = $form_state->get('protocol_community');
       if (!$community) {
-        $raw = $form_state->getValue(['field_communities', 0, 'target_id']);
-        $cid = $raw ? EntityAutocomplete::extractEntityIdFromAutocompleteInput((string) $raw) : NULL;
+        $cid = $form_state->getValue('field_communities');
         if ($cid) {
           $community = $this->entityTypeManager->getStorage('community')->load($cid);
           if ($community) {
@@ -148,7 +157,6 @@ class ProtocolAddForm extends EntityForm {
       if ($community) {
         $this->entity->setCommunities([$community]);
       }
-
     }
 
     // Community name.
@@ -550,6 +558,13 @@ class ProtocolAddForm extends EntityForm {
     $entity->setDescription($form_state->getValue('field_description'));
     $entity->setSharingSetting($form_state->getValue('field_access_mode'));
     $entity->setMembershipDisplay($form_state->getValue('field_membership_display'));
+
+    // On the standalone form the community is selected via a custom element
+    // and stored in form state rather than pre-set via the URL.
+    $stored_community = $form_state->get('protocol_community');
+    if ($stored_community) {
+      $entity->setCommunities([$stored_community]);
+    }
 
     $role_keys = array_keys(static::getRoles());
     $stored_members = $form_state->get('members') ?? [];
