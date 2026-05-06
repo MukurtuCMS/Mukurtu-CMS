@@ -158,21 +158,21 @@ function mukurtu_browse_views_query_alter($view, $query) {
 }
 
 /**
- * Implements hook_multipage_item_insert().
+ * Implements hook_entity_insert().
  */
 function mukurtu_browse_multipage_item_insert($entity) {
   _mukurtu_browse_reindex_mpi_pages($entity);
 }
 
 /**
- * Implements hook_multipage_item_update().
+ * Implements hook_entity_update().
  */
 function mukurtu_browse_multipage_item_update($entity) {
   _mukurtu_browse_reindex_mpi_pages($entity, $entity->original ?? NULL);
 }
 
 /**
- * Implements hook_multipage_item_delete().
+ * Implements hook_entity_delete().
  */
 function mukurtu_browse_multipage_item_delete($entity) {
   _mukurtu_browse_reindex_mpi_pages($entity);
