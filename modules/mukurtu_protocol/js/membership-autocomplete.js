@@ -19,29 +19,41 @@
         const users = (drupalSettings.mukurtuMembership || {}).users || [];
         if (!users.length) return;
 
+        function applyLocalSource() {
+          const instance = $input.autocomplete('instance');
+          if (!instance) return;
+
+          // Replace the AJAX source with local client-side filtering.
+          $input.autocomplete('option', {
+            source(request, response) {
+              const term = request.term.toLowerCase();
+              response(
+                term
+                  ? users.filter(u => u.label.toLowerCase().includes(term)).slice(0, 20)
+                  : users.slice(0, 20)
+              );
+            },
+            minLength: 0,
+          });
+        }
+
+        // Apply immediately if jQuery UI autocomplete is already initialised,
+        // otherwise wait for it (avoids brittle setTimeout timing assumptions).
+        if ($input.autocomplete('instance')) {
+          applyLocalSource();
+        }
+        else {
+          $input.one('autocompleteopen', applyLocalSource);
+        }
+
         $input.on('focus', () => {
-          setTimeout(() => {
-            const instance = $input.autocomplete('instance');
-            if (!instance) return;
+          applyLocalSource();
 
-            // Replace the AJAX source with local client-side filtering.
-            $input.autocomplete('option', {
-              source(request, response) {
-                const term = request.term.toLowerCase();
-                response(
-                  term
-                    ? users.filter(u => u.label.toLowerCase().includes(term)).slice(0, 20)
-                    : users.slice(0, 20)
-                );
-              },
-              minLength: 0,
-            });
-
-            // Show all results immediately when the field is empty.
-            if (input.value === '') {
-              instance._suggest(users.slice(0, 20));
-            }
-          }, 50);
+          // Show all results immediately when the field is empty.
+          const instance = $input.autocomplete('instance');
+          if (instance && input.value === '') {
+            instance._suggest(users.slice(0, 20));
+          }
         });
       });
     },

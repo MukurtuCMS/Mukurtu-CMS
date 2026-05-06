@@ -106,7 +106,7 @@ class CommunityAddForm extends ContentEntityForm {
     // anyone already added to the membership table.
     $already_added = array_keys($form_state->get('members') ?? []);
     $uids = $this->entityTypeManager->getStorage('user')->getQuery()
-      ->accessCheck(FALSE)
+      ->accessCheck(TRUE)
       ->condition('status', 1)
       ->condition('uid', 0, '<>')
       ->sort('name')
@@ -123,6 +123,7 @@ class CommunityAddForm extends ContentEntityForm {
     }
     $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
     $form['#attached']['drupalSettings']['mukurtuMembership']['scrollToTable'] = (bool) $form_state->get('membership_scroll');
+    $form_state->set('membership_scroll', FALSE);
 
     return $form;
   }
@@ -198,6 +199,7 @@ class CommunityAddForm extends ContentEntityForm {
       $row = [];
       if (in_array($uid, $error_uids)) {
         $row['#attributes']['class'][] = 'error';
+        $row['#attributes']['aria-invalid'] = 'true';
       }
       $row['user'] = [
         '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
@@ -320,15 +322,14 @@ class CommunityAddForm extends ContentEntityForm {
 
     if ($missing_names) {
       $form_state->set('membership_role_errors', $missing_uids);
-      $form_state->setError(
-        $form['membership_wrapper']['membership_label'],
+      $this->messenger()->addError(
         $this->t('All members must be assigned at least one role. Missing roles for: @names.', [
           '@names' => implode(', ', $missing_names),
         ])
       );
+      $form_state->setError($form['membership_wrapper']['member_table'], '');
     }
 
-    $current_uid = $this->currentUser()->id();
     $has_manager = FALSE;
     foreach ($stored_members as $uid => $data) {
       $row = $table_values[$uid] ?? [];
@@ -340,10 +341,10 @@ class CommunityAddForm extends ContentEntityForm {
     }
 
     if (!$has_manager) {
-      $form_state->setError(
-        $form['membership_wrapper']['membership_label'],
+      $this->messenger()->addError(
         $this->t('At least one member must be assigned the Community manager role.')
       );
+      $form_state->setError($form['membership_wrapper']['member_table'], '');
     }
   }
 

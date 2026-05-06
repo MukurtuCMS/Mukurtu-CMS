@@ -143,18 +143,28 @@ class ProtocolAddForm extends EntityForm {
         ],
       ];
 
-      // Resolve the effective community from form state (persists across rebuilds)
-      // or from the just-submitted select value.
-      $community = $form_state->get('protocol_community');
-      if (!$community) {
-        $cid = $form_state->getValue('field_communities');
-        if ($cid) {
-          $community = $this->entityTypeManager->getStorage('community')->load($cid);
-          if ($community) {
-            $form_state->set('protocol_community', $community);
-          }
+      // Resolve the effective community from the just-submitted select value or
+      // from form state (persists across rebuilds).
+      $cid = $form_state->getValue('field_communities');
+      $stored_community = $form_state->get('protocol_community');
+      $new_cid = $stored_community ? $stored_community->id() : NULL;
+
+      if ($cid && $cid != $new_cid) {
+        // Community changed — load the new one and reset the member list so
+        // carried-over members from the previous community are cleared.
+        $community = $this->entityTypeManager->getStorage('community')->load($cid);
+        if ($community) {
+          $form_state->set('protocol_community', $community);
+          // Reset members to just the current user when community changes.
+          $form_state->set('members', [
+            $currentUser->id() => ['entity' => $currentUser, 'roles' => ['protocol_steward']],
+          ]);
         }
       }
+      elseif ($stored_community) {
+        $community = $stored_community;
+      }
+
       if ($community) {
         $this->entity->setCommunities([$community]);
       }
@@ -172,7 +182,7 @@ class ProtocolAddForm extends EntityForm {
     $form['field_access_mode'] = [
       '#type' => 'radios',
       '#title' => $this->t('Cultural Protocol Type'),
-      '#description' => $this->t('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.'),
+      '#description' => $this->t('<p><strong>Strict</strong> — Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.</p><p><strong>Open</strong> — Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.</p>'),
       '#options' => [
         'strict' => $this->t('Strict'),
         'open' => $this->t('Open'),
@@ -231,8 +241,6 @@ class ProtocolAddForm extends EntityForm {
       $form_state->set('members', [
         $currentUser->id() => ['entity' => $currentUser, 'roles' => ['protocol_steward']],
       ]);
-      // Store the community for use in static AJAX callbacks.
-      $form_state->set('protocol_community', $community);
     }
 
     $form['membership_wrapper'] = [
@@ -308,7 +316,7 @@ class ProtocolAddForm extends EntityForm {
     }
     else {
       $uids = $this->entityTypeManager->getStorage('user')->getQuery()
-        ->accessCheck(FALSE)
+        ->accessCheck(TRUE)
         ->condition('status', 1)
         ->condition('uid', 0, '<>')
         ->sort('name')
@@ -325,6 +333,7 @@ class ProtocolAddForm extends EntityForm {
     }
     $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
     $form['#attached']['drupalSettings']['mukurtuMembership']['scrollToTable'] = (bool) $form_state->get('membership_scroll');
+    $form_state->set('membership_scroll', FALSE);
 
     return $form;
   }
@@ -380,6 +389,7 @@ class ProtocolAddForm extends EntityForm {
       $row = [];
       if (in_array($uid, $error_uids)) {
         $row['#attributes']['class'][] = 'error';
+        $row['#attributes']['aria-invalid'] = 'true';
       }
       $row['user'] = [
         '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
@@ -539,12 +549,12 @@ class ProtocolAddForm extends EntityForm {
 
     if ($missing_names) {
       $form_state->set('membership_role_errors', $missing_uids);
-      $form_state->setError(
-        $form['membership_wrapper']['membership_label'],
+      $this->messenger()->addError(
         $this->t('All members must be assigned at least one role. Missing roles for: @names.', [
           '@names' => implode(', ', $missing_names),
         ])
       );
+      $form_state->setError($form['membership_wrapper']['member_table'], '');
     }
 
     $has_steward = FALSE;
@@ -558,10 +568,10 @@ class ProtocolAddForm extends EntityForm {
     }
 
     if (!$has_steward) {
-      $form_state->setError(
-        $form['membership_wrapper']['membership_label'],
+      $this->messenger()->addError(
         $this->t('At least one member must be assigned the Protocol steward role.')
       );
+      $form_state->setError($form['membership_wrapper']['member_table'], '');
     }
   }
 
