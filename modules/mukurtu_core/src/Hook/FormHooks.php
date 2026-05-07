@@ -480,45 +480,41 @@ class FormHooks {
   /**
    * Prevents a user from applying bulk actions to their own account.
    *
-   * Attaches a validation callback to the standard user admin bulk form that
-   * decodes each selected bulk form key, removes the current user's row from
-   * the selection, and shows a warning. The VBO-based mukurtu_people view is
-   * protected at the action access() level instead.
+   * Disables the current user's checkbox in the standard user admin bulk form
+   * via #after_build so the entry is never submitted. The VBO-based
+   * mukurtu_people view is protected at the action access() level instead.
    */
   #[Hook('form_alter')]
   public function formAlterPreventSelfBlock(array &$form, FormStateInterface $form_state, string $form_id): void {
     if (!str_starts_with($form_id, 'views_form_user_admin_people_')) {
       return;
     }
-    $form['#validate'][] = [static::class, 'validateNoSelfBlock'];
+    if (isset($form['user_bulk_form'])) {
+      $form['user_bulk_form']['#after_build'][] = [static::class, 'disableSelfBulkFormCheckbox'];
+    }
   }
 
   /**
-   * Validate callback: removes the current user from a bulk form selection.
+   * After-build callback: disables the bulk form checkbox for the current user.
+   *
+   * BulkForm key format: base64(json([langcode, entity_id])) or
+   * base64(json([langcode, entity_id, revision_id])).
    */
-  public static function validateNoSelfBlock(array &$form, FormStateInterface $form_state): void {
-    $selected = $form_state->getValue('user_bulk_form', []);
+  public static function disableSelfBulkFormCheckbox(array $element, FormStateInterface $form_state): array {
     $current_uid = \Drupal::currentUser()->id();
-    $self_removed = FALSE;
-
-    foreach ($selected as $index => $value) {
+    foreach (Element::children($element) as $key) {
+      $value = $element[$key]['#return_value'] ?? NULL;
       if (!$value) {
         continue;
       }
-      // BulkForm key format: base64(json([langcode, entity_id])) or
-      // base64(json([langcode, entity_id, revision_id])).
       $key_parts = json_decode(base64_decode($value), TRUE);
       $entity_id = $key_parts[1] ?? NULL;
       if ($entity_id == $current_uid) {
-        $selected[$index] = 0;
-        $self_removed = TRUE;
+        $element[$key]['#disabled'] = TRUE;
+        break;
       }
     }
-
-    if ($self_removed) {
-      $form_state->setValue('user_bulk_form', $selected);
-      \Drupal::messenger()->addWarning(t('You cannot apply bulk actions to your own account.'));
-    }
+    return $element;
   }
 
   /**
