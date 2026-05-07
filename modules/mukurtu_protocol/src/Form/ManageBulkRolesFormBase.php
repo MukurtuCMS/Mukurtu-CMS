@@ -99,6 +99,7 @@ abstract class ManageBulkRolesFormBase extends FormBase {
 
     $form['roles_table'] = [
       '#type' => 'table',
+      '#caption' => $this->t('Members and roles'),
       '#header' => $header,
       '#empty' => $this->t('No members found.'),
     ];
@@ -122,6 +123,7 @@ abstract class ManageBulkRolesFormBase extends FormBase {
           '#title' => $role_label,
           '#title_display' => 'invisible',
           '#default_value' => in_array($role_id, $current_role_ids),
+          '#attributes' => ['aria-label' => $this->t('@role for @name', ['@role' => $role_label, '@name' => $user->getDisplayName()])],
         ];
       }
 
