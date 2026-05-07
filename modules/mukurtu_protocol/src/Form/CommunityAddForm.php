@@ -63,7 +63,7 @@ class CommunityAddForm extends ContentEntityForm {
     $form['membership_wrapper'] = [
       '#type' => 'container',
       '#tree' => TRUE,
-      '#weight' => 1001,
+      '#weight' => 50,
       '#access' => $this->isDefaultFormLangcode($form_state),
       '#attributes' => ['id' => 'membership-wrapper'],
     ];
