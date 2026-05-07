@@ -368,6 +368,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       $membership = Og::createMembership($this, $account);
       $membership->setRoles($ogRoles);
       $membership->save();
+      Cache::invalidateTags(["user:{$account->id()}"]);
     } else {
       return $this->setRoles($account, $roles);
     }
@@ -405,6 +406,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       // Add the roles.
       $membership->setRoles($ogRoles);
       $membership->save();
+      Cache::invalidateTags(["user:{$account->id()}"]);
     }
 
     return $this;
