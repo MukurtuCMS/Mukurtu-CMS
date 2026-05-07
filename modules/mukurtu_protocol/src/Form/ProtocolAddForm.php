@@ -373,6 +373,7 @@ class ProtocolAddForm extends EntityForm {
 
     $table = [
       '#type' => 'table',
+      '#caption' => t('Protocol members and roles'),
       '#header' => $header,
       '#empty' => t('No members added yet.'),
       '#attributes' => ['class' => ['membership-table']],

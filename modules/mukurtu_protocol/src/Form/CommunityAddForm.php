@@ -183,6 +183,7 @@ class CommunityAddForm extends ContentEntityForm {
 
     $table = [
       '#type' => 'table',
+      '#caption' => t('Community members and roles'),
       '#header' => $header,
       '#empty' => t('No members added yet.'),
       '#attributes' => ['class' => ['membership-table']],

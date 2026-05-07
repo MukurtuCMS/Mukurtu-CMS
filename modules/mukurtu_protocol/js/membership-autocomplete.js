@@ -6,7 +6,11 @@
       once('membership-scroll', 'body', context).forEach(() => {
         if ((drupalSettings.mukurtuMembership || {}).scrollToTable) {
           const el = document.getElementById('membership-wrapper');
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const searchField = el.querySelector('.membership-add-row .form-autocomplete');
+            if (searchField) requestAnimationFrame(() => searchField.focus());
+          }
         }
       });
     },
