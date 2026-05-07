@@ -780,7 +780,7 @@ display:
           exposed: true
           expose:
             operator_id: roles_target_id_op
-            label: Role
+            label: 'Site role'
             description: ''
             use_operator: false
             operator: roles_target_id_op
