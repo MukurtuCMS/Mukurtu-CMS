@@ -601,6 +601,9 @@ function mukurtu_core_invalidate_entity_reference_field_references(EntityInterfa
  * so the link to its layout page must be assembled dynamically.
  */
 function mukurtu_core_menu_links_discovered_alter(&$links) {
+  // Remove the core "My account" link (/user) from the account menu.
+  unset($links['user.page']);
+
   $config = \Drupal::config('system.site');
   $homepagePath = $config->get('page.front');
   $links['mukurtu_core.landing_page_dashboard'] = [

@@ -270,6 +270,103 @@
           }
         }
 
+        // Display options toggle box — matches facet box styling.
+        // Rendered as a <fieldset> for a11y grouping; reset browser defaults.
+        .search-collapse-toggle {
+          background-color: var(--mukurtu-panel-pane-content-background-color);
+          margin-block-start: 1rem;
+          margin-block-end: var(--v-space-4xs);
+          border: none;
+          padding: 0;
+          min-inline-size: 0;
+
+          &__header {
+            display: block;
+            width: 100%;
+            background-color: var(--brand-primary-dark);
+            color: var(--light-text-color);
+            font-size: var(--font-size-m);
+            font-weight: var(--text-bold);
+            padding-inline: var(--v-space-4xxs);
+            padding-block: var(--v-space-5xs);
+          }
+
+          &__content {
+            padding: var(--v-space-4xxs);
+            display: flex;
+            flex-direction: column;
+            gap: var(--v-space-5xs);
+          }
+
+          &__item {
+            display: flex;
+            align-items: center;
+            gap: var(--v-space-5xs);
+            cursor: pointer;
+          }
+
+          // Visually hide the native checkbox while keeping it in the a11y tree.
+          &__input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+          }
+
+          // Toggle switch track. Height ≥ 24px meets WCAG 2.5.8 target size.
+          &__switch {
+            display: inline-block;
+            flex-shrink: 0;
+            width: 36px;
+            height: 24px;
+            border-radius: 12px;
+            background-color: var(--color-greys-alpha-border);
+            position: relative;
+            transition: background-color 0.2s;
+
+            // Thumb.
+            &::after {
+              content: '';
+              position: absolute;
+              inset-block-start: 2px;
+              inset-inline-start: 2px;
+              width: 20px;
+              height: 20px;
+              border-radius: 50%;
+              background-color: var(--light-text-color);
+              transition: inset-inline-start 0.2s;
+            }
+          }
+
+          // Checked: move thumb right, change track color.
+          // Must use the full class name (not &__switch) on the right side of +
+          // because SCSS would otherwise expand & to the full ancestor chain,
+          // producing an invalid descendant-combinator after the + operator.
+          &__input:checked + .search-collapse-toggle__switch {
+            background-color: var(--brand-primary);
+
+            &::after {
+              inset-inline-start: 14px;
+            }
+          }
+
+          // Focus ring on the visual switch for keyboard users.
+          // --brand-primary-dark achieves ≥ 3:1 contrast against page background (WCAG 1.4.11).
+          &__input:focus-visible + .search-collapse-toggle__switch {
+            outline: 3px solid var(--brand-primary-dark);
+            outline-offset: 2px;
+          }
+
+          &__label {
+            font-size: var(--font-size-base);
+          }
+        }
+
         .form-checkboxes > .form-item {
           margin-inline: var(--v-space-4xxs);
           margin-block: 0;
@@ -293,8 +390,9 @@
           cursor: pointer;
           min-block-size: 24px;
 
+          // --brand-primary-dark achieves ≥ 3:1 contrast against page background (WCAG 1.4.11).
           &:focus-visible {
-            outline: 3px solid var(--brand-secondary);
+            outline: 3px solid var(--brand-primary-dark);
             outline-offset: 2px;
           }
         }

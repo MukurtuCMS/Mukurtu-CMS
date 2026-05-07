@@ -1,8 +1,12 @@
 <?php
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
 use Drupal\node\NodeInterface;
 use Drupal\node\NodeTypeInterface;
+use Drupal\search_api\Entity\Index;
+use Drupal\search_api\Item\Field;
+use Drupal\search_api\Plugin\views\query\SearchApiQuery;
 
 /**
  * Implements hook_theme().
@@ -15,6 +19,12 @@ function mukurtu_browse_theme($existing, $type, $theme, $path) {
         'list_results' => NULL,
         'grid_results' => NULL,
         'map_results' => NULL,
+      ],
+    ],
+    'search_collapse_toggle' => [
+      'variables' => [
+        'show_all_pages' => TRUE,
+        'show_community_records' => FALSE,
       ],
     ],
   ];
@@ -95,10 +105,281 @@ function mukurtu_browse_preprocess_node(&$variables) {
 }
 
 /**
+ * Implements hook_views_query_alter().
+ *
+ * Applies collapse filters for multipage item pages and community records
+ * when the corresponding admin setting is enabled. The site-wide default can
+ * be overridden per-request with the URL parameters mpi_collapse and
+ * cr_collapse (1 = collapse, 0 = expand).
+ *
+ * Collections pages always hide community records and additional MPI pages.
+ */
+function mukurtu_browse_views_query_alter($view, $query) {
+  if (!$query instanceof SearchApiQuery) {
+    return;
+  }
+
+  $api_query = $query->getSearchApiQuery();
+  $index_fields = $api_query->getIndex()->getFields();
+
+  // Collections pages never show community records or additional MPI pages.
+  if (in_array($view->id(), ['mukurtu_browse_collections', 'mukurtu_browse_collections_solr'])) {
+    if (isset($index_fields['is_additional_mpi_page'])) {
+      $api_query->addCondition('is_additional_mpi_page', TRUE, '<>');
+    }
+    if (isset($index_fields['is_community_record'])) {
+      $api_query->addCondition('is_community_record', TRUE, '<>');
+    }
+    return;
+  }
+
+  $config = \Drupal::config('mukurtu_search.settings');
+  $req = \Drupal::request()->query;
+
+  $collapse_mpi = $req->has('mpi_collapse')
+    ? (bool) $req->get('mpi_collapse')
+    : (bool) ($config->get('collapse_multipage_pages') ?? FALSE);
+
+  $collapse_cr = $req->has('cr_collapse')
+    ? (bool) $req->get('cr_collapse')
+    : (bool) ($config->get('collapse_community_records') ?? FALSE);
+
+  if (!$collapse_mpi && !$collapse_cr) {
+    return;
+  }
+
+  if ($collapse_mpi && isset($index_fields['is_additional_mpi_page'])) {
+    $api_query->addCondition('is_additional_mpi_page', TRUE, '<>');
+  }
+
+  if ($collapse_cr && isset($index_fields['is_community_record'])) {
+    $api_query->addCondition('is_community_record', TRUE, '<>');
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function mukurtu_browse_multipage_item_insert($entity) {
+  _mukurtu_browse_reindex_mpi_pages($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function mukurtu_browse_multipage_item_update($entity) {
+  _mukurtu_browse_reindex_mpi_pages($entity, $entity->original ?? NULL);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function mukurtu_browse_multipage_item_delete($entity) {
+  _mukurtu_browse_reindex_mpi_pages($entity);
+}
+
+/**
+ * Marks all pages of an MPI for reindexing in Search API.
+ *
+ * When a multipage_item entity is saved with pre-existing nodes as pages, those
+ * nodes won't be automatically reindexed because they haven't changed. This
+ * ensures the is_additional_mpi_page processor field stays accurate.
+ */
+function _mukurtu_browse_reindex_mpi_pages($entity, $original = NULL) {
+  if (!$entity->hasField('field_pages')) {
+    return;
+  }
+
+  $node_ids = [];
+  foreach ($entity->field_pages as $item) {
+    if ($item->target_id) {
+      $node_ids[] = $item->target_id;
+    }
+  }
+
+  // Include any pages that were removed so they also get reindexed.
+  if ($original && $original->hasField('field_pages')) {
+    foreach ($original->field_pages as $item) {
+      if ($item->target_id) {
+        $node_ids[] = $item->target_id;
+      }
+    }
+  }
+
+  $node_ids = array_unique($node_ids);
+  if (empty($node_ids)) {
+    return;
+  }
+
+  // Load each node and group translation item IDs by bundle so we can resolve
+  // the correct set of Search API indexes for each bundle.
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $item_ids_by_bundle = [];
+  foreach ($node_ids as $node_id) {
+    $node = $node_storage->load($node_id);
+    if (!$node) {
+      continue;
+    }
+    $bundle = $node->bundle();
+    foreach ($node->getTranslationLanguages() as $langcode => $language) {
+      $item_ids_by_bundle[$bundle][] = $node_id . ':' . $langcode;
+    }
+  }
+
+  if (empty($item_ids_by_bundle)) {
+    return;
+  }
+
+  // For each bundle, find all covering indexes and mark items for reindexing.
+  // Deduplicate by index ID to avoid double-tracking when multiple bundles
+  // resolve to the same index.
+  $index_item_ids = [];
+  foreach ($item_ids_by_bundle as $bundle => $item_ids) {
+    foreach (_mukurtu_browse_indexes_for_bundle($bundle) as $index) {
+      if ($index->status()) {
+        $index_item_ids[$index->id()]['index'] = $index;
+        $index_item_ids[$index->id()]['item_ids'] = array_unique(
+          array_merge($index_item_ids[$index->id()]['item_ids'] ?? [], $item_ids)
+        );
+      }
+    }
+  }
+
+  foreach ($index_item_ids as $entry) {
+    $entry['index']->trackItemsUpdated('entity:node', $entry['item_ids']);
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Attaches submit handlers to the community-records and multipage-item
+ * settings forms so that enabling a content type for either feature
+ * automatically adds the corresponding Search API processor and field to
+ * every index that covers that bundle.
+ */
+function mukurtu_browse_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if ($form_id === 'mukurtu_community_records_settings_form') {
+    $form['#submit'][] = '_mukurtu_browse_cr_settings_submit';
+  }
+  if ($form_id === 'mukurtu_multipage_items_multipage_config') {
+    $form['#submit'][] = '_mukurtu_browse_mpi_settings_submit';
+  }
+}
+
+/**
+ * Submit handler: ensure CR processor/field exists on all covering indexes.
+ */
+function _mukurtu_browse_cr_settings_submit(array &$form, FormStateInterface $form_state): void {
+  $allowed = \Drupal::config('mukurtu_community_records.settings')
+    ->get('allowed_community_record_bundles') ?? [];
+  foreach ($allowed as $bundle) {
+    foreach (_mukurtu_browse_indexes_for_bundle($bundle) as $index) {
+      _mukurtu_browse_ensure_processor_on_index(
+        $index,
+        'mukurtu_community_record_flag',
+        'is_community_record',
+        'Is community record',
+        'boolean'
+      );
+    }
+  }
+}
+
+/**
+ * Submit handler: ensure MPI processor/field exists on all covering indexes.
+ */
+function _mukurtu_browse_mpi_settings_submit(array &$form, FormStateInterface $form_state): void {
+  $bundle_config = \Drupal::config('mukurtu_multipage_items.settings')
+    ->get('bundles_config') ?? [];
+  foreach (array_keys(array_filter($bundle_config)) as $bundle) {
+    foreach (_mukurtu_browse_indexes_for_bundle($bundle) as $index) {
+      _mukurtu_browse_ensure_processor_on_index(
+        $index,
+        'mukurtu_multipage_page_index',
+        'is_additional_mpi_page',
+        'Is additional multipage item page',
+        'boolean'
+      );
+    }
+  }
+}
+
+/**
+ * Returns all Search API indexes whose entity:node datasource covers $bundle.
+ *
+ * Note on confusing config convention:
+ * When datasource config's ['bundles']['default'] is TRUE, the bundles listed in ['bundles']['selected'] are NOT indexed.
+ * Likewise, when ['bundles']['default'] is FALSE, the bundles listed in ['bundles']['selected'] ARE indexed.
+ *
+ * @return \Drupal\search_api\Entity\Index[]
+ */
+function _mukurtu_browse_indexes_for_bundle(string $bundle): array {
+  $result = [];
+  foreach (Index::loadMultiple() as $index) {
+    try {
+      $datasource = $index->getDatasource('entity:node');
+    }
+    catch (\Exception) {
+      continue;
+    }
+    $cfg = $datasource->getConfiguration();
+    $default = (bool) ($cfg['bundles']['default'] ?? FALSE);
+    $selected = (array) ($cfg['bundles']['selected'] ?? []);
+    $covers = $default ? !in_array($bundle, $selected) : in_array($bundle, $selected);
+    if ($covers) {
+      $result[] = $index;
+    }
+  }
+  return $result;
+}
+
+/**
+ * Adds a processor and its computed field to an index if not already present.
+ */
+function _mukurtu_browse_ensure_processor_on_index(
+  Index $index,
+  string $processor_id,
+  string $field_id,
+  string $field_label,
+  string $field_type
+): void {
+  $changed = FALSE;
+
+  $processors = $index->getProcessors();
+  if (!isset($processors[$processor_id])) {
+    $manager = \Drupal::service('plugin.manager.search_api.processor');
+    $processors[$processor_id] = $manager->createInstance($processor_id, ['#index' => $index]);
+    $index->setProcessors($processors);
+    $changed = TRUE;
+  }
+
+  if (!$index->getField($field_id)) {
+    $field = new Field($index, $field_id);
+    $field->setType($field_type);
+    $field->setPropertyPath($field_id);
+    $field->setDatasourceId('entity:node');
+    $field->setLabel($field_label);
+    $index->addField($field);
+    $changed = TRUE;
+  }
+
+  if ($changed) {
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
  * Implements hook_preprocess_block().
  */
 function mukurtu_browse_preprocess_block(&$variables) {
-  if (!isset($variables['plugin_id']) || !in_array($variables['plugin_id'], ['views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block', 'views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block'])) {
+  $browse_block_ids = [
+    'views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block',
+    'views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block',
+    'views_exposed_filter_block:mukurtu_dictionary-mukurtu_dictionary_block',
+  ];
+  if (!isset($variables['plugin_id']) || !in_array($variables['plugin_id'], $browse_block_ids)) {
     return;
   }
   if (isset($variables['content']['search_api_fulltext'])) {
@@ -107,4 +388,10 @@ function mukurtu_browse_preprocess_block(&$variables) {
   if (isset($variables['content']['sort_by'])) {
     $variables['content']['sort_by']['#weight'] = -10.8;
   }
+
+  // Inject the display options toggle between sort by and the first facet.
+  $toggle_plugin = \Drupal::service('plugin.manager.block')->createInstance('mukurtu_search_collapse_toggle');
+  $toggle = $toggle_plugin->build();
+  $toggle['#weight'] = -5;
+  $variables['content']['search_collapse_toggle'] = $toggle;
 }
