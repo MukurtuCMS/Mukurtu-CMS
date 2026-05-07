@@ -478,6 +478,50 @@ class FormHooks {
   }
 
   /**
+   * Prevents a user from applying bulk actions to their own account.
+   *
+   * Attaches a validation callback to the standard user admin bulk form that
+   * decodes each selected bulk form key, removes the current user's row from
+   * the selection, and shows a warning. The VBO-based mukurtu_people view is
+   * protected at the action access() level instead.
+   */
+  #[Hook('form_alter')]
+  public function formAlterPreventSelfBlock(array &$form, FormStateInterface $form_state, string $form_id): void {
+    if (!str_starts_with($form_id, 'views_form_user_admin_people_')) {
+      return;
+    }
+    $form['#validate'][] = [static::class, 'validateNoSelfBlock'];
+  }
+
+  /**
+   * Validate callback: removes the current user from a bulk form selection.
+   */
+  public static function validateNoSelfBlock(array &$form, FormStateInterface $form_state): void {
+    $selected = $form_state->getValue('user_bulk_form', []);
+    $current_uid = \Drupal::currentUser()->id();
+    $self_removed = FALSE;
+
+    foreach ($selected as $index => $value) {
+      if (!$value) {
+        continue;
+      }
+      // BulkForm key format: base64(json([langcode, entity_id])) or
+      // base64(json([langcode, entity_id, revision_id])).
+      $key_parts = json_decode(base64_decode($value), TRUE);
+      $entity_id = $key_parts[1] ?? NULL;
+      if ($entity_id == $current_uid) {
+        $selected[$index] = 0;
+        $self_removed = TRUE;
+      }
+    }
+
+    if ($self_removed) {
+      $form_state->setValue('user_bulk_form', $selected);
+      \Drupal::messenger()->addWarning(t('You cannot apply bulk actions to your own account.'));
+    }
+  }
+
+  /**
    * Removes message_digest notification actions from the user admin bulk form.
    *
    * These come from message_digest_ui optional config and should not be
