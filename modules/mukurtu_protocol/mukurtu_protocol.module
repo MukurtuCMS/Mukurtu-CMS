@@ -100,8 +100,10 @@ function mukurtu_protocol_views_pre_render(\Drupal\views\ViewExecutable $view): 
 /**
  * Implements hook_views_pre_build().
  *
- * Injects Mukurtu's manage-roles actions into the OG members overview bulk
- * form, which uses an explicit allowlist that does not include them by default.
+ * Injects the correct manage-roles action into the OG members overview bulk
+ * form based on whether we are on a community or protocol members page. The
+ * OG bulk form uses an explicit allowlist, so actions must be added here to
+ * appear in the dropdown.
  */
 function mukurtu_protocol_views_pre_build(\Drupal\views\ViewExecutable $view): void {
   if ($view->id() !== 'og_members_overview') {
@@ -110,9 +112,15 @@ function mukurtu_protocol_views_pre_build(\Drupal\views\ViewExecutable $view): v
   if (!isset($view->field['og_membership_bulk_form'])) {
     return;
   }
-  $actions = &$view->field['og_membership_bulk_form']->options['selected_actions'];
-  $actions[] = 'mukurtu_manage_community_roles_action';
-  $actions[] = 'mukurtu_manage_protocol_roles_action';
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  $action_map = [
+    'mukurtu_protocol.community_members_list' => 'mukurtu_manage_community_roles_action',
+    'mukurtu_protocol.protocol_members_list'  => 'mukurtu_manage_protocol_roles_action',
+  ];
+  if (!isset($action_map[$route_name])) {
+    return;
+  }
+  $view->field['og_membership_bulk_form']->options['selected_actions'][] = $action_map[$route_name];
 }
 
 /**
