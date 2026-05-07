@@ -286,6 +286,9 @@ function mukurtu_protocol_update_40007(): void {
 
 /**
  * Install "Manage roles" bulk actions for community and protocol members pages.
+ *
+ * For fresh installs, config/install/ handles these action configs automatically.
+ * This hook only applies to existing sites updating from a prior release.
  */
 function mukurtu_protocol_update_40008(): void {
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');

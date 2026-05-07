@@ -2,8 +2,10 @@
 
 namespace Drupal\mukurtu_protocol\Form;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Url;
 use Drupal\og\OgRoleInterface;
@@ -114,7 +116,7 @@ abstract class ManageBulkRolesFormBase extends FormBase {
       $row = [];
 
       $row['username'] = [
-        '#markup' => $this->t('<strong>@name</strong>', ['@name' => $user->getDisplayName()]),
+        '#markup' => Markup::create('<strong>' . Html::escape($user->getDisplayName()) . '</strong>'),
       ];
 
       foreach ($role_options as $role_id => $role_label) {
@@ -241,12 +243,13 @@ abstract class ManageBulkRolesFormBase extends FormBase {
     $role_storage = \Drupal::entityTypeManager()->getStorage('og_role');
 
     $all_roles = $role_storage->loadMultiple($role_ids);
+    $memberships = $storage->loadMultiple(array_keys($table_values));
     $updated = 0;
     $group = NULL;
 
     foreach ($table_values as $membership_id => $row) {
       /** @var \Drupal\og\Entity\OgMembership $membership */
-      $membership = $storage->load($membership_id);
+      $membership = $memberships[$membership_id] ?? NULL;
       if (!$membership) {
         continue;
       }
