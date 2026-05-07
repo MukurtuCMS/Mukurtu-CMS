@@ -110,7 +110,7 @@ abstract class ManageBulkRolesFormBase extends FormBase {
         continue;
       }
 
-      $current_role_ids = array_keys($membership->getRoles());
+      $current_role_ids = $membership->getRolesIds();
       $row = [];
 
       $row['username'] = [
