@@ -508,9 +508,13 @@ class FormHooks {
         continue;
       }
       $key_parts = json_decode(base64_decode($value), TRUE);
-      $entity_id = $key_parts[1] ?? NULL;
+      if (!is_array($key_parts) || !isset($key_parts[1])) {
+        continue;
+      }
+      $entity_id = $key_parts[1];
       if ($entity_id == $current_uid) {
         $element[$key]['#disabled'] = TRUE;
+        $element[$key]['#attributes']['title'] = t('You cannot apply bulk actions to your own account.');
         break;
       }
     }

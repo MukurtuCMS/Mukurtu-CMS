@@ -88,7 +88,7 @@ class MukurtuDeleteOgMembershipAction extends ActionBase implements ContainerFac
     $owner = $membership->getOwner();
     $membership->delete();
     if ($owner) {
-      Cache::invalidateTags(["user:{$owner->id()}", "user_roles"]);
+      Cache::invalidateTags(["user:{$owner->id()}"]);
     }
   }
 

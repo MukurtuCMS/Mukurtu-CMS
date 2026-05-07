@@ -381,7 +381,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
     $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
     if ($membership) {
       $membership->delete();
-      Cache::invalidateTags(["user:{$account->id()}", "user_roles"]);
+      Cache::invalidateTags(["user:{$account->id()}"]);
     }
 
     return $this;

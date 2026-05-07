@@ -60,7 +60,8 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
       return $return_as_object ? AccessResult::forbidden() : FALSE;
     }
 
-    // Users cannot unblock themselves via bulk action.
+    // Defensive guard: a blocked user cannot be logged in, but prevent any
+    // edge-case code path from having an admin unblock themselves via bulk.
     if ($object->id() == $account->id()) {
       return $return_as_object ? AccessResult::forbidden()->cachePerUser() : FALSE;
     }
