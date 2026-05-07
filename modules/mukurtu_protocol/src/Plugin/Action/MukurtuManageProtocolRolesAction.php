@@ -90,6 +90,12 @@ class MukurtuManageProtocolRolesAction extends ActionBase implements ContainerFa
       return $return_as_object ? AccessResult::forbidden() : FALSE;
     }
     $access = $this->ogAccess->userAccess($object->getGroup(), 'manage members', $account);
+    // ogAccess returns neutral() for users without an explicit OG role, even
+    // site admins who hold 'administer organic groups'. Treat neutral as allowed
+    // to avoid denying access to Drupal-level administrators.
+    if (!$access->isForbidden()) {
+      $access = AccessResult::allowed()->addCacheableDependency($access);
+    }
     return $return_as_object ? $access : $access->isAllowed();
   }
 
