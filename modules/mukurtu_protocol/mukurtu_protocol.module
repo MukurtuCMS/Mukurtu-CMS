@@ -98,6 +98,24 @@ function mukurtu_protocol_views_pre_render(\Drupal\views\ViewExecutable $view): 
 }
 
 /**
+ * Implements hook_views_pre_build().
+ *
+ * Injects Mukurtu's manage-roles actions into the OG members overview bulk
+ * form, which uses an explicit allowlist that does not include them by default.
+ */
+function mukurtu_protocol_views_pre_build(\Drupal\views\ViewExecutable $view): void {
+  if ($view->id() !== 'og_members_overview') {
+    return;
+  }
+  if (!isset($view->field['og_membership_bulk_form'])) {
+    return;
+  }
+  $actions = &$view->field['og_membership_bulk_form']->options['selected_actions'];
+  $actions[] = 'mukurtu_manage_community_roles_action';
+  $actions[] = 'mukurtu_manage_protocol_roles_action';
+}
+
+/**
  * Implements hook_views_data_alter().
  */
 function mukurtu_protocol_views_data_alter(array &$data)

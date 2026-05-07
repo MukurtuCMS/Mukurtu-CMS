@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol\Plugin\Action;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -85,6 +86,9 @@ class MukurtuManageCommunityRolesAction extends ActionBase implements ContainerF
    */
   public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
+    if ($object->getGroupEntityType() !== 'community') {
+      return $return_as_object ? AccessResult::forbidden() : FALSE;
+    }
     $access = $this->ogAccess->userAccess($object->getGroup(), 'manage members', $account);
     return $return_as_object ? $access : $access->isAllowed();
   }
