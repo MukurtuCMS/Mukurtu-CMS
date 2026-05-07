@@ -138,7 +138,7 @@ abstract class ManageBulkRolesFormBase extends FormBase {
     ];
 
     // Store admin role IDs and group context for the manager-count validation.
-    $admin_role_ids = array_keys(array_filter($roles, fn($r) => $r->isAdmin()));
+    $admin_role_ids = array_keys(array_filter($roles, fn($r) => in_array('manage members', $r->getPermissions())));
     $form['admin_role_ids'] = ['#type' => 'value', '#value' => $admin_role_ids];
     $form['group_entity_type'] = ['#type' => 'value', '#value' => $group_entity->getEntityTypeId()];
     $form['group_id'] = ['#type' => 'value', '#value' => $group_entity->id()];
