@@ -137,6 +137,12 @@ abstract class ManageBulkRolesFormBase extends FormBase {
       '#value' => array_keys($role_options),
     ];
 
+    // Store admin role IDs and group context for the manager-count validation.
+    $admin_role_ids = array_keys(array_filter($roles, fn($r) => $r->isAdmin()));
+    $form['admin_role_ids'] = ['#type' => 'value', '#value' => $admin_role_ids];
+    $form['group_entity_type'] = ['#type' => 'value', '#value' => $group_entity->getEntityTypeId()];
+    $form['group_id'] = ['#type' => 'value', '#value' => $group_entity->id()];
+
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
       '#type' => 'submit',
@@ -153,6 +159,75 @@ abstract class ManageBulkRolesFormBase extends FormBase {
     ];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $table_values = $form_state->getValue('roles_table', []);
+    $role_ids = array_flip($form_state->getValue('role_ids', []));
+
+    // Each row must have at least one role.
+    foreach ($table_values as $membership_id => $row) {
+      $checked = array_filter(array_intersect_key($row, $role_ids));
+      if (empty($checked)) {
+        $form_state->setError(
+          $form['roles_table'][$membership_id],
+          $this->t('Each member must have at least one role. To remove a member from the group, use the members list.')
+        );
+      }
+    }
+
+    // Ensure the group retains at least one manager after these changes.
+    $admin_role_ids = $form_state->getValue('admin_role_ids', []);
+    if (empty($admin_role_ids)) {
+      return;
+    }
+
+    $group_entity_type = $form_state->getValue('group_entity_type');
+    $group_id = $form_state->getValue('group_id');
+    $edited_ids = array_keys($table_values);
+
+    // Count managers in memberships NOT being edited — they are unaffected.
+    $all_memberships = \Drupal::entityTypeManager()
+      ->getStorage('og_membership')
+      ->loadByProperties([
+        'entity_type' => $group_entity_type,
+        'entity_id'   => $group_id,
+        'state'       => 'active',
+      ]);
+
+    $managers_outside = 0;
+    foreach ($all_memberships as $gm) {
+      if (in_array($gm->id(), $edited_ids)) {
+        continue;
+      }
+      foreach ($admin_role_ids as $admin_role_id) {
+        if (in_array($admin_role_id, $gm->getRolesIds())) {
+          $managers_outside++;
+          break;
+        }
+      }
+    }
+
+    // Count managers within the edited rows that would retain the role.
+    $managers_in_form = 0;
+    foreach ($table_values as $row) {
+      foreach ($admin_role_ids as $admin_role_id) {
+        if (!empty($row[$admin_role_id])) {
+          $managers_in_form++;
+          break;
+        }
+      }
+    }
+
+    if ($managers_outside + $managers_in_form === 0) {
+      $form_state->setError(
+        $form['roles_table'],
+        $this->t('At least one manager must remain in the group. Assign the manager role to at least one member, or assign it to another member before removing it here.')
+      );
+    }
   }
 
   /**
