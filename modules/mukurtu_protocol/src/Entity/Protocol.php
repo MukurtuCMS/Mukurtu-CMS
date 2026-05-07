@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EditorialContentEntityBase;
@@ -380,6 +381,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
     $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
     if ($membership) {
       $membership->delete();
+      Cache::invalidateTags(["user:{$account->id()}", "user_roles"]);
     }
 
     return $this;
