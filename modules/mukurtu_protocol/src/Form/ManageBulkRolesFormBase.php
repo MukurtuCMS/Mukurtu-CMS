@@ -120,8 +120,8 @@ abstract class ManageBulkRolesFormBase extends FormBase {
       foreach ($role_options as $role_id => $role_label) {
         $row[$role_id] = [
           '#type' => 'checkbox',
-          '#title' => $role_label,
-          '#title_display' => 'invisible',
+          '#title' => '',
+          '#title_display' => 'none',
           '#default_value' => in_array($role_id, $current_role_ids),
           '#attributes' => ['aria-label' => $this->t('@role for @name', ['@role' => $role_label, '@name' => $user->getDisplayName()])],
         ];
@@ -155,7 +155,7 @@ abstract class ManageBulkRolesFormBase extends FormBase {
       '#url' => $group
         ? Url::fromRoute($this->getMembersRouteId(), ['group' => $group->id()])
         : Url::fromRoute('<front>'),
-      '#attributes' => ['class' => ['button']],
+      '#attributes' => ['class' => ['button'], 'role' => 'button'],
     ];
 
     return $form;
