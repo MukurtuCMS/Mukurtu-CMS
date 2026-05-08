@@ -3,11 +3,13 @@
 namespace Drupal\mukurtu_core\Hook;
 
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\Render\Element;
 use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -500,6 +502,22 @@ class FormHooks {
   }
 
   /**
+   * Implements hook_form_alter() for OG membership add/edit forms.
+   *
+   * Removes "Pending" from the membership state options so that only Active
+   * and Blocked are available when managing group memberships.
+   */
+  #[Hook('form_alter')]
+  public function formAlterRemoveOgPendingState(array &$form, FormStateInterface $form_state, string $form_id): void {
+    if (!preg_match('/^og_membership_.+_(add|edit)_form$/', $form_id)) {
+      return;
+    }
+    if (isset($form['state']['widget']['#options'][OgMembershipInterface::STATE_PENDING])) {
+      unset($form['state']['widget']['#options'][OgMembershipInterface::STATE_PENDING]);
+    }
+  }
+
+  /**
    * Removes message_digest notification actions from the user admin bulk form.
    *
    * These come from message_digest_ui optional config and should not be
@@ -509,8 +527,11 @@ class FormHooks {
    */
   #[Hook('form_alter')]
   public function formAlterRemoveNotificationBulkActions(array &$form, FormStateInterface $form_state, string $form_id): void {
-    if (!str_starts_with($form_id, 'views_form_user_admin_people_') &&
-        !str_starts_with($form_id, 'views_form_mukurtu_people_')) {
+    $is_user_form = str_starts_with($form_id, 'views_form_user_admin_people_') ||
+        str_starts_with($form_id, 'views_form_mukurtu_people_');
+    $is_members_form = str_starts_with($form_id, 'views_form_og_members_overview_');
+
+    if (!$is_user_form && !$is_members_form) {
       return;
     }
 
@@ -518,6 +539,8 @@ class FormHooks {
       'message_digest_interval.email_user.immediate',
       'message_digest_interval.email_user.daily',
       'message_digest_interval.email_user.weekly',
+      'og_membership_approve_pending_action',
+      'og_membership_pending_action',
     ];
 
     if (isset($form['header']['user_bulk_form']['action']['#options'])) {
@@ -527,6 +550,30 @@ class FormHooks {
       if (isset($form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'])) {
         $form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'] = t('Delete the selected user account(s)');
       }
+    }
+
+    if (isset($form['header']['og_membership_bulk_form']['action']['#options'])) {
+      foreach ($actions_to_remove as $action_id) {
+        unset($form['header']['og_membership_bulk_form']['action']['#options'][$action_id]);
+      }
+      if (isset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_delete_action'])) {
+        $form['header']['og_membership_bulk_form']['action']['#options']['og_membership_delete_action'] = t('Remove from group');
+      }
+    }
+  }
+
+  /**
+   * Implements hook_entity_operation_alter().
+   *
+   * Relabels the "Delete" operation on OG memberships to "Remove from group".
+   */
+  #[Hook('entity_operation_alter')]
+  public function entityOperationAlter(array &$operations, EntityInterface $entity): void {
+    if ($entity->getEntityTypeId() !== 'og_membership') {
+      return;
+    }
+    if (isset($operations['delete'])) {
+      $operations['delete']['title'] = t('Remove from group');
     }
   }
 
