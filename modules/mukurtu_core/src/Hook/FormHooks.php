@@ -478,26 +478,27 @@ class FormHooks {
       unset($form['field_display_name']);
     }
 
-    // Relabel the "Cancel account" button to "Delete account".
+    // Relabel the "Cancel account" button to "Block or delete account".
     if (isset($form['actions']['delete']['#title'])) {
-      $form['actions']['delete']['#title'] = t('Delete account');
+      $form['actions']['delete']['#title'] = t('Block or delete account');
     }
   }
 
   /**
    * Implements hook_form_FORM_ID_alter() for 'user_cancel_confirm_form'.
    *
-   * Relabels "Cancel account" to "Delete account" so users understand the action.
+   * Updates the single-user cancel confirm form title and submit button to
+   * reflect that both blocking and deletion are available.
    */
   #[Hook('form_user_cancel_confirm_form_alter')]
   public function formUserCancelConfirmFormAlter(array &$form, FormStateInterface $form_state): void {
     $entity = $form_state->getFormObject()->getEntity();
     $own_account = $entity->id() == \Drupal::currentUser()->id();
     $form['#title'] = $own_account
-      ? t('Are you sure you want to delete your account?')
-      : t('Are you sure you want to delete the account %name?', ['%name' => $entity->label()]);
+      ? t('Are you sure you want to delete or block your account?')
+      : t('Are you sure you want to delete or block the account %name?', ['%name' => $entity->label()]);
     if (isset($form['actions']['submit'])) {
-      $form['actions']['submit']['#value'] = t('Delete account');
+      $form['actions']['submit']['#value'] = t('Block or delete account');
     }
   }
 
@@ -541,6 +542,8 @@ class FormHooks {
       'message_digest_interval.email_user.weekly',
       'og_membership_approve_pending_action',
       'og_membership_pending_action',
+      'mukurtu_block_user_action',
+      'user_block_user_action',
     ];
 
     if (isset($form['header']['user_bulk_form']['action']['#options'])) {
@@ -548,7 +551,7 @@ class FormHooks {
         unset($form['header']['user_bulk_form']['action']['#options'][$action_id]);
       }
       if (isset($form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'])) {
-        $form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'] = t('Delete the selected user account(s)');
+        $form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'] = t('Block or delete the selected user account(s)');
       }
     }
 
@@ -558,6 +561,53 @@ class FormHooks {
       }
       if (isset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_delete_action'])) {
         $form['header']['og_membership_bulk_form']['action']['#options']['og_membership_delete_action'] = t('Remove from group');
+      }
+    }
+  }
+
+  /**
+   * Implements hook_form_FORM_ID_alter() for 'user_multiple_cancel_confirm'.
+   *
+   * Changes the bulk cancel confirmation form title and relabels "Disable"
+   * options to "Block" so terminology matches what the action actually does.
+   */
+  #[Hook('form_user_multiple_cancel_confirm_alter')]
+  public function formUserMultipleCancelConfirmAlter(array &$form, FormStateInterface $form_state): void {
+    $form['#title'] = t('Block or delete selected user accounts');
+    $this->relabelCancelMethods($form);
+  }
+
+  /**
+   * Implements hook_form_FORM_ID_alter() for 'user_admin_settings'.
+   *
+   * Updates the account settings page to use "delete or block" language and
+   * replaces "Disable the account" option descriptions with "Block the account".
+   */
+  #[Hook('form_user_admin_settings_alter')]
+  public function formUserAdminSettingsAlter(array &$form, FormStateInterface $form_state): void {
+    if (isset($form['registration_cancellation']['user_cancel_method']['#title'])) {
+      $form['registration_cancellation']['user_cancel_method']['#title'] = t('Default option when blocking or deleting a user account:');
+    }
+    if (isset($form['registration_cancellation'])) {
+      $this->relabelCancelMethods($form['registration_cancellation']);
+    }
+    else {
+      $this->relabelCancelMethods($form);
+    }
+  }
+
+  /**
+   * Replaces "Disable the account" with "Block the account" in cancel method
+   * radio option descriptions wherever they appear in a form subtree.
+   */
+  private function relabelCancelMethods(array &$element): void {
+    $replacements = [
+      'user_cancel_block' => t('Block the account and keep its content.'),
+      'user_cancel_block_unpublish' => t('Block the account and unpublish its content.'),
+    ];
+    foreach ($replacements as $key => $label) {
+      if (isset($element['user_cancel_method']['#options'][$key])) {
+        $element['user_cancel_method']['#options'][$key] = $label;
       }
     }
   }

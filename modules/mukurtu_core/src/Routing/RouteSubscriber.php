@@ -22,10 +22,10 @@ class RouteSubscriber extends RouteSubscriberBase
       $route->setRequirement('_custom_access', '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access');
     }
 
-    // Relabel the user account cancel route from "Cancel account" to
-    // "Delete account".
+    // Relabel the user account cancel route to reflect that both blocking
+    // and deletion are available options.
     if ($route = $collection->get('entity.user.cancel_form')) {
-      $route->setDefault('_title', 'Delete account');
+      $route->setDefault('_title', 'Block or delete account');
     }
   }
 }

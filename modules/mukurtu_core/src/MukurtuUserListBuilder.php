@@ -105,8 +105,12 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
    */
   public function getOperations(EntityInterface $entity) {
     $operations = parent::getOperations($entity);
-    if (isset($operations['cancel'])) {
-      $operations['cancel']['title'] = $this->t('Delete account');
+    if ($entity->access('cancel')) {
+      $operations['cancel'] = [
+        'title' => $this->t('Block or delete'),
+        'url' => $entity->toUrl('cancel-form'),
+        'weight' => 10,
+      ];
     }
     $operations['memberships'] = [
       'title' => $this->t('Memberships'),
