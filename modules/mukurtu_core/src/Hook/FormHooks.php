@@ -490,13 +490,17 @@ class FormHooks {
    * Updates the single-user cancel confirm form title and submit button to
    * reflect that both blocking and deletion are available.
    */
-  #[Hook('form_user_cancel_confirm_form_alter')]
+  #[Hook('form_user_cancel_form_alter')]
   public function formUserCancelConfirmFormAlter(array &$form, FormStateInterface $form_state): void {
     $entity = $form_state->getFormObject()->getEntity();
     $own_account = $entity->id() == \Drupal::currentUser()->id();
     $form['#title'] = $own_account
-      ? t('Are you sure you want to delete or block your account?')
-      : t('Are you sure you want to delete or block the account %name?', ['%name' => $entity->label()]);
+      ? t('Are you sure you want to block or delete your account?')
+      : t('Are you sure you want to block or delete the account %name?', ['%name' => $entity->label()]);
+    if (isset($form['user_cancel_method']['#title'])) {
+      $form['user_cancel_method']['#title'] = t('Block or delete options:');
+    }
+    $this->relabelCancelMethods($form);
     if (isset($form['actions']['submit'])) {
       $form['actions']['submit']['#value'] = t('Block or delete account');
     }
@@ -573,7 +577,13 @@ class FormHooks {
    */
   #[Hook('form_user_multiple_cancel_confirm_alter')]
   public function formUserMultipleCancelConfirmAlter(array &$form, FormStateInterface $form_state): void {
-    $form['#title'] = t('Block or delete selected user accounts');
+    $form['#title'] = t('Block or delete selected user account(s)');
+    if (isset($form['user_cancel_method']['#title'])) {
+      $form['user_cancel_method']['#title'] = t('Block or delete options:');
+    }
+    if (isset($form['user_cancel_method_show']['#title'])) {
+      $form['user_cancel_method_show']['#title'] = t('Block or delete options:');
+    }
     $this->relabelCancelMethods($form);
   }
 
@@ -602,8 +612,10 @@ class FormHooks {
    */
   private function relabelCancelMethods(array &$element): void {
     $replacements = [
-      'user_cancel_block' => t('Block the account and keep its content.'),
-      'user_cancel_block_unpublish' => t('Block the account and unpublish its content.'),
+      'user_cancel_block' => t('Block the user account(s), do not change their content.'),
+      'user_cancel_block_unpublish' => t('Block the user account(s) and unpublish their content.'),
+      'user_cancel_reassign' => t('Delete the user account(s), keep their content and assign it to the Anonymous user account. This cannot be undone.'),
+      'user_cancel_delete' => t('Delete the user account(s) and their content. This cannot be undone and is high risk.'),
     ];
     foreach ($replacements as $key => $label) {
       if (isset($element['user_cancel_method']['#options'][$key])) {
