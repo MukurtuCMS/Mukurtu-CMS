@@ -283,3 +283,10 @@ function mukurtu_protocol_update_40006(): void {
 function mukurtu_protocol_update_40007(): void {
   \Drupal::service('router.builder')->rebuild();
 }
+
+/**
+ * Rebuild node access grants so community-blocked users lose protocol access.
+ */
+function mukurtu_protocol_update_40008(): void {
+  node_access_rebuild(TRUE);
+}
