@@ -21,5 +21,11 @@ class RouteSubscriber extends RouteSubscriberBase
     if ($route = $collection->get('entity.dashboard.canonical')) {
       $route->setRequirement('_custom_access', '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access');
     }
+
+    // Relabel the user account cancel route from "Cancel account" to
+    // "Delete account".
+    if ($route = $collection->get('entity.user.cancel_form')) {
+      $route->setDefault('_title', 'Delete account');
+    }
   }
 }

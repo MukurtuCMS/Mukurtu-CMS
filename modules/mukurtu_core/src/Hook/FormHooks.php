@@ -475,6 +475,11 @@ class FormHooks {
       $form['account']['field_display_name']['#weight'] = 0.0013;
       unset($form['field_display_name']);
     }
+
+    // Relabel the "Cancel account" button to "Delete account".
+    if (isset($form['actions']['delete']['#title'])) {
+      $form['actions']['delete']['#title'] = t('Delete account');
+    }
   }
 
   /**
@@ -484,10 +489,12 @@ class FormHooks {
    */
   #[Hook('form_user_cancel_confirm_form_alter')]
   public function formUserCancelConfirmFormAlter(array &$form, FormStateInterface $form_state): void {
-    if (isset($form['#title'])) {
-      $form['#title'] = t('Are you sure you want to delete your account?');
-    }
-    if (isset($form['actions']['submit']['#value'])) {
+    $entity = $form_state->getFormObject()->getEntity();
+    $own_account = $entity->id() == \Drupal::currentUser()->id();
+    $form['#title'] = $own_account
+      ? t('Are you sure you want to delete your account?')
+      : t('Are you sure you want to delete the account %name?', ['%name' => $entity->label()]);
+    if (isset($form['actions']['submit'])) {
       $form['actions']['submit']['#value'] = t('Delete account');
     }
   }
@@ -516,6 +523,9 @@ class FormHooks {
     if (isset($form['header']['user_bulk_form']['action']['#options'])) {
       foreach ($actions_to_remove as $action_id) {
         unset($form['header']['user_bulk_form']['action']['#options'][$action_id]);
+      }
+      if (isset($form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'])) {
+        $form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'] = t('Delete the selected user account(s)');
       }
     }
   }

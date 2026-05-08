@@ -593,14 +593,6 @@ function mukurtu_core_invalidate_entity_reference_field_references(EntityInterfa
   }
 }
 
-/**
- * Implements hook_local_tasks_alter().
- */
-function mukurtu_core_local_tasks_alter(&$local_tasks) {
-  if (isset($local_tasks['user.cancel'])) {
-    $local_tasks['user.cancel']['title'] = t('Delete account');
-  }
-}
 
 /**
  * Implements hook_menu_links_discovered_alter().
