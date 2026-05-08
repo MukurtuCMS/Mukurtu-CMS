@@ -110,6 +110,9 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
         'title' => $this->t('Block or delete'),
         'url' => $entity->toUrl('cancel-form'),
         'weight' => 10,
+        'attributes' => [
+          'aria-label' => $this->t('Block or delete @name', ['@name' => $entity->getDisplayName()]),
+        ],
       ];
     }
     $operations['memberships'] = [

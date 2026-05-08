@@ -491,7 +491,7 @@ class FormHooks {
    * reflect that both blocking and deletion are available.
    */
   #[Hook('form_user_cancel_form_alter')]
-  public function formUserCancelConfirmFormAlter(array &$form, FormStateInterface $form_state): void {
+  public function formUserCancelFormAlter(array &$form, FormStateInterface $form_state): void {
     $entity = $form_state->getFormObject()->getEntity();
     $own_account = $entity->id() == \Drupal::currentUser()->id();
     $form['#title'] = $own_account
