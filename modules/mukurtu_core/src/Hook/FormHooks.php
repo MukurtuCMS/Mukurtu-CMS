@@ -478,6 +478,21 @@ class FormHooks {
   }
 
   /**
+   * Implements hook_form_FORM_ID_alter() for 'user_cancel_confirm_form'.
+   *
+   * Relabels "Cancel account" to "Delete account" so users understand the action.
+   */
+  #[Hook('form_user_cancel_confirm_form_alter')]
+  public function formUserCancelConfirmFormAlter(array &$form, FormStateInterface $form_state): void {
+    if (isset($form['#title'])) {
+      $form['#title'] = t('Are you sure you want to delete your account?');
+    }
+    if (isset($form['actions']['submit']['#value'])) {
+      $form['actions']['submit']['#value'] = t('Delete account');
+    }
+  }
+
+  /**
    * Removes message_digest notification actions from the user admin bulk form.
    *
    * These come from message_digest_ui optional config and should not be
