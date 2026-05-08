@@ -593,7 +593,6 @@ function mukurtu_core_invalidate_entity_reference_field_references(EntityInterfa
   }
 }
 
-
 /**
  * Implements hook_menu_links_discovered_alter().
  *
