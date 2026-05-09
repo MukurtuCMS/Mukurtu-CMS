@@ -20,6 +20,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Url;
 use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
 use Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction;
 
 /**
@@ -834,6 +835,73 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
 function mukurtu_protocol_action_info_alter(array &$definitions): void {
   if (isset($definitions['og_membership_delete_action'])) {
     $definitions['og_membership_delete_action']['class'] = MukurtuDeleteOgMembershipAction::class;
+  }
+}
+
+/**
+ * Implements hook_entity_operation().
+ *
+ * Adds per-row Block and Approve links to OG membership rows on the community
+ * and protocol member list pages.
+ */
+function mukurtu_protocol_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
+  $operations = [];
+
+  if ($entity->getEntityTypeId() !== 'og_membership') {
+    return $operations;
+  }
+
+  /** @var \Drupal\og\Entity\OgMembership $entity */
+  $group_type = $entity->getGroupEntityType();
+  if ($group_type !== 'community' && $group_type !== 'protocol') {
+    return $operations;
+  }
+
+  $state = $entity->getState();
+
+  if ($state !== OgMembershipInterface::STATE_BLOCKED) {
+    $operations['block'] = [
+      'title' => t('Block'),
+      'url' => Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]),
+      'weight' => 20,
+    ];
+  }
+
+  if ($state === OgMembershipInterface::STATE_PENDING) {
+    $operations['approve'] = [
+      'title' => t('Approve'),
+      'url' => Url::fromRoute('mukurtu_protocol.og_membership.approve', ['og_membership' => $entity->id()]),
+      'weight' => 25,
+    ];
+  }
+
+  return $operations;
+}
+
+/**
+ * Implements hook_entity_operation_alter().
+ *
+ * Renames the default OG membership "Edit" and "Delete" operations to use
+ * Mukurtu-appropriate labels on community and protocol member pages.
+ */
+function mukurtu_protocol_entity_operation_alter(array &$operations, \Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->getEntityTypeId() !== 'og_membership') {
+    return;
+  }
+
+  /** @var \Drupal\og\Entity\OgMembership $entity */
+  $group_type = $entity->getGroupEntityType();
+  if ($group_type !== 'community' && $group_type !== 'protocol') {
+    return;
+  }
+
+  if (isset($operations['edit'])) {
+    $operations['edit']['title'] = t('Manage roles');
+  }
+
+  if (isset($operations['delete'])) {
+    $label = $group_type === 'community' ? t('Remove from community') : t('Remove from protocol');
+    $operations['delete']['title'] = $label;
   }
 }
 

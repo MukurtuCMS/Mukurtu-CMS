@@ -198,6 +198,32 @@ mukurtu_protocol.protocol_add_membership:
       group:
         type: entity:protocol
 
+mukurtu_protocol.og_membership.block:
+  path: '/admin/members/{og_membership}/block'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgMembershipBlockForm'
+    _title: 'Block membership'
+  requirements:
+    _entity_access: 'og_membership.update'
+  options:
+    _admin_route: TRUE
+    parameters:
+      og_membership:
+        type: entity:og_membership
+
+mukurtu_protocol.og_membership.approve:
+  path: '/admin/members/{og_membership}/approve'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgMembershipApproveForm'
+    _title: 'Approve membership'
+  requirements:
+    _entity_access: 'og_membership.update'
+  options:
+    _admin_route: TRUE
+    parameters:
+      og_membership:
+        type: entity:og_membership
+
 mukurtu_protocol.comment_settings:
   path: '/admin/config/mukurtu/commenting/settings'
   defaults:
