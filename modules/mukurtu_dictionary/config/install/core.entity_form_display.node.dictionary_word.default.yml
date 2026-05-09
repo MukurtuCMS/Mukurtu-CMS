@@ -232,7 +232,7 @@ content:
         auto_center: '1'
         scroll_zoom_enabled: '1'
         map_position:
-          zoom: '12'
+          zoom: '2'
           minZoom: '3'
           maxZoom: '18'
           zoomFiner: '0'
@@ -284,7 +284,7 @@ content:
       locate:
         options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
         automatic: '1'
-        control: 0
+        control: 1
       feature_properties:
         values: ''
     third_party_settings: {  }

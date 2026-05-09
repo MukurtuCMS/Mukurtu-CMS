@@ -50,6 +50,16 @@
       // Start updating the Leaflet Map.
       this.update_leaflet_widget_map();
 
+      // The parent locate call uses maxZoom from map config (now zoom 2 for
+      // the fallback world view). When geolocation succeeds, re-zoom to street
+      // level. Registering after update_leaflet_widget_map ensures our handler
+      // fires after Leaflet's internal setView handler.
+      if (this.map_settings.locate && this.map_settings.locate.automatic && !this.map_settings.map_position_force) {
+        map.once('locationfound', function(e) {
+          map.setView(e.latlng, 12);
+        });
+      }
+
       /* Copied from leaflet.widget.js end. */
 
       /* Mukurtu additions begin: */
