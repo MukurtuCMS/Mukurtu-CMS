@@ -51,12 +51,16 @@
       this.update_leaflet_widget_map();
 
       // The parent locate call uses maxZoom from map config (now zoom 2 for
-      // the fallback world view). When geolocation succeeds, re-zoom to street
-      // level. Registering after update_leaflet_widget_map ensures our handler
-      // fires after Leaflet's internal setView handler.
-      if (this.map_settings.locate && this.map_settings.locate.automatic && !this.map_settings.map_position_force) {
+      // the fallback world view). When geolocation succeeds, fit the map to
+      // the accuracy circle so zoom reflects actual precision. Registering
+      // after update_leaflet_widget_map ensures our handler fires after
+      // Leaflet's internal setView handler. Guard mirrors the parent's
+      // value.length === 0 check so we don't register when data already exists.
+      if (this.map_settings.locate && this.map_settings.locate.automatic &&
+          !this.map_settings.map_position_force && this.get_json_value().length === 0) {
         map.once('locationfound', function(e) {
-          map.setView(e.latlng, 12);
+          var radius = Math.max(e.accuracy / 2, 0);
+          map.fitBounds(e.latlng.toBounds(radius * 2), {maxZoom: 16});
         });
       }
 
