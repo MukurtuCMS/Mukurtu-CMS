@@ -485,6 +485,51 @@ class FormHooks {
    * alongside the composer patch and update hook 40004: if the patch fails to
    * apply on a given environment the actions are still hidden from the UI.
    */
+  /**
+   * Implements hook_form_alter().
+   *
+   * Warns editors on content add forms when no Cultural Protocols exist yet.
+   * Protocols are required to control access to content; without at least one,
+   * newly created items cannot be properly shared.
+   */
+  #[Hook('form_alter')]
+  public function formAlterWarnNoProtocols(array &$form, FormStateInterface $form_state, string $form_id): void {
+    $affected_forms = [
+      'node_digital_heritage_form',
+      'node_collection_form',
+      'node_dictionary_word_form',
+      'node_word_list_form',
+      'node_person_form',
+      'node_place_form',
+    ];
+
+    if (!in_array($form_id, $affected_forms, TRUE)) {
+      return;
+    }
+
+    $node = $form_state->getFormObject()->getEntity();
+    if (!$node->isNew()) {
+      return;
+    }
+
+    $protocol_count = \Drupal::entityQuery('protocol')
+      ->accessCheck(FALSE)
+      ->count()
+      ->execute();
+
+    if ($protocol_count > 0) {
+      return;
+    }
+
+    $message = t('There are no Cultural Protocols available. Cultural Protocols are required to control who can access your content. Please create a Cultural Protocol before adding content.');
+
+    $form['no_protocols_warning'] = [
+      '#type' => 'markup',
+      '#markup' => '<div class="messages messages--warning" role="alert">' . $message . '</div>',
+      '#weight' => -100,
+    ];
+  }
+
   #[Hook('form_alter')]
   public function formAlterRemoveNotificationBulkActions(array &$form, FormStateInterface $form_state, string $form_id): void {
     if (!str_starts_with($form_id, 'views_form_user_admin_people_') &&
