@@ -1,8 +1,5 @@
 <?php
 
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\AnnounceCommand;
-use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -85,81 +82,20 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
     }
   }
 
-  $create_url = Url::fromRoute('node.add', ['node_type' => 'person'], ['query' => ['mukurtu_modal' => '1']]);
+  $create_url = Url::fromRoute('node.add', ['node_type' => 'person']);
   if ($create_url->access()) {
     $element['create_person_link'] = [
       '#type' => 'link',
       '#title' => t("Can't find the person? Create a new person record."),
       '#url' => $create_url,
       '#attributes' => [
-        'class' => ['use-ajax', 'button', 'button--small', 'button--extrasmall'],
-        'data-dialog-type' => 'modal',
-        'data-dialog-options' => json_encode([
-          'width' => 800,
-          'maxHeight' => '90vh',
-        ]),
-        'aria-haspopup' => 'dialog',
+        'class' => ['button', 'button--small', 'button--extrasmall'],
+        'target' => '_blank',
+        'rel' => 'noopener noreferrer',
       ],
-      '#attached' => ['library' => ['core/drupal.dialog.ajax']],
       '#weight' => 10,
     ];
   }
-}
-
-/**
- * Implements hook_form_node_person_form_alter().
- *
- * When the person creation form is opened in a modal (via the "create on the
- * fly" link on the related person widget), override the save button to close
- * the modal on success and show validation errors in-place rather than
- * redirecting to the new node's view page.
- */
-function mukurtu_person_form_node_person_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  // Require both an XHR request AND the mukurtu_modal query parameter set by
-  // our create-person link. The dual check scopes this to our specific modal
-  // entry point and prevents any other AJAX context (Inline Entity Form, etc.)
-  // that loads /node/add/person via XHR from silently inheriting modal behavior.
-  $request = \Drupal::request();
-  if (!$request->isXmlHttpRequest() || !$request->query->has('mukurtu_modal')) {
-    return;
-  }
-
-  // Wrap the form so the AJAX callback can target it, preserving any prefix/
-  // suffix already set by other modules.
-  $existing_prefix = $form['#prefix'] ?? '';
-  $form['#prefix'] = '<div id="mukurtu-person-modal-form">' . $existing_prefix;
-  $existing_suffix = $form['#suffix'] ?? '';
-  $form['#suffix'] = $existing_suffix . '</div>';
-
-  if (isset($form['actions']['submit'])) {
-    $form['actions']['submit']['#ajax'] = [
-      'callback' => 'mukurtu_person_modal_save_callback',
-      'wrapper' => 'mukurtu-person-modal-form',
-      'progress' => ['type' => 'throbber'],
-    ];
-  }
-
-  // Preview has no useful behaviour inside a modal.
-  if (isset($form['actions']['preview'])) {
-    $form['actions']['preview']['#access'] = FALSE;
-  }
-}
-
-/**
- * AJAX callback: close the modal on save, or return the form with errors.
- */
-function mukurtu_person_modal_save_callback(array &$form, FormStateInterface $form_state) {
-  if ($form_state->getErrors()) {
-    return $form;
-  }
-  $response = new AjaxResponse();
-  // The announce message is intentionally generic. If the person's name should
-  // be included, retrieve it via $form_state->getFormObject()->getEntity()->label()
-  // and use t('@name created. Use the entity browser to select the new person.',
-  // ['@name' => $name]) — requires the entity to already be saved at this point.
-  $response->addCommand(new AnnounceCommand(t('Person record created. Use the entity browser to select the new person.'), 'polite'));
-  $response->addCommand(new CloseModalDialogCommand());
-  return $response;
 }
 
 /**
