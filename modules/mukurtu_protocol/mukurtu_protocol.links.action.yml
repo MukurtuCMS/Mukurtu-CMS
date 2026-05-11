@@ -1,5 +1,5 @@
 entity.protocol.add_form:
-  route_name: entity.protocol.add_form
+  route_name: mukurtu_protocol.protocol_create
   title: 'Add Protocol'
   appears_on:
     - entity.protocol.collection
