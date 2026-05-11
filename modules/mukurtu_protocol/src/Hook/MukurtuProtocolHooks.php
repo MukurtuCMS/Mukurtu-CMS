@@ -7,6 +7,8 @@ namespace Drupal\mukurtu_protocol\Hook;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Url;
+use Drupal\og\Entity\OgMembership;
+use Drupal\og\OgMembershipInterface;
 use Drupal\user\UserInterface;
 
 /**
@@ -33,6 +35,72 @@ class MukurtuProtocolHooks {
         'weight' => 20,
       ],
     ];
+  }
+
+  /**
+   * Implements hook_entity_operation() for OG memberships.
+   *
+   * Adds per-row Block and Approve links to OG membership rows on the community
+   * and protocol member list pages.
+   */
+  #[Hook('entity_operation')]
+  public function entityOperationOgMembership(EntityInterface $entity): array {
+    if (!$entity instanceof OgMembership) {
+      return [];
+    }
+
+    $group_type = $entity->getGroupEntityType();
+    if ($group_type !== 'community' && $group_type !== 'protocol') {
+      return [];
+    }
+
+    $operations = [];
+    $state = $entity->getState();
+
+    if ($state !== OgMembershipInterface::STATE_BLOCKED) {
+      $operations['block'] = [
+        'title' => t('Block'),
+        'url' => Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]),
+        'weight' => 20,
+      ];
+    }
+
+    if ($state === OgMembershipInterface::STATE_PENDING) {
+      $operations['approve'] = [
+        'title' => t('Approve'),
+        'url' => Url::fromRoute('mukurtu_protocol.og_membership.approve', ['og_membership' => $entity->id()]),
+        'weight' => 25,
+      ];
+    }
+
+    return $operations;
+  }
+
+  /**
+   * Implements hook_entity_operation_alter() for OG memberships.
+   *
+   * Renames the default OG membership "Edit" and "Delete" operations to use
+   * Mukurtu-appropriate labels on community and protocol member pages.
+   */
+  #[Hook('entity_operation_alter')]
+  public function entityOperationAlterOgMembership(array &$operations, EntityInterface $entity): void {
+    if (!$entity instanceof OgMembership) {
+      return;
+    }
+
+    $group_type = $entity->getGroupEntityType();
+    if ($group_type !== 'community' && $group_type !== 'protocol') {
+      return;
+    }
+
+    if (isset($operations['edit'])) {
+      $operations['edit']['title'] = t('Manage roles');
+    }
+
+    if (isset($operations['delete'])) {
+      $label = $group_type === 'community' ? t('Remove from community') : t('Remove from protocol');
+      $operations['delete']['title'] = $label;
+    }
   }
 
   /**

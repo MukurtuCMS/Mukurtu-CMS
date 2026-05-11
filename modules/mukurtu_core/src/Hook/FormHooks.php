@@ -584,18 +584,24 @@ class FormHooks {
       return;
     }
 
+    // Remove notification and user-only actions from all applicable forms.
     $actions_to_remove = [
       'message_digest_interval.email_user.immediate',
       'message_digest_interval.email_user.daily',
       'message_digest_interval.email_user.weekly',
-      'og_membership_approve_pending_action',
-      'og_membership_pending_action',
       'mukurtu_block_user_action',
       'user_block_user_action',
     ];
 
+    // Remove OG pending-state actions only from user admin forms, not from the
+    // members overview where approve/pending are intentional workflow actions.
+    $user_only_actions_to_remove = [
+      'og_membership_approve_pending_action',
+      'og_membership_pending_action',
+    ];
+
     if (isset($form['header']['user_bulk_form']['action']['#options'])) {
-      foreach ($actions_to_remove as $action_id) {
+      foreach (array_merge($actions_to_remove, $user_only_actions_to_remove) as $action_id) {
         unset($form['header']['user_bulk_form']['action']['#options'][$action_id]);
       }
       if (isset($form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'])) {
