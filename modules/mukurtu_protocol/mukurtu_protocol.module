@@ -98,6 +98,32 @@ function mukurtu_protocol_views_pre_render(\Drupal\views\ViewExecutable $view): 
 }
 
 /**
+ * Implements hook_views_pre_build().
+ *
+ * Injects the correct manage-roles action into the OG members overview bulk
+ * form based on whether we are on a community or protocol members page. The
+ * OG bulk form uses an explicit allowlist, so actions must be added here to
+ * appear in the dropdown.
+ */
+function mukurtu_protocol_views_pre_build(\Drupal\views\ViewExecutable $view): void {
+  if ($view->id() !== 'og_members_overview') {
+    return;
+  }
+  if (!isset($view->field['og_membership_bulk_form'])) {
+    return;
+  }
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  $action_map = [
+    'mukurtu_protocol.community_members_list' => 'mukurtu_manage_community_roles_action',
+    'mukurtu_protocol.protocol_members_list'  => 'mukurtu_manage_protocol_roles_action',
+  ];
+  if (!isset($action_map[$route_name])) {
+    return;
+  }
+  $view->field['og_membership_bulk_form']->options['selected_actions'][] = $action_map[$route_name];
+}
+
+/**
  * Implements hook_views_data_alter().
  */
 function mukurtu_protocol_views_data_alter(array &$data)
@@ -120,6 +146,23 @@ function mukurtu_protocol_views_data_alter(array &$data)
         'id' => 'user_roles_plain',
       ],
     ];
+  }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * OgMembership has no label entity key, so $entity->label() returns NULL.
+ * BulkForm::viewsFormSubmit() passes the entity label to Html::escape() in its
+ * "no access" error message, which crashes with a TypeError on NULL. Using the
+ * 'state' field as the label gives memberships a non-null string ("active",
+ * "pending", or "blocked") that satisfies the type requirement.
+ */
+function mukurtu_protocol_entity_type_alter(array &$entity_types): void {
+  if (isset($entity_types['og_membership'])) {
+    $entity_keys = $entity_types['og_membership']->get('entity_keys');
+    $entity_keys['label'] = 'state';
+    $entity_types['og_membership']->set('entity_keys', $entity_keys);
   }
 }
 
