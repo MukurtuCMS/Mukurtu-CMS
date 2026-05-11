@@ -440,3 +440,113 @@ function mukurtu_dictionary_update_40010(): void {
 function mukurtu_dictionary_update_40011(): void {
   mukurtu_dictionary_update_40010();
 }
+
+/**
+ * Add word_list to type filter, enable multi-select on facets, add community facet.
+ */
+function mukurtu_dictionary_update_40012(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if (!$config) {
+    return;
+  }
+
+  $base = 'display.default.display_options';
+
+  // 1. Include word_list in the hard type filter so word lists appear in results.
+  $value = $config->get("$base.filters.type.value") ?? [];
+  $value['word_list'] = 'word_list';
+  $config->set("$base.filters.type.value", $value);
+
+  // 2. Enable multiple selections on all exposed facet dropdown filters.
+  $multi_filters = [
+    'facets_type',
+    'facets_mukurtu_cultural_protocol_ids',
+    'facets_language',
+    'facets_keyword',
+    'facets_word_lists',
+    'facets_word_type',
+  ];
+  foreach ($multi_filters as $filter_id) {
+    $config->set("$base.filters.$filter_id.expose.multiple", TRUE);
+    $config->set("$base.filters.$filter_id.group_info.multiple", TRUE);
+  }
+
+  // 3. Add community facet filter.
+  $community_filter = [
+    'id' => 'facets_community_title',
+    'table' => 'search_api_index_mukurtu_dictionary_index',
+    'field' => 'facets_community_title',
+    'relationship' => 'none',
+    'group_type' => 'group',
+    'admin_label' => '',
+    'plugin_id' => 'facets_filter',
+    'operator' => '=',
+    'value' => '',
+    'group' => 1,
+    'exposed' => TRUE,
+    'expose' => [
+      'operator_id' => '',
+      'label' => 'Community',
+      'description' => '',
+      'use_operator' => FALSE,
+      'operator' => '',
+      'operator_limit_selection' => FALSE,
+      'operator_list' => [],
+      'identifier' => 'community',
+      'required' => FALSE,
+      'remember' => FALSE,
+      'multiple' => TRUE,
+      'remember_roles' => ['authenticated' => 'authenticated'],
+    ],
+    'is_grouped' => FALSE,
+    'group_info' => [
+      'label' => '',
+      'description' => '',
+      'identifier' => '',
+      'optional' => TRUE,
+      'widget' => 'select',
+      'multiple' => TRUE,
+      'remember' => FALSE,
+      'default_group' => 'All',
+      'default_group_multiple' => [],
+      'group_items' => [],
+    ],
+    'hierarchy' => FALSE,
+    'label_display' => 'visible',
+    'facet' => [
+      'query_operator' => 'or',
+      'hard_limit' => 0,
+      'min_count' => 1,
+      'show_numbers' => FALSE,
+      'processor_configs' => [
+        'display_value_widget_order' => [
+          'processor_id' => 'display_value_widget_order',
+          'weights' => ['sort' => 40],
+          'settings' => ['sort' => 'ASC'],
+        ],
+      ],
+    ],
+  ];
+  $config->set("$base.filters.facets_community_title", $community_filter);
+
+  // 4. Add community facet to BEF filter config.
+  $bef_entry = [
+    'plugin_id' => 'default',
+    'advanced' => [
+      'rewrite' => [
+        'filter_rewrite_values' => '',
+        'filter_rewrite_values_key' => FALSE,
+      ],
+      'collapsible' => FALSE,
+      'collapsible_disable_automatic_open' => FALSE,
+      'open_by_default' => FALSE,
+      'is_secondary' => FALSE,
+      'hide_label' => FALSE,
+      'field_classes' => '',
+      'sort_options_unsupported' => '',
+    ],
+  ];
+  $config->set("$base.exposed_form.options.bef.filter.facets_community_title", $bef_entry);
+
+  $config->save(TRUE);
+}
