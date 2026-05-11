@@ -360,3 +360,85 @@ function mukurtu_browse_update_40008(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Add multipage page delta and community record flag fields to the content index.
+ */
+function mukurtu_browse_update_40009() {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  // Add processors first via the entity so they are saved together with fields.
+  $processors = $index->getProcessors();
+  foreach (['mukurtu_multipage_page_index', 'mukurtu_community_record_flag'] as $processor_id) {
+    if (!isset($processors[$processor_id])) {
+      $processor_manager = \Drupal::service('plugin.manager.search_api.processor');
+      $processor = $processor_manager->createInstance($processor_id, ['#index' => $index]);
+      $processors[$processor_id] = $processor;
+    }
+  }
+  $index->setProcessors($processors);
+
+  $new_fields = [
+    'multipage_page_delta' => [
+      'type' => 'integer',
+      'property_path' => 'multipage_page_delta',
+      'datasource_id' => 'entity:node',
+      'label' => 'Multipage page delta',
+    ],
+    'is_community_record' => [
+      'type' => 'boolean',
+      'property_path' => 'is_community_record',
+      'datasource_id' => 'entity:node',
+      'label' => 'Is community record',
+    ],
+  ];
+
+  foreach ($new_fields as $field_id => $field_config) {
+    if (!$index->getField($field_id)) {
+      $field = new \Drupal\search_api\Item\Field($index, $field_id);
+      $field->setType($field_config['type']);
+      $field->setPropertyPath($field_config['property_path']);
+      $field->setDatasourceId($field_config['datasource_id']);
+      $field->setLabel($field_config['label']);
+      $index->addField($field);
+    }
+  }
+
+  $index->save();
+  $index->reindex();
+}
+
+/**
+ * Replace multipage_page_delta (integer) with is_additional_mpi_page (boolean).
+ *
+ * The original integer field used a < 1 comparison which silently passed all
+ * items when the processor query found no rows. The boolean field mirrors the
+ * community record pattern and is unambiguous.
+ */
+function mukurtu_browse_update_40010() {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  // Remove the old integer field if present.
+  if ($index->getField('multipage_page_delta')) {
+    $index->removeField('multipage_page_delta');
+  }
+
+  // Add the replacement boolean field.
+  if (!$index->getField('is_additional_mpi_page')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'is_additional_mpi_page');
+    $field->setType('boolean');
+    $field->setPropertyPath('is_additional_mpi_page');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Is additional multipage item page');
+    $index->addField($field);
+  }
+
+  $index->save();
+  $index->reindex();
+}

@@ -194,6 +194,13 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
   }
 
   /**
+   * Suppresses the default add-form route — replaced by mukurtu_protocol.protocol_create.
+   */
+  protected function getAddFormRoute(EntityTypeInterface $entity_type): ?Route {
+    return NULL;
+  }
+
+  /**
    * Gets the collection route.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
@@ -217,7 +224,7 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title_arguments' => $label->getArguments(),
           '_title_context' => $label->getOption('context'),
         ])
-        ->setRequirement('_mukurtu_permission', 'site:administer site configuration+protocol:update group+protocol:approve and deny subscription+protocol:manage members');
+        ->setRequirement('_mukurtu_permission', 'site:administer site configuration+protocol:update group+protocol:approve and deny subscription+protocol:manage members+community:update group+community:approve and deny subscription+community:manage members');
       return $route;
     }
   }
