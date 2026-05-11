@@ -26,7 +26,7 @@ content:
     region: content
   field_thumbnail:
     type: image
-    label: above
+    label: hidden
     settings:
       image_link: ''
       image_style: ''
