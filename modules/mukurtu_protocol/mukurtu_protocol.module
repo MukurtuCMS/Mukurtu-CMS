@@ -22,6 +22,7 @@ use Drupal\Core\Url;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction;
+use Drupal\Core\Render\Markup;
 
 /**
  * @file
@@ -80,6 +81,10 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles)
  * abandoned operation; plain row selections do not set this key.
  */
 function mukurtu_protocol_views_pre_render(\Drupal\views\ViewExecutable $view): void {
+  if ($view->id() === 'og_members_overview') {
+    $view->element['#attached']['library'][] = 'mukurtu_protocol/protocol-list';
+  }
+
   // Todo: fetch the display id programmatically instead of hardcoding it to page_1.
   if ($view->id() !== 'mukurtu_people' || $view->current_display !== 'page_1') {
     return;
@@ -948,4 +953,37 @@ function mukurtu_protocol_entity_access(\Drupal\Core\Entity\EntityInterface $ent
   }
 
   return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_preprocess_views_view_field().
+ */
+function mukurtu_protocol_preprocess_views_view_field(&$variables) {
+  if ($variables['view']->id() !== 'og_members_overview') {
+    return;
+  }
+  if ($variables['field']->field !== 'state') {
+    return;
+  }
+
+  $membership_id = $variables['row']->id ?? NULL;
+  if (!$membership_id) {
+    return;
+  }
+
+  $membership = \Drupal::entityTypeManager()->getStorage('og_membership')->load($membership_id);
+  if (!$membership) {
+    return;
+  }
+
+  $group = $membership->getGroup();
+  $owner = $membership->getOwner();
+  if (!$group || !$owner || $group->getEntityTypeId() !== 'protocol') {
+    return;
+  }
+
+  if (CulturalProtocols::isUserBlockedFromProtocolViaCommunity($owner, $group)) {
+    $badge = '<span class="community-blocked-badge">' . t('Community blocked') . '</span>';
+    $variables['output'] = Markup::create((string) $variables['output'] . ' ' . $badge);
+  }
 }
