@@ -695,7 +695,7 @@ class FormHooks
         }
 
         $message = t(
-            "You do not have permission to create content in any cultural protocols, which is a requirement for all content. If you think you should have access to existing protocol(s), contact your site administrator. If you are the site adminsitrator, ensure that you have created appropriate communities and cultural protocols before creating content.",
+            "You do not have permission to create content in any cultural protocols, which is a requirement for all content. If you think you should have access to existing protocol(s), contact your site administrator. If you are the site administrator, ensure that you have created appropriate communities and cultural protocols before creating content.",
         );
 
         $form["no_protocols_warning"] = [
