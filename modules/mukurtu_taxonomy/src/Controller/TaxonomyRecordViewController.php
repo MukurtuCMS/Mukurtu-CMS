@@ -106,7 +106,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     $person = $this->getSinglePersonRecord($taxonomy_term);
     if ($person) {
       $url = $person->toUrl()->toString();
-      $this->getLogger('mukurtu_taxonomy')->debug(
+      $this->getLogger('mukurtu_taxonomy')->notice(
         'Taxonomy term %label (tid %tid) redirected to person record nid %nid.',
         ['%label' => $taxonomy_term->label(), '%tid' => $taxonomy_term->id(), '%nid' => $person->id()]
       );
