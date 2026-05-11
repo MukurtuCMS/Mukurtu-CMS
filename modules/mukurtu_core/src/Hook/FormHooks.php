@@ -523,6 +523,50 @@ class FormHooks {
   }
 
   /**
+   * Prevents a user from applying bulk actions to their own account.
+   *
+   * Disables the current user's checkbox in the standard user admin bulk form
+   * via #after_build so the entry is never submitted. The VBO-based
+   * mukurtu_people view is protected at the action access() level instead.
+   */
+  #[Hook('form_alter')]
+  public function formAlterPreventSelfBlock(array &$form, FormStateInterface $form_state, string $form_id): void {
+    if (!str_starts_with($form_id, 'views_form_user_admin_people_')) {
+      return;
+    }
+    if (isset($form['user_bulk_form'])) {
+      $form['user_bulk_form']['#after_build'][] = [static::class, 'disableSelfBulkFormCheckbox'];
+    }
+  }
+
+  /**
+   * After-build callback: disables the bulk form checkbox for the current user.
+   *
+   * BulkForm key format: base64(json([langcode, entity_id])) or
+   * base64(json([langcode, entity_id, revision_id])).
+   */
+  public static function disableSelfBulkFormCheckbox(array $element, FormStateInterface $form_state): array {
+    $current_uid = \Drupal::currentUser()->id();
+    foreach (Element::children($element) as $key) {
+      $value = $element[$key]['#return_value'] ?? NULL;
+      if (!$value) {
+        continue;
+      }
+      $key_parts = json_decode(base64_decode($value), TRUE);
+      if (!is_array($key_parts) || !isset($key_parts[1])) {
+        continue;
+      }
+      $entity_id = $key_parts[1];
+      if ($entity_id == $current_uid) {
+        $element[$key]['#disabled'] = TRUE;
+        $element[$key]['#attributes']['title'] = t('You cannot apply bulk actions to your own account.');
+        break;
+      }
+    }
+    return $element;
+  }
+
+  /**
    * Removes message_digest notification actions from the user admin bulk form.
    *
    * These come from message_digest_ui optional config and should not be

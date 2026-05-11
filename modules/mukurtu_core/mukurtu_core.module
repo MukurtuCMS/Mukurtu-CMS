@@ -432,6 +432,18 @@ function mukurtu_core_entity_presave(EntityInterface $entity) {
       $entity->set('field_content_type', $entity->type->entity->label());
     }
   }
+
+  // Prevent any code path (bulk actions, direct edits) from blocking the
+  // currently logged-in user's own account.
+  if ($entity instanceof \Drupal\user\Entity\User && !$entity->isNew()) {
+    if ($entity->id() == \Drupal::currentUser()->id()
+        && isset($entity->original)
+        && $entity->original->isActive()
+        && $entity->isBlocked()) {
+      $entity->set('status', 1);
+      \Drupal::messenger()->addWarning(t('You cannot block your own account.'));
+    }
+  }
 }
 
 /**
