@@ -553,3 +553,31 @@ function mukurtu_core_update_40014(): void {
 
   $config->set('sections', $sections)->save();
 }
+
+/**
+ * Add small, medium, and large media view modes.
+ */
+function mukurtu_core_update_40015(): void {
+  $config_storage = \Drupal::service('config.storage');
+
+  // Import view mode definitions from mukurtu_core module.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach (['small', 'medium', 'large'] as $mode) {
+    $name = 'core.entity_view_mode.media.' . $mode;
+    $config_storage->write($name, $module_source->read($name));
+  }
+
+  // Import view display configs from the profile.
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  $bundles = ['image', 'video', 'audio', 'document', 'external_embed', 'remote_video'];
+  foreach (['small', 'medium', 'large'] as $mode) {
+    foreach ($bundles as $bundle) {
+      $name = 'core.entity_view_display.media.' . $bundle . '.' . $mode;
+      $config_storage->write($name, $profile_source->read($name));
+    }
+  }
+}
