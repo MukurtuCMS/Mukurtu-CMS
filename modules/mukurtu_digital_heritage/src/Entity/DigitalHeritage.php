@@ -2,16 +2,19 @@
 
 namespace Drupal\mukurtu_digital_heritage\Entity;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_digital_heritage\DigitalHeritageInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_core\Entity\BundleSpecificCheckCreateAccessInterface;
 use Drupal\mukurtu_drafts\Entity\MukurtuDraftTrait;
 use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 
-class DigitalHeritage extends Node implements DigitalHeritageInterface, CulturalProtocolControlledInterface, MukurtuDraftInterface {
+class DigitalHeritage extends Node implements DigitalHeritageInterface, CulturalProtocolControlledInterface, BundleSpecificCheckCreateAccessInterface, MukurtuDraftInterface {
   use CulturalProtocolControlledTrait;
   use MukurtuDraftTrait;
 
@@ -570,6 +573,15 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function bundleCheckCreateAccess(AccountInterface $account, array $context): AccessResult {
+    $query = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->getQuery();
+    $categories = $query->condition('vid', 'category')->accessCheck(TRUE)->execute();
+    return AccessResult::allowedIf(!empty($categories));
   }
 
 }
