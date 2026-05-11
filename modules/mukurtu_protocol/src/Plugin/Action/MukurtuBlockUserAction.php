@@ -55,6 +55,11 @@ class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
       return $return_as_object ? AccessResult::forbidden() : FALSE;
     }
 
+    // Users cannot block themselves.
+    if ($object->id() == $account->id()) {
+      return $return_as_object ? AccessResult::forbidden()->cachePerUser() : FALSE;
+    }
+
     if ($account->hasPermission('administer users')) {
       return $return_as_object ? AccessResult::allowed()->cachePerPermissions() : TRUE;
     }

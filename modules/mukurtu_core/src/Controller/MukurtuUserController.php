@@ -10,7 +10,6 @@ use Drupal\Core\Link;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
-use Drupal\Core\Ajax\MessageCommand;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
 
@@ -207,3 +206,4 @@ class MukurtuUserController extends ControllerBase {
   }
 
 }
+
