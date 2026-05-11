@@ -581,7 +581,8 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
   public static function bundleCheckCreateAccess(AccountInterface $account, array $context): AccessResult {
     $query = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->getQuery();
     $categories = $query->condition('vid', 'category')->accessCheck(TRUE)->execute();
-    return AccessResult::allowedIf(!empty($categories));
+    return AccessResult::allowedIf(!empty($categories))
+      ->addCacheTags(['taxonomy_term_list:category']);
   }
 
 }
