@@ -4,7 +4,9 @@ namespace Drupal\mukurtu_protocol;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
 class CulturalProtocols {
@@ -105,6 +107,21 @@ class CulturalProtocols {
     return $compoundProtocols;
   }
 
+  /**
+   * Returns TRUE if the account is OG-blocked in any of a protocol's parent communities.
+   *
+   * A community-level block takes precedence over an active protocol membership,
+   * so this check must be applied wherever protocol access is evaluated.
+   */
+  public static function isUserBlockedFromProtocolViaCommunity(AccountInterface $account, ProtocolInterface $protocol): bool {
+    foreach ($protocol->getCommunities() as $community) {
+      if (Og::getMembership($community, $account, [OgMembershipInterface::STATE_BLOCKED]) !== NULL) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
   public static function getAccountGrantIds(AccountInterface $account) {
     $grants = [];
 
@@ -114,6 +131,12 @@ class CulturalProtocols {
     /** @var \Drupal\og\OgMembershipInterface[] $memberships */
     $memberships = Og::getMemberships($account);
     $memberships = array_filter($memberships, fn ($e) => $e->getGroupEntityType() == 'protocol');
+
+    // Exclude protocols where the user is blocked in a parent community.
+    $memberships = array_filter($memberships, function ($m) use ($account) {
+      $protocol = $m->getGroup();
+      return $protocol && !self::isUserBlockedFromProtocolViaCommunity($account, $protocol);
+    });
 
     // Get the protocol NID list and sort them.
     $protocols = array_map(fn ($e) => $e->getGroupId(), $memberships);
