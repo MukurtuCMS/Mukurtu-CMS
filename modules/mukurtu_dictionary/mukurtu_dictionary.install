@@ -421,22 +421,20 @@ function mukurtu_dictionary_update_40011(): void {
  * Remove the LanguageCommunity entity type (superseded by Community).
  */
 function mukurtu_dictionary_update_40012(): void {
-  $entity_type_manager = \Drupal::entityTypeManager();
-  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $db = \Drupal::database();
+  $schema = $db->schema();
 
-  // Delete all existing language_community entities.
-  if ($entity_type_manager->hasDefinition('language_community')) {
-    $storage = $entity_type_manager->getStorage('language_community');
-    $ids = $storage->getQuery()->accessCheck(FALSE)->execute();
-    if ($ids) {
-      $entities = $storage->loadMultiple($ids);
-      $storage->delete($entities);
-    }
+  // Remove OG memberships referencing language_community groups.
+  if ($schema->tableExists('og_membership')) {
+    $db->delete('og_membership')
+      ->condition('group_type', 'language_community')
+      ->execute();
+  }
 
-    // Drop the entity schema (database tables).
-    $entity_type = $update_manager->getEntityType('language_community');
-    if ($entity_type) {
-      $update_manager->uninstallEntityType($entity_type);
+  // Drop language_community tables if they exist.
+  foreach (['language_community_field_revision', 'language_community_revision', 'language_community_field_data', 'language_community'] as $table) {
+    if ($schema->tableExists($table)) {
+      $schema->dropTable($table);
     }
   }
 
