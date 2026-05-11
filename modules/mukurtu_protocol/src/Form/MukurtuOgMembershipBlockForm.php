@@ -35,6 +35,16 @@ class MukurtuOgMembershipBlockForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
+  public function getDescription() {
+    if ($this->membership->getGroupEntityType() === 'community') {
+      return $this->t('The user will not be able to access content from this community or its closed protocols. You can unblock them at any time from the members list.');
+    }
+    return $this->t('The user will not be able to access content from this protocol. You can unblock them at any time from the members list.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getConfirmText() {
     return $this->t('Block');
   }
