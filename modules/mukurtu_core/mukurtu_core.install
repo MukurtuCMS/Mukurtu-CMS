@@ -570,7 +570,7 @@ function mukurtu_core_update_40015(): void {
   }
 
   // Import view display configs from the profile.
-  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $profile_path = \Drupal::service('extension.list.profile')->getPath(\Drupal::installProfile());
   $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
 
   $bundles = ['image', 'video', 'audio', 'document', 'external_embed', 'remote_video'];
