@@ -373,3 +373,20 @@ function mukurtu_protocol_update_40013(): void {
     }
   }
 }
+
+/**
+ * Rebuild node access grants so community-blocked users lose protocol access.
+ */
+function mukurtu_protocol_update_40014(): void {
+  node_access_rebuild(TRUE);
+}
+
+/**
+ * Re-import og_members_overview view: remove Unblock bulk action.
+ */
+function mukurtu_protocol_update_40015(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $config_file = $module_path . '/config/install/views.view.og_members_overview.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($data)->save(TRUE);
+}
