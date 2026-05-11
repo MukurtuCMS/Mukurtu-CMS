@@ -3,11 +3,13 @@
 namespace Drupal\mukurtu_core\Hook;
 
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\Render\Element;
 use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -475,6 +477,49 @@ class FormHooks {
       $form['account']['field_display_name']['#weight'] = 0.0013;
       unset($form['field_display_name']);
     }
+
+    // Relabel the "Cancel account" button to "Block or delete account".
+    if (isset($form['actions']['delete']['#title'])) {
+      $form['actions']['delete']['#title'] = t('Block or delete account');
+    }
+  }
+
+  /**
+   * Implements hook_form_FORM_ID_alter() for 'user_cancel_confirm_form'.
+   *
+   * Updates the single-user cancel confirm form title and submit button to
+   * reflect that both blocking and deletion are available.
+   */
+  #[Hook('form_user_cancel_form_alter')]
+  public function formUserCancelFormAlter(array &$form, FormStateInterface $form_state): void {
+    $entity = $form_state->getFormObject()->getEntity();
+    $own_account = $entity->id() == \Drupal::currentUser()->id();
+    $form['#title'] = $own_account
+      ? t('Are you sure you want to block or delete your account?')
+      : t('Are you sure you want to block or delete the account %name?', ['%name' => $entity->label()]);
+    if (isset($form['user_cancel_method']['#title'])) {
+      $form['user_cancel_method']['#title'] = t('Block or delete options:');
+    }
+    $this->relabelCancelMethods($form);
+    if (isset($form['actions']['submit'])) {
+      $form['actions']['submit']['#value'] = t('Block or delete account');
+    }
+  }
+
+  /**
+   * Implements hook_form_alter() for OG membership add/edit forms.
+   *
+   * Removes "Pending" from the membership state options so that only Active
+   * and Blocked are available when managing group memberships.
+   */
+  #[Hook('form_alter')]
+  public function formAlterRemoveOgPendingState(array &$form, FormStateInterface $form_state, string $form_id): void {
+    if (!preg_match('/^og_membership_.+_(add|edit)_form$/', $form_id)) {
+      return;
+    }
+    if (isset($form['state']['widget']['#options'][OgMembershipInterface::STATE_PENDING])) {
+      unset($form['state']['widget']['#options'][OgMembershipInterface::STATE_PENDING]);
+    }
   }
 
   /**
@@ -531,8 +576,11 @@ class FormHooks {
    */
   #[Hook('form_alter')]
   public function formAlterRemoveNotificationBulkActions(array &$form, FormStateInterface $form_state, string $form_id): void {
-    if (!str_starts_with($form_id, 'views_form_user_admin_people_') &&
-        !str_starts_with($form_id, 'views_form_mukurtu_people_')) {
+    $is_user_form = str_starts_with($form_id, 'views_form_user_admin_people_') ||
+        str_starts_with($form_id, 'views_form_mukurtu_people_');
+    $is_members_form = str_starts_with($form_id, 'views_form_og_members_overview_');
+
+    if (!$is_user_form && !$is_members_form) {
       return;
     }
 
@@ -540,12 +588,98 @@ class FormHooks {
       'message_digest_interval.email_user.immediate',
       'message_digest_interval.email_user.daily',
       'message_digest_interval.email_user.weekly',
+      'og_membership_approve_pending_action',
+      'og_membership_pending_action',
+      'mukurtu_block_user_action',
+      'user_block_user_action',
     ];
 
     if (isset($form['header']['user_bulk_form']['action']['#options'])) {
       foreach ($actions_to_remove as $action_id) {
         unset($form['header']['user_bulk_form']['action']['#options'][$action_id]);
       }
+      if (isset($form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'])) {
+        $form['header']['user_bulk_form']['action']['#options']['user_cancel_user_action'] = t('Block or delete the selected user account(s)');
+      }
+    }
+
+    if (isset($form['header']['og_membership_bulk_form']['action']['#options'])) {
+      foreach ($actions_to_remove as $action_id) {
+        unset($form['header']['og_membership_bulk_form']['action']['#options'][$action_id]);
+      }
+      if (isset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_delete_action'])) {
+        $form['header']['og_membership_bulk_form']['action']['#options']['og_membership_delete_action'] = t('Remove from group');
+      }
+    }
+  }
+
+  /**
+   * Implements hook_form_FORM_ID_alter() for 'user_multiple_cancel_confirm'.
+   *
+   * Changes the bulk cancel confirmation form title and relabels "Disable"
+   * options to "Block" so terminology matches what the action actually does.
+   */
+  #[Hook('form_user_multiple_cancel_confirm_alter')]
+  public function formUserMultipleCancelConfirmAlter(array &$form, FormStateInterface $form_state): void {
+    $form['#title'] = t('Block or delete selected user account(s)');
+    if (isset($form['user_cancel_method']['#title'])) {
+      $form['user_cancel_method']['#title'] = t('Block or delete options:');
+    }
+    if (isset($form['user_cancel_method_show']['#title'])) {
+      $form['user_cancel_method_show']['#title'] = t('Block or delete options:');
+    }
+    $this->relabelCancelMethods($form);
+  }
+
+  /**
+   * Implements hook_form_FORM_ID_alter() for 'user_admin_settings'.
+   *
+   * Updates the account settings page to use "delete or block" language and
+   * replaces "Disable the account" option descriptions with "Block the account".
+   */
+  #[Hook('form_user_admin_settings_alter')]
+  public function formUserAdminSettingsAlter(array &$form, FormStateInterface $form_state): void {
+    if (isset($form['registration_cancellation']['user_cancel_method']['#title'])) {
+      $form['registration_cancellation']['user_cancel_method']['#title'] = t('Default option when blocking or deleting a user account:');
+    }
+    if (isset($form['registration_cancellation'])) {
+      $this->relabelCancelMethods($form['registration_cancellation']);
+    }
+    else {
+      $this->relabelCancelMethods($form);
+    }
+  }
+
+  /**
+   * Replaces "Disable the account" with "Block the account" in cancel method
+   * radio option descriptions wherever they appear in a form subtree.
+   */
+  private function relabelCancelMethods(array &$element): void {
+    $replacements = [
+      'user_cancel_block' => t('Block the user account(s), do not change their content.'),
+      'user_cancel_block_unpublish' => t('Block the user account(s) and unpublish their content.'),
+      'user_cancel_reassign' => t('Delete the user account(s), keep their content and assign it to the Anonymous user account. This cannot be undone.'),
+      'user_cancel_delete' => t('Delete the user account(s) and their content. This cannot be undone and is high risk.'),
+    ];
+    foreach ($replacements as $key => $label) {
+      if (isset($element['user_cancel_method']['#options'][$key])) {
+        $element['user_cancel_method']['#options'][$key] = $label;
+      }
+    }
+  }
+
+  /**
+   * Implements hook_entity_operation_alter().
+   *
+   * Relabels the "Delete" operation on OG memberships to "Remove from group".
+   */
+  #[Hook('entity_operation_alter')]
+  public function entityOperationAlter(array &$operations, EntityInterface $entity): void {
+    if ($entity->getEntityTypeId() !== 'og_membership') {
+      return;
+    }
+    if (isset($operations['delete'])) {
+      $operations['delete']['title'] = t('Remove from group');
     }
   }
 
