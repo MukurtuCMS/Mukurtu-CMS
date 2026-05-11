@@ -69,30 +69,3 @@ html.gin--dark-mode tr.community-row button:focus-visible {
     outline-color: #7ab8f5;
   }
 }
-
-/* Badge shown in the protocol members list when a member is blocked at the
- * community level but still holds an active protocol membership. */
-.community-blocked-badge {
-  display: inline-block;
-  padding: 0.1em 0.45em;
-  font-size: 0.75em;
-  font-weight: 600;
-  line-height: 1.4;
-  vertical-align: middle;
-  background-color: var(--gin-color-warning-background, #fdf8ed);
-  color: var(--gin-color-warning, #734c00);
-  border: 1px solid currentColor;
-  border-radius: 2px;
-}
-
-html.gin--dark-mode .community-blocked-badge {
-  background-color: var(--gin-color-warning-background, #3d2e00);
-  color: var(--gin-color-warning, #f5c518);
-}
-
-@media (prefers-color-scheme: dark) {
-  .community-blocked-badge {
-    background-color: var(--gin-color-warning-background, #3d2e00);
-    color: var(--gin-color-warning, #f5c518);
-  }
-}
