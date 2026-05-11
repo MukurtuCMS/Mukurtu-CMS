@@ -1,8 +1,4 @@
-entity.language_community.add_form:
-  route_name: entity.language_community.add_form
-  title: 'Add Language community'
-  appears_on:
-    - entity.language_community.collection
+
 mukurtu_dictionary.add_dictionary_word:
   route_name: mukurtu_core.add
   route_parameters:
