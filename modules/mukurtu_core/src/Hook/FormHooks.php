@@ -13,541 +13,728 @@ use Drupal\user\Entity\User;
 /**
  * Hook implementations for mukurtu_core forms.
  */
-class FormHooks {
-
-  /**
-   * Implements hook_block_view_alter().
-   *
-   * Clears the Gin help block on the admin user register form so the generic
-   * Drupal core help text ("This web page allows administrators to register
-   * new users…") does not appear.
-   */
-  #[Hook('block_view_alter')]
-  public function blockViewAlter(array &$build, BlockPluginInterface $block): void {
-    if ($block->getPluginId() !== 'help_block') {
-      return;
-    }
-    if (\Drupal::routeMatch()->getRouteName() === 'user.admin_create') {
-      $build = [];
-    }
-  }
-
-  /**
-   * Implements hook_form_FORM_ID_alter() for 'language_content_settings_form'.
-   *
-   * Hides og_group fields from the translation settings form to prevent users
-   * from marking og_group bundle fields as translatable.
-   *
-   * This hook must run after the content_translation module's form alter hook
-   * (\Drupal\content_translation\Hook\ContentTranslationHooks::formLanguageContentSettingsFormAlter)
-   * which adds the field translation checkboxes via
-   * _content_translation_form_language_content_settings_form_alter().
-   */
-  #[Hook('form_language_content_settings_form_alter', order: new OrderAfter(['content_translation']))]
-  public function formLanguageContentSettingsFormAlter(array &$form, FormStateInterface $form_state): void {
-    // Check if the settings array exists.
-    if (empty($form['settings'])) {
-      return;
-    }
-
-    // Loop through all entity types in the form.
-    foreach (Element::children($form['settings']) as $entity_type_id) {
-      // Loop through all bundles for this entity type.
-      foreach (Element::children($form['settings'][$entity_type_id]) as $bundle) {
-        if (empty($form['settings'][$entity_type_id][$bundle]['fields'])) {
-          continue;
+class FormHooks
+{
+    /**
+     * Implements hook_block_view_alter().
+     *
+     * Clears the Gin help block on the admin user register form so the generic
+     * Drupal core help text ("This web page allows administrators to register
+     * new users…") does not appear.
+     */
+    #[Hook("block_view_alter")]
+    public function blockViewAlter(
+        array &$build,
+        BlockPluginInterface $block,
+    ): void {
+        if ($block->getPluginId() !== "help_block") {
+            return;
         }
-        // Loop through all fields for this bundle.
-        foreach (Element::children($form['settings'][$entity_type_id][$bundle]['fields']) as $field_name) {
-          // Hide the og_group field from translation settings.
-          if ($field_name !== 'og_group') {
-            continue;
-          }
-          unset($form['settings'][$entity_type_id][$bundle]['fields'][$field_name]);
-
-          // Also hide any column settings for the og_group field if they exist.
-          if (isset($form['settings'][$entity_type_id][$bundle]['columns'][$field_name])) {
-            unset($form['settings'][$entity_type_id][$bundle]['columns'][$field_name]);
-          }
+        if (\Drupal::routeMatch()->getRouteName() === "user.admin_create") {
+            $build = [];
         }
-      }
-    }
-  }
-
-  /**
-   * Implements hook_form_FORM_ID_alter() for 'user-register-form' and
-   * 'user-form'.
-   *
-   * Hides 'Administrator' option from the Roles selection for Mukurtu Managers
-   * so that they cannot assign the admin role.
-   */
-  #[Hook('form_user_register_form_alter')]
-  public function formUserRegisterFormAlter(array &$form, FormStateInterface $form_state): void {
-    $currentUser = \Drupal::currentUser()->getAccount();
-    /** @var \Drupal\Core\Session\UserSession $currentUser */
-    if ($currentUser->hasRole('mukurtu_manager')) {
-      if (isset($form['account']['roles']['#options']['administrator'])) {
-        unset($form['account']['roles']['#options']['administrator']);
-      }
     }
 
-    // Move display name field to sit directly below password in the account group.
-    if (isset($form['account']['pass'])) {
-      $form['account']['pass']['#weight'] = 0.0012;
-    }
-    if (isset($form['field_display_name'])) {
-      $form['account']['field_display_name'] = $form['field_display_name'];
-      $form['account']['field_display_name']['#weight'] = 0.0013;
-      unset($form['field_display_name']);
-    }
-
-    if (isset($form['account']['notify'])) {
-      unset($form['account']['notify']['#description']);
-    }
-    if (isset($form['account']['mail'])) {
-      $form['account']['mail']['#description'] = t('Email addresses must be unique. The email address is not made public. It will only be used to contact the user about their account or for opted-in notifications.');
-    }
-    if (isset($form['account']['name'])) {
-      $form['account']['name']['#description'] = t("Usernames must be unique. Several special characters are allowed, including space, period (.), hyphen (-), apostrophe ('), underscore (_), and the @ sign.");
-    }
-    if (isset($form['account']['status'])) {
-      $form['account']['status']['#options'] = [1 => t('Active'), 0 => t('Blocked')];
-    }
-    if (isset($form['account']['roles']['#options'])) {
-      $desiredOrder = ['authenticated', 'mukurtu_roundtrip_manager', 'mukurtu_manager', 'administrator'];
-      $existing = $form['account']['roles']['#options'];
-      $reordered = [];
-      foreach ($desiredOrder as $rid) {
-        if (isset($existing[$rid])) {
-          $reordered[$rid] = $existing[$rid];
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'language_content_settings_form'.
+     *
+     * Hides og_group fields from the translation settings form to prevent users
+     * from marking og_group bundle fields as translatable.
+     *
+     * This hook must run after the content_translation module's form alter hook
+     * (\Drupal\content_translation\Hook\ContentTranslationHooks::formLanguageContentSettingsFormAlter)
+     * which adds the field translation checkboxes via
+     * _content_translation_form_language_content_settings_form_alter().
+     */
+    #[
+        Hook(
+            "form_language_content_settings_form_alter",
+            order: new OrderAfter(["content_translation"]),
+        ),
+    ]
+    public function formLanguageContentSettingsFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        // Check if the settings array exists.
+        if (empty($form["settings"])) {
+            return;
         }
-      }
-      foreach ($existing as $rid => $label) {
-        if (!isset($reordered[$rid])) {
-          $reordered[$rid] = $label;
+
+        // Loop through all entity types in the form.
+        foreach (Element::children($form["settings"]) as $entity_type_id) {
+            // Loop through all bundles for this entity type.
+            foreach (
+                Element::children($form["settings"][$entity_type_id])
+                as $bundle
+            ) {
+                if (
+                    empty($form["settings"][$entity_type_id][$bundle]["fields"])
+                ) {
+                    continue;
+                }
+                // Loop through all fields for this bundle.
+                foreach (
+                    Element::children(
+                        $form["settings"][$entity_type_id][$bundle]["fields"],
+                    )
+                    as $field_name
+                ) {
+                    // Hide the og_group field from translation settings.
+                    if ($field_name !== "og_group") {
+                        continue;
+                    }
+                    unset(
+                        $form["settings"][$entity_type_id][$bundle]["fields"][
+                            $field_name
+                        ],
+                    );
+
+                    // Also hide any column settings for the og_group field if they exist.
+                    if (
+                        isset(
+                            $form["settings"][$entity_type_id][$bundle][
+                                "columns"
+                            ][$field_name],
+                        )
+                    ) {
+                        unset(
+                            $form["settings"][$entity_type_id][$bundle][
+                                "columns"
+                            ][$field_name],
+                        );
+                    }
+                }
+            }
         }
-      }
-      $form['account']['roles']['#options'] = $reordered;
     }
 
-    // The notify section is only useful to authenticated users with create
-    // access; skip it for anonymous self-registration.
-    $currentAccount = \Drupal::currentUser();
-    if ($currentAccount->isAnonymous()) {
-      return;
-    }
-
-    $entityTypeManager = \Drupal::entityTypeManager();
-    $protocolStorage = $entityTypeManager->getStorage('protocol');
-
-    // Site admins see all communities/protocols. Other privileged users (e.g.
-    // Mukurtu Managers) are limited to communities they actively manage so
-    // that community/protocol names aren't exposed beyond their membership.
-    if ($currentAccount->hasPermission('administer users')) {
-      $communityEntities = $entityTypeManager->getStorage('community')->loadMultiple();
-    }
-    else {
-      $userEntity = User::load($currentAccount->id());
-      $memberships = array_filter(Og::getMemberships($userEntity), fn($m) => $m->getGroupBundle() === 'community');
-      $managerMemberships = array_filter($memberships, fn($m) => $m->hasPermission('manage members'));
-      $communityEntities = array_filter(array_map(fn($m) => $m->getGroup(), $managerMemberships));
-    }
-
-    $communityOptions = [];
-    $protocolsByCommunity = [];
-    $membershipProtocolsByCommunity = [];
-    foreach ($communityEntities as $community) {
-      $communityOptions[$community->id()] = $community->getName();
-      $communityProtocolIds = $protocolStorage->getQuery()
-        ->condition('field_communities', $community->id())
-        ->accessCheck(FALSE)
-        ->execute();
-      $communityProtocols = [];
-      foreach ($protocolStorage->loadMultiple($communityProtocolIds) as $protocol) {
-        $communityProtocols[$protocol->id()] = $protocol->getName();
-      }
-      asort($communityProtocols);
-      if (!empty($communityProtocols)) {
-        $protocolsByCommunity[$community->id()] = [
-          'label' => $community->getName(),
-          'protocols' => $communityProtocols,
-        ];
-        $membershipProtocolsByCommunity[$community->id()] = $communityProtocols;
-      }
-    }
-    asort($communityOptions);
-    uasort($protocolsByCommunity, fn($a, $b) => strcmp($a['label'], $b['label']));
-
-    $form['notify'] = [
-      '#type' => 'details',
-      '#title' => t('Notify other users of new account'),
-      '#description' => t('You can choose to notify other users about the creation of this new account. This is useful if you think the user may need to be enrolled in additional communities and/or protocols. If you choose to notify other users, they will receive an email with the new account username and a link to the user profile.'),
-      '#open' => FALSE,
-      '#attached' => ['library' => ['mukurtu_core/notify-form']],
-    ];
-
-    $form['notify']['notify_all_managers'] = [
-      '#type' => 'checkbox',
-      '#title' => t('Notify all Mukurtu Managers'),
-      '#default_value' => FALSE,
-    ];
-
-    if (!empty($communityOptions)) {
-      $form['notify']['notify_communities'] = [
-        '#type' => 'checkboxes',
-        '#title' => t('Notify all community managers in the following communities:'),
-        '#options' => $communityOptions,
-        '#required' => FALSE,
-        '#attributes' => ['class' => ['notify-form-checkboxes']],
-      ];
-    }
-
-    if (!empty($protocolsByCommunity)) {
-      $protocols_label_id = 'notify-protocols-label';
-      $form['notify']['notify_protocols'] = [
-        '#type' => 'container',
-        '#attributes' => [
-          'class' => ['notify-protocols-wrapper'],
-          'role' => 'group',
-          'aria-labelledby' => $protocols_label_id,
-        ],
-      ];
-      $form['notify']['notify_protocols']['title'] = [
-        '#markup' => '<p id="' . $protocols_label_id . '" class="fieldset__label fieldset__label--group">' . t('Notify all protocol stewards in the following protocols:') . '</p>',
-      ];
-
-      foreach ($protocolsByCommunity as $communityId => $data) {
-        $form['notify']['notify_protocols'][$communityId] = [
-          '#type' => 'checkboxes',
-          '#title' => $data['label'],
-          '#options' => $data['protocols'],
-          '#attributes' => ['class' => ['notify-form-checkboxes']],
-        ];
-      }
-    }
-
-    $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
-    $users_label_id = 'notify-users-label';
-
-    $form['notify']['notify_users'] = [
-      '#type' => 'container',
-      '#tree' => TRUE,
-      '#prefix' => '<div id="notify-users-wrapper" role="group" aria-labelledby="' . $users_label_id . '" aria-live="polite"><p id="' . $users_label_id . '" class="fieldset__label fieldset__label--group">' . t('Notify specific users:') . '</p>',
-      '#suffix' => '</div>',
-    ];
-
-    for ($i = 0; $i < $notifyUserCount; $i++) {
-      $form['notify']['notify_users']['user_' . $i] = [
-        '#type' => 'entity_autocomplete',
-        '#target_type' => 'user',
-        // Numbered labels give screen reader users positional context when
-        // multiple fields exist.
-        '#title' => t('User @num', ['@num' => $i + 1]),
-        '#title_display' => 'invisible',
-        '#selection_handler' => 'mukurtu_manager_users',
-        '#required' => FALSE,
-      ];
-    }
-
-    $form['notify']['notify_users']['add_more'] = [
-      '#type' => 'submit',
-      '#value' => t('Add another user'),
-      '#submit' => [[self::class, 'addMoreNotifyUser']],
-      '#ajax' => [
-        'callback' => [self::class, 'addMoreNotifyUserCallback'],
-        'wrapper' => 'notify-users-wrapper',
-      ],
-      '#limit_validation_errors' => [],
-    ];
-
-    $form['actions']['submit']['#submit'][] = [self::class, 'userRegisterNotifySubmit'];
-
-    // Membership section — community and protocol role assignment.
-    $roleManager = \Drupal::service('og.role_manager');
-
-    $communityRolesRaw = $roleManager->getRolesByBundle('community', 'community');
-    $communityRoles = [];
-    foreach ($communityRolesRaw as $roleValue) {
-      if ($roleValue->getName() !== 'non-member' && $roleValue->getName() !== 'member') {
-        $communityRoles[$roleValue->getName()] = $roleValue->getLabel();
-      }
-    }
-
-    $protocolRolesRaw = $roleManager->getRolesByBundle('protocol', 'protocol');
-    $protocolRoles = [];
-    foreach ($protocolRolesRaw as $roleValue) {
-      if ($roleValue->getName() !== 'non-member' && $roleValue->getName() !== 'member') {
-        $protocolRoles[$roleValue->getName()] = $roleValue->getLabel();
-      }
-    }
-
-    $form['membership'] = [
-      '#type' => 'fieldset',
-      '#title' => t('Community and Protocol Membership'),
-      '#tree' => TRUE,
-    ];
-
-    foreach ($communityOptions as $communityId => $communityName) {
-      $form['membership'][$communityId] = [
-        '#type' => 'details',
-        '#title' => $communityName,
-        '#open' => TRUE,
-      ];
-      $form['membership'][$communityId]['community_roles'] = [
-        '#type' => 'checkboxes',
-        '#title' => t('Community Roles'),
-        '#options' => $communityRoles,
-      ];
-
-      if (!empty($membershipProtocolsByCommunity[$communityId])) {
-        $statesConditions = [];
-        foreach (array_keys($communityRoles) as $roleName) {
-          $statesConditions[] = [
-            ':input[name="membership[' . $communityId . '][community_roles][' . $roleName . ']"]' => ['checked' => TRUE],
-          ];
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'user-register-form' and
+     * 'user-form'.
+     *
+     * Hides 'Administrator' option from the Roles selection for Mukurtu Managers
+     * so that they cannot assign the admin role.
+     */
+    #[Hook("form_user_register_form_alter")]
+    public function formUserRegisterFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $currentUser = \Drupal::currentUser()->getAccount();
+        /** @var \Drupal\Core\Session\UserSession $currentUser */
+        if ($currentUser->hasRole("mukurtu_manager")) {
+            if (isset($form["account"]["roles"]["#options"]["administrator"])) {
+                unset($form["account"]["roles"]["#options"]["administrator"]);
+            }
         }
-        $form['membership'][$communityId]['protocols'] = [
-          '#type' => 'container',
-          '#tree' => TRUE,
-          '#states' => ['visible' => $statesConditions],
-          '#prefix' => '<div aria-live="polite">',
-          '#suffix' => '</div>',
-        ];
-        $form['membership'][$communityId]['protocols']['hint'] = [
-          '#markup' => '<p>' . t('Select one or more protocol roles below.') . '</p>',
-        ];
-        foreach ($membershipProtocolsByCommunity[$communityId] as $protocolId => $protocolName) {
-          $form['membership'][$communityId]['protocols'][$protocolId] = [
-            '#type' => 'details',
-            '#title' => $protocolName,
-            '#open' => FALSE,
-          ];
-          $form['membership'][$communityId]['protocols'][$protocolId]['protocol_roles'] = [
-            '#type' => 'checkboxes',
-            '#title' => t('Protocol Roles'),
-            '#options' => $protocolRoles,
-          ];
+
+        // Move display name field to sit directly below password in the account group.
+        if (isset($form["account"]["pass"])) {
+            $form["account"]["pass"]["#weight"] = 0.0012;
         }
-      }
-    }
-
-    $form_state->set('membershipCommunitiesWithProtocols', array_keys($membershipProtocolsByCommunity));
-    $form['actions']['submit']['#submit'][] = [self::class, 'userRegisterMembershipSubmit'];
-  }
-
-  /**
-   * Submit handler that sends notifications after a new user account is created.
-   */
-  public static function userRegisterNotifySubmit(array &$form, FormStateInterface $form_state): void {
-    $notifyUids = mukurtu_notifications_extract_notify_uids($form_state);
-    if (!empty($notifyUids)) {
-      $new_user = $form_state->getFormObject()->getEntity();
-      mukurtu_notifications_notify_new_account_created($new_user, $notifyUids);
-    }
-  }
-
-  /**
-   * AJAX submit handler to add another user autocomplete field.
-   */
-  public static function addMoreNotifyUser(array &$form, FormStateInterface $form_state): void {
-    $count = $form_state->get('notify_user_count') ?? 1;
-    $form_state->set('notify_user_count', $count + 1);
-    $form_state->setRebuild();
-  }
-
-  /**
-   * AJAX callback to return the updated notify_users container.
-   */
-  public static function addMoreNotifyUserCallback(array &$form, FormStateInterface $form_state): array {
-    return $form['notify']['notify_users'];
-  }
-
-  /**
-   * Validate handler for membership assignment on the admin user register form.
-   *
-   * If a community role is selected in a community that has protocols, at least
-   * one protocol role must also be selected.
-   *
-   * This method is intentionally NOT registered on the admin user register form
-   * ($form['#validate']) because membership is optional there — an admin can
-   * create a user without assigning any community or protocol roles. It is kept
-   * here for symmetry with CommunityManagerUserCreationForm and in case stricter
-   * validation is needed on a future form that reuses the membership section.
-   */
-  public static function userRegisterMembershipValidate(array &$form, FormStateInterface $form_state): void {
-    $membership = $form_state->getValue('membership') ?? [];
-    $communitiesWithProtocols = $form_state->get('membershipCommunitiesWithProtocols') ?? [];
-
-    foreach ($communitiesWithProtocols as $communityId) {
-      $communityData = $membership[$communityId] ?? [];
-      if (empty(array_filter($communityData['community_roles'] ?? []))) {
-        continue;
-      }
-      $hasProtocolRole = FALSE;
-      foreach ($communityData['protocols'] ?? [] as $protocolData) {
-        if (!empty(array_filter($protocolData['protocol_roles'] ?? []))) {
-          $hasProtocolRole = TRUE;
-          break;
+        if (isset($form["field_display_name"])) {
+            $form["account"]["field_display_name"] =
+                $form["field_display_name"];
+            $form["account"]["field_display_name"]["#weight"] = 0.0013;
+            unset($form["field_display_name"]);
         }
-      }
-      if (!$hasProtocolRole) {
-        $communityName = $form['membership'][$communityId]['#title'] ?? $communityId;
-        $form_state->setError(
-          $form['membership'][$communityId],
-          t('Please assign the new user at least one protocol role in %community.', ['%community' => $communityName])
+
+        if (isset($form["account"]["notify"])) {
+            unset($form["account"]["notify"]["#description"]);
+        }
+        if (isset($form["account"]["mail"])) {
+            $form["account"]["mail"]["#description"] = t(
+                "Email addresses must be unique. The email address is not made public. It will only be used to contact the user about their account or for opted-in notifications.",
+            );
+        }
+        if (isset($form["account"]["name"])) {
+            $form["account"]["name"]["#description"] = t(
+                "Usernames must be unique. Several special characters are allowed, including space, period (.), hyphen (-), apostrophe ('), underscore (_), and the @ sign.",
+            );
+        }
+        if (isset($form["account"]["status"])) {
+            $form["account"]["status"]["#options"] = [
+                1 => t("Active"),
+                0 => t("Blocked"),
+            ];
+        }
+        if (isset($form["account"]["roles"]["#options"])) {
+            $desiredOrder = [
+                "authenticated",
+                "mukurtu_roundtrip_manager",
+                "mukurtu_manager",
+                "administrator",
+            ];
+            $existing = $form["account"]["roles"]["#options"];
+            $reordered = [];
+            foreach ($desiredOrder as $rid) {
+                if (isset($existing[$rid])) {
+                    $reordered[$rid] = $existing[$rid];
+                }
+            }
+            foreach ($existing as $rid => $label) {
+                if (!isset($reordered[$rid])) {
+                    $reordered[$rid] = $label;
+                }
+            }
+            $form["account"]["roles"]["#options"] = $reordered;
+        }
+
+        // The notify section is only useful to authenticated users with create
+        // access; skip it for anonymous self-registration.
+        $currentAccount = \Drupal::currentUser();
+        if ($currentAccount->isAnonymous()) {
+            return;
+        }
+
+        $entityTypeManager = \Drupal::entityTypeManager();
+        $protocolStorage = $entityTypeManager->getStorage("protocol");
+
+        // Site admins see all communities/protocols. Other privileged users (e.g.
+        // Mukurtu Managers) are limited to communities they actively manage so
+        // that community/protocol names aren't exposed beyond their membership.
+        if ($currentAccount->hasPermission("administer users")) {
+            $communityEntities = $entityTypeManager
+                ->getStorage("community")
+                ->loadMultiple();
+        } else {
+            $userEntity = User::load($currentAccount->id());
+            $memberships = array_filter(
+                Og::getMemberships($userEntity),
+                fn($m) => $m->getGroupBundle() === "community",
+            );
+            $managerMemberships = array_filter(
+                $memberships,
+                fn($m) => $m->hasPermission("manage members"),
+            );
+            $communityEntities = array_filter(
+                array_map(fn($m) => $m->getGroup(), $managerMemberships),
+            );
+        }
+
+        $communityOptions = [];
+        $protocolsByCommunity = [];
+        $membershipProtocolsByCommunity = [];
+        foreach ($communityEntities as $community) {
+            $communityOptions[$community->id()] = $community->getName();
+            $communityProtocolIds = $protocolStorage
+                ->getQuery()
+                ->condition("field_communities", $community->id())
+                ->accessCheck(false)
+                ->execute();
+            $communityProtocols = [];
+            foreach (
+                $protocolStorage->loadMultiple($communityProtocolIds)
+                as $protocol
+            ) {
+                $communityProtocols[$protocol->id()] = $protocol->getName();
+            }
+            asort($communityProtocols);
+            if (!empty($communityProtocols)) {
+                $protocolsByCommunity[$community->id()] = [
+                    "label" => $community->getName(),
+                    "protocols" => $communityProtocols,
+                ];
+                $membershipProtocolsByCommunity[
+                    $community->id()
+                ] = $communityProtocols;
+            }
+        }
+        asort($communityOptions);
+        uasort(
+            $protocolsByCommunity,
+            fn($a, $b) => strcmp($a["label"], $b["label"]),
         );
-      }
-    }
-  }
 
-  /**
-   * Submit handler that assigns community and protocol memberships after a new
-   * user account is created via the admin user register form.
-   */
-  public static function userRegisterMembershipSubmit(array &$form, FormStateInterface $form_state): void {
-    $values = $form_state->getValues();
-    if (empty($values['membership'])) {
-      return;
-    }
+        $form["notify"] = [
+            "#type" => "details",
+            "#title" => t("Notify other users of new account"),
+            "#description" => t(
+                "You can choose to notify other users about the creation of this new account. This is useful if you think the user may need to be enrolled in additional communities and/or protocols. If you choose to notify other users, they will receive an email with the new account username and a link to the user profile.",
+            ),
+            "#open" => false,
+            "#attached" => ["library" => ["mukurtu_core/notify-form"]],
+        ];
 
-    $user = $form_state->getFormObject()->getEntity();
-    $entityTypeManager = \Drupal::entityTypeManager();
+        $form["notify"]["notify_all_managers"] = [
+            "#type" => "checkbox",
+            "#title" => t("Notify all Mukurtu Managers"),
+            "#default_value" => false,
+        ];
 
-    try {
-      foreach ($values['membership'] as $communityId => $communityData) {
-        $communityRoles = array_keys(array_filter($communityData['community_roles'] ?? []));
-        if (empty($communityRoles)) {
-          continue;
+        if (!empty($communityOptions)) {
+            $form["notify"]["notify_communities"] = [
+                "#type" => "checkboxes",
+                "#title" => t(
+                    "Notify all community managers in the following communities:",
+                ),
+                "#options" => $communityOptions,
+                "#required" => false,
+                "#attributes" => ["class" => ["notify-form-checkboxes"]],
+            ];
         }
-        $community = $entityTypeManager->getStorage('community')->load($communityId);
-        if (!$community) {
-          continue;
+
+        if (!empty($protocolsByCommunity)) {
+            $protocols_label_id = "notify-protocols-label";
+            $form["notify"]["notify_protocols"] = [
+                "#type" => "container",
+                "#attributes" => [
+                    "class" => ["notify-protocols-wrapper"],
+                    "role" => "group",
+                    "aria-labelledby" => $protocols_label_id,
+                ],
+            ];
+            $form["notify"]["notify_protocols"]["title"] = [
+                "#markup" =>
+                    '<p id="' .
+                    $protocols_label_id .
+                    '" class="fieldset__label fieldset__label--group">' .
+                    t(
+                        "Notify all protocol stewards in the following protocols:",
+                    ) .
+                    "</p>",
+            ];
+
+            foreach ($protocolsByCommunity as $communityId => $data) {
+                $form["notify"]["notify_protocols"][$communityId] = [
+                    "#type" => "checkboxes",
+                    "#title" => $data["label"],
+                    "#options" => $data["protocols"],
+                    "#attributes" => ["class" => ["notify-form-checkboxes"]],
+                ];
+            }
         }
-        $community->addMember($user, $communityRoles);
 
-        foreach ($communityData['protocols'] ?? [] as $protocolId => $protocolData) {
-          $protocolRoles = array_keys(array_filter($protocolData['protocol_roles'] ?? []));
-          if (empty($protocolRoles)) {
-            continue;
-          }
-          $protocol = $entityTypeManager->getStorage('protocol')->load($protocolId);
-          if (!$protocol) {
-            continue;
-          }
-          $protocol->addMember($user, $protocolRoles);
+        $notifyUserCount = $form_state->get("notify_user_count") ?? 1;
+        $users_label_id = "notify-users-label";
+
+        $form["notify"]["notify_users"] = [
+            "#type" => "container",
+            "#tree" => true,
+            "#prefix" =>
+                '<div id="notify-users-wrapper" role="group" aria-labelledby="' .
+                $users_label_id .
+                '" aria-live="polite"><p id="' .
+                $users_label_id .
+                '" class="fieldset__label fieldset__label--group">' .
+                t("Notify specific users:") .
+                "</p>",
+            "#suffix" => "</div>",
+        ];
+
+        for ($i = 0; $i < $notifyUserCount; $i++) {
+            $form["notify"]["notify_users"]["user_" . $i] = [
+                "#type" => "entity_autocomplete",
+                "#target_type" => "user",
+                // Numbered labels give screen reader users positional context when
+                // multiple fields exist.
+                "#title" => t("User @num", ["@num" => $i + 1]),
+                "#title_display" => "invisible",
+                "#selection_handler" => "mukurtu_manager_users",
+                "#required" => false,
+            ];
         }
-      }
+
+        $form["notify"]["notify_users"]["add_more"] = [
+            "#type" => "submit",
+            "#value" => t("Add another user"),
+            "#submit" => [[self::class, "addMoreNotifyUser"]],
+            "#ajax" => [
+                "callback" => [self::class, "addMoreNotifyUserCallback"],
+                "wrapper" => "notify-users-wrapper",
+            ],
+            "#limit_validation_errors" => [],
+        ];
+
+        $form["actions"]["submit"]["#submit"][] = [
+            self::class,
+            "userRegisterNotifySubmit",
+        ];
+
+        // Membership section — community and protocol role assignment.
+        $roleManager = \Drupal::service("og.role_manager");
+
+        $communityRolesRaw = $roleManager->getRolesByBundle(
+            "community",
+            "community",
+        );
+        $communityRoles = [];
+        foreach ($communityRolesRaw as $roleValue) {
+            if (
+                $roleValue->getName() !== "non-member" &&
+                $roleValue->getName() !== "member"
+            ) {
+                $communityRoles[$roleValue->getName()] = $roleValue->getLabel();
+            }
+        }
+
+        $protocolRolesRaw = $roleManager->getRolesByBundle(
+            "protocol",
+            "protocol",
+        );
+        $protocolRoles = [];
+        foreach ($protocolRolesRaw as $roleValue) {
+            if (
+                $roleValue->getName() !== "non-member" &&
+                $roleValue->getName() !== "member"
+            ) {
+                $protocolRoles[$roleValue->getName()] = $roleValue->getLabel();
+            }
+        }
+
+        $form["membership"] = [
+            "#type" => "fieldset",
+            "#title" => t("Community and Protocol Membership"),
+            "#tree" => true,
+        ];
+
+        foreach ($communityOptions as $communityId => $communityName) {
+            $form["membership"][$communityId] = [
+                "#type" => "details",
+                "#title" => $communityName,
+                "#open" => true,
+            ];
+            $form["membership"][$communityId]["community_roles"] = [
+                "#type" => "checkboxes",
+                "#title" => t("Community Roles"),
+                "#options" => $communityRoles,
+            ];
+
+            if (!empty($membershipProtocolsByCommunity[$communityId])) {
+                $statesConditions = [];
+                foreach (array_keys($communityRoles) as $roleName) {
+                    $statesConditions[] = [
+                        ':input[name="membership[' .
+                        $communityId .
+                        "][community_roles][" .
+                        $roleName .
+                        ']"]' => ["checked" => true],
+                    ];
+                }
+                $form["membership"][$communityId]["protocols"] = [
+                    "#type" => "container",
+                    "#tree" => true,
+                    "#states" => ["visible" => $statesConditions],
+                    "#prefix" => '<div aria-live="polite">',
+                    "#suffix" => "</div>",
+                ];
+                $form["membership"][$communityId]["protocols"]["hint"] = [
+                    "#markup" =>
+                        "<p>" .
+                        t("Select one or more protocol roles below.") .
+                        "</p>",
+                ];
+                foreach (
+                    $membershipProtocolsByCommunity[$communityId]
+                    as $protocolId => $protocolName
+                ) {
+                    $form["membership"][$communityId]["protocols"][
+                        $protocolId
+                    ] = [
+                        "#type" => "details",
+                        "#title" => $protocolName,
+                        "#open" => false,
+                    ];
+                    $form["membership"][$communityId]["protocols"][$protocolId][
+                        "protocol_roles"
+                    ] = [
+                        "#type" => "checkboxes",
+                        "#title" => t("Protocol Roles"),
+                        "#options" => $protocolRoles,
+                    ];
+                }
+            }
+        }
+
+        $form_state->set(
+            "membershipCommunitiesWithProtocols",
+            array_keys($membershipProtocolsByCommunity),
+        );
+        $form["actions"]["submit"]["#submit"][] = [
+            self::class,
+            "userRegisterMembershipSubmit",
+        ];
     }
-    catch (\Throwable $e) {
-      \Drupal::logger('mukurtu_core')->error(
-        'Error assigning memberships for new user @name: @message',
-        ['@name' => $user->getAccountName(), '@message' => $e->getMessage()]
-      );
-      \Drupal::messenger()->addWarning(t(
-        'The account was created but some membership assignments may not have completed. Please review the memberships for <a href=":url">%name</a>.',
-        [':url' => $user->toUrl()->toString(), '%name' => $user->getAccountName()]
-      ));
-    }
-  }
 
-  /**
-   * Implements hook_form_FORM_ID_alter() for 'user-form'.
-   *
-   * Hides 'Administrator' option from the Roles selection for Mukurtu Managers
-   * so that they cannot assign the admin role.
-   */
-  #[Hook('form_user_form_alter')]
-  public function formUserFormAlter(array &$form, FormStateInterface $form_state): void {
-    $currentUser = \Drupal::currentUser()->getAccount();
-    /** @var \Drupal\Core\Session\UserSession $currentUser */
-    if ($currentUser->hasRole('mukurtu_manager')) {
-      if (isset($form['account']['roles']['#options']['administrator'])) {
-        unset($form['account']['roles']['#options']['administrator']);
-      }
+    /**
+     * Submit handler that sends notifications after a new user account is created.
+     */
+    public static function userRegisterNotifySubmit(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $notifyUids = mukurtu_notifications_extract_notify_uids($form_state);
+        if (!empty($notifyUids)) {
+            $new_user = $form_state->getFormObject()->getEntity();
+            mukurtu_notifications_notify_new_account_created(
+                $new_user,
+                $notifyUids,
+            );
+        }
     }
 
-    // Move display name field to sit directly below password in the account group.
-    if (isset($form['account']['pass'])) {
-      $form['account']['pass']['#weight'] = 0.0012;
-    }
-    if (isset($form['field_display_name'])) {
-      $form['account']['field_display_name'] = $form['field_display_name'];
-      $form['account']['field_display_name']['#weight'] = 0.0013;
-      unset($form['field_display_name']);
-    }
-  }
-
-  /**
-   * Removes message_digest notification actions from the user admin bulk form.
-   *
-   * These come from message_digest_ui optional config and should not be
-   * exposed in Mukurtu's user management UI. This hook acts as a safety net
-   * alongside the composer patch and update hook 40004: if the patch fails to
-   * apply on a given environment the actions are still hidden from the UI.
-   */
-  /**
-   * Implements hook_form_alter().
-   *
-   * Warns editors on content add forms when no Cultural Protocols exist yet.
-   * Protocols are required to control access to content; without at least one,
-   * newly created items cannot be properly shared.
-   */
-  #[Hook('form_alter')]
-  public function formAlterWarnNoProtocols(array &$form, FormStateInterface $form_state, string $form_id): void {
-    $affected_forms = [
-      'node_digital_heritage_form',
-      'node_collection_form',
-      'node_dictionary_word_form',
-      'node_word_list_form',
-      'node_person_form',
-      'node_place_form',
-    ];
-
-    if (!in_array($form_id, $affected_forms, TRUE)) {
-      return;
+    /**
+     * AJAX submit handler to add another user autocomplete field.
+     */
+    public static function addMoreNotifyUser(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $count = $form_state->get("notify_user_count") ?? 1;
+        $form_state->set("notify_user_count", $count + 1);
+        $form_state->setRebuild();
     }
 
-    $node = $form_state->getFormObject()->getEntity();
-    if (!$node->isNew()) {
-      return;
+    /**
+     * AJAX callback to return the updated notify_users container.
+     */
+    public static function addMoreNotifyUserCallback(
+        array &$form,
+        FormStateInterface $form_state,
+    ): array {
+        return $form["notify"]["notify_users"];
     }
 
-    $protocol_count = \Drupal::entityQuery('protocol')
-      ->accessCheck(FALSE)
-      ->count()
-      ->execute();
+    /**
+     * Validate handler for membership assignment on the admin user register form.
+     *
+     * If a community role is selected in a community that has protocols, at least
+     * one protocol role must also be selected.
+     *
+     * This method is intentionally NOT registered on the admin user register form
+     * ($form['#validate']) because membership is optional there — an admin can
+     * create a user without assigning any community or protocol roles. It is kept
+     * here for symmetry with CommunityManagerUserCreationForm and in case stricter
+     * validation is needed on a future form that reuses the membership section.
+     */
+    public static function userRegisterMembershipValidate(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $membership = $form_state->getValue("membership") ?? [];
+        $communitiesWithProtocols =
+            $form_state->get("membershipCommunitiesWithProtocols") ?? [];
 
-    if ($protocol_count > 0) {
-      return;
+        foreach ($communitiesWithProtocols as $communityId) {
+            $communityData = $membership[$communityId] ?? [];
+            if (empty(array_filter($communityData["community_roles"] ?? []))) {
+                continue;
+            }
+            $hasProtocolRole = false;
+            foreach ($communityData["protocols"] ?? [] as $protocolData) {
+                if (
+                    !empty(array_filter($protocolData["protocol_roles"] ?? []))
+                ) {
+                    $hasProtocolRole = true;
+                    break;
+                }
+            }
+            if (!$hasProtocolRole) {
+                $communityName =
+                    $form["membership"][$communityId]["#title"] ?? $communityId;
+                $form_state->setError(
+                    $form["membership"][$communityId],
+                    t(
+                        "Please assign the new user at least one protocol role in %community.",
+                        ["%community" => $communityName],
+                    ),
+                );
+            }
+        }
     }
 
-    $message = t('There are no Cultural Protocols available. Cultural Protocols are required to control who can access your content. Please create a Cultural Protocol before adding content.');
+    /**
+     * Submit handler that assigns community and protocol memberships after a new
+     * user account is created via the admin user register form.
+     */
+    public static function userRegisterMembershipSubmit(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $values = $form_state->getValues();
+        if (empty($values["membership"])) {
+            return;
+        }
 
-    $form['no_protocols_warning'] = [
-      '#type' => 'markup',
-      '#markup' => '<div class="messages messages--warning" role="alert">' . $message . '</div>',
-      '#weight' => -100,
-    ];
-  }
+        $user = $form_state->getFormObject()->getEntity();
+        $entityTypeManager = \Drupal::entityTypeManager();
 
-  #[Hook('form_alter')]
-  public function formAlterRemoveNotificationBulkActions(array &$form, FormStateInterface $form_state, string $form_id): void {
-    if (!str_starts_with($form_id, 'views_form_user_admin_people_') &&
-        !str_starts_with($form_id, 'views_form_mukurtu_people_')) {
-      return;
+        try {
+            foreach ($values["membership"] as $communityId => $communityData) {
+                $communityRoles = array_keys(
+                    array_filter($communityData["community_roles"] ?? []),
+                );
+                if (empty($communityRoles)) {
+                    continue;
+                }
+                $community = $entityTypeManager
+                    ->getStorage("community")
+                    ->load($communityId);
+                if (!$community) {
+                    continue;
+                }
+                $community->addMember($user, $communityRoles);
+
+                foreach (
+                    $communityData["protocols"] ?? []
+                    as $protocolId => $protocolData
+                ) {
+                    $protocolRoles = array_keys(
+                        array_filter($protocolData["protocol_roles"] ?? []),
+                    );
+                    if (empty($protocolRoles)) {
+                        continue;
+                    }
+                    $protocol = $entityTypeManager
+                        ->getStorage("protocol")
+                        ->load($protocolId);
+                    if (!$protocol) {
+                        continue;
+                    }
+                    $protocol->addMember($user, $protocolRoles);
+                }
+            }
+        } catch (\Throwable $e) {
+            \Drupal::logger("mukurtu_core")->error(
+                "Error assigning memberships for new user @name: @message",
+                [
+                    "@name" => $user->getAccountName(),
+                    "@message" => $e->getMessage(),
+                ],
+            );
+            \Drupal::messenger()->addWarning(
+                t(
+                    'The account was created but some membership assignments may not have completed. Please review the memberships for <a href=":url">%name</a>.',
+                    [
+                        ":url" => $user->toUrl()->toString(),
+                        "%name" => $user->getAccountName(),
+                    ],
+                ),
+            );
+        }
     }
 
-    $actions_to_remove = [
-      'message_digest_interval.email_user.immediate',
-      'message_digest_interval.email_user.daily',
-      'message_digest_interval.email_user.weekly',
-    ];
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'user-form'.
+     *
+     * Hides 'Administrator' option from the Roles selection for Mukurtu Managers
+     * so that they cannot assign the admin role.
+     */
+    #[Hook("form_user_form_alter")]
+    public function formUserFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $currentUser = \Drupal::currentUser()->getAccount();
+        /** @var \Drupal\Core\Session\UserSession $currentUser */
+        if ($currentUser->hasRole("mukurtu_manager")) {
+            if (isset($form["account"]["roles"]["#options"]["administrator"])) {
+                unset($form["account"]["roles"]["#options"]["administrator"]);
+            }
+        }
 
-    if (isset($form['header']['user_bulk_form']['action']['#options'])) {
-      foreach ($actions_to_remove as $action_id) {
-        unset($form['header']['user_bulk_form']['action']['#options'][$action_id]);
-      }
+        // Move display name field to sit directly below password in the account group.
+        if (isset($form["account"]["pass"])) {
+            $form["account"]["pass"]["#weight"] = 0.0012;
+        }
+        if (isset($form["field_display_name"])) {
+            $form["account"]["field_display_name"] =
+                $form["field_display_name"];
+            $form["account"]["field_display_name"]["#weight"] = 0.0013;
+            unset($form["field_display_name"]);
+        }
     }
-  }
 
+    /**
+     * Removes message_digest notification actions from the user admin bulk form.
+     *
+     * These come from message_digest_ui optional config and should not be
+     * exposed in Mukurtu's user management UI. This hook acts as a safety net
+     * alongside the composer patch and update hook 40004: if the patch fails to
+     * apply on a given environment the actions are still hidden from the UI.
+     */
+    /**
+     * Implements hook_form_alter().
+     *
+     * Warns editors on content add forms when no Cultural Protocols exist yet.
+     * Protocols are required to control access to content; without at least one,
+     * newly created items cannot be properly shared.
+     */
+    #[Hook("form_alter")]
+    public function formAlterWarnNoProtocols(
+        array &$form,
+        FormStateInterface $form_state,
+        string $form_id,
+    ): void {
+        $affected_forms = [
+            "node_digital_heritage_form",
+            "node_collection_form",
+            "node_dictionary_word_form",
+            "node_word_list_form",
+            "node_person_form",
+            "node_place_form",
+        ];
+
+        if (!in_array($form_id, $affected_forms, true)) {
+            return;
+        }
+
+        $node = $form_state->getFormObject()->getEntity();
+        if (!$node->isNew()) {
+            return;
+        }
+
+        $protocol_count = \Drupal::entityQuery("protocol")
+            ->accessCheck(false)
+            ->count()
+            ->execute();
+
+        if ($protocol_count > 0) {
+            return;
+        }
+
+        $message = t(
+            "You do not have permission to create content in any cultural protocols, which is a requirement for all content. If you think you should have access to existing protocol(s), contact your site administrator. If you are the site adminsitrator, ensure that you have created appropriate communities and cultural protocols before creating content.",
+        );
+
+        $form["no_protocols_warning"] = [
+            "#type" => "markup",
+            "#markup" =>
+                '<div class="messages messages--warning" role="alert">' .
+                $message .
+                "</div>",
+            "#weight" => -100,
+        ];
+    }
+
+    #[Hook("form_alter")]
+    public function formAlterRemoveNotificationBulkActions(
+        array &$form,
+        FormStateInterface $form_state,
+        string $form_id,
+    ): void {
+        if (
+            !str_starts_with($form_id, "views_form_user_admin_people_") &&
+            !str_starts_with($form_id, "views_form_mukurtu_people_")
+        ) {
+            return;
+        }
+
+        $actions_to_remove = [
+            "message_digest_interval.email_user.immediate",
+            "message_digest_interval.email_user.daily",
+            "message_digest_interval.email_user.weekly",
+        ];
+
+        if (isset($form["header"]["user_bulk_form"]["action"]["#options"])) {
+            foreach ($actions_to_remove as $action_id) {
+                unset(
+                    $form["header"]["user_bulk_form"]["action"]["#options"][
+                        $action_id
+                    ],
+                );
+            }
+        }
+    }
 }
