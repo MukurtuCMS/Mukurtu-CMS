@@ -19,7 +19,7 @@ class FormHooks
         if (isset($form['field_external_links'])) {
             foreach (Element::children($form['field_external_links']) as $delta) {
                 if (isset($form['field_external_links'][$delta]['uri'])) {
-                    $form['field_external_links'][$delta]['uri']['#description'] = t('This must be an external URL starting with <em>https://</em> or <em>http://</em>. Eg: <em>https://mukurtu.org</em>.');
+                    $form['field_external_links'][$delta]['uri']['#description'] = t('This must be an external URL starting with <em>https://</em> or <em>http://</em>. For example: <em>https://mukurtu.org</em>.');
                 }
             }
         }
