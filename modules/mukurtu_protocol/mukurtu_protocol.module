@@ -771,8 +771,12 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
   // adding them first to the protocol owning communities.
   $group = \Drupal::requestStack()->getCurrentRequest()->attributes->get('group');
   if ($group instanceof ProtocolInterface) {
-    // Only add the form validator if this form is in the protocol context.
-    $form['#validate'][] = 'add_protocol_member_form_validate';
+    // Only validate community membership when adding a new member, not when
+    // editing roles on an existing (possibly blocked) membership.
+    $entity = $form_state->getFormObject()->getEntity();
+    if ($entity->isNew()) {
+      $form['#validate'][] = 'add_protocol_member_form_validate';
+    }
   }
 
   // Sort roles checkboxes by weight for both protocol and community forms.
