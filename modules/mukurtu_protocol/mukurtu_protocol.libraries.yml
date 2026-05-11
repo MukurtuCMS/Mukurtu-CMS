@@ -1,3 +1,16 @@
+membership-table:
+  version: 1.x
+  css:
+    theme:
+      css/membership-table.css: {}
+  js:
+    js/membership-autocomplete.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+    - core/jquery.ui.autocomplete
+
 protocol-list:
   version: 1.x
   css:

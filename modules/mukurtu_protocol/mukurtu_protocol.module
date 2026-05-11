@@ -129,11 +129,14 @@ function mukurtu_protocol_views_pre_build(\Drupal\views\ViewExecutable $view): v
 function mukurtu_protocol_views_data_alter(array &$data)
 {
   if (isset($data['users'])) {
-    // Add the communities field to Views.
+    // Add the communities field and filter to Views.
     $data['users']['communities'] = [
       'title' => t('Communities'),
       'field' => [
         'id' => 'user_community',
+      ],
+      'filter' => [
+        'id' => 'user_community_filter',
       ],
     ];
     // Add a plain-text roles field (no list markup).

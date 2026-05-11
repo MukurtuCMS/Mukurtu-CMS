@@ -285,12 +285,42 @@ function mukurtu_protocol_update_40007(): void {
 }
 
 /**
+ * Add Communities filter to the core user_admin_people view (/admin/people).
+ */
+function mukurtu_protocol_update_40008(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $config_file = $module_path . '/config/install/views.view.user_admin_people.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($data)->save(TRUE);
+}
+
+/**
+ * Update "Role" filter label to "Site role" on the user admin people view.
+ */
+function mukurtu_protocol_update_40009(): void {
+  \Drupal::configFactory()
+    ->getEditable('views.view.user_admin_people')
+    ->set('display.default.display_options.filters.roles_target_id.expose.label', 'Site role')
+    ->save(TRUE);
+}
+
+/**
+ * Re-import mukurtu_people view: add columns, filters, and column reordering.
+ */
+function mukurtu_protocol_update_40010(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $config_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($data)->save(TRUE);
+}
+
+/**
  * Install "Manage roles" bulk actions for community and protocol members pages.
  *
  * For fresh installs, config/install/ handles these action configs automatically.
  * This hook only applies to existing sites updating from a prior release.
  */
-function mukurtu_protocol_update_40008(): void {
+function mukurtu_protocol_update_40011(): void {
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
   $action_ids = [
     'mukurtu_manage_community_roles_action',
@@ -307,7 +337,7 @@ function mukurtu_protocol_update_40008(): void {
 /**
  * Reorder community roles: Community Member, Community Affiliate, Community Manager.
  */
-function mukurtu_protocol_update_40009(): void {
+function mukurtu_protocol_update_40012(): void {
   $weights = [
     'community-community-community_member'    => 13,
     'community-community-community_affiliate' => 15,
@@ -325,7 +355,7 @@ function mukurtu_protocol_update_40009(): void {
  * Reorder protocol roles: Member, Affiliate, Contributor, Curator,
  * Language Contributor, Language Steward, Community Record Steward, Protocol Steward.
  */
-function mukurtu_protocol_update_40010(): void {
+function mukurtu_protocol_update_40013(): void {
   $weights = [
     'protocol-protocol-protocol_member'           => 10,
     'protocol-protocol-protocol_affiliate'        => 11,

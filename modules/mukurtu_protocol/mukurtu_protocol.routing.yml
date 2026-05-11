@@ -267,6 +267,8 @@ mukurtu_protocol.protocol_create:
     _title: 'Add cultural protocol'
   requirements:
     _permission: 'add protocol entities'
+  options:
+    _admin_route: TRUE
 
 mukurtu_protocol.user_memberships:
   path: '/user/{user}/memberships'

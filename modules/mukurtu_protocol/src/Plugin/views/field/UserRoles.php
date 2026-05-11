@@ -36,7 +36,7 @@ class UserRoles extends FieldPluginBase {
     }
     sort($labels);
 
-    return empty($labels) ? ['#markup' => $this->t('None')] : ['#markup' => implode(', ', array_map([Html::class, 'escape'], $labels))];
+    return empty($labels) ? ['#markup' => $this->t('Authenticated user')] : ['#markup' => implode(', ', array_map([Html::class, 'escape'], $labels))];
   }
 
   public function query() {
