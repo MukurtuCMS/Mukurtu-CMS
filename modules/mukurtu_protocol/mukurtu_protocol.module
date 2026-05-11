@@ -550,6 +550,20 @@ function mukurtu_protocol_query_protocol_access_alter(AlterableInterface $query)
       ->condition($strict_conditions)
       ->condition($open_conditions);
     $query->condition($open_or_strict);
+
+    // Exclude strict protocols where the user is blocked in a parent community.
+    // Open protocols remain accessible regardless of community membership.
+    $community_block_exempt = $query->orConditionGroup()
+      ->condition('pf.field_access_mode', 'open')
+      ->where("NOT EXISTS (
+        SELECT 1 FROM {protocol__field_communities} pfc
+        INNER JOIN {og_membership} ogc ON pfc.field_communities_target_id = ogc.entity_id
+          AND ogc.entity_type = 'community'
+          AND ogc.uid = :community_block_uid
+          AND ogc.state = 'blocked'
+        WHERE pfc.entity_id = {$protocolTable}.id
+      )", [':community_block_uid' => $account->id()]);
+    $query->condition($community_block_exempt);
   }
 }
 
