@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
 
@@ -694,8 +695,14 @@ class FormHooks
             return;
         }
 
+        $communities_url = Url::fromUri("internal:/admin/communities-protocols");
+        $link = \Drupal::service("link_generator")->generate(
+            t("communities and cultural protocols"),
+            $communities_url,
+        );
         $message = t(
-            "You do not have permission to create content in any cultural protocols, which is a requirement for all content. If you think you should have access to existing protocol(s), contact your site administrator. If you are the site administrator, ensure that you have created appropriate communities and cultural protocols before creating content.",
+            "You do not have permission to create content in any cultural protocols, which is a requirement for all content. If you think you should have access to existing protocol(s), contact your site administrator. If you are the site administrator, ensure that you have created appropriate @link before creating content.",
+            ["@link" => $link],
         );
 
         $form["no_protocols_warning"] = [
