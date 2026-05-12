@@ -373,3 +373,31 @@ function mukurtu_protocol_update_40013(): void {
     }
   }
 }
+
+/**
+ * Rebuild node access grants so community-blocked users lose protocol access.
+ */
+function mukurtu_protocol_update_40014(): void {
+  node_access_rebuild(TRUE);
+}
+
+/**
+ * Install Approve User action; add Unblock to og_members_overview bulk form.
+ *
+ * Installs the mukurtu_approve_user_from_membership_action config before
+ * re-importing the view that references it, then updates the view to include
+ * og_membership_unblock_action.
+ */
+function mukurtu_protocol_update_40015(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+
+  // Install the new action config first so the view reference is valid.
+  $action_file = $module_path . '/config/install/system.action.mukurtu_approve_user_from_membership_action.yml';
+  $action_data = \Symfony\Component\Yaml\Yaml::parseFile($action_file);
+  \Drupal::configFactory()->getEditable('system.action.mukurtu_approve_user_from_membership_action')->setData($action_data)->save(TRUE);
+
+  // Re-import the view with the updated selected_actions list.
+  $view_file = $module_path . '/config/install/views.view.og_members_overview.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($view_data)->save(TRUE);
+}
