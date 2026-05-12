@@ -2,6 +2,10 @@
 @use "../../00-base/layout/layout";
 
 // Main /dictionary page layout.
+.path-dictionary .layout-container .page__title {
+  margin-block-end: 0;
+}
+
 .dictionary {
   .browse__main-content {
     display: block;

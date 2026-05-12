@@ -4880,6 +4880,11 @@ header {
   }
 }
 
+.path-dictionary .layout-container .page__title {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+
 .dictionary .browse__main-content {
   display: block;
 }
