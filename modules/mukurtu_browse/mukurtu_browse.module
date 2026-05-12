@@ -386,7 +386,8 @@ function mukurtu_browse_preprocess_block(&$variables) {
     $variables['content']['search_api_fulltext']['#weight'] = -10.9;
   }
   if (isset($variables['content']['sort_by'])) {
-    $variables['content']['sort_by']['#weight'] = -10.8;
+    $is_dictionary = $variables['plugin_id'] === 'views_exposed_filter_block:mukurtu_dictionary-mukurtu_dictionary_block';
+    $variables['content']['sort_by']['#weight'] = $is_dictionary ? 99 : -10.8;
   }
 
   // Inject the display options toggle at the end of the filter block.
