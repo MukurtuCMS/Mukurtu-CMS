@@ -288,7 +288,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: search_api
+          plugin_id: glossary_custom_order
           order: ASC
           expose:
             label: ''

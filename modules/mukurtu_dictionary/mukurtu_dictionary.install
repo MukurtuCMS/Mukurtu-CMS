@@ -552,7 +552,7 @@ function mukurtu_dictionary_update_40012(): void {
 }
 
 /**
- * Fix word_type index field; set community facet to single-select; move before cultural protocol.
+ * Fix word_type index field; set community facet to single-select; move before cultural protocol; reorder filters; use glossary custom order sort.
  */
 function mukurtu_dictionary_update_40013(): void {
   // Fix word_type index field to use the main node field.
@@ -596,6 +596,37 @@ function mukurtu_dictionary_update_40013(): void {
     }
     $config->set("$base.filters", $new_filters);
   }
+
+  // Reorder exposed filters: search > language > community > protocol > type > word_type > keyword.
+  $filters = $config->get("$base.filters");
+  $order = [
+    'type',
+    'search_api_language',
+    'search_api_fulltext',
+    'facets_language',
+    'facets_community_title',
+    'facets_mukurtu_cultural_protocol_ids',
+    'facets_type',
+    'facets_word_type',
+    'facets_keyword',
+    'facets_word_lists',
+    'facets_field_glossary_entry',
+  ];
+  $new_filters = [];
+  foreach ($order as $key) {
+    if (isset($filters[$key])) {
+      $new_filters[$key] = $filters[$key];
+    }
+  }
+  foreach ($filters as $key => $value) {
+    if (!isset($new_filters[$key])) {
+      $new_filters[$key] = $value;
+    }
+  }
+  $config->set("$base.filters", $new_filters);
+
+  // Use glossary custom order sort plugin for field_glossary_entry.
+  $config->set("$base.sorts.field_glossary_entry.plugin_id", 'glossary_custom_order');
 
   $config->save();
 }
