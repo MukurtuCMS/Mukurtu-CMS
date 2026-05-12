@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\og\Og;
+use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Access controller for the Protocol entity.
@@ -34,9 +35,16 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::allowed()->addCacheableDependency($entity);
       }
 
-      // Users with an active membership in the protocol can view.
+      // Users with an active membership in the protocol can view,
+      // unless they are blocked in a parent community.
       $membership = Og::getMembership($entity, $account);
       if ($membership) {
+        if (CulturalProtocols::isUserBlockedFromProtocolViaCommunity($account, $entity)) {
+          return AccessResult::forbidden()
+            ->addCacheableDependency($entity)
+            ->addCacheableDependency($membership)
+            ->addCacheTags(["user:{$account->id()}"]);
+        }
         return AccessResult::allowed()->addCacheableDependency($membership);
       }
 
