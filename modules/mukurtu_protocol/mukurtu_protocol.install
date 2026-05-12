@@ -390,3 +390,19 @@ function mukurtu_protocol_update_40015(): void {
   $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
   \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($data)->save(TRUE);
 }
+
+/**
+ * Add mukurtu_approve_user_from_membership_action; swap out og_membership_approve_pending_action.
+ */
+function mukurtu_protocol_update_40016(): void {
+  // Install the new action config.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $action_file = $module_path . '/config/install/system.action.mukurtu_approve_user_from_membership_action.yml';
+  $action_data = \Symfony\Component\Yaml\Yaml::parseFile($action_file);
+  \Drupal::configFactory()->getEditable('system.action.mukurtu_approve_user_from_membership_action')->setData($action_data)->save(TRUE);
+
+  // Re-import the view to replace og_membership_approve_pending_action.
+  $view_file = $module_path . '/config/install/views.view.og_members_overview.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($view_data)->save(TRUE);
+}

@@ -154,7 +154,7 @@ display:
           include_exclude: include
           selected_actions:
             - og_membership_add_multiple_roles_action
-            - og_membership_approve_pending_action
+            - mukurtu_approve_user_from_membership_action
             - og_membership_block_action
             - og_membership_delete_action
           entity_type: og_membership
