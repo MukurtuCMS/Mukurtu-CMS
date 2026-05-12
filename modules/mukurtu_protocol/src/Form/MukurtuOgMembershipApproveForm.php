@@ -35,6 +35,13 @@ class MukurtuOgMembershipApproveForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
+  public function getDescription() {
+    return $this->t('The user will be granted active membership and will gain access to content shared with this group.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getConfirmText() {
     return $this->t('Approve');
   }
