@@ -22,6 +22,14 @@ field_settings:
     dependencies:
       module:
         - node
+  field_coverage:
+    label: 'Map Points'
+    datasource_id: 'entity:node'
+    property_path: field_coverage
+    type: string
+    dependencies:
+      module:
+        - node
   community_title:
     label: Community
     datasource_id: 'entity:node'

@@ -1,5 +1,6 @@
 @use "../../../external/include-media";
 @use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
 
 // Main /dictionary page layout.
 .path-dictionary .layout-container .page__title {
@@ -76,14 +77,9 @@
         }
       }
 
-      // Apply button.
+      // Apply button — hidden by BEF auto-submit; collapse leftover whitespace.
       .form-actions {
-        display: flex;
-        align-items: flex-end;
-
-        input {
-          block-size: 45px;
-        }
+        display: none;
       }
     }
 
@@ -186,11 +182,27 @@
     }
   }
 
+  // List/map view toggle buttons.
+  .browse-links {
+    padding-block: var(--v-space-4xxs);
+    display: flex;
+    gap: var(--v-space-5xs);
+
+    a,
+    button {
+      @include mixins.block-link;
+    }
+
+    .active-toggle {
+      @include mixins.block-link-active;
+    }
+  }
+
   .browse-content__wrapper {
     @include layout.layout--full-width-grid;
   }
 
-  .browse-content {
+  .dictionary-view-container {
     @include layout.layout--full-width-grid-item;
   }
 

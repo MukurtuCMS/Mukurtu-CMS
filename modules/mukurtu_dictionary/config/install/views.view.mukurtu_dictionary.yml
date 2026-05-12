@@ -167,7 +167,6 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
-              facets_type:
               facets_language:
                 plugin_id: default
                 advanced:
@@ -181,7 +180,6 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
-              facets_field_glossary_entry:
               facets_community_title:
                 plugin_id: default
                 advanced:
@@ -196,7 +194,6 @@ display:
                   field_classes: ''
                   sort_options_unsupported: ''
               facets_field_cultural_protocols:
-              facets_field_cultural_protocols:
                 plugin_id: default
                 advanced:
                   rewrite:
@@ -209,7 +206,6 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
-              facets_language:
               facets_type:
                 plugin_id: default
                 advanced:
@@ -223,7 +219,6 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
-              facets_community_title:
               facets_word_type:
                 plugin_id: default
                 advanced:
@@ -237,7 +232,6 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
-      access:
               facets_keyword:
                 plugin_id: default
                 advanced:
@@ -252,7 +246,6 @@ display:
                   field_classes: ''
                   sort_options_unsupported: ''
               facets_word_lists:
-              facets_word_lists:
                 plugin_id: default
                 advanced:
                   rewrite:
@@ -265,7 +258,6 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
-              facets_word_type:
               facets_field_glossary_entry:
                 plugin_id: bef_links
                 advanced:
@@ -283,7 +275,7 @@ display:
                 soft_limit: 0
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
-              facets_keyword:
+      access:
         type: perm
         options:
           perm: 'access content'
@@ -1018,6 +1010,8 @@ display:
         type: search_api_none
       defaults:
         cache: false
+        css_class: false
+      css_class: list
       exposed_block: true
       display_extenders: {  }
     cache_metadata:
@@ -1030,5 +1024,352 @@ display:
         - user.permissions
       tags:
         - 'config:mukurtu_dictionary_glossary_order.settings'
+        - 'config:search_api.index.mukurtu_dictionary_index'
+        - 'search_api_list:mukurtu_dictionary_index'
+  mukurtu_dictionary_block_map:
+    id: mukurtu_dictionary_block_map
+    display_title: 'Map View Block'
+    display_plugin: block
+    position: 2
+    display_options:
+      fields:
+        nid:
+          id: nid
+          table: search_api_datasource_mukurtu_dictionary_index_entity_node
+          field: nid
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: node
+          plugin_id: search_api_field
+          label: ''
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: number_integer
+          settings:
+            thousand_separator: ''
+            prefix_suffix: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          field_rendering: true
+          fallback_handler: search_api_numeric
+          fallback_options:
+            set_precision: false
+            precision: 0
+            decimal: .
+            separator: ','
+            format_plural: false
+            format_plural_string: !!binary MQNAY291bnQ=
+            prefix: ''
+            suffix: ''
+            link_to_item: false
+            use_highlighting: false
+            multi_type: separator
+            multi_separator: ', '
+            format_plural_values:
+              - '1'
+              - '@count'
+        field_coverage:
+          id: field_coverage
+          table: search_api_index_mukurtu_dictionary_index
+          field: field_coverage
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_field
+          label: ''
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: geofield_default
+          settings:
+            output_format: json
+            output_escape: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          field_rendering: true
+          fallback_handler: search_api
+          fallback_options:
+            link_to_item: false
+            use_highlighting: false
+            multi_type: separator
+            multi_separator: ', '
+        title:
+          id: title
+          table: search_api_index_mukurtu_dictionary_index
+          field: title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_field
+          label: ''
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          field_rendering: true
+          fallback_handler: search_api
+          fallback_options:
+            link_to_item: false
+            use_highlighting: false
+            multi_type: separator
+            multi_separator: ', '
+      style:
+        type: leaflet_map
+        options:
+          grouping:
+            -
+              field: field_coverage
+              rendered: true
+              overlays_options:
+                disabled_overlays: {  }
+                hidden_overlays_controls: {  }
+          data_source:
+            field_coverage: field_coverage
+          entity_source: __base_table
+          name_field: title
+          leaflet_tooltip:
+            value: ''
+            options: '{"permanent":false,"direction":"center"}'
+          leaflet_popup:
+            value: '#rendered_view_fields'
+            view_mode: full
+            options: '{"maxWidth":"400","minWidth":"300","autoPan":true}'
+          leaflet_map: 'OSM Mapnik'
+          height: '600'
+          height_unit: px
+          hide_empty_map: true
+          disable_wheel: false
+          gesture_handling: false
+          fitbounds_options: '{"padding":[0,0]}'
+          reset_map:
+            control: false
+            options: '{"position":"topleft","title":"Reset View"}'
+          map_scale:
+            control: false
+            options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+          locate:
+            control: false
+            options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+            automatic: false
+          map_position:
+            force: false
+            center:
+              lat: 0.0
+              lon: 0.0
+            zoomControlPosition: topleft
+            zoom: 12
+            minZoom: 2
+            maxZoom: 18
+            zoomFiner: 0
+          weight: ''
+          icon:
+            iconType: marker
+            iconUrl: ''
+            shadowUrl: ''
+            className: ''
+            iconSize:
+              x: ''
+              'y': ''
+            iconAnchor:
+              x: ''
+              'y': ''
+            shadowSize:
+              x: ''
+              'y': ''
+            shadowAnchor:
+              x: ''
+              'y': ''
+            popupAnchor:
+              x: ''
+              'y': ''
+            html: '<div></div>'
+            html_class: leaflet-map-divicon
+            circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
+          leaflet_markercluster:
+            control: true
+            excluded: ''
+            options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
+            include_path: true
+          fullscreen:
+            control: false
+            options: '{"position":"topleft","pseudoFullscreen":false}'
+          path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+          feature_properties:
+            values: ''
+          map_lazy_load:
+            lazy_load: false
+      row:
+        type: search_api
+        options:
+          view_modes:
+            'entity:node':
+              ':default': map_browse
+              dictionary_word: ':default'
+              word_list: ':default'
+      defaults:
+        css_class: false
+        style: false
+        row: false
+        fields: false
+        filters: true
+        filter_groups: true
+        pager: true
+      css_class: map
+      display_description: ''
+      exposed_block: true
+      display_extenders: {  }
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+        - 'user.node_grants:view'
+        - user.permissions
+      tags:
         - 'config:search_api.index.mukurtu_dictionary_index'
         - 'search_api_list:mukurtu_dictionary_index'

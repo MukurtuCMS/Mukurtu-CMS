@@ -665,3 +665,24 @@ function mukurtu_dictionary_update_40013(): void {
 
   $config->save();
 }
+
+/**
+ * Add field_coverage to the dictionary search index for map view support.
+ */
+function mukurtu_dictionary_update_40014(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if (!$index) {
+    return;
+  }
+
+  if (!$index->getField('field_coverage')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'field_coverage');
+    $field->setType('string');
+    $field->setPropertyPath('field_coverage');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Map Points');
+    $index->addField($field);
+    $index->save();
+    $index->reindex();
+  }
+}
