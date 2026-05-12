@@ -141,6 +141,17 @@ display:
               secondary_label: 'Advanced options'
               secondary_open: false
               reset_button_always_show: false
+            sort:
+              plugin_id: default
+              advanced:
+                combine: false
+                combine_rewrite: ''
+                combine_param: sort_bef_combine
+                reset: false
+                reset_label: ''
+                collapsible: false
+                collapsible_label: 'Sort options'
+                is_secondary: false
             filter:
               search_api_fulltext:
                 plugin_id: default
@@ -291,9 +302,22 @@ display:
           plugin_id: glossary_custom_order
           order: ASC
           expose:
-            label: ''
-            field_identifier: ''
-          exposed: false
+            label: 'Glossary order'
+            field_identifier: glossary_order
+          exposed: true
+        search_api_relevance:
+          id: search_api_relevance
+          table: search_api_index_mukurtu_dictionary_index
+          field: search_api_relevance
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: DESC
+          expose:
+            label: 'Search relevance'
+            field_identifier: relevance
+          exposed: true
         title:
           id: title
           table: search_api_index_mukurtu_dictionary_index

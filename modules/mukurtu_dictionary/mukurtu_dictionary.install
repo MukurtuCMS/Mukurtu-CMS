@@ -625,8 +625,43 @@ function mukurtu_dictionary_update_40013(): void {
   }
   $config->set("$base.filters", $new_filters);
 
-  // Use glossary custom order sort plugin for field_glossary_entry.
+  // Use glossary custom order sort plugin for field_glossary_entry and expose it.
   $config->set("$base.sorts.field_glossary_entry.plugin_id", 'glossary_custom_order');
+  $config->set("$base.sorts.field_glossary_entry.expose.label", 'Glossary order');
+  $config->set("$base.sorts.field_glossary_entry.expose.field_identifier", 'glossary_order');
+  $config->set("$base.sorts.field_glossary_entry.exposed", TRUE);
+
+  // Add search relevance sort option.
+  $config->set("$base.sorts.search_api_relevance", [
+    'id' => 'search_api_relevance',
+    'table' => 'search_api_index_mukurtu_dictionary_index',
+    'field' => 'search_api_relevance',
+    'relationship' => 'none',
+    'group_type' => 'group',
+    'admin_label' => '',
+    'plugin_id' => 'search_api',
+    'order' => 'DESC',
+    'expose' => [
+      'label' => 'Search relevance',
+      'field_identifier' => 'relevance',
+    ],
+    'exposed' => TRUE,
+  ]);
+
+  // Add BEF sort section.
+  $config->set("$base.exposed_form.options.bef.sort", [
+    'plugin_id' => 'default',
+    'advanced' => [
+      'combine' => FALSE,
+      'combine_rewrite' => '',
+      'combine_param' => 'sort_bef_combine',
+      'reset' => FALSE,
+      'reset_label' => '',
+      'collapsible' => FALSE,
+      'collapsible_label' => 'Sort options',
+      'is_secondary' => FALSE,
+    ],
+  ]);
 
   $config->save();
 }
