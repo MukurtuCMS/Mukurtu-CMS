@@ -9,6 +9,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\node\NodeAccessControlHandler;
 use Drupal\og\Og;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Access controller for node entities under Mukurtu protocol control.
@@ -126,6 +127,12 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
       }
 
       $cacheability->addCacheableDependency($membership);
+
+      // Skip if the user is blocked in any parent community.
+      $protocol = $membership->getGroup();
+      if (!$protocol || CulturalProtocols::isUserBlockedFromProtocolViaCommunity($account, $protocol)) {
+        continue;
+      }
 
       // Account must be permitted to use the protocol on content.
       if (!$membership->hasPermission("apply protocol")) {
