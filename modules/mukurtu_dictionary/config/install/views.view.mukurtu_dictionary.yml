@@ -157,6 +157,7 @@ display:
                   field_classes: ''
                   sort_options_unsupported: ''
               facets_type:
+              facets_language:
                 plugin_id: default
                 advanced:
                   rewrite:
@@ -169,6 +170,21 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
+              facets_field_glossary_entry:
+              facets_community_title:
+                plugin_id: default
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: false
+                  collapsible_disable_automatic_open: false
+                  open_by_default: false
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+              facets_field_cultural_protocols:
               facets_field_cultural_protocols:
                 plugin_id: default
                 advanced:
@@ -183,6 +199,7 @@ display:
                   field_classes: ''
                   sort_options_unsupported: ''
               facets_language:
+              facets_type:
                 plugin_id: default
                 advanced:
                   rewrite:
@@ -195,6 +212,49 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
+              facets_community_title:
+              facets_word_type:
+                plugin_id: default
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: false
+                  collapsible_disable_automatic_open: false
+                  open_by_default: false
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+      access:
+              facets_keyword:
+                plugin_id: default
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: false
+                  collapsible_disable_automatic_open: false
+                  open_by_default: false
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+              facets_word_lists:
+              facets_word_lists:
+                plugin_id: default
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: false
+                  collapsible_disable_automatic_open: false
+                  open_by_default: false
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+              facets_word_type:
               facets_field_glossary_entry:
                 plugin_id: bef_links
                 advanced:
@@ -213,58 +273,6 @@ display:
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
               facets_keyword:
-                plugin_id: default
-                advanced:
-                  rewrite:
-                    filter_rewrite_values: ''
-                    filter_rewrite_values_key: false
-                  collapsible: false
-                  collapsible_disable_automatic_open: false
-                  open_by_default: false
-                  is_secondary: false
-                  hide_label: false
-                  field_classes: ''
-                  sort_options_unsupported: ''
-              facets_word_lists:
-                plugin_id: default
-                advanced:
-                  rewrite:
-                    filter_rewrite_values: ''
-                    filter_rewrite_values_key: false
-                  collapsible: false
-                  collapsible_disable_automatic_open: false
-                  open_by_default: false
-                  is_secondary: false
-                  hide_label: false
-                  field_classes: ''
-                  sort_options_unsupported: ''
-              facets_word_type:
-                plugin_id: default
-                advanced:
-                  rewrite:
-                    filter_rewrite_values: ''
-                    filter_rewrite_values_key: false
-                  collapsible: false
-                  collapsible_disable_automatic_open: false
-                  open_by_default: false
-                  is_secondary: false
-                  hide_label: false
-                  field_classes: ''
-                  sort_options_unsupported: ''
-              facets_community_title:
-                plugin_id: default
-                advanced:
-                  rewrite:
-                    filter_rewrite_values: ''
-                    filter_rewrite_values_key: false
-                  collapsible: false
-                  collapsible_disable_automatic_open: false
-                  open_by_default: false
-                  is_secondary: false
-                  hide_label: false
-                  field_classes: ''
-                  sort_options_unsupported: ''
-      access:
         type: perm
         options:
           perm: 'access content'
@@ -428,6 +436,167 @@ display:
           parse_mode: terms
           min_length: null
           fields: {  }
+        facets_language:
+          id: facets_language
+          table: search_api_index_mukurtu_dictionary_index
+          field: facets_language
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Language
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: language
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: true
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: false
+          label_display: visible
+          facet:
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: false
+            processor_configs:
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_community_title:
+          id: facets_community_title
+          table: search_api_index_mukurtu_dictionary_index
+          field: facets_community_title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Community
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: community
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: false
+          label_display: visible
+          facet:
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: false
+            processor_configs:
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
+        facets_mukurtu_cultural_protocol_ids:
+          id: facets_mukurtu_cultural_protocol_ids
+          table: search_api_index_mukurtu_dictionary_index
+          field: facets_mukurtu_cultural_protocol_ids
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: 'Cultural Protocol'
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: cultural_protocol
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: false
+          label_display: visible
+          facet:
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: false
+            processor_configs:
+              cultural_protocol_facet_label_processor:
+                processor_id: cultural_protocol_facet_label_processor
+                weights:
+                  build: 50
+                settings: {  }
+              display_value_widget_order:
+                processor_id: display_value_widget_order
+                weights:
+                  sort: 40
+                settings:
+                  sort: ASC
         facets_type:
           id: facets_type
           table: search_api_index_mukurtu_dictionary_index
@@ -491,10 +660,10 @@ display:
                   sort: 40
                 settings:
                   sort: ASC
-        facets_mukurtu_cultural_protocol_ids:
-          id: facets_mukurtu_cultural_protocol_ids
+        facets_word_type:
+          id: facets_word_type
           table: search_api_index_mukurtu_dictionary_index
-          field: facets_mukurtu_cultural_protocol_ids
+          field: facets_word_type
           relationship: none
           group_type: group
           admin_label: ''
@@ -505,13 +674,13 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: 'Cultural Protocol'
+            label: 'Word Type'
             description: ''
             use_operator: false
             operator: ''
             operator_limit_selection: false
             operator_list: {  }
-            identifier: cultural_protocol
+            identifier: word_type
             required: false
             remember: false
             multiple: true
@@ -525,115 +694,6 @@ display:
             optional: true
             widget: select
             multiple: true
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          hierarchy: false
-          label_display: visible
-          facet:
-            query_operator: or
-            hard_limit: 0
-            min_count: 1
-            show_numbers: false
-            processor_configs:
-              cultural_protocol_facet_label_processor:
-                processor_id: cultural_protocol_facet_label_processor
-                weights:
-                  build: 50
-                settings: {  }
-              display_value_widget_order:
-                processor_id: display_value_widget_order
-                weights:
-                  sort: 40
-                settings:
-                  sort: ASC
-        facets_language:
-          id: facets_language
-          table: search_api_index_mukurtu_dictionary_index
-          field: facets_language
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: facets_filter
-          operator: '='
-          value: ''
-          group: 1
-          exposed: true
-          expose:
-            operator_id: ''
-            label: Language
-            description: ''
-            use_operator: false
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: language
-            required: false
-            remember: false
-            multiple: true
-            remember_roles:
-              authenticated: authenticated
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: true
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          hierarchy: false
-          label_display: visible
-          facet:
-            query_operator: or
-            hard_limit: 0
-            min_count: 1
-            show_numbers: false
-            processor_configs:
-              display_value_widget_order:
-                processor_id: display_value_widget_order
-                weights:
-                  sort: 40
-                settings:
-                  sort: ASC
-        facets_field_glossary_entry:
-          id: facets_field_glossary_entry
-          table: search_api_index_mukurtu_dictionary_index
-          field: facets_field_glossary_entry
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: facets_filter
-          operator: '='
-          value: ''
-          group: 1
-          exposed: true
-          expose:
-            operator_id: ''
-            label: 'Glossary Entry'
-            description: ''
-            use_operator: false
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: glossary_entry
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
             remember: false
             default_group: All
             default_group_multiple: {  }
@@ -646,28 +706,29 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: true
+            show_numbers: false
             processor_configs:
-              hide_1_result_facet:
-                processor_id: hide_1_result_facet
-                weights:
-                  build: 50
-                settings: {  }
               hierarchy_processor:
                 processor_id: hierarchy_processor
                 weights:
                   build: 100
                 settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
                   sort: 40
-                settings:
-                  sort: ASC
-              glossary_custom_order:
-                processor_id: glossary_custom_order
-                weights:
-                  sort: 35
                 settings:
                   sort: ASC
         facets_keyword:
@@ -817,10 +878,10 @@ display:
                   sort: 40
                 settings:
                   sort: ASC
-        facets_word_type:
-          id: facets_word_type
+        facets_field_glossary_entry:
+          id: facets_field_glossary_entry
           table: search_api_index_mukurtu_dictionary_index
-          field: facets_word_type
+          field: facets_field_glossary_entry
           relationship: none
           group_type: group
           admin_label: ''
@@ -831,16 +892,16 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: 'Word Type'
+            label: 'Glossary Entry'
             description: ''
             use_operator: false
             operator: ''
             operator_limit_selection: false
             operator_list: {  }
-            identifier: word_type
+            identifier: glossary_entry
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
           is_grouped: false
@@ -850,7 +911,7 @@ display:
             identifier: ''
             optional: true
             widget: select
-            multiple: true
+            multiple: false
             remember: false
             default_group: All
             default_group_multiple: {  }
@@ -863,81 +924,28 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
+              hide_1_result_facet:
+                processor_id: hide_1_result_facet
+                weights:
+                  build: 50
+                settings: {  }
               hierarchy_processor:
                 processor_id: hierarchy_processor
                 weights:
                   build: 100
                 settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
                   sort: 40
                 settings:
                   sort: ASC
-        facets_community_title:
-          id: facets_community_title
-          table: search_api_index_mukurtu_dictionary_index
-          field: facets_community_title
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: facets_filter
-          operator: '='
-          value: ''
-          group: 1
-          exposed: true
-          expose:
-            operator_id: ''
-            label: Community
-            description: ''
-            use_operator: false
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: community
-            required: false
-            remember: false
-            multiple: true
-            remember_roles:
-              authenticated: authenticated
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: true
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          hierarchy: false
-          label_display: visible
-          facet:
-            query_operator: or
-            hard_limit: 0
-            min_count: 1
-            show_numbers: false
-            processor_configs:
-              display_value_widget_order:
-                processor_id: display_value_widget_order
+              glossary_custom_order:
+                processor_id: glossary_custom_order
                 weights:
-                  sort: 40
+                  sort: 35
                 settings:
                   sort: ASC
       filter_groups:

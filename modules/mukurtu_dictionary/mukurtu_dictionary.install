@@ -550,3 +550,52 @@ function mukurtu_dictionary_update_40012(): void {
 
   $config->save();
 }
+
+/**
+ * Fix word_type index field; set community facet to single-select; move before cultural protocol.
+ */
+function mukurtu_dictionary_update_40013(): void {
+  // Fix word_type index field to use the main node field.
+  $index_ids = ['mukurtu_dictionary_index', 'mukurtu_dictionary_solr_index'];
+  foreach ($index_ids as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+    $field = $index->getField('word_type');
+    if (!$field) {
+      continue;
+    }
+    if ($field->getPropertyPath() !== 'field_word_type:entity:name') {
+      $field->setPropertyPath('field_word_type:entity:name');
+      $index->save();
+      $index->reindex();
+    }
+  }
+
+  // Set community facet to single-select and move it before cultural protocol.
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if (!$config) {
+    return;
+  }
+  $base = 'display.default.display_options';
+
+  $config->set("$base.filters.facets_community_title.expose.multiple", FALSE);
+  $config->set("$base.filters.facets_community_title.group_info.multiple", FALSE);
+
+  $filters = $config->get("$base.filters");
+  if (isset($filters['facets_community_title']) && isset($filters['facets_mukurtu_cultural_protocol_ids'])) {
+    $community = $filters['facets_community_title'];
+    unset($filters['facets_community_title']);
+    $new_filters = [];
+    foreach ($filters as $key => $value) {
+      if ($key === 'facets_mukurtu_cultural_protocol_ids') {
+        $new_filters['facets_community_title'] = $community;
+      }
+      $new_filters[$key] = $value;
+    }
+    $config->set("$base.filters", $new_filters);
+  }
+
+  $config->save();
+}
