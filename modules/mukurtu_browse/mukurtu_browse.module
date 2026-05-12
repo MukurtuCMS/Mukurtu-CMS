@@ -389,9 +389,9 @@ function mukurtu_browse_preprocess_block(&$variables) {
     $variables['content']['sort_by']['#weight'] = -10.8;
   }
 
-  // Inject the display options toggle between sort by and the first facet.
+  // Inject the display options toggle at the end of the filter block.
   $toggle_plugin = \Drupal::service('plugin.manager.block')->createInstance('mukurtu_search_collapse_toggle');
   $toggle = $toggle_plugin->build();
-  $toggle['#weight'] = -5;
+  $toggle['#weight'] = 100;
   $variables['content']['search_collapse_toggle'] = $toggle;
 }

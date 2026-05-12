@@ -548,5 +548,5 @@ function mukurtu_dictionary_update_40012(): void {
   ];
   $config->set("$base.exposed_form.options.bef.filter.facets_community_title", $bef_entry);
 
-  $config->save(TRUE);
+  $config->save();
 }

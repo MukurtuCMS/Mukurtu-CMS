@@ -553,3 +553,18 @@ function mukurtu_core_update_40014(): void {
 
   $config->set('sections', $sections)->save();
 }
+
+/**
+ * Hide local actions block on /dictionary.
+ */
+function mukurtu_core_update_40015(): void {
+  $config = \Drupal::configFactory()->getEditable('block.block.mukurtu_v4_local_actions');
+  if (!$config) {
+    return;
+  }
+  $pages = $config->get('visibility.request_path.pages') ?? '';
+  if (!str_contains($pages, '/dictionary')) {
+    $config->set('visibility.request_path.pages', $pages . "\r\n/dictionary");
+    $config->save(TRUE);
+  }
+}
