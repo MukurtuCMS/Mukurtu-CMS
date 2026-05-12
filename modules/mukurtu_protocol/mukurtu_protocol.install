@@ -382,36 +382,21 @@ function mukurtu_protocol_update_40014(): void {
 }
 
 /**
- * Re-import og_members_overview view: remove Unblock bulk action.
+ * Install Approve User action; add Unblock to og_members_overview bulk form.
+ *
+ * Installs the mukurtu_approve_user_from_membership_action config before
+ * re-importing the view that references it, then updates the view to include
+ * og_membership_unblock_action.
  */
 function mukurtu_protocol_update_40015(): void {
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $config_file = $module_path . '/config/install/views.view.og_members_overview.yml';
-  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
-  \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($data)->save(TRUE);
-}
 
-/**
- * Add og_membership_unblock_action to the og_members_overview bulk form.
- */
-function mukurtu_protocol_update_40017(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.og_members_overview.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($view_data)->save(TRUE);
-}
-
-/**
- * Add mukurtu_approve_user_from_membership_action; swap out og_membership_approve_pending_action.
- */
-function mukurtu_protocol_update_40016(): void {
-  // Install the new action config.
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  // Install the new action config first so the view reference is valid.
   $action_file = $module_path . '/config/install/system.action.mukurtu_approve_user_from_membership_action.yml';
   $action_data = \Symfony\Component\Yaml\Yaml::parseFile($action_file);
   \Drupal::configFactory()->getEditable('system.action.mukurtu_approve_user_from_membership_action')->setData($action_data)->save(TRUE);
 
-  // Re-import the view to replace og_membership_approve_pending_action.
+  // Re-import the view with the updated selected_actions list.
   $view_file = $module_path . '/config/install/views.view.og_members_overview.yml';
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($view_data)->save(TRUE);

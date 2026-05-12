@@ -23,6 +23,7 @@ use Drupal\og\Og;
 use Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction;
 use Drupal\mukurtu_protocol\Plugin\Action\MukurtuUserSetRandomPasswordAction;
 use Drupal\Core\Render\Markup;
+use Drupal\og\Entity\OgMembership;
 
 /**
  * @file
@@ -958,7 +959,11 @@ function mukurtu_protocol_preprocess_views_view_field(&$variables) {
     return;
   }
 
-  $membership = \Drupal::entityTypeManager()->getStorage('og_membership')->load($membership_id);
+  $row_index = $variables['view']->row_index;
+  $membership = $variables['view']->result[$row_index]->_entity ?? NULL;
+  if (!$membership instanceof OgMembership) {
+    $membership = \Drupal::entityTypeManager()->getStorage('og_membership')->load($membership_id);
+  }
   if (!$membership) {
     return;
   }

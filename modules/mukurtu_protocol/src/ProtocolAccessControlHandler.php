@@ -42,6 +42,7 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
         if (CulturalProtocols::isUserBlockedFromProtocolViaCommunity($account, $entity)) {
           return AccessResult::forbidden()
             ->addCacheableDependency($entity)
+            ->addCacheableDependency($membership)
             ->addCacheTags(["user:{$account->id()}"]);
         }
         return AccessResult::allowed()->addCacheableDependency($membership);

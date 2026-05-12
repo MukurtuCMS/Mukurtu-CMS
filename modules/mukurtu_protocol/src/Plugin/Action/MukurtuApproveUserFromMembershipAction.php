@@ -45,6 +45,7 @@ class MukurtuApproveUserFromMembershipAction extends ActionBase implements Conta
     }
     $owner->set('status', 1);
     $owner->save();
+    node_access_rebuild(TRUE);
     \Drupal::messenger()->addStatus(t('%user has been approved.', ['%user' => $owner->getDisplayName()]));
   }
 

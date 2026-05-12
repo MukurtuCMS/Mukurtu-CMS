@@ -59,27 +59,36 @@ class MukurtuProtocolHooks {
     $state = $entity->getState();
 
     if ($state !== OgMembershipInterface::STATE_BLOCKED) {
-      $operations['block'] = [
-        'title' => t('Block'),
-        'url' => Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]),
-        'weight' => 20,
-      ];
+      $block_url = Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]);
+      if ($block_url->access()) {
+        $operations['block'] = [
+          'title' => t('Block'),
+          'url' => $block_url,
+          'weight' => 20,
+        ];
+      }
     }
 
     if ($state === OgMembershipInterface::STATE_BLOCKED) {
-      $operations['unblock'] = [
-        'title' => t('Unblock'),
-        'url' => Url::fromRoute('mukurtu_protocol.og_membership.unblock', ['og_membership' => $entity->id()]),
-        'weight' => 21,
-      ];
+      $unblock_url = Url::fromRoute('mukurtu_protocol.og_membership.unblock', ['og_membership' => $entity->id()]);
+      if ($unblock_url->access()) {
+        $operations['unblock'] = [
+          'title' => t('Unblock'),
+          'url' => $unblock_url,
+          'weight' => 21,
+        ];
+      }
     }
 
     if ($state === OgMembershipInterface::STATE_PENDING) {
-      $operations['approve'] = [
-        'title' => t('Approve'),
-        'url' => Url::fromRoute('mukurtu_protocol.og_membership.approve', ['og_membership' => $entity->id()]),
-        'weight' => 25,
-      ];
+      $approve_url = Url::fromRoute('mukurtu_protocol.og_membership.approve', ['og_membership' => $entity->id()]);
+      if ($approve_url->access()) {
+        $operations['approve'] = [
+          'title' => t('Approve'),
+          'url' => $approve_url,
+          'weight' => 25,
+        ];
+      }
     }
 
     // If the member's Drupal user account is inactive (pending or blocked at

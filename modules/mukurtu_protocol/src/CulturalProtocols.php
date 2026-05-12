@@ -128,14 +128,34 @@ class CulturalProtocols {
     // Deny grant for missing protocols.
     $grants[0] = 0;
 
+    // Preload blocked community memberships in one query to avoid N+1.
+    $blocked_community_ids = array_map(
+      fn($m) => $m->getGroupId(),
+      array_filter(
+        Og::getMemberships($account, [OgMembershipInterface::STATE_BLOCKED]),
+        fn($m) => $m->getGroupEntityType() === 'community'
+      )
+    );
+
     /** @var \Drupal\og\OgMembershipInterface[] $memberships */
     $memberships = Og::getMemberships($account);
     $memberships = array_filter($memberships, fn ($e) => $e->getGroupEntityType() == 'protocol');
 
     // Exclude protocols where the user is blocked in a parent community.
-    $memberships = array_filter($memberships, function ($m) use ($account) {
+    $memberships = array_filter($memberships, function ($m) use ($blocked_community_ids) {
+      if (empty($blocked_community_ids)) {
+        return TRUE;
+      }
       $protocol = $m->getGroup();
-      return $protocol && !self::isUserBlockedFromProtocolViaCommunity($account, $protocol);
+      if (!$protocol) {
+        return FALSE;
+      }
+      foreach ($protocol->getCommunities() as $community) {
+        if (in_array($community->id(), $blocked_community_ids)) {
+          return FALSE;
+        }
+      }
+      return TRUE;
     });
 
     // Get the protocol NID list and sort them.

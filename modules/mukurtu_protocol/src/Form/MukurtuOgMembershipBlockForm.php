@@ -37,7 +37,7 @@ class MukurtuOgMembershipBlockForm extends ConfirmFormBase {
    */
   public function getDescription() {
     if ($this->membership->getGroupEntityType() === 'community') {
-      return $this->t('The user will not be able to access content from this community or its closed protocols. You can unblock them at any time from the members list.');
+      return $this->t('The user will not be able to access content from this community or its strict protocols. You can unblock them at any time from the members list.');
     }
     return $this->t('The user will not be able to access content from this protocol. You can unblock them at any time from the members list.');
   }
@@ -78,6 +78,7 @@ class MukurtuOgMembershipBlockForm extends ConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->membership->setState(OgMembershipInterface::STATE_BLOCKED)->save();
+    node_access_rebuild(TRUE);
 
     $this->messenger()->addStatus($this->t('%user has been blocked from %group.', [
       '%user' => $this->membership->getOwner()->getDisplayName(),

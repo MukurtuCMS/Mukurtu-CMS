@@ -38,7 +38,7 @@ class MukurtuOgMembershipUnblockForm extends ConfirmFormBase {
   public function getDescription() {
     $group_type = $this->membership->getGroupEntityType();
     if ($group_type === 'community') {
-      return $this->t('The user will be restored to active membership and will regain access to this community and its closed protocols.');
+      return $this->t('The user will be restored to active membership and will regain access to this community and its strict protocols.');
     }
     return $this->t('The user will be restored to active membership and will regain access to this protocol.');
   }
@@ -79,6 +79,7 @@ class MukurtuOgMembershipUnblockForm extends ConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->membership->setState(OgMembershipInterface::STATE_ACTIVE)->save();
+    node_access_rebuild(TRUE);
 
     $this->messenger()->addStatus($this->t('%user has been unblocked from %group.', [
       '%user' => $this->membership->getOwner()->getDisplayName(),
