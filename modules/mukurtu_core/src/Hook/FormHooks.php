@@ -113,6 +113,31 @@ class FormHooks
     }
 
     /**
+     * Implements hook_menu_local_tasks_alter().
+     *
+     * Relabels the "Create new account" tab to "Request new account" on the
+     * login, register, and password-reset pages.
+     */
+    #[Hook("menu_local_tasks_alter")]
+    public function menuLocalTasksAlterUserRegister(
+        array &$data,
+        string $route_name,
+    ): void {
+        if (
+            in_array(
+                $route_name,
+                ["user.login", "user.register", "user.pass"],
+                true,
+            ) &&
+            isset($data["tabs"][0]["user.register"])
+        ) {
+            $data["tabs"][0]["user.register"]["#link"]["title"] = t(
+                "Request new account",
+            );
+        }
+    }
+
+    /**
      * Implements hook_form_FORM_ID_alter() for 'user-register-form' and
      * 'user-form'.
      *
@@ -188,6 +213,13 @@ class FormHooks
         // access; skip it for anonymous self-registration.
         $currentAccount = \Drupal::currentUser();
         if ($currentAccount->isAnonymous()) {
+            $form["#title"] = t("Request new account");
+            if (isset($form["actions"]["submit"])) {
+                $form["actions"]["submit"]["#value"] = t("Request new account");
+            }
+            if (isset($form["account"]["field_display_name"])) {
+                unset($form["account"]["field_display_name"]);
+            }
             return;
         }
 
